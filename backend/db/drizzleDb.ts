@@ -4,7 +4,7 @@ import { createDatabase, createPool } from "@/backend/db/factory";
 import { clearHttpClientSingleton, getNeonHttpDb } from "@/backend/db/http-client";
 import { ensureEnvironmentValidated, getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import { clearGlobalSingleton, getGlobalSingleton, getGlobalSingletonIfExists } from "@/backend/lib/global-singleton";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 const DB_KEY = Symbol.for("siraj.db");
 const DB_POOL_KEY = Symbol.for("siraj.dbPool");
@@ -55,11 +55,16 @@ function getStatelessHttpDb() {
  * - Resolves to the cached HTTP database singleton if eligible.
  * - Falls back to default pooled `db` instance.
  */
-export function queryDb<T = undefined>(
-  tx?: T
-): T extends undefined ? ReturnType<typeof getNeonHttpDb> | typeof db : Exclude<T, undefined> {
-  if (tx !== undefined) return tx as Exclude<T, undefined> as never;
-  return ((getStatelessHttpDb() as ReturnType<typeof getNeonHttpDb> | null) ?? db) as never;
+export type QueryDbHandle = ReturnType<typeof getNeonHttpDb> | typeof db;
+
+function isTxDefined<T>(tx: T | undefined): tx is T {
+  return tx !== undefined;
+}
+
+export function queryDb(): QueryDbHandle;
+export function queryDb<T>(tx: T): T extends undefined ? QueryDbHandle : T;
+export function queryDb<T>(tx?: T): QueryDbHandle | T {
+  return isTxDefined(tx) ? tx : (getStatelessHttpDb() ?? db);
 }
 
 export function getDrizzleDbPool(): ReturnType<typeof createPool> | null {
@@ -70,9 +75,16 @@ export function getDrizzleDbPool(): ReturnType<typeof createPool> | null {
   }
 }
 
+/** Type guard: checks if a value is a pool with an `end()` method. */
+function isPoolWithEnd(value: unknown): value is { end(): Promise<void> } {
+  if (value == null || typeof value !== "object") return false;
+  const endFn = Reflect.get(value, "end");
+  return typeof endFn === "function";
+}
+
 export async function closeDrizzleDbPool(): Promise<void> {
-  const pool = getGlobalSingletonIfExists<ReturnType<typeof createPool>>(DB_POOL_KEY);
-  if (pool) {
+  const pool = getGlobalSingletonIfExists(DB_POOL_KEY);
+  if (isPoolWithEnd(pool)) {
     await pool.end();
     clearGlobalSingleton(DB_POOL_KEY);
   }

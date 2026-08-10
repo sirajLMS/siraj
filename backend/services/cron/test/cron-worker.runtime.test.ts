@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import { CronJobKind } from "@/backend/enum/cron/cron.enums";
 import type { CronJobPayload } from "@/backend/types/cron/cron.types";
 
 // ── Mock state ──
@@ -10,10 +11,10 @@ let failRunCalls: { runId: string; error: string }[] = [];
 let retryRunCalls: { runId: string; backoff: number; attempt: number }[] = [];
 let heartbeatCalls: { runId: string; workerId: string }[] = [];
 let retryCalls: { jobId: string; delaySeconds: number; newAttempt?: number }[] = [];
-let queuedJobs: CronJobPayload[] = [];
+let queuedJobs: TestJobPayload[] = [];
 let jobCounter = 0;
 
-mock.module("@/backend/services/cron/queue-adapter.factory", () => ({
+await mock.module("@/backend/services/cron/queue-adapter.factory", () => ({
   getQueueAdapter: async () => ({
     init: async () => {},
     send: async () => "mock-queue-id",
@@ -37,7 +38,7 @@ mock.module("@/backend/services/cron/queue-adapter.factory", () => ({
   resolveQueueBackend: async () => "PG_BOSS",
 }));
 
-mock.module("@/backend/services/cron/cron.service", () => ({
+await mock.module("@/backend/services/cron/cron.service", () => ({
   CronService: {
     setRunRunning: async (runId: string, workerId: string) => {
       setRunRunningCalls.push({ runId, workerId });
@@ -58,7 +59,7 @@ mock.module("@/backend/services/cron/cron.service", () => ({
   },
 }));
 
-mock.module("@/backend/services/cron/job-handler-registry", () => ({
+await mock.module("@/backend/services/cron/job-handler-registry", () => ({
   getHandler: (kind: string) => {
     if (kind === "NOOP") return async () => ({ success: true });
     if (kind === "SLOW_NOOP")
@@ -77,19 +78,26 @@ mock.module("@/backend/services/cron/job-handler-registry", () => ({
 
 const { runDrainLoop } = await import("@/backend/services/cron/cron-worker.runtime");
 
-function makeJob(overrides: Partial<CronJobPayload> = {}): CronJobPayload {
+// CronJobKind is a string enum; tests use arbitrary string values (e.g. "FAILING")
+// for the mock handler registry, so we widen jobKind to string for test payloads.
+type TestJobPayload = Omit<CronJobPayload, "jobKind"> & { jobKind: string } & { queueJobId: string };
+
+function makeJob(
+  overrides: Partial<Omit<TestJobPayload, "queueJobId">> & { queueJobId?: string } = {}
+): TestJobPayload {
+  const { jobKind, queueJobId, ...rest } = overrides;
   return {
     runId: `run-${++jobCounter}`,
     scheduleId: "sched-1",
-    jobKind: "NOOP" as never,
+    jobKind: jobKind ?? CronJobKind.NOOP,
     payload: null,
     attempt: 1,
     timeoutSeconds: 300,
-    queueJobId: `qj-${jobCounter}`,
+    queueJobId: queueJobId ?? `qj-${jobCounter}`,
     maxRetries: 3,
     retryBackoffSeconds: 60,
-    ...overrides,
-  } as CronJobPayload;
+    ...rest,
+  };
 }
 
 afterEach(() => {
@@ -117,7 +125,7 @@ describe("cron-worker.runtime", () => {
     expect(result.failed).toBe(0);
     expect(setRunRunningCalls).toHaveLength(1);
     expect(setRunRunningCalls[0].runId).toBe(job.runId);
-    expect(completeCalls).toContain(job.queueJobId ?? "");
+    expect(completeCalls).toContain(job.queueJobId);
     expect(completeRunCalls).toContain(job.runId);
   });
 
@@ -133,7 +141,7 @@ describe("cron-worker.runtime", () => {
 
   test("uses queueJobId for adapter.fail when retries are exhausted", async () => {
     const job = makeJob({
-      jobKind: "FAILING" as never,
+      jobKind: "FAILING",
       queueJobId: "qj-fail-456",
       attempt: 4,
       maxRetries: 3,
@@ -150,7 +158,7 @@ describe("cron-worker.runtime", () => {
 
   test("retries with exponential backoff using job.maxRetries and retryBackoffSeconds", async () => {
     const job = makeJob({
-      jobKind: "FAILING" as never,
+      jobKind: "FAILING",
       attempt: 1,
       maxRetries: 5,
       retryBackoffSeconds: 30,
@@ -170,7 +178,7 @@ describe("cron-worker.runtime", () => {
 
   test("does not retry when attempt > maxRetries (initial run counts as attempt 1)", async () => {
     const job = makeJob({
-      jobKind: "FAILING" as never,
+      jobKind: "FAILING",
       attempt: 4,
       maxRetries: 3,
     });
@@ -183,7 +191,7 @@ describe("cron-worker.runtime", () => {
   });
 
   test("marks run FAILED and fails queue job when no handler is registered", async () => {
-    const job = makeJob({ jobKind: "UNREGISTERED" as never, queueJobId: "qj-no-handler" });
+    const job = makeJob({ jobKind: "UNREGISTERED", queueJobId: "qj-no-handler" });
     queuedJobs = [job];
 
     await runDrainLoop({ maxDurationMs: 1000, batchSize: 5 });
@@ -198,7 +206,7 @@ describe("cron-worker.runtime", () => {
     // timeoutSeconds: 2 → heartbeatMs = 500ms, SLOW_NOOP takes 400ms → still too fast.
     // Use timeoutSeconds: 4 → heartbeatMs = 1000ms, SLOW_NOOP takes 400ms → still too fast.
     // Bigger: timeoutSeconds: 4, handlerDelay 1100ms → heartbeat at 1000ms, handler at 1100ms ✓
-    const job = makeJob({ jobKind: "SLOW_NOOP" as never, timeoutSeconds: 4 });
+    const job = makeJob({ jobKind: "SLOW_NOOP", timeoutSeconds: 4 });
     queuedJobs = [job];
 
     process.env.WORKER_ID = "test-worker-abc";
@@ -215,9 +223,9 @@ describe("cron-worker.runtime", () => {
     // (only ~400ms budget left → 1100ms handler exceeds it), then the overall
     // deadline is reached and the loop exits — leaving the 3rd job untouched.
     const jobs = [
-      makeJob({ jobKind: "SLOW_NOOP" as never, timeoutSeconds: 300 }),
-      makeJob({ jobKind: "SLOW_NOOP" as never, timeoutSeconds: 300 }),
-      makeJob({ jobKind: "SLOW_NOOP" as never, timeoutSeconds: 300 }),
+      makeJob({ jobKind: "SLOW_NOOP", timeoutSeconds: 300 }),
+      makeJob({ jobKind: "SLOW_NOOP", timeoutSeconds: 300 }),
+      makeJob({ jobKind: "SLOW_NOOP", timeoutSeconds: 300 }),
     ];
     queuedJobs = [...jobs];
 

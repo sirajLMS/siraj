@@ -27,8 +27,8 @@ export interface ParsedPage<T> {
 /**
  * Generic collector that aggregates all items across cursor-paginated pages.
  *
- * @typeParam T           Item type accumulated across pages.
- * @typeParam R           Raw response body type returned by `fetchPage` and consumed by `parseResponse`.
+ * @template T           Item type accumulated across pages.
+ * @template R           Raw response body type returned by `fetchPage` and consumed by `parseResponse`.
  * @param buildRequest    Builds a `GraphApiRequestInit` for a given cursor (or `undefined` for the first page).
  * @param fetchPage       Executes the fetch and returns the raw JSON body.
  * @param parseResponse   Extracts the items array and next cursor from a raw page body.
@@ -42,24 +42,24 @@ export async function collectAllPages<T, R = unknown>(
   maxPages = 50
 ): Promise<readonly T[]> {
   const allItems: T[] = [];
-  let cursor: string | undefined;
-  let pageCount = 0;
 
-  do {
+  async function fetchNext(cursor: string | undefined, pageCount: number): Promise<void> {
     if (pageCount >= maxPages) {
       logger.warn("collectAllPages: reached maxPages limit, results may be truncated", {
         maxPages,
         itemsCollected: allItems.length,
       });
-      return allItems;
+      return;
     }
     const request = buildRequest(cursor);
     const body = await fetchPage(request);
     const { items, nextCursor } = parseResponse(body);
     allItems.push(...items);
-    cursor = nextCursor;
-    pageCount++;
-  } while (cursor);
+    if (!nextCursor) return;
+    return fetchNext(nextCursor, pageCount + 1);
+  }
+
+  await fetchNext(undefined, 0);
 
   return allItems;
 }

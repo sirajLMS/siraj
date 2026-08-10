@@ -9,20 +9,25 @@ import {
   useAudienceAutocomplete,
 } from "@/frontend/common/hooks/userAutocomplete/useAudienceAutocomplete";
 
+type UserData = {
+  readonly users?: readonly {
+    readonly id?: string | null;
+    readonly name?: string | null;
+    readonly avatarUrl?: string | null;
+    readonly email?: string | null;
+  }[];
+};
+
+function isUserData(data: unknown): data is UserData {
+  return typeof data === "object" && data !== null;
+}
+
 export function useUserAutocomplete(args?: {
   readonly value?: PersonOption | null;
   readonly skip?: boolean;
 }): UseAudienceAutocompleteResult {
   const extractRows = useCallback((data: unknown) => {
-    const typed = data as {
-      users?: readonly {
-        id?: string | null;
-        name?: string | null;
-        avatarUrl?: string | null;
-        email?: string | null;
-      }[];
-    } | null;
-    return typed?.users ?? [];
+    return isUserData(data) ? (data.users ?? []) : [];
   }, []);
 
   const buildVariables = useCallback(

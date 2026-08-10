@@ -16,6 +16,10 @@ function collectErrorMessages(error: unknown): string {
   return messages.join(" ");
 }
 
+function hasErrorCode(value: unknown): value is { code?: string } {
+  return typeof value === "object" && value !== null && "code" in value;
+}
+
 function isLeaveQuotaViolation(error: unknown): boolean {
   const combined = collectErrorMessages(error);
   if (combined.includes("Leave quota exceeded")) {
@@ -24,7 +28,7 @@ function isLeaveQuotaViolation(error: unknown): boolean {
 
   let current: unknown = error;
   while (current instanceof Error) {
-    if ((current as { code?: string }).code === "P0001") {
+    if (hasErrorCode(current) && current.code === "P0001") {
       return true;
     }
     current = current.cause;
@@ -64,7 +68,7 @@ export async function incrementTeacherLeaveQuota(
   const periodYear = now.getUTCFullYear();
   const periodMonth = now.getUTCMonth() + 1;
 
-  const queryDb = tx ?? db;
+  const dbToQuery = tx ?? db;
 
   const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2, tx);
   const currentUsage = await getTeacherLeaveQuotaUsage(teacherId, periodYear, periodMonth, tx);
@@ -74,7 +78,7 @@ export async function incrementTeacherLeaveQuota(
   }
 
   try {
-    const [updated] = await queryDb
+    const [updated] = await dbToQuery
       .update(leaveQuotaUsage)
       .set({ usedCount: sql`${leaveQuotaUsage.usedCount} + 1` })
       .where(
@@ -87,7 +91,7 @@ export async function incrementTeacherLeaveQuota(
       .returning({ id: leaveQuotaUsage.id });
 
     if (!updated) {
-      await queryDb.insert(leaveQuotaUsage).values({
+      await dbToQuery.insert(leaveQuotaUsage).values({
         teacherId,
         periodYear,
         periodMonth,

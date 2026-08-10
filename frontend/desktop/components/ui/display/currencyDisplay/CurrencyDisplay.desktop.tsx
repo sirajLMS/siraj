@@ -2,7 +2,6 @@
 
 import Stack from "@mui/material/Stack";
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { TypographyProps } from "@mui/material/Typography";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import {
@@ -14,6 +13,8 @@ import {
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 
 export type DesktopCurrencyDisplayProps = {
@@ -26,22 +27,27 @@ export type DesktopCurrencyDisplayProps = {
    */
   readonly parts?: readonly CurrencyDisplayPartValue[];
   readonly fallback?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: UiTypographyVariant;
   readonly sx?: SxProps<Theme>;
 };
 
-export const DesktopCurrencyDisplay: React.FC<DesktopCurrencyDisplayProps> = ({
+export const DesktopCurrencyDisplay = ({
   code,
   parts,
   fallback,
   typographyVariant = "bodyMd",
   sx,
-}): React.ReactNode => {
+}: DesktopCurrencyDisplayProps): React.JSX.Element | null => {
   const locale = useAppLocale();
   const visibleParts = resolveCurrencyDisplayParts(parts);
+  const fallbackNode = fallback ? (
+    <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
+      {fallback}
+    </Typography>
+  ) : null;
 
   if (!code) {
-    return (fallback ?? null) as React.ReactNode;
+    return fallbackNode;
   }
 
   const flag = getCurrencyFlag(code);
@@ -50,7 +56,7 @@ export const DesktopCurrencyDisplay: React.FC<DesktopCurrencyDisplayProps> = ({
   const shortCode = code;
 
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center", ...sx }}>
+    <Stack direction="row" spacing={1} sx={mergeSx({ alignItems: "center" }, sx)}>
       {CURRENCY_DISPLAY_PART_ORDER.map(part => {
         switch (part) {
           case CurrencyDisplayPart.Flag:

@@ -204,10 +204,14 @@ export type CronJobHandlerContext = {
 /** Handler function type: receives the job payload and optional execution context, returns a result. */
 export type CronJobHandler = (job: CronJobPayload, context?: CronJobHandlerContext) => Promise<CronJobResult>;
 
+function isCronJobKind(value: string): value is CronJobKind {
+  return (Object.values(CronJobKind) as readonly string[]).includes(value);
+}
+
 /** Runtime guard: validates that a raw string is a `CronJobKind` enum member, throws otherwise. */
 export function safeCronJobKind(value: string): CronJobKind {
-  if (Object.values(CronJobKind).includes(value as CronJobKind)) {
-    return value as CronJobKind;
+  if (isCronJobKind(value)) {
+    return value;
   }
   throw new Error(`Invalid CronJobKind: "${value}"`);
 }

@@ -60,11 +60,10 @@ export namespace ScheduleQueryService {
     return Promise.all(
       rows.map(async row => {
         const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(row.id, tErrors);
-        return {
-          ...row,
+        return Object.assign(row, {
           meetingJoinUrl: effectiveMeeting.joinUrl,
           effectiveMeeting,
-        };
+        });
       })
     );
   }

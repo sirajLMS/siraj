@@ -28,7 +28,7 @@ export const DialogPresets = {
   confirm: {
     maxWidth: "xs",
     fullWidth: true,
-  } as DialogProps,
+  } satisfies Partial<DialogProps>,
 
   /**
    * Error dialog preset (small width, centered).
@@ -37,7 +37,7 @@ export const DialogPresets = {
   error: {
     maxWidth: "xs",
     fullWidth: true,
-  } as DialogProps,
+  } satisfies Partial<DialogProps>,
 
   /**
    * Info dialog preset (medium width).
@@ -46,7 +46,7 @@ export const DialogPresets = {
   info: {
     maxWidth: "sm",
     fullWidth: true,
-  } as DialogProps,
+  } satisfies Partial<DialogProps>,
 
   /**
    * Large dialog preset (large width).
@@ -55,5 +55,5 @@ export const DialogPresets = {
   large: {
     maxWidth: "md",
     fullWidth: true,
-  } as DialogProps,
+  } satisfies Partial<DialogProps>,
 };

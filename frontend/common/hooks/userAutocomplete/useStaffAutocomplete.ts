@@ -9,6 +9,21 @@ import {
   useAudienceAutocomplete,
 } from "@/frontend/common/hooks/userAutocomplete/useAudienceAutocomplete";
 
+interface StaffDirectoryRow {
+  readonly id?: string | null;
+  readonly name?: string | null;
+  readonly avatarUrl?: string | null;
+  readonly email?: string | null;
+}
+
+interface StaffDirectoryData {
+  readonly staffDirectory?: readonly StaffDirectoryRow[];
+}
+
+function isStaffDirectoryData(value: unknown): value is StaffDirectoryData {
+  return typeof value === "object" && value !== null && "staffDirectory" in value;
+}
+
 /**
  * Staff audience autocomplete.
  * `permissionGroupFilter` reuses manager-directory semantics: `"admin"` | `"staff"`.
@@ -21,15 +36,8 @@ export function useStaffAutocomplete(args?: {
   const permissionGroupFilter = args?.scope?.permissionGroupFilter ?? null;
 
   const extractRows = useCallback((data: unknown) => {
-    const typed = data as {
-      staffDirectory?: readonly {
-        id?: string | null;
-        name?: string | null;
-        avatarUrl?: string | null;
-        email?: string | null;
-      }[];
-    } | null;
-    return typed?.staffDirectory ?? [];
+    if (!isStaffDirectoryData(data)) return [];
+    return data.staffDirectory ?? [];
   }, []);
 
   const buildVariables = useCallback(

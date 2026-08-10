@@ -20,7 +20,7 @@ export default async function ComplaintsPage() {
 
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
 
   try {

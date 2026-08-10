@@ -153,6 +153,8 @@ export class FcmPushAdapter implements IPushChannel {
     let successCount = 0;
     let failureCount = 0;
 
+    const tasks: Promise<void>[] = [];
+
     for (let i = 0; i < response.responses.length; i++) {
       const tokenResponse = response.responses[i];
       const delivery = deliveries[i];
@@ -163,13 +165,18 @@ export class FcmPushAdapter implements IPushChannel {
 
       if (tokenResponse.success) {
         successCount++;
-        await this.markDeliverySent(delivery.id, tokenResponse);
+        tasks.push(this.markDeliverySent(delivery.id, tokenResponse));
       } else {
         failureCount++;
-        await this.markDeliveryFailed(delivery.id, tokenResponse, errors, locale);
-        await this.deactivateTokenIfNeeded(tokenResponse, deviceTokens[i], userId);
+        tasks.push(
+          this.markDeliveryFailed(delivery.id, tokenResponse, errors, locale).then(() =>
+            this.deactivateTokenIfNeeded(tokenResponse, deviceTokens[i], userId)
+          )
+        );
       }
     }
+
+    await Promise.all(tasks);
 
     return {
       success: failureCount === 0,
@@ -241,13 +248,15 @@ export class FcmPushAdapter implements IPushChannel {
       error: errorMessage,
     });
 
-    for (const delivery of deliveries) {
-      await NotificationRepository.updateDeliveryStatus({
-        deliveryId: delivery.id,
-        status: NotificationDeliveryStatus.FAILED,
-        failureReason: errorMessage,
-      });
-    }
+    await Promise.all(
+      deliveries.map(delivery =>
+        NotificationRepository.updateDeliveryStatus({
+          deliveryId: delivery.id,
+          status: NotificationDeliveryStatus.FAILED,
+          failureReason: errorMessage,
+        })
+      )
+    );
 
     return {
       success: false,

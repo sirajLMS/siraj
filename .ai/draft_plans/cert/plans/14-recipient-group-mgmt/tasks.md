@@ -1,5 +1,7 @@
 # Tasks — Plan 14: Recipient Group Management
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+
 ## Task Dependency Graph
 
 ```
@@ -27,6 +29,50 @@ T10 (Mobile variants verification + infinite scroll)
 T11 (Knowledge propagation)
 ```
 
+**Execution order**: T01 → (T02, T03, T03b via parallel subagents) → (T04, T05, T05b via parallel subagents) → (T06, T07, T07b via parallel subagents) → T08 → T09 → T10 → T11
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundation task — i18n types and translations required by all subsequent tasks
+
+### Wave 2: T02, T03, T03b
+- Tasks: T02, T03, T03b
+- Rationale: No interdependencies — all depend only on T01 (i18n). T02 (Zustand store), T03 (GraphQL documents), and T03b (types, schemas, utilities) produce independent files with no shared imports.
+
+### Wave 3: T04, T05, T05b
+- Tasks: T04, T05, T05b
+- Rationale: T04 depends on T02 + T03 + T03b (list page needs store, GraphQL docs, and types). T05 and T05b depend on T03 + T03b (dialogs need GraphQL docs and schemas). No interdependencies among the three — each produces separate view/dialog files.
+
+### Wave 4: T06, T07, T07b
+- Tasks: T06, T07, T07b
+- Rationale: T06 depends on T04 (detail page follows list page pattern) and T05 + T05b (dialogs rendered in detail). T07 and T07b depend on T03 + T03b (GraphQL docs and types for student assignment and import/export). All three produce separate components with no circular dependencies.
+
+### Wave 5: T08
+- Tasks: T08
+- Rationale: Per-recipient variable value editor depends on T06 (detail desktop/mobile views provide inline expansion targets) and T07 + T07b (assignment and import components for integration). Single task — no parallelization at this level.
+
+### Wave 6: T09
+- Tasks: T09
+- Rationale: Group operations menu and navigation config depend on T08 (detail view integration complete). Single task.
+
+### Wave 7: T10
+- Tasks: T10
+- Rationale: Mobile variants verification depends on T09 (navigation and operations menu complete). Single task.
+
+### Final Wave: Knowledge Propagation
+- Task: T11
+- Rationale: Must run after all other tasks complete — synthesizes learnings from all outcome files
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
+
+---
+
 ## Execution Rules
 
 - **Before starting any task**: Read ALL files in `.ai/plans/14-recipient-group-mgmt/outcome/`
@@ -36,6 +82,8 @@ T11 (Knowledge propagation)
 ---
 
 ## T01: i18n Type Definitions and Translations
+
+**Depends on**: (none — foundation task)
 
 - [ ] 1.1 Create i18n type file `shared/locale/types/certificates/recipient-groups.ts`
   - Define `RecipientGroupsLabels` interface with 10 nested sub-domains: `list`, `create`, `detail`, `variables`, `operations`, `errors`, `importExport`, `permissions`, `breadcrumbs`, `serverValidation`
@@ -72,13 +120,13 @@ T11 (Knowledge propagation)
   - **Files to modify**: `shared/locale/namespaces/certificates/index.ts`
   - **Instruction files**: `frontend.instructions.md`, `shared/AGENTS.md`
 
-- [ ] 1.6 Run quality loop
+- [ ] 1.6 Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t01","files":["shared/locale/types/certificates/recipient-groups.ts","shared/locale/ar/certificates/recipient-groups.ts","shared/locale/en/certificates/recipient-groups.ts","shared/locale/namespaces/certificates/recipient-groups.namespace.ts"]}'
+  bun run scripts/health/sub-loop.ts shared/locale/types/certificates/recipient-groups.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/recipient-groups.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/en/certificates/recipient-groups.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/recipient-groups.namespace.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/index.ts --lifecycle codescene
   ```
 
 - [ ] 1.7 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t01-outcome.md`
@@ -89,6 +137,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T02: Zustand Store for Recipient Group Management
+
+**Depends on**: T01
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T03, T03b.
 
 - [ ] 2.1 Create `frontend/common/stores/certRecipientGroupsStore.ts`
   - Follow Siraj Zustand pattern: `create<State>(set => ({...}))`, no `persist`
@@ -102,13 +153,9 @@ _**Instruction files**: `frontend.instructions.md`_
   - **Files to create**: `frontend/common/stores/certRecipientGroupsStore.ts`
   - **Instruction files**: `frontend.instructions.md`
 
-- [ ] 2.2 Run quality loop on the new store file
+- [ ] 2.2 Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t02","files":["frontend/common/stores/certRecipientGroupsStore.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/stores/certRecipientGroupsStore.ts --lifecycle codescene
   ```
 
 - [ ] 2.3 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t02-outcome.md`
@@ -119,6 +166,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T03: GraphQL Documents
+
+**Depends on**: T01
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02, T03b.
 
 - [ ] 3.1 Create `frontend/common/graphql/sharedDocuments/certificates/certificateRecipientGroup.documents.ts`
   - Define all GraphQL documents listed in the design.md Interface Contracts section
@@ -141,13 +191,9 @@ _**Instruction files**: `frontend.instructions.md`_
   - **Files to create**: `frontend/common/graphql/sharedDocuments/certificates/certificateRecipientGroup.documents.ts`
   - **Instruction files**: `frontend.instructions.md`
 
-- [ ] 3.2 Run quality loop
+- [ ] 3.2 Run per-file quality loop (full progressive chain: tsgo → biome → lint → codescene):
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t03","files":["frontend/common/graphql/sharedDocuments/certificates/certificateRecipientGroup.documents.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/certificateRecipientGroup.documents.ts --lifecycle codescene
   ```
 
 - [ ] 3.3 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t03-outcome.md`
@@ -158,6 +204,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T03b: Types, Schemas, and Utilities
+
+**Depends on**: T01
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02, T03.
 
 - [ ] 3b.1 Create types file `frontend/common/views/dashboard/certificates/recipient-groups/types/recipientGroup.types.ts`
   - Define ViewModel return types: `RecipientGroupListViewModel`, `RecipientGroupDetailViewModel`
@@ -198,11 +247,11 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 3b.6 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t03b","files":["frontend/common/views/dashboard/certificates/recipient-groups/types/recipientGroup.types.ts","frontend/common/views/dashboard/certificates/recipient-groups/schemas/recipientGroup.schema.ts","frontend/common/views/dashboard/certificates/recipient-groups/utils/buildRecipientGroupLabels.ts","frontend/common/views/dashboard/certificates/recipient-groups/utils/mapRecipientGroupRows.ts","frontend/common/views/dashboard/certificates/recipient-groups/utils/exportGroupMembersCsv.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/types/recipientGroup.types.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/schemas/recipientGroup.schema.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/utils/buildRecipientGroupLabels.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/utils/mapRecipientGroupRows.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/utils/exportGroupMembersCsv.ts --lifecycle codescene
   ```
 
 - [ ] 3b.7 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t03b-outcome.md`
@@ -213,6 +262,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T04: Recipient Group List Page (ViewModel + Switcher + Container + Desktop + Mobile)
+
+**Depends on**: T02, T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T05, T05b.
 
 - [ ] 4.1 Create App Router page `app/(dashboard)/certificates/recipient-groups/page.tsx`
   - Server component calling `requirePermissionForPage(userId, [AppPermission.CertificateRecipientGroupView], locale, context)`
@@ -284,11 +336,12 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 4.7 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t04","files":["app/(dashboard)/certificates/recipient-groups/page.tsx","frontend/common/views/dashboard/certificates/recipient-groups/useRecipientGroupListViewModel.ts","frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupListView.tsx","frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupListContainer.tsx","frontend/desktop/views/dashboard/certificates/recipient-groups/recipientGroupList.desktop.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupList.mobile.tsx"]}'
+  bun run scripts/health/sub-loop.ts app/(dashboard)/certificates/recipient-groups/page.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/useRecipientGroupListViewModel.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupListView.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupListContainer.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/recipient-groups/recipientGroupList.desktop.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupList.mobile.tsx --lifecycle codescene
   ```
 
 - [ ] 4.8 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t04-outcome.md`
@@ -299,6 +352,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T05: Create Recipient Group Dialog
+
+**Depends on**: T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T04, T05b.
 
 - [ ] 5.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/createRecipientGroupDialog.tsx`
   - Dialog form: name (required, min 1, max 100 chars), description (optional multiline, max 500), template selection (Autocomplete)
@@ -316,11 +372,7 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 5.2 Run quality loop
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t05","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/createRecipientGroupDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/createRecipientGroupDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 5.3 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t05-outcome.md`
@@ -331,6 +383,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T05b: Group Operation Dialogs (Duplicate, Delete, Change Template)
+
+**Depends on**: T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T04, T05.
 
 - [ ] 5b.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/duplicateGroupDialog.tsx`
   - Fields: newName (default: "{originalName} (Copy)"), template (default: same template)
@@ -360,11 +415,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 5b.4 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t05b","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/duplicateGroupDialog.tsx","frontend/common/views/dashboard/certificates/recipient-groups/shared/deleteGroupConfirmDialog.tsx","frontend/common/views/dashboard/certificates/recipient-groups/shared/changeTemplateDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/duplicateGroupDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/deleteGroupConfirmDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/changeTemplateDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 5b.5 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t05b-outcome.md`
@@ -375,6 +428,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T06: Group Detail Page (ViewModel + Switcher + Container + Desktop + Mobile)
+
+**Depends on**: T04, T05, T05b
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T07b.
 
 - [ ] 6.1 Create App Router page `app/(dashboard)/certificates/recipient-groups/[id]/page.tsx`
   - Server component calling `requirePermissionForPage(userId, [AppPermission.CertificateRecipientGroupView], locale, context)`
@@ -436,11 +492,12 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 6.7 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t06","files":["app/(dashboard)/certificates/recipient-groups/[id]/page.tsx","frontend/common/views/dashboard/certificates/recipient-groups/useRecipientGroupDetailViewModel.ts","frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupDetailView.tsx","frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupDetailContainer.tsx","frontend/desktop/views/dashboard/certificates/recipient-groups/recipientGroupDetail.desktop.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupDetail.mobile.tsx"]}'
+  bun run scripts/health/sub-loop.ts app/(dashboard)/certificates/recipient-groups/[id]/page.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/useRecipientGroupDetailViewModel.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupDetailView.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/recipientGroupDetailContainer.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/recipient-groups/recipientGroupDetail.desktop.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupDetail.mobile.tsx --lifecycle codescene
   ```
 
 - [ ] 6.8 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t06-outcome.md`
@@ -451,6 +508,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T07: Student Assignment Flow
+
+**Depends on**: T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T06, T07b.
 
 - [ ] 7.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/studentAssignmentDialog.tsx`
   - Dialog (desktop) / bottom sheet `mobileAssignmentSheet` (mobile) for searching and selecting students
@@ -481,11 +541,8 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 7.3 Run quality loop
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t07","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/studentAssignmentDialog.tsx","frontend/common/views/dashboard/certificates/recipient-groups/shared/removeStudentsConfirmDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/studentAssignmentDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/removeStudentsConfirmDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 7.4 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t07-outcome.md`
@@ -496,6 +553,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T07b: Member Import/Export
+
+**Depends on**: T03, T03b
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T06, T07.
 
 - [ ] 7b.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/importMembersDialog.tsx`
   - CSV file upload dropzone (accepts `.csv` only, max 1MB)
@@ -524,11 +584,7 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 7b.3 Run quality loop
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t07b","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/importMembersDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/importMembersDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 7b.4 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t07b-outcome.md`
@@ -539,6 +595,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T08: Per-Recipient Variable Value Editor
+
+**Depends on**: T06, T07, T07b
+> **Parallelizable**: This task runs as a subagent in Wave 5 (sole task in this wave — no siblings).
 
 - [ ] 8.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/variableValueEditor.tsx`
   - Core variable editing form (shared logic for desktop inline + mobile dialog)
@@ -587,11 +646,10 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 8.5 Run quality loop on all new files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t08","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/variableValueEditor.tsx","frontend/desktop/views/dashboard/certificates/recipient-groups/desktopVariableRow.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/mobileVariableDialog.tsx","frontend/common/views/dashboard/certificates/recipient-groups/shared/variableStatusBadge.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/variableValueEditor.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/desktop/views/dashboard/certificates/recipient-groups/desktopVariableRow.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/mobileVariableDialog.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/variableStatusBadge.tsx --lifecycle codescene
   ```
 
 - [ ] 8.6 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t08-outcome.md`
@@ -602,6 +660,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T09: Group Operations Menu
+
+**Depends on**: T08
+> **Parallelizable**: This task runs as a subagent in Wave 6 (sole task in this wave — no siblings).
 
 - [ ] 9.1 Create `frontend/common/views/dashboard/certificates/recipient-groups/shared/groupOperationsMenu.tsx`
   - `Popover` with `MenuList` — items: Duplicate, Change Template, Delete (with divider), Edit Description
@@ -624,11 +685,8 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 9.3 Run quality loop
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t09","files":["frontend/common/views/dashboard/certificates/recipient-groups/shared/groupOperationsMenu.tsx","frontend/common/views/dashboard/config/navigationConfig.ts"]}'
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/certificates/recipient-groups/shared/groupOperationsMenu.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/config/navigationConfig.ts --lifecycle codescene
   ```
 
 - [ ] 9.4 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t09-outcome.md`
@@ -639,6 +697,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T10: Mobile Variants Integration
+
+**Depends on**: T09
+> **Parallelizable**: This task runs as a subagent in Wave 7 (sole task in this wave — no siblings).
 
 - [ ] 10.1 Verify mobile list view (`recipientGroupList.mobile.tsx`) connects to the same Apollo queries as desktop
   - Ensure `MobileCardList` renders paginated results
@@ -659,11 +720,9 @@ _**Instruction files**: `frontend.instructions.md`_
 
 - [ ] 10.3 Run quality loop on mobile-specific files
   ```bash
-  bun tsgo
-  bun biome:check
-  curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-    -H "Content-Type: application/json" \
-    -d '{"id":"verify-t10","files":["frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupList.mobile.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupDetail.mobile.tsx","frontend/mobile/views/dashboard/certificates/recipient-groups/mobileVariableDialog.tsx"]}'
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupList.mobile.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/recipientGroupDetail.mobile.tsx --lifecycle codescene
+  bun run scripts/health/sub-loop.ts frontend/mobile/views/dashboard/certificates/recipient-groups/mobileVariableDialog.tsx --lifecycle codescene
   ```
 
 - [ ] 10.4 Write outcome file: `.ai/plans/14-recipient-group-mgmt/outcome/t10-outcome.md`
@@ -674,6 +733,9 @@ _**Instruction files**: `frontend.instructions.md`_
 ---
 
 ## T11: Knowledge Propagation & Documentation
+
+**Depends on**: T10
+> **Parallelizable**: This task runs as a subagent in the Final Wave (sole task — knowledge propagation must run after all other tasks complete).
 
 - [ ] 11.1 Read all outcome files in `.ai/plans/14-recipient-group-mgmt/outcome/` to synthesize learnings
 

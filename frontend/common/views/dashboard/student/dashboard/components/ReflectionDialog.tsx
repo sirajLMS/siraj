@@ -77,7 +77,6 @@ export function ReflectionDialog({ labels, commonLabels }: Readonly<ReflectionDi
           </Alert>
         ) : null}
         <TextField
-          autoFocus
           fullWidth
           multiline
           minRows={4}

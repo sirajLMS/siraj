@@ -22,6 +22,12 @@ const ENV_KEYS = [
 type EnvKey = (typeof ENV_KEYS)[number];
 type EnvSnapshot = Partial<Record<EnvKey, string | undefined>>;
 
+const ENV_KEY_SET: ReadonlySet<string> = new Set(ENV_KEYS);
+
+function isEnvKey(value: string): value is EnvKey {
+  return ENV_KEY_SET.has(value);
+}
+
 let envSnapshot: EnvSnapshot = {};
 
 function setProcessEnv(key: EnvKey, value: string | undefined): void {
@@ -48,7 +54,9 @@ function setEnv(overrides: EnvSnapshot): void {
     setProcessEnv(key, undefined);
   }
   for (const [key, value] of Object.entries(overrides)) {
-    setProcessEnv(key as EnvKey, value);
+    if (isEnvKey(key)) {
+      setProcessEnv(key, value);
+    }
   }
 }
 
@@ -130,42 +138,54 @@ describe("poolMax", () => {
   });
 });
 
+const NEON_DB_URL = "postgres://user:pass@ep-cool-12345.us-east-2.aws.neon.tech/neondb";
+
+function assertNeonHttpEligible(overrides: EnvSnapshot, eligible: boolean, expectedProvider: "neon" | "none"): void {
+  snapshotEnv();
+  setEnv(overrides);
+  expect(isNeonHttpEligible()).toBe(eligible);
+  expect(getActiveHttpProvider()).toBe(expectedProvider);
+}
+
 describe("isNeonHttpEligible", () => {
   afterEach(() => {
     restoreEnv();
   });
 
   test("returns true when DB_PROVIDER=neon, *.neon.tech host, mode!=pg, enabled!=false", () => {
-    snapshotEnv();
-    setEnv({
-      DB_PROVIDER: "neon",
-      DATABASE_URL: "postgres://user:pass@ep-cool-12345.us-east-2.aws.neon.tech/neondb",
-      DB_CONNECTION_MODE: "auto",
-      DB_NEON_HTTP_ENABLED: "true",
-    });
-    expect(isNeonHttpEligible()).toBe(true);
-    expect(getActiveHttpProvider()).toBe("neon");
+    assertNeonHttpEligible(
+      {
+        DB_PROVIDER: "neon",
+        DATABASE_URL: NEON_DB_URL,
+        DB_CONNECTION_MODE: "auto",
+        DB_NEON_HTTP_ENABLED: "true",
+      },
+      true,
+      "neon"
+    );
   });
 
   test("returns false when DB_NEON_HTTP_ENABLED=false", () => {
-    snapshotEnv();
-    setEnv({
-      DB_PROVIDER: "neon",
-      DATABASE_URL: "postgres://user:pass@ep-cool-12345.us-east-2.aws.neon.tech/neondb",
-      DB_NEON_HTTP_ENABLED: "false",
-    });
-    expect(isNeonHttpEligible()).toBe(false);
-    expect(getActiveHttpProvider()).toBe("none");
+    assertNeonHttpEligible(
+      {
+        DB_PROVIDER: "neon",
+        DATABASE_URL: NEON_DB_URL,
+        DB_NEON_HTTP_ENABLED: "false",
+      },
+      false,
+      "none"
+    );
   });
 
   test("returns false when DB_PROVIDER=postgres", () => {
-    snapshotEnv();
-    setEnv({
-      DB_PROVIDER: "postgres",
-      DATABASE_URL: "postgres://user:pass@ep-cool-12345.us-east-2.aws.neon.tech/neondb",
-    });
-    expect(isNeonHttpEligible()).toBe(false);
-    expect(getActiveHttpProvider()).toBe("none");
+    assertNeonHttpEligible(
+      {
+        DB_PROVIDER: "postgres",
+        DATABASE_URL: NEON_DB_URL,
+      },
+      false,
+      "none"
+    );
   });
 
   test("returns false when DB_CONNECTION_MODE=pg", () => {
@@ -173,7 +193,7 @@ describe("isNeonHttpEligible", () => {
     setEnv({
       DB_PROVIDER: "neon",
       DB_CONNECTION_MODE: "pg",
-      DATABASE_URL: "postgres://user:pass@ep-cool-12345.us-east-2.aws.neon.tech/neondb",
+      DATABASE_URL: NEON_DB_URL,
     });
     expect(isNeonHttpEligible()).toBe(false);
   });

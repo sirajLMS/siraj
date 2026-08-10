@@ -3,7 +3,7 @@
 import { useApolloClient, useQuery } from "@apollo/client/react";
 import { useEffect, useRef } from "react";
 import { meQueryDocument, userQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
-import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/fx-sync-health.documents";
+import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/fx-ingestion.documents";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/profile/profile.documents";
 import { FX_SUBJECT_CURRENCY_CHANGED_KEY } from "@/frontend/common/lib/sync-subject-profile";
 import { syncViewerFromProfile } from "@/frontend/common/lib/sync-viewer-profile";
@@ -27,7 +27,7 @@ function onRefetchFailed(error: unknown) {
 function onMeFetched(
   client: ReturnType<typeof useApolloClient>,
   refetchFxHealth: () => Promise<{ data: unknown; error?: Error }>,
-  syncViewerFromProfile: typeof import("@/frontend/common/lib/sync-viewer-profile").syncViewerFromProfile,
+  syncViewerFn: typeof import("@/frontend/common/lib/sync-viewer-profile").syncViewerFromProfile,
   result: Awaited<ReturnType<typeof client.query>>
 ) {
   const me = result.data?.me;
@@ -37,7 +37,7 @@ function onMeFetched(
 
   // Only sync if displayCurrency is explicitly set (not null/undefined)
   if (me.displayCurrency !== null && me.displayCurrency !== undefined) {
-    syncViewerFromProfile(client, { displayCurrency: me.displayCurrency });
+    syncViewerFn(client, { displayCurrency: me.displayCurrency });
     if (me.displayCurrency) {
       refetchFxHealth().catch(onRefetchFailed);
     }

@@ -1,6 +1,6 @@
-import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
 import type { EmailProvider, IEmailChannel } from "@/backend/services/communication/channels/email/IEmailChannel";
+import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/services/system";
 
 let instance: IEmailChannel | null = null;
 let initializationPromise: Promise<IEmailChannel> | null = null;
@@ -58,7 +58,7 @@ async function createEmailChannel(): Promise<IEmailChannel> {
   logger.info(`Initializing Email channel with provider: ${provider}`);
 
   if (provider !== "resend") {
-    logger.warn(`Unknown email provider: ${provider}, falling back to resend`);
+    logger.warn(`Unknown email provider: ${String(provider)}, falling back to resend`);
   }
 
   return await createResendAdapter();
@@ -86,7 +86,7 @@ export const getEmailChannel = async (): Promise<IEmailChannel> => {
 
 export const resetEmailChannel = (): void => {
   if (instance) {
-    instance.disconnect();
+    void instance.disconnect();
     instance = null;
   }
   initializationPromise = null;

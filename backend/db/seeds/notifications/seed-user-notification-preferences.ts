@@ -8,7 +8,7 @@ import {
   SUPERVISOR_USER_EMAIL,
 } from "@/backend/db/seeds/lib";
 import { NotificationEventType } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { NotificationPreferencesService } from "@/backend/services/notification/notification-preferences.service";
 import type { UserSelectType } from "@/backend/types";
 import {
@@ -39,24 +39,23 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
       ? usersList.filter(u => u.email.includes("@seed.siraj.local") || u.email.includes("@siraj.local"))
       : usersList.slice(0, 3);
 
-  const results = [];
+  const results = await Promise.all(
+    targetUsers.map(async (user, userIndex) => {
+      const channel = cycleAtIndex(ALL_NOTIFICATION_CHANNELS, userIndex);
+      const allowlist = eventTypesForUser(user.email);
+      const eventType = cycleAtIndex(allowlist, userIndex);
 
-  for (let userIndex = 0; userIndex < targetUsers.length; userIndex++) {
-    const user = targetUsers[userIndex];
-    const channel = cycleAtIndex(ALL_NOTIFICATION_CHANNELS, userIndex);
-    const allowlist = eventTypesForUser(user.email);
-    const eventType = cycleAtIndex(allowlist, userIndex);
+      return NotificationPreferencesService.upsertManyPreferences(user.id, [
+        {
+          channel,
+          eventType,
+          enabled: userIndex % 5 !== 0,
+        },
+      ]);
+    })
+  );
+  const inserted = results.flat();
 
-    const inserted = await NotificationPreferencesService.upsertManyPreferences(user.id, [
-      {
-        channel,
-        eventType,
-        enabled: userIndex % 5 !== 0,
-      },
-    ]);
-    results.push(...inserted);
-  }
-
-  logger.info(`User notification preferences seeded (${results.length} rows).`);
-  return results;
+  logger.info(`User notification preferences seeded (${inserted.length} rows).`);
+  return inserted;
 }

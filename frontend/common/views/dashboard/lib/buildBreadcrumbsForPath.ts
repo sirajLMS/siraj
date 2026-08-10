@@ -80,13 +80,13 @@ export function buildBreadcrumbsForPath(
   const autoCrumbs: PageHeaderBreadcrumb[] = [];
   // Sort items by href length descending so the longest matching href per
   // prefix wins (matches getActiveNavKey's behavior).
-  const sortedItems = [...navItems].sort((a, b) => b.href.length - a.href.length);
+  const sortedItems = [...navItems].toSorted((a, b) => b.href.length - a.href.length);
   let lastHref = "";
   // Walk path prefixes from "/" up to the full pathname in segment steps.
   const segments = normalized.split("/").filter(Boolean);
   let walkedPrefix = "";
-  for (let i = 0; i < segments.length; i++) {
-    walkedPrefix = `${walkedPrefix}/${segments[i]}`;
+  for (const segment of segments) {
+    walkedPrefix = `${walkedPrefix}/${segment}`;
     const match = sortedItems.find(item => {
       if (!walkedPrefix.startsWith(item.href)) {
         return false;

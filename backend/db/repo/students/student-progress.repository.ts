@@ -25,18 +25,22 @@ export namespace StudentProgressRepository {
   ): Promise<StudentProgressSelectType[]> {
     if (inputs.length === 0) return [];
     const executor = tx ?? db;
-    const results: StudentProgressSelectType[] = [];
-    for (const input of inputs) {
-      const [row] = await executor
-        .insert(studentProgress)
-        .values(input)
-        .onConflictDoUpdate({
-          target: [studentProgress.studentId, studentProgress.classInstanceId],
-          set: { updatedAt: input.updatedAt },
-        })
-        .returning();
-      if (row) results.push(row);
-    }
+    const results = await inputs.reduce(
+      async (prev, input) => {
+        const acc = await prev;
+        const [row] = await executor
+          .insert(studentProgress)
+          .values(input)
+          .onConflictDoUpdate({
+            target: [studentProgress.studentId, studentProgress.classInstanceId],
+            set: { updatedAt: input.updatedAt },
+          })
+          .returning();
+        if (row) acc.push(row);
+        return acc;
+      },
+      Promise.resolve([] as StudentProgressSelectType[])
+    );
     return results;
   }
 

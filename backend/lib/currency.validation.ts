@@ -14,7 +14,7 @@ import { CurrencyCode } from "@/backend/enum";
  */
 export function isCurrencyCode(value: unknown): value is CurrencyCode {
   if (typeof value !== "string") return false;
-  return Object.values(CurrencyCode).includes(value as CurrencyCode);
+  return (Object.values(CurrencyCode) as readonly string[]).includes(value);
 }
 
 /**

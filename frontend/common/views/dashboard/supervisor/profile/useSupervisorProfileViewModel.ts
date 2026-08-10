@@ -7,6 +7,7 @@ import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { type SupervisorPortalProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface SupervisorProfileData {
+  readonly userId: string;
   readonly name: string;
   readonly email: string | null;
   readonly phone: string | null;
@@ -42,8 +43,10 @@ export function useSupervisorProfileViewModel(
 
   const profile = useMemo((): SupervisorProfileData | null => {
     const staff = data?.profileByUserId?.staffProfile;
+    const userId = data?.profileByUserId?.id ?? targetUserId;
     if (!staff) return null;
     return {
+      userId,
       name: staff.name ?? data?.profileByUserId?.name ?? "",
       email: staff.email ?? data?.profileByUserId?.email ?? null,
       phone: staff.phone ?? null,
@@ -51,7 +54,7 @@ export function useSupervisorProfileViewModel(
       roleName: staff.roleName ?? staff.roleSlug ?? null,
       avatarUrl: staff.avatarUrl ?? data?.profileByUserId?.avatarUrl ?? null,
     };
-  }, [data]);
+  }, [data, targetUserId]);
 
   return {
     labels,

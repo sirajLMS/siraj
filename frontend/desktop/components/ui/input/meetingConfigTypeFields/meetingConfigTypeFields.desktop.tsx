@@ -68,6 +68,8 @@ export function MeetingConfigTypeFieldsDesktop({
   const fields = getVisibleMeetingConfigFields(provider);
   const supportsAuto = provider.fieldSchema?.supportsAutoGeneration === true;
 
+  const buttonLabel = generating ? t.generating : value.meetingUrl.trim() ? t.regenerate : t.generateAutomatically;
+
   return (
     <Stack spacing={2}>
       <TextField
@@ -83,7 +85,7 @@ export function MeetingConfigTypeFieldsDesktop({
       {supportsAuto && onGenerateUrl ? (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <Button variant="outlined" size="small" disabled={disabled || generating} onClick={onGenerateUrl}>
-            {generating ? t.generating : value.meetingUrl.trim() ? t.regenerate : t.generateAutomatically}
+            {buttonLabel}
           </Button>
           {generationError ? (
             <Typography sx={{ typography: "bodySm", color: "error.main" }}>{generationError}</Typography>

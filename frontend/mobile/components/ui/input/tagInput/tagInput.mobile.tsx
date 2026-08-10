@@ -13,6 +13,8 @@ export type TagInputProps = {
   readonly initialTags?: string[];
 };
 
+const DEFAULT_INITIAL_TAGS: string[] = [];
+
 const TagContainerMobile = styled(Paper)(({ theme }) => ({
   display: "flex",
   flexWrap: "wrap",
@@ -98,7 +100,6 @@ function TagInputChipListMobile({
         onChange={onEditInputChange}
         onKeyDown={e => onEditKeyDown(e, index)}
         onBlur={() => onEditBlur(index)}
-        autoFocus
       />
     ) : (
       <Chip
@@ -118,7 +119,7 @@ export const TagInputMobile: React.FC<TagInputProps> = ({
   label,
   placeholder,
   onChange,
-  initialTags = [],
+  initialTags = DEFAULT_INITIAL_TAGS,
 }: TagInputProps): React.ReactNode => {
   const t = useAppTranslation(Translation.Ui.TagInput);
   const [tags, setTags] = useState<string[]>(initialTags);

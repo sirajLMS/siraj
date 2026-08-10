@@ -63,6 +63,7 @@ function getPersonAccentColor(tone: PersonAccentTone, theme: Theme): string {
     case "default":
       return theme.palette.onSurface;
   }
+  throw new Error(`Unhandled case in getPersonAccentColor`);
 }
 
 function resolveApprovalStatusKey(status: LessonReportStatus | null): string {

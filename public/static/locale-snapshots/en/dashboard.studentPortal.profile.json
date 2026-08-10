@@ -18,5 +18,6 @@
   "backToDashboard": "Back to Dashboard",
   "loadingMessage": "Loading...",
   "saveSuccess": "Profile updated successfully",
-  "saveError": "Failed to update profile"
+  "saveError": "Failed to update profile",
+  "accountStatus": "Account Status"
 }

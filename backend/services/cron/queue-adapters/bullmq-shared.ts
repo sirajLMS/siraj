@@ -1,4 +1,4 @@
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { type CronQueueAdapter, CronQueueBackendNotAvailable } from "@/backend/types/cron/cron.types";
 
 /**

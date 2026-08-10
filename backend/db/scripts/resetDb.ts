@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import ws from "ws";
 import { runMigrations } from "@/backend/db/scripts/migrate";
 import { getStringEnv, requireEnv } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { assertDestructiveDbCommandAllowed } from "@/scripts/lib/destructiveDbGuard";
 
 type ResetPool = Pool | NeonPool;
@@ -51,8 +51,12 @@ function createNeonPool(connectionString: string): NeonPool {
   return new NeonPool({ connectionString });
 }
 
-function createResetPool(connectionString: string, isNeon: boolean): ResetPool {
-  return isNeon ? createNeonPool(connectionString) : createPgPool(connectionString);
+function createNeonResetPool(connectionString: string): ResetPool {
+  return createNeonPool(connectionString);
+}
+
+function createPgResetPool(connectionString: string): ResetPool {
+  return createPgPool(connectionString);
 }
 
 type QueryablePool = {
@@ -61,7 +65,7 @@ type QueryablePool = {
 };
 
 function asQueryablePool(pool: ResetPool): QueryablePool {
-  return pool as QueryablePool;
+  return pool;
 }
 
 async function resetNeonDatabase(pool: ResetPool, database: string): Promise<void> {
@@ -113,7 +117,9 @@ async function resetDatabase() {
 
   logger.log(`Resetting database: ${database} (provider: ${provider})`);
 
-  const pool = createResetPool(isNeon ? connectionString : buildConnectionString(connectionString, "postgres"), isNeon);
+  const pool = isNeon
+    ? createNeonResetPool(connectionString)
+    : createPgResetPool(buildConnectionString(connectionString, "postgres"));
 
   try {
     if (isNeon) {

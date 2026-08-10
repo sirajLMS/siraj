@@ -9,6 +9,9 @@
 | **Dependencies** | Plan 4 (Services & Business Logic) |
 | **Task Count** | 12 tasks across 4 phases |
 
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+> **Execution order**: (T01, T02, T04, T05, T07, T08, T09, T10 via parallel subagents) → (T03, T06 via parallel subagents) → T11 → T12 → T13
+
 ---
 
 ## Dependency Graph
@@ -38,6 +41,34 @@ T07 (backgroundImageLoader)  T08 (fontLoader)           │
                ▼
           T12 (batchRenderer)
 ```
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01, T02, T04, T05, T07, T08, T09, T10
+- Tasks: T01 (qrcode dep), T02 (puppeteerConfig), T04 (elementRenderer), T05 (variableResolver), T07 (backgroundImageLoader), T08 (fontLoader), T09 (shapeRenderer), T10 (renderCache)
+- Rationale: All have no internal task dependencies — T01, T02, T04, T05, T08, T09 have zero deps; T07 and T10 depend only on Plan 7 (StorageService) which is an external already-completed dependency. These 8 tasks are fully independent of each other and can run concurrently.
+
+### Wave 2: T03, T06
+- Tasks: T03 (puppeteerManager), T06 (qrCodeGenerator)
+- Rationale: T03 depends on T02 (puppeteerConfig from Wave 1); T06 depends on T01 (qrcode package from Wave 1). Both depend only on Wave 1 outputs and are independent of each other, so they can run in parallel.
+
+### Wave 3: T11
+- Tasks: T11 (renderService — main orchestrator)
+- Rationale: T11 depends on T02, T03, T04, T05, T06, T07, T08, T09, T10, and Plan 7. All dependencies are satisfied after Waves 1 and 2 complete. This is a single task — it runs as a single subagent.
+
+### Wave 4: T12
+- Tasks: T12 (batchRenderer)
+- Rationale: T12 depends on T11 (renderService). Must run after Wave 3 completes. Single task — single subagent.
+
+### Final Wave: Knowledge Propagation
+- Task: T13
+- Rationale: Must run after all other tasks complete (depends on T01–T12). Synthesizes all implementation learnings into docs and updates AGENTS.md files.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -88,16 +119,16 @@ T07 (backgroundImageLoader)  T08 (fontLoader)           │
 
 **Dependencies:** None
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T02, T04, T05, T07, T08, T09, T10.
+
 **Requirements References:** REQ-RENDER-04
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t01","files":["package.json"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts package.json --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/qrCodeGenerator.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -124,16 +155,16 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Dependencies:** None
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T01, T04, T05, T07, T08, T09, T10.
+
 **Requirements References:** REQ-RENDER-11
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t02","files":["backend/services/cert/puppeteer/puppeteerConfig.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/puppeteer/puppeteerConfig.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/puppeteer/__tests__/puppeteerConfig.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -165,16 +196,16 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Dependencies:** T02
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T06.
+
 **Requirements References:** REQ-RENDER-11 (AC1-AC5)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t03","files":["backend/services/cert/puppeteer/puppeteerManager.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/puppeteer/puppeteerManager.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/puppeteer/__tests__/puppeteerManager.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -211,13 +242,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-01 (AC1-AC4), REQ-RENDER-02 (AC1-AC7)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t04","files":["backend/services/cert/render/elementRenderer.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/elementRenderer.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/elementRenderer.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -252,13 +281,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-06 (AC1-AC5)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t05","files":["backend/services/cert/render/variableResolver.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/variableResolver.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/variableResolver.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -292,13 +319,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-04 (AC1-AC3)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t06","files":["backend/services/cert/render/qrCodeGenerator.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/qrCodeGenerator.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/qrCodeGenerator.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -332,13 +357,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-05 (AC1-AC3)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t07","files":["backend/services/cert/render/backgroundImageLoader.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/backgroundImageLoader.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/backgroundImageLoader.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -372,13 +395,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-03 (AC1-AC4)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t08","files":["backend/services/cert/render/fontLoader.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/fontLoader.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/fontLoader.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -412,13 +433,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-12 (AC1-AC4)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t09","files":["backend/services/cert/render/shapeRenderer.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/shapeRenderer.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/shapeRenderer.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -452,13 +471,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-07 (AC1-AC4)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t10","files":["backend/services/cert/render/renderCache.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/renderCache.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/render/__tests__/renderCache.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -507,13 +524,11 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** REQ-RENDER-01 (AC1-AC5), REQ-RENDER-09 (all error codes), REQ-RENDER-10 (AC1-AC4)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t11","files":["backend/services/cert/renderService.ts"]}'
-```
+- [ ] Run per-file quality loop for each file created/modified (full progressive chain: tsgo → biome → lint → codescene):
+  ```bash
+  bun run scripts/health/sub-loop.ts backend/services/cert/renderService.ts --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/cert/__tests__/renderService.test.ts --lifecycle codescene
+  ```
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — service layer conventions
@@ -551,13 +566,10 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Requirements References:** REQ-RENDER-08 (AC1-AC5)
 
-**Quality Loop:**
+**Quality Loop:** Run per-file progressive verification (tsgo → biome → lint → codescene, short-circuiting on first failure):
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-06-t12","files":["backend/services/cert/batch/batchRenderer.ts"]}'
+bun run scripts/health/sub-loop.ts backend/services/cert/batch/batchRenderer.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/services/cert/batch/__tests__/batchRenderer.test.ts --lifecycle codescene
 ```
 
 **Instruction Verification:**
@@ -585,7 +597,14 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - [ ] Update `backend/AGENTS.md` — add rendering engine reference to services section
 - [ ] Update root `AGENTS.md` Important References — add `docs/services/pdf-rendering-engine.md`
 - [ ] Update `.agents/instructions/backend.instructions.md` — add rendering section if new conventions
-- [ ] Run global quality check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+- [ ] Run per-file quality loop for documentation and instruction files (tsgo → biome → lint → codescene, short-circuiting on first failure):
+  ```bash
+  bun run scripts/health/sub-loop.ts docs/services/pdf-rendering-engine.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/services/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts backend/AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene
+  bun run scripts/health/sub-loop.ts .agents/instructions/backend.instructions.md --lifecycle codescene
+  ```
 - [ ] Write outcome file: `.ai/plans/06-pdf-rendering-engine/outcome/T13-knowledge-propagation-outcome.md`
 - [ ] Mark task T13 as `[x]` in `tasks.md`
 
@@ -601,11 +620,7 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Requirements References:** All (knowledge consolidation)
 
 **Quality Loop:**
-```bash
-bun tsgo
-bun biome:check
-bun run lint
-```
+Same as the per-file quality loop checklist item above — each file listed in "Files to Create/Modify" is verified via `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (full progressive chain: tsgo → biome → lint → codescene).
 
 **Instruction Verification:**
 - `backend/services/AGENTS.md` — verify new section matches conventions

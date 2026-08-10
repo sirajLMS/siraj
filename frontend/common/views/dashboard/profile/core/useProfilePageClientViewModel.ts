@@ -11,10 +11,7 @@ import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ownProfileHref, profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import { useRefetchOnWindowFocus } from "@/frontend/common/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
-import {
-  isStudentProfileAudience,
-  PROFILE_AUDIENCE_STUDENT,
-} from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";
+import { isStudentProfileAudience } from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";
 import type {
   ProfilePageClientLabels,
   ProfilePageClientProps,
@@ -23,6 +20,60 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ProfileLabels, ProfileRoleLabels } from "@/shared/locale/types/profile";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+
+function isProfileRoleKey(value: string): value is keyof ProfileRoleLabels {
+  return value === "teacher" || value === "parent" || value === "staff" || value === "student";
+}
+
+function buildStudentProfile(
+  audience: ProfileAudience,
+  scope: ProfileScope,
+  targetUserId: string,
+  user: User | null,
+  userName: string,
+  userAvatarUrl: string,
+  userEmail: string | null | undefined
+): ProfileData {
+  return {
+    assignedStudents: null,
+    associatedStudents: null,
+    audience,
+    avatarUrl: userAvatarUrl || user?.avatarUrl || null,
+    displayCurrency: null,
+    email: userEmail ?? user?.email ?? "",
+    id: targetUserId,
+    meetingConfigs: null,
+    name: userName || user?.name || "",
+    parentAdminProfile: null,
+    parentId: null,
+    parentOwnProfile: null,
+    paymentMethodDefaults: null,
+    paymentMethods: null,
+    phone: null,
+    scope,
+    staffPermissionGroups: null,
+    staffPermissionOverrides: null,
+    staffProfile: null,
+    staffProfileId: null,
+    teacherAdminProfile: null,
+    teacherId: null,
+    teacherOwnProfile: null,
+    timezone: null,
+    userId: targetUserId,
+  };
+}
+
+interface UseProfileDataParams {
+  isStudentAudience: boolean;
+  audience: ProfileAudience;
+  scope: ProfileScope;
+  targetUserId: string;
+  unifiedProfileData: Operations.ProfileByUserIdQuery | null | undefined;
+  user: User | null;
+  userName: string;
+  userAvatarUrl: string;
+  userEmail: string | null | undefined;
+}
 
 export interface ProfilePageClientViewModel extends ProfilePageClientProps {
   readonly labels: ProfilePageClientLabels;
@@ -46,27 +97,22 @@ export interface ProfilePageClientViewModel extends ProfilePageClientProps {
  * For student audience, returns user data from store.
  * For other audiences, returns data from GraphQL query.
  */
-function useProfileData(
-  isStudentAudience: boolean,
-  audience: ProfileAudience,
-  scope: ProfileScope,
-  targetUserId: string,
-  unifiedProfileData: Operations.ProfileByUserIdQuery | null | undefined,
-  user: User | null,
-  userName: string,
-  userAvatarUrl: string
-): ProfileData | null | undefined {
+function useProfileData(params: UseProfileDataParams): ProfileData | null | undefined {
+  const {
+    isStudentAudience,
+    audience,
+    scope,
+    targetUserId,
+    unifiedProfileData,
+    user,
+    userName,
+    userAvatarUrl,
+    userEmail,
+  } = params;
+
   return useMemo((): ProfileData | null | undefined => {
     if (isStudentAudience) {
-      return {
-        id: targetUserId,
-        userId: targetUserId,
-        audience,
-        scope,
-        name: userName || user?.name || "",
-        email: user?.email ?? "",
-        avatarUrl: userAvatarUrl || user?.avatarUrl || null,
-      } as ProfileData;
+      return buildStudentProfile(audience, scope, targetUserId, user, userName, userAvatarUrl, userEmail);
     }
     return unifiedProfileData?.profileByUserId;
   }, [
@@ -78,6 +124,7 @@ function useProfileData(
     user,
     userAvatarUrl,
     userName,
+    userEmail,
   ]);
 }
 
@@ -121,7 +168,8 @@ function computeRoleLabel(
   if (audience === ProfileAudience.Staff) {
     return profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined;
   }
-  return base.role[audience.toLowerCase() as keyof ProfileRoleLabels];
+  const roleKey = audience.toLowerCase();
+  return isProfileRoleKey(roleKey) ? base.role[roleKey] : undefined;
 }
 
 /**
@@ -155,7 +203,7 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
     skip: isStudentAudience,
   });
 
-  const profile = useProfileData(
+  const profile = useProfileData({
     isStudentAudience,
     audience,
     scope,
@@ -163,8 +211,9 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
     unifiedProfileData,
     user,
     userName,
-    userAvatarUrl
-  );
+    userAvatarUrl,
+    userEmail: user?.email ?? null,
+  });
 
   const loading = isStudentAudience ? false : unifiedLoading;
   const error = isStudentAudience ? undefined : unifiedError;
@@ -209,4 +258,7 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
   };
 }
 
-export { isStudentProfileAudience, PROFILE_AUDIENCE_STUDENT };
+export {
+  isStudentProfileAudience,
+  PROFILE_AUDIENCE_STUDENT,
+} from "@/frontend/common/views/dashboard/profile/core/isStudentProfileAudience";

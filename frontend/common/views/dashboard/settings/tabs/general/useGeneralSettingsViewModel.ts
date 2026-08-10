@@ -3,7 +3,11 @@
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useMemo, useState } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  SystemSettingCategory as GraphQLSystemSettingCategory,
+  SystemSettingDataType as GraphQLSystemSettingDataType,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { upsertSystemSettingMutationDocument } from "@/frontend/common/graphql/sharedDocuments/settings/general-settings.documents";
 import { useSystemSettingsQuery } from "@/frontend/common/hooks/settings";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -15,6 +19,7 @@ import type {
   UseGeneralSettingsViewModelProps,
 } from "@/frontend/common/views/dashboard/settings/types/generalSettings.types";
 import { GENERAL_SETTINGS_DEFINITIONS } from "@/shared/constants/settings/generalSettings.constants";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 type DbSystemSetting = {
@@ -44,6 +49,68 @@ function mergeDefinitionsWithDbRows(dbSettings: readonly DbSystemSetting[]): rea
   });
 }
 
+/** Convert shared SystemSettingDataType (lowercase) to GraphQL SystemSettingDataType (PascalCase). */
+function toGraphQLDataType(dataType: SystemSettingDataType): GraphQLSystemSettingDataType {
+  switch (dataType) {
+    case SystemSettingDataType.String:
+      return GraphQLSystemSettingDataType.String;
+    case SystemSettingDataType.Integer:
+      return GraphQLSystemSettingDataType.Integer;
+    case SystemSettingDataType.Boolean:
+      return GraphQLSystemSettingDataType.Boolean;
+    case SystemSettingDataType.Json:
+      return GraphQLSystemSettingDataType.Json;
+    default: {
+      // Exhaustiveness check
+      const exhaustiveCheck: never = dataType;
+      return exhaustiveCheck;
+    }
+  }
+}
+
+/** Convert shared SystemSettingCategory (lowercase) to GraphQL SystemSettingCategory (PascalCase). */
+function toGraphQLCategory(category: SystemSettingCategory): GraphQLSystemSettingCategory {
+  switch (category) {
+    case SystemSettingCategory.Security:
+      return GraphQLSystemSettingCategory.Security;
+    case SystemSettingCategory.System:
+      return GraphQLSystemSettingCategory.System;
+    case SystemSettingCategory.Scheduling:
+      return GraphQLSystemSettingCategory.Scheduling;
+    case SystemSettingCategory.Communication:
+      return GraphQLSystemSettingCategory.Communication;
+    case SystemSettingCategory.Email:
+      return GraphQLSystemSettingCategory.Email;
+    case SystemSettingCategory.Sms:
+      return GraphQLSystemSettingCategory.Sms;
+    case SystemSettingCategory.Push:
+      return GraphQLSystemSettingCategory.Push;
+    case SystemSettingCategory.Fx:
+      return GraphQLSystemSettingCategory.Fx;
+    case SystemSettingCategory.Cache:
+      return GraphQLSystemSettingCategory.Cache;
+    case SystemSettingCategory.Redis:
+      return GraphQLSystemSettingCategory.Redis;
+    case SystemSettingCategory.Storage:
+      return GraphQLSystemSettingCategory.Storage;
+    case SystemSettingCategory.Auth:
+      return GraphQLSystemSettingCategory.Auth;
+    case SystemSettingCategory.App:
+      return GraphQLSystemSettingCategory.App;
+    case SystemSettingCategory.Meeting:
+      return GraphQLSystemSettingCategory.Meeting;
+    case SystemSettingCategory.Billing:
+      return GraphQLSystemSettingCategory.Billing;
+    case SystemSettingCategory.General:
+      return GraphQLSystemSettingCategory.General;
+    default: {
+      // Exhaustiveness check
+      const exhaustiveCheck: never = category;
+      return exhaustiveCheck;
+    }
+  }
+}
+
 export function useGeneralSettingsViewModel(
   _props: Readonly<UseGeneralSettingsViewModelProps>
 ): GeneralSettingsViewModel {
@@ -68,7 +135,9 @@ export function useGeneralSettingsViewModel(
         return;
       }
 
-      const validationError = validateSystemSettingValue(definition.dataType, value, labels);
+      // Convert shared dataType to GraphQL dataType for validation
+      const graphQLDataType = toGraphQLDataType(definition.dataType);
+      const validationError = validateSystemSettingValue(graphQLDataType, value, labels);
       if (validationError) {
         notifications.show(validationError, { severity: "error" });
         return;
@@ -81,9 +150,9 @@ export function useGeneralSettingsViewModel(
             input: {
               key: definition.code,
               value,
-              dataType: definition.dataType,
+              dataType: graphQLDataType,
               description: definition.description,
-              category: definition.category,
+              category: toGraphQLCategory(definition.category),
             },
           },
         });

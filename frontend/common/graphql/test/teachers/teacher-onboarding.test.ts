@@ -7,6 +7,7 @@ import {
   IanaTimezone,
   PaymentDirection,
   PaymentMethodType,
+  type TeacherOnboardingInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createTeacherMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
@@ -23,11 +24,11 @@ const createMinimalTeacherInput = (
     name: string;
     email: string;
   }>
-) => ({
+): TeacherOnboardingInput => ({
   name: overrides?.name ?? "Test Teacher",
   email: overrides?.email ?? `test_teacher_${Date.now()}@test.com`,
   avatarUrl: null,
-  password: `${randomUUID()}`,
+  password: randomUUID(),
   timezone: IanaTimezone.Utc,
   nationality: CountryCode.Us,
   countryCode: CountryCode.Us,
@@ -49,9 +50,16 @@ const createMinimalTeacherInput = (
       bankName: "Bank of America",
       beneficiaryName: "John Doe",
       iban: "US12345678901234567890",
+      identifier: null,
+      note: null,
+      onlineAccountId: null,
+      paymentLinkId: null,
+      phone: null,
       routingNumber: "123456789",
       swiftBic: "BOFAUS3N",
-    } as import("@/frontend/common/graphql/generated/gql/graphql-types").PaymentMethodDetailsInput,
+      url: null,
+      walletId: null,
+    },
   },
   displayCurrency: null,
 });
@@ -65,6 +73,22 @@ const attemptCreateTeacherAs = async (demoUser: string) => {
     context: { headers: { Authorization: `Bearer ${token}` } },
     errorPolicy: "all",
   });
+};
+
+type TeacherInputOverrides = { name: string; email: string };
+
+const createTeacherAsAdmin = async (
+  overrides: TeacherInputOverrides,
+  fieldOverrides?: Partial<TeacherOnboardingInput>
+) => {
+  const token = await loginDemoUser("academy_admin");
+  const base = createMinimalTeacherInput(overrides);
+  const input: TeacherOnboardingInput = fieldOverrides ? { ...base, ...fieldOverrides } : base;
+
+  const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
+
+  if (!result.createTeacher) throw new Error("createTeacher is null");
+  return result.createTeacher;
 };
 
 describe("Teacher Onboarding GraphQL API", () => {
@@ -140,41 +164,21 @@ describe("Teacher Onboarding GraphQL API", () => {
   // ─── Phone field tests ─────────────────────────────────────────────
 
   test("create teacher with null phone succeeds and persists null", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const input = {
-      ...createMinimalTeacherInput({
-        name: "Null Phone Teacher",
-        email: `null_phone_${Date.now()}@test.com`,
-      }),
-      phone: null,
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, {
-      input,
-    });
-
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
-    expect(result.createTeacher.phone).toBeNull();
+    const teacher = await createTeacherAsAdmin(
+      { name: "Null Phone Teacher", email: `null_phone_${Date.now()}@test.com` },
+      { phone: null }
+    );
+    expect(teacher.userId).toBeDefined();
+    expect(teacher.phone).toBeNull();
   });
 
   test("create teacher with phone exactly 50 chars succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
     const longPhone = "+12345678901234567890123456789012345678901234567";
-    const input = {
-      ...createMinimalTeacherInput({
-        name: "Max Phone Teacher",
-        email: `maxphone_${Date.now()}@test.com`,
-      }),
-      phone: longPhone,
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, {
-      input,
-    });
-
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.phone).toBe(longPhone);
+    const teacher = await createTeacherAsAdmin(
+      { name: "Max Phone Teacher", email: `maxphone_${Date.now()}@test.com` },
+      { phone: longPhone }
+    );
+    expect(teacher.phone).toBe(longPhone);
   });
 
   test("create teacher with phone exceeding 50 chars — documents current constraint gap", async () => {
@@ -208,22 +212,12 @@ describe("Teacher Onboarding GraphQL API", () => {
   });
 
   test("create teacher with special characters in phone succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
     const specialPhone = "+1 (555) 123-4567 ext. 890";
-    const input = {
-      ...createMinimalTeacherInput({
-        name: "Special Phone",
-        email: `specialphone_${Date.now()}@test.com`,
-      }),
-      phone: specialPhone,
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, {
-      input,
-    });
-
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.phone).toBe(specialPhone);
+    const teacher = await createTeacherAsAdmin(
+      { name: "Special Phone", email: `specialphone_${Date.now()}@test.com` },
+      { phone: specialPhone }
+    );
+    expect(teacher.phone).toBe(specialPhone);
   });
 
   // ─── Minimal input tests ────────────────────────────────────────────
@@ -234,7 +228,7 @@ describe("Teacher Onboarding GraphQL API", () => {
     const minimalInput = {
       name: "Minimal Teacher",
       email: `minimal_${Date.now()}@test.com`,
-      password: `${randomUUID()}`,
+      password: randomUUID(),
       timezone: IanaTimezone.Utc,
       avatarUrl: null,
       nationality: null,
@@ -265,111 +259,76 @@ describe("Teacher Onboarding GraphQL API", () => {
   // ─── Individual optional field tests ────────────────────────────────
 
   test("create teacher with nationality set succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const base = createMinimalTeacherInput({ name: "Nationality Teacher", email: `nat_${Date.now()}@test.com` });
-    const input = { ...base, nationality: CountryCode.Gb };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
+    const teacher = await createTeacherAsAdmin(
+      { name: "Nationality Teacher", email: `nat_${Date.now()}@test.com` },
+      { nationality: CountryCode.Gb }
+    );
+    expect(teacher.userId).toBeDefined();
   });
 
   test("create teacher with nationalId set succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const input = {
-      ...createMinimalTeacherInput({ name: "NatId Teacher", email: `natid_${Date.now()}@test.com` }),
-      nationalId: "PASSPORT-998877",
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
+    const teacher = await createTeacherAsAdmin(
+      { name: "NatId Teacher", email: `natid_${Date.now()}@test.com` },
+      { nationalId: "PASSPORT-998877" }
+    );
+    expect(teacher.userId).toBeDefined();
   });
 
   test("create teacher with dateOfBirth set succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const input = {
-      ...createMinimalTeacherInput({ name: "DOB Teacher", email: `dob_${Date.now()}@test.com` }),
-      dateOfBirth: "1985-06-15",
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
+    const teacher = await createTeacherAsAdmin(
+      { name: "DOB Teacher", email: `dob_${Date.now()}@test.com` },
+      { dateOfBirth: "1985-06-15" }
+    );
+    expect(teacher.userId).toBeDefined();
   });
 
   test("create teacher with female gender succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const input = {
-      ...createMinimalTeacherInput({ name: "Female Teacher", email: `female_${Date.now()}@test.com` }),
-      gender: Gender.Female,
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
-    expect(result.createTeacher.gender).toBe(Gender.Female);
+    const teacher = await createTeacherAsAdmin(
+      { name: "Female Teacher", email: `female_${Date.now()}@test.com` },
+      { gender: Gender.Female }
+    );
+    expect(teacher.userId).toBeDefined();
+    expect(teacher.gender).toBe(Gender.Female);
   });
 
   test("create teacher with address set succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const input = {
-      ...createMinimalTeacherInput({ name: "Address Teacher", email: `addr_${Date.now()}@test.com` }),
-      address: "456 Oak Avenue, Apt 5B",
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
+    const teacher = await createTeacherAsAdmin(
+      { name: "Address Teacher", email: `addr_${Date.now()}@test.com` },
+      { address: "456 Oak Avenue, Apt 5B" }
+    );
+    expect(teacher.userId).toBeDefined();
   });
 
   test("create teacher with qualifications set succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const input = {
-      ...createMinimalTeacherInput({ name: "Qual Teacher", email: `qual_${Date.now()}@test.com` }),
-      qualifications: "MSc Mathematics, BSc Education",
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
+    const teacher = await createTeacherAsAdmin(
+      { name: "Qual Teacher", email: `qual_${Date.now()}@test.com` },
+      { qualifications: "MSc Mathematics, BSc Education" }
+    );
+    expect(teacher.userId).toBeDefined();
   });
 
   test("create teacher with countryCode set succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const input = {
-      ...createMinimalTeacherInput({ name: "CountryCode Teacher", email: `cc_${Date.now()}@test.com` }),
-      countryCode: CountryCode.Gb,
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
+    const teacher = await createTeacherAsAdmin(
+      { name: "CountryCode Teacher", email: `cc_${Date.now()}@test.com` },
+      { countryCode: CountryCode.Gb }
+    );
+    expect(teacher.userId).toBeDefined();
   });
 
   test("create teacher with hourlyRate and rateCurrency succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const input = {
-      ...createMinimalTeacherInput({ name: "Hourly Teacher", email: `hourly_${Date.now()}@test.com` }),
-      hourlyRate: "75.50",
-      rateCurrency: CurrencyCode.Eur,
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
+    const teacher = await createTeacherAsAdmin(
+      { name: "Hourly Teacher", email: `hourly_${Date.now()}@test.com` },
+      { hourlyRate: "75.50", rateCurrency: CurrencyCode.Eur }
+    );
+    expect(teacher.userId).toBeDefined();
   });
 
   test("create teacher with different timezone succeeds", async () => {
-    const token = await loginDemoUser("academy_admin");
-    const input = {
-      ...createMinimalTeacherInput({ name: "TZ Teacher", email: `tz_${Date.now()}@test.com` }),
-      timezone: IanaTimezone.AmericaNewYork,
-    };
-
-    const result = await authenticatedRequest(token, "mutate", createTeacherMutationDocument, { input });
-    if (!result.createTeacher) throw new Error("createTeacher is null");
-    expect(result.createTeacher.userId).toBeDefined();
+    const teacher = await createTeacherAsAdmin(
+      { name: "TZ Teacher", email: `tz_${Date.now()}@test.com` },
+      { timezone: IanaTimezone.AmericaNewYork }
+    );
+    expect(teacher.userId).toBeDefined();
   });
 
   test("create teacher with all fields populated succeeds", async () => {

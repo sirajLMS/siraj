@@ -1,5 +1,5 @@
 // NEW FOR PLAN v5 (lifted from frontend/{mobile,desktop}/components/ui/display/personProfileLink/PersonProfileLink.{mobile,desktop}.tsx)
-import type { TypographyProps } from "@mui/material/Typography";
+import type { UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
 
 export type PersonProfileLinkProps = {
   readonly href?: string | null;
@@ -10,7 +10,7 @@ export type PersonProfileLinkProps = {
   readonly fallbackInitial?: string;
   readonly label?: string;
   /** Wider than `TypographyProps["variant"]` to admit custom theme variants like `bodySm`. */
-  readonly typographyVariant?: TypographyProps["variant"] | (string & {});
+  readonly typographyVariant?: UiTypographyVariantLoose;
   readonly fontWeight?: number;
   /** When true, use primary color for the name (linked look). Default true when href is set. */
   readonly emphasizeLink?: boolean;

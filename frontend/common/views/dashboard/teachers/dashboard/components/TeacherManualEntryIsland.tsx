@@ -2,10 +2,15 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useCallback, useEffect } from "react";
-import type { ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
+
+function parseClassTypeOrNull(value: string): ClassType | null {
+  const match = Object.values(ClassType).find(v => (v as string) === value);
+  return match ?? null;
+}
 
 interface TeacherManualEntryIslandProps {
   readonly labels: TeacherDashboardViewLabels;
@@ -69,7 +74,7 @@ export function TeacherManualEntryIsland({ labels }: Readonly<TeacherManualEntry
             scheduledStartAt: data.scheduledStartAt,
             scheduledEndAt: data.scheduledEndAt,
             durationMinutes: data.durationMinutes,
-            classType: data.classType as unknown as ClassType | null,
+            classType: parseClassTypeOrNull(data.classType),
           },
         },
       });

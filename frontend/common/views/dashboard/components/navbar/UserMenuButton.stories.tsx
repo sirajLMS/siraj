@@ -1,3 +1,4 @@
+import type { MockLink } from "@apollo/client/testing";
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ReactNode } from "react";
@@ -10,7 +11,7 @@ import {
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { UserMenuButton } from "@/frontend/common/views/dashboard/components/navbar/UserMenuButton";
 
-const baseMocks = [
+const baseMocks: MockLink.MockedResponse[] = [
   {
     request: { query: impersonationStatusQueryDocument },
     result: { data: { impersonationStatus: { isActive: false } } },
@@ -42,7 +43,7 @@ const baseMocks = [
   },
 ];
 
-const impersonatingMocks = [
+const impersonatingMocks: MockLink.MockedResponse[] = [
   {
     request: { query: impersonationStatusQueryDocument },
     result: {
@@ -74,7 +75,7 @@ const impersonatingMocks = [
   },
 ];
 
-const simulatingMocks = [
+const simulatingMocks: MockLink.MockedResponse[] = [
   {
     request: { query: impersonationStatusQueryDocument },
     result: { data: { impersonationStatus: { isActive: false } } },
@@ -95,7 +96,10 @@ const simulatingMocks = [
   },
 ];
 
-function StoryShell({ mocks, children }: Readonly<{ mocks: Array<Record<string, unknown>>; children: ReactNode }>) {
+function StoryShell({
+  mocks,
+  children,
+}: Readonly<{ mocks: ReadonlyArray<MockLink.MockedResponse>; children: ReactNode }>) {
   useUserStore.setState({
     user: {
       id: "actor-id",
@@ -123,7 +127,7 @@ function StoryShell({ mocks, children }: Readonly<{ mocks: Array<Record<string, 
     actorIsSuperAdmin: true,
   });
 
-  return <MockedProvider mocks={mocks as never}>{children}</MockedProvider>;
+  return <MockedProvider mocks={mocks}>{children}</MockedProvider>;
 }
 
 const meta: Meta<typeof UserMenuButton> = {

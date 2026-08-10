@@ -5,7 +5,7 @@ import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
-import type { TeacherProfileReturnType } from "@/backend/types/teachers/teacher.types";
+import type { TeacherProfileReturnType, TeacherSelectType } from "@/backend/types/teachers/teacher.types";
 import { getServerTranslations } from "@/shared/locale";
 
 const baseProfile: TeacherProfileReturnType = {
@@ -30,6 +30,32 @@ const baseProfile: TeacherProfileReturnType = {
   avgEngagementScore: 4.5,
 };
 
+// Minimal `TeacherSelectType` fixture used to satisfy the full row shape that
+// `TeacherRepository.findByUserId` returns. Individual tests spread this and
+// override only the fields relevant to the scenario under test.
+const baseTeacher: TeacherSelectType = {
+  id: "teacher-1",
+  userId: "user-1",
+  nationality: null,
+  nationalId: null,
+  phone: null,
+  dateOfBirth: null,
+  gender: null,
+  address: null,
+  qualifications: null,
+  countryCode: null,
+  hourlyRate: null,
+  rateCurrency: null,
+  createdAt: new Date("2024-01-01T00:00:00.000Z"),
+  updatedAt: new Date("2024-01-01T00:00:00.000Z"),
+};
+
+// Utility to normalize a value or promise-returning call into a Promise so tests can
+// safely `await` regardless of whether the implementation is synchronous or async.
+const toPromise = async <T>(fn: () => T | Promise<T>): Promise<T> => {
+  return fn();
+};
+
 afterEach(() => {
   spyOn(PermissionsService, "hasPermission").mockRestore();
   spyOn(TeacherRepository, "getTeacherProfileForEdit").mockRestore();
@@ -52,7 +78,7 @@ describe("TeacherPortalService own profile", () => {
     spyOn(PermissionsService, "hasPermission").mockImplementation(
       async (_userId, permission) => permission === AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN
     );
-    spyOn(TeacherRepository, "findByUserId").mockResolvedValue({ id: "teacher-1", userId: "user-1" } as never);
+    spyOn(TeacherRepository, "findByUserId").mockResolvedValue(baseTeacher);
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
     return tErrors;
   };
@@ -91,16 +117,15 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(true);
     spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
-      id: "teacher-1",
-      userId: "user-1",
+      ...baseTeacher,
       nationality: "EG",
-    } as never);
+    });
     spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
 
-    await expect(
+    await toPromise(() =>
       TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: validEgId }, tErrors)
-    ).resolves.toBeDefined();
+    );
     expect(TeacherRepository.updateTeacherProfile).toHaveBeenCalledWith(
       "teacher-1",
       expect.objectContaining({ nationalId: validEgId })
@@ -110,15 +135,21 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
   test("rejects an invalid national ID format", async () => {
     spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(true);
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
-      id: "teacher-1",
-      userId: "user-1",
+      ...baseTeacher,
       nationality: "EG",
-    } as never);
+    });
     spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
 
-    await expect(
-      TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: "not-a-valid-id" }, tErrors)
-    ).rejects.toThrow(tErrors.invalidNationalId);
+    let caughtErr: Error | undefined;
+    try {
+      await toPromise(() =>
+        TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: "not-a-valid-id" }, tErrors)
+      );
+      throw new Error("Expected updateOwnProfile to throw");
+    } catch (err) {
+      caughtErr = err instanceof Error ? err : new Error(String(err));
+    }
+    expect(caughtErr?.message).toContain(tErrors.invalidNationalId);
     expect(TeacherRepository.updateTeacherProfile).not.toHaveBeenCalled();
   });
 
@@ -128,15 +159,15 @@ describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
     spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
     // Existing teacher nationality is EG; input does not pass nationality.
     spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
-      id: "teacher-1",
-      userId: "user-1",
+      ...baseTeacher,
       nationality: "EG",
-    } as never);
+    });
     spyOn(TeacherRepository, "updateTeacherProfile").mockResolvedValue(true);
     spyOn(TeacherRepository, "getTeacherProfileForEdit").mockResolvedValue(baseProfile);
 
-    await expect(
+    const result = await toPromise(() =>
       TeacherPortalService.updateOwnProfile("user-1", "teacher-1", { nationalId: validEgId }, tErrors)
-    ).resolves.toBeDefined();
+    );
+    expect(result).toBeDefined();
   });
 });

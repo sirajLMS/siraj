@@ -19,6 +19,7 @@ import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
 import type { CurrencyCode } from "@/backend/enum";
+import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type {
   PaymentMethodTransactionSnapshot,
   PaymentProofTransactionSnapshot,
@@ -88,7 +89,7 @@ export const payments = pgTable(
     userPaymentMethodId: uuid("user_payment_method_id").references(() => userPaymentMethods.id, {
       onDelete: "set null",
     }),
-    paymentMethodType: paymentMethodTypeEnum("payment_method_type").notNull(),
+    paymentMethodType: paymentMethodTypeEnum("payment_method_type").notNull().$type<PaymentMethodType>(),
     paymentMethodSnapshot: jsonb("payment_method_snapshot")
       .$type<PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot>()
       .notNull(),

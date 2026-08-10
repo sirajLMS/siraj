@@ -7,7 +7,8 @@
  * silently assume an invalid enum member.
  */
 export function safeEnum<T extends string>(value: unknown, validValues: readonly T[]): T | null {
-  return typeof value === "string" && (validValues as readonly string[]).includes(value) ? (value as T) : null;
+  if (typeof value !== "string") return null;
+  return validValues.find(v => v === value) ?? null;
 }
 
 /**
@@ -17,5 +18,21 @@ export function safeEnum<T extends string>(value: unknown, validValues: readonly
  * used an unchecked `value as string` cast.
  */
 export function safeString(value: unknown): string {
-  return typeof value === "string" ? value : String(value ?? "");
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+    return String(value);
+  }
+  if (typeof value === "symbol") {
+    return value.description ?? "";
+  }
+  if (value == null) {
+    return "";
+  }
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return "";
+  }
 }

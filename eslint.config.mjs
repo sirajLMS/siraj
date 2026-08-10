@@ -1,18 +1,26 @@
+// import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended"; disabled for performance
 import eslint from "@eslint/js";
+import graphqlPlugin from "@graphql-eslint/eslint-plugin";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import drizzle from "eslint-plugin-drizzle";
+import { flatConfigs as importXFlatConfigs } from "eslint-plugin-import-x";
 import reactHooks from "eslint-plugin-react-hooks";
-import reactRefresh from "eslint-plugin-react-refresh";
-import sonarjs from "eslint-plugin-sonarjs";
-import storybook from "eslint-plugin-storybook";
+import { reactRefresh } from "eslint-plugin-react-refresh";
+import { configs as sonarjsConfigs } from "eslint-plugin-sonarjs";
+import { configs as storybookConfigs } from "eslint-plugin-storybook";
 import globals from "globals";
-import tseslint from "typescript-eslint";
+import { configs as tseslintConfigs } from "typescript-eslint";
+
+/** Drizzle query executors used across repos (`db`, `tx`, `t`, `q`, `queryDb`, `client`). */
+const drizzleObjectName = ["db", "tx", "t", "q", "queryDb", "client"];
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // import cspellESLintPluginRecommended from "@cspell/eslint-plugin/recommended";
+  importXFlatConfigs.recommended,
+  importXFlatConfigs.typescript,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Ignore ALL dot-directories anywhere in the tree (e.g. .next, .git, .cursor,
@@ -52,13 +60,13 @@ const eslintConfig = defineConfig([
     "*storybook.log",
   ]),
   eslint.configs.recommended,
-  sonarjs.configs.recommended,
-  // cspellESLintPluginRecommended, // Disabled for performance
+  sonarjsConfigs.recommended,
+  // cspellESLintPluginRecommended, disabled for performance
 
-  ...storybook.configs["flat/recommended"],
+  ...storybookConfigs["flat/recommended"],
 
   // TypeScript and React-specific configuration
-  ...tseslint.configs.recommended.map(config => ({
+  ...tseslintConfigs.recommended.map(config => ({
     ...config,
     files: ["**/*.{ts,tsx}"],
   })),
@@ -67,13 +75,24 @@ const eslintConfig = defineConfig([
     files: ["**/*.{ts,tsx}"],
     plugins: {
       "react-hooks": reactHooks,
-      "react-refresh": reactRefresh,
+      "react-refresh": reactRefresh.plugin,
     },
     languageOptions: {
       // ecmaVersion: 2020,
       globals: globals.browser,
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
+        ...(process.env.ESLINT_TYPE_AWARE === "true"
+          ? {
+              // Only files NOT covered by tsconfig.json belong here. Root/scripts
+              // `*.ts` are already in the project service via `include: ["**/*.ts"]`,
+              // so listing them in allowDefaultProject causes parse errors.
+              projectService: {
+                allowDefaultProject: ["*.mjs"],
+                defaultProject: "tsconfig.json",
+              },
+            }
+          : {}),
       },
     },
     rules: {
@@ -119,6 +138,15 @@ const eslintConfig = defineConfig([
       // SonarJS rules
       "sonarjs/no-nested-conditional": "off",
 
+      ...(process.env.ESLINT_TYPE_AWARE === "true"
+        ? {
+            "@typescript-eslint/await-thenable": "error",
+            "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+            "@typescript-eslint/no-base-to-string": "warn",
+            "sonarjs/deprecation": "warn",
+          }
+        : {}),
+
       // `sonarjs/no-unused-vars` (S1481) is hardcoded with `defaultOptions: []`
       // and accepts no ignore patterns — it does NOT honor the `^_` underscore
       // convention that `@typescript-eslint/no-unused-vars` uses via
@@ -134,7 +162,7 @@ const eslintConfig = defineConfig([
       "react-hooks/preserve-manual-memoization": "off",
       "@typescript-eslint/restrict-template-expressions": "off",
 
-      // Spell checking (disabled for performance - run separately if needed)
+      // Spell checking disabled for performance;
       // "@cspell/spellchecker": [
       //   "warn",
       //   {
@@ -175,6 +203,7 @@ const eslintConfig = defineConfig([
   {
     files: [
       "frontend/utils/logger.ts",
+      "scripts/oxlint-categorize.ts",
       "scripts/**/*.ts",
       "backend/db/scripts/**/*.ts",
       "backend/db/test/**/*.ts",
@@ -187,6 +216,7 @@ const eslintConfig = defineConfig([
       "sonarjs/no-hardcoded-ip": "off",
       "sonarjs/sql-queries": "off",
       "@typescript-eslint/no-unnecessary-condition": "off",
+      "@cspell/spellchecker": "off",
     },
   },
 
@@ -347,6 +377,52 @@ const eslintConfig = defineConfig([
                 "Seeders must not import from the database layer — call backend services (bootstrap methods) instead. See backend/db/seeds/AGENTS.md",
             },
           ],
+        },
+      ],
+    },
+  },
+
+  // Drizzle: require `.where()` on delete/update to avoid wiping whole tables.
+  {
+    files: ["backend/**/*.{ts,tsx}"],
+    plugins: {
+      drizzle,
+    },
+    rules: {
+      "drizzle/enforce-delete-with-where": ["error", { drizzleObjectName }],
+      "drizzle/enforce-update-with-where": ["error", { drizzleObjectName }],
+    },
+  },
+
+  // GraphQL-ESLint: pluck `gql` operations from shared documents, then lint as virtual `.graphql`.
+  {
+    files: ["frontend/common/graphql/sharedDocuments/**/*.{ts,tsx}"],
+    processor: graphqlPlugin.processor,
+  },
+  {
+    files: ["**/*.graphql"],
+    languageOptions: {
+      parser: graphqlPlugin.parser,
+    },
+    plugins: {
+      "@graphql-eslint": graphqlPlugin,
+    },
+    rules: {
+      ...graphqlPlugin.configs["flat/operations-recommended"].rules,
+      // Repo has mixed camelCase/PascalCase operation names; enforce only anti-patterns.
+      "@graphql-eslint/naming-convention": [
+        "error",
+        {
+          VariableDefinition: "camelCase",
+          OperationDefinition: {
+            forbiddenPrefixes: ["Query", "Mutation", "Subscription", "Get"],
+            forbiddenSuffixes: ["Query", "Mutation", "Subscription"],
+          },
+          FragmentDefinition: {
+            style: "PascalCase",
+            forbiddenPrefixes: ["Fragment"],
+            forbiddenSuffixes: ["Fragment"],
+          },
         },
       ],
     },

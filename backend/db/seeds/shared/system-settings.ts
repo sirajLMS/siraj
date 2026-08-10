@@ -1,13 +1,13 @@
 import * as fs from "node:fs/promises";
 import { resolveAssetPath } from "@/backend/db/seeds/lib/file-seed-helper";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
-import { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { ENV_CONFIG_KEYS } from "@/backend/lib/env-config-keys";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import type { SystemSettingSelectType } from "@/backend/types";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { getServerTranslations } from "@/shared/locale";
 
 /** Matches `env-config-resolver.ts` / `environment-config.service.ts` DB key prefix. */
@@ -167,9 +167,7 @@ export async function seedOrGet() {
   logger.info("Initializing storage directories...");
   try {
     const fileSeeder = await createFileSeedingService();
-    for (const dir of SEED_STORAGE_DIRECTORIES) {
-      await fileSeeder.ensureDirectory(dir, true);
-    }
+    await Promise.all(SEED_STORAGE_DIRECTORIES.map(dir => fileSeeder.ensureDirectory(dir, true)));
     logger.info("Storage directories initialized successfully.");
   } catch (error) {
     logger.error("Failed to initialize storage directories:", error);

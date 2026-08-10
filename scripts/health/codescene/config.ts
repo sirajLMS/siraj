@@ -4,8 +4,8 @@ import os from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-export const SCRIPT_DIR = __dirname;
+const currentDir = dirname(fileURLToPath(import.meta.url));
+export const SCRIPT_DIR = currentDir;
 export const PROJECT_ROOT = join(SCRIPT_DIR, "..", "..", "..");
 
 export const CONFIG = {

@@ -4,21 +4,26 @@ const MAX_ENTRIES = 100;
 const MAX_KEY_LENGTH = 64;
 const MAX_VALUE_LENGTH = 1024;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 /**
  * Validates that a value is a Record<string, string>
  * with entry count, key length, and value length limits
  */
 function validateStringMap(value: unknown): Record<string, string> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+  if (!isRecord(value)) {
     throw new GraphQLError("StringMap must be an object");
   }
 
-  const obj = value as Record<string, unknown>;
-  const entries = Object.entries(obj);
+  const entries = Object.entries(value);
 
   if (entries.length > MAX_ENTRIES) {
     throw new GraphQLError(`StringMap must have at most ${MAX_ENTRIES} entries, got ${entries.length}`);
   }
+
+  const result: Record<string, string> = {};
 
   // Validate all values are strings with length constraints
   for (const [key, val] of entries) {
@@ -35,9 +40,10 @@ function validateStringMap(value: unknown): Record<string, string> {
         `StringMap values must be at most ${MAX_VALUE_LENGTH} characters. Key "${key}" exceeds limit`
       );
     }
+    result[key] = val;
   }
 
-  return obj as Record<string, string>;
+  return result;
 }
 
 /**

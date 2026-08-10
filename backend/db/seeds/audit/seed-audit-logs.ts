@@ -5,7 +5,7 @@ import {
   loadSeedConfig,
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type { CreateAuditLogInput, InvoiceSelectType, UserSelectType } from "@/backend/types";
 

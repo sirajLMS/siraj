@@ -93,9 +93,14 @@ describe("User Notification Preferences", () => {
         });
         throw new Error("Expected unique constraint violation");
       } catch (error) {
-        const err = error as Error & { cause?: { code?: string } };
-        const message = err.message || "";
-        const code = err.cause?.code || "";
+        let message = "";
+        let code = "";
+        if (error instanceof Error) {
+          message = error.message || "";
+          if ("cause" in error && typeof error.cause === "object" && error.cause !== null && "code" in error.cause) {
+            code = typeof error.cause.code === "string" ? error.cause.code : "";
+          }
+        }
         expect(
           message.includes("23505") || code === "23505" || message.includes("Expected unique constraint violation")
         ).toBe(true);

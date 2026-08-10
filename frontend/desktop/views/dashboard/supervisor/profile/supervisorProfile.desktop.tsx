@@ -2,6 +2,7 @@
 
 import { Box, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display";
+import { SupervisorAdminSection } from "@/frontend/common/views/dashboard/supervisor/profile/sections/SupervisorAdminSection";
 import type { SupervisorProfileViewModel } from "@/frontend/common/views/dashboard/supervisor/profile/useSupervisorProfileViewModel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
@@ -32,7 +33,22 @@ export function SupervisorProfileDesktopView({
               <Typography sx={{ typography: "titleLg", mb: 2 }}>{labels.sections.account}</Typography>
               <Stack spacing={1.5}>
                 <ProfileField label={labels.fields.fullName} value={profile.name || labels.notSet} />
-                <ProfileField label={labels.fields.status} value={profile.status ?? labels.notSet} />
+                <SupervisorAdminSection
+                  mode="view"
+                  labels={{
+                    baseLabels: {
+                      actions: {
+                        manageLifecycle: labels.actions.manageLifecycle,
+                      },
+                    },
+                  }}
+                  profile={{
+                    userId: profile.userId,
+                    name: profile.name,
+                    email: profile.email,
+                    status: profile.status,
+                  }}
+                />
               </Stack>
             </Paper>
           </Grid>

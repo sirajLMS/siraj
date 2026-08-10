@@ -64,9 +64,7 @@ function fixRelativeImport(importStatement: string, filePath: string): string {
 find backend -name "*.ts" | xargs grep -l "import.*['\"]\.\./\|import.*['\"]\./"
 
 # Check lint
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"fix-imports","files":["<file-path>"]}'
+bun run scripts/lint-service.ts -f <file-path> --id fix-imports --json
 ```
 
 ## Limitations

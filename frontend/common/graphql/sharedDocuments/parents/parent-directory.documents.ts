@@ -3,7 +3,7 @@ import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-typ
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
 export const parentDirectoryAutocompleteRowFragment = gql`
-  fragment ParentDirectoryAutocompleteRowFragment on ParentDirectoryAutocompleteRow {
+  fragment ParentDirectoryAutocompleteRow on ParentDirectoryAutocompleteRow {
     id
     name
     avatarUrl
@@ -68,7 +68,8 @@ export const parentsDirectoryQueryDocument: TypedDocumentNode<
   ${parentDirectoryAutocompleteRowFragment}
   query parentsDirectory($search: String, $limit: Int) {
     parentsDirectory(search: $search, limit: $limit) {
-      ...ParentDirectoryAutocompleteRowFragment
+      id
+      ...ParentDirectoryAutocompleteRow
     }
   }
 `;

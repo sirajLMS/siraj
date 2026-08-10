@@ -8,7 +8,7 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import { NotificationDeliveryStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import type { UserSelectType } from "@/backend/types";
 

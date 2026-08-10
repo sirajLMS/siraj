@@ -41,11 +41,12 @@ function computeMetricCounts(rows: readonly StatusTrackingRow[]): MetricCounts {
 }
 
 function buildMetrics(counts: MetricCounts, subLabelMap: Record<string, string>): readonly RawMetric[] {
-  return METRIC_DEFINITIONS.map(def => ({
-    ...def,
-    count: counts[def.key],
-    subLabel: subLabelMap[def.key],
-  }));
+  return METRIC_DEFINITIONS.map(def =>
+    Object.assign(def, {
+      count: counts[def.key],
+      subLabel: subLabelMap[def.key],
+    })
+  );
 }
 
 export function useStatusTrackingMetrics(rows: readonly StatusTrackingRow[]) {

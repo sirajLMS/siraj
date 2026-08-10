@@ -7,4 +7,4 @@ export { MeetingConfigService } from "@/backend/services/meeting/meeting-config.
 export { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/services/meeting/meeting-config-mask";
 export { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 export { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
-export { extractMeetingId } from "@/backend/services/meeting/meeting-url-parser";
+export { extractMeetingId } from "@/shared/lib/meeting-config";

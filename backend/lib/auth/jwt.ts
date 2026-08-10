@@ -24,96 +24,79 @@ export interface CustomJWTPayload extends JoseJWTPayload {
   groupSimulationExpiresAt?: number;
 }
 
+function signToken(claims: Record<string, unknown>, expiry: string): Promise<string> {
+  const jti = randomUUID();
+  return new SignJWT({ ...claims, jti })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(expiry)
+    .sign(secret);
+}
+
 /**
  * Generate an access token for a user
  */
-export async function generateAccessToken(userId: string, email: string): Promise<string> {
-  const jti = randomUUID();
-  const token = await new SignJWT({
-    userId,
-    email,
-    type: "access" as const,
-    jti,
-  })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(JWT_ACCESS_TOKEN_EXPIRY)
-    .sign(secret);
-
-  return token;
+export function generateAccessToken(userId: string, email: string): Promise<string> {
+  return signToken({ userId, email, type: "access" }, JWT_ACCESS_TOKEN_EXPIRY);
 }
 
 /**
  * Generate a refresh token for a user
  */
-export async function generateRefreshToken(userId: string, email: string): Promise<string> {
-  const jti = randomUUID();
-  const token = await new SignJWT({
-    userId,
-    email,
-    type: "refresh" as const,
-    jti,
-  })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(JWT_REFRESH_TOKEN_EXPIRY)
-    .sign(secret);
-
-  return token;
+export function generateRefreshToken(userId: string, email: string): Promise<string> {
+  return signToken({ userId, email, type: "refresh" }, JWT_REFRESH_TOKEN_EXPIRY);
 }
 
 /**
  * Generate an access token for impersonation (effective user = target, actor = admin).
  */
-export async function generateImpersonationAccessToken(
+export function generateImpersonationAccessToken(
   actorUserId: string,
   targetUserId: string,
   targetEmail: string,
   impersonationExpiresAt: number
 ): Promise<string> {
-  const jti = randomUUID();
-  const token = await new SignJWT({
-    userId: targetUserId,
-    email: targetEmail,
-    type: "access" as const,
-    jti,
-    actorUserId,
-    impersonation: true as const,
-    impersonationExpiresAt,
-  })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(JWT_ACCESS_TOKEN_EXPIRY)
-    .sign(secret);
-
-  return token;
+  return signToken(
+    {
+      userId: targetUserId,
+      email: targetEmail,
+      type: "access",
+      actorUserId,
+      impersonation: true,
+      impersonationExpiresAt,
+    },
+    JWT_ACCESS_TOKEN_EXPIRY
+  );
 }
 
 /**
  * Generate an access token for permission group simulation (identity stays admin).
  */
-export async function generateGroupSimulationAccessToken(
+export function generateGroupSimulationAccessToken(
   userId: string,
   email: string,
   groupSlug: string,
   groupSimulationExpiresAt: number
 ): Promise<string> {
-  const jti = randomUUID();
-  const token = await new SignJWT({
-    userId,
-    email,
-    type: "access" as const,
-    jti,
-    groupSimulation: true as const,
-    groupSimulationSlug: groupSlug,
-    groupSimulationExpiresAt,
-  })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(JWT_ACCESS_TOKEN_EXPIRY)
-    .sign(secret);
+  return signToken(
+    {
+      userId,
+      email,
+      type: "access",
+      groupSimulation: true,
+      groupSimulationSlug: groupSlug,
+      groupSimulationExpiresAt,
+    },
+    JWT_ACCESS_TOKEN_EXPIRY
+  );
+}
 
-  return token;
+function isCustomJWTPayload(payload: JoseJWTPayload): payload is CustomJWTPayload {
+  return (
+    typeof payload.userId === "string" &&
+    typeof payload.email === "string" &&
+    (payload.type === "access" || payload.type === "refresh")
+  );
 }
 
 /**
@@ -122,7 +105,10 @@ export async function generateGroupSimulationAccessToken(
 export async function verifyToken(token: string): Promise<CustomJWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as unknown as CustomJWTPayload;
+    if (!isCustomJWTPayload(payload)) {
+      return null;
+    }
+    return payload;
   } catch {
     // Token verification failed - invalid or expired
     return null;

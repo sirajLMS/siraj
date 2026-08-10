@@ -24,7 +24,6 @@ export const classInstanceQueryDocument: TypedDocumentNode<
       hasTimezoneMismatch
       studentTimezone
       teacherTimezone
-      meetingJoinUrl
       recurringScheduleId
       effectiveMeeting {
         ...EffectiveMeetingFields
@@ -97,7 +96,6 @@ export const activateClassMutationDocument: TypedDocumentNode<
       status
       durationMinutes
       remarks
-      meetingJoinUrl
     }
   }
 `;
@@ -113,7 +111,6 @@ export const activateOverrideClassMutationDocument: TypedDocumentNode<
       status
       durationMinutes
       remarks
-      meetingJoinUrl
     }
   }
 `;
@@ -165,6 +162,7 @@ export const updateSessionStatusLeaveMutationDocument: TypedDocumentNode<
 > = gql`
   mutation updateSessionStatusLeave($classInstanceId: ID!, $leaveReason: String!) {
     updateSessionStatusLeave(classInstanceId: $classInstanceId, leaveReason: $leaveReason) {
+      id
       completedInstanceId
       rescheduledInstanceId
       completedInstance {

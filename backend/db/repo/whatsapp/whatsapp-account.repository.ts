@@ -11,15 +11,15 @@ import type {
   WhatsappAccountSelectType,
   WhatsappAccountUpdateInput,
 } from "@/backend/types/whatsapp/whatsapp-account.types";
-import {
+import { buildReturnType as _buildReturnType } from "@/backend/types/whatsapp/whatsapp-account.types";
+
+// Re-export the type-guard helpers and buildReturnType for backward-compatible imports
+// (the webhook handler and other consumers import them from this module).
+export {
   buildReturnType,
   isValidLimitTier,
   isValidQualityRating,
 } from "@/backend/types/whatsapp/whatsapp-account.types";
-
-// Re-export the type-guard helpers for backward-compatible imports
-// (the webhook handler and other consumers import them from this module).
-export { buildReturnType, isValidLimitTier, isValidQualityRating };
 
 /**
  * Convert a SelectType row (with encrypted fields and raw enum strings)
@@ -34,7 +34,7 @@ export function toReturnType(row: WhatsappAccountSelectType): WhatsappAccountRet
     portfolioMessagingLimitTier,
     ...rest
   } = row;
-  return buildReturnType(rest, qualityRating, portfolioMessagingLimitTier);
+  return _buildReturnType(rest, qualityRating, portfolioMessagingLimitTier);
 }
 
 /**
@@ -42,6 +42,70 @@ export function toReturnType(row: WhatsappAccountSelectType): WhatsappAccountRet
  * Pure data-access only — no business logic or permissions.
  * All methods accept an optional `tx` for transaction propagation.
  */
+/**
+ * Runs a transactional or bare operation depending on whether `tx` is provided.
+ * When `tx` is provided, the runner executes in the caller's transaction;
+ * otherwise a new top-level transaction is created.
+ */
+async function runWithTx<T>(runner: (t: DBTransaction) => Promise<T>, tx?: DBTransaction): Promise<T> {
+  return tx ? runner(tx) : db.transaction(runner);
+}
+
+/**
+ * Executes a conditional update — sets a single column, filters by id, and
+ * returns the updated row mapped to `ReturnType` (or `null` if not found).
+ */
+async function updateAndReturn(
+  t: DBTransaction,
+  id: string,
+  setClause: Partial<WhatsappAccountUpdateInput>
+): Promise<WhatsappAccountReturnType | null> {
+  const [row] = await t.update(whatsappAccounts).set(setClause).where(eq(whatsappAccounts.id, id)).returning();
+  return row ? toReturnType(row) : null;
+}
+
+/**
+ * Helper to find a single row matching a where clause and map it to ReturnType.
+ */
+async function findSingleRow(
+  whereClause: ReturnType<typeof eq>,
+  tx?: DBTransaction
+): Promise<WhatsappAccountReturnType | null> {
+  const q = queryDb(tx);
+  const rows = await q.select().from(whatsappAccounts).where(whereClause).limit(1);
+  return rows[0] ? toReturnType(rows[0]) : null;
+}
+
+/**
+ * Helper for update operations that return the updated row (or null).
+ */
+async function updateById(
+  id: string,
+  setClause: Record<string, unknown>,
+  tx?: DBTransaction
+): Promise<WhatsappAccountReturnType | null> {
+  const runner = async (t: DBTransaction) => {
+    const [row] = await t.update(whatsappAccounts).set(setClause).where(eq(whatsappAccounts.id, id)).returning();
+    return row ? toReturnType(row) : null;
+  };
+  return runWithTx(runner, tx);
+}
+
+/**
+ * Helper to query multiple rows with a where clause and map to ReturnType array.
+ */
+async function findManyRows(
+  whereClause: ReturnType<typeof eq>,
+  tx?: DBTransaction,
+  orderByClause?: ReturnType<typeof asc>
+): Promise<WhatsappAccountReturnType[]> {
+  const q = queryDb(tx);
+  const rows = orderByClause
+    ? await q.select().from(whatsappAccounts).where(whereClause).orderBy(orderByClause)
+    : await q.select().from(whatsappAccounts).where(whereClause);
+  return rows.map(toReturnType);
+}
+
 export namespace WhatsappAccountRepository {
   /**
    * Maps a raw select row to the ReturnType by stripping encrypted columns.
@@ -52,22 +116,14 @@ export namespace WhatsappAccountRepository {
    * helpers (defined in the types file).
    */
   export async function findById(id: string, tx?: DBTransaction): Promise<WhatsappAccountReturnType | null> {
-    const q = queryDb(tx);
-    const row = await q.select().from(whatsappAccounts).where(eq(whatsappAccounts.id, id)).limit(1);
-    return row[0] ? toReturnType(row[0]) : null;
+    return findSingleRow(eq(whatsappAccounts.id, id), tx);
   }
 
   export async function findByPhoneNumberId(
     phoneNumberId: string,
     tx?: DBTransaction
   ): Promise<WhatsappAccountReturnType | null> {
-    const q = queryDb(tx);
-    const row = await q
-      .select()
-      .from(whatsappAccounts)
-      .where(eq(whatsappAccounts.phoneNumberId, phoneNumberId))
-      .limit(1);
-    return row[0] ? toReturnType(row[0]) : null;
+    return findSingleRow(eq(whatsappAccounts.phoneNumberId, phoneNumberId), tx);
   }
 
   /**
@@ -114,19 +170,11 @@ export namespace WhatsappAccountRepository {
   }
 
   export async function findByWabaId(wabaId: string, tx?: DBTransaction): Promise<WhatsappAccountReturnType[]> {
-    const q = queryDb(tx);
-    const rows = await q.select().from(whatsappAccounts).where(eq(whatsappAccounts.wabaId, wabaId));
-    return rows.map(toReturnType);
+    return findManyRows(eq(whatsappAccounts.wabaId, wabaId), tx);
   }
 
   export async function listActive(tx?: DBTransaction): Promise<WhatsappAccountReturnType[]> {
-    const q = queryDb(tx);
-    const rows = await q
-      .select()
-      .from(whatsappAccounts)
-      .where(eq(whatsappAccounts.isActive, true))
-      .orderBy(desc(whatsappAccounts.createdAt));
-    return rows.map(toReturnType);
+    return findManyRows(eq(whatsappAccounts.isActive, true), tx, desc(whatsappAccounts.createdAt));
   }
 
   export async function create(
@@ -137,7 +185,7 @@ export namespace WhatsappAccountRepository {
       const [row] = await t.insert(whatsappAccounts).values(input).returning();
       return row;
     };
-    const row = tx ? await runner(tx) : await db.transaction(runner);
+    const row = await runWithTx(runner, tx);
     return toReturnType(row);
   }
 
@@ -146,52 +194,24 @@ export namespace WhatsappAccountRepository {
     input: WhatsappAccountUpdateInput,
     tx?: DBTransaction
   ): Promise<WhatsappAccountReturnType | null> {
-    const runner = async (t: DBTransaction) => {
-      const [row] = await t.update(whatsappAccounts).set(input).where(eq(whatsappAccounts.id, id)).returning();
-      return row ? toReturnType(row) : null;
-    };
-    return tx ? await runner(tx) : await db.transaction(runner);
+    return runWithTx(t => updateAndReturn(t, id, input), tx);
   }
 
   export async function setAccessToken(
     input: SetWhatsappAccessTokenInput,
     tx?: DBTransaction
   ): Promise<WhatsappAccountReturnType | null> {
-    const runner = async (t: DBTransaction) => {
-      const [row] = await t
-        .update(whatsappAccounts)
-        .set({ encryptedAccessToken: input.encryptedAccessToken })
-        .where(eq(whatsappAccounts.id, input.id))
-        .returning();
-      return row ? toReturnType(row) : null;
-    };
-    return tx ? await runner(tx) : await db.transaction(runner);
+    return updateById(input.id, { encryptedAccessToken: input.encryptedAccessToken }, tx);
   }
 
   export async function setTwoStepPin(
     input: SetWhatsappTwoStepPinInput,
     tx?: DBTransaction
   ): Promise<WhatsappAccountReturnType | null> {
-    const runner = async (t: DBTransaction) => {
-      const [row] = await t
-        .update(whatsappAccounts)
-        .set({ encryptedTwoStepPin: input.encryptedTwoStepPin })
-        .where(eq(whatsappAccounts.id, input.id))
-        .returning();
-      return row ? toReturnType(row) : null;
-    };
-    return tx ? await runner(tx) : await db.transaction(runner);
+    return updateById(input.id, { encryptedTwoStepPin: input.encryptedTwoStepPin }, tx);
   }
 
   export async function deactivateById(id: string, tx?: DBTransaction): Promise<WhatsappAccountReturnType | null> {
-    const runner = async (t: DBTransaction) => {
-      const [row] = await t
-        .update(whatsappAccounts)
-        .set({ isActive: false })
-        .where(eq(whatsappAccounts.id, id))
-        .returning();
-      return row ? toReturnType(row) : null;
-    };
-    return tx ? await runner(tx) : await db.transaction(runner);
+    return runWithTx(t => updateAndReturn(t, id, { isActive: false }), tx);
   }
 }

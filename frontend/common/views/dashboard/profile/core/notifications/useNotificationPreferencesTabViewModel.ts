@@ -8,7 +8,6 @@ import {
   type NotificationEventType,
   type NotificationPreferenceInput,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,
@@ -40,31 +39,75 @@ type NotificationPreferencesTabProps = {
 };
 
 type PendingChange = NotificationPreferenceInput;
-type PendingChangeArray = NotificationPreferenceInput[];
 
 export type NotificationPreferencesTabViewModel = NotificationPreferencesTabVariantProps;
 
-function useInitialPreferences(eventTypes: readonly NotificationEventType[]) {
-  return useState<NotificationPrefRow[]>(() => buildDefaultPreferences(CHANNEL_ORDER, eventTypes));
+function usePendingChanges() {
+  const pendingChangesRef = useRef<Map<string, PendingChange>>(new Map());
+
+  const addPendingChange = useCallback((key: string, change: PendingChange) => {
+    pendingChangesRef.current.set(key, change);
+  }, []);
+
+  const clearPendingChanges = useCallback(() => {
+    pendingChangesRef.current.clear();
+  }, []);
+
+  const getPendingChanges = useCallback(() => {
+    return Array.from(pendingChangesRef.current.values());
+  }, []);
+
+  return { addPendingChange, clearPendingChanges, getPendingChanges };
 }
 
-function usePreferenceSync(
-  data: Operations.NotificationPreferencesQuery | undefined,
-  eventTypes: readonly NotificationEventType[],
-  setLocalPreferences: React.Dispatch<React.SetStateAction<NotificationPrefRow[]>>,
-  pendingChangesRef: React.MutableRefObject<Map<string, PendingChange>>
+function usePreferenceState(eventTypes: readonly NotificationEventType[]) {
+  const [localPreferences, setLocalPreferences] = useState<NotificationPrefRow[]>(() =>
+    buildDefaultPreferences(CHANNEL_ORDER, eventTypes)
+  );
+
+  const resetPreferences = useCallback(
+    (preferences?: NotificationPrefRow[]) => {
+      setLocalPreferences(preferences ?? buildDefaultPreferences(CHANNEL_ORDER, eventTypes));
+    },
+    [eventTypes]
+  );
+
+  const updatePreferenceEnabled = useCallback((key: string, enabled: boolean) => {
+    setLocalPreferences(current =>
+      current.map(pref =>
+        pref.channel && pref.eventType && preferenceKey(pref.channel, pref.eventType) === key
+          ? { ...pref, enabled }
+          : pref
+      )
+    );
+  }, []);
+
+  const updateCategoryPreferences = useCallback(
+    (categoryEventTypes: readonly NotificationEventType[], enabled: boolean) => {
+      setLocalPreferences(current =>
+        current.map(pref => {
+          if (pref.eventType && categoryEventTypes.includes(pref.eventType)) {
+            return { ...pref, enabled };
+          }
+          return pref;
+        })
+      );
+    },
+    []
+  );
+
+  return {
+    localPreferences,
+    resetPreferences,
+    updatePreferenceEnabled,
+    updateCategoryPreferences,
+  };
+}
+
+function useDerivedPreferences(
+  localPreferences: readonly NotificationPrefRow[],
+  eventTypes: readonly NotificationEventType[]
 ) {
-  useEffect(() => {
-    if (data?.notificationPreferences) {
-      setLocalPreferences(data.notificationPreferences);
-      pendingChangesRef.current.clear();
-      return;
-    }
-    setLocalPreferences(buildDefaultPreferences(CHANNEL_ORDER, eventTypes));
-  }, [data?.notificationPreferences, eventTypes, setLocalPreferences, pendingChangesRef]);
-}
-
-function useDerivedState(localPreferences: NotificationPrefRow[], eventTypes: readonly NotificationEventType[]) {
   const preferenceMap = useMemo(() => buildPreferenceMap(localPreferences), [localPreferences]);
   const matrixRows = useMemo(
     () => buildPreferenceMatrixRows(preferenceMap, eventTypes, CHANNEL_ORDER),
@@ -74,116 +117,119 @@ function useDerivedState(localPreferences: NotificationPrefRow[], eventTypes: re
   return { preferenceMap, matrixRows, categoryRows };
 }
 
-function useFlushPendingChanges(
+function useNotificationSave(
   labels: ProfileNotificationsLabels,
-  updatePreferences: ReturnType<
-    typeof useMutation<
-      Operations.UpdateNotificationPreferencesMutation,
-      Operations.UpdateNotificationPreferencesMutationVariables
-    >
-  >[0],
-  pendingChangesRef: React.MutableRefObject<Map<string, PendingChange>>,
-  setSnackbarMessage: React.Dispatch<React.SetStateAction<string>>,
-  setSnackbarSeverity: React.Dispatch<React.SetStateAction<"success" | "error">>,
-  setSnackbarOpen: React.Dispatch<React.SetStateAction<boolean>>
+  clearPendingChanges: () => void,
+  getPendingChanges: () => PendingChange[]
 ) {
-  return useCallback(async () => {
-    const pending = Array.from(pendingChangesRef.current.values());
+  const [snackbarState, setSnackbarState] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const [updatePreferences, { loading: saving }] = useMutation(updateNotificationPreferencesMutationDocument);
+
+  const flushPendingChanges = useCallback(async () => {
+    const pending = getPendingChanges();
     if (pending.length === 0) {
       return;
     }
 
     try {
       await updatePreferences({
-        variables: { input: pending as PendingChangeArray },
+        variables: { input: pending },
       });
-      pendingChangesRef.current.clear();
-      setSnackbarMessage(labels.saved);
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
+      clearPendingChanges();
+      setSnackbarState({
+        open: true,
+        message: labels.saved,
+        severity: "success",
+      });
     } catch (saveError) {
       logger.error("Failed to save notification preferences", { error: saveError });
-      setSnackbarMessage(labels.errorSaving);
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+      setSnackbarState({
+        open: true,
+        message: labels.errorSaving,
+        severity: "error",
+      });
     }
-  }, [labels, updatePreferences, pendingChangesRef, setSnackbarMessage, setSnackbarSeverity, setSnackbarOpen]);
+  }, [clearPendingChanges, getPendingChanges, labels, updatePreferences]);
+
+  const debouncedSave = useDebouncedCallback(() => {
+    void flushPendingChanges();
+  }, 500);
+
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbarState(prev => ({ ...prev, open: false }));
+  }, []);
+
+  return {
+    saving,
+    snackbarOpen: snackbarState.open,
+    snackbarMessage: snackbarState.message,
+    snackbarSeverity: snackbarState.severity,
+    handleSnackbarClose,
+    debouncedSave,
+  };
 }
 
-function useHandleToggle(
-  debouncedSave: () => void,
-  pendingChangesRef: React.MutableRefObject<Map<string, PendingChange>>,
-  setLocalPreferences: React.Dispatch<React.SetStateAction<NotificationPrefRow[]>>
+function useChannelNavigation() {
+  const [activeChannel, setActiveChannel] = useState<NotificationChannel>(NotificationChannel.Email);
+  const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
+  const previousChannelIndexRef = useRef<number>(0);
+
+  const handleChannelChange = useCallback((channel: NotificationChannel, direction: "left" | "right") => {
+    const nextIndex = CHANNEL_ORDER.indexOf(channel);
+    previousChannelIndexRef.current = nextIndex;
+    setSlideDirection(direction);
+    setActiveChannel(channel);
+  }, []);
+
+  return {
+    activeChannel,
+    slideDirection,
+    handleChannelChange,
+  };
+}
+
+function useNotificationPreferenceHandlers(
+  updatePreferenceEnabled: (key: string, enabled: boolean) => void,
+  updateCategoryPreferences: (categoryEventTypes: readonly NotificationEventType[], enabled: boolean) => void,
+  addPendingChange: (key: string, change: PendingChange) => void,
+  debouncedSave: () => void
 ) {
-  return useCallback(
+  const handleToggle = useCallback(
     (channel: NotificationChannel, eventType: NotificationEventType, enabled: boolean) => {
       const key = preferenceKey(channel, eventType);
-
-      setLocalPreferences(current =>
-        current.map(pref =>
-          pref.channel && pref.eventType && preferenceKey(pref.channel, pref.eventType) === key
-            ? { ...pref, enabled }
-            : pref
-        )
-      );
-
-      pendingChangesRef.current.set(key, { channel, eventType, enabled });
+      updatePreferenceEnabled(key, enabled);
+      addPendingChange(key, { channel, eventType, enabled });
       debouncedSave();
     },
-    [debouncedSave, pendingChangesRef, setLocalPreferences]
+    [addPendingChange, debouncedSave, updatePreferenceEnabled]
   );
-}
 
-function useHandleSnackbarClose(setSnackbarOpen: React.Dispatch<React.SetStateAction<boolean>>) {
-  return useCallback(() => {
-    setSnackbarOpen(false);
-  }, [setSnackbarOpen]);
-}
-
-function useHandleCategoryToggle(
-  debouncedSave: () => void,
-  pendingChangesRef: React.MutableRefObject<Map<string, PendingChange>>,
-  setLocalPreferences: React.Dispatch<React.SetStateAction<NotificationPrefRow[]>>
-) {
-  return useCallback(
+  const handleCategoryToggle = useCallback(
     (category: NotificationEventCategory, enabled: boolean) => {
       const catEventTypes = NOTIFICATION_EVENT_TYPES_BY_CATEGORY[category] ?? [];
-
-      setLocalPreferences(current =>
-        current.map(pref => {
-          if (pref.eventType && catEventTypes.includes(pref.eventType as NotificationEventType)) {
-            return { ...pref, enabled };
-          }
-          return pref;
-        })
-      );
+      updateCategoryPreferences(catEventTypes, enabled);
 
       for (const channel of NOTIFICATION_CHANNELS) {
         for (const eventType of catEventTypes) {
           const key = preferenceKey(channel, eventType);
-          pendingChangesRef.current.set(key, { channel, eventType, enabled });
+          addPendingChange(key, { channel, eventType, enabled });
         }
       }
       debouncedSave();
     },
-    [debouncedSave, pendingChangesRef, setLocalPreferences]
+    [addPendingChange, debouncedSave, updateCategoryPreferences]
   );
-}
 
-function useHandleChannelChange(
-  previousChannelIndexRef: React.MutableRefObject<number>,
-  setSlideDirection: React.Dispatch<React.SetStateAction<"left" | "right">>,
-  setActiveChannel: React.Dispatch<React.SetStateAction<NotificationChannel>>
-) {
-  return useCallback(
-    (channel: NotificationChannel, direction: "left" | "right") => {
-      const nextIndex = CHANNEL_ORDER.indexOf(channel);
-      previousChannelIndexRef.current = nextIndex;
-      setSlideDirection(direction);
-      setActiveChannel(channel);
-    },
-    [previousChannelIndexRef, setSlideDirection, setActiveChannel]
-  );
+  return { handleToggle, handleCategoryToggle };
 }
 
 export function useNotificationPreferencesTabViewModel(
@@ -196,49 +242,37 @@ export function useNotificationPreferencesTabViewModel(
   const preferenceRole = useMemo(() => resolveNotificationPreferenceRole({ role: viewerRole }), [viewerRole]);
   const eventTypes = useMemo(() => getNotificationEventTypesForRole(preferenceRole), [preferenceRole]);
 
-  const [localPreferences, setLocalPreferences] = useInitialPreferences(eventTypes);
-  const pendingChangesRef = useRef<Map<string, PendingChange>>(new Map());
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
-  const [activeChannel, setActiveChannel] = useState<NotificationChannel>(NotificationChannel.Email);
-  const [slideDirection, setSlideDirection] = useState<"left" | "right">("left");
-  const previousChannelIndexRef = useRef<number>(0);
+  const { addPendingChange, clearPendingChanges, getPendingChanges } = usePendingChanges();
+  const { localPreferences, resetPreferences, updatePreferenceEnabled, updateCategoryPreferences } =
+    usePreferenceState(eventTypes);
 
   const { data, loading, error } = useQuery(notificationPreferencesQueryDocument, {
     skip: !isActive,
     fetchPolicy: "cache-and-network",
   });
 
-  const [updatePreferencesRaw, { loading: saving }] = useMutation(updateNotificationPreferencesMutationDocument);
-  const updatePreferences = updatePreferencesRaw as ReturnType<
-    typeof useMutation<
-      Operations.UpdateNotificationPreferencesMutation,
-      Operations.UpdateNotificationPreferencesMutationVariables
-    >
-  >[0];
+  useEffect(() => {
+    if (data?.notificationPreferences) {
+      resetPreferences(data.notificationPreferences);
+      clearPendingChanges();
+      return;
+    }
+    resetPreferences();
+  }, [data?.notificationPreferences, resetPreferences, clearPendingChanges]);
 
-  usePreferenceSync(data, eventTypes, setLocalPreferences, pendingChangesRef);
+  const { preferenceMap, matrixRows, categoryRows } = useDerivedPreferences(localPreferences, eventTypes);
 
-  const { preferenceMap, matrixRows, categoryRows } = useDerivedState(localPreferences, eventTypes);
+  const { saving, snackbarOpen, snackbarMessage, snackbarSeverity, handleSnackbarClose, debouncedSave } =
+    useNotificationSave(labels, clearPendingChanges, getPendingChanges);
 
-  const flushPendingChanges = useFlushPendingChanges(
-    labels,
-    updatePreferences,
-    pendingChangesRef,
-    setSnackbarMessage,
-    setSnackbarSeverity,
-    setSnackbarOpen
+  const { handleToggle, handleCategoryToggle } = useNotificationPreferenceHandlers(
+    updatePreferenceEnabled,
+    updateCategoryPreferences,
+    addPendingChange,
+    debouncedSave
   );
 
-  const debouncedSave = useDebouncedCallback(() => {
-    void flushPendingChanges();
-  }, 500);
-
-  const handleToggle = useHandleToggle(debouncedSave, pendingChangesRef, setLocalPreferences);
-  const handleCategoryToggle = useHandleCategoryToggle(debouncedSave, pendingChangesRef, setLocalPreferences);
-  const handleSnackbarClose = useHandleSnackbarClose(setSnackbarOpen);
-  const handleChannelChange = useHandleChannelChange(previousChannelIndexRef, setSlideDirection, setActiveChannel);
+  const { activeChannel, slideDirection, handleChannelChange } = useChannelNavigation();
 
   return {
     labels,

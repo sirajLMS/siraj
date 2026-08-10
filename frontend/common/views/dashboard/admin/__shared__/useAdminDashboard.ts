@@ -13,6 +13,25 @@ import { resolveDailyScheduleMetricFilter } from "@/frontend/common/views/dashbo
 
 export const ADMIN_DASHBOARD_PAGE_SIZE = 10;
 
+const ADMIN_METRIC_KEYS: readonly AdminMetricKey[] = [
+  "total",
+  "regular",
+  "trial",
+  "advance",
+  "rescheduled",
+  "suspended",
+  "taken",
+  "pending",
+  "activated",
+  "running",
+  "absent",
+  "leave",
+];
+
+function isAdminMetricKey(value: string): value is AdminMetricKey {
+  return (ADMIN_METRIC_KEYS as readonly string[]).includes(value);
+}
+
 /** Tracks when dashboard data first arrives and computes an elapsed-time label that updates every minute. */
 export function useLastUpdatedLabel(data: unknown, labels: AdminDashboardLastUpdatedLabels) {
   const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
@@ -27,7 +46,7 @@ export function useLastUpdatedLabel(data: unknown, labels: AdminDashboardLastUpd
   useEffect(() => {
     if (dataArrivedAt === null) {
       setLastUpdated(labels.updatedJustNow);
-      return;
+      return undefined;
     }
     const computeLabel = () => {
       const elapsedMin = Math.floor((Date.now() - dataArrivedAt) / 60000);
@@ -105,8 +124,10 @@ export function useAdminDashboardHandlers(setPage: (p: number) => void) {
     setPage(0);
     if (filters.selectedStatus === key) {
       setSelectedStatus(null);
+    } else if (isAdminMetricKey(key)) {
+      setSelectedStatus(key);
     } else {
-      setSelectedStatus(key as AdminMetricKey);
+      setSelectedStatus(null);
     }
   };
 

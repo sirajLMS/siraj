@@ -59,20 +59,19 @@ describe("NotificationPreferencesService role allowlists", () => {
 
   test("student only materializes CLASS_* + CLASS_REMINDER events", () => {
     const events = eventTypesForRole(resolvePreferenceRole(UserRole.STUDENT));
-    expect(new Set(events as string[])).toEqual(new Set(STUDENT_NOTIFICATION_EVENTS as readonly string[]));
+    expect(new Set(events.map(String))).toEqual(new Set(STUDENT_NOTIFICATION_EVENTS.map(String)));
   });
 
   test("supervisor only materializes lesson-report + complaint events", () => {
     const events = eventTypesForRole(resolvePreferenceRole(UserRole.SUPERVISOR));
-    expect(new Set(events as string[])).toEqual(new Set(SUPERVISOR_NOTIFICATION_EVENTS as readonly string[]));
+    expect(new Set(events.map(String))).toEqual(new Set(SUPERVISOR_NOTIFICATION_EVENTS.map(String)));
   });
 });
 
 describe("NotificationPreferencesService.getPreferences access", () => {
   test("allows students with student.student_identity.view_own", async () => {
     spyOn(PermissionsService, "hasAnyPermission").mockImplementation(async (_userId, keys) => {
-      const list = keys as AppPermission[];
-      return list.includes(AppPermission.STUDENT_IDENTITY_VIEW_OWN);
+      return keys.includes(AppPermission.STUDENT_IDENTITY_VIEW_OWN);
     });
     spyOn(PermissionsService, "getUserContext").mockResolvedValue({
       permissions: [AppPermission.STUDENT_IDENTITY_VIEW_OWN],
@@ -94,6 +93,6 @@ describe("NotificationPreferencesService.getPreferences access", () => {
   test("rejects users without profile or student own-view permissions", async () => {
     spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(false);
 
-    await expect(NotificationPreferencesService.getPreferences("restricted-user")).rejects.toThrow();
+    return expect(NotificationPreferencesService.getPreferences("restricted-user")).rejects.toThrow();
   });
 });

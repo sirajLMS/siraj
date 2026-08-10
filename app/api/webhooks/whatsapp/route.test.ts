@@ -21,7 +21,30 @@ const WEBHOOK_URL = "http://localhost:3000/api/webhooks/whatsapp";
 // Mock state
 // ---------------------------------------------------------------------------
 
-const processEventMock = mock(async (_payload?: unknown): Promise<void> => {});
+type WebhookChangeValue = {
+  messages?: unknown[];
+  statuses?: unknown[];
+  messaging_product?: string;
+  phone_number_id?: string;
+  [key: string]: unknown;
+};
+
+type WebhookChange = {
+  field?: string;
+  value?: WebhookChangeValue;
+};
+
+type WebhookEntry = {
+  id?: string;
+  changes?: WebhookChange[];
+};
+
+type WebhookPayload = {
+  object?: string;
+  entry?: WebhookEntry[];
+};
+
+const processEventMock = mock(async (_payload?: WebhookPayload): Promise<void> => {});
 
 const loggerWarnMock = mock((_msg: string, _meta?: Record<string, unknown>) => {});
 const loggerErrorMock = mock((_msg: string, _meta?: Record<string, unknown>) => {});
@@ -47,7 +70,7 @@ let envAppSecret: string | undefined = TEST_APP_SECRET;
 // We store the callback so tests can explicitly await it after the route returns.
 // Real NextRequest and NextResponse constructors are preserved so the route can
 // use `new NextResponse(...)` exactly as in production.
-mock.module("next/server", () => {
+await mock.module("next/server", () => {
   return {
     after: (cb: () => Promise<void>) => {
       afterCallback = cb;
@@ -57,7 +80,7 @@ mock.module("next/server", () => {
   };
 });
 
-mock.module("@/backend/lib/env-config-resolver", () => ({
+await mock.module("@/backend/services/system", () => ({
   resolveEnvConfig: async (key: string): Promise<string | undefined> => {
     switch (key) {
       case "WHATSAPP_APP_SECRET":
@@ -70,7 +93,7 @@ mock.module("@/backend/lib/env-config-resolver", () => ({
   },
 }));
 
-mock.module("@/backend/lib/ratelimit", () => ({
+await mock.module("@/backend/lib/ratelimit", () => ({
   apiRateLimiter: {},
   checkRateLimit: async () => ({
     success: rateLimitSuccess,
@@ -81,13 +104,13 @@ mock.module("@/backend/lib/ratelimit", () => ({
   getClientIdentifier: (request: Request): string => request.headers.get("x-forwarded-for") ?? "127.0.0.1",
 }));
 
-mock.module("@/backend/services/whatsapp/whatsapp-webhook.handler", () => ({
+await mock.module("@/backend/services/whatsapp/whatsapp-webhook.handler", () => ({
   WhatsappWebhookHandler: {
     processEvent: processEventMock,
   },
 }));
 
-mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     log: loggerLogMock,
     info: loggerInfoMock,
@@ -113,29 +136,21 @@ function computeHmac(body: string, secret: string = TEST_APP_SECRET): string {
 }
 
 function buildWebhookBody(messagesIncluded = false): string {
-  const entry = {
-    id: "123456789",
-    changes: [
+  const value: WebhookChangeValue = {
+    messaging_product: "whatsapp",
+    phone_number_id: "987654321",
+    statuses: [
       {
-        field: "messages",
-        value: {
-          messaging_product: "whatsapp",
-          phone_number_id: "987654321",
-          statuses: [
-            {
-              id: "wamid.test123",
-              status: "delivered",
-              timestamp: "1700000000",
-              recipient_id: "1234567890",
-            },
-          ],
-        },
+        id: "wamid.test123",
+        status: "delivered",
+        timestamp: "1700000000",
+        recipient_id: "1234567890",
       },
     ],
   };
 
   if (messagesIncluded) {
-    (entry.changes[0].value as Record<string, unknown>).messages = [
+    value.messages = [
       {
         from: "1234567890",
         id: "wamid.inbound1",
@@ -145,6 +160,16 @@ function buildWebhookBody(messagesIncluded = false): string {
       },
     ];
   }
+
+  const entry = {
+    id: "123456789",
+    changes: [
+      {
+        field: "messages",
+        value,
+      },
+    ],
+  };
 
   return JSON.stringify({
     object: "whatsapp_business_account",
@@ -179,14 +204,41 @@ function makeGetRequest(params: Record<string, string> = {}, headers: Record<str
   });
 }
 
-async function importRoute(): Promise<{
-  GET: (request: NextRequest) => Promise<Response>;
-  POST: (request: NextRequest) => Promise<Response>;
-}> {
-  return import("./route") as Promise<{
-    GET: (request: NextRequest) => Promise<Response>;
-    POST: (request: NextRequest) => Promise<Response>;
-  }>;
+function makeSignedPostRequest(body: string, customHeaders: Record<string, string> = {}): NextRequest {
+  const signature = computeHmac(body);
+  return makePostRequest(body, {
+    "content-type": "application/json",
+    "x-hub-signature-256": signature,
+    "content-length": String(Buffer.byteLength(body)),
+    ...customHeaders,
+  });
+}
+
+async function assertPostRejected(
+  POST: (request: NextRequest) => Promise<Response>,
+  req: NextRequest,
+  expectedStatus: number
+): Promise<Response> {
+  const res = await POST(req);
+  expect(res.status).toBe(expectedStatus);
+  expect(afterCallback).toBeNull();
+  expect(processEventMock).toHaveBeenCalledTimes(0);
+  return res;
+}
+
+async function assertGetForbidden(
+  GET: (request: NextRequest) => Promise<Response>,
+  params: Record<string, string>
+): Promise<Response> {
+  const req = makeGetRequest(params);
+  const res = await GET(req);
+  expect(res.status).toBe(403);
+  expect(afterCallback).toBeNull();
+  return res;
+}
+
+async function importRoute() {
+  return import("./route");
 }
 
 // ---------------------------------------------------------------------------
@@ -255,10 +307,8 @@ describe("POST /api/webhooks/whatsapp", () => {
     expect(loggerWarnMock).toHaveBeenCalled();
 
     // S2: The logged metadata must NOT contain the raw body or any sensitive content.
-    const warnCalls = loggerWarnMock.mock.calls as unknown as [string, Record<string, unknown>?][];
-    const hmacMismatchCall = warnCalls.find(
-      ([msg]) => typeof msg === "string" && msg.includes("HMAC signature mismatch")
-    );
+    const warnCalls = loggerWarnMock.mock.calls;
+    const hmacMismatchCall = warnCalls.find(([msg]) => msg.includes("HMAC signature mismatch"));
     expect(hmacMismatchCall).toBeDefined();
 
     const loggedMeta = hmacMismatchCall?.[1] ?? {};
@@ -319,16 +369,14 @@ describe("POST /api/webhooks/whatsapp", () => {
     // processEvent should have been called once with the stripped payload.
     expect(processEventMock).toHaveBeenCalledTimes(1);
 
-    const passedPayload = processEventMock.mock.calls[0][0] as {
-      entry?: Array<{ changes?: Array<{ value?: { messages?: unknown[]; statuses?: unknown[] } }> }>;
-    };
+    const passedPayload = processEventMock.mock.calls[0][0];
 
     expect(passedPayload).toBeDefined();
-    expect(passedPayload.entry).toBeDefined();
-    expect(Array.isArray(passedPayload.entry)).toBe(true);
+    expect(passedPayload?.entry).toBeDefined();
+    expect(Array.isArray(passedPayload?.entry)).toBe(true);
 
     // Every change entry's value MUST NOT have a messages[] array — it should be stripped (S3).
-    for (const entry of passedPayload.entry ?? []) {
+    for (const entry of passedPayload?.entry ?? []) {
       for (const change of entry.changes ?? []) {
         if (change.value) {
           expect(change.value.messages).toBeUndefined();
@@ -365,12 +413,9 @@ describe("POST /api/webhooks/whatsapp", () => {
     expect(processEventMock).toHaveBeenCalledTimes(1);
 
     // Step 5: The passed payload has messages[] stripped (S3)
-    const passedPayload = processEventMock.mock.calls[0][0] as {
-      object?: string;
-      entry?: Array<{ changes?: Array<{ value?: { messages?: unknown[]; statuses?: unknown[] } }> }>;
-    };
-    expect(passedPayload.object).toBe("whatsapp_business_account");
-    for (const entry of passedPayload.entry ?? []) {
+    const passedPayload = processEventMock.mock.calls[0][0];
+    expect(passedPayload?.object).toBe("whatsapp_business_account");
+    for (const entry of passedPayload?.entry ?? []) {
       for (const change of entry.changes ?? []) {
         if (change.value) {
           expect(change.value.messages).toBeUndefined();
@@ -384,95 +429,43 @@ describe("POST /api/webhooks/whatsapp", () => {
   test("Malformed JSON body returns 400", async () => {
     const { POST } = await importRoute();
     const malformedBody = "{ this is not valid json";
-    const signature = computeHmac(malformedBody);
-
-    const req = makePostRequest(malformedBody, {
-      "content-type": "application/json",
-      "x-hub-signature-256": signature,
-      "content-length": String(Buffer.byteLength(malformedBody)),
-    });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(400);
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    const req = makeSignedPostRequest(malformedBody);
+    await assertPostRejected(POST, req, 400);
   });
 
   test("Missing WHATSAPP_APP_SECRET env returns 500", async () => {
     const { POST } = await importRoute();
     envAppSecret = undefined;
-
     const rawBody = buildWebhookBody(false);
-    const signature = computeHmac(rawBody);
-
-    const req = makePostRequest(rawBody, {
-      "content-type": "application/json",
-      "x-hub-signature-256": signature,
-      "content-length": String(Buffer.byteLength(rawBody)),
-    });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(500);
+    const req = makeSignedPostRequest(rawBody);
+    await assertPostRejected(POST, req, 500);
     expect(loggerErrorMock).toHaveBeenCalled();
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
   });
 
   test("object !== 'whatsapp_business_account' returns 404", async () => {
     const { POST } = await importRoute();
     const rawBody = JSON.stringify({ object: "page", entry: [] });
-    const signature = computeHmac(rawBody);
-
-    const req = makePostRequest(rawBody, {
-      "content-type": "application/json",
-      "x-hub-signature-256": signature,
-      "content-length": String(Buffer.byteLength(rawBody)),
-    });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(404);
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    const req = makeSignedPostRequest(rawBody);
+    await assertPostRejected(POST, req, 404);
   });
 
   test("POST with rate limit exceeded returns 429", async () => {
     const { POST } = await importRoute();
     rateLimitSuccess = false;
-
     const rawBody = buildWebhookBody(false);
-    const signature = computeHmac(rawBody);
-
-    const req = makePostRequest(rawBody, {
-      "content-type": "application/json",
-      "x-hub-signature-256": signature,
-      "content-length": String(Buffer.byteLength(rawBody)),
-    });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(429);
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    const req = makeSignedPostRequest(rawBody);
+    await assertPostRejected(POST, req, 429);
   });
 
   test("Malformed signature header without sha256= prefix returns 401", async () => {
     const { POST } = await importRoute();
     const rawBody = buildWebhookBody(false);
-
     const req = makePostRequest(rawBody, {
       "content-type": "application/json",
       "x-hub-signature-256": "invalidsig-without-prefix",
       "content-length": String(Buffer.byteLength(rawBody)),
     });
-
-    const res = await POST(req);
-
-    expect(res.status).toBe(401);
-    expect(afterCallback).toBeNull();
-    expect(processEventMock).toHaveBeenCalledTimes(0);
+    await assertPostRejected(POST, req, 401);
   });
 
   // r10-022: Actual-body-size boundary tests
@@ -559,81 +552,49 @@ describe("GET /api/webhooks/whatsapp", () => {
 
   test("403 invalid mode: hub.mode not subscribe", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.mode": "unsubscribe",
       "hub.verify_token": TEST_VERIFY_TOKEN,
-      "hub.challenge": "1234567890",
+      "hub.challenge": "[PHONE_REDACTED]",
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
     expect(loggerWarnMock).toHaveBeenCalled();
-    // Handler must not be called for GET.
-    expect(afterCallback).toBeNull();
   });
 
   test("403 invalid token: verify_token mismatch", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.mode": "subscribe",
       "hub.verify_token": "wrong-token",
-      "hub.challenge": "1234567890",
+      "hub.challenge": "[PHONE_REDACTED]",
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
     expect(loggerWarnMock).toHaveBeenCalled();
-    // Should log the verify token mismatch
-    const warnCalls = loggerWarnMock.mock.calls as unknown as [string, Record<string, unknown>?][];
-    const mismatchCall = warnCalls.find(([msg]) => typeof msg === "string" && msg.includes("verify token mismatch"));
+    const warnCalls = loggerWarnMock.mock.calls;
+    const mismatchCall = warnCalls.find(([msg]) => msg.includes("verify token mismatch"));
     expect(mismatchCall).toBeDefined();
-    expect(afterCallback).toBeNull();
   });
 
   test("403 missing hub.mode", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.verify_token": TEST_VERIFY_TOKEN,
-      "hub.challenge": "1234567890",
+      "hub.challenge": "[PHONE_REDACTED]",
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
-    expect(afterCallback).toBeNull();
   });
 
   test("403 missing hub.challenge", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.mode": "subscribe",
       "hub.verify_token": TEST_VERIFY_TOKEN,
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
-    expect(afterCallback).toBeNull();
   });
 
   test("403 missing hub.verify_token", async () => {
     const { GET } = await importRoute();
-
-    const req = makeGetRequest({
+    await assertGetForbidden(GET, {
       "hub.mode": "subscribe",
-      "hub.challenge": "1234567890",
+      "hub.challenge": "[PHONE_REDACTED]",
     });
-
-    const res = await GET(req);
-
-    expect(res.status).toBe(403);
-    expect(afterCallback).toBeNull();
   });
 
   test("429 rate limited: per-IP rate limit triggers on token mismatch when rate limit exceeded", async () => {
@@ -670,10 +631,8 @@ describe("GET /api/webhooks/whatsapp", () => {
 
     expect(res.status).toBe(500);
     expect(loggerErrorMock).toHaveBeenCalled();
-    const errorCalls = loggerErrorMock.mock.calls as unknown as [string, Record<string, unknown>?][];
-    const tokenMissingCall = errorCalls.find(
-      ([msg]) => typeof msg === "string" && msg.includes("WHATSAPP_VERIFY_TOKEN not configured")
-    );
+    const errorCalls = loggerErrorMock.mock.calls;
+    const tokenMissingCall = errorCalls.find(([msg]) => msg.includes("WHATSAPP_VERIFY_TOKEN not configured"));
     expect(tokenMissingCall).toBeDefined();
     expect(afterCallback).toBeNull();
   });

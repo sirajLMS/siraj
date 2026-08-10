@@ -24,7 +24,7 @@ export function filterResources(
     return row.title.toLowerCase().includes(normalizedQuery) || row.fileName.toLowerCase().includes(normalizedQuery);
   });
 
-  return [...filtered].sort((left, right) => {
+  return [...filtered].toSorted((left, right) => {
     if (sortBy === "name") {
       return left.title.localeCompare(right.title);
     }

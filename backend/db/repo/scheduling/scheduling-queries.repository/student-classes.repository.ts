@@ -3,9 +3,20 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
-import type { ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { UpcomingClassRow } from "@/backend/types/scheduling/scheduling.types";
+
+const VALID_EXECUTION_STATES = new Set(Object.values(ClassExecutionState) as string[]);
+const VALID_OUTCOMES = new Set(Object.values(ClassOutcome) as string[]);
+
+function isClassExecutionState(value: string): value is ClassExecutionState {
+  return VALID_EXECUTION_STATES.has(value);
+}
+
+function isClassOutcome(value: string): value is ClassOutcome {
+  return VALID_OUTCOMES.has(value);
+}
 
 export const bulkFreezeStudentClasses = async (
   studentId: string,
@@ -30,18 +41,17 @@ async function setStudentClassesFrozenState(
   extraPredicate: ReturnType<typeof eq> | undefined,
   tx?: DBTransaction
 ): Promise<number> {
+  const BATCH_SIZE = 500;
+
+  const conditions = and(
+    eq(classInstances.studentId, studentId),
+    isNull(classInstances.deletedAt),
+    gte(classInstances.scheduledStartAt, fromDate),
+    extraPredicate
+  );
+
   const runner = async (t: DBTransaction): Promise<number> => {
-    const BATCH_SIZE = 500;
-    let totalUpdated = 0;
-
-    const conditions = and(
-      eq(classInstances.studentId, studentId),
-      isNull(classInstances.deletedAt),
-      gte(classInstances.scheduledStartAt, fromDate),
-      extraPredicate
-    );
-
-    while (true) {
+    const processNextBatch = async (totalUpdated: number): Promise<number> => {
       const batch = await t
         .select({ id: classInstances.id })
         .from(classInstances)
@@ -49,7 +59,7 @@ async function setStudentClassesFrozenState(
         .limit(BATCH_SIZE)
         .for("update");
 
-      if (batch.length === 0) break;
+      if (batch.length === 0) return totalUpdated;
 
       await t
         .update(classInstances)
@@ -61,12 +71,12 @@ async function setStudentClassesFrozenState(
           )
         );
 
-      totalUpdated += batch.length;
+      const newTotal = totalUpdated + batch.length;
+      if (batch.length < BATCH_SIZE) return newTotal;
+      return processNextBatch(newTotal);
+    };
 
-      if (batch.length < BATCH_SIZE) break;
-    }
-
-    return totalUpdated;
+    return processNextBatch(0);
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 }
@@ -97,7 +107,7 @@ export const getStudentFutureClasses = async (
     id: r.id,
     executionState: r.executionState,
     scheduledStartAt: r.scheduledStartAt,
-  })) as { id: string; executionState: string; scheduledStartAt: Date }[];
+  }));
 };
 
 export const getUpcomingClassesForStudent = async (
@@ -144,8 +154,8 @@ export const getUpcomingClassesForStudent = async (
     scheduledStartAt: r.scheduledStartAt,
     scheduledEndAt: r.scheduledEndAt,
     durationMinutes: r.durationMinutes,
-    executionState: r.executionState as ClassExecutionState,
-    outcome: r.outcome as ClassOutcome | null,
+    executionState: isClassExecutionState(r.executionState) ? r.executionState : ClassExecutionState.NOT_ACTIVATED,
+    outcome: isClassOutcome(r.outcome) ? r.outcome : ClassOutcome.PENDING,
     isFrozen: r.isFrozen,
     instructor: r.instructor,
     teacherId: r.teacherId,

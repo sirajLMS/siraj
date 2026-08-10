@@ -37,7 +37,8 @@ export type NotificationDeliverySubmitInput = Omit<
   | "webhookPayload"
 >;
 
-export type NotificationDeliveryStatusCount = Pick<NotificationDeliverySelectType, "status"> & {
+export type NotificationDeliveryStatusCount = {
+  status: NotificationDeliveryStatus;
   count: number;
 };
 

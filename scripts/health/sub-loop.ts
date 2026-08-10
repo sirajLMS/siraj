@@ -4,10 +4,13 @@
  * This script is called by subagents dispatched by the quality-gate skill. It runs a progressive
  * quality loop on a single file, checking in strict order:
  *
- *   tsgo → biome:check → lint (via queue client) → codescene --file
+ *   tsgo → biome:check → oxlint → lint:type-aware (via lint service) → check:duplicates → codescene --file
  *
  * It SHORT-CIRCUITS at the first failing check — stops and prints the errors for the subagent
  * to fix. The subagent fixes the errors and re-runs this script until it passes all checks.
+ *
+ * ⚠️  SINGLE-FILE ONLY: Every check is scoped to the target file. Cross-file issues (including
+ *    cross-file duplication) are out of scope — report those to the orchestrator instead.
  *
  * ⚠️  CRITICAL: SonarQube scan is VERY COSTLY to run.
  *    This script NEVER runs `bun sonar-scan` or `bun scripts/sonar-manager.ts`.
@@ -20,24 +23,25 @@
  * Lifecycle stages (controls how deep the loop goes):
  *   tsgo          → only run tsgo (type checking only)
  *   biome         → run tsgo, then biome:check (stop if tsgo fails)
- *   lint          → run tsgo, biome, then lint via queue client (stop if earlier check fails)
- *   codescene     → run tsgo, biome, lint, then codescene --file (stop if earlier check fails)
- *   sonar-results → same as codescene (subagents verify file is clean before orchestrator handles sonar)
+ *   lint          → run tsgo, biome, oxlint, then lint:type-aware via lint service (stop if earlier check fails)
+ *   codescene     → run tsgo, biome, oxlint, lint:type-aware, check:duplicates, then codescene --file
  *
  * Exit codes:
  *   0 = all checks up to the lifecycle stage passed
  *   1 = stopped at a failing check (errors printed to stdout/stderr)
- *   2 = invalid arguments or lint queue server unavailable
+ *   2 = invalid arguments
  */
 
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
-import { BASE_URL as LINT_QUEUE_URL } from "@/scripts/lint-queue-config";
+import { isCodeSceneOutputFailed } from "@/scripts/health/codescene/checker";
+import { withProcessLock } from "@/scripts/lib/process-lock";
+import { type LintResult, requestLint } from "@/scripts/lint-service";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type Lifecycle = "tsgo" | "biome" | "lint" | "codescene" | "sonar-results";
+type Lifecycle = "tsgo" | "biome" | "lint" | "codescene";
 
 interface CheckResult {
   name: string;
@@ -53,7 +57,6 @@ const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
   biome: 1,
   lint: 2,
   codescene: 3,
-  "sonar-results": 3, // same depth as codescene — no sonar for subagents
 };
 
 const RED = "\x1b[31m";
@@ -76,8 +79,8 @@ function getInstructionFiles(filePath: string): string[] {
 
   // Test files → tests.instructions.md
   if (
-    normalized.match(/\.test\.tsx?$/) ||
-    normalized.match(/\.spec\.tsx?$/) ||
+    /\.test\.tsx?$/.exec(normalized) ||
+    /\.spec\.tsx?$/.exec(normalized) ||
     normalized.includes("scripts/run-test/")
   ) {
     instructions.push(".github/instructions/tests.instructions.md");
@@ -171,6 +174,20 @@ function printApplicableRuleFiles(filePath: string): void {
   console.log(`  • If fixing requires modifying ANOTHER file: do NOT modify that file.`);
   console.log(`    Report the cross-file dependency to the orchestrator instead.`);
   console.log("");
+  console.log(`${BOLD}Oxlint Fix Patterns (see AGENTS.md for full details):${NC}`);
+  console.log(
+    `  • no-unsafe-type-assertion: Use type guards ("value is Type"), instanceof Error, satisfies Partial<T>`
+  );
+  console.log(`  • no-await-in-loop: Use Promise.all (parallel) or recursive helper/reduce (sequential)`);
+  console.log(`  • consistent-function-scoping: Move non-capturing functions to module scope`);
+  console.log(`  • no-object-type-as-default-prop: Extract default to module-level const`);
+  console.log(`  • no-unsafe-enum-comparison: Wrap with String() or use string literals`);
+  console.log(`  • no-shadow: Destructuring rename or _ prefix for unused params`);
+  console.log(`  • consistent-return: Use "return undefined" instead of bare "return"`);
+  console.log(`  • no-map-spread: Use Object.assign instead of spread in .map()`);
+  console.log(`  • no-underscore-dangle: Rename or use bracket notation for external APIs`);
+  console.log(`  • NEVER add oxlint-disable comments — fix the root cause`);
+  console.log("");
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
@@ -187,75 +204,63 @@ function logFail(msg: string): void {
   console.error(`${RED}❌${NC} ${BOLD}${msg}${NC}`);
 }
 
-function logWarn(msg: string): void {
-  console.warn(`${YELLOW}⚠${NC}  ${msg}`);
+interface CommandRunResult {
+  exitCode: number | null;
+  output: string;
 }
 
 /**
  * Run a command synchronously and capture its output.
  */
-function runCommand(command: string, args: string[]): CheckResult {
+function runCommand(command: string, args: string[]): CommandRunResult {
   const result = spawnSync(command, args, {
     encoding: "utf8",
     cwd: PROJECT_ROOT,
     stdio: ["pipe", "pipe", "pipe"],
   });
 
-  const output = (result.stdout || "") + (result.stderr || "");
   return {
-    name: `${command} ${args.join(" ")}`,
-    passed: result.status === 0,
-    output,
+    exitCode: result.status,
+    output: (result.stdout || "") + (result.stderr || ""),
   };
 }
 
+function exitCodePassed(exitCode: number | null): boolean {
+  return exitCode === 0;
+}
+
+function toCheckResult(name: string, passed: boolean, output: string): CheckResult {
+  return { name, passed, output };
+}
+
 /**
- * Submit a lint request to the lint queue server.
- * Returns null if the server is unavailable.
+ * Submit a lint request to the in-process lint service.
  */
-async function lintViaQueue(filePath: string): Promise<CheckResult | null> {
+async function lintViaQueue(filePath: string): Promise<LintResult> {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
+  return requestLint("sub-loop", [relPath], { typeAware: true, maxWarnings: 0 });
+}
 
-  try {
-    const response = await fetch(`${LINT_QUEUE_URL}/status`);
-    if (!response.ok) {
-      logWarn("Lint queue server is up but returned non-200 on /status");
-      return null;
-    }
-  } catch {
-    logWarn("Lint queue server is NOT running. Start it first:");
-    console.error(`  ~/.bun/bin/bun run scripts/lint-queue-server.ts`);
-    return null;
+function eslintOutputHasProblems(output: string): boolean {
+  const summary = /\((\d+) errors?, (\d+) warnings?\)/.exec(output);
+  if (summary) {
+    return Number(summary[1]) > 0 || Number(summary[2]) > 0;
   }
 
-  try {
-    const response = await fetch(`${LINT_QUEUE_URL}/lint`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: "sub-loop", files: [relPath] }),
-    });
-
-    if (!response.ok) {
-      return {
-        name: "lint-queue-client",
-        passed: false,
-        output: `Lint queue request failed: ${response.status}`,
-      };
+  for (const line of output.split("\n")) {
+    if (/^\s+\d+:\d+\s+(?:error|warning) /.test(line)) {
+      return true;
     }
-
-    const data = (await response.json()) as { success: boolean; output: string; exitCode: number };
-    return {
-      name: "lint-queue-client",
-      passed: data.success,
-      output: data.output,
-    };
-  } catch (err) {
-    return {
-      name: "lint-queue-client",
-      passed: false,
-      output: `Failed to reach lint queue server: ${(err as Error).message}`,
-    };
   }
+  return false;
+}
+
+function oxlintOutputHasDiagnostics(output: string): boolean {
+  return /:\d+:\d+:\s+(error|warning)\s/.test(output);
+}
+
+function biomeOutputHasDiagnostics(output: string): boolean {
+  return output.includes("×") || output.includes("⚠");
 }
 
 /**
@@ -271,7 +276,7 @@ function lineMentionsFile(line: string, relPath: string, filePath: string): bool
 function collectErrorBlock(lines: string[], startIndex: number, errorBlockRegex: RegExp): string[] {
   const block: string[] = [lines[startIndex]];
   for (let j = startIndex + 1; j < lines.length; j++) {
-    if (lines[j].match(errorBlockRegex) || lines[j].trim() === "") break;
+    if (errorBlockRegex.exec(lines[j]) || lines[j].trim() === "") break;
     block.push(lines[j]);
   }
   return block;
@@ -285,15 +290,15 @@ function filterTsgoForFile(tsgoOutput: string, filePath: string): string {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
   const lines = tsgoOutput.split("\n");
   const matchingLines: string[] = [];
-  const errorBlockRegex = /^(.+\.t sx?)\(\d+,\d+\):/;
+  const errorBlockRegex = /^(.+\.tsx?)\(\d+,\d+\):/;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const isErrorBlock = line.match(errorBlockRegex);
+    const isErrorBlock = errorBlockRegex.exec(line);
 
     if (isErrorBlock && lineMentionsFile(line, relPath, filePath)) {
       matchingLines.push(...collectErrorBlock(lines, i, errorBlockRegex));
-    } else if (!isErrorBlock && lineMentionsFile(line, relPath, filePath)) {
+    } else if (!isErrorBlock && !line.startsWith("$ ") && lineMentionsFile(line, relPath, filePath)) {
       matchingLines.push(line);
     }
   }
@@ -306,63 +311,123 @@ function filterTsgoForFile(tsgoOutput: string, filePath: string): string {
 function checkTsgo(filePath: string): CheckResult {
   logInfo(`Running tsgo (project-wide, filtering for ${filePath})...`);
   const result = runCommand("bun", ["tsgo"]);
+  const relevantDiagnostics = filterTsgoForFile(result.output, filePath);
 
-  if (result.passed) {
-    return { name: "tsgo", passed: true, output: "" };
+  if (relevantDiagnostics) {
+    return toCheckResult("tsgo", false, relevantDiagnostics);
   }
 
-  const relevantErrors = filterTsgoForFile(result.output, filePath);
-  if (relevantErrors) {
-    return { name: "tsgo", passed: false, output: relevantErrors };
-  }
-
-  // tsgo had errors but none for THIS file — pass for this file
-  return { name: "tsgo", passed: true, output: "" };
+  return toCheckResult("tsgo", true, "");
 }
 
 function checkBiome(filePath: string): CheckResult {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
   logInfo(`Running biome:check on ${relPath}...`);
-  const result = runCommand("bun", ["biome:check", relPath]);
-  return { name: "biome:check", passed: result.passed, output: result.output };
+  const result = runCommand("bunx", ["@biomejs/biome", "check", "--write", "--unsafe", "--error-on-warnings", relPath]);
+  return toCheckResult(
+    "biome:check",
+    exitCodePassed(result.exitCode) && !biomeOutputHasDiagnostics(result.output),
+    result.output
+  );
+}
+
+function checkOxlint(filePath: string): CheckResult {
+  const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
+  logInfo(`Running oxlint on ${relPath}...`);
+  const result = runCommand("bun", ["oxlint", "--deny-warnings", relPath]);
+  const passed = exitCodePassed(result.exitCode) && !oxlintOutputHasDiagnostics(result.output);
+  return toCheckResult("oxlint", passed, result.output);
 }
 
 async function checkLint(filePath: string): Promise<CheckResult> {
-  logInfo(`Submitting lint via queue client for ${filePath}...`);
-  const result = await lintViaQueue(filePath);
+  logInfo(`Submitting lint:type-aware via in-process service for ${filePath}...`);
+  try {
+    const result = await lintViaQueue(filePath);
+    const passed = result.success && !eslintOutputHasProblems(result.output);
+    return toCheckResult("lint:type-aware", passed, result.output);
+  } catch (err) {
+    return toCheckResult(
+      "lint:type-aware",
+      false,
+      `In-process lint service (type-aware) failed: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+}
 
-  if (result === null) {
-    return {
-      name: "lint-queue-client",
-      passed: false,
-      output: "Lint queue server is unavailable. Start it: ~/.bun/bin/bun run scripts/lint-queue-server.ts",
-    };
+function jscpdFoundIntraFileClones(output: string): boolean {
+  return /Clone found/.test(output) || /Found [1-9]\d* clones/.test(output);
+}
+
+/** Paths ignored by `.jscpd.json` (keep in sync with that file). */
+function shouldSkipJscpd(filePath: string): boolean {
+  const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath)).replace(/\\/g, "/");
+
+  if (!/\.(ts|tsx)$/.test(relPath) || relPath.endsWith(".d.ts") || relPath === "next-env.d.ts") {
+    return true;
+  }
+  if (/\.test\.(ts|tsx)$/.test(relPath)) {
+    return true;
+  }
+  if (
+    /(^|\/)(node_modules|out|build|dist|logs|storage|scratch|draft|storybook-static|docs|coverage)\//.test(relPath) ||
+    /(^|\/)\.(ai|agents|codescene|cursor|git|github|husky|kiro|next|next-dev|playwright-mcp|scannerwork|stakpak|vercel|vscode)\//.test(
+      relPath
+    ) ||
+    /(^|\/)\.next-test[^/]*\//.test(relPath) ||
+    /(^|\/)messages\//.test(relPath) ||
+    relPath.startsWith("frontend/common/graphql/generated/") ||
+    /(^|\/)(seeds|migration|unRefactored_tests)\//.test(relPath)
+  ) {
+    return true;
   }
 
-  return result;
+  return false;
+}
+
+function checkDuplicates(filePath: string): CheckResult {
+  const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath)).replace(/\\/g, "/");
+
+  if (shouldSkipJscpd(filePath)) {
+    logInfo(`Skipping check:duplicates for ${relPath} (outside jscpd scan scope)...`);
+    return { name: "check:duplicates", passed: true, output: "" };
+  }
+
+  logInfo(`Running check:duplicates (jscpd, intra-file only) on ${relPath}...`);
+  const result = runCommand("bunx", ["jscpd", "-c", ".jscpd.json", relPath]);
+  const hasClones = jscpdFoundIntraFileClones(result.output);
+  const passed = exitCodePassed(result.exitCode) && !hasClones;
+
+  return toCheckResult("check:duplicates", passed, hasClones || !exitCodePassed(result.exitCode) ? result.output : "");
 }
 
 function checkCodescene(filePath: string): CheckResult {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
   logInfo(`Running codescene --file ${relPath}...`);
   const result = runCommand("bun", ["codescene", "--file", relPath]);
-  return { name: "codescene --file", passed: result.passed, output: result.output };
+  const passed = !isCodeSceneOutputFailed(result.output, result.exitCode);
+  return toCheckResult("codescene --file", passed, result.output);
 }
 
 // ─── Argument Parsing ──────────────────────────────────────────────────────
 
+const VALID_LIFECYCLES = ["tsgo", "biome", "lint", "codescene", "sonar-results"] as const;
+
+function isLifecycle(value: string): value is Lifecycle {
+  return (VALID_LIFECYCLES as readonly string[]).includes(value);
+}
+
 interface ParsedArgs {
   filePath: string | null;
-  lifecycle: Lifecycle | null;
+  lifecycle: string | null;
 }
 
 function parseArgs(args: string[]): ParsedArgs {
   let filePath: string | null = null;
-  let lifecycle: Lifecycle | null = null;
+  let lifecycle: string | null = null;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--lifecycle") {
-      lifecycle = args[i + 1] as Lifecycle;
+      lifecycle = args[i + 1] ?? null;
       i++;
     } else if (!args[i].startsWith("--")) {
       filePath = args[i];
@@ -374,17 +439,22 @@ function parseArgs(args: string[]): ParsedArgs {
 
 // ─── Validation ────────────────────────────────────────────────────────────
 
-function validateArgs(filePath: string | null, lifecycle: Lifecycle | null): void {
+interface ValidatedArgs {
+  filePath: string;
+  lifecycle: Lifecycle;
+}
+
+function validateArgs(filePath: string | null, lifecycle: string | null): ValidatedArgs {
   if (!filePath) {
     logFail("Missing <file-path> argument.");
     console.error("Usage: bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>");
     process.exit(2);
   }
 
-  const validLifecycles: Lifecycle[] = ["tsgo", "biome", "lint", "codescene", "sonar-results"];
-  if (!lifecycle || !validLifecycles.includes(lifecycle)) {
+  const validLifecycles = VALID_LIFECYCLES.join(", ");
+  if (!lifecycle || !isLifecycle(lifecycle)) {
     logFail(`Invalid or missing --lifecycle argument.`);
-    console.error(`Valid stages: ${validLifecycles.join(", ")}`);
+    console.error(`Valid stages: ${validLifecycles}`);
     process.exit(2);
   }
 
@@ -393,16 +463,19 @@ function validateArgs(filePath: string | null, lifecycle: Lifecycle | null): voi
     logFail(`File not found: ${filePath}`);
     process.exit(2);
   }
+
+  return { filePath, lifecycle };
 }
 
 // ─── Progressive Check Runner ───────────────────────────────────────────────
 
-function failOnResult(result: CheckResult, failMsg: string): void {
+function failOnResult(result: CheckResult, failMsg: string): boolean {
   if (!result.passed) {
     logFail(failMsg);
     console.log("\n" + result.output);
-    process.exit(1);
+    return true;
   }
+  return false;
 }
 
 async function runProgressiveChecks(
@@ -410,45 +483,62 @@ async function runProgressiveChecks(
   relPath: string,
   lifecycle: Lifecycle,
   targetDepth: number
-): Promise<void> {
+): Promise<number> {
   // Step 1: tsgo (always runs first, project-wide, filtered for this file)
   const tsgoResult = checkTsgo(filePath);
-  failOnResult(tsgoResult, "tsgo FAILED — stopping here. Fix type errors before proceeding.");
+  if (failOnResult(tsgoResult, "tsgo FAILED — stopping here. Fix type errors before proceeding.")) return 1;
   logPass(`tsgo passed (no errors for ${relPath})`);
 
   if (targetDepth <= LIFECYCLE_ORDER.tsgo) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "tsgo" passed.${NC}`);
-    process.exit(0);
+    return 0;
   }
 
   // Step 2: biome:check (file-level)
   const biomeResult = checkBiome(filePath);
-  failOnResult(biomeResult, "biome:check FAILED — stopping here. Fix formatting/biome issues before proceeding.");
+  if (failOnResult(biomeResult, "biome:check FAILED — stopping here. Fix formatting/biome issues before proceeding."))
+    return 1;
   logPass("biome:check passed");
 
   if (targetDepth <= LIFECYCLE_ORDER.biome) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "biome" passed.${NC}`);
-    process.exit(0);
+    return 0;
   }
 
-  // Step 3: lint via queue client (file-level)
+  // Step 3: oxlint (file-level)
+  const oxlintResult = checkOxlint(filePath);
+  if (failOnResult(oxlintResult, "oxlint FAILED — stopping here. Fix oxlint errors before proceeding.")) return 1;
+  logPass("oxlint passed");
+
+  // Step 4: lint:type-aware via lint service (file-level)
   const lintResult = await checkLint(filePath);
-  failOnResult(lintResult, "lint FAILED — stopping here. Fix lint errors before proceeding.");
-  logPass("lint passed (via queue client)");
+  if (failOnResult(lintResult, "lint:type-aware FAILED — stopping here. Fix lint errors before proceeding.")) return 1;
+  logPass("lint:type-aware passed");
 
   if (targetDepth <= LIFECYCLE_ORDER.lint) {
     console.log(`\n${GREEN}✅ All checks for lifecycle "lint" passed.${NC}`);
-    process.exit(0);
+    return 0;
   }
 
-  // Step 4: codescene --file (file-level)
+  // Step 5: check:duplicates via jscpd (intra-file clones only)
+  const duplicatesResult = checkDuplicates(filePath);
+  if (
+    failOnResult(
+      duplicatesResult,
+      "check:duplicates FAILED — stopping here. Remove intra-file duplicated code before proceeding."
+    )
+  )
+    return 1;
+  logPass("check:duplicates passed");
+
+  // Step 6: codescene --file (file-level)
   const codesceneResult = checkCodescene(filePath);
-  failOnResult(codesceneResult, "codescene FAILED — stopping here. Fix CodeScene health warnings.");
+  if (failOnResult(codesceneResult, "codescene FAILED — stopping here. Fix CodeScene health warnings.")) return 1;
   logPass("codescene passed");
 
   // All checks passed for this lifecycle
   console.log(`\n${GREEN}✅ All checks for lifecycle "${lifecycle}" passed for ${relPath}${NC}`);
-  process.exit(0);
+  return 0;
 }
 
 // ─── Main ──────────────────────────────────────────────────────────────────
@@ -463,23 +553,22 @@ ${BOLD}Usage:${NC}
 ${BOLD}Lifecycle stages (controls depth of checks):${NC}
   tsgo          Only run tsgo (type checking)
   biome         Run tsgo, then biome:check
-  lint          Run tsgo, biome, then lint via queue client
-  codescene     Run tsgo, biome, lint, then codescene --file
+  lint          Run tsgo, biome, oxlint, then lint:type-aware via lint service
+  codescene     Run tsgo, biome, oxlint, lint:type-aware, check:duplicates, then codescene --file
   sonar-results Same as codescene (no sonar for subagents — EVER)
 
 ${BOLD}Check order (always strict, no skipping):${NC}
   1. tsgo (project-wide, filtered for this file)
   2. biome:check (file-level)
-  3. lint via queue client (file-level)
-  4. codescene --file (file-level)
+  3. oxlint (file-level)
+  4. lint:type-aware via lint service (file-level)
+  5. check:duplicates via jscpd (intra-file clones only)
+  6. codescene --file (file-level)
 
 ${BOLD}Exit codes:${NC}
   0 = all checks up to lifecycle stage passed
   1 = stopped at a failing check (errors printed)
-  2 = invalid arguments or lint queue unavailable
-
-${BOLD}⚠️  IMPORTANT:${NC} This script NEVER runs sonar-scan or sonar-manager.
-   SonarQube scan is very costly. Only the quality-gate orchestrator runs it.
+  2 = invalid arguments
 `);
 }
 
@@ -492,11 +581,7 @@ async function main(): Promise<void> {
   }
 
   const { filePath, lifecycle } = parseArgs(args);
-  validateArgs(filePath, lifecycle);
-
-  // After validation, both are guaranteed non-null
-  const filePathSafe = filePath as string;
-  const lifecycleSafe = lifecycle as Lifecycle;
+  const { filePath: filePathSafe, lifecycle: lifecycleSafe } = validateArgs(filePath, lifecycle);
 
   const absPath = resolve(PROJECT_ROOT, filePathSafe);
   const relPath = relative(PROJECT_ROOT, absPath);
@@ -508,7 +593,11 @@ async function main(): Promise<void> {
 
   printApplicableRuleFiles(filePathSafe);
 
-  await runProgressiveChecks(filePathSafe, relPath, lifecycleSafe, targetDepth);
+  const exitCode = await withProcessLock(`sub-loop: ${relPath}`, async () => {
+    return await runProgressiveChecks(filePathSafe, relPath, lifecycleSafe, targetDepth);
+  });
+
+  process.exit(exitCode);
 }
 
 void main();

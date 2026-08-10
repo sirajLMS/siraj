@@ -8,7 +8,7 @@ import {
   startImpersonationMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useAuthToken } from "@/frontend/common/hooks/useAuthToken";
-import logger from "@/frontend/common/lib/logger";
+import { logger } from "@/frontend/common/lib/logger";
 
 export function useImpersonation() {
   const { updateAuthToken } = useAuthToken();

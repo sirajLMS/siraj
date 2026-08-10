@@ -22,7 +22,7 @@ export default async function EditMeetingProviderPage({ searchParams }: EditPage
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.MEETING_PROVIDERS_MANAGE_CATALOG], locale, context);
   const resolvedSearchParams = await searchParams;

@@ -24,6 +24,10 @@ import { PaymentMethodSnapshotService } from "@/backend/services/payment-method/
 import type * as Types from "@/backend/types";
 import type { PaymentRecordInput } from "@/backend/types/billing/billing.types";
 import type {
+  BankTransferDetails,
+  MobileWalletDetails,
+  OnlineAccountDetails,
+  PaymentLinkDetails,
   PaymentMethodDefaults,
   PaymentMethodDetails,
   UpdateUserPaymentMethodInput,
@@ -48,12 +52,30 @@ function supportsTransactionDirection(
   return methodDirection === PaymentDirection.BOTH || methodDirection === transactionDirection;
 }
 
+function isMobileWalletDetails(details: PaymentMethodDetails): details is MobileWalletDetails {
+  return "walletId" in details;
+}
+
+function isPaymentLinkDetails(details: PaymentMethodDetails): details is PaymentLinkDetails {
+  return "paymentLinkId" in details;
+}
+
+function isOnlineAccountDetails(details: PaymentMethodDetails): details is OnlineAccountDetails {
+  return "onlineAccountId" in details;
+}
+
+// `BankTransferDetails` has only optional routing fields; we identify it by the
+// absence of the discriminant keys carried by every other variant.
+function isBankTransferDetails(details: PaymentMethodDetails): details is BankTransferDetails {
+  return (
+    !("walletId" in details) && !("paymentLinkId" in details) && !("onlineAccountId" in details) && !("note" in details)
+  );
+}
+
 function encryptDetailsForStorage(type: PaymentMethodType, details: PaymentMethodDetails): PaymentMethodDetails {
   const validated = parsePaymentMethodDetails(type, details);
-  if (type === PaymentMethodType.BANK_TRANSFER) {
-    return encryptBankTransferDetails(
-      validated as import("@/backend/types/billing/payment-method.types").BankTransferDetails
-    );
+  if (type === PaymentMethodType.BANK_TRANSFER && isBankTransferDetails(validated)) {
+    return encryptBankTransferDetails(validated);
   }
   return validated;
 }
@@ -66,40 +88,37 @@ async function assertCatalogActive(
 ): Promise<void> {
   switch (type) {
     case PaymentMethodType.MOBILE_WALLET: {
-      const wallet = await SupportedMobileWalletRepository.getById((details as { walletId: string }).walletId, tx);
+      if (!isMobileWalletDetails(details)) return;
+      const wallet = await SupportedMobileWalletRepository.getById(details.walletId, tx);
       if (!wallet?.isActive)
         throw new Error(
           tErrors.file.recordNotFound({
             tableName: "supported_mobile_wallets",
-            entityId: (details as { walletId: string }).walletId,
+            entityId: details.walletId,
           })
         );
       return;
     }
     case PaymentMethodType.PAYMENT_LINK: {
-      const link = await SupportedPaymentLinkRepository.getById(
-        (details as { paymentLinkId: string }).paymentLinkId,
-        tx
-      );
+      if (!isPaymentLinkDetails(details)) return;
+      const link = await SupportedPaymentLinkRepository.getById(details.paymentLinkId, tx);
       if (!link?.isActive)
         throw new Error(
           tErrors.file.recordNotFound({
             tableName: "supported_payment_links",
-            entityId: (details as { paymentLinkId: string }).paymentLinkId,
+            entityId: details.paymentLinkId,
           })
         );
       return;
     }
     case PaymentMethodType.ONLINE_ACCOUNT: {
-      const account = await SupportedOnlineAccountRepository.getById(
-        (details as { onlineAccountId: string }).onlineAccountId,
-        tx
-      );
+      if (!isOnlineAccountDetails(details)) return;
+      const account = await SupportedOnlineAccountRepository.getById(details.onlineAccountId, tx);
       if (!account?.isActive)
         throw new Error(
           tErrors.file.recordNotFound({
             tableName: "supported_online_accounts",
-            entityId: (details as { onlineAccountId: string }).onlineAccountId,
+            entityId: details.onlineAccountId,
           })
         );
       return;
@@ -243,9 +262,11 @@ export namespace PaymentMethodService {
       await assertCatalogActive(parsed.type, input.details, tErrors, t);
 
       if (parsed.isDefault) {
-        for (const slot of slotsForDirection(parsed.direction)) {
-          await UserPaymentMethodRepository.clearDefaultsInSlot(parsed.userId, slot, t);
-        }
+        await Promise.all(
+          slotsForDirection(parsed.direction).map(slot =>
+            UserPaymentMethodRepository.clearDefaultsInSlot(parsed.userId, slot, t)
+          )
+        );
       }
 
       const created = await UserPaymentMethodRepository.create(
@@ -304,9 +325,11 @@ export namespace PaymentMethodService {
 
       const direction = input.direction ?? existing.direction;
       if (input.isDefault) {
-        for (const slot of slotsForDirection(direction)) {
-          await UserPaymentMethodRepository.clearDefaultsInSlot(existing.userId, slot, t);
-        }
+        await Promise.all(
+          slotsForDirection(direction).map(slot =>
+            UserPaymentMethodRepository.clearDefaultsInSlot(existing.userId, slot, t)
+          )
+        );
       }
 
       const updated = await UserPaymentMethodRepository.update(
@@ -514,9 +537,11 @@ export namespace PaymentMethodService {
     await assertCatalogActive(parsed.type, input.details, tErrors, tx);
 
     if (parsed.isDefault) {
-      for (const slot of slotsForDirection(parsed.direction)) {
-        await UserPaymentMethodRepository.clearDefaultsInSlot(parsed.userId, slot, tx);
-      }
+      await Promise.all(
+        slotsForDirection(parsed.direction).map(slot =>
+          UserPaymentMethodRepository.clearDefaultsInSlot(parsed.userId, slot, tx)
+        )
+      );
     }
 
     const created = await UserPaymentMethodRepository.create(

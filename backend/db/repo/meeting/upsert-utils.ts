@@ -19,20 +19,19 @@ export async function upsertManyWith<TInput, TResult, TExisting extends { id: st
   if (inputs.length === 0) return [];
 
   const run = async (t: DBTransaction): Promise<TResult[]> => {
-    const results: TResult[] = [];
-
-    for (const input of inputs) {
+    const processOne = async (index: number, acc: TResult[]): Promise<TResult[]> => {
+      if (index >= inputs.length) return acc;
+      const input = inputs[index];
       const existing = await findExisting(input, t);
-
       if (existing) {
         const updated = await updateOne(existing.id, input, t, tErrors);
-        results.push(updated);
-      } else {
-        results.push(await createOne(input, t, tErrors));
+        return processOne(index + 1, [...acc, updated]);
       }
-    }
+      const created = await createOne(input, t, tErrors);
+      return processOne(index + 1, [...acc, created]);
+    };
 
-    return results;
+    return processOne(0, []);
   };
 
   if (tx) {

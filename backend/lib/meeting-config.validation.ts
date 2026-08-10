@@ -2,21 +2,7 @@ import { z } from "zod";
 import { localizedStringRequiredSchema } from "@/backend/lib/payment-method.validation";
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
-// ============================================================================
-// URL allowlist — host must match one of the provider patterns
-// ============================================================================
-
-export function isUrlAllowedByProvider(url: string, allowlist: readonly string[]): boolean {
-  try {
-    const hostname = new URL(url).hostname.toLowerCase();
-    return allowlist.some(pattern => {
-      const normalized = pattern.toLowerCase().replace(/^\*\./, "");
-      return hostname === normalized || hostname.endsWith(`.${normalized}`);
-    });
-  } catch {
-    return false;
-  }
-}
+import { isUrlAllowedByProvider } from "@/shared/lib/meeting-config";
 
 function buildMeetingConfigDetailsSchema(provider: MeetingProviderSelectType): z.ZodType<MeetingConfigDetails> {
   // Gate on providerKind rather than fieldSchema.supportsAutoGeneration:
@@ -30,29 +16,29 @@ function buildMeetingConfigDetailsSchema(provider: MeetingProviderSelectType): z
   const meetingUrlSchema = isAutoProvider
     ? z
         .union([z.url(), z.null()])
-        .transform(v => (v === null ? undefined : v))
+        .transform(v => v ?? undefined)
         .optional()
     : z.url();
+
   const base = z.object({
     meetingUrl: meetingUrlSchema,
     username: z.string().optional(),
     tenantId: z.string().optional(),
   });
 
-  return base.check(ctx => {
-    const data = ctx.value;
+  return base.superRefine((data, ctx) => {
     // Only enforce URL allowlist for manual providers when a meetingUrl is present.
     // Auto-generation providers' URLs bypass the allowlist (plan task 3.2) to be
     // tolerant of upstream host variations, though the Zod .url() validation above
     // still ensures it's a valid URL.
     if (!isAutoProvider && data.meetingUrl && !isUrlAllowedByProvider(data.meetingUrl, provider.urlAllowlist)) {
-      ctx.issues.push({ code: "custom", message: "meetingUrlHostNotAllowed", path: ["meetingUrl"], input: ctx.value });
+      ctx.addIssue({ code: "custom", message: "meetingUrlHostNotAllowed", path: ["meetingUrl"] });
     }
     if (provider.fieldSchema.supportsUsername && data.username?.trim() === "") {
-      ctx.issues.push({ code: "custom", message: "usernameRequired", path: ["username"], input: ctx.value });
+      ctx.addIssue({ code: "custom", message: "usernameRequired", path: ["username"] });
     }
     if (provider.fieldSchema.supportsTenantId && data.tenantId?.trim() === "") {
-      ctx.issues.push({ code: "custom", message: "tenantIdRequired", path: ["tenantId"], input: ctx.value });
+      ctx.addIssue({ code: "custom", message: "tenantIdRequired", path: ["tenantId"] });
     }
   });
 }

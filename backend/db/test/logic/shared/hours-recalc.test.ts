@@ -110,7 +110,11 @@ describe("hoursPerWeek Recalculation Triggers", () => {
     testLogger.info("Cleaning up hoursPerWeek recalculation test records...");
     try {
       if (testStudent) {
-        await db.delete(recurringScheduleDays);
+        await db
+          .delete(recurringScheduleDays)
+          .where(
+            sql`recurring_schedule_id IN (SELECT id FROM recurring_schedules WHERE student_id = ${testStudent.id})`
+          );
         await db.delete(recurringSchedules).where(sql`student_id = ${testStudent.id}`);
         await db.delete(students).where(sql`id = ${testStudent.id}`);
       }

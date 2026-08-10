@@ -71,7 +71,7 @@ export function NumbersTabMobile({
                   startIcon={<DeleteOutlined />}
                   onClick={() => {
                     if (!account.id) return;
-                    onDeleteAccount(account.id);
+                    void onDeleteAccount(account.id);
                   }}
                 >
                   {t.deleteAccount}

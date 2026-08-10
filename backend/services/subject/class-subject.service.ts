@@ -11,12 +11,31 @@ import type {
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
+const EMPTY_RESOURCES: SubjectResourceReturnType[] = [];
+const EMPTY_RESOURCES_MAP: Map<string, SubjectResourceReturnType[]> = new Map();
+
 export namespace ClassSubjectService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels): Promise<void> {
     const hasPermission = await PermissionsService.hasPermission(userId, permission);
     if (!hasPermission) {
       throw new Error(tErrors.insufficientPermissions);
     }
+  }
+
+  function buildSubjectReturnType<T extends { id: string }>(
+    subject: T,
+    resourcesBySubjectId: Map<string, SubjectResourceReturnType[]>
+  ): T & { resources: SubjectResourceReturnType[] } {
+    return {
+      ...subject,
+      resources: resourcesBySubjectId.get(subject.id) ?? EMPTY_RESOURCES,
+    };
+  }
+
+  async function fetchSubjectWithResources(id: string): Promise<ClassSubjectReturnType> {
+    const subject = await ClassSubjectRepository.getSubjectById(id);
+    const resourcesBySubjectId = await SubjectResourceRepository.loadResourcesBySubjectIds([id]);
+    return buildSubjectReturnType(subject, resourcesBySubjectId);
   }
 
   export async function listSubjects(
@@ -31,10 +50,7 @@ export namespace ClassSubjectService {
     const subjectIds = subjects.map(s => s.id);
     const resourcesBySubjectId = await SubjectResourceRepository.loadResourcesBySubjectIds(subjectIds);
 
-    return subjects.map(s => ({
-      ...s,
-      resources: resourcesBySubjectId.get(s.id) ?? [],
-    }));
+    return subjects.map(s => buildSubjectReturnType(s, resourcesBySubjectId));
   }
 
   export async function getSubjectById(
@@ -44,12 +60,7 @@ export namespace ClassSubjectService {
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_LIST, tErrors);
 
-    const subject = await ClassSubjectRepository.getSubjectById(id);
-    const resources = await SubjectResourceRepository.loadResourcesBySubjectIds([id]);
-    return {
-      ...subject,
-      resources: resources.get(id) ?? [],
-    };
+    return fetchSubjectWithResources(id);
   }
 
   export async function createSubject(
@@ -58,12 +69,7 @@ export namespace ClassSubjectService {
     tErrors: ErrorsLabels
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_CREATE, tErrors);
-
-    const subject = await ClassSubjectRepository.createSubject(input);
-    return {
-      ...subject,
-      resources: [],
-    };
+    return buildSubjectReturnType(await ClassSubjectRepository.createSubject(input), EMPTY_RESOURCES_MAP);
   }
 
   export async function updateSubject(
@@ -73,13 +79,8 @@ export namespace ClassSubjectService {
     tErrors: ErrorsLabels
   ): Promise<ClassSubjectReturnType> {
     await assertPermission(userId, AppPermission.SUBJECTS_UPDATE, tErrors);
-
-    const subject = await ClassSubjectRepository.updateSubject(id, input);
-    const resources = await SubjectResourceRepository.loadResourcesBySubjectIds([id]);
-    return {
-      ...subject,
-      resources: resources.get(id) ?? [],
-    };
+    await ClassSubjectRepository.updateSubject(id, input);
+    return fetchSubjectWithResources(id);
   }
 
   export async function deleteSubject(userId: string, id: string, tErrors: ErrorsLabels): Promise<{ id: string }> {

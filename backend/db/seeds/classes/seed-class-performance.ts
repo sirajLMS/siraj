@@ -9,8 +9,7 @@ import {
   type SeedConfig,
   startOfDay,
 } from "@/backend/db/seeds/lib";
-import { ClassOutcome } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
 import type { ClassInstancePerformanceInsertType, ClassInstanceSelectType } from "@/backend/types";
 
@@ -31,7 +30,7 @@ function buildPerformanceRow(
     sessionHealth: cycleAtIndex(ALL_SESSION_HEALTH, rowIndex),
     heatmapData: Array.from({ length: 5 }, () => faker.number.int({ min: 1, max: 5 })),
     latencyMs: faker.number.int({ min: 20, max: 120 }),
-    attendanceRate: instance.outcome === ClassOutcome.TAKEN ? 100 : faker.number.int({ min: 0, max: 50 }),
+    attendanceRate: instance.outcome === "TAKEN" ? 100 : faker.number.int({ min: 0, max: 50 }),
     avgGrade: cycleAtIndex(ALL_GRADES, rowIndex),
     lastClassDaysAgo: Math.max(0, daysBetween(startOfDay(instance.scheduledStartAt), startOfDay(config.anchorDate))),
     createdAt: instance.actualEndAt ?? instance.scheduledEndAt,
@@ -51,7 +50,7 @@ export async function seedOrGet(classInstancesList: ClassInstanceSelectType[], c
   const specs: ClassInstancePerformanceInsertType[] = [];
   let rowIndex = 0;
   for (const instance of classInstancesList) {
-    if (instance.outcome !== ClassOutcome.TAKEN) continue;
+    if (instance.outcome !== "TAKEN") continue;
     specs.push(buildPerformanceRow(instance, seedConfig, rowIndex, now));
     rowIndex++;
   }

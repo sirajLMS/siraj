@@ -48,6 +48,8 @@ export const NOTIFICATION_EVENT_CATEGORY: Record<NotificationEventType, Notifica
   [NotificationEventType.OnDemandInstanceReminderT3]: "reminder",
   [NotificationEventType.OnDemandInstanceReminderT1]: "urgent",
   [NotificationEventType.OnDemandTeacherDailyDigest]: "digest",
+  [NotificationEventType.PasswordResetByAdmin]: "info",
+  [NotificationEventType.UserStatusChanged]: "info",
 };
 
 export const NOTIFICATION_CHANNELS = [
@@ -94,17 +96,18 @@ export const NOTIFICATION_EVENT_TYPES = [
   NotificationEventType.OnDemandInstanceReminderT3,
   NotificationEventType.OnDemandInstanceReminderT1,
   NotificationEventType.OnDemandTeacherDailyDigest,
+  // Admin notification events
+  NotificationEventType.PasswordResetByAdmin,
+  NotificationEventType.UserStatusChanged,
 ] as const;
 
-/** Reverse lookup: category → event types (for category-level toggles). */
 export const NOTIFICATION_EVENT_TYPES_BY_CATEGORY: Record<NotificationEventCategory, readonly NotificationEventType[]> =
-  (["urgent", "reminder", "info", "digest"] as NotificationEventCategory[]).reduce(
-    (acc, cat) => {
-      acc[cat] = NOTIFICATION_EVENT_TYPES.filter(et => NOTIFICATION_EVENT_CATEGORY[et] === cat);
-      return acc;
-    },
-    {} as Record<NotificationEventCategory, readonly NotificationEventType[]>
-  );
+  {
+    urgent: NOTIFICATION_EVENT_TYPES.filter(et => NOTIFICATION_EVENT_CATEGORY[et] === "urgent"),
+    reminder: NOTIFICATION_EVENT_TYPES.filter(et => NOTIFICATION_EVENT_CATEGORY[et] === "reminder"),
+    info: NOTIFICATION_EVENT_TYPES.filter(et => NOTIFICATION_EVENT_CATEGORY[et] === "info"),
+    digest: NOTIFICATION_EVENT_TYPES.filter(et => NOTIFICATION_EVENT_CATEGORY[et] === "digest"),
+  };
 
 export type NotificationPrefRow = NonNullable<
   Operations.NotificationPreferencesQuery["notificationPreferences"]

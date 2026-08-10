@@ -12,11 +12,11 @@ const cacheInstance = {
   expire: expireMock,
 };
 
-mock.module("@/backend/services/cache", () => ({
+await mock.module("@/backend/services/cache", () => ({
   cacheService: cacheInstance,
 }));
 
-mock.module("@/backend/lib", () => ({
+await mock.module("@/backend/lib", () => ({
   logger: {
     log: () => {},
     info: () => {},
@@ -63,10 +63,14 @@ describe("FxRateLimitService.checkManualRefreshRateLimit", () => {
   test("allows up to 3 refreshes within window", async () => {
     const { FxRateLimitService } = await importService();
 
-    for (let i = 1; i <= 3; i++) {
-      incrMock.mockResolvedValueOnce(i);
+    // Sequential: each mockResolvedValueOnce must be consumed in order
+    async function refreshOnce(index: number): Promise<void> {
+      if (index > 3) return;
+      incrMock.mockResolvedValueOnce(index);
       await FxRateLimitService.checkManualRefreshRateLimit("user-1");
+      return refreshOnce(index + 1);
     }
+    await refreshOnce(1);
 
     expect(incrMock).toHaveBeenCalledTimes(3);
   });
@@ -91,7 +95,7 @@ describe("FxRateLimitService.checkManualRefreshRateLimit", () => {
     }
 
     expect(thrown).toBeInstanceOf(Error);
-    expect((thrown as Error).message).toBe("fxRefreshRateLimitExceeded");
+    expect(thrown instanceof Error ? thrown.message : "").toBe("fxRefreshRateLimitExceeded");
 
     expect(incrMock).toHaveBeenCalledTimes(4);
   });

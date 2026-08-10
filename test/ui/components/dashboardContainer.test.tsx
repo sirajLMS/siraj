@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 
-mock.module("@/frontend/common/views/dashboard/admin/home/AdminDashboardContainer", () => ({
+await mock.module("@/frontend/common/views/dashboard/admin/home/AdminDashboardContainer", () => ({
   AdminDashboardContainer: () => <div data-testid="admin-dashboard">Admin Dashboard</div>,
 }));
-mock.module("@/frontend/common/views/dashboard/parent/dashboard/ParentDashboardContainer", () => ({
+await mock.module("@/frontend/common/views/dashboard/parent/dashboard/ParentDashboardContainer", () => ({
   ParentDashboardContainer: () => <div data-testid="parent-dashboard">Parent Dashboard</div>,
 }));
-mock.module("@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer", () => ({
+await mock.module("@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer", () => ({
   StudentDashboardContainer: () => <div data-testid="student-dashboard">Student Dashboard</div>,
 }));
-mock.module("@/frontend/common/views/dashboard/supervisor/dashboard/SupervisorDashboardContainer", () => ({
+await mock.module("@/frontend/common/views/dashboard/supervisor/dashboard/SupervisorDashboardContainer", () => ({
   SupervisorDashboardContainer: () => <div data-testid="supervisor-dashboard">Supervisor Dashboard</div>,
 }));
-mock.module("@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer", () => ({
+await mock.module("@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardContainer", () => ({
   TeacherDashboardContainer: () => <div data-testid="teacher-dashboard">Teacher Dashboard</div>,
 }));
 

@@ -193,6 +193,10 @@ export enum AppPermission {
   PROFILE_MEETING_CONFIGS_VIEW_OTHER = "profile.meeting_configs.view_other",
   PROFILE_MEETING_CONFIGS_EDIT_OWN = "profile.meeting_configs.edit_own",
   PROFILE_MEETING_CONFIGS_EDIT_OTHER = "profile.meeting_configs.edit_other",
+  PROFILE_CORE_STATUS_VIEW_OWN = "profile.core_status.view_own",
+  PROFILE_CORE_STATUS_VIEW_OTHER = "profile.core_status.view_other",
+  PROFILE_CORE_STATUS_EDIT_OWN = "profile.core_status.edit_own",
+  PROFILE_CORE_STATUS_EDIT_OTHER = "profile.core_status.edit_other",
   // Student field-group ACL
   STUDENT_IDENTITY_VIEW_OWN = "student.student_identity.view_own",
   STUDENT_IDENTITY_VIEW_OTHER = "student.student_identity.view_other",
@@ -256,26 +260,42 @@ export enum AppPermission {
   QUOTAS_MANAGE = "quotas.manage",
   // Cron Management
   CRON_MANAGE = "cron.manage",
+  // User Admin Management
+  USER_ADMIN_RESET_PASSWORD = "user.admin_reset_password",
 }
 
-let knownAppPermissionsCache: Set<string> | undefined;
+const appPermissionValues = Object.values(AppPermission) as readonly AppPermission[];
+const appPermissionStrings = appPermissionValues as readonly string[];
 
-function getKnownAppPermissions(): Set<string> {
-  if (knownAppPermissionsCache === undefined) {
-    knownAppPermissionsCache = new Set(Object.values(AppPermission));
+/**
+ * Type guard to check if a string is a valid AppPermission.
+ */
+export function isAppPermission(value: string): value is AppPermission {
+  return appPermissionStrings.includes(value);
+}
+
+/**
+ * Parses a string value into an AppPermission enum, returning null if invalid.
+ */
+export function parseAppPermission(value: string | null | undefined): AppPermission | null {
+  if (value === null || value === undefined) {
+    return null;
   }
-  return knownAppPermissionsCache;
+  if (isAppPermission(value)) {
+    return value;
+  }
+  return null;
 }
 
 /** Drops DB rows whose keys were removed from the TypeScript/GraphQL enum (e.g. legacy profile ACL). */
 export function filterKnownAppPermissions(keys: Iterable<string>): AppPermission[] {
-  const known = getKnownAppPermissions();
   const result: AppPermission[] = [];
   const seen = new Set<string>();
   for (const key of keys) {
-    if (known.has(key) && !seen.has(key)) {
-      seen.add(key);
-      result.push(key as AppPermission);
+    const parsed = parseAppPermission(key);
+    if (parsed && !seen.has(parsed)) {
+      seen.add(parsed);
+      result.push(parsed);
     }
   }
   return result;

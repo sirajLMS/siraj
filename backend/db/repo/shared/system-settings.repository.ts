@@ -1,17 +1,20 @@
 import { eq } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
+import { queryDb as queryDbFn } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { systemSettings } from "@/backend/db/schema/shared/settings";
-import { SystemSettingCategory as SettingCategory, SystemSettingDataType as SettingDataType } from "@/backend/enum";
 import type { SystemSettingSelectType, SystemSettingUpsertInput } from "@/backend/types";
+import {
+  SystemSettingCategory as SettingCategory,
+  SystemSettingDataType as SettingDataType,
+} from "@/shared/constants/settings/system-settings.enum";
 
 export namespace SystemSettingsRepository {
   /**
    * Fetches a system setting by its key.
    */
   export async function getByKey(key: string, tx?: DBTransaction): Promise<SystemSettingSelectType | null> {
-    const q = queryDb(tx);
+    const q = queryDbFn(tx);
     const [setting] = await q.select().from(systemSettings).where(eq(systemSettings.key, key)).limit(1);
     return setting ?? null;
   }
@@ -69,7 +72,11 @@ export namespace SystemSettingsRepository {
     if (setting?.value == null || setting.value === "") {
       return null;
     }
-    return JSON.parse(setting.value) as T;
+    try {
+      return JSON.parse(setting.value);
+    } catch {
+      return null;
+    }
   }
 
   /**
@@ -82,9 +89,9 @@ export namespace SystemSettingsRepository {
     },
     tx?: DBTransaction
   ): Promise<SystemSettingSelectType> {
-    const queryDb = tx ?? db;
+    const q = tx ?? db;
     const now = new Date();
-    const [inserted] = await queryDb
+    const [inserted] = await q
       .insert(systemSettings)
       .values({
         key: input.key,
@@ -114,9 +121,9 @@ export namespace SystemSettingsRepository {
    * Deletes a system setting by key.
    */
   export async function deleteSetting(key: string, tx?: DBTransaction): Promise<boolean> {
-    const queryDb = tx ?? db;
+    const q = tx ?? db;
     try {
-      await queryDb.delete(systemSettings).where(eq(systemSettings.key, key));
+      await q.delete(systemSettings).where(eq(systemSettings.key, key));
       return true;
     } catch {
       return false;

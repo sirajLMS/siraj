@@ -12,7 +12,7 @@ export type MobileLocalizedStringDisplayProps = {
   readonly value?: LocalizedString | null;
   readonly locale?: string;
   readonly fallback?: React.ReactNode;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: NonNullable<TypographyProps["variant"]>;
   readonly sx?: SxProps<Theme>;
   readonly onClick?: React.MouseEventHandler<HTMLElement>;
 };

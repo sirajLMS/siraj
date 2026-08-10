@@ -2,13 +2,13 @@ import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { SessionRepository } from "@/backend/db/repo";
-import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import type { SafeUser, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Internal machine roles — never exposed as demo quick-login options. */
@@ -31,10 +31,10 @@ export namespace DemoAuthService {
       return groups
         .filter(group => !EXCLUDED_DEMO_LOGIN_GROUP_SLUGS.has(group.slug))
         .map(group => {
-          const description = resolveLocalized(group.description, locale);
+          const description = resolveLocalizedString(group.description, locale);
           return {
             slug: group.slug,
-            name: resolveLocalized(group.name, locale),
+            name: resolveLocalizedString(group.name, locale),
             description: description === "" ? null : description,
           };
         });
@@ -48,9 +48,9 @@ export namespace DemoAuthService {
    * Logs in a user by bypassing password checks, based purely on a requested permission group slug.
    * It looks up the group in the database and finds an associated user.
    *
-   * @drizzle `db.select().from(permissionGroups)`
-   * @drizzle `db.select().from(userPermissionGroups).innerJoin(users)`
-   * @drizzle `db.select().from(users)`
+   * @see {@link db.select().from(permissionGroups)}
+   * @see {@link db.select().from(userPermissionGroups).innerJoin(users)}
+   * @see {@link db.select().from(users)}
    * @param groupSlug The unique slug of the permission group to authenticate as.
    * @param tErrors Translated error labels (passed from GraphQL resolver via ctx.t("errors"))
    * @returns The user entity along with newly generated access and refresh tokens.
@@ -98,7 +98,7 @@ export namespace DemoAuthService {
    * with different seeded notification preferences / overrides.
    */
   async function selectDemoUserForGroup(groupId: string, groupSlug: string): Promise<UserSelectType | null> {
-    const canonicalEmail = INTERNAL_DEMO_USERS.find(entry => entry.groupSlug === groupSlug)?.email;
+    const canonicalEmail = INTERNAL_DEMO_USERS.find(entry => entry.groupSlug.toString() === groupSlug)?.email;
 
     if (canonicalEmail) {
       const [byEmail] = await db

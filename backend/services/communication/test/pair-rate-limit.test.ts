@@ -8,30 +8,37 @@ import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType 
 const redisGetMock = mock(async (_key: string): Promise<string | null> => null);
 const redisSetMock = mock(async (): Promise<void> => {});
 
-mock.module("@/backend/services/redis", () => ({
-  redisService: {
-    get: redisGetMock,
-    set: redisSetMock,
-  },
-  getRedisService: async () => ({
-    get: redisGetMock,
-    set: redisSetMock,
-  }),
-}));
+function makeRedisModuleFactory(extras?: Record<string, unknown>) {
+  return () => {
+    const base = {
+      redisService: {
+        get: redisGetMock,
+        set: redisSetMock,
+      },
+      getRedisService: async () => ({
+        get: redisGetMock,
+        set: redisSetMock,
+      }),
+    };
+    return extras ? { ...base, ...extras } : base;
+  };
+}
 
-mock.module("@/backend/services/redis/index", () => ({
-  redisService: {
-    get: redisGetMock,
-    set: redisSetMock,
-  },
-  getRedisService: async () => ({
-    get: redisGetMock,
-    set: redisSetMock,
-  }),
-  SessionRedisService: class {},
-}));
+await mock.module("@/backend/services/redis", makeRedisModuleFactory());
 
-mock.module("@/backend/lib/logger", () => ({
+await mock.module(
+  "@/backend/services/redis/index",
+  makeRedisModuleFactory({
+    SessionRedisService: class SessionRedisService {
+      // Minimal placeholder used by tests — provides a ping method to avoid an empty-class lint/sonar issue.
+      ping(): boolean {
+        return true;
+      }
+    },
+  })
+);
+
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     log: () => {},
     info: () => {},
@@ -41,12 +48,13 @@ mock.module("@/backend/lib/logger", () => ({
   },
 }));
 
-mock.module("@/backend/lib/field-encryption", () => ({
+await mock.module("@/backend/lib/field-encryption", () => ({
   encryptField: (val: string) => val,
   decryptField: (val: string) => val,
 }));
 
-mock.module("@/backend/lib/env-config-resolver", () => ({
+// Mock the entire system barrel to avoid pulling in real DB services during test
+await mock.module("@/backend/services/system", () => ({
   resolveEnvConfig: async (key: string) => {
     if (key === "WHATSAPP_ACCESS_TOKEN") return "test-token";
     if (key === "WHATSAPP_PHONE_NUMBER_ID") return "phone-id-123";
@@ -87,7 +95,7 @@ const mockDelivery = {
   updatedAt: new Date(),
 };
 
-mock.module("@/backend/db/repo", () => ({
+await mock.module("@/backend/db/repo", () => ({
   NotificationRepository: {
     createDelivery: async () => mockDelivery,
     updateDeliveryStatus: async () => mockDelivery,
@@ -102,14 +110,14 @@ mock.module("@/backend/db/repo", () => ({
   },
 }));
 
-mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
+await mock.module("@/backend/db/repo/notifications/notification.repository", () => ({
   NotificationRepository: {
     createDelivery: async () => mockDelivery,
     updateDeliveryStatus: async () => mockDelivery,
   },
 }));
 
-mock.module("@/backend/db/schema", () => ({
+await mock.module("@/backend/db/schema", () => ({
   whatsappAccounts: {
     id: "wa",
     isActive: "isActive",
@@ -124,7 +132,7 @@ const mockFromChain = () => ({ where: mockWhereChain });
 const mockSelectChain = () => ({ from: mockFromChain });
 const mockQueryDb = () => ({ select: mockSelectChain });
 
-mock.module("@/backend/db", () => ({
+await mock.module("@/backend/db", () => ({
   queryDb: mockQueryDb,
   db: {},
 }));
@@ -148,6 +156,20 @@ function computeDeferMs(lastStr: string | null, now: number): number {
 
 function makeOkResponse(body: unknown): Response {
   return new Response(JSON.stringify(body), { status: 200 });
+}
+
+interface AdapterSendScenario {
+  adapter: InstanceType<Awaited<ReturnType<typeof importAdapter>>["MetaCloudApiAdapter"]>;
+  fetchSpy: ReturnType<typeof spyOn>;
+}
+
+async function setupAdapterAndFetchSpy(wamid: string): Promise<AdapterSendScenario> {
+  const { MetaCloudApiAdapter } = await importAdapter();
+  const adapter = new MetaCloudApiAdapter();
+  const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
+    makeOkResponse({ messages: [{ id: wamid }], messaging_product: "whatsapp" })
+  );
+  return { adapter, fetchSpy };
 }
 
 function resetRedisMocks() {
@@ -254,13 +276,8 @@ describe("B2: Pair-Rate-Limit GET guard path", () => {
   });
 
   test("when redis has a recent timestamp, adapter returns rateLimited without sending", async () => {
-    const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const { adapter, fetchSpy } = await setupAdapterAndFetchSpy("wamid.deferred");
     redisGetMock.mockResolvedValueOnce(String(Date.now()));
-
-    const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-      makeOkResponse({ messages: [{ id: "wamid.deferred" }], messaging_product: "whatsapp" })
-    );
 
     const result = await adapter.send({ ...sendPayload });
 
@@ -274,13 +291,8 @@ describe("B2: Pair-Rate-Limit GET guard path", () => {
   });
 
   test("when redis GET returns a stale timestamp, adapter proceeds and sends", async () => {
-    const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const { adapter, fetchSpy } = await setupAdapterAndFetchSpy("wamid.stale");
     redisGetMock.mockResolvedValueOnce(String(Date.now() - PAIR_RATE_LIMIT_MS - 1000));
-
-    const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-      makeOkResponse({ messages: [{ id: "wamid.stale" }], messaging_product: "whatsapp" })
-    );
 
     const result = await adapter.send({ ...sendPayload });
 
@@ -294,13 +306,8 @@ describe("B2: Pair-Rate-Limit GET guard path", () => {
 
 describe("B2: Pair-Rate-Limit adapter behavior (guard hit / fail-open)", () => {
   test("when redis returns null, no rate-limit — proceed to send, set written", async () => {
-    const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const { adapter, fetchSpy } = await setupAdapterAndFetchSpy("wamid.456");
     redisGetMock.mockResolvedValueOnce(null);
-
-    const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-      makeOkResponse({ messages: [{ id: "wamid.456" }], messaging_product: "whatsapp" })
-    );
 
     await adapter.send({ ...sendPayload });
 
@@ -313,14 +320,9 @@ describe("B2: Pair-Rate-Limit adapter behavior (guard hit / fail-open)", () => {
   });
 
   test("when redis throws, adapter uses local fallback and still proceeds on first send", async () => {
-    const { MetaCloudApiAdapter } = await importAdapter();
-    const adapter = new MetaCloudApiAdapter();
+    const { adapter, fetchSpy } = await setupAdapterAndFetchSpy("wamid.789");
 
     redisGetMock.mockRejectedValueOnce(new Error("Redis down"));
-
-    const fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-      makeOkResponse({ messages: [{ id: "wamid.789" }], messaging_product: "whatsapp" })
-    );
 
     const result = await adapter.send({ ...sendPayload });
 

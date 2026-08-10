@@ -1,5 +1,5 @@
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { fileInfoByPath } from "@/backend/storage/disk/gcp/operations/file.operations";
 import { directoryInfoByPath } from "@/backend/storage/disk/gcp/operations/folder.operations";
 import type { GcpContext, GenericOperationResult } from "@/backend/storage/disk/gcp/types";
@@ -74,16 +74,21 @@ export async function deleteItems(
 
   const context = await getDeleteContext(input.paths, input.force || false);
 
-  for (const path of input.paths) {
-    const result: GenericOperationResult<Types.FileInfo | Types.DirectoryInfo> = await deleteSingleItem(ctx, {
-      path,
-      force: input.force || false,
-      dbFile: context.dbFileMap.get(path),
-      dbDirectory: context.dbDirectoryMap.get(path),
-      parentDir: context.dbParentDirMap.get(path.substring(0, path.lastIndexOf("/"))),
-      usageCheck: context.usageCheckMap.get(path),
-    });
+  const results = await Promise.all(
+    input.paths.map(path =>
+      deleteSingleItem(ctx, {
+        path,
+        force: input.force || false,
+        dbFile: context.dbFileMap.get(path),
+        dbDirectory: context.dbDirectoryMap.get(path),
+        parentDir: context.dbParentDirMap.get(path.substring(0, path.lastIndexOf("/"))),
+        usageCheck: context.usageCheckMap.get(path),
+      })
+    )
+  );
 
+  input.paths.forEach((path, index) => {
+    const result = results[index];
     if (result.success && result.data) {
       successCount++;
       successfulItems.push(result.data);
@@ -91,7 +96,7 @@ export async function deleteItems(
       failureCount++;
       failures.push({ path, error: result.message || "Unknown error" });
     }
-  }
+  });
 
   return {
     success: failureCount === 0,

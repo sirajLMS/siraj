@@ -1,6 +1,6 @@
-import { mock } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
-mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "ar" }),
   useRouter: () => ({
     push: () => {},
@@ -15,7 +15,7 @@ mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   locales: ["ar", "en"],
   defaultLocale: "ar",
   useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
@@ -28,7 +28,7 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -44,7 +44,7 @@ mock.module("@/shared/i18n/navigation", () => ({
 // Note: mock.module registrations are process-global in Bun, so this mock
 // will bleed into subsequent test files. The signature MUST match the real
 // RequirePermission component (plural "permissions", single-or-array).
-mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
+await mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
   RequirePermission: ({
     permissions,
     children,
@@ -69,7 +69,7 @@ mock.module("@/frontend/common/components/auth/RequirePermission", () => ({
 // mock-module target path below redirects to the canonical desktop tier module
 // (real file) so the import in this file resolves at type-check time; at runtime
 // the mock factory still substitutes our hand-rolled stub for assertion control.
-mock.module("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop", () => ({
+await mock.module("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/scheduleOverview.desktop", () => ({
   ScheduleOverviewDesktopView: (props: UseScheduleOverviewViewModelProps) => {
     const hasSearchPermission = useUserStore.getState().hasPermission?.(AppPermission.DashboardSearch) ?? false;
     const { shell, filters } = props.labelsBySection;
@@ -89,10 +89,10 @@ mock.module("@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/sche
   },
 }));
 
-import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";
-import React from "react";
+import type React from "react";
+import { createElement } from "react";
 
 expect.extend(matchers);
 
@@ -229,7 +229,7 @@ const renderScheduleView = (
   props: ScheduleOverviewViewModel,
   options: { permissions?: AppPermission[]; viewport?: "desktop" | "mobile" } = {}
 ) => {
-  return renderWithWrapper(React.createElement(ScheduleOverviewView, props), {
+  return renderWithWrapper(createElement(ScheduleOverviewView, props), {
     permissions: options.permissions ?? [],
     viewport: options.viewport ?? "desktop",
   });

@@ -133,7 +133,7 @@ function ClassInstanceDetailsFields({
 }: ClassInstanceDetailsFieldsProps) {
   return (
     <Grid container spacing={3} sx={theme => ({ pb: 4, borderBottom: 1, borderColor: theme.palette.outlineVariant })}>
-      {!hideStudentField ? (
+      {!hideStudentField && (
         <Grid size={{ xs: 12, sm: 6 }}>
           <DetailField
             label={labels.studentName}
@@ -148,7 +148,7 @@ function ClassInstanceDetailsFields({
             }
           />
         </Grid>
-      ) : null}
+      )}
       <Grid size={{ xs: 12, sm: 6 }}>
         <DetailField
           label={labels.courseModule}
@@ -313,7 +313,7 @@ export function ClassInstanceDetailsCard({
         hideStudentField={hideStudentField}
         labels={labels}
       />
-      {!hideRateSection && rateAmount != null && (
+      {hideRateSection || rateAmount == null ? null : (
         <ClassInstanceRateSection
           rateAmount={rateAmount}
           rateCurrency={rateCurrency}

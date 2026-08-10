@@ -1,6 +1,6 @@
-import { mock } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
-mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
     push: () => {},
@@ -15,7 +15,7 @@ mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   locales: ["ar", "en"] as const,
   defaultLocale: "en",
   useRouter: () => ({
@@ -35,7 +35,7 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -47,11 +47,10 @@ mock.module("@/shared/i18n/navigation", () => ({
   usePathname: () => "/students/sessions",
 }));
 
-mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 
-import { afterEach, describe, expect, test } from "bun:test";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen, waitFor } from "@testing-library/react";

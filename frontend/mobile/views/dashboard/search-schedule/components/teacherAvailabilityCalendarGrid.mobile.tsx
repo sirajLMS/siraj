@@ -13,6 +13,11 @@ import {
 } from "@/frontend/common/views/dashboard/shared/CalendarGridShared";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
 
+function isWeekdayKey<K extends string>(key: string, _record: Record<K, string>): key is K {
+  const validKeys = Object.keys(_record);
+  return validKeys.includes(key);
+}
+
 function CalendarDayCell({ day, gaps }: Readonly<{ day: number; gaps: readonly TeacherAvailabilityGapItem[] }>) {
   const hasGaps = gaps.length > 0;
 
@@ -72,7 +77,9 @@ export function TeacherAvailabilityCalendarGridMobile({
 
   return (
     <CalendarGridContainer>
-      <CalendarWeekdayHeader translateDay={day => labels.calendar.days[day as keyof typeof labels.calendar.days]} />
+      <CalendarWeekdayHeader
+        translateDay={day => (isWeekdayKey(day, labels.calendar.days) ? labels.calendar.days[day] : day)}
+      />
 
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
         {emptyStartDays.map(day => (

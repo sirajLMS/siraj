@@ -1,5 +1,5 @@
 import { SchedulingRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
-import { AppPermission, type CountryCode, type CurrencyCode } from "@/backend/enum";
+import { AppPermission, type CurrencyCode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
@@ -54,7 +54,7 @@ export namespace TeacherPortalService {
 
     const displayAmount = await FxDisplayService.convertForDisplay(
       profile.hourlyRate,
-      profile.rateCurrency as CurrencyCode | null | undefined,
+      profile.rateCurrency,
       displayCurrency,
       profile.id,
       undefined,
@@ -100,8 +100,8 @@ export namespace TeacherPortalService {
           scheduledStartAt: row.scheduledStartAt.toISOString(),
           scheduledEndAt: row.scheduledEndAt.toISOString(),
           durationMinutes: row.durationMinutes,
-          executionState: row.executionState as TeacherAssignedClassesResult["rows"][number]["executionState"],
-          outcome: row.outcome as TeacherAssignedClassesResult["rows"][number]["outcome"],
+          executionState: row.executionState,
+          outcome: row.outcome,
           isFrozen: row.isFrozen,
           meetingJoinUrl: effectiveMeeting.joinUrl,
           effectiveMeeting,
@@ -153,7 +153,7 @@ export namespace TeacherPortalService {
     // otherwise fall back to the teacher's existing nationality so a teacher
     // can fix their national ID without first re-selecting their country.
     if (input.nationalId != null && input.nationalId.trim() !== "") {
-      const effectiveNationality = (input.nationality ?? teacher.nationality) as string | null | undefined;
+      const effectiveNationality = input.nationality ?? teacher.nationality;
       if (!isValidNationalIdForCountry(input.nationalId, effectiveNationality)) {
         throw new Error(tErrors.invalidNationalId);
       }
@@ -161,8 +161,8 @@ export namespace TeacherPortalService {
 
     const success = await TeacherRepository.updateTeacherProfile(teacherId, {
       phone: input.phone ?? undefined,
-      nationality: (input.nationality as CountryCode) ?? undefined,
-      countryCode: (input.countryCode as CountryCode) ?? undefined,
+      nationality: input.nationality ?? undefined,
+      countryCode: input.countryCode ?? undefined,
       nationalId: input.nationalId ?? undefined,
       dateOfBirth: input.dateOfBirth ?? undefined,
       gender: input.gender ?? undefined,
@@ -180,6 +180,6 @@ export namespace TeacherPortalService {
       logger.error("Failed to invalidate teacher cache tags", { teacherId, userId, error: cacheErr });
     }
 
-    return getOwnProfile(userId, tErrors, undefined, undefined);
+    return getOwnProfile(userId, tErrors);
   }
 }

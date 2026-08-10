@@ -12,7 +12,7 @@ import {
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, type CurrencyCode, NotificationEventType, SchedulingMode } from "@/backend/enum";
-import { DomainError, NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
+import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -77,30 +77,37 @@ export namespace RecurringClassService {
     // separately, producing one query per instance inside the loop.
     const instanceMap = await SchedulingRepository.getClassInstancesByIds([...classInstanceIds]);
 
-    for (const instanceId of classInstanceIds) {
-      try {
-        const instance = instanceMap.get(instanceId);
-        if (!instance) continue;
+    // Dispatch notifications for all instances in parallel. Each dispatch is
+    // independent (own payload, own affected set), so per-instance try/catch
+    // keeps one failure from surfacing as a 500 to the caller (specs.md
+    // "Dispatch failures must NOT throw out of the action") while still
+    // letting the rest fire concurrently.
+    await Promise.allSettled(
+      classInstanceIds.map(async instanceId => {
+        try {
+          const instance = instanceMap.get(instanceId);
+          if (!instance) return;
 
-        const payloads = buildClassLifecyclePayloads(
-          instance,
-          NotificationEventType.CLASS_SCHEDULED,
-          affectedUserIds,
-          locale,
-          { studentName }
-        );
-        await dispatchWithPreferences(payloads, affectedUserIds, locale);
-      } catch (error) {
-        logger.error("Class scheduled notification dispatch failed", {
-          classInstanceId: instanceId,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
+          const payloads = buildClassLifecyclePayloads(
+            instance,
+            NotificationEventType.CLASS_SCHEDULED,
+            affectedUserIds,
+            locale,
+            { studentName }
+          );
+          await dispatchWithPreferences(payloads, affectedUserIds, locale);
+        } catch (error) {
+          logger.error("Class scheduled notification dispatch failed", {
+            classInstanceId: instanceId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      })
+    );
   }
 
   async function validateBalanceOrQuota(input: CreateRecurringClassInput, tErrors: ErrorsLabels) {
-    if (input.schedulingMode === "ON_DEMAND") return;
+    if (input.schedulingMode === SchedulingMode.ON_DEMAND) return;
 
     if (input.quotaId) {
       const quota = await QuotaRepository.findById(db, input.quotaId);
@@ -110,8 +117,7 @@ export namespace RecurringClassService {
     } else {
       const balance = await CreditRepository.getBalance(db, input.studentId);
       if (balance.classesRemaining <= 0) {
-        throw new DomainError(
-          "INSUFFICIENT_BALANCE",
+        throw new ValidationError(
           tErrors.credit.insufficientBalance({
             studentId: input.studentId,
             remaining: balance.classesRemaining,
@@ -156,18 +162,19 @@ export namespace RecurringClassService {
       ? new Date(input.effectiveUntil)
       : new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    await AvailabilityService.assertSchedulePatternAvailable(
-      input.studentId,
-      input.teacherId,
-      activeDays,
+    await AvailabilityService.assertSchedulePatternAvailable({
+      studentId: input.studentId,
+      teacherId: input.teacherId,
+      days: activeDays,
       startDate,
       endDate,
-      [],
-      input.locale,
-      undefined,
-      input.durationMinutes,
-      input.timezone
-    );
+      options: {
+        ignoreInstanceIds: [],
+        locale: input.locale,
+        durationMinutes: input.durationMinutes,
+        timezone: input.timezone,
+      },
+    });
 
     await validateBalanceOrQuota(input, tErrors);
 
@@ -184,7 +191,7 @@ export namespace RecurringClassService {
     tErrors: ErrorsLabels
   ) {
     return db.transaction(async tx => {
-      const isOndemand = input.schedulingMode === "ON_DEMAND";
+      const isOndemand = input.schedulingMode === SchedulingMode.ON_DEMAND;
       const instanceWeeks = isOndemand ? 0 : input.generateInstancesForWeeks;
 
       const created = await SchedulingRepository.createRecurringScheduleWithInstances(
@@ -237,11 +244,17 @@ export namespace RecurringClassService {
           );
         }
       } else if (!isOndemand) {
-        // Standard credit-backed mode
-        for (const classInstanceId of created.classInstanceIds) {
+        // Standard credit-backed mode. Deductions run sequentially within the
+        // shared transaction because `CreditService.deductForBooking` re-reads
+        // the student's balance on every call and throws if it has dropped to
+        // zero — so each call must observe the prior call's deduction. A
+        // `reduce` chain preserves that ordering without an `await` directly
+        // inside a `for` body.
+        await created.classInstanceIds.reduce(async (prev, classInstanceId) => {
+          await prev;
           const idempotencyKey = `credit-deduction:${classInstanceId}`;
           await CreditService.deductForBooking(input.studentId, classInstanceId, userId, idempotencyKey, tx, tErrors);
-        }
+        }, Promise.resolve());
       }
 
       return created;
@@ -256,17 +269,21 @@ export namespace RecurringClassService {
 
       await dispatchClassScheduledNotifications(result.classInstanceIds, input.studentId, input.locale);
 
-      // Best-effort meeting URL generation — never fails the booking.
-      for (const instanceId of result.classInstanceIds) {
-        try {
-          await MeetingConfigSnapshotService.generateAndAttachForClassInstance(instanceId);
-        } catch (error) {
-          logger.error("Booking-time meeting URL generation failed for class instance", {
-            classInstanceId: instanceId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-        }
-      }
+      // Best-effort meeting URL generation — never fails the booking. Each
+      // instance is generated independently, so they are dispatched in
+      // parallel; per-instance try/catch keeps any single failure isolated.
+      await Promise.allSettled(
+        result.classInstanceIds.map(async instanceId => {
+          try {
+            await MeetingConfigSnapshotService.generateAndAttachForClassInstance(instanceId);
+          } catch (error) {
+            logger.error("Booking-time meeting URL generation failed for class instance", {
+              classInstanceId: instanceId,
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        })
+      );
 
       return {
         id: result.recurringScheduleId,
@@ -345,6 +362,62 @@ export namespace RecurringClassService {
     quotaDeducted: boolean;
   };
 
+  type UpcomingInstance = { id: string; studentId: string; quotaDeducted: boolean };
+
+  /**
+   * Shared permission gate for recurring-schedule management mutations.
+   * Throws a localized `UnauthorizedError` when the user lacks
+   * `SCHEDULE_CREATE_CLASS`.
+   */
+  async function requireManageAccess(userId: string, tErrors: ErrorsLabels): Promise<void> {
+    const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
+    if (!hasManageAccess) {
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
+    }
+  }
+
+  /**
+   * Load a recurring schedule row by id and return its snapshot, throwing a
+   * localized `NotFoundError` when it does not exist. Shared by
+   * `cancelSchedule` and `switchSchedulingMode`.
+   */
+  async function loadScheduleOrThrow(
+    recurringScheduleId: string,
+    tErrors: ErrorsLabels,
+    t: DBTransaction
+  ): Promise<RecurringScheduleSelectType> {
+    const row = await RecurringScheduleRepository.findById(recurringScheduleId, t);
+    if (!row) {
+      throw new NotFoundError("RECURRING_SCHEDULE", tErrors.notFound);
+    }
+    return row.schedule;
+  }
+
+  /**
+   * Find all non-deleted upcoming instances for a schedule and soft-delete
+   * them in a single batch. Returns the ids of the archived instances plus
+   * the loaded instance rows (for downstream refund/quota release logic).
+   * Shared by `cancelSchedule` and `switchSchedulingMode`.
+   */
+  async function archiveUpcomingInstances(
+    recurringScheduleId: string,
+    t: DBTransaction
+  ): Promise<{ archivedInstanceIds: string[]; instances: UpcomingInstance[] }> {
+    const upcomingInstances = await SchedulingRepository.findUpcomingInstancesByScheduleId(
+      recurringScheduleId,
+      new Date(),
+      t
+    );
+
+    const archivedInstanceIds: string[] = [];
+    if (upcomingInstances.length > 0) {
+      const instanceIds = upcomingInstances.map(i => i.id);
+      await SchedulingRepository.softDeleteBatch(instanceIds, t);
+      archivedInstanceIds.push(...instanceIds);
+    }
+    return { archivedInstanceIds, instances: upcomingInstances };
+  }
+
   /**
    * Release quota (earmark or pool mode) when a recurring schedule is cancelled.
    * Returns true if any quota was released.
@@ -420,42 +493,24 @@ export namespace RecurringClassService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<{ cancelledInstanceIds: string[]; quotaReleased: boolean }> {
-    const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
-    if (!hasManageAccess) {
-      throw new UnauthorizedError(tErrors.unauthorizedAction);
-    }
+    await requireManageAccess(userId, tErrors);
 
     const runner = async (t: DBTransaction) => {
-      const row = await RecurringScheduleRepository.findById(recurringScheduleId, t);
-      if (!row) {
-        throw new NotFoundError("RECURRING_SCHEDULE", tErrors.notFound);
-      }
-      const schedule = row.schedule;
-
-      const now = new Date();
+      const schedule = await loadScheduleOrThrow(recurringScheduleId, tErrors, t);
 
       // 1. Soft-delete the schedule (V3-021: delegated to repository)
       await RecurringScheduleRepository.softDelete(recurringScheduleId, t);
 
       // 2. Soft-delete all non-deleted upcoming instances (via repository)
-      const upcomingInstances = await SchedulingRepository.findUpcomingInstancesByScheduleId(
+      const { archivedInstanceIds, instances: upcomingInstances } = await archiveUpcomingInstances(
         recurringScheduleId,
-        now,
         t
       );
-
-      const cancelledInstanceIds: string[] = [];
-      if (upcomingInstances.length > 0) {
-        const instanceIds = upcomingInstances.map(i => i.id);
-        // V3-021: delegated to repository
-        await SchedulingRepository.softDeleteBatch(instanceIds, t);
-        cancelledInstanceIds.push(...instanceIds);
-      }
 
       // 3. Release quota if applicable
       const quotaReleased = await releaseQuotaOnCancel(schedule, upcomingInstances, recurringScheduleId, userId, t);
 
-      return { cancelledInstanceIds, quotaReleased };
+      return { cancelledInstanceIds: archivedInstanceIds, quotaReleased };
     };
 
     return tx ? runner(tx) : db.transaction(runner);
@@ -556,46 +611,28 @@ export namespace RecurringClassService {
     creditsRefunded: number;
     quotaReleased: boolean;
   }> {
-    const hasManageAccess = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
-    if (!hasManageAccess) {
-      throw new UnauthorizedError(tErrors.unauthorizedAction);
-    }
+    await requireManageAccess(userId, tErrors);
 
     const runner = async (t: DBTransaction) => {
-      const row = await RecurringScheduleRepository.findById(recurringScheduleId, t);
-      if (!row) {
-        throw new NotFoundError("RECURRING_SCHEDULE", tErrors.notFound);
-      }
-      const schedule = row.schedule;
+      const schedule = await loadScheduleOrThrow(recurringScheduleId, tErrors, t);
 
-      const now = new Date();
-
-      // 1. Find all non-deleted, upcoming instances (via repository)
-      const upcomingInstances = await SchedulingRepository.findUpcomingInstancesByScheduleId(
+      // 1. Find all non-deleted, upcoming instances and soft-delete them
+      const { archivedInstanceIds, instances: upcomingInstances } = await archiveUpcomingInstances(
         recurringScheduleId,
-        now,
         t
       );
 
-      // 2. Soft-delete all upcoming instances (V3-021: delegated to repository)
-      const archivedInstanceIds: string[] = [];
-      if (upcomingInstances.length > 0) {
-        const instanceIds = upcomingInstances.map(i => i.id);
-        await SchedulingRepository.softDeleteBatch(instanceIds, t);
-        archivedInstanceIds.push(...instanceIds);
-      }
-
-      // 3. Refund credits or release quota
+      // 2. Refund credits or release quota
       const { quotaReleased, creditsRefunded } = await refundOrReleaseForInstances(
         schedule,
-        upcomingInstances as ScheduledInstanceInfo[],
+        upcomingInstances,
         recurringScheduleId,
         userId,
         tErrors,
         t
       );
 
-      // 4. Update the schedule mode (V3-021: delegated to repository)
+      // 3. Update the schedule mode (V3-021: delegated to repository)
       await RecurringScheduleRepository.updateSchedulingMode(recurringScheduleId, newMode, t);
 
       return { archivedInstanceIds, quotaReleased, creditsRefunded };

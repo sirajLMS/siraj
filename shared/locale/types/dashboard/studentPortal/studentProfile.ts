@@ -19,4 +19,5 @@ export interface StudentPortalProfileLabels {
   readonly loadingMessage: string;
   readonly saveSuccess: string;
   readonly saveError: string;
+  readonly accountStatus: string;
 }

@@ -82,6 +82,7 @@ function InvoicesSection({
 >) {
   const invoicesList = invoices;
   const loading = isSearchPending || (invoicesLoading && invoices.length === 0);
+  const invoicesLoaded = !invoicesLoading;
 
   const renderItem = (row: (typeof invoices)[number]): ReactNode => (
     <MobileCardListItem variant="edge-to-edge">
@@ -98,7 +99,7 @@ function InvoicesSection({
     </MobileCardListItem>
   );
 
-  if (invoices.length === 0 && !invoicesLoading) {
+  if (invoices.length === 0 && invoicesLoaded) {
     return (
       <MobileSectionPanel title={labels.sections.recentInvoices} contentInset={false}>
         <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.adminTable.noEntries} />
@@ -196,17 +197,17 @@ function StudentCreditSection({
 export function AdminBillingMobileView({
   labels,
   summary,
-  summaryLoading = false,
+  summaryLoading,
   invoices,
   creditRows,
-  creditLoading = false,
+  creditLoading,
   searchQuery,
   canManage,
   canCreate,
   canViewExchangeRates,
-  billingActionsDisabled = false,
+  billingActionsDisabled,
   creditFilter,
-  isSearchPending = false,
+  isSearchPending,
   onSearchChange,
   onMarkAsPaid,
   onViewPaymentDetails,
@@ -215,12 +216,12 @@ export function AdminBillingMobileView({
   onViewAllNegativeBalance,
   onClearCreditFilter,
   onDeleteInvoice,
-  canDelete = false,
+  canDelete,
   page,
   pageSize,
   totalCount,
   onPageChange,
-  invoicesLoading = false,
+  invoicesLoading,
   sendingReminderId,
 }: Readonly<AdminBillingViewModel>) {
   return (

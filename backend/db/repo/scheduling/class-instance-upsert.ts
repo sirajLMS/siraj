@@ -156,13 +156,21 @@ export async function runClassInstanceUpsertMany(
   const updatedAt = options?.updatedAt ?? new Date();
 
   const runner = async (t: DBTransaction): Promise<ClassInstanceSelectType[]> => {
-    const results: ClassInstanceSelectType[] = [];
+    const chunks: ClassInstanceInsertType[][] = [];
     for (let i = 0; i < instances.length; i += chunkSize) {
-      const chunk = instances.slice(i, i + chunkSize);
-      for (const instance of chunk) {
-        results.push(await upsertRow(t, instance, updatedAt));
-      }
+      chunks.push(instances.slice(i, i + chunkSize));
     }
+
+    const results: ClassInstanceSelectType[] = [];
+    await chunks.reduce(async (prev, chunk) => {
+      await prev;
+      const chunkResults = await chunk.reduce(async (prevChunk, instance) => {
+        const prevResult = await prevChunk;
+        const row = await upsertRow(t, instance, updatedAt);
+        return [...prevResult, row];
+      }, Promise.resolve<ClassInstanceSelectType[]>([]));
+      results.push(...chunkResults);
+    }, Promise.resolve());
     return results;
   };
 
@@ -213,7 +221,7 @@ export async function upsertSeedClassInstance(
     return inserted;
   }
 
-  if (!instance.idempotencyKey) {
+  if (instance.idempotencyKey == null) {
     throw new Error("Seed class instance upsert requires an idempotency key.");
   }
 
@@ -223,22 +231,22 @@ export async function upsertSeedClassInstance(
     .where(eq(classInstances.idempotencyKey, instance.idempotencyKey))
     .limit(1);
 
-  if (!existing) {
-    throw new Error(`Seed class instance conflict missing row for key ${instance.idempotencyKey}.`);
+  if (existing) {
+    if (statesMatch(existing, instance)) {
+      await t
+        .update(classInstances)
+        .set({
+          actualStartAt: instance.actualStartAt,
+          actualEndAt: instance.actualEndAt,
+          updatedAt,
+        })
+        .where(eq(classInstances.id, existing.id));
+    } else {
+      await applyDesiredSeedState(t, existing, instance, updatedAt);
+    }
+
+    return updateSchedulingOnly(t, existing.id, instance, updatedAt);
   }
 
-  if (!statesMatch(existing, instance)) {
-    await applyDesiredSeedState(t, existing, instance, updatedAt);
-  } else {
-    await t
-      .update(classInstances)
-      .set({
-        actualStartAt: instance.actualStartAt,
-        actualEndAt: instance.actualEndAt,
-        updatedAt,
-      })
-      .where(eq(classInstances.id, existing.id));
-  }
-
-  return updateSchedulingOnly(t, existing.id, instance, updatedAt);
+  throw new Error(`Seed class instance conflict missing row for key ${instance.idempotencyKey}.`);
 }

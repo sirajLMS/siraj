@@ -1,9 +1,8 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBQueryExecutor, DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { localeJsonKey, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import {
   permissionGroups,
   permissions,
@@ -13,7 +12,6 @@ import {
   users,
 } from "@/backend/db/schema";
 import { AccountStatus, OverrideState } from "@/backend/enum";
-import { parseAccountStatus, parseOverrideState } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   ManagerDirectoryFilters,
@@ -28,6 +26,8 @@ import type {
   StaffProfileCreateResult,
   StaffProfileEntityInput,
 } from "@/backend/types";
+import { parseAccountStatus, parseCurrencyCodeOrNull, parseOverrideState } from "@/shared/lib/enum";
+import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
 import { getServerTranslations } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
 
@@ -48,9 +48,9 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<StaffProfileCreateResult> {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const existingProfile = await queryDb
+    const existingProfile = await executor
       .select({ id: staffProfiles.id })
       .from(staffProfiles)
       .where(eq(staffProfiles.userId, input.userId))
@@ -61,7 +61,7 @@ export namespace StaffProfileRepository {
       throw new Error(staff.alreadyExists);
     }
 
-    const [created] = await queryDb
+    const [created] = await executor
       .insert(staffProfiles)
       .values({
         userId: input.userId,
@@ -74,7 +74,7 @@ export namespace StaffProfileRepository {
       throw new Error("Failed to create staff profile");
     }
 
-    const [userRow] = await queryDb
+    const [userRow] = await executor
       .select({ phone: users.phone, status: users.status })
       .from(users)
       .where(eq(users.id, created.userId))
@@ -95,9 +95,9 @@ export namespace StaffProfileRepository {
   }
 
   export async function ensureForUser(userId: string, tx?: DBTransaction): Promise<void> {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const now = new Date();
-    await queryDb
+    await executor
       .insert(staffProfiles)
       .values({
         userId,
@@ -146,9 +146,9 @@ export namespace StaffProfileRepository {
       phone: row.phone,
       status: parseAccountStatus(row.status),
       roleSlug: row.roleSlug,
-      roleName: row.roleNameMap ? resolveLocalized(row.roleNameMap, locale) : null,
+      roleName: row.roleNameMap ? resolveLocalizedString(row.roleNameMap, locale) : null,
       hourlyRate: row.hourlyRate,
-      rateCurrency: row.rateCurrency as ManagerDirectoryRow["rateCurrency"],
+      rateCurrency: parseCurrencyCodeOrNull(row.rateCurrency),
     };
   }
 
@@ -193,10 +193,10 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ManagerDirectoryResult> {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const whereClause = buildManagerDirectoryWhere(filters);
 
-    const baseQuery = queryDb
+    const baseQuery = executor
       .select(MANAGER_DIRECTORY_SELECT)
       .from(staffProfiles)
       .innerJoin(users, eq(staffProfiles.userId, users.id))
@@ -206,7 +206,7 @@ export namespace StaffProfileRepository {
       .orderBy(users.name);
 
     if (!pagination) {
-      const [rows, metrics] = await Promise.all([baseQuery, getManagerDirectoryMetrics(queryDb)]);
+      const [rows, metrics] = await Promise.all([baseQuery, getManagerDirectoryMetrics(executor)]);
       return {
         metrics,
         rows: rows.map(row => mapManagerDirectoryRow(row, locale)),
@@ -221,14 +221,14 @@ export namespace StaffProfileRepository {
 
     const [rows, countResult, metrics] = await Promise.all([
       baseQuery.limit(perPage).offset(offset),
-      queryDb
+      executor
         .select({ count: count() })
         .from(staffProfiles)
         .innerJoin(users, eq(staffProfiles.userId, users.id))
         .leftJoin(userPermissionGroups, eq(users.id, userPermissionGroups.userId))
         .leftJoin(permissionGroups, eq(userPermissionGroups.groupId, permissionGroups.id))
         .where(whereClause),
-      getManagerDirectoryMetrics(queryDb),
+      getManagerDirectoryMetrics(executor),
     ]);
 
     const totalCount = countResult[0]?.count ?? 0;
@@ -255,7 +255,7 @@ export namespace StaffProfileRepository {
     options: { search?: string | null; limit: number; permissionGroupFilter?: string | null },
     tx?: DBTransaction
   ): Promise<StaffDirectoryAutocompleteRow[]> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
     const filters: ManagerDirectoryFilters = {
       roleFilter: options.permissionGroupFilter ?? null,
     };
@@ -286,8 +286,8 @@ export namespace StaffProfileRepository {
       .limit(options.limit);
   }
 
-  async function getManagerDirectoryMetrics(queryDb: typeof db | DBTransaction): Promise<ManagerDirectoryMetrics> {
-    const metricsResult = await queryDb
+  async function getManagerDirectoryMetrics(executor: typeof db | DBTransaction): Promise<ManagerDirectoryMetrics> {
+    const metricsResult = await executor
       .select({
         totalAdmin:
           sql<number>`COUNT(DISTINCT ${users.id}) FILTER (WHERE ${permissionGroups.slug} ILIKE '%admin%')`.mapWith(
@@ -318,7 +318,7 @@ export namespace StaffProfileRepository {
   }
 
   export async function getOnboardingMetrics(tx?: DBTransaction): Promise<OnboardingMetricsResult> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
 
     const ninetyDaysAgo = sql`NOW() - INTERVAL '90 days'`;
 
@@ -345,7 +345,7 @@ export namespace StaffProfileRepository {
 
   async function findManagerDirectoryRow(
     whereCondition: ReturnType<typeof eq>,
-    queryDbInstance: typeof db | DBTransaction,
+    queryDbInstance: DBQueryExecutor,
     locale?: string
   ): Promise<ManagerDirectoryRow | null> {
     const results = await queryDbInstance
@@ -365,8 +365,8 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ManagerDirectoryRow | null> {
-    const q = queryDb(tx);
-    return findManagerDirectoryRow(eq(users.id, userId), q as never, locale);
+    const q = queryDb(tx) ?? db;
+    return findManagerDirectoryRow(eq(users.id, userId), q, locale);
   }
 
   export async function findByStaffProfileId(
@@ -374,8 +374,8 @@ export namespace StaffProfileRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<ManagerDirectoryRow | null> {
-    const q = queryDb(tx);
-    return findManagerDirectoryRow(eq(staffProfiles.id, staffProfileId), q as never, locale);
+    const q = queryDb(tx) ?? db;
+    return findManagerDirectoryRow(eq(staffProfiles.id, staffProfileId), q, locale);
   }
 
   export async function updateManagerProfile(
@@ -411,9 +411,7 @@ export namespace StaffProfileRepository {
           .update(staffProfiles)
           .set({
             ...(input.hourlyRateIsSet ? { hourlyRate: input.hourlyRate ?? null } : {}),
-            ...(input.rateCurrencyIsSet
-              ? { rateCurrency: input.rateCurrency as ManagerDirectoryRow["rateCurrency"] }
-              : {}),
+            ...(input.rateCurrencyIsSet ? { rateCurrency: parseCurrencyCodeOrNull(input.rateCurrency ?? null) } : {}),
             updatedAt: new Date(),
           })
           .where(eq(staffProfiles.id, staffProfileId));
@@ -446,7 +444,7 @@ export namespace StaffProfileRepository {
   }
 
   export async function getUserPermissionGroupSlugs(userId: string, tx?: DBTransaction): Promise<string[]> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
 
     const results = await q
       .select({ slug: permissionGroups.slug })
@@ -462,7 +460,7 @@ export namespace StaffProfileRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<StaffPermissionGroupReturnType[]> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
     const key = localeJsonKey(locale);
 
     const rows = await q
@@ -478,10 +476,10 @@ export namespace StaffProfileRepository {
       .orderBy(sql`coalesce(${permissionGroups.name}->>${key}, ${permissionGroups.name}->>${DEFAULT_CONTENT_LOCALE})`);
 
     return rows.map(row => {
-      const description = resolveLocalized(row.description, locale);
+      const description = resolveLocalizedString(row.description, locale);
       return {
         id: row.id,
-        name: resolveLocalized(row.name, locale),
+        name: resolveLocalizedString(row.name, locale),
         slug: row.slug,
         description: description === "" ? null : description,
       };
@@ -492,7 +490,7 @@ export namespace StaffProfileRepository {
     userId: string,
     tx?: DBTransaction
   ): Promise<StaffPermissionOverrideReturnType[]> {
-    const q = queryDb(tx);
+    const q = queryDb(tx) ?? db;
 
     const rows = await q
       .select({

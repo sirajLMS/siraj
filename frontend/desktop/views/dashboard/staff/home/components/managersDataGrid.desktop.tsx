@@ -15,22 +15,30 @@ import { DesktopPersonProfileLinkCell, DesktopPhoneDisplay } from "@/frontend/de
 
 const StyledRoleChip = styled(Chip, {
   shouldForwardProp: prop => prop !== "role",
-})<{ role: ManagerRole }>(({ theme, role }) => ({
-  fontWeight: 700,
-  textTransform: "uppercase",
-  backgroundColor:
-    role === "admin"
-      ? theme.palette.primaryContainer
-      : role === "supervisor"
-        ? theme.palette.tertiaryContainer
-        : theme.palette.secondaryContainer,
-  color:
-    role === "admin"
-      ? theme.palette.onPrimaryContainer
-      : role === "supervisor"
-        ? theme.palette.onTertiaryContainer
-        : theme.palette.onSecondaryContainer,
-}));
+})<{ role: ManagerRole }>(({ theme, role }) => {
+  // Use explicit, typed maps to avoid referencing local inferred types and to keep lookups simple
+  const roleBackgroundMap: Record<ManagerRole, string> = {
+    admin: theme.palette.primaryContainer,
+    supervisor: theme.palette.tertiaryContainer,
+    staff: theme.palette.secondaryContainer,
+  };
+
+  const roleColorMap: Record<ManagerRole, string> = {
+    admin: theme.palette.onPrimaryContainer,
+    supervisor: theme.palette.onTertiaryContainer,
+    staff: theme.palette.onSecondaryContainer,
+  };
+
+  const roleBackgroundColor = roleBackgroundMap[role] ?? theme.palette.secondaryContainer;
+  const roleColor = roleColorMap[role] ?? theme.palette.onSecondaryContainer;
+
+  return {
+    fontWeight: 700,
+    textTransform: "uppercase",
+    backgroundColor: roleBackgroundColor,
+    color: roleColor,
+  };
+});
 
 const StyledDataGridWrapper = styled(Box)({
   width: "100%",

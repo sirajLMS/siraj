@@ -48,6 +48,7 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
       }
       teacherAdminProfile {
         id
+        userId
         name
         email
         phone
@@ -135,6 +136,7 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
       }
       staffProfile {
         id
+        userId
         staffProfileId
         name
         email
@@ -251,6 +253,7 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
       }
       staffProfile {
         id
+        userId
         staffProfileId
         name
         email
@@ -287,6 +290,7 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
       displayCurrency
       teacherAdminProfile {
         id
+        userId
         name
         email
         phone
@@ -340,6 +344,7 @@ export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.Upd
       }
       staffProfile {
         id
+        userId
         staffProfileId
         name
         email

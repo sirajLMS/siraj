@@ -69,6 +69,16 @@ export function MeetingConfigTypeFieldsMobile({
   const fields = getVisibleMeetingConfigFields(provider);
   const supportsAuto = provider.fieldSchema?.supportsAutoGeneration === true;
 
+  const getGenerateButtonText = () => {
+    if (generating) {
+      return t.generating;
+    }
+    if (value.meetingUrl.trim()) {
+      return t.regenerate;
+    }
+    return t.generateAutomatically;
+  };
+
   return (
     <MobileContentStack gap={1.5}>
       <TextField
@@ -86,7 +96,7 @@ export function MeetingConfigTypeFieldsMobile({
       {supportsAuto && onGenerateUrl ? (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <Button variant="outlined" size="small" disabled={disabled || generating} onClick={onGenerateUrl}>
-            {generating ? t.generating : value.meetingUrl.trim() ? t.regenerate : t.generateAutomatically}
+            {getGenerateButtonText()}
           </Button>
           {generationError ? (
             <Typography sx={{ typography: "bodySm", color: "error.main" }}>{generationError}</Typography>

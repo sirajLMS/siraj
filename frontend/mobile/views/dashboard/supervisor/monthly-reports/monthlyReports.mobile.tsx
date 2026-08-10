@@ -26,13 +26,16 @@ import { StudentAutocompleteMobile, TeacherAutocompleteMobile } from "@/frontend
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
 function buildActiveToggleSx(isActive: boolean): SxProps<Theme> {
+  let sx: SxProps<Theme>;
   if (!isActive) {
-    return {};
+    sx = {};
+  } else {
+    sx = theme => ({
+      backgroundColor: theme.palette.primaryContainer,
+      color: theme.palette.onPrimaryContainer,
+    });
   }
-  return theme => ({
-    backgroundColor: theme.palette.primaryContainer,
-    color: theme.palette.onPrimaryContainer,
-  });
+  return sx;
 }
 
 function ReportTypeToggle({ reportType, labels, onReportTypeChange }: ReportTypeToggleProps) {

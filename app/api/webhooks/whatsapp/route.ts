@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import { after, type NextRequest, NextResponse } from "next/server";
-import { resolveEnvConfig } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
 import { apiRateLimiter, checkRateLimit, getClientIdentifier } from "@/backend/lib/ratelimit";
+import { resolveEnvConfig } from "@/backend/services/system";
 import { WhatsappWebhookHandler } from "@/backend/services/whatsapp/whatsapp-webhook.handler";
 
 /**
@@ -152,6 +152,35 @@ export async function POST(request: NextRequest) {
     return new NextResponse("Payload Too Large", { status: 413 });
   }
 
+  const hmacResult = await verifyHmacSignature(request, ip, contentLength, rawBody);
+  if (hmacResult) {
+    return hmacResult;
+  }
+
+  const parseResult = parseWebhookBody(rawBody, ip);
+  if (parseResult.response) {
+    return parseResult.response;
+  }
+
+  // S3: Strip inbound `value.messages[]` from every change entry before anything else
+  const stripped = stripInboundMessages(parseResult.body);
+
+  deferWebhookProcessing(stripped);
+
+  return NextResponse.json({ status: "ok" }, { status: 200 });
+}
+
+/**
+ * Verify HMAC-SHA256 signature of the incoming webhook payload.
+ * Returns a NextResponse if verification fails (caller should return it),
+ * or `null` if the signature is valid.
+ */
+async function verifyHmacSignature(
+  request: NextRequest,
+  ip: string,
+  contentLength: number,
+  rawBody: string
+): Promise<NextResponse | null> {
   // HMAC-SHA256 signature verification
   const signatureHeader = request.headers.get("x-hub-signature-256") ?? "";
   const appSecret = await resolveEnvConfig("WHATSAPP_APP_SECRET");
@@ -188,57 +217,68 @@ export async function POST(request: NextRequest) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  // Parse the verified body
+  return null;
+}
+
+/**
+ * Parse and validate the webhook body JSON.
+ * Returns `{ body, response: null }` on success, or `{ body: null, response }` on failure.
+ */
+function parseWebhookBody(rawBody: string, ip: string): { body: unknown; response: NextResponse | null } {
   let body: unknown;
   try {
     body = JSON.parse(rawBody);
   } catch {
     logger.warn("whatsapp-webhook: invalid JSON body", { ip });
-    return new NextResponse("Bad Request", { status: 400 });
+    return { body: null, response: new NextResponse("Bad Request", { status: 400 }) };
   }
+
+  const objectValue =
+    body !== null && typeof body === "object" && "object" in body && typeof body.object === "string"
+      ? body.object
+      : undefined;
 
   // Validate top-level object field
-  if (!body || typeof body !== "object" || (body as { object?: string }).object !== "whatsapp_business_account") {
+  if (objectValue !== "whatsapp_business_account") {
     logger.warn("whatsapp-webhook: unexpected object field", {
       ip,
-      object: (body as { object?: string })?.object,
+      object: objectValue,
     });
-    return new NextResponse("Not Found", { status: 404 });
+    return { body: null, response: new NextResponse("Not Found", { status: 404 }) };
   }
 
-  // S3: Strip inbound `value.messages[]` from every change entry before anything else
-  const stripped = stripInboundMessages(body);
+  return { body, response: null };
+}
 
-  /**
-   * C3: Defer event processing via `after()` from `next/server`.
-   *
-   * ⚠️ Best-effort on serverless (r7-048):
-   * On Vercel serverless, `after()` runs after the response is sent but is NOT
-   * guaranteed to complete — the serverless function may be frozen or terminated
-   * before the deferred work finishes. This means webhook processing can be
-   * silently dropped.
-   *
-   * Reliability is ensured by two mechanisms:
-   * - Meta retries unacknowledged webhooks (exponential backoff up to ~24h).
-   * - `WhatsappWebhookHandler.processEvent` is idempotent — the B3 forward-only
-   *   rank guard handles duplicate deliveries safely.
-   *
-   * Together, these guarantee that dropped deferred work is retried by Meta and
-   * that retries do not cause duplicate side-effects. The `after()` call itself
-   * is still preferred because it returns 200 immediately, reducing webhook
-   * timeout risk and Meta retry pressure.
-   */
+/**
+ * C3: Defer event processing via `after()` from `next/server`.
+ *
+ * ⚠️ Best-effort on serverless (r7-048):
+ * On Vercel serverless, `after()` runs after the response is sent but is NOT
+ * guaranteed to complete — the serverless function may be frozen or terminated
+ * before the deferred work finishes. This means webhook processing can be
+ * silently dropped.
+ *
+ * Reliability is ensured by two mechanisms:
+ * - Meta retries unacknowledged webhooks (exponential backoff up to ~24h).
+ * - `WhatsappWebhookHandler.processEvent` is idempotent — the B3 forward-only
+ *   rank guard handles duplicate deliveries safely.
+ *
+ * Together, these guarantee that dropped deferred work is retried by Meta and
+ * that retries do not cause duplicate side-effects. The `after()` call itself
+ * is still preferred because it returns 200 immediately, reducing webhook
+ * timeout risk and Meta retry pressure.
+ */
+function deferWebhookProcessing(strippedBody: unknown): void {
   after(async () => {
     try {
-      await WhatsappWebhookHandler.processEvent(stripped);
+      await WhatsappWebhookHandler.processEvent(strippedBody);
     } catch (error) {
       logger.error("whatsapp-webhook: deferred handler error", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
   });
-
-  return NextResponse.json({ status: "ok" }, { status: 200 });
 }
 
 /**
@@ -247,34 +287,37 @@ export async function POST(request: NextRequest) {
  * template lifecycle events, and account-level updates are handled.
  */
 function stripInboundMessages(webhookBody: unknown): unknown {
-  if (!webhookBody || typeof webhookBody !== "object") {
-    return webhookBody;
-  }
-  const body = webhookBody as { entry?: unknown[] };
-  if (!Array.isArray(body.entry)) {
+  if (
+    !webhookBody ||
+    typeof webhookBody !== "object" ||
+    !("entry" in webhookBody) ||
+    !Array.isArray(webhookBody.entry)
+  ) {
     return webhookBody;
   }
 
-  body.entry = body.entry.map(entry => {
-    if (!entry || typeof entry !== "object") {
+  const entries = webhookBody.entry.map((entry: unknown) => {
+    if (!entry || typeof entry !== "object" || !("changes" in entry) || !Array.isArray(entry.changes)) {
       return entry;
     }
-    const e = entry as { changes?: unknown[] };
-    if (!Array.isArray(e.changes)) {
-      return e;
-    }
-    e.changes = e.changes.map(change => {
-      if (!change || typeof change !== "object") {
+    const changes = entry.changes.map((change: unknown) => {
+      if (!change || typeof change !== "object" || !("value" in change)) {
         return change;
       }
-      const c = change as { value?: { messages?: unknown[] } };
-      if (c.value && Array.isArray(c.value.messages)) {
-        delete c.value.messages;
+      const val = change.value;
+      if (val && typeof val === "object" && "messages" in val && Array.isArray(val.messages)) {
+        const valObj: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(val)) {
+          if (k !== "messages") {
+            valObj[k] = v;
+          }
+        }
+        return { ...change, value: valObj };
       }
-      return c;
+      return change;
     });
-    return e;
+    return { ...entry, changes };
   });
 
-  return body;
+  return { ...webhookBody, entry: entries };
 }

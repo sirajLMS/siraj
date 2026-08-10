@@ -6,6 +6,11 @@ export {
   type PaymentMethodTypeFieldsProps,
 } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFields";
 export {
+  type PaymentMethodTypeFieldSharedOptions,
+  PaymentMethodTypeFieldsShared,
+  type PaymentMethodTypeFieldsSlots,
+} from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeFieldsShared";
+export {
   PaymentMethodTypeSelector,
   type PaymentMethodTypeSelectorProps,
 } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";

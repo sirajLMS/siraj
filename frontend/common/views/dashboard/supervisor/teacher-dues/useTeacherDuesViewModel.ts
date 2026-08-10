@@ -91,9 +91,11 @@ export function useTeacherDuesViewModel(_props: Readonly<UseTeacherDuesViewModel
     }
 
     try {
-      for (const [teacherPaymentId, groupDueIds] of groups) {
-        await markPaid({ variables: { dueIds: groupDueIds, teacherPaymentId } });
-      }
+      await Promise.all(
+        [...groups].map(([teacherPaymentId, groupDueIds]) =>
+          markPaid({ variables: { dueIds: groupDueIds, teacherPaymentId } })
+        )
+      );
       clearSelection();
       await refetch();
       setSnackbar({ open: true, message: t.markPaidSuccess, severity: "success" });

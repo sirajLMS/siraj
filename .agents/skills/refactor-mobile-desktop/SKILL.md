@@ -107,7 +107,7 @@ Brief: what legacy pattern exists, what breaks
 ## 6. Governing Rules
 - AGENTS.md: frontend/, frontend/views/, frontend/stores/, frontend/components/ui/
 - Instructions: .agents/instructions/mobile-desktop.instructions.md, frontend.instructions.md
-- Lint: `bun run lint` IS the lint queue client (safe to run directly — serializes through the queue server). For file-scoped lint, call `requestLint(id, [files])` from `scripts/lint-queue-client.ts`.
+- Lint: `bun run lint` uses the in-process lint service (safe to run directly — serializes via in-memory FIFO queue). For file-scoped lint, use `bun run scripts/lint-service.ts -f <file> --id refactor-mobile-desktop`.
 ```
 
 **`plan.md` template:**
@@ -133,7 +133,7 @@ Brief: what legacy pattern exists, what breaks
 ### Verify
 - tsgo on useXxViewModel.ts
 - biome:check
-- lint-queue
+- sub-loop.ts --lifecycle lint
 
 ## Phase 2 — Mobile View Creation
 **Goal**: Create mobile/ directory with .mobile.tsx files using shared components
@@ -148,7 +148,7 @@ Brief: what legacy pattern exists, what breaks
 - <exact edit table>
 
 ### Verify
-- tsgo, biome, lint-queue
+- tsgo, biome, sub-loop.ts --lifecycle lint
 
 ## Phase 3 — Desktop View Creation/Refactor
 **Goal**: Create desktop/ directory, ensure no useMediaQuery, uses Grid/SectionPanel/AppDataGrid
@@ -184,11 +184,11 @@ Brief: what legacy pattern exists, what breaks
 # <Feature> Mobile/Desktop Migration — Tasks
 
 **Spec**: ./spec.md — **Plan**: ./plan.md
-**Tracking**: checkboxes map 1:1 to plan.md phases. Mark `[x]` only after per-file verification (tsgo → biome → lint-queue) passes.
+**Tracking**: checkboxes map 1:1 to plan.md phases. Mark `[x]` only after per-file verification (tsgo → biome → sub-loop --lifecycle lint) passes.
 
-**Lint queue**: `bun run lint` IS the lint queue client — safe to run directly (serializes through the queue server). Make sure the server is running first.
+**Lint verification**: `bun run lint` uses the in-process lint service — safe to run directly (no HTTP server). For file-scoped verification:
 ```bash
-~/.bun/bin/bun run scripts/lint-queue-server.ts &
+bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 ```
 
 **Rule files per phase** (read ALL before editing):

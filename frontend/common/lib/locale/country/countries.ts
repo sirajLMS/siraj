@@ -256,5 +256,3 @@ export const countries: readonly CountryType[] = [
   { code: "ZM", phone: "260", emoji: "🇿🇲" },
   { code: "ZW", phone: "263", emoji: "🇿🇼" },
 ];
-
-export default countries;

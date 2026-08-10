@@ -1,9 +1,8 @@
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo";
-import { resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, parseAppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { invalidateRoleChange } from "@/backend/services/cache";
@@ -14,10 +13,51 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
-import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
+import { DEFAULT_CONTENT_LOCALE, isAppLocale, type LocalizedString } from "@/shared/types";
 
 export namespace PermissionManagementService {
+  // ─── Private Helpers ──────────────────────────────────────────────────────
+
+  async function buildPermissionMap(): Promise<Map<string, AppPermission>> {
+    const allPerms = await PermissionManagementRepository.listAllPermissions();
+    const permMap = new Map<string, AppPermission>();
+    for (const p of allPerms) {
+      const parsed = parseAppPermission(p.key);
+      if (parsed) {
+        permMap.set(p.id, parsed);
+      }
+    }
+    return permMap;
+  }
+
+  async function getAllSystemPermissions(): Promise<AppPermission[]> {
+    const allPerms = await PermissionManagementRepository.listAllPermissions();
+    const result: AppPermission[] = [];
+    for (const p of allPerms) {
+      const parsed = parseAppPermission(p.key);
+      if (parsed) {
+        result.push(parsed);
+      }
+    }
+    return result;
+  }
+
+  function applyOverrides(
+    effectiveSet: Set<AppPermission>,
+    overrides: UserOverrideEntity[],
+    permMap: Map<string, AppPermission>
+  ): Set<AppPermission> {
+    for (const override of overrides) {
+      const key = permMap.get(override.permissionId);
+      if (!key) continue;
+      if (override.state === "GRANTED") effectiveSet.add(key);
+      else if (override.state === "DENIED") effectiveSet.delete(key);
+    }
+    return effectiveSet;
+  }
+
   // ─── Private Guards ───────────────────────────────────────────────────────
 
   async function requireManageAccess(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
@@ -63,6 +103,37 @@ export namespace PermissionManagementService {
     await requireGroupExists(groupId, tErrors);
   }
 
+  /**
+   * Shared fail-open cache invalidation helper. Wraps {@link invalidateRoleChange}
+   * in a try/catch so cache provider errors never crash the calling request.
+   * Returns the same `userIds` it was given so batch callers can chain inline.
+   */
+  async function invalidateRoleChangeFailOpen(userIds: string | string[], context: string): Promise<void> {
+    const ids = Array.isArray(userIds) ? userIds : [userIds];
+    try {
+      await Promise.all(ids.map(uid => invalidateRoleChange(uid)));
+    } catch (cacheErr) {
+      logger.error("Failed to invalidate role change cache", { userIds: ids, context, error: cacheErr });
+    }
+  }
+
+  /**
+   * Toggles the `trg_protect_system_permissions` trigger on the `permissions`
+   * table. The DO $$ block swallows concurrent / missing-table errors so the
+   * call is safe to run even when the trigger does not exist.
+   */
+  async function setSystemPermissionTrigger(enabled: boolean): Promise<void> {
+    const action = enabled ? "ENABLE" : "DISABLE";
+    await db.execute(sql`
+      DO $$
+      BEGIN
+        ALTER TABLE permissions ${sql.raw(action)} TRIGGER trg_protect_system_permissions;
+      EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Could not ${sql.raw(action.toLowerCase())} trigger: %', SQLERRM;
+      END $$;
+    `);
+  }
+
   async function requireUserSetup(
     actorUserId: string,
     userId: string,
@@ -85,7 +156,7 @@ export namespace PermissionManagementService {
   }
 
   async function validateGroupName(name: LocalizedString, tErrors: ErrorsLabels) {
-    const resolvedName = resolveLocalized(name, DEFAULT_CONTENT_LOCALE);
+    const resolvedName = resolveLocalizedString(name, DEFAULT_CONTENT_LOCALE);
     const trimmedName = resolvedName.trim();
     if (!trimmedName) throw new Error(tErrors.permissionManagement.permissionGroupNameRequired);
     if (trimmedName.length > 255) throw new Error(tErrors.permissionManagement.permissionGroupNameTooLong);
@@ -114,8 +185,8 @@ export namespace PermissionManagementService {
 
     const trimmed: LocalizedString = {};
     for (const [locale, text] of Object.entries(value)) {
-      if (typeof text === "string") {
-        trimmed[locale as keyof LocalizedString] = text.trim();
+      if (typeof text === "string" && isAppLocale(locale)) {
+        trimmed[locale] = text.trim();
       }
     }
     return trimmed;
@@ -190,15 +261,16 @@ export namespace PermissionManagementService {
 
     const { slug: baseSlug } = await validateGroupName(input.name, tErrors);
 
+    // Find next available slug by checking existing slugs in a single query
+    const existingSlugs = await db
+      .select({ slug: permissionGroups.slug })
+      .from(permissionGroups)
+      .where(sql`${permissionGroups.slug} LIKE ${baseSlug + "%"}`);
+
+    const existingSlugSet = new Set(existingSlugs.map(s => s.slug));
     let slug = baseSlug;
     let counter = 1;
-    while (true) {
-      const [existingGroup] = await db
-        .select({ id: permissionGroups.id })
-        .from(permissionGroups)
-        .where(eq(permissionGroups.slug, slug))
-        .limit(1);
-      if (!existingGroup) break;
+    while (existingSlugSet.has(slug)) {
       slug = `${baseSlug}_${counter}`;
       counter++;
     }
@@ -261,12 +333,7 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     await requireUserSetup(actorUserId, input.userId, "assign", "existsFull", tErrors);
     await PermissionManagementRepository.bulkAssignUsersToGroup([input.userId], input.groupId, actorUserId);
-
-    try {
-      await invalidateRoleChange(input.userId);
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache", { userId: input.userId, error: cacheErr });
-    }
+    await invalidateRoleChangeFailOpen(input.userId, "assignGroupToUser");
   }
 
   export async function revokeGroupFromUser(
@@ -276,12 +343,7 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     await requireUserSetup(actorUserId, input.userId, "assign", "nonSuperAdmin", tErrors);
     await PermissionManagementRepository.bulkRevokeUsersFromGroup([input.userId], input.groupId);
-
-    try {
-      await invalidateRoleChange(input.userId);
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache", { userId: input.userId, error: cacheErr });
-    }
+    await invalidateRoleChangeFailOpen(input.userId, "revokeGroupFromUser");
   }
 
   export async function listGroupsForUser(
@@ -310,17 +372,7 @@ export namespace PermissionManagementService {
     if (foundUsers.length !== input.userIds.length) throw new Error(tErrors.permissionManagement.userNotFound(""));
 
     await PermissionManagementRepository.bulkAssignUsersToGroup(input.userIds, input.groupId, actorUserId);
-
-    try {
-      for (const uid of input.userIds) {
-        await invalidateRoleChange(uid);
-      }
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache for bulk assign", {
-        userIds: input.userIds,
-        error: cacheErr,
-      });
-    }
+    await invalidateRoleChangeFailOpen(input.userIds, "bulkAssignUsersToGroup");
   }
 
   export async function bulkRevokeUsersFromGroup(
@@ -340,17 +392,7 @@ export namespace PermissionManagementService {
     if (nonSuperAdminUserIds.length === 0) return;
 
     await PermissionManagementRepository.bulkRevokeUsersFromGroup(nonSuperAdminUserIds, input.groupId);
-
-    try {
-      for (const uid of nonSuperAdminUserIds) {
-        await invalidateRoleChange(uid);
-      }
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache for bulk revoke", {
-        userIds: nonSuperAdminUserIds,
-        error: cacheErr,
-      });
-    }
+    await invalidateRoleChangeFailOpen(nonSuperAdminUserIds, "bulkRevokeUsersFromGroup");
   }
 
   export async function listUserOverrides(
@@ -369,15 +411,7 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     await requireUserSetup(actorUserId, input.userId, "manage", "nonSuperAdmin", tErrors);
     await PermissionManagementRepository.setUserOverrides(input.userId, input.overrides, actorUserId);
-
-    try {
-      await invalidateRoleChange(input.userId);
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate role change cache for user overrides", {
-        userId: input.userId,
-        error: cacheErr,
-      });
-    }
+    await invalidateRoleChangeFailOpen(input.userId, "updateUserOverrides");
   }
 
   export async function getEffectiveUserPermissions(
@@ -389,8 +423,7 @@ export namespace PermissionManagementService {
     const user = await requireUserExistsFull(userId, tErrors);
 
     if (user.isSuperAdmin) {
-      const allPerms = await PermissionManagementRepository.listAllPermissions();
-      return allPerms.map(p => p.key);
+      return getAllSystemPermissions();
     }
 
     // Resolve base group permissions
@@ -401,15 +434,8 @@ export namespace PermissionManagementService {
     const overrides = await PermissionManagementRepository.getUserOverrides(userId);
     if (overrides.length === 0) return [...effectiveSet];
 
-    const allPerms = await PermissionManagementRepository.listAllPermissions();
-    const permMap = new Map(allPerms.map(p => [p.id, p.key]));
-
-    for (const override of overrides) {
-      const key = permMap.get(override.permissionId);
-      if (!key) continue;
-      if (override.state === "GRANTED") effectiveSet.add(key);
-      else if (override.state === "DENIED") effectiveSet.delete(key);
-    }
+    const permMap = await buildPermissionMap();
+    applyOverrides(effectiveSet, overrides, permMap);
 
     return [...effectiveSet];
   }
@@ -417,34 +443,20 @@ export namespace PermissionManagementService {
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────
 
   async function disableSystemPermissionTrigger(): Promise<void> {
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        ALTER TABLE permissions DISABLE TRIGGER trg_protect_system_permissions;
-      EXCEPTION WHEN OTHERS THEN
-        RAISE NOTICE 'Could not disable trigger: %', SQLERRM;
-      END $$;
-    `);
+    await setSystemPermissionTrigger(false);
   }
 
   async function enableSystemPermissionTrigger(): Promise<void> {
-    await db.execute(sql`
-      DO $$
-      BEGIN
-        ALTER TABLE permissions ENABLE TRIGGER trg_protect_system_permissions;
-      EXCEPTION WHEN OTHERS THEN
-        RAISE NOTICE 'Could not re-enable trigger: %', SQLERRM;
-      END $$;
-    `);
+    await setSystemPermissionTrigger(true);
   }
 
   /**
    * Ensures app_permission enum values exist before inserting system permissions.
    */
   export async function ensurePermissionEnumValues(keys: readonly AppPermission[]): Promise<void> {
-    for (const key of keys) {
-      await db.execute(sql.raw(`ALTER TYPE app_permission ADD VALUE IF NOT EXISTS '${key}';`));
-    }
+    await Promise.all(
+      keys.map(key => db.execute(sql.raw(`ALTER TYPE app_permission ADD VALUE IF NOT EXISTS '${key}';`)))
+    );
   }
 
   /**
@@ -455,12 +467,22 @@ export namespace PermissionManagementService {
   ): Promise<AppPermission[]> {
     if (inputs.length === 0) return [];
 
-    await ensurePermissionEnumValues(inputs.map(spec => spec.key));
+    const permissionKeys: AppPermission[] = [];
+    for (const spec of inputs) {
+      const parsed = parseAppPermission(spec.key);
+      if (!parsed) {
+        throw new Error(`Invalid AppPermission key: ${spec.key}`);
+      }
+      permissionKeys.push(parsed);
+    }
+
+    await ensurePermissionEnumValues(permissionKeys);
     await disableSystemPermissionTrigger();
 
     try {
-      for (const spec of inputs) {
-        await db.execute(sql`
+      await Promise.all(
+        inputs.map(spec =>
+          db.execute(sql`
           INSERT INTO permissions (id, key, resource, action, description, category, is_system)
           VALUES (
             gen_random_uuid(),
@@ -477,9 +499,10 @@ export namespace PermissionManagementService {
             description = EXCLUDED.description,
             category = EXCLUDED.category,
             is_system = EXCLUDED.is_system
-        `);
-      }
-      return inputs.map(spec => spec.key);
+        `)
+        )
+      );
+      return permissionKeys;
     } finally {
       await enableSystemPermissionTrigger();
     }
@@ -494,16 +517,18 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     if (permissionKeys.length === 0) return;
 
-    for (const key of permissionKeys) {
-      await db.execute(sql`
+    await Promise.all(
+      permissionKeys.map(key =>
+        db.execute(sql`
         INSERT INTO group_permissions (group_id, permission_id)
         SELECT g.id, p.id
         FROM permission_groups g, permissions p
         WHERE g.slug = ${groupSlug}
           AND p.key = ${key}::app_permission
         ON CONFLICT DO NOTHING
-      `);
-    }
+      `)
+      )
+    );
   }
 
   /**
@@ -513,9 +538,7 @@ export namespace PermissionManagementService {
     groupSlugs: readonly string[],
     permissionKeys: readonly AppPermission[]
   ): Promise<void> {
-    for (const groupSlug of groupSlugs) {
-      await ensureGroupPermissions(groupSlug, permissionKeys);
-    }
+    await Promise.all(groupSlugs.map(groupSlug => ensureGroupPermissions(groupSlug, permissionKeys)));
   }
 
   /**
@@ -528,16 +551,18 @@ export namespace PermissionManagementService {
   ): Promise<void> {
     if (permissionKeys.length === 0) return;
 
-    for (const key of permissionKeys) {
-      await db.execute(sql`
+    await Promise.all(
+      permissionKeys.map(key =>
+        db.execute(sql`
         DELETE FROM group_permissions gp
         USING permission_groups g, permissions p
         WHERE gp.group_id = g.id
           AND gp.permission_id = p.id
           AND g.slug = ${groupSlug}
           AND p.key = ${key}::app_permission
-      `);
-    }
+      `)
+      )
+    );
   }
   /**
    * Idempotent single user permission override (seed / bootstrap use).

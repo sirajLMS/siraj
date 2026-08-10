@@ -18,6 +18,31 @@ import type {
 } from "@/backend/types";
 import { StudentsOrderByColumn } from "@/backend/types";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getDateField(value: unknown, field: string): Date | null {
+  if (!isRecord(value)) return null;
+  const v = value[field];
+  return v instanceof Date ? v : null;
+}
+
+type InputFieldBuilder = Parameters<
+  NonNullable<Parameters<ReturnType<typeof gqlSchemaBuilder.inputRef<StudentCreateInput>>["implement"]>[0]["fields"]>
+>[0];
+
+function optionalStudentInputFields(t: InputFieldBuilder) {
+  return {
+    primaryTeacherId: t.string({ required: false }),
+    dateOfBirth: t.field({ type: "DateTime", required: false }),
+    gender: t.field({ type: GenderPothosObject, required: false }),
+    language: t.field({ type: AppLanguagePothosObject, required: false }),
+    classesTotal: t.int({ required: false }),
+    classesRemaining: t.int({ required: false }),
+  };
+}
+
 export const StudentPothosObject = gqlSchemaBuilder
   .loadableObjectRef<StudentReturnType, string>("Student", {
     load: async (ids: string[]) => StudentRepository.loadByIds(ids),
@@ -60,12 +85,12 @@ export const StudentPothosObject = gqlSchemaBuilder
       createdAt: t.field({
         type: "DateTime",
         nullable: true,
-        resolve: s => (s as { createdAt?: Date }).createdAt ?? null,
+        resolve: s => getDateField(s, "createdAt"),
       }),
       updatedAt: t.field({
         type: "DateTime",
         nullable: true,
-        resolve: s => (s as { updatedAt?: Date }).updatedAt ?? null,
+        resolve: s => getDateField(s, "updatedAt"),
       }),
     }),
   });
@@ -76,26 +101,12 @@ export const StudentCreateInputPothosObject = gqlSchemaBuilder
     fields: t => ({
       parentId: t.string({ required: true }),
       userId: t.string({ required: true }),
-      primaryTeacherId: t.string({ required: false }),
       name: t.string({ required: true }),
-      dateOfBirth: t.field({
-        type: "DateTime",
-        required: false,
-      }),
-      gender: t.field({
-        type: GenderPothosObject,
-        required: false,
-      }),
-      language: t.field({
-        type: AppLanguagePothosObject,
-        required: false,
-      }),
+      ...optionalStudentInputFields(t),
       status: t.field({
         type: StudentStatusPothosObject,
         required: true,
       }),
-      classesTotal: t.int({ required: false }),
-      classesRemaining: t.int({ required: false }),
       idempotencyKey: t.string({ required: true }),
     }),
   });
@@ -107,26 +118,12 @@ export const PartialStudentUpdateInputPothosObject = gqlSchemaBuilder
       id: t.string({ required: true }),
       parentId: t.string({ required: false }),
       userId: t.string({ required: false }),
-      primaryTeacherId: t.string({ required: false }),
       name: t.string({ required: false }),
-      dateOfBirth: t.field({
-        type: "DateTime",
-        required: false,
-      }),
-      gender: t.field({
-        type: GenderPothosObject,
-        required: false,
-      }),
-      language: t.field({
-        type: AppLanguagePothosObject,
-        required: false,
-      }),
+      ...optionalStudentInputFields(t),
       status: t.field({
         type: StudentStatusPothosObject,
         required: false,
       }),
-      classesTotal: t.int({ required: false }),
-      classesRemaining: t.int({ required: false }),
     }),
   });
 

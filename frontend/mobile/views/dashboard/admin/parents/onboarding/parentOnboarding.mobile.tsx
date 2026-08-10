@@ -72,7 +72,7 @@ export function ParentOnboardingMobileView({
         <Box
           component="form"
           onSubmit={e => {
-            handleSubmit(onSubmit)(e);
+            void handleSubmit(onSubmit)(e);
           }}
           sx={{ display: "flex", flexDirection: "column", gap: 2, px: { xs: 2, md: 3 }, pb: 4 }}
         >

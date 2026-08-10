@@ -74,11 +74,7 @@ describe("applyEnvFile", () => {
   });
 
   afterEach(() => {
-    if (originalDatabaseUrl === undefined) {
-      Reflect.deleteProperty(process.env, "DATABASE_URL");
-    } else {
-      process.env.DATABASE_URL = originalDatabaseUrl;
-    }
+    process.env.DATABASE_URL = originalDatabaseUrl;
     rmSync(tempDir, { recursive: true, force: true });
   });
 

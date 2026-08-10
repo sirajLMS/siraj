@@ -1,16 +1,39 @@
 import { RecurringScheduleRepository } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
-import { parseIanaTimezone } from "@/backend/lib/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { RecurringScheduleSelectType } from "@/backend/types";
 import type { RecurringScheduleDetailReturnType } from "@/backend/types/scheduling/recurring-schedule-detail.types";
+import { parseIanaTimezone } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
+
+/**
+ * Repository returns rows with studentName and teacherUserName attached via Object.assign
+ * but typed as RecurringScheduleSelectType[]. This type represents the actual shape.
+ */
+type RecurringScheduleRepositoryRow = RecurringScheduleSelectType & {
+  studentName: string;
+  teacherUserName: string;
+};
 
 type RecurringScheduleListRow = RecurringScheduleSelectType & {
   studentName: string;
   teacherUserName: string;
 };
+
+/**
+ * Type guard to check if a RecurringScheduleSelectType row has the extended properties
+ * attached by the repository via Object.assign.
+ */
+function isRecurringScheduleRepositoryRow(row: RecurringScheduleSelectType): row is RecurringScheduleRepositoryRow {
+  return (
+    typeof row === "object" &&
+    "studentName" in row &&
+    "teacherUserName" in row &&
+    typeof (row as Record<string, unknown>).studentName === "string" &&
+    typeof (row as Record<string, unknown>).teacherUserName === "string"
+  );
+}
 
 export namespace RecurringScheduleDetailService {
   async function assertViewAccess(userId: string, teacherId: string, tErrors: ErrorsLabels) {
@@ -50,12 +73,12 @@ export namespace RecurringScheduleDetailService {
       teacherId: row.schedule.teacherId,
       teacherName: row.teacherUserName,
       durationMinutes: row.schedule.durationMinutes,
-      defaultStartTime: String(row.schedule.defaultStartTime).slice(0, 5),
+      defaultStartTime: row.schedule.defaultStartTime.slice(0, 5),
       timezone: parseIanaTimezone(row.schedule.timezone),
       days: dayRows.map(day => ({
         id: day.id,
         dayOfWeek: day.dayOfWeek,
-        startTime: String(day.startTime).slice(0, 5),
+        startTime: day.startTime.slice(0, 5),
         isActive: day.isActive,
       })),
       hourlyRate: row.schedule.hourlyRate,
@@ -79,9 +102,48 @@ export namespace RecurringScheduleDetailService {
       throw new Error(tErrors.unauthorizedAction);
     }
 
-    return RecurringScheduleRepository.findAll(undefined, options) as Promise<{
-      rows: RecurringScheduleListRow[];
-      totalCount: number;
-    }>;
+    const result = await RecurringScheduleRepository.findAll(undefined, options);
+    // Repository returns rows with studentName and teacherUserName attached via Object.assign
+    // but typed as RecurringScheduleSelectType[]. Use type guard to narrow safely.
+    const rows: RecurringScheduleListRow[] = result.rows.map(row => {
+      if (!isRecurringScheduleRepositoryRow(row)) {
+        // Should never happen if repository is correct, but fallback for safety
+        return {
+          ...row,
+          studentName: "",
+          teacherUserName: "",
+        } satisfies RecurringScheduleListRow;
+      }
+      return {
+        id: row.id,
+        studentId: row.studentId,
+        teacherId: row.teacherId,
+        subjectId: row.subjectId,
+        avatarUrl: row.avatarUrl,
+        durationMinutes: row.durationMinutes,
+        defaultStartTime: row.defaultStartTime,
+        timezoneId: row.timezoneId,
+        timezone: row.timezone,
+        utcOffsetSnapshot: row.utcOffsetSnapshot,
+        hourlyRate: row.hourlyRate,
+        rateCurrency: row.rateCurrency,
+        effectiveFrom: row.effectiveFrom,
+        effectiveUntil: row.effectiveUntil,
+        quotaId: row.quotaId,
+        earmarkedClasses: row.earmarkedClasses,
+        schedulingMode: row.schedulingMode,
+        generationHorizonWeeks: row.generationHorizonWeeks,
+        ondemandNoCreditsOutcome: row.ondemandNoCreditsOutcome,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        deletedAt: row.deletedAt,
+        studentName: row.studentName,
+        teacherUserName: row.teacherUserName,
+      } satisfies RecurringScheduleListRow;
+    });
+    return {
+      rows,
+      totalCount: result.totalCount,
+    };
   }
 }

@@ -10,8 +10,8 @@ export namespace InvoicePaymentSubmissionRepository {
     input: Types.InvoicePaymentSubmissionInsertType,
     tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb.insert(invoicePaymentSubmissions).values(input).returning();
+    const dbToQuery = tx ?? db;
+    const [row] = await dbToQuery.insert(invoicePaymentSubmissions).values(input).returning();
     return row;
   }
 
@@ -51,9 +51,9 @@ export namespace InvoicePaymentSubmissionRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType> {
-    const queryDb = tx ?? db;
+    const dbToQuery = tx ?? db;
     const now = new Date();
-    const [row] = await queryDb
+    const [row] = await dbToQuery
       .update(invoicePaymentSubmissions)
       .set({
         status,
@@ -112,17 +112,14 @@ export namespace InvoicePaymentSubmissionRepository {
     tx?: DBTransaction
   ): Promise<Types.InvoicePaymentSubmissionSelectType[]> {
     if (inputs.length === 0) return [];
-    const results: Types.InvoicePaymentSubmissionSelectType[] = [];
-
-    for (const input of inputs) {
-      const existing = await getLatestByInvoiceId(input.invoiceId, tx);
-      if (existing) {
-        results.push(existing);
-        continue;
-      }
-      results.push(await createSubmission(input, tx));
-    }
-
-    return results;
+    return Promise.all(
+      inputs.map(async input => {
+        const existing = await getLatestByInvoiceId(input.invoiceId, tx);
+        if (existing) {
+          return existing;
+        }
+        return createSubmission(input, tx);
+      })
+    );
   }
 }

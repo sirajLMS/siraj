@@ -46,7 +46,7 @@ describe("buildSocialLink", () => {
     });
 
     test("url with http protocol is kept as-is", () => {
-      const httpUrl = `${"http"}://facebook.com/foo`;
+      const httpUrl = `http://facebook.com/foo`;
       const result = buildSocialLink("facebook", httpUrl);
       expect(result).toEqual({
         href: httpUrl,

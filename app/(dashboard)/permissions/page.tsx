@@ -20,7 +20,7 @@ export default async function PermissionsPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.PERMISSION_GROUPS_MANAGE], locale, context);
   return (

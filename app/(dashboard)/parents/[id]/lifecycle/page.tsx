@@ -17,6 +17,32 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.pageTitle };
 }
 
+const getGraphqlLifecycleStatus = (backendStatus: string): GraphQLParentStatus => {
+  switch (backendStatus) {
+    case "REGULAR":
+      return GraphQLParentStatus.Regular;
+    case "ON_LEAVE":
+      return GraphQLParentStatus.OnLeave;
+    case "SUSPENDED":
+      return GraphQLParentStatus.Suspended;
+    case "ON_TRIAL":
+      return GraphQLParentStatus.OnTrial;
+    default:
+      return GraphQLParentStatus.Regular;
+  }
+};
+
+const getGraphqlAccountStatus = (backendStatus: string): GraphQLAccountStatus => {
+  switch (backendStatus) {
+    case "ACTIVATED":
+      return GraphQLAccountStatus.Activated;
+    case "DEACTIVATED":
+      return GraphQLAccountStatus.Deactivated;
+    default:
+      return GraphQLAccountStatus.Activated;
+  }
+};
+
 export default async function ParentLifecyclePage({ params }: { readonly params: Promise<{ readonly id: string }> }) {
   const { id } = await params;
   const { userId, context } = await getServerUserContext();
@@ -32,32 +58,6 @@ export default async function ParentLifecyclePage({ params }: { readonly params:
   // Convert backend enums to GraphQL enums
   const backendLifecycleStatus = parent.lifecycleStatus;
   const backendAccountStatus = parent.accountStatus;
-
-  const getGraphqlLifecycleStatus = (backendStatus: string): GraphQLParentStatus => {
-    switch (backendStatus) {
-      case "REGULAR":
-        return GraphQLParentStatus.Regular;
-      case "ON_LEAVE":
-        return GraphQLParentStatus.OnLeave;
-      case "SUSPENDED":
-        return GraphQLParentStatus.Suspended;
-      case "ON_TRIAL":
-        return GraphQLParentStatus.OnTrial;
-      default:
-        return GraphQLParentStatus.Regular;
-    }
-  };
-
-  const getGraphqlAccountStatus = (backendStatus: string): GraphQLAccountStatus => {
-    switch (backendStatus) {
-      case "ACTIVATED":
-        return GraphQLAccountStatus.Activated;
-      case "DEACTIVATED":
-        return GraphQLAccountStatus.Deactivated;
-      default:
-        return GraphQLAccountStatus.Activated;
-    }
-  };
 
   const graphqlLifecycleStatus = getGraphqlLifecycleStatus(backendLifecycleStatus);
   const graphqlAccountStatus = getGraphqlAccountStatus(backendAccountStatus);

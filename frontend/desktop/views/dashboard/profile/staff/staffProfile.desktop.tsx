@@ -7,6 +7,8 @@ import { StaffExtensionProfileSection } from "@/frontend/common/views/dashboard/
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileEditForm";
+import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
+import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/staff/sections/AdminOnlySection";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
 import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import { toStaffSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
@@ -148,6 +150,41 @@ export function StaffProfileDesktopView({
     />
   );
 
+  const renderAccountSection = () => {
+    if (!isAdminScope || !staffData) {
+      return null;
+    }
+    return (
+      <AccountSection
+        mode="view"
+        labels={sectionLabels}
+        scope={scope}
+        staffData={staffData}
+        isAdminScope={isAdminScope}
+        displayCurrency={displayCurrency}
+        targetUserId={targetUserId}
+      />
+    );
+  };
+
+  const renderAdminOnlySection = () => {
+    if (!isAdminScope || !staffData) {
+      return null;
+    }
+    return (
+      <AdminOnlySection
+        mode="view"
+        labels={sectionLabels}
+        profile={{
+          userId: targetUserId,
+          name: staffData.name ?? null,
+          email: staffData.email ?? null,
+          status: staffData.status ?? null,
+        }}
+      />
+    );
+  };
+
   if (mode === ProfileMode.View) {
     return (
       <Grid container spacing={3}>
@@ -158,6 +195,7 @@ export function StaffProfileDesktopView({
                 {st.adminBanner}
               </Typography>
             ) : null}
+            {renderAccountSection()}
             {renderContactSection()}
             <StaffExtensionProfileSection
               scope={scope}
@@ -165,6 +203,7 @@ export function StaffProfileDesktopView({
               hourlyRate={staffData?.hourlyRate}
               rateCurrency={staffData?.rateCurrency}
             />
+            {renderAdminOnlySection()}
           </Stack>
         </Grid>
       </Grid>

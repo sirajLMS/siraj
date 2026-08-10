@@ -1,4 +1,6 @@
-import type { TabNavItem, TabNavVariantProps } from "@/frontend/common/views/dashboard/lib/tabbedPane";
+import type { TabNavVariantProps } from "@/frontend/common/views/dashboard/lib/tabbedPane";
+
+export type { TabNavItem } from "@/frontend/common/views/dashboard/lib/tabbedPane";
 
 export interface DateTabNavItem<TabId extends string = string> {
   readonly id: TabId;
@@ -32,5 +34,3 @@ export function isDateTabNavProps<TabId extends string>(
 ): props is DateGenericTabNavVariantProps<TabId> {
   return props.variant === "date";
 }
-
-export type { TabNavItem };

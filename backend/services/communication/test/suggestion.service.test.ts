@@ -112,10 +112,36 @@ async function expectErrorMatching(promise: Promise<unknown>, predicate: (messag
   try {
     await promise;
   } catch (e) {
-    errorCaught = e as Error;
+    if (e instanceof Error) {
+      errorCaught = e;
+    } else {
+      errorCaught = new Error(String(e));
+    }
   }
   expect(errorCaught).not.toBeNull();
   expect(predicate(errorCaught?.message?.toLowerCase() ?? "")).toBe(true);
+}
+
+function mockSafeUser(id: string): UserSelectType {
+  return {
+    id,
+    name: "Test User",
+    email: "[EMAIL_REDACTED]",
+    password: "hashed",
+    rememberTokenHash: null,
+    avatarUrl: null,
+    avatarFilePath: null,
+    phone: null,
+    timezone: IanaTimezone.UTC,
+    status: AccountStatus.ACTIVATED,
+    isSuperAdmin: false,
+    lastLoginAt: null,
+    deletedAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    emailVerifiedAt: null,
+    displayCurrency: null,
+  };
 }
 
 describe("SuggestionService", () => {
@@ -160,10 +186,7 @@ describe("SuggestionService", () => {
     // tests don't require a live database (and avoid the non-UUID parent id).
     submitSuggestionRepoSpy = spyOn(SuggestionRepository, "submitSuggestion").mockResolvedValue(mockSuggestionSelect);
     // Default: submitter user has an email — recipient resolution stamps `to`.
-    findSafeByIdSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue({
-      email: "parent@test.com",
-      phone: null,
-    } as unknown as UserSelectType);
+    findSafeByIdSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser("submitter-uuid"));
   });
 
   afterEach(() => {
@@ -264,7 +287,7 @@ describe("SuggestionService", () => {
     test("dispatches NEW_SUGGESTION email with `metadata.to` set to the submitter's email", async () => {
       hasPermissionSpy.mockResolvedValue(true);
       findByUserIdSpy.mockResolvedValue(mockParent);
-      findSafeByIdSpy.mockResolvedValue({ email: "parent@test.com", phone: null } as unknown as UserSelectType);
+      findSafeByIdSpy.mockResolvedValue({ email: "parent@test.com", phone: null });
       dispatchSpy.mockResolvedValue({ channel: NotificationChannel.EMAIL, success: true });
 
       await SuggestionService.submitSuggestion(MOCK_ACTOR_ID, {
@@ -281,7 +304,7 @@ describe("SuggestionService", () => {
     test("skips email dispatch when submitter has no email", async () => {
       hasPermissionSpy.mockResolvedValue(true);
       findByUserIdSpy.mockResolvedValue(mockParent);
-      findSafeByIdSpy.mockResolvedValue({ email: null, phone: null } as unknown as UserSelectType);
+      findSafeByIdSpy.mockResolvedValue({ email: null, phone: null });
 
       await SuggestionService.submitSuggestion(MOCK_ACTOR_ID, {
         submitterName: "Test Parent",

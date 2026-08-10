@@ -136,6 +136,7 @@ export const quotaBalanceQueryDocument: TypedDocumentNode<Operations.QuotaBalanc
       totalRemaining
       totalReserved
       breakdownByExpiration {
+        id
         quotaId
         quotaName
         remaining

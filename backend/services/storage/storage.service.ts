@@ -16,7 +16,26 @@ import type {
   StorageUploadValidationParams,
 } from "@/backend/types";
 import type { SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
+import type { ValidReferenceTable } from "@/backend/types/storage/storage.types";
 import type { ErrorsLabels } from "@/shared/locale";
+
+const VALID_REFERENCE_TABLES: readonly ValidReferenceTable[] = [
+  "users",
+  "teachers",
+  "students",
+  "parents",
+  "invoices",
+  "complaints",
+  "learning_resources",
+  "staff_profiles",
+  "recurring_schedules",
+  "class_instances",
+  "storageFiles",
+];
+
+function isValidReferenceTable(value: string): value is ValidReferenceTable {
+  return (VALID_REFERENCE_TABLES as readonly string[]).includes(value);
+}
 
 // --- Extended StorageService ---
 export namespace StorageService {
@@ -178,19 +197,20 @@ export namespace StorageService {
     const userContext = await PermissionsService.getUserContext(userId);
     if (userContext.isSuperAdmin) return null;
 
-    for (const usage of usages) {
-      // Direct access for user
-      if (usage.referenceTable === "users" && usage.referenceId === userId) {
-        return null;
-      }
-      // Check access through related entities
-      if (
-        (usage.referenceTable === "teachers" || usage.referenceTable === "parents") &&
-        (await checkUserAccessThroughEntity(userId, usage.referenceTable, usage.referenceId))
-      ) {
-        return null;
-      }
+    // Direct access for user — short-circuit before async checks
+    if (usages.some(u => u.referenceTable === "users" && u.referenceId === userId)) {
+      return null;
     }
+
+    // Check access through related entities in parallel
+    const entityUsages = usages.filter(
+      (u): u is typeof u & { referenceTable: "teachers" | "parents" } =>
+        u.referenceTable === "teachers" || u.referenceTable === "parents"
+    );
+    const entityChecks = entityUsages.map(u => checkUserAccessThroughEntity(userId, u.referenceTable, u.referenceId));
+
+    const hasEntityAccess = (await Promise.all(entityChecks)).some(Boolean);
+    if (hasEntityAccess) return null;
 
     return { error: "Forbidden", status: 403 };
   }
@@ -268,10 +288,11 @@ export namespace StorageService {
     usageType: string;
     filePath: string;
   }): Promise<FileOperationResult> {
+    if (!isValidReferenceTable(input.referenceTable)) {
+      throw new Error(`Invalid reference table: ${input.referenceTable}`);
+    }
     return StorageDbRepository.registerFileUsage({
-      referenceTable: input.referenceTable as Parameters<
-        typeof StorageDbRepository.registerFileUsage
-      >[0]["referenceTable"],
+      referenceTable: input.referenceTable,
       referenceId: input.referenceId,
       usageType: input.usageType,
       filePath: input.filePath,

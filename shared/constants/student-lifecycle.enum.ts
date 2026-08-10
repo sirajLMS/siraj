@@ -1,0 +1,7 @@
+export enum StudentStatus {
+  REGULAR = "REGULAR",
+  ON_LEAVE = "ON_LEAVE",
+  SUSPENDED = "SUSPENDED",
+  ON_TRIAL = "ON_TRIAL",
+  DEACTIVATED = "DEACTIVATED",
+}

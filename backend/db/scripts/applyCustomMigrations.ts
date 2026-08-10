@@ -47,7 +47,7 @@
 import crypto from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { withStatementBreakpoints } from "@/scripts/dbActions/sqlBreakpoints";
 
 const MIGRATIONS_SRC_DIR = resolve("backend/db/migration");
@@ -72,6 +72,30 @@ interface Sidecar {
   appliedFolders: string[];
 }
 
+/** Type guard: validates that an unknown value is a valid Sidecar object. */
+function isSidecar(value: unknown): value is Sidecar {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  return (
+    "manifestHash" in value &&
+    typeof value.manifestHash === "string" &&
+    "manifest" in value &&
+    Array.isArray(value.manifest) &&
+    value.manifest.every(
+      (e): e is ManifestEntry =>
+        typeof e === "object" &&
+        e !== null &&
+        !Array.isArray(e) &&
+        "file" in e &&
+        typeof e.file === "string" &&
+        "sha256" in e &&
+        typeof e.sha256 === "string"
+    ) &&
+    "appliedFolders" in value &&
+    Array.isArray(value.appliedFolders) &&
+    value.appliedFolders.every((f): f is string => typeof f === "string")
+  );
+}
+
 /** Returns true for files that should be excluded from custom-migration bundling. */
 function isExcluded(filename: string): boolean {
   if (EXCLUDED_FILES.has(filename)) return true;
@@ -86,7 +110,7 @@ function listCustomSqlFiles(): string[] {
   if (!existsSync(MIGRATIONS_SRC_DIR)) return [];
   return readdirSync(MIGRATIONS_SRC_DIR)
     .filter(f => f.endsWith(".sql") && !isExcluded(f))
-    .sort((a, b) => a.localeCompare(b));
+    .toSorted((a, b) => a.localeCompare(b));
 }
 
 /** Builds the manifest: one entry per custom SQL file with its SHA-256. */
@@ -109,7 +133,12 @@ function computeManifestHash(manifest: ManifestEntry[]): string {
 function readSidecar(): Sidecar | null {
   if (!existsSync(SIDECAR_PATH)) return null;
   try {
-    return JSON.parse(readFileSync(SIDECAR_PATH, "utf8")) as Sidecar;
+    const parsed: unknown = JSON.parse(readFileSync(SIDECAR_PATH, "utf8"));
+    if (!isSidecar(parsed)) {
+      logger.warn("⚠️  .custom-migrations.json sidecar has invalid structure; ignoring it.");
+      return null;
+    }
+    return parsed;
   } catch {
     logger.warn("⚠️  Could not parse .custom-migrations.json sidecar; ignoring it.");
     return null;

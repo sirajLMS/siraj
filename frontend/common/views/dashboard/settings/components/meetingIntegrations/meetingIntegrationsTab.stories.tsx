@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
+  MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -39,7 +40,9 @@ const viewModelConnected: MeetingIntegrationsViewModel = createViewModelMock({
   expandedSlug: MeetingIntegrationProviderSlug.Zoom,
   connectedAccountsByProvider: {
     [MeetingIntegrationProviderSlug.Zoom]: connectedAccounts,
-  } as never,
+    [MeetingIntegrationProviderSlug.GoogleMeet]: [],
+    [MeetingIntegrationProviderSlug.MicrosoftTeams]: [],
+  },
 });
 
 const viewModelTestResult: MeetingIntegrationsViewModel = createViewModelMock({
@@ -50,7 +53,7 @@ const viewModelTestResult: MeetingIntegrationsViewModel = createViewModelMock({
     [MeetingIntegrationProviderSlug.Zoom]: {
       ok: true,
       latencyMs: 245,
-      mode: "VALIDATE_CONFIG",
+      mode: MeetingConnectionTestMode.ValidateConfig,
       testJoinUrl: "https://zoom.us/j/123456789?pwd=abc123",
       deleted: null,
       upstreamResponseSummary: "200 OK — scopes verified",
@@ -60,7 +63,9 @@ const viewModelTestResult: MeetingIntegrationsViewModel = createViewModelMock({
       requiredScopes: ["user:write:admin", "meeting:write"],
       grantedScopes: ["user:write:admin", "meeting:write", "user:read"],
     },
-  } as never,
+    [MeetingIntegrationProviderSlug.GoogleMeet]: null,
+    [MeetingIntegrationProviderSlug.MicrosoftTeams]: null,
+  },
 });
 
 const viewModelError: MeetingIntegrationsViewModel = createViewModelMock({
@@ -71,7 +76,7 @@ const viewModelError: MeetingIntegrationsViewModel = createViewModelMock({
     [MeetingIntegrationProviderSlug.GoogleMeet]: {
       ok: false,
       latencyMs: 1200,
-      mode: "VALIDATE_CONFIG",
+      mode: MeetingConnectionTestMode.ValidateConfig,
       testJoinUrl: null,
       deleted: null,
       upstreamResponseSummary: "401 Unauthorized",
@@ -81,7 +86,9 @@ const viewModelError: MeetingIntegrationsViewModel = createViewModelMock({
       requiredScopes: null,
       grantedScopes: null,
     },
-  } as never,
+    [MeetingIntegrationProviderSlug.Zoom]: null,
+    [MeetingIntegrationProviderSlug.MicrosoftTeams]: null,
+  },
 });
 
 const viewModelMetadataOpen: MeetingIntegrationsViewModel = createViewModelMock({
@@ -90,7 +97,9 @@ const viewModelMetadataOpen: MeetingIntegrationsViewModel = createViewModelMock(
   expandedSlug: MeetingIntegrationProviderSlug.Zoom,
   connectedAccountsByProvider: {
     [MeetingIntegrationProviderSlug.Zoom]: connectedAccounts,
-  } as never,
+    [MeetingIntegrationProviderSlug.GoogleMeet]: [],
+    [MeetingIntegrationProviderSlug.MicrosoftTeams]: [],
+  },
   metadataDialogAccount: {
     id: "a1",
     userId: "user1",

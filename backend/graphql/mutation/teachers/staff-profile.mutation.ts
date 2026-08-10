@@ -13,13 +13,7 @@ async function enrichWithDisplayAmount(
   profile: TeacherProfileReturnType,
   ctx: BaseContext
 ): Promise<TeacherProfileReturnType & { displayAmount: unknown }> {
-  const displayAmounts = await resolveDisplayAmountFields(
-    [profile as unknown as Record<string, unknown>],
-    ctx,
-    "hourlyRate",
-    "rateCurrency",
-    "userId"
-  );
+  const displayAmounts = await resolveDisplayAmountFields([profile], ctx, "hourlyRate", "rateCurrency", "userId");
   return {
     ...profile,
     displayAmount: displayAmounts.get(profile.id) ?? null,

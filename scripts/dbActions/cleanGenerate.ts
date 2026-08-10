@@ -60,7 +60,7 @@ export async function cleanGenerate(): Promise<number> {
   const migrationsDir = "backend/db/migration";
   const customFiles = readdirSync(migrationsDir)
     .filter(f => f.endsWith(".sql") && f !== "1-extensions.sql")
-    .sort((a, b) => a.localeCompare(b));
+    .toSorted((a, b) => a.localeCompare(b));
 
   if (customFiles.length > 0) {
     globalThis.console.log(`\nCombining ${customFiles.length} custom migrations into one...`);

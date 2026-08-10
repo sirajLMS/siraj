@@ -10,6 +10,50 @@ export type VercelUploadUrlClientPlayload = {
   contentType: string;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isHandleUploadBody(value: unknown): value is HandleUploadBody {
+  return isRecord(value) && typeof value.type === "string" && isRecord(value.payload);
+}
+
+function parseClientPayload(raw: string | null | undefined): VercelUploadUrlClientPlayload {
+  const empty: VercelUploadUrlClientPlayload = {
+    sessionId: "",
+    fileSize: 0,
+    contentType: "",
+  };
+  if (!raw) {
+    return empty;
+  }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) {
+      return empty;
+    }
+    return {
+      sessionId: typeof parsed.sessionId === "string" ? parsed.sessionId : "",
+      fileSize: typeof parsed.fileSize === "number" ? parsed.fileSize : 0,
+      contentType: typeof parsed.contentType === "string" ? parsed.contentType : "",
+    };
+  } catch {
+    return empty;
+  }
+}
+
+function parseTokenPayload(raw: string): { sessionId?: string } {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) {
+      return {};
+    }
+    return typeof parsed.sessionId === "string" ? { sessionId: parsed.sessionId } : {};
+  } catch {
+    return {};
+  }
+}
+
 async function getUserIdFromRequest(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get("authorization");
   const accessToken = extractTokenFromHeader(authHeader) ?? request.cookies.get("access_token")?.value ?? null;
@@ -134,14 +178,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     // Step 2: Parse request body from Vercel SDK
-    const body = (await request.json()) as HandleUploadBody;
+    const rawBody: unknown = await request.json();
+    if (!isHandleUploadBody(rawBody)) {
+      logger.warn("Invalid upload request body", { userId });
+      return NextResponse.json({ error: "Invalid upload request body" }, { status: 400 });
+    }
+    const body: HandleUploadBody = rawBody;
     if (body.type !== "blob.generate-client-token") {
       throw new Error("InvalidEventType");
     }
 
-    const clientPlayload: VercelUploadUrlClientPlayload = body.payload.clientPayload
-      ? (JSON.parse(body.payload.clientPayload) as VercelUploadUrlClientPlayload)
-      : ({} as VercelUploadUrlClientPlayload);
+    const clientPlayload = parseClientPayload(body.payload.clientPayload);
     const pathName = body.payload.pathname;
 
     const payloadValidationError: NextResponse | null = await validateUploadPayload(pathName, clientPlayload, userId);
@@ -216,14 +263,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         try {
           // Parse token payload
-          const rawPayload = JSON.parse(tokenPayload || "{}") as {
-            sessionId?: string;
-          };
-          const sessionId = rawPayload.sessionId;
+          const rawPayload = parseTokenPayload(tokenPayload || "{}");
+          const parsedSessionId = rawPayload.sessionId;
 
           // Mark session as used
-          if (sessionId) {
-            await StorageService.claimSignedUrl(sessionId);
+          if (parsedSessionId) {
+            await StorageService.claimSignedUrl(parsedSessionId);
           }
 
           // Create file record in database

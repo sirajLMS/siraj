@@ -3,7 +3,7 @@ import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-typ
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
 export const learningResourceRowFragment = gql`
-fragment LearningResourceRowFragment on LearningResourceRow {
+fragment LearningResourceRow on LearningResourceRow {
   id
   displayName
   filePath
@@ -22,7 +22,7 @@ export const learningResourcesQueryDocument: TypedDocumentNode<
   ${learningResourceRowFragment}
   query learningResources($searchQuery: String) {
     learningResources(searchQuery: $searchQuery) {
-      ...LearningResourceRowFragment
+      ...LearningResourceRow
     }
   }
 `;
@@ -34,7 +34,7 @@ export const uploadLearningResourceMutationDocument: TypedDocumentNode<
   ${learningResourceRowFragment}
   mutation uploadLearningResource($input: ResourceUploadInput!) {
     uploadLearningResource(input: $input) {
-      ...LearningResourceRowFragment
+      ...LearningResourceRow
     }
   }
 `;

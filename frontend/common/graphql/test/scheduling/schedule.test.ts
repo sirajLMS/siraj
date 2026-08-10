@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ClassOutcome, DayOfWeek, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  ClassOutcome,
+  ClassType,
+  DayOfWeek,
+  IanaTimezone,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { executeDstBulkUpdateMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/dst-migration.documents";
 import {
   adminDashboardScheduleQueryDocument,
@@ -289,15 +293,23 @@ describe("GraphQL Schedule Integration Tests", () => {
     const result = await mutateCreateRecurringClass(superAdminToken, {
       studentId,
       teacherId,
+      subjectId: "",
       durationMinutes: 60,
       defaultStartTime: "10:00:00",
       timezone: IanaTimezone.Utc,
-      days: [{ dayOfWeek: "MONDAY", startTime: "10:00:00", isActive: true }],
-      classType: "REGULAR",
+      days: [{ dayOfWeek: DayOfWeek.Monday, startTime: "10:00:00", isActive: true }],
+      classType: ClassType.Regular,
       generateInstancesForWeeks: 1,
       effectiveFrom: null,
       effectiveUntil: null,
-    } as unknown as CreateRecurringClassInput);
+      hourlyRate: null,
+      rateCurrency: null,
+      quotaId: null,
+      earmarkedClasses: null,
+      schedulingMode: null,
+      generationHorizonWeeks: null,
+      ondemandNoCreditsOutcome: null,
+    });
     expect(result.error).toBeDefined();
   });
 

@@ -35,6 +35,7 @@ export const errorsEn: ErrorsLabels = {
     groupSimulationAlreadyHasGroup: "You already have this permission group; choose a different group to simulate",
     insufficientPermissions: "You do not have sufficient permissions to perform this action.",
     impersonationNotAllowedWhileImpersonating: "You cannot impersonate while already impersonating another user.",
+    cannotResetOwnPasswordViaAdmin: "You cannot reset your own password via the admin path.",
     // ─── Functions (were {param} strings) ────────────────────────────
     demoGroupNotFound: (groupSlug: string) => `Demo group not found: ${groupSlug}`,
     demoGroupNoUser: (groupSlug: string) => `No user found for demo group: ${groupSlug}`,

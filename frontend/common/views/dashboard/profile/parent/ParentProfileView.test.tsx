@@ -1,10 +1,13 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
 import {
+  AccountStatus,
   CurrencyCode,
   IanaTimezone,
+  ParentStatus,
   ProfileMode,
   ProfileScope,
+  StudentStatus,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ParentProfileView } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileView";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
@@ -12,18 +15,17 @@ import type {
   AssociatedStudents,
   ParentAdminData,
   ParentOwnData,
-  ParentViewData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { profileEn } from "@/shared/locale/en/profile";
+import { profileBaseEn } from "@/shared/locale/en/profile/base";
 import { profileParentEn } from "@/shared/locale/en/profile/parent";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const mockParentProfileLabels = {
-  base: profileEn,
+  base: profileBaseEn,
   parent: profileParentEn,
 } as const;
 
-const parentOwnProfile = {
+const parentOwnProfile: ParentOwnData = {
   id: "parent-own-1",
   name: "Noor Abdullah",
   email: "noor.abdullah@example.com",
@@ -31,16 +33,18 @@ const parentOwnProfile = {
   facebook: "facebook.com/noor",
   whatsapp: "+966501234567",
   twitter: "@noor",
-} as unknown as ParentOwnData;
+  nationality: "SA",
+  address: "123 King Fahd Rd, Riyadh",
+};
 
-const parentAdminProfile = {
+const parentAdminProfile: ParentAdminData = {
   id: "parent-admin-1",
   userId: "user-parent-1",
   name: "Noor Abdullah",
   email: "noor.abdullah@example.com",
   avatarUrl: null,
-  lifecycleStatus: "REGULAR",
-  accountStatus: "ACTIVATED",
+  lifecycleStatus: ParentStatus.Regular,
+  accountStatus: AccountStatus.Activated,
   phone: "+966 50 123 4567",
   nationality: "SA",
   address: "123 King Fahd Rd, Riyadh",
@@ -54,9 +58,9 @@ const parentAdminProfile = {
   timezone: IanaTimezone.AsiaRiyadh,
   createdAt: "2024-01-15T00:00:00.000Z",
   updatedAt: "2024-06-01T00:00:00.000Z",
-} as unknown as ParentAdminData;
+};
 
-const associatedStudents = {
+const associatedStudents: AssociatedStudents = {
   id: "associated-students-1",
   totalCount: 1,
   rows: [
@@ -64,7 +68,7 @@ const associatedStudents = {
       id: "student-1",
       name: "Adam Noor",
       studentAvatarUrl: null,
-      status: "REGULAR",
+      status: StudentStatus.Regular,
       primaryTeacherId: "teacher-1",
       teacherUserId: "user-teacher-1",
       teacherName: "Ahmed Hassan",
@@ -74,9 +78,9 @@ const associatedStudents = {
       classesTotal: 20,
     },
   ],
-} as unknown as AssociatedStudents;
+};
 
-const baseEditData = {
+const baseEditData: ParentAdminEditFormData = {
   name: "Noor Abdullah",
   email: "noor.abdullah@example.com",
   displayCurrency: null,
@@ -90,8 +94,8 @@ const baseEditData = {
   feeAmount: "500",
   currency: CurrencyCode.Sar,
   timezone: IanaTimezone.AsiaRiyadh,
-  lifecycleStatus: "REGULAR",
-} as unknown as ParentAdminEditFormData;
+  lifecycleStatus: ParentStatus.Regular,
+};
 
 const noop = async () => {};
 const noopVoid = () => {};
@@ -116,7 +120,7 @@ describe("ParentProfileView admin sections", () => {
         isSaving={false}
         onSubmit={noop}
         onRetry={noopVoid}
-        parentData={parentOwnProfile as ParentViewData}
+        parentData={parentOwnProfile}
         editData={baseEditData}
         avatarUrl={null}
         displayCurrency={null}
@@ -147,9 +151,9 @@ describe("ParentProfileView admin sections", () => {
         loading={false}
         error={null}
         isSaving={false}
-        onSubmit={noop as (formData: ParentAdminEditFormData) => Promise<void>}
+        onSubmit={noop}
         onRetry={noopVoid}
-        parentData={parentAdminProfile as ParentViewData}
+        parentData={parentAdminProfile}
         editData={baseEditData}
         avatarUrl={null}
         displayCurrency={CurrencyCode.Sar}

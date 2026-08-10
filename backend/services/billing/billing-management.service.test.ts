@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { CurrencyCode, InvoiceType, NotificationEventType } from "@/backend/enum";
+import type { ErrorsLabels } from "@/shared/locale";
 
 // ---------------------------------------------------------------------------
 // Mocks — registered before the service module is imported.
@@ -106,8 +107,7 @@ function chainWith(results: () => unknown[]): Record<string, unknown> {
 //   (2) `dispatchUnpaidInvoicesForStudent` — passes no arguments (selects all columns)
 // We branch by the presence of `userId` in the first argument.
 const dbSelectMock = mock((arg?: unknown) => {
-  const a = arg as { userId?: unknown } | undefined;
-  if (a && "userId" in a) {
+  if (arg !== null && arg !== undefined && typeof arg === "object" && "userId" in arg) {
     return chainWith(staffSelectRowsMock);
   }
   return chainWith(unpaidInvoicesSelectMock);
@@ -115,21 +115,21 @@ const dbSelectMock = mock((arg?: unknown) => {
 
 const dbTransactionMock = mock(async (fn: (tx: unknown) => Promise<unknown>) => fn({}));
 
-mock.module("@/backend/db/drizzleDb", () => ({
+await mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     select: dbSelectMock,
     transaction: dbTransactionMock,
   },
 }));
 
-mock.module("@/backend/db/schema", () => ({
+await mock.module("@/backend/db/schema", () => ({
   groupPermissions: {},
   permissions: {},
   userPermissionGroups: {},
   invoices: {},
 }));
 
-mock.module("@/backend/db/repo", () => ({
+await mock.module("@/backend/db/repo", () => ({
   BillingRepository: {
     createInvoice: createInvoiceMock,
     createInvoiceCoverageMonths: createInvoiceCoverageMonthsMock,
@@ -164,7 +164,7 @@ mock.module("@/backend/db/repo", () => ({
 
 const hasPermissionMock = mock(async () => true);
 
-mock.module("@/backend/services/auth/permissions.service", () => ({
+await mock.module("@/backend/services/auth/permissions.service", () => ({
   PermissionsService: {
     hasPermission: hasPermissionMock,
   },
@@ -180,7 +180,7 @@ const syncUnpaidNotificationsMock = mock(async () => ({
   items: [],
 }));
 
-mock.module("@/backend/services/system/notification-sync.service", () => ({
+await mock.module("@/backend/services/system/notification-sync.service", () => ({
   NotificationSyncService: {
     syncUnpaidNotifications: syncUnpaidNotificationsMock,
   },
@@ -188,7 +188,7 @@ mock.module("@/backend/services/system/notification-sync.service", () => ({
 
 // Re-export NotificationSyncService barrel-aligned (the service file imports
 // via `@/backend/services`).
-mock.module("@/backend/services", () => ({
+await mock.module("@/backend/services", () => ({
   NotificationSyncService: {
     syncUnpaidNotifications: syncUnpaidNotificationsMock,
   },
@@ -208,6 +208,15 @@ interface CapturedBuilderCall {
   eventType?: NotificationEventType;
   invoice?: unknown;
   locale?: string;
+}
+
+interface TestPayload {
+  userId: string;
+  channel: string;
+  eventType: NotificationEventType;
+  title: string;
+  body: string;
+  metadata?: { action?: string };
 }
 
 const buildInvoiceGeneratedCalls: CapturedBuilderCall[] = [];
@@ -263,35 +272,37 @@ const buildInvoiceStatusChangedPayloadsMock = mock(
   }
 );
 
-mock.module("@/backend/services/notification/notification-payloads.builders", () => ({
+await mock.module("@/backend/services/notification/notification-payloads.builders", () => ({
   buildInvoiceGeneratedPayloads: buildInvoiceGeneratedPayloadsMock,
   buildInvoiceStatusChangedPayloads: buildInvoiceStatusChangedPayloadsMock,
 }));
 
 interface DispatchCall {
-  payloads: unknown[];
+  payloads: TestPayload[];
   affectedUserIds: string[];
   locale?: string;
 }
 
 const dispatchCalls: DispatchCall[] = [];
-const dispatchWithPreferencesMock = mock(async (payloads: unknown[], affectedUserIds: string[], locale?: string) => {
-  dispatchCalls.push({ payloads, affectedUserIds, locale });
-  // Simulate a successful multi-channel dispatch.
-  const out: unknown[] = [];
-  for (const p of payloads as Array<{ channel: string }>) {
-    out.push({ channel: p.channel, success: true });
+const dispatchWithPreferencesMock = mock(
+  async (payloads: TestPayload[], affectedUserIds: string[], locale?: string) => {
+    dispatchCalls.push({ payloads, affectedUserIds, locale });
+    // Simulate a successful multi-channel dispatch.
+    const out: unknown[] = [];
+    for (const p of payloads) {
+      out.push({ channel: p.channel, success: true });
+    }
+    return out;
   }
-  return out;
-});
+);
 
-mock.module("@/backend/services/notification/notification-dispatch.helpers", () => ({
+await mock.module("@/backend/services/notification/notification-dispatch.helpers", () => ({
   dispatchWithPreferences: dispatchWithPreferencesMock,
 }));
 
 // --- Logger mock ---------------------------------------------------------
 
-mock.module("@/backend/lib", () => ({
+await mock.module("@/backend/lib", () => ({
   logger: {
     info: () => {},
     warn: () => {},
@@ -310,7 +321,7 @@ mock.module("@/backend/lib", () => ({
 
 // --- Locale mock (the service imports `@/shared/locale` for type-only) ---
 
-mock.module("@/shared/locale", () => ({
+await mock.module("@/shared/locale", () => ({
   getServerTranslations: () => ({
     errorsTranslations: new Proxy(
       {},
@@ -326,7 +337,7 @@ mock.module("@/shared/locale", () => ({
 
 // --- Proof-file helpers mock --------------------------------------------
 
-mock.module("@/backend/services/billing/billing-payment-proof.helpers", () => ({
+await mock.module("@/backend/services/billing/billing-payment-proof.helpers", () => ({
   assertInvoiceBelongsToParentUser: async () => undefined,
   validateProofFile: async () => ({ filePath: "uploads/proof.png", mimeType: "image/png" }),
   linkProofToInvoice: async () => undefined,
@@ -349,6 +360,12 @@ async function importService(): Promise<typeof import("@/backend/services/billin
   return import("@/backend/services/billing/billing-management.service");
 }
 
+function assertIsErrorsLabels(value: unknown): asserts value is ErrorsLabels {
+  if (value === null || typeof value !== "object") {
+    throw new Error("tErrorsStub must be an object");
+  }
+}
+
 const tErrorsStub = new Proxy(
   {},
   {
@@ -357,7 +374,8 @@ const tErrorsStub = new Proxy(
       return undefined;
     },
   }
-) as Record<string, () => string>;
+);
+assertIsErrorsLabels(tErrorsStub);
 
 function resetMocks(): void {
   buildInvoiceGeneratedCalls.length = 0;
@@ -442,10 +460,7 @@ function expectStatusChangedDispatchToParent(action: string): void {
 
   expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
   expect(dispatchCalls[0]?.affectedUserIds).toEqual([PARENT_USER_ID]);
-  const dispatched = dispatchCalls[0]?.payloads as Array<{
-    eventType: NotificationEventType;
-    metadata?: { action?: string };
-  }>;
+  const dispatched = dispatchCalls[0]?.payloads ?? [];
   expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_STATUS_CHANGED)).toBe(true);
   expect(dispatched.every(p => p.metadata?.action === action)).toBe(true);
 }
@@ -478,12 +493,7 @@ describe("BillingManagementService notification dispatch", () => {
     test("dispatches INVOICE_GENERATED to the parent via dispatchWithPreferences", async () => {
       const { BillingManagementService } = await importService();
 
-      await BillingManagementService.createManualInvoice(
-        ACTOR_ID,
-        createManualInvoiceInput(null),
-        tErrorsStub as never,
-        "en"
-      );
+      await BillingManagementService.createManualInvoice(ACTOR_ID, createManualInvoiceInput(null), tErrorsStub, "en");
 
       // Builder called once for the parent.
       expect(buildInvoiceGeneratedPayloadsMock).toHaveBeenCalledTimes(1);
@@ -493,7 +503,7 @@ describe("BillingManagementService notification dispatch", () => {
       expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
       const affectedUserIds = dispatchCalls[0]?.affectedUserIds;
       expect(affectedUserIds).toEqual([PARENT_USER_ID]);
-      const dispatched = dispatchCalls[0]?.payloads as Array<{ eventType: NotificationEventType; channel: string }>;
+      const dispatched = dispatchCalls[0]?.payloads ?? [];
       expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_GENERATED)).toBe(true);
       // 4 channels emitted by builder.
       expect(dispatched).toHaveLength(4);
@@ -503,12 +513,7 @@ describe("BillingManagementService notification dispatch", () => {
     test("preserves the tray-summary syncUnpaidNotifications call (F9)", async () => {
       const { BillingManagementService } = await importService();
 
-      await BillingManagementService.createManualInvoice(
-        ACTOR_ID,
-        createManualInvoiceInput(true),
-        tErrorsStub as never,
-        "en"
-      );
+      await BillingManagementService.createManualInvoice(ACTOR_ID, createManualInvoiceInput(true), tErrorsStub, "en");
 
       // syncUnpaidNotifications must fire because sendEmail=true → tray-summary kept.
       expect(syncUnpaidNotificationsMock).toHaveBeenCalled();
@@ -519,12 +524,7 @@ describe("BillingManagementService notification dispatch", () => {
     test("dispatches INVOICE_GENERATED for each unpaid invoice and keeps the tray-summary sync (F9)", async () => {
       const { BillingManagementService } = await importService();
 
-      const result = await BillingManagementService.sendPaymentReminder(
-        ACTOR_ID,
-        STUDENT_ID,
-        tErrorsStub as never,
-        "en"
-      );
+      const result = await BillingManagementService.sendPaymentReminder(ACTOR_ID, STUDENT_ID, tErrorsStub, "en");
 
       expect(result.success).toBe(true);
       expect(syncUnpaidNotificationsMock).toHaveBeenCalledTimes(1);
@@ -536,7 +536,7 @@ describe("BillingManagementService notification dispatch", () => {
       expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(2);
       for (const call of dispatchCalls) {
         expect(call.affectedUserIds).toEqual([PARENT_USER_ID]);
-        const dispatched = call.payloads as Array<{ eventType: NotificationEventType }>;
+        const dispatched = call.payloads;
         expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_GENERATED)).toBe(true);
       }
     });
@@ -550,7 +550,7 @@ describe("BillingManagementService notification dispatch", () => {
         PARENT_USER_ID,
         INVOICE_ID,
         PROOF_FILE_ID,
-        tErrorsStub as never,
+        tErrorsStub,
         undefined,
         "en"
       );
@@ -565,11 +565,7 @@ describe("BillingManagementService notification dispatch", () => {
       // dispatchWithPreferences called once with the staff fanout.
       expect(dispatchWithPreferencesMock).toHaveBeenCalledTimes(1);
       expect(dispatchCalls[0]?.affectedUserIds).toEqual([STAFF_USER_ID_A, STAFF_USER_ID_B]);
-      const dispatched = dispatchCalls[0]?.payloads as Array<{
-        userId: string;
-        eventType: NotificationEventType;
-        metadata?: { action?: string };
-      }>;
+      const dispatched = dispatchCalls[0]?.payloads ?? [];
       // 2 staff × 4 channels = 8 payloads.
       expect(dispatched).toHaveLength(8);
       expect(dispatched.every(p => p.eventType === NotificationEventType.INVOICE_STATUS_CHANGED)).toBe(true);
@@ -582,7 +578,7 @@ describe("BillingManagementService notification dispatch", () => {
       const { BillingManagementService } = await importService();
       getInvoiceByIdMock.mockResolvedValue(mockPaymentPendingInvoice);
 
-      await BillingManagementService.approvePaymentProof(ACTOR_ID, INVOICE_ID, tErrorsStub as never, undefined, "en");
+      await BillingManagementService.approvePaymentProof(ACTOR_ID, INVOICE_ID, tErrorsStub, undefined, "en");
 
       expectStatusChangedDispatchToParent("proofApproved");
     });
@@ -593,14 +589,7 @@ describe("BillingManagementService notification dispatch", () => {
       const { BillingManagementService } = await importService();
       getInvoiceByIdMock.mockResolvedValue(mockPaymentPendingInvoice);
 
-      await BillingManagementService.rejectPaymentProof(
-        ACTOR_ID,
-        INVOICE_ID,
-        tErrorsStub as never,
-        "Bad file",
-        undefined,
-        "en"
-      );
+      await BillingManagementService.rejectPaymentProof(ACTOR_ID, INVOICE_ID, tErrorsStub, "Bad file", undefined, "en");
 
       expectStatusChangedDispatchToParent("proofRejected");
     });
@@ -610,14 +599,7 @@ describe("BillingManagementService notification dispatch", () => {
     test("dispatches INVOICE_STATUS_CHANGED with action=markedPaid to the parent", async () => {
       const { BillingManagementService } = await importService();
 
-      await BillingManagementService.markInvoicePaid(
-        ACTOR_ID,
-        INVOICE_ID,
-        PROOF_FILE_ID,
-        tErrorsStub as never,
-        undefined,
-        "en"
-      );
+      await BillingManagementService.markInvoicePaid(ACTOR_ID, INVOICE_ID, PROOF_FILE_ID, tErrorsStub, undefined, "en");
 
       expectStatusChangedDispatchToParent("markedPaid");
     });
@@ -631,7 +613,7 @@ describe("BillingManagementService notification dispatch", () => {
       const result = await BillingManagementService.createManualInvoice(
         ACTOR_ID,
         createManualInvoiceInput(null),
-        tErrorsStub as never,
+        tErrorsStub,
         "en"
       );
 

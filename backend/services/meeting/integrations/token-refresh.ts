@@ -15,7 +15,7 @@
  */
 
 import { getEnvironmentConfig } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { MeetingProvider } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { ProviderReauthRequiredError } from "@/backend/services/meeting/channels/IMeetingChannel";
 
@@ -40,6 +40,20 @@ interface TokenEndpointResponse {
 interface TokenEndpointError {
   error: string;
   error_description?: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isTokenEndpointError(value: unknown): value is TokenEndpointError {
+  if (!isRecord(value)) return false;
+  return typeof value.error === "string";
+}
+
+function isTokenEndpointResponse(value: unknown): value is TokenEndpointResponse {
+  if (!isRecord(value)) return false;
+  return typeof value.access_token === "string" && typeof value.expires_in === "number";
 }
 
 // ============================================================================
@@ -77,6 +91,7 @@ function getProviderTokenConfig(providerSlug: MeetingProvider): ProviderTokenCon
       };
     }
   }
+  throw new Error(`Unhandled case in getProviderTokenConfig`);
 }
 
 // ============================================================================
@@ -126,7 +141,8 @@ export async function refreshAccessToken(
   if (!response.ok) {
     let errorBody: TokenEndpointError | null = null;
     try {
-      errorBody = (await response.json()) as TokenEndpointError;
+      const parsed: unknown = await response.json();
+      errorBody = isTokenEndpointError(parsed) ? parsed : null;
     } catch {
       // Non-JSON error response
     }
@@ -157,7 +173,11 @@ export async function refreshAccessToken(
     );
   }
 
-  const tokenData = (await response.json()) as TokenEndpointResponse;
+  const parsed: unknown = await response.json();
+  if (!isTokenEndpointResponse(parsed)) {
+    throw new Error(`Token refresh failed for "${providerSlug}": malformed token endpoint response`);
+  }
+  const tokenData = parsed;
   const expiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
 
   return {

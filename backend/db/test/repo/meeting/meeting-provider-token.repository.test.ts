@@ -23,7 +23,7 @@ describe("MeetingProviderTokenRepository", () => {
     tokenTest("inserts a new token row and retrieves it", async tx => {
       const user = await createTestUser(tx);
       const slug = `zoom-${randomUUID().slice(0, 8)}`;
-      const expiresAt = new Date(Date.now() + 3600_000);
+      const expiresAt = new Date(Date.now() + 3600000);
 
       const saved = await MeetingProviderTokenRepository.upsert(
         {
@@ -63,7 +63,7 @@ describe("MeetingProviderTokenRepository", () => {
           providerSlug: slug,
           accessToken: "new-token",
           refreshToken: "refresh-2",
-          expiresAt: new Date(Date.now() + 7200_000),
+          expiresAt: new Date(Date.now() + 7200000),
         },
         tx
       );
@@ -136,7 +136,7 @@ describe("MeetingProviderTokenRepository", () => {
       const slug = `zoom-${randomUUID().slice(0, 8)}`;
       const userA = await createTestUser(tx);
       const userB = await createTestUser(tx);
-      const expiresAt = new Date(Date.now() + 3600_000);
+      const expiresAt = new Date(Date.now() + 3600000);
 
       await MeetingProviderTokenRepository.upsert(
         { userId: userA.id, providerSlug: slug, accessToken: "token-a", expiresAt },

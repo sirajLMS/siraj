@@ -1,6 +1,6 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 import type { TeacherSelectType, UserSelectType } from "@/backend/types";
 
@@ -30,13 +30,14 @@ export async function seedOrGet(teachersList: TeacherSelectType[], usersList: Us
   }
 
   const selectedNotes = seedConfig.profile === "standard" ? NOTE_SPECS : NOTE_SPECS.slice(0, 1);
-  const specs: TeacherNoteSeedSpec[] = selectedNotes.map(note => ({
-    ...note,
-    teacherId: teacher.id,
-    createdByUserId: adminUser.id,
-    isPublished: true,
-    priority: 1,
-  }));
+  const specs: TeacherNoteSeedSpec[] = selectedNotes.map(note =>
+    Object.assign(note, {
+      teacherId: teacher.id,
+      createdByUserId: adminUser.id,
+      isPublished: true,
+      priority: 1,
+    })
+  );
 
   const results = await orchestrateSeedMany({
     specs,

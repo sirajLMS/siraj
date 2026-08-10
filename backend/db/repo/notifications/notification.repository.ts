@@ -28,6 +28,25 @@ const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
   [NotificationDeliveryStatus.FAILED]: -1,
 };
 
+// Lookup map from the raw DB status string to the NotificationDeliveryStatus enum.
+// The pgEnum column infers as `string` at the Drizzle level, so this map restores
+// the enum type without resorting to an unsafe type assertion.
+const DELIVERY_STATUS_LOOKUP: Record<string, NotificationDeliveryStatus> = {
+  [NotificationDeliveryStatus.PENDING]: NotificationDeliveryStatus.PENDING,
+  [NotificationDeliveryStatus.SENT]: NotificationDeliveryStatus.SENT,
+  [NotificationDeliveryStatus.DELIVERED]: NotificationDeliveryStatus.DELIVERED,
+  [NotificationDeliveryStatus.OPENED]: NotificationDeliveryStatus.OPENED,
+  [NotificationDeliveryStatus.FAILED]: NotificationDeliveryStatus.FAILED,
+};
+
+const toDeliveryStatus = (value: string): NotificationDeliveryStatus => {
+  const status = DELIVERY_STATUS_LOOKUP[value];
+  if (!status) {
+    throw new Error(`Invalid NotificationDeliveryStatus: ${value}`);
+  }
+  return status;
+};
+
 export namespace NotificationRepository {
   export type NotificationDeliveryInsertInput = CreateNotificationDeliveryInput & {
     status: NotificationDeliveryStatus;
@@ -248,6 +267,88 @@ export namespace NotificationRepository {
     return tx ? runner(tx) : db.transaction(runner);
   };
 
+  const tryUpdateConflictingWebhookRow = async (
+    t: DBTransaction,
+    incomingProviderMessageId: string | null,
+    current: NotificationDeliverySelectType,
+    input: UpdateDeliveryStatusInput,
+    statusTimestamps: ReturnType<typeof buildStatusTimestamps>,
+    now: Date
+  ): Promise<NotificationDeliverySelectType | null> => {
+    // r10-015: Dual-lock strategy — the advisory lock on deliveryId alone is
+    // insufficient when two concurrent adapter calls target DIFFERENT
+    // deliveryIds but both assign the SAME providerMessageId. Each would
+    // pass the conflicting-row check since neither blocks the other on
+    // deliveryId. To close this race, we acquire a SECOND advisory lock
+    // keyed on the incoming providerMessageId when it differs from the
+    // current row's providerMessageId. This serializes concurrent updates
+    // that are assigning the same providerMessageId regardless of which
+    // deliveryId they target, preventing a unique-constraint violation.
+    if (incomingProviderMessageId && incomingProviderMessageId !== current.providerMessageId) {
+      await t.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${incomingProviderMessageId}))`);
+    }
+
+    // Fix 3: Race-condition guard — if the webhook handler already created a
+    // row with the same providerMessageId (webhook won the race), the adapter's
+    // UPDATE would violate the unique constraint. When the adapter is setting a
+    // new providerMessageId, check whether a webhook-created row already owns
+    // it. If so, merge the status transition into THAT row instead of failing.
+    if (incomingProviderMessageId && incomingProviderMessageId !== current.providerMessageId) {
+      const conflicting = await t
+        .select()
+        .from(notificationDeliveries)
+        .where(eq(notificationDeliveries.providerMessageId, incomingProviderMessageId))
+        .limit(1)
+        .for("update");
+
+      if (conflicting.length > 0) {
+        return updateConflictingWebhookRow(t, conflicting[0], input, statusTimestamps, now);
+      }
+    }
+
+    return null;
+  };
+
+  const updateConflictingWebhookRow = async (
+    t: DBTransaction,
+    webhookRow: NotificationDeliverySelectType,
+    input: UpdateDeliveryStatusInput,
+    statusTimestamps: ReturnType<typeof buildStatusTimestamps>,
+    now: Date
+  ): Promise<NotificationDeliverySelectType> => {
+    const webhookStatus = toDeliveryStatus(webhookRow.status);
+
+    // Only update if the new status represents a valid forward transition
+    // for the webhook-created row (B3 forward-only guard).
+    const webhookRank = STATUS_ORDER[webhookStatus];
+    const nextRank = STATUS_ORDER[input.status];
+    const isValidTransition =
+      nextRank > webhookRank ||
+      input.status === NotificationDeliveryStatus.FAILED ||
+      (webhookRank === -1 && nextRank > 0);
+
+    if (!isValidTransition) {
+      return webhookRow;
+    }
+
+    const [updated] = await t
+      .update(notificationDeliveries)
+      .set({
+        status: input.status,
+        failureReason: input.failureReason ?? webhookRow.failureReason,
+        webhookPayload: input.webhookPayload ?? webhookRow.webhookPayload,
+        sentAt: webhookRow.sentAt ?? statusTimestamps.sentAt,
+        deliveredAt: webhookRow.deliveredAt ?? statusTimestamps.deliveredAt,
+        openedAt: webhookRow.openedAt ?? statusTimestamps.openedAt,
+        failedAt: webhookRow.failedAt ?? statusTimestamps.failedAt,
+        updatedAt: now,
+      })
+      .where(eq(notificationDeliveries.id, webhookRow.id))
+      .returning();
+
+    return updated;
+  };
+
   export const updateDeliveryStatus = async (
     input: UpdateDeliveryStatusInput,
     tx?: DBTransaction,
@@ -268,74 +369,22 @@ export namespace NotificationRepository {
       }
 
       const current = results[0];
-      await assertValidStatusTransition(current.status as NotificationDeliveryStatus, input.status, locale);
+      await assertValidStatusTransition(toDeliveryStatus(current.status), input.status, locale);
 
       const statusTimestamps = buildStatusTimestamps(input.status, now);
 
       const incomingProviderMessageId = input.providerMessageId ?? current.providerMessageId;
 
-      // r10-015: Dual-lock strategy — the advisory lock on deliveryId alone is
-      // insufficient when two concurrent adapter calls target DIFFERENT
-      // deliveryIds but both assign the SAME providerMessageId. Each would
-      // pass the conflicting-row check since neither blocks the other on
-      // deliveryId. To close this race, we acquire a SECOND advisory lock
-      // keyed on the incoming providerMessageId when it differs from the
-      // current row's providerMessageId. This serializes concurrent updates
-      // that are assigning the same providerMessageId regardless of which
-      // deliveryId they target, preventing a unique-constraint violation.
-      if (incomingProviderMessageId && incomingProviderMessageId !== current.providerMessageId) {
-        await t.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${incomingProviderMessageId}))`);
-      }
-
-      // Fix 3: Race-condition guard — if the webhook handler already created a
-      // row with the same providerMessageId (webhook won the race), the adapter's
-      // UPDATE would violate the unique constraint. When the adapter is setting a
-      // new providerMessageId, check whether a webhook-created row already owns
-      // it. If so, merge the status transition into THAT row instead of failing.
-      if (incomingProviderMessageId && incomingProviderMessageId !== current.providerMessageId) {
-        const conflicting = await t
-          .select()
-          .from(notificationDeliveries)
-          .where(eq(notificationDeliveries.providerMessageId, incomingProviderMessageId))
-          .limit(1)
-          .for("update");
-
-        if (conflicting.length > 0) {
-          // Webhook-created row exists with this providerMessageId — update it
-          // instead of the adapter's row to avoid unique constraint violation.
-          const webhookRow = conflicting[0];
-          const webhookStatus = webhookRow.status as NotificationDeliveryStatus;
-
-          // Only update if the new status represents a valid forward transition
-          // for the webhook-created row (B3 forward-only guard).
-          const webhookRank = STATUS_ORDER[webhookStatus];
-          const nextRank = STATUS_ORDER[input.status];
-          const isValidTransition =
-            nextRank > webhookRank ||
-            input.status === NotificationDeliveryStatus.FAILED ||
-            (webhookRank === -1 && nextRank > 0);
-
-          if (!isValidTransition) {
-            return webhookRow;
-          }
-
-          const [updated] = await t
-            .update(notificationDeliveries)
-            .set({
-              status: input.status,
-              failureReason: input.failureReason ?? webhookRow.failureReason,
-              webhookPayload: input.webhookPayload ?? webhookRow.webhookPayload,
-              sentAt: webhookRow.sentAt ?? statusTimestamps.sentAt,
-              deliveredAt: webhookRow.deliveredAt ?? statusTimestamps.deliveredAt,
-              openedAt: webhookRow.openedAt ?? statusTimestamps.openedAt,
-              failedAt: webhookRow.failedAt ?? statusTimestamps.failedAt,
-              updatedAt: now,
-            })
-            .where(eq(notificationDeliveries.id, webhookRow.id))
-            .returning();
-
-          return updated;
-        }
+      const conflictResult = await tryUpdateConflictingWebhookRow(
+        t,
+        incomingProviderMessageId,
+        current,
+        input,
+        statusTimestamps,
+        now
+      );
+      if (conflictResult) {
+        return conflictResult;
       }
 
       const [updated] = await t
@@ -453,6 +502,149 @@ export namespace NotificationRepository {
    * doesn't exist and those fields are absent, returns null (graceful skip —
    * will be reconciled on subsequent webhook or adapter row creation).
    */
+  const updateExistingWebhookDelivery = async (
+    t: DBTransaction,
+    current: NotificationDeliverySelectType,
+    status: NotificationDeliveryStatus,
+    webhookPayload: Record<string, unknown> | null | undefined,
+    failureReason: string | null | undefined,
+    now: Date
+  ): Promise<NotificationDeliverySelectType> => {
+    const currentStatus = toDeliveryStatus(current.status);
+
+    // Same-status webhook — no-op, return current row.
+    if (currentStatus === status) {
+      return current;
+    }
+
+    // B3: Forward-only rank guard.
+    // Use the same logic as assertValidStatusTransition but silently skip
+    // stale/duplicate events instead of throwing (webhooks are idempotent).
+    //   - nextRank > currentRank (normal forward progression), OR
+    //   - status === FAILED (terminal failure reachable from any state), OR
+    //   - currentRank === -1 and nextRank > 0 (resurrect transient failed)
+    const currentRank = STATUS_ORDER[currentStatus];
+    const nextRank = STATUS_ORDER[status];
+    const isValidTransition =
+      nextRank > currentRank || status === NotificationDeliveryStatus.FAILED || (currentRank === -1 && nextRank > 0);
+
+    if (!isValidTransition) {
+      // Stale/duplicate webhook that would downgrade status — skip.
+      return current;
+    }
+
+    const statusTimestamps = buildStatusTimestamps(status, now);
+
+    const [updated] = await t
+      .update(notificationDeliveries)
+      .set({
+        status,
+        failureReason: failureReason ?? null,
+        webhookPayload: webhookPayload ?? null,
+        sentAt: current.sentAt ?? statusTimestamps.sentAt,
+        deliveredAt: current.deliveredAt ?? statusTimestamps.deliveredAt,
+        openedAt: current.openedAt ?? statusTimestamps.openedAt,
+        failedAt: current.failedAt ?? statusTimestamps.failedAt,
+        updatedAt: now,
+      })
+      .where(eq(notificationDeliveries.id, current.id))
+      .returning();
+
+    return updated;
+  };
+
+  const insertWebhookDelivery = async (
+    t: DBTransaction,
+    input: {
+      providerMessageId: string;
+      status: NotificationDeliveryStatus;
+      webhookPayload: Record<string, unknown> | null | undefined;
+      failureReason: string | null | undefined;
+      userId?: string;
+      channel?: NotificationChannel;
+      eventType?: NotificationEventType;
+    },
+    now: Date
+  ): Promise<NotificationDeliverySelectType | null> => {
+    const { providerMessageId, status, webhookPayload, failureReason, userId, channel, eventType } = input;
+
+    // P3: Row not found — attempt INSERT with ON CONFLICT DO UPDATE if we have required fields.
+    if (!userId || !channel || !eventType) {
+      // Cannot INSERT without required NOT NULL fields — graceful skip.
+      return null;
+    }
+
+    const statusTimestamps = buildStatusTimestamps(status, now);
+
+    // B3: SQL rank guard for ON CONFLICT branch — mirrors isValidTransition:
+    //   nextRank > currentRank || status === FAILED || (currentRank === -1 && nextRank > 0)
+    // IMPORTANT: These SQL CASE values must stay in sync with STATUS_ORDER
+    // above. The values are derived from the actual NotificationDeliveryStatus
+    // enum members and STATUS_ORDER map so any drift surfaces at compile time.
+    // See test at backend/db/repo/notifications/test/notification-rank-guard.test.ts.
+    const statusRankSql = (col: unknown) =>
+      sql`CASE ${col} WHEN ${NotificationDeliveryStatus.PENDING} THEN ${STATUS_ORDER[NotificationDeliveryStatus.PENDING]} WHEN ${NotificationDeliveryStatus.SENT} THEN ${STATUS_ORDER[NotificationDeliveryStatus.SENT]} WHEN ${NotificationDeliveryStatus.DELIVERED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.DELIVERED]} WHEN ${NotificationDeliveryStatus.OPENED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.OPENED]} WHEN ${NotificationDeliveryStatus.FAILED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.FAILED]} ELSE -2 END`;
+    const currentRankSql = statusRankSql(notificationDeliveries.status);
+    // Incoming rank — uses the same STATUS_ORDER mapping via sql.raw()
+    // referencing the actual NotificationDeliveryStatus enum members.
+    const incomingRankSql = sql`(CASE WHEN ${status} = ${NotificationDeliveryStatus.PENDING} THEN ${STATUS_ORDER[NotificationDeliveryStatus.PENDING]} WHEN ${status} = ${NotificationDeliveryStatus.SENT} THEN ${STATUS_ORDER[NotificationDeliveryStatus.SENT]} WHEN ${status} = ${NotificationDeliveryStatus.DELIVERED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.DELIVERED]} WHEN ${status} = ${NotificationDeliveryStatus.OPENED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.OPENED]} WHEN ${status} = ${NotificationDeliveryStatus.FAILED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.FAILED]} ELSE -2 END)`;
+    const rankGuardSql = sql`(${incomingRankSql} > ${currentRankSql} OR ${incomingRankSql} = -1 OR (${currentRankSql} = -1 AND ${incomingRankSql} > 0))`;
+
+    const [inserted] = await t
+      .insert(notificationDeliveries)
+      .values({
+        userId,
+        channel,
+        eventType,
+        providerMessageId,
+        status,
+        failureReason: failureReason ?? null,
+        webhookPayload: webhookPayload ?? null,
+        sentAt: statusTimestamps.sentAt,
+        deliveredAt: statusTimestamps.deliveredAt,
+        openedAt: statusTimestamps.openedAt,
+        failedAt: statusTimestamps.failedAt,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: notificationDeliveries.providerMessageId,
+        targetWhere: sql`${notificationDeliveries.providerMessageId} IS NOT NULL`,
+        set: {
+          status,
+          eventType,
+          failureReason: failureReason ?? null,
+          webhookPayload: webhookPayload ?? null,
+          sentAt: statusTimestamps.sentAt,
+          deliveredAt: statusTimestamps.deliveredAt,
+          openedAt: statusTimestamps.openedAt,
+          failedAt: statusTimestamps.failedAt,
+          updatedAt: now,
+        },
+        setWhere: rankGuardSql,
+      })
+      .returning();
+
+    // r10-038: When `inserted` is undefined here, it has a DUAL meaning:
+    //   1. The INSERT found no existing row AND no conflict occurred — the
+    //      row genuinely does not exist (e.g., INSERT failed for other
+    //      reasons). This is the "no existing delivery" case.
+    //   2. The INSERT hit an ON CONFLICT (row already exists with the same
+    //      providerMessageId) AND the rank guard (setWhere) evaluated to
+    //      false, meaning the incoming status is stale/lower-rank. In this
+    //      case RETURNING yields nothing, so `inserted` is undefined — but
+    //      the row DOES exist; it was simply skipped by the rank guard.
+    //
+    // The caller's "no existing delivery" log is misleading in case 2
+    // (the actual scenario is a rank-guard rejection on concurrent insert).
+    //
+    // If needed, the caller can disambiguate by calling
+    // `getDeliveryByProviderMessageId` to check whether the row exists.
+    // We do not perform that check here to avoid an extra query inside the
+    // transaction; the rank-guard skip is idempotent and harmless.
+    return inserted;
+  };
+
   export const handleDeliveryWebhook = async (
     input: DeliveryWebhookInput,
     tx?: DBTransaction
@@ -495,127 +687,14 @@ export namespace NotificationRepository {
         .for("update");
 
       if (existing.length > 0) {
-        const current = existing[0];
-        const currentStatus = current.status as NotificationDeliveryStatus;
-
-        // Same-status webhook — no-op, return current row.
-        if (currentStatus === status) {
-          return current;
-        }
-
-        // B3: Forward-only rank guard.
-        // Use the same logic as assertValidStatusTransition but silently skip
-        // stale/duplicate events instead of throwing (webhooks are idempotent).
-        //   - nextRank > currentRank (normal forward progression), OR
-        //   - status === FAILED (terminal failure reachable from any state), OR
-        //   - currentRank === -1 and nextRank > 0 (resurrect transient failed)
-        const currentRank = STATUS_ORDER[currentStatus];
-        const nextRank = STATUS_ORDER[status];
-        const isValidTransition =
-          nextRank > currentRank ||
-          status === NotificationDeliveryStatus.FAILED ||
-          (currentRank === -1 && nextRank > 0);
-
-        if (!isValidTransition) {
-          // Stale/duplicate webhook that would downgrade status — skip.
-          return current;
-        }
-
-        const statusTimestamps = buildStatusTimestamps(status, now);
-
-        const [updated] = await t
-          .update(notificationDeliveries)
-          .set({
-            status,
-            failureReason: failureReason ?? null,
-            webhookPayload: webhookPayload ?? null,
-            sentAt: current.sentAt ?? statusTimestamps.sentAt,
-            deliveredAt: current.deliveredAt ?? statusTimestamps.deliveredAt,
-            openedAt: current.openedAt ?? statusTimestamps.openedAt,
-            failedAt: current.failedAt ?? statusTimestamps.failedAt,
-            updatedAt: now,
-          })
-          .where(eq(notificationDeliveries.id, current.id))
-          .returning();
-
-        return updated;
+        return updateExistingWebhookDelivery(t, existing[0], status, webhookPayload, failureReason, now);
       }
 
-      // P3: Row not found — attempt INSERT with ON CONFLICT DO UPDATE if we have required fields.
-      if (!userId || !channel || !eventType) {
-        // Cannot INSERT without required NOT NULL fields — graceful skip.
-        return null;
-      }
-
-      const statusTimestamps = buildStatusTimestamps(status, now);
-
-      // B3: SQL rank guard for ON CONFLICT branch — mirrors isValidTransition:
-      //   nextRank > currentRank || status === FAILED || (currentRank === -1 && nextRank > 0)
-      // IMPORTANT: These SQL CASE values must stay in sync with STATUS_ORDER
-      // above. The values are derived from the actual NotificationDeliveryStatus
-      // enum members and STATUS_ORDER map so any drift surfaces at compile time.
-      // See test at backend/db/repo/notifications/test/notification-rank-guard.test.ts.
-      const statusRankSql = (col: unknown) =>
-        sql`CASE ${col} WHEN ${NotificationDeliveryStatus.PENDING} THEN ${STATUS_ORDER[NotificationDeliveryStatus.PENDING]} WHEN ${NotificationDeliveryStatus.SENT} THEN ${STATUS_ORDER[NotificationDeliveryStatus.SENT]} WHEN ${NotificationDeliveryStatus.DELIVERED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.DELIVERED]} WHEN ${NotificationDeliveryStatus.OPENED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.OPENED]} WHEN ${NotificationDeliveryStatus.FAILED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.FAILED]} ELSE -2 END`;
-      const currentRankSql = statusRankSql(notificationDeliveries.status);
-      // Incoming rank — uses the same STATUS_ORDER mapping via sql.raw()
-      // referencing the actual NotificationDeliveryStatus enum members.
-      const incomingRankSql = sql`(CASE WHEN ${status} = ${NotificationDeliveryStatus.PENDING} THEN ${STATUS_ORDER[NotificationDeliveryStatus.PENDING]} WHEN ${status} = ${NotificationDeliveryStatus.SENT} THEN ${STATUS_ORDER[NotificationDeliveryStatus.SENT]} WHEN ${status} = ${NotificationDeliveryStatus.DELIVERED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.DELIVERED]} WHEN ${status} = ${NotificationDeliveryStatus.OPENED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.OPENED]} WHEN ${status} = ${NotificationDeliveryStatus.FAILED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.FAILED]} ELSE -2 END)`;
-      const rankGuardSql = sql`(${incomingRankSql} > ${currentRankSql} OR ${incomingRankSql} = -1 OR (${currentRankSql} = -1 AND ${incomingRankSql} > 0))`;
-
-      const [inserted] = await t
-        .insert(notificationDeliveries)
-        .values({
-          userId,
-          channel,
-          eventType,
-          providerMessageId,
-          status,
-          failureReason: failureReason ?? null,
-          webhookPayload: webhookPayload ?? null,
-          sentAt: statusTimestamps.sentAt,
-          deliveredAt: statusTimestamps.deliveredAt,
-          openedAt: statusTimestamps.openedAt,
-          failedAt: statusTimestamps.failedAt,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .onConflictDoUpdate({
-          target: notificationDeliveries.providerMessageId,
-          targetWhere: sql`${notificationDeliveries.providerMessageId} IS NOT NULL`,
-          set: {
-            status,
-            eventType,
-            failureReason: failureReason ?? null,
-            webhookPayload: webhookPayload ?? null,
-            sentAt: statusTimestamps.sentAt,
-            deliveredAt: statusTimestamps.deliveredAt,
-            openedAt: statusTimestamps.openedAt,
-            failedAt: statusTimestamps.failedAt,
-            updatedAt: now,
-          },
-          setWhere: rankGuardSql,
-        })
-        .returning();
-
-      // r10-038: When `inserted` is undefined here, it has a DUAL meaning:
-      //   1. The INSERT found no existing row AND no conflict occurred — the
-      //      row genuinely does not exist (e.g., INSERT failed for other
-      //      reasons). This is the "no existing delivery" case.
-      //   2. The INSERT hit an ON CONFLICT (row already exists with the same
-      //      providerMessageId) AND the rank guard (setWhere) evaluated to
-      //      false, meaning the incoming status is stale/lower-rank. In this
-      //      case RETURNING yields nothing, so `inserted` is undefined — but
-      //      the row DOES exist; it was simply skipped by the rank guard.
-      //
-      // The caller's "no existing delivery" log is misleading in case 2
-      // (the actual scenario is a rank-guard rejection on concurrent insert).
-      //
-      // If needed, the caller can disambiguate by calling
-      // `getDeliveryByProviderMessageId` to check whether the row exists.
-      // We do not perform that check here to avoid an extra query inside the
-      // transaction; the rank-guard skip is idempotent and harmless.
-      return inserted;
+      return insertWebhookDelivery(
+        t,
+        { providerMessageId, status, webhookPayload, failureReason, userId, channel, eventType },
+        now
+      );
     };
 
     return tx ? runner(tx) : db.transaction(runner);
@@ -661,7 +740,7 @@ export namespace NotificationRepository {
       .groupBy(notificationDeliveries.status);
 
     const normalizedStatusCounts: NotificationDeliveryStatusCount[] = statusCounts.map(row => ({
-      status: row.status as NotificationDeliveryStatus,
+      status: toDeliveryStatus(row.status),
       count: row.count,
     }));
 

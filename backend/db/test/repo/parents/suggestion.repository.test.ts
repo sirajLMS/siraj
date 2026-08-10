@@ -19,7 +19,10 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (errorCaught instanceof Error) {
+    return errorCaught;
+  }
+  throw new Error("Expected thrown value to be an Error instance");
 }
 
 function suggestionTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
@@ -73,21 +76,7 @@ async function insertSuggestion(
       createdAt: overrides.createdAt ?? now,
     })
     .returning();
-  const rows = result as unknown as Array<{
-    id: string;
-    parentId: string;
-    submitterName: string;
-    body: string;
-    status: string;
-    adminResponse: string | null;
-    reviewedByUserId: string | null;
-    reviewedAt: Date | null;
-    duplicateOfId: string | null;
-    deletedAt: Date | null;
-    emailSentAt: Date | null;
-    createdAt: Date;
-  }>;
-  return rows[0];
+  return result[0];
 }
 
 async function insertOriginalDuplicatePair(
@@ -316,7 +305,7 @@ describe("SuggestionRepository — getAdminSuggestionQueue", () => {
 
     const result = await SuggestionRepository.getAdminSuggestionQueue({ limit: 50, offset: 0, status: "PENDING" }, tx);
 
-    expect(result.rows.every(r => r.status === SuggestionStatus.PENDING)).toBeTrue();
+    expect(result.rows.every(r => r.status === "PENDING")).toBeTrue();
     expect(result.rows.some(r => r.body === "Reviewed admin")).toBeFalse();
   });
 
@@ -357,9 +346,9 @@ describe("SuggestionRepository — getAdminSuggestionQueue", () => {
   suggestionTest("supports pagination with limit and offset", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "PagAdmSug");
 
-    for (let i = 0; i < 3; i++) {
-      await insertSuggestion(tx, parent.id, { body: `Paginated admin suggestion ${i}` });
-    }
+    await Promise.all(
+      Array.from({ length: 3 }, (_, i) => insertSuggestion(tx, parent.id, { body: `Paginated admin suggestion ${i}` }))
+    );
 
     const page1 = await SuggestionRepository.getAdminSuggestionQueue({ limit: 2, offset: 0 }, tx);
     const page2 = await SuggestionRepository.getAdminSuggestionQueue({ limit: 2, offset: 2 }, tx);
@@ -443,7 +432,7 @@ describe("SuggestionRepository — markSuggestionReviewed (Story 15)", () => {
     expectReviewedFields(result, user.id);
   });
 
-  expectNonExistentError("throws for non-existent suggestion ID", tx =>
+  void expectNonExistentError("throws for non-existent suggestion ID", tx =>
     SuggestionRepository.markSuggestionReviewed({ suggestionId: NIL_UUID, reviewedByUserId: NIL_UUID }, tx)
   );
 });
@@ -466,7 +455,7 @@ describe("SuggestionRepository — respondToSuggestion", () => {
     expectReviewedFields(result, user.id);
   });
 
-  expectNonExistentError("throws for non-existent suggestion ID", tx =>
+  void expectNonExistentError("throws for non-existent suggestion ID", tx =>
     SuggestionRepository.respondToSuggestion(
       { suggestionId: NIL_UUID, adminResponse: "Should fail", reviewedByUserId: NIL_UUID },
       tx
@@ -512,7 +501,7 @@ describe("SuggestionRepository — markAsDuplicate", () => {
     expect(result.status).toBe(SuggestionStatus.DUPLICATE);
   });
 
-  expectNonExistentError("throws for non-existent duplicate suggestion ID", async tx => {
+  void expectNonExistentError("throws for non-existent duplicate suggestion ID", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "MarkDupNF");
     const original = await insertSuggestion(tx, parent.id, { status: "REVIEWED" });
     return SuggestionRepository.markAsDuplicate(
@@ -521,7 +510,7 @@ describe("SuggestionRepository — markAsDuplicate", () => {
     );
   });
 
-  expectNonExistentError("throws for non-existent original suggestion ID (FK violation)", async tx => {
+  void expectNonExistentError("throws for non-existent original suggestion ID (FK violation)", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "MarkDupOrig");
     const duplicate = await insertSuggestion(tx, parent.id, { status: "PENDING" });
     return SuggestionRepository.markAsDuplicate(
@@ -583,9 +572,11 @@ describe("SuggestionRepository — searchSuggestions", () => {
   suggestionTest("limits results to 10", async tx => {
     const { parent } = await setupParentForSuggestion(tx, "SearchLimit");
 
-    for (let i = 0; i < 15; i++) {
-      await insertSuggestion(tx, parent.id, { body: `Limit test suggestion ${i} with keyword` });
-    }
+    await Promise.all(
+      Array.from({ length: 15 }, (_, i) =>
+        insertSuggestion(tx, parent.id, { body: `Limit test suggestion ${i} with keyword` })
+      )
+    );
 
     const result = await SuggestionRepository.searchSuggestions("keyword", NIL_UUID, tx);
 

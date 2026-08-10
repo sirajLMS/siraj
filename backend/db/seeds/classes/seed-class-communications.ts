@@ -1,5 +1,5 @@
 import type { SeedConfig } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { GroupClassService } from "@/backend/services/group-class/group-class.service";
 import type { ClassCommunicationSelectType } from "@/backend/types";
 
@@ -16,38 +16,38 @@ export async function seedOrGet(groupClassesList: GroupClassEntity[], _config?: 
   const existingIds = await GroupClassService.listGroupClassIdsWithCommunications(
     groupClassesList.map(groupClass => groupClass.id)
   );
-  const results: ClassCommunicationSelectType[] = [];
+  const toSeed = groupClassesList.filter(groupClass => !existingIds.has(groupClass.id));
 
-  for (const groupClass of groupClassesList) {
-    if (existingIds.has(groupClass.id)) continue;
+  const insertedArrays = await Promise.all(
+    toSeed.map(async groupClass => {
+      return GroupClassService.createManyCommunications([
+        {
+          groupClassId: groupClass.id,
+          type: "email",
+          title: "Class Reminder",
+          description: `Reminder for ${groupClass.courseName}`,
+          isActive: true,
+          isDelivered: true,
+          timestamp: new Date(now.getTime() - 86400000),
+          notificationDeliveryId: null,
+          classStatusEventId: null,
+        },
+        {
+          groupClassId: groupClass.id,
+          type: "sms",
+          title: "Schedule Update",
+          description: `Schedule updated for ${groupClass.courseName}`,
+          isActive: true,
+          isDelivered: false,
+          timestamp: now,
+          notificationDeliveryId: null,
+          classStatusEventId: null,
+        },
+      ]);
+    })
+  );
 
-    const inserted = await GroupClassService.createManyCommunications([
-      {
-        groupClassId: groupClass.id,
-        type: "email",
-        title: "Class Reminder",
-        description: `Reminder for ${groupClass.courseName}`,
-        isActive: true,
-        isDelivered: true,
-        timestamp: new Date(now.getTime() - 86400000),
-        notificationDeliveryId: null,
-        classStatusEventId: null,
-      },
-      {
-        groupClassId: groupClass.id,
-        type: "sms",
-        title: "Schedule Update",
-        description: `Schedule updated for ${groupClass.courseName}`,
-        isActive: true,
-        isDelivered: false,
-        timestamp: now,
-        notificationDeliveryId: null,
-        classStatusEventId: null,
-      },
-    ]);
-
-    results.push(...inserted);
-  }
+  const results: ClassCommunicationSelectType[] = insertedArrays.flat();
 
   logger.info(`System class communications seeded (${results.length} rows).`);
   return results;

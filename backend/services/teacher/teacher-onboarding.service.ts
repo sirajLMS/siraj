@@ -1,6 +1,6 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { TeacherRepository } from "@/backend/db/repo";
-import { AppPermission, type CurrencyCode, type Gender, SystemPermissionGroupSlug } from "@/backend/enum";
+import { AppPermission, type CurrencyCode, Gender, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
@@ -31,6 +31,13 @@ export interface TeacherOnboardingInput {
   readonly rateCurrency?: CurrencyCode | null;
   readonly displayCurrency?: CurrencyCode | null;
   readonly initialPayoutMethod?: Omit<UserPaymentMethodSubmitInput, "userId"> | null;
+}
+
+const VALID_GENDERS = new Set(Object.values(Gender) as readonly string[]);
+
+function isGenderOrNull(value: string | null): value is Gender | null {
+  if (value === null) return true;
+  return VALID_GENDERS.has(value);
 }
 
 export interface TeacherOnboardingResult {
@@ -109,7 +116,7 @@ export namespace TeacherOnboardingService {
       name: user.name,
       email: user.email,
       phone: teacher.phone,
-      gender: teacher.gender as Gender | null,
+      gender: isGenderOrNull(teacher.gender) ? teacher.gender : null,
       status: teacher.status,
     };
   }

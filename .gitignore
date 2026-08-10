@@ -69,6 +69,7 @@ coverage/
 .next-dev
 tsconfig.tsbuildinfo
 .quality-gate-state.json
+.quality-gate-lock/
 
 eslint-results.json
 *storybook.log
@@ -105,3 +106,8 @@ scripts/run-test/feedback/feedback*.md
 
 .graphql-test-heartbeats/dump.rdb
 .graphql-test-heartbeats/
+
+.eslintcache-type-aware
+.oxlint-baseline.json
+.oxlint/
+nohup.out

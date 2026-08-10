@@ -13,6 +13,7 @@ import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import {
   CLASS_TYPE_OPTIONS,
+  type ClassType,
   type RecurringClassFormFieldsProps,
 } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
@@ -23,6 +24,12 @@ import {
 import { DaysScheduleSectionDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/daysScheduleSection.desktop";
 import { DurationInputDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/durationInput.desktop";
 import { TimeInputDesktop } from "@/frontend/desktop/views/dashboard/classes/recurring/components/timeInput.desktop";
+
+const VALID_CLASS_TYPES: ReadonlySet<string> = new Set(CLASS_TYPE_OPTIONS);
+
+function isClassType(value: string): value is ClassType {
+  return VALID_CLASS_TYPES.has(value);
+}
 
 interface OptionSelectDesktopProps {
   readonly labelId: string;
@@ -254,7 +261,7 @@ interface RateSectionDesktopProps {
 
 function RateSectionDesktop({ register, control, labels, isSubmitting }: RateSectionDesktopProps) {
   const rateCurrency = useWatch({ control, name: "rateCurrency" });
-  const currencySymbol = rateCurrency ? getCurrencySymbol(rateCurrency as string) : "";
+  const currencySymbol = rateCurrency ? getCurrencySymbol(rateCurrency) : "";
   return (
     <Box sx={{ display: "flex", gap: 3, flexDirection: "row", alignItems: "flex-start" }}>
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -321,7 +328,9 @@ export function RecurringClassFormFieldsDesktop({
         isSubmitting={isSubmitting}
         classType={classType}
         onClassTypeChange={val => {
-          setValue("classType", val as RecurringClassFormData["classType"], { shouldValidate: true });
+          if (isClassType(val)) {
+            setValue("classType", val, { shouldValidate: true });
+          }
         }}
       />
 

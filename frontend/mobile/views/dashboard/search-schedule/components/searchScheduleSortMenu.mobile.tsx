@@ -28,9 +28,7 @@ export function SearchScheduleSortMenuMobile({
           onClick={onSortMenuOpen}
           size="small"
           color={sortActive ? "primary" : "default"}
-          sx={theme => ({
-            ...(sortActive ? { backgroundColor: alpha(theme.palette.primary.main, 0.12) } : {}),
-          })}
+          sx={theme => (sortActive ? { backgroundColor: alpha(theme.palette.primary.main, 0.12) } : {})}
         >
           <SortOutlined fontSize="small" />
         </IconButton>

@@ -3,12 +3,12 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
-import { parseCurrencyCode } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   AttendanceReportPaidAmountReturnType,
   AttendanceReportRowReturnType,
 } from "@/backend/types/books/report.types";
+import { parseCurrencyCode } from "@/shared/lib/enum";
 
 export enum ReportGroupingMode {
   DATE = "DATE",
@@ -161,11 +161,12 @@ export namespace ReportRepository {
         const paidByGroup = await fetchPaidAmountsByGroup(filters, groupKeyExpr, tx, true);
 
         logger.debug(`[ReportRepository.generateAttendanceReport] Generated ${results.length} rows.`);
-        return results.map(row => ({
-          ...row,
-          paidAmounts: paidByGroup.get(row.groupKey) ?? [],
-          engagementGrowth: null,
-        }));
+        return results.map(row =>
+          Object.assign(row, {
+            paidAmounts: paidByGroup.get(row.groupKey) ?? [],
+            engagementGrowth: null,
+          })
+        );
       }
 
       const results = await q
@@ -187,11 +188,12 @@ export namespace ReportRepository {
       const paidByGroup = await fetchPaidAmountsByGroup(filters, groupKeyExpr, tx, false);
 
       logger.debug(`[ReportRepository.generateAttendanceReport] Generated ${results.length} rows.`);
-      return results.map(row => ({
-        ...row,
-        paidAmounts: paidByGroup.get(row.groupKey) ?? [],
-        engagementGrowth: null,
-      }));
+      return results.map(row =>
+        Object.assign(row, {
+          paidAmounts: paidByGroup.get(row.groupKey) ?? [],
+          engagementGrowth: null,
+        })
+      );
     } catch (error) {
       logger.error("[ReportRepository.generateAttendanceReport] Fatal query execution error:", error);
       throw error;

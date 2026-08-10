@@ -1,6 +1,5 @@
 import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
-import { ClassOutcome } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
 import type { ClassInstanceSelectType } from "@/backend/types";
 
@@ -13,7 +12,7 @@ export async function seedOrGet(classInstancesList: ClassInstanceSelectType[], c
     return [];
   }
 
-  const takenInstances = classInstancesList.filter(ci => ci.outcome === ClassOutcome.TAKEN);
+  const takenInstances = classInstancesList.filter(ci => ci.outcome === "TAKEN");
   const sampleRate = seedConfig.profile === "standard" ? 10 : 50;
   const inputs = [];
 

@@ -16,7 +16,7 @@ export type MobilePersonProfileLinkProps = {
   readonly fallbackInitial?: string;
   readonly label?: string;
   /** Wider than `TypographyProps["variant"]` to admit custom theme variants like `bodySm`. */
-  readonly typographyVariant?: TypographyProps["variant"] | (string & {});
+  readonly typographyVariant?: NonNullable<TypographyProps["variant"]> | (string & {});
   readonly fontWeight?: number;
   /** When true, use primary color for the name (linked look). Default true when href is set. */
   readonly emphasizeLink?: boolean;

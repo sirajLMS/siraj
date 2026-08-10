@@ -34,83 +34,66 @@ export namespace QuotaNotificationService {
     }
   }
 
-  export const sendQuotaExpiringSoon = async (input: {
+  export const sendQuotaExpiringSoon = (input: {
     affectedUserIds: string[];
     quotaName: string;
     validUntil: string;
     remaining: number;
     locale?: string;
-  }): Promise<void> => {
-    await dispatch(buildQuotaExpiringSoonPayloads, input, "Quota expiring soon notification dispatch failed");
-  };
+  }): Promise<void> =>
+    dispatch(buildQuotaExpiringSoonPayloads, input, "Quota expiring soon notification dispatch failed");
 
-  export const sendQuotaExpired = async (input: {
+  export const sendQuotaExpired = (input: {
     affectedUserIds: string[];
     quotaName: string;
     locale?: string;
-  }): Promise<void> => {
-    await dispatch(buildQuotaExpiredPayloads, input, "Quota expired notification dispatch failed");
-  };
+  }): Promise<void> => dispatch(buildQuotaExpiredPayloads, input, "Quota expired notification dispatch failed");
 
-  export const sendQuotaLowBalance = async (input: {
+  export const sendQuotaLowBalance = (input: {
     affectedUserIds: string[];
     studentName: string;
     remaining: number;
     totalClasses: number;
     locale?: string;
-  }): Promise<void> => {
-    await dispatch(buildQuotaLowBalancePayloads, input, "Quota low balance notification dispatch failed");
-  };
+  }): Promise<void> => dispatch(buildQuotaLowBalancePayloads, input, "Quota low balance notification dispatch failed");
 
-  export const sendOndemandInstancePendingCredit = async (input: {
+  export const sendOndemandInstancePendingCredit = (input: {
     affectedUserIds: string[];
     studentName: string;
     scheduledStartAt: string;
     locale?: string;
-  }): Promise<void> => {
-    await dispatch(
+  }): Promise<void> =>
+    dispatch(
       buildOndemandInstancePendingCreditPayloads,
       input,
       "On-demand pending credit notification dispatch failed"
     );
-  };
 
-  export const sendOndemandInstanceReminderT3 = async (input: {
+  export const sendOndemandInstanceReminderT3 = (input: {
     affectedUserIds: string[];
     studentName: string;
     scheduledStartAt: string;
     locale?: string;
-  }): Promise<void> => {
-    await dispatch(
-      buildOndemandInstanceReminderT3Payloads,
-      input,
-      "On-demand T-3 reminder notification dispatch failed"
-    );
-  };
+  }): Promise<void> =>
+    dispatch(buildOndemandInstanceReminderT3Payloads, input, "On-demand T-3 reminder notification dispatch failed");
 
-  export const sendOndemandInstanceReminderT1 = async (input: {
+  export const sendOndemandInstanceReminderT1 = (input: {
     affectedUserIds: string[];
     studentName: string;
     scheduledStartAt: string;
     locale?: string;
-  }): Promise<void> => {
-    await dispatch(
-      buildOndemandInstanceReminderT1Payloads,
-      input,
-      "On-demand T-1 reminder notification dispatch failed"
-    );
-  };
+  }): Promise<void> =>
+    dispatch(buildOndemandInstanceReminderT1Payloads, input, "On-demand T-1 reminder notification dispatch failed");
 
-  export const sendOndemandTeacherDailyDigest = async (input: {
+  export const sendOndemandTeacherDailyDigest = (input: {
     affectedUserIds: string[];
     teacherName: string;
     pendingCount: number;
     locale?: string;
-  }): Promise<void> => {
-    await dispatch(
+  }): Promise<void> =>
+    dispatch(
       buildOndemandTeacherDailyDigestPayloads,
       input,
       "On-demand teacher daily digest notification dispatch failed"
     );
-  };
 }

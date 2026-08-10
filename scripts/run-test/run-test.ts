@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, relative, sep } from "node:path";
+import { withProcessLock } from "@/scripts/lib/process-lock";
 
 const BUN_BIN = join(homedir(), ".bun", "bin", "bun");
 const PROJECT_ROOT = process.cwd();
@@ -96,7 +97,7 @@ function parseArgs(args: string[]): ParsedArgs {
   let focus: string | null = null;
   let feedback: string | null = null;
   let context: string | null = null;
-  let listFeedback = false;
+  let shouldListFeedback = false;
   let testPath: string | null = null;
 
   let i = 0;
@@ -116,7 +117,7 @@ function parseArgs(args: string[]): ParsedArgs {
       context = requireStringArg(args, i, "--context");
       i++;
     } else if (arg === "--list-feedback") {
-      listFeedback = true;
+      shouldListFeedback = true;
     } else if (!arg.startsWith("-")) {
       testPath = arg;
     } else {
@@ -126,7 +127,7 @@ function parseArgs(args: string[]): ParsedArgs {
     i++;
   }
 
-  return { help, last, focus, feedback, context, listFeedback, testPath };
+  return { help, last, focus, feedback, context, listFeedback: shouldListFeedback, testPath };
 }
 
 async function runTest(testPath: string): Promise<number> {
@@ -187,8 +188,8 @@ function findLatestLog(testPath: string): string | null {
       const fullPath = join(LOGS_DIR, entry);
       return existsSync(fullPath) && existsSync(`${fullPath}${sep}`) ? true : existsSync(fullPath);
     })
-    .sort()
-    .reverse();
+    .toSorted((a, b) => a.localeCompare(b))
+    .toReversed();
 
   for (const tsDir of timestampDirs) {
     const candidate = join(LOGS_DIR, tsDir, expectedLogName);
@@ -228,11 +229,11 @@ function extractTestName(trimmed: string): string {
 }
 
 function isFailResultLine(trimmed: string): boolean {
-  return /^\(fail\)/.test(trimmed);
+  return trimmed.startsWith("(fail)");
 }
 
 function isPassResultLine(trimmed: string): boolean {
-  return /^\(pass\)/.test(trimmed);
+  return trimmed.startsWith("(pass)");
 }
 
 interface FailEntry {
@@ -299,10 +300,10 @@ function scanLines(lines: string[]): ScanResult {
   for (let i = 0; i < lines.length; i++) {
     const trimmed = lines[i].trim();
 
-    const passMatch = trimmed.match(/^(\d+)\s+pass/);
+    const passMatch = /^(\d+)\s+pass/.exec(trimmed);
     if (passMatch) passes = Number.parseInt(passMatch[1], 10);
 
-    const failMatch = trimmed.match(/^(\d+)\s+fail/);
+    const failMatch = /^(\d+)\s+fail/.exec(trimmed);
     if (failMatch) fails = Number.parseInt(failMatch[1], 10);
 
     if (isResultOrSummaryLine(trimmed)) resultLineIndices.push(i);
@@ -322,7 +323,7 @@ function parseTestLog(logContent: string, logFilePath: string, focusStr: string 
 
   const { passes, fails, failEntries, resultLineIndices } = scanLines(lines);
 
-  const sortedResultIndices = [...resultLineIndices].sort((a, b) => a - b);
+  const sortedResultIndices = [...resultLineIndices].toSorted((a, b) => a - b);
   computeErrorStartLines(failEntries, sortedResultIndices);
 
   const failedTests: string[] = [];
@@ -454,8 +455,8 @@ function getFeedbackFiles(): string[] {
 
   return readdirSync(FEEDBACK_DIR)
     .filter(f => f.startsWith("feedback-") && f.endsWith(".md"))
-    .sort()
-    .reverse();
+    .toSorted((a, b) => a.localeCompare(b))
+    .toReversed();
 }
 
 function listFeedback(): void {
@@ -470,9 +471,9 @@ function listFeedback(): void {
 
   for (const file of files) {
     const content = readFileSync(join(FEEDBACK_DIR, file), "utf8");
-    const statusMatch = content.match(/\*\*Status\*\*:\s*(\w+)/);
+    const statusMatch = /\*\*Status\*\*:\s*(\w+)/.exec(content);
     const status = statusMatch ? statusMatch[1] : "unknown";
-    const timestampMatch = content.match(/\*\*Timestamp\*\*:\s*(.+)/);
+    const timestampMatch = /\*\*Timestamp\*\*:\s*(.+)/.exec(content);
     const timestamp = timestampMatch ? timestampMatch[1].trim() : "unknown";
     const feedbackText = extractFeedbackText(content);
 
@@ -521,7 +522,9 @@ async function main(): Promise<void> {
     return;
   }
 
-  const exitCode = await runTest(resolvedPath);
+  const exitCode = await withProcessLock(`run-test: ${testPath}`, async () => {
+    return await runTest(resolvedPath);
+  });
   process.exit(exitCode);
 }
 

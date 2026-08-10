@@ -16,7 +16,7 @@ import { useEffect, useMemo } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { CountryAutocomplete } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
-import type { CountryCode, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CountryCode, type CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { activateSupportedCurrencyMutationDocument } from "@/frontend/common/graphql/sharedDocuments/billing/currency-catalog.documents";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
@@ -27,6 +27,17 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 import type { SupportedCurrenciesLabels } from "@/shared/locale/types";
 
 const FORM_ID = "supported-currency-activate-form";
+
+const VALID_COUNTRY_CODES = new Set(Object.values(CountryCode) as readonly string[]);
+
+function isCountryCode(value: string): value is CountryCode {
+  return VALID_COUNTRY_CODES.has(value);
+}
+
+function toCountryCodeOrEmpty(value: string | null | undefined): CountryCode | "" {
+  if (value && isCountryCode(value)) return value;
+  return "";
+}
 
 type ActivateFormValues = {
   code: CurrencyCode | "";
@@ -116,7 +127,7 @@ function ActivateCurrencyFormFields({ control, errors, isEdit, excludedCodes, t 
         render={({ field }) => (
           <CountryAutocomplete
             country={resolveCountry(field.value)}
-            onChangeAction={country => field.onChange(country.code as CountryCode)}
+            onChangeAction={country => field.onChange(country.code)}
             onClearAction={() => field.onChange("")}
             label={t.countryField}
             fullWidth
@@ -188,7 +199,7 @@ function useActivateCurrencyDialog({ open, row, onClose, onSaved }: SupportedCur
     reset({
       code: row.code,
       symbol: row.symbol,
-      countryCode: (row.countryCode as CountryCode | "") ?? "",
+      countryCode: toCountryCodeOrEmpty(row.countryCode),
       decimals: "",
       sortOrder: "",
     });
@@ -201,7 +212,7 @@ function useActivateCurrencyDialog({ open, row, onClose, onSaved }: SupportedCur
     const catalogEntry: CurrencyOption | undefined = getCurrencyByCode(selectedCode);
     if (catalogEntry && !currentSymbol) {
       setValue("symbol", catalogEntry.symbol);
-      setValue("countryCode", (catalogEntry.countryCode as CountryCode | "") ?? "");
+      setValue("countryCode", toCountryCodeOrEmpty(catalogEntry.countryCode));
     }
   }, [selectedCode, currentSymbol, setValue]);
 

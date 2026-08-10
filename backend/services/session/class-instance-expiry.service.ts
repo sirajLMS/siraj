@@ -1,7 +1,7 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { NotificationEventType } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { DEFAULT_MISSED_GRACE_MINUTES } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -53,20 +53,24 @@ export namespace ClassInstanceExpiryService {
 
     const locale = options?.locale;
 
-    let processedCount = 0;
-    for (const row of expiredRows) {
+    // Per-instance processing is fully isolated: each instance owns its own
+    // try/catch boundaries so one failure never halts the batch or surfaces
+    // as a 500 to the cron caller. We collect the per-instance promises and
+    // run them in parallel via `Promise.all` instead of awaiting each one
+    // sequentially inside a loop.
+    const processOne = async (row: { id: string }): Promise<number> => {
+      const tErrors: ErrorsLabels = getServerTranslations(locale ?? "ar").errorsTranslations;
       try {
-        const tErrors: ErrorsLabels = getServerTranslations(locale ?? "ar").errorsTranslations;
         const updated = await SchedulingRepository.markClassMissedBySystem(row.id, undefined, tErrors);
-        if (updated) {
-          processedCount += 1;
+        if (!updated) {
+          return 0;
         }
       } catch (error) {
         logger.error("Failed to auto-mark missed class instance", {
           classInstanceId: row.id,
           error,
         });
-        continue;
+        return 0;
       }
 
       // Per-instance CLASS_MARKED_MISSED dispatch to the parent only (the
@@ -82,7 +86,12 @@ export namespace ClassInstanceExpiryService {
           error: error instanceof Error ? error.message : String(error),
         });
       }
-    }
+
+      return 1;
+    };
+
+    const results = await Promise.all(expiredRows.map(row => processOne(row)));
+    const processedCount = results.reduce((sum, value) => sum + value, 0);
 
     if (processedCount > 0) {
       logger.info("Auto-marked missed class instances", { processedCount });

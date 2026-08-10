@@ -83,9 +83,9 @@ export const EnvConfigUpsertInputPothosObject = gqlSchemaBuilder
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-async function findEnvConfigEntry(key: string): Promise<EnvConfigEntry | undefined> {
+async function findEnvConfigEntry(key: string): Promise<EnvConfigEntry | null> {
   const entries = await listEnvConfigEntries();
-  return entries.find(entry => entry.key === key);
+  return entries.find(entry => entry.key === key) ?? null;
 }
 
 function handleEnvConfigServiceError(error: unknown, tErrors: ErrorsLabels): never {
@@ -189,13 +189,7 @@ gqlSchemaBuilder.mutationField("deleteEnvConfigEntry", t =>
       key: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      return executeEnvConfigMutation(
-        ctx,
-        args.key,
-        "delete",
-        () => deleteEnvConfigOverride(args.key),
-        undefined // no new value for delete
-      );
+      return executeEnvConfigMutation(ctx, args.key, "delete", () => deleteEnvConfigOverride(args.key));
     },
   })
 );

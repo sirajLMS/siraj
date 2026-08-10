@@ -18,12 +18,23 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (!(errorCaught instanceof Error)) {
+    throw new Error(`Expected an Error instance but got: ${String(errorCaught)}`);
+  }
+  return errorCaught;
+}
+
+/**
+ * Type guard that narrows an unknown value to DBTransaction for mock-based tests.
+ * Performs a structural check on the minimal methods exercised by the test mock.
+ */
+function isDbTransaction(value: unknown): value is DBTransaction {
+  return typeof value === "object" && value !== null && "select" in value && "insert" in value;
 }
 
 type ParentSetupOptions = {
-  userOverrides?: Parameters<typeof createTestUser>[1];
-  parentOverrides?: Parameters<typeof createTestParent>[2];
+  userOverrides?: Exclude<Parameters<typeof createTestUser>[1], undefined>;
+  parentOverrides?: Exclude<Parameters<typeof createTestParent>[2], undefined>;
 };
 
 async function setupParent(tx: DBTransaction, label: string, emailPrefix: string, options: ParentSetupOptions = {}) {
@@ -57,7 +68,7 @@ function testParentRepoError(
 }
 
 type StudentSetupOptions = ParentSetupOptions & {
-  studentOverrides?: Parameters<typeof createTestStudent>[2];
+  studentOverrides?: Exclude<Parameters<typeof createTestStudent>[2], undefined>;
 };
 
 async function setupParentWithStudent(
@@ -271,19 +282,14 @@ describe("ParentRepository — create", () => {
         tx
       );
 
-      let error: unknown = null;
-      try {
-        await ParentRepository.create(
+      const error = await expectRepoError(() =>
+        ParentRepository.create(
           { userId: user.id, status: "REGULAR", createdAt: new Date(), updatedAt: new Date() },
           tx,
           "ar"
-        );
-      } catch (e) {
-        error = e;
-      }
-
-      expect(error).not.toBeNull();
-      expect((error as Error).message).toContain("موجود بالفعل");
+        )
+      );
+      expect(error.message).toContain("موجود بالفعل");
     });
   });
 
@@ -331,21 +337,19 @@ describe("ParentRepository — create", () => {
           returning: () => [],
         }),
       }),
-    } as unknown as DBTransaction;
+    };
+    if (!isDbTransaction(mockTx)) {
+      throw new Error("Mock transaction does not satisfy DBTransaction contract");
+    }
 
-    let error: unknown = null;
-    try {
-      await ParentRepository.create(
+    const error = await expectRepoError(() =>
+      ParentRepository.create(
         { userId: user.id, status: "REGULAR", createdAt: new Date(), updatedAt: new Date() },
         mockTx,
         "ar"
-      );
-    } catch (e) {
-      error = e;
-    }
-
-    expect(error).not.toBeNull();
-    expect((error as Error).message).toContain("فشل");
+      )
+    );
+    expect(error.message).toContain("فشل");
   });
 });
 

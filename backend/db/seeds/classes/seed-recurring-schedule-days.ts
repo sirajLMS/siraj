@@ -4,7 +4,7 @@ import {
   loadSeedConfig,
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 import type { RecurringScheduleDayInsertType, RecurringScheduleSelectType } from "@/backend/types";
 

@@ -199,7 +199,7 @@ export function PermissionGroupFormMobile({
         handleTogglePermission={handleTogglePermission}
         handleSubmitForm={(e: React.SyntheticEvent<HTMLFormElement>) => {
           e.preventDefault();
-          handleSubmit(onSubmit)(e);
+          void handleSubmit(onSubmit)(e);
         }}
         t={t}
       />

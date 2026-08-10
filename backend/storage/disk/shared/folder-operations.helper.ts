@@ -1,5 +1,5 @@
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";

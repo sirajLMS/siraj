@@ -77,10 +77,10 @@ export namespace PermissionsService {
   function resolveRoleFromGroupSlugs(groupSlugs: string[]): UserRole {
     if (groupSlugs.includes(SystemPermissionGroupSlug.SUPER_ADMIN)) return UserRole.SUPER_ADMIN;
     if (groupSlugs.includes(SystemPermissionGroupSlug.ACADEMY_ADMIN)) return UserRole.ACADEMY_ADMIN;
-    if (groupSlugs.some(slug => slug === SystemPermissionGroupSlug.TEACHER_DEFAULT || slug === "teacher")) {
+    if (groupSlugs.some(slug => slug === "teacher_default" || slug === "teacher")) {
       return UserRole.TEACHER;
     }
-    if (groupSlugs.some(slug => slug === SystemPermissionGroupSlug.PARENT_DEFAULT || slug === "parent")) {
+    if (groupSlugs.some(slug => slug === "parent_default" || slug === "parent")) {
       return UserRole.PARENT;
     }
     if (groupSlugs.includes(SystemPermissionGroupSlug.SUPERVISOR_DEFAULT)) return UserRole.SUPERVISOR;

@@ -1,5 +1,5 @@
 import { runMigrations } from "@/backend/db/scripts/migrate";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { baselineDrizzleMigrations } from "@/scripts/baseline-drizzle-migrations";
 
 /**

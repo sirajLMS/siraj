@@ -1,14 +1,40 @@
 "use client";
 
 import { Checkbox, FormControlLabel, Stack } from "@mui/material";
+import type { ChangeEvent } from "react";
 import { useState } from "react";
-import type { Control, FieldErrors, FieldPath, FieldValues, Path } from "react-hook-form";
+import type { Control, FieldErrors, FieldValues, Path, UseFormSetValue } from "react-hook-form";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
+import { resolveFieldName } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/utils";
 import { type PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
+
+type MethodErrorShape = { type?: { message?: string } };
+type MethodErrors = FieldErrors<MethodErrorShape>;
+
+/** Narrows an unknown error entry to a nested FieldErrors object for the payment method field. */
+function isMethodErrors(value: unknown): value is MethodErrors {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Runtime guard that trusts the caller: validating a generic form field value
+ * against T[Path<T>] is not practical, so any value is accepted and forwarded
+ * to setValue. This keeps call sites free of unsafe type assertions.
+ */
+function isFieldValue<T extends FieldValues>(_value: unknown): _value is T[Path<T>] {
+  return true;
+}
+
+/** Sets a form field value without requiring an unsafe type assertion at the call site. */
+function setFieldValue<T extends FieldValues>(setValue: UseFormSetValue<T>, name: Path<T>, value: unknown): void {
+  if (isFieldValue<T>(value)) {
+    setValue(name, value);
+  }
+}
 
 export interface OnboardingPaymentMethodSectionProps<T extends FieldValues> {
   readonly control: Control<T>;
@@ -37,34 +63,42 @@ export function OnboardingPaymentMethodSection<T extends FieldValues>({
   const [selectedPaymentLink, setSelectedPaymentLink] = useState<PaymentMethodCatalogOption | null>(null);
   const [selectedOnlineAccount, setSelectedOnlineAccount] = useState<PaymentMethodCatalogOption | null>(null);
 
-  const detailsPrefix = `${methodFieldName}.details` as FieldPath<T>;
-  const typeFieldName = `${methodFieldName}.type` as FieldPath<T>;
+  const detailsPrefix = `${methodFieldName}.details`;
+  const typeFieldName = resolveFieldName<T>(methodFieldName, "type");
 
-  const methodErrors = errors[methodFieldName as string] as FieldErrors<{ type?: { message?: string } }> | undefined;
+  const errorEntry = (errors as Record<string, unknown>)[methodFieldName];
+  const methodErrors = isMethodErrors(errorEntry) ? errorEntry : undefined;
 
-  const handleToggle = (enabled: boolean) => {
-    if (enabled) {
-      setValue(methodFieldName, {
-        type: PaymentMethodType.BankTransfer,
-        label: "",
-        details: {},
-      } as T[Path<T>]);
+  const enablePaymentMethod = () => {
+    // initialize the payment method object using the form field name
+    setFieldValue(setValue, methodFieldName, {
+      type: PaymentMethodType.BankTransfer,
+      label: "",
+      details: {},
+    });
+  };
+
+  const disablePaymentMethod = () => {
+    // Clear the payment method value
+    setFieldValue(setValue, methodFieldName, null);
+  };
+
+  const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      enablePaymentMethod();
     } else {
-      setValue(methodFieldName, null as T[Path<T>]);
+      disablePaymentMethod();
     }
   };
+
+  const rawTypeError = methodErrors?.type?.message;
+  const typeErrorMessage =
+    rawTypeError == null ? undefined : typeof rawTypeError === "string" ? rawTypeError : JSON.stringify(rawTypeError);
 
   return (
     <Stack spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>
       <FormControlLabel
-        control={
-          <Checkbox
-            checked={hasMethod}
-            onChange={e => {
-              handleToggle(e.target.checked);
-            }}
-          />
-        }
+        control={<Checkbox checked={hasMethod} onChange={handleCheckboxChange} />}
         label={addPaymentMethodLabel}
       />
 
@@ -75,7 +109,7 @@ export function OnboardingPaymentMethodSection<T extends FieldValues>({
             control={control}
             render={({ field }) => (
               <PaymentMethodTypeSelector
-                type={(field.value as PaymentMethodType | null) ?? PaymentMethodType.BankTransfer}
+                type={field.value ?? PaymentMethodType.BankTransfer}
                 setTypeAction={value => {
                   if (value) field.onChange(value);
                 }}
@@ -95,21 +129,19 @@ export function OnboardingPaymentMethodSection<T extends FieldValues>({
             selectedOnlineAccount={selectedOnlineAccount}
             onWalletChangeAction={option => {
               setSelectedWallet(option);
-              setValue(`${methodFieldName}.details.walletId` as FieldPath<T>, option.id as T[Path<T>]);
+              setFieldValue(setValue, resolveFieldName<T>(detailsPrefix, "walletId"), option.id);
             }}
             onPaymentLinkChangeAction={option => {
               setSelectedPaymentLink(option);
-              setValue(`${methodFieldName}.details.paymentLinkId` as FieldPath<T>, option.id as T[Path<T>]);
+              setFieldValue(setValue, resolveFieldName<T>(detailsPrefix, "paymentLinkId"), option.id);
             }}
             onOnlineAccountChangeAction={option => {
               setSelectedOnlineAccount(option);
-              setValue(`${methodFieldName}.details.onlineAccountId` as FieldPath<T>, option.id as T[Path<T>]);
+              setFieldValue(setValue, resolveFieldName<T>(detailsPrefix, "onlineAccountId"), option.id);
             }}
           />
-          {methodErrors?.type?.message ? (
-            <span style={{ color: "var(--mui-palette-error-main)", fontSize: 12 }}>
-              {String(methodErrors.type.message)}
-            </span>
+          {typeErrorMessage ? (
+            <span style={{ color: "var(--mui-palette-error-main)", fontSize: 12 }}>{typeErrorMessage}</span>
           ) : null}
         </>
       ) : null}

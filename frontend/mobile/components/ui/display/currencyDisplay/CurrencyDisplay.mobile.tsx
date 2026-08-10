@@ -14,6 +14,7 @@ import {
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type MobileCurrencyDisplayProps = {
@@ -26,7 +27,7 @@ export type MobileCurrencyDisplayProps = {
    */
   readonly parts?: readonly CurrencyDisplayPartValue[];
   readonly fallback?: string;
-  readonly typographyVariant?: TypographyProps["variant"] | (string & {});
+  readonly typographyVariant?: NonNullable<TypographyProps["variant"]> | (string & {});
   readonly sx?: SxProps<Theme>;
 };
 
@@ -52,52 +53,54 @@ export const MobileCurrencyDisplay: React.FC<MobileCurrencyDisplayProps> = ({
   const locale = useAppLocale();
   const visibleParts = resolveCurrencyDisplayParts(parts);
 
+  let content: React.ReactNode;
   if (!code) {
-    return (fallback ?? null) as React.ReactNode;
+    content = fallback ?? null;
+  } else {
+    const flag = getCurrencyFlag(code);
+    const longLabel = getCurrencyDisplayName(code, locale);
+    const symbol = getCurrencySymbol(code);
+    const shortCode = code;
+
+    content = (
+      <Stack direction="row" spacing={0.5} sx={mergeSx({ alignItems: "center" }, sx)}>
+        {CURRENCY_DISPLAY_PART_ORDER.map(part => {
+          switch (part) {
+            case CurrencyDisplayPart.Flag:
+              return visibleParts.has(part) ? <MobileLocaleEmoji key={part} emoji={flag} /> : null;
+            case CurrencyDisplayPart.Label:
+              return visibleParts.has(part) ? (
+                <Typography key={part} sx={{ typography: typographyVariant, whiteSpace: "nowrap" }}>
+                  {longLabel}
+                </Typography>
+              ) : null;
+            case CurrencyDisplayPart.Symbol:
+              return visibleParts.has(part) ? (
+                <Typography
+                  key={part}
+                  component="span"
+                  sx={theme => ({ color: theme.palette.text.secondary, whiteSpace: "nowrap" })}
+                >
+                  {symbol}
+                </Typography>
+              ) : null;
+            case CurrencyDisplayPart.Code:
+              return visibleParts.has(part) ? (
+                <Typography
+                  key={part}
+                  component="span"
+                  dir="ltr"
+                  sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}
+                >
+                  {shortCode}
+                </Typography>
+              ) : null;
+            default:
+              return null;
+          }
+        })}
+      </Stack>
+    );
   }
-
-  const flag = getCurrencyFlag(code);
-  const longLabel = getCurrencyDisplayName(code, locale);
-  const symbol = getCurrencySymbol(code);
-  const shortCode = code;
-
-  return (
-    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", ...sx }}>
-      {CURRENCY_DISPLAY_PART_ORDER.map(part => {
-        switch (part) {
-          case CurrencyDisplayPart.Flag:
-            return visibleParts.has(part) ? <MobileLocaleEmoji key={part} emoji={flag} /> : null;
-          case CurrencyDisplayPart.Label:
-            return visibleParts.has(part) ? (
-              <Typography key={part} sx={{ typography: typographyVariant, whiteSpace: "nowrap" }}>
-                {longLabel}
-              </Typography>
-            ) : null;
-          case CurrencyDisplayPart.Symbol:
-            return visibleParts.has(part) ? (
-              <Typography
-                key={part}
-                component="span"
-                sx={theme => ({ color: theme.palette.text.secondary, whiteSpace: "nowrap" })}
-              >
-                {symbol}
-              </Typography>
-            ) : null;
-          case CurrencyDisplayPart.Code:
-            return visibleParts.has(part) ? (
-              <Typography
-                key={part}
-                component="span"
-                dir="ltr"
-                sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}
-              >
-                {shortCode}
-              </Typography>
-            ) : null;
-          default:
-            return null;
-        }
-      })}
-    </Stack>
-  );
+  return content;
 };

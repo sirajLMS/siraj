@@ -20,6 +20,27 @@ import {
 } from "@/frontend/mobile/components/ui";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 
+function rateSourceLabel(
+  source: RateSource | null,
+  labels: Pick<
+    TeacherDuesViewModel["labels"],
+    "rateSourceOverride" | "rateSourceRecurring" | "rateSourceSubject" | "rateSourceTeacher"
+  >
+): string {
+  switch (source) {
+    case RateSource.Override:
+      return labels.rateSourceOverride;
+    case RateSource.Recurring:
+      return labels.rateSourceRecurring;
+    case RateSource.Subject:
+      return labels.rateSourceSubject;
+    case RateSource.Teacher:
+      return labels.rateSourceTeacher;
+    default:
+      return labels.rateSourceTeacher;
+  }
+}
+
 function DueCard({
   row,
   labels,
@@ -41,7 +62,7 @@ function DueCard({
     <MobileCardListItem variant="edge-to-edge">
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
-          {canMarkPaid ? <Checkbox checked={selected} onChange={() => onToggle(row.id)} size="small" /> : null}
+          {canMarkPaid && <Checkbox checked={selected} onChange={() => onToggle(row.id)} size="small" />}
           <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.75 }}>
             <MobilePersonProfileLink
               href={profileHrefForTeacher({ userId: row.teacherUserId, teacherId: row.teacherId })}
@@ -91,18 +112,12 @@ function DueCard({
               {labels.rateSourceColumn}
             </Typography>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface })}>
-              {row.rateSource === RateSource.Override
-                ? labels.rateSourceOverride
-                : row.rateSource === RateSource.Recurring
-                  ? labels.rateSourceRecurring
-                  : row.rateSource === RateSource.Subject
-                    ? labels.rateSourceSubject
-                    : labels.rateSourceTeacher}
+              {rateSourceLabel(row.rateSource, labels)}
             </Typography>
           </Box>
         </Stack>
 
-        {canMarkPaid ? (
+        {canMarkPaid && (
           <MobilePrimaryPageAction
             size="small"
             onClick={() => onMarkPaid([row.id])}
@@ -111,7 +126,7 @@ function DueCard({
           >
             {labels.markAsPaidButton}
           </MobilePrimaryPageAction>
-        ) : null}
+        )}
       </Box>
     </MobileCardListItem>
   );
@@ -146,11 +161,11 @@ export function TeacherDuesMobileView(props: Readonly<TeacherDuesViewModel>) {
           }
         />
 
-        {loading ? (
+        {loading && (
           <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {labels.loadingMessage}
           </Typography>
-        ) : null}
+        )}
 
         <MobileSectionPanel contentInset={false}>
           <MobileCardList<TeacherDueRow>

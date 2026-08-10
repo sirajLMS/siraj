@@ -1,4 +1,4 @@
-export { countries as countryList, default as countries } from "@/frontend/common/lib/locale/country/countries";
+export { countries, countries as countryList } from "@/frontend/common/lib/locale/country/countries";
 export { getCountryDisplayName } from "@/frontend/common/lib/locale/country/display";
 export { countryCodeToEmoji, getCountryEmoji } from "@/frontend/common/lib/locale/country/emoji";
 export { getCountryByCode } from "@/frontend/common/lib/locale/country/lookup";

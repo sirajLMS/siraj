@@ -105,6 +105,22 @@ export interface CurrencyHedgesViewModel {
   readonly labelsBySection: CurrencyHedgesLabelsBySection;
   readonly rows: readonly HedgeRow[];
   readonly loading: boolean;
+  readonly dialogOpen: boolean;
+  readonly deleteOpen: boolean;
+  readonly editingRow: HedgeRow | null;
+  readonly deletingRow: HedgeRow | null;
+  readonly currency: CurrencyCode;
+  readonly amount: string;
+  readonly hedgeType: string;
+  readonly notes: string;
+  readonly setDialogOpen: (open: boolean) => void;
+  readonly setDeleteOpen: (open: boolean) => void;
+  readonly setEditingRow: (row: HedgeRow | null) => void;
+  readonly setDeletingRow: (row: HedgeRow | null) => void;
+  readonly setCurrency: (code: CurrencyCode) => void;
+  readonly setAmount: (amount: string) => void;
+  readonly setHedgeType: (hedgeType: string) => void;
+  readonly setNotes: (notes: string) => void;
   readonly onEdit: (row: HedgeRow) => void;
   readonly onDelete: (row: HedgeRow) => void;
   readonly onAdd: () => void;
@@ -113,14 +129,14 @@ export interface CurrencyHedgesViewModel {
 export function useCurrencyHedgesViewModel(_props: Readonly<UseCurrencyHedgesViewModelProps>): CurrencyHedgesViewModel {
   const labels = useAppTranslation(Translation.Dashboard.BillingCurrencyHedges);
   const labelsBySection = useMemo(() => buildLabelsBySection(labels), [labels]);
-  const [_dialogOpen, setDialogOpen] = useState(false);
-  const [_deleteOpen, setDeleteOpen] = useState(false);
-  const [_editingRow, setEditingRow] = useState<HedgeRow | null>(null);
-  const [_deletingRow, setDeletingRow] = useState<HedgeRow | null>(null);
-  const [_currency, setCurrency] = useState<CurrencyCode>(CurrencyCode.Usd);
-  const [_amount, setAmount] = useState("");
-  const [_hedgeType, setHedgeType] = useState<string>(INITIAL_HEDGE_TYPE);
-  const [_notes, setNotes] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editingRow, setEditingRow] = useState<HedgeRow | null>(null);
+  const [deletingRow, setDeletingRow] = useState<HedgeRow | null>(null);
+  const [currency, setCurrency] = useState<CurrencyCode>(CurrencyCode.Usd);
+  const [amount, setAmount] = useState("");
+  const [hedgeType, setHedgeType] = useState<string>(INITIAL_HEDGE_TYPE);
+  const [notes, setNotes] = useState("");
 
   const { data, loading } = useQuery(currencyHedgesQueryDocument, {
     fetchPolicy: "cache-and-network",
@@ -159,5 +175,28 @@ export function useCurrencyHedgesViewModel(_props: Readonly<UseCurrencyHedgesVie
     [deleteSetters]
   );
 
-  return { labelsBySection, rows, loading, onEdit, onDelete, onAdd };
+  return {
+    labelsBySection,
+    rows,
+    loading,
+    dialogOpen,
+    deleteOpen,
+    editingRow,
+    deletingRow,
+    currency,
+    amount,
+    hedgeType,
+    notes,
+    setDialogOpen,
+    setDeleteOpen,
+    setEditingRow,
+    setDeletingRow,
+    setCurrency,
+    setAmount,
+    setHedgeType,
+    setNotes,
+    onEdit,
+    onDelete,
+    onAdd,
+  };
 }

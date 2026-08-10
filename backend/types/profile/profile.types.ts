@@ -1,4 +1,5 @@
 import type { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
+import type { AccountStatus } from "@/backend/enum/auth/auth.enum";
 import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { PaymentMethodDefaults, UserPaymentMethodReturnType } from "@/backend/types/billing/payment-method.types";
 import type {
@@ -19,7 +20,11 @@ import type {
   TeacherProfileUpdateInputType,
 } from "@/backend/types/teachers/teacher.types";
 
-export type { ProfileAudience, ProfileMode, ProfileScope, TeacherOwnProfileUpdateInput };
+// Re-surface the profile enums from @/backend/enum so type-layer consumers
+// importing via `@/backend/types` can resolve them. TeacherOwnProfileUpdateInput
+// is NOT re-exported here — it is owned by the teachers domain and reached via
+// `@/backend/types` through the teachers barrel.
+export type { ProfileAudience, ProfileMode, ProfileScope };
 
 export type ProfilePageContext = {
   readonly scope: ProfileScope;
@@ -47,6 +52,7 @@ export type CoreUserProfileFields = {
   readonly displayCurrency?: CurrencyCode | null;
   readonly phone?: string | null;
   readonly timezone?: IanaTimezone | null;
+  readonly status?: AccountStatus | null;
 };
 
 export type ParentOwnProfileUpdateInput = {

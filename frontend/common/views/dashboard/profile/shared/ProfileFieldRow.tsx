@@ -26,6 +26,28 @@ export function ProfileFieldRow({
   const valueIsEmptyString = typeof value === "string" && value.trim() === "";
   const displayValue: React.ReactNode = valueIsEmptyString ? fallback : value;
 
+  // Render the value based on whether it's a link, plain text/number, or a React node
+  const renderValue = (): React.ReactNode => {
+    let content: React.ReactNode;
+    if (hasLink) {
+      content = (
+        <Link
+          href={linkHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{ typography: "bodyMd", textDecoration: "none" }}
+        >
+          {displayValue}
+        </Link>
+      );
+    } else if (typeof displayValue === "string" || typeof displayValue === "number") {
+      content = <Typography sx={{ typography: "bodyMd" }}>{displayValue}</Typography>;
+    } else {
+      content = displayValue;
+    }
+    return content;
+  };
+
   return (
     <Stack
       direction="row"
@@ -66,20 +88,7 @@ export function ProfileFieldRow({
         >
           {label}
         </Typography>
-        {hasLink ? (
-          <Link
-            href={linkHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{ typography: "bodyMd", textDecoration: "none" }}
-          >
-            {displayValue}
-          </Link>
-        ) : typeof displayValue === "string" || typeof displayValue === "number" ? (
-          <Typography sx={{ typography: "bodyMd" }}>{displayValue}</Typography>
-        ) : (
-          displayValue
-        )}
+        {renderValue()}
       </Stack>
     </Stack>
   );

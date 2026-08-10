@@ -28,7 +28,7 @@ export function useNarrowContainer(
   useEffect(() => {
     const element = containerRef.current;
     if (!element) {
-      return;
+      return undefined;
     }
 
     const measure = () => {

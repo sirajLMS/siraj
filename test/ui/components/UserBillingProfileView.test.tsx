@@ -1,11 +1,11 @@
-import { mock } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
 // Defensive mocks against bleed from earlier test files (e.g. ScheduleOverviewSection.test.tsx).
 // mock.module registrations are process-global in Bun, so a mock registered in a test file that
 // runs earlier alphabetically may bleed into this file if we don't re-register our own versions.
 // These mocks MUST be registered before any imports so they apply before module resolution.
 
-mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({
     push: () => {},
@@ -20,7 +20,7 @@ mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   locales: ["ar", "en"],
   defaultLocale: "en",
   useRouter: () => ({
@@ -40,7 +40,7 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),
@@ -52,7 +52,7 @@ mock.module("@/shared/i18n/navigation", () => ({
   usePathname: () => "/users/test-user-id/billing-profile",
 }));
 
-mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 
@@ -158,7 +158,7 @@ function MobileView({ metrics, invoices, labels, searchQuery, onSearchChange }: 
 // type-check time; at runtime the mock factory substitutes our hand-rolled
 // stub that branches on `mediaQueryResult` to render the desktop/mobile test
 // fixtures our assertions check.
-mock.module("@/frontend/desktop/views/dashboard/users/billing-profile/userBillingProfile.desktop", () => ({
+await mock.module("@/frontend/desktop/views/dashboard/users/billing-profile/userBillingProfile.desktop", () => ({
   UserBillingProfileDesktopView: (props: UserBillingProfileViewProps) => {
     const hasPermission = useUserStore.getState().hasPermission?.(AppPermission.BillingViewHistory) ?? false;
     if (!hasPermission) return null;
@@ -173,12 +173,12 @@ mock.module("@/frontend/desktop/views/dashboard/users/billing-profile/userBillin
   },
 }));
 
-import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import type { SvgIconComponent } from "@mui/icons-material";
 import { AppPermission, InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
@@ -628,9 +628,7 @@ const baseProps: UserBillingProfileViewProps = {
   userId: "test-user-id",
 };
 
-const MockIcon = Object.assign(() => null as React.ReactElement | null, {
-  muiName: "SvgIcon",
-}) as unknown as import("@mui/icons-material").SvgIconComponent;
+const MockIcon: SvgIconComponent = Object.assign((_props: unknown) => null, { muiName: "SvgIcon" });
 
 describe("UserBillingProfileView", () => {
   test("renders nothing when unauthorized", () => {

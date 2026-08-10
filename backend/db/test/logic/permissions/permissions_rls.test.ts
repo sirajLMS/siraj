@@ -5,7 +5,6 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, students, users } from "@/backend/db/schema";
 import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
-import type { ParentEntity, StudentSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 /**
@@ -23,10 +22,10 @@ async function createNamedUser(tx: DBTransaction, name: string, now: Date) {
  * Helper to create a parent linked to a given user
  */
 async function createParentForUser(tx: DBTransaction, userId: string, now: Date) {
-  const [parent] = (await tx
+  const [parent] = await tx
     .insert(parents)
     .values({ userId, status: "REGULAR", createdAt: now, updatedAt: now })
-    .returning()) as [ParentEntity];
+    .returning();
   return parent;
 }
 
@@ -35,7 +34,7 @@ async function createParentForUser(tx: DBTransaction, userId: string, now: Date)
  */
 async function createStudentForParent(tx: DBTransaction, parentId: string, name: string, now: Date) {
   const studentUser = await createNamedUser(tx, `${name} User`, now);
-  const [student] = (await tx
+  const [student] = await tx
     .insert(students)
     .values({
       parentId,
@@ -46,7 +45,7 @@ async function createStudentForParent(tx: DBTransaction, parentId: string, name:
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [StudentSelectType];
+    .returning();
   return student;
 }
 

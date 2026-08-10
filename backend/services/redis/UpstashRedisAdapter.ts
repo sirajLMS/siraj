@@ -1,5 +1,5 @@
 import { Redis } from "@upstash/redis";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { BaseRedisAdapter } from "@/backend/services/redis/BaseRedisAdapter";
 
 /**
@@ -11,7 +11,7 @@ import { BaseRedisAdapter } from "@/backend/services/redis/BaseRedisAdapter";
 export class UpstashRedisAdapter extends BaseRedisAdapter<Redis> {
   constructor(url: string, token: string) {
     if (!url.startsWith("https://")) {
-      throw new Error("Upstash Redis requires HTTPS URL. " + "Get your URL from https://console.upstash.com/");
+      throw new Error("Upstash Redis requires HTTPS URL. Get your URL from https://console.upstash.com/");
     }
 
     if (!token) {

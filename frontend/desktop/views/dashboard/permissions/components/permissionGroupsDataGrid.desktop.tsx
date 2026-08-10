@@ -15,6 +15,14 @@ export interface PermissionGroupsDataGridDesktopProps extends BasePermissionGrou
   readonly loading?: boolean;
 }
 
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(item => typeof item === "string");
+}
+
 interface RowActionsProps {
   readonly labels: BasePermissionGroupListProps["labels"];
   readonly group: PermissionGroup;
@@ -128,7 +136,7 @@ export function PermissionGroupsDataGridDesktop({
               color: theme.palette.text.secondary,
             })}
           >
-            {params.value as string}
+            {isString(params.value) ? params.value : ""}
           </Typography>
         ),
       },
@@ -149,7 +157,7 @@ export function PermissionGroupsDataGridDesktop({
         headerName: t.columnPermissionsCount,
         width: 150,
         renderCell: params => {
-          const count = (params.value as string[] | null)?.length ?? 0;
+          const count = isStringArray(params.value) ? params.value.length : 0;
           return <Typography variant="bodyMd">{count}</Typography>;
         },
       },

@@ -1,6 +1,5 @@
 /** Flattened, dot-free top-level translation schema. */
 
-import type { AppLocale } from "@/shared/locale/AppLocale.ts";
 import type { AuthLabels } from "@/shared/locale/types/auth";
 import type { CommonLabels } from "@/shared/locale/types/common";
 // ─── dashboard/leaf interfaces (collected into DashboardTranslations) ────
@@ -112,25 +111,13 @@ import type {
   MeetingConfigProviderSelectLabels,
   MeetingConfigRecurringScheduleLabels,
   MeetingConfigSummaryLabels,
-  PaymentMethodDefaultsEditorLabels,
-  PaymentMethodDirectionLabels,
-  PaymentMethodDisplayLabels,
-  PaymentMethodIdentifierLabels,
   PaymentMethodLabels,
-  PaymentMethodListLabels,
-  PaymentMethodManagerLabels,
-  PaymentMethodSelectLabels,
-  PaymentMethodTypeFieldsLabels,
-  PaymentMethodTypeLabels,
-  PaymentMethodTypeSelectorLabels,
   PhoneInputLabels,
   TagInputLabels,
   TimezoneSelectLabels,
   UserSelectLabels,
 } from "@/shared/locale/types/ui";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
-
-export type { AppLocale };
 
 /** DashboardTranslations — group collector for all dashboard-domain labels. */
 export interface DashboardTranslations {
@@ -235,16 +222,6 @@ export interface UiTranslations {
   meetingConfigSummary: MeetingConfigSummaryLabels;
   meetingConfigRecurringSchedule: MeetingConfigRecurringScheduleLabels;
   paymentMethod: PaymentMethodLabels;
-  paymentMethodTypeSelector: PaymentMethodTypeSelectorLabels;
-  paymentMethodSelect: PaymentMethodSelectLabels;
-  paymentMethodDisplay: PaymentMethodDisplayLabels;
-  paymentMethodList: PaymentMethodListLabels;
-  paymentMethodManager: PaymentMethodManagerLabels;
-  paymentMethodDefaultsEditor: PaymentMethodDefaultsEditorLabels;
-  paymentMethodTypeFields: PaymentMethodTypeFieldsLabels;
-  paymentMethodType: PaymentMethodTypeLabels;
-  paymentMethodDirection: PaymentMethodDirectionLabels;
-  paymentMethodIdentifier: PaymentMethodIdentifierLabels;
   phoneInput: PhoneInputLabels;
   tagInput: TagInputLabels;
   timezoneSelect: TimezoneSelectLabels;

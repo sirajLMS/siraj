@@ -5,6 +5,7 @@ import type { CurrencyHedgeSelectType, CurrencyHedgeSubmitInput, CurrencyHedgeUp
 import type { ErrorsLabels } from "@/shared/locale";
 
 const VALID_HEDGE_TYPES = ["LONG", "SHORT"] as const;
+const VALID_HEDGE_TYPE_SET: ReadonlySet<string> = new Set(VALID_HEDGE_TYPES);
 
 export namespace CurrencyHedgeService {
   async function assertManagePermission(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
@@ -18,7 +19,7 @@ export namespace CurrencyHedgeService {
   }
 
   async function assertValidHedgeType(hedgeType: string, tErrors: ErrorsLabels): Promise<void> {
-    if (!VALID_HEDGE_TYPES.includes(hedgeType as (typeof VALID_HEDGE_TYPES)[number])) {
+    if (!VALID_HEDGE_TYPE_SET.has(hedgeType)) {
       throw new Error(tErrors.invalidInput);
     }
   }

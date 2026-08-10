@@ -6,7 +6,7 @@ import {
   startOfDay,
 } from "@/backend/db/seeds/lib";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { TeacherPaymentSeedService } from "@/backend/services/seed/teacher-payment-seed.service";
 import type { PaymentMethodTransactionSnapshot, TeacherSelectType, UserSelectType } from "@/backend/types";
 
@@ -56,31 +56,33 @@ export async function seedOrGet(teachersList: TeacherSelectType[], _usersList: U
 
   const anchor = startOfDay(seedConfig.anchorDate);
   const monthsBack = seedConfig.profile === "standard" ? 3 : 1;
-  const inputs = [];
+  const payoutMethods = await Promise.all(
+    teachersList.map(teacher => TeacherPaymentSeedService.findDefaultPayoutMethod(teacher.userId))
+  );
 
-  for (const teacher of teachersList) {
-    const payoutMethod = await TeacherPaymentSeedService.findDefaultPayoutMethod(teacher.userId);
+  const inputs = teachersList.flatMap((teacher, i) => {
+    const payoutMethod = payoutMethods[i];
     const snapshot = payoutMethod
       ? buildSnapshotFromPayoutMethod(payoutMethod, snapshottedAt)
       : buildBankTransferSnapshot(null, snapshottedAt);
     const paymentMethodType = payoutMethod?.type ?? PaymentMethodType.BANK_TRANSFER;
 
-    for (let m = 1; m <= monthsBack; m++) {
-      const paymentDate = addMonths(anchor, -m);
-      inputs.push({
+    return Array.from({ length: monthsBack }, (_, m) => {
+      const paymentDate = addMonths(anchor, -(m + 1));
+      return {
         teacherId: teacher.id,
         userPaymentMethodId: payoutMethod?.id ?? null,
         paymentMethodType,
         paymentMethodSnapshot: snapshot,
-        amount: (150 + m * 25).toFixed(2),
+        amount: (150 + (m + 1) * 25).toFixed(2),
         currency: DEFAULT_INVOICE_CURRENCY,
         paymentDate,
         isTestPayment: true,
         createdAt: now,
         updatedAt: now,
-      });
-    }
-  }
+      };
+    });
+  });
 
   const results = await TeacherPaymentSeedService.seedTeacherPaymentsIfMissing(inputs);
   logger.info(`Teacher payments seeded (${results.length} rows).`);

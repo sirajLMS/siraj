@@ -1,14 +1,12 @@
 /**
  * Canonical types for the `session_config` table (Settings → Session & Security tab).
  *
+ * Only the new {@link SessionConfigUpsertInput} mutation input type is defined here.
  * The DB-derived {@link SessionConfigSelectType} and {@link SessionConfigInsertType}
- * are already defined in `backend/types/auth/auth.types.ts` (since the table is
- * owned by the auth domain). They are re-exported here so consumers of the
- * `backend/types/users` barrel can import all session-config types from a single
- * location, and so Stage 4a has a clear home for the new
- * {@link SessionConfigUpsertInput} mutation input type.
+ * are owned by the auth domain (`backend/types/auth/auth.types.ts`, since the
+ * `session_config` table is owned by auth) and are reachable via `@/backend/types`
+ * through the auth domain barrel.
  */
-export type { SessionConfigInsertType, SessionConfigSelectType } from "@/backend/types/auth/auth.types";
 
 /**
  * Input shape accepted by `SessionConfigRepository.upsert` /

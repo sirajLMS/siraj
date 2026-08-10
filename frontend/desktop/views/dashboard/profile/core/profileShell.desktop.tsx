@@ -2,11 +2,7 @@
 
 import { Box, Button, Skeleton, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import {
-  type ProfileAudience,
-  ProfileMode,
-  type ProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileHeader } from "@/frontend/common/views/dashboard/profile/core/ProfileHeader";
 import { ProfileSkeleton } from "@/frontend/common/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/common/views/dashboard/profile/core/ProfileTabNav";
@@ -63,6 +59,23 @@ function renderBody(
     );
   }
 
+  const headerOrActions = isEditMode ? (
+    actions ? (
+      <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>{actions}</Box>
+    ) : null
+  ) : (
+    <ProfileHeader
+      name={name ?? ""}
+      email={email ?? ""}
+      roleLabel={roleLabel}
+      avatarUrl={avatarUrl}
+      actions={actions}
+    />
+  );
+
+  const contentKey = currentTab ?? "content";
+  const tabAnimation = showTabs ? "profileTabFade 0.2s ease-out" : undefined;
+
   return (
     <Box
       sx={theme => ({
@@ -77,31 +90,14 @@ function renderBody(
         },
       })}
     >
-      {isEditMode ? (
-        actions ? (
-          <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>{actions}</Box>
-        ) : null
-      ) : (
-        <ProfileHeader
-          name={name ?? ""}
-          email={email ?? ""}
-          roleLabel={roleLabel}
-          avatarUrl={avatarUrl}
-          actions={actions}
-        />
-      )}
+      {headerOrActions}
       {showTabs ? (
-        <ProfileTabNav
-          audience={audience as ProfileAudience}
-          scope={scope as ProfileScope}
-          currentTab={currentTab}
-          onTabChange={onTabChange}
-        />
+        <ProfileTabNav audience={audience} scope={scope} currentTab={currentTab} onTabChange={onTabChange} />
       ) : null}
       <Box
-        key={currentTab ?? "content"}
+        key={contentKey}
         sx={{
-          animation: showTabs ? "profileTabFade 0.2s ease-out" : undefined,
+          animation: tabAnimation,
           "@keyframes profileTabFade": {
             from: { opacity: 0 },
             to: { opacity: 1 },

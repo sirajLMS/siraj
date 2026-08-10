@@ -72,7 +72,7 @@ async function expectThrowsAsync(fn: () => Promise<unknown>, expectedSubstring: 
   try {
     await fn();
   } catch (e) {
-    errorCaught = e as Error;
+    errorCaught = e instanceof Error ? e : new Error(String(e));
   }
   expect(errorCaught).not.toBeNull();
   expect(errorCaught?.message.toLowerCase()).toContain(expectedSubstring);

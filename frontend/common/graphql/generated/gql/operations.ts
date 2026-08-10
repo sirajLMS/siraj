@@ -16,6 +16,12 @@ export type AdminDashboardScheduleInput = {
   teacherId: string | null | undefined;
 };
 
+export type AdminResetPasswordInput = {
+  newPassword: string;
+  sendNotificationEmail: boolean | null | undefined;
+  userId: string | number;
+};
+
 export type AdminRevokeTokenInput = {
   providerSlug: MeetingIntegrationProviderSlug;
   userId: string;
@@ -94,6 +100,10 @@ export type AppPermission =
   | 'PROFILE_CORE_IDENTITY_EDIT_OWN'
   | 'PROFILE_CORE_IDENTITY_VIEW_OTHER'
   | 'PROFILE_CORE_IDENTITY_VIEW_OWN'
+  | 'PROFILE_CORE_STATUS_EDIT_OTHER'
+  | 'PROFILE_CORE_STATUS_EDIT_OWN'
+  | 'PROFILE_CORE_STATUS_VIEW_OTHER'
+  | 'PROFILE_CORE_STATUS_VIEW_OWN'
   | 'PROFILE_MEETING_CONFIGS_EDIT_OTHER'
   | 'PROFILE_MEETING_CONFIGS_EDIT_OWN'
   | 'PROFILE_MEETING_CONFIGS_VIEW_OTHER'
@@ -256,6 +266,7 @@ export type AppPermission =
   | 'TEST_CUSTOM_ALT'
   | 'TEST_CUSTOM_ONLY'
   | 'TEST_SYSTEM_ONLY'
+  | 'USER_ADMIN_RESET_PASSWORD'
   | 'WHATSAPP_CONFIG_MANAGE'
   | 'WHATSAPP_TEMPLATES_MANAGE'
   | 'WHATSAPP_VIEW';
@@ -446,6 +457,8 @@ export type CoreUserProfileFieldsInput = {
   displayCurrency: CurrencyCode | null | undefined;
   email: string | null | undefined;
   name: string | null | undefined;
+  /** User account status (super admin only) */
+  status: AccountStatus | null | undefined;
   timezone: IanaTimezone | null | undefined;
 };
 
@@ -1532,6 +1545,7 @@ export type NotificationEventType =
   | 'ON_DEMAND_INSTANCE_REMINDER_T1'
   | 'ON_DEMAND_INSTANCE_REMINDER_T3'
   | 'ON_DEMAND_TEACHER_DAILY_DIGEST'
+  | 'PASSWORD_RESET_BY_ADMIN'
   | 'PAYMENT_METHOD_CHANGED'
   | 'QUOTA_EXPIRED'
   | 'QUOTA_EXPIRING_SOON'
@@ -1540,7 +1554,8 @@ export type NotificationEventType =
   | 'STUDENT_STATUS_CHANGED'
   | 'STUDENT_TEACHER_REASSIGNED'
   | 'SUGGESTION_ACKNOWLEDGED'
-  | 'SUGGESTION_DUPLICATE_MARKED';
+  | 'SUGGESTION_DUPLICATE_MARKED'
+  | 'USER_STATUS_CHANGED';
 
 export type NotificationPreferenceInput = {
   channel: NotificationChannel;
@@ -2010,28 +2025,28 @@ export type SupportedPaymentLinkUpdateInput = {
 };
 
 export type SystemSettingCategory =
-  | 'app'
-  | 'auth'
-  | 'billing'
-  | 'cache'
-  | 'communication'
-  | 'email'
-  | 'fx'
-  | 'general'
-  | 'meeting'
-  | 'push'
-  | 'redis'
-  | 'scheduling'
-  | 'security'
-  | 'sms'
-  | 'storage'
-  | 'system';
+  | 'App'
+  | 'Auth'
+  | 'Billing'
+  | 'Cache'
+  | 'Communication'
+  | 'Email'
+  | 'Fx'
+  | 'General'
+  | 'Meeting'
+  | 'Push'
+  | 'Redis'
+  | 'Scheduling'
+  | 'Security'
+  | 'Sms'
+  | 'Storage'
+  | 'System';
 
 export type SystemSettingDataType =
-  | 'boolean'
-  | 'integer'
-  | 'json'
-  | 'string';
+  | 'Boolean'
+  | 'Integer'
+  | 'Json'
+  | 'String';
 
 export type SystemSettingUpsertInput = {
   category: SystemSettingCategory | null | undefined;
@@ -2363,7 +2378,7 @@ export type ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_tar
 
 export type ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_actorUser_User = { id: string | null, name: string | null, email: string | null };
 
-export type ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus = { isActive: boolean | null, startedAt: string | null, expiresAt: string | null, reason: string | null, targetUser: ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_targetUser_User | null, actorUser: ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_actorUser_User | null };
+export type ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus = { id: string | null, isActive: boolean | null, startedAt: string | null, expiresAt: string | null, reason: string | null, targetUser: ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_targetUser_User | null, actorUser: ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus_actorUser_User | null };
 
 export type ImpersonationStatusQuery_Query = { impersonationStatus: ImpersonationStatusQuery_impersonationStatus_ImpersonationStatus | null };
 
@@ -2375,7 +2390,7 @@ export type ImpersonationStatusQuery = ImpersonationStatusQuery_Query;
 
 export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User = { id: string | null, name: string | null, email: string | null, permissions: Array<Types.AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: Types.AccountStatus | null, displayCurrency: Types.CurrencyCode | null };
 
-export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse = { token: string | null, expiresAt: string | null, impersonationSessionId: string | null, targetUser: StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User | null };
+export type StartImpersonationMutation_startImpersonation_StartImpersonationResponse = { id: string | null, token: string | null, expiresAt: string | null, impersonationSessionId: string | null, targetUser: StartImpersonationMutation_startImpersonation_StartImpersonationResponse_targetUser_User | null };
 
 export type StartImpersonationMutation_Mutation = { startImpersonation: StartImpersonationMutation_startImpersonation_StartImpersonationResponse | null };
 
@@ -2449,6 +2464,18 @@ export type ChangePasswordMutationVariables = Exact<{
 
 
 export type ChangePasswordMutation = ChangePasswordMutation_Mutation;
+
+export type AdminResetPasswordMutation_adminResetPassword_AdminResetPasswordResult = { success: boolean | null, userId: string | null, message: string | null };
+
+export type AdminResetPasswordMutation_Mutation = { adminResetPassword: AdminResetPasswordMutation_adminResetPassword_AdminResetPasswordResult | null };
+
+
+export type AdminResetPasswordMutationVariables = Exact<{
+  input: Types.AdminResetPasswordInput;
+}>;
+
+
+export type AdminResetPasswordMutation = AdminResetPasswordMutation_Mutation;
 
 export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_UnpaidInvoicesSummary_overdueAmountsByCurrency_BillingCurrencyTotal_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
@@ -3232,7 +3259,7 @@ export type StudentOpenQuotasQueryVariables = Exact<{
 
 export type StudentOpenQuotasQuery = StudentOpenQuotasQuery_Query;
 
-export type QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown = { quotaId: string | null, quotaName: string | null, remaining: number | null, validUntil: string | null };
+export type QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown = { id: string | null, quotaId: string | null, quotaName: string | null, remaining: number | null, validUntil: string | null };
 
 export type QuotaBalanceQuery_quotaBalance_QuotaBalance = { id: string | null, studentId: string | null, totalActiveClasses: number | null, totalRemaining: number | null, totalReserved: number | null, breakdownByExpiration: Array<QuotaBalanceQuery_quotaBalance_QuotaBalance_breakdownByExpiration_QuotaExpirationBreakdown> | null };
 
@@ -4212,7 +4239,7 @@ export type ParentBillingSummaryQuery = ParentBillingSummaryQuery_Query;
 
 export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, bookingStatus: Types.BookingStatus | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, classTimeFormatted: string | null, effectiveMeeting: ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow_effectiveMeeting_EffectiveMeeting | null };
+export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, bookingStatus: Types.BookingStatus | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, classTimeFormatted: string | null, effectiveMeeting: ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_rows_ParentDashboardScheduleRow_effectiveMeeting_EffectiveMeeting | null };
 
 export type ParentDashboardScheduleQuery_parentDashboardSchedule_ParentDashboardScheduleResult_pageInfo_PageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
 
@@ -4246,7 +4273,7 @@ export type ParentDashboardMetricsQueryVariables = Exact<{ [key: string]: never;
 
 export type ParentDashboardMetricsQuery = ParentDashboardMetricsQuery_Query;
 
-export type ParentDirectoryAutocompleteRowFragmentFragment = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
+export type ParentDirectoryAutocompleteRowFragment = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
 
 export type ParentDirectoryQuery_parentDirectory_ParentDirectory_metrics_ParentDirectoryMetrics = { id: string | null, regular: number | null, onLeave: number | null, onTrial: number | null, suspended: number | null };
 
@@ -4595,7 +4622,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherOwnProfil
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_teacherAdminProfile_TeacherProfileResult_displayAmount_DisplayAmount | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_parentOwnProfile_ParentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
 
@@ -4613,7 +4640,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_associatedStuden
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, roleSlug: string | null, roleName: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, roleSlug: string | null, roleName: string | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionGroups_StaffPermissionGroup = { id: string | null, name: string | null, slug: string | null, description: string | null };
 
@@ -4647,7 +4674,7 @@ export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnPr
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
 
 export type UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, timezone: Types.IanaTimezone | null, teacherOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_teacherOwnProfile_TeacherOwnProfile | null, parentOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_parentOwnProfile_ParentOwnProfile | null, staffProfile: UpdateOwnProfileMutation_updateOwnProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
 
@@ -4661,7 +4688,7 @@ export type UpdateOwnProfileMutationVariables = Exact<{
 
 export type UpdateOwnProfileMutation = UpdateOwnProfileMutation_Mutation;
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Types.Gender | null, address: string | null, qualifications: string | null, timezone: Types.IanaTimezone | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, status: Types.AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
@@ -4673,7 +4700,7 @@ export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMe
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount = { id: string | null, amount: string | null, currency: Types.CurrencyCode | null, stale: boolean | null };
 
-export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
+export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: Types.AccountStatus | null, hourlyRate: string | null, rateCurrency: Types.CurrencyCode | null, displayAmount: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow_displayAmount_DisplayAmount | null };
 
 export type UpdateUserProfileMutation_updateUserProfile_UnifiedProfile = { id: string | null, userId: string | null, audience: Types.ProfileAudience | null, scope: Types.ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: Types.CurrencyCode | null, teacherAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_teacherAdminProfile_TeacherProfileResult | null, parentAdminProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_parentAdminProfile_ParentProfile | null, paymentMethods: Array<UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMethods_UserPaymentMethod> | null, paymentMethodDefaults: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_paymentMethodDefaults_PaymentMethodDefaults | null, staffProfile: UpdateUserProfileMutation_updateUserProfile_UnifiedProfile_staffProfile_ManagerDirectoryRow | null };
 
@@ -4720,17 +4747,17 @@ export type GenerateAttendanceReportQueryVariables = Exact<{
 
 export type GenerateAttendanceReportQuery = GenerateAttendanceReportQuery_Query;
 
-export type DeleteBookMutationMutation_Mutation = { deleteBook: boolean | null };
+export type DeleteBookMutation_Mutation = { deleteBook: boolean | null };
 
 
-export type DeleteBookMutationMutationVariables = Exact<{
+export type DeleteBookMutationVariables = Exact<{
   id: string | number;
 }>;
 
 
-export type DeleteBookMutationMutation = DeleteBookMutationMutation_Mutation;
+export type DeleteBookMutation = DeleteBookMutation_Mutation;
 
-export type LearningResourceRowFragmentFragment = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
+export type LearningResourceRowFragment = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
 
 export type LearningResourcesQuery_learningResources_LearningResourceRow = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
 
@@ -4819,7 +4846,7 @@ export type ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassIn
 
 export type ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance = { id: string | null, engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, authorizationLabel: string | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null };
 
-export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, classType: Types.ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: Types.ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: Types.IanaTimezone | null, teacherTimezone: Types.IanaTimezone | null, meetingJoinUrl: string | null, recurringScheduleId: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, isFrozen: boolean | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, avatarUrl: string | null, subjectId: string | null, subjectName: string | null, subjectAvatarUrl: string | null, rateAmount: string | null, rateCurrency: Types.CurrencyCode | null, isRateOverridden: boolean | null, rateSource: Types.RateSource | null, effectiveMeeting: ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
+export type ClassInstanceQuery_classInstance_ClassInstanceDetail = { id: string | null, courseName: string | null, classType: Types.ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: Types.ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: Types.IanaTimezone | null, teacherTimezone: Types.IanaTimezone | null, recurringScheduleId: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, isFrozen: boolean | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, avatarUrl: string | null, subjectId: string | null, subjectName: string | null, subjectAvatarUrl: string | null, rateAmount: string | null, rateCurrency: Types.CurrencyCode | null, isRateOverridden: boolean | null, rateSource: Types.RateSource | null, effectiveMeeting: ClassInstanceQuery_classInstance_ClassInstanceDetail_effectiveMeeting_EffectiveMeeting | null, student: ClassInstanceQuery_classInstance_ClassInstanceDetail_student_ClassInstanceStudentInfo | null, teacher: ClassInstanceQuery_classInstance_ClassInstanceDetail_teacher_ClassInstanceTeacherInfo | null, performance: ClassInstanceQuery_classInstance_ClassInstanceDetail_performance_ClassInstancePerformance | null };
 
 export type ClassInstanceQuery_Query = { classInstance: ClassInstanceQuery_classInstance_ClassInstanceDetail | null };
 
@@ -4843,7 +4870,7 @@ export type ClassStatusEventsQueryVariables = Exact<{
 
 export type ClassStatusEventsQuery = ClassStatusEventsQuery_Query;
 
-export type ActivateClassMutation_activateClass_ClassInstanceDetail = { id: string | null, status: Types.ClassExecutionState | null, durationMinutes: number | null, remarks: string | null, meetingJoinUrl: string | null };
+export type ActivateClassMutation_activateClass_ClassInstanceDetail = { id: string | null, status: Types.ClassExecutionState | null, durationMinutes: number | null, remarks: string | null };
 
 export type ActivateClassMutation_Mutation = { activateClass: ActivateClassMutation_activateClass_ClassInstanceDetail | null };
 
@@ -4855,7 +4882,7 @@ export type ActivateClassMutationVariables = Exact<{
 
 export type ActivateClassMutation = ActivateClassMutation_Mutation;
 
-export type ActivateOverrideClassMutation_activateOverrideClass_ClassInstanceDetail = { id: string | null, executionState: Types.ClassExecutionState | null, status: Types.ClassExecutionState | null, durationMinutes: number | null, remarks: string | null, meetingJoinUrl: string | null };
+export type ActivateOverrideClassMutation_activateOverrideClass_ClassInstanceDetail = { id: string | null, executionState: Types.ClassExecutionState | null, status: Types.ClassExecutionState | null, durationMinutes: number | null, remarks: string | null };
 
 export type ActivateOverrideClassMutation_Mutation = { activateOverrideClass: ActivateOverrideClassMutation_activateOverrideClass_ClassInstanceDetail | null };
 
@@ -4905,7 +4932,7 @@ export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProce
 
 export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult_rescheduledInstance_ClassInstanceDetail = { id: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null };
 
-export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult = { completedInstanceId: string | null, rescheduledInstanceId: string | null, completedInstance: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult_completedInstance_ClassInstanceDetail | null, rescheduledInstance: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult_rescheduledInstance_ClassInstanceDetail | null };
+export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult = { id: string | null, completedInstanceId: string | null, rescheduledInstanceId: string | null, completedInstance: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult_completedInstance_ClassInstanceDetail | null, rescheduledInstance: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult_rescheduledInstance_ClassInstanceDetail | null };
 
 export type UpdateSessionStatusLeaveMutation_Mutation = { updateSessionStatusLeave: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_LeaveProcessResult | null };
 
@@ -5285,7 +5312,7 @@ export type MeetingIntegrationProviderFieldsFragment = { id: string | null, slug
 
 export type MeetingIntegrationConnectedAccountFieldsFragment = { id: string | null, userId: string | null, name: string | null, email: string | null, connectedAt: string | null, expiresAt: string | null, lastRefreshedAt: string | null, status: Types.MeetingIntegrationConnectedAccountStatus | null, scopes: Array<string> | null };
 
-export type TestMeetingConnectionResultFieldsFragment = { ok: boolean | null, latencyMs: number | null, mode: Types.MeetingConnectionTestMode | null, testJoinUrl: string | null, deleted: boolean | null, upstreamResponseSummary: string | null, errorCode: string | null, errorMessage: string | null, rawUpstreamPayload: unknown, requiredScopes: Array<string> | null, grantedScopes: Array<string> | null };
+export type TestMeetingConnectionResultFieldsFragment = { id: string | null, ok: boolean | null, latencyMs: number | null, mode: Types.MeetingConnectionTestMode | null, testJoinUrl: string | null, deleted: boolean | null, upstreamResponseSummary: string | null, errorCode: string | null, errorMessage: string | null, rawUpstreamPayload: unknown, requiredScopes: Array<string> | null, grantedScopes: Array<string> | null };
 
 export type AdminRevokeTokenResultFieldsFragment = { id: string | null, providerSlug: string | null, userId: string | null, revoked: boolean | null };
 
@@ -5311,7 +5338,7 @@ export type MeetingIntegrationConnectedAccountsQueryVariables = Exact<{
 
 export type MeetingIntegrationConnectedAccountsQuery = MeetingIntegrationConnectedAccountsQuery_Query;
 
-export type TestMeetingProviderConnectionMutation_testMeetingProviderConnection_TestMeetingConnectionResult = { ok: boolean | null, latencyMs: number | null, mode: Types.MeetingConnectionTestMode | null, testJoinUrl: string | null, deleted: boolean | null, upstreamResponseSummary: string | null, errorCode: string | null, errorMessage: string | null, rawUpstreamPayload: unknown, requiredScopes: Array<string> | null, grantedScopes: Array<string> | null };
+export type TestMeetingProviderConnectionMutation_testMeetingProviderConnection_TestMeetingConnectionResult = { id: string | null, ok: boolean | null, latencyMs: number | null, mode: Types.MeetingConnectionTestMode | null, testJoinUrl: string | null, deleted: boolean | null, upstreamResponseSummary: string | null, errorCode: string | null, errorMessage: string | null, rawUpstreamPayload: unknown, requiredScopes: Array<string> | null, grantedScopes: Array<string> | null };
 
 export type TestMeetingProviderConnectionMutation_Mutation = { testMeetingProviderConnection: TestMeetingProviderConnectionMutation_testMeetingProviderConnection_TestMeetingConnectionResult | null };
 
@@ -5584,9 +5611,7 @@ export type TranslatedMessageQueryVariables = Exact<{
 
 export type TranslatedMessageQuery = TranslatedMessageQuery_Query;
 
-export type StudentDirectoryRowFragmentFragment = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
-
-export type StudentDirectoryDetailFragmentFragment = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, parentName: string | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
+export type StudentDirectoryRowFragment = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
 
 export type StudentDirectoryQuery_studentDirectory_StudentDirectoryPayload_rows_StudentDirectoryRow = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
 
@@ -5963,7 +5988,7 @@ export type OnboardingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type OnboardingMetricsQuery = OnboardingMetricsQuery_Query;
 
-export type StaffDirectoryAutocompleteRowFragmentFragment = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
+export type StaffDirectoryAutocompleteRowFragment = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
 
 export type StaffDirectoryQuery_staffDirectory_StaffDirectoryAutocompleteRow = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
 
@@ -6020,7 +6045,7 @@ export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_Teac
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, yourTimeFormatted: string | null, effectiveMeeting: TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow_effectiveMeeting_EffectiveMeeting | null };
+export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow = { id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: Types.ClassExecutionState | null, outcome: Types.ClassOutcome | null, isFrozen: boolean | null, yourTimeFormatted: string | null, effectiveMeeting: TeacherDashboardQuery_teacherDashboard_TeacherDashboard_scheduleRows_TeacherDashboardScheduleRow_effectiveMeeting_EffectiveMeeting | null };
 
 export type TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem = { id: string | null, studentId: string | null, studentName: string | null, scheduledTimeFormatted: string | null, durationMinutes: number | null, eventKind: Types.TeacherProgressFeedEventKind | null, occurredAt: string | null };
 
@@ -6065,7 +6090,7 @@ export type LogTeacherSupportRequestMutation = LogTeacherSupportRequestMutation_
 
 export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass_effectiveMeeting_EffectiveMeeting = { joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: Types.EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass = { id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null, subjectId: string | null, subjectName: string | null, classType: Types.ClassType | null, executionState: string | null, outcome: string | null, meetingJoinUrl: string | null, avatarUrl: string | null, effectiveMeeting: TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass_effectiveMeeting_EffectiveMeeting | null };
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass = { id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null, subjectId: string | null, subjectName: string | null, classType: Types.ClassType | null, executionState: string | null, outcome: string | null, avatarUrl: string | null, effectiveMeeting: TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_classes_FutureClass_effectiveMeeting_EffectiveMeeting | null };
 
 export type TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
 
@@ -6242,7 +6267,7 @@ export type TeachersQueryVariables = Exact<{
 
 export type TeachersQuery = TeachersQuery_Query;
 
-export type UserFieldsFragmentFragment = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
+export type UserFieldsFragment = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: Types.AccountStatus | null, permissions: Array<Types.AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: Types.CurrencyCode | null };
 
 export type WhatsappAccountFieldsFragment = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: Types.WhatsappQualityRating | null, portfolioMessagingLimitTier: Types.WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
 

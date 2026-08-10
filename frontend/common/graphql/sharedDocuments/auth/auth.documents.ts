@@ -7,7 +7,7 @@ export const meQueryDocument: TypedDocumentNode<Operations.MeQuery> = gql`
   ${UserFieldsFragmentDoc}
   query me {
     me {
-      ...UserFieldsFragment
+      ...UserFields
     }
   }
 `;
@@ -16,7 +16,7 @@ export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.Qu
   ${UserFieldsFragmentDoc}
   query user($id: String!) {
     user(id: $id) {
-      ...UserFieldsFragment
+      ...UserFields
     }
   }
 `;
@@ -25,7 +25,7 @@ export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery, Types.
   ${UserFieldsFragmentDoc}
   query users($search: String, $limit: Int, $offset: Int) {
     users(search: $search, limit: $limit, offset: $offset) {
-      ...UserFieldsFragment
+      ...UserFields
     }
   }
 `;
@@ -36,7 +36,7 @@ export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, 
     login(input: $input) {
       token
       user {
-        ...UserFieldsFragment
+        ...UserFields
       }
     }
   }
@@ -49,7 +49,7 @@ export const demoLoginMutationDocument: TypedDocumentNode<Operations.DemoLoginMu
       demoLogin(input: $input) {
         token
         user {
-          ...UserFieldsFragment
+          ...UserFields
         }
       }
     }
@@ -67,7 +67,7 @@ export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshT
     refreshToken {
       token
       user {
-        ...UserFieldsFragment
+        ...UserFields
       }
     }
   }
@@ -76,6 +76,7 @@ export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshT
 export const impersonationStatusQueryDocument: TypedDocumentNode<Operations.ImpersonationStatusQuery> = gql`
   query impersonationStatus {
     impersonationStatus {
+      id
       isActive
       startedAt
       expiresAt
@@ -100,6 +101,7 @@ export const startImpersonationMutationDocument: TypedDocumentNode<
 > = gql`
   mutation startImpersonation($targetUserId: String!, $reason: String) {
     startImpersonation(targetUserId: $targetUserId, reason: $reason) {
+      id
       token
       expiresAt
       impersonationSessionId
@@ -178,5 +180,18 @@ export const changePasswordMutationDocument: TypedDocumentNode<
 > = gql`
   mutation changePassword($input: ChangePasswordInput!) {
     changePassword(input: $input)
+  }
+`;
+
+export const adminResetPasswordMutationDocument: TypedDocumentNode<
+  Operations.AdminResetPasswordMutation,
+  Types.MutationAdminResetPasswordArgs
+> = gql`
+  mutation adminResetPassword($input: AdminResetPasswordInput!) {
+    adminResetPassword(input: $input) {
+      success
+      userId
+      message
+    }
   }
 `;

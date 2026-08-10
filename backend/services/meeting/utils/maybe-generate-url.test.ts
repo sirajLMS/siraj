@@ -3,7 +3,7 @@ import { MeetingChannelError } from "@/backend/services/meeting/channels/IMeetin
 import * as MeetingChannelFactory from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { isMeetingChannelError, maybeGenerateUrl } from "@/backend/services/meeting/utils/maybe-generate-url";
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderKind, MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 
 function buildProvider(overrides: Partial<MeetingProviderSelectType> = {}): MeetingProviderSelectType {
   return {
@@ -26,6 +26,23 @@ function buildProvider(overrides: Partial<MeetingProviderSelectType> = {}): Meet
 
 const baseDetails: MeetingConfigDetails = { meetingUrl: undefined };
 
+function mockGenerateMeeting(joinUrl: string, providerMetadata: Record<string, unknown> = {}) {
+  return spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockResolvedValue({
+    joinUrl,
+    providerMetadata,
+  });
+}
+
+async function runMaybeGenerateUrl(
+  meetingUrl: string | undefined | null,
+  topic = "Test",
+  providerKind: MeetingProviderKind = "zoom_oauth"
+) {
+  const provider = buildProvider({ providerKind });
+  const details: MeetingConfigDetails = { meetingUrl };
+  return { provider, result: await maybeGenerateUrl(provider, details, { topic }) };
+}
+
 describe("maybeGenerateUrl", () => {
   afterEach(() => {
     mock.restore();
@@ -42,13 +59,11 @@ describe("maybeGenerateUrl", () => {
   });
 
   test("auto provider + blank meetingUrl — generates URL via adapter", async () => {
-    const provider = buildProvider({ providerKind: "zoom_oauth" });
-    const generateMeeting = spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockResolvedValue({
-      joinUrl: "https://zoom.us/j/999",
-      providerMetadata: { id: "meeting-123" },
-    });
+    const generateMeeting = mockGenerateMeeting("https://zoom.us/j/999", { id: "meeting-123" });
 
-    const result = await maybeGenerateUrl(provider, baseDetails, { topic: "Test Meeting" });
+    const result = await maybeGenerateUrl(buildProvider({ providerKind: "zoom_oauth" }), baseDetails, {
+      topic: "Test Meeting",
+    });
 
     expect(generateMeeting).toHaveBeenCalledTimes(1);
     expect(generateMeeting).toHaveBeenCalledWith("zoom_oauth", expect.objectContaining({ topic: "Test Meeting" }));
@@ -57,14 +72,9 @@ describe("maybeGenerateUrl", () => {
   });
 
   test("auto provider + user-supplied meetingUrl — override, no generation", async () => {
-    const provider = buildProvider({ providerKind: "zoom_oauth" });
-    const generateMeeting = spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockResolvedValue({
-      joinUrl: "https://zoom.us/j/999",
-      providerMetadata: { id: "meeting-123" },
-    });
+    const generateMeeting = mockGenerateMeeting("https://zoom.us/j/999", { id: "meeting-123" });
 
-    const details: MeetingConfigDetails = { meetingUrl: "https://zoom.us/j/custom" };
-    const result = await maybeGenerateUrl(provider, details, { topic: "Test" });
+    const { result } = await runMaybeGenerateUrl("https://zoom.us/j/custom");
 
     expect(generateMeeting).not.toHaveBeenCalled();
     expect(result.details.meetingUrl).toBe("https://zoom.us/j/custom");
@@ -72,28 +82,18 @@ describe("maybeGenerateUrl", () => {
   });
 
   test("auto provider + empty-string meetingUrl — generates URL", async () => {
-    const provider = buildProvider({ providerKind: "zoom_oauth" });
-    const generateMeeting = spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockResolvedValue({
-      joinUrl: "https://zoom.us/j/generated",
-      providerMetadata: {},
-    });
+    const generateMeeting = mockGenerateMeeting("https://zoom.us/j/generated");
 
-    const details: MeetingConfigDetails = { meetingUrl: "" };
-    const result = await maybeGenerateUrl(provider, details, { topic: "Test" });
+    const { result } = await runMaybeGenerateUrl("");
 
     expect(generateMeeting).toHaveBeenCalledTimes(1);
     expect(result.details.meetingUrl).toBe("https://zoom.us/j/generated");
   });
 
   test("auto provider + null meetingUrl — generates URL", async () => {
-    const provider = buildProvider({ providerKind: "zoom_oauth" });
-    const generateMeeting = spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockResolvedValue({
-      joinUrl: "https://zoom.us/j/generated",
-      providerMetadata: {},
-    });
+    const generateMeeting = mockGenerateMeeting("https://zoom.us/j/generated");
 
-    const details: MeetingConfigDetails = { meetingUrl: null };
-    const result = await maybeGenerateUrl(provider, details, { topic: "Test" });
+    const { result } = await runMaybeGenerateUrl(null);
 
     expect(generateMeeting).toHaveBeenCalledTimes(1);
     expect(result.details.meetingUrl).toBe("https://zoom.us/j/generated");
@@ -104,7 +104,16 @@ describe("maybeGenerateUrl", () => {
     const error = new MeetingChannelError("Rate limited", "RATE_LIMITED");
     spyOn(MeetingChannelFactory.meetingChannel, "generateMeeting").mockRejectedValue(error);
 
-    await expect(maybeGenerateUrl(provider, baseDetails, { topic: "Test" })).rejects.toThrow("Rate limited");
+    // Await the call directly and assert the thrown error to avoid awaiting a non-Promise
+    try {
+      await maybeGenerateUrl(provider, baseDetails, { topic: "Test" });
+      // Should not reach here
+      throw new Error("Expected maybeGenerateUrl to reject with MeetingChannelError");
+    } catch (err) {
+      expect(err).toBeInstanceOf(MeetingChannelError);
+      // Ensure message is preserved
+      expect(err instanceof Error ? err.message : "").toBe("Rate limited");
+    }
   });
 
   test("passes startDateTime and durationMinutes to adapter", async () => {

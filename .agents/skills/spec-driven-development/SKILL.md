@@ -44,7 +44,34 @@ Every feature plan enforces three mandatory execution rules across all tasks:
 - Time-critical hotfixes requiring immediate action
 - Well-established patterns with minimal ambiguity
 
-## The Three-Phase Workflow
+## The Development Lifecycle
+
+### Phase 0: Pre-Implementation Baseline (MANDATORY)
+
+**Purpose:** Establish error baseline to distinguish new issues from pre-existing ones
+
+**Process:**
+1. Record current error counts before any implementation work begins
+2. Create deferred-items ledger from template
+3. Document baseline in outcome file
+
+**Baseline Commands:**
+```bash
+# Record tsgo error count
+bun tsgo 2>&1 | grep "error TS" | wc -l > /tmp/baseline-tsgo.txt
+
+# Record biome warnings
+bun biome:check 2>&1 | grep -c "warn" > /tmp/baseline-biome.txt
+
+# Record lint output
+bun run scripts/lint-service.ts --json --id baseline > /tmp/baseline-lint.json
+```
+
+> **Note:** These granular per-tool counts are for baseline comparison only. For per-file quality verification during implementation, use the unified script: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0 = pass).
+
+**Why this matters:** During implementation, distinguishing "I introduced this error" from "this was already here" is critical for focused fixing. Four implementations (quota, whatsapp, cron, auto-meeting-url) showed baseline confusion caused wasted debugging time.
+
+---
 
 ### Phase 1: Requirements Gathering
 
@@ -74,6 +101,36 @@ WHEN [event] AND [condition] THEN [system] SHALL [response]
 3. WHEN user provides password shorter than 8 characters THEN system SHALL display "password too short" error
 4. WHEN account creation succeeds THEN system SHALL send confirmation email
 ```
+
+### Phase 1.5: Plan Review Gate (MANDATORY)
+
+**Purpose:** Catch plan-to-reality mismatches BEFORE implementation begins
+
+**Process:**
+1. After `specs.md`, `implementation.md`/`design.md`, and `trackable-tasks.md` are drafted
+2. Invoke the existing `@plan-review` skill on the complete plan
+3. Fix all violations reported by the skill
+4. Re-run `@plan-review` until output is: "Plan passes all AGENTS.md rules"
+5. Write outcome file: `.ai/plans/<feature-name>/outcome/plan-review-R1.md`
+6. Commit patched plan files
+
+**What this catches:**
+- Path errors (cited files don't exist or wrong paths)
+- i18n namespace mismatches (string literals vs `Translation` enum)
+- GraphQL document naming violations
+- Component prop interface mismatches
+- Permission matrix vs seed data inconsistencies
+- Cross-reference gaps (ACs without tasks, components without definitions)
+
+**Evidence:** auto-meeting-url ran plan review pre-implementation and caught 28 issues across 8 dimensions → required only 3 total review rounds. Other implementations (quota, whatsapp, cron) skipped this gate → required 5-12 post-implementation review rounds.
+
+**Invocation:**
+```markdown
+# In the planning session, after tasks.md complete:
+"Please review this plan using @plan-review skill"
+```
+
+---
 
 ### Phase 2: Design Documentation
 
@@ -126,6 +183,36 @@ Every feature plan MUST include a UX/Navigation section defining:
 **Rationale:** [Why this was selected]
 ```
 
+### Phase 2.5: Mid-Point Review Gate (CONDITIONAL)
+
+**Purpose:** Catch backend architecture issues before they propagate to frontend
+
+**When to use:**
+- Multi-phase plans with >15 total tasks
+- Plans with distinct backend + frontend phases
+- Features with complex service/repository layers
+
+**When to skip:**
+- Single-phase plans
+- Frontend-only features
+- Plans with <10 tasks
+
+**Process:**
+1. After Phase 2 (Backend Foundation) completes, BEFORE Phase 3 (Webhook/Frontend/Integration)
+2. Dispatch backend-scoped review subagents:
+   - `review-backend` (scope: all `backend/` files modified in Phases 1-2)
+   - `review-types` (scope: all `backend/types/` files)
+   - `review-config` (scope: env-config, drizzle.config, migration files)
+3. Aggregate findings (filter to backend-specific issues only)
+4. Dispatch fix subagents per file using `.agents/instructions/backend.instructions.md`
+5. Run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per fixed file
+6. Re-run backend review until zero backend-specific findings
+7. Write outcome: `.ai/plans/<feature-name>/outcome/midpoint-review-R1.md`
+
+**Evidence:** whatsapp R3 comprehensive review after 9 tasks found 23 findings (2 HIGH) that accumulated. Mid-point gate would have caught these after backend (Task 6) before frontend propagation.
+
+---
+
 ### Phase 3: Task Planning
 
 **Purpose:** Break design into actionable, sequential implementation steps
@@ -146,10 +233,46 @@ Every feature plan MUST include a UX/Navigation section defining:
 ```
 
 **Task Sequencing Strategies:**
-- **Foundation-First:** Core interfaces before dependent components
+- **Foundation-First + Interleaved Tests (RECOMMENDED):** Core interfaces before dependent components, with each implementation task including its paired test as a subtask
 - **Feature-Slice:** End-to-end vertical slices for early validation
 - **Risk-First:** Tackle uncertain areas early
 - **Hybrid:** Combine approaches based on project needs
+
+**Interleaved Test Structure (RECOMMENDED):**
+
+Each builder/adapter/service task should include paired tests:
+
+```markdown
+- [ ] 5. Implement MetaCloudApiAdapter
+  - [ ] 5.1 Implement adapter interface methods
+    - Core send/fetch/complete/fail/retry logic
+    - Error handling, retries, logging
+    - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
+    - _Requirements: REQ-4, REQ-5_
+    
+  - [ ] 5.2 Write paired integration test
+    - Test file: `backend/services/.../test/meta-cloud-api.adapter.test.ts`
+    - Tag: `@live-comm` or `@live-integration` (if external API calls)
+    - Cover: All interface methods, error paths, retry logic
+    - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
+    - _Requirements: REQ-4, REQ-5_
+    
+  - [ ] 5.3 Run test suite and verify all pass
+  - [ ] 5.4 Quality loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) on both implementation + test files
+```
+
+**When to interleave:**
+- Builder/adapter tasks (always)
+- Service layer tasks (recommended)
+- Repository layer tasks (recommended)
+- Complex business logic tasks (recommended)
+
+**When to defer tests:**
+- Simple utility functions (test in batch)
+- UI component tests (can batch at phase end)
+- E2E tests (requires complete feature)
+
+**Evidence:** whatsapp "Task 4 builders shipped without @live-comm tests; Task 5 adapter shipped without integration tests" — integration issues discovered late. Interleaved tests provide immediate feedback.
 
 ## Plan Templates
 
@@ -183,8 +306,8 @@ The official process templates for generating feature specifications are located
 - [ ] Each task produces testable code
 - [ ] Requirements references included
 - [ ] Scope is appropriate (2-4 hours each)
-- [ ] **Quality loop task per file** (tsgo + biome:check + lint queue)
-- [ ] **Instruction verification task per subtask** (validate against layer AGENTS.md + .agents/instructions)
+- [ ] **Quality loop task per file** (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
+- [ ] **Instruction verification task per subtask** (sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions files)
 - [ ] **Drizzle schema handled correctly** (push for schema, migrate for custom SQL only)
 
 ## Integration with AI Workflows
@@ -208,6 +331,82 @@ Context:
 
 Please help me develop requirements using the EARS format, starting with user stories and acceptance criteria.
 ```
+
+## Parallel Review Wave Pattern (Post-Implementation)
+
+After all implementation tasks complete and BEFORE marking the plan done, dispatch specialized review subagents in parallel to catch semantic bugs that quality loops miss.
+
+### When to Use
+
+- **MANDATORY** for all feature plans with >10 tasks
+- Run AFTER all implementation tasks complete
+- Run BEFORE Phase 7 (Knowledge Propagation) task executes
+- Scope to files created/modified by the plan only (`git diff --name-only` vs baseline)
+
+### Review Wave Dispatch
+
+Dispatch these review subagents via Task tool:
+
+**1. review-types** (scope: all new/modified type files)
+- Canonical type naming
+- No duplicate type definitions
+- Import path consistency (all `@/` aliases, no relative imports)
+- Enum usage (value imports vs type imports) correct everywhere
+
+**2. review-backend** (scope: all new/modified `backend/` files)
+- Architecture compliance
+- TOCTOU race conditions
+- Dead code (unused exports, unreachable methods)
+- Cross-layer imports
+- Race conditions in repository methods
+
+**3. review-frontend** (scope: all new/modified `frontend/`, `app/` files)
+- MUI v9 compliance
+- Apollo hook patterns
+- Zustand store patterns
+- Theme compliance
+- Component patterns
+
+### Findings Aggregation
+
+1. Collect findings from all subagents
+2. Deduplicate overlapping findings
+3. Categorize: CRITICAL / HIGH / MEDIUM / LOW
+4. **Filter out pre-existing code issues** — focus on new code only
+
+### Fix Phase
+
+1. Dispatch fix subagents per file cluster (1 subagent per cluster of 3-5 related files)
+2. Each fix subagent:
+   - Uses `.agents/instructions/*.instructions.md` as guardrails (auto-discovered by `sub-loop.ts`)
+   - Runs `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per file for verification
+   - Reports cross-file dependencies to orchestrator (sub-loop.ts enforces the Fix-Or-Report rule)
+3. Orchestrator coordinates multi-file fixes
+
+### Verification
+
+- Re-run review subagents on fixed files
+- Repeat until **zero feature-specific findings** remain
+- Write outcome: `.ai/plans/<feature-name>/outcome/post-implementation-review.md`
+
+### Evidence
+
+All four implementations required 5-12 post-implementation review rounds because this pattern was ad-hoc. Formalizing it as Phase 8 (numbered after Phase 7 to avoid renumbering existing phases; executes before Phase 7 propagation task) reduces rounds to 2-3.
+
+---
+
+## Outcome Synthesis Protocol (Post-Review)
+
+After post-implementation review is clean:
+
+1. **Read ALL outcome files** in `.ai/plans/<feature-name>/outcome/`
+2. **Extract recurring patterns/gotchas** (e.g., "dialog/ vs dialogs/ directory confusion appeared 3x")
+3. **Identify knowledge propagation targets** based on plan domain (see table below)
+4. **Phase 7 Knowledge Propagation task** creates docs and updates AGENTS.md files with learnings
+
+This synthesis ensures learnings don't remain siloed in outcome files but propagate to permanent project knowledge.
+
+---
 
 ## Knowledge Propagation from Plan Outcomes (CRITICAL)
 
@@ -331,7 +530,7 @@ After all implementation tasks are complete, the final task in every plan MUST:
   - Update `.agents/skills/<skill>/SKILL.md` if new patterns affect the skill's domain
   - Update `.agents/instructions/<layer>.instructions.md` if new conventions should be enforced
   - Update root `AGENTS.md` Important References section with the new doc
-  - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
+  - Run global check: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file (0 errors, 0 warnings)
   - Write outcome file: `.ai/plans/<feature-name>/outcome/X.Y-knowledge-propagation-outcome.md`
   - Update progress: Mark task X.Y as `[x]` in `tasks.md`
 ```
@@ -370,7 +569,7 @@ Given a plan that introduced prepared statements across repositories:
 3. **Update `backend/AGENTS.md`**: Add prepared statements bullet to Repository Layer section
 4. **Update `.agents/skills/drizzle/SKILL.md`**: Add "Prepared Statements" section with key rules and doc reference
 5. **Update root `AGENTS.md`**: Add `docs/drizzle/prepared-statements.md` to Important References
-6. **Quality check**: `bun tsgo`, `bun biome:check`, `bun run lint`
+6. **Quality check**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file
 
 ## Standard Task Enhancement Rules (Applied to Every Feature Plan)
 
@@ -382,23 +581,76 @@ Every feature plan MUST include:
 - Per-audience rendering specifications (what each role sees differently)
 - Mobile vs Desktop navigation differences
 
-### 2. Quality Loop Per File (Default in Every Subtask)
-After creating/modifying ANY file, the executing agent MUST run:
+### 2. Quality Loop Per File (Default in Every Subtask — EXPANDED)
+
+After creating/modifying ANY file, the executing agent MUST run the **unified per-file quality verification script** `scripts/health/sub-loop.ts` on the modified file. This single script replaces running `tsgo`, `biome:check`, `oxlint`, `lint:type-aware`, `check:duplicates`, and `codescene --file` individually — it runs them all in strict progressive order and short-circuits at the first failing check.
+
+**Unified Quality Gate (replaces individual tsgo/biome/lint commands):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify","files":["<the-file>"]}'
+# Run the progressive per-file quality loop (tsgo → biome → oxlint → lint → duplicates → codescene)
+bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 ```
-Fix all errors before proceeding to next file/subtask.
+
+**Lifecycle stages** (controls how deep the loop goes — pick the deepest stage needed for the file):
+
+| `--lifecycle` | Checks run (in strict order, short-circuit at first failure) |
+|---------------|-------------------------------------------------------------|
+| `tsgo` | tsgo only |
+| `biome` | tsgo → biome:check |
+| `lint` | tsgo → biome:check → oxlint → lint:type-aware (via lint service) |
+| `codescene` | tsgo → biome:check → oxlint → lint:type-aware → check:duplicates → codescene --file |
+| `sonar-results` | same as `codescene` (subagents never run sonar-scan — hardcoded exclusion) |
+
+**What the script handles automatically (no manual steps needed):**
+- ✅ Discovers and prints ALL applicable `.github/instructions/*.instructions.md` files for the target file
+- ✅ Discovers and prints ALL applicable layer `AGENTS.md` files for the target file
+- ✅ Enforces the Fix-Or-Report rule (fix within same file; report cross-file dependencies to orchestrator)
+- ✅ Runs `check:duplicates` for single-file duplication detection (codescene lifecycle)
+- ✅ Runs `codescene --file` for code health (codescene lifecycle)
+- ✅ Hardcodes exclusion of `sonar-scan` and `sonar-manager` — subagents NEVER trigger a sonar scan
+
+**Exit codes:** `0` = all checks passed · `1` = stopped at a failing check (errors printed) · `2` = invalid arguments
+
+Fix all errors reported by the script and re-run until it exits `0` before proceeding to the next file/subtask.
+
+**Semantic Review Checklist (Agent Self-Review):**
+
+Before marking ANY subtask `[x]`, verify (the sub-loop script handles mechanical checks; this checklist covers semantic bugs the script cannot detect):
+
+**Race Conditions & Concurrency:**
+- [ ] No read-then-write sequences without atomicity (SELECT FOR UPDATE / transaction / advisory lock)
+- [ ] No module-level mutable state (Maps, Sets, arrays) without bounded size
+- [ ] All async credit/balance/quota deductions use SELECT FOR UPDATE or advisory locks
+- [ ] All Redis operations are atomic (use `SET NX EX`, not separate `SET NX` + `GET`)
+
+**Environment & Configuration:**
+- [ ] All `resolveEnvConfig("<KEY>")` calls have matching entry in `env-config-keys.ts`
+- [ ] All `resetX()` / cache-invalidation functions invalidate ALL keys resolved via `resolveEnvConfig`
+- [ ] No credential/secret setters accepting empty strings
+
+**Code Quality:**
+- [ ] No dead branches (all `if` paths reachable, every `throw` reachable)
+- [ ] No cross-layer imports (frontend → backend, shared → frontend/backend)
+- [ ] No manual ReturnType construction (use `toReturnType` helper where applicable)
+
+**Schema & Types:**
+- [ ] Schema columns in migrations exist in Drizzle schema (and vice versa)
+- [ ] All enums imported as value imports (not `import type`) when used in runtime expressions
+- [ ] No string literals where enum types expected — always use enum members
+
+**Deferred Work:**
+- [ ] No deferred items without entry in `.ai/plans/<feature-name>/deferred-items.md`
+
+**Why this matters:** The `sub-loop.ts` script catches syntax/format/duplication/code-health issues but structurally cannot detect race conditions, dead code, type cascades, or cross-layer violations. Four implementations (whatsapp, quota, cron, auto-meeting-url) showed 100% of tasks reported "quality gate ✅" while harboring semantic bugs requiring 5-12 post-implementation review rounds. This semantic checklist is agent self-review (no scripts) — minimal overhead, high signal.
+
+Fix all errors reported by `sub-loop.ts` and resolve all semantic checklist findings before proceeding to next file/subtask.
 
 ### 3. Instruction Verification Per Subtask (Default in Every Subtask)
-After quality loop passes, the agent MUST validate the file against ALL applicable instruction files:
-- **Layer AGENTS.md**: Absolute path to each layer's AGENTS.md (e.g., `/home/ahmed/Projects/siraj/backend/db/schema/AGENTS.md`)
-- **.agents/instructions/*.md**: Absolute paths to all matching instruction files (e.g., `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`)
+After the `sub-loop.ts` quality loop passes, the agent MUST read and validate the file against ALL applicable instruction files. **The `sub-loop.ts` script automatically discovers and prints** the applicable `.github/instructions/*.instructions.md` and layer `AGENTS.md` files for the target file — the agent reads those printed paths (no manual lookup needed):
+- **Layer AGENTS.md**: Printed by `sub-loop.ts` under the "AGENTS.md files (read before fixing)" section
+- **.agents/instructions/*.md**: Printed by `sub-loop.ts` under the "Instruction files (read before fixing)" section
 
-The task-to-instructions mapping is defined in the implementation guide and must be included in every plan.
+The task-to-instructions mapping is defined in the implementation guide and must be included in every plan as a reference, but `sub-loop.ts` performs the actual discovery at runtime.
 
 ### 4. Drizzle Schema Convention
 - **Schema changes** (new tables, columns, indexes): Use `bun run db push` — creates schema automatically
@@ -420,8 +672,8 @@ Every task in the plan MUST specify:
 5. **Monolithic tasks:** Break down into 2-4 hour increments
 6. **Missing error cases:** Always consider what happens when things go wrong
 7. **Missing UX/Navigation spec:** Every feature needs routes, sidebar, permissions, audiences defined
-8. **Missing quality loop:** Every file must pass tsgo + biome + lint before moving on
-9. **Missing instruction verification:** Every file must be validated against layer rules
+8. **Missing quality loop:** Every file must pass `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` before moving on
+9. **Missing instruction verification:** Every file must be validated against layer rules (sub-loop.ts auto-discovers applicable rule files)
 10. **Confusing migrate vs push:** Use push for Drizzle schema, migrate for custom SQL only
 
 ## Next Steps

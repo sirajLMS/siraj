@@ -8,8 +8,12 @@ const messagesByLocale: Record<AppLocale, Translations> = {
   en: enMessages,
 };
 
+function isAppLocale(value: string): value is AppLocale {
+  return (locales as readonly string[]).includes(value);
+}
+
 function resolveLocale(locale: string): AppLocale {
-  return (locales as readonly string[]).includes(locale) ? (locale as AppLocale) : defaultLocale;
+  return isAppLocale(locale) ? locale : defaultLocale;
 }
 
 export function getTranslations(locale: string): Translations {

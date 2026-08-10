@@ -68,23 +68,20 @@ const renderCountryInput = (config: RenderInputConfig): React.ReactNode => {
   const resolvedPlaceholder = listAttached ? (label ?? selectCountryLabel) : undefined;
 
   const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-    const inputProps = (
-      params as unknown as { inputProps?: { onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void } }
-    ).inputProps;
-    inputProps?.onBlur?.(event);
+    params.slotProps.htmlInput?.onBlur?.(event);
     onBlur?.();
   };
 
   return (
     <TextField
       {...params}
+      autoFocus={autoFocus}
       label={resolvedLabel}
       placeholder={resolvedPlaceholder}
       required={required}
       error={showError}
       helperText={helperText}
       onBlur={handleBlur}
-      autoFocus={autoFocus}
       slotProps={{
         ...params.slotProps,
         input: {

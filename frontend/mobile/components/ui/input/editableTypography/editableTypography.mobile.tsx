@@ -7,7 +7,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { styled } from "@mui/material/styles";
 import TextField, { type TextFieldProps } from "@mui/material/TextField";
 import Typography, { type TypographyProps } from "@mui/material/Typography";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type EditableTypographyProps = {
   readonly typography: TypographyProps;
@@ -53,7 +54,6 @@ function EditableTypographyEditFieldMobile({
       error={!!error}
       helperText={error}
       onKeyDown={onKeyDown}
-      autoFocus
       inputRef={inputRef}
       slotProps={{
         input: {
@@ -80,11 +80,11 @@ export const EditableTypographyMobile: React.FC<EditableTypographyProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const touchTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIsEditing(startEditing);
   }, [startEditing]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setInputValue(value);
   }, [value]);
 
@@ -138,7 +138,7 @@ export const EditableTypographyMobile: React.FC<EditableTypographyProps> = ({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter") {
-        handleSave().then(r => r);
+        void handleSave().then(r => r);
       } else if (e.key === "Escape") {
         handleCancel();
       }

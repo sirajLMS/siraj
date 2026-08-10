@@ -23,8 +23,11 @@ async function performLogin(page: Page, context: BrowserContext): Promise<void> 
   try {
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
   } catch (e) {
-    const err = e as Error;
-    logger.error("login failed:", err.message);
+    if (e instanceof Error) {
+      logger.error("login failed:", e.message);
+    } else {
+      logger.error("login failed:", String(e));
+    }
   }
   await page.waitForLoadState("networkidle").catch(() => {});
 }
@@ -39,7 +42,7 @@ async function auditNav(page: Page): Promise<void> {
     .catch(() => "<no nav>");
   logger.info("URL after login:", page.url());
   logger.info("nav visible:", navVisible);
-  logger.info("nav text (first 800):", (navText as string).slice(0, 800));
+  logger.info("nav text (first 800):", navText.slice(0, 800));
 
   logger.info("=== Checking 'بحث الجدول' nav item ===");
   const item = page.getByText("بحث الجدول");

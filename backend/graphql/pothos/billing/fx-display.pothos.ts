@@ -3,9 +3,9 @@ import type { CurrencyCode } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { parseCurrencyCode } from "@/backend/lib/enum";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
 import type { DisplayAmountReturnType } from "@/backend/types";
+import { parseCurrencyCode } from "@/shared/lib/enum";
 
 const DisplayAmountRef = gqlSchemaBuilder.objectRef<DisplayAmountReturnType>("DisplayAmount");
 
@@ -78,11 +78,11 @@ export async function populateBillingFxDisplayCurrencyByUserId(
   ctx.billingFxDisplayCurrencyByUserId = map;
 }
 
-export function resolveDisplayAmountField<P extends { id: string }>(
+export function resolveDisplayAmountField<P extends { id: string; amount?: string | null; currency?: string | null }>(
   parent: P,
   ctx: BaseContext,
-  amountKey: keyof P & string = "amount" as keyof P & string,
-  currencyKey: keyof P & string = "currency" as keyof P & string,
+  amountKey: keyof P & string = "amount",
+  currencyKey: keyof P & string = "currency",
   subjectUserId?: string | null
 ) {
   const displayCurrency = resolveEffectiveDisplayCurrency(ctx, subjectUserId);
@@ -90,9 +90,12 @@ export function resolveDisplayAmountField<P extends { id: string }>(
     return null;
   }
 
+  const amount = parent[amountKey];
+  const currency = parent[currencyKey];
+
   return FxDisplayService.convertForDisplay(
-    parent[amountKey] as string | null | undefined,
-    parseCurrencyCode(parent[currencyKey] as string | null | undefined),
+    typeof amount === "string" ? amount : null,
+    typeof currency === "string" ? parseCurrencyCode(currency) : null,
     displayCurrency,
     parent.id,
     undefined,
@@ -101,7 +104,7 @@ export function resolveDisplayAmountField<P extends { id: string }>(
 }
 
 export async function resolveDisplayAmountFields(
-  parents: Record<string, unknown>[],
+  items: readonly { id: string }[],
   ctx: BaseContext,
   amountKey: string,
   currencyKey: string,
@@ -109,33 +112,36 @@ export async function resolveDisplayAmountFields(
 ): Promise<Map<string, DisplayAmountReturnType | null>> {
   const map = new Map<string, DisplayAmountReturnType | null>();
   await Promise.all(
-    parents.map(async parent => {
-      const parentId = parent.id as string;
-      const displayCurrency = resolveEffectiveDisplayCurrency(
-        ctx,
-        subjectUserIdKey ? (parent[subjectUserIdKey] as string | null | undefined) : null
-      );
+    items.map(async item => {
+      const itemId = item.id;
+      const record = item as Record<string, unknown>;
+      const subjectUserId = subjectUserIdKey
+        ? typeof record[subjectUserIdKey] === "string"
+          ? record[subjectUserIdKey]
+          : null
+        : null;
+      const displayCurrency = resolveEffectiveDisplayCurrency(ctx, subjectUserId);
       if (!displayCurrency) {
-        map.set(parentId, null);
+        map.set(itemId, null);
         return;
       }
 
-      const amount = parent[amountKey] as string | null | undefined;
-      const currencyStr = parent[currencyKey] as string | null | undefined;
-      if (amount == null || currencyStr == null) {
-        map.set(parentId, null);
+      const amount = record[amountKey];
+      const currencyStr = record[currencyKey];
+      if ((typeof amount !== "string" && typeof amount !== "number") || typeof currencyStr !== "string") {
+        map.set(itemId, null);
         return;
       }
 
       const result = await FxDisplayService.convertForDisplay(
-        amount,
+        String(amount),
         parseCurrencyCode(currencyStr),
         displayCurrency,
-        parentId,
+        itemId,
         undefined,
         ctx.locale
       );
-      map.set(parentId, result);
+      map.set(itemId, result);
     })
   );
   return map;

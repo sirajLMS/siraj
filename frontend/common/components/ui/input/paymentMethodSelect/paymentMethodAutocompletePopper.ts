@@ -15,11 +15,10 @@ const sameWidthModifier: Modifier<"sameWidth", Record<string, unknown>> = {
   fn: ({ state }) => {
     const anchor = state.rects.reference;
     if (anchor) {
-      state.styles.popper = {
-        ...state.styles.popper,
+      state.styles.popper = Object.assign({}, state.styles.popper, {
         width: `${anchor.width}px`,
         minWidth: `${anchor.width}px`,
-      };
+      });
     }
   },
 };

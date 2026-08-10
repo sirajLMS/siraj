@@ -198,66 +198,71 @@ export namespace SubjectResourceRepository {
     }
   }
 
+  async function processOne(
+    t: DBTransaction,
+    input: SubjectResourceAttachInput
+  ): Promise<SubjectResourceReturnType | null> {
+    const [existing] = await t
+      .select()
+      .from(subjectResources)
+      .where(
+        and(
+          eq(subjectResources.subjectId, input.subjectId),
+          eq(subjectResources.learningResourceId, input.learningResourceId)
+        )
+      )
+      .limit(1);
+
+    if (existing) {
+      const [row] = await t
+        .select(resourceSelectColumns)
+        .from(subjectResources)
+        .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
+        .where(eq(subjectResources.id, existing.id));
+
+      return row ? mapRowToReturnType(row) : null;
+    }
+
+    const [created] = await t
+      .insert(subjectResources)
+      .values({
+        subjectId: input.subjectId,
+        learningResourceId: input.learningResourceId,
+        resourceType: input.resourceType ?? null,
+        sortOrder: input.sortOrder ?? 0,
+      })
+      .returning();
+
+    if (!created) return null;
+
+    const [row] = await t
+      .select(resourceSelectColumns)
+      .from(subjectResources)
+      .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
+      .where(eq(subjectResources.id, created.id));
+
+    return row ? mapRowToReturnType(row) : null;
+  }
+
   export async function createMany(
     inputs: readonly SubjectResourceAttachInput[],
     tx?: DBTransaction
   ): Promise<SubjectResourceReturnType[]> {
     if (inputs.length === 0) return [];
 
+    async function processMany(
+      t: DBTransaction,
+      index: number,
+      acc: SubjectResourceReturnType[]
+    ): Promise<SubjectResourceReturnType[]> {
+      if (index >= inputs.length) return acc;
+      const result = await processOne(t, inputs[index]);
+      if (result) acc.push(result);
+      return processMany(t, index + 1, acc);
+    }
+
     try {
-      return await runInTx(tx, async t => {
-        const results: SubjectResourceReturnType[] = [];
-
-        for (const input of inputs) {
-          const [existing] = await t
-            .select()
-            .from(subjectResources)
-            .where(
-              and(
-                eq(subjectResources.subjectId, input.subjectId),
-                eq(subjectResources.learningResourceId, input.learningResourceId)
-              )
-            )
-            .limit(1);
-
-          if (existing) {
-            const [row] = await t
-              .select(resourceSelectColumns)
-              .from(subjectResources)
-              .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
-              .where(eq(subjectResources.id, existing.id));
-
-            if (row) {
-              results.push(mapRowToReturnType(row));
-            }
-            continue;
-          }
-
-          const [created] = await t
-            .insert(subjectResources)
-            .values({
-              subjectId: input.subjectId,
-              learningResourceId: input.learningResourceId,
-              resourceType: input.resourceType ?? null,
-              sortOrder: input.sortOrder ?? 0,
-            })
-            .returning();
-
-          if (created) {
-            const [row] = await t
-              .select(resourceSelectColumns)
-              .from(subjectResources)
-              .leftJoin(learningResources, eq(subjectResources.learningResourceId, learningResources.id))
-              .where(eq(subjectResources.id, created.id));
-
-            if (row) {
-              results.push(mapRowToReturnType(row));
-            }
-          }
-        }
-
-        return results;
-      });
+      return await runInTx(tx, async t => processMany(t, 0, []));
     } catch (error) {
       logger.error("Error creating subject resources:", error);
       throw error;

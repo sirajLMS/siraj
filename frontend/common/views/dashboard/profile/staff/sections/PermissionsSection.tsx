@@ -15,6 +15,12 @@ import {
 
 type StaffPermissionOverride = NonNullable<PermissionsSectionProps["permissionOverrides"]>[number];
 
+const OVERRIDE_STATE_VALUES = new Set(Object.values(OverrideState) as readonly string[]);
+
+function isOverrideState(value: unknown): value is OverrideState {
+  return typeof value === "string" && OVERRIDE_STATE_VALUES.has(value);
+}
+
 interface PermissionsOverridesGridProps {
   readonly overrides: readonly StaffPermissionOverride[];
   readonly labels: StaffPermissionsSectionLabels;
@@ -40,7 +46,7 @@ function PermissionsOverridesGrid({ overrides, labels: tp }: Readonly<Permission
         headerName: tp.columns.state,
         width: 120,
         renderCell: params => {
-          const state = params.value as OverrideState | null;
+          const state = isOverrideState(params.value) ? params.value : null;
           return state === OverrideState.Granted ? tp.states.granted : tp.states.denied;
         },
       },

@@ -8,7 +8,9 @@ describe("env-config-keys", () => {
       descriptor => descriptor.key
     );
     const sharedHiddenKeys: string[] = [...HIDDEN_ENV_CONFIG_KEYS];
-    expect(registryHiddenKeys.sort()).toEqual(sharedHiddenKeys.sort());
+    const sortedRegistryKeys = registryHiddenKeys.toSorted((a, b) => a.localeCompare(b));
+    const sortedSharedKeys = sharedHiddenKeys.toSorted((a, b) => a.localeCompare(b));
+    expect(sortedRegistryKeys).toEqual(sortedSharedKeys);
   });
 
   test("hidden keys are env-only and never exposed in settings", () => {

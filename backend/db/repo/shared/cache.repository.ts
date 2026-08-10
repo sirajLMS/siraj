@@ -2,7 +2,7 @@ import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { rateLimitCache, sessionCache } from "@/backend/db/schema/shared/cache";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 export namespace CacheDbRepository {
   /**

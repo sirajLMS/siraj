@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { StorageService } from "@/backend/services/storage/storage.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
@@ -30,9 +30,7 @@ export async function seedEntityFile(input: SeedEntityFileInput): Promise<{ url:
   const storageService = await getStorageService();
 
   if (input.ensureParentDirs) {
-    for (const dir of input.ensureParentDirs) {
-      await fileSeeder.ensureDirectory(dir, true);
-    }
+    await Promise.all(input.ensureParentDirs.map(dir => fileSeeder.ensureDirectory(dir, true)));
   }
 
   const localFilePath = resolveAssetPath(input.assetRelativePath);

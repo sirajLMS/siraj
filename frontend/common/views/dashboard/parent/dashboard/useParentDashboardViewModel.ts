@@ -62,13 +62,9 @@ function mapExecutionStateToLiveClassStatus(
   return "scheduled";
 }
 
-function resolveMeetingJoinUrl(
-  meetingJoinUrl?: string | null,
-  effectiveMeeting?: EffectiveMeeting | null
-): string | null {
+function resolveMeetingJoinUrl(effectiveMeeting?: EffectiveMeeting | null): string | null {
   const fromEffective = effectiveMeeting?.joinUrl?.trim();
-  const fromLegacy = meetingJoinUrl?.trim();
-  return fromEffective || fromLegacy || null;
+  return fromEffective || null;
 }
 
 type ScheduleQueryData = Operations.ParentDashboardScheduleQuery;
@@ -78,7 +74,7 @@ function useScheduleRows(data: ScheduleQueryData | undefined): readonly ParentSc
     const rows = data?.parentDashboardSchedule?.rows;
     if (!rows) return [];
     return rows.map(r => {
-      const joinUrl = resolveMeetingJoinUrl(r.meetingJoinUrl, r.effectiveMeeting);
+      const joinUrl = resolveMeetingJoinUrl(r.effectiveMeeting);
       const executionState = r.executionState ?? ClassExecutionState.NotActivated;
       const outcome = r.outcome ?? ClassOutcome.Pending;
       return {
@@ -299,7 +295,7 @@ export function useParentDashboardViewModel(_props: UseParentDashboardViewModelP
   const schedulePagination = useSchedulePagination(page, pageSize, totalCount, handlers.handlePageChange);
 
   const pageCount =
-    schedulePagination !== undefined && schedulePagination.pageSize > 0
+    schedulePagination.pageSize > 0
       ? Math.max(1, Math.ceil(schedulePagination.totalCount / schedulePagination.pageSize))
       : 0;
 

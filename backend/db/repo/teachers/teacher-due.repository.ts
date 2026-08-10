@@ -242,11 +242,12 @@ export namespace TeacherDueRepository {
       .where(and(...conditions))
       .orderBy(teacherDues.approvedAt);
 
-    return rows.map(row => ({
-      ...row,
-      status: row.status,
-      currency: row.currency,
-    }));
+    return rows.map(row =>
+      Object.assign(row, {
+        status: row.status,
+        currency: row.currency,
+      })
+    );
   }
 
   export async function getPendingDuesSummary(tx?: DBTransaction): Promise<TeacherPendingDuesSummaryReturnType> {

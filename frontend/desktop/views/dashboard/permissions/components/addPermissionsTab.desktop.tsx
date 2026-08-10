@@ -16,6 +16,10 @@ const StyledTabContainer = styled(Box)({
   gap: 24,
 });
 
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
 const StyledPermissionKeyCell = styled(Box)(({ theme }) => ({
   fontFamily: "var(--font-jetbrains-mono), monospace",
 
@@ -61,7 +65,11 @@ export function AddPermissionsTabDesktop({
         headerName: t.columnKey,
         flex: 1,
         minWidth: 200,
-        renderCell: params => <StyledPermissionKeyCell>{params.value as string}</StyledPermissionKeyCell>,
+        renderCell: params => (
+          <StyledPermissionKeyCell>
+            {isString(params.value) ? params.value : String(params.value ?? "")}
+          </StyledPermissionKeyCell>
+        ),
       },
       {
         field: "category",

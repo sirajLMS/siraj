@@ -60,7 +60,7 @@ Your context window is a scarce resource. Violating these rules will degrade you
 
 The following paths are internal development tooling and should be **excluded from security findings**:
 - `scripts/health/` — SonarQube/CodeScene health check tooling (dev-only, not production code)
-- `scripts/lint-queue-server.ts` — Dev-only lint queue server (runs locally, not in production)
+- `scripts/lint-service.ts` — Dev-only in-process lint service (runs locally, not in production)
 
 Do NOT flag security issues in these excluded files.
 
@@ -203,7 +203,7 @@ Use the `Task` tool with `agent_type: "explore"` and `mode: "background"`. Each 
 - The diff content (from discovery subagent)
 - The specific track's check categories (listed in Phase 3)
 - The output format (FINDING|SEVERITY|FILE:LINE|TRACK|DESCRIPTION)
-- **Excluded paths** reminder: skip security findings in `scripts/health/` and `scripts/lint-queue-server.ts`
+- **Excluded paths** reminder: skip security findings in `scripts/health/` and `scripts/lint-service.ts`
 
 ### Nesting Depth Limit
 

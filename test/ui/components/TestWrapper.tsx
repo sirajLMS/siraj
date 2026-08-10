@@ -27,6 +27,9 @@ const cacheRtl = createCache({
   stylisPlugins: [prefixer, rtlPlugin],
 });
 
+const DEFAULT_PERMISSIONS: readonly AppPermission[] = [];
+const DEFAULT_MOCKS: readonly MockLink.MockedResponse[] = [];
+
 interface TestWrapperProps {
   readonly locale?: "ar" | "en";
   readonly themeMode?: "dark" | "light";
@@ -39,8 +42,8 @@ interface TestWrapperProps {
 export function TestWrapper({
   locale = "ar",
   themeMode = "dark",
-  permissions = [],
-  mocks = [],
+  permissions = DEFAULT_PERMISSIONS,
+  mocks = DEFAULT_MOCKS,
   viewport,
   children,
 }: TestWrapperProps) {

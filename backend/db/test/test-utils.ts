@@ -5,8 +5,8 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
-import { parseIanaTimezone } from "@/backend/lib/enum";
 import type { UserReturnType } from "@/backend/types/users/user.types";
+import { parseIanaTimezone } from "@/shared/lib/enum";
 
 /**
  * Runs a function within a database transaction that is always rolled back.
@@ -40,11 +40,12 @@ export async function runInRollback(fn: (tx: DBTransaction) => Promise<void>): P
  */
 export function testInRollback(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   // We dynamically import test from bun:test to avoid global pollution if not in test env
-  import("bun:test").then(({ test }) => {
+  void import("bun:test").then(({ test }) => {
     test(name, async () => {
       expect(typeof fn).toBe("function");
       await runInRollback(fn);
     });
+    return undefined;
   });
 }
 
@@ -58,7 +59,7 @@ export async function createTestUser(
   overrides: Partial<typeof users.$inferInsert> = {}
 ): Promise<UserReturnType> {
   const now = new Date();
-  const [user] = (await tx
+  const [user] = await tx
     .insert(users)
     .values({
       name: overrides.name || "Test User",
@@ -76,7 +77,7 @@ export async function createTestUser(
       deletedAt: overrides.deletedAt || null,
       ...overrides,
     })
-    .returning()) as [typeof users.$inferSelect];
+    .returning();
 
   return {
     ...user,
@@ -123,35 +124,38 @@ async function executeGrantWithRetry(quotedRole: string): Promise<void> {
     `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${quotedRole}`,
   ];
 
-  for (const stmt of grantStatements) {
-    await retryOnConcurrentConflict(() => db.execute(sql.raw(stmt)), 5);
-  }
+  await Promise.all(grantStatements.map(stmt => retryOnConcurrentConflict(() => db.execute(sql.raw(stmt)), 5)));
 }
 
 async function retryOnConcurrentConflict(fn: () => Promise<unknown>, maxRetries = 3): Promise<void> {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
+  async function attemptWithRetry(attempt: number): Promise<void> {
     try {
       await fn();
-      return;
     } catch (e) {
       if (isConcurrentConflictError(e) && attempt < maxRetries - 1) {
         await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
-        continue;
+        await attemptWithRetry(attempt + 1);
+      } else {
+        throw e;
       }
-      throw e;
     }
   }
+  await attemptWithRetry(0);
 }
 
 function isConcurrentConflictError(e: unknown): boolean {
-  let msg = e instanceof Error ? e.message : String(e);
+  const msg = e instanceof Error ? e.message : String(e);
   if (msg.includes("tuple concurrently updated") || msg.includes("deadlock detected") || msg.includes("40P01")) {
     return true;
   }
-  const cause = e instanceof Error ? (e as { cause?: unknown }).cause : undefined;
+  const cause = e instanceof Error ? e.cause : undefined;
   if (cause instanceof Error) {
-    msg = cause.message;
-    if (msg.includes("tuple concurrently updated") || msg.includes("deadlock detected") || msg.includes("40P01")) {
+    const causeMsg = cause.message;
+    if (
+      causeMsg.includes("tuple concurrently updated") ||
+      causeMsg.includes("deadlock detected") ||
+      causeMsg.includes("40P01")
+    ) {
       return true;
     }
   }
@@ -181,29 +185,35 @@ export type RlsPolicyDef = {
 function isPolicyConflictError(e: unknown): boolean {
   const msg = e instanceof Error ? e.message : String(e);
   if (msg.includes("duplicate_object") || msg.includes("already exists")) return true;
-  const cause = e instanceof Error ? (e as { cause?: { code?: string } }).cause : undefined;
-  const code = cause && typeof cause === "object" && "code" in cause ? (cause as { code: string }).code : "";
-  return code === "42710";
+  const cause = e instanceof Error ? e.cause : undefined;
+  if (cause && typeof cause === "object" && "code" in cause) {
+    const code = (cause as Record<string, unknown>).code;
+    return typeof code === "string" && code === "42710";
+  }
+  return false;
 }
 
 async function installPolicy(policy: RlsPolicyDef): Promise<void> {
   const tbl = quoteIdent(policy.table);
   const pol = quoteIdent(policy.name);
-  for (let attempt = 0; attempt < 5; attempt++) {
+
+  async function attemptInstall(attempt: number): Promise<void> {
     try {
       await db.execute(sql.raw(`DROP POLICY IF EXISTS ${pol} ON ${tbl}`));
       await db.execute(sql.raw(`CREATE POLICY ${pol} ON ${tbl} ${policy.definition}`));
-      return;
     } catch (e) {
       const isConflict = isPolicyConflictError(e);
       const isDeadlock = isConcurrentConflictError(e);
       if ((isConflict || isDeadlock) && attempt < 4) {
         await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
-        continue;
+        await attemptInstall(attempt + 1);
+      } else {
+        throw e;
       }
-      throw e;
     }
   }
+
+  await attemptInstall(0);
 }
 
 async function dropLegacySoftDeletePolicy(table: string): Promise<void> {
@@ -221,16 +231,16 @@ async function enableRowLevelSecurity(table: string): Promise<void> {
 }
 
 export async function setupRlsPolicies(policies: RlsPolicyDef[]): Promise<void> {
-  for (const policy of policies) {
-    await installPolicy(policy);
-    if (policy.name.endsWith("_update_policy")) {
-      await dropLegacySoftDeletePolicy(policy.table);
-    }
-  }
+  await Promise.all(policies.map(policy => installPolicy(policy)));
+
+  await Promise.all(
+    policies
+      .filter(policy => policy.name.endsWith("_update_policy"))
+      .map(policy => dropLegacySoftDeletePolicy(policy.table))
+  );
+
   const tables = [...new Set(policies.map(p => p.table))];
-  for (const table of tables) {
-    await enableRowLevelSecurity(table);
-  }
+  await Promise.all(tables.map(table => enableRowLevelSecurity(table)));
 }
 
 function quoteIdent(ident: string): string {
@@ -261,15 +271,14 @@ export async function queryAsRlsRole<T>(
     // Ensure soft-delete bypass is not leaked across pooled connections.
     await client.query(`SELECT set_config('app.soft_delete', '', false)`);
     const result = await client.query(querySql, params);
-    return result.rows as T[];
+    // result.rows from pg is typed as any[], which is assignable to T[]
+    return result.rows;
   } finally {
     client.release();
   }
 }
 
 export async function closeRlsClients(): Promise<void> {
-  for (const [, pool] of rlsClientCache) {
-    await pool.end();
-  }
+  await Promise.all(Array.from(rlsClientCache.values()).map(pool => pool.end()));
   rlsClientCache.clear();
 }

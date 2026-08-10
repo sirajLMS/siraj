@@ -10,7 +10,8 @@ export interface EntityLinkTargets {
   readonly teacherId: string;
 }
 
-import type { ClassInstanceDetail, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassInstance } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { ClassDetailsLabels, SessionLabels } from "@/shared/locale";
 
@@ -52,11 +53,6 @@ export interface SessionActionProps {
   readonly error: string | null;
 }
 
-export interface ActionFeedbackState {
-  readonly message: string;
-  readonly severity: "success" | "error";
-}
-
 export interface ClassActionHandlers {
   readonly handleForceActivate: () => Promise<void>;
   readonly handleStop: () => Promise<void>;
@@ -68,7 +64,7 @@ export interface ClassActionHandlers {
 }
 
 export interface CommonViewProps {
-  readonly instance: ClassInstanceDetail;
+  readonly instance: ClassInstance;
   readonly formattedScheduledDate: string;
   readonly formattedStartTime: string;
   readonly formattedEndTime: string;
@@ -119,7 +115,7 @@ export interface TierSessionActionProps {
 // NEW FOR PLAN v5: lifted from classDetailsHeader.{mobile,desktop}.tsx inline declaration
 // specs.md §4.1 Class-B unified shape (mobile/desktop header bodies were identical modulo tier PageHeader import).
 export interface ClassDetailsHeaderProps {
-  readonly instance: ClassInstanceDetail;
+  readonly instance: ClassInstance;
   readonly canOverride: boolean;
   readonly isStudentView: boolean;
   readonly labels: ClassDetailsHeaderLabels;
@@ -128,7 +124,7 @@ export interface ClassDetailsHeaderProps {
 // NEW FOR PLAN v5: lifted from classDetailsContent.{mobile,desktop}.tsx inline declaration
 // specs.md §4.1 Class-B unified shape (mobile/desktop content prop contracts were identical).
 export interface ClassDetailsContentProps {
-  readonly instance: ClassInstanceDetail;
+  readonly instance: ClassInstance;
   readonly canOverride: boolean;
   readonly isParentView: boolean;
   readonly isStudentView: boolean;

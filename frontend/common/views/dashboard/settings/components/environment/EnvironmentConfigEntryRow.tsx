@@ -30,13 +30,13 @@ function resolveSourceLabel(source: string | null | undefined, labels: Environme
 }
 
 interface KeyBlockProps {
-  readonly key: string;
+  readonly configKey: string;
   readonly description: string | undefined;
   readonly editable: boolean;
   readonly labels: EnvironmentConfigViewModel["labels"];
 }
 
-function KeyBlock({ key, description, editable, labels }: KeyBlockProps) {
+function KeyBlock({ configKey, description, editable, labels }: KeyBlockProps) {
   return (
     <Stack sx={{ gap: 0.75, minWidth: 0 }}>
       <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{labels.columns.key}</Typography>
@@ -48,14 +48,14 @@ function KeyBlock({ key, description, editable, labels }: KeyBlockProps) {
           overflowWrap: "anywhere",
         }}
       >
-        {key}
+        {configKey}
       </Typography>
       {description ? (
         <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{description}</Typography>
       ) : null}
-      {!editable ? (
+      {editable ? null : (
         <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.readOnlyHint}</Typography>
-      ) : null}
+      )}
     </Stack>
   );
 }
@@ -81,7 +81,7 @@ function SourceBlock({ sourceLabel, hasDbOverride, labels }: SourceBlockProps) {
 }
 
 interface ValueBlockProps {
-  readonly key: string;
+  readonly configKey: string;
   readonly displayValue: string;
   readonly editable: boolean;
   readonly saving: boolean;
@@ -99,7 +99,7 @@ interface ValueBlockProps {
 }
 
 function ValueBlock({
-  key,
+  configKey,
   displayValue,
   editable,
   saving,
@@ -115,15 +115,17 @@ function ValueBlock({
   onRevert,
   labels,
 }: ValueBlockProps) {
+  const handleDraftChange = (value: string) => onDraftChange(configKey, value);
+  const handleSave = () => onSave(configKey);
+  const handleRevert = () => onRevert(configKey);
+
   return (
     <Stack sx={{ gap: 1.5, minWidth: 0 }}>
       <EnvSecretField
-        configKey={key}
+        configKey={configKey}
         label={valueLabel}
         value={displayValue}
-        onChange={value => {
-          onDraftChange(key, value);
-        }}
+        onChange={handleDraftChange}
         disabled={!editable || saving}
         readOnly={!editable}
         isSecret={isSecret}
@@ -139,9 +141,7 @@ function ValueBlock({
             variant="contained"
             startIcon={<SaveOutlined />}
             disabled={!dirty || saving}
-            onClick={() => {
-              void onSave(key);
-            }}
+            onClick={handleSave}
           >
             {labels.actions.save}
           </Button>
@@ -152,9 +152,7 @@ function ValueBlock({
               color="secondary"
               startIcon={<DeleteOutlined />}
               disabled={saving}
-              onClick={() => {
-                void onRevert(key);
-              }}
+              onClick={handleRevert}
             >
               {labels.actions.revert}
             </Button>
@@ -221,22 +219,22 @@ export function EnvironmentConfigEntryRow({
   const { labels, locale, canEdit, onDraftChange, onSave, onRevert, getDisplayValue, isEntryDirty, isEntrySaving } =
     viewModel;
 
-  const key = entry.key ?? "";
+  const entryKey = entry.key ?? "";
   const isSecret = isEnvConfigSecretEntry(entry);
   const editable = entry.editable === true && canEdit;
   const displayValue = getDisplayValue(entry);
   const description = resolveLocalizedEnvDescription(entry.description, locale);
-  const saving = isEntrySaving(key);
+  const saving = isEntrySaving(entryKey);
   const dirty = isEntryDirty(entry);
   const sourceLabel = resolveSourceLabel(entry.source, labels);
   const valueLabel = labels.columns.value;
   const emptyPlaceholder = labels.emptyValue;
 
-  const keyBlock = <KeyBlock key={key} description={description} editable={editable} labels={labels} />;
+  const keyBlock = <KeyBlock configKey={entryKey} description={description} editable={editable} labels={labels} />;
   const sourceBlock = <SourceBlock sourceLabel={sourceLabel} hasDbOverride={entry.hasDbOverride} labels={labels} />;
   const valueBlock = (
     <ValueBlock
-      key={key}
+      configKey={entryKey}
       displayValue={displayValue}
       editable={editable}
       saving={saving}

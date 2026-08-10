@@ -31,6 +31,18 @@ const cacheRtl = createCache({
   stylisPlugins: [prefixer, rtlPlugin],
 });
 
+function isLocale(value: unknown): value is "ar" | "en" {
+  return value === "ar" || value === "en";
+}
+
+function isViewport(value: unknown): value is "mobile" | "tablet" | "desktop" {
+  return value === "mobile" || value === "tablet" || value === "desktop";
+}
+
+function isPaletteMode(value: unknown): value is PaletteMode {
+  return value === "light" || value === "dark";
+}
+
 /**
  * Syncs Storybook's `theme` global to MUI's `useColorScheme()` and the DOM
  * attributes that scope CSS variable palettes (`data-theme`, `data-mui-color-scheme`).
@@ -65,10 +77,10 @@ function StorybookColorSchemeBridge({
 }
 
 export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: StoryContext }) => {
-  const locale = ((context.globals.locale as string | undefined) ?? "ar") as "ar" | "en";
-  const rawTheme = context.globals.theme;
-  const themeMode: PaletteMode = rawTheme === "light" || rawTheme === "dark" ? rawTheme : "dark";
-  const _viewport = (context.globals.viewport as "mobile" | "tablet" | "desktop" | undefined) ?? "desktop";
+  const globals = context.globals as Record<string, unknown>;
+  const locale = isLocale(globals.locale) ? globals.locale : "ar";
+  const themeMode: PaletteMode = isPaletteMode(globals.theme) ? globals.theme : "dark";
+  const viewport = isViewport(globals.viewport) ? globals.viewport : "desktop";
   const direction: "rtl" | "ltr" = locale === "ar" ? "rtl" : "ltr";
 
   // CSS-variables theme matches the App Router provider; mode toggles via useColorScheme.
@@ -180,7 +192,7 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
   const content = <RenderStory Story={Story} context={context} />;
 
   // Calculate maxWidth based on viewport global
-  const maxWidth = _viewport === "mobile" ? 600 : _viewport === "tablet" ? 900 : "none";
+  const maxWidth = viewport === "mobile" ? 600 : viewport === "tablet" ? 900 : "none";
 
   return (
     <LocaleProvider locale={locale}>
@@ -197,30 +209,30 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
             <CssBaseline />
             <StorybookColorSchemeBridge mode={themeMode} direction={direction} locale={locale}>
               <GlobalStyles
-                styles={theme => ({
+                styles={muiTheme => ({
                   ".sbdocs-wrapper": {
                     maxWidth: "100% !important",
                     padding: "2rem !important",
-                    backgroundColor: `${theme.palette.background.default} !important`,
+                    backgroundColor: `${muiTheme.palette.background.default} !important`,
                   },
                   ".sbdocs-preview, .docs-story, .innerZoomElementWrapper, .docs-story > div, .sbdocs [role='toolbar']":
                     {
-                      backgroundColor: `${theme.palette.background.default} !important`,
-                      borderColor: `${theme.palette.divider} !important`,
-                      color: `${theme.palette.text.primary} !important`,
+                      backgroundColor: `${muiTheme.palette.background.default} !important`,
+                      borderColor: `${muiTheme.palette.divider} !important`,
+                      color: `${muiTheme.palette.text.primary} !important`,
                     },
                   ".sbdocs-content": {
                     maxWidth: "100% !important",
                     width: "100% !important",
                   },
                   ".sbdocs-title, .sbdocs-h1, .sbdocs-h2, .sbdocs-h3": {
-                    color: `${theme.palette.text.primary} !important`,
+                    color: `${muiTheme.palette.text.primary} !important`,
                   },
                   ".sbdocs-p, .sbdocs-li, .sbdocs-a": {
-                    color: `${theme.palette.text.secondary} !important`,
+                    color: `${muiTheme.palette.text.secondary} !important`,
                   },
                   ".sbdocs button, .sbdocs a, .sbdocs [role='toolbar'] button": {
-                    color: `${theme.palette.text.primary} !important`,
+                    color: `${muiTheme.palette.text.primary} !important`,
                   },
                 })}
               />

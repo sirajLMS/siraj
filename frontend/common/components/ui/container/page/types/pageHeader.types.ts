@@ -1,5 +1,5 @@
-import type { TypographyProps } from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 
 // NEW FOR PLAN v5: shared PageHeaderBreadcrumb + BasePageHeaderProps lifted from Mobile/Desktop twins.
 export interface PageHeaderBreadcrumb {
@@ -11,7 +11,7 @@ export interface PageHeaderBreadcrumb {
 export interface BasePageHeaderProps {
   readonly title: string;
   readonly subtitle?: string;
-  readonly titleVariant?: TypographyProps["variant"];
+  readonly titleVariant?: UiTypographyVariant;
   readonly breadcrumbs?: readonly PageHeaderBreadcrumb[];
   readonly actions?: ReactNode;
 }

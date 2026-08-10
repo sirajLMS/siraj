@@ -14,7 +14,7 @@ import {
   ThumbDownOutlined,
 } from "@mui/icons-material";
 import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics } from "@/frontend/common/graphql/generated/gql/operations";
-import type { MetricItem } from "@/frontend/common/types/shared.types";
+import type { MetricItem, MetricItemVariant } from "@/frontend/common/types/shared.types";
 import type { AdminDashboardLabels } from "@/shared/locale";
 
 export type RawMetrics =
@@ -26,7 +26,7 @@ interface AdminMetricDefinition {
   readonly key: string;
   readonly labelKey: keyof AdminDashboardLabels["metrics"];
   readonly icon: SvgIconComponent;
-  readonly variant?: MetricItem["variant"];
+  readonly variant?: MetricItemVariant;
   readonly count: (metrics: RawMetrics) => number;
 }
 

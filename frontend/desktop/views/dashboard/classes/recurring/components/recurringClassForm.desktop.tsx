@@ -93,7 +93,7 @@ export function RecurringClassFormDesktop({
       component="form"
       onSubmit={e => {
         e.preventDefault();
-        handleSubmit(onSubmit)(e);
+        void handleSubmit(onSubmit)(e);
       }}
       sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
     >

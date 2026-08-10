@@ -218,7 +218,7 @@ export function StaffProfileEditForm({
           </PrimaryPageAction>
         </Stack>
       </Box>
-      {!isAdminScope ? <ChangePasswordSection /> : null}
+      {!isAdminScope && <ChangePasswordSection />}
       <FormSuccessSnackbar
         open={successOpen}
         message={labels.base.actions.saveSuccess}

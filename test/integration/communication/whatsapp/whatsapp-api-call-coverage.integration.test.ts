@@ -34,7 +34,9 @@ describeLive("whatsapp-api-call-coverage @live-comm", () => {
 
     const builderFiles = requestFiles.filter(f => f.endsWith(".request.ts") && !f.endsWith(".test.ts"));
 
-    expect(builderFiles.sort()).toEqual([...EXPECTED_BUILDERS].sort());
+    expect(builderFiles.toSorted((a, b) => a.localeCompare(b))).toEqual(
+      [...EXPECTED_BUILDERS].toSorted((a, b) => a.localeCompare(b))
+    );
 
     const testFiles = await requestsDir.readdir(path.resolve(process.cwd(), INTEGRATION_TEST_DIR));
 

@@ -5,7 +5,6 @@ import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
 import { AccountStatus, type CurrencyCode, type Gender } from "@/backend/enum";
-import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/backend/lib/enum";
 import type {
   PaginationArgs,
   TeacherCreateReturnType,
@@ -17,6 +16,7 @@ import type {
   TeacherSelectType,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
+import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherRepository {
@@ -25,9 +25,9 @@ export namespace TeacherRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<TeacherCreateReturnType> {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const existingTeacher = await queryDb
+    const existingTeacher = await executor
       .select({ id: teachers.id })
       .from(teachers)
       .where(eq(teachers.userId, input.userId))
@@ -38,7 +38,7 @@ export namespace TeacherRepository {
       throw new Error(teacher.alreadyExists);
     }
 
-    const [created] = await queryDb
+    const [created] = await executor
       .insert(teachers)
       .values({
         userId: input.userId,
@@ -61,7 +61,7 @@ export namespace TeacherRepository {
       throw new Error("Failed to create teacher profile");
     }
 
-    const [userRow] = await queryDb
+    const [userRow] = await executor
       .select({ timezone: users.timezone, status: users.status })
       .from(users)
       .where(eq(users.id, input.userId))
@@ -78,7 +78,7 @@ export namespace TeacherRepository {
     };
   }
 
-  export const findByUserId = async (userId: string, tx?: DBTransaction) => {
+  export const findByUserId = async (userId: string, tx?: DBTransaction): Promise<TeacherSelectType | null> => {
     const q = queryDb(tx);
     const [teacher] = await q.select().from(teachers).where(eq(teachers.userId, userId)).limit(1);
     return teacher ?? null;
@@ -93,8 +93,8 @@ export namespace TeacherRepository {
   export const findByUserIds = async (userIds: string[], tx?: DBTransaction): Promise<Map<string, string | null>> => {
     if (userIds.length === 0) return new Map();
 
-    const queryDb = tx ?? db;
-    const rows = await queryDb
+    const executor = tx ?? db;
+    const rows = await executor
       .select({ userId: teachers.userId, teacherId: teachers.id })
       .from(teachers)
       .where(inArray(teachers.userId, userIds));
@@ -107,8 +107,8 @@ export namespace TeacherRepository {
   };
 
   export const searchTeachers = async (searchQuery: string, limit: number, tx?: DBTransaction) => {
-    const queryDb = tx ?? db;
-    return await queryDb
+    const executor = tx ?? db;
+    return await executor
       .select({
         id: teachers.id,
         name: users.name,
@@ -131,7 +131,7 @@ export namespace TeacherRepository {
     search?: string,
     tx?: DBTransaction
   ): Promise<{ rows: TeacherDirectoryRow[]; totalCount: number }> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
     const conditions = and(
       isNull(users.deletedAt),
@@ -152,7 +152,7 @@ export namespace TeacherRepository {
       status: users.status,
     };
 
-    let rowsQuery = queryDb
+    let rowsQuery = executor
       .select(baseSelect)
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))
@@ -164,7 +164,7 @@ export namespace TeacherRepository {
       rowsQuery = queryWithPagination(rowsQuery, paginationArgs);
     }
 
-    const countQuery = queryDb
+    const countQuery = executor
       .select({ count: sql<number>`count(*)`.mapWith(Number) })
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))
@@ -172,10 +172,7 @@ export namespace TeacherRepository {
 
     const [rawRows, countResult] = await Promise.all([rowsQuery, countQuery]);
 
-    const rows = rawRows.map(row => ({
-      ...row,
-      status: parseAccountStatus(row.status),
-    }));
+    const rows = rawRows.map(row => Object.assign(row, { status: parseAccountStatus(row.status) }));
 
     const totalCount = countResult[0]?.count ?? 0;
 
@@ -183,9 +180,9 @@ export namespace TeacherRepository {
   };
 
   export const getTeacherDirectoryMetrics = async (tx?: DBTransaction): Promise<TeacherDirectoryMetrics> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
 
-    const [metrics] = await queryDb
+    const [metrics] = await executor
       .select({
         activated: sql<number>`sum(case when ${users.status} = 'ACTIVATED' then 1 else 0 end)`.mapWith(Number),
         deactivated: sql<number>`sum(case when ${users.status} = 'DEACTIVATED' then 1 else 0 end)`.mapWith(Number),
@@ -282,8 +279,8 @@ export namespace TeacherRepository {
     teacherId: string,
     tx?: DBTransaction
   ): Promise<TeacherProfileReturnType | null> => {
-    const queryDb = tx ?? db;
-    const [teacher] = await queryDb
+    const executor = tx ?? db;
+    const [teacher] = await executor
       .select(buildTeacherProfileSelect())
       .from(teachers)
       .innerJoin(users, eq(teachers.userId, users.id))
@@ -304,7 +301,7 @@ export namespace TeacherRepository {
     input: TeacherProfileUpdateInputType,
     tx?: DBTransaction
   ): Promise<boolean> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const now = new Date();
     const restInput = Object.fromEntries(
       Object.entries(input).filter(([key]) => key !== "timezone" && key !== "status")
@@ -313,7 +310,7 @@ export namespace TeacherRepository {
       ...restInput,
       updatedAt: now,
     };
-    const [updated] = await queryDb
+    const [updated] = await executor
       .update(teachers)
       .set(setInput)
       .where(eq(teachers.id, teacherId))
@@ -325,9 +322,9 @@ export namespace TeacherRepository {
     extraValues?: { hourlyRate?: string | null; rateCurrency?: CurrencyCode | null },
     tx?: DBTransaction
   ): Promise<TeacherSelectType> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const now = new Date();
-    const [row] = await queryDb
+    const [row] = await executor
       .insert(teachers)
       .values({ userId, createdAt: now, updatedAt: now, ...extraValues })
       .onConflictDoUpdate({

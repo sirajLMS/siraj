@@ -64,7 +64,7 @@ export function useSupervisorDashboardViewModel(
   const pendingDuesSummary = useMemo(
     () => ({
       totalCount: dashboard?.pendingDuesSummary?.totalCount ?? 0,
-      totalAmount: Number(dashboard?.pendingDuesSummary?.totalAmount ?? 0),
+      totalAmount: dashboard?.pendingDuesSummary?.totalAmount ?? 0,
       currency: dashboard?.pendingDuesSummary?.currency ?? "USD",
     }),
     [dashboard?.pendingDuesSummary]

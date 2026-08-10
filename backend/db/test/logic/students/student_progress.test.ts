@@ -33,17 +33,15 @@ async function insertUser(tx: DBTransaction, now: Date, name: string, prefix: st
 }
 
 async function insertParent(tx: DBTransaction, now: Date, userId: string): Promise<ParentEntity> {
-  const [parent] = (await tx
+  const [parent] = await tx
     .insert(parents)
     .values({ userId, status: "REGULAR", createdAt: now, updatedAt: now })
-    .returning()) as [ParentEntity];
+    .returning();
   return parent;
 }
 
 async function insertTeacher(tx: DBTransaction, now: Date, userId: string): Promise<TeacherSelectType> {
-  const [teacher] = (await tx.insert(teachers).values({ userId, createdAt: now, updatedAt: now }).returning()) as [
-    TeacherSelectType,
-  ];
+  const [teacher] = await tx.insert(teachers).values({ userId, createdAt: now, updatedAt: now }).returning();
   return teacher;
 }
 
@@ -53,7 +51,7 @@ async function insertStudent(
   parentId: string,
   userId: string
 ): Promise<StudentSelectType> {
-  const [student] = (await tx
+  const [student] = await tx
     .insert(students)
     .values({
       parentId,
@@ -65,7 +63,7 @@ async function insertStudent(
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [StudentSelectType];
+    .returning();
   return student;
 }
 
@@ -75,7 +73,7 @@ async function insertClassInstance(
   studentId: string,
   teacherId: string
 ): Promise<ClassInstanceSelectType> {
-  const [classInst] = (await tx
+  const [classInst] = await tx
     .insert(classInstances)
     .values({
       studentId,
@@ -89,7 +87,7 @@ async function insertClassInstance(
       createdAt: now,
       updatedAt: now,
     })
-    .returning()) as [ClassInstanceSelectType];
+    .returning();
   return classInst;
 }
 
@@ -174,8 +172,17 @@ describe("Student Progress Tracking", () => {
         });
         throw new Error("Expected duplicate progress insert to violate unique constraint");
       } catch (error) {
-        const err = error as Error & { cause?: { code?: string } };
-        const code = err.cause?.code || "";
+        let code = "";
+        if (
+          error instanceof Error &&
+          error.cause !== null &&
+          error.cause !== undefined &&
+          typeof error.cause === "object" &&
+          "code" in error.cause
+        ) {
+          const causeCode = error.cause.code;
+          code = typeof causeCode === "string" ? causeCode : "";
+        }
         expect(code).toBe("23505");
       }
     });

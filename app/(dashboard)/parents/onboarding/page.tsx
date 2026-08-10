@@ -18,7 +18,7 @@ export default async function ParentOnboardingPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.PARENTS_CREATE], locale, context);
 

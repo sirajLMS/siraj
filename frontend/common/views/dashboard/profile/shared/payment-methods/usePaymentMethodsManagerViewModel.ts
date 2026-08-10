@@ -11,7 +11,7 @@ import {
   userPaymentMethodsQueryDocument,
   verifyBankTransferPaymentMethodMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
-import { getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
+import type { PaymentMethodTypeLabels } from "@/frontend/common/lib/payment-method";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { PaymentMethodsSlot } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsManager";
 import { usePaymentMethodProfileLabels } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodProfileLabels";
@@ -68,6 +68,25 @@ function buildMethodMap(
   return map;
 }
 
+function toPaymentMethodFragments(
+  methods: Array<UserPaymentMethodFieldsFragment> | null | undefined
+): readonly UserPaymentMethodFieldsFragment[] | undefined {
+  return methods ?? undefined;
+}
+
+const PAYMENT_METHOD_TYPE_TO_LABEL_KEY: Readonly<Record<string, keyof PaymentMethodTypeLabels>> = {
+  MOBILE_WALLET: "mobileWallet",
+  PAYMENT_LINK: "paymentLink",
+  ONLINE_ACCOUNT: "onlineAccount",
+  BANK_TRANSFER: "bankTransfer",
+  CASH: "cash",
+};
+
+function resolveTypeLabel(type: string, labels: PaymentMethodTypeLabels): string {
+  const labelKey = PAYMENT_METHOD_TYPE_TO_LABEL_KEY[type];
+  return labelKey ? labels[labelKey] : "";
+}
+
 function buildDeleteLabel(
   deleteId: string | null,
   methods: readonly PaymentMethodRow[],
@@ -76,9 +95,7 @@ function buildDeleteLabel(
   if (!deleteId) return "";
   const row = methods.find(m => m.id === deleteId);
   if (!row) return "";
-  return (
-    row.label?.trim() || getPaymentMethodTypeLabel(row.type, key => tType.type[key as keyof typeof tType.type] ?? "")
-  );
+  return row.label?.trim() || resolveTypeLabel(row.type, tType.type);
 }
 
 function computeBusy(loading: boolean, deleting: boolean, settingDefault: boolean, verifying: boolean): boolean {
@@ -210,9 +227,11 @@ export function usePaymentMethodsManagerViewModel(props: Readonly<UsePaymentMeth
 
   const { formOpen, setFormOpen, editMethod, setEditMethod, deleteId, setDeleteId } = useFormState();
 
-  const methods = useComputedMethods(data?.userPaymentMethods as UserPaymentMethodFieldsFragment[] | undefined, slot);
+  const userPaymentMethods = toPaymentMethodFragments(data?.userPaymentMethods);
 
-  const methodById = useMethodMap(data?.userPaymentMethods as UserPaymentMethodFieldsFragment[] | undefined);
+  const methods = useComputedMethods(userPaymentMethods, slot);
+
+  const methodById = useMethodMap(userPaymentMethods);
 
   const refetchData = useCallback(async () => {
     await refetch();

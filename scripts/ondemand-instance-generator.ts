@@ -77,7 +77,7 @@ function computeStartAtInTimezone(currentDate: Date, startHour: number, startMin
 
   const offsetStr = tzParts.find(p => p.type === "timeZoneName")?.value ?? "+0";
   // Parse offset strings like "GMT+5", "GMT-3:30", "GMT" (UTC)
-  const match = offsetStr.match(/GMT([+-])(\d{1,2})(?::(\d{2}))?/);
+  const match = /GMT([+-])(\d{1,2})(?::(\d{2}))?/.exec(offsetStr);
   const sign = match?.[1] === "-" ? -1 : 1;
   const hours = match ? Number(match[2]) : 0;
   const minutes = match?.[3] ? Number(match[3]) : 0;
@@ -105,8 +105,8 @@ interface PendingInstance {
   recurringScheduleId: string;
   studentId: string;
   teacherId: string;
-  subjectId: string | null;
-  durationMinutes: number | null;
+  subjectId: string;
+  durationMinutes: number;
   bookingTimezone: string | null;
   scheduledStartAt: Date;
   scheduledEndAt: Date;
@@ -129,82 +129,18 @@ export async function runOndemandInstanceGenerator(): Promise<void> {
     logger.info(`[OnDemandInstanceGenerator] Found ${schedules.length} active ON_DEMAND schedules.`);
 
     const now = new Date();
-    let totalGenerated = 0;
 
-    for (const schedule of schedules) {
-      const generated = await generateInstancesForSchedule(schedule, now);
-      totalGenerated += generated;
-    }
+    // Process schedules in parallel — each schedule runs inside its own tx with
+    // SELECT FOR UPDATE on the student's quotas + existing on-demand instances,
+    // so concurrent runs for the same student serialize at the DB level.
+    const generatedCounts = await Promise.all(schedules.map(schedule => generateInstancesForSchedule(schedule, now)));
+    const totalGenerated = generatedCounts.reduce((sum, count) => sum + count, 0);
 
     logger.info(`[OnDemandInstanceGenerator] Completed generation. Generated ${totalGenerated} instances.`);
   } catch (error) {
     logger.error("[OnDemandInstanceGenerator] Error running on-demand instance generator:", { error });
     throw error;
   }
-}
-
-async function tryGenerateSlotDay(
-  schedule: typeof recurringSchedules.$inferSelect,
-  currentDate: Date,
-  matchingDay: typeof recurringScheduleDays.$inferSelect,
-  remainingBalance: number,
-  existingConflicts: Set<string>,
-  pendingInstances: PendingInstance[]
-): Promise<{ generated: boolean; remaining: number }> {
-  const [startHour, startMin] = matchingDay.startTime.split(":").map(Number);
-  // RC2-1: Compute start time in the schedule's IANA timezone, not server-local.
-  const scheduledStartAt = computeStartAtInTimezone(currentDate, startHour, startMin, schedule.timezone);
-
-  const scheduledEndAt = new Date(scheduledStartAt.getTime() + schedule.durationMinutes * 60 * 1000);
-
-  // Check if this exact slot already has a conflicting instance (quick in-memory reject)
-  const tsIso = scheduledStartAt.toISOString();
-  const slotKey = `${schedule.id}-${tsIso}`;
-  let isAvailable = !existingConflicts.has(slotKey);
-
-  // Use AvailabilityService for teacher availability + conflict checks (Task 14 requirement).
-  // Falls back to the service which validates teacher availability windows, vacations, and
-  // overlapping instances via SchedulingRepository + TeacherAvailabilityRepository.
-  if (isAvailable) {
-    isAvailable = await AvailabilityService.isSlotAvailable(
-      schedule.studentId,
-      schedule.teacherId,
-      scheduledStartAt,
-      scheduledEndAt,
-      [],
-      undefined,
-      "en"
-    );
-  }
-
-  const { executionState, ondemandStatus } = determineExecutionState(isAvailable, remainingBalance > 0);
-
-  const dateIso = scheduledStartAt.toISOString().split("T")[0];
-  // V3-009: Use IANA-aware day-of-week for the idempotency key so DST
-  // transitions in the timezone don't cause key collisions/misses.
-  const idempotencyDow = (() => {
-    const df = new Intl.DateTimeFormat("en-US", { timeZone: schedule.timezone, weekday: "short" });
-    return SHORT_WEEKDAY_TO_ENUM[df.format(currentDate)] ?? currentDate.getDay();
-  })();
-  const idempotencyKey = `recurring-${schedule.id}-${idempotencyDow}-${dateIso}`;
-
-  pendingInstances.push({
-    recurringScheduleId: schedule.id,
-    studentId: schedule.studentId,
-    teacherId: schedule.teacherId,
-    subjectId: schedule.subjectId,
-    durationMinutes: schedule.durationMinutes,
-    bookingTimezone: schedule.timezone,
-    scheduledStartAt,
-    scheduledEndAt,
-    executionState,
-    ondemandStatus,
-    schedulingMode: SchedulingMode.ON_DEMAND,
-    idempotencyKey,
-  });
-
-  const newRemaining = executionState === ClassExecutionState.NOT_ACTIVATED ? remainingBalance - 1 : remainingBalance;
-  return { generated: true, remaining: newRemaining };
 }
 
 interface ScheduleDateRange {
@@ -259,13 +195,29 @@ function buildExistingConflictSet(scheduleId: string, overlappingInstances: { sc
 }
 
 /** Resolves the IANA-timezone-aware day-of-week for the current iteration date. */
-function resolveScheduleDOW(currentDate: Date, timezone: string): DayOfWeek | undefined {
+function resolveScheduleDOW(currentDate: Date, timezone: string): string | undefined {
   const fmt = new Intl.DateTimeFormat("en-US", { timeZone: timezone, weekday: "short" });
   const weekdayShort = fmt.format(currentDate);
   return SHORT_WEEKDAY_TO_ENUM[weekdayShort];
 }
 
-/** Iterates through the date range, generating pending instances for each matching schedule day. */
+/** Prepared slot metadata used for availability checks and instance construction. */
+interface PreparedSlot {
+  scheduledStartAt: Date;
+  scheduledEndAt: Date;
+  slotKey: string;
+  dateIso: string;
+  idempotencyDow: string | number;
+}
+
+/**
+ * Iterates through the date range, generating pending instances for each matching schedule day.
+ *
+ * The availability checks for all candidate slots are batched into a single `Promise.all`
+ * (no await-in-loop), then the results are consumed sequentially to track the running
+ * credit/quota balance correctly - each slot's execution state depends on whether the
+ * balance was depleted by earlier slots in the same iteration.
+ */
 async function generatePendingInstancesForRange(
   schedule: typeof recurringSchedules.$inferSelect,
   scheduleDays: (typeof recurringScheduleDays.$inferSelect)[],
@@ -276,34 +228,87 @@ async function generatePendingInstancesForRange(
 ): Promise<{ pendingInstances: PendingInstance[]; finalBalance: number }> {
   const pendingInstances: PendingInstance[] = [];
   let currentBalance = remainingBalance;
-  const currentDate = new Date(startDate);
+  const DAY_MS = 24 * 60 * 60 * 1000;
 
-  while (currentDate <= scheduleEndDate) {
+  // Phase 1 - collect matching slots with pre-computed metadata (sync).
+  const slots: PreparedSlot[] = [];
+  let currentDate = new Date(startDate.getTime());
+  const endDate = scheduleEndDate;
+  while (currentDate <= endDate) {
     const scheduleDOW = resolveScheduleDOW(currentDate, schedule.timezone);
     const matchingDay = scheduleDOW ? scheduleDays.find(d => d.dayOfWeek === scheduleDOW) : undefined;
-
     if (matchingDay) {
-      const result = await tryGenerateSlotDay(
-        schedule,
-        currentDate,
-        matchingDay,
-        currentBalance,
-        existingConflicts,
-        pendingInstances
-      );
-      if (result.generated) {
-        currentBalance = result.remaining;
-      }
+      const [startHour, startMin] = matchingDay.startTime.split(":").map(Number);
+      // RC2-1: Compute start time in the schedule's IANA timezone, not server-local.
+      const scheduledStartAt = computeStartAtInTimezone(currentDate, startHour, startMin, schedule.timezone);
+      const scheduledEndAt = new Date(scheduledStartAt.getTime() + schedule.durationMinutes * 60 * 1000);
+      const tsIso = scheduledStartAt.toISOString();
+      // V3-009: Use IANA-aware day-of-week for the idempotency key so DST
+      // transitions in the timezone don't cause key collisions/misses.
+      const idempotencyDow = (() => {
+        const df = new Intl.DateTimeFormat("en-US", { timeZone: schedule.timezone, weekday: "short" });
+        return SHORT_WEEKDAY_TO_ENUM[df.format(currentDate)] ?? currentDate.getDay();
+      })();
+      slots.push({
+        scheduledStartAt,
+        scheduledEndAt,
+        slotKey: `${schedule.id}-${tsIso}`,
+        dateIso: tsIso.split("T")[0],
+        idempotencyDow,
+      });
     }
+    currentDate = new Date(currentDate.getTime() + DAY_MS);
+  }
 
-    currentDate.setDate(currentDate.getDate() + 1);
+  // Phase 2 - check availability for all slots in parallel (no await-in-loop).
+  // Use AvailabilityService for teacher availability + conflict checks (Task 14 requirement).
+  // Falls back to the service which validates teacher availability windows, vacations, and
+  // overlapping instances via SchedulingRepository + TeacherAvailabilityRepository.
+  const availabilityResults = await Promise.all(
+    slots.map(slot =>
+      existingConflicts.has(slot.slotKey)
+        ? Promise.resolve(false)
+        : AvailabilityService.isSlotAvailable({
+            studentId: schedule.studentId,
+            teacherId: schedule.teacherId,
+            startAt: slot.scheduledStartAt,
+            endAt: slot.scheduledEndAt,
+            ignoreInstanceIds: [],
+            locale: "en",
+          })
+    )
+  );
+
+  // Phase 3 - build pending instances sequentially to track balance correctly.
+  for (let i = 0; i < slots.length; i++) {
+    const slot = slots[i];
+    const isAvailable = availabilityResults[i];
+    const { executionState, ondemandStatus } = determineExecutionState(isAvailable, currentBalance > 0);
+    const idempotencyKey = `recurring-${schedule.id}-${slot.idempotencyDow}-${slot.dateIso}`;
+    pendingInstances.push({
+      recurringScheduleId: schedule.id,
+      studentId: schedule.studentId,
+      teacherId: schedule.teacherId,
+      subjectId: schedule.subjectId,
+      durationMinutes: schedule.durationMinutes,
+      bookingTimezone: schedule.timezone,
+      scheduledStartAt: slot.scheduledStartAt,
+      scheduledEndAt: slot.scheduledEndAt,
+      executionState,
+      ondemandStatus,
+      schedulingMode: SchedulingMode.ON_DEMAND,
+      idempotencyKey,
+    });
+    if (executionState === ClassExecutionState.NOT_ACTIVATED) {
+      currentBalance -= 1;
+    }
   }
 
   return { pendingInstances, finalBalance: currentBalance };
 }
 
 /** Maps a PendingInstance to the insert shape expected by the classInstances table. */
-function toClassInstanceInsertType(p: PendingInstance): ClassInstanceInsertType {
+function toClassInstanceInsertType(p: PendingInstance, now: Date): ClassInstanceInsertType {
   return {
     recurringScheduleId: p.recurringScheduleId,
     studentId: p.studentId,
@@ -319,7 +324,9 @@ function toClassInstanceInsertType(p: PendingInstance): ClassInstanceInsertType 
     schedulingMode: p.schedulingMode,
     quotaDeducted: false,
     idempotencyKey: p.idempotencyKey,
-  } as ClassInstanceInsertType;
+    createdAt: now,
+    updatedAt: now,
+  };
 }
 
 async function generateInstancesForSchedule(
@@ -404,7 +411,7 @@ async function generateInstancesForSchedule(
 
     const inserted = await tx
       .insert(classInstances)
-      .values(pendingInstances.map(toClassInstanceInsertType))
+      .values(pendingInstances.map(p => toClassInstanceInsertType(p, now)))
       .onConflictDoNothing()
       .returning({ id: classInstances.id });
 

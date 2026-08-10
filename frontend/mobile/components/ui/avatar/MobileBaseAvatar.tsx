@@ -19,9 +19,13 @@ export type BaseAvatarProps = {
 
 const ROUNDED_BORDER_RADIUS = 1.5;
 
+function isSxProps(value: SxProps<Theme> | undefined | null | false): value is SxProps<Theme> {
+  return Boolean(value);
+}
+
 export function MobileBaseAvatar({ src, label = "", size = 36, variant = "circular", sx, children }: BaseAvatarProps) {
   const initials = children ?? avatarInitials(label);
-  const normalizedSx = Array.isArray(sx) ? sx : ([sx].filter(Boolean) as SxProps<Theme>[]);
+  const normalizedSx = Array.isArray(sx) ? sx : [sx].filter(isSxProps);
   const roundedStyle = variant === "rounded" ? { borderRadius: ROUNDED_BORDER_RADIUS } : {};
   const circularOutlineSx: SxProps<Theme> =
     variant === "circular" ? theme => ({ outline: `1px solid ${theme.palette.divider}` }) : [];

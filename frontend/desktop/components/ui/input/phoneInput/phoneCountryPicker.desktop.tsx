@@ -38,7 +38,6 @@ export const PhoneCountryPickerDesktop: React.FC<PhoneCountryPickerDesktopProps>
         label={t.selectCountry}
         fullWidth
         open
-        autoFocus
         showPhonePrefix
         matchAnchorWidth
         listAttached

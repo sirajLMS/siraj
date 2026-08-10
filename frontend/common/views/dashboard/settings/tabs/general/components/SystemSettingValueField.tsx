@@ -1,9 +1,10 @@
 "use client";
 
-import { Switch, TextField } from "@mui/material";
+import { Switch, TextField, Typography } from "@mui/material";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SystemSettingRow } from "@/frontend/common/views/dashboard/settings/types/generalSettings.types";
+import { SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 export interface SystemSettingValueFieldProps {
   readonly row: SystemSettingRow;
@@ -17,25 +18,25 @@ export function SystemSettingValueField({
   canEdit,
   disabled = false,
   onValueChange,
-}: Readonly<SystemSettingValueFieldProps>) {
+}: Readonly<SystemSettingValueFieldProps>): ReactNode {
   const [draftValue, setDraftValue] = useState(row.value);
 
   useEffect(() => {
     setDraftValue(row.value);
   }, [row.value]);
 
-  const commitValue = (nextValue: string): void => {
+  const commitValue = (nextValue: string): Promise<void> | void | undefined => {
     if (nextValue === row.value) {
-      return;
+      return undefined;
     }
-    void onValueChange(row.code, nextValue);
+    return onValueChange(row.code, nextValue);
   };
 
   if (!canEdit) {
     if (row.dataType === SystemSettingDataType.Boolean) {
       return <Switch checked={row.value === "true"} readOnly size="small" disabled />;
     }
-    return row.value;
+    return <Typography component="span">{row.value}</Typography>;
   }
 
   if (row.dataType === SystemSettingDataType.Boolean) {

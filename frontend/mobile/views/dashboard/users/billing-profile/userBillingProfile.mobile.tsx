@@ -25,7 +25,7 @@ export function UserBillingProfileMobileView({
   loading,
   canView,
   canSubmitProof,
-  canManage = false,
+  canManage,
   billingActionsDisabled = false,
   onSearchChange,
   onPayNow,
@@ -75,16 +75,12 @@ export function UserBillingProfileMobileView({
                 ...getParentInvoiceGridLabels(labels),
                 hasPaymentProofHint: labels.hasPaymentProofHint,
               }}
-              paginationOptions={
-                totalCount !== undefined && onPageChange !== undefined
-                  ? buildServerPaginationOptions({
-                      page: page ?? 0,
-                      pageSize: pageSize ?? 10,
-                      totalCount,
-                      onPageChange,
-                    })
-                  : false
-              }
+              paginationOptions={buildServerPaginationOptions({
+                page: page ?? 0,
+                pageSize: pageSize ?? 10,
+                totalCount,
+                onPageChange,
+              })}
             />
           )}
         </MobileContentStack>

@@ -76,7 +76,7 @@ function DeleteConfirmDialog({
       </DialogContent>
       <DialogActions>
         <MuiButton onClick={onClose}>{cancelLabel}</MuiButton>
-        <MuiButton onClick={onConfirm} color="error" variant="contained" autoFocus>
+        <MuiButton onClick={onConfirm} color="error" variant="contained">
           {confirmLabel}
         </MuiButton>
       </DialogActions>
@@ -269,6 +269,10 @@ interface DaySelectorProps {
   readonly labels: TeacherWeeklyScheduleLabels;
 }
 
+function isDayKey<T extends Record<string, unknown>>(key: string, days: T): key is keyof T & string {
+  return key in days;
+}
+
 function DaySelector({ selectedDay, onSelect, labels }: Readonly<DaySelectorProps>) {
   const t = labels;
   return (
@@ -281,7 +285,8 @@ function DaySelector({ selectedDay, onSelect, labels }: Readonly<DaySelectorProp
     >
       <MobileHorizontalScrollRow leadSpacing={0} sx={theme => ({ gap: theme.spacing(1.25), paddingBottom: 0 })}>
         {WEEKLY_SCHEDULE_DAYS.map(day => {
-          const dayKey = day.slice(0, 3) as keyof typeof t.days;
+          const abbr = day.slice(0, 3);
+          const dayKey = isDayKey(abbr, t.days) ? abbr : day;
           const isSelected = selectedDay === day;
 
           return (
@@ -385,11 +390,13 @@ function TimeSlotRow({
     );
   }
 
+  const slotMinHeight = isLunch ? 48 : slotClasses.length > 0 ? 96 : 64;
+
   return (
     <Box
       sx={theme => ({
         display: "flex",
-        minHeight: isLunch ? 48 : slotClasses.length > 0 ? 96 : 64,
+        minHeight: slotMinHeight,
         backgroundColor: theme.palette.background.paper,
       })}
     >

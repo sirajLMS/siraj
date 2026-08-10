@@ -31,6 +31,7 @@ const MEETING_INTEGRATION_CONNECTED_ACCOUNT_FIELDS = gql`
 
 const TEST_MEETING_CONNECTION_RESULT_FIELDS = gql`
   fragment TestMeetingConnectionResultFields on TestMeetingConnectionResult {
+    id
     ok
     latencyMs
     mode

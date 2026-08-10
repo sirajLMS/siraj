@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { processFile } from "@/backend/storage/disk/local/shared";
 import type { LocalContext } from "@/backend/storage/disk/local/types";
 import { calculateFileHash, ensureDirectory, getAbsolutePath } from "@/backend/storage/disk/local/utils";

@@ -61,7 +61,7 @@ Your context window is a scarce resource. Violating these rules will degrade you
 
 The following paths are internal development tooling and should be **excluded from security findings**:
 - `scripts/health/` — SonarQube/CodeScene health check tooling (dev-only, not production code)
-- `scripts/lint-queue-server.ts` — Dev-only lint queue server (runs locally, not in production)
+- `scripts/lint-service.ts` — Dev-only in-process lint service (runs locally, not in production)
 
 Do NOT flag security issues in these files. Convention issues (wrong commands, broken scripts) are still valid findings.
 

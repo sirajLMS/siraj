@@ -11,13 +11,14 @@ import {
   getTimezoneSelectLabel,
 } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type MobileTimezoneDisplayProps = {
   readonly timezone?: string | null;
   readonly showOffset?: boolean;
   readonly fallback?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: NonNullable<TypographyProps["variant"]>;
   /** Render shape: "label" (default) renders the textual label; "iconOnly" renders just the territory flag emoji. */
   readonly displayType?: "label" | "iconOnly";
   readonly sx?: SxProps<Theme>;
@@ -43,23 +44,23 @@ export const MobileTimezoneDisplay: React.FC<MobileTimezoneDisplayProps> = ({
 }): React.ReactNode => {
   const locale = useAppLocale();
 
+  let content: React.ReactNode;
   if (!timezone) {
-    return fallback ?? null;
+    content = fallback ?? null;
+  } else {
+    const normalizedTimezone = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
+    if (displayType === "iconOnly") {
+      content = <MobileLocaleEmoji emoji={getTimezoneEmoji(normalizedTimezone)} sx={sx} />;
+    } else {
+      const display = showOffset
+        ? getTimezoneSelectLabel(normalizedTimezone, locale)
+        : getTimezonePathLabel(normalizedTimezone, locale);
+      content = (
+        <Typography component="span" variant={typographyVariant} sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
+          {display}
+        </Typography>
+      );
+    }
   }
-
-  const normalizedTimezone = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
-
-  if (displayType === "iconOnly") {
-    return <MobileLocaleEmoji emoji={getTimezoneEmoji(normalizedTimezone)} sx={sx} />;
-  }
-
-  const display = showOffset
-    ? getTimezoneSelectLabel(normalizedTimezone, locale)
-    : getTimezonePathLabel(normalizedTimezone, locale);
-
-  return (
-    <Typography component="span" variant={typographyVariant} sx={{ whiteSpace: "nowrap", ...sx }}>
-      {display}
-    </Typography>
-  );
+  return content;
 };

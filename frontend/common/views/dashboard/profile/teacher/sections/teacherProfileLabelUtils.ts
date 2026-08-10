@@ -3,25 +3,23 @@ import type {
   ProfileSharedBaseLabels,
 } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { toTeacherBaseLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 
 export function toProfileSharedBaseLabels(base: TeacherProfileViewLabels["base"]): ProfileSharedBaseLabels {
-  return {
-    notSet: base.notSet,
-    fieldAccess: base.fieldAccess,
-  };
+  return toTeacherBaseLabels(base);
 }
 
 export function toTeacherSectionLabels(labels: TeacherProfileViewLabels) {
   return {
     teacher: labels.teacher,
-    baseLabels: toProfileSharedBaseLabels(labels.base),
+    baseLabels: toTeacherBaseLabels(labels.base),
   };
 }
 
 export function toTeacherPersonalFieldLabels(labels: TeacherProfileViewLabels): ProfilePersonalFieldLabels {
   const t = labels.teacher;
   return {
-    nationality: labels.base.parent.fields.nationality,
+    nationality: t.fields.nationalId,
     address: t.fields.address,
     dateOfBirth: t.fields.dateOfBirth,
     gender: t.fields.gender,

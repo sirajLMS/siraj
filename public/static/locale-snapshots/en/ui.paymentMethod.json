@@ -30,7 +30,7 @@
   "select": {
     "selectMethod": "Select payment method",
     "searchByNameOrSlug": "Search by name or slug",
-    "required": "Payment method is required"
+    "required": "Required"
   },
   "display": {
     "defaultBadge": "Default",
@@ -59,15 +59,15 @@
     "setDefault": "Set as default"
   },
   "manager": {
-    "add": "Add payment method",
+    "add": "Add method",
     "addTitle": "Add payment method",
     "editTitle": "Edit payment method",
     "listTitle": "Payment methods",
     "empty": "No payment methods yet",
     "direction": "Direction",
-    "label": "Label (optional)",
-    "defaultPayin": "Set as default pay-in method",
-    "defaultPayout": "Set as default pay-out method",
+    "label": "Label",
+    "defaultPayin": "Default payin",
+    "defaultPayout": "Default payout",
     "cancel": "Cancel",
     "save": "Save",
     "deleteTitle": "Delete payment method",
@@ -82,19 +82,19 @@
     }
   },
   "defaultsEditor": {
-    "payinDefault": "Pay-in default",
-    "payoutDefault": "Pay-out default",
+    "payinDefault": "Payin default",
+    "payoutDefault": "Payout default",
     "instructions": "Instructions",
     "editInstructions": "Edit instructions",
     "displayCurrency": "Display currency",
-    "saved": "Settings saved",
+    "saved": "Saved",
     "none": "None"
   },
   "typeFields": {
     "wallet": "Wallet",
     "paymentLink": "Payment link",
     "onlineAccount": "Online account",
-    "phone": "Phone number",
+    "phone": "Phone",
     "url": "URL",
     "identifier": "Identifier",
     "bankName": "Bank name",

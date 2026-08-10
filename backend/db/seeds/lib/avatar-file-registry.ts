@@ -34,6 +34,7 @@ export function getAvatarPoolFiles(persona: AvatarPersona): readonly string[] {
     case "students":
       return STUDENT_AVATAR_FILES;
   }
+  throw new Error(`Unhandled case in getAvatarPoolFiles`);
 }
 
 export function getAvatarFileNameForPersona(persona: AvatarPersona, index: number): string {

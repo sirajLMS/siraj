@@ -80,9 +80,171 @@ export namespace QuotaRepository {
   const isRichRolloverPolicy = (
     policy: unknown
   ): policy is { maxRolloverPercent: number | null; accumulationCap: number | null } => {
-    if (typeof policy !== "object" || policy === null) return false;
-    const obj = policy as Record<string, unknown>;
-    return "maxRolloverPercent" in obj && "accumulationCap" in obj;
+    if (typeof policy === "object" && policy !== null) {
+      return "maxRolloverPercent" in policy && "accumulationCap" in policy;
+    }
+    return false;
+  };
+
+  /**
+   * Re-fetches the live (non-deleted) quota row for a student. Used by the
+   * ledger-first duplicate-skip branches inside reserve/release/redeem methods
+   * to return the current row on a duplicate idempotency hit.
+   */
+  const fetchLiveQuota = (tx: DBTransaction, quotaId: string, studentId: string): Promise<QuotaSelectType | null> =>
+    tx
+      .select()
+      .from(quotas)
+      .where(and(eq(quotas.id, quotaId), eq(quotas.studentId, studentId), isNull(quotas.deletedAt)))
+      .limit(1)
+      .then(([row]) => row ?? null);
+
+  /** Handles a duplicate idempotency-key hit by logging, returning the current quota row, or throwing. */
+  const handleDuplicateIdempotencyKey = async (
+    tx: DBTransaction,
+    operationName: string,
+    input: { quotaId: string; studentId: string }
+  ): Promise<QuotaSelectType> => {
+    logger.info(
+      `${operationName}: duplicate idempotency key, skipping (quota ${input.quotaId}, student ${input.studentId})`
+    );
+    const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
+    if (!existing) throw new QuotaNotFoundError("Quota not found");
+    return existing;
+  };
+
+  /** Computes the period-end date from an anchor + periodDays. */
+  const computePeriodEnd = (anchor: Date, periodDays: number): Date =>
+    new Date(anchor.getTime() + periodDays * 24 * 60 * 60 * 1000);
+  /**
+   * Computes how many of `unused` classes carry over to the new period, honoring
+   * both the rich JSONB rollover policy (`maxRolloverPercent` + `accumulationCap`)
+   * and the legacy plain-string `"GRANT" | "EXPIRE"` policy.
+   */
+  const computeRolloverAmount = (rolloverPolicy: QuotaSelectType["rolloverPolicy"], unused: number): number => {
+    if (isRichRolloverPolicy(rolloverPolicy)) {
+      const percent = rolloverPolicy.maxRolloverPercent ?? 100;
+      const raw = Math.floor(unused * (percent / 100));
+      const cap = rolloverPolicy.accumulationCap;
+      return Math.min(raw, cap ?? raw);
+    }
+    if (typeof rolloverPolicy === "string") {
+      if (rolloverPolicy === "GRANT") {
+        return unused;
+      }
+      return 0;
+    }
+    return unused;
+  };
+
+  /** Advances an anchor forward in whole `periodDays` increments until it sits after `now`. */
+  const advancePeriodAnchor = (anchor: Date, periodDays: number, now: Date): Date => {
+    let next = anchor;
+    while (next <= now) {
+      next = new Date(next.getTime() + periodDays * 24 * 60 * 60 * 1000);
+    }
+    return next;
+  };
+
+  /**
+   * Returns the subset of `instanceIds` that do NOT yet have a REDEEM ledger entry
+   * for the given quota (RB2-5 dedup): prevents already-redeemed instances from
+   * being counted against the remaining quota in batch redeem.
+   */
+  const findUnredeemedInstanceIds = async (
+    tx: DBTransaction,
+    instanceIds: string[],
+    quotaId: string
+  ): Promise<string[]> => {
+    const expectedKeys = instanceIds.map(instId => deriveRedeemIdempotencyKey(instId, quotaId));
+    const alreadyRedeemed = await tx
+      .select({ idempotencyKey: quotaLedger.idempotencyKey })
+      .from(quotaLedger)
+      .where(inArray(quotaLedger.idempotencyKey, expectedKeys));
+    const redeemedKeySet = new Set(alreadyRedeemed.map(r => r.idempotencyKey));
+    return instanceIds.filter(instId => !redeemedKeySet.has(deriveRedeemIdempotencyKey(instId, quotaId)));
+  };
+
+  /** Marks the given class instances as quota-deducted (CR-2/CR-4 fix). */
+  const markInstancesQuotaDeducted = (tx: DBTransaction, instanceIds: string[], now: Date): Promise<unknown> =>
+    tx
+      .update(classInstances)
+      .set({ quotaDeducted: true, updatedAt: now })
+      .where(inArray(classInstances.id, instanceIds));
+
+  /**
+   * Guards a batch redeem: returns the active quota row only when it has at least
+   * `newCount` remaining classes; otherwise returns null (caller skips redemption).
+   */
+  const fetchRedemptionGuardRow = (
+    tx: DBTransaction,
+    quotaId: string,
+    studentId: string,
+    newCount: number
+  ): Promise<QuotaSelectType | null> =>
+    tx
+      .select()
+      .from(quotas)
+      .where(
+        and(
+          eq(quotas.id, quotaId),
+          eq(quotas.studentId, studentId),
+          eq(quotas.status, QuotaStatus.ACTIVE),
+          gte(quotas.remaining, newCount),
+          isNull(quotas.deletedAt)
+        )
+      )
+      .limit(1)
+      .then(([row]) => row ?? null);
+
+  /** Builds one REDEEM ledger row per instance id for batch insertion. */
+  const buildRedeemBatchLedgerRows = (
+    input: { quotaId: string; studentId: string; recurringScheduleId?: string | null; actorUserId?: string | null },
+    instanceIds: string[]
+  ) =>
+    instanceIds.map(instId => ({
+      quotaId: input.quotaId,
+      studentId: input.studentId,
+      recurringScheduleId: input.recurringScheduleId ?? null,
+      classInstanceId: instId,
+      delta: -1,
+      reason: QuotaLedgerReason.REDEEM,
+      reasonNote: `Redeemed 1 class for instance ${instId}`,
+      actorUserId: input.actorUserId ?? null,
+      idempotencyKey: deriveRedeemIdempotencyKey(instId, input.quotaId),
+    }));
+
+  /** Common ledger-row inputs shared by all single-operation quota mutations. */
+  type LedgerRowInput = {
+    quotaId: string;
+    studentId: string;
+    recurringScheduleId?: string | null;
+    classInstanceId?: string | null;
+    actorUserId?: string | null;
+    idempotencyKey: string;
+  };
+
+  /**
+   * Builds a single `quota_ledger` insert-values object for the four single-operation
+   * quota mutations (reserve / release-recurring / redeem / release-instance), which
+   * all share the same ledger-first structure. Consolidates the per-method ledger-row
+   * builders that CodeScene flagged as duplicates (DUP-1 partial).
+   */
+  const buildLedgerValues = (input: LedgerRowInput, delta: number, reason: QuotaLedgerReason, reasonNote: string) => {
+    const now = new Date();
+    return {
+      quotaId: input.quotaId,
+      studentId: input.studentId,
+      recurringScheduleId: input.recurringScheduleId ?? null,
+      classInstanceId: input.classInstanceId ?? null,
+      delta,
+      reason,
+      reasonNote,
+      actorUserId: input.actorUserId ?? null,
+      idempotencyKey: input.idempotencyKey,
+      createdAt: now,
+      updatedAt: now,
+    };
   };
 
   export const create = async (
@@ -255,7 +417,7 @@ export namespace QuotaRepository {
 
     return {
       rows,
-      totalCount: Number(countRow[0]?.value ?? 0),
+      totalCount: countRow[0]?.value ?? 0,
     };
   };
 
@@ -276,9 +438,9 @@ export namespace QuotaRepository {
       updatedAt: now,
     };
 
-    if (input.name !== undefined && input.name !== null) updateData.name = input.name;
-    if (input.priority !== undefined && input.priority !== null) updateData.priority = input.priority;
-    if (input.status !== undefined && input.status !== null) updateData.status = input.status;
+    if (input.name !== undefined && input.name != null) updateData.name = input.name;
+    if (input.priority !== undefined && input.priority != null) updateData.priority = input.priority;
+    if (input.status !== undefined && input.status != null) updateData.status = input.status;
     if (input.validUntil !== undefined) {
       updateData.validUntil = input.validUntil ? new Date(input.validUntil).toISOString().slice(0, 10) : null;
     }
@@ -380,32 +542,19 @@ export namespace QuotaRepository {
     // AUDIT: ledger entry required for RESERVE tracking and balance reconstruction
     const ledgerResult = await tx
       .insert(quotaLedger)
-      .values({
-        quotaId: input.quotaId,
-        studentId: input.studentId,
-        recurringScheduleId: input.recurringScheduleId,
-        delta: -input.count,
-        reason: QuotaLedgerReason.RESERVE,
-        reasonNote: `Reserved ${input.count} classes for recurring schedule`,
-        actorUserId: input.actorUserId ?? null,
-        idempotencyKey: input.idempotencyKey,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      .values(
+        buildLedgerValues(
+          { ...input, classInstanceId: null },
+          -input.count,
+          QuotaLedgerReason.RESERVE,
+          `Reserved ${input.count} classes for recurring schedule`
+        )
+      )
       .onConflictDoNothing({ target: quotaLedger.idempotencyKey });
 
     if (ledgerResult.rowCount === 0) {
       // Duplicate idempotency key — operation already applied on a previous call
-      logger.info(
-        `reserveClasses: duplicate idempotency key, skipping (quota ${input.quotaId}, schedule ${input.recurringScheduleId})`
-      );
-      const [existing] = await tx
-        .select()
-        .from(quotas)
-        .where(and(eq(quotas.id, input.quotaId), eq(quotas.studentId, input.studentId), isNull(quotas.deletedAt)))
-        .limit(1);
-      if (!existing) throw new QuotaNotFoundError("Quota not found");
-      return existing;
+      return handleDuplicateIdempotencyKey(tx, "reserveClasses", input);
     }
 
     // Only update balance after successful ledger insert
@@ -452,32 +601,19 @@ export namespace QuotaRepository {
     // AUDIT: ledger entry required for RELEASE tracking and balance reconstruction
     const ledgerResult = await tx
       .insert(quotaLedger)
-      .values({
-        quotaId: input.quotaId,
-        studentId: input.studentId,
-        recurringScheduleId: input.recurringScheduleId,
-        delta: input.count,
-        reason: QuotaLedgerReason.RELEASE,
-        reasonNote: `Released ${input.count} reserved classes for recurring schedule`,
-        actorUserId: input.actorUserId ?? null,
-        idempotencyKey: input.idempotencyKey,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      .values(
+        buildLedgerValues(
+          { ...input, classInstanceId: null },
+          input.count,
+          QuotaLedgerReason.RELEASE,
+          `Released ${input.count} reserved classes for recurring schedule`
+        )
+      )
       .onConflictDoNothing({ target: quotaLedger.idempotencyKey });
 
     if (ledgerResult.rowCount === 0) {
       // Duplicate idempotency key — operation already applied on a previous call
-      logger.info(
-        `releaseForRecurringSchedule: duplicate idempotency key, skipping (quota ${input.quotaId}, schedule ${input.recurringScheduleId})`
-      );
-      const [existing] = await tx
-        .select()
-        .from(quotas)
-        .where(and(eq(quotas.id, input.quotaId), eq(quotas.studentId, input.studentId), isNull(quotas.deletedAt)))
-        .limit(1);
-      if (!existing) throw new QuotaNotFoundError("Quota not found");
-      return existing;
+      return handleDuplicateIdempotencyKey(tx, "releaseForRecurringSchedule", input);
     }
 
     // Only update balance after successful ledger insert
@@ -538,28 +674,21 @@ export namespace QuotaRepository {
     if (!locked) throw new QuotaNotFoundError("Failed to redeem quota class: quota may be depleted or inactive");
 
     // Ledger-first pattern (V3-002): Insert the ledger row BEFORE updating the balance.
-    // If the idempotency key already exists (duplicate on retry), the insert affects 0 rows
-    // and we return early — the operation was already applied, preventing double deduction.
+    // A duplicate idempotency key (retry) inserts 0 rows → return the locked row, preventing double deduction.
     // AUDIT: ledger entry required for REDEEM tracking and balance reconstruction
     const ledgerResult = await tx
       .insert(quotaLedger)
-      .values({
-        quotaId: input.quotaId,
-        studentId: input.studentId,
-        recurringScheduleId: input.recurringScheduleId ?? null,
-        classInstanceId: input.classInstanceId,
-        delta: -1,
-        reason: QuotaLedgerReason.REDEEM,
-        reasonNote: `Redeemed 1 class for instance ${input.classInstanceId}`,
-        actorUserId: input.actorUserId ?? null,
-        idempotencyKey: input.idempotencyKey,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      .values(
+        buildLedgerValues(
+          { ...input, recurringScheduleId: input.recurringScheduleId ?? null },
+          -1,
+          QuotaLedgerReason.REDEEM,
+          `Redeemed 1 class for instance ${input.classInstanceId}`
+        )
+      )
       .onConflictDoNothing({ target: quotaLedger.idempotencyKey });
 
     if (ledgerResult.rowCount === 0) {
-      // Duplicate idempotency key — operation already applied on a previous call
       logger.info(
         `redeemForInstance: duplicate idempotency key, skipping (quota ${input.quotaId}, instance ${input.classInstanceId})`
       );
@@ -607,51 +736,36 @@ export namespace QuotaRepository {
     // and balance update. The delta for a single-instance release is always 1,
     // but we use Number() so the guard type-checks and is ready for future callers
     // that might pass a dynamic count.
-    const releaseCount: number = Number(1);
+    const releaseCount: number = 1;
     if (releaseCount === 0) {
       logger.info(
         `releaseForInstance: delta=0, skipping ledger insert and balance update (quota ${input.quotaId}, instance ${input.classInstanceId})`
       );
-      const [existing] = await tx
-        .select()
-        .from(quotas)
-        .where(and(eq(quotas.id, input.quotaId), eq(quotas.studentId, input.studentId), isNull(quotas.deletedAt)))
-        .limit(1);
+      const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
       if (!existing) throw new QuotaNotFoundError("Quota not found");
       return existing;
     }
 
     // Ledger-first pattern (V3-003): Insert the ledger row BEFORE updating the balance.
-    // If the idempotency key already exists (duplicate on retry), the insert affects 0 rows
-    // and we return early — the operation was already applied, preventing double credit.
+    // A duplicate idempotency key (retry) inserts 0 rows → return the existing row, preventing double credit.
     // AUDIT: ledger entry required for RELEASE tracking and balance reconstruction
     const ledgerResult = await tx
       .insert(quotaLedger)
-      .values({
-        quotaId: input.quotaId,
-        studentId: input.studentId,
-        recurringScheduleId: input.recurringScheduleId ?? null,
-        classInstanceId: input.classInstanceId,
-        delta: 1,
-        reason: QuotaLedgerReason.RELEASE,
-        reasonNote: `Released 1 class for instance ${input.classInstanceId}`,
-        actorUserId: input.actorUserId ?? null,
-        idempotencyKey: input.idempotencyKey,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      .values(
+        buildLedgerValues(
+          { ...input, recurringScheduleId: input.recurringScheduleId ?? null },
+          1,
+          QuotaLedgerReason.RELEASE,
+          `Released 1 class for instance ${input.classInstanceId}`
+        )
+      )
       .onConflictDoNothing({ target: quotaLedger.idempotencyKey });
 
     if (ledgerResult.rowCount === 0) {
-      // Duplicate idempotency key — operation already applied on a previous call
       logger.info(
         `releaseForInstance: duplicate idempotency key, skipping (quota ${input.quotaId}, instance ${input.classInstanceId})`
       );
-      const [existing] = await tx
-        .select()
-        .from(quotas)
-        .where(and(eq(quotas.id, input.quotaId), eq(quotas.studentId, input.studentId), isNull(quotas.deletedAt)))
-        .limit(1);
+      const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
       if (!existing) throw new QuotaNotFoundError("Quota not found");
       return existing;
     }
@@ -700,17 +814,8 @@ export namespace QuotaRepository {
     const now = new Date();
 
     // Determine which instances are not yet redeemed by checking existing ledger entries
-    // with the same per-instance idempotency keys. This prevents the guard from counting
-    // already-redeemed instances against the remaining quota (RB2-5).
-    const expectedKeys = input.instanceIds.map(instId => deriveRedeemIdempotencyKey(instId, input.quotaId));
-    const alreadyRedeemed = await tx
-      .select({ idempotencyKey: quotaLedger.idempotencyKey })
-      .from(quotaLedger)
-      .where(inArray(quotaLedger.idempotencyKey, expectedKeys));
-    const redeemedKeySet = new Set(alreadyRedeemed.map(r => r.idempotencyKey));
-    const newInstanceIds = input.instanceIds.filter(
-      instId => !redeemedKeySet.has(deriveRedeemIdempotencyKey(instId, input.quotaId))
-    );
+    // with the same per-instance idempotency keys (RB2-5 dedup).
+    const newInstanceIds = await findUnredeemedInstanceIds(tx, input.instanceIds, input.quotaId);
 
     if (newInstanceIds.length === 0) {
       // All instances were already redeemed; no deduction needed
@@ -725,38 +830,13 @@ export namespace QuotaRepository {
     const newCount = newInstanceIds.length;
 
     // Guard: ensure quota is active and has enough remaining for the not-yet-redeemed instances.
-    const [guardRow] = await tx
-      .select()
-      .from(quotas)
-      .where(
-        and(
-          eq(quotas.id, input.quotaId),
-          eq(quotas.studentId, input.studentId),
-          eq(quotas.status, QuotaStatus.ACTIVE),
-          gte(quotas.remaining, newCount),
-          isNull(quotas.deletedAt)
-        )
-      )
-      .limit(1);
-
+    const guardRow = await fetchRedemptionGuardRow(tx, input.quotaId, input.studentId, newCount);
     if (!guardRow) {
       return { redeemedCount: 0, quota: null };
     }
 
-    // Build one ledger row per NEW instance using the same idempotency-key derivation as redeemForInstance
     // AUDIT: ledger entries required for REDEEM batch tracking and balance reconstruction
-    const ledgerRows = newInstanceIds.map(instId => ({
-      quotaId: input.quotaId,
-      studentId: input.studentId,
-      recurringScheduleId: input.recurringScheduleId ?? null,
-      classInstanceId: instId,
-      delta: -1,
-      reason: QuotaLedgerReason.REDEEM,
-      reasonNote: `Redeemed 1 class for instance ${instId}`,
-      actorUserId: input.actorUserId ?? null,
-      idempotencyKey: deriveRedeemIdempotencyKey(instId, input.quotaId),
-    }));
-
+    const ledgerRows = buildRedeemBatchLedgerRows(input, newInstanceIds);
     const inserted = await QuotaLedgerRepository.insertBatch(tx, ledgerRows);
     const redeemedCount = inserted.length;
 
@@ -793,20 +873,14 @@ export namespace QuotaRepository {
       throw new QuotaLedgerError("Quota redemption failed: insufficient remaining after concurrent deduction");
     }
 
-    // Mark the redeemed instances as quota-deducted. This is the root-cause fix for CR-2/CR-4:
-    // without it, clearWeeklySchedule (recurring.ts) skips pool-mode instances when deciding
-    // which to refund (because it filters by instance.quotaDeducted), leaking quota; and
-    // refreshPeriodic resets reservedClasses based on these flags, so missing flags cause
-    // reservedClasses to never be decremented, triggering a CHECK-constraint violation
+    // Mark the redeemed instances as quota-deducted (CR-2/CR-4 root-cause fix):
+    // without it, clearWeeklySchedule (recurring.ts) skips pool-mode instances when
+    // refunding, leaking quota; and refreshPeriodic resets reservedClasses from these
+    // flags, so missing flags cause a CHECK-constraint violation
     // (reservedClasses + remaining > totalClasses).
-    if (redeemedCount > 0) {
-      const insertedInstanceIds = inserted.map(row => row.classInstanceId).filter((id): id is string => id !== null);
-      if (insertedInstanceIds.length > 0) {
-        await tx
-          .update(classInstances)
-          .set({ quotaDeducted: true, updatedAt: now })
-          .where(inArray(classInstances.id, insertedInstanceIds));
-      }
+    const insertedInstanceIds = inserted.map(row => row.classInstanceId).filter((id): id is string => id !== null);
+    if (insertedInstanceIds.length > 0) {
+      await markInstancesQuotaDeducted(tx, insertedInstanceIds, now);
     }
 
     return { redeemedCount, quota: updated };
@@ -1041,35 +1115,20 @@ export namespace QuotaRepository {
 
     const now = new Date();
     const periodAnchor = target.periodAnchor ?? target.createdAt;
-    const periodEnd = new Date(periodAnchor.getTime() + target.periodDays * 24 * 60 * 60 * 1000);
+    const periodEnd = computePeriodEnd(periodAnchor, target.periodDays);
 
     // Only refresh if the current period has expired
     if (now <= periodEnd) return mapQuotaToReturnType(target);
 
     const periodStr = periodEnd.toISOString().slice(0, 10);
-    const unused = target.remaining > 0 ? target.remaining : 0;
-
-    // Determine how many of the unused classes carry over into the new period.
-    let rolloverAmount: number;
-    if (isRichRolloverPolicy(target.rolloverPolicy)) {
-      const percent = target.rolloverPolicy.maxRolloverPercent ?? 100;
-      const raw = Math.floor(unused * (percent / 100));
-      const cap = target.rolloverPolicy.accumulationCap ?? null;
-      rolloverAmount = cap !== null ? Math.min(raw, cap) : raw;
-    } else {
-      // Legacy string policy: "GRANT" preserves all unused, "EXPIRE" discards all.
-      const policyStr = (target.rolloverPolicy as string | null) ?? "GRANT";
-      rolloverAmount = policyStr === "GRANT" ? unused : 0;
-    }
+    const unused = Math.max(target.remaining, 0);
+    const rolloverAmount = computeRolloverAmount(target.rolloverPolicy, unused);
 
     const newRemaining = rolloverAmount + target.totalClasses;
     const expiredAmount = unused - rolloverAmount;
 
     // Advance the period anchor to the first future period boundary
-    let newAnchor = periodEnd;
-    while (newAnchor <= now) {
-      newAnchor = new Date(newAnchor.getTime() + target.periodDays * 24 * 60 * 60 * 1000);
-    }
+    const newAnchor = advancePeriodAnchor(periodEnd, target.periodDays, now);
 
     // Version-checked UPDATE first. Ledger INSERTs are deferred to AFTER the UPDATE
     // succeeds so that a conflict (concurrent write) rolls back cleanly without
@@ -1150,34 +1209,44 @@ export namespace QuotaRepository {
       .orderBy(desc(quotas.priority))
       .for("update");
 
+    // Pre-compute the per-quota deductions sequentially (no awaits) so the loop
+    // can break early once the requested count is fully allocated across quotas
+    // ordered by priority. The rows are already locked by `FOR UPDATE`, so the
+    // subsequent writes can be dispatched in parallel without TOCTOU races.
+    const plannedDeductions: Array<{ quota: (typeof activeQuotas)[number]; toTake: number; index: number }> = [];
     let remainingToDeduct = input.count;
-    let deducted = 0;
-
     for (let i = 0; i < activeQuotas.length; i++) {
       const quota = activeQuotas[i];
       if (remainingToDeduct <= 0) break;
       const toTake = Math.min(remainingToDeduct, quota.remaining);
-      const now = new Date();
+      plannedDeductions.push({ quota, toTake, index: i });
+      remainingToDeduct -= toTake;
+    }
 
-      const [updated] = await tx
-        .update(quotas)
-        .set({
-          remaining: sql<number>`${quotas.remaining} - ${toTake}`,
-          usedThisPeriod: sql<number>`${quotas.usedThisPeriod} + ${toTake}`,
-          version: sql<number>`${quotas.version} + 1`,
-          updatedAt: now,
-        })
-        .where(
-          and(
-            eq(quotas.id, quota.id),
-            eq(quotas.status, QuotaStatus.ACTIVE),
-            gte(quotas.remaining, toTake),
-            isNull(quotas.deletedAt)
+    const now = new Date();
+
+    const deductions = await Promise.all(
+      plannedDeductions.map(async ({ quota, toTake, index }) => {
+        const [updated] = await tx
+          .update(quotas)
+          .set({
+            remaining: sql<number>`${quotas.remaining} - ${toTake}`,
+            usedThisPeriod: sql<number>`${quotas.usedThisPeriod} + ${toTake}`,
+            version: sql<number>`${quotas.version} + 1`,
+            updatedAt: now,
+          })
+          .where(
+            and(
+              eq(quotas.id, quota.id),
+              eq(quotas.status, QuotaStatus.ACTIVE),
+              gte(quotas.remaining, toTake),
+              isNull(quotas.deletedAt)
+            )
           )
-        )
-        .returning();
+          .returning();
 
-      if (updated) {
+        if (!updated) return 0;
+
         // Deterministic idempotency key based on quota ID, period, and deduction sequence
         // index so each levy within a call produces a unique key (RBL2-6).
         // Using the quota's current periodAnchor as the period key avoids the non-deterministic
@@ -1192,15 +1261,14 @@ export namespace QuotaRepository {
           reason: QuotaLedgerReason.ADJUST,
           reasonNote: `Deducted ${toTake} for on-demand refresh`,
           actorUserId: input.actorUserId ?? null,
-          idempotencyKey: deriveIdempotencyKey("refresh-deduct", quota.id, periodKey, String(i)),
+          idempotencyKey: deriveIdempotencyKey("refresh-deduct", quota.id, periodKey, String(index)),
         });
 
-        deducted += toTake;
-        remainingToDeduct -= toTake;
-      }
-    }
+        return toTake;
+      })
+    );
 
-    return deducted;
+    return deductions.reduce((total, value) => total + value, 0);
   };
 
   /** @internal — Used by tests for per-period reset assertions. Production rollover uses refreshPeriodic.

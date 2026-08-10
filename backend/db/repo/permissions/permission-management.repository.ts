@@ -9,9 +9,8 @@ import {
 } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { localeJsonKey, omitEmptyLocalized, resolveLocalized } from "@/backend/db/repo/utils/resolve-localized";
 import type { AppPermission } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type {
   CreateGroupInput,
   GroupUserEntity,
@@ -22,6 +21,7 @@ import type {
   UserOverrideEntity,
   UserOverrideInput,
 } from "@/backend/types";
+import { localeJsonKey, omitEmptyLocalizedString, resolveLocalizedString } from "@/shared/lib/localized-string";
 import { getServerTranslations } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
 
@@ -31,8 +31,8 @@ function toPermissionReturn(row: PermissionSelectType, locale?: string): Permiss
     key: row.key,
     resource: row.resource,
     action: row.action,
-    description: resolveLocalized(row.description, locale),
-    category: resolveLocalized(row.category, locale),
+    description: resolveLocalizedString(row.description, locale),
+    category: resolveLocalizedString(row.category, locale),
     isSystem: row.isSystem,
   };
 }
@@ -240,8 +240,8 @@ export namespace PermissionManagementRepository {
   ): Promise<{ id: string; slug: string; isSystem: boolean }> {
     const client = tx ?? db;
     const now = new Date();
-    const nameMap = omitEmptyLocalized(input.name);
-    const descriptionMap = input.description === null ? null : omitEmptyLocalized(input.description ?? {});
+    const nameMap = omitEmptyLocalizedString(input.name);
+    const descriptionMap = input.description === null ? null : omitEmptyLocalizedString(input.description ?? {});
 
     const [row] = await client
       .insert(permissionGroups)
@@ -287,9 +287,11 @@ export namespace PermissionManagementRepository {
   ): Promise<GroupWithPermissionIds> {
     const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const now = new Date();
-      const nameMap = omitEmptyLocalized(input.name);
+      const nameMap = omitEmptyLocalizedString(input.name);
       const descriptionMap =
-        input.description === undefined || input.description === null ? null : omitEmptyLocalized(input.description);
+        input.description === undefined || input.description === null
+          ? null
+          : omitEmptyLocalizedString(input.description);
 
       const [insertedGroup] = await t
         .insert(permissionGroups)
@@ -352,14 +354,14 @@ export namespace PermissionManagementRepository {
       }
 
       const now = new Date();
-      const nextName = input.name === undefined ? existing.name : omitEmptyLocalized(input.name);
+      const nextName = input.name === undefined ? existing.name : omitEmptyLocalizedString(input.name);
       let nextDescription: typeof existing.description;
       if (input.description === undefined) {
         nextDescription = existing.description;
       } else if (input.description === null) {
         nextDescription = null;
       } else {
-        nextDescription = omitEmptyLocalized(input.description);
+        nextDescription = omitEmptyLocalizedString(input.description);
       }
 
       const [updatedGroup] = await t

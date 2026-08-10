@@ -1,5 +1,5 @@
 import Redis from "ioredis";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { BaseRedisAdapter } from "@/backend/services/redis/BaseRedisAdapter";
 
 /**

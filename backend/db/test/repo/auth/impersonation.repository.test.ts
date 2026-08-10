@@ -17,7 +17,8 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (errorCaught instanceof Error) return errorCaught;
+  throw new Error(String(errorCaught));
 }
 
 function impersonationTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {

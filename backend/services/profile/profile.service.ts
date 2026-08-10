@@ -6,7 +6,6 @@ import {
   UserRepository,
 } from "@/backend/db";
 import { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import {
   ManagerProfileService,
   ParentPortalService,
@@ -24,20 +23,34 @@ import {
   type FieldFilterContext,
   filterProfileByFieldGroups,
 } from "@/backend/services/profile/profile-field-filter";
+import { AuditService } from "@/backend/services/system/audit.service";
 import type {
+  CoreUserProfileFields,
+  ManagerDirectoryRow,
   ParentAdminProfileUpdateInput,
+  ParentAssignedStudentsResult,
+  ParentOwnProfileReturnType,
   ParentOwnProfileUpdateInput,
+  ParentProfileResult,
+  PaymentMethodDefaults,
   ProfilePageContext,
   ProfilePageResolution,
+  StaffPermissionGroupReturnType,
+  StaffPermissionOverrideReturnType,
+  TeacherAssignedStudentsResult,
+  TeacherOwnProfileReturnType,
+  TeacherProfileReturnType,
   UnifiedProfileReturnType,
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
+  UserPaymentMethodReturnType,
 } from "@/backend/types";
 import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
 import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
 import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
 import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
 import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
+import { parseAccountStatus, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 type ResolvedRoleIds = {
@@ -172,7 +185,7 @@ async function hasAnyPermissionForProfile(
   return PermissionsService.hasAnyPermission(actorUserId, permissionKeys);
 }
 
-async function throwInsufficientPermissions(locale?: string): Promise<never> {
+function throwInsufficientPermissions(locale?: string): never {
   const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
   throw new Error(errorsTranslations.insufficientPermissions);
 }
@@ -314,7 +327,7 @@ async function assertCanAccessProfile(
   if (await assertProfileAccess(actorUserId, targetUserId, scope, audience, action, permissionContext)) {
     return;
   }
-  await throwInsufficientPermissions(locale);
+  throwInsufficientPermissions(locale);
 }
 
 async function assertCanViewProfile(
@@ -339,13 +352,6 @@ async function assertCanEditProfile(
   return assertCanAccessProfile(actorUserId, targetUserId, scope, audience, "edit", locale, permissionContext);
 }
 
-function createNullRoleProfile<T extends Record<string, unknown>>(keys: (keyof T)[]): T {
-  return keys.reduce((acc, key) => {
-    acc[key] = null as T[keyof T];
-    return acc;
-  }, {} as T);
-}
-
 export namespace ProfileService {
   async function loadTeacherRoleProfiles(
     actorUserId: string,
@@ -355,11 +361,11 @@ export namespace ProfileService {
     locale?: string
   ) {
     if (roleIds.audience !== ProfileAudience.TEACHER || !roleIds.teacherId) {
-      return createNullRoleProfile<{
-        teacherOwnProfile: unknown;
-        teacherAdminProfile: unknown;
-        assignedStudents: unknown;
-      }>(["teacherOwnProfile", "teacherAdminProfile", "assignedStudents"]);
+      return {
+        teacherOwnProfile: null,
+        teacherAdminProfile: null,
+        assignedStudents: null,
+      };
     }
 
     if (scope === ProfileScope.OWN) {
@@ -386,11 +392,11 @@ export namespace ProfileService {
     locale?: string
   ) {
     if (roleIds.audience !== ProfileAudience.PARENT || !roleIds.parentId) {
-      return createNullRoleProfile<{
-        parentOwnProfile: unknown;
-        parentAdminProfile: unknown;
-        associatedStudents: unknown;
-      }>(["parentOwnProfile", "parentAdminProfile", "associatedStudents"]);
+      return {
+        parentOwnProfile: null,
+        parentAdminProfile: null,
+        associatedStudents: null,
+      };
     }
 
     const parentOwnProfile =
@@ -436,11 +442,11 @@ export namespace ProfileService {
     locale?: string
   ) {
     if (roleIds.audience !== ProfileAudience.STAFF || !roleIds.staffProfileId) {
-      return createNullRoleProfile<{
-        staffProfile: unknown;
-        staffPermissionGroups: unknown;
-        staffPermissionOverrides: unknown;
-      }>(["staffProfile", "staffPermissionGroups", "staffPermissionOverrides"]);
+      return {
+        staffProfile: null,
+        staffPermissionGroups: null,
+        staffPermissionOverrides: null,
+      };
     }
 
     const staffProfile = await StaffProfileRepository.findByStaffProfileId(roleIds.staffProfileId);
@@ -651,20 +657,20 @@ export namespace ProfileService {
       teacherId: string | null;
       parentId: string | null;
       staffProfileId: string | null;
-      teacherOwnProfile: unknown;
-      teacherAdminProfile: unknown;
-      parentOwnProfile: unknown;
-      parentAdminProfile: unknown;
-      associatedStudents: unknown;
-      staffProfile: unknown;
-      staffPermissionGroups: unknown;
-      staffPermissionOverrides: unknown;
-      meetingConfigs: unknown;
-      paymentMethods: unknown;
-      paymentMethodDefaults: unknown;
-      assignedStudents: unknown;
+      teacherOwnProfile: TeacherOwnProfileReturnType | null;
+      teacherAdminProfile: TeacherProfileReturnType | null;
+      parentOwnProfile: ParentOwnProfileReturnType | null;
+      parentAdminProfile: ParentProfileResult | null;
+      associatedStudents: ParentAssignedStudentsResult | null;
+      staffProfile: ManagerDirectoryRow | null;
+      staffPermissionGroups: StaffPermissionGroupReturnType[] | null;
+      staffPermissionOverrides: StaffPermissionOverrideReturnType[] | null;
+      meetingConfigs: readonly UserMeetingConfigReturnType[] | null;
+      paymentMethods: readonly UserPaymentMethodReturnType[] | null;
+      paymentMethodDefaults: PaymentMethodDefaults | null;
+      assignedStudents: TeacherAssignedStudentsResult | null;
     }>
-  ) {
+  ): UnifiedProfileReturnType {
     return {
       id: targetUserId,
       userId: targetUserId,
@@ -689,7 +695,7 @@ export namespace ProfileService {
       paymentMethodDefaults: overrides.paymentMethodDefaults ?? null,
       assignedStudents: overrides.assignedStudents ?? null,
       displayCurrency: user.displayCurrency ?? null,
-      timezone: (user.timezone as IanaTimezone) ?? null,
+      timezone: parseIanaTimezoneOrNull(user.timezone),
       phone: user.phone ?? null,
     };
   }
@@ -708,13 +714,7 @@ export namespace ProfileService {
       ProfileAudience.STUDENT,
       permissionContext
     );
-    const baseProfile = buildBaseProfileObject(
-      user,
-      targetUserId,
-      ProfileAudience.STUDENT,
-      effectiveScope,
-      {}
-    ) as UnifiedProfileReturnType;
+    const baseProfile = buildBaseProfileObject(user, targetUserId, ProfileAudience.STUDENT, effectiveScope, {});
     return filterProfileByFieldGroups(baseProfile, filterCtx);
   }
 
@@ -769,7 +769,7 @@ export namespace ProfileService {
         paymentMethods,
         paymentMethodDefaults,
         assignedStudents,
-      }) as UnifiedProfileReturnType,
+      }),
       filterCtx
     );
   }
@@ -778,7 +778,7 @@ export namespace ProfileService {
     actorUserId: string,
     targetUserId: string,
     scope: ProfileScope,
-    core: UpdateOwnProfileInput["core"] | UpdateUserProfileInput["core"],
+    core: CoreUserProfileFields | undefined,
     locale?: string
   ): Promise<void> {
     if (!core) {
@@ -789,6 +789,7 @@ export namespace ProfileService {
     const contactKeys = ["phone", "timezone"] as const;
     const touchesIdentity = identityKeys.some(key => core[key] !== undefined);
     const touchesContact = contactKeys.some(key => core[key] !== undefined);
+    const touchesStatus = core.status !== undefined;
 
     if (touchesIdentity) {
       const identityPermission =
@@ -812,16 +813,55 @@ export namespace ProfileService {
       }
     }
 
+    if (touchesStatus) {
+      await handleStatusUpdate(actorUserId, targetUserId, scope, core, locale);
+    }
+
     await UserRepository.updateProfileFields(targetUserId, core, locale);
     if (core.timezone) {
       await UserRepository.updateTimezone(targetUserId, core.timezone, undefined, locale);
     }
   }
 
+  async function handleStatusUpdate(
+    actorUserId: string,
+    targetUserId: string,
+    scope: ProfileScope,
+    core: CoreUserProfileFields,
+    locale?: string
+  ): Promise<void> {
+    const statusPermission =
+      scope === ProfileScope.OWN
+        ? AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN
+        : AppPermission.PROFILE_CORE_IDENTITY_EDIT_OTHER;
+    if (!(await PermissionsService.hasPermission(actorUserId, statusPermission))) {
+      const errorsTranslations = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(errorsTranslations.insufficientPermissions);
+    }
+    // core.status is non-null here because touchesStatus means status !== undefined
+    // but it can still be null or undefined, so we guard against that
+    if (core.status === null || core.status === undefined) {
+      return;
+    }
+    const newStatus = core.status;
+    await UserRepository.updateStatus(targetUserId, newStatus, undefined, locale);
+
+    // Audit log for status change
+    await AuditService.createManyAdminAuditLogs([
+      {
+        actorUserId,
+        targetUserId,
+        action: "USER_STATUS_CHANGED",
+        description: `User status changed to ${newStatus}`,
+        newState: { newStatus },
+      },
+    ]);
+  }
+
   type RoleSpecificUpdateInput = {
-    readonly teacher?: UpdateOwnProfileInput["teacher"] | UpdateUserProfileInput["teacher"];
-    readonly parent?: UpdateOwnProfileInput["parent"] | UpdateUserProfileInput["parent"];
-    readonly staff?: UpdateOwnProfileInput["staff"] | UpdateUserProfileInput["staff"];
+    readonly teacher?: Exclude<UpdateOwnProfileInput["teacher"] | UpdateUserProfileInput["teacher"], undefined>;
+    readonly parent?: Exclude<UpdateOwnProfileInput["parent"] | UpdateUserProfileInput["parent"], undefined>;
+    readonly staff?: Exclude<UpdateOwnProfileInput["staff"] | UpdateUserProfileInput["staff"], undefined>;
   };
 
   async function applyTeacherUpdate(
@@ -893,27 +933,36 @@ export namespace ProfileService {
     }
 
     if (scope === ProfileScope.OWN) {
-      const ownInput = staffInput as NonNullable<UpdateOwnProfileInput["staff"]>;
-      await ManagerProfileService.updateOwnStaffProfile(
-        actorUserId,
-        roleIds.staffProfileId,
-        {
-          phone: ownInput.phone ?? null,
-        },
-        locale
-      );
+      // When scope is OWN, staffInput must be StaffOwnProfileUpdateInput
+      // Use a type guard to narrow the type
+      if ("phone" in staffInput) {
+        // Type is narrowed by the type guard
+        await ManagerProfileService.updateOwnStaffProfile(
+          actorUserId,
+          roleIds.staffProfileId,
+          {
+            phone: staffInput.phone ?? null,
+          },
+          locale
+        );
+      }
       return;
     }
 
-    const adminInput = staffInput as NonNullable<UpdateUserProfileInput["staff"]>;
-    await ManagerProfileService.updateManagerProfile(
-      actorUserId,
-      roleIds.staffProfileId,
-      {
-        status: adminInput.status as import("@/backend/enum").AccountStatus | null | undefined,
-      },
-      locale
-    );
+    // When scope is OTHER, staffInput must be StaffAdminProfileUpdateInput
+    if ("status" in staffInput || "hourlyRate" in staffInput || "rateCurrency" in staffInput) {
+      // Type is narrowed by the type guard
+      // Parse the status string to AccountStatus enum if provided
+      const parsedStatus = staffInput.status ? parseAccountStatus(staffInput.status) : null;
+      await ManagerProfileService.updateManagerProfile(
+        actorUserId,
+        roleIds.staffProfileId,
+        {
+          status: parsedStatus ?? undefined,
+        },
+        locale
+      );
+    }
   }
 
   async function applyRoleSpecificUpdates(
@@ -972,7 +1021,7 @@ export namespace ProfileService {
     const editGroups = collectProfileEditGroupsFromUpdate(roleIds.audience, scope, input);
     for (const groupKey of editGroups) {
       if (!canEditProfileFieldGroup(filterCtx, groupKey)) {
-        await throwInsufficientPermissions(locale);
+        throwInsufficientPermissions(locale);
       }
     }
 

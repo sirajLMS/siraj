@@ -9,7 +9,7 @@ import {
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
 import type { StudentSelectType, TeacherSelectType } from "@/backend/types";
@@ -46,22 +46,21 @@ export async function seedOrGet(
   const results = await RecurringClassService.upsertManyRecurringSchedules(inputs);
 
   if (shouldSeedExtendedFiles(seedConfig)) {
-    for (const schedule of results) {
-      if (!schedule) continue;
-
-      try {
-        await seedEntityFile({
+    const validSchedules = results;
+    await Promise.all(
+      validSchedules.map(schedule =>
+        seedEntityFile({
           assetRelativePath: "documents/sample-attachment.pdf",
           bucketPath: `public/schedules/seed_${schedule.id}.pdf`,
           referenceTable: "recurring_schedules",
           referenceId: schedule.id,
           usageType: "attachment",
           ensureParentDirs: ["public/schedules"],
-        });
-      } catch (error) {
-        logger.error(`Failed to seed recurring schedule file for ${schedule.id}:`, error);
-      }
-    }
+        }).catch(error => {
+          logger.error(`Failed to seed recurring schedule file for ${schedule.id}:`, error);
+        })
+      )
+    );
   }
 
   logger.info(`System classes seeded (${results.length} recurring schedules).`);

@@ -50,7 +50,7 @@ export async function resolveStudentNotificationRecipients(
   let parentUserMap = new Map<string, string>();
 
   if (validParents.length > 0) {
-    const parentIds = [...new Set(validParents.map(s => s.parentId as string))];
+    const parentIds = [...new Set(validParents.flatMap(s => (s.parentId !== null ? [s.parentId] : [])))];
     const parentRows = await q
       .select({ parentId: parents.id, userId: parents.userId })
       .from(parents)

@@ -38,6 +38,7 @@ import type {
   TestMeetingConnectionReturnType,
   TestMeetingConnectionSubmitInput,
 } from "@/backend/types/meeting/meeting-integrations.types";
+import type { MeetingProviderKind } from "@/backend/types/meeting/meeting-provider.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 // ============================================================================
@@ -73,9 +74,10 @@ function getAdapterEndpoints(slug: MeetingProvider): readonly string[] {
     case "microsoft_teams":
       return MicrosoftTeamsAdapter.ENDPOINTS;
   }
+  throw new Error(`Unhandled case in getAdapterEndpoints`);
 }
 
-function getProviderKind(slug: MeetingProvider): string {
+function getProviderKind(slug: MeetingProvider): MeetingProviderKind {
   switch (slug) {
     case "zoom":
       return "zoom_oauth";
@@ -84,6 +86,7 @@ function getProviderKind(slug: MeetingProvider): string {
     case "microsoft_teams":
       return "microsoft_teams_oauth";
   }
+  throw new Error(`Unhandled case in getProviderKind`);
 }
 
 function classifyTokenStatus(expiresAt: Date | null, revoked: boolean): MeetingIntegrationConnectedAccountStatus {
@@ -119,7 +122,7 @@ export namespace MeetingIntegrationService {
 
         return {
           slug,
-          kind: getProviderKind(slug) as MeetingIntegrationProviderReturnType["kind"],
+          kind: getProviderKind(slug),
           credentialsHealthy,
           lastTestedAt: credentialsHealthy ? new Date() : null,
           connectedTeacherCount: tokens.length,

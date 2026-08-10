@@ -3,10 +3,16 @@ import { type NextRequest, NextResponse } from "next/server";
 // import { logger } from "@/backend/lib";
 import { type AppLocale, defaultLocale, locales } from "@/shared/locale/AppLocale";
 
+const localeSet = new Set<string>(locales);
+
+function isAppLocale(value: string): value is AppLocale {
+  return localeSet.has(value);
+}
+
 function resolveLocale(request: NextRequest): AppLocale {
   const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
-  if (cookieLocale && (locales as readonly string[]).includes(cookieLocale)) {
-    return cookieLocale as AppLocale;
+  if (cookieLocale && isAppLocale(cookieLocale)) {
+    return cookieLocale;
   }
 
   const acceptLanguage = request.headers.get("accept-language");

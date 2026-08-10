@@ -1,6 +1,6 @@
-import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
 import type { IPushChannel, PushProvider } from "@/backend/services/communication/channels/push/IPushChannel";
+import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/services/system";
 
 let instance: IPushChannel | null = null;
 let initializationPromise: Promise<IPushChannel> | null = null;
@@ -51,7 +51,7 @@ async function createPushChannel(): Promise<IPushChannel> {
   logger.info(`Initializing Push channel with provider: ${provider}`);
 
   if (provider !== "fcm") {
-    logger.warn(`Unknown push provider: ${provider}, falling back to fcm`);
+    logger.warn(`Unknown push provider: ${String(provider)}, falling back to fcm`);
   }
 
   return await createFcmAdapter();
@@ -87,7 +87,7 @@ export const getPushChannel = async (): Promise<IPushChannel> => {
  */
 export const resetPushChannel = (): void => {
   if (instance) {
-    instance.disconnect();
+    void instance.disconnect();
     instance = null;
   }
   initializationPromise = null;

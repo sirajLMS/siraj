@@ -1,7 +1,7 @@
 import { index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { systemSettingCategoryEnum, systemSettingDataTypeEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
-import { type SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
+import { type SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 export const systemSettings = pgTable(
   "system_settings",

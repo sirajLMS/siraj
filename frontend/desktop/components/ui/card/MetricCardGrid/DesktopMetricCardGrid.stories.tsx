@@ -85,10 +85,7 @@ export const Arabic: Story = {
         arabicLabel = "المعلمون";
       }
 
-      return {
-        ...metric,
-        label: arabicLabel,
-      };
+      return Object.assign(metric, { label: arabicLabel });
     }),
   },
 };

@@ -20,7 +20,7 @@ export default async function StudentOwnCreditsPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.STUDENT_VIEW_OWN_DASHBOARD], locale, context);
   return (

@@ -32,6 +32,10 @@ import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/student
 
 const DATE_FORMAT = "yyyy-MM-dd";
 
+function getFieldLabel(fields: StudentQuotaLabels["fields"], key: string): string {
+  return Object.entries(fields).find(([k]) => k === key)?.[1] ?? key;
+}
+
 function parseDateValue(dateStr: string): Date | null {
   if (!dateStr) return null;
   const parsed = parse(dateStr, DATE_FORMAT, new Date());
@@ -163,11 +167,7 @@ function GenderField() {
                         })}
                       />
                     }
-                    label={
-                      <Typography variant="bodyMd">
-                        {t.fields[option.labelKey as keyof StudentQuotaLabels["fields"]]}
-                      </Typography>
-                    }
+                    label={<Typography variant="bodyMd">{getFieldLabel(t.fields, option.labelKey)}</Typography>}
                     sx={option.value === GENDER_OPTIONS[0].value ? { mr: 4 } : undefined}
                   />
                 ))}

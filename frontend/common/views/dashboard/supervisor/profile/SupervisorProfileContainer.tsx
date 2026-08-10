@@ -7,6 +7,7 @@ import {
   type UseSupervisorProfileViewModelProps,
   useSupervisorProfileViewModel,
 } from "@/frontend/common/views/dashboard/supervisor/profile/useSupervisorProfileViewModel";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const lazyViews = createLazyView<SupervisorProfileViewModel>(
   () =>
@@ -21,7 +22,22 @@ const lazyViews = createLazyView<SupervisorProfileViewModel>(
 
 export function SupervisorProfileContainer(props: Readonly<UseSupervisorProfileViewModelProps>) {
   const viewModel = useSupervisorProfileViewModel(props);
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+  const t = useAppTranslation(Translation.Dashboard.SupervisorPortalProfile);
+  const labelsWithAdmin = {
+    ...viewModel.labels,
+    adminResetPassword: t.adminResetPassword,
+    actions: {
+      ...viewModel.labels.actions,
+      manageLifecycle: t.actions.manageLifecycle,
+    },
+  };
+  return (
+    <ResponsiveViewSwitch
+      mobile={lazyViews.mobile}
+      desktop={lazyViews.desktop}
+      props={{ ...viewModel, labels: labelsWithAdmin }}
+    />
+  );
 }
 
 export type { SupervisorProfileViewModel, UseSupervisorProfileViewModelProps };

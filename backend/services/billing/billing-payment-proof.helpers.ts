@@ -5,7 +5,7 @@ import {
   ParentRepository,
   StorageDbRepository,
 } from "@/backend/db/repo";
-import type { InvoicePaymentSubmissionStatus } from "@/backend/enum/billing/billing.enum";
+import { InvoicePaymentSubmissionStatus } from "@/backend/enum/billing/billing.enum";
 import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
@@ -24,6 +24,10 @@ function inferMimeFromPath(path: string): string | null {
     return null;
   }
   return extToMime[ext] ?? null;
+}
+
+function isInvoicePaymentSubmissionStatus(value: string): value is InvoicePaymentSubmissionStatus {
+  return (Object.values(InvoicePaymentSubmissionStatus) as readonly string[]).includes(value);
 }
 
 export async function validateProofFile(
@@ -139,7 +143,9 @@ export async function mapSubmissionToReturnType(
     fileId: submission.fileId,
     filePath: file?.path ?? "",
     mimeType,
-    status: submission.status as InvoicePaymentSubmissionStatus,
+    status: isInvoicePaymentSubmissionStatus(submission.status)
+      ? submission.status
+      : InvoicePaymentSubmissionStatus.PENDING,
     submittedByUserId: submission.submittedByUserId,
     submittedAt: submission.submittedAt.toISOString(),
     reviewedByUserId: submission.reviewedByUserId,

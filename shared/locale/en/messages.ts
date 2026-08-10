@@ -85,11 +85,11 @@ import { dashboardUsersDirectoryParentEn } from "@/shared/locale/en/dashboard/us
 import { emailsEn } from "@/shared/locale/en/emails";
 import { errorsEn } from "@/shared/locale/en/errors";
 import { notificationsEn } from "@/shared/locale/en/notifications";
+import { profileBaseEn } from "@/shared/locale/en/profile/base";
 import { profileNotificationsEn } from "@/shared/locale/en/profile/notifications";
 import { profileParentEn } from "@/shared/locale/en/profile/parent";
 import { profileStaffEn } from "@/shared/locale/en/profile/staff";
 import { profileTeacherEn } from "@/shared/locale/en/profile/teacher";
-import { profileEn } from "@/shared/locale/en/profile.ts";
 import { sessionEn } from "@/shared/locale/en/session";
 import { smsEn } from "@/shared/locale/en/sms";
 import { uiCatalogImageUploadEn } from "@/shared/locale/en/ui/catalog-image-upload.ts";
@@ -98,7 +98,7 @@ import { uiCurrencySelectEn } from "@/shared/locale/en/ui/currency-select.ts";
 import { uiGenderSelectorEn } from "@/shared/locale/en/ui/gender-selector.ts";
 import { uiLanguageSelectorEn } from "@/shared/locale/en/ui/language-selector.ts";
 import { uiLocalizedStringEn } from "@/shared/locale/en/ui/localized-string.ts";
-import { uiMeetingConfigEn } from "@/shared/locale/en/ui/meeting-config.ts";
+import { uiMeetingConfigEn } from "@/shared/locale/en/ui/meetingConfig";
 import { uiMeetingConfigClassScopeEn } from "@/shared/locale/en/ui/meetingConfig/classScope.ts";
 import { uiMeetingConfigDisplayEn } from "@/shared/locale/en/ui/meetingConfig/display.ts";
 import { uiMeetingConfigFieldsEn } from "@/shared/locale/en/ui/meetingConfig/fields.ts";
@@ -107,17 +107,7 @@ import { uiMeetingConfigManagerEn } from "@/shared/locale/en/ui/meetingConfig/ma
 import { uiMeetingConfigProviderSelectEn } from "@/shared/locale/en/ui/meetingConfig/providerSelect.ts";
 import { uiMeetingConfigRecurringScheduleEn } from "@/shared/locale/en/ui/meetingConfig/recurringSchedule.ts";
 import { uiMeetingConfigSummaryEn } from "@/shared/locale/en/ui/meetingConfig/summary.ts";
-import { uiPaymentMethodEn } from "@/shared/locale/en/ui/payment-method.ts";
-import { uiPaymentMethodDefaultsEditorEn } from "@/shared/locale/en/ui/paymentMethod/defaultsEditor.ts";
-import { uiPaymentMethodDirectionEn } from "@/shared/locale/en/ui/paymentMethod/direction.ts";
-import { uiPaymentMethodDisplayEn } from "@/shared/locale/en/ui/paymentMethod/display.ts";
-import { uiPaymentMethodIdentifierEn } from "@/shared/locale/en/ui/paymentMethod/identifier.ts";
-import { uiPaymentMethodListEn } from "@/shared/locale/en/ui/paymentMethod/list.ts";
-import { uiPaymentMethodManagerEn } from "@/shared/locale/en/ui/paymentMethod/manager.ts";
-import { uiPaymentMethodSelectEn } from "@/shared/locale/en/ui/paymentMethod/select.ts";
-import { uiPaymentMethodTypeEn } from "@/shared/locale/en/ui/paymentMethod/type.ts";
-import { uiPaymentMethodTypeFieldsEn } from "@/shared/locale/en/ui/paymentMethod/typeFields.ts";
-import { uiPaymentMethodTypeSelectorEn } from "@/shared/locale/en/ui/paymentMethod/typeSelector.ts";
+import { uiPaymentMethodEn } from "@/shared/locale/en/ui/paymentMethod";
 import { uiPhoneInputEn } from "@/shared/locale/en/ui/phone-input.ts";
 import { uiTagInputEn } from "@/shared/locale/en/ui/tag-input.ts";
 import { uiTimezoneSelectEn } from "@/shared/locale/en/ui/timezone-select.ts";
@@ -149,16 +139,6 @@ export const enMessages: Translations = {
     meetingConfigSummary: uiMeetingConfigSummaryEn,
     meetingConfigRecurringSchedule: uiMeetingConfigRecurringScheduleEn,
     paymentMethod: uiPaymentMethodEn,
-    paymentMethodTypeSelector: uiPaymentMethodTypeSelectorEn,
-    paymentMethodSelect: uiPaymentMethodSelectEn,
-    paymentMethodDisplay: uiPaymentMethodDisplayEn,
-    paymentMethodList: uiPaymentMethodListEn,
-    paymentMethodManager: uiPaymentMethodManagerEn,
-    paymentMethodDefaultsEditor: uiPaymentMethodDefaultsEditorEn,
-    paymentMethodTypeFields: uiPaymentMethodTypeFieldsEn,
-    paymentMethodType: uiPaymentMethodTypeEn,
-    paymentMethodDirection: uiPaymentMethodDirectionEn,
-    paymentMethodIdentifier: uiPaymentMethodIdentifierEn,
     phoneInput: uiPhoneInputEn,
     tagInput: uiTagInputEn,
     timezoneSelect: uiTimezoneSelectEn,
@@ -248,7 +228,7 @@ export const enMessages: Translations = {
     teacherWeeklySchedule: dashboardTeacherWeeklyScheduleEn,
   },
   profileTranslations: {
-    base: profileEn,
+    base: profileBaseEn,
     teacher: profileTeacherEn,
     parent: profileParentEn,
     staff: profileStaffEn,

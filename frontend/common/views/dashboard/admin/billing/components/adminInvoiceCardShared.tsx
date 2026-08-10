@@ -3,7 +3,6 @@
 import { VisibilityOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   AdminInvoiceCardProps,
@@ -103,7 +102,7 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
           {actionLabel}
         </Button>
       ) : null}
-      {row.status === InvoiceStatus.PaymentPending && actionsEnabled ? (
+      {row.status === "PAYMENT_PENDING" && actionsEnabled ? (
         <Button
           fullWidth
           variant="outlined"
@@ -113,7 +112,7 @@ export function AdminInvoiceCardShared({ props, slots }: Readonly<AdminInvoiceCa
           {labels.adminTable.reviewSubmission}
         </Button>
       ) : null}
-      {row.status === InvoiceStatus.Paid && onViewPaymentDetails ? (
+      {row.status === "PAID" && onViewPaymentDetails ? (
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
           <IconButton
             size="small"

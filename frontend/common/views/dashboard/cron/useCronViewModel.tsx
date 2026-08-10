@@ -10,7 +10,7 @@ import {
   PauseOutlined,
   PlayArrowOutlined,
 } from "@mui/icons-material";
-import { Chip, IconButton, Stack } from "@mui/material";
+import { Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { CronExpressionParser } from "cron-parser";
 import { useCallback, useMemo, useState } from "react";
@@ -178,7 +178,7 @@ function buildColumns(
       width: 140,
       renderCell: ({ value }) => {
         const policy = safeEnum(value, Object.values(CronConcurrencyPolicy));
-        if (!policy) return "—";
+        if (!policy) return <Typography variant="bodyMd">—</Typography>;
         let label: string;
         let color: "default" | "warning" | "secondary";
         if (policy === CronConcurrencyPolicy.Allow) {
@@ -234,23 +234,137 @@ function buildColumns(
   return cols;
 }
 
-export type CronViewModel = CronViewProps;
+function toNullOrNumber(v: string | number): number | null {
+  return v === "" ? null : Number(v);
+}
 
-export function useCronViewModel(): CronViewModel {
-  const labels = useAppTranslation(Translation.Dashboard.Cron);
-  const locale = useAppLocale();
-  const notifications = useNotificationState();
+function buildScheduleInput(data: CronScheduleFormData) {
+  const payload = data.payload ? JSON.parse(data.payload) : null;
+  return {
+    name: data.name,
+    description: data.description || null,
+    cronExpression: data.cronExpression,
+    jobKind: data.jobKind,
+    payload,
+    timezone: data.timezone || null,
+    concurrencyPolicy: data.concurrencyPolicy,
+    maxRetries: toNullOrNumber(data.maxRetries),
+    retryBackoffSeconds: toNullOrNumber(data.retryBackoffSeconds),
+    timeoutSeconds: toNullOrNumber(data.timeoutSeconds),
+  };
+}
 
-  const hasPermission = useUserStore(state => state.hasPermission);
-  const canManage = hasPermission(AppPermission.CronManage);
+function previewNextRuns(expression: string, timezone: string): string[] {
+  if (!expression) return [];
+  try {
+    const interval = CronExpressionParser.parse(expression, { tz: timezone || "UTC" });
+    const results: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      const next = interval.next();
+      const iso = next.toISOString();
+      if (iso) results.push(iso);
+    }
+    return results;
+  } catch {
+    return [];
+  }
+}
 
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editingSchedule, setEditingSchedule] = useState<CronScheduleFieldsFragment | null>(null);
-  const [deletingSchedule, setDeletingSchedule] = useState<CronScheduleFieldsFragment | null>(null);
-  const [triggeringSchedule, setTriggeringSchedule] = useState<CronScheduleFieldsFragment | null>(null);
-  const [runsOpen, setRunsOpen] = useState(false);
-  const [runsSchedule, setRunsSchedule] = useState<CronScheduleFieldsFragment | null>(null);
+interface CronRowActionHandlers {
+  onDeleteConfirm: () => Promise<void>;
+  onPauseRow: (row: CronScheduleFieldsFragment) => Promise<void>;
+  onResumeRow: (row: CronScheduleFieldsFragment) => Promise<void>;
+  onTriggerConfirm: () => Promise<void>;
+}
 
+function useCronRowActionHandlers(args: {
+  labels: CronLabels;
+  notifications: CronNotificationState;
+  refetch: () => Promise<unknown>;
+  deletingSchedule: CronScheduleFieldsFragment | null;
+  setDeletingSchedule: (row: CronScheduleFieldsFragment | null) => void;
+  triggeringSchedule: CronScheduleFieldsFragment | null;
+  setTriggeringSchedule: (row: CronScheduleFieldsFragment | null) => void;
+  mutations: {
+    deleteSchedule: (opts: { variables: { input: { id: string; hard: boolean } } }) => Promise<unknown>;
+    pauseSchedule: (opts: { variables: { id: string } }) => Promise<unknown>;
+    resumeSchedule: (opts: { variables: { id: string } }) => Promise<unknown>;
+    triggerRun: (opts: {
+      variables: { input: { id: string; payload: null } };
+    }) => Promise<{ data?: { cronRunTrigger?: unknown } }>;
+  };
+}): CronRowActionHandlers {
+  const { labels, notifications, refetch, mutations } = args;
+
+  const onDeleteConfirm = useCallback(async () => {
+    const target = args.deletingSchedule;
+    if (!target?.id) return;
+    try {
+      await mutations.deleteSchedule({ variables: { input: { id: target.id, hard: false } } });
+      args.setDeletingSchedule(null);
+      await refetch();
+      notifications.showSuccess(labels.scheduleDeleted);
+    } catch (error) {
+      logger.error("Cron delete failed", { error });
+      notifications.showError(getCronErrorMessage(error, labels, { scheduleId: target.id }));
+    }
+  }, [args, mutations, refetch, notifications, labels]);
+
+  const onPauseRow = useCallback(
+    async (row: CronScheduleFieldsFragment) => {
+      if (!row.id) return;
+      try {
+        await mutations.pauseSchedule({ variables: { id: row.id } });
+        await refetch();
+        notifications.showSuccess(labels.schedulePaused);
+      } catch (error) {
+        logger.error("Cron pause failed", { error });
+        notifications.showError(getCronErrorMessage(error, labels, { scheduleId: row.id }));
+      }
+    },
+    [mutations, refetch, notifications, labels]
+  );
+
+  const onResumeRow = useCallback(
+    async (row: CronScheduleFieldsFragment) => {
+      if (!row.id) return;
+      try {
+        await mutations.resumeSchedule({ variables: { id: row.id } });
+        await refetch();
+        notifications.showSuccess(labels.scheduleResumed);
+      } catch (error) {
+        logger.error("Cron resume failed", { error });
+        notifications.showError(getCronErrorMessage(error, labels, { scheduleId: row.id }));
+      }
+    },
+    [mutations, refetch, notifications, labels]
+  );
+
+  const onTriggerConfirm = useCallback(async () => {
+    const target = args.triggeringSchedule;
+    if (!target?.id) return;
+    try {
+      const result = await mutations.triggerRun({
+        variables: { input: { id: target.id, payload: null } },
+      });
+      const triggeredRun = result.data?.cronRunTrigger;
+      if (triggeredRun) {
+        notifications.showSuccess(labels.scheduleTriggered);
+      } else {
+        notifications.showInfo(labels.triggerSkipped);
+      }
+    } catch (error) {
+      logger.error("Cron trigger failed", { error });
+      notifications.showError(getCronErrorMessage(error, labels, { scheduleId: target.id }));
+    } finally {
+      args.setTriggeringSchedule(null);
+    }
+  }, [args, mutations, notifications, labels]);
+
+  return { onDeleteConfirm, onPauseRow, onResumeRow, onTriggerConfirm };
+}
+
+function useCronQueries(runsSchedule: CronScheduleFieldsFragment | null, runsOpen: boolean) {
   const { data, loading, refetch } = useQuery(cronSchedulesQueryDocument, {
     variables: { input: null },
   });
@@ -276,51 +390,59 @@ export function useCronViewModel(): CronViewModel {
     skip: !runsOpen || !runsSchedule,
   });
 
-  const [createSchedule, { loading: creating }] = useMutation(cronScheduleCreateMutationDocument);
-  const [updateSchedule, { loading: updating }] = useMutation(cronScheduleUpdateMutationDocument);
-  const [pauseSchedule] = useMutation(cronSchedulePauseMutationDocument);
-  const [resumeSchedule] = useMutation(cronScheduleResumeMutationDocument);
-  const [deleteSchedule, { loading: deleting }] = useMutation(cronScheduleDeleteMutationDocument);
-  const [triggerRun] = useMutation(cronRunTriggerMutationDocument);
-
   const rows = useMemo(() => data?.cronSchedules?.rows ?? [], [data?.cronSchedules?.rows]);
   const queueStats = useMemo(() => queueStatsData?.cronQueueStats ?? null, [queueStatsData?.cronQueueStats]);
   const runs = useMemo<CronRunsQuery_cronRuns_CronPaginatedRuns_rows_CronRun[]>(
     () => runsData?.cronRuns?.rows ?? [],
     [runsData?.cronRuns?.rows]
   );
+
+  return { rows, queueStats, runs, loading, queueStatsLoading, runsLoading, refetch };
+}
+
+function useCronMutations() {
+  const [createSchedule, { loading: creating }] = useMutation(cronScheduleCreateMutationDocument);
+  const [updateSchedule, { loading: updating }] = useMutation(cronScheduleUpdateMutationDocument);
+  const [pauseSchedule] = useMutation(cronSchedulePauseMutationDocument);
+  const [resumeSchedule] = useMutation(cronScheduleResumeMutationDocument);
+  const [deleteSchedule, { loading: deleting }] = useMutation(cronScheduleDeleteMutationDocument);
+  const [triggerRun] = useMutation(cronRunTriggerMutationDocument);
   const saving = creating || updating;
+  return {
+    createSchedule,
+    updateSchedule,
+    pauseSchedule,
+    resumeSchedule,
+    deleteSchedule,
+    triggerRun,
+    deleting,
+    saving,
+  };
+}
 
-  const handleCreateOpen = useCallback(() => setCreateOpen(true), []);
-  const handleCreateClose = useCallback(() => setCreateOpen(false), []);
-  const handleEditClose = useCallback(() => setEditingSchedule(null), []);
+export type CronViewModel = CronViewProps;
 
-  const handleEditRow = useCallback((row: CronScheduleFieldsFragment) => {
-    setEditingSchedule(row);
-  }, []);
+type CronScheduleInputPayload = ReturnType<typeof buildScheduleInput>;
 
-  const buildScheduleInput = useCallback((data: CronScheduleFormData) => {
-    const payload = data.payload ? JSON.parse(data.payload) : null;
-    const toNullOrNumber = (v: string | number): number | null => (v === "" ? null : Number(v));
-    return {
-      name: data.name,
-      description: data.description || null,
-      cronExpression: data.cronExpression,
-      jobKind: data.jobKind,
-      payload,
-      timezone: data.timezone || null,
-      concurrencyPolicy: data.concurrencyPolicy,
-      maxRetries: toNullOrNumber(data.maxRetries),
-      retryBackoffSeconds: toNullOrNumber(data.retryBackoffSeconds),
-      timeoutSeconds: toNullOrNumber(data.timeoutSeconds),
-    };
-  }, []);
+function useCronScheduleSaveHandler(args: {
+  labels: CronLabels;
+  notifications: CronNotificationState;
+  refetch: () => Promise<unknown>;
+  editingSchedule: CronScheduleFieldsFragment | null;
+  setCreateOpen: (open: boolean) => void;
+  setEditingSchedule: (row: CronScheduleFieldsFragment | null) => void;
+  mutations: {
+    createSchedule: (opts: { variables: { input: CronScheduleInputPayload } }) => Promise<unknown>;
+    updateSchedule: (opts: { variables: { id: string; input: CronScheduleInputPayload } }) => Promise<unknown>;
+  };
+}) {
+  const { labels, notifications, refetch, editingSchedule, mutations } = args;
 
-  const handleSave = useCallback(
+  return useCallback(
     async (data: CronScheduleFormData) => {
       try {
         if (editingSchedule?.id) {
-          await updateSchedule({
+          await mutations.updateSchedule({
             variables: {
               id: editingSchedule.id,
               input: buildScheduleInput(data),
@@ -328,15 +450,15 @@ export function useCronViewModel(): CronViewModel {
           });
           notifications.showSuccess(labels.scheduleUpdated);
         } else {
-          await createSchedule({
+          await mutations.createSchedule({
             variables: {
               input: buildScheduleInput(data),
             },
           });
           notifications.showSuccess(labels.scheduleCreated);
         }
-        setCreateOpen(false);
-        setEditingSchedule(null);
+        args.setCreateOpen(false);
+        args.setEditingSchedule(null);
         await refetch();
       } catch (error) {
         logger.error("Cron save failed", { error });
@@ -349,114 +471,143 @@ export function useCronViewModel(): CronViewModel {
         );
       }
     },
-    [editingSchedule, createSchedule, updateSchedule, refetch, notifications, labels, buildScheduleInput]
+    [editingSchedule?.id, mutations, notifications, labels, refetch, args]
   );
+}
 
-  const handleDeleteConfirm = useCallback(async () => {
-    if (!deletingSchedule?.id) return;
-    try {
-      await deleteSchedule({ variables: { input: { id: deletingSchedule.id, hard: false } } });
-      setDeletingSchedule(null);
-      await refetch();
-      notifications.showSuccess(labels.scheduleDeleted);
-    } catch (error) {
-      logger.error("Cron delete failed", { error });
-      notifications.showError(getCronErrorMessage(error, labels, { scheduleId: deletingSchedule.id }));
-    }
-  }, [deletingSchedule, deleteSchedule, refetch, notifications, labels]);
+function useCronDialogState() {
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<CronScheduleFieldsFragment | null>(null);
+  const [deletingSchedule, setDeletingSchedule] = useState<CronScheduleFieldsFragment | null>(null);
+  const [triggeringSchedule, setTriggeringSchedule] = useState<CronScheduleFieldsFragment | null>(null);
+  const [runsOpen, setRunsOpen] = useState(false);
+  const [runsSchedule, setRunsSchedule] = useState<CronScheduleFieldsFragment | null>(null);
 
-  const handlePauseRow = useCallback(
-    async (row: CronScheduleFieldsFragment) => {
-      if (!row.id) return;
-      try {
-        await pauseSchedule({ variables: { id: row.id } });
-        await refetch();
-        notifications.showSuccess(labels.schedulePaused);
-      } catch (error) {
-        logger.error("Cron pause failed", { error });
-        notifications.showError(getCronErrorMessage(error, labels, { scheduleId: row.id }));
-      }
+  return {
+    createOpen,
+    setCreateOpen,
+    editingSchedule,
+    setEditingSchedule,
+    deletingSchedule,
+    setDeletingSchedule,
+    triggeringSchedule,
+    setTriggeringSchedule,
+    runsOpen,
+    setRunsOpen,
+    runsSchedule,
+    setRunsSchedule,
+  };
+}
+
+function useCronHandlers(dialogState: ReturnType<typeof useCronDialogState>) {
+  const { setCreateOpen, setEditingSchedule, setTriggeringSchedule, setRunsSchedule, setRunsOpen } = dialogState;
+
+  const handleCreateOpen = useCallback(() => setCreateOpen(true), [setCreateOpen]);
+  const handleCreateClose = useCallback(() => setCreateOpen(false), [setCreateOpen]);
+  const handleEditClose = useCallback(() => setEditingSchedule(null), [setEditingSchedule]);
+  const handleEditRow = useCallback((row: CronScheduleFieldsFragment) => setEditingSchedule(row), [setEditingSchedule]);
+  const handleTriggerRow = useCallback(
+    (row: CronScheduleFieldsFragment) => setTriggeringSchedule(row),
+    [setTriggeringSchedule]
+  );
+  const handleTriggerClose = useCallback(() => setTriggeringSchedule(null), [setTriggeringSchedule]);
+  const handleRunsOpen = useCallback(
+    (row: CronScheduleFieldsFragment) => {
+      setRunsSchedule(row);
+      setRunsOpen(true);
     },
-    [pauseSchedule, refetch, notifications, labels]
+    [setRunsSchedule, setRunsOpen]
   );
-
-  const handleResumeRow = useCallback(
-    async (row: CronScheduleFieldsFragment) => {
-      if (!row.id) return;
-      try {
-        await resumeSchedule({ variables: { id: row.id } });
-        await refetch();
-        notifications.showSuccess(labels.scheduleResumed);
-      } catch (error) {
-        logger.error("Cron resume failed", { error });
-        notifications.showError(getCronErrorMessage(error, labels, { scheduleId: row.id }));
-      }
-    },
-    [resumeSchedule, refetch, notifications, labels]
-  );
-
-  const handleTriggerRow = useCallback((row: CronScheduleFieldsFragment) => {
-    setTriggeringSchedule(row);
-  }, []);
-
-  const handleTriggerClose = useCallback(() => {
-    setTriggeringSchedule(null);
-  }, []);
-
-  const handleTriggerConfirm = useCallback(async () => {
-    if (!triggeringSchedule?.id) return;
-    try {
-      const result = await triggerRun({ variables: { input: { id: triggeringSchedule.id, payload: null } } });
-      const triggeredRun = result.data?.cronRunTrigger;
-      if (triggeredRun) {
-        notifications.showSuccess(labels.scheduleTriggered);
-      } else {
-        notifications.showInfo(labels.triggerSkipped);
-      }
-    } catch (error) {
-      logger.error("Cron trigger failed", { error });
-      notifications.showError(getCronErrorMessage(error, labels, { scheduleId: triggeringSchedule.id }));
-    } finally {
-      setTriggeringSchedule(null);
-    }
-  }, [triggeringSchedule, triggerRun, notifications, labels]);
-
-  const handleRunsOpen = useCallback((row: CronScheduleFieldsFragment) => {
-    setRunsSchedule(row);
-    setRunsOpen(true);
-  }, []);
   const handleRunsClose = useCallback(() => {
     setRunsOpen(false);
     setRunsSchedule(null);
-  }, []);
+  }, [setRunsOpen, setRunsSchedule]);
+  const handlePreviewNextRuns = useCallback(
+    (expression: string, timezone: string): string[] => previewNextRuns(expression, timezone),
+    []
+  );
 
-  const handlePreviewNextRuns = useCallback((expression: string, timezone: string): string[] => {
-    if (!expression) return [];
-    try {
-      const interval = CronExpressionParser.parse(expression, { tz: timezone || "UTC" });
-      const results: string[] = [];
-      for (let i = 0; i < 3; i++) {
-        const next = interval.next();
-        const iso = next.toISOString();
-        if (iso) results.push(iso);
-      }
-      return results;
-    } catch {
-      return [];
-    }
-  }, []);
+  return {
+    handleCreateOpen,
+    handleCreateClose,
+    handleEditClose,
+    handleEditRow,
+    handleTriggerRow,
+    handleTriggerClose,
+    handleRunsOpen,
+    handleRunsClose,
+    handlePreviewNextRuns,
+  };
+}
+
+export function useCronViewModel(): CronViewModel {
+  const labels = useAppTranslation(Translation.Dashboard.Cron);
+  const locale = useAppLocale();
+  const notifications = useNotificationState();
+
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canManage = hasPermission(AppPermission.CronManage);
+
+  const dialogState = useCronDialogState();
+  const { createOpen, editingSchedule, deletingSchedule, triggeringSchedule, runsOpen, runsSchedule } = dialogState;
+
+  const { rows, queueStats, runs, loading, queueStatsLoading, runsLoading, refetch } = useCronQueries(
+    runsSchedule,
+    runsOpen
+  );
+
+  const mutations = useCronMutations();
+  const handlers = useCronHandlers(dialogState);
+
+  const handleSave = useCronScheduleSaveHandler({
+    labels,
+    notifications,
+    refetch,
+    editingSchedule,
+    setCreateOpen: dialogState.setCreateOpen,
+    setEditingSchedule: dialogState.setEditingSchedule,
+    mutations: {
+      createSchedule: mutations.createSchedule,
+      updateSchedule: mutations.updateSchedule,
+    },
+  });
+
+  const rowActions = useCronRowActionHandlers({
+    labels,
+    notifications,
+    refetch,
+    deletingSchedule,
+    setDeletingSchedule: dialogState.setDeletingSchedule,
+    triggeringSchedule,
+    setTriggeringSchedule: dialogState.setTriggeringSchedule,
+    mutations: {
+      deleteSchedule: mutations.deleteSchedule,
+      pauseSchedule: mutations.pauseSchedule,
+      resumeSchedule: mutations.resumeSchedule,
+      triggerRun: mutations.triggerRun,
+    },
+  });
 
   const columns = useMemo(
     () =>
       buildColumns(labels, canManage, {
-        onEdit: handleEditRow,
-        onDelete: setDeletingSchedule,
-        onPause: handlePauseRow,
-        onResume: handleResumeRow,
-        onTrigger: handleTriggerRow,
-        onRuns: handleRunsOpen,
+        onEdit: handlers.handleEditRow,
+        onDelete: dialogState.setDeletingSchedule,
+        onPause: rowActions.onPauseRow,
+        onResume: rowActions.onResumeRow,
+        onTrigger: handlers.handleTriggerRow,
+        onRuns: handlers.handleRunsOpen,
       }),
-    [labels, canManage, handleEditRow, handlePauseRow, handleResumeRow, handleTriggerRow, handleRunsOpen]
+    [
+      labels,
+      canManage,
+      handlers.handleEditRow,
+      dialogState.setDeletingSchedule,
+      rowActions.onPauseRow,
+      rowActions.onResumeRow,
+      handlers.handleTriggerRow,
+      handlers.handleRunsOpen,
+    ]
   );
 
   return {
@@ -470,8 +621,8 @@ export function useCronViewModel(): CronViewModel {
     createOpen,
     editingSchedule,
     deletingSchedule,
-    deleting,
-    saving,
+    deleting: mutations.deleting,
+    saving: mutations.saving,
     triggering: Boolean(triggeringSchedule),
     triggeringSchedule,
     runsOpen,
@@ -480,21 +631,21 @@ export function useCronViewModel(): CronViewModel {
     runsLoading,
     notifications,
     canManage,
-    onCreateOpen: handleCreateOpen,
-    onCreateClose: handleCreateClose,
-    onEditRow: handleEditRow,
-    onEditClose: handleEditClose,
+    onCreateOpen: handlers.handleCreateOpen,
+    onCreateClose: handlers.handleCreateClose,
+    onEditRow: handlers.handleEditRow,
+    onEditClose: handlers.handleEditClose,
     onSave: handleSave,
-    onDeleteRow: setDeletingSchedule,
-    onDeleteClose: () => setDeletingSchedule(null),
-    onDeleteConfirm: handleDeleteConfirm,
-    onPauseRow: handlePauseRow,
-    onResumeRow: handleResumeRow,
-    onTriggerRow: handleTriggerRow,
-    onTriggerClose: handleTriggerClose,
-    onTriggerConfirm: handleTriggerConfirm,
-    onRunsOpen: handleRunsOpen,
-    onRunsClose: handleRunsClose,
-    onPreviewNextRuns: handlePreviewNextRuns,
+    onDeleteRow: dialogState.setDeletingSchedule,
+    onDeleteClose: () => dialogState.setDeletingSchedule(null),
+    onDeleteConfirm: rowActions.onDeleteConfirm,
+    onPauseRow: rowActions.onPauseRow,
+    onResumeRow: rowActions.onResumeRow,
+    onTriggerRow: handlers.handleTriggerRow,
+    onTriggerClose: handlers.handleTriggerClose,
+    onTriggerConfirm: rowActions.onTriggerConfirm,
+    onRunsOpen: handlers.handleRunsOpen,
+    onRunsClose: handlers.handleRunsClose,
+    onPreviewNextRuns: handlers.handlePreviewNextRuns,
   };
 }

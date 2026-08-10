@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { getLanguageDisplayName, getLanguageEmoji, type LanguageType } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
 
 export type MobileLanguageDisplayProps = {
@@ -15,7 +16,7 @@ export type MobileLanguageDisplayProps = {
   readonly showEmoji?: boolean;
   readonly showLabel?: boolean;
   readonly fallback?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: NonNullable<TypographyProps["variant"]>;
   readonly sx?: SxProps<Theme>;
 };
 
@@ -40,21 +41,23 @@ export const MobileLanguageDisplay: React.FC<MobileLanguageDisplayProps> = ({
   const locale = useAppLocale();
 
   const resolvedCode = language?.code ?? code;
+  let content: React.ReactNode;
   if (!resolvedCode) {
-    return fallback ?? null;
+    content = fallback ?? null;
+  } else {
+    const emoji = language?.emoji ?? getLanguageEmoji(resolvedCode);
+    const name = getLanguageDisplayName(resolvedCode, locale);
+
+    content = (
+      <Stack direction="row" spacing={0.5} sx={mergeSx({ alignItems: "center", flexWrap: "nowrap" }, sx)}>
+        {showEmoji && <MobileLocaleEmoji emoji={emoji} />}
+        {showLabel && (
+          <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
+            {name}
+          </Typography>
+        )}
+      </Stack>
+    );
   }
-
-  const emoji = language?.emoji ?? getLanguageEmoji(resolvedCode);
-  const name = getLanguageDisplayName(resolvedCode, locale);
-
-  return (
-    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", flexWrap: "nowrap", ...sx }}>
-      {showEmoji && <MobileLocaleEmoji emoji={emoji} />}
-      {showLabel && (
-        <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
-          {name}
-        </Typography>
-      )}
-    </Stack>
-  );
+  return content;
 };

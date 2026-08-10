@@ -17,6 +17,34 @@ interface RedisClient {
   pipeline(): { exec(): Promise<unknown[] | null> };
   ping(): Promise<unknown>;
   on?(event: string, callback: (...args: unknown[]) => void): void;
+  dbsize?(): Promise<number>;
+}
+
+/**
+ * Type guard verifying that an unknown value structurally satisfies RedisClient.
+ * Runtime checks replace unsafe type assertions so callers can safely narrow TClient
+ * (ioredis.Redis / @upstash/redis Redis) to the RedisClient contract.
+ */
+function isRedisClient(client: unknown): client is RedisClient {
+  if (typeof client !== "object" || client === null) return false;
+  return (
+    "get" in client &&
+    typeof client.get === "function" &&
+    "set" in client &&
+    typeof client.set === "function" &&
+    "incr" in client &&
+    typeof client.incr === "function" &&
+    "expire" in client &&
+    typeof client.expire === "function" &&
+    "ttl" in client &&
+    typeof client.ttl === "function" &&
+    "del" in client &&
+    typeof client.del === "function" &&
+    "pipeline" in client &&
+    typeof client.pipeline === "function" &&
+    "ping" in client &&
+    typeof client.ping === "function"
+  );
 }
 
 /**
@@ -26,7 +54,10 @@ export abstract class BaseRedisAdapter<TClient> implements IRedisService {
   constructor(protected readonly client: TClient) {}
 
   private get clientRef(): RedisClient {
-    return this.client as unknown as RedisClient;
+    if (!isRedisClient(this.client)) {
+      throw new Error("Invalid Redis client: missing required RedisClient methods");
+    }
+    return this.client;
   }
 
   async get(key: string): Promise<string | null> {
@@ -62,11 +93,11 @@ export abstract class BaseRedisAdapter<TClient> implements IRedisService {
       return typeof result === "string" ? result : null;
     }
 
-    // Upstash Redis uses an options object: { nx: true, px: ms-number }
-    const upstashClient = client as unknown as {
-      set: (key: string, value: string, opts: { nx: true; px: number }) => Promise<string | null>;
-    };
-    return await upstashClient.set(key, value, { nx: true, px: pxMs });
+    // Upstash Redis uses an options object: { nx: true, px: ms-number }.
+    // The RedisClient.set signature (...args: unknown[]) accepts the options object
+    // without requiring an unsafe type assertion.
+    const result = await client.set(key, value, { nx: true, px: pxMs });
+    return typeof result === "string" ? result : null;
   }
 
   async incr(key: string): Promise<number> {
@@ -97,7 +128,7 @@ export abstract class BaseRedisAdapter<TClient> implements IRedisService {
 
     return results.map((res: unknown) => {
       if (Array.isArray(res) && res.length === 2) {
-        const [err, result] = res as [unknown, unknown];
+        const [err, result] = res;
         if (err) throw err;
         return result;
       }
@@ -122,7 +153,7 @@ export abstract class BaseRedisAdapter<TClient> implements IRedisService {
   async stats(): Promise<CacheStats> {
     try {
       let size = 0;
-      const client = this.clientRef as unknown as { dbsize?(): Promise<number> };
+      const client = this.clientRef;
       if (typeof client.dbsize === "function") {
         size = await client.dbsize();
       }

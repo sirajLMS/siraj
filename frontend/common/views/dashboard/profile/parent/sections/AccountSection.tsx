@@ -1,10 +1,13 @@
 "use client";
 
+import { MenuItem, Stack, TextField, Tooltip } from "@mui/material";
+import { useState } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import {
   AccountStatus,
   type CurrencyCode,
+  type ParentStatus,
   type ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
@@ -13,6 +16,7 @@ import type {
   ParentSectionLabelsBundle,
   ParentViewData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { ProfileParentLabels } from "@/shared/locale/types/profile";
@@ -22,13 +26,17 @@ type ParentAccountFormFields = {
   email: string;
   avatarUrl?: string | null;
   displayCurrency?: CurrencyCode | null;
+  lifecycleStatus?: ParentStatus;
 };
 
-type AccountParentData = Pick<ParentViewData, "name" | "email">;
+type AccountParentData = Pick<ParentViewData, "name" | "email"> & { accountStatus?: string | null };
 
 function resolveAccountStatusLabel(accountStatus: string | null | undefined, t: ProfileParentLabels): string {
   const normalized = (accountStatus ?? AccountStatus.Activated).toLowerCase();
-  return t.accountStatus[normalized as "activated" | "deactivated"];
+  if (normalized === "activated" || normalized === "deactivated") {
+    return t.accountStatus[normalized];
+  }
+  return t.accountStatus.activated;
 }
 
 type AccountSectionProps =
@@ -53,9 +61,12 @@ type AccountSectionProps =
 export function AccountSection(props: AccountSectionProps) {
   const t = props.labels.parent;
   const { baseLabels } = props.labels;
-  const { canView } = useProfileFieldAccess({ scope: props.scope });
+  const { canView, canEditStatus, canAdminResetPassword } = useProfileFieldAccess({ scope: props.scope });
+  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
+  const [sendEmail, setSendEmail] = useState(false);
 
   if (props.mode === "edit") {
+    const canEditStatusField = canEditStatus();
     return (
       <CoreIdentitySection
         mode="edit"
@@ -68,12 +79,28 @@ export function AccountSection(props: AccountSectionProps) {
         baseLabels={baseLabels}
         register={props.register}
         control={props.control}
+        additionalEditContent={
+          canEditStatusField ? (
+            <Stack spacing={2}>
+              <TextField
+                label={t.fields.accountStatus}
+                fullWidth
+                size="small"
+                select
+                {...props.register("lifecycleStatus")}
+              >
+                <MenuItem value={AccountStatus.Activated}>{t.accountStatus.activated}</MenuItem>
+                <MenuItem value={AccountStatus.Deactivated}>{t.accountStatus.deactivated}</MenuItem>
+              </TextField>
+            </Stack>
+          ) : null
+        }
       />
     );
   }
 
   const accountStatusRaw = props.adminData && "accountStatus" in props.adminData ? props.adminData.accountStatus : null;
-  const accountStatus = accountStatusRaw ? String(accountStatusRaw) : null;
+  const accountStatus = accountStatusRaw ?? null;
   const accountStatusContent =
     canView("parent_account") && accountStatus ? (
       <InfoField
@@ -89,20 +116,62 @@ export function AccountSection(props: AccountSectionProps) {
       />
     ) : null;
 
+  const canResetPassword = canAdminResetPassword();
+  const targetUserId = props.adminData?.userId;
+  const parentName = props.parentData.name ?? "";
+  const parentEmail = props.parentData.email ?? "";
+
   return (
-    <CoreIdentitySection
-      mode="view"
-      scope={props.scope}
-      name={props.parentData.name}
-      email={props.parentData.email}
-      avatarUrl={props.avatarUrl}
-      displayCurrency={props.displayCurrency}
-      sectionTitle={t.sections.account}
-      nameLabel={t.fields.fullName}
-      emailLabel={t.fields.primaryEmail}
-      currencyLabel={t.fields.displayCurrency}
-      baseLabels={baseLabels}
-      additionalViewContent={accountStatusContent}
-    />
+    <Stack>
+      <CoreIdentitySection
+        mode="view"
+        scope={props.scope}
+        name={parentName}
+        email={parentEmail}
+        avatarUrl={props.avatarUrl}
+        displayCurrency={props.displayCurrency}
+        sectionTitle={t.sections.account}
+        nameLabel={t.fields.fullName}
+        emailLabel={t.fields.primaryEmail}
+        currencyLabel={t.fields.displayCurrency}
+        baseLabels={baseLabels}
+        additionalViewContent={
+          <Stack spacing={1}>
+            {accountStatusContent}
+            {canResetPassword && targetUserId && (
+              <Tooltip title={baseLabels.actions.manageLifecycle}>
+                <InfoField
+                  label={baseLabels.actions.manageLifecycle}
+                  value={
+                    <ResetPasswordDialog
+                      open={resetPasswordOpen}
+                      onClose={() => setResetPasswordOpen(false)}
+                      userName={parentName}
+                      userEmail={parentEmail}
+                      isLoading={false}
+                      sendEmail={sendEmail}
+                      setSendEmail={setSendEmail}
+                      onConfirm={() => setResetPasswordOpen(false)}
+                    />
+                  }
+                />
+              </Tooltip>
+            )}
+          </Stack>
+        }
+      />
+      {canResetPassword && targetUserId && (
+        <ResetPasswordDialog
+          open={resetPasswordOpen}
+          onClose={() => setResetPasswordOpen(false)}
+          userName={parentName}
+          userEmail={parentEmail}
+          isLoading={false}
+          sendEmail={sendEmail}
+          setSendEmail={setSendEmail}
+          onConfirm={() => setResetPasswordOpen(false)}
+        />
+      )}
+    </Stack>
   );
 }

@@ -3,21 +3,30 @@
  * This preload must be registered before tests that use ResponsiveViewSwitch
  */
 import { mock } from "bun:test";
-import React from "react";
+import type React from "react";
+import { createElement } from "react";
+
+// Type guard: narrows `unknown` to a React component type so we can pass it to
+// createElement without an unsafe `as` assertion (oxlint no-unsafe-type-assertion).
+function isComponentType(value: unknown): value is React.ComponentType<unknown> {
+  return typeof value === "function";
+}
 
 // Cache for loaded modules. The cached views have heterogeneous, view-specific prop
 // types (Readonly<ScheduleOverviewViewModel>, Readonly<PendingReviewsViewModel>, ...),
-// so no single non-`any` ComponentType<P> is a sound supertype of all of them. We
-// therefore store them under the empty-props component type and assert on insertion;
-// the retrieved component is re-cast to ComponentType<T> at the call site so
-// React.createElement receives a prop-compatible component for the generic prop type T.
-const moduleCache = new Map<string, React.ComponentType<Record<string, never>>>();
+// so no single non-`any` ComponentType<P> is a sound supertype of all of them. We store
+// components as `unknown` and use the `isComponentType` type guard on retrieval to
+// safely narrow back to ComponentType<unknown> — createElement then accepts props of
+// any generic type T since T extends Record<string, unknown> is assignable to unknown.
+const moduleCache = new Map<string, unknown>();
 
-// Helper that absorbs any concrete view component and stores it under the empty-props
-// cache type. The assertion is intentional: dropping prop-type specificity in the
-// cache is safe because the caller always re-casts to the correct prop type on read.
-function cacheComponent<TProps>(key: string, component: React.ComponentType<TProps>): void {
-  moduleCache.set(key, component as unknown as React.ComponentType<Record<string, never>>);
+function cacheComponent<TProps extends Record<string, unknown>>(
+  key: string,
+  component: React.ComponentType<TProps>
+): void {
+  // ComponentType<TProps> is assignable to `unknown` — no assertion needed.
+  const entry: unknown = component;
+  moduleCache.set(key, entry);
 }
 
 // Pre-load all lazy views synchronously by importing them directly
@@ -52,9 +61,9 @@ async function preloadViews() {
 }
 
 // Start preloading immediately
-preloadViews();
+void preloadViews();
 
-mock.module("next/dynamic", () => {
+void mock.module("next/dynamic", () => {
   const dynamic = <T extends Record<string, unknown>>(
     importer: () => Promise<{ default: React.ComponentType<T> }>,
     options?: { ssr?: boolean; loading?: () => React.ReactNode }
@@ -86,17 +95,20 @@ mock.module("next/dynamic", () => {
 
     // Create synchronous component
     const DynamicComponent = ({ ...props }: T) => {
-      const Component = moduleCache.get(cacheKey);
+      const cached = moduleCache.get(cacheKey);
+      let content: React.ReactNode;
 
-      if (Component) {
-        // Re-cast the cached empty-props component to ComponentType<T> so
-        // React.createElement receives a prop-compatible component for props: T.
-        const TypedComponent = Component as unknown as React.ComponentType<T>;
-        return React.createElement(TypedComponent, props);
+      if (cached && isComponentType(cached)) {
+        // The type guard narrows `unknown` to ComponentType<unknown>; createElement
+        // accepts props of type T since T extends Record<string, unknown> is
+        // assignable to `unknown`. No `as` assertion needed.
+        content = createElement(cached, props);
+      } else {
+        // Show loading or null if not loaded yet
+        content = options?.loading?.() ?? null;
       }
 
-      // Show loading or null if not loaded yet
-      return options?.loading?.() ?? null;
+      return content;
     };
 
     DynamicComponent.displayName = "DynamicComponent";

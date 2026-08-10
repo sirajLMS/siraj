@@ -18,7 +18,7 @@ export function getSidebarStateFromCookies(cookieValue?: string): boolean {
  * Persist sidebar open/collapsed state to cookie on the client.
  */
 export function setSidebarCookie(open: boolean) {
-  if (typeof window !== "undefined") {
+  if (typeof globalThis.window !== "undefined") {
     const value = open ? "true" : "false";
     const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toUTCString();
     // biome-ignore lint/suspicious/noDocumentCookie: Cookie setting for SSR sidebar state

@@ -10,6 +10,7 @@ import {
 } from "@/backend/graphql/pothos/parents/parent-portal.pothos";
 import { ParentProfilePothosObject } from "@/backend/graphql/pothos/parents/parent-profile.pothos";
 import {
+  AccountStatusPothosObject,
   CurrencyCodePothosObject,
   GenderPothosObject,
   IanaTimezonePothosObject,
@@ -118,6 +119,11 @@ export const CoreUserProfileFieldsInputPothosObject = gqlSchemaBuilder
       avatarUrl: t.string({ required: false }),
       displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
+      status: t.field({
+        type: AccountStatusPothosObject,
+        required: false,
+        description: "User account status (super admin only)",
+      }),
     }),
   });
 

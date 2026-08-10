@@ -76,6 +76,7 @@ export const profileTeacherAr: ProfileTeacherLabels = {
     retry: "إعادة المحاولة",
     saveSuccess: "تم حفظ الملف الشخصي بنجاح.",
     saveError: "فشل حفظ الملف الشخصي.",
+    manageLifecycle: "إدارة دورة حياة الحساب",
   },
   errors: {
     failedToLoad: "Failed to load profile.",

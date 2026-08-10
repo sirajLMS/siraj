@@ -3,8 +3,8 @@
 > **Feature**: Certificate Module — Types, Enums, and Permissions
 > **Plan #**: 02
 > **Dependencies**: Plan 1 (DB Schema & Enums) — provides Drizzle table definitions
-> **Execution Model**: Sequential per task (each task produces types the next task imports)
-> **Quality Model**: Per-file tsgo + biome + lint via `scripts/health/sub-loop.ts`
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+> **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
 > **Time Budget**: 2-4 hours per task
 
 ---
@@ -30,7 +30,43 @@ T01 (enums in backend/enum) ──→ T02 (entity types: Template)
                                └─→ T13 (knowledge propagation)
 ```
 
-**Execution order**: T01 → T02 → (T03, T04, T05, T06, T07 in parallel after T02) → T08 → T09 → T10 → T11 → T12 → T13
+**Execution order**: T01 → T02 → (T03, T04, T05, T06, T07 via parallel subagents after T02) → T08 → T09 → T10 → T11 → T12 → T13
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01
+- Rationale: Foundation task — all other tasks depend on the 11 certificate TS enums. Must complete before any type or permission work begins.
+
+### Wave 2: T02, T09
+- Tasks: T02, T09
+- Rationale: Both depend only on T01 (enums exist). T02 creates template type definitions; T09 registers AppPermission entries. No interdependencies between them — safe to run as parallel subagents.
+
+### Wave 3: T03, T04, T05
+- Tasks: T03, T04, T05
+- Rationale: T03 depends on T02 (CertificateReturnType needs TemplateReturnType). T04 depends on T01+T02 (category types reference TemplateReturnType). T05 depends on T02 (element/variable types reference TemplateReturnType). All three only need T02 complete and have no mutual dependencies — safe to run as parallel subagents.
+
+### Wave 4: T06, T07
+- Tasks: T06, T07
+- Rationale: T06 depends on T02+T05 (recipient group item variable values reference TemplateVariableReturnType from T05). T07 depends on T03 (verification types reference CertificateReturnType from T03). T06 needs T05 complete; T07 needs T03 complete. Both satisfied after Wave 3. No mutual dependency between T06 and T07 — safe to run as parallel subagents.
+
+### Wave 5: T08, T10, T12
+- Tasks: T08, T10, T12
+- Rationale: T08 depends on T02–T07 (all entity ReturnTypes exist for filter/sort types). T10 depends on T09 (AppPermission entries exist for group mappings). T12 depends on T01+T09 (enums and permissions exist for i18n key schemas). All dependencies satisfied after Wave 4. No mutual dependencies among T08, T10, T12 — safe to run as parallel subagents.
+
+### Wave 6: T11
+- Tasks: T11
+- Rationale: Barrel exports depend on T01–T08 (all types and enums must exist). T08 completes in Wave 5, unblocking T11. Runs alone since no other task is ready at this dependency level.
+
+### Final Wave: Knowledge Propagation
+- Task: T13
+- Rationale: Must run after all other tasks complete — aggregates outcomes from T01–T12 into documentation and knowledge base.
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -77,13 +113,14 @@ T01 (enums in backend/enum) ──→ T02 (entity types: Template)
 
 For each file:
 ```bash
-bun run scripts/health/sub-loop.ts <file> --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/enum/certificates/index.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/enum/index.ts --lifecycle codescene
 ```
 
 ### Verification
 - All 11 TypeScript enums exported
 - No `label/labelAr/description/descriptionAr` fields co-located in the enum files (display labels are added in T12 via `shared/locale/`)
-- `bun tsgo` passes with zero new type errors
+- Per-file quality loop passes with zero type errors
 
 ---
 
@@ -91,6 +128,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 
 **Estimated time**: 3 hours
 **Depends on**: T01 (enums exist for ReturnType re-application)
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T09.
 **Requirements**: REQ-TYPE-001, REQ-TYPE-002, REQ-TYPE-003, REQ-TYPE-004, AC-03
 
 ### Subtasks
@@ -109,7 +147,7 @@ bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/template.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/template.types.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -124,6 +162,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/template.types.ts 
 
 **Estimated time**: 2 hours
 **Depends on**: T02 (TemplateReturnType exists for certificate join)
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T04, T05.
 **Requirements**: REQ-TYPE-005 through REQ-TYPE-008, AC-04
 
 ### Subtasks
@@ -136,7 +175,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/template.types.ts 
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/certificate.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/certificate.types.ts --lifecycle codescene
 ```
 
 ---
@@ -145,6 +184,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/certificate.types.
 
 **Estimated time**: 2 hours
 **Depends on**: T01 (enums), T02 (TemplateReturnType for category.children)
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03, T05.
 **Requirements**: REQ-TYPE-009, AC-05
 
 ### Subtasks
@@ -156,7 +196,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/certificate.types.
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/category.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/category.types.ts --lifecycle codescene
 ```
 
 ---
@@ -165,6 +205,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/category.types.ts 
 
 **Estimated time**: 3 hours
 **Depends on**: T02 (TemplateReturnType exists)
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T03, T04.
 **Requirements**: REQ-TYPE-010 through REQ-TYPE-015, AC-06
 
 ### Subtasks
@@ -183,8 +224,8 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/category.types.ts 
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/templateElement.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/templateVariable.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/templateElement.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/templateVariable.types.ts --lifecycle codescene
 ```
 
 ---
@@ -193,6 +234,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/templateVariable.t
 
 **Estimated time**: 3 hours
 **Depends on**: T02 (TemplateReturnType), T05 (TemplateVariableReturnType)
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07.
 **Requirements**: REQ-TYPE-016 through REQ-TYPE-022, AC-07
 
 ### Subtasks
@@ -214,9 +256,9 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/templateVariable.t
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroup.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItem.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItemVariableValue.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroup.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItem.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItemVariableValue.types.ts --lifecycle codescene
 ```
 
 ---
@@ -225,6 +267,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItem
 
 **Estimated time**: 2 hours
 **Depends on**: T03 (CertificateReturnType exists)
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T06.
 **Requirements**: REQ-TYPE-023, REQ-TYPE-024, AC-08
 
 ### Subtasks
@@ -241,8 +284,8 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/recipientGroupItem
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/certificateVerification.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/templateStylePreset.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/certificateVerification.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/templateStylePreset.types.ts --lifecycle codescene
 ```
 
 ---
@@ -251,6 +294,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/templateStylePrese
 
 **Estimated time**: 3 hours
 **Depends on**: T02 through T07 (entity ReturnTypes exist)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T10, T12.
 **Requirements**: REQ-TYPE-025 through REQ-TYPE-030, AC-09
 
 ### Subtasks
@@ -269,8 +313,8 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/templateStylePrese
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/filters.types.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/certificates/pagination.types.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/filters.types.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/certificates/pagination.types.ts --lifecycle codescene
 ```
 
 ---
@@ -279,6 +323,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/pagination.types.t
 
 **Estimated time**: 2 hours
 **Depends on**: T01 (enums exist for permission metadata)
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T02.
 **Requirements**: REQ-PERM-001 through REQ-PERM-011, AC-10, AC-11
 
 ### Subtasks
@@ -308,7 +353,7 @@ bun run scripts/health/sub-loop.ts backend/types/certificates/pagination.types.t
    - The Dutch/Arabic/English permission display rows are added via the seed/insert step in T10 (permission-group mappings) and the i18n namespace in T12.
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -338,7 +383,7 @@ bun run scripts/health/sub-loop.ts backend/enum/permissions/permission.enum.ts -
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts <modified-file> --lifecycle lint
+bun run scripts/health/sub-loop.ts <modified-file> --lifecycle codescene
 ```
 
 ---
@@ -362,8 +407,8 @@ bun run scripts/health/sub-loop.ts <modified-file> --lifecycle lint
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/types/certificates/index.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/types/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/types/certificates/index.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/types/index.ts --lifecycle codescene
 ```
 
 ---
@@ -393,14 +438,14 @@ bun run scripts/health/sub-loop.ts backend/types/index.ts --lifecycle lint
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts shared/locale/types/certificates/permissions.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/types/certificates/enums.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/permissions.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/enums.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/en/certificates/permissions.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/en/certificates/enums.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/permissions.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/enums.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts shared/locale/types/certificates/permissions.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/types/certificates/enums.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/permissions.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/namespaces/certificates/enums.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/certificates/permissions.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/certificates/enums.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/permissions.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/certificates/enums.ts --lifecycle codescene
 ```
 
 

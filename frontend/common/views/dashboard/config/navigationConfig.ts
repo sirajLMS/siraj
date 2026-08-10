@@ -852,6 +852,27 @@ function resolveNavFeatureFlags(
 }
 
 /**
+ * Type guards for the union-typed parameters of
+ * `getNavItemsForPermissions`. The active overload is selected by the third
+ * argument (`maybePermissionsOrFlags`); these guards narrow the correlated
+ * array parameters so the implementation can avoid unsafe type assertions.
+ * `NavItem` carries a required `href` (absent on `NavGroup`), and
+ * `AppPermission` is a string enum — so a single element check is enough to
+ * classify a homogeneous array. Empty arrays match either branch, which is
+ * safe because filtering an empty array is a no-op.
+ */
+type NavEntryArray = readonly NavGroup[] | readonly NavItem[] | readonly AppPermission[];
+
+const isNavItemArray = (arr: NavEntryArray): arr is readonly NavItem[] =>
+  arr.length === 0 || (typeof arr[0] === "object" && arr[0] !== null && "href" in arr[0]);
+
+const isNavGroupArray = (arr: NavEntryArray): arr is readonly NavGroup[] =>
+  arr.length === 0 || (typeof arr[0] === "object" && arr[0] !== null && !("href" in arr[0]));
+
+const isAppPermissionArray = (arr: NavEntryArray): arr is readonly AppPermission[] =>
+  arr.length === 0 || typeof arr[0] === "string";
+
+/**
  * Returns the subset of NAV ITEMS that survive the user's permission + audience
  * gate + per-portal overrides. The same predicate is reused for both the
  * sidebar and the mobile bottom nav (which administers its own flat list).
@@ -880,8 +901,8 @@ export function getNavItemsForPermissions(
 ): NavItem[] | NavGroup[] {
   // Overload 1: (items, permissions[, featureFlags]) => NavItem[]
   if (maybePermissionsOrFlags === undefined || !Array.isArray(maybePermissionsOrFlags)) {
-    const items = groupsOrItems as readonly NavItem[];
-    const permissions = itemsOrPermissions as readonly AppPermission[];
+    const items = isNavItemArray(groupsOrItems) ? groupsOrItems : [];
+    const permissions = isAppPermissionArray(itemsOrPermissions) ? itemsOrPermissions : [];
     const featureFlags = resolveNavFeatureFlags(maybePermissionsOrFlags);
     const filtered = items.filter(item => {
       // Next.js App Router Link rejects unresolved dynamic segments
@@ -926,9 +947,9 @@ export function getNavItemsForPermissions(
   }
 
   // Overload 2: (groups, items, permissions[, featureFlags]) => NavGroup[]
-  const groups = groupsOrItems as readonly NavGroup[];
-  const items = itemsOrPermissions as readonly NavItem[];
-  const permissions = maybePermissionsOrFlags as readonly AppPermission[];
+  const groups = isNavGroupArray(groupsOrItems) ? groupsOrItems : [];
+  const items = isNavItemArray(itemsOrPermissions) ? itemsOrPermissions : [];
+  const permissions = maybePermissionsOrFlags;
   const featureFlags = resolveNavFeatureFlags(undefined, maybeFeatureFlags);
 
   // 1) Filter items (single pass, exactly the same logic as overload 1).

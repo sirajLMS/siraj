@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { ParentRepository, StaffProfileRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
-import { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope, UserRole } from "@/backend/enum";
+import {
+  AccountStatus,
+  AppPermission,
+  CurrencyCode,
+  ProfileAudience,
+  ProfileMode,
+  ProfileScope,
+  UserRole,
+} from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { isRedirect, ProfileService, toParentRepoInput } from "@/backend/services";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -44,14 +52,14 @@ function assertProfileContext(
 function setupProfileReposSpies(
   overrides: {
     teacher?: Awaited<ReturnType<typeof TeacherRepository.findByUserId>> | null;
-    parent?: Awaited<ReturnType<typeof ParentRepository.findByUserId>> | null;
-    staff?: Awaited<ReturnType<typeof StaffProfileRepository.findByUserId>> | null;
-    student?: Awaited<ReturnType<typeof StudentRepository.getStudentIdByUserId>> | null;
+    parent?: Awaited<ReturnType<typeof ParentRepository.findByUserId>>;
+    staff?: Awaited<ReturnType<typeof StaffProfileRepository.findByUserId>>;
+    student?: Awaited<ReturnType<typeof StudentRepository.getStudentIdByUserId>>;
   } = {}
 ) {
-  spyOn(TeacherRepository, "findByUserId").mockResolvedValue(overrides.teacher ?? (null as never));
-  spyOn(ParentRepository, "findByUserId").mockResolvedValue(overrides.parent ?? (null as never));
-  spyOn(StaffProfileRepository, "findByUserId").mockResolvedValue(overrides.staff ?? (null as never));
+  spyOn(TeacherRepository, "findByUserId").mockResolvedValue(overrides.teacher ?? null);
+  spyOn(ParentRepository, "findByUserId").mockResolvedValue(overrides.parent ?? null);
+  spyOn(StaffProfileRepository, "findByUserId").mockResolvedValue(overrides.staff ?? null);
   spyOn(StudentRepository, "getStudentIdByUserId").mockResolvedValue(overrides.student ?? null);
 }
 
@@ -91,8 +99,7 @@ async function runStudentProfileTest(
   setupPermissionSpies({
     hasAnyPermission: async (_userId: string, keys: AppPermission[]) => {
       permissionChecks += 1;
-      const list = keys as AppPermission[];
-      return expectedPermissionKeys.some(key => list.includes(key));
+      return expectedPermissionKeys.some(key => keys.includes(key));
     },
     getUserContext: {
       permissions: expectedPermissionKeys,
@@ -105,11 +112,10 @@ async function runStudentProfileTest(
   const result = await ProfileService.resolvePageContext("student-user", { mode });
 
   expect(permissionChecks).toBeLessThan(10);
-  expect(isRedirect(result)).toBe(false);
-  if (isRedirect(result)) {
+  if ("redirect" in result) {
     throw new Error(`expected student profile ${mode.toLowerCase()} context, got redirect to ${result.redirect}`);
   }
-  const context = result as ProfilePageContext;
+  const context = result;
   assertProfileContext(context, expectedContext);
 }
 
@@ -127,16 +133,27 @@ async function runStaffProfileTest(
   expectedRedirect?: string
 ) {
   setupProfileReposSpies({
-    staff: { id: "staff-profile-1", userId: "staff-user" } as never,
+    staff: {
+      id: "staff-profile-1",
+      staffProfileId: "staff-profile-1",
+      name: "Staff User",
+      email: "[EMAIL_REDACTED]",
+      avatarUrl: null,
+      phone: null,
+      status: AccountStatus.ACTIVATED,
+      roleSlug: null,
+      roleName: null,
+      hourlyRate: null,
+      rateCurrency: null,
+    },
   });
   setupPermissionSpies({
     hasAnyPermission: async (_userId: string, keys: AppPermission[]) => {
       if (!hasEditPermissions) return false;
-      const list = keys as AppPermission[];
       return (
-        list.includes(AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN) ||
-        list.includes(AppPermission.PROFILE_CORE_CONTACT_EDIT_OWN) ||
-        list.includes(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN)
+        keys.includes(AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN) ||
+        keys.includes(AppPermission.PROFILE_CORE_CONTACT_EDIT_OWN) ||
+        keys.includes(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN)
       );
     },
     getUserContext: {
@@ -159,11 +176,10 @@ async function runStaffProfileTest(
   if (expectedRedirect) {
     expect(result).toEqual({ redirect: expectedRedirect });
   } else if (expectedContext) {
-    expect(isRedirect(result)).toBe(false);
-    if (isRedirect(result)) {
+    if ("redirect" in result) {
       throw new Error(`expected staff profile ${mode.toLowerCase()} context, got redirect to ${result.redirect}`);
     }
-    const context = result as ProfilePageContext;
+    const context = result;
     assertProfileContext(context, expectedContext);
   }
 }
@@ -184,11 +200,10 @@ describe("ProfileService.resolvePageContext", () => {
 
     const result = await ProfileService.resolvePageContext("admin-user", { mode: ProfileMode.VIEW });
 
-    expect(isRedirect(result)).toBe(false);
-    if (isRedirect(result)) {
+    if ("redirect" in result) {
       throw new Error("expected profile page context, got redirect");
     }
-    const context = result as ProfilePageContext;
+    const context = result;
     assertProfileContext(context, {
       audience: ProfileAudience.STAFF,
       scope: ProfileScope.OTHER,
@@ -315,7 +330,7 @@ describe("toParentRepoInput", () => {
   test("maps displayCurrency through core profile fields", () => {
     const coreInput = {
       name: "Test User",
-      email: "test@example.com",
+      email: "[EMAIL_REDACTED]",
       displayCurrency: CurrencyCode.USD,
     };
 

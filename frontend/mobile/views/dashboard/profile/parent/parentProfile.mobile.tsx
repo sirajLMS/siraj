@@ -4,8 +4,8 @@ import { Alert, Box, Button, Typography } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
+import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/parent/sections/AdminOnlySection";
 import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
-import type { ParentAdminData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { toParentSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
 import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
@@ -84,7 +84,7 @@ export function ParentProfileMobileView({
     );
   }
 
-  const adminData = isAdminScope ? (parentData as ParentAdminData) : null;
+  const adminData = isAdminScope && parentData && "invoiceType" in parentData ? parentData : null;
 
   const renderSocialSection = () => {
     if (!canView("parent_social")) {
@@ -116,6 +116,13 @@ export function ParentProfileMobileView({
         parentId={_parentId}
       />
     );
+  };
+
+  const renderAdminOnlySection = () => {
+    if (!isAdminScope || !adminData || !canView("parent_identity")) {
+      return null;
+    }
+    return <AdminOnlySection mode="view" labels={sectionLabels} adminData={adminData} />;
   };
 
   const sectionLabels = {
@@ -161,6 +168,7 @@ export function ParentProfileMobileView({
         {renderContactSection()}
         {renderSocialSection()}
         {renderIdentitySection()}
+        {renderAdminOnlySection()}
         {renderBillingSection()}
         {renderStudentsSection()}
       </MobileContentStack>

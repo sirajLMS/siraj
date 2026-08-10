@@ -21,11 +21,25 @@ import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/fro
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { InvoiceType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { ParentOnboardingLabels } from "@/shared/locale/types/dashboard/parents";
 
 interface SectionProps {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
   readonly control: Control<ParentOnboardingFormData>;
   readonly errors: FieldErrors<ParentOnboardingFormData>;
+}
+
+type ValidationMessages = ParentOnboardingLabels["validation"];
+
+function isValidationKey(key: string, validation: ValidationMessages): key is keyof typeof validation {
+  return key in validation;
+}
+
+function getValidationMessage(message: string | undefined, validation: ValidationMessages): string | undefined {
+  if (message && isValidationKey(message, validation)) {
+    return validation[message];
+  }
+  return undefined;
 }
 
 export function FeesContractSection({ register, control, errors }: SectionProps) {
@@ -53,7 +67,7 @@ export function FeesContractSection({ register, control, errors }: SectionProps)
               <MenuItem value={InvoiceType.Monthly}>{t.options.invoiceType.monthly}</MenuItem>
             </Select>
             {errors.invoiceType ? (
-              <FormHelperText>{t.validation[errors.invoiceType.message as keyof typeof t.validation]}</FormHelperText>
+              <FormHelperText>{getValidationMessage(errors.invoiceType.message, t.validation)}</FormHelperText>
             ) : null}
           </FormControl>
         </Grid>
@@ -64,9 +78,7 @@ export function FeesContractSection({ register, control, errors }: SectionProps)
             placeholder={t.placeholders.feeAmount}
             required
             error={!!errors.feeAmount}
-            helperText={
-              errors.feeAmount ? t.validation[errors.feeAmount.message as keyof typeof t.validation] : undefined
-            }
+            helperText={errors.feeAmount ? getValidationMessage(errors.feeAmount.message, t.validation) : undefined}
             fullWidth
             type="number"
             sx={outlinedInputSx}
@@ -106,9 +118,7 @@ export function FeesContractSection({ register, control, errors }: SectionProps)
                   label={t.fields.currency}
                   required
                   error={!!errors.currency}
-                  helperText={
-                    errors.currency ? t.validation[errors.currency.message as keyof typeof t.validation] : undefined
-                  }
+                  helperText={errors.currency ? getValidationMessage(errors.currency.message, t.validation) : undefined}
                   fullWidth
                 />
               );

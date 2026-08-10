@@ -63,30 +63,33 @@ function updateJar(setCookies: string[]) {
   }
 }
 
-const customFetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
-  const headers = new Headers(init?.headers);
-  const userCookie = headers.get("Cookie");
-  const merged = mergeCookies(cookieJar, userCookie);
-  if (merged) {
-    headers.set("Cookie", merged);
-  }
+const customFetch: typeof fetch = Object.assign(
+  async (_input: URL | RequestInfo, init?: BunFetchRequestInit) => {
+    const headers = new Headers(init?.headers);
+    const userCookie = headers.get("Cookie");
+    const merged = mergeCookies(cookieJar, userCookie);
+    if (merged) {
+      headers.set("Cookie", merged);
+    }
 
-  const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
-  const response = await fetchFn(getTestGraphqlUrl(), {
-    ...init,
-    headers,
-  });
+    const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
+    const response = await fetchFn(getTestGraphqlUrl(), {
+      ...init,
+      headers,
+    });
 
-  const setCookies = response.headers.getSetCookie?.() || [];
-  updateJar(setCookies);
+    const setCookies = response.headers.getSetCookie?.() || [];
+    updateJar(setCookies);
 
-  return response;
-};
+    return response;
+  },
+  { preconnect: fetch.preconnect }
+);
 
 export const testClient = new ApolloClient({
   link: new HttpLink({
     uri: "http://localhost/__graphql_test_placeholder__/api/graphql",
-    fetch: customFetch as unknown as typeof fetch,
+    fetch: customFetch,
     headers: {
       "apollo-require-preflight": "true",
     },

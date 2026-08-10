@@ -32,8 +32,24 @@ function testRepoError(name: string, operation: () => Promise<unknown>) {
   });
 }
 
+/**
+ * Type guard that narrows an unknown value to DBTransaction for mock-based tests.
+ */
+function isDbTransaction(value: unknown): value is DBTransaction {
+  return typeof value === "object" && value !== null && "select" in value && "insert" in value;
+}
+
+/**
+ * Safely converts a mock object to DBTransaction using a type guard.
+ * Throws if the mock doesn't satisfy the minimum DBTransaction shape.
+ */
+function asDbTx(mock: object): DBTransaction {
+  if (isDbTransaction(mock)) return mock;
+  throw new Error("Mock is not a valid DBTransaction");
+}
+
 // Mock database client that throws errors to test error/catch paths
-const badTx = {
+const badTx = asDbTx({
   select: () => {
     throw new Error("Mock database error");
   },
@@ -46,7 +62,7 @@ const badTx = {
   delete: () => {
     throw new Error("Mock database error");
   },
-} as unknown as DBTransaction;
+});
 
 describe("PermissionManagementRepository", () => {
   describe("Group Management", () => {

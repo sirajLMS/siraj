@@ -3,7 +3,7 @@ import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-typ
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 
 export const studentDirectoryRowFragment = gql`
-  fragment StudentDirectoryRowFragment on StudentDirectoryRow {
+  fragment StudentDirectoryRow on StudentDirectoryRow {
     id
     name
     email
@@ -12,23 +12,6 @@ export const studentDirectoryRowFragment = gql`
     classesRemaining
     classesTotal
     hoursPerWeek
-    teacherName
-    createdAt
-    updatedAt
-  }
-`;
-
-export const studentDirectoryDetailFragment = gql`
-  fragment StudentDirectoryDetailFragment on StudentDirectoryRow {
-    id
-    name
-    email
-    avatarUrl
-    status
-    classesRemaining
-    classesTotal
-    hoursPerWeek
-    parentName
     teacherName
     createdAt
     updatedAt
@@ -53,7 +36,7 @@ export const studentDirectoryQueryDocument: TypedDocumentNode<
       id
       totalCount
       rows {
-        ...StudentDirectoryRowFragment
+        ...StudentDirectoryRow
       }
       pageInfo {
         count
@@ -99,7 +82,8 @@ export const studentsDirectoryQueryDocument: TypedDocumentNode<
   ${studentDirectoryRowFragment}
   query studentsDirectory($search: String, $limit: Int) {
     studentsDirectory(search: $search, limit: $limit) {
-      ...StudentDirectoryRowFragment
+      id
+      ...StudentDirectoryRow
     }
   }
 `;

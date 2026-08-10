@@ -40,7 +40,7 @@ async function uploadViaSignedUrl(
     throw new Error("uploadFailed");
   }
 
-  const result = (await putResponse.json()) as { url?: string };
+  const result: { url?: string } = await putResponse.json();
   if (!result.url) {
     throw new Error("uploadFailed");
   }

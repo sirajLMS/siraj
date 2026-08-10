@@ -1,6 +1,6 @@
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { AppPermission, OverrideState } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
 import type { UserSelectType } from "@/backend/types";
 

@@ -43,6 +43,35 @@ function createMockResponse(body: unknown, status = 200): Response {
   });
 }
 
+function setupAdapterWithFetchMock(fetchSpy: ReturnType<typeof spyOn>, ...responses: Response[]): void {
+  fetchSpy.mockRestore();
+  if (responses.length === 1) {
+    spyOn(globalThis, "fetch").mockResolvedValue(responses[0]);
+  } else {
+    const newSpy = spyOn(globalThis, "fetch");
+    for (const res of responses) {
+      newSpy.mockResolvedValueOnce(res);
+    }
+  }
+}
+
+function rateLimitedResponse(retryAfter = "60"): Response {
+  return new Response(null, {
+    status: 429,
+    headers: { "Retry-After": retryAfter },
+  });
+}
+
+function expectMeetingError(
+  fetchSpy: ReturnType<typeof spyOn>,
+  mockResponses: Response[],
+  expectedError: unknown
+): void {
+  setupAdapterWithFetchMock(fetchSpy, ...mockResponses);
+  const adapter = new ZoomMeetingAdapter(VALID_OPTS);
+  expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(expectedError);
+}
+
 describe("ZoomMeetingAdapter", () => {
   let fetchSpy: ReturnType<typeof spyOn>;
 
@@ -67,9 +96,9 @@ describe("ZoomMeetingAdapter", () => {
       fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(createMockResponse(MOCK_TOKEN_RESPONSE));
     });
 
-    test("throws NoOrgCredentialsNoUserTokenError when credentials missing", async () => {
+    test("throws NoOrgCredentialsNoUserTokenError when credentials missing", () => {
       const adapter = new ZoomMeetingAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
     });
 
     test("creates a meeting successfully", async () => {
@@ -107,52 +136,32 @@ describe("ZoomMeetingAdapter", () => {
       expect(fetchSpy).toHaveBeenCalledTimes(3);
     });
 
-    test("throws RateLimitedError on 429 token response", async () => {
-      fetchSpy.mockRestore();
-      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-        new Response(null, {
-          status: 429,
-          headers: { "Retry-After": "60" },
-        })
+    test("throws RateLimitedError on 429 token response", () => {
+      expectMeetingError(fetchSpy, [rateLimitedResponse("60")], RateLimitedError);
+    });
+
+    test("throws ZoomApiError on non-ok token response", () => {
+      expectMeetingError(
+        fetchSpy,
+        [createMockResponse({ code: 124, message: "Invalid client credentials" }, 401)],
+        ZoomApiError
       );
-
-      const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(RateLimitedError);
     });
 
-    test("throws ZoomApiError on non-ok token response", async () => {
-      fetchSpy.mockRestore();
-      fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
-        createMockResponse({ code: 124, message: "Invalid client credentials" }, 401)
+    test("throws RateLimitedError on 429 meeting response", () => {
+      expectMeetingError(
+        fetchSpy,
+        [createMockResponse(MOCK_TOKEN_RESPONSE), rateLimitedResponse("30")],
+        RateLimitedError
       );
-
-      const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(ZoomApiError);
     });
 
-    test("throws RateLimitedError on 429 meeting response", async () => {
-      fetchSpy.mockRestore();
-      fetchSpy = spyOn(globalThis, "fetch")
-        .mockResolvedValueOnce(createMockResponse(MOCK_TOKEN_RESPONSE))
-        .mockResolvedValueOnce(
-          new Response(null, {
-            status: 429,
-            headers: { "Retry-After": "30" },
-          })
-        );
-
-      const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(RateLimitedError);
-    });
-
-    test("throws ZoomApiError on non-ok meeting response", async () => {
-      fetchSpy.mockRestore();
-      fetchSpy = spyOn(globalThis, "fetch")
-        .mockResolvedValueOnce(createMockResponse(MOCK_TOKEN_RESPONSE))
-        .mockResolvedValueOnce(createMockResponse({ code: 300, message: "Invalid topic" }, 400));
-
-      const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(ZoomApiError);
+    test("throws ZoomApiError on non-ok meeting response", () => {
+      expectMeetingError(
+        fetchSpy,
+        [createMockResponse(MOCK_TOKEN_RESPONSE), createMockResponse({ code: 300, message: "Invalid topic" }, 400)],
+        ZoomApiError
+      );
     });
 
     test("retries on 5xx then succeeds", async () => {
@@ -167,17 +176,17 @@ describe("ZoomMeetingAdapter", () => {
       expect(result.joinUrl).toBe(MOCK_MEETING_RESPONSE.join_url);
     });
 
-    test("throws ProviderUnavailableError on network error", async () => {
+    test("throws ProviderUnavailableError on network error", () => {
       fetchSpy.mockRestore();
       fetchSpy = spyOn(globalThis, "fetch").mockRejectedValue(new Error("Network error"));
 
       const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
     });
   });
 
   describe("scope validation", () => {
-    test("throws InsufficientScopesError when token response is missing required scopes", async () => {
+    test("throws InsufficientScopesError when token response is missing required scopes", () => {
       fetchSpy = spyOn(globalThis, "fetch").mockResolvedValue(
         createMockResponse({
           ...MOCK_TOKEN_RESPONSE,
@@ -186,7 +195,7 @@ describe("ZoomMeetingAdapter", () => {
       );
 
       const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InsufficientScopesError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InsufficientScopesError);
     });
   });
 
@@ -197,7 +206,7 @@ describe("ZoomMeetingAdapter", () => {
         .mockResolvedValueOnce(new Response(null, { status: 204 }));
 
       const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.deleteMeeting("123456789")).resolves.toBeUndefined();
+      expect(await adapter.deleteMeeting("123456789")).toBeUndefined();
     });
 
     test("logs warning on non-204 response but does not throw", async () => {
@@ -206,7 +215,7 @@ describe("ZoomMeetingAdapter", () => {
         .mockResolvedValueOnce(createMockResponse({ code: 300, message: "Not found" }, 404));
 
       const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.deleteMeeting("123456789")).resolves.toBeUndefined();
+      expect(await adapter.deleteMeeting("123456789")).toBeUndefined();
     });
 
     test("logs warning on network error but does not throw", async () => {
@@ -215,52 +224,62 @@ describe("ZoomMeetingAdapter", () => {
         .mockRejectedValueOnce(new Error("Network error"));
 
       const adapter = new ZoomMeetingAdapter(VALID_OPTS);
-      await expect(adapter.deleteMeeting("123456789")).resolves.toBeUndefined();
+      expect(await adapter.deleteMeeting("123456789")).toBeUndefined();
     });
 
     test("throws NoOrgCredentialsNoUserTokenError when org creds missing", async () => {
       const adapter = new ZoomMeetingAdapter({});
-      await expect(adapter.deleteMeeting("123456789")).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
+      return expect(adapter.deleteMeeting("123456789")).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
     });
   });
 
   describe("generateMeeting with per-user fallback", () => {
-    const MOCK_TOKEN_ROW: Partial<MeetingProviderTokenSelectType> = {
+    let refreshSpy: ReturnType<typeof spyOn>;
+
+    const MOCK_TOKEN_ROW: MeetingProviderTokenSelectType = {
+      id: "token-row-id",
       userId: "user-123",
       providerSlug: "zoom",
       refreshToken: "stored-refresh-token",
       accessToken: "old-access-token",
+      expiresAt: null,
       scopes: ["meeting:write:meeting"],
+      createdAt: new Date("2026-01-01T00:00:00Z"),
+      updatedAt: new Date("2026-01-01T00:00:00Z"),
     };
+
+    function mergeTokenRow(overrides: Partial<MeetingProviderTokenSelectType>): MeetingProviderTokenSelectType {
+      return { ...MOCK_TOKEN_ROW, ...overrides };
+    }
 
     function mockTokenRepo(
       tokenRow: Partial<MeetingProviderTokenSelectType> | null,
       upsertResult?: Partial<MeetingProviderTokenSelectType>
     ) {
+      const resolvedTokenRow: MeetingProviderTokenSelectType | null = tokenRow ? mergeTokenRow(tokenRow) : null;
+
       const getByUserAndProviderSpy = spyOn(MeetingProviderTokenRepository, "getByUserAndProvider").mockResolvedValue(
-        tokenRow as MeetingProviderTokenSelectType | null
+        resolvedTokenRow
       );
 
-      const upsertSpy = spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(
-        (upsertResult ?? MOCK_TOKEN_ROW) as MeetingProviderTokenSelectType
-      );
+      const resolvedUpsert = upsertResult ? mergeTokenRow(upsertResult) : MOCK_TOKEN_ROW;
+      const upsertSpy = spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(resolvedUpsert);
 
       return { getByUserAndProviderSpy, upsertSpy };
     }
 
     afterEach(() => {
-      try {
-        (tokenRefreshModule.refreshAccessToken as unknown as { mockRestore?: () => void })?.mockRestore?.();
-      } catch {
-        // spy might not be set
+      if (refreshSpy) {
+        refreshSpy.mockRestore();
+        refreshSpy = undefined;
       }
     });
 
     test("uses per-user token when org creds missing and actorUserId provided", async () => {
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-zoom-token",
         refreshToken: "new-refresh-token",
-        expiresAt: new Date(Date.now() + 3600_000),
+        expiresAt: new Date(Date.now() + 3_600_000),
       });
 
       mockTokenRepo(MOCK_TOKEN_ROW);
@@ -280,23 +299,32 @@ describe("ZoomMeetingAdapter", () => {
 
     test("throws NoOrgCredentialsNoUserTokenError when no token row and no org creds", async () => {
       mockTokenRepo(null);
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new ZoomMeetingAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
-        NoOrgCredentialsNoUserTokenError
-      );
+      let caughtErr: Error | undefined;
+      try {
+        await adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" });
+        throw new Error("Expected generateMeeting to throw");
+      } catch (err) {
+        if (err instanceof Error) {
+          caughtErr = err;
+        } else {
+          throw new Error(String(err), { cause: err });
+        }
+      }
+      expect(caughtErr).toBeInstanceOf(NoOrgCredentialsNoUserTokenError);
       expect(refreshSpy).not.toHaveBeenCalled();
     });
 
     test("throws ProviderReauthRequiredError when refresh token is invalid_grant", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
         new ProviderReauthRequiredError("zoom", "user-123", "invalid_grant")
       );
 
       const adapter = new ZoomMeetingAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
+      return expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
         ProviderReauthRequiredError
       );
     });

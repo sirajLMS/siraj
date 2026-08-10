@@ -1,7 +1,8 @@
-import type { ProfileFieldAccessLabels, ProfileLabels } from "@/shared/locale/types/profile";
+import type { ProfileActionsLabels, ProfileFieldAccessLabels, ProfileLabels } from "@/shared/locale/types/profile";
 
 export type ProfileSharedBaseLabels = Pick<ProfileLabels, "notSet"> & {
   readonly fieldAccess: ProfileFieldAccessLabels;
+  readonly actions: ProfileActionsLabels & { readonly manageLifecycle: string };
 };
 
 export type ProfilePersonalFieldLabels = {

@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import sharp from "sharp";
+import { sharp } from "sharp";
 import toIco from "to-ico";
 
 const svgPath = process.argv[2] || "public/favicon.svg";

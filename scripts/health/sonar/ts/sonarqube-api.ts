@@ -2,31 +2,41 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { CONFIG, logError, logInfo, logSuccess, logWarning } from "@/scripts/health/sonar/ts/config";
 import { isStepCompleted, markStepCompleted } from "@/scripts/health/sonar/ts/state";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
 export async function waitForSonarQube(): Promise<void> {
   logInfo("Waiting for SonarQube to be ready...");
 
   const maxAttempts = 60;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+
+  async function attempt(attemptIndex: number): Promise<void> {
+    if (attemptIndex >= maxAttempts) {
+      globalThis.console.log("");
+      logError("SonarQube failed to start within expected time");
+      process.exit(1);
+    }
+
     try {
       const response = await fetch(`${CONFIG.SONAR_HOST}/api/system/status`);
       if (response.ok) {
-        const data = (await response.json()) as { status: string };
-        if (data.status === "UP") {
+        const data: unknown = await response.json();
+        if (isRecord(data) && typeof data.status === "string" && data.status === "UP") {
           logSuccess("SonarQube is ready");
           return;
         }
       }
     } catch (e) {
-      logWarning(`Connection attempt ${attempt + 1} failed: ${e instanceof Error ? e.message : String(e)}`);
+      logWarning(`Connection attempt ${attemptIndex + 1} failed: ${e instanceof Error ? e.message : String(e)}`);
     }
 
     process.stdout.write(".");
     await new Promise(resolve => setTimeout(resolve, 2000));
+    return attempt(attemptIndex + 1);
   }
 
-  globalThis.console.log("");
-  logError("SonarQube failed to start within expected time");
-  process.exit(1);
+  await attempt(0);
 }
 
 export async function changeAdminPassword(): Promise<void> {
@@ -43,8 +53,8 @@ export async function changeAdminPassword(): Promise<void> {
       headers: { Authorization: authHeaderNew },
     });
     if (response.ok) {
-      const data = (await response.json()) as { valid: boolean };
-      if (data.valid) {
+      const data: unknown = await response.json();
+      if (isRecord(data) && typeof data.valid === "boolean" && data.valid) {
         logSuccess(`Admin password is already set to ${CONFIG.ADMIN_NEW_PASSWORD}`);
         markStepCompleted("password_changed");
         return;
@@ -99,7 +109,11 @@ export async function generateToken(): Promise<string> {
     process.exit(1);
   }
 
-  const data = (await response.json()) as { token: string };
+  const data: unknown = await response.json();
+  if (!isRecord(data) || typeof data.token !== "string" || data.token.length === 0) {
+    logError("Failed to parse token from response");
+    process.exit(1);
+  }
   const token = data.token;
 
   writeFileSync(CONFIG.SONAR_TOKEN_FILE, token, { mode: 0o600 });
@@ -120,10 +134,12 @@ export async function createProject(token: string): Promise<void> {
   });
 
   if (searchResponse.ok) {
-    const data = (await searchResponse.json()) as {
-      components: Array<{ key: string }>;
-    };
-    if (data.components.some(c => c.key === CONFIG.PROJECT_KEY)) {
+    const data: unknown = await searchResponse.json();
+    if (
+      isRecord(data) &&
+      Array.isArray(data.components) &&
+      (data.components as unknown[]).some(c => isRecord(c) && typeof c.key === "string" && c.key === CONFIG.PROJECT_KEY)
+    ) {
       logSuccess("Project already exists");
       markStepCompleted("project_created");
       return;

@@ -10,6 +10,18 @@ import { testLogger } from "@/shared/lib/logger/testlogger";
 
 const SOFT_DELETE_RLS_ROLE = "test_rls_user_soft_delete";
 
+function isRecordArray(value: unknown): value is Record<string, unknown>[] {
+  return Array.isArray(value);
+}
+
+function getResultRows(result: unknown): Record<string, unknown>[] {
+  if (typeof result === "object" && result !== null && "rows" in result && isRecordArray(result.rows)) {
+    return result.rows;
+  }
+  if (isRecordArray(result)) return result;
+  return [];
+}
+
 describe("Soft Delete Security (Issue #2)", () => {
   beforeAll(async () => {
     testLogger.info("Setting up soft delete security test role...");
@@ -40,7 +52,7 @@ describe("Soft Delete Security (Issue #2)", () => {
       WHERE nspname = 'public' AND proname = 'soft_delete_row_trigger_fn'
     `);
 
-    const rows = "rows" in result ? result.rows : (result as unknown as Record<string, unknown>[]);
+    const rows = getResultRows(result);
     expect(rows).toHaveLength(0);
     testLogger.info("soft_delete_row_trigger_fn no longer exists.");
   });
@@ -54,7 +66,7 @@ describe("Soft Delete Security (Issue #2)", () => {
       WHERE nspname = 'public' AND prosecdef = true AND proname LIKE '%soft_delete%'
     `);
 
-    const rows = "rows" in result ? result.rows : (result as unknown as Record<string, unknown>[]);
+    const rows = getResultRows(result);
     expect(rows).toHaveLength(0);
     testLogger.info("No soft-delete SECURITY DEFINER functions found.");
   });

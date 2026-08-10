@@ -1,16 +1,16 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { ClassExecutionState, type ClassOutcome } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import type { ClassInstanceDetailReturnType } from "@/backend/types";
+import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import {
   parseClassExecutionState,
   parseClassOutcome,
   parseClassType,
   parseIanaTimezone,
   parseIanaTimezoneOrNull,
-} from "@/backend/lib/enum";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import type { ClassInstanceDetailReturnType } from "@/backend/types";
-import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
+} from "@/shared/lib/enum";
 import type { ErrorsLabels, SessionLabels } from "@/shared/locale";
 
 type ClassInstanceWithRelations = NonNullable<Awaited<ReturnType<typeof SchedulingRepository.getClassInstanceById>>>;
@@ -87,8 +87,7 @@ export async function buildClassInstanceDetail(
   const end = instance.scheduledEndAt;
   const studentTimezone = parseIanaTimezone(await SchedulingRepository.resolveStudentTimezone(instance.studentId));
   const teacherTimezone = parseIanaTimezoneOrNull(instance.teacher?.user?.timezone ?? null);
-  const hasTimezoneMismatch =
-    teacherTimezone !== null && studentTimezone !== null && teacherTimezone !== studentTimezone;
+  const hasTimezoneMismatch = teacherTimezone != null && studentTimezone != null && teacherTimezone !== studentTimezone;
 
   const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(instance.id, tErrors);
 

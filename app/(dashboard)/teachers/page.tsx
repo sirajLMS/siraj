@@ -24,7 +24,7 @@ export default async function TeachersPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.STAFF_VIEW_DIRECTORY], locale, context);
 

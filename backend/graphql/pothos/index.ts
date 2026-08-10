@@ -9,7 +9,12 @@ export * from "@/backend/graphql/pothos/billing";
 export * from "@/backend/graphql/pothos/books";
 export * from "@/backend/graphql/pothos/classes";
 export * from "@/backend/graphql/pothos/complaints";
-export * from "@/backend/graphql/pothos/cron";
+
+// Side-effect import: registers Cron query/mutation fields with gqlSchemaBuilder.
+// The cron submodule owns no named exports (object/enum types are registered
+// imperatively).
+import "@/backend/graphql/pothos/cron";
+
 export * from "@/backend/graphql/pothos/meeting";
 export * from "@/backend/graphql/pothos/notifications";
 export * from "@/backend/graphql/pothos/parents";

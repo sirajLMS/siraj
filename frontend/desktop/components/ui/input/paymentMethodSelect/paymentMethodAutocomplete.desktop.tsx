@@ -1,7 +1,7 @@
 "use client";
 
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
+import Autocomplete, { type AutocompleteRenderInputParams, createFilterOptions } from "@mui/material/Autocomplete";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -75,7 +75,7 @@ const EndAdornment: React.FC<{
   );
 
 const AutocompleteTextField: React.FC<{
-  readonly params: React.ComponentProps<typeof TextField>;
+  readonly params: AutocompleteRenderInputParams;
   readonly label?: string;
   readonly placeholder?: string;
   readonly required?: boolean;
@@ -97,29 +97,26 @@ const AutocompleteTextField: React.FC<{
   autoComplete,
   option,
 }) => {
-  const slotProps = params.slotProps as {
-    input?: { startAdornment?: React.ReactNode; endAdornment?: React.ReactNode } & Record<string, unknown>;
-    htmlInput?: Record<string, unknown>;
-  };
+  const { input: inputSlot, htmlInput: htmlInputSlot } = params.slotProps;
   return (
     <TextField
       {...params}
+      autoFocus={autoFocus}
       label={label}
       placeholder={placeholder}
       required={required}
       error={showError}
       helperText={resolvedHelperText}
       onBlur={onBlur}
-      autoFocus={autoFocus}
       slotProps={{
         ...params.slotProps,
         input: {
-          ...slotProps.input,
-          startAdornment: <StartAdornment option={option} existingAdornment={slotProps.input?.startAdornment} />,
-          endAdornment: <EndAdornment option={option} existingAdornment={slotProps.input?.endAdornment} />,
+          ...inputSlot,
+          startAdornment: <StartAdornment option={option} existingAdornment={inputSlot.startAdornment} />,
+          endAdornment: <EndAdornment option={option} existingAdornment={inputSlot.endAdornment} />,
         },
         htmlInput: {
-          ...slotProps.htmlInput,
+          ...htmlInputSlot,
           autoComplete,
         },
       }}
@@ -319,7 +316,7 @@ const AutocompleteContent: React.FC<{
   );
 
   return (
-    <Autocomplete<PaymentMethodCatalogOption, false, false, false>
+    <Autocomplete<PaymentMethodCatalogOption>
       fullWidth={fullWidth}
       options={options}
       autoHighlight

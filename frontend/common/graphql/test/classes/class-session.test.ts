@@ -44,20 +44,24 @@ async function clearClassesOnDate(token: string, dateVal: string) {
   });
 
   const list = result.data?.dailyScheduleList || [];
-  for (const item of list) {
-    if (!item.id) continue;
-    const deleteRes = await testClient.mutate({
-      mutation: deleteClassInstanceMutationDocument,
-      variables: {
-        classInstanceId: item.id,
-      },
-      errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${token}`,
+  const idsToDelete = list.map(item => item?.id).filter((id): id is string => Boolean(id));
+  const deleteResults = await Promise.all(
+    idsToDelete.map(classInstanceId =>
+      testClient.mutate({
+        mutation: deleteClassInstanceMutationDocument,
+        variables: {
+          classInstanceId,
         },
-      },
-    });
+        errorPolicy: "all",
+        context: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      })
+    )
+  );
+  for (const deleteRes of deleteResults) {
     expect(deleteRes.error).toBeUndefined();
   }
 }
@@ -128,13 +132,15 @@ describe("GraphQL Class Session Integration Tests", () => {
 
   test("find student and teacher IDs, then clear schedule range to avoid overlaps", async () => {
     if (!adminToken) throw new Error("No admin token");
+    const token = adminToken;
 
     // 1. Delete all classes in range of [-1, 12] days to avoid scheduling conflicts/overlaps
+    const dateStrings: string[] = [];
     for (let i = -1; i <= 12; i++) {
       const d = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
-      const dateStr = d.toISOString().split("T")[0];
-      await clearClassesOnDate(adminToken, dateStr);
+      dateStrings.push(d.toISOString().split("T")[0]);
     }
+    await Promise.all(dateStrings.map(dateStr => clearClassesOnDate(token, dateStr)));
   });
 
   test("teacher activates class within window successfully", async () => {

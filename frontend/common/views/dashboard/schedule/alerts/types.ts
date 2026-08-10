@@ -70,7 +70,7 @@ export interface ScheduleAlertsLabels {
   readonly leaveDisabledReason: string;
   readonly viewClassAudit: string;
   readonly contactAdmin: string;
-  readonly showingOf: string;
+  readonly showingOf: (shown: number, total: number) => string;
   readonly active: string;
   readonly upcoming: string;
   readonly missed: string;

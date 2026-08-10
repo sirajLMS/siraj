@@ -13,10 +13,11 @@
 - **➡️ Next Phase:** [Tasks Phase](tasks-phase.md) - After design is approved
 
 ## Phase Navigation
-- **Previous:** [Requirements Phase](requirements-phase.md) - Must be completed first
-- **Current:** **Design Phase** - Create technical architecture and plan
-- **Next:** [Tasks Phase](tasks-phase.md) - Break down into implementation steps
-- **Context:** [Process Overview](README.md) - Three-phase workflow
+- **Previous:** [Requirements Phase](requirements-phase.md) - Must be completed first (Phase 1)
+- **Current:** **Design Phase (Phase 2)** - Create technical architecture and plan
+- **Next:** Phase 1.5 (Plan Review Gate) → [Tasks Phase](tasks-phase.md) (Phase 3+)
+- **Mid-Point:** Phase 2.5 (conditional) - Backend review before frontend
+- **Context:** [Process Overview](README.md) - Development lifecycle
 
 ---
 
@@ -33,6 +34,9 @@ The design phase serves to:
 - Establish error handling and testing strategies
 - Create a foundation for breaking down work into implementation tasks
 - Document design rationale and decision-making process
+- **NEW: Assess concurrency and race conditions (for shared-state features)**
+- **NEW: Define translation system requirements (client/server/resolver patterns)**
+- **NEW: Document Drizzle anti-patterns and enum import guidelines**
 
 ## Step-by-Step Process
 

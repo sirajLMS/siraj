@@ -25,7 +25,7 @@ export function useLocaleSwitchSuccess(): {
 
   useEffect(() => {
     if (!successSwitch) {
-      return;
+      return undefined;
     }
     const id = setTimeout(() => setSuccessSwitch(false), 500);
     return () => clearTimeout(id);

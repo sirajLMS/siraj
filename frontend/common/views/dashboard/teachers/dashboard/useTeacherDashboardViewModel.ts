@@ -162,10 +162,10 @@ export function useTeacherDashboardTranslations(): TeacherDashboardTranslations 
   const lessonReportLabels = useMemo(() => buildLessonReportLabels(lessonReportI18n), [lessonReportI18n]);
   const lastUpdatedLabels = useMemo<TeacherDashboardLastUpdatedLabels>(
     () => ({
-      updatedJustNow: t.updatedJustNow as string,
-      updatedMinutesAgo: t.updatedMinutesAgo as (minutes: number) => string,
+      updatedJustNow: t.updatedJustNow ?? dashboardT.updatedJustNow,
+      updatedMinutesAgo: t.updatedMinutesAgo ?? dashboardT.updatedMinutesAgo,
     }),
-    [t]
+    [t, dashboardT]
   );
 
   return { labels, lessonReportLabels, lastUpdatedLabels };

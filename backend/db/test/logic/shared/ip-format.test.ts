@@ -136,7 +136,7 @@ describe("IP Address Formatting", () => {
         await tx.insert(adminAuditLogs).values(invalidAuditLog);
       } catch (error) {
         auditDidThrow = true;
-        testLogger.info(`Caught expected error: ${error}`);
+        testLogger.info(`Caught expected error: ${String(error)}`);
       }
       expect(auditDidThrow).toBe(true);
     });

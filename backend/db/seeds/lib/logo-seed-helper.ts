@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import { resolveAssetPath } from "@/backend/db/seeds/lib/file-seed-helper";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 
@@ -41,9 +41,6 @@ export async function seedCatalogLogoUrls(
   category: CatalogLogoCategory,
   slugs: readonly string[]
 ): Promise<Map<string, string | null>> {
-  const results = new Map<string, string | null>();
-  for (const slug of slugs) {
-    results.set(slug, await seedCatalogLogoUrl(category, slug));
-  }
-  return results;
+  const entries = await Promise.all(slugs.map(async slug => [slug, await seedCatalogLogoUrl(category, slug)] as const));
+  return new Map<string, string | null>(entries);
 }

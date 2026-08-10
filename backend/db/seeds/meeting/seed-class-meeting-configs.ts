@@ -1,5 +1,5 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import type { ClassInstanceSelectType } from "@/backend/types";

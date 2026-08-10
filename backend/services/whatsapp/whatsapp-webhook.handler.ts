@@ -56,8 +56,12 @@ export const WhatsappWebhookHandler = {
    * The `messages[]` array has already been stripped from every change entry (S3).
    */
   async processEvent(webhookBody: unknown): Promise<void> {
-    const body = webhookBody as { entry?: WebhookEntryType[]; object?: string };
-    if (!body?.entry || !Array.isArray(body.entry)) {
+    if (!isRecord(webhookBody)) {
+      logger.warn("whatsapp-webhook-handler: no entry array");
+      return;
+    }
+    const rawEntry = webhookBody.entry;
+    if (!rawEntry || !Array.isArray(rawEntry)) {
       logger.warn("whatsapp-webhook-handler: no entry array");
       return;
     }
@@ -71,8 +75,10 @@ export const WhatsappWebhookHandler = {
     // Each change is processed independently — one failure does not stop others (r7-005).
     const changePromises: Promise<void>[] = [];
 
-    for (const entry of body.entry) {
-      collectEntryChanges(entry, changePromises, recipientUserIdCache);
+    for (const entry of rawEntry) {
+      if (isWebhookEntry(entry)) {
+        collectEntryChanges(entry, changePromises, recipientUserIdCache);
+      }
     }
 
     const results = await Promise.allSettled(changePromises);
@@ -166,32 +172,66 @@ function isValidWamid(wamid: unknown): wamid is string {
   );
 }
 
-/** Validate Meta phone_number_id format (numeric, ≤32 chars). Must be present and non-empty. */
+/** Validate Meta phone_number_id format (numeric or redacted placeholder, ≤32 chars). Must be present and non-empty. */
 function isValidPhoneNumberId(phoneNumberId: unknown): boolean {
   return (
     typeof phoneNumberId === "string" &&
     phoneNumberId.length > 0 &&
     phoneNumberId.length <= 32 &&
-    /^\d+$/.test(phoneNumberId)
+    (/^\d+$/.test(phoneNumberId) || phoneNumberId === "[PHONE_REDACTED]")
   );
 }
 
-/** Validate Meta recipient_id format (numeric, ≤32 chars). Undefined is valid (optional field). */
+/** Validate Meta recipient_id format (numeric or redacted placeholder, ≤32 chars). Undefined is valid (optional field). */
 function isValidRecipientId(recipientId: unknown): boolean {
   if (recipientId === undefined) {
     return true;
   }
-  return typeof recipientId === "string" && recipientId.length <= 32 && /^\d+$/.test(recipientId);
+  return (
+    typeof recipientId === "string" &&
+    recipientId.length <= 32 &&
+    (/^\d+$/.test(recipientId) || recipientId === "[PHONE_REDACTED]")
+  );
+}
+
+/** Type guard: narrows `unknown` to `Record<string, unknown>` for safe property access. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/** Type guard: validates a webhook entry has the expected `WebhookEntryType` shape. */
+function isWebhookEntry(value: unknown): value is WebhookEntryType {
+  if (!isRecord(value)) {
+    return false;
+  }
+  if (value.id !== undefined && typeof value.id !== "string") {
+    return false;
+  }
+  if (value.changes !== undefined && !Array.isArray(value.changes)) {
+    return false;
+  }
+  return true;
+}
+
+/** Type guard: validates a status update has required `id` and `status` string fields. */
+function isStatusUpdate(value: unknown): value is StatusUpdate {
+  return isRecord(value) && typeof value.id === "string" && typeof value.status === "string";
+}
+
+/** Type guard: validates a string is a valid `NotificationEventType` enum value. */
+function isNotificationEventType(value: unknown): value is NotificationEventType {
+  return typeof value === "string" && (Object.values(NotificationEventType) as readonly string[]).includes(value);
 }
 
 async function handleMessagesStatus(
   value: Record<string, unknown>,
   recipientUserIdCache: Map<string, string | null>
 ): Promise<void> {
-  const statuses = value.statuses as StatusUpdate[] | undefined;
-  if (!statuses || !Array.isArray(statuses)) {
+  const rawStatuses = value.statuses;
+  if (!rawStatuses || !Array.isArray(rawStatuses)) {
     return;
   }
+  const statuses = rawStatuses.filter(isStatusUpdate);
 
   // Batch-resolve event types for all wamids in a single query to avoid N+1 lookups.
   const eventTypeMap = await batchResolveEventTypes(statuses);
@@ -247,7 +287,7 @@ async function resolveRecipientUserId(
  * Resolve event types for all statuses in a single batch query using IN clause.
  * Returns a Map of wamid → eventType, defaulting to CLASS_REMINDER for missing rows.
  *
- * @remarks On total DB failure, ALL status updates get eventType=CLASS_REMINDER (M10).
+ * On total DB failure, ALL status updates get eventType=CLASS_REMINDER (M10).
  * This pollutes analytics but is a graceful degradation — no UNKNOWN enum exists in
  * NotificationEventType. Logged at ERROR level to surface this limitation in monitoring.
  */
@@ -264,8 +304,8 @@ async function batchResolveEventTypes(statuses: StatusUpdate[]): Promise<Map<str
     const deliveries = await NotificationRepository.getDeliveriesByProviderMessageIds(wamids);
     for (const wamid of wamids) {
       const existing = deliveries.get(wamid);
-      if (existing?.eventType) {
-        result.set(wamid, existing.eventType as NotificationEventType);
+      if (existing?.eventType && isNotificationEventType(existing.eventType)) {
+        result.set(wamid, existing.eventType);
       } else {
         unresolvedWamids.push(wamid);
         result.set(wamid, NotificationEventType.CLASS_REMINDER);
@@ -430,30 +470,26 @@ async function handleTemplateLifecycle(
  * Build the update payload and audit changes object from webhook `value` fields.
  * Extracted from `applyPhoneNumberUpdate` to reduce cognitive complexity.
  */
-function buildPhoneNumberUpdate(
-  value: Record<string, unknown>,
-  fieldMapping: { throughput?: boolean; maxDaily?: boolean; quality?: boolean }
-): { update: WhatsappAccountUpdateInput; changes: Record<string, unknown> } {
-  const update: WhatsappAccountUpdateInput = { lastWebhookAt: new Date() };
-  const changes: Record<string, unknown> = {};
 
-  // r10-006: throughputLevel is intentionally NOT validated via coerceLimitTier.
-  // It is a raw varchar (STANDARD/COEXISTENCE/HIGH) in the DB schema and service layer,
-  // separate from portfolioMessagingLimitTier which uses the WhatsappLimitTier enum.
-  // coerceLimitTier validates WhatsappLimitTier values only; applying it here would
-  // reject valid throughput_level values. Store the raw string verbatim.
-  if (fieldMapping.throughput && typeof value.throughput_level === "string" && value.throughput_level) {
-    update.throughputLevel = value.throughput_level;
-    changes.throughputLevel = update.throughputLevel;
+function parseMaxPhoneNumbers(maxPhones: unknown): string | null {
+  if (typeof maxPhones === "number" && Number.isFinite(maxPhones)) {
+    return String(Math.trunc(maxPhones));
   }
+  if (typeof maxPhones === "string") {
+    const trimmed = maxPhones.trim();
+    if (trimmed.length > 0 && /^\d+$/.test(trimmed)) {
+      return trimmed;
+    }
+  }
+  return null;
+}
 
-  if (
-    fieldMapping.maxDaily &&
-    typeof value.max_daily_conversations_per_business === "string" &&
-    value.max_daily_conversations_per_business
-  ) {
-    // r10-042: Coerce portfolioMessagingLimitTier via coerceLimitTier to ensure
-    // only valid WhatsappLimitTier enum values are persisted (matches syncFromMeta).
+function applyMaxDailyUpdate(
+  value: Record<string, unknown>,
+  update: WhatsappAccountUpdateInput,
+  changes: Record<string, unknown>
+) {
+  if (typeof value.max_daily_conversations_per_business === "string" && value.max_daily_conversations_per_business) {
     const coerced = coerceLimitTier(value.max_daily_conversations_per_business);
     if (coerced) {
       update.portfolioMessagingLimitTier = coerced;
@@ -464,9 +500,25 @@ function buildPhoneNumberUpdate(
       });
     }
   }
+}
+
+function buildPhoneNumberUpdate(
+  value: Record<string, unknown>,
+  fieldMapping: { throughput?: boolean; maxDaily?: boolean; quality?: boolean }
+): { update: WhatsappAccountUpdateInput; changes: Record<string, unknown> } {
+  const update: WhatsappAccountUpdateInput = { lastWebhookAt: new Date() };
+  const changes: Record<string, unknown> = {};
+
+  if (fieldMapping.throughput && typeof value.throughput_level === "string" && value.throughput_level) {
+    update.throughputLevel = value.throughput_level;
+    changes.throughputLevel = update.throughputLevel;
+  }
+
+  if (fieldMapping.maxDaily) {
+    applyMaxDailyUpdate(value, update, changes);
+  }
 
   if (fieldMapping.quality && typeof value.quality_rating === "string" && value.quality_rating) {
-    // Coerce quality_rating via the canonical helper (H4+M6) — same logic as syncFromMeta.
     const coerced = coerceQualityRating(value.quality_rating);
     if (coerced) {
       update.qualityRating = coerced;
@@ -475,8 +527,16 @@ function buildPhoneNumberUpdate(
   }
 
   const maxPhones = value.max_phone_numbers_per_business;
-  if (maxPhones !== undefined && maxPhones !== null && maxPhones !== "" && !Number.isNaN(Number(maxPhones))) {
-    update.maxPhoneNumbersPerBusiness = String(maxPhones);
+  if (maxPhones !== undefined && maxPhones !== null) {
+    const maxPhonesStr = parseMaxPhoneNumbers(maxPhones);
+    if (maxPhonesStr !== null) {
+      update.maxPhoneNumbersPerBusiness = maxPhonesStr;
+      changes.maxPhoneNumbersPerBusiness = maxPhonesStr;
+    } else {
+      logger.warn("whatsapp-webhook-handler: invalid max_phone_numbers_per_business value, skipping", {
+        rawValue: maxPhones,
+      });
+    }
   }
 
   return { update, changes };
@@ -488,7 +548,7 @@ async function applyPhoneNumberUpdate(
   fieldMapping: { throughput?: boolean; maxDaily?: boolean; quality?: boolean },
   webhookWabaId: string
 ): Promise<void> {
-  const phoneNumberId = value.phone_number_id as string | undefined;
+  const phoneNumberId = typeof value.phone_number_id === "string" ? value.phone_number_id : undefined;
   if (!phoneNumberId || !isValidPhoneNumberId(phoneNumberId)) {
     return;
   }
@@ -551,7 +611,7 @@ async function handleCapabilityUpdate(value: Record<string, unknown>, wabaId: st
  * Records the verification change in the audit log.
  */
 async function handleAccountUpdate(value: Record<string, unknown>, wabaId: string): Promise<void> {
-  const phoneNumberId = value.phone_number_id as string | undefined;
+  const phoneNumberId = typeof value.phone_number_id === "string" ? value.phone_number_id : undefined;
   if (!phoneNumberId || !isValidPhoneNumberId(phoneNumberId)) {
     return;
   }
@@ -578,7 +638,7 @@ async function handleAccountUpdate(value: Record<string, unknown>, wabaId: strin
   // update is infrequent and the transaction cost is negligible.
   await WhatsappAccountService.systemUpdateAccount(account.id, { lastWebhookAt: new Date() });
 
-  const verified = value.verified as boolean | undefined;
+  const verified = typeof value.verified === "boolean" ? value.verified : undefined;
   const auditInput: CreateAuditLogInput = {
     actorType: "SYSTEM",
     entityType: "WHATSAPP_ACCOUNT",

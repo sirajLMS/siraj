@@ -441,4 +441,115 @@ Track the effectiveness of your spec-driven development process:
 
 ---
 
+## Semantic Review Checklist (Per-Task)
+
+Use this checklist as agent self-review BEFORE marking any task complete. The `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` script catches syntax/style/duplication/code-health issues but misses these semantic bugs.
+
+### Race Conditions & Concurrency
+- [ ] **Atomic Operations**: No read-then-write sequences without atomicity (SELECT FOR UPDATE / transaction / advisory lock)
+- [ ] **Bounded State**: No module-level mutable state (Maps, Sets, arrays) without bounded size
+- [ ] **Credit/Quota Safety**: All async deductions use SELECT FOR UPDATE or advisory locks
+- [ ] **Redis Atomicity**: All Redis operations are atomic (use `SET NX EX`, not separate `SET NX` + `GET`)
+
+### Environment & Configuration
+- [ ] **Env-Config Registration**: All `resolveEnvConfig("<KEY>")` calls have matching entry in `env-config-keys.ts`
+- [ ] **Cache Invalidation Completeness**: All `resetX()` functions invalidate ALL keys resolved via `resolveEnvConfig`
+- [ ] **Credential Safety**: No credential/secret setters accepting empty strings
+
+### Code Quality
+- [ ] **Reachable Code**: No dead branches (all `if` paths reachable, every `throw` reachable)
+- [ ] **Layer Boundaries**: No cross-layer imports (frontend → backend, shared → frontend/backend)
+- [ ] **Type Helpers**: No manual ReturnType construction (use `toReturnType` helper where applicable)
+
+### Schema & Types
+- [ ] **Schema Sync**: Migration columns exist in Drizzle schema (and vice versa)
+- [ ] **Enum Value Imports**: All enums imported as value imports (not `import type`) when used in runtime expressions
+- [ ] **Enum Usage**: No string literals where enum types expected — always use enum members
+
+### Deferred Work
+- [ ] **Ledger Tracking**: No deferred items without entry in `.ai/plans/<feature-name>/deferred-items.md`
+
+---
+
+## Translation & Enum Import Checklist (Per-Task)
+
+### Translation System Compliance
+- [ ] **Client Components**: Use `useAppTranslation(Translation.<Namespace>)` with Translation enum (not string literal)
+- [ ] **Property Access**: Use property access (`t.propertyName`) NOT function calls (`t('propertyName')`)
+- [ ] **Server Components**: Use `await getTranslations(locale)` (single arg) and access namespace as property
+- [ ] **GraphQL Resolvers**: Use `ctx.t("namespace")` with string key (already bound to `ctx.locale`)
+- [ ] **Namespace Casing**: Use lowercase casing for namespace directories (`shared/locale/namespaces/ui/featureName.namespace.ts`)
+- [ ] **No Hardcoded Strings**: All user-facing text uses translation system
+- [ ] **No Legacy Imports**: No `next-intl`, `getBackendTranslations`, or `shared/messages/` references
+
+### Enum Import Compliance
+- [ ] **Runtime Value Imports**: Enums used in runtime expressions imported as values (not `import type`)
+- [ ] **Conditional/Cast Usage**: Enums used in conditionals/casts/object literals imported as values
+- [ ] **Type-Only Imports**: `import type` used ONLY for pure type annotations (not runtime usage)
+- [ ] **No String Literals**: Enum consumers use enum members NOT string literals
+
+---
+
+## Race Condition Review Checklist
+
+Use this when implementing features with shared state, concurrent actors, or optimistic locking.
+
+### Concurrency Scenarios
+- [ ] **Concurrent Actors Identified**: All scenarios where multiple actors modify same record documented
+- [ ] **Race Risk Assessment**: Each scenario assessed for credit leak / stale data / double-booking risk
+- [ ] **Mitigation Strategy**: Each risk has documented mitigation (SELECT FOR UPDATE / advisory lock / version field)
+
+### Read-Then-Write Patterns
+- [ ] **TOCTOU Windows**: All read-then-write sequences identified and documented
+- [ ] **Atomicity Guarantees**: Each sequence has explicit atomicity guarantee (tx / lock / atomic operation)
+- [ ] **Repository Methods**: All methods requiring row-level locking use SELECT FOR UPDATE
+
+### Redis Patterns
+- [ ] **Atomic Operations**: All Redis increment/decrement/check-and-set operations are atomic
+- [ ] **Key Expiry**: All keys with TTL set atomically (SET NX EX) not separately
+- [ ] **Race-Free Checks**: No separate GET + SET sequences (use Lua scripts or atomic commands)
+
+### Transaction Boundaries
+- [ ] **Isolation Level**: Transaction isolation level appropriate for operation (e.g., SERIALIZABLE for credit deduction)
+- [ ] **Lock Duration**: SELECT FOR UPDATE locks held for minimal duration
+- [ ] **Deadlock Prevention**: Lock acquisition order consistent across all code paths
+
+---
+
+## Type Cascade Checklist
+
+Use this at phase boundaries to catch cross-file type errors that per-file tsgo misses.
+
+### Phase-Boundary Type Coherence Gate
+- [ ] **Baseline Comparison**: Run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` and compare exit code / error count vs pre-phase baseline
+- [ ] **Cross-File Dependencies**: Document all type/interface changes and their consumer files
+- [ ] **Breaking Changes**: Flag all breaking changes (renamed fields, removed properties, type narrowing)
+- [ ] **Cascade Fix**: Fix all new errors caused by type changes before proceeding to next phase
+
+### Type Definition Best Practices
+- [ ] **Canonical Location**: All types live in `backend/types/<entity>.types.ts` (not local definitions)
+- [ ] **Consistent Naming**: Follow `<Entity>SelectType`, `<Entity>ReturnType`, `<Entity>SubmitInput` conventions
+- [ ] **Import Paths**: All type imports use `@/` aliases (not relative paths)
+- [ ] **No Duplication**: No duplicate type definitions across files
+
+---
+
+## Scope Boundary Checklist (Review Phase)
+
+Use this during post-implementation review to distinguish in-scope from pre-existing issues.
+
+### Scope Definition
+- [ ] **Baseline Recorded**: Pre-implementation error counts recorded (tsgo / biome / lint)
+- [ ] **Files Identified**: All files created/modified by plan identified via `git diff --name-only`
+- [ ] **In-Scope Filter**: Review findings filtered to plan-touched files only
+- [ ] **Pre-Existing Documented**: Pre-existing issues documented but not blocking
+
+### Review Execution
+- [ ] **Subagent Scope**: Each review subagent receives explicit file list (not "all backend/")
+- [ ] **Finding Attribution**: Each finding tagged as NEW (introduced by plan) or PRE-EXISTING
+- [ ] **Blocking Criteria**: Only NEW findings block plan completion
+- [ ] **Pre-Existing Triage**: Pre-existing findings logged for separate cleanup task
+
+---
+
 [← Tasks Template](tasks-template.md) | [Tool Integration Guide →](../resources/tools.md)

@@ -5,7 +5,7 @@ import { LessonReportRepository, type PendingReviewFilters } from "@/backend/db/
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
-import { AppPermission, type AttendanceEvaluation, ClassExecutionState, LessonReportStatus } from "@/backend/enum";
+import { AppPermission, AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -34,6 +34,28 @@ import { getServerTranslations } from "@/shared/locale";
  *   rejectReport   → PENDING_REVIEW → REJECTED    (side effect: CreditService.refundOnCancel)
  */
 export namespace LessonReportService {
+  function isLessonReportStatus(value: string): value is LessonReportStatus {
+    return (Object.values(LessonReportStatus) as readonly string[]).includes(value);
+  }
+
+  function isAttendanceEvaluation(value: string): value is AttendanceEvaluation {
+    return (Object.values(AttendanceEvaluation) as readonly string[]).includes(value);
+  }
+
+  function assertLessonReportStatus(value: string): LessonReportStatus {
+    if (!isLessonReportStatus(value)) {
+      throw new Error(`Unexpected LessonReportStatus: ${value}`);
+    }
+    return value;
+  }
+
+  function assertAttendanceEvaluation(value: string): AttendanceEvaluation {
+    if (!isAttendanceEvaluation(value)) {
+      throw new Error(`Unexpected AttendanceEvaluation: ${value}`);
+    }
+    return value;
+  }
+
   function toReturnType(
     row: LessonReportSelectType & {
       teacherName?: string | null;
@@ -44,8 +66,8 @@ export namespace LessonReportService {
   ): LessonReportReturnType {
     return {
       ...row,
-      status: row.status as LessonReportStatus,
-      attendanceEvaluation: row.attendanceEvaluation as AttendanceEvaluation,
+      status: assertLessonReportStatus(row.status),
+      attendanceEvaluation: assertAttendanceEvaluation(row.attendanceEvaluation),
       teacherName: row.teacherName ?? null,
       studentName: row.studentName ?? null,
       subjectName: row.subjectName ?? null,
@@ -211,7 +233,7 @@ export namespace LessonReportService {
     if (!instance) {
       throw new Error(tErrors.scheduling.classInstanceNotFound({ id: input.classInstanceId }));
     }
-    if (instance.executionState !== ClassExecutionState.COMPLETED) {
+    if (instance.executionState !== "COMPLETED") {
       throw new Error("lessonReport.notEligibleForReview");
     }
 
@@ -337,18 +359,32 @@ export namespace LessonReportService {
    * Generic function to transition a lesson report status (APPROVED/REJECTED).
    * Handles permission check, validation, transaction, side effects, logging, and notification.
    */
-  async function transitionReportStatus(
-    actorUserId: string,
-    reportId: string,
-    newStatus: LessonReportStatus,
-    locale: string | undefined,
-    approvePermission: AppPermission,
-    rejectPermission: AppPermission,
-    sideEffect: (tx: DBTransaction, report: LessonReportSelectType) => Promise<void>,
-    successLogMessage: string,
-    dispatchDecision: "approved" | "rejected",
-    rejectionReason?: string | null
-  ): Promise<LessonReportReturnType> {
+  interface TransitionReportStatusOptions {
+    actorUserId: string;
+    reportId: string;
+    newStatus: LessonReportStatus;
+    locale?: string;
+    approvePermission: AppPermission;
+    rejectPermission: AppPermission;
+    sideEffect: (tx: DBTransaction, report: LessonReportSelectType) => Promise<void>;
+    successLogMessage: string;
+    dispatchDecision: "approved" | "rejected";
+    rejectionReason?: string | null;
+  }
+
+  async function transitionReportStatus(options: TransitionReportStatusOptions): Promise<LessonReportReturnType> {
+    const {
+      actorUserId,
+      reportId,
+      newStatus,
+      locale,
+      approvePermission,
+      rejectPermission,
+      sideEffect,
+      successLogMessage,
+      dispatchDecision,
+      rejectionReason,
+    } = options;
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
     // Check appropriate permission based on the target status
@@ -359,7 +395,7 @@ export namespace LessonReportService {
     if (!report) {
       throw new Error("lessonReport.notFound");
     }
-    if (report.status !== LessonReportStatus.PENDING_REVIEW) {
+    if (report.status !== "PENDING_REVIEW") {
       throw new Error("lessonReport.alreadyReviewed");
     }
 
@@ -399,14 +435,14 @@ export namespace LessonReportService {
     reportId: string,
     locale?: string
   ): Promise<LessonReportReturnType> {
-    return transitionReportStatus(
+    return transitionReportStatus({
       actorUserId,
       reportId,
-      LessonReportStatus.APPROVED,
+      newStatus: LessonReportStatus.APPROVED,
       locale,
-      AppPermission.LESSON_REPORTS_APPROVE,
-      AppPermission.LESSON_REPORTS_REJECT,
-      async (tx, report) => {
+      approvePermission: AppPermission.LESSON_REPORTS_APPROVE,
+      rejectPermission: AppPermission.LESSON_REPORTS_REJECT,
+      sideEffect: async (tx, report) => {
         // Side effect (Work Stream 4): create a TeacherDue row so the teacher is
         // owed for this approved lesson. Idempotent at the DB level via the
         // unique (class_instance_id) index on teacher_dues.
@@ -419,9 +455,9 @@ export namespace LessonReportService {
           locale
         );
       },
-      "Lesson report approved and teacher due entry created",
-      "approved"
-    );
+      successLogMessage: "Lesson report approved and teacher due entry created",
+      dispatchDecision: "approved",
+    });
   }
 
   export async function rejectReport(
@@ -429,14 +465,14 @@ export namespace LessonReportService {
     input: LessonReviewInput,
     locale?: string
   ): Promise<LessonReportReturnType> {
-    return transitionReportStatus(
+    return transitionReportStatus({
       actorUserId,
-      input.reportId,
-      LessonReportStatus.REJECTED,
+      reportId: input.reportId,
+      newStatus: LessonReportStatus.REJECTED,
       locale,
-      AppPermission.LESSON_REPORTS_APPROVE,
-      AppPermission.LESSON_REPORTS_REJECT,
-      async (tx, report) => {
+      approvePermission: AppPermission.LESSON_REPORTS_APPROVE,
+      rejectPermission: AppPermission.LESSON_REPORTS_REJECT,
+      sideEffect: async (tx, report) => {
         // Side effect (Work Stream 2): refund the student's reserved credit for
         // the rejected lesson. The refund is idempotent on the booking key
         // (derived from classInstanceId), so re-running approve/reject cycles
@@ -452,10 +488,10 @@ export namespace LessonReportService {
           tErrors
         );
       },
-      "Lesson report rejected and credit refunded",
-      "rejected",
-      input.rejectionReason
-    );
+      successLogMessage: "Lesson report rejected and credit refunded",
+      dispatchDecision: "rejected",
+      rejectionReason: input.rejectionReason,
+    });
   }
 
   export async function getReportById(

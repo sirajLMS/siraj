@@ -1,4 +1,4 @@
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 export type SeedStepResult = {
   name: string;

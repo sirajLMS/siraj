@@ -14,7 +14,7 @@
  *                                    default 1 — sequential in-process for safety)
  *   CRON_QUEUE_WORKER_TIMEOUT     — max worker duration in ms (default 270_000)
  */
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import {
   CRON_DEFAULT_BATCH_SIZE,
   CRON_DEFAULT_WORKER_CONCURRENCY,
@@ -51,7 +51,9 @@ async function main(): Promise<void> {
 
   logger.info("cron.worker.script.start", { batchSize, maxDurationMs, workerConcurrency });
 
-  while (running) {
+  async function drainCycle(): Promise<void> {
+    if (!running) return;
+
     const result = await runDrainLoop({ batchSize, maxDurationMs });
 
     logger.info("cron.worker.script.drain", {
@@ -60,9 +62,12 @@ async function main(): Promise<void> {
       retried: result.retried,
     });
 
-    if (!running) break;
+    if (!running) return;
     await Bun.sleep(1000);
+    return drainCycle();
   }
+
+  await drainCycle();
 
   logger.info("cron.worker.script.shutdown", {});
 }

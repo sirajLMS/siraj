@@ -19,6 +19,7 @@ function requireInstance(instance: ClassInstanceSelectType | null): ClassInstanc
 /** Inserts a minimal teacher_payments row to satisfy the FK in mark_as_paid. */
 async function insertTeacherPayment(tx: DBTransaction, teacherId: string, amount = "100.00"): Promise<string> {
   const now = new Date();
+  const details: Record<string, unknown> = { type: PaymentMethodType.CASH };
   const [row] = await tx
     .insert(teacherPayments)
     .values({
@@ -30,7 +31,7 @@ async function insertTeacherPayment(tx: DBTransaction, teacherId: string, amount
         type: PaymentMethodType.CASH,
         direction: PaymentDirection.PAYOUT,
         label: "Cash payout",
-        details: { type: PaymentMethodType.CASH } as unknown as Record<string, unknown>,
+        details,
         catalog: null,
         snapshottedAt: now.toISOString(),
       },

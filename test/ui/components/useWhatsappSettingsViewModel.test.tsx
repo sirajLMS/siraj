@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
@@ -7,7 +7,6 @@ import { useEffect } from "react";
 
 expect.extend(matchers);
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import {
   isUserWhatsappOptInQueryDocument,
   whatsappAccountsQueryDocument,
@@ -95,11 +94,11 @@ function optInMock(optedIn: boolean): MockLink.MockedResponse {
   };
 }
 
-mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
 }));
 
-mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
   usePathname: () => "/dashboard",
   Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
@@ -110,7 +109,7 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: () => {},
 }));
 
-mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({
     push: mock(() => {}),
     back: mock(() => {}),

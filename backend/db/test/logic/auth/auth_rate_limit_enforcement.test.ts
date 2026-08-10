@@ -37,8 +37,11 @@ describe("Authentication Rate Limiting Enforcement", () => {
     const ip = uniqueTestIp();
     const maxAttempts = 3;
 
-    // Simulate failed attempts
-    for (let i = 1; i <= maxAttempts; i++) {
+    // Simulate failed attempts — sequential via reduce (each attempt depends on
+    // accumulated state from prior attempts; cannot parallelize)
+    const attempts = Array.from({ length: maxAttempts }, (_, i) => i + 1);
+    await attempts.reduce(async (prev, i) => {
+      await prev;
       const result = await RateLimitRepository.recordAttempt(ip, email, maxAttempts);
       testLogger.info(`Attempt ${i}: attempts=${result.attempts}, isLocked=${result.isLocked}`);
 
@@ -48,7 +51,7 @@ describe("Authentication Rate Limiting Enforcement", () => {
         expect(result.isLocked).toBe(true);
         expect(result.lockedUntil).not.toBeNull();
       }
-    }
+    }, Promise.resolve());
 
     // Verify it's locked
     const locked = await RateLimitRepository.isLocked(ip, email);

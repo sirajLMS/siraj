@@ -4,7 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getEnvironmentConfig } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { getRedisService, SessionRedisService } from "@/backend/services";
 import type {
   RedisGroupSimulationSessionData,
@@ -49,6 +49,41 @@ export namespace SessionRepository {
    */
   async function acquireUserLock(tx: DBTransaction, userId: string): Promise<void> {
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('session_user_' || ${userId}::text))`);
+  }
+
+  /**
+   * Map a Redis session to a SessionSelectType return shape.
+   */
+  function mapRedisSession(redisSession: RedisSessionData): SessionSelectType {
+    return {
+      hashedId: redisSession.hashedId,
+      userId: redisSession.userId,
+      ipAddress: redisSession.ipAddress || null,
+      userAgent: redisSession.userAgent || null,
+      payload: redisSession.payload,
+      lastActivity: BigInt(Math.floor(new Date(redisSession.lastActivityAt).getTime() / 1000)),
+    };
+  }
+
+  /**
+   * Build a SessionSelectType return shape from input fields and a timestamp.
+   */
+  function buildInlineSession(
+    hashedId: string,
+    userId: string,
+    ipAddress: string | null | undefined,
+    userAgent: string | null | undefined,
+    payload: string,
+    now: Date
+  ): SessionSelectType {
+    return {
+      hashedId,
+      userId,
+      ipAddress: ipAddress || null,
+      userAgent: userAgent || null,
+      payload,
+      lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
+    };
   }
 
   /**
@@ -112,17 +147,7 @@ export namespace SessionRepository {
       if (redisSessionsEnabled()) {
         const redisService = await getSessionRedisService();
         const redisSession = await redisService.getSession(hashedId);
-
-        if (redisSession) {
-          return {
-            hashedId: redisSession.hashedId,
-            userId: redisSession.userId,
-            ipAddress: redisSession.ipAddress || null,
-            userAgent: redisSession.userAgent || null,
-            payload: redisSession.payload,
-            lastActivity: BigInt(Math.floor(new Date(redisSession.lastActivityAt).getTime() / 1000)),
-          };
-        }
+        if (redisSession) return mapRedisSession(redisSession);
       }
 
       return await db
@@ -268,14 +293,7 @@ export namespace SessionRepository {
       });
 
       logger.info(`Created session ${hashedId} for user ${input.userId}`);
-      return {
-        hashedId,
-        userId: input.userId,
-        ipAddress: input.ipAddress || null,
-        userAgent: input.userAgent || null,
-        payload: input.payload,
-        lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
-      };
+      return buildInlineSession(hashedId, input.userId, input.ipAddress, input.userAgent, input.payload, now);
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
@@ -306,9 +324,7 @@ export namespace SessionRepository {
         } = {
           lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
         };
-        if (input.payload !== undefined) {
-          postgresUpdates.payload = input.payload;
-        }
+        postgresUpdates.payload = input.payload;
         const returning = await t
           .update(sessions)
           .set(postgresUpdates)
@@ -335,14 +351,7 @@ export namespace SessionRepository {
         .where(eq(sessionMetadata.sessionId, hashedId));
 
       logger.debug(`Updated session ${hashedId}`);
-      return {
-        hashedId,
-        userId: input.userId,
-        ipAddress: input.ipAddress || null,
-        userAgent: input.userAgent || null,
-        payload: input.payload,
-        lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
-      };
+      return buildInlineSession(hashedId, input.userId, input.ipAddress, input.userAgent, input.payload, now);
     };
 
     return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
@@ -435,14 +444,7 @@ export namespace SessionRepository {
       .set({ lastActivityAt: now, expiresAt })
       .where(eq(sessionMetadata.sessionId, hashedId));
 
-    return {
-      hashedId: session.hashedId,
-      userId: session.userId,
-      ipAddress: session.ipAddress || null,
-      userAgent: session.userAgent || null,
-      payload: session.payload,
-      lastActivity: BigInt(Math.floor(new Date(session.lastActivityAt).getTime() / 1000)),
-    };
+    return mapRedisSession(session);
   };
 
   /**
@@ -454,16 +456,7 @@ export namespace SessionRepository {
       if (redisSessionsEnabled()) {
         const redisService = await getSessionRedisService();
         const redisSession = await redisService.getSession(hmacHash);
-        if (redisSession) {
-          return {
-            hashedId: redisSession.hashedId,
-            userId: redisSession.userId,
-            ipAddress: redisSession.ipAddress || null,
-            userAgent: redisSession.userAgent || null,
-            payload: redisSession.payload,
-            lastActivity: BigInt(Math.floor(new Date(redisSession.lastActivityAt).getTime() / 1000)),
-          };
-        }
+        if (redisSession) return mapRedisSession(redisSession);
       }
 
       return await db
@@ -601,13 +594,15 @@ export namespace SessionRepository {
     return updated;
   };
 
+  function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
   function parseSessionPayload(payload: string | null | undefined): Record<string, unknown> {
     if (!payload) return {};
     try {
       const parsed: unknown = JSON.parse(payload);
-      return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
-        ? (parsed as Record<string, unknown>)
-        : {};
+      return isRecord(parsed) ? parsed : {};
     } catch {
       return {};
     }
@@ -615,21 +610,20 @@ export namespace SessionRepository {
 
   function readGroupSimulationFromPayload(payload: string | null | undefined): RedisGroupSimulationSessionData | null {
     const groupSimulation = parseSessionPayload(payload).groupSimulation;
-    if (!groupSimulation || typeof groupSimulation !== "object" || Array.isArray(groupSimulation)) {
+    if (!isRecord(groupSimulation)) {
       return null;
     }
-    const record = groupSimulation as Record<string, unknown>;
     if (
-      typeof record.groupSlug !== "string" ||
-      typeof record.startedAt !== "string" ||
-      typeof record.expiresAt !== "string"
+      typeof groupSimulation.groupSlug !== "string" ||
+      typeof groupSimulation.startedAt !== "string" ||
+      typeof groupSimulation.expiresAt !== "string"
     ) {
       return null;
     }
     return {
-      groupSlug: record.groupSlug,
-      startedAt: record.startedAt,
-      expiresAt: record.expiresAt,
+      groupSlug: groupSimulation.groupSlug,
+      startedAt: groupSimulation.startedAt,
+      expiresAt: groupSimulation.expiresAt,
     };
   }
 

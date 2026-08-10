@@ -1,9 +1,19 @@
 import type { File, GetFilesResponse } from "@google-cloud/storage";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { GcpContext, GcsApiResponse } from "@/backend/storage/disk/gcp/types";
 import { formatFileTypeBreakdown, updateFileTypeMap } from "@/backend/storage/disk/shared/stats-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isGcsApiResponse(value: unknown): value is GcsApiResponse {
+  if (!isRecord(value)) return false;
+  const prefixes = value.prefixes;
+  return prefixes === undefined || Array.isArray(prefixes);
+}
 
 /**
  * Get storage statistics for a GCP bucket path
@@ -19,7 +29,7 @@ export async function storageStatistics(ctx: GcpContext, path?: string | null): 
       prefix,
       delimiter: "/",
     });
-    const apiResponse = response[2] as GcsApiResponse | undefined;
+    const apiResponse = isGcsApiResponse(response[2]) ? response[2] : undefined;
     const directoryCount = apiResponse?.prefixes?.length || 0;
 
     return {

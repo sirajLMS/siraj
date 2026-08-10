@@ -38,7 +38,27 @@
     "**/*.tsx",
     ".next-dev/types/**/*.ts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".next-test-3054/dev/types/**/*.ts",
+    ".next-test-3054/dev/dev/types/**/*.ts",
+    ".next-test-3055/dev/types/**/*.ts",
+    ".next-test-3055/dev/dev/types/**/*.ts",
+    ".next-test-3089/dev/types/**/*.ts",
+    ".next-test-3089/dev/dev/types/**/*.ts",
+    ".next-test-3029/dev/types/**/*.ts",
+    ".next-test-3029/dev/dev/types/**/*.ts",
+    ".next-test-3180/dev/types/**/*.ts",
+    ".next-test-3180/dev/dev/types/**/*.ts",
+    ".next-test-3001/dev/types/**/*.ts",
+    ".next-test-3001/dev/dev/types/**/*.ts",
+    ".next-test-3166/dev/types/**/*.ts",
+    ".next-test-3166/dev/dev/types/**/*.ts",
+    ".next-test-3167/dev/types/**/*.ts",
+    ".next-test-3167/dev/dev/types/**/*.ts",
+    ".next-test-3163/dev/types/**/*.ts",
+    ".next-test-3163/dev/dev/types/**/*.ts",
+    ".next-test-3164/dev/types/**/*.ts",
+    ".next-test-3164/dev/dev/types/**/*.ts"
   ],
   "exclude": [
     // Dot-directories (except `.storybook`, which is explicitly included above).

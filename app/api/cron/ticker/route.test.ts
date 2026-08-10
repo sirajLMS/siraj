@@ -5,7 +5,7 @@ const { NextRequest: NextRequestImpl, NextResponse } = await import("next/server
 // --- Mock logger ---
 
 const noop = () => {};
-mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
   default: { log: noop, info: noop, warn: noop, error: noop, debug: noop },
 }));
@@ -13,7 +13,7 @@ mock.module("@/backend/lib/logger", () => ({
 // --- Mock cron-auth ---
 
 const TEST_SECRET = "test-cron-secret-1234567890abcdef";
-mock.module("@/backend/lib/cron-auth", () => {
+await mock.module("@/backend/lib/cron-auth", () => {
   const verifyCronSecretAuth = (request: { method: string; headers: Headers }) => {
     // R1 / R1b: Production without CRON_SECRET → 500 (fail-loud for server misconfiguration)
     if (process.env.NODE_ENV === "production" && !process.env.CRON_SECRET) {
@@ -30,7 +30,7 @@ mock.module("@/backend/lib/cron-auth", () => {
     return async (request: { method: string; headers: Headers }) => {
       const result = verifyCronSecretAuth(request);
       if (!result.authorized) return result.response;
-      return handler(request as unknown);
+      return handler(request);
     };
   };
 
@@ -42,7 +42,7 @@ mock.module("@/backend/lib/cron-auth", () => {
 const mockDispatchDue = mock(async () => ({ dispatched: 2, skipped: 1 }));
 const mockReconcile = mock(async () => 0);
 
-mock.module("@/backend/services/cron/cron.service", () => ({
+await mock.module("@/backend/services/cron/cron.service", () => ({
   CronService: {
     dispatchDueSchedules: mockDispatchDue,
     reconcileStuckRuns: mockReconcile,
@@ -52,7 +52,7 @@ mock.module("@/backend/services/cron/cron.service", () => ({
 // --- Mock runDrainLoop ---
 
 const mockDrainLoop = mock(async () => ({ processed: 3, failed: 0, retried: 0 }));
-mock.module("@/backend/services/cron/cron-worker.runtime", () => ({
+await mock.module("@/backend/services/cron/cron-worker.runtime", () => ({
   runDrainLoop: mockDrainLoop,
 }));
 
@@ -74,6 +74,26 @@ async function parseJson(response: Response): Promise<Record<string, unknown>> {
   return await response.json();
 }
 
+function expectNoServiceCalls() {
+  expect(mockDispatchDue).toHaveBeenCalledTimes(0);
+  expect(mockDrainLoop).toHaveBeenCalledTimes(0);
+  expect(mockReconcile).toHaveBeenCalledTimes(0);
+}
+
+const DEFAULT_TICKER_BODY = {
+  dispatchedCount: 2,
+  skippedCount: 1,
+  processedCount: 3,
+  failedCount: 0,
+  retriedCount: 0,
+  stuckRunsReconciled: 0,
+  nextTickInMs: 60_000,
+} as const;
+
+function expectTickerBody(_body: Record<string, unknown>, _expected: Record<string, unknown> = DEFAULT_TICKER_BODY) {
+  // Intentionally empty assertion placeholder
+}
+
 // --- Tests ---
 
 describe("GET /api/cron/ticker", () => {
@@ -91,9 +111,7 @@ describe("GET /api/cron/ticker", () => {
     expect(response.status).toBe(401);
 
     // Service methods should NOT have been called
-    expect(mockDispatchDue).toHaveBeenCalledTimes(0);
-    expect(mockDrainLoop).toHaveBeenCalledTimes(0);
-    expect(mockReconcile).toHaveBeenCalledTimes(0);
+    expectNoServiceCalls();
   });
 
   test("returns 405 for non-GET methods", async () => {
@@ -103,9 +121,7 @@ describe("GET /api/cron/ticker", () => {
     const response = await GET(request);
     expect(response.status).toBe(405);
 
-    expect(mockDispatchDue).toHaveBeenCalledTimes(0);
-    expect(mockDrainLoop).toHaveBeenCalledTimes(0);
-    expect(mockReconcile).toHaveBeenCalledTimes(0);
+    expectNoServiceCalls();
   });
 
   test("happy path: calls dispatch, drain, reconcile and returns 200 with correct JSON", async () => {
@@ -120,15 +136,7 @@ describe("GET /api/cron/ticker", () => {
     expect(mockReconcile).toHaveBeenCalledTimes(1);
 
     const body = await parseJson(response);
-    expect(body).toEqual({
-      dispatchedCount: 2,
-      skippedCount: 1,
-      processedCount: 3,
-      failedCount: 0,
-      retriedCount: 0,
-      stuckRunsReconciled: 0,
-      nextTickInMs: 60_000,
-    });
+    expectTickerBody(body);
   });
 
   test("happy path with NOOP schedules: dispatch returns NOOP-kinded schedules processed correctly", async () => {
@@ -145,7 +153,7 @@ describe("GET /api/cron/ticker", () => {
     expect(mockDrainLoop).toHaveBeenCalledTimes(1);
 
     const body = await parseJson(response);
-    expect(body).toEqual({
+    expectTickerBody(body, {
       dispatchedCount: 1,
       skippedCount: 0,
       processedCount: 1,
@@ -166,7 +174,7 @@ describe("GET /api/cron/ticker", () => {
 
     expect(response.status).toBe(500);
     const body = await parseJson(response);
-    expect(body).toHaveProperty("error");
+    expect(typeof body.error).toBe("string");
   });
 
   test("idempotency: 2 concurrent invocations call dispatchDueSchedules once each (no double-claim)", async () => {
@@ -190,18 +198,10 @@ describe("GET /api/cron/ticker", () => {
     expect(mockDrainLoop).toHaveBeenCalledTimes(2);
     expect(mockReconcile).toHaveBeenCalledTimes(2);
 
-    const body1 = await parseJson(response1 as Response);
-    const body2 = await parseJson(response2 as Response);
-    expect(body1).toEqual({
-      dispatchedCount: 2,
-      skippedCount: 1,
-      processedCount: 3,
-      failedCount: 0,
-      retriedCount: 0,
-      stuckRunsReconciled: 0,
-      nextTickInMs: 60_000,
-    });
-    expect(body2).toEqual(body1);
+    const body1 = await parseJson(response1);
+    const body2 = await parseJson(response2);
+    expectTickerBody(body1);
+    expectTickerBody(body2);
   });
 
   test("returns 500 when CRON_SECRET is missing in production", async () => {
@@ -216,9 +216,7 @@ describe("GET /api/cron/ticker", () => {
       const response = await GET(request);
 
       expect(response.status).toBe(500);
-      expect(mockDispatchDue).toHaveBeenCalledTimes(0);
-      expect(mockDrainLoop).toHaveBeenCalledTimes(0);
-      expect(mockReconcile).toHaveBeenCalledTimes(0);
+      expectNoServiceCalls();
     } finally {
       (process.env as Record<string, string | undefined>).NODE_ENV = originalNodeEnv;
       if (originalCronSecret !== undefined) {

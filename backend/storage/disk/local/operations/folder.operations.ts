@@ -1,7 +1,7 @@
 import type { Stats } from "node:fs";
 import fs from "node:fs/promises";
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { LocalContext } from "@/backend/storage/disk/local/types";
 import { getAbsolutePath } from "@/backend/storage/disk/local/utils";
 import { createFolderHelper } from "@/backend/storage/disk/shared/folder-operations.helper";

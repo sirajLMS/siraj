@@ -13,10 +13,12 @@
 - **🔄 Back to Start:** [Requirements Phase](requirements-phase.md) - Full workflow context
 
 ## Phase Navigation
-- **Previous:** [Design Phase](design-phase.md) - Must be completed first
-- **Current:** **Tasks Phase** - Break down design into actionable steps
-- **Next:** [Implementation](../execution/implementation-guide.md) - Execute the tasks
-- **Context:** [Process Overview](README.md) - Three-phase workflow
+- **Previous:** [Design Phase](design-phase.md) - Must be completed first (Phase 2)
+- **Plan Review:** Phase 1.5 - Invoke @plan-review skill on complete plan BEFORE implementation
+- **Current:** **Tasks Phase (Phase 3+)** - Break down design into actionable steps
+- **Mid-Point:** Phase 2.5 (conditional) - Backend review checkpoint
+- **Next:** [Implementation](../execution/implementation-guide.md) - Execute the tasks (Task 0 → Phase 1 → ...)
+- **Context:** [Process Overview](README.md) - Development lifecycle
 
 ---
 
@@ -35,6 +37,10 @@ The tasks phase serves to:
 - Establish dependencies and build order between tasks
 - Enable incremental progress with testable milestones
 - Provide a roadmap for systematic feature development
+- **NEW: Include Task 0 (baseline) and Phase 1.5 (plan review gate)**
+- **NEW: Define semantic review subtasks (race conditions, env-config, cross-layer, enums)**
+- **NEW: Establish interleaved test structure (pair tests with implementation)**
+- **NEW: Enforce deferred-items ledger tracking**
 
 ## Step-by-Step Process
 

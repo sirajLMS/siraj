@@ -51,7 +51,7 @@
   "queueStatsFailed": "Failed",
   "runsTitle": "Run History",
   "runsCount": {
-    "__fn": "(count) => count === 0 ? \"No runs\" : count === 1 ? \"1 run\" : `${count} runs`"
+    "__fn": "(count) => {\n    if (count === 0)\n      return \"No runs\";\n    if (count === 1)\n      return \"1 run\";\n    return `${count} runs`;\n  }"
   },
   "statusPending": "Pending",
   "statusRunning": "Running",

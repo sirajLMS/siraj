@@ -46,7 +46,7 @@
   "categoryDeleted": "Category deleted successfully",
   "detail": {
     "pageTitle": {
-      "__fn": "(name) => `${name}`"
+      "__fn": "(name) => name"
     },
     "resourcesTitle": "Resources",
     "resourcesSubtitle": {

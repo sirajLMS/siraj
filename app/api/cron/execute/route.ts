@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { CronTriggerSource } from "@/backend/enum/cron/cron.enums";
 import { withCronAuth } from "@/backend/lib/cron-auth";
 import { DomainError } from "@/backend/lib/errors";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { CronService } from "@/backend/services/cron/cron.service";
 import { extractLocale, formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
 
@@ -90,10 +90,20 @@ function isNotFoundError(error: unknown): boolean {
   if (error instanceof DomainError) {
     return error.code.endsWith("_NOT_FOUND");
   }
+
   // Handle errors that carry a `code` property but are not DomainError instances
-  if (error !== null && typeof error === "object" && "code" in error) {
-    const code = (error as { code: unknown }).code;
+  if (hasErrorCode(error)) {
+    const { code } = error;
     return typeof code === "string" && code.endsWith("_NOT_FOUND");
   }
+
   return false;
+}
+
+/**
+ * Type guard asserting the presence of a `code` property on an object.
+ * Keeps narrowing logic centralized and avoids ad-hoc type assertions.
+ */
+function hasErrorCode(obj: unknown): obj is { code: unknown } {
+  return obj !== null && typeof obj === "object" && "code" in obj;
 }

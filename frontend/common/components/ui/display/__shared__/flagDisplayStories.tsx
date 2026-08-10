@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
-import type { Meta, StoryObj } from "@storybook/react";
-import type { ComponentType, FC, ReactElement } from "react";
+import type { Decorator, Meta, StoryObj } from "@storybook/react";
+import type { ComponentType } from "react";
 
 export type FlagDisplayProps = {
   readonly code?: string | null;
@@ -23,23 +23,21 @@ export type FlagDisplayStoriesData = {
   readonly unknownFallback: string;
 };
 
-type StoryDecorator = (Story: FC) => ReactElement;
+const flagDecorator: Decorator = Story => (
+  <Box sx={{ p: 2 }}>
+    <Story />
+  </Box>
+);
 
 export function buildFlagDisplayMeta<TComponent extends ComponentType<FlagDisplayProps>>(
   config: FlagDisplayStoriesConfig<TComponent>
-): Meta<TComponent> {
-  const decorator: StoryDecorator = Story => (
-    <Box sx={{ p: 2 }}>
-      <Story />
-    </Box>
-  );
-  const meta = {
+): Meta<ComponentType<FlagDisplayProps>> {
+  return {
     title: config.title,
     component: config.component,
     tags: ["ai-generated"],
-    decorators: [decorator],
-  } as Meta<TComponent>;
-  return meta;
+    decorators: [flagDecorator],
+  };
 }
 
 export function buildFlagDisplayStories(config: FlagDisplayStoriesData): {

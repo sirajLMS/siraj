@@ -1,7 +1,7 @@
 import { runAllSeeds } from "@/backend/db/seeds/index";
 import { loadSeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import { validateSeedAssetsOrThrow } from "@/backend/db/seeds/lib/validate-seed-assets";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 process.env.SEED_MODE = "true";
 

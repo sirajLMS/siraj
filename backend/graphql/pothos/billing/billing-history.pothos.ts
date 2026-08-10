@@ -53,6 +53,45 @@ function enrichCurrencyTotalsWithDisplay(
   }));
 }
 
+type BillingSummaryWithCurrencyTotals = {
+  readonly id: string;
+  readonly outstandingByCurrency: readonly BillingCurrencyTotal[];
+  readonly [key: string]: unknown;
+};
+
+function extractCurrencyTotals(result: Record<string, unknown>, key: string): readonly BillingCurrencyTotal[] {
+  const value = result[key];
+  if (Array.isArray(value)) {
+    return value as readonly BillingCurrencyTotal[];
+  }
+  return [];
+}
+
+async function enrichSummaryWithDisplayAmounts<T extends BillingSummaryWithCurrencyTotals>(
+  result: T,
+  ctx: import("@/backend/graphql/gqlContext").BaseContext,
+  firstArrayKey: keyof T & string,
+  secondArrayKey: keyof T & string
+): Promise<T> {
+  const firstArray = extractCurrencyTotals(result, firstArrayKey);
+  const secondArray = extractCurrencyTotals(result, secondArrayKey);
+  const allCurrencyTotals = [...firstArray, ...secondArray];
+
+  const displayAmounts = await resolveDisplayAmountFields(
+    allCurrencyTotals,
+    ctx,
+    "amount",
+    "currency",
+    "subjectUserId"
+  );
+
+  return {
+    ...result,
+    [firstArrayKey]: enrichCurrencyTotalsWithDisplay(firstArray, displayAmounts),
+    [secondArrayKey]: enrichCurrencyTotalsWithDisplay(secondArray, displayAmounts),
+  };
+}
+
 interface ParentScopedResolverArgs {
   parentId?: string | null;
   userId?: string | null;
@@ -224,10 +263,7 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
       const displayAmounts = await resolveDisplayAmountFields(result.rows, ctx, "amount", "currency", "parentUserId");
       return {
         ...result,
-        rows: result.rows.map(row => ({
-          ...row,
-          displayAmount: displayAmounts.get(row.id) ?? null,
-        })),
+        rows: result.rows.map(row => Object.assign(row, { displayAmount: displayAmounts.get(row.id) ?? null })),
       };
     },
   })
@@ -255,10 +291,7 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
       const displayAmounts = await resolveDisplayAmountFields(result.rows, ctx, "amount", "currency", "parentUserId");
       return {
         ...result,
-        rows: result.rows.map(row => ({
-          ...row,
-          displayAmount: displayAmounts.get(row.id) ?? null,
-        })),
+        rows: result.rows.map(row => Object.assign(row, { displayAmount: displayAmounts.get(row.id) ?? null })),
       };
     },
   })
@@ -273,20 +306,7 @@ gqlSchemaBuilder.queryField("adminBillingSummary", t =>
       const tErrors = ctx.t().errorsTranslations;
       const result = await BillingHistoryService.getAdminBillingSummary(userId, tErrors);
 
-      const allCurrencyTotals = [...result.outstandingByCurrency, ...result.mtdRevenueByCurrency];
-      const displayAmounts = await resolveDisplayAmountFields(
-        allCurrencyTotals,
-        ctx,
-        "amount",
-        "currency",
-        "subjectUserId"
-      );
-
-      return {
-        ...result,
-        outstandingByCurrency: enrichCurrencyTotalsWithDisplay(result.outstandingByCurrency, displayAmounts),
-        mtdRevenueByCurrency: enrichCurrencyTotalsWithDisplay(result.mtdRevenueByCurrency, displayAmounts),
-      };
+      return enrichSummaryWithDisplayAmounts(result, ctx, "outstandingByCurrency", "mtdRevenueByCurrency");
     },
   })
 );
@@ -321,20 +341,7 @@ gqlSchemaBuilder.queryField("parentBillingSummary", t =>
         tErrors
       );
 
-      const allCurrencyTotals = [...result.outstandingByCurrency, ...result.paidThisTermByCurrency];
-      const displayAmounts = await resolveDisplayAmountFields(
-        allCurrencyTotals,
-        ctx,
-        "amount",
-        "currency",
-        "subjectUserId"
-      );
-
-      return {
-        ...result,
-        outstandingByCurrency: enrichCurrencyTotalsWithDisplay(result.outstandingByCurrency, displayAmounts),
-        paidThisTermByCurrency: enrichCurrencyTotalsWithDisplay(result.paidThisTermByCurrency, displayAmounts),
-      };
+      return enrichSummaryWithDisplayAmounts(result, ctx, "outstandingByCurrency", "paidThisTermByCurrency");
     },
   })
 );

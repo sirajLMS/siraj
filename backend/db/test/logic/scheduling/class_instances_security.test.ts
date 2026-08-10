@@ -8,6 +8,13 @@ import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "
 import { CurrencyCode } from "@/backend/enum";
 import { getErrorMessage } from "@/shared/utils/error";
 
+async function testOutcome(tx: DBTransaction, instanceId: string, outcome: "ABSENT" | "LEAVE") {
+  await tx
+    .update(classInstances)
+    .set({ executionState: "COMPLETED", outcome })
+    .where(eq(classInstances.id, instanceId));
+}
+
 async function createTestInstance(
   tx: DBTransaction,
   teacherId: string,
@@ -99,7 +106,7 @@ describe("Class Instances Security Logic", () => {
           .set({ executionState: "RUNNING", outcome: "PENDING" })
           .where(eq(classInstances.id, instance.id));
       } catch (e) {
-        error = e as Error;
+        if (e instanceof Error) error = e;
       }
       expect(error).toBeTruthy();
       expect(getErrorMessage(error)).toMatch(/Invalid transition: Cannot reactivate a COMPLETED class instance/);
@@ -137,20 +144,13 @@ describe("Class Instances Security Logic", () => {
           .set({ classesRemaining: sql`${students.classesRemaining} - 1` })
           .where(eq(students.id, student.id));
       } catch (e) {
-        error = e as Error;
+        if (e instanceof Error) error = e;
       }
       expect(error).toBeTruthy();
       expect(getErrorMessage(error)).toMatch(/students_classes_remaining_chk/);
     }));
 
   describe("Story 2: State Transitions", () => {
-    const testOutcome = async (tx: DBTransaction, instanceId: string, outcome: "ABSENT" | "LEAVE") => {
-      await tx
-        .update(classInstances)
-        .set({ executionState: "COMPLETED", outcome })
-        .where(eq(classInstances.id, instanceId));
-    };
-
     it.each(["ABSENT", "LEAVE"] as const)("allows ACTIVATED → COMPLETED with outcome=%s", outcome =>
       runInRollback(async tx => {
         const { teacher, student } = await setupTestEntities(tx, `S2-${outcome}`, { skipInstance: true });
@@ -179,7 +179,7 @@ describe("Class Instances Security Logic", () => {
             .set({ executionState: "COMPLETED", outcome: "TAKEN" })
             .where(eq(classInstances.id, instance.id));
         } catch (e) {
-          error = e as Error;
+          if (e instanceof Error) error = e;
         }
         expect(error).toBeTruthy();
         expect(getErrorMessage(error)).toMatch(/Invalid transition:/);

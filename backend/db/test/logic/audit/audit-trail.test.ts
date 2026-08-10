@@ -19,9 +19,9 @@ import { AuditRepository } from "@/backend/db/repo";
 import { auditLogs, users } from "@/backend/db/schema";
 import { IP_ADDRESS_1 } from "@/backend/db/test/const";
 import { AccountStatus, CurrencyCode, StudentStatus, UserRole } from "@/backend/enum";
-import { parseIanaTimezone } from "@/backend/lib/enum";
 import type { CreateAuditLogInput } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
+import { parseIanaTimezone } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Audit Trail System", () => {

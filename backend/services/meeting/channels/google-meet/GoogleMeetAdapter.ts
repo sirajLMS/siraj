@@ -63,6 +63,40 @@ function isExpired(token: CachedToken | null): boolean {
   return Date.now() >= token.expiresAt - TOKEN_REFRESH_MARGIN_MS;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isServiceAccountJson(value: unknown): value is GoogleMeetServiceAccountJson {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.type === "string" && typeof value.client_email === "string" && typeof value.private_key === "string"
+  );
+}
+
+function isTokenResponse(value: unknown): value is GoogleMeetTokenResponse {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.access_token === "string" &&
+    typeof value.token_type === "string" &&
+    typeof value.expires_in === "number"
+  );
+}
+
+function isSpaceResponse(value: unknown): value is GoogleMeetSpaceResponse {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.name === "string" && typeof value.meetingUri === "string" && typeof value.meetingCode === "string"
+  );
+}
+
+function isErrorResponse(value: unknown): value is GoogleMeetErrorResponse {
+  if (!isRecord(value)) return false;
+  if (value.error === undefined) return true;
+  if (!isRecord(value.error)) return false;
+  return typeof value.error.code === "number" && typeof value.error.message === "string";
+}
+
 export class GoogleMeetAdapter implements IMeetingChannel {
   static readonly ENDPOINTS: readonly string[] = [
     "https://oauth2.googleapis.com/token",
@@ -76,25 +110,32 @@ export class GoogleMeetAdapter implements IMeetingChannel {
   private cachedToken: CachedToken | null = null;
 
   constructor(opts?: GoogleMeetAdapterOptions) {
-    const envConfig = opts?.serviceAccountJson !== undefined ? null : getEnvironmentConfig();
+    // If the caller provided a service account JSON explicitly, do not read env
+    // config; otherwise load runtime environment configuration.
+    const envConfig = opts?.serviceAccountJson != null ? null : getEnvironmentConfig();
     this.rawServiceAccountJson = opts?.serviceAccountJson ?? envConfig?.googleMeetServiceAccountJson;
     this.impersonateSubject = opts?.impersonateSubject ?? envConfig?.googleMeetImpersonateSubject;
     this.defaultAccessType = opts?.defaultAccessType ?? 1;
   }
 
   async validateConfig(): Promise<boolean> {
-    if (!this.rawServiceAccountJson) {
+    if (this.rawServiceAccountJson == null) {
       logger.warn("GoogleMeetAdapter: missing service account JSON");
       return false;
     }
-    if (!this.impersonateSubject) {
+
+    if (this.impersonateSubject == null) {
       logger.warn("GoogleMeetAdapter: missing impersonate subject");
       return false;
     }
+
     try {
       this.parsedServiceAccount = this.parseServiceAccount();
       return true;
-    } catch {
+    } catch (err: unknown) {
+      logger.warn("GoogleMeetAdapter: invalid service account JSON", {
+        message: err instanceof Error ? err.message : String(err),
+      });
       return false;
     }
   }
@@ -102,22 +143,16 @@ export class GoogleMeetAdapter implements IMeetingChannel {
   async generateMeeting(input: GenerateMeetingInput): Promise<GenerateMeetingResult> {
     const accessToken = await this.resolveAccessToken(input);
 
-    let lastError: unknown = null;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      if (attempt > 0) {
-        await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
-      }
-      try {
-        return await this.createSpace(accessToken, input);
-      } catch (error) {
-        lastError = error;
-        if (error instanceof ProviderUnavailableError) {
-          continue;
-        }
+    try {
+      return await this.createSpace(accessToken, input);
+    } catch (error) {
+      if (!(error instanceof ProviderUnavailableError)) {
         throw error;
       }
     }
-    throw lastError;
+
+    await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
+    return this.createSpace(accessToken, input);
   }
 
   private async resolveAccessToken(input: GenerateMeetingInput): Promise<string> {
@@ -164,12 +199,16 @@ export class GoogleMeetAdapter implements IMeetingChannel {
       throw new NoOrgCredentialsNoUserTokenError("google_meet");
     }
 
-    let parsed: GoogleMeetServiceAccountJson;
+    let raw: unknown;
     try {
-      parsed = JSON.parse(this.rawServiceAccountJson) as GoogleMeetServiceAccountJson;
+      raw = JSON.parse(this.rawServiceAccountJson);
     } catch {
       throw new InvalidServiceAccountJsonError("Invalid JSON");
     }
+    if (!isServiceAccountJson(raw)) {
+      throw new InvalidServiceAccountJsonError("Invalid service account structure");
+    }
+    const parsed: GoogleMeetServiceAccountJson = raw;
 
     if (parsed.type !== "service_account") {
       throw new InvalidServiceAccountJsonError(`Expected type "service_account", got "${parsed.type}"`);
@@ -240,7 +279,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
 
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
-      throw new RateLimitedError("google_meet", retryAfter ? parseInt(retryAfter, 10) : undefined);
+      throw new RateLimitedError("google_meet", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
     }
 
     if (!response.ok) {
@@ -252,7 +291,11 @@ export class GoogleMeetAdapter implements IMeetingChannel {
       );
     }
 
-    const tokenData = (await response.json()) as GoogleMeetTokenResponse;
+    const rawToken: unknown = await response.json();
+    if (!isTokenResponse(rawToken)) {
+      throw new GoogleMeetApiError("Google token exchange returned malformed response", undefined, response.status);
+    }
+    const tokenData: GoogleMeetTokenResponse = rawToken;
     this.cachedToken = {
       accessToken: tokenData.access_token,
       expiresAt: Date.now() + tokenData.expires_in * 1000,
@@ -302,10 +345,32 @@ export class GoogleMeetAdapter implements IMeetingChannel {
       },
     };
 
+    const response = await this.executeSpaceRequest(accessToken, spaceBody);
+    await this.assertSpaceResponseOk(response);
+
+    const rawSpace: unknown = await response.json();
+    if (!isSpaceResponse(rawSpace)) {
+      throw new GoogleMeetApiError("Google Meet returned malformed space response", undefined, response.status);
+    }
+    const space: GoogleMeetSpaceResponse = rawSpace;
+    return {
+      joinUrl: space.meetingUri,
+      meetingId: space.name,
+      providerMetadata: {
+        meetingCode: space.meetingCode,
+        spaceName: space.name,
+        accessType: space.config?.accessType ?? this.defaultAccessType,
+      },
+    };
+  }
+
+  private async executeSpaceRequest(
+    accessToken: string,
+    spaceBody: { config: { accessType: number } }
+  ): Promise<Response> {
     const { signal, cancel } = withTimeout(REQUEST_TIMEOUT_MS);
-    let response: Response;
     try {
-      response = await fetch(GOOGLE_MEET_SPACES_URL, {
+      return await fetch(GOOGLE_MEET_SPACES_URL, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -315,51 +380,25 @@ export class GoogleMeetAdapter implements IMeetingChannel {
         signal,
       });
     } catch (error) {
-      cancel();
       throw new ProviderUnavailableError(
         "google_meet",
         undefined,
         error instanceof Error ? error.message : String(error)
       );
+    } finally {
+      cancel();
     }
-    cancel();
+  }
 
+  private async assertSpaceResponseOk(response: Response): Promise<void> {
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
-      throw new RateLimitedError("google_meet", retryAfter ? parseInt(retryAfter, 10) : undefined);
+      throw new RateLimitedError("google_meet", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
     }
 
     if (response.status === 403) {
-      const errorBody = await this.parseErrorBody(response);
-      const upstreamMessage = errorBody?.error?.message ?? `Google Meet space creation forbidden (${response.status})`;
-      const combinedText = `${upstreamMessage} ${errorBody?.error?.status ?? ""}`.toLowerCase();
-
-      // DWD (Domain-Wide Delegation) and service-account issues produce
-      // specific error keywords in the Google API response.  Only those
-      // should be mapped to PermissionDeniedError.
-      const isDwdIssue =
-        combinedText.includes("domain-wide") ||
-        combinedText.includes("delegation") ||
-        combinedText.includes("service account");
-
-      if (isDwdIssue) {
-        logger.warn("GoogleMeetAdapter: 403 from spaces endpoint — DWD misconfiguration", {
-          upstreamMessage,
-          upstreamStatus: errorBody?.error?.status,
-        });
-        throw new PermissionDeniedError(upstreamMessage, response.status);
-      }
-
-      logger.warn("GoogleMeetAdapter: 403 from spaces endpoint — permission denied", {
-        upstreamMessage,
-        upstreamStatus: errorBody?.error?.status,
-      });
-      throw new MeetingChannelError(
-        `Permission denied by Google Meet: ${upstreamMessage}`,
-        "PERMISSION_DENIED",
-        upstreamMessage,
-        response.status
-      );
+      await this.handleSpace403(response);
+      return;
     }
 
     if (response.status >= 500) {
@@ -375,17 +414,39 @@ export class GoogleMeetAdapter implements IMeetingChannel {
         response.status
       );
     }
+  }
 
-    const space = (await response.json()) as GoogleMeetSpaceResponse;
-    return {
-      joinUrl: space.meetingUri,
-      meetingId: space.name,
-      providerMetadata: {
-        meetingCode: space.meetingCode,
-        spaceName: space.name,
-        accessType: space.config?.accessType ?? this.defaultAccessType,
-      },
-    };
+  private async handleSpace403(response: Response): Promise<void> {
+    const errorBody = await this.parseErrorBody(response);
+    const upstreamMessage = errorBody?.error?.message ?? `Google Meet space creation forbidden (${response.status})`;
+    const combinedText = `${upstreamMessage} ${errorBody?.error?.status ?? ""}`.toLowerCase();
+
+    // DWD (Domain-Wide Delegation) and service-account issues produce
+    // specific error keywords in the Google API response.  Only those
+    // should be mapped to PermissionDeniedError.
+    const isDwdIssue =
+      combinedText.includes("domain-wide") ||
+      combinedText.includes("delegation") ||
+      combinedText.includes("service account");
+
+    if (isDwdIssue) {
+      logger.warn("GoogleMeetAdapter: 403 from spaces endpoint — DWD misconfiguration", {
+        upstreamMessage,
+        upstreamStatus: errorBody?.error?.status,
+      });
+      throw new PermissionDeniedError(upstreamMessage, response.status);
+    }
+
+    logger.warn("GoogleMeetAdapter: 403 from spaces endpoint — permission denied", {
+      upstreamMessage,
+      upstreamStatus: errorBody?.error?.status,
+    });
+    throw new MeetingChannelError(
+      `Permission denied by Google Meet: ${upstreamMessage}`,
+      "PERMISSION_DENIED",
+      upstreamMessage,
+      response.status
+    );
   }
 
   private async importPrivateKey(pem: string): Promise<CryptoKey> {
@@ -393,13 +454,17 @@ export class GoogleMeetAdapter implements IMeetingChannel {
       .replace("-----BEGIN PRIVATE KEY-----", "")
       .replace("-----END PRIVATE KEY-----", "")
       .replace(/\s/g, "");
-    const der = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+    const der = Uint8Array.from(atob(pemContents), c => c.codePointAt(0) ?? 0);
     return crypto.subtle.importKey("pkcs8", der, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
   }
 
   private async parseErrorBody(response: Response): Promise<GoogleMeetErrorResponse | null> {
     try {
-      return (await response.json()) as GoogleMeetErrorResponse;
+      const raw: unknown = await response.json();
+      if (!isErrorResponse(raw)) {
+        return null;
+      }
+      return raw;
     } catch {
       return null;
     }

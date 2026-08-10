@@ -1,5 +1,5 @@
 {
-  "manifestHash": "5ae401ddcd203714ce3d8d83c0ae6a63d1d34429510294a0b102ac3e48e86493",
+  "manifestHash": "6bdf0813a5f0cbc27c903b9cad50f89b0d2d6d691331a77194250c29dd43ff1d",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -20,6 +20,14 @@
     {
       "file": "30-c-class_instances_auto_miss_transition.sql",
       "sha256": "4972068d5b636e42725250c66587753cce79170d27bbfc32eac4b00d30a35c96"
+    },
+    {
+      "file": "31-user-admin-reset-password.sql",
+      "sha256": "1abb1304f5204d570fc9cea52088bd07496b513c3734ba6eb3a80d82b07ba0e0"
+    },
+    {
+      "file": "32-user-admin-reset-password-data.sql",
+      "sha256": "9b4ee33bc88f6b21f3cfc4d99cee8ee12217d7981656b8bab5b96484ff2d1b84"
     },
     {
       "file": "4-class_categories_and_subjects.sql",
@@ -234,6 +242,10 @@
     "20260803041719_custom_7d-quota_permissions_data",
     "20260803041720_custom_8b-whatsapp-permissions-data",
     "20260803041721_custom_9a-cron-permissions-enum",
-    "20260803041722_custom_9b-cron-permissions-data"
+    "20260803041722_custom_9b-cron-permissions-data",
+    "20260808165054_custom_31-user-admin-reset-password",
+    "20260808165215_custom_31-user-admin-reset-password",
+    "20260809053906_custom_31-user-admin-reset-password",
+    "20260809053907_custom_32-user-admin-reset-password-data"
   ]
 }

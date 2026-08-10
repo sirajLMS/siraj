@@ -1,7 +1,6 @@
 import { db } from "@/backend/db/drizzleDb";
 import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
 import { adminAuditLogs } from "@/backend/db/schema";
-import { AccountStatus } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { generateAccessToken, generateImpersonationAccessToken } from "@/backend/lib/auth/jwt";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
@@ -113,7 +112,7 @@ export namespace ImpersonationService {
       throw new Error(tErrors.auth.impersonationTargetInactive);
     }
 
-    if (targetUser.status === AccountStatus.DEACTIVATED) {
+    if (targetUser.status === "DEACTIVATED") {
       throw new Error(tErrors.auth.impersonationTargetInactive);
     }
 

@@ -12,4 +12,3 @@ export type { MobileSectionPanelProps } from "@/frontend/mobile/components/ui/co
 export { MobileSectionPanel } from "@/frontend/mobile/components/ui/container/MobileSectionPanel";
 export type { MobileSectionTitleRowProps } from "@/frontend/mobile/components/ui/container/MobileSectionTitleRow";
 export { MobileSectionTitleRow } from "@/frontend/mobile/components/ui/container/MobileSectionTitleRow";
-export * from "@/frontend/mobile/components/ui/container/page";

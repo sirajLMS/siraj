@@ -13,11 +13,14 @@ export function ClassDetailsHeaderMobile({
   labels,
 }: Readonly<ClassDetailsHeaderProps>) {
   const title = getLocalizedClassTypeName(instance.classType, labels.classTypes, instance.courseName);
-  const subtitle = canOverride
-    ? labels.pageSubtitleAdmin
-    : isStudentView
-      ? labels.pageSubtitleStudent
-      : labels.pageSubtitleTeacher;
+  let subtitle: string;
+  if (canOverride) {
+    subtitle = labels.pageSubtitleAdmin;
+  } else if (isStudentView) {
+    subtitle = labels.pageSubtitleStudent;
+  } else {
+    subtitle = labels.pageSubtitleTeacher;
+  }
 
   return (
     <Box sx={classDetailsContentPaddingSx}>

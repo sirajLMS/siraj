@@ -122,7 +122,7 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
   activeCalls = 0;
 
   /** Queue of resolvers waiting for a concurrency slot to open up. */
-  private waitQueue: (() => void)[] = [];
+  private readonly waitQueue: (() => void)[] = [];
 
   /**
    * Local in-memory fallback for pair-rate-limiting when Redis is
@@ -133,7 +133,7 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
    * r11-r04: Bounded to {@link LOCAL_PAIR_RATE_LIMIT_MAX_ENTRIES} entries
    * via {@link pruneLocalPairRateLimit} to prevent unbounded growth.
    */
-  private localPairRateLimit: Map<string, number> = new Map();
+  private readonly localPairRateLimit: Map<string, number> = new Map();
 
   /**
    * In-memory cache for `resolveCredentials` (r7-011). Avoids running a DB
@@ -221,15 +221,15 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
 
     this.activeCalls++;
     try {
-      return await this.executeSend(
-        params.deliveryId,
-        params.payload,
-        params.e164,
-        params.accessToken,
-        params.phoneNumberId,
-        params.apiVersion,
-        params.locale
-      );
+      return await this.executeSend({
+        deliveryId: params.deliveryId,
+        payload: params.payload,
+        e164: params.e164,
+        accessToken: params.accessToken,
+        phoneNumberId: params.phoneNumberId,
+        apiVersion: params.apiVersion,
+        locale: params.locale,
+      });
     } finally {
       this.activeCalls--;
       const next = this.waitQueue.shift();
@@ -237,16 +237,17 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
     }
   }
 
-  private async executeSend(
-    deliveryId: string,
-    payload: WhatsappPayload,
-    e164: string,
-    accessToken: string,
-    phoneNumberId: string,
-    apiVersion: string | undefined,
-    locale: string,
-    isRetry = false
-  ): Promise<WhatsappSendResult> {
+  private async executeSend(params: {
+    deliveryId: string;
+    payload: WhatsappPayload;
+    e164: string;
+    accessToken: string;
+    phoneNumberId: string;
+    apiVersion: string | undefined;
+    locale: string;
+    isRetry?: boolean;
+  }): Promise<WhatsappSendResult> {
+    const { deliveryId, payload, e164, accessToken, phoneNumberId, apiVersion, locale, isRetry = false } = params;
     const ctx: GraphApiRequestContext = { accessToken, apiVersion };
     const { url, init } = buildSendTemplateRequest(ctx, {
       phoneNumberId,
@@ -278,16 +279,16 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
           // Fix 5 (M7): Call executeSend directly without executeWithConcurrencyLimit
           // since the outer call already holds a concurrency slot. Retrying through
           // the wrapper would try to acquire a second slot and block.
-          return await this.executeSend(
+          return await this.executeSend({
             deliveryId,
             payload,
             e164,
-            freshCreds.accessToken,
-            freshCreds.phoneNumberId,
-            freshCreds.apiVersion,
+            accessToken: freshCreds.accessToken,
+            phoneNumberId: freshCreds.phoneNumberId,
+            apiVersion: freshCreds.apiVersion,
             locale,
-            true
-          );
+            isRetry: true,
+          });
         }
 
         return await this.handleHttpError(deliveryId, response, locale);

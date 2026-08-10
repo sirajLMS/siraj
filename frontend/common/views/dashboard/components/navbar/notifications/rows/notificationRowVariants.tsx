@@ -202,6 +202,16 @@ export const EVENT_VARIANT_CONFIG: Record<NotificationEventType, EventVariantCon
     iconColor: infoAccent,
     accentColor: infoAccent,
   },
+  [NotificationEventType.PasswordResetByAdmin]: {
+    icon: <ReportProblemOutlined fontSize="small" />,
+    iconColor: warningAccent,
+    accentColor: warningAccent,
+  },
+  [NotificationEventType.UserStatusChanged]: {
+    icon: <PersonOutlined fontSize="small" />,
+    iconColor: infoAccent,
+    accentColor: infoAccent,
+  },
 };
 
 export const COMPLAINT_BUCKET_VARIANT: EventVariantConfig = {

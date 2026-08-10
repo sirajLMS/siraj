@@ -12,7 +12,6 @@ import type {
   WhatsappAccountCreateSubmitInput,
   WhatsappAccountUpdateInput,
 } from "@/backend/types/whatsapp/whatsapp-account.types";
-import type { LocalizedString } from "@/shared/types/localized-string";
 
 gqlSchemaBuilder.mutationFields(t => ({
   createWhatsappAccount: t.field({
@@ -26,7 +25,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       const input: WhatsappAccountCreateSubmitInput = {
         ...args.input,
         displayName: args.input.displayName
-          ? (Object.fromEntries(Object.entries(args.input.displayName).filter(([, v]) => v != null)) as LocalizedString)
+          ? Object.fromEntries(Object.entries(args.input.displayName).filter(([, v]) => v != null))
           : null,
         isActive: args.input.isActive ?? true,
       };
@@ -46,7 +45,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       const input: WhatsappAccountUpdateInput = {
         ...args.input,
         displayName: args.input.displayName
-          ? (Object.fromEntries(Object.entries(args.input.displayName).filter(([, v]) => v != null)) as LocalizedString)
+          ? Object.fromEntries(Object.entries(args.input.displayName).filter(([, v]) => v != null))
           : undefined,
         isActive: args.input.isActive ?? undefined,
         displayPhoneNumber: args.input.displayPhoneNumber ?? undefined,

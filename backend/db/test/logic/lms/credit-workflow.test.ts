@@ -52,7 +52,8 @@ async function expectSavepointError(fn: () => Promise<unknown>, tx: DBTransactio
     await tx.execute(sql.raw(`RELEASE SAVEPOINT ${sp}`));
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (errorCaught instanceof Error) return errorCaught;
+  throw new Error(String(errorCaught));
 }
 
 describe("Credit workflow — purchase, deduct, refund, idempotency", () => {

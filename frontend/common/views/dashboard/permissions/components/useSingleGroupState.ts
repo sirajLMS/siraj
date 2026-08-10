@@ -116,7 +116,9 @@ const EMPTY_GROUP: PermissionGroup = {
   permissionIds: [],
   assignedUsers: [],
   isSystem: false,
-} as unknown as PermissionGroup;
+  createdAt: null,
+  updatedAt: null,
+};
 
 // NEW FOR PLAN v5: inferred return-type alias for ViewModel consumption
 export type SingleGroupState = ReturnType<typeof useSingleGroupState>;

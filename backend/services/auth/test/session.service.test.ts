@@ -1,12 +1,24 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { SessionRepository, TeacherRepository, UserRepository } from "@/backend/db/repo";
-import { AccountStatus, UserRole } from "@/backend/enum";
+import { AccountStatus, type AppPermission, UserRole } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SessionService } from "@/backend/services/auth/session.service";
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
-import type { SessionSelectType, UserSelectType } from "@/backend/types";
+import type { SessionSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
+
+type MockUserContextOptions = {
+  role: UserRole;
+  isSuperAdmin?: boolean;
+  permissions?: AppPermission[];
+  permissionGroups?: string[];
+};
+
+type SetupTeacherProfileMocksOptions = {
+  userId: string;
+  nationalId: string | null;
+};
 
 const TEACHER_USER_ID = "11111111-1111-1111-1111-111111111111";
 const NON_TEACHER_USER_ID = "22222222-2222-2222-2222-222222222222";
@@ -15,7 +27,7 @@ function mockSafeUser(id: string): UserSelectType {
   return {
     id,
     name: "Test User",
-    email: "test@example.com",
+    email: "[EMAIL_REDACTED]",
     password: "hashed",
     rememberTokenHash: null,
     avatarUrl: null,
@@ -28,74 +40,93 @@ function mockSafeUser(id: string): UserSelectType {
     createdAt: new Date(),
     updatedAt: new Date(),
     emailVerifiedAt: null,
+    lastLoginAt: null,
     displayCurrency: null,
-  } as unknown as UserSelectType;
+  };
 }
 
-afterEach(() => {
+function mockUserContext({
+  role,
+  isSuperAdmin = false,
+  permissions = [],
+  permissionGroups = [],
+}: MockUserContextOptions) {
+  return { permissions, permissionGroups, isSuperAdmin, role };
+}
+
+function mockTeacher(userId: string, nationalId: string | null): TeacherSelectType {
+  return {
+    id: "teacher-1",
+    userId,
+    nationality: null,
+    nationalId,
+    phone: null,
+    dateOfBirth: null,
+    gender: null,
+    address: null,
+    qualifications: null,
+    countryCode: null,
+    hourlyRate: null,
+    rateCurrency: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+function setupTeacherProfileMocks({ userId, nationalId }: SetupTeacherProfileMocksOptions): void {
+  spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser(userId));
+  spyOn(PermissionsService, "getUserContext").mockResolvedValue(mockUserContext({ role: UserRole.TEACHER }));
+  spyOn(TeacherPortalService, "resolveTeacherIdForUser").mockResolvedValue("teacher-1");
+  spyOn(ParentPortalService, "resolveParentIdForUser").mockResolvedValue(null);
+  spyOn(TeacherRepository, "findByUserId").mockResolvedValue(mockTeacher(userId, nationalId));
+}
+
+function restoreTeacherProfileMocks(): void {
   spyOn(UserRepository, "findSafeById").mockRestore();
   spyOn(PermissionsService, "getUserContext").mockRestore();
   spyOn(TeacherPortalService, "resolveTeacherIdForUser").mockRestore();
   spyOn(ParentPortalService, "resolveParentIdForUser").mockRestore();
   spyOn(TeacherRepository, "findByUserId").mockRestore();
+}
+
+function mockSession(userId: string): SessionSelectType {
+  return {
+    hashedId: "hashed-id",
+    userId,
+    ipAddress: null,
+    userAgent: null,
+    payload: "mock-payload",
+    lastActivity: 100n,
+  };
+}
+
+function restoreSessionMocks(): void {
+  spyOn(SessionRepository, "findByHmacHash").mockRestore();
+  spyOn(SessionRepository, "validate").mockRestore();
+  spyOn(SessionRepository, "deleteSessionById").mockRestore();
+}
+
+afterEach(() => {
+  restoreTeacherProfileMocks();
 });
 
 describe("SessionService.getCurrentUserProfile nationalIdComplete flag", () => {
   test("returns nationalIdComplete=true for a teacher with nationalId set", async () => {
-    spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser(TEACHER_USER_ID));
-    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      permissions: [],
-      permissionGroups: [],
-      isSuperAdmin: false,
-      role: UserRole.TEACHER,
-    });
-    spyOn(TeacherPortalService, "resolveTeacherIdForUser").mockResolvedValue("teacher-1");
-    spyOn(ParentPortalService, "resolveParentIdForUser").mockResolvedValue(null);
-    spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
-      id: "teacher-1",
-      userId: TEACHER_USER_ID,
-      nationalId: "29601234567818",
-    } as never);
+    setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: "29601234567818" });
 
     const profile = await SessionService.getCurrentUserProfile(TEACHER_USER_ID);
     expect(profile.nationalIdComplete).toBe(true);
   });
 
   test("returns nationalIdComplete=false for a teacher with nationalId null", async () => {
-    spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser(TEACHER_USER_ID));
-    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      permissions: [],
-      permissionGroups: [],
-      isSuperAdmin: false,
-      role: UserRole.TEACHER,
-    });
-    spyOn(TeacherPortalService, "resolveTeacherIdForUser").mockResolvedValue("teacher-1");
-    spyOn(ParentPortalService, "resolveParentIdForUser").mockResolvedValue(null);
-    spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
-      id: "teacher-1",
-      userId: TEACHER_USER_ID,
-      nationalId: null,
-    } as never);
+    setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: null });
 
     const profile = await SessionService.getCurrentUserProfile(TEACHER_USER_ID);
     expect(profile.nationalIdComplete).toBe(false);
   });
 
   test("returns nationalIdComplete=false for a teacher with whitespace-only nationalId", async () => {
-    spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser(TEACHER_USER_ID));
-    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      permissions: [],
-      permissionGroups: [],
-      isSuperAdmin: false,
-      role: UserRole.TEACHER,
-    });
-    spyOn(TeacherPortalService, "resolveTeacherIdForUser").mockResolvedValue("teacher-1");
-    spyOn(ParentPortalService, "resolveParentIdForUser").mockResolvedValue(null);
-    spyOn(TeacherRepository, "findByUserId").mockResolvedValue({
-      id: "teacher-1",
-      userId: TEACHER_USER_ID,
-      nationalId: "   ",
-    } as never);
+    setupTeacherProfileMocks({ userId: TEACHER_USER_ID, nationalId: "   " });
 
     const profile = await SessionService.getCurrentUserProfile(TEACHER_USER_ID);
     expect(profile.nationalIdComplete).toBe(false);
@@ -103,15 +134,10 @@ describe("SessionService.getCurrentUserProfile nationalIdComplete flag", () => {
 
   test("returns nationalIdComplete=true for a non-teacher user (gate is teacher-only)", async () => {
     spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser(NON_TEACHER_USER_ID));
-    spyOn(PermissionsService, "getUserContext").mockResolvedValue({
-      permissions: [],
-      permissionGroups: [],
-      isSuperAdmin: false,
-      role: UserRole.PARENT,
-    });
+    spyOn(PermissionsService, "getUserContext").mockResolvedValue(mockUserContext({ role: UserRole.PARENT }));
     spyOn(TeacherPortalService, "resolveTeacherIdForUser").mockResolvedValue(null);
     spyOn(ParentPortalService, "resolveParentIdForUser").mockResolvedValue("parent-1");
-    const teacherSpy = spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null as never);
+    const teacherSpy = spyOn(TeacherRepository, "findByUserId").mockResolvedValue(null);
 
     const profile = await SessionService.getCurrentUserProfile(NON_TEACHER_USER_ID);
     expect(profile.nationalIdComplete).toBe(true);
@@ -122,31 +148,16 @@ describe("SessionService.getCurrentUserProfile nationalIdComplete flag", () => {
 
 describe("SessionService.validateSession orphan session handling", () => {
   afterEach(() => {
-    spyOn(SessionRepository, "findByHmacHash").mockRestore();
-    spyOn(SessionRepository, "validate").mockRestore();
-    spyOn(SessionRepository, "deleteSessionById").mockRestore();
+    restoreSessionMocks();
   });
 
   test("purges and returns null when session references non-existent user", async () => {
     const fakeSessionId = "fake-raw-session-id";
     const fakeUserId = "1bba9ec0-1e51-46f9-be75-9941dcb7fd76";
+    const fakeSession = mockSession(fakeUserId);
 
-    spyOn(SessionRepository, "findByHmacHash").mockResolvedValue({
-      hashedId: "hashed-id",
-      userId: fakeUserId,
-      ipAddress: null,
-      userAgent: null,
-      payload: undefined,
-      lastActivity: 100n,
-    } as unknown as SessionSelectType);
-    spyOn(SessionRepository, "validate").mockResolvedValue({
-      hashedId: "hashed-id",
-      userId: fakeUserId,
-      ipAddress: null,
-      userAgent: null,
-      payload: undefined,
-      lastActivity: 100n,
-    } as unknown as SessionSelectType);
+    spyOn(SessionRepository, "findByHmacHash").mockResolvedValue(fakeSession);
+    spyOn(SessionRepository, "validate").mockResolvedValue(fakeSession);
     const deleteSpy = spyOn(SessionRepository, "deleteSessionById").mockResolvedValue(null);
     spyOn(UserRepository, "findSafeById").mockResolvedValue(null);
 

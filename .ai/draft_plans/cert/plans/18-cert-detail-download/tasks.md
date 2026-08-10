@@ -4,6 +4,88 @@
 > **Dependencies:** Plan 2 (Types & Permissions), Plan 4 (Services), Plan 5 (GraphQL API), Plan 6 (PDF Rendering Engine), Plan 7 (Storage & Signed URLs), Plan 16 (Certificate List), Plan 01 (Database Schema)
 > **Dependents:** Plan 19 (Public Verification Page)
 > **Estimate:** 18 tasks · ~68 hours total
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+
+---
+
+## Task Dependency Graph & Execution Order
+
+```
+T00 ─┬──► T04 ─┬──► T05 ──► T07 ──► T11 ┐
+T01 ─┤         ├──► T06 ──► T07 ──► T11 ┃
+T02 ─┤         ├──► T08 ──► T07 ──► T11 ┃──► T11, T12 (Phase 1–4 complete)
+T03 ─┘         ├──► T09 ──► T07 ──► T11 ┃
+               ├──► T10 ──► T07 ──► T11 ┃
+               └──► T16 ──► T07 ──► T11 ┘
+T39 (independent) ──► R4 backend schema
+T13 ──► T15 ──► T17, T32
+T14 ──► T28, T30
+T18, T19 ──► T31, T38
+T20 ──► T24
+T21 ──► T30, T37
+T22 ──► T33, T34
+T23 ──► T28, T29, T31, T34
+T24, T25, T26, T27 (Phase 3 R2 gate)
+T28–T34 ──► T35 ──► T40 ──► T41 ──► T42 ──► T43 ──► T44
+```
+
+**Execution order**: (T00, T01, T02, T03, T39 via parallel subagents) → (T04 via parallel subagents after Wave 1) → (T05, T06, T08, T09, T10, T16 via parallel subagents after T04) → (T07, T13, T14, T18, T19, T20, T21, T22, T23 via parallel subagents after Wave 3) → (T11, T12, T15, T28, T30, T31, T33, T34, T37, T38 via parallel subagents after Wave 4) → (T17, T29, T32, T36 via parallel subagents after Wave 5) → (T24, T35 via parallel subagents after Wave 6) → (T25, T40 via parallel subagents after Wave 7) → (T26, T41 via parallel subagents after Wave 8) → (T27, T42 via parallel subagents after Wave 9) → T43 → T44
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T00, T01, T02, T03, T39
+- Tasks: T00 (qrcode install), T01 (i18n + store), T02 (GraphQL documents), T03 (App Router page), T39 (backend R4 schema)
+- Rationale: All have zero internal dependencies — foundation tasks can proceed concurrently (T00 installs packages, T01 defines i18n/store, T02 writes GraphQL documents, T03 scaffolds the route page, T39 adds backend schema independently)
+
+### Wave 2: T04
+- Tasks: T04 (container with query & state orchestration)
+- Rationale: T04 depends on T00–T03; all from Wave 1 must complete before the container can import store, documents, and page wiring
+
+### Wave 3: T05, T06, T08, T09, T10, T16
+- Tasks: T05 (desktop/mobile presentation views), T06 (PDF/PNG/JPG download), T08 (revoke & re-issue dialogs), T09 (audit trail timeline), T10 (verification URL & QR code), T16 (overview tab)
+- Rationale: All depend only on T04 (and T01/T02 from Wave 1) — no interdependencies among them, so they can run as 6 parallel subagents
+
+### Wave 4: T07, T13, T14, T18, T19, T20, T21, T22, T23
+- Tasks: T07 (print via iframe), T13 (presentation shell), T14 (preview viewer), T18 (audit trail tab), T19 (download history tab), T20 (revoke confirm dialog), T21 (PDF download button), T22 (QR verification card), T23 (store extension)
+- Rationale: T07 depends on T06 (completed in Wave 3); T13 depends on T05 (Wave 3); T14 depends on T06; T18/T19 depend on T09; T20 depends on T08; T21 depends on T06; T22 depends on T10; T23 depends on T06/T01/T02 — all prerequisites satisfied, no cross-dependencies within the wave
+
+### Wave 5: T11, T12, T15, T28, T30, T31, T33, T34, T37, T38
+- Tasks: T11 (component tests), T12 (knowledge propagation), T15 (details panel), T28 (zoom/pan gestures), T30 (download format menu), T31 (certificate timeline visualization), T33 (share link generation), T34 (QR code card enhancement), T37 (print preview), T38 (audit trail download tracking)
+- Rationale: T11/T12 depend on T01–T10 (all prior); T15 depends on T13; T28 depends on T13/T23; T30 depends on T21/T06/T02; T31 depends on T18/T09/T23; T33 depends on T22/T10; T34 depends on T22/T23; T37 depends on T13/T21; T38 depends on T19/T06 — all interdependencies resolved after Wave 4
+
+### Wave 6: T17, T29, T32, T36
+- Tasks: T17 (variable values tab), T29 (full-screen viewer), T32 (revision history panel), T36 (loading & error states)
+- Rationale: T17 depends on T02/T15/T03; T29 depends on T28/T23; T32 depends on T15/T01; T36 depends on T13/T28/T30/T06 — all are available after Wave 5
+
+### Wave 7: T24, T35
+- Tasks: T24 (component tests R2), T35 (accessibility audit R4)
+- Rationale: T24 depends on T13–T22 (all prior R2); T35 depends on T28–T34 (all R4 components) — both barriers met simultaneously
+
+### Wave 8: T25, T40
+- Tasks: T25 (E2E tests R2), T40 (i18n keys for R4)
+- Rationale: T25 depends on T13–T22 + T24 (Wave 7); T40 depends on T28–T38 (Wave 5) — both prerequisites resolve synchronously
+
+### Wave 9: T26, T41
+- Tasks: T26 (quality loop R2), T41 (R4 component tests)
+- Rationale: T26 depends on T13–T25 (Wave 8 for T25); T41 depends on T28–T40 (Wave 8 for T40) + T24 — both release after Wave 8 completes
+
+### Wave 10: T27, T42
+- Tasks: T27 (knowledge propagation R2), T42 (R4 E2E tests)
+- Rationale: T27 depends on T13–T26 (Wave 9); T42 depends on T28–T40 + T41 (Wave 9) — concurrent readiness
+
+### Wave 11: T43
+- Tasks: T43 (R4 quality loop per file)
+- Rationale: Depends on T28–T42 (all Wave 10 done); must wait for all R4 files and tests to exist
+
+### Final Wave: Knowledge Propagation
+- Task: T44 (R4 knowledge propagation)
+- Rationale: Must run after all other tasks (T28–T43) complete — synthesizes every outcome file into the knowledge base
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -74,12 +156,13 @@
 
 **Dependencies:** None
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T01, T02, T03, T39.
+
 **Requirements covered:** REQ-18-11 (QR code generation requires qrcode package)
 
 **Quality loop:**
 ```bash
-bun tsgo
-bun biome:check
+bun run scripts/health/sub-loop.ts package.json --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -152,15 +235,17 @@ bun biome:check
 - `frontend/common/stores/certDetailStore.ts`
 - `frontend/common/stores/__mocks__/certDetailStore.ts`
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T00, T02, T03, T39.
+
 **Requirements covered:** REQ-18-01 (i18n), REQ-18-04 (revoke i18n), REQ-18-05 (reissue i18n), REQ-18-06 (audit i18n), REQ-18-08a (share i18n)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T01","files":["<file-path>"]}'
+bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/certificates/detail.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/certificates/detail.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/certificates/detail.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/certDetailStore.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/stores/__mocks__/certDetailStore.ts --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -240,15 +325,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 **Files modified (code generation):**
 - `frontend/common/graphql/generated/` (auto-generated — do not edit manually)
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T00, T01, T03, T39.
+
 **Requirements covered:** REQ-18-01 through REQ-18-07, REQ-18-09, REQ-18-11
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T02","files":["frontend/common/graphql/sharedDocuments/certificates/certDetail.documents.ts"]}'
+bun run scripts/health/sub-loop.ts frontend/common/graphql/sharedDocuments/certificates/certDetail.documents.ts --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -301,15 +384,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - `frontend/common/views/dashboard/cert-detail/DashboardAccessDeniedContent.tsx` (if not already in Plan 16)
 - `frontend/common/views/dashboard/cert-detail/DashboardNotFoundContent.tsx` (if not already in Plan 16)
 
+> **Parallelizable**: This task runs as a subagent in Wave 1 alongside T00, T01, T02, T39.
+
 **Requirements covered:** REQ-18-01 (detail page route), REQ-18-01a (UUID validation), REQ-18-13 (permission access)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T03","files":["app/(dashboard)/certificates/[certificateId]/page.tsx"]}'
+bun run scripts/health/sub-loop.ts app/(dashboard)/certificates/[certificateId]/page.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -437,15 +518,16 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Dependencies:** T00 (qrcode), T01 (store), T02 (documents), T03 (page)
 
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T39.
+
+**Requirements covered:** REQ-18-01 through REQ-18-11
+
 **Requirements covered:** REQ-18-01 through REQ-18-07, REQ-18-09, REQ-18-11, REQ-18-11a
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T04","files":["frontend/common/views/dashboard/cert-detail/certDetailContainer.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/certDetailContainer.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/useCertDetailViewModel.ts --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -603,15 +685,16 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Dependencies:** T04 (container provides ViewModel)
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T06, T08, T09, T10, T16.
+
 **Requirements covered:** REQ-18-01 (detail display), REQ-18-07 (status badge C.1), REQ-18-09 (breadcrumb), REQ-18-10 (mobile), REQ-18-09 (audit timeline C.9)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T05","files":["<file-path>"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/VerificationLinkCopy.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/CertificateActionsBar.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/DownloadMenu.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/StatusTimeline.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -688,15 +771,15 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Dependencies:** T01 (store), T02 (documents), T04 (container), Plan 06 (PDF Rendering Engine), Plan 07 (Storage & Signed URLs)
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T05, T08, T09, T10, T16.
+
 **Requirements covered:** REQ-18-02 (PDF download), REQ-18-02a (PNG), REQ-18-02b (JPG), REQ-18-03 (lazy render polling), REQ-18-04 (error handling C.5)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T06","files":["<file-path>"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/certDetailContainer.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/utils/downloadFile.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/DownloadMenu.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -759,15 +842,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Dependencies:** T01 (store), T02 (documents), T04 (container), T06 (shares lazy render logic and `downloadFromUrl` utility)
 
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T13, T14, T18, T19, T20, T21, T22, T23.
+
 **Requirements covered:** REQ-18-05 (print via off-screen iframe — C.6, not display:none)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T07","files":["frontend/common/views/dashboard/cert-detail/PrintFrame.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/PrintFrame.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -837,15 +918,14 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Dependencies:** T01 (store), T02 (documents), T04 (container)
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T05, T06, T09, T10, T16.
+
 **Requirements covered:** REQ-18-05 (revocation), REQ-18-06 (re-issue — C.7 renamed from reactivation), REQ-18-10 (status badge 5 canonical values)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T08","files":["frontend/common/views/dashboard/cert-detail/RevokeDialog.tsx","frontend/common/views/dashboard/cert-detail/ReissueDialog.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/RevokeDialog.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/ReissueDialog.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -917,15 +997,13 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Dependencies:** T01 (store), T02 (documents), T04 (container — provides ViewModel with audit state)
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T05, T06, T08, T10, T16.
+
 **Requirements covered:** REQ-18-07 (audit trail — C.9 paginated, server-sorted, expandable), REQ-18-10 (status badge canonical values)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T09","files":["frontend/common/views/dashboard/cert-detail/StatusTimeline.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/StatusTimeline.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -996,15 +1074,15 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 
 **Dependencies:** T00 (qrcode package), T01 (i18n, store), T04 (container — provides ViewModel)
 
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T05, T06, T08, T09, T16.
+
 **Requirements covered:** REQ-18-09 (verification URL display + QR), REQ-18-08a (share dialog), REQ-18-11 (QR at 200x200 SVG, 1024x1024 PNG download)
 
-**Quality loop per file:**
+**Quality loop per file (full progressive chain: tsgo → biome → lint → codescene):**
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify-18-T10","files":["frontend/common/views/dashboard/cert-detail/QrCodeDisplay.tsx","frontend/common/views/dashboard/cert-detail/VerificationLinkCopy.tsx","frontend/common/views/dashboard/cert-detail/ShareDialog.tsx"]}'
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/QrCodeDisplay.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/VerificationLinkCopy.tsx --lifecycle codescene
+bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/cert-detail/ShareDialog.tsx --lifecycle codescene
 ```
 
 **Instruction verification:**
@@ -1066,6 +1144,8 @@ curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
 - `test/ui/components/cert-detail/DashboardAccessDeniedContent.test.tsx`
 
 **Dependencies:** All prior tasks (T01–T10)
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T12, T15, T28, T30, T31, T33, T34, T37, T38.
 
 **Requirements covered:** Validates REQ-18-01 through REQ-18-13, all C.1 through C.13 reality check fixes
 
@@ -1151,6 +1231,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 **Status:** Supplemental — appended atop T00–T12; no removals.
 **Dependencies:** T00–T10 (store, queries, i18n, download/print plumbing, audit/verify wiring).
 
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T15, T28, T30, T31, T33, T34, T37, T38.
+
 ### T13: CertificateDetailPage Presentation Shell
 
 **Goal:** Container-style top-level page composing header + breadcrumb + two-column body grid + QR card.
@@ -1167,6 +1249,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 6 hours
 **Dependencies:** T01 (store), T04 (container), T05 (desktop view tier pattern).
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T14, T18, T19, T20, T21, T22, T23.
 **Outcome file:** `.ai/plans/cert-18/outcome/T13-outcome.md`
 
 ---
@@ -1193,6 +1277,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 10 hours
 **Dependencies:** T06 (mint signed URL plumbing), C.6 print pattern.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T13, T18, T19, T20, T21, T22, T23.
 **Outcome file:** `.ai/plans/cert-18/outcome/T14-outcome.md`
 
 ---
@@ -1211,6 +1297,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 4 hours
 **Dependencies:** T13 (parent shell).
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T28, T30, T31, T33, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T15-outcome.md`
 
 ---
@@ -1238,6 +1326,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 8 hours
 **Dependencies:** T03 (page), T04 (container).
+
+> **Parallelizable**: This task runs as a subagent in Wave 3 alongside T05, T06, T08, T09, T10.
 **Outcome file:** `.ai/plans/cert-18/outcome/T16-outcome.md`
 
 ---
@@ -1260,6 +1350,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 6 hours
 **Dependencies:** T02 (documents), T15 (panel), T03 (page).
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T29, T32, T36.
 **Outcome file:** `.ai/plans/cert-18/outcome/T17-outcome.md`
 
 ---
@@ -1286,6 +1378,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 10 hours
 **Dependencies:** T09 (audit pagination/wiring), C.9 pagination pattern.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T13, T14, T19, T20, T21, T22, T23.
 **Outcome file:** `.ai/plans/cert-18/outcome/T18-outcome.md`
 
 ---
@@ -1309,6 +1403,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 6 hours
 **Dependencies:** T09 (audit query plumbing).
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T13, T14, T18, T20, T21, T22, T23.
 **Outcome file:** `.ai/plans/cert-18/outcome/T19-outcome.md`
 
 ---
@@ -1334,6 +1430,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 6 hours
 **Dependencies:** T08 (revoke mutation glue), C.7 reason enum.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T13, T14, T18, T19, T21, T22, T23.
 **Outcome file:** `.ai/plans/cert-18/outcome/T20-outcome.md`
 
 ---
@@ -1358,6 +1456,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 6 hours
 **Dependencies:** T06 (download plumbing), C.4 split-download.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T13, T14, T18, T19, T20, T22, T23.
 **Outcome file:** `.ai/plans/cert-18/outcome/T21-outcome.md`
 
 ---
@@ -1381,6 +1481,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 4 hours
 **Dependencies:** T00 (qrcode install), T10 (verify URL plumbing), C.13 base URL convention.
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T13, T14, T18, T19, T20, T21, T23.
 **Outcome file:** `.ai/plans/cert-18/outcome/T22-outcome.md`
 
 ---
@@ -1406,6 +1508,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 8 hours
 **Dependencies:** T01 (initial store from T01 baseline), T02 (documents), T06 (download glue).
+
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T07, T13, T14, T18, T19, T20, T21, T22.
 **Outcome file:** `.ai/plans/cert-18/outcome/T23-outcome.md`
 
 ---
@@ -1429,10 +1533,12 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 24.4 Each test file includes ≥3 test cases for robust coverage.
 - [ ] 24.5 Run all six tests via `bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.tsx` per `tests.instructions.md`.
 - [ ] 24.6 Verify with `frontend/AGENTS.md` + `test/ui/AGENTS.md` instructions.
-- [ ] 24.7 Quality loop per test file (`bun biome:check` + tsgo + lint queue client for each file).
+- [ ] 24.7 Quality loop per test file: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each file.
 
 **Duration:** 14 hours
 **Dependencies:** All T13–T22 implementation tasks.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T35.
 **Outcome file:** `.ai/plans/cert-18/outcome/T24-outcome.md`
 
 ---
@@ -1452,10 +1558,12 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 25.6 Test 5 — Revoke certificate: click Revoke, choose reason (e.g. `DISHONESTY`), toggle notify switch off, confirm — assert success snackbar + badge updates to REVOKED + Revoke button hidden.
 - [ ] 25.7 Test 6 — Copy verification URL: in Overview tab, click Copy icon on verification URL, assert clipboard contains `NEXT_PUBLIC_PUBLIC_BASE_URL/verify/<code>` (use Playwright `browserContext.grantPermissions(['clipboard-read', 'clipboard-write'])`).
 - [ ] 25.8 Each test seeds a fresh certificate via Playwright fixture (use `globalSetup` script — mirror Plan 16 fixture pattern).
-- [ ] 25.9 Quality loop per test file (`bun biome:check` + tsgo + lint queue client).
+- [ ] 25.9 Quality loop per test file: `bun run scripts/health/sub-loop.ts test/ui/e2e/cert-detail-18.spec.ts --lifecycle codescene`.
 
 **Duration:** 16 hours
 **Dependencies:** T13–T22 implementation tasks done + T24 component tests.
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T40.
 **Outcome file:** `.ai/plans/cert-18/outcome/T25-outcome.md`
 
 ---
@@ -1471,11 +1579,13 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 26.2 Persist sub-loop stdout to per-file log under `.ai/plans/cert-18/outcome/quality-logs/` directory (NOT in repo root).
 - [ ] 26.3 For each failed check, apply the relevant fix following `frontend.instructions.md` and/or `tests.instructions.md` (per the AGENTS.md instruction file mapping).
 - [ ] 26.4 Cross-file violation follow-up reported to orchestrator per the "Fix-Or-Report" rule in root AGENTS.md.
-- [ ] 26.5 Re-run full `bun run lint` (queue client serializes) after all files green to verify no inter-file regressions.
-- [ ] 26.6 Final `bun tsgo` + `bun biome:check` reproduction run.
+- [ ] 26.5 Re-run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for any file whose fix required cross-file coordination (the sub-loop serializes lint in-process).
+- [ ] 26.6 Final full-repo `bun quality-gate` run to confirm no regressions across tsgo → biome → lint → codescene.
 
 **Duration:** 8 hours
 **Dependencies:** All T13–T25 atomic files exist.
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T41.
 **Outcome file:** `.ai/plans/cert-18/outcome/T26-outcome.md`
 
 ---
@@ -1499,6 +1609,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 2-3 hours
 **Dependencies:** All T13–T26 tasks complete.
+
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T42.
 **Outcome file:** `.ai/plans/cert-18/outcome/T27-outcome.md`
 
 ---
@@ -1532,6 +1644,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 10 hours
 **Dependencies:** T13 (CertificatePreviewViewer baseline), T23.1 (store viewer fields).
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T30, T31, T33, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T28-outcome.md`
 
 ---
@@ -1561,6 +1675,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 8 hours
 **Dependencies:** T28 (zoom/pan gestures), T23.1 (store fullscreen field).
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T17, T32, T36.
 **Outcome file:** `.ai/plans/cert-18/outcome/T29-outcome.md`
 
 ---
@@ -1591,6 +1707,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 8 hours
 **Dependencies:** T21 (PdfDownloadButton baseline), T06 (download plumbing), T02 (GraphQL documents).
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T31, T33, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T30-outcome.md`
 
 ---
@@ -1620,6 +1738,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 8 hours
 **Dependencies:** T18 (AuditTimeline vertical), T09 (audit query plumbing), T23.3 (audit store fields).
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T33, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T31-outcome.md`
 
 ---
@@ -1657,6 +1777,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 14 hours
 **Dependencies:** T15 (CertificateDetailsPanel baseline), T01 (store baseline), backend revision schema.
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T17, T29, T36.
 **Outcome file:** `.ai/plans/cert-18/outcome/T32-outcome.md`
 
 ---
@@ -1694,6 +1816,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 14 hours
 **Dependencies:** T22 (QrVerificationCard pattern), T01 (store), T10 (verify URL plumbing), C.13 base URL.
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T31, T34, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T33-outcome.md`
 
 ---
@@ -1720,6 +1844,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 6 hours
 **Dependencies:** T22 (QrVerificationCard baseline), T23 (store).
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T31, T33, T37, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T34-outcome.md`
 
 ---
@@ -1754,6 +1880,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 10 hours
 **Dependencies:** T28–T34 (all R4 components exist), shared/locale infrastructure.
+
+> **Parallelizable**: This task runs as a subagent in Wave 7 alongside T24.
 **Outcome file:** `.ai/plans/cert-18/outcome/T35-outcome.md`
 
 ---
@@ -1779,6 +1907,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 8 hours
 **Dependencies:** T13 (preview viewer), T28 (zoom/pan), T30 (format menu), T06 (render status poll).
+
+> **Parallelizable**: This task runs as a subagent in Wave 6 alongside T17, T29, T32.
 **Outcome file:** `.ai/plans/cert-18/outcome/T36-outcome.md`
 
 ---
@@ -1805,6 +1935,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 6 hours
 **Dependencies:** T13 (preview viewer), T21 (download button), shared/locale infrastructure.
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T31, T33, T34, T38.
 **Outcome file:** `.ai/plans/cert-18/outcome/T37-outcome.md`
 
 ---
@@ -1834,6 +1966,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 10 hours
 **Dependencies:** T19 (DownloadHistoryTable baseline), T06 (download plumbing), shared/locale infrastructure.
+
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T11, T12, T15, T28, T30, T31, T33, T34, T37.
 **Outcome file:** `.ai/plans/cert-18/outcome/T38-outcome.md`
 
 ---
@@ -1869,6 +2003,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 16 hours
 **Dependencies:** T02 (schema baseline), backend/types infrastructure, backend/graphql infrastructure.
+
+> **Parallelizable**: This task runs as a subagent in Wave 2 alongside T04.
 **Outcome file:** `.ai/plans/cert-18/outcome/T39-outcome.md`
 
 ---
@@ -1905,6 +2041,8 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 8 hours
 **Dependencies:** All R4 component tasks (T28–T38) for key exhaustion; shared/locale infrastructure.
+
+> **Parallelizable**: This task runs as a subagent in Wave 8 alongside T25.
 **Outcome file:** `.ai/plans/cert-18/outcome/T40-outcome.md`
 
 ---
@@ -1931,11 +2069,13 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 41.5 Test consent checkbox state persistence via `localStorage` mock.
 - [ ] 41.6 Run all tests via `bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.tsx` per `tests.instructions.md`.
 - [ ] 41.7 Verify with `frontend/AGENTS.md` + `test/ui/AGENTS.md` + `tests.instructions.md` instructions.
-- [ ] 41.8 Quality loop per test file (`bun biome:check` + tsgo + lint queue client for each file).
+- [ ] 41.8 Quality loop per test file: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each file.
 - [ ] 41.9 Persist results to `.ai/plans/cert-18/outcome/quality-logs/T41-*.log`.
 
 **Duration:** 16 hours
 **Dependencies:** T28–T40 implementation tasks, T24 (existing cert-detail test pattern).
+
+> **Parallelizable**: This task runs as a subagent in Wave 9 alongside T26.
 **Outcome file:** `.ai/plans/cert-18/outcome/T41-outcome.md`
 
 ---
@@ -1953,11 +2093,13 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 42.4 Test 3 — Share link: click Share, select 7-day expiry, enable password, generate, assert URL textfield contains `/share/`, copy to clipboard (grant permissions), revoke button visible.
 - [ ] 42.5 Test 4 — Revision revert: switch to Revisions tab, select a previous revision, click Revert, confirm in dialog, assert success snackbar + certificate detail refetches.
 - [ ] 42.6 Each test seeds a fresh certificate via Playwright fixture (mirror Plan 16 fixture pattern).
-- [ ] 42.7 Quality loop per test file (`bun biome:check` + tsgo + lint queue client).
+- [ ] 42.7 Quality loop per test file: `bun run scripts/health/sub-loop.ts test/ui/e2e/cert-detail-18-r4.spec.ts --lifecycle codescene`.
 - [ ] 42.8 Persist results to `.ai/plans/cert-18/outcome/quality-logs/T42-*.log`.
 
 **Duration:** 12 hours
 **Dependencies:** T28–T40 done + T41 component tests; production build.
+
+> **Parallelizable**: This task runs as a subagent in Wave 10 alongside T27.
 **Outcome file:** `.ai/plans/cert-18/outcome/T42-outcome.md`
 
 ---
@@ -1973,12 +2115,13 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 - [ ] 43.2 Persist sub-loop stdout to per-file log under `.ai/plans/cert-18/outcome/quality-logs/R4-T43-*.log` (NOT in repo root).
 - [ ] 43.3 For each failed check, apply fix per `frontend.instructions.md` and/or `tests.instructions.md` and/or `backend.instructions.md` (per AGENTS.md instruction file mapping).
 - [ ] 43.4 Cross-file violation follow-up reported to orchestrator per the "Fix-Or-Report" rule in root AGENTS.md.
-- [ ] 43.5 Re-run `bun run lint` (queue client serializes) after all files green.
-- [ ] 43.6 Final `bun tsgo` + `bun biome:check` reproduction run.
-- [ ] 43.7 Start lint queue server if not running: `~/.bun/bin/bun run scripts/lint-queue-server.ts` (background; AGENTS.md lint queue section).
+- [ ] 43.5 Re-run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for any file whose fix required cross-file coordination (the sub-loop serializes lint in-process).
+- [ ] 43.6 Final full-repo `bun quality-gate` run to confirm no regressions across tsgo → biome → lint → codescene.
 
 **Duration:** 8 hours
 **Dependencies:** All T28–T42 atomic files exist.
+
+> **Parallelizable**: This task runs as a subagent in Wave 11 (solo — no siblings, but waits for all Wave 10 subagents).
 **Outcome file:** `.ai/plans/cert-18/outcome/T43-outcome.md`
 
 ---
@@ -2004,4 +2147,6 @@ bun run scripts/run-test/run-test.ts test/ui/components/cert-detail/<file>.test.
 
 **Duration:** 3 hours
 **Dependencies:** All T28–T43 tasks complete.
+
+> **Parallelizable**: This task runs in the Final Wave (knowledge propagation) — must complete after all other tasks.
 **Outcome file:** `.ai/plans/cert-18/outcome/T44-outcome.md`

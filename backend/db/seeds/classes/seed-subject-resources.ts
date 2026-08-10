@@ -1,4 +1,4 @@
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
 import { LearningResourceService } from "@/backend/services/resource/learning-resource.service";
 import type { SubjectResourceReturnType } from "@/backend/types";

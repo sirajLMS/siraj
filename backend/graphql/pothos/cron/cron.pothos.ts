@@ -10,7 +10,7 @@ import {
   CronScheduleStatusPothosEnum,
   CronTriggerSourcePothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { CronService } from "@/backend/services/cron/cron.service";
 import type {
   CronQueueStats,
@@ -136,33 +136,34 @@ const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
   }),
 });
 
-const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmitInput", {
-  fields: t => ({
-    name: t.string({ required: true }),
+/** Fields shared by both submit and update input types — all optional. */
+function commonScheduleOptionalFields(t: Parameters<Parameters<typeof gqlSchemaBuilder.inputType>[1]["fields"]>[0]) {
+  return {
     description: t.string({ required: false }),
-    cronExpression: t.string({ required: true }),
-    jobKind: t.field({ type: CronJobKindPothosEnum, required: true }),
     payload: t.field({ type: "JSON", required: false }),
     timezone: t.string({ required: false }),
     concurrencyPolicy: t.field({ type: CronConcurrencyPolicyPothosEnum, required: false }),
     maxRetries: t.int({ required: false }),
     retryBackoffSeconds: t.int({ required: false }),
     timeoutSeconds: t.int({ required: false }),
+  };
+}
+
+const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmitInput", {
+  fields: t => ({
+    name: t.string({ required: true }),
+    cronExpression: t.string({ required: true }),
+    jobKind: t.field({ type: CronJobKindPothosEnum, required: true }),
+    ...commonScheduleOptionalFields(t),
   }),
 });
 
 const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronScheduleUpdateInput", {
   fields: t => ({
     name: t.string({ required: false }),
-    description: t.string({ required: false }),
     cronExpression: t.string({ required: false }),
     jobKind: t.field({ type: CronJobKindPothosEnum, required: false }),
-    payload: t.field({ type: "JSON", required: false }),
-    timezone: t.string({ required: false }),
-    concurrencyPolicy: t.field({ type: CronConcurrencyPolicyPothosEnum, required: false }),
-    maxRetries: t.int({ required: false }),
-    retryBackoffSeconds: t.int({ required: false }),
-    timeoutSeconds: t.int({ required: false }),
+    ...commonScheduleOptionalFields(t),
   }),
 });
 
@@ -187,6 +188,13 @@ const CronRunRetryInput = gqlSchemaBuilder.inputType("CronRunRetryInput", {
   }),
 });
 
+// ─── Type Guards ──────────────────────────────────────────────────────────────
+
+function isRecordOrNull(value: unknown): value is Record<string, unknown> | null {
+  if (value === null) return true;
+  return typeof value === "object" && !Array.isArray(value);
+}
+
 // ─── Error Handler ────────────────────────────────────────────────────────────
 
 function handleNotFoundError(result: unknown, id: string, tErrors: ErrorsLabels): asserts result {
@@ -210,8 +218,8 @@ gqlSchemaBuilder.queryField("cronSchedule", t =>
     description: "Fetch a single cron schedule by ID.",
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
-      const result = await CronService.getSchedule(String(args.id));
-      handleNotFoundError(result, String(args.id), tErrors);
+      const result = await CronService.getSchedule(args.id);
+      handleNotFoundError(result, args.id, tErrors);
       return result;
     },
   })
@@ -228,8 +236,8 @@ gqlSchemaBuilder.queryField("cronRun", t =>
     description: "Fetch a single cron run by ID.",
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
-      const result = await CronService.getRunById(String(args.id));
-      handleNotFoundError(result, String(args.id), tErrors);
+      const result = await CronService.getRunById(args.id);
+      handleNotFoundError(result, args.id, tErrors);
       return result;
     },
   })
@@ -295,7 +303,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         description: args.input.description ?? null,
         cronExpression: args.input.cronExpression,
         jobKind: args.input.jobKind,
-        payload: (args.input.payload as Record<string, unknown> | null) ?? null,
+        payload: isRecordOrNull(args.input.payload) ? args.input.payload : null,
         timezone: args.input.timezone ?? IanaTimezone.UTC,
         concurrencyPolicy: args.input.concurrencyPolicy ?? CronConcurrencyPolicy.ALLOW,
         maxRetries: args.input.maxRetries ?? 3,
@@ -320,7 +328,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         description: args.input.description ?? undefined,
         cronExpression: args.input.cronExpression ?? undefined,
         jobKind: args.input.jobKind ?? undefined,
-        payload: (args.input.payload as Record<string, unknown> | null) ?? undefined,
+        payload: isRecordOrNull(args.input.payload) ? args.input.payload : undefined,
         timezone: args.input.timezone ?? undefined,
         concurrencyPolicy: args.input.concurrencyPolicy ?? undefined,
         maxRetries: args.input.maxRetries ?? undefined,
@@ -378,7 +386,7 @@ gqlSchemaBuilder.mutationFields(t => ({
         {
           id: args.input.id,
           source: CronTriggerSource.MANUAL,
-          payload: args.input.payload as Record<string, unknown> | null,
+          payload: isRecordOrNull(args.input.payload) ? args.input.payload : null,
         },
         ctx.locale
       );

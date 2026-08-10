@@ -1,7 +1,7 @@
+import type { SQL } from "drizzle-orm";
 import { and, desc, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
 import { siteContent } from "@/backend/db/schema/storage/site-content";
 import type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
 
@@ -9,6 +9,12 @@ export namespace SiteContentRepository {
   export async function findBySlug(slug: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
     const q = queryDb(tx);
     const [row] = await q.select().from(siteContent).where(eq(siteContent.slug, slug)).limit(1);
+    return row ?? null;
+  }
+
+  export async function findById(id: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
+    const q = queryDb(tx);
+    const [row] = await q.select().from(siteContent).where(eq(siteContent.id, id)).limit(1);
     return row ?? null;
   }
 
@@ -54,26 +60,22 @@ export namespace SiteContentRepository {
     inputs: readonly SiteContentUpsertInput[],
     tx?: DBTransaction
   ): Promise<SiteContentSelectType[]> {
-    const results: SiteContentSelectType[] = [];
-    for (const input of inputs) {
-      results.push(await upsert(input, tx));
-    }
-    return results;
+    return Promise.all(inputs.map(input => upsert(input, tx)));
   }
 
   export async function listAll(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
     const q = queryDb(tx);
-    return q.select().from(siteContent).orderBy(desc(siteContent.updatedAt));
+    const rows = await q.select().from(siteContent).orderBy(desc(siteContent.updatedAt));
+    return rows;
   }
 
-  function selectOrdered(
+  async function selectOrdered(
     tx: DBTransaction | undefined,
-    where: ReturnType<typeof eq> | ReturnType<typeof and>
+    where: SQL | undefined
   ): Promise<SiteContentSelectType[]> {
     const q = queryDb(tx);
-    return q.select().from(siteContent).where(where).orderBy(desc(siteContent.updatedAt)) as Promise<
-      SiteContentSelectType[]
-    >;
+    const rows = await q.select().from(siteContent).where(where).orderBy(desc(siteContent.updatedAt));
+    return rows;
   }
 
   export async function listPublished(tx?: DBTransaction): Promise<SiteContentSelectType[]> {
@@ -91,19 +93,13 @@ export namespace SiteContentRepository {
     return selectOrdered(tx, and(eq(siteContent.contentType, contentType), eq(siteContent.isPublished, true)));
   }
 
-  export async function findById(id: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {
-    const q = queryDb(tx);
-    const [row] = await q.select().from(siteContent).where(eq(siteContent.id, id)).limit(1);
-    return row ?? null;
-  }
-
   export async function updatePublishState(
     id: string,
     isPublished: boolean,
     tx?: DBTransaction
   ): Promise<SiteContentSelectType | null> {
-    const queryDb = tx ?? db;
-    const [updated] = await queryDb
+    const q = queryDb(tx);
+    const [updated] = await q
       .update(siteContent)
       .set({ isPublished, updatedAt: new Date() })
       .where(eq(siteContent.id, id))
@@ -112,9 +108,9 @@ export namespace SiteContentRepository {
   }
 
   export async function deleteById(id: string, tx?: DBTransaction): Promise<boolean> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     try {
-      const deleted = await queryDb.delete(siteContent).where(eq(siteContent.id, id)).returning();
+      const deleted = await q.delete(siteContent).where(eq(siteContent.id, id)).returning();
       return deleted.length > 0;
     } catch {
       return false;
@@ -122,9 +118,9 @@ export namespace SiteContentRepository {
   }
 
   export async function deleteBySlug(slug: string, tx?: DBTransaction): Promise<boolean> {
-    const queryDb = tx ?? db;
+    const q = queryDb(tx);
     try {
-      const deleted = await queryDb.delete(siteContent).where(eq(siteContent.slug, slug)).returning();
+      const deleted = await q.delete(siteContent).where(eq(siteContent.slug, slug)).returning();
       return deleted.length > 0;
     } catch {
       return false;

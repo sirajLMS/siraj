@@ -51,18 +51,74 @@ export namespace QuotaService {
     await sharedRequirePermission(actorUserId, permission, tErrors);
   }
 
+  /**
+   * Shared transaction executor: runs `runner` against `tx` when provided,
+   * otherwise against a fresh `db.transaction`. Eliminates the repeating
+   * `return tx ? runner(tx) : db.transaction(runner);` boilerplate across
+   * every write method in this service.
+   */
+  async function runInTx<T>(tx: DBTransaction | undefined, runner: (t: DBTransaction) => Promise<T>): Promise<T> {
+    return tx ? runner(tx) : db.transaction(runner);
+  }
+
+  /**
+   * Shared permission + IDOR-scoping gate for student-scoped list reads.
+   * Applies the QUOTAS_VIEW permission check, then verifies the caller is
+   * associated with `studentId` (or holds QUOTAS_MANAGE) before delegating
+   * to `listFn` and mapping the rows. Used by `listStudentOpenQuotas` and
+   * `listStudentQuotas`.
+   */
+  async function listScopedByStudent<T extends Parameters<typeof mapQuotaToReturnType>[0]>(
+    studentId: string,
+    tx: ReadExecutor | undefined,
+    actorUserId: string | null | undefined,
+    locale: string,
+    listFn: (tx: ReadExecutor | undefined, studentId: string) => Promise<T[]>
+  ): Promise<QuotaReturnType[]> {
+    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
+    const uid = actorUserId ?? "";
+    await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
+    const rows = await listFn(tx, studentId);
+    return rows.map(row => mapQuotaToReturnType(row));
+  }
+
+  /**
+   * Shared QUOTAS_MANAGE write helper: permission gate + transaction + map.
+   * Used by the CRUD write methods (`createQuota`, `updateQuota`,
+   * `deleteQuota`) to collapse their identical scaffolding into a single
+   * call site.
+   */
+  async function manageAndMap(
+    locale: string,
+    actorUserId: string | null | undefined,
+    tx: DBTransaction | undefined,
+    op: (t: DBTransaction) => Promise<Parameters<typeof mapQuotaToReturnType>[0]>
+  ): Promise<QuotaReturnType> {
+    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_MANAGE);
+    return runInTx(tx, async t => mapQuotaToReturnType(await op(t)));
+  }
+
+  /**
+   * Shared transactional idempotent-write helper. Runs an idempotency-keyed
+   * ledger mutation (reserve/release/redeem) inside `runInTx` and casts the
+   * repository result to `QuotaReturnType`. Collapses the repeated
+   * derive-key → repo-op → cast body shared by the recurring-schedule and
+   * per-instance reserve/release methods.
+   */
+  async function txOp(
+    tx: DBTransaction | undefined,
+    op: (t: DBTransaction) => Promise<QuotaReturnType>
+  ): Promise<QuotaReturnType> {
+    return runInTx(tx, op);
+  }
+
   export const createQuota = async (
     input: QuotaSubmitInput,
     actorUserId?: string | null,
     _locale = "en",
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
-    await requirePermission(actorUserId, _locale, AppPermission.QUOTAS_MANAGE);
-    const runner = async (t: DBTransaction) => {
-      const created = await QuotaRepository.create(t, { ...input, actorUserId });
-      return mapQuotaToReturnType(created);
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    return manageAndMap(_locale, actorUserId, tx, async t => QuotaRepository.create(t, { ...input, actorUserId }));
   };
 
   export const getQuota = async (
@@ -196,13 +252,9 @@ export namespace QuotaService {
     actorUserId?: string | null,
     locale = "en"
   ): Promise<QuotaReturnType[]> => {
-    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
-    // V3-036: IDOR scoping — ensure the caller is associated with this student
-    // or holds QUOTAS_MANAGE before returning their open quotas.
-    const uid = actorUserId ?? "";
-    await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
-    const rows = await QuotaRepository.listActiveByStudent(tx, studentId);
-    return rows.map(mapQuotaToReturnType);
+    // V3-036: IDOR scoping — permission + association gate shared with
+    // `listStudentQuotas` via `listScopedByStudent`.
+    return listScopedByStudent(studentId, tx, actorUserId, locale, QuotaRepository.listActiveByStudent);
   };
 
   export const listStudentQuotas = async (
@@ -211,13 +263,9 @@ export namespace QuotaService {
     actorUserId?: string | null,
     locale = "en"
   ): Promise<QuotaReturnType[]> => {
-    await requirePermission(actorUserId, locale, AppPermission.QUOTAS_VIEW);
-    // IDOR scoping — ensure the caller is associated with this student
-    // or holds QUOTAS_MANAGE before returning their quotas.
-    const uid = actorUserId ?? "";
-    await assertAssociatedOrManage(uid, studentId, getServerTranslations(locale).errorsTranslations);
-    const rows = await QuotaRepository.listByStudent(tx, studentId);
-    return rows.map(mapQuotaToReturnType);
+    // IDOR scoping — permission + association gate shared with
+    // `listStudentOpenQuotas` via `listScopedByStudent`.
+    return listScopedByStudent(studentId, tx, actorUserId, locale, QuotaRepository.listByStudent);
   };
 
   export const getStudentQuotaBalance = async (
@@ -289,12 +337,7 @@ export namespace QuotaService {
     _locale = "en",
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
-    await requirePermission(actorUserId, _locale, AppPermission.QUOTAS_MANAGE);
-    const runner = async (t: DBTransaction) => {
-      const updated = await QuotaRepository.update(t, id, { ...input, actorUserId });
-      return mapQuotaToReturnType(updated);
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    return manageAndMap(_locale, actorUserId, tx, async t => QuotaRepository.update(t, id, { ...input, actorUserId }));
   };
 
   export const deleteQuota = async (
@@ -303,12 +346,7 @@ export namespace QuotaService {
     _locale = "en",
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
-    await requirePermission(_actorUserId, _locale, AppPermission.QUOTAS_MANAGE);
-    const runner = async (t: DBTransaction) => {
-      const deleted = await QuotaRepository.softDelete(t, id);
-      return mapQuotaToReturnType(deleted);
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    return manageAndMap(_locale, _actorUserId, tx, async t => QuotaRepository.softDelete(t, id));
   };
 
   export const reserveForRecurringSchedule = async (
@@ -319,7 +357,7 @@ export namespace QuotaService {
     actorUserId?: string | null,
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
-    const runner = async (t: DBTransaction) => {
+    return txOp(tx, async t => {
       const idempotencyKey = QuotaRepository.deriveReserveIdempotencyKey(recurringScheduleId, quotaId);
       const updated = await QuotaRepository.reserveClasses(t, {
         quotaId,
@@ -329,9 +367,8 @@ export namespace QuotaService {
         actorUserId,
         idempotencyKey,
       });
-      return updated as QuotaReturnType;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+      return mapQuotaToReturnType(updated);
+    });
   };
 
   export const releaseForRecurringSchedule = async (
@@ -342,7 +379,7 @@ export namespace QuotaService {
     actorUserId?: string | null,
     tx?: DBTransaction
   ): Promise<QuotaReturnType> => {
-    const runner = async (t: DBTransaction) => {
+    return runInTx(tx, async t => {
       // Deterministic operation identifier: hashing recurringScheduleId +
       // quotaId (NOT count) produces a stable key across retries of the same
       // release. Count is intentionally excluded because a partial release
@@ -364,9 +401,8 @@ export namespace QuotaService {
         actorUserId,
         idempotencyKey,
       });
-      return updated as QuotaReturnType;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+      return mapQuotaToReturnType(updated);
+    });
   };
 
   export const selectQuotaForBooking = async (
@@ -379,10 +415,10 @@ export namespace QuotaService {
     // internal flows (CreditService, scripts, class-session service) where
     // no user session exists. Read access to quota selection is safe — the
     // result is only used to decide booking backing, not to expose data.
-    const runner = async (t: DBTransaction) => {
-      return (await QuotaRepository.selectQuotaForBookingFIFO(t, studentId)) as QuotaReturnType | null;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    return runInTx(tx, async t => {
+      const quotaRow = await QuotaRepository.selectQuotaForBookingFIFO(t, studentId);
+      return quotaRow ? mapQuotaToReturnType(quotaRow) : null;
+    });
   };
 
   export const redeemForInstance = async (
@@ -393,7 +429,7 @@ export namespace QuotaService {
     tx?: DBTransaction,
     locale = "en"
   ): Promise<QuotaReturnType> => {
-    const runner = async (t: DBTransaction) => {
+    return runInTx(tx, async t => {
       let targetQuotaId = quotaId;
       if (!targetQuotaId) {
         const fifoQuota = await QuotaRepository.selectQuotaForBookingFIFO(t, studentId);
@@ -412,9 +448,8 @@ export namespace QuotaService {
         actorUserId,
         idempotencyKey,
       });
-      return updated as QuotaReturnType;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+      return mapQuotaToReturnType(updated);
+    });
   };
 
   export const redeemForInstances = async (
@@ -426,7 +461,7 @@ export namespace QuotaService {
     tx: DBTransaction,
     locale = "en"
   ): Promise<{ redeemedCount: number; quota: QuotaReturnType | null }> => {
-    const runner = async (t: DBTransaction) => {
+    return runInTx(tx, async t => {
       if (classInstanceIds.length === 0) {
         return { redeemedCount: 0, quota: null };
       }
@@ -449,10 +484,9 @@ export namespace QuotaService {
 
       return {
         redeemedCount: result.redeemedCount,
-        quota: result.quota ? (result.quota as QuotaReturnType) : null,
+        quota: result.quota ? mapQuotaToReturnType(result.quota) : null,
       };
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   export const releaseForInstance = async (
@@ -463,7 +497,7 @@ export namespace QuotaService {
     tx?: DBTransaction,
     _locale?: string
   ): Promise<QuotaReturnType> => {
-    const runner = async (t: DBTransaction) => {
+    return txOp(tx, async t => {
       const idempotencyKey = QuotaRepository.deriveReleasePoolIdempotencyKey(classInstanceId, quotaId);
       const updated = await QuotaRepository.releaseForInstance(t, {
         quotaId,
@@ -472,9 +506,8 @@ export namespace QuotaService {
         actorUserId,
         idempotencyKey,
       });
-      return updated as QuotaReturnType;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+      return mapQuotaToReturnType(updated);
+    });
   };
 
   /**
@@ -516,7 +549,7 @@ export namespace QuotaService {
     actorUserId: string | null | undefined,
     tx: DBTransaction
   ): Promise<{ releasedCount: number; quota: QuotaReturnType | null }> => {
-    const runner = async (t: DBTransaction) => {
+    return runInTx(tx, async t => {
       const result = await QuotaRepository.releaseForInstanceBatch(t, {
         quotaId,
         studentId,
@@ -526,18 +559,13 @@ export namespace QuotaService {
       });
       return {
         releasedCount: result.releasedCount,
-        quota: result.quota ? (result.quota as QuotaReturnType) : null,
+        quota: result.quota ? mapQuotaToReturnType(result.quota) : null,
       };
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   export const expireOverdueQuotas = async (tx?: DBTransaction): Promise<QuotaReturnType[]> => {
-    const runner = async (t: DBTransaction) => {
-      const expired = await QuotaRepository.expireOverdue(t);
-      return expired as QuotaReturnType[];
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    return runInTx(tx, async t => (await QuotaRepository.expireOverdue(t)).map(mapQuotaToReturnType));
   };
 
   export const refreshStudentOndemandInstances = async (
@@ -550,7 +578,7 @@ export namespace QuotaService {
     // internal flows (CreditService, on-demand instance generator, class
     // lifecycle) where no user session exists. It mutates on-demand instance
     // states only, not quota data directly.
-    const runner = async (t: DBTransaction) => {
+    return runInTx(tx, async t => {
       const creditBalance = await CreditRepository.getBalance(t, studentId);
       const openQuotas = await QuotaRepository.listActiveByStudent(t, studentId);
       const totalQuotaRemaining = openQuotas.reduce((sum, q) => sum + q.remaining, 0);
@@ -603,9 +631,7 @@ export namespace QuotaService {
 
       logger.info({ studentId, flippedCount }, "Refreshed student on-demand instances");
       return flippedCount;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   /**
@@ -639,10 +665,11 @@ export namespace QuotaService {
         return res.rows.map(mapQuotaToReturnType);
       }
       const created: QuotaReturnType[] = [];
-      for (const input of inputs) {
+      await inputs.reduce(async (prev, input) => {
+        await prev;
         const row = await QuotaRepository.create(t, { ...input });
         created.push(mapQuotaToReturnType(row));
-      }
+      }, Promise.resolve());
       return created;
     });
   };

@@ -6,7 +6,7 @@ import {
   UserPaymentMethodRepository,
 } from "@/backend/db/repo";
 import { type PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import { parsePaymentMethodDetails } from "@/backend/lib/payment-method.validation";
+import { bankTransferDetailsSchema, parsePaymentMethodDetails } from "@/backend/lib/payment-method.validation";
 import { encryptBankTransferDetails } from "@/backend/lib/payment-method-jsonb";
 import type {
   PaymentMethodCatalogSnapshot,
@@ -25,23 +25,20 @@ async function resolveCatalogSnapshot(
 ): Promise<PaymentMethodCatalogSnapshot | null> {
   switch (type) {
     case PaymentMethodType.MOBILE_WALLET: {
-      const wallet = await SupportedMobileWalletRepository.getById((details as { walletId: string }).walletId, tx);
+      if (!("walletId" in details)) return null;
+      const wallet = await SupportedMobileWalletRepository.getById(details.walletId, tx);
       if (!wallet) return null;
       return { catalogId: wallet.id, catalogSlug: wallet.slug, catalogName: wallet.name };
     }
     case PaymentMethodType.PAYMENT_LINK: {
-      const link = await SupportedPaymentLinkRepository.getById(
-        (details as { paymentLinkId: string }).paymentLinkId,
-        tx
-      );
+      if (!("paymentLinkId" in details)) return null;
+      const link = await SupportedPaymentLinkRepository.getById(details.paymentLinkId, tx);
       if (!link) return null;
       return { catalogId: link.id, catalogSlug: link.slug, catalogName: link.name };
     }
     case PaymentMethodType.ONLINE_ACCOUNT: {
-      const account = await SupportedOnlineAccountRepository.getById(
-        (details as { onlineAccountId: string }).onlineAccountId,
-        tx
-      );
+      if (!("onlineAccountId" in details)) return null;
+      const account = await SupportedOnlineAccountRepository.getById(details.onlineAccountId, tx);
       if (!account) return null;
       return { catalogId: account.id, catalogSlug: account.slug, catalogName: account.name };
     }
@@ -51,12 +48,10 @@ async function resolveCatalogSnapshot(
 }
 
 function encryptDetailsForSnapshot(type: PaymentMethodType, details: PaymentMethodDetails): PaymentMethodDetails {
-  if (type === PaymentMethodType.BANK_TRANSFER) {
-    return encryptBankTransferDetails(
-      details as import("@/backend/types/billing/payment-method.types").BankTransferDetails
-    );
-  }
-  return details;
+  if (type !== PaymentMethodType.BANK_TRANSFER) return details;
+  const parsed = bankTransferDetailsSchema.safeParse(details);
+  if (!parsed.success) return details;
+  return encryptBankTransferDetails(parsed.data);
 }
 
 export function buildTransactionSnapshotFromMethod(

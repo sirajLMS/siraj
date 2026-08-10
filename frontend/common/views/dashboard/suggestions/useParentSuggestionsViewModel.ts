@@ -63,7 +63,7 @@ export function useParentSuggestionsViewModel(
   });
 
   const handleFormSubmit = () => {
-    handleSubmit(data => {
+    void handleSubmit(data => {
       onSubmit(data);
       reset();
     })();

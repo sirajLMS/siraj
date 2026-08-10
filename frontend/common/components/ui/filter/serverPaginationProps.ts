@@ -14,16 +14,16 @@ export function getServerPaginationOptions(
   totalCount: number | undefined,
   onPageChange: ((page: number) => void) | undefined
 ): ServerListPaginationOptions | false {
-  if (totalCount === undefined || onPageChange === undefined) {
-    return false;
+  let result: ServerListPaginationOptions | false = false;
+  if (totalCount !== undefined && onPageChange !== undefined) {
+    result = buildServerPaginationOptions({
+      page: config.page,
+      pageSize: config.pageSize,
+      totalCount,
+      onPageChange,
+    });
   }
-
-  return buildServerPaginationOptions({
-    page: config.page,
-    pageSize: config.pageSize,
-    totalCount,
-    onPageChange,
-  });
+  return result;
 }
 
 export function isServerPagination(

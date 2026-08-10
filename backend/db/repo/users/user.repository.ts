@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import { hash } from "bcryptjs";
 import { and, asc, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
@@ -6,13 +6,9 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { users } from "@/backend/db/schema";
 import type { AccountStatus, CurrencyCode } from "@/backend/enum";
-import {
-  isValidIanaTimezone,
-  logger,
-  normalizeIanaTimezone,
-  parseAccountStatus,
-  validatePasswordStrength,
-} from "@/backend/lib";
+import { validatePasswordStrength } from "@/backend/lib/auth/password";
+import { logger } from "@/backend/lib/logger";
+import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
 import {
   type PaginatedUsersResponseSelectType,
   PaginationArgsDefault,
@@ -22,6 +18,7 @@ import {
   type UserSelectType,
 } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
+import { parseAccountStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 // ============================================================================
@@ -44,7 +41,7 @@ export namespace UserRepository {
   export const existsByEmail = async (email: string, tx?: DBTransaction): Promise<boolean> => {
     const q = queryDb(tx);
     const [result] = await q.select({ count: count() }).from(users).where(eq(users.email, email));
-    return Number(result?.count ?? 0) > 0;
+    return (result?.count ?? 0) > 0;
   };
 
   export const findUserByIdOrThrow = async (id: string, locale?: string): Promise<UserSelectType> => {
@@ -87,6 +84,32 @@ export namespace UserRepository {
     return result[0] ?? null;
   };
 
+  const SAFE_USER_SELECT = {
+    id: users.id,
+    name: users.name,
+    email: users.email,
+    emailVerifiedAt: users.emailVerifiedAt,
+    password: users.password,
+    rememberTokenHash: users.rememberTokenHash,
+    avatarFilePath: users.avatarFilePath,
+    avatarUrl: users.avatarUrl,
+    phone: users.phone,
+    status: users.status,
+    isSuperAdmin: users.isSuperAdmin,
+    timezone: users.timezone,
+    displayCurrency: users.displayCurrency,
+    lastLoginAt: users.lastLoginAt,
+    createdAt: users.createdAt,
+    updatedAt: users.updatedAt,
+    deletedAt: users.deletedAt,
+  } as const;
+
+  async function selectSafeUserRows(where: SQL, tx?: DBTransaction, limit?: number): Promise<UserSelectType[]> {
+    const q = queryDb(tx);
+    const base = q.select(SAFE_USER_SELECT).from(users).where(where);
+    return limit === undefined ? base : base.limit(limit);
+  }
+
   /**
    * Batch-fetch contact info (email/phone) for multiple users in a single
    * query. Returns a `Map<userId, UserSelectType | null>` — pre-initialized
@@ -105,30 +128,7 @@ export namespace UserRepository {
       map.set(id, null);
     }
     try {
-      const q = queryDb(tx);
-      const results = await q
-        .select({
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          emailVerifiedAt: users.emailVerifiedAt,
-          password: users.password,
-          rememberTokenHash: users.rememberTokenHash,
-          avatarFilePath: users.avatarFilePath,
-          avatarUrl: users.avatarUrl,
-          phone: users.phone,
-          status: users.status,
-          isSuperAdmin: users.isSuperAdmin,
-          timezone: users.timezone,
-          displayCurrency: users.displayCurrency,
-          lastLoginAt: users.lastLoginAt,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-          deletedAt: users.deletedAt,
-        })
-        .from(users)
-        .where(inArray(users.id, ids));
-
+      const results = await selectSafeUserRows(inArray(users.id, ids), tx);
       for (const row of results) {
         map.set(row.id, row);
       }
@@ -139,31 +139,8 @@ export namespace UserRepository {
   };
 
   export const findSafeById = async (id: string, tx?: DBTransaction): Promise<UserSelectType | null> => {
-    const q = queryDb(tx);
     try {
-      const results = await q
-        .select({
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          emailVerifiedAt: users.emailVerifiedAt,
-          password: users.password,
-          rememberTokenHash: users.rememberTokenHash,
-          avatarFilePath: users.avatarFilePath,
-          avatarUrl: users.avatarUrl,
-          phone: users.phone,
-          status: users.status,
-          isSuperAdmin: users.isSuperAdmin,
-          timezone: users.timezone,
-          displayCurrency: users.displayCurrency,
-          lastLoginAt: users.lastLoginAt,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-          deletedAt: users.deletedAt,
-        })
-        .from(users)
-        .where(eq(users.id, id))
-        .limit(1);
+      const results = await selectSafeUserRows(eq(users.id, id), tx, 1);
       return results[0] ?? null;
     } catch (error) {
       logger.error("Error finding safe user by id:", error);
@@ -216,10 +193,7 @@ export namespace UserRepository {
       })
       .from(users)
       .limit(500);
-    return rows.map(row => ({
-      ...row,
-      status: parseAccountStatus(row.status),
-    }));
+    return rows.map(row => Object.assign(row, { status: parseAccountStatus(row.status) }));
   };
 
   export const findUsers = async (opts: {
@@ -303,7 +277,7 @@ export namespace UserRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<UserReturnType> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const exists = await existsByEmail(input.email.value, tx);
     const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
     if (exists) {
@@ -313,10 +287,10 @@ export namespace UserRepository {
     AuthUtils.validateUserName(input.name);
     await validatePasswordStrength(input.password, locale);
     const now = new Date();
-    const hashedPassword = await bcrypt.hash(input.password, 12);
+    const hashedPassword = await hash(input.password, 12);
 
     try {
-      const [result] = await queryDb
+      const [result] = await executor
         .insert(users)
         .values({
           name: input.name,
@@ -354,7 +328,7 @@ export namespace UserRepository {
     locale?: string,
     tx?: DBTransaction
   ): Promise<UserReturnType> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
     const existing = await findSafeById(userId, tx);
@@ -391,7 +365,7 @@ export namespace UserRepository {
       updateSet.phone = input.phone;
     }
 
-    const [updated] = await queryDb.update(users).set(updateSet).where(eq(users.id, userId)).returning();
+    const [updated] = await executor.update(users).set(updateSet).where(eq(users.id, userId)).returning();
 
     if (!updated) {
       throw new Error(errorsTranslations.userNotFound(userId));
@@ -406,10 +380,10 @@ export namespace UserRepository {
     tx?: DBTransaction,
     locale?: string
   ): Promise<UserSelectType> {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
 
-    const [updated] = await queryDb
+    const [updated] = await executor
       .update(users)
       .set({ ...set, updatedAt: new Date() })
       .where(eq(users.id, userId))
@@ -476,9 +450,9 @@ export namespace UserRepository {
     input: BootstrapUserUpsertInput,
     tx?: DBTransaction
   ): Promise<UserSelectType> => {
-    const queryDb = tx ?? db;
+    const executor = tx ?? db;
     const now = new Date();
-    const [user] = await queryDb
+    const [user] = await executor
       .insert(users)
       .values({
         name: input.name,

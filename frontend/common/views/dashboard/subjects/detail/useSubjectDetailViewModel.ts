@@ -38,6 +38,12 @@ export interface SubjectDetailViewModel {
   readonly onDownloadResource: (resource: SubjectResourceItem) => void;
 }
 
+function downloadResource(resource: SubjectResourceItem): void {
+  if (resource.filePath) {
+    window.open(`/api/storage/files/${resource.filePath}`, "_blank", "noopener,noreferrer");
+  }
+}
+
 /**
  * `useSubjectDetailViewModel` encapsulates the single-subject GraphQL fetch,
  * resource sort, breadcrumbs memo, and the "not found" derivation. Both the
@@ -71,7 +77,7 @@ export function useSubjectDetailViewModel(props: Readonly<UseSubjectDetailViewMo
 
   const resources = useMemo<readonly SubjectResourceItem[]>(() => {
     if (!subject?.resources) return [];
-    return [...subject.resources].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+    return [...subject.resources].toSorted((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   }, [subject?.resources]);
 
   const breadcrumbs = useMemo<readonly PageHeaderBreadcrumb[]>(
@@ -85,11 +91,7 @@ export function useSubjectDetailViewModel(props: Readonly<UseSubjectDetailViewMo
   const notFound = !loading && !subject;
 
   // NEW FOR PLAN v5: onDownloadResource exposed by the ViewModel so the tier views no longer call `window.open` directly (was a window.open-in-tier violation per specs §3 N19).
-  const onDownloadResource = (resource: SubjectResourceItem) => {
-    if (resource.filePath) {
-      window.open(`/api/storage/files/${resource.filePath}`, "_blank", "noopener,noreferrer");
-    }
-  };
+  const onDownloadResource = downloadResource;
 
   return {
     subject,

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useMemo, useState } from "react";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
-import type { AdminMetricKey } from "@/frontend/common/types/shared.types";
+import { isAdminMetricKey } from "@/frontend/common/views/dashboard/admin/__shared__/adminDashboardView";
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import {
@@ -14,6 +14,8 @@ import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/sched
 import type { AdminDashboardLabels } from "@/shared/locale";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";
+
+function noopSubmit() {}
 
 function buildLabelsBySection(labels: AdminDashboardLabels): AdminDashboardLabelsBySection {
   return {
@@ -66,8 +68,6 @@ export function MockAdminDashboardContainer() {
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
-  const handleSubmit = () => {};
-
   const cleanedLastUpdatedKey = lastUpdatedKey.startsWith("dashboard.")
     ? lastUpdatedKey.replace("dashboard.", "")
     : lastUpdatedKey;
@@ -114,16 +114,14 @@ export function MockAdminDashboardContainer() {
   const filteredRows = baseRows.filter(row => matchesDailyScheduleMetricFilter(row, metricFilter));
   const paginatedRows = filteredRows.slice(page * pageSize, (page + 1) * pageSize);
 
-  const selectedMetricLabel = filters.selectedStatus
-    ? labelsBySection.metrics[filters.selectedStatus as keyof AdminDashboardLabels["metrics"]]
-    : null;
+  const selectedMetricLabel = filters.selectedStatus ? labelsBySection.metrics[filters.selectedStatus] : null;
 
   const handleMetricClick = (key: string) => {
     setPage(0);
     if (filters.selectedStatus === key) {
       setSelectedStatus(null);
-    } else {
-      setSelectedStatus(key as AdminMetricKey);
+    } else if (isAdminMetricKey(key)) {
+      setSelectedStatus(key);
     }
   };
 
@@ -148,7 +146,7 @@ export function MockAdminDashboardContainer() {
       onSearchChange={setSearchQuery}
       onDateChange={setDateFilter}
       onTeacherChange={setTeacherFilter}
-      onSubmit={handleSubmit}
+      onSubmit={noopSubmit}
       pageSize={pageSize}
       pageCount={pageCount}
       canDashboardSearch

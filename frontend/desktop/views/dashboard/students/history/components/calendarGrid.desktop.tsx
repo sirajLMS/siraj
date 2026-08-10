@@ -60,6 +60,13 @@ function CalendarStatusBadge({ status, label }: Readonly<{ status: AttendanceSta
   return <DesktopStatusBadge category="classSession" status={badgeStatus} label={label} />;
 }
 
+const WEEKDAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+type WeekdayKey = (typeof WEEKDAY_KEYS)[number];
+
+function isWeekdayKey(value: string): value is WeekdayKey {
+  return (WEEKDAY_KEYS as readonly string[]).includes(value);
+}
+
 function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: ClassSession }>) {
   const content = (
     <>
@@ -119,7 +126,7 @@ export function CalendarGridDesktop({ currentMonth, classes }: Readonly<Calendar
 
   return (
     <CalendarGridContainer>
-      <CalendarWeekdayHeader translateDay={day => t.calendar.days[day as keyof typeof t.calendar.days]} />
+      <CalendarWeekdayHeader translateDay={day => t.calendar.days[isWeekdayKey(day) ? day : "sun"]} />
 
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", minHeight: 800 }}>
         {emptyStartDays.map(day => (

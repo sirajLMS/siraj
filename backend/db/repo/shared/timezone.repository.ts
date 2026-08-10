@@ -20,28 +20,28 @@ export namespace TimezoneRepository {
 
   export async function upsertMany(inputs: TimezoneUpsertInput[], tx?: DBTransaction): Promise<TimezoneSelectType[]> {
     if (inputs.length === 0) return [];
-    const queryDb = tx ?? db;
-    const results: TimezoneSelectType[] = [];
+    const dbToQuery = tx ?? db;
 
-    for (const input of inputs) {
-      const [row] = await queryDb
-        .insert(timezones)
-        .values({
-          ianaId: input.ianaId,
-          baseOffsetMinutes: input.baseOffsetMinutes,
-          isDstSupported: input.isDstSupported ?? true,
-        })
-        .onConflictDoUpdate({
-          target: timezones.ianaId,
-          set: {
+    const rows = await Promise.all(
+      inputs.map(input =>
+        dbToQuery
+          .insert(timezones)
+          .values({
+            ianaId: input.ianaId,
             baseOffsetMinutes: input.baseOffsetMinutes,
             isDstSupported: input.isDstSupported ?? true,
-          },
-        })
-        .returning();
-      results.push(row);
-    }
+          })
+          .onConflictDoUpdate({
+            target: timezones.ianaId,
+            set: {
+              baseOffsetMinutes: input.baseOffsetMinutes,
+              isDstSupported: input.isDstSupported ?? true,
+            },
+          })
+          .returning()
+      )
+    );
 
-    return results;
+    return rows.map(([row]) => row);
   }
 }

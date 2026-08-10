@@ -4,6 +4,7 @@ import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import { Button, Card, CardContent, Chip, Fab, Skeleton, Stack, Typography } from "@mui/material";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { useQuotaViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import {
   formatQuotaDate,
@@ -11,8 +12,80 @@ import {
   formatQuotaStatus,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaFormatters";
 
-export function QuotaListMobile(props: ReturnType<typeof useQuotaViewModel>) {
+const SKELETON_KEYS = ["skeleton-0", "skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4"] as const;
+
+function renderSkeletons() {
+  return SKELETON_KEYS.map(key => (
+    <Card key={key} variant="outlined">
+      <CardContent>
+        <Skeleton variant="text" width="60%" />
+        <Skeleton variant="text" width="40%" />
+        <Skeleton variant="rectangular" height={40} sx={{ mt: 1 }} />
+      </CardContent>
+    </Card>
+  ));
+}
+
+export function QuotaListMobile(props: Readonly<ReturnType<typeof useQuotaViewModel>>) {
   const { t, quotas, loading } = props;
+
+  function renderEmptyState() {
+    return (
+      <Card variant="outlined">
+        <CardContent>
+          <Typography sx={{ textAlign: "center", py: 4 }}>{t.noQuotas}</Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  function renderQuotaList(): ReactNode {
+    const isLoading = loading;
+    const hasNoQuotas = quotas.length === 0;
+
+    let content: ReactNode;
+    if (isLoading) {
+      content = renderSkeletons();
+    } else if (hasNoQuotas) {
+      content = renderEmptyState();
+    } else {
+      content = quotas.map(quota => {
+        const { label, color } = formatQuotaStatus(quota.status ?? "", t);
+        const quotaKind = formatQuotaKind(quota.kind ?? "", t);
+        return (
+          <Card key={quota.id} component={Link} href={`/quotas/${quota.id}`} sx={{ textDecoration: "none" }}>
+            <CardContent>
+              <Stack spacing={1}>
+                <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    {quota.name ?? ""}
+                  </Typography>
+                  <Chip label={label} color={color} size="small" />
+                </Stack>
+
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                  <Chip label={quotaKind} size="small" variant="outlined" />
+                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                    {t.fields.validUntil}: {formatQuotaDate(quota.validUntil)}
+                  </Typography>
+                </Stack>
+
+                <Stack direction="row" sx={{ justifyContent: "space-between", pt: 1 }}>
+                  <Typography variant="body2">
+                    {t.fields.remaining}: <strong>{quota.remaining ?? 0}</strong> / {quota.totalClasses ?? 0}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    {t.fields.reservedClasses}: {quota.reservedClasses ?? 0}
+                  </Typography>
+                </Stack>
+              </Stack>
+            </CardContent>
+          </Card>
+        );
+      });
+    }
+    return content;
+  }
 
   return (
     <Stack spacing={2} sx={{ pb: 8 }}>
@@ -25,58 +98,7 @@ export function QuotaListMobile(props: ReturnType<typeof useQuotaViewModel>) {
         </Button>
       </Stack>
 
-      {loading ? (
-        Array.from({ length: 5 }).map((_item, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list, order never changes
-          <Card key={`skeleton-${i}`} variant="outlined">
-            <CardContent>
-              <Skeleton variant="text" width="60%" />
-              <Skeleton variant="text" width="40%" />
-              <Skeleton variant="rectangular" height={40} sx={{ mt: 1 }} />
-            </CardContent>
-          </Card>
-        ))
-      ) : quotas.length === 0 ? (
-        <Card variant="outlined">
-          <CardContent>
-            <Typography sx={{ textAlign: "center", py: 4 }}>{t.noQuotas}</Typography>
-          </CardContent>
-        </Card>
-      ) : (
-        quotas.map(quota => {
-          const { label, color } = formatQuotaStatus(quota.status ?? "", t);
-          return (
-            <Card key={quota.id} component={Link} href={`/quotas/${quota.id}`} sx={{ textDecoration: "none" }}>
-              <CardContent>
-                <Stack spacing={1}>
-                  <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                      {quota.name ?? ""}
-                    </Typography>
-                    <Chip label={label} color={color} size="small" />
-                  </Stack>
-
-                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                    <Chip label={formatQuotaKind(quota.kind ?? "", t)} size="small" variant="outlined" />
-                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                      {t.fields.validUntil}: {formatQuotaDate(quota.validUntil)}
-                    </Typography>
-                  </Stack>
-
-                  <Stack direction="row" sx={{ justifyContent: "space-between", pt: 1 }}>
-                    <Typography variant="body2">
-                      {t.fields.remaining}: <strong>{quota.remaining ?? 0}</strong> / {quota.totalClasses ?? 0}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                      {t.fields.reservedClasses}: {quota.reservedClasses ?? 0}
-                    </Typography>
-                  </Stack>
-                </Stack>
-              </CardContent>
-            </Card>
-          );
-        })
-      )}
+      {renderQuotaList()}
 
       <Fab color="primary" component={Link} href="/quotas/new" sx={{ position: "fixed", bottom: 24, right: 24 }}>
         <AddOutlinedIcon />

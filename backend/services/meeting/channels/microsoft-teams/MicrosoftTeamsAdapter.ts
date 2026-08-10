@@ -35,6 +35,38 @@ const TOKEN_REFRESH_MARGIN_MS = 120_000;
 
 const MS_TEAMS_REQUIRED_SCOPES = ["OnlineMeetings.ReadWrite.All"] as const;
 
+const MS_GRAPH_SCOPE_PREFIX = "https://graph.microsoft.com/";
+
+function normalizeScope(scope: string): string {
+  return scope.startsWith(MS_GRAPH_SCOPE_PREFIX) ? scope.slice(MS_GRAPH_SCOPE_PREFIX.length) : scope;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isMicrosoftTeamsTokenResponse(value: unknown): value is MicrosoftTeamsTokenResponse {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.token_type === "string" &&
+    typeof value.expires_in === "number" &&
+    typeof value.access_token === "string" &&
+    (value.scope === undefined || typeof value.scope === "string")
+  );
+}
+
+function isMicrosoftTeamsMeetingResponse(value: unknown): value is MicrosoftTeamsMeetingResponse {
+  if (!isRecord(value)) return false;
+  return typeof value.id === "string" && typeof value.joinWebUrl === "string";
+}
+
+function isMicrosoftTeamsErrorResponse(value: unknown): value is MicrosoftTeamsErrorResponse {
+  if (!isRecord(value)) return false;
+  if (value.error === undefined) return true;
+  if (!isRecord(value.error)) return false;
+  return typeof value.error.code === "string" && typeof value.error.message === "string";
+}
+
 interface CachedToken {
   accessToken: string;
   expiresAt: number;
@@ -68,7 +100,7 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
   private cachedToken: CachedToken | null = null;
 
   constructor(opts?: MicrosoftTeamsAdapterOptions) {
-    const envConfig = opts?.tenantId !== undefined ? null : getEnvironmentConfig();
+    const envConfig = opts?.tenantId != null ? null : getEnvironmentConfig();
     this.tenantId = opts?.tenantId ?? envConfig?.msTeamsTenantId;
     this.clientId = opts?.clientId ?? envConfig?.msTeamsClientId;
     this.clientSecret = opts?.clientSecret ?? envConfig?.msTeamsClientSecret;
@@ -106,22 +138,27 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
       throw new NoOrgCredentialsNoUserTokenError("microsoft_teams");
     }
 
-    let lastError: unknown = null;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      if (attempt > 0) {
-        await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
-      }
-      try {
-        return await this.createOnlineMeeting(accessToken, organizerUserId, input);
-      } catch (error) {
-        lastError = error;
-        if (error instanceof ProviderUnavailableError) {
-          continue;
-        }
-        throw error;
-      }
+    return this.createMeetingWithRetry(accessToken, organizerUserId, input, 0, 2);
+  }
+
+  private async createMeetingWithRetry(
+    accessToken: string,
+    organizerUserId: string,
+    input: GenerateMeetingInput,
+    attempt: number,
+    maxAttempts: number
+  ): Promise<GenerateMeetingResult> {
+    if (attempt > 0) {
+      await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
     }
-    throw lastError;
+    try {
+      return await this.createOnlineMeeting(accessToken, organizerUserId, input);
+    } catch (error) {
+      if (error instanceof ProviderUnavailableError && attempt + 1 < maxAttempts) {
+        return this.createMeetingWithRetry(accessToken, organizerUserId, input, attempt + 1, maxAttempts);
+      }
+      throw error;
+    }
   }
 
   async deleteMeeting(meetingId: string): Promise<void> {
@@ -156,7 +193,7 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
 
   async disconnect(token?: { accessToken: string; refreshToken: string | null }): Promise<void> {
     if (token) {
-      if (!this.tenantId) {
+      if (this.tenantId == null) {
         logger.warn("MicrosoftTeamsAdapter: cannot revoke token — tenantId not configured");
       } else {
         try {
@@ -226,15 +263,21 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
       );
     }
 
-    const tokenData = (await response.json()) as MicrosoftTeamsTokenResponse;
+    const rawToken: unknown = await response.json();
+    if (!isMicrosoftTeamsTokenResponse(rawToken)) {
+      throw new MicrosoftTeamsApiError(
+        `Microsoft token response was malformed (${response.status})`,
+        undefined,
+        response.status
+      );
+    }
+    const tokenData = rawToken;
 
     if (tokenData.scope) {
       const grantedScopes = tokenData.scope.split(" ");
-      const normalizeScope = (scope: string): string =>
-        scope.startsWith("https://graph.microsoft.com/") ? scope.slice("https://graph.microsoft.com/".length) : scope;
-      const normalizedGranted = grantedScopes.map(normalizeScope);
+      const normalizedGranted = new Set(grantedScopes.map(normalizeScope));
       const normalizedRequired = MS_TEAMS_REQUIRED_SCOPES.map(normalizeScope);
-      const missingScopes = normalizedRequired.filter(scope => !normalizedGranted.includes(scope));
+      const missingScopes = normalizedRequired.filter(scope => !normalizedGranted.has(scope));
       if (missingScopes.length > 0) {
         throw new InsufficientScopesError(
           [...MS_TEAMS_REQUIRED_SCOPES],
@@ -280,11 +323,11 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
     return refreshed.accessToken;
   }
 
-  private async createOnlineMeeting(
-    accessToken: string,
-    organizerUserId: string,
-    input: GenerateMeetingInput
-  ): Promise<GenerateMeetingResult> {
+  private buildMeetingRequestBody(input: GenerateMeetingInput): {
+    subject: string;
+    startDateTime: string;
+    endDateTime: string;
+  } {
     const now = new Date();
     const startISO = input.startDateTime ?? now.toISOString();
     const durationMinutes = input.durationMinutes ?? 60;
@@ -292,20 +335,27 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
       ? new Date(new Date(input.startDateTime).getTime() + durationMinutes * 60_000).toISOString()
       : new Date(now.getTime() + durationMinutes * 60_000).toISOString();
 
-    const meetingBody = {
+    return {
       subject: input.topic,
       startDateTime: startISO,
       endDateTime: endISO,
     };
+  }
 
-    const url =
-      organizerUserId === "me"
-        ? `${MS_GRAPH_BASE}/me/onlineMeetings`
-        : `${MS_GRAPH_BASE}/users/${organizerUserId}/onlineMeetings`;
+  private buildMeetingUrl(organizerUserId: string): string {
+    return organizerUserId === "me"
+      ? `${MS_GRAPH_BASE}/me/onlineMeetings`
+      : `${MS_GRAPH_BASE}/users/${organizerUserId}/onlineMeetings`;
+  }
+
+  private async postMeetingRequest(
+    url: string,
+    accessToken: string,
+    meetingBody: { subject: string; startDateTime: string; endDateTime: string }
+  ): Promise<Response> {
     const { signal, cancel } = withTimeout(REQUEST_TIMEOUT_MS);
-    let response: Response;
     try {
-      response = await fetch(url, {
+      return await fetch(url, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -315,15 +365,17 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
         signal,
       });
     } catch (error) {
-      cancel();
       throw new ProviderUnavailableError(
         "microsoft_teams",
         undefined,
         error instanceof Error ? error.message : String(error)
       );
+    } finally {
+      cancel();
     }
-    cancel();
+  }
 
+  private async assertMeetingResponseOk(response: Response): Promise<void> {
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
       throw new RateLimitedError("microsoft_teams", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
@@ -356,8 +408,9 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
         response.status
       );
     }
+  }
 
-    const meeting = (await response.json()) as MicrosoftTeamsMeetingResponse;
+  private mapMeetingResponse(meeting: MicrosoftTeamsMeetingResponse): GenerateMeetingResult {
     return {
       joinUrl: meeting.joinWebUrl,
       meetingId: meeting.id,
@@ -370,9 +423,34 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
     };
   }
 
+  private async createOnlineMeeting(
+    accessToken: string,
+    organizerUserId: string,
+    input: GenerateMeetingInput
+  ): Promise<GenerateMeetingResult> {
+    const meetingBody = this.buildMeetingRequestBody(input);
+    const url = this.buildMeetingUrl(organizerUserId);
+    const response = await this.postMeetingRequest(url, accessToken, meetingBody);
+    await this.assertMeetingResponseOk(response);
+    const rawMeeting: unknown = await response.json();
+    if (!isMicrosoftTeamsMeetingResponse(rawMeeting)) {
+      throw new MicrosoftTeamsApiError(
+        `Teams meeting response was malformed (${response.status})`,
+        undefined,
+        response.status
+      );
+    }
+    const meeting = rawMeeting;
+    return this.mapMeetingResponse(meeting);
+  }
+
   private async parseErrorBody(response: Response): Promise<MicrosoftTeamsErrorResponse | null> {
     try {
-      return (await response.json()) as MicrosoftTeamsErrorResponse;
+      const data: unknown = await response.json();
+      if (!isMicrosoftTeamsErrorResponse(data)) {
+        return null;
+      }
+      return data;
     } catch {
       return null;
     }

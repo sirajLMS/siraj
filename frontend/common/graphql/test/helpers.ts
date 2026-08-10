@@ -4,7 +4,7 @@ import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   ClassType,
   type CreateRecurringClassInput,
-  type DayOfWeek,
+  DayOfWeek,
   IanaTimezone,
   type ManagerAccountType,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -32,17 +32,56 @@ import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 import { isTestServerRunning } from "@/frontend/common/graphql/test/testServer";
 
-/** Shared test password — all provisioned test users use this value. */
-// eslint-disable-next-line sonarjs/no-hardcoded-passwords
-const TEST_USER_PASSWORD = "Test_Pass1!";
+import { DEFAULT_SEED_ADMIN_PASSWORD } from "@/shared/demo-users";
+
+const TEST_USER_PASSWORD = DEFAULT_SEED_ADMIN_PASSWORD;
 
 let demoUsersReadyPromise: Promise<void> | null = null;
 
+async function pollServerRecovery(wait: number): Promise<void> {
+  if (wait >= 60) return;
+  if (await isTestServerRunning()) return;
+  await new Promise(resolve => setTimeout(resolve, 3_000));
+  return pollServerRecovery(wait + 1);
+}
+
 async function waitForServerRecovery(): Promise<void> {
-  for (let wait = 0; wait < 60; wait++) {
-    if (await isTestServerRunning()) break;
-    await new Promise(resolve => setTimeout(resolve, 3_000));
+  return pollServerRecovery(0);
+}
+
+async function attemptEnsureDemoUsers(attempt: number, maxAttempts: number): Promise<boolean> {
+  const result = await testClient.mutate({
+    mutation: ensureDemoUsersMutationDocument,
+  });
+
+  if (!result.error) {
+    if (!result.data?.ensureDemoUsers) {
+      throw new Error("ensureDemoUsers returned false");
+    }
+    return true;
   }
+
+  const errorMsg = `ensureDemoUsers failed: ${result.error.message ?? "unknown GraphQL error"}`;
+  if (attempt >= maxAttempts) {
+    throw new Error(errorMsg);
+  }
+
+  await waitForServerRecovery();
+  await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
+  return false;
+}
+
+async function provisionDemoUsers(): Promise<void> {
+  const maxAttempts = 5;
+  const retry = async (attempt: number): Promise<void> => {
+    if (attempt > maxAttempts) {
+      throw new Error("ensureDemoUsers failed after all retries");
+    }
+    const success = await attemptEnsureDemoUsers(attempt, maxAttempts);
+    if (success) return;
+    return retry(attempt + 1);
+  };
+  return retry(1);
 }
 
 /**
@@ -51,29 +90,7 @@ async function waitForServerRecovery(): Promise<void> {
  */
 export async function ensureDemoUsersForTests(): Promise<void> {
   if (!demoUsersReadyPromise) {
-    demoUsersReadyPromise = (async () => {
-      const maxAttempts = 5;
-      let lastError: unknown;
-      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        const result = await testClient.mutate({
-          mutation: ensureDemoUsersMutationDocument,
-        });
-        if (result.error) {
-          lastError = new Error(`ensureDemoUsers failed: ${result.error.message ?? "unknown GraphQL error"}`);
-          if (attempt < maxAttempts) {
-            await waitForServerRecovery();
-            await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
-            continue;
-          }
-          throw lastError;
-        }
-        if (!result.data?.ensureDemoUsers) {
-          throw new Error("ensureDemoUsers returned false");
-        }
-        return;
-      }
-      throw lastError ?? new Error("ensureDemoUsers failed after all retries");
-    })();
+    demoUsersReadyPromise = provisionDemoUsers();
   }
   await demoUsersReadyPromise;
 }
@@ -127,17 +144,16 @@ export async function ensureTestSubjectId(token: string): Promise<string> {
   return subjectId;
 }
 
-async function executeLogin<TData, TVars>(
+async function executeLogin<TData, TVars extends OperationVariables>(
   mutation: TypedDocumentNode<TData, TVars>,
   variables: TVars,
   extractToken: (data: TData | null | undefined) => string | null | undefined,
   errorLabel: string
 ): Promise<string> {
-  const result = await testClient.mutate({ mutation, variables } as unknown as Parameters<typeof testClient.mutate>[0]);
-  const token = extractToken(result.data as TData | null | undefined);
+  const result = await testClient.mutate({ mutation, variables });
+  const token = extractToken(result.data);
   if (!token) {
-    const gqlErrors =
-      (result as { errors?: Array<{ message: string }> }).errors?.map(e => e.message).join("; ") ?? "unknown";
+    const gqlErrors = result.error?.message ?? "unknown";
     throw new Error(`Failed to login: ${errorLabel} (${gqlErrors})`);
   }
   return token;
@@ -232,23 +248,23 @@ export async function provisionTestEntities(
   const entities = setupRes.createTestEntities;
   if (!entities) throw new Error("Failed to create test entities");
 
-  if (!entities.teacherUserEmail) throw new Error("Teacher email not returned");
-  if (!entities.studentUserEmail) throw new Error("Student email not returned");
-  if (!entities.studentId) throw new Error("Student ID not returned");
-  if (!entities.teacherId) throw new Error("Teacher ID not returned");
+  const teacherEmail = entities.teacherUserEmail;
+  if (!teacherEmail) throw new Error("Teacher email not returned");
 
   // Retry login to handle race condition where the DB transaction creating
   // the user may not yet be visible when the login query fires.
-  let teacherToken!: string;
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  const loginWithRetry = async (attempt: number): Promise<string> => {
     try {
-      teacherToken = await loginUser(entities.teacherUserEmail, TEST_USER_PASSWORD);
-      break;
-    } catch {
-      if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 500));
-      else throw new Error("Failed to login teacher after 3 attempts");
+      return await loginUser(teacherEmail, TEST_USER_PASSWORD);
+    } catch (err) {
+      if (attempt >= 3) {
+        throw new Error("Failed to login teacher after 3 attempts", { cause: err });
+      }
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return loginWithRetry(attempt + 1);
     }
-  }
+  };
+  const teacherToken = await loginWithRetry(1);
 
   return {
     studentId: entities.studentId ?? "",
@@ -313,23 +329,21 @@ export async function authenticatedRequest<TData, TVariables extends OperationVa
     },
   };
 
-  const result =
-    type === "query"
-      ? await testClient.query({
-          query: document,
-          variables,
-          context,
-        } as Parameters<typeof testClient.query>[0])
-      : await testClient.mutate({
-          mutation: document,
-          variables,
-          context,
-        } as Parameters<typeof testClient.mutate>[0]);
+  if (type === "query") {
+    const options = Object.assign({ query: document, context }, variables !== undefined ? { variables } : undefined);
+    const result = await testClient.query(options);
+    expect(result.data).toBeDefined();
+    expect(result.error).toBeUndefined();
+    if (!result.data) throw new Error("No data");
+    return result.data;
+  }
 
+  const options = Object.assign({ mutation: document, context }, variables !== undefined ? { variables } : undefined);
+  const result = await testClient.mutate(options);
   expect(result.data).toBeDefined();
   expect(result.error).toBeUndefined();
   if (!result.data) throw new Error("No data");
-  return result.data as TData;
+  return result.data;
 }
 
 export async function fetchFirstClassInstanceId(token: string, date: string): Promise<string> {
@@ -337,8 +351,16 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
   const subjectId = await ensureTestSubjectId(token);
 
   const d = new Date(date);
-  const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
-  const dayOfWeek = days[d.getUTCDay()] || "MONDAY";
+  const days = [
+    DayOfWeek.Sunday,
+    DayOfWeek.Monday,
+    DayOfWeek.Tuesday,
+    DayOfWeek.Wednesday,
+    DayOfWeek.Thursday,
+    DayOfWeek.Friday,
+    DayOfWeek.Saturday,
+  ];
+  const dayOfWeek = days[d.getUTCDay()] ?? DayOfWeek.Monday;
 
   await mutateCreateRecurringClass(token, {
     studentId: entities.studentId,
@@ -347,7 +369,7 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
     timezone: IanaTimezone.Utc,
-    days: [{ dayOfWeek: dayOfWeek as DayOfWeek, startTime: "10:00:00", isActive: true }],
+    days: [{ dayOfWeek, startTime: "10:00:00", isActive: true }],
     classType: ClassType.Regular,
     generateInstancesForWeeks: 2,
     effectiveFrom: date,
@@ -594,26 +616,29 @@ export async function provisionTestSuperAdmin(
     prefix,
   });
   const sa = createRes.createTestSuperAdmin;
-  if (!sa?.email || !sa?.userId) throw new Error("Failed to create test super admin");
+  const saEmail = sa?.email;
+  const saUserId = sa?.userId;
+  if (!saEmail || !saUserId) throw new Error("Failed to create test super admin");
 
   // Retry login to handle race condition where the DB transaction creating
   // the user may not yet be visible when the login query fires (common in
   // parallel test suites sharing the same DB connection pool).
   const maxAttempts = 3;
   const delayMs = 500;
-  let lastError: Error | undefined;
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  const attemptLogin = async (attempt: number): Promise<{ token: string; userId: string }> => {
     try {
-      const token = await loginUser(sa.email, TEST_USER_PASSWORD);
-      return { token, userId: sa.userId };
+      const token = await loginUser(saEmail, TEST_USER_PASSWORD);
+      return { token, userId: saUserId };
     } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, delayMs));
+      const lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt >= maxAttempts) {
+        throw lastError;
       }
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+      return attemptLogin(attempt + 1);
     }
-  }
-  throw lastError;
+  };
+  return attemptLogin(1);
 }
 
 export async function cleanupTestSuperAdmin(superAdminToken: string, userId: string): Promise<void> {

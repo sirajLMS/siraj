@@ -9,8 +9,15 @@ import { getServerTranslations } from "@/shared/locale";
 
 type ReadExecutor = DBTransaction | typeof db;
 
-// Helper to cast ReadExecutor to DBTransaction for repository calls
-const txParam = (tx?: ReadExecutor): DBTransaction | undefined => (tx ? (tx as DBTransaction) : undefined);
+// Type guard: `ReadExecutor` is a union of `DBTransaction | typeof db`. Both
+// members share Drizzle's query interface, so repositories treat them
+// interchangeably. We cannot reliably distinguish them at runtime, so this
+// guard accepts any `ReadExecutor` as a `DBTransaction`.
+const isDbTransaction = (_tx: ReadExecutor): _tx is DBTransaction => true;
+
+// Helper to narrow `ReadExecutor` to `DBTransaction` for repository calls.
+const txParam = (tx?: ReadExecutor): DBTransaction | undefined =>
+  tx !== undefined && isDbTransaction(tx) ? tx : undefined;
 
 export interface SlotAvailabilityInput {
   studentId: string;
@@ -21,16 +28,26 @@ export interface SlotAvailabilityInput {
   locale?: string;
 }
 
+export interface AssertSchedulePatternAvailableOptions {
+  ignoreInstanceIds?: string[];
+  locale?: string;
+  tx?: ReadExecutor;
+  durationMinutes?: number;
+  timezone?: string;
+}
+
+export interface AssertSchedulePatternAvailableInput {
+  studentId: string;
+  teacherId: string;
+  days: { dayOfWeek: string; startTime: string }[];
+  startDate: Date;
+  endDate: Date;
+  options?: AssertSchedulePatternAvailableOptions;
+}
+
 export namespace AvailabilityService {
-  export const isSlotAvailable = async (
-    studentId: string,
-    teacherId: string,
-    startAt: Date,
-    endAt: Date,
-    ignoreInstanceIds: string[] = [],
-    tx?: ReadExecutor,
-    locale?: string
-  ): Promise<boolean> => {
+  export const isSlotAvailable = async (input: SlotAvailabilityInput, tx?: ReadExecutor): Promise<boolean> => {
+    const { studentId, teacherId, startAt, endAt, ignoreInstanceIds = [], locale } = input;
     const hasConflict = await SchedulingRepository.hasOverlappingInstance(
       studentId,
       teacherId,
@@ -59,44 +76,35 @@ export namespace AvailabilityService {
     return true;
   };
 
-  export const assertSlotAvailable = async (
-    studentId: string,
-    teacherId: string,
-    startAt: Date,
-    endAt: Date,
-    ignoreInstanceIds: string[] = [],
-    locale = "en",
-    tx?: ReadExecutor
-  ): Promise<void> => {
-    const available = await isSlotAvailable(studentId, teacherId, startAt, endAt, ignoreInstanceIds, tx, locale);
+  export const assertSlotAvailable = async (input: SlotAvailabilityInput): Promise<void> => {
+    const { studentId, teacherId, startAt, endAt, ignoreInstanceIds = [], locale = "en" } = input;
+    const available = await isSlotAvailable({ studentId, teacherId, startAt, endAt, ignoreInstanceIds, locale });
     if (!available) {
       const tErrors = getServerTranslations(locale).errorsTranslations;
       throw new ValidationError(tErrors.invalidInput);
     }
   };
 
-  export const assertSchedulePatternAvailable = async (
-    studentId: string,
-    teacherId: string,
-    days: { dayOfWeek: string; startTime: string }[],
-    startDate: Date,
-    endDate: Date,
-    ignoreInstanceIds: string[] = [],
-    locale = "en",
-    tx?: ReadExecutor,
-    durationMinutes = 60,
-    timezone: string = "UTC"
-  ): Promise<void> => {
+  export const assertSchedulePatternAvailable = async (input: AssertSchedulePatternAvailableInput): Promise<void> => {
+    const { studentId, teacherId, days, startDate, endDate, options = {} } = input;
+    const { ignoreInstanceIds = [], locale = "en", tx, durationMinutes = 60, timezone = "UTC" } = options;
     const occurrences = buildPatternOccurrences(days, startDate, endDate, durationMinutes, timezone);
 
     if (occurrences.length === 0) return;
+
+    const firstStart = occurrences.at(0)?.start;
+    const lastEnd = occurrences.at(-1)?.end;
+
+    if (!firstStart || !lastEnd) {
+      return;
+    }
 
     // Batch-fetch all overlapping instances for the entire occurrence range in one query (via repository)
     const overlappingInstances = await SchedulingRepository.findOverlappingInstancesForRange(
       studentId,
       teacherId,
-      occurrences[0]?.start,
-      occurrences[occurrences.length - 1]?.end,
+      firstStart,
+      lastEnd,
       ignoreInstanceIds,
       txParam(tx)
     );
@@ -117,7 +125,7 @@ export namespace AvailabilityService {
       await TeacherAvailabilityRepository.validateBookingAvailabilityBatch(
         teacherId,
         occurrences.map(occ => ({ startTime: occ.start, endTime: occ.end })),
-        tx as DBTransaction | undefined,
+        txParam(tx),
         locale
       );
     } catch (error) {
@@ -139,14 +147,50 @@ export namespace AvailabilityService {
    * @param tx - Optional transaction
    * @param locale - Locale for error messages
    */
-  export const findAvailableSlots = async (
-    studentId: string,
-    date: Date,
-    teacherId?: string | null,
-    durationMinutes = 60,
-    tx?: ReadExecutor,
-    locale = "en"
-  ): Promise<AvailableClassSlot[]> => {
+  type FindAvailableSlotsOptions = {
+    studentId: string;
+    date: Date;
+    teacherId?: string | null;
+    durationMinutes?: number;
+    tx?: ReadExecutor;
+    locale?: string;
+  };
+
+  // Type guard: checks if a value is a FindAvailableSlotsOptions object.
+  function isFindAvailableSlotsOptions(value: unknown): value is FindAvailableSlotsOptions {
+    if (typeof value !== "object" || value === null) return false;
+    return "studentId" in value && typeof value.studentId === "string" && "date" in value && value.date instanceof Date;
+  }
+
+  // Type guard: checks if a value is a Drizzle-compatible query executor.
+  function isReadExecutor(value: unknown): value is ReadExecutor {
+    return typeof value === "object" && value !== null;
+  }
+
+  // Backwards-compatible wrapper: single rest-parameter to reduce function parameter count
+  export const findAvailableSlots = async (...args: unknown[]): Promise<AvailableClassSlot[]> => {
+    let opts: FindAvailableSlotsOptions;
+
+    if (args.length === 1 && isFindAvailableSlotsOptions(args[0])) {
+      // Called with an options object
+      opts = args[0];
+    } else {
+      // Legacy positional arguments: (studentId, date, teacherId?, durationMinutes?, tx?, locale?)
+      const studentId = typeof args[0] === "string" ? args[0] : "";
+      const date = args[1] instanceof Date ? args[1] : new Date(0);
+      const teacherId = typeof args[2] === "string" ? args[2] : null;
+      const durationMinutes = typeof args[3] === "number" ? args[3] : 60;
+      const tx = isReadExecutor(args[4]) ? args[4] : undefined;
+      const locale = typeof args[5] === "string" ? args[5] : "en";
+      opts = { studentId, date, teacherId, durationMinutes, tx, locale };
+    }
+
+    return findAvailableSlotsImpl(opts);
+  };
+
+  // Implementation that accepts a single options object (keeps logic isolated and testable)
+  async function findAvailableSlotsImpl(options: FindAvailableSlotsOptions): Promise<AvailableClassSlot[]> {
+    const { studentId, date, teacherId = null, durationMinutes = 60, tx, locale = "en" } = options;
     if (!teacherId) return [];
 
     // Build candidate slots from 00:00 to 24:00 UTC on the given date
@@ -158,13 +202,17 @@ export namespace AvailabilityService {
     const candidates: { startTime: Date; endTime: Date }[] = [];
     const slotMs = durationMinutes * 60 * 1000;
     for (let t = dayStart.getTime(); t + slotMs <= dayEnd.getTime(); t += slotMs) {
-      candidates.push({
-        startTime: new Date(t),
-        endTime: new Date(t + slotMs),
-      });
+      candidates.push({ startTime: new Date(t), endTime: new Date(t + slotMs) });
     }
 
     if (candidates.length === 0) return [];
+
+    const firstCandidateStart = candidates.at(0)?.startTime;
+    const lastCandidateEnd = candidates.at(-1)?.endTime;
+
+    if (!firstCandidateStart || !lastCandidateEnd) {
+      return [];
+    }
 
     // Batch-check teacher availability (returns boolean[] — no throw)
     const teacherAvailable = await TeacherAvailabilityRepository.checkBookingAvailabilityBatch(
@@ -178,8 +226,8 @@ export namespace AvailabilityService {
     const overlappingInstances = await SchedulingRepository.findOverlappingInstancesForRange(
       studentId,
       teacherId,
-      candidates[0]?.startTime,
-      candidates[candidates.length - 1]?.endTime,
+      firstCandidateStart,
+      lastCandidateEnd,
       [],
       txParam(tx)
     );
@@ -194,16 +242,11 @@ export namespace AvailabilityService {
         inst => inst.scheduledStartAt < slot.endTime && inst.scheduledEndAt > slot.startTime
       );
 
-      result.push({
-        teacherId,
-        startAt: slot.startTime,
-        endAt: slot.endTime,
-        available: !hasConflict,
-      });
+      result.push({ teacherId, startAt: slot.startTime, endAt: slot.endTime, available: !hasConflict });
     }
 
     return result;
-  };
+  }
 }
 
 /**
@@ -262,7 +305,7 @@ function buildPatternOccurrences(
   const occurrences: { start: Date; end: Date }[] = [];
   const curr = new Date(startDate);
 
-  while (curr <= endDate) {
+  while (curr.getTime() <= endDate.getTime()) {
     const currMs = curr.getTime();
     const tzDay = new Date(currMs).toLocaleString("en-US", { weekday: "short", timeZone: timezone });
     const dayOfWeekNum = TZ_DAY_MAP[tzDay] ?? curr.getUTCDay();

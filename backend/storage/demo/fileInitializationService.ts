@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { StorageDbRepository } from "@/backend/db/repo";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { getStorageService, type StorageService } from "@/backend/storage/storage.service";
 import type { FileOperationResult, FileUploadResult, FolderCreateInput } from "@/backend/types";
 import { extToMime } from "@/shared/utils/storage.utils";
@@ -48,35 +48,35 @@ export class FileSeedingService implements IFileSeedingService {
   /**
    * Ensures that a directory exists in the storage system.
    */
-  async ensureDirectory(path: string, isProtected = true): Promise<FileOperationResult> {
+  async ensureDirectory(dirPath: string, isProtected = true): Promise<FileOperationResult> {
     try {
-      const directoryInfo = await this.storageService.directoryInfoByPath(path);
-      const dbRecord = await StorageDbRepository.directoryByPath(path);
+      const directoryInfo = await this.storageService.directoryInfoByPath(dirPath);
+      const dbRecord = await StorageDbRepository.directoryByPath(dirPath);
 
       if (directoryInfo && dbRecord) {
-        return { success: true, message: `Directory already exists: ${path}` };
+        return { success: true, message: `Directory already exists: ${dirPath}` };
       }
 
       if (directoryInfo && !dbRecord) {
-        await StorageDbRepository.ensureDirectoryRecord({ path, protected: isProtected });
-        logger.info(`   📁 Synced directory DB record: ${path}`);
-        return { success: true, message: `Directory DB record synced: ${path}` };
+        await StorageDbRepository.ensureDirectoryRecord({ path: dirPath, protected: isProtected });
+        logger.info(`   📁 Synced directory DB record: ${dirPath}`);
+        return { success: true, message: `Directory DB record synced: ${dirPath}` };
       }
 
       const input: FolderCreateInput = {
-        path,
+        path: dirPath,
         protected: isProtected,
       };
 
       const result = await this.storageService.createFolder(input);
       if (result.success) {
-        logger.info(`   📁 Created directory: ${path}`);
+        logger.info(`   📁 Created directory: ${dirPath}`);
       } else {
-        logger.warn(`   ⚠️  Could not create directory: ${path} - ${result.message}`);
+        logger.warn(`   ⚠️  Could not create directory: ${dirPath} - ${result.message}`);
       }
       return result;
     } catch (error) {
-      logger.error(`   ❌ Error ensuring directory ${path}:`, error);
+      logger.error(`   ❌ Error ensuring directory ${dirPath}:`, error);
       return {
         success: false,
         message: error instanceof Error ? error.message : String(error),
@@ -131,15 +131,10 @@ export class FileSeedingService implements IFileSeedingService {
   }
 
   /**
-   * Seeds multiple files in sequence.
+   * Seeds multiple files concurrently.
    */
   async seedFiles(inputs: FileSeedInput[]): Promise<FileUploadResult[]> {
-    const results: FileUploadResult[] = [];
-    for (const input of inputs) {
-      const result = await this.seedFile(input);
-      results.push(result);
-    }
-    return results;
+    return Promise.all(inputs.map(input => this.seedFile(input)));
   }
 
   private getContentTypeFromFileName(fileName: string): string {

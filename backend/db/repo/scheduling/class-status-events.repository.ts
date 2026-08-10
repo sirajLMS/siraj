@@ -20,6 +20,23 @@ async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTran
   return tx ? fn(tx) : db.transaction(fn);
 }
 
+async function insertChunks(
+  tx: DBTransaction,
+  inputs: readonly ClassStatusEventSeedInsertInput[],
+  chunkCount: number
+): Promise<ClassStatusEventSelectType[]> {
+  async function processChunk(index: number, acc: ClassStatusEventSelectType[]): Promise<ClassStatusEventSelectType[]> {
+    if (index >= chunkCount) return acc;
+    const chunk = inputs.slice(
+      index * DEFAULT_BULK_CHUNK_SIZE,
+      index * DEFAULT_BULK_CHUNK_SIZE + DEFAULT_BULK_CHUNK_SIZE
+    );
+    const inserted = await tx.insert(classStatusEvents).values(chunk).returning();
+    return processChunk(index + 1, [...acc, ...inserted]);
+  }
+  return processChunk(0, []);
+}
+
 export namespace ClassStatusEventsRepository {
   export async function findFirstByClassInstanceIds(
     classInstanceIds: readonly string[],
@@ -64,13 +81,8 @@ export namespace ClassStatusEventsRepository {
     if (inputs.length === 0) return [];
 
     return runInTransaction(tx, async t => {
-      const results: ClassStatusEventSelectType[] = [];
-      for (let i = 0; i < inputs.length; i += DEFAULT_BULK_CHUNK_SIZE) {
-        const chunk = inputs.slice(i, i + DEFAULT_BULK_CHUNK_SIZE);
-        const inserted = await t.insert(classStatusEvents).values(chunk).returning();
-        results.push(...inserted);
-      }
-      return results;
+      const chunkCount = Math.ceil(inputs.length / DEFAULT_BULK_CHUNK_SIZE);
+      return insertChunks(t, inputs, chunkCount);
     });
   }
 

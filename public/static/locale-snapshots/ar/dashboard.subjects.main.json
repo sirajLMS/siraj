@@ -46,7 +46,7 @@
   "categoryDeleted": "تم حذف الفئة بنجاح",
   "detail": {
     "pageTitle": {
-      "__fn": "(name) => `${name}`"
+      "__fn": "(name) => name"
     },
     "resourcesTitle": "الموارد",
     "resourcesSubtitle": {

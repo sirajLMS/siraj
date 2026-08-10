@@ -28,8 +28,8 @@ import type {
 /**
  * Options for {@link buildPaginatedListRequest}.
  *
- * @typeParam T  Item type accumulated across pages (e.g. `WhatsappPhoneNumber`).
- * @typeParam R  Raw response body type returned by `fetchPage`.
+ * @template T Item type accumulated across pages (e.g. `WhatsappPhoneNumber`).
+ * @template R Raw response body type returned by `fetchPage`.
  */
 export interface PaginatedListRequestOptions<T, _R extends GraphApiPaginatedResponse<T>> {
   /** API path segment appended after `/{wabaId}`, e.g. `"phone_numbers"`. */
@@ -64,8 +64,8 @@ export interface PaginatedListRequestResult<T, R extends GraphApiPaginatedRespon
  * The generated `collectAll` wraps `collectAllPages`, extracting
  * `body.data` as items and `body.paging?.cursors?.after` as the next cursor.
  *
- * @typeParam T  Item type accumulated across pages.
- * @typeParam R  Raw paginated response body type.
+ * @template T Item type accumulated across pages.
+ * @template R Raw paginated response body type.
  */
 export function buildPaginatedListRequest<T, R extends GraphApiPaginatedResponse<T>>(
   options: PaginatedListRequestOptions<T, R>

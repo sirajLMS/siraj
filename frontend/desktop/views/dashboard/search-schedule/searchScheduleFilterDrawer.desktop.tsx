@@ -19,6 +19,33 @@ import type { SearchScheduleFilterDrawerProps } from "@/frontend/common/views/da
 import { getClearDrawerFiltersPatch } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
 import type { SearchScheduleLabels } from "@/shared/locale/types/dashboard/core/searchSchedule";
 
+type DayLabelKey = keyof SearchScheduleLabels["day"];
+
+const DAY_OF_WEEK_LABEL_KEY: Record<DayOfWeek, DayLabelKey> = {
+  [DayOfWeek.Friday]: "friday",
+  [DayOfWeek.Monday]: "monday",
+  [DayOfWeek.Saturday]: "saturday",
+  [DayOfWeek.Sunday]: "sunday",
+  [DayOfWeek.Thursday]: "thursday",
+  [DayOfWeek.Tuesday]: "tuesday",
+  [DayOfWeek.Wednesday]: "wednesday",
+};
+
+const DAY_OF_WEEK_VALUES: readonly string[] = Object.values(DayOfWeek);
+const GENDER_VALUES: readonly string[] = Object.values(Gender);
+
+function isDayOfWeek(value: string): value is DayOfWeek {
+  return DAY_OF_WEEK_VALUES.includes(value);
+}
+
+function isGender(value: string): value is Gender {
+  return GENDER_VALUES.includes(value);
+}
+
+function getDayLabel(day: DayOfWeek, labels: SearchScheduleLabels): string {
+  return labels.day[DAY_OF_WEEK_LABEL_KEY[day]];
+}
+
 function DaysOfWeekSelect({
   labels,
   value,
@@ -42,7 +69,7 @@ function DaysOfWeekSelect({
         renderValue={selected => (
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
             {selected.slice(0, 2).map(day => (
-              <Chip key={day} label={labels.day[day.toLowerCase() as keyof typeof labels.day]} size="small" />
+              <Chip key={day} label={getDayLabel(day, labels)} size="small" />
             ))}
             {selected.length > 2 ? <Chip label={`+${selected.length - 2}`} size="small" /> : null}
           </Box>
@@ -50,7 +77,7 @@ function DaysOfWeekSelect({
       >
         {Object.values(DayOfWeek).map(day => (
           <MenuItem key={day} value={day}>
-            {labels.day[day.toLowerCase() as keyof typeof labels.day]}
+            {getDayLabel(day, labels)}
           </MenuItem>
         ))}
       </Select>
@@ -68,8 +95,9 @@ function FilterFields({ labels, draft, onDraftChange }: Readonly<FilterFieldsPro
   const handleDaysOfWeekChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value;
     const selectedDays = typeof value === "string" ? value.split(",") : value;
+    const dayValues = selectedDays.filter(isDayOfWeek);
     onDraftChange({
-      daysOfWeek: selectedDays.length > 0 ? (selectedDays as DayOfWeek[]) : null,
+      daysOfWeek: dayValues.length > 0 ? dayValues : null,
     });
   };
 
@@ -84,13 +112,8 @@ function FilterFields({ labels, draft, onDraftChange }: Readonly<FilterFieldsPro
         onChange={event => {
           const value = event.target.value;
           let gender: Gender | null = null;
-          if (value) {
-            for (const option of Object.values(Gender)) {
-              if (option === value) {
-                gender = option;
-                break;
-              }
-            }
+          if (value && isGender(value)) {
+            gender = value;
           }
           onDraftChange({ gender });
         }}

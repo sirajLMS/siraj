@@ -13,9 +13,14 @@ type HandleCache = Map<NamespaceHandle<unknown>, LocaleCache>;
 
 const translationCache: HandleCache = new Map();
 
-const useSnapshotFallback = typeof window !== "undefined" && !window.isSecureContext && "indexedDB" in window;
+const useSnapshotFallback =
+  typeof globalThis.window !== "undefined" && !globalThis.window.isSecureContext && "indexedDB" in globalThis.window;
 
 let hasWipedBuildId = false;
+
+function isCacheEntry<TLabels>(entry: CacheEntry<unknown> | undefined): entry is CacheEntry<TLabels> {
+  return entry !== undefined;
+}
 
 function checkBuildIdWipe(): void {
   if (useSnapshotFallback && !hasWipedBuildId) {
@@ -41,13 +46,14 @@ function startNamespaceLoad<TLabels>(handle: NamespaceHandle<TLabels>, locale: A
 
   checkBuildIdWipe();
 
-  const localeCache = getLocaleCache(handle as NamespaceHandle<unknown>);
-  const existing = localeCache.get(locale) as CacheEntry<TLabels> | undefined;
+  const localeCache = getLocaleCache(handle);
+  const cachedEntry = localeCache.get(locale);
+  const existing = isCacheEntry<TLabels>(cachedEntry) ? cachedEntry : undefined;
   if (existing) {
     return existing;
   }
 
-  const namespaceId = getNamespaceId(handle as NamespaceHandle<unknown>);
+  const namespaceId = getNamespaceId(handle);
   const entryHolder: { entry?: CacheEntry<TLabels> } = {};
 
   const loadPromise = (async (): Promise<TLabels> => {
@@ -82,7 +88,7 @@ function startNamespaceLoad<TLabels>(handle: NamespaceHandle<TLabels>, locale: A
   };
   entryHolder.entry = entry;
 
-  localeCache.set(locale, entry as CacheEntry<unknown>);
+  localeCache.set(locale, entry);
   return entry;
 }
 

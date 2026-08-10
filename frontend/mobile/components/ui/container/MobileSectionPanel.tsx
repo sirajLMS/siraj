@@ -113,28 +113,33 @@ export function MobileSectionPanel({
     </Paper>
   );
 
-  function renderChildren() {
-    if (!children) {
-      return null;
+  function renderChildren(): ReactNode {
+    let content: ReactNode = null;
+    if (children) {
+      content = contentInset ? (
+        <Box
+          sx={mergeSx(mobileContentGutterSx, {
+            py: 2,
+          })}
+        >
+          {children}
+        </Box>
+      ) : (
+        children
+      );
     }
-    if (!contentInset) {
-      return children;
-    }
-    return (
-      <Box
-        sx={mergeSx(mobileContentGutterSx, {
-          py: 2,
-        })}
-      >
-        {children}
-      </Box>
-    );
+    return content;
   }
 }
 
-function renderTitle(title: ReactNode) {
+function renderTitle(title: ReactNode): ReactNode {
+  let content: ReactNode;
   if (typeof title === "string") {
-    return <Typography sx={theme => ({ typography: "titleMd", color: theme.palette.onSurface })}>{title}</Typography>;
+    content = (
+      <Typography sx={theme => ({ typography: "titleMd", color: theme.palette.onSurface })}>{title}</Typography>
+    );
+  } else {
+    content = title;
   }
-  return title;
+  return content;
 }

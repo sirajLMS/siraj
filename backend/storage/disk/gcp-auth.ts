@@ -2,7 +2,7 @@ import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 import { Storage } from "@google-cloud/storage";
 import { GoogleAuth } from "google-auth-library";
 import { getStringEnv } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 const projectId = getStringEnv("GCP_PROJECT_ID");
 const secretId = getStringEnv("GCP_SECRET_ID");
@@ -13,6 +13,36 @@ interface GcpCredentials {
   private_key: string;
   type: string;
   project_id?: string;
+}
+
+/**
+ * Type guard that validates parsed JSON has the shape of GcpCredentials
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isGcpCredentials(value: unknown): value is GcpCredentials {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value.client_email === "string" &&
+    typeof value.private_key === "string" &&
+    typeof value.type === "string" &&
+    (value.project_id === undefined || typeof value.project_id === "string")
+  );
+}
+
+/**
+ * Parses and validates a JSON string into GcpCredentials
+ */
+function parseGcpCredentials(json: string): GcpCredentials {
+  const parsed: unknown = JSON.parse(json);
+  if (!isGcpCredentials(parsed)) {
+    throw new Error("Parsed JSON does not match GcpCredentials shape");
+  }
+  return parsed;
 }
 
 /**
@@ -55,7 +85,7 @@ const getStorageFromSecretManager = async (): Promise<Storage> => {
       throw new Error("No payload found in secret version");
     }
 
-    const credentials = JSON.parse(payload.toString()) as GcpCredentials;
+    const credentials = parseGcpCredentials(payload.toString());
     validateGcpCredentials(credentials, "Secret Manager");
 
     return createStorageClient(credentials, projectId);
@@ -73,7 +103,7 @@ const getStorageFromEnv = (): Storage | null => {
   }
 
   try {
-    const credentials = JSON.parse(credentialsJson) as GcpCredentials;
+    const credentials = parseGcpCredentials(credentialsJson);
     validateGcpCredentials(credentials, "GCP_CREDENTIALS_JSON");
 
     return createStorageClient(credentials, projectId);

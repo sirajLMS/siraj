@@ -26,7 +26,7 @@ describe("LearningResourceService — deleteResource", () => {
     try {
       await LearningResourceService.deleteResource(dummyResourceId, dummyActorId);
     } catch (e) {
-      errorCaught = e as Error;
+      errorCaught = e instanceof Error ? e : new Error(String(e));
     }
 
     expect(errorCaught).not.toBeNull();
@@ -73,15 +73,15 @@ describe("LearningResourceService — deleteResource", () => {
     try {
       await LearningResourceService.deleteResource(dummyResourceId, dummyActorId);
     } catch (e) {
-      errorCaught = e as Error;
+      errorCaught = e instanceof Error ? e : new Error(String(e));
     }
 
     expect(errorCaught).not.toBeNull();
     if (errorCaught) {
       expect(errorCaught.message).toContain("resourceDeleteFailed");
       expect(errorCaught.cause).toBeDefined();
-      if (errorCaught.cause) {
-        expect((errorCaught.cause as Error).message).toContain("AWS S3 Timeout");
+      if (errorCaught.cause instanceof Error) {
+        expect(errorCaught.cause.message).toContain("AWS S3 Timeout");
       }
     }
     expect(deleteResourceSpy).not.toHaveBeenCalled();
@@ -101,7 +101,7 @@ describe("LearningResourceService — deleteResource", () => {
     try {
       await LearningResourceService.deleteResource(dummyResourceId, dummyActorId);
     } catch (e) {
-      errorCaught = e as Error;
+      errorCaught = e instanceof Error ? e : new Error(String(e));
     }
 
     expect(errorCaught).not.toBeNull();

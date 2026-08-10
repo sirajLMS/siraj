@@ -1,12 +1,11 @@
 "use server";
 
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { parseIanaTimezone } from "@/backend/lib/enum";
+import { logger } from "@/backend/lib/logger";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
-import { logger } from "@/frontend/common/utils/logger";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import { mapFormDataToServiceInput } from "@/frontend/common/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
+import { parseIanaTimezone } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export async function createRecurringClass(
@@ -39,7 +38,8 @@ export async function createRecurringClass(
       userId,
       {
         ...input,
-        timezone: parseIanaTimezone(toGraphqlIanaTimezone(input.timezone)),
+        rateCurrency: input.rateCurrency ?? undefined,
+        timezone: parseIanaTimezone(input.timezone),
       },
       tErrors
     );

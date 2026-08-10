@@ -37,7 +37,7 @@ export const teacherOnboardingSchema = (validationLabels: {
       address: z.string().optional(),
       qualifications: z.string().optional(),
       countryCode: z.custom<CountryCode>(
-        val => typeof val === "string" && Object.values(CountryCode).includes(val as CountryCode),
+        val => typeof val === "string" && (Object.values(CountryCode) as readonly string[]).includes(val),
         { message: validationLabels.countryRequired }
       ),
       timezone: z.custom<IanaTimezone>(
@@ -65,9 +65,7 @@ export const teacherOnboardingSchema = (validationLabels: {
         });
       }
       if (hasUrl && data.meetingUrl) {
-        try {
-          new URL(data.meetingUrl);
-        } catch {
+        if (!URL.canParse(data.meetingUrl)) {
           ctx.addIssue({
             code: "custom",
             message: validationLabels.urlInvalid,

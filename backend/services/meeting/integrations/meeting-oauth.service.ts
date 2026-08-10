@@ -19,7 +19,7 @@ import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meetin
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { MeetingProvider } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
@@ -74,6 +74,22 @@ export interface MeetingOAuthStatePayload extends JoseJWTPayload {
   nonce: string;
 }
 
+const MEETING_PROVIDERS: readonly MeetingProvider[] = ["zoom", "google_meet", "microsoft_teams"];
+
+function isMeetingProvider(value: string): value is MeetingProvider {
+  return (MEETING_PROVIDERS as readonly string[]).includes(value);
+}
+
+function isOAuthStatePayload(payload: JoseJWTPayload): payload is MeetingOAuthStatePayload {
+  return (
+    typeof payload.userId === "string" &&
+    typeof payload.providerSlug === "string" &&
+    isMeetingProvider(payload.providerSlug) &&
+    typeof payload.returnPath === "string" &&
+    typeof payload.nonce === "string"
+  );
+}
+
 function getStateSigningSecret(): Uint8Array {
   const config = getEnvironmentConfig();
   return new TextEncoder().encode(config.jwtSecret);
@@ -96,7 +112,8 @@ async function signOAuthState(userId: string, providerSlug: MeetingProvider, ret
 export async function verifyOAuthState(state: string): Promise<MeetingOAuthStatePayload | null> {
   try {
     const { payload } = await jwtVerify(state, getStateSigningSecret());
-    return payload as unknown as MeetingOAuthStatePayload;
+    if (!isOAuthStatePayload(payload)) return null;
+    return payload;
   } catch {
     return null;
   }
@@ -109,7 +126,9 @@ export async function verifyOAuthState(state: string): Promise<MeetingOAuthState
 function buildRedirectUri(providerSlug: MeetingProvider): string {
   const config = getEnvironmentConfig();
   const baseUrl = config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "";
-  const pathSlug = providerSlug.replace(/_/g, "-");
+  // Use split/join instead of replace/replaceAll for better compatibility and to
+  // satisfy static analysis rules that prefer explicit all-occurrence handling.
+  const pathSlug = providerSlug.split("_").join("-");
   return `${baseUrl.replace(/\/$/, "")}/api/oauth/${pathSlug}/callback`;
 }
 
@@ -117,28 +136,36 @@ const ZOOM_SCOPES = ["meeting:write:meeting", "user:read:user"] as const;
 const GOOGLE_SCOPES = ["https://www.googleapis.com/auth/meetings.space.created"] as const;
 const MS_TEAMS_SCOPES = ["https://graph.microsoft.com/OnlineMeetings.ReadWrite", "User.Read"] as const;
 
-function buildZoomAuthorizeUrl(redirectUri: string, state: string): string {
-  const config = getEnvironmentConfig();
-  const clientId = config.zoomClientId ?? "";
-  const params = new URLSearchParams({
+/**
+ * Builds the common `URLSearchParams` shared by all meeting-provider OAuth
+ * authorize endpoints, then layers provider-specific extras on top.
+ */
+function buildOAuthParams(
+  redirectUri: string,
+  state: string,
+  clientId: string,
+  scope: string,
+  extraParams?: Record<string, string>
+): URLSearchParams {
+  return new URLSearchParams({
     response_type: "code",
     client_id: clientId,
     redirect_uri: redirectUri,
     state,
-    scope: ZOOM_SCOPES.join(" "),
+    scope,
+    ...extraParams,
   });
+}
+
+function buildZoomAuthorizeUrl(redirectUri: string, state: string): string {
+  const config = getEnvironmentConfig();
+  const params = buildOAuthParams(redirectUri, state, config.zoomClientId ?? "", ZOOM_SCOPES.join(" "));
   return `https://zoom.us/oauth/authorize?${params.toString()}`;
 }
 
 function buildGoogleMeetAuthorizeUrl(redirectUri: string, state: string): string {
   const config = getEnvironmentConfig();
-  const clientId = config.googleMeetClientId ?? "";
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    state,
-    scope: GOOGLE_SCOPES.join(" "),
+  const params = buildOAuthParams(redirectUri, state, config.googleMeetClientId ?? "", GOOGLE_SCOPES.join(" "), {
     access_type: "offline",
     prompt: "consent",
   });
@@ -148,13 +175,7 @@ function buildGoogleMeetAuthorizeUrl(redirectUri: string, state: string): string
 function buildMicrosoftTeamsAuthorizeUrl(redirectUri: string, state: string): string {
   const config = getEnvironmentConfig();
   const tenantId = config.msTeamsTenantId ?? "common";
-  const clientId = config.msTeamsClientId ?? "";
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    state,
-    scope: MS_TEAMS_SCOPES.join(" "),
+  const params = buildOAuthParams(redirectUri, state, config.msTeamsClientId ?? "", MS_TEAMS_SCOPES.join(" "), {
     response_mode: "query",
   });
   return `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?${params.toString()}`;
@@ -169,6 +190,7 @@ function buildAuthorizeUrl(providerSlug: MeetingProvider, redirectUri: string, s
     case "microsoft_teams":
       return buildMicrosoftTeamsAuthorizeUrl(redirectUri, state);
   }
+  throw new Error(`Unhandled case in buildAuthorizeUrl`);
 }
 
 // ============================================================================
@@ -272,11 +294,16 @@ export namespace MeetingOAuthService {
     const user = await UserRepository.findById(actorUserId);
     const email = user?.email ?? null;
 
-    return tokens.map(token => ({
-      providerSlug: token.providerSlug as MeetingProvider,
-      email,
-      connectedAt: token.createdAt ?? null,
-      expiresAt: token.expiresAt ?? null,
-    }));
+    return tokens.reduce<MyConnectedMeetingProviderReturnType[]>((acc, token) => {
+      if (isMeetingProvider(token.providerSlug)) {
+        acc.push({
+          providerSlug: token.providerSlug,
+          email,
+          connectedAt: token.createdAt ?? null,
+          expiresAt: token.expiresAt ?? null,
+        });
+      }
+      return acc;
+    }, []);
   }
 }

@@ -17,6 +17,7 @@ import {
   parentOwnEditSchema,
 } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/parent/sections/AccountSection";
+import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/parent/sections/AdminOnlySection";
 import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/parent/sections/ContactSection";
 import {
@@ -171,6 +172,9 @@ function ParentEditFormSections({
           {canEdit("parent_billing") ? (
             <BillingSection mode="edit" labels={pt} register={register} control={control} />
           ) : null}
+          {canEdit("parent_identity") ? (
+            <AdminOnlySection labels={sectionLabels} mode="edit" register={register} />
+          ) : null}
         </>
       ) : null}
     </Box>
@@ -249,7 +253,7 @@ export function ParentProfileEditForm({
           </PrimaryPageAction>
         </Stack>
       </Box>
-      {!isAdminScope ? <ChangePasswordSection /> : null}
+      {isAdminScope ? null : <ChangePasswordSection />}
       <ParentEditFormSnackbars
         successOpen={feedback.successOpen}
         errorOpen={feedback.errorOpen}

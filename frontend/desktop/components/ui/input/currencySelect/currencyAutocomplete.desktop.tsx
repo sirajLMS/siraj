@@ -58,13 +58,13 @@ const renderCurrencyInput = ({
   return (
     <TextField
       {...params}
+      autoFocus={autoFocus}
       label={resolvedLabel}
       placeholder={resolvedPlaceholder}
       required={required}
       error={showError}
       helperText={resolvedHelperText}
       onBlur={onBlur}
-      autoFocus={autoFocus}
       slotProps={{
         ...params.slotProps,
         input: {
@@ -224,7 +224,7 @@ export const CurrencyAutocompleteDesktop: React.FC<CurrencyAutocompleteProps> = 
   const resolvedPlaceholder = listAttached ? (label ?? t.selectCurrency) : (placeholder ?? t.searchByCodeOrName);
 
   return (
-    <Autocomplete<CurrencyOption, false, false, false>
+    <Autocomplete<CurrencyOption>
       fullWidth={fullWidth}
       options={options}
       autoHighlight

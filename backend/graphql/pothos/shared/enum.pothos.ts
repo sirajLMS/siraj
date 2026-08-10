@@ -51,8 +51,6 @@ import {
   RescheduleDateLabel,
   SchedulingMode,
   StudentStatus,
-  SystemSettingCategory,
-  SystemSettingDataType,
   TeacherDueStatus,
   TeacherProgressFeedEventKind,
   UserRole,
@@ -61,10 +59,10 @@ import {
   WhatsappTemplateCategory,
   WhatsappTemplateStatus,
 } from "@/backend/enum";
-
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
   name: "AppPermission",
@@ -230,34 +228,12 @@ export const RateSourcePothosEnum = gqlSchemaBuilder.enumType(RateSource, {
   name: "RateSource",
 });
 
-export const SystemSettingCategoryPothos = gqlSchemaBuilder.enumType("SystemSettingCategory", {
-  values: {
-    app: { value: SystemSettingCategory.App },
-    auth: { value: SystemSettingCategory.Auth },
-    billing: { value: SystemSettingCategory.Billing },
-    cache: { value: SystemSettingCategory.Cache },
-    communication: { value: SystemSettingCategory.Communication },
-    email: { value: SystemSettingCategory.Email },
-    fx: { value: SystemSettingCategory.Fx },
-    general: { value: SystemSettingCategory.General },
-    meeting: { value: SystemSettingCategory.Meeting },
-    push: { value: SystemSettingCategory.Push },
-    redis: { value: SystemSettingCategory.Redis },
-    scheduling: { value: SystemSettingCategory.Scheduling },
-    security: { value: SystemSettingCategory.Security },
-    sms: { value: SystemSettingCategory.Sms },
-    storage: { value: SystemSettingCategory.Storage },
-    system: { value: SystemSettingCategory.System },
-  },
+export const SystemSettingCategoryPothos = gqlSchemaBuilder.enumType(SystemSettingCategory, {
+  name: "SystemSettingCategory",
 });
 
-export const SystemSettingDataTypePothos = gqlSchemaBuilder.enumType("SystemSettingDataType", {
-  values: {
-    boolean: { value: SystemSettingDataType.Boolean },
-    integer: { value: SystemSettingDataType.Integer },
-    json: { value: SystemSettingDataType.Json },
-    string: { value: SystemSettingDataType.String },
-  },
+export const SystemSettingDataTypePothos = gqlSchemaBuilder.enumType(SystemSettingDataType, {
+  name: "SystemSettingDataType",
 });
 
 export const InvoicePaymentSubmissionStatusPothosEnum = gqlSchemaBuilder.enumType(InvoicePaymentSubmissionStatus, {

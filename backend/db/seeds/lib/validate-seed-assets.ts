@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { SEED_ASSET_MANIFEST } from "@/backend/db/seeds/lib/asset-manifest";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 
 const ASSETS_ROOT = path.join(import.meta.dir, "..", "assets");
 

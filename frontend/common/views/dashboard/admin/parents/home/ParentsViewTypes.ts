@@ -1,4 +1,4 @@
-import { AccountStatus, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { ParentsDirectoryLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/home/types/parentsDirectory.types";
 import type { ParentLifecycleStatus as BaseParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
@@ -7,8 +7,17 @@ import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/par
 export type ParentLifecycleStatus = BaseParentLifecycleStatus;
 export type ParentAccountStatusKey = "activated" | "deactivated";
 
+const VALID_LIFECYCLE_STATUSES: ReadonlySet<string> = new Set(
+  Object.values(ParentStatus).map(value => value.toLowerCase())
+);
+
+function isParentLifecycleStatus(value: string): value is ParentLifecycleStatus {
+  return VALID_LIFECYCLE_STATUSES.has(value);
+}
+
 export function toParentLifecycleStatus(status: ParentStatus): ParentLifecycleStatus {
-  return status.toLowerCase() as ParentLifecycleStatus;
+  const lower = status.toLowerCase();
+  return isParentLifecycleStatus(lower) ? lower : "regular";
 }
 
 export function toParentAccountStatusKey(status: AccountStatus | null | undefined): ParentAccountStatusKey {
@@ -72,30 +81,10 @@ export interface ParentsViewLabels {
   readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
 }
 
-export interface ParentsViewModel {
-  readonly metrics: readonly MetricItem[];
-  readonly rows: readonly ParentDirectoryRow[];
-  readonly labelsBySection: ParentsDirectoryLabelsBySection;
+export interface ParentsViewModel extends BaseParentsViewProps {
+  // NEW FOR PLAN v5: desktop variant adds `loading?` — mobile omits (uses sentinel rows / skeleton-in-list).
+  // BaseParentsViewProps already carries metrics, rows, labelsBySection, pagination, handlers, and permission booleans.
   readonly loading?: boolean;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly lifecycleStatusFilter: ParentStatus | null;
-  readonly filterPanelOpen: boolean;
-  readonly onAddParent: () => void;
-  readonly onOpenSettings: (id: string) => void;
-  readonly onSearch: (query: string) => void;
-  readonly onPageChange?: (page: number) => void;
-  readonly onFilter: () => void;
-  readonly onExport: () => void;
-  readonly onLifecycleStatusFilterChange: (status: ParentStatus | null) => void;
-  readonly onResetFilters: () => void;
-  // NEW FOR PLAN v5: lifted permission booleans per specs.md §3 N3 + §6.1.
-  // Tier parents views (and the desktop data-grid child) no longer import
-  // `RequirePermission` or call `useUserStore()` — the ViewModel computes
-  // the gates ONCE and the tier views read the booleans as plain props.
-  readonly canParentsCreate: boolean;
-  readonly canParentManageStatus: boolean;
 }
 
 // NEW FOR PLAN v5: BaseParentsViewProps lifted per specs.md §4.1 Class C — desktop variant adds `loading?: boolean`

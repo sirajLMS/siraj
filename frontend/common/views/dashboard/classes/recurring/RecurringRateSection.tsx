@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
 
 export interface RecurringRateSectionLabels {
@@ -33,6 +33,10 @@ interface RateFormValues {
   readonly rateCurrency: string;
 }
 
+function isCurrencyCode(value: string): value is CurrencyCode {
+  return (Object.values(CurrencyCode) as readonly string[]).includes(value);
+}
+
 export function RecurringRateSection({
   hourlyRate,
   rateCurrency,
@@ -58,7 +62,7 @@ export function RecurringRateSection({
   const currencySymbol = watchedCurrency ? getCurrencySymbol(watchedCurrency) : "";
 
   const handleValidSubmit = async (data: RateFormValues) => {
-    await onSave(data.hourlyRate || null, (data.rateCurrency as CurrencyCode | "") || null);
+    await onSave(data.hourlyRate || null, isCurrencyCode(data.rateCurrency) ? data.rateCurrency : null);
   };
 
   const handleClear = async () => {

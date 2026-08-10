@@ -5,21 +5,18 @@ import type {
   UserMeetingConfigSelectType,
 } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
-import type { ErrorsLabels } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const PROVIDER_ID = "33333333-3333-4333-8333-333333333333";
-const CONFIG_ID = "44444444-4444-4444-8444-444444444444";
-const CLASS_INSTANCE_ID = "55555555-5555-4555-8555-555555555555";
+const PROVIDER_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
+const CONFIG_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
+const CLASS_INSTANCE_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const UPSTREAM_MEETING_ID = "zoom-meeting-123";
 
-const FAKE_ERRORS = {
-  meetingConfigNotFound: "Meeting config not found.",
-  meetingProviderNotFound: "Meeting provider not found.",
-} as unknown as ErrorsLabels;
+const FAKE_ERRORS = errorsEn;
 
 // ---------------------------------------------------------------------------
 // Mock data builders
@@ -57,7 +54,7 @@ function buildUserConfig(overrides: Partial<UserMeetingConfigSelectType> = {}): 
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  } as UserMeetingConfigSelectType;
+  };
 }
 
 interface FakeClassInstance {
@@ -88,7 +85,7 @@ function buildClassInstance(overrides: Partial<FakeClassInstance> = {}): FakeCla
 // ---------------------------------------------------------------------------
 
 // --- Logger
-mock.module("@/backend/lib/logger", () => ({
+await mock.module("@/backend/lib/logger", () => ({
   logger: {
     info: () => {},
     warn: () => {},
@@ -98,12 +95,25 @@ mock.module("@/backend/lib/logger", () => ({
 }));
 
 // --- meeting-config.validation — passthrough
-mock.module("@/backend/lib/meeting-config.validation", () => ({
-  parseMeetingConfigDetails: (_provider: unknown, details: unknown) => details as MeetingConfigDetails,
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isMeetingConfigDetails(value: unknown): value is MeetingConfigDetails {
+  if (!isRecord(value)) return false;
+  if ("meetingUrl" in value && value.meetingUrl !== null && typeof value.meetingUrl !== "string") return false;
+  if ("username" in value && typeof value.username !== "string") return false;
+  if ("tenantId" in value && typeof value.tenantId !== "string") return false;
+  return true;
+}
+
+await mock.module("@/backend/lib/meeting-config.validation", () => ({
+  parseMeetingConfigDetails: (_provider: unknown, details: unknown): MeetingConfigDetails =>
+    isMeetingConfigDetails(details) ? details : {},
 }));
 
 // --- meeting-config-mask
-mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
+await mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
   buildMeetingProviderCatalogSnapshot: (provider: MeetingProviderSelectType) => ({
     catalogId: provider.id,
     catalogSlug: provider.slug,
@@ -117,7 +127,7 @@ mock.module("@/backend/services/meeting/meeting-config-mask", () => ({
 const userConfigGetByIdOrThrowMock = mock(async (): Promise<UserMeetingConfigSelectType> => buildUserConfig());
 const userConfigGetByIdMock = mock(async (): Promise<UserMeetingConfigSelectType | null> => buildUserConfig());
 
-mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
   UserMeetingConfigRepository: {
     getByIdOrThrow: userConfigGetByIdOrThrowMock,
     getById: userConfigGetByIdMock,
@@ -127,7 +137,7 @@ mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", () => ({
 // --- ClassMeetingConfigRepository
 import type { ClassMeetingConfigSelectType } from "@/backend/types/meeting/class-meeting-config.types";
 
-function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {}): ClassMeetingConfigSelectType {
+function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {}) {
   return {
     id: CONFIG_ID,
     classInstanceId: CLASS_INSTANCE_ID,
@@ -141,12 +151,12 @@ function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {})
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
-  } as unknown as ClassMeetingConfigSelectType;
+  };
 }
 
 const classConfigGetByIdOrThrowMock = mock(async (): Promise<ClassMeetingConfigSelectType> => buildClassConfig());
 
-mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => ({
   ClassMeetingConfigRepository: {
     getByIdOrThrow: classConfigGetByIdOrThrowMock,
   },
@@ -156,7 +166,7 @@ mock.module("@/backend/db/repo/meeting/class-meeting-config.repository", () => (
 const providerGetByIdOrThrowMock = mock(async (): Promise<MeetingProviderSelectType> => buildProvider());
 const providerGetByIdMock = mock(async (): Promise<MeetingProviderSelectType | null> => buildProvider());
 
-mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
+await mock.module("@/backend/db/repo/meeting/meeting-provider.repository", () => ({
   MeetingProviderRepository: {
     getByIdOrThrow: providerGetByIdOrThrowMock,
     getById: providerGetByIdMock,
@@ -195,7 +205,7 @@ const providerKindToSlugMock = mock((kind: string): "zoom" | "google_meet" | "mi
   return null;
 });
 
-mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
+await mock.module("@/backend/services/meeting/channels/MeetingChannelFactory", () => ({
   getMeetingChannel: getMeetingChannelMock,
   providerKindToSlug: providerKindToSlugMock,
   meetingChannel: {},
@@ -215,13 +225,13 @@ const dbUpdateSetWhereMock = mock(async () => ({}));
 const dbUpdateSetMock = mock(() => ({ where: dbUpdateSetWhereMock }));
 const dbUpdateMock = mock(() => ({ set: dbUpdateSetMock }));
 
-mock.module("@/backend/db/drizzleDb", () => ({
+await mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     update: dbUpdateMock,
   },
 }));
 
-mock.module("@/backend/db/schema", () => ({
+await mock.module("@/backend/db/schema", () => ({
   classInstances: { id: "id" },
   teachers: { id: "id", userId: "userId" },
 }));
@@ -236,7 +246,7 @@ function buildQueryClient() {
 
 const queryClient = buildQueryClient();
 
-mock.module("@/backend/db", () => ({
+await mock.module("@/backend/db", () => ({
   queryDb: () => queryClient,
 }));
 
@@ -315,6 +325,37 @@ afterEach(() => {
 });
 
 // ---------------------------------------------------------------------------
+// Shared test helpers
+// ---------------------------------------------------------------------------
+
+/** Shared snapshot object used across cancelMeetingForClassInstance tests. */
+function buildSnapshotForCancel(overrides: Record<string, unknown> = {}) {
+  return {
+    userMeetingConfigId: null,
+    providerId: PROVIDER_ID,
+    label: null,
+    details: {},
+    provider: {
+      catalogId: PROVIDER_ID,
+      catalogSlug: "zoom",
+      catalogName: { en: "Zoom" },
+      logoUrl: null,
+      supportsAutoGeneration: true,
+    },
+    snapshottedAt: new Date().toISOString(),
+    ...overrides,
+  };
+}
+
+/** Shared assertion for failed generateAndAttach results. */
+async function expectGenerateFailure(): Promise<void> {
+  const { MeetingConfigSnapshotService } = await importService();
+  const result = await MeetingConfigSnapshotService.generateAndAttachForClassInstance(CLASS_INSTANCE_ID);
+  expect(result.success).toBe(false);
+  expect(result.joinUrl).toBeNull();
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -380,11 +421,7 @@ describe("MeetingConfigSnapshotService", () => {
       queryResult = [buildClassInstance()];
       providerGetByIdMock.mockResolvedValue(buildProvider({ providerKind: "manual" }));
 
-      const { MeetingConfigSnapshotService } = await importService();
-      const result = await MeetingConfigSnapshotService.generateAndAttachForClassInstance(CLASS_INSTANCE_ID);
-
-      expect(result.success).toBe(false);
-      expect(result.joinUrl).toBeNull();
+      await expectGenerateFailure();
       expect(generateMeetingMock).not.toHaveBeenCalled();
     });
 
@@ -393,11 +430,7 @@ describe("MeetingConfigSnapshotService", () => {
       providerGetByIdMock.mockResolvedValue(buildProvider({ providerKind: "manual" }));
       providerKindToSlugMock.mockReturnValue(null);
 
-      const { MeetingConfigSnapshotService } = await importService();
-      const result = await MeetingConfigSnapshotService.generateAndAttachForClassInstance(CLASS_INSTANCE_ID);
-
-      expect(result.success).toBe(false);
-      expect(result.joinUrl).toBeNull();
+      await expectGenerateFailure();
     });
 
     test("generates and attaches meeting URL on first attempt", async () => {
@@ -443,11 +476,7 @@ describe("MeetingConfigSnapshotService", () => {
       providerGetByIdMock.mockResolvedValue(buildProvider({ providerKind: "zoom_oauth" }));
       generateMeetingMock.mockRejectedValue(new Error("Permanent failure"));
 
-      const { MeetingConfigSnapshotService } = await importService();
-      const result = await MeetingConfigSnapshotService.generateAndAttachForClassInstance(CLASS_INSTANCE_ID);
-
-      expect(result.success).toBe(false);
-      expect(result.joinUrl).toBeNull();
+      await expectGenerateFailure();
       expect(generateMeetingMock).toHaveBeenCalledTimes(3);
     });
   });
@@ -475,20 +504,7 @@ describe("MeetingConfigSnapshotService", () => {
       queryResult = [
         buildClassInstance({
           meetingJoinUrl: "https://zoom.us/j/123",
-          meetingConfigSnapshot: {
-            userMeetingConfigId: null,
-            providerId: PROVIDER_ID,
-            label: null,
-            details: {},
-            provider: {
-              catalogId: PROVIDER_ID,
-              catalogSlug: "zoom",
-              catalogName: { en: "Zoom" },
-              logoUrl: null,
-              supportsAutoGeneration: true,
-            },
-            snapshottedAt: new Date().toISOString(),
-          },
+          meetingConfigSnapshot: buildSnapshotForCancel(),
         }),
       ];
 
@@ -502,21 +518,7 @@ describe("MeetingConfigSnapshotService", () => {
       queryResult = [
         buildClassInstance({
           meetingJoinUrl: "https://zoom.us/j/123",
-          meetingConfigSnapshot: {
-            userMeetingConfigId: null,
-            providerId: PROVIDER_ID,
-            label: null,
-            details: {},
-            provider: {
-              catalogId: PROVIDER_ID,
-              catalogSlug: "zoom",
-              catalogName: { en: "Zoom" },
-              logoUrl: null,
-              supportsAutoGeneration: true,
-            },
-            snapshottedAt: new Date().toISOString(),
-            upstreamMeetingId: UPSTREAM_MEETING_ID,
-          },
+          meetingConfigSnapshot: buildSnapshotForCancel({ upstreamMeetingId: UPSTREAM_MEETING_ID }),
         }),
       ];
       providerGetByIdMock.mockResolvedValue(buildProvider({ providerKind: "zoom_oauth" }));
@@ -532,21 +534,7 @@ describe("MeetingConfigSnapshotService", () => {
       queryResult = [
         buildClassInstance({
           meetingJoinUrl: "https://zoom.us/j/123",
-          meetingConfigSnapshot: {
-            userMeetingConfigId: null,
-            providerId: PROVIDER_ID,
-            label: null,
-            details: {},
-            provider: {
-              catalogId: PROVIDER_ID,
-              catalogSlug: "zoom",
-              catalogName: { en: "Zoom" },
-              logoUrl: null,
-              supportsAutoGeneration: true,
-            },
-            snapshottedAt: new Date().toISOString(),
-            upstreamMeetingId: UPSTREAM_MEETING_ID,
-          },
+          meetingConfigSnapshot: buildSnapshotForCancel({ upstreamMeetingId: UPSTREAM_MEETING_ID }),
         }),
       ];
       providerGetByIdMock.mockResolvedValue(buildProvider({ providerKind: "zoom_oauth" }));
@@ -555,7 +543,7 @@ describe("MeetingConfigSnapshotService", () => {
       const { MeetingConfigSnapshotService } = await importService();
 
       // Should not throw — cancel is best-effort
-      await expect(
+      return expect(
         MeetingConfigSnapshotService.cancelMeetingForClassInstance(CLASS_INSTANCE_ID)
       ).resolves.toBeUndefined();
     });

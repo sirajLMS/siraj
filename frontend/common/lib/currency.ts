@@ -21,8 +21,10 @@ export type CurrencyOption = {
 /**
  * Curated currency catalog aligned with the backend `CurrencyCode` enum.
  *
- * Each entry is keyed by the codegen enum value so the list stays
- * type-checked against the GraphQL schema. Keep this list in sync with
+ * This is the **single canonical source** for static currency data in the
+ * frontend. Use `currencies` directly for a static fallback (e.g. the
+ * `currencyStore`'s pre-load state) or `getCurrencyOptions()` for the
+ * Autocomplete picker. Keep this list in sync with
  * `backend/enum/currency.enum.ts` whenever the enum changes.
  */
 export const currencies: readonly CurrencyOption[] = [
@@ -62,7 +64,7 @@ export const currencies: readonly CurrencyOption[] = [
 
 /** Find a currency catalog entry by its ISO 4217 code. */
 export function getCurrencyByCode(code: CurrencyCode | string): CurrencyOption | undefined {
-  return currencies.find(currency => currency.code === code);
+  return currencies.find(currency => (currency.code as string) === code);
 }
 
 /** Resolve the flag emoji for a currency, falling back to a globe. */
@@ -72,7 +74,7 @@ export function getCurrencyFlag(code: CurrencyCode | string): string {
 
 /** Resolve the symbol glyph for a currency, falling back to the code itself. */
 export function getCurrencySymbol(code: CurrencyCode | string): string {
-  return getCurrencyByCode(code)?.symbol ?? String(code);
+  return getCurrencyByCode(code)?.symbol ?? code;
 }
 
 /** ISO 4217 minor-unit decimals for currencies that differ from the default (2). */
@@ -132,9 +134,9 @@ export function formatLockedAmount(amount: string, currency: CurrencyCode, local
 export function getCurrencyDisplayName(code: CurrencyCode | string, locale?: string): string {
   try {
     const displayNames = new Intl.DisplayNames([locale ?? "en"], { type: "currency" });
-    return displayNames.of(code) ?? String(code);
+    return displayNames.of(code) ?? code;
   } catch {
-    return String(code);
+    return code;
   }
 }
 

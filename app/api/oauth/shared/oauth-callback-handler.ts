@@ -15,7 +15,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
 import { ensureEnvironmentValidated, getEnvironmentConfig } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { MeetingProvider } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { verifyOAuthState } from "@/backend/services/meeting/integrations/meeting-oauth.service";
 
@@ -67,8 +67,9 @@ export interface OAuthCallbackConfig {
  */
 function buildRedirectUri(providerSlug: MeetingProvider): string {
   const config = getEnvironmentConfig();
-  const baseUrl = (config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "").replace(/\/$/, "");
-  const pathSlug = providerSlug.replace(/_/g, "-");
+  const baseUrlRaw = config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "";
+  const baseUrl = baseUrlRaw.endsWith("/") ? baseUrlRaw.slice(0, -1) : baseUrlRaw;
+  const pathSlug = providerSlug.replaceAll("_", "-");
   return `${baseUrl}/api/oauth/${pathSlug}/callback`;
 }
 
@@ -89,8 +90,17 @@ async function exchangeCodeForTokens(
     redirect_uri: redirectUri,
     client_id: cfg.resolveClientId(config),
     client_secret: cfg.resolveClientSecret(config),
-    ...(cfg.extraTokenParams ?? {}),
   });
+
+  // Conditionally append provider-specific extra params to avoid creating an
+  // effectively empty object via spread when `extraTokenParams` is undefined.
+  if (cfg.extraTokenParams) {
+    for (const [key, value] of Object.entries(cfg.extraTokenParams)) {
+      // Ensure only string values are appended; the config type enforces this,
+      // but guard defensively in case of unexpected runtime values.
+      if (value != null) params.set(key, value);
+    }
+  }
 
   const res = await fetch(cfg.buildTokenUrl(config), {
     method: "POST",
@@ -103,7 +113,32 @@ async function exchangeCodeForTokens(
     throw new Error(`${cfg.displayName} token exchange failed (${res.status}): ${body}`);
   }
 
-  return (await res.json()) as OAuthTokenResponse;
+  const data: unknown = await res.json();
+  if (!isOAuthTokenResponse(data)) {
+    throw new Error(`${cfg.displayName} token exchange returned unexpected shape: ${JSON.stringify(data)}`);
+  }
+  return data;
+}
+
+/**
+ * Type guard that validates a token-endpoint response conforms to the minimal
+ * {@link OAuthTokenResponse} shape. Used instead of `as` to satisfy oxlint's
+ * `no-unsafe-type-assertion` rule.
+ */
+function isOAuthTokenResponse(value: unknown): value is OAuthTokenResponse {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  return (
+    "access_token" in value &&
+    typeof value.access_token === "string" &&
+    "token_type" in value &&
+    typeof value.token_type === "string" &&
+    "expires_in" in value &&
+    typeof value.expires_in === "number" &&
+    (!("refresh_token" in value) || value.refresh_token === undefined || typeof value.refresh_token === "string") &&
+    (!("scope" in value) || value.scope === undefined || typeof value.scope === "string")
+  );
 }
 
 /**

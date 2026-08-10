@@ -29,16 +29,18 @@ import {
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
 
+type CronRow = CronScheduleFieldsFragment;
+
 interface MobileScheduleRowProps {
-  readonly row: CronScheduleFieldsFragment;
+  readonly row: CronRow;
   readonly labels: CronViewProps["labels"];
   readonly canManage: boolean;
-  readonly onEdit: (row: CronScheduleFieldsFragment) => void;
-  readonly onDelete: (row: CronScheduleFieldsFragment) => void;
-  readonly onPause: (row: CronScheduleFieldsFragment) => void;
-  readonly onResume: (row: CronScheduleFieldsFragment) => void;
-  readonly onTrigger: (row: CronScheduleFieldsFragment) => void;
-  readonly onRuns: (row: CronScheduleFieldsFragment) => void;
+  readonly onEdit: (row: CronRow) => void;
+  readonly onDelete: (row: CronRow) => void;
+  readonly onPause: (row: CronRow) => void;
+  readonly onResume: (row: CronRow) => void;
+  readonly onTrigger: (row: CronRow) => void;
+  readonly onRuns: (row: CronRow) => void;
 }
 
 function MobileScheduleRow({
@@ -118,6 +120,159 @@ function MobileScheduleRow({
   );
 }
 
+interface CronMobileDialogsProps {
+  readonly deletingSchedule: CronViewProps["deletingSchedule"];
+  readonly deleting: CronViewProps["deleting"];
+  readonly createOpen: CronViewProps["createOpen"];
+  readonly editingSchedule: CronViewProps["editingSchedule"];
+  readonly saving: CronViewProps["saving"];
+  readonly runsOpen: CronViewProps["runsOpen"];
+  readonly runsSchedule: CronViewProps["runsSchedule"];
+  readonly runs: CronViewProps["runs"];
+  readonly runsLoading: CronViewProps["runsLoading"];
+  readonly triggering: CronViewProps["triggering"];
+  readonly triggeringSchedule: CronViewProps["triggeringSchedule"];
+  readonly labels: CronViewProps["labels"];
+  readonly onDeleteClose: CronViewProps["onDeleteClose"];
+  readonly onDeleteConfirm: CronViewProps["onDeleteConfirm"];
+  readonly onEditClose: CronViewProps["onEditClose"];
+  readonly onCreateClose: CronViewProps["onCreateClose"];
+  readonly onSave: CronViewProps["onSave"];
+  readonly onPreviewNextRuns: CronViewProps["onPreviewNextRuns"];
+  readonly onRunsClose: CronViewProps["onRunsClose"];
+  readonly onTriggerClose: CronViewProps["onTriggerClose"];
+  readonly onTriggerConfirm: CronViewProps["onTriggerConfirm"];
+}
+
+function CronMobileDialogs({
+  deletingSchedule,
+  deleting,
+  createOpen,
+  editingSchedule,
+  saving,
+  runsOpen,
+  runsSchedule,
+  runs,
+  runsLoading,
+  triggering,
+  triggeringSchedule,
+  labels,
+  onDeleteClose,
+  onDeleteConfirm,
+  onEditClose,
+  onCreateClose,
+  onSave,
+  onPreviewNextRuns,
+  onRunsClose,
+  onTriggerClose,
+  onTriggerConfirm,
+}: CronMobileDialogsProps) {
+  return (
+    <>
+      <MobileBaseDeleteDialog
+        open={Boolean(deletingSchedule)}
+        onClose={onDeleteClose}
+        onConfirm={onDeleteConfirm}
+        isLoading={deleting}
+        title={labels.actionDelete}
+        body={`${labels.actionDelete}: ${deletingSchedule?.name ?? ""}`}
+        cancelLabel={labels.actionCancel}
+        confirmLabel={labels.actionDelete}
+      />
+
+      <CronScheduleCreateEditDialog
+        open={createOpen || editingSchedule != null}
+        editingSchedule={editingSchedule}
+        labels={labels}
+        saving={saving}
+        previewNextRuns={onPreviewNextRuns}
+        onClose={editingSchedule ? onEditClose : onCreateClose}
+        onSave={onSave}
+      />
+
+      <CronRunsDialog
+        open={runsOpen}
+        scheduleName={runsSchedule?.name ?? null}
+        labels={labels}
+        runs={runs}
+        loading={runsLoading}
+        onClose={onRunsClose}
+      />
+
+      <CronManualTriggerDialog
+        open={triggering}
+        schedule={triggeringSchedule}
+        labels={labels}
+        triggering={triggering}
+        onConfirm={onTriggerConfirm}
+        onClose={onTriggerClose}
+      />
+    </>
+  );
+}
+
+interface CronMobileNotificationsProps {
+  readonly notifications: CronViewProps["notifications"];
+}
+
+function CronMobileNotifications({ notifications }: CronMobileNotificationsProps) {
+  return (
+    <>
+      <MobileFormErrorSnackbar
+        open={notifications.errorOpen}
+        message={notifications.errorMsg}
+        onClose={notifications.closeError}
+      />
+      <MobileFormSuccessSnackbar
+        open={notifications.successOpen}
+        message={notifications.successMsg}
+        onClose={notifications.closeSuccess}
+      />
+      <Snackbar
+        open={notifications.infoOpen}
+        autoHideDuration={6000}
+        onClose={notifications.closeInfo}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="info" onClose={notifications.closeInfo} sx={{ width: "100%" }}>
+          {notifications.infoMsg}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+}
+
+function CronMobileQueueAlerts({
+  queueStats,
+  queueStatsLoading,
+  loading,
+  rows,
+  labels,
+}: {
+  readonly queueStats: CronViewProps["queueStats"];
+  readonly queueStatsLoading: CronViewProps["queueStatsLoading"];
+  readonly loading: CronViewProps["loading"];
+  readonly rows: CronViewProps["rows"];
+  readonly labels: CronViewProps["labels"];
+}) {
+  return (
+    <>
+      {queueStats && !queueStatsLoading ? (
+        <Alert severity="info" sx={{ mx: 2, mb: 2 }}>
+          {labels.queueStatsTitle} ({queueStats.backend}): {labels.queueStatsPending} = {queueStats.pending},{" "}
+          {labels.queueStatsInFlight} = {queueStats.inFlight}, {labels.queueStatsFailed} = {queueStats.failed}
+        </Alert>
+      ) : null}
+
+      {!loading && rows.length === 0 ? (
+        <Alert severity="info" sx={{ mx: 2, mb: 2 }}>
+          {labels.pageSubtitle}
+        </Alert>
+      ) : null}
+    </>
+  );
+}
+
 export function CronMobileView({
   labels,
   rows,
@@ -172,18 +327,13 @@ export function CronMobileView({
     <MobilePageContainer>
       <MobilePageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
 
-      {queueStats && !queueStatsLoading ? (
-        <Alert severity="info" sx={{ mx: 2, mb: 2 }}>
-          {labels.queueStatsTitle} ({queueStats.backend}): {labels.queueStatsPending} = {queueStats.pending},{" "}
-          {labels.queueStatsInFlight} = {queueStats.inFlight}, {labels.queueStatsFailed} = {queueStats.failed}
-        </Alert>
-      ) : null}
-
-      {!loading && rows.length === 0 ? (
-        <Alert severity="info" sx={{ mx: 2, mb: 2 }}>
-          {labels.pageSubtitle}
-        </Alert>
-      ) : null}
+      <CronMobileQueueAlerts
+        queueStats={queueStats}
+        queueStatsLoading={queueStatsLoading}
+        loading={loading}
+        rows={rows}
+        labels={labels}
+      />
 
       <MobileCardList
         rows={rows}
@@ -196,65 +346,31 @@ export function CronMobileView({
         paginationOptions={{ mode: "client" }}
       />
 
-      <MobileBaseDeleteDialog
-        open={Boolean(deletingSchedule)}
-        onClose={onDeleteClose}
-        onConfirm={onDeleteConfirm}
-        isLoading={deleting}
-        title={labels.actionDelete}
-        body={`${labels.actionDelete}: ${deletingSchedule?.name ?? ""}`}
-        cancelLabel={labels.actionCancel}
-        confirmLabel={labels.actionDelete}
-      />
-
-      <CronScheduleCreateEditDialog
-        open={createOpen || editingSchedule != null}
+      <CronMobileDialogs
+        deletingSchedule={deletingSchedule}
+        deleting={deleting}
+        createOpen={createOpen}
         editingSchedule={editingSchedule}
-        labels={labels}
         saving={saving}
-        previewNextRuns={onPreviewNextRuns}
-        onClose={editingSchedule ? onEditClose : onCreateClose}
-        onSave={onSave}
-      />
-
-      <CronRunsDialog
-        open={runsOpen}
-        scheduleName={runsSchedule?.name ?? null}
-        labels={labels}
+        runsOpen={runsOpen}
+        runsSchedule={runsSchedule}
         runs={runs}
-        loading={runsLoading}
-        onClose={onRunsClose}
-      />
-
-      <CronManualTriggerDialog
-        open={triggering}
-        schedule={triggeringSchedule}
-        labels={labels}
+        runsLoading={runsLoading}
         triggering={triggering}
-        onConfirm={onTriggerConfirm}
-        onClose={onTriggerClose}
+        triggeringSchedule={triggeringSchedule}
+        labels={labels}
+        onDeleteClose={onDeleteClose}
+        onDeleteConfirm={onDeleteConfirm}
+        onEditClose={onEditClose}
+        onCreateClose={onCreateClose}
+        onSave={onSave}
+        onPreviewNextRuns={onPreviewNextRuns}
+        onRunsClose={onRunsClose}
+        onTriggerClose={onTriggerClose}
+        onTriggerConfirm={onTriggerConfirm}
       />
 
-      <MobileFormErrorSnackbar
-        open={notifications.errorOpen}
-        message={notifications.errorMsg}
-        onClose={notifications.closeError}
-      />
-      <MobileFormSuccessSnackbar
-        open={notifications.successOpen}
-        message={notifications.successMsg}
-        onClose={notifications.closeSuccess}
-      />
-      <Snackbar
-        open={notifications.infoOpen}
-        autoHideDuration={6000}
-        onClose={notifications.closeInfo}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity="info" onClose={notifications.closeInfo} sx={{ width: "100%" }}>
-          {notifications.infoMsg}
-        </Alert>
-      </Snackbar>
+      <CronMobileNotifications notifications={notifications} />
 
       {canManage ? <MobileFab icon={<AddOutlined />} label={labels.actionCreate} onClick={onCreateOpen} /> : null}
     </MobilePageContainer>

@@ -93,26 +93,25 @@ export function DesktopSectionPanel({
     </Paper>
   );
 
-  function renderChildren() {
-    if (!children) {
-      return null;
+  function renderChildren(): ReactNode {
+    let content: ReactNode = null;
+    if (children) {
+      content = contentPadding ? <Box sx={desktopSectionContentInsetSx}>{children}</Box> : children;
     }
-
-    if (!contentPadding) {
-      return children;
-    }
-
-    return <Box sx={desktopSectionContentInsetSx}>{children}</Box>;
+    return content;
   }
 }
 
-function renderTitle(title: ReactNode) {
+function renderTitle(title: ReactNode): ReactNode {
+  let content: ReactNode;
   if (typeof title === "string") {
-    return (
+    content = (
       <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
         {title}
       </Typography>
     );
+  } else {
+    content = title;
   }
-  return title;
+  return content;
 }

@@ -7,8 +7,8 @@ import {
   type SeedConfig,
   startOfDay,
 } from "@/backend/db/seeds/lib";
-import { ClassOutcome, LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
+import { logger } from "@/backend/lib/logger";
 import { LeaveRequestSeedService } from "@/backend/services/seed/leave-request-seed.service";
 import type {
   ClassInstanceSelectType,
@@ -130,10 +130,10 @@ export async function seedOrGet(
     return [];
   }
 
-  const leaveInstances = classInstancesList.filter(ci => ci.outcome === ClassOutcome.LEAVE);
+  const leaveInstances = classInstancesList.filter(ci => ci.outcome === "LEAVE");
   const pendingFutureInstances = classInstancesList.filter(
     ci =>
-      ci.outcome === ClassOutcome.PENDING &&
+      ci.outcome === "PENDING" &&
       startOfDay(ci.scheduledStartAt).getTime() > startOfDay(seedConfig.anchorDate).getTime()
   );
   const teacherUserMap = new Map(teachersList.map(t => [t.id, t.userId]));

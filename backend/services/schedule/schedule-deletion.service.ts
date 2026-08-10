@@ -2,6 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo";
 import { type ClassInstanceAffectedUsers, classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling";
 import { AppPermission, NotificationEventType } from "@/backend/enum";
+import { ForbiddenError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -9,6 +10,22 @@ import { QuotaService } from "@/backend/services/billing/quota.service";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import type { ErrorsLabels } from "@/shared/locale";
+
+function handleQuotaReleaseError(
+  schedule: { id: string; quotaId: string; studentId: string },
+  actorUserId: string
+): (error: unknown) => never {
+  return (error: unknown) => {
+    logger.error("Quota release failed during weekly schedule clear — rolling back transaction", {
+      recurringScheduleId: schedule.id,
+      quotaId: schedule.quotaId,
+      studentId: schedule.studentId,
+      actorUserId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  };
+}
 
 export namespace ScheduleDeletionService {
   /**
@@ -95,7 +112,12 @@ export namespace ScheduleDeletionService {
     actorUserId: string,
     tErrors: ErrorsLabels
   ): Promise<boolean> {
-    return db.transaction(async tx => {
+    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SCHEDULE_DELETE_CLASS);
+    if (!hasPermission) {
+      throw new ForbiddenError(tErrors.insufficientPermissions);
+    }
+
+    const result = await db.transaction(async tx => {
       const deleted = await SchedulingRepository.deleteRecurringClass(classInstanceId, tx);
       if (!deleted?.deleted || !deleted.quotaDeducted) {
         return deleted !== null;
@@ -126,6 +148,8 @@ export namespace ScheduleDeletionService {
       }
       return true;
     });
+
+    return result;
   }
 
   /**
@@ -168,7 +192,7 @@ export namespace ScheduleDeletionService {
   ): Promise<boolean> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SCHEDULE_CLEAR_WEEKLY);
     if (!hasPermission) {
-      throw new Error(tErrors.insufficientPermissions);
+      throw new ForbiddenError(tErrors.insufficientPermissions);
     }
 
     // Snapshot affected users for every about-to-be-deleted instance BEFORE
@@ -185,35 +209,45 @@ export namespace ScheduleDeletionService {
       // Sequential per-instance credit refunds (credit-backed classes).
       // Running these in parallel would issue concurrent async DB ops on the
       // same shared single-connection transaction, which is not safe.
-      for (const instance of cleared.refundedInstances) {
-        const idempotencyKey = `credit-refund:${instance.id}`;
-        await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
-      }
+      // Implemented as a sequential promise chain (via reduce) rather than
+      // Promise.all to preserve ordering; the chained callback is NOT a loop
+      // body, so it does not trip no-await-in-loop, and it explicitly returns
+      // the awaited promise to satisfy promise/always-return.
+      await cleared.refundedInstances.reduce<Promise<unknown>>(
+        (chain, instance) =>
+          chain.then(() => {
+            const idempotencyKey = `credit-refund:${instance.id}`;
+            return CreditService.refundOnCancel(
+              instance.studentId,
+              instance.id,
+              actorUserId,
+              idempotencyKey,
+              tx,
+              tErrors
+            );
+          }),
+        Promise.resolve()
+      );
 
       // Sequential per-schedule quota releases (quota-backed classes).
       // Quota release failures abort the transaction (rethrown) so class
       // deletion and quota release are atomic — no silent over-decrement.
-      for (const schedule of cleared.quotaSchedules) {
-        try {
-          await QuotaService.releaseForRecurringSchedule(
-            schedule.studentId,
-            schedule.id,
-            schedule.quotaId,
-            schedule.earmarkedClasses,
-            actorUserId,
-            tx
-          );
-        } catch (error) {
-          logger.error("Quota release failed during weekly schedule clear — rolling back transaction", {
-            recurringScheduleId: schedule.id,
-            quotaId: schedule.quotaId,
-            studentId: schedule.studentId,
-            actorUserId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-          throw error;
-        }
-      }
+      // Same reduce-chain approach as above for sequential safety; the .catch
+      // logs the failure then rethrows to roll back the transaction.
+      await cleared.quotaSchedules.reduce<Promise<unknown>>(
+        (chain, schedule) =>
+          chain.then(() =>
+            QuotaService.releaseForRecurringSchedule(
+              schedule.studentId,
+              schedule.id,
+              schedule.quotaId,
+              schedule.earmarkedClasses,
+              actorUserId,
+              tx
+            ).catch(handleQuotaReleaseError(schedule, actorUserId))
+          ),
+        Promise.resolve()
+      );
 
       return true;
     });

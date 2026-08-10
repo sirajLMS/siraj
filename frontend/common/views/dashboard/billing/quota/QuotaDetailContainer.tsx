@@ -5,15 +5,17 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Box, Button, Chip, Grid, Paper, Skeleton, Stack, type Theme, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import type { QuotaLedgerItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
+import type { QuotaItem, QuotaLedgerItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import { useQuotaDetailViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaDetailViewModel";
 import {
   formatQuotaDate,
   formatQuotaKind,
   formatQuotaStatus,
 } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaFormatters";
+
+type QuotaDetailT = ReturnType<typeof useQuotaDetailViewModel>["t"];
 
 function getDeltaColor(value: number) {
   return (theme: Theme) => {
@@ -24,10 +26,121 @@ function getDeltaColor(value: number) {
 }
 
 interface QuotaDetailContainerProps {
-  quotaId: string;
+  readonly quotaId: string;
 }
 
-export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
+interface DetailFieldProps {
+  readonly caption: string;
+  readonly children: ReactNode;
+  readonly variant?: "body1" | "h6";
+  readonly fontWeight?: number;
+}
+
+function DetailField(props: Readonly<DetailFieldProps>) {
+  const { caption, children, variant = "body1", fontWeight = 600 } = props;
+
+  return (
+    <Grid size={{ xs: 12, sm: 4 }}>
+      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+        {caption}
+      </Typography>
+      <Typography variant={variant} sx={{ fontWeight }}>
+        {children}
+      </Typography>
+    </Grid>
+  );
+}
+
+function QuotaDetailHeader(props: Readonly<{ quota: QuotaItem; t: QuotaDetailT }>) {
+  const { quota, t } = props;
+  const { label, color } = formatQuotaStatus(quota.status ?? "", t);
+  return (
+    <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+        <Button startIcon={<ArrowBackOutlinedIcon />} component={Link} href="/quotas" color="inherit">
+          {t.actions.cancel}
+        </Button>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+          {quota.name}
+        </Typography>
+        <Chip label={label} color={color} size="small" />
+      </Stack>
+
+      <Button variant="outlined" startIcon={<EditOutlinedIcon />} component={Link} href={`/quotas/${quota.id}/edit`}>
+        {t.actions.edit}
+      </Button>
+    </Stack>
+  );
+}
+
+function QuotaDetailFields(props: Readonly<{ quota: QuotaItem; t: QuotaDetailT }>) {
+  const { quota, t } = props;
+
+  return (
+    <Paper variant="outlined" sx={{ p: 3 }}>
+      <Grid container spacing={3}>
+        <DetailField caption={t.fields.kind}>{formatQuotaKind(quota.kind ?? "", t)}</DetailField>
+        <DetailField caption={`${t.fields.remaining} / ${t.fields.totalClasses}`} variant="h6" fontWeight={700}>
+          {quota.remaining} / {quota.totalClasses}
+        </DetailField>
+        <DetailField caption={t.fields.reservedClasses}>{quota.reservedClasses}</DetailField>
+        <DetailField caption={t.fields.validUntil}>{formatQuotaDate(quota.validUntil)}</DetailField>
+        <DetailField caption={t.fields.priority}>{quota.priority}</DetailField>
+      </Grid>
+    </Paper>
+  );
+}
+
+interface QuotaLedgerSectionProps {
+  readonly t: QuotaDetailT;
+  readonly ledgerColumns: GridColDef<QuotaLedgerItem>[];
+  readonly ledgerEntries: readonly QuotaLedgerItem[];
+  readonly loadingLedger: boolean;
+  readonly ledgerPage: number;
+  readonly setLedgerPage: (page: number) => void;
+  readonly ledgerPageSize: number;
+  readonly ledgerTotalCount: number;
+}
+
+function QuotaLedgerSection(props: Readonly<QuotaLedgerSectionProps>) {
+  const {
+    t,
+    ledgerColumns,
+    ledgerEntries,
+    loadingLedger,
+    ledgerPage,
+    setLedgerPage,
+    ledgerPageSize,
+    ledgerTotalCount,
+  } = props;
+
+  return (
+    <Stack spacing={2}>
+      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+        {t.ledger.title}
+      </Typography>
+
+      <Box sx={{ width: "100%", height: 400 }}>
+        <AppDataGrid<QuotaLedgerItem>
+          rows={ledgerEntries}
+          columns={ledgerColumns}
+          loading={loadingLedger}
+          paginationOptions={{
+            mode: "server",
+            page: ledgerPage + 1,
+            pageSize: ledgerPageSize,
+            totalCount: ledgerTotalCount,
+            onPageChange: (newPage: number) => setLedgerPage(newPage - 1),
+          }}
+        />
+      </Box>
+    </Stack>
+  );
+}
+
+export function QuotaDetailContainer(props: Readonly<QuotaDetailContainerProps>) {
+  const { quotaId } = props;
+
   const {
     t,
     quota,
@@ -91,87 +204,20 @@ export function QuotaDetailContainer({ quotaId }: QuotaDetailContainerProps) {
     );
   }
 
-  const { label, color } = formatQuotaStatus(quota.status ?? "", t);
-
   return (
     <Stack spacing={3} sx={{ py: 3 }}>
-      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
-        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-          <Button startIcon={<ArrowBackOutlinedIcon />} component={Link} href="/quotas" color="inherit">
-            {t.actions.cancel}
-          </Button>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            {quota.name}
-          </Typography>
-          <Chip label={label} color={color} size="small" />
-        </Stack>
-
-        <Button variant="outlined" startIcon={<EditOutlinedIcon />} component={Link} href={`/quotas/${quota.id}/edit`}>
-          {t.actions.edit}
-        </Button>
-      </Stack>
-
-      <Paper variant="outlined" sx={{ p: 3 }}>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              {t.fields.kind}
-            </Typography>
-            <Typography variant="body1" sx={{ fontWeight: 600 }}>
-              {formatQuotaKind(quota.kind ?? "", t)}
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              {t.fields.remaining} / {t.fields.totalClasses}
-            </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              {quota.remaining} / {quota.totalClasses}
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              {t.fields.reservedClasses}
-            </Typography>
-            <Typography variant="body1" sx={{ fontWeight: 600 }}>
-              {quota.reservedClasses}
-            </Typography>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              {t.fields.validUntil}
-            </Typography>
-            <Typography variant="body1">{formatQuotaDate(quota.validUntil)}</Typography>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              {t.fields.priority}
-            </Typography>
-            <Typography variant="body1">{quota.priority}</Typography>
-          </Grid>
-        </Grid>
-      </Paper>
-
-      <Stack spacing={2}>
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {t.ledger.title}
-        </Typography>
-
-        <Box sx={{ width: "100%", height: 400 }}>
-          <AppDataGrid<QuotaLedgerItem>
-            rows={ledgerEntries}
-            columns={ledgerColumns}
-            loading={loadingLedger}
-            paginationOptions={{
-              mode: "server",
-              page: ledgerPage + 1,
-              pageSize: ledgerPageSize,
-              totalCount: ledgerTotalCount,
-              onPageChange: (newPage: number) => setLedgerPage(newPage - 1),
-            }}
-          />
-        </Box>
-      </Stack>
+      <QuotaDetailHeader quota={quota} t={t} />
+      <QuotaDetailFields quota={quota} t={t} />
+      <QuotaLedgerSection
+        t={t}
+        ledgerColumns={ledgerColumns}
+        ledgerEntries={ledgerEntries}
+        loadingLedger={loadingLedger}
+        ledgerPage={ledgerPage}
+        setLedgerPage={setLedgerPage}
+        ledgerPageSize={ledgerPageSize}
+        ledgerTotalCount={ledgerTotalCount}
+      />
     </Stack>
   );
 }

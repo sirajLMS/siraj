@@ -2,7 +2,8 @@
 
 import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField/AvatarImageField";
-import type { ClassSubjectCreateInput, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassSubjectCreateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import {
   ActiveToggleField,
@@ -14,6 +15,10 @@ import type { SubjectFormValues } from "@/frontend/common/views/dashboard/subjec
 import type { CreateSubjectDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 
 const FORM_ID = "create-subject-form-mobile";
+
+function isCurrencyCode(value: string): value is CurrencyCode {
+  return (Object.values(CurrencyCode) as readonly string[]).includes(value);
+}
 
 /**
  * CreateSubjectDialogMobile — full-screen create-subject dialog.
@@ -45,7 +50,7 @@ export function CreateSubjectDialogMobile({
       sortOrder: null,
       avatarUrl: data.avatarUrl || null,
       hourlyRate: data.hourlyRate || null,
-      rateCurrency: data.rateCurrency ? (data.rateCurrency as CurrencyCode) : null,
+      rateCurrency: data.rateCurrency && isCurrencyCode(data.rateCurrency) ? data.rateCurrency : null,
     };
     onSubmit(input);
   };

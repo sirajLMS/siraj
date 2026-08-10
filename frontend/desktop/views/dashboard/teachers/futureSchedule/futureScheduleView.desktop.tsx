@@ -83,7 +83,7 @@ export function FutureScheduleViewDesktop({
                 item={item}
                 labels={labels}
                 onRequestLeave={() => {
-                  if (item.id) onRequestLeave(item.id);
+                  if (item.id) void onRequestLeave(item.id);
                 }}
               />
             ))}

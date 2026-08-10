@@ -21,6 +21,7 @@ import {
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
+import type { DesktopPersonProfileLinkCellProps } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
@@ -36,27 +37,8 @@ export function StatusTrackingDataGridDesktop({
 
   // Helper to render a profile link cell with common props, reducing duplication across columns
   const renderProfileCell = useCallback(
-    ({
-      href,
-      name,
-      avatarUrl,
-      avatarSize = 40,
-      fontWeight = 700,
-    }: {
-      href?: string;
-      name: string;
-      avatarUrl?: string | null;
-      avatarSize?: number;
-      fontWeight?: number;
-    }) => (
-      <DesktopPersonProfileLinkCell
-        href={href}
-        name={name}
-        avatarUrl={avatarUrl ?? undefined}
-        avatarSize={avatarSize}
-        typographyVariant="bodyMd"
-        fontWeight={fontWeight}
-      />
+    (props: DesktopPersonProfileLinkCellProps) => (
+      <DesktopPersonProfileLinkCell {...props} typographyVariant="bodyMd" />
     ),
     []
   );

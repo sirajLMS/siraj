@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import type { ClassInstanceDetail } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { formatScheduleTimeOnly } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -17,6 +17,20 @@ import { useRouter } from "@/shared/i18n/navigation";
 import { type ClassDetailsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 const noopAsync = () => Promise.resolve();
+
+export type ClassInstance = NonNullable<Operations.ClassInstanceQuery["classInstance"]>;
+
+type SessionActionProps = {
+  readonly onStart: () => Promise<void>;
+  readonly onAbsent: () => Promise<void>;
+  readonly onLeave: (reason: string) => Promise<void>;
+  readonly onReset: () => Promise<void>;
+  readonly isStarting: boolean;
+  readonly isMarkingAbsent: boolean;
+  readonly isProcessingLeave: boolean;
+  readonly isResetting: boolean;
+  readonly error: null;
+};
 
 const noopSessionActionProps = {
   onStart: noopAsync,
@@ -62,7 +76,7 @@ function useClassInstanceId(): string {
   return typeof rawId === "string" ? rawId : "";
 }
 
-function formatClassInstanceSchedule(instance: ClassInstanceDetail, locale: string) {
+function formatClassInstanceSchedule(instance: ClassInstance, locale: string) {
   return {
     formattedScheduledDate: formatClassDetailDate(instance.scheduledDate, locale),
     formattedStartTime: formatScheduleTimeOnly(instance.startTime, locale),
@@ -78,17 +92,7 @@ type CommonViewModelFields = {
   readonly isWarningDismissed: boolean;
   readonly setIsWarningDismissed: (value: boolean) => void;
   readonly handlers: Handlers;
-  readonly sessionActionProps: {
-    readonly onStart: () => Promise<void>;
-    readonly onAbsent: () => Promise<void>;
-    readonly onLeave: (reason: string) => Promise<void>;
-    readonly onReset: () => Promise<void>;
-    readonly isStarting: boolean;
-    readonly isMarkingAbsent: boolean;
-    readonly isProcessingLeave: boolean;
-    readonly isResetting: boolean;
-    readonly error: null;
-  };
+  readonly sessionActionProps: SessionActionProps;
   readonly feedbackState: FeedbackState;
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
@@ -162,7 +166,7 @@ function buildSessionActionProps(mutations: MutationsShape): CommonViewModelFiel
 }
 
 type ReadyInputs = {
-  readonly instance: ClassInstanceDetail;
+  readonly instance: ClassInstance;
   readonly canOverride: boolean;
   readonly isParentView: boolean;
   readonly isStudentView: boolean;
@@ -206,7 +210,7 @@ function buildReadyViewModel(inputs: ReadyInputs): ClassDetailsViewModel {
 
 export interface ClassDetailsViewModel {
   readonly status: "loading" | "invalidId" | "error" | "ready";
-  readonly instance: ClassInstanceDetail | null;
+  readonly instance: ClassInstance | null;
   readonly canOverride: boolean;
   readonly isParentView: boolean;
   readonly isStudentView: boolean;
@@ -214,17 +218,7 @@ export interface ClassDetailsViewModel {
   readonly isWarningDismissed: boolean;
   readonly setIsWarningDismissed: (value: boolean) => void;
   readonly handlers: ReturnType<typeof useClassActionHandlers>;
-  readonly sessionActionProps: {
-    readonly onStart: () => Promise<void>;
-    readonly onAbsent: () => Promise<void>;
-    readonly onLeave: (reason: string) => Promise<void>;
-    readonly onReset: () => Promise<void>;
-    readonly isStarting: boolean;
-    readonly isMarkingAbsent: boolean;
-    readonly isProcessingLeave: boolean;
-    readonly isResetting: boolean;
-    readonly error: null;
-  };
+  readonly sessionActionProps: SessionActionProps;
   readonly feedbackState: { readonly message: string; readonly severity: "success" | "error" } | null;
   readonly deleteDialogOpen: boolean;
   readonly setDeleteDialogOpen: (value: boolean) => void;
@@ -288,7 +282,7 @@ export function useClassDetailsViewModel(): ClassDetailsViewModel {
     return buildEarlyReturnViewModel("error", earlyReturnShared);
   }
 
-  const instance = data.classInstance as ClassInstanceDetail;
+  const instance = data.classInstance;
   const { formattedScheduledDate, formattedStartTime, formattedEndTime } = formatClassInstanceSchedule(
     instance,
     locale

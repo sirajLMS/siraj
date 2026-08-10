@@ -1,6 +1,6 @@
-import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/lib/env-config-resolver";
 import { logger } from "@/backend/lib/logger";
 import type { ISmsChannel, SmsProvider } from "@/backend/services/communication/channels/sms/ISmsChannel";
+import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/services/system";
 
 let instance: ISmsChannel | null = null;
 let initializationPromise: Promise<ISmsChannel> | null = null;
@@ -45,7 +45,7 @@ async function createSmsChannel(): Promise<ISmsChannel> {
   logger.info(`Initializing SMS channel with provider: ${provider}`);
 
   if (provider !== "twilio") {
-    logger.warn(`Unknown SMS provider: ${provider}, falling back to twilio`);
+    logger.warn(`Unknown SMS provider: ${String(provider)}, falling back to twilio`);
   }
 
   return await createTwilioAdapter();
@@ -73,7 +73,7 @@ export const getSmsChannel = async (): Promise<ISmsChannel> => {
 
 export const resetSmsChannel = (): void => {
   if (instance) {
-    instance.disconnect();
+    void instance.disconnect();
     instance = null;
   }
   initializationPromise = null;

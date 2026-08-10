@@ -3,8 +3,8 @@
 > **Feature**: Certificate Module — Database Schema, Enums, and Relations
 > **Plan #**: 01
 > **Dependencies**: None (foundation plan)
-> **Execution Model**: Sequential per task (each task produces files the next task imports)
-> **Quality Model**: Per-file tsgo + biome + lint via `scripts/health/sub-loop.ts`
+> **Execution Model**: Parallel subagents per independent task group (see dependency graph for parallelization points)
+> **Quality Model**: Per-file progressive verification via `scripts/health/sub-loop.ts --lifecycle codescene` (runs tsgo → biome → lint → codescene in one command, short-circuiting on first failure)
 > **Time Budget**: 2-4 hours per task
 
 ---
@@ -29,7 +29,55 @@ T01 (pgEnums) ──→ T02 (categories table) ──→ T03 (templates table)
                                                           └─→ T15 (knowledge propagation)
 ```
 
-**Execution order**: T01 → T02 → T03 → (T04, T05, T06, T07, T08, T09, T10, T11 in parallel after T03) → T12 → T13 → T14 → T15
+**Execution order**: T01 → T02 → T03 → (T04, T05, T06, T09, T11 via parallel subagents after T03) → (T07, T10 via parallel subagents) → T08 → T12 → T13 → T14 → T15
+
+---
+
+## Parallel Subagent Strategy
+
+Tasks grouped by wave (each wave runs as parallel subagents):
+
+### Wave 1: T01
+- Tasks: T01 (pgEnums)
+- Rationale: Foundation task — no dependencies, must complete first as all subsequent tasks reference the pgEnums
+
+### Wave 2: T02
+- Tasks: T02 (categories table)
+- Rationale: Depends on T01 only; T03 depends on T02, so T02 must complete before any parallel wave starts
+
+### Wave 3: T03
+- Tasks: T03 (templates table)
+- Rationale: Depends on T02 only; T03 is the branching point — all Wave 4 tasks depend on T03 but not on each other
+
+### Wave 4: T04, T05, T06, T09, T11
+- Tasks: T04 (template_elements), T05 (template_variables), T06 (recipient_groups), T09 (certificates), T11 (template_style_presets)
+- Rationale: All depend only on T03 (templates table exists for FK); no interdependencies among these five tasks
+
+### Wave 5: T07, T10
+- Tasks: T07 (recipient_group_items), T10 (certificate_verifications)
+- Rationale: T07 depends on T06 (Wave 4), T10 depends on T09 (Wave 4); no interdependency between T07 and T10
+
+### Wave 6: T08
+- Tasks: T08 (recipient_group_item_variable_values)
+- Rationale: Depends on T05 (Wave 4) and T07 (Wave 5); must wait for both to complete
+
+### Wave 7: T12
+- Tasks: T12 (relations)
+- Rationale: Depends on T02–T11 (all tables must exist before defining relations)
+
+### Wave 8: T13
+- Tasks: T13 (barrel exports)
+- Rationale: Depends on T01–T12 (all tables, enums, and relations must exist before barrel exporting)
+
+### Wave 9: T14
+- Tasks: T14 (push migration)
+- Rationale: Depends on T01–T13 (all schema files complete before migration)
+
+### Final Wave: Knowledge Propagation
+- Task: T15 (knowledge propagation & documentation)
+- Rationale: Must run after all other tasks complete — synthesizes learnings from all prior tasks
+
+> **Subagent dispatch**: Each task in a wave is dispatched as a separate subagent. The orchestrator waits for all subagents in a wave to complete before starting the next wave.
 
 ---
 
@@ -71,21 +119,12 @@ T01 (pgEnums) ──→ T02 (categories table) ──→ T03 (templates table)
 
 For the modified file:
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"t01","files":["backend/db/schema/enums.ts"]}'
-```
-
-Or equivalently:
-```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/enums.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/enums.ts --lifecycle codescene
 ```
 
 ### Verification
 - All 11 pgEnums appended to `backend/db/schema/enums.ts` with correct value lists (via `createPgEnumFromEnum`)
-- `bun tsgo` passes with zero new type errors
+- `bun tsgo` passes (via sub-loop) with zero new type errors
 - No enum name or value duplicates with existing codebase
 
 ---
@@ -113,7 +152,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/enums.ts --lifecycle lint
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/categories.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/categories.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -146,7 +185,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/categories.ts 
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templates.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templates.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -161,6 +200,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templates.ts -
 
 **Estimated time**: 2 hours
 **Depends on**: T03 (templates table exists for FK)
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T05, T06, T09, T11.
 **Requirements**: REQ-01-060 through REQ-01-068, AC-07
 
 ### Subtasks
@@ -179,7 +219,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templates.ts -
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateElements.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateElements.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -194,6 +234,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateElemen
 
 **Estimated time**: 2 hours
 **Depends on**: T03 (templates table exists for FK)
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T04, T06, T09, T11.
 **Requirements**: REQ-01-070 through REQ-01-078, AC-08
 
 ### Subtasks
@@ -208,7 +249,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateElemen
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateVariables.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateVariables.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -223,6 +264,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateVariab
 
 **Estimated time**: 2 hours
 **Depends on**: T03 (templates table exists for FK)
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T04, T05, T09, T11.
 **Requirements**: REQ-01-080 through REQ-01-086, AC-09
 
 ### Subtasks
@@ -238,7 +280,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateVariab
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroups.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroups.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -252,6 +294,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroup
 
 **Estimated time**: 2 hours
 **Depends on**: T06 (recipient_groups table exists for FK)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T10.
 **Requirements**: REQ-01-090 through REQ-01-096, AC-10
 
 ### Subtasks
@@ -268,7 +311,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroup
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroupItems.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroupItems.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -282,6 +325,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroup
 
 **Estimated time**: 2 hours
 **Depends on**: T05 (template_variables exists), T07 (recipient_group_items exists)
+> **Parallelizable**: This task runs as a subagent in Wave 6 (no siblings — sole task in this wave).
 **Requirements**: REQ-01-100 through REQ-01-105, AC-11
 
 ### Subtasks
@@ -297,7 +341,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroup
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroupItemVariableValues.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroupItemVariableValues.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -311,6 +355,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroup
 
 **Estimated time**: 3 hours
 **Depends on**: T03 (templates table exists for FK)
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T04, T05, T06, T11.
 **Requirements**: REQ-01-110 through REQ-01-125, AC-12, AC-13
 
 ### Subtasks
@@ -327,7 +372,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/recipientGroup
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificates.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificates.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -343,6 +388,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificates.t
 
 **Estimated time**: 2 hours
 **Depends on**: T09 (certificates table exists for FK)
+> **Parallelizable**: This task runs as a subagent in Wave 5 alongside T07.
 **Requirements**: REQ-01-130 through REQ-01-136, AC-14
 
 ### Subtasks
@@ -359,7 +405,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificates.t
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificateVerifications.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificateVerifications.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -373,6 +419,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificateVer
 
 **Estimated time**: 2 hours
 **Depends on**: T03 (templates table exists for FK)
+> **Parallelizable**: This task runs as a subagent in Wave 4 alongside T04, T05, T06, T09.
 **Requirements**: REQ-01-140 through REQ-01-145, AC-15
 
 ### Subtasks
@@ -387,7 +434,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/certificateVer
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateStylePresets.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateStylePresets.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -424,7 +471,7 @@ bun run scripts/health/sub-loop.ts backend/db/schema/certificates/templateStyleP
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/drizzleRelations.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/drizzleRelations.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -453,8 +500,8 @@ bun run scripts/health/sub-loop.ts backend/db/schema/drizzleRelations.ts --lifec
 
 ### Quality Loop
 ```bash
-bun run scripts/health/sub-loop.ts backend/db/schema/certificates/index.ts --lifecycle lint
-bun run scripts/health/sub-loop.ts backend/db/schema/index.ts --lifecycle lint
+bun run scripts/health/sub-loop.ts backend/db/schema/certificates/index.ts --lifecycle codescene
+bun run scripts/health/sub-loop.ts backend/db/schema/index.ts --lifecycle codescene
 ```
 
 ### Verification
@@ -483,9 +530,10 @@ bun run scripts/health/sub-loop.ts backend/db/schema/index.ts --lifecycle lint
 3. **Verify** no existing data is affected (migration is additive only — new tables)
 
 ### Quality Loop
+
+Run per-file quality loop for the barrel export that aggregates all schema files (verifies tsgo still passes after migration):
 ```bash
-# Verify tsgo still passes after migration
-bun tsgo
+bun run scripts/health/sub-loop.ts backend/db/schema/index.ts --lifecycle codescene
 ```
 
 ### Verification

@@ -10,7 +10,7 @@
 import { randomUUID } from "node:crypto";
 
 import { createPool } from "@/backend/db/factory";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { pruneMaps } from "@/backend/services/cron/queue-adapters/bullmq-shared";
 import type { CronJobPayload, CronQueueAdapter, CronQueueRow, CronQueueStats } from "@/backend/types/cron/cron.types";
 import { safeCronJobKind } from "@/backend/types/cron/cron.types";
@@ -20,7 +20,7 @@ import { safeCronJobKind } from "@/backend/types/cron/cron.types";
  * Used to type the pool returned by `createPool()` without coupling to `pg` types directly.
  */
 interface QueryablePool {
-  query<T = unknown>(text: string, values?: unknown[]): Promise<{ rows: T[]; rowCount: number }>;
+  query(text: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[]; rowCount: number }>;
   end(): Promise<void>;
 }
 
@@ -58,6 +58,26 @@ const CREATE_TABLE_SQL = `
     WHERE status = 'pending';
 `;
 
+/** Type guard: narrows `unknown` to `Record<string, unknown>`. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Parse a raw DB row into a typed CronQueueRow. */
+function parseCronQueueRow(row: Record<string, unknown>): CronQueueRow {
+  return {
+    id: String(row.id),
+    run_id: String(row.run_id),
+    schedule_id: String(row.schedule_id),
+    job_kind: String(row.job_kind),
+    payload: isRecord(row.payload) ? row.payload : null,
+    attempt: Number(row.attempt),
+    timeout_seconds: Number(row.timeout_seconds),
+    max_retries: Number(row.max_retries),
+    retry_backoff_seconds: Number(row.retry_backoff_seconds),
+  };
+}
+
 function genId(): string {
   return `cq_${randomUUID()}`;
 }
@@ -69,7 +89,7 @@ export function createCustomSqlAdapter(): CronQueueAdapter {
 
   async function ensureInit(): Promise<QueryablePool> {
     if (pool) return pool;
-    pool = createPool() as unknown as QueryablePool;
+    pool = createPool();
     await pool.query(CREATE_TABLE_SQL);
     logger.info("cron.customSql.initialized", {});
     return pool;
@@ -106,7 +126,7 @@ export function createCustomSqlAdapter(): CronQueueAdapter {
 
     async fetch({ count }) {
       const p = await ensureInit();
-      const result = await p.query<CronQueueRow>(
+      const result = await p.query(
         `WITH claimed AS (
            SELECT id, run_id, schedule_id, job_kind, payload, attempt, timeout_seconds, max_retries, retry_backoff_seconds
            FROM cron_queue
@@ -122,7 +142,7 @@ export function createCustomSqlAdapter(): CronQueueAdapter {
          RETURNING claimed.id, claimed.run_id, claimed.schedule_id, claimed.job_kind, claimed.payload, claimed.attempt, claimed.timeout_seconds, claimed.max_retries, claimed.retry_backoff_seconds`,
         [count]
       );
-      const rows = result.rows ?? [];
+      const rows = (result.rows ?? []).map(parseCronQueueRow);
       for (const r of rows) {
         runIdToQueueId.set(r.run_id, r.id);
         queueIdToRunId.set(r.id, r.run_id);
@@ -133,7 +153,7 @@ export function createCustomSqlAdapter(): CronQueueAdapter {
           runId: r.run_id,
           scheduleId: r.schedule_id,
           jobKind: safeCronJobKind(r.job_kind),
-          payload: (r.payload as Record<string, unknown> | null) ?? null,
+          payload: r.payload ?? null,
           attempt: r.attempt,
           timeoutSeconds: r.timeout_seconds,
           queueJobId: r.id,
@@ -179,7 +199,7 @@ export function createCustomSqlAdapter(): CronQueueAdapter {
 
     async getQueueStats() {
       const p = await ensureInit();
-      const result = await p.query<{ job_kind: string; status: string; count: string }>(
+      const result = await p.query(
         `SELECT job_kind, status, COUNT(*)::TEXT as count
          FROM cron_queue
          GROUP BY job_kind, status`
@@ -192,19 +212,21 @@ export function createCustomSqlAdapter(): CronQueueAdapter {
         byJobKind: {},
       };
       for (const row of result.rows ?? []) {
-        const count = parseInt(row.count, 10);
-        if (!stats.byJobKind[row.job_kind]) {
-          stats.byJobKind[row.job_kind] = { pending: 0, inFlight: 0, failed: 0 };
+        const jobKind = String(row.job_kind);
+        const status = String(row.status);
+        const count = Number.parseInt(String(row.count), 10);
+        if (!stats.byJobKind[jobKind]) {
+          stats.byJobKind[jobKind] = { pending: 0, inFlight: 0, failed: 0 };
         }
-        if (row.status === "pending") {
+        if (status === "pending") {
           stats.pending += count;
-          stats.byJobKind[row.job_kind].pending += count;
-        } else if (row.status === "in_flight") {
+          stats.byJobKind[jobKind].pending += count;
+        } else if (status === "in_flight") {
           stats.inFlight += count;
-          stats.byJobKind[row.job_kind].inFlight += count;
-        } else if (row.status === "failed") {
+          stats.byJobKind[jobKind].inFlight += count;
+        } else if (status === "failed") {
           stats.failed += count;
-          stats.byJobKind[row.job_kind].failed += count;
+          stats.byJobKind[jobKind].failed += count;
         }
       }
       return stats;

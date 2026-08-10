@@ -29,10 +29,25 @@ Foundation: Requirements Validation
 
 ## Phase-Specific Validation Techniques
 
+### Phase 0: Baseline Validation (NEW)
+
+#### Baseline Quality Checklist
+- [ ] **Error Counts Recorded**: tsgo, biome, lint baseline counts documented
+- [ ] **Deferred Ledger Created**: `deferred-items.md` exists with proper structure
+- [ ] **Baseline Outcome Written**: Baseline counts documented in outcome file
+
+### Phase 1.5: Plan Review Gate Validation (NEW)
+
+#### Plan Review Quality Checklist
+- [ ] **@plan-review Invoked**: Plan passed to @plan-review skill
+- [ ] **Zero Violations**: Plan passes all AGENTS.md rules
+- [ ] **Findings Documented**: All violations fixed and documented in `plan-review-R1.md`
+- [ ] **Plan Committed**: Patched plan files committed before implementation
+
 ### Requirements Phase Validation
 
 #### Requirements Quality Checklist
-- [ ] **Completeness**: All user stories have acceptance criteria
+- [ ] **Completeness**: All user stories have acceptance criteria (including REQ-0 baseline, REQ-0.5 i18n/enum)
 - [ ] **Clarity**: Requirements are unambiguous and specific
 - [ ] **Testability**: Each requirement can be validated
 - [ ] **EARS Format**: Proper use of WHEN/IF/THEN structure
@@ -438,6 +453,75 @@ stages:
 3. **Risk-Based Testing**: Focus testing on high-risk areas
 4. **Documentation**: Keep testing documentation current
 5. **Tool Integration**: Integrate testing tools with development workflow
+
+---
+
+## Parallel Review Wave Pattern (Post-Implementation)
+
+After all implementation tasks complete and BEFORE marking the plan done, dispatch specialized review subagents in parallel to catch semantic bugs that quality loops miss.
+
+### When to Use
+- **MANDATORY** for all feature plans with >10 tasks
+- Run AFTER all implementation tasks complete
+- Run BEFORE Phase 7 (Knowledge Propagation) task executes
+- Scope to files created/modified by the plan only (`git diff --name-only` vs baseline)
+
+### Review Wave Dispatch
+
+Dispatch these review subagents via Task tool in parallel:
+
+1. **review-types** (scope: all new/modified type files)
+   - Canonical type naming
+   - No duplicate type definitions
+   - Import path consistency (all `@/` aliases, no relative imports)
+   - Enum usage (value imports vs type imports) correct everywhere
+
+2. **review-backend** (scope: all new/modified `backend/` files)
+   - Architecture compliance
+   - TOCTOU race conditions
+   - Dead code (unused exports, unreachable methods)
+   - Cross-layer imports
+   - Race conditions in repository methods
+
+3. **review-frontend** (scope: all new/modified `frontend/`, `app/` files)
+   - MUI v9 compliance
+   - Apollo hook patterns
+   - Zustand store patterns
+   - Theme compliance
+   - Component patterns
+
+### Findings Aggregation & Scope Boundary Enforcement
+
+1. **Scope Definition:**
+   - Pre-implementation baseline recorded (Phase 0)
+   - Files identified via `git diff --name-only` vs baseline
+   - Only plan-touched files are in-scope
+
+2. **Collect findings** from all subagents
+3. **Deduplicate** overlapping findings
+4. **Categorize**: CRITICAL / HIGH / MEDIUM / LOW
+5. **Filter out pre-existing code issues** — focus on new code only
+6. **Tag each finding**: NEW (introduced by plan) or PRE-EXISTING
+7. **Blocking criteria**: Only NEW findings block plan completion
+
+### Fix Phase
+
+1. Dispatch fix subagents per file cluster (1 subagent per cluster of 3-5 related files)
+2. Each fix subagent:
+   - Uses `.agents/instructions/*.instructions.md` as guardrails
+   - Runs `scripts/health/sub-loop.ts` per file for verification
+   - Reports cross-file dependencies to orchestrator
+3. Orchestrator coordinates multi-file fixes
+
+### Verification
+
+- Re-run review subagents on fixed files
+- Repeat until **zero feature-specific findings** remain
+- Write outcome: `.ai/plans/<feature-name>/outcome/post-implementation-review.md`
+
+### Evidence
+
+All four implementations required 5-12 post-implementation review rounds because this pattern was ad-hoc. Formalizing it reduces rounds to 2-3.
 
 ---
 

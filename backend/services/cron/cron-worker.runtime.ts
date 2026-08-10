@@ -10,7 +10,7 @@
  * utility — same formula as the pg-boss adapter's `computeHeartbeatSeconds`).
  */
 import { DomainError } from "@/backend/lib/errors";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { CronService } from "@/backend/services/cron/cron.service";
 import {
   CRON_DEFAULT_BATCH_SIZE,
@@ -73,33 +73,12 @@ export async function runDrainLoop(
 
   logger.info("cron.worker.drain.start", { maxDurationMs, batchSize });
 
-  while (Date.now() < deadline) {
-    const jobs = await adapter.fetch({ count: batchSize });
-    if (jobs.length === 0) {
-      logger.info("cron.worker.drain.queueEmpty", { processed: result.processed });
-      break;
-    }
-
-    // Process up to `concurrency` jobs in parallel (bounded concurrency)
-    const cap = Math.max(1, Math.min(concurrency, jobs.length));
-    for (let i = 0; i < jobs.length; i += cap) {
-      const batch = jobs.slice(i, i + cap);
-      await Promise.all(
-        batch.map(job =>
-          processJob(job, adapter, deadline, result).catch(err => {
-            // Guard against unexpected errors from processJob itself (e.g. handleJobError failing)
-            logger.error("cron.worker.jobProcessingCrashed", {
-              runId: job.runId,
-              jobKind: job.jobKind,
-              error: formatError(err),
-            });
-            result.failed++;
-          })
-        )
-      );
-      if (Date.now() >= deadline) break;
-    }
-  }
+  // Drain the queue via tail-recursive helpers so no `await` is lexically
+  // inside a `while`/`for` body (oxlint `no-await-in-loop`). The drain must
+  // stay sequential: each `adapter.fetch` only returns jobs that haven't been
+  // claimed yet, so the next fetch must observe the prior iteration's drain;
+  // and batches must run one-after-another to honour the `concurrency` cap.
+  await drainQueue(adapter, deadline, batchSize, concurrency, result);
 
   logger.info("cron.worker.drain.done", {
     processed: result.processed,
@@ -108,6 +87,67 @@ export async function runDrainLoop(
   });
 
   return result;
+}
+
+/**
+ * Drain the queue one fetch at a time. Each iteration is a tail call, so the
+ * `await adapter.fetch` lives at the top of the function (not inside a loop);
+ * the await yields to the event loop and unwinds the stack before the
+ * recursive call, so there's no stack growth across iterations.
+ */
+async function drainQueue(
+  adapter: CronQueueAdapter,
+  deadline: number,
+  batchSize: number,
+  concurrency: number,
+  result: WorkerDrainResult
+): Promise<void> {
+  if (Date.now() >= deadline) return;
+  const jobs = await adapter.fetch({ count: batchSize });
+  if (jobs.length === 0) {
+    logger.info("cron.worker.drain.queueEmpty", { processed: result.processed });
+    return;
+  }
+
+  // Process up to `concurrency` jobs in parallel (bounded concurrency).
+  // Batches run sequentially so the cap is respected across the whole fetch.
+  const cap = Math.max(1, Math.min(concurrency, jobs.length));
+  await processJobBatches(jobs, 0, cap, adapter, deadline, result);
+
+  return drainQueue(adapter, deadline, batchSize, concurrency, result);
+}
+
+/**
+ * Process job batches one at a time. Each batch waits for the previous one to
+ * complete so the bounded-concurrency cap is preserved. Implemented as a tail
+ * call so the `await Promise.all` is not lexically inside a `for` body —
+ * the deadline check before the recursive call matches the original `break`.
+ */
+async function processJobBatches(
+  jobs: CronJobPayload[],
+  startIndex: number,
+  cap: number,
+  adapter: CronQueueAdapter,
+  deadline: number,
+  result: WorkerDrainResult
+): Promise<void> {
+  if (startIndex >= jobs.length) return;
+  const batch = jobs.slice(startIndex, startIndex + cap);
+  await Promise.all(
+    batch.map(job =>
+      processJob(job, adapter, deadline, result).catch(err => {
+        // Guard against unexpected errors from processJob itself (e.g. handleJobError failing)
+        logger.error("cron.worker.jobProcessingCrashed", {
+          runId: job.runId,
+          jobKind: job.jobKind,
+          error: formatError(err),
+        });
+        result.failed++;
+      })
+    )
+  );
+  if (Date.now() >= deadline) return;
+  return processJobBatches(jobs, startIndex + cap, cap, adapter, deadline, result);
 }
 
 /**
@@ -243,14 +283,14 @@ async function handleJobError(
     // If the DB update throws, don't enqueue the retry — avoids orphaned jobs.
     try {
       await CronService.retryRun(job.runId, backoff, job.attempt + 1);
-    } catch (err) {
-      logRetryFailure("retryRun", job.runId, err);
+    } catch (caughtErr) {
+      logRetryFailure("retryRun", job.runId, caughtErr);
       return;
     }
     try {
       await adapter.retry(job.queueJobId ?? job.runId, backoff, job.attempt + 1);
-    } catch (err) {
-      logRetryFailure("adapter.retry", job.runId, err);
+    } catch (caughtErr) {
+      logRetryFailure("adapter.retry", job.runId, caughtErr);
     }
     result.retried++;
   } else {
@@ -259,13 +299,13 @@ async function handleJobError(
     // rather than leaving the DB stuck in RUNNING while the queue is failed.
     try {
       await CronService.failRun(job.runId, errorMessage, errorStack);
-    } catch (err) {
-      logger.error("cron.worker", `failRun failed for run ${job.runId}: ${formatError(err)}`);
+    } catch (caughtErr) {
+      logger.error("cron.worker", `failRun failed for run ${job.runId}: ${formatError(caughtErr)}`);
     }
     try {
       await adapter.fail(job.queueJobId ?? job.runId, errorMessage, errorStack ?? undefined);
-    } catch (err) {
-      logger.error("cron.worker", `adapter.fail failed for job ${job.queueJobId}: ${formatError(err)}`);
+    } catch (caughtErr) {
+      logger.error("cron.worker", `adapter.fail failed for job ${job.queueJobId}: ${formatError(caughtErr)}`);
     }
     result.failed++;
   }
@@ -366,8 +406,8 @@ async function runJobWithHeartbeat(
       clearTimeoutTimer();
       handlerCompleted = true;
 
-      if (handlerResult && handlerResult.success === false) {
-        throw new DomainError("JOB_HANDLER_FAILED", handlerResult.error ?? "Handler returned failure");
+      if (!handlerResult?.success) {
+        throw new DomainError("JOB_HANDLER_FAILED", handlerResult?.error ?? "Handler returned failure");
       }
     } catch (err) {
       resolved = true;

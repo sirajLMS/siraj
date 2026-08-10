@@ -42,6 +42,9 @@ export interface UserMenuButtonProps {
   };
 }
 
+const EMPTY_SLOTS: NonNullable<UserMenuButtonProps["slots"]> = {};
+const EMPTY_SLOT_PROPS: NonNullable<UserMenuButtonProps["slotProps"]> = {};
+
 function DefaultUserInfo({ name, mail, secondaryLine }: Readonly<UserInfoSlotProps>) {
   return (
     <Box
@@ -317,8 +320,8 @@ export function UserMenuButton({
   userEmail,
   avatarUrl,
   onLogout,
-  slots = {},
-  slotProps = {},
+  slots = EMPTY_SLOTS,
+  slotProps = EMPTY_SLOT_PROPS,
 }: Readonly<UserMenuButtonProps>) {
   const { logout } = useAuth();
   const router = useRouter();

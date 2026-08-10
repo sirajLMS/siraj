@@ -1,5 +1,5 @@
 import { QuotaKind, QuotaPeriodType, SchedulingMode } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
 import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";

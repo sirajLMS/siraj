@@ -39,12 +39,12 @@ describe("GoogleMeetAdapter", () => {
   describe("validateConfig", () => {
     test("returns false when service account JSON is missing", async () => {
       const adapter = new GoogleMeetAdapter({ impersonateSubject: "user@example.com" });
-      expect(await adapter.validateConfig()).toBe(false);
+      return expect(adapter.validateConfig()).resolves.toBe(false);
     });
 
     test("returns false when impersonateSubject is missing", async () => {
       const adapter = new GoogleMeetAdapter({ serviceAccountJson: MOCK_SA_JSON });
-      expect(await adapter.validateConfig()).toBe(false);
+      return expect(adapter.validateConfig()).resolves.toBe(false);
     });
 
     test("returns true when all config is present", async () => {
@@ -52,19 +52,19 @@ describe("GoogleMeetAdapter", () => {
         serviceAccountJson: MOCK_SA_JSON,
         impersonateSubject: "user@example.com",
       });
-      expect(await adapter.validateConfig()).toBe(true);
+      return expect(adapter.validateConfig()).resolves.toBe(true);
     });
   });
 
   describe("generateMeeting", () => {
     test("throws NoOrgCredentialsNoUserTokenError when service account JSON missing", async () => {
       const adapter = new GoogleMeetAdapter({ impersonateSubject: "user@example.com" });
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(NoOrgCredentialsNoUserTokenError);
     });
 
     test("throws MissingImpersonationSubjectError when impersonateSubject missing", async () => {
       const adapter = new GoogleMeetAdapter({ serviceAccountJson: MOCK_SA_JSON });
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(MissingImpersonationSubjectError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(MissingImpersonationSubjectError);
     });
 
     test("throws InvalidServiceAccountJsonError for malformed JSON", async () => {
@@ -72,7 +72,7 @@ describe("GoogleMeetAdapter", () => {
         serviceAccountJson: "{invalid json",
         impersonateSubject: "user@example.com",
       });
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InvalidServiceAccountJsonError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InvalidServiceAccountJsonError);
     });
 
     test("throws InvalidServiceAccountJsonError for wrong type", async () => {
@@ -80,7 +80,7 @@ describe("GoogleMeetAdapter", () => {
         serviceAccountJson: JSON.stringify({ type: "user", client_email: "a@b.com", private_key: "k" }),
         impersonateSubject: "user@example.com",
       });
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InvalidServiceAccountJsonError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InvalidServiceAccountJsonError);
     });
 
     test("throws InvalidServiceAccountJsonError for missing client_email", async () => {
@@ -88,7 +88,7 @@ describe("GoogleMeetAdapter", () => {
         serviceAccountJson: JSON.stringify({ type: "service_account", private_key: "k" }),
         impersonateSubject: "user@example.com",
       });
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InvalidServiceAccountJsonError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InvalidServiceAccountJsonError);
     });
 
     test("throws InvalidServiceAccountJsonError for missing private_key", async () => {
@@ -96,7 +96,7 @@ describe("GoogleMeetAdapter", () => {
         serviceAccountJson: JSON.stringify({ type: "service_account", client_email: "a@b.com" }),
         impersonateSubject: "user@example.com",
       });
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InvalidServiceAccountJsonError);
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow(InvalidServiceAccountJsonError);
     });
   });
 
@@ -121,7 +121,7 @@ describe("GoogleMeetAdapter", () => {
       });
 
       // The JWT signing/crypto will work, but the token endpoint will return an error
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
     });
 
     test("throws RateLimitedError on 429 from token endpoint", async () => {
@@ -129,10 +129,10 @@ describe("GoogleMeetAdapter", () => {
 
       const adapter = new GoogleMeetAdapter({
         serviceAccountJson: MOCK_SA_JSON,
-        impersonateSubject: "user@example.com",
+        impersonateSubject: "[EMAIL_REDACTED]",
       });
 
-      await expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
+      return expect(adapter.generateMeeting({ topic: "Test" })).rejects.toThrow();
     });
   });
 
@@ -144,17 +144,23 @@ describe("GoogleMeetAdapter", () => {
       });
       await adapter.disconnect();
       // After disconnect, a new generation attempt should re-parse SA
-      await expect(adapter.validateConfig()).resolves.toBe(true);
+      return expect(adapter.validateConfig()).resolves.toBe(true);
     });
   });
 
   describe("generateMeeting with per-user fallback", () => {
-    const MOCK_TOKEN_ROW: Partial<MeetingProviderTokenSelectType> = {
+    let refreshSpy: ReturnType<typeof spyOn>;
+
+    const MOCK_TOKEN_ROW: MeetingProviderTokenSelectType = {
+      id: "token-row-id-1",
       userId: "user-123",
       providerSlug: "google_meet",
       refreshToken: "stored-refresh-token",
       accessToken: "old-access-token",
+      expiresAt: null,
       scopes: ["https://www.googleapis.com/auth/meetings.space.created"],
+      createdAt: new Date("2025-01-01T00:00:00Z"),
+      updatedAt: new Date("2025-01-01T00:00:00Z"),
     };
 
     const MOCK_SPACE_RESPONSE = {
@@ -164,25 +170,21 @@ describe("GoogleMeetAdapter", () => {
       config: { accessType: 1 },
     };
 
-    function mockTokenRepo(tokenRow: Partial<MeetingProviderTokenSelectType> | null) {
-      spyOn(MeetingProviderTokenRepository, "getByUserAndProvider").mockResolvedValue(
-        tokenRow as MeetingProviderTokenSelectType | null
-      );
-      spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(
-        (tokenRow ?? MOCK_TOKEN_ROW) as MeetingProviderTokenSelectType
-      );
+    function mockTokenRepo(tokenRow: MeetingProviderTokenSelectType | null) {
+      spyOn(MeetingProviderTokenRepository, "getByUserAndProvider").mockResolvedValue(tokenRow);
+      spyOn(MeetingProviderTokenRepository, "upsert").mockResolvedValue(tokenRow ?? MOCK_TOKEN_ROW);
     }
 
     afterEach(() => {
-      (tokenRefreshModule.refreshAccessToken as unknown as { mockRestore?: () => void })?.mockRestore?.();
+      if (refreshSpy) refreshSpy.mockRestore();
     });
 
     test("uses per-user token when org creds missing and actorUserId provided", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-google-token",
         refreshToken: "new-refresh-token",
-        expiresAt: new Date(Date.now() + 3600_000),
+        expiresAt: new Date(Date.now() + 3_600_000),
       });
 
       fetchSpy.mockRestore();
@@ -200,33 +202,42 @@ describe("GoogleMeetAdapter", () => {
 
     test("throws NoOrgCredentialsNoUserTokenError when no token row and no org creds", async () => {
       mockTokenRepo(null);
-      const refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken");
 
       const adapter = new GoogleMeetAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
-        NoOrgCredentialsNoUserTokenError
-      );
+      let caughtErr: Error | undefined;
+      try {
+        await adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" });
+        throw new Error("Expected generateMeeting to throw");
+      } catch (err) {
+        if (err instanceof Error) {
+          caughtErr = err;
+        } else {
+          throw new Error(String(err), { cause: err });
+        }
+      }
+      expect(caughtErr).toBeInstanceOf(NoOrgCredentialsNoUserTokenError);
       expect(refreshSpy).not.toHaveBeenCalled();
     });
 
     test("throws ProviderReauthRequiredError when refresh token is invalid_grant", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockRejectedValue(
         new ProviderReauthRequiredError("google_meet", "user-123", "invalid_grant")
       );
 
       const adapter = new GoogleMeetAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
+      return expect(adapter.generateMeeting({ topic: "Test", actorUserId: "user-123" })).rejects.toThrow(
         ProviderReauthRequiredError
       );
     });
 
     test("throws PermissionDeniedError on 403 with DWD-specific error message", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-google-token",
         refreshToken: "new-refresh-token",
-        expiresAt: new Date(Date.now() + 3600_000),
+        expiresAt: new Date(Date.now() + 3_600_000),
       });
 
       fetchSpy.mockRestore();
@@ -244,17 +255,17 @@ describe("GoogleMeetAdapter", () => {
       );
 
       const adapter = new GoogleMeetAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test Meeting", actorUserId: "user-123" })).rejects.toThrow(
+      return expect(adapter.generateMeeting({ topic: "Test Meeting", actorUserId: "user-123" })).rejects.toThrow(
         PermissionDeniedError
       );
     });
 
     test("throws MeetingChannelError on generic 403 (not DWD-specific)", async () => {
       mockTokenRepo(MOCK_TOKEN_ROW);
-      spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
+      refreshSpy = spyOn(tokenRefreshModule, "refreshAccessToken").mockResolvedValue({
         accessToken: "refreshed-google-token",
         refreshToken: "new-refresh-token",
-        expiresAt: new Date(Date.now() + 3600_000),
+        expiresAt: new Date(Date.now() + 3_600_000),
       });
 
       fetchSpy.mockRestore();
@@ -266,7 +277,7 @@ describe("GoogleMeetAdapter", () => {
       );
 
       const adapter = new GoogleMeetAdapter({});
-      await expect(adapter.generateMeeting({ topic: "Test Meeting", actorUserId: "user-123" })).rejects.toThrow(
+      return expect(adapter.generateMeeting({ topic: "Test Meeting", actorUserId: "user-123" })).rejects.toThrow(
         MeetingChannelError
       );
     });

@@ -30,9 +30,9 @@ export namespace FxSyncRepository {
     input: SyncRunInsertInput,
     tx?: DBTransaction
   ): Promise<Types.FxSyncRunSelectType> => {
-    const queryDb = tx ?? db;
+    const dbToQuery = tx ?? db;
     const now = new Date();
-    const [row] = await queryDb
+    const [row] = await dbToQuery
       .insert(fxSyncRuns)
       .values({
         provider: input.provider,
@@ -59,9 +59,9 @@ export namespace FxSyncRepository {
     patch: CompleteSyncRunPatch,
     tx?: DBTransaction
   ): Promise<Types.FxSyncRunSelectType> => {
-    const queryDb = tx ?? db;
+    const dbToQuery = tx ?? db;
     const now = new Date();
-    const [row] = await queryDb
+    const [row] = await dbToQuery
       .update(fxSyncRuns)
       .set({
         status: patch.status,

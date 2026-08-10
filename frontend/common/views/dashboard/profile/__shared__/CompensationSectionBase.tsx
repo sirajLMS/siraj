@@ -28,6 +28,26 @@ export interface CompensationViewData {
 
 type CompensationTranslations = ProfileTeacherLabels | ProfileStaffLabels;
 
+/**
+ * Type guard: narrows a string to a `FieldPath<TFormValues>` for react-hook-form.
+ * `FieldPath<T>` is a deep path type that TypeScript cannot verify from an arbitrary
+ * string, so a type guard is used instead of an unsafe `as` assertion.
+ */
+function isFieldPath<TFormValues extends FieldValues>(value: string): value is FieldPath<TFormValues> {
+  return typeof value === "string";
+}
+
+/**
+ * Wraps a form field name for use with react-hook-form's `useWatch` / `register` / `Controller`.
+ * Uses the `isFieldPath` type guard to avoid unsafe type assertions.
+ */
+function fieldPath<TFormValues extends FieldValues>(name: string): FieldPath<TFormValues> {
+  if (!isFieldPath<TFormValues>(name)) {
+    throw new Error(`Invalid field path: ${name}`);
+  }
+  return name;
+}
+
 export function CompensationEditFields<TFormValues extends FieldValues>({
   register,
   control,
@@ -38,10 +58,10 @@ export function CompensationEditFields<TFormValues extends FieldValues>({
   readonly translations: CompensationTranslations;
 }) {
   const t = translations;
-  const rateCurrency = useWatch({ control, name: "rateCurrency" as FieldPath<TFormValues> });
+  const rateCurrency = useWatch({ control, name: fieldPath<TFormValues>("rateCurrency") });
   const currencySymbol = getCurrencySymbol(rateCurrency ?? CurrencyCode.Usd);
 
-  const rateCurrencyName = "rateCurrency" as FieldPath<TFormValues>;
+  const rateCurrencyName = fieldPath<TFormValues>("rateCurrency");
 
   return (
     <SectionPanel title={t.sections.compensation}>
@@ -50,7 +70,7 @@ export function CompensationEditFields<TFormValues extends FieldValues>({
           label={t.fields.hourlyRate}
           fullWidth
           size="small"
-          {...register("hourlyRate" as FieldPath<TFormValues>)}
+          {...register(fieldPath<TFormValues>("hourlyRate"))}
           slotProps={{
             input: {
               startAdornment: <InputAdornment position="start">{currencySymbol}</InputAdornment>,

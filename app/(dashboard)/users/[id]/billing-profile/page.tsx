@@ -28,7 +28,7 @@ export default async function BillingProfilePage({ params }: Readonly<BillingPro
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.BILLING_VIEW_HISTORY], locale, context);
   const { id } = await params;

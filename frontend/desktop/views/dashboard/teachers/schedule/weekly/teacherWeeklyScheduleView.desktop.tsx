@@ -13,7 +13,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { PrimaryPageAction } from "@/frontend/common/components/ui/container";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
@@ -146,7 +146,7 @@ function ClearScheduleDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>{labels.dialogs.cancel}</Button>
-        <Button onClick={onConfirm} color="error" variant="contained" autoFocus>
+        <Button onClick={onConfirm} color="error" variant="contained">
           {labels.actions.clearSchedule}
         </Button>
       </DialogActions>

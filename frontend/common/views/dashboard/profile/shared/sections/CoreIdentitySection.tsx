@@ -48,6 +48,7 @@ type CoreIdentityEditProps = {
   readonly baseLabels?: ProfileSharedBaseLabels;
   readonly register: UseFormRegister<CoreIdentityFormFields>;
   readonly control: Control<CoreIdentityFormFields>;
+  readonly additionalEditContent?: React.ReactNode;
 };
 
 type CoreIdentitySectionProps = CoreIdentityViewProps | CoreIdentityEditProps;
@@ -87,6 +88,7 @@ export function CoreIdentitySection(props: CoreIdentitySectionProps) {
               );
             }}
           />
+          {props.additionalEditContent}
         </Stack>
       </SectionPanel>
     );

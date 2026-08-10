@@ -1,11 +1,11 @@
 import { getEnvironmentConfig } from "@/backend/lib/env";
-import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/lib/env-config-resolver";
 import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
 import type { IRedisService, RedisProvider } from "@/backend/services/redis/IRedisService";
 import { LocalRedisAdapter } from "@/backend/services/redis/LocalRedisAdapter";
 import { UpstashRedisAdapter } from "@/backend/services/redis/UpstashRedisAdapter";
+import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/services/system";
 
 const REDIS_STATE_KEY = Symbol.for("siraj.redisState");
 

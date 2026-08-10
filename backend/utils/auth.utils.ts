@@ -1,6 +1,6 @@
 import { UserRole } from "@/backend/enum";
-import { parseAccountStatus, parseIanaTimezone } from "@/backend/lib/enum";
 import type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types";
+import { parseAccountStatus, parseIanaTimezone } from "@/shared/lib/enum";
 
 type UserResolvedFields = Pick<UserReturnType, "role" | "status" | "teacherId" | "parentId" | "displayCurrency">;
 

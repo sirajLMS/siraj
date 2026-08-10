@@ -20,7 +20,7 @@ import type { ErrorsLabels } from "@/shared/locale/types/errors";
  * @returns True if the state is a valid OverrideState, false otherwise.
  */
 function isOverrideState(state: string): state is OverrideState {
-  return Object.values(OverrideState).includes(state as OverrideState);
+  return (Object.values(OverrideState) as readonly string[]).includes(state);
 }
 
 /**
@@ -214,105 +214,112 @@ gqlSchemaBuilder.queryFields(t => ({
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
-gqlSchemaBuilder.mutationFields(t => ({
-  createPermissionGroup: t.field({
-    type: PermissionGroupObject,
-    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
-    args: { input: t.arg({ type: CreatePermissionGroupInput, required: true }) },
-    resolve: async (_root, args, ctx) =>
-      PermissionManagementService.createGroup(
-        resolveActorId(ctx),
-        {
-          name: args.input.name,
-          description: args.input.description ?? null,
-          permissionIds: args.input.permissionIds,
-        },
-        resolveErrorsTranslations(ctx)
-      ),
-  }),
-  updatePermissionGroup: t.field({
-    type: PermissionGroupObject,
-    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
-    args: { input: t.arg({ type: UpdatePermissionGroupInput, required: true }) },
-    resolve: async (_root, args, ctx) =>
-      PermissionManagementService.updateGroup(
-        resolveActorId(ctx),
-        {
-          groupId: args.input.groupId,
-          name: args.input.name ?? undefined,
-          description: args.input.description ?? undefined,
-          permissionIds: args.input.permissionIds ?? undefined,
-        },
-        resolveErrorsTranslations(ctx)
-      ),
-  }),
-  deletePermissionGroup: t.boolean({
-    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
-    args: { groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
-    resolve: async (_root, args, ctx) => {
-      await PermissionManagementService.deleteGroup(resolveActorId(ctx), args.groupId, resolveErrorsTranslations(ctx));
-      return true;
-    },
-  }),
-  assignPermissionGroupToUser: t.boolean({
-    authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
-    args: { input: t.arg({ type: AssignPermissionGroupToUserInput, required: true }) },
-    resolve: async (_root, args, ctx) =>
-      runGroupMembershipMutation(
-        ctx,
-        { userId: args.input.userId, groupId: args.input.groupId },
-        (actorId, body, tErrors) => PermissionManagementService.assignGroupToUser(actorId, body, tErrors)
-      ),
-  }),
-  revokePermissionGroupFromUser: t.boolean({
-    authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
-    args: { input: t.arg({ type: RevokePermissionGroupFromUserInput, required: true }) },
-    resolve: async (_root, args, ctx) =>
-      runGroupMembershipMutation(
-        ctx,
-        { userId: args.input.userId, groupId: args.input.groupId },
-        (actorId, body, tErrors) => PermissionManagementService.revokeGroupFromUser(actorId, body, tErrors)
-      ),
-  }),
-  bulkAssignUsersToGroup: t.boolean({
-    authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
-    args: {
-      groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-      userIds: t.arg.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
-    },
-    resolve: async (_root, args, ctx) =>
-      runBulkGroupMembershipMutation(ctx, { userIds: args.userIds, groupId: args.groupId }, (actorId, body, tErrors) =>
-        PermissionManagementService.bulkAssignUsersToGroup(actorId, body, tErrors)
-      ),
-  }),
-  bulkRevokeUsersFromGroup: t.boolean({
-    authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
-    args: {
-      groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-      userIds: t.arg.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
-    },
-    resolve: async (_root, args, ctx) =>
-      runBulkGroupMembershipMutation(ctx, { userIds: args.userIds, groupId: args.groupId }, (actorId, body, tErrors) =>
-        PermissionManagementService.bulkRevokeUsersFromGroup(actorId, body, tErrors)
-      ),
-  }),
-  updateUserOverrides: t.boolean({
-    authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
-    args: {
-      userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-      overrides: t.arg({ type: [UserOverrideInputRef], required: true }),
-    },
-    resolve: async (_root, args, ctx) => {
-      const formattedOverrides = args.overrides.map(o => ({
-        permissionId: o.permissionId,
-        state: o.state,
-      }));
-      await PermissionManagementService.updateUserOverrides(
-        resolveActorId(ctx),
-        { userId: args.userId, overrides: formattedOverrides },
-        resolveErrorsTranslations(ctx)
-      );
-      return true;
-    },
-  }),
-}));
+gqlSchemaBuilder.mutationFields(t => {
+  const bulkUserGroupMutation = (
+    service: (actorId: string, body: BulkGroupMembershipInput, tErrors: ErrorsLabels) => Promise<unknown>
+  ) =>
+    t.boolean({
+      authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
+      args: {
+        groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+        userIds: t.arg.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
+      },
+      resolve: async (_root, args, ctx) =>
+        runBulkGroupMembershipMutation(
+          ctx,
+          { userIds: args.userIds, groupId: args.groupId },
+          (actorId, body, tErrors) => service(actorId, body, tErrors)
+        ),
+    });
+
+  return {
+    createPermissionGroup: t.field({
+      type: PermissionGroupObject,
+      authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
+      args: { input: t.arg({ type: CreatePermissionGroupInput, required: true }) },
+      resolve: async (_root, args, ctx) =>
+        PermissionManagementService.createGroup(
+          resolveActorId(ctx),
+          {
+            name: args.input.name,
+            description: args.input.description ?? null,
+            permissionIds: args.input.permissionIds,
+          },
+          resolveErrorsTranslations(ctx)
+        ),
+    }),
+    updatePermissionGroup: t.field({
+      type: PermissionGroupObject,
+      authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
+      args: { input: t.arg({ type: UpdatePermissionGroupInput, required: true }) },
+      resolve: async (_root, args, ctx) =>
+        PermissionManagementService.updateGroup(
+          resolveActorId(ctx),
+          {
+            groupId: args.input.groupId,
+            name: args.input.name ?? undefined,
+            description: args.input.description ?? undefined,
+            permissionIds: args.input.permissionIds ?? undefined,
+          },
+          resolveErrorsTranslations(ctx)
+        ),
+    }),
+    deletePermissionGroup: t.boolean({
+      authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
+      args: { groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
+      resolve: async (_root, args, ctx) => {
+        await PermissionManagementService.deleteGroup(
+          resolveActorId(ctx),
+          args.groupId,
+          resolveErrorsTranslations(ctx)
+        );
+        return true;
+      },
+    }),
+    assignPermissionGroupToUser: t.boolean({
+      authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
+      args: { input: t.arg({ type: AssignPermissionGroupToUserInput, required: true }) },
+      resolve: async (_root, args, ctx) =>
+        runGroupMembershipMutation(
+          ctx,
+          { userId: args.input.userId, groupId: args.input.groupId },
+          (actorId, body, tErrors) => PermissionManagementService.assignGroupToUser(actorId, body, tErrors)
+        ),
+    }),
+    revokePermissionGroupFromUser: t.boolean({
+      authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
+      args: { input: t.arg({ type: RevokePermissionGroupFromUserInput, required: true }) },
+      resolve: async (_root, args, ctx) =>
+        runGroupMembershipMutation(
+          ctx,
+          { userId: args.input.userId, groupId: args.input.groupId },
+          (actorId, body, tErrors) => PermissionManagementService.revokeGroupFromUser(actorId, body, tErrors)
+        ),
+    }),
+    bulkAssignUsersToGroup: bulkUserGroupMutation((actorId, body, tErrors) =>
+      PermissionManagementService.bulkAssignUsersToGroup(actorId, body, tErrors)
+    ),
+    bulkRevokeUsersFromGroup: bulkUserGroupMutation((actorId, body, tErrors) =>
+      PermissionManagementService.bulkRevokeUsersFromGroup(actorId, body, tErrors)
+    ),
+    updateUserOverrides: t.boolean({
+      authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },
+      args: {
+        userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+        overrides: t.arg({ type: [UserOverrideInputRef], required: true }),
+      },
+      resolve: async (_root, args, ctx) => {
+        const formattedOverrides = args.overrides.map(o => ({
+          permissionId: o.permissionId,
+          state: o.state,
+        }));
+        await PermissionManagementService.updateUserOverrides(
+          resolveActorId(ctx),
+          { userId: args.userId, overrides: formattedOverrides },
+          resolveErrorsTranslations(ctx)
+        );
+        return true;
+      },
+    }),
+  };
+});

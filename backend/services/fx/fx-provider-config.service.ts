@@ -1,11 +1,12 @@
 import { SystemSettingsRepository, UserRepository } from "@/backend/db/repo";
-import { AppPermission, type FxProvider, SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
+import { AppPermission, type FxProvider, FxProviderConfigSource } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   getResolvedFxProviderConfig,
   resetFxRateProvider,
 } from "@/backend/services/fx/providers/FxRateProviderFactory";
 import type { FxProviderConfigReturnType } from "@/backend/types";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { getServerTranslations } from "@/shared/locale";
 
 const FX_PROVIDER_SETTING_KEY = "fx_provider";
@@ -25,7 +26,7 @@ export namespace FxProviderConfigService {
     let updatedByUserId: string | null = null;
     let updatedByName: string | null = null;
 
-    if (source === "database") {
+    if (source === FxProviderConfigSource.DATABASE) {
       const setting = await SystemSettingsRepository.getByKey(FX_PROVIDER_SETTING_KEY);
       if (setting) {
         updatedAt = setting.updatedAt ?? null;

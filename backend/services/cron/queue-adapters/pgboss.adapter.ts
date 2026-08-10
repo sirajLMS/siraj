@@ -12,11 +12,11 @@
  * `resetQueueAdapterFactory()` can produce a fresh, independent adapter instance.
  */
 
-import type { SendOptions } from "pg-boss";
+import type { Job, SendOptions } from "pg-boss";
 import { PgBoss } from "pg-boss";
 import { createPool } from "@/backend/db/factory";
 import { DomainError } from "@/backend/lib/errors";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { computeHeartbeatSeconds } from "@/backend/services/cron/cron-heartbeat.utils";
 import { formatError } from "@/backend/services/cron/cron-utils";
 import { pruneMaps } from "@/backend/services/cron/queue-adapters/bullmq-shared";
@@ -170,32 +170,29 @@ export function createPgBossAdapter(): CronQueueAdapter {
       const batchPerQueue = Math.max(1, Math.ceil(count / queues.length));
 
       /**
-       * Adapter-internal shape of a raw pg-boss fetched job. Not exported — only
-       * used within this `fetch()` to cast the untyped `b.fetch()` return value
-       * before mapping to the canonical {@link CronJobPayload}. The `data` fields
-       * mirror {@link CronJobPayload} (see `@/backend/types/cron/cron.types.ts`).
+       * Adapter-internal shape of the `data` payload on a raw pg-boss fetched
+       * job. Used as the generic type argument to `b.fetch<T>()` so the return
+       * value is already typed — no `as` cast needed. The fields mirror
+       * {@link CronJobPayload} (see `@/backend/types/cron/cron.types.ts`).
        */
-      type FetchedJob = {
-        id: string;
-        data: {
-          runId: string;
-          scheduleId: string;
-          jobKind: string;
-          payload: Record<string, unknown> | null;
-          attempt: number;
-          timeoutSeconds: number;
-          maxRetries?: number;
-          retryBackoffSeconds?: number;
-        };
+      type FetchedJobData = {
+        runId: string;
+        scheduleId: string;
+        jobKind: string;
+        payload: Record<string, unknown> | null;
+        attempt: number;
+        timeoutSeconds: number;
+        maxRetries?: number;
+        retryBackoffSeconds?: number;
       };
 
       /** Adapter-internal: per-queue result of the fan-out `fetch` call. */
-      type FetchedBatch = { name: string; jobs: FetchedJob[] | null };
+      type FetchedBatch = { name: string; jobs: Job<FetchedJobData>[] | null };
       const batchResults: FetchedBatch[] = await Promise.all(
         queues.map(async name => {
           try {
-            const raw = await b.fetch(name, { batchSize: batchPerQueue });
-            return { name, jobs: raw as FetchedJob[] };
+            const raw = await b.fetch<FetchedJobData>(name, { batchSize: batchPerQueue });
+            return { name, jobs: raw };
           } catch (err) {
             logger.warn("cron.pgboss.fetch.failed", {
               queue: name,
@@ -237,7 +234,7 @@ export function createPgBossAdapter(): CronQueueAdapter {
       if (queueName !== undefined) {
         const b = await ensureStarted();
         try {
-          await b.complete(queueName, [jobId] as string[]);
+          await b.complete(queueName, [jobId]);
         } catch (err) {
           logger.warn("cron.pgboss.complete.failed", {
             jobId,
@@ -257,7 +254,7 @@ export function createPgBossAdapter(): CronQueueAdapter {
       await Promise.all(
         [...knownQueues].map(async q => {
           try {
-            await b.complete(q, [jobId] as string[]);
+            await b.complete(q, [jobId]);
           } catch (err) {
             logger.debug("cron.pgboss.complete.fallbackMiss", {
               jobId,
@@ -279,7 +276,7 @@ export function createPgBossAdapter(): CronQueueAdapter {
       const failData = { message: error, stack: stack ?? null };
       if (queueName) {
         try {
-          await b.fail(queueName, [jobId], failData as object);
+          await b.fail(queueName, [jobId], failData);
         } catch (err) {
           logger.warn("cron.pgboss.fail.failed", {
             jobId,
@@ -292,7 +289,7 @@ export function createPgBossAdapter(): CronQueueAdapter {
         await Promise.all(
           [...knownQueues].map(async q => {
             try {
-              await b.fail(q, [jobId], failData as object);
+              await b.fail(q, [jobId], failData);
             } catch (err) {
               logger.debug("cron.pgboss.fail.fallbackMiss", {
                 jobId,

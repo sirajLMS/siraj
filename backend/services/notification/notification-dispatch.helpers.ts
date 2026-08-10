@@ -59,6 +59,7 @@ export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, Noti
     NotificationChannel.PUSH,
     NotificationChannel.EMAIL,
   ],
+  [NotificationEventType.PASSWORD_RESET_BY_ADMIN]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
 };
 
 // ─── Channel comparison helper ────────────────────────────────────────
@@ -66,6 +67,10 @@ export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, Noti
 const ALL_ENUM_CHANNELS: readonly NotificationChannel[] = Object.values(NotificationChannel).filter(
   ch => ch !== NotificationChannel.WHATSAPP
 );
+
+// String arrays for O(1) type guard lookup (avoids unsafe casts in includes)
+const NOTIFICATION_CHANNEL_STRINGS = Object.values(NotificationChannel) as readonly string[];
+const NOTIFICATION_EVENT_TYPE_STRINGS = Object.values(NotificationEventType) as readonly string[];
 
 function isAllowed(eventType: NotificationEventType, channel: NotificationChannel): boolean {
   const allowedEnums = EVENT_CHANNEL_ALLOWLIST[eventType];
@@ -82,12 +87,34 @@ function prefKey(channel: NotificationChannel, eventType: NotificationEventType)
 }
 
 /**
+ * Type guard + parser for NotificationChannel.
+ * Safely narrows a string to NotificationChannel | null.
+ */
+function isNotificationChannel(value: unknown): value is NotificationChannel {
+  return typeof value === "string" && NOTIFICATION_CHANNEL_STRINGS.includes(value);
+}
+
+function parseNotificationChannel(value: unknown): NotificationChannel | null {
+  return isNotificationChannel(value) ? value : null;
+}
+
+/**
+ * Type guard + parser for NotificationEventType.
+ * Safely narrows a string to NotificationEventType | null.
+ */
+function isNotificationEventType(value: unknown): value is NotificationEventType {
+  return typeof value === "string" && NOTIFICATION_EVENT_TYPE_STRINGS.includes(value);
+}
+
+function parseNotificationEventType(value: unknown): NotificationEventType | null {
+  return isNotificationEventType(value) ? value : null;
+}
+
+/**
  * Convert rows from `NotificationPreferencesRepository.getByUserId(userId)`
  * to a `Map<preferenceKey(channel, eventType), enabled>`. Channel/enum
- * columns on the row are typed as the underlying DB string but cast to the
- * enum members (they're always set by `NotificationPreferencesRepository`
- * via `notificationChannelEnum`/`notificationEventTypeEnum` Drizzle enums,
- * so the cast is safe here).
+ * columns on the row are typed as the underlying DB string but parsed to the
+ * enum members via safe helpers (avoiding unsafe `as` casts).
  */
 function prefsToMap(
   rows: ReadonlyArray<{
@@ -98,7 +125,12 @@ function prefsToMap(
 ): PreferencesByChannel {
   const map = new Map<string, boolean>();
   for (const row of rows) {
-    map.set(prefKey(row.channel as NotificationChannel, row.eventType as NotificationEventType), row.enabled);
+    const channel = parseNotificationChannel(row.channel);
+    const eventType = parseNotificationEventType(row.eventType);
+    // DB rows should always have valid enum values; skip if not (defensive)
+    if (channel !== null && eventType !== null) {
+      map.set(prefKey(channel, eventType), row.enabled);
+    }
   }
   return map;
 }
@@ -204,7 +236,10 @@ function stampRecipientAddress(
     }
     stamped.push({
       ...payload,
-      metadata: { ...(payload.metadata ?? {}), to: address },
+      metadata:
+        payload.metadata && Object.keys(payload.metadata).length > 0
+          ? { ...payload.metadata, to: address }
+          : { to: address },
     });
   }
 

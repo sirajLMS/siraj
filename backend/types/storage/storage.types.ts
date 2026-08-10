@@ -121,7 +121,7 @@ export enum FileSortField {
 }
 
 // Input types
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 
 /**
  * Parameters for upload validation (path, size, contentType).
@@ -133,56 +133,56 @@ export interface StorageUploadValidationParams {
   contentType: string;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface FolderCreateInput {
-  /** @remarks Must be validated against path traversal attacks before use */
+  /** Must be validated against path traversal attacks before use */
   path: string;
   permissions?: DirectoryPermissions | null;
   protected?: boolean | null;
   protectChildren?: boolean | null;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface DirectoryPermissionsUpdateInput {
-  /** @remarks Must be validated against path traversal attacks before use */
+  /** Must be validated against path traversal attacks before use */
   path: string;
   permissions: DirectoryPermissions;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface StorageItemProtectionUpdateInput {
-  /** @remarks Must be validated against path traversal attacks before use */
+  /** Must be validated against path traversal attacks before use */
   path: string;
   isProtected: boolean;
   protectChildren?: boolean | null;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface StorageItemsMoveInput {
-  /** @remarks All paths must be validated against path traversal attacks before use */
+  /** All paths must be validated against path traversal attacks before use */
   sourcePaths: string[];
-  /** @remarks Must be validated against path traversal attacks before use */
+  /** Must be validated against path traversal attacks before use */
   destinationPath: string;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface StorageItemsCopyInput {
-  /** @remarks All paths must be validated against path traversal attacks before use */
+  /** All paths must be validated against path traversal attacks before use */
   sourcePaths: string[];
-  /** @remarks Must be validated against path traversal attacks before use */
+  /** Must be validated against path traversal attacks before use */
   destinationPath: string;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface StorageItemsDeleteInput {
-  /** @remarks All paths must be validated against path traversal attacks before use */
+  /** All paths must be validated against path traversal attacks before use */
   paths: string[];
   force?: boolean | null;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface FileUsageCheckInput {
-  /** @remarks Must be validated against path traversal attacks before use */
+  /** Must be validated against path traversal attacks before use */
   path: string;
 }
 
@@ -193,16 +193,16 @@ export interface FileUsageRegisterInput {
   referenceTable: ValidReferenceTable;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface FileRenameInput {
-  /** @remarks Must be validated against path traversal attacks before use */
+  /** Must be validated against path traversal attacks before use */
   currentPath: string;
   newName: string;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface FilesListSearchInput {
-  /** @remarks Must be validated against path traversal attacks before use */
+  /** Must be validated against path traversal attacks before use */
   path: string;
   limit?: number | null;
   offset?: number | null;
@@ -215,9 +215,9 @@ export interface FilesListSearchInput {
   sortDirection?: OrderSortDirection | null;
 }
 
-/** @remarks Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
+/** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
 export interface UploadPreparationInput {
-  /** @remarks Must be validated against path traversal attacks before use */
+  /** Must be validated against path traversal attacks before use */
   path: string;
   contentType: string;
   fileSize: number;

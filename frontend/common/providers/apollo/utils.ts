@@ -3,7 +3,7 @@
 import { ApolloLink, CombinedGraphQLErrors, Observable } from "@apollo/client";
 import { ErrorLink } from "@apollo/client/link/error";
 import CryptoJS from "crypto-js";
-import logger from "@/frontend/common/lib/logger";
+import { logger } from "@/frontend/common/lib/logger";
 import { buildLoginHref } from "@/frontend/common/lib/safeRedirect";
 import { isNetworkError } from "@/frontend/common/utils/errorUtils";
 
@@ -92,6 +92,7 @@ export const createConnectivityLink = (
             } else {
               handleDisconnected(observer);
             }
+            return undefined;
           })
           .catch(e => observer.error(e));
       }
@@ -226,7 +227,7 @@ async function handleAuthError(error: unknown, operationName: string | undefined
     return false;
   }
 
-  if (globalThis.window === undefined) return false;
+  if (typeof globalThis.window === "undefined") return false;
 
   const pathname = globalThis.window.location.pathname;
   if (pathname === "/login" || pathname.endsWith("/login")) {

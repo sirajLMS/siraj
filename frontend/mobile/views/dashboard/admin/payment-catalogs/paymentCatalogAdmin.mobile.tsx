@@ -18,14 +18,18 @@ export function PaymentCatalogAdminMobileView({
   mobileWallets,
   paymentLinks,
   onlineAccounts,
-  loading = false,
+  loading,
   onAdd,
   onEdit,
   onDelete,
 }: Readonly<PaymentCatalogAdminViewModel>) {
-  const catalogRows =
-    activeTab === "mobileWallet" ? mobileWallets : activeTab === "paymentLink" ? paymentLinks : onlineAccounts;
-  const rows = catalogRows.filter((row): row is NonNullable<typeof row> & { id: string } => Boolean(row?.id));
+  const catalogRowsMap = {
+    mobileWallet: mobileWallets,
+    paymentLink: paymentLinks,
+    onlineAccount: onlineAccounts,
+  };
+  const catalogRows = catalogRowsMap[activeTab];
+  const rows = catalogRows.filter((row): row is (typeof catalogRows)[number] & { id: string } => Boolean(row?.id));
 
   return (
     <MobilePageContainer>

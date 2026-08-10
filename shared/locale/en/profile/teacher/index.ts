@@ -76,6 +76,7 @@ export const profileTeacherEn: ProfileTeacherLabels = {
     retry: "Retry",
     saveSuccess: "Profile saved successfully.",
     saveError: "Failed to save profile.",
+    manageLifecycle: "Manage Account Lifecycle",
   },
   errors: {
     failedToLoad: "Failed to load profile.",

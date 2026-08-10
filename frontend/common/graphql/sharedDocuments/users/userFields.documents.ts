@@ -22,7 +22,7 @@ import { gql } from "@apollo/client";
  * selections. Only spread it inside selections on the `User` type itself.
  */
 export const USER_FIELDS = gql`
-  fragment UserFieldsFragment on User {
+  fragment UserFields on User {
     id
     name
     email

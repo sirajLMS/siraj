@@ -88,7 +88,7 @@ function withReportJoins(query: ReportSelectBuilder) {
 
 function reportsByIdQuery(whereClause: SQL, tx?: DBTransaction) {
   const q = queryDb(tx);
-  return withReportJoins(q.select(reportSelectFields) as never).where(whereClause);
+  return withReportJoins(q.select(reportSelectFields)).where(whereClause);
 }
 
 function buildPaginatedReportQuery(
@@ -112,7 +112,7 @@ async function findPaginatedReports(
 ): Promise<LessonReportWithNames[]> {
   const q = queryDb(tx);
   const queryBuilder = q.select(reportSelectFields);
-  const rows = await buildPaginatedReportQuery(queryBuilder as never, whereClause, orderBy, paginationArgs);
+  const rows = await buildPaginatedReportQuery(queryBuilder, whereClause, orderBy, paginationArgs);
   return rows.map(mapReportWithNames);
 }
 
@@ -146,7 +146,7 @@ export namespace LessonReportRepository {
     paginationArgs: PaginationArgs,
     tx?: DBTransaction
   ): Promise<LessonReportWithNames[]> {
-    const conditions: SQL<unknown>[] = [eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW)];
+    const conditions: SQL[] = [eq(lessonReports.status, LessonReportStatus.PENDING_REVIEW)];
     if (filters.teacherId) conditions.push(eq(lessonReports.teacherId, filters.teacherId));
     if (filters.studentId) conditions.push(eq(lessonReports.studentId, filters.studentId));
 
@@ -177,7 +177,7 @@ export namespace LessonReportRepository {
       .select({ value: count() })
       .from(lessonReports)
       .where(eq(lessonReports.status, LessonReportStatus.APPROVED));
-    return Number(result?.value ?? 0);
+    return result?.value ?? 0;
   }
 
   /** Student portal: lesson reports for a single student (newest lesson first). */
@@ -200,12 +200,12 @@ export namespace LessonReportRepository {
       .select({ value: count() })
       .from(lessonReports)
       .where(eq(lessonReports.studentId, studentId));
-    return Number(result?.value ?? 0);
+    return result?.value ?? 0;
   }
 
   export async function create(input: LessonReportInsertType, tx?: DBTransaction): Promise<LessonReportSelectType> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb.insert(lessonReports).values(input).returning();
+    const dbToQuery = tx ?? db;
+    const [row] = await dbToQuery.insert(lessonReports).values(input).returning();
     return row;
   }
 
@@ -255,7 +255,7 @@ export namespace LessonReportRepository {
       .select({ value: count() })
       .from(lessonReports)
       .where(and(...conditions));
-    return Number(result?.value ?? 0);
+    return result?.value ?? 0;
   }
 
   export async function findByIdempotencyKeys(
@@ -275,8 +275,8 @@ export namespace LessonReportRepository {
     studentNotes: string,
     tx?: DBTransaction
   ): Promise<LessonReportSelectType | null> {
-    const queryDb = tx ?? db;
-    const [row] = await queryDb
+    const dbToQuery = tx ?? db;
+    const [row] = await dbToQuery
       .update(lessonReports)
       .set({
         studentNotes,
@@ -293,7 +293,7 @@ async function updateReportFields(
   fields: Partial<LessonReportInsertType>,
   tx?: DBTransaction
 ): Promise<LessonReportSelectType> {
-  const queryDb = tx ?? db;
-  const [row] = await queryDb.update(lessonReports).set(fields).where(eq(lessonReports.id, reportId)).returning();
+  const dbToQuery = tx ?? db;
+  const [row] = await dbToQuery.update(lessonReports).set(fields).where(eq(lessonReports.id, reportId)).returning();
   return row;
 }

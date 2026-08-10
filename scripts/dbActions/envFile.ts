@@ -133,7 +133,7 @@ export function discoverEnvFilesWithDatabaseUrl(rootDir = process.cwd()): EnvFil
     options.push({ fileName: entry, databaseUrl });
   }
 
-  return options.sort((a, b) => compareEnvFileNames(a.fileName, b.fileName));
+  return options.toSorted((a, b) => compareEnvFileNames(a.fileName, b.fileName));
 }
 
 /**
@@ -233,6 +233,34 @@ export function formatEnvFileLabel(option: EnvFileOption): string {
  * @returns The selected env file name (e.g. `.env`, `.env.test`).
  * @throws When no valid env files exist or the user cancels.
  */
+function promptEnvironment(rl: Interface): Promise<string> {
+  return new Promise<string>(resolve => {
+    rl.question("\nEnvironment: ", answer => {
+      resolve(answer);
+    });
+  });
+}
+
+async function readEnvFileChoice(rl: Interface, options: EnvFileOption[]): Promise<string> {
+  const choice = (await promptEnvironment(rl)).trim();
+
+  if (choice === "0") {
+    throw new Error("Cancelled.");
+  }
+
+  const selectedIndex = Number.parseInt(choice, 10);
+  if (Number.isInteger(selectedIndex) && selectedIndex >= 1 && selectedIndex <= options.length) {
+    const selected = options[selectedIndex - 1];
+    if (!selected) {
+      return readEnvFileChoice(rl, options);
+    }
+    return selected.fileName;
+  }
+
+  globalThis.console.error(`Invalid choice: ${choice}`);
+  return readEnvFileChoice(rl, options);
+}
+
 export async function selectEnvFileInteractive(rl: Interface, rootDir = process.cwd()): Promise<string> {
   const options = discoverEnvFilesWithDatabaseUrl(rootDir);
 
@@ -251,30 +279,7 @@ export async function selectEnvFileInteractive(rl: Interface, rootDir = process.
   }
   globalThis.console.log("0. Exit");
 
-  while (true) {
-    const choice = (
-      await new Promise<string>(resolve => {
-        rl.question("\nEnvironment: ", answer => {
-          resolve(answer);
-        });
-      })
-    ).trim();
-
-    if (choice === "0") {
-      throw new Error("Cancelled.");
-    }
-
-    const selectedIndex = Number.parseInt(choice, 10);
-    if (Number.isInteger(selectedIndex) && selectedIndex >= 1 && selectedIndex <= options.length) {
-      const selected = options[selectedIndex - 1];
-      if (!selected) {
-        continue;
-      }
-      return selected.fileName;
-    }
-
-    globalThis.console.error(`Invalid choice: ${choice}`);
-  }
+  return readEnvFileChoice(rl, options);
 }
 
 /** Parsed arguments for the `bun db` CLI entrypoint. */

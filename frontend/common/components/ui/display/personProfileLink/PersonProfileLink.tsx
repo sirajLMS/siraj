@@ -1,8 +1,8 @@
 "use client";
 
-import type { TypographyProps } from "@mui/material/Typography";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { ProfileLinkBase } from "@/frontend/common/components/ui/display/__shared__/ProfileLinkBase";
+import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 
 export type PersonProfileLinkProps = {
   readonly href?: string | null;
@@ -12,7 +12,7 @@ export type PersonProfileLinkProps = {
   readonly avatarSize?: number;
   readonly fallbackInitial?: string;
   readonly label?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: UiTypographyVariant;
   readonly fontWeight?: number;
   /** When true, use primary color for the name (linked look). Default true when href is set. */
   readonly emphasizeLink?: boolean;

@@ -4,6 +4,8 @@ import { Alert, Button, Chip, Skeleton, Stack, Typography } from "@mui/material"
 import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabTypes";
 import type { AssignedStudentsTabSlotProps } from "@/frontend/common/views/dashboard/profile/teacher/students/types/assignedStudentsTabShared.types";
 
+type ClassFilterWrapperComponent = NonNullable<AssignedStudentsTabSlotProps["ClassFilterWrapper"]>;
+
 function LoadingState() {
   return (
     <Stack spacing={1.5}>
@@ -48,7 +50,7 @@ function ClassFilterRow({
   ClassFilterWrapper,
 }: Readonly<{
   classFilter: AssignedStudentsTabViewModel["classFilter"];
-  ClassFilterWrapper?: AssignedStudentsTabSlotProps["ClassFilterWrapper"];
+  ClassFilterWrapper?: ClassFilterWrapperComponent;
 }>) {
   const chips = classFilter.options.map(className => {
     const isActive =

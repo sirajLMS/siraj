@@ -17,6 +17,33 @@ import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboar
 import type { AdminDashboardLabels } from "@/shared/locale";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
+const METRIC_LABEL_KEYS: ReadonlySet<string> = new Set<string>([
+  "total",
+  "regular",
+  "trial",
+  "advance",
+  "rescheduled",
+  "suspended",
+  "taken",
+  "pending",
+  "activated",
+  "running",
+  "absent",
+  "leave",
+]);
+
+/** Type guard: checks whether a string is a valid admin metric label key. */
+function isMetricLabelKey(value: string): value is keyof AdminDashboardLabels["metrics"] {
+  return METRIC_LABEL_KEYS.has(value);
+}
+
+/** Type guard: validates an unknown value is a readonly array of DailyScheduleRow objects. */
+function isReadonlyDailyScheduleRowArray(value: unknown): value is readonly DailyScheduleRow[] {
+  return Array.isArray(value);
+}
+
+const EMPTY_ROWS: readonly DailyScheduleRow[] = [];
+
 export interface UseAdminDashboardViewModelProps {
   readonly onRetry?: () => void;
 }
@@ -104,16 +131,16 @@ export function useAdminDashboardViewModel(_props: Readonly<UseAdminDashboardVie
   };
 
   const scheduleResult = dashboardData?.adminDashboardSchedule;
-  const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null).map(metric => ({
-    ...metric,
-    label: labelsBySection.metrics[metric.key as keyof AdminDashboardLabels["metrics"]] ?? metric.labelKey,
-  }));
-  const rows = (scheduleResult?.rows ?? []) as unknown as readonly DailyScheduleRow[];
+  const metricsList = buildAdminDashboardMetrics(scheduleResult?.metrics ?? null).map(metric =>
+    Object.assign(metric, {
+      label: isMetricLabelKey(metric.key) ? (labelsBySection.metrics[metric.key] ?? metric.labelKey) : metric.labelKey,
+    })
+  );
+  const rawRows = scheduleResult?.rows ?? EMPTY_ROWS;
+  const rows: readonly DailyScheduleRow[] = isReadonlyDailyScheduleRowArray(rawRows) ? rawRows : EMPTY_ROWS;
   const totalCount = scheduleResult ? (scheduleResult.pageInfo?.total ?? scheduleResult.totalCount ?? 0) : undefined;
 
-  const selectedMetricLabel = filters.selectedStatus
-    ? labelsBySection.metrics[filters.selectedStatus as keyof AdminDashboardLabels["metrics"]]
-    : null;
+  const selectedMetricLabel = filters.selectedStatus ? labelsBySection.metrics[filters.selectedStatus] : null;
 
   const pageCount =
     totalCount !== undefined && ADMIN_DASHBOARD_PAGE_SIZE > 0

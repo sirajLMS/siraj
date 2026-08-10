@@ -1,12 +1,12 @@
 import { ParentRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, NotificationEventType, StudentStatus } from "@/backend/enum";
-import { parseStudentStatus } from "@/backend/lib/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
 import { buildStudentLifecyclePayloads } from "@/backend/services/notification/notification-payloads.builders";
 import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
 import type { ChangeStudentStatusResult, ReassignStudentTeacherResult, TeacherSelectType } from "@/backend/types";
+import { parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace StudentLifecycleService {

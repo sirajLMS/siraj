@@ -20,7 +20,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { logger } from "@/frontend/common/utils/logger";
 import { ActivityHeatmap } from "@/frontend/common/views/dashboard/classes/details/admin/ActivityHeatmap";
 import { AdminActionsBar } from "@/frontend/common/views/dashboard/classes/details/admin/AdminActionsBar";
 import { ClassInfoCard } from "@/frontend/common/views/dashboard/classes/details/admin/ClassInfoCard";
@@ -29,6 +30,12 @@ import { MetadataCard } from "@/frontend/common/views/dashboard/classes/details/
 import { TimezoneWarningBanner } from "@/frontend/common/views/dashboard/classes/details/teacher/TimezoneWarningBanner";
 import type { AdminViewProps } from "@/frontend/common/views/dashboard/classes/details/types";
 import type { AdminViewLabels } from "@/shared/locale";
+
+const CURRENCY_CODE_VALUES = new Set<string>(Object.values(CurrencyCode).map((v): string => v));
+
+function isCurrencyCode(value: string): value is CurrencyCode {
+  return CURRENCY_CODE_VALUES.has(value);
+}
 
 interface ClassDetailsAdminViewProps extends AdminViewProps {
   readonly labels: AdminViewLabels;
@@ -170,7 +177,7 @@ interface OverrideRateDialogProps {
   readonly onOverrideRateAmountChange: (value: string) => void;
   readonly overrideRateCurrency: CurrencyCode | null;
   readonly onOverrideRateCurrencyChange: (value: CurrencyCode | null) => void;
-  readonly onSubmitOverride: (clearOverride: boolean) => void;
+  readonly onSubmitOverride: (clearOverride: boolean) => void | Promise<void>;
 }
 
 function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
@@ -204,7 +211,10 @@ function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
           select
           label={labels.rate.currencyLabel}
           value={overrideRateCurrency ?? ""}
-          onChange={event => onOverrideRateCurrencyChange((event.target.value as CurrencyCode) || null)}
+          onChange={event => {
+            const raw = event.target.value;
+            onOverrideRateCurrencyChange(raw && isCurrencyCode(raw) ? raw : null);
+          }}
           fullWidth
         >
           <MenuItem value="">{labels.rate.currencyLabel}</MenuItem>
@@ -217,8 +227,23 @@ function OverrideRateDialog(props: Readonly<OverrideRateDialogProps>) {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{labels.rate.cancelButton}</Button>
-        <Button onClick={() => void onSubmitOverride(true)}>{labels.rate.clearOverrideButton}</Button>
-        <Button variant="contained" onClick={() => void onSubmitOverride(false)}>
+        <Button
+          onClick={() => {
+            void Promise.resolve(onSubmitOverride(true)).catch((err: Error) =>
+              logger.error("Failed to clear override rate", err)
+            );
+          }}
+        >
+          {labels.rate.clearOverrideButton}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => {
+            void Promise.resolve(onSubmitOverride(false)).catch((err: Error) =>
+              logger.error("Failed to save override rate", err)
+            );
+          }}
+        >
           {labels.rate.saveButton}
         </Button>
       </DialogActions>
@@ -280,7 +305,8 @@ export function ClassDetailsAdminView(props: Readonly<ClassDetailsAdminViewProps
 
   const executionState = instance.executionState ?? "";
   const performance = instance.performance;
-  const showLiveMetadata = executionState === "ACTIVATED" || executionState === "RUNNING";
+  const showLiveMetadata =
+    executionState === ClassExecutionState.Activated || executionState === ClassExecutionState.Running;
   const { metrics, hasData } = buildLivePerformanceMetrics(instance);
   const heatmapData = coerceHeatmapData(performance?.heatmapData);
 

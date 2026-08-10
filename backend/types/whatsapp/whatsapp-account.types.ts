@@ -128,7 +128,7 @@ export type SetWhatsappTwoStepPinInput = {
  * Template snapshot returned by Meta's list-message-templates API.
  * Used in both GraphQL sync results and service-layer return types.
  *
- * @remarks This is an intentional **value-object type** — it represents a
+ * This is an intentional **value-object type** — it represents a
  * template snapshot from Meta's Cloud API, not a row derived from a Drizzle
  * table. Therefore the canonical `SelectType`/`ReturnType` naming pattern
  * does not apply; this type serves as the canonical shape for the snapshot
@@ -146,7 +146,7 @@ export type WhatsappTemplateSnapshot = {
 /**
  * Return type for `syncFromMeta` — includes both synced accounts and template snapshots.
  *
- * @remarks This is an intentional **result-envelope type** — it is a composite
+ * This is an intentional **result-envelope type** — it is a composite
  * result that bundles accounts and templates from the sync operation, not a
  * single-entity return type derived from a Drizzle table. Therefore the
  * canonical `{Entity}ReturnType` naming pattern does not apply; this type is
@@ -172,7 +172,7 @@ export type WhatsappAccountCreateSubmitInput = Omit<
 /**
  * Template metadata used by the communication dispatch layer.
  *
- * @remarks This is an intentional **value-object type** — it represents
+ * This is an intentional **value-object type** — it represents
  * WhatsApp template metadata consumed by the dispatch layer (template name,
  * language code, parameter ordering) and is not derived from a Drizzle table.
  * Therefore the canonical `SelectType`/`ReturnType` naming pattern does not

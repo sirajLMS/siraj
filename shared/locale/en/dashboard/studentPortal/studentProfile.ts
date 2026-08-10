@@ -21,4 +21,5 @@ export const dashboardStudentPortalProfileEn: StudentPortalProfileLabels = {
   loadingMessage: "Loading...",
   saveSuccess: "Profile updated successfully",
   saveError: "Failed to update profile",
+  accountStatus: "Account Status",
 };

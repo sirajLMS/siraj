@@ -2,6 +2,7 @@
 
 import { Stack } from "@mui/material";
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AdminOnlySection } from "@/frontend/common/views/dashboard/student/profile/sections/AdminOnlySection";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
 import { StudentProfileUserDetailsSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileUserDetailsSection";
@@ -36,6 +37,14 @@ export function StudentUserProfileTabContent({
     enforceFieldAccess: scope !== ProfileScope.Own,
   };
 
+  const adminOnlyLabels = {
+    baseLabels: {
+      notSet: baseLabels.notSet,
+      fieldAccess: baseLabels.fieldAccess,
+      actions: baseLabels.actions,
+    },
+  };
+
   return (
     <Stack spacing={3}>
       <StudentProfileUserDetailsSection
@@ -45,7 +54,7 @@ export function StudentUserProfileTabContent({
         phoneLabel={labels.phone}
         timezoneLabel={parentLabels.fields.timezone}
         currencyLabel={teacherLabels.fields.displayCurrency}
-        baseLabels={{ notSet: baseLabels.notSet, fieldAccess: baseLabels.fieldAccess }}
+        baseLabels={{ notSet: baseLabels.notSet, fieldAccess: baseLabels.fieldAccess, actions: baseLabels.actions }}
       />
       <StudentExtensionProfileSection
         {...sectionProps}
@@ -53,6 +62,7 @@ export function StudentUserProfileTabContent({
         formattedDateOfBirth={formattedDateOfBirth}
       />
       <StudentParentAssignmentProfileSection {...sectionProps} sectionTitle={labels.parentInfo} />
+      {scope === ProfileScope.Other && <AdminOnlySection mode="view" labels={adminOnlyLabels} profile={profile} />}
     </Stack>
   );
 }

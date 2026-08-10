@@ -31,11 +31,44 @@
     "cancel": "إلغاء",
     "retry": "إعادة المحاولة",
     "saveSuccess": "تم حفظ الملف الشخصي بنجاح.",
-    "saveError": "فشل حفظ الملف الشخصي."
+    "saveError": "فشل حفظ الملف الشخصي.",
+    "manageLifecycle": "إدارة دورة حياة الحساب"
   },
   "errors": {
     "failedToLoad": "تعذر تحميل الملف الشخصي.",
     "notFound": "لم يتم العثور على الملف الشخصي."
+  },
+  "changePassword": {
+    "title": "تغيير كلمة المرور",
+    "currentPassword": "كلمة المرور الحالية",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد كلمة المرور الجديدة",
+    "submit": "تحديث كلمة المرور",
+    "success": "تم تحديث كلمة المرور بنجاح"
+  },
+  "adminResetPassword": {
+    "title": "إعادة تعيين كلمة المرور",
+    "description": {
+      "__fn": "(userName, userEmail) => `\\u062A\\u0639\\u064A\\u064A\\u0646 \\u0643\\u0644\\u0645\\u0629 \\u0645\\u0631\\u0648\\u0631 \\u062C\\u062F\\u064A\\u062F\\u0629 \\u0644\\u0640 ${userName} (${userEmail})`"
+    },
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmPassword": "تأكيد كلمة المرور الجديدة",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "sendEmail": "إرسال بريد إلكتروني لإعادة التعيين للمستخدم",
+    "sendEmailLabel": "إرسال بريد إلكتروني لإعادة التعيين للمستخدم",
+    "resetButton": "إعادة تعيين كلمة المرور",
+    "resettingButton": "جاري إعادة التعيين...",
+    "cancelButton": "إلغاء",
+    "success": "تمت إعادة تعيين كلمة المرور بنجاح. تم إرسال بريد إلكتروني للمستخدم.",
+    "error": "فشلت إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى.",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "passwordMinLength": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+    "passwordsDoNotMatch": "كلمات المرور غير متطابقة",
+    "accountStatus": "حالة الحساب",
+    "statusActivated": "مفعّل",
+    "statusDeactivated": "معطّل",
+    "cannotResetOwnPasswordViaAdmin": "لا يمكنك إعادة تعيين كلمة مرورك الخاصة عبر إجراء المسؤول. استخدم ميزة تغيير كلمة المرور بدلاً من ذلك."
   },
   "convertedAmount": {
     "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
@@ -46,225 +79,6 @@
   "fieldAccess": {
     "restrictedTitle": "محتوى مقيّد",
     "restrictedDescription": "ليس لديك صلاحية لعرض هذه التفاصيل."
-  },
-  "teacher": {
-    "ownSubtitle": "عرض وتحديث ملفك التدريسي وبيانات الاتصال.",
-    "subtitle": "إدارة بيانات الاعتماد المؤسسية والتفاصيل الإدارية لأعضاء هيئة التدريس.",
-    "adminBanner": "عرض إداري: تظهر حقول الهوية وبيانات زووم والحالة.",
-    "sections": {
-      "account": "الحساب",
-      "contact": "معلومات الاتصال",
-      "zoom": "زووم",
-      "compensation": "التعويضات",
-      "identity": "الهوية",
-      "professional": "المؤهلات المهنية",
-      "stats": "الإحصائيات",
-      "adminOnly": "تفاصيل إدارية"
-    },
-    "baseSalary": {
-      "__fn": "(amount, currency) => `${amount} ${currency}`"
-    },
-    "paymentMethod": {
-      "__fn": "(method) => method"
-    },
-    "convertedAmount": {
-      "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
-    },
-    "stats": {
-      "totalClasses": "إجمالي الحصص",
-      "avgEngagement": "متوسط التفاعل"
-    },
-    "fields": {
-      "fullName": "الاسم الكامل",
-      "primaryEmail": "البريد الإلكتروني الأساسي",
-      "phone": "رقم الهاتف",
-      "address": "العنوان السكني",
-      "timezone": "المنطقة الزمنية",
-      "nationalId": "رقم الهوية",
-      "dateOfBirth": "تاريخ الميلاد",
-      "gender": "الجنس",
-      "qualifications": "المؤهلات",
-      "hourlyRate": "الأجر بالساعة",
-      "currency": "العملة",
-      "paymentMethod": "طريقة الدفع",
-      "status": "حالة الحساب",
-      "displayCurrency": "عملة العرض",
-      "avatar": "الصورة الشخصية"
-    },
-    "gender": {
-      "male": "ذكر",
-      "female": "أنثى"
-    },
-    "status": {
-      "activated": "مفعّل",
-      "deactivated": "غير مفعّل"
-    },
-    "nationalIdCompletion": {
-      "banner": "يجب إدخال الرقم القومي قبل التمكن من استخدام لوحة التحكم.",
-      "action": "أدخل رقمك القومي في قسم الهوية بالأسفل واحفظ."
-    },
-    "validation": {
-      "nationalIdRequired": "الرقم القومي مطلوب.",
-      "nationalIdInvalid": "الرقم القومي غير صالح للجنسية المحددة."
-    },
-    "shell": {
-      "tabs": {
-        "profile": "الملف الشخصي",
-        "paymentMethods": "طرق الدفع",
-        "meeting": "إعدادات الاجتماع",
-        "students": "الطلاب",
-        "notifications": "الإشعارات",
-        "permissions": "الصلاحيات"
-      },
-      "loading": "جارٍ تحميل الملف الشخصي...",
-      "error": {
-        "retry": "أعد المحاولة"
-      }
-    },
-    "actions": {
-      "edit": "تعديل الملف الشخصي",
-      "save": "حفظ التغييرات",
-      "cancel": "إلغاء",
-      "retry": "إعادة المحاولة",
-      "saveSuccess": "تم حفظ الملف الشخصي بنجاح.",
-      "saveError": "فشل حفظ الملف الشخصي."
-    },
-    "errors": {
-      "failedToLoad": "تعذر تحميل الملف الشخصي.",
-      "notFound": "لم يتم العثور على الملف الشخصي."
-    }
-  },
-  "parent": {
-    "ownSubtitle": "عرض وتحديث بيانات الاتصال والتواصل الخاصة بك.",
-    "subtitle": "إدارة بيانات الاتصال والتواصل لولي الأمر الأساسي للطالب.",
-    "adminBanner": "عرض إداري: تظهر حقول الهوية والفوترة.",
-    "convertedAmount": {
-      "__fn": "(lockedAmount, lockedCurrency, convertedApprox, displayCurrency) => `${lockedAmount} ${lockedCurrency} (\\u062A\\u0642\\u0631\\u064A\\u0628\\u0627\\u064B ${convertedApprox} ${displayCurrency})`"
-    },
-    "sections": {
-      "account": "الحساب",
-      "contact": "معلومات الاتصال",
-      "social": "التواصل الاجتماعي",
-      "identity": "الهوية",
-      "billing": "الفوترة",
-      "students": "الطلاب المرتبطون"
-    },
-    "fields": {
-      "fullName": "الاسم الكامل",
-      "primaryEmail": "البريد الإلكتروني الأساسي",
-      "phone": "الهاتف",
-      "whatsapp": "واتساب",
-      "facebook": "فيسبوك",
-      "twitter": "تويتر",
-      "nationality": "الجنسية",
-      "address": "العنوان السكني",
-      "invoiceType": "نوع الفاتورة",
-      "feeAmount": "قيمة الرسوم الأساسية",
-      "paymentMethod": "طريقة الدفع الافتراضية",
-      "currency": "العملة",
-      "displayCurrency": "عملة العرض",
-      "timezone": "المنطقة الزمنية",
-      "lifecycleStatus": "حالة دورة الحياة",
-      "accountStatus": "حالة الحساب",
-      "avatar": "الصورة الشخصية"
-    },
-    "status": {
-      "regular": "عادي",
-      "on_trial": "فترة تجريبية",
-      "on_leave": "في إجازة",
-      "suspended": "موقوف",
-      "deactivated": "غير مفعّل"
-    },
-    "accountStatus": {
-      "activated": "مفعّل",
-      "deactivated": "غير مفعّل"
-    },
-    "actions": {
-      "deactivateAccount": "إلغاء صلاحية الدخول",
-      "deactivateDialogTitle": "إلغاء صلاحية دخول ولي الأمر",
-      "deactivateConfirmText": "هل أنت متأكد من إلغاء صلاحية دخول ولي الأمر؟ سيتم تسجيل خروجه فوراً ولن يتمكن من تسجيل الدخول حتى استعادة الصلاحية.",
-      "reactivateAccount": "استعادة صلاحية الدخول",
-      "reactivateDialogTitle": "استعادة صلاحية دخول ولي الأمر",
-      "reactivateConfirmText": "هل أنت متأكد من استعادة صلاحية الدخول لولي الأمر؟ سيتمكن من تسجيل الدخول مجدداً. هذا لا يغيّر حالة دورة الحياة.",
-      "cancel": "إلغاء",
-      "deactivating": "جارٍ إلغاء الصلاحية...",
-      "reactivating": "جارٍ استعادة الصلاحية...",
-      "deactivateSuccess": "تم إلغاء صلاحية دخول ولي الأمر.",
-      "reactivateSuccess": "تم استعادة صلاحية دخول ولي الأمر.",
-      "manageLifecycle": "إدارة دورة الحياة"
-    },
-    "common": {
-      "student": {
-        "fallbackInitial": "ط"
-      },
-      "teacher": {
-        "fallbackInitial": "م"
-      }
-    },
-    "students": {
-      "empty": "لا يوجد طلاب مرتبطون حالياً.",
-      "mobileListLabel": "قائمة الطلاب المرتبطين",
-      "columns": {
-        "name": "اسم الطالب",
-        "status": "الحالة",
-        "teacher": "المعلم",
-        "hoursPerWeek": "الساعات أسبوعياً"
-      },
-      "statusLabel": {
-        "regular": "عادي",
-        "on_trial": "فترة تجريبية",
-        "on_leave": "في إجازة",
-        "suspended": "موقوف",
-        "deactivated": "غير مفعّل"
-      }
-    },
-    "notSet": "غير محدد"
-  },
-  "staff": {
-    "ownSubtitle": "عرض وتحديث بيانات حسابك ومعلومات الاتصال.",
-    "subtitle": "إدارة الأدوار والصلاحيات على مستوى النظام للموظفين الإداريين.",
-    "adminBanner": "عرض إداري: الحالة والصلاحيات مرئية.",
-    "sections": {
-      "account": "معلومات الحساب",
-      "contact": "معلومات الاتصال",
-      "role": "معلومات الدور",
-      "compensation": "التعويض",
-      "permissions": "الصلاحيات الفعّالة"
-    },
-    "fields": {
-      "fullName": "الاسم الكامل",
-      "primaryEmail": "البريد الإلكتروني",
-      "phone": "رقم الهاتف",
-      "timezone": "المنطقة الزمنية",
-      "roleName": "الدور",
-      "roleSlug": "معرّف الدور",
-      "department": "القسم",
-      "status": "حالة الحساب",
-      "statusActive": "نشط",
-      "statusInactive": "غير نشط",
-      "displayCurrency": "عملة العرض",
-      "hourlyRate": "الأجر بالساعة",
-      "currency": "العملة",
-      "avatar": "الصورة الشخصية"
-    },
-    "permissions": {
-      "inheritedGroups": "مجموعات الصلاحيات",
-      "directOverrides": "التجاوزات المباشرة",
-      "empty": {
-        "title": "لا توجد مجموعات صلاحيات معيّنة",
-        "description": "لا يملك هذا الموظف مجموعات صلاحيات موروثة. عيّن المجموعات من إدارة الصلاحيات.",
-        "ownDescription": "ليس لديك أي مجموعات صلاحيات معيّنة بعد."
-      },
-      "columns": {
-        "resource": "المورد",
-        "action": "الإجراء",
-        "state": "الحالة"
-      },
-      "states": {
-        "granted": "مسموح",
-        "denied": "مرفوض"
-      }
-    }
   },
   "banking": {
     "title": "تفاصيل البنك والمدفوعات",
@@ -323,83 +137,5 @@
       "failedToLoad": "تعذر تحميل الطلاب المعينين.",
       "retry": "إعادة المحاولة"
     }
-  },
-  "notifications": {
-    "title": "تفضيلات الإشعارات",
-    "description": "اختر كيفية استلام التحديثات لكل نوع حدث وقناة.",
-    "saved": "تم حفظ تفضيلات الإشعارات.",
-    "errorLoading": "تعذر تحميل تفضيلات الإشعارات.",
-    "errorSaving": "تعذر حفظ تفضيلات الإشعارات.",
-    "autoGeneration": {
-      "title": "أوضاع التوليد التلقائي",
-      "onSave": "عند الحفظ — يتم توليد رابط الاجتماع تلقائيًا عند تفعيل التوليد التلقائي",
-      "preview": "معاينة — ولّد رابطًا تجريبيًا لمعرفة شكل اجتماعك",
-      "booking": "الحجز — يتم توليد رابط جديد عند حجز اجتماع",
-      "learnMore": "اعرف المزيد"
-    },
-    "categories": {
-      "info": "معلومات",
-      "reminder": "تذكيرات",
-      "urgent": "عاجل",
-      "digest": "ملخصات"
-    },
-    "channels": {
-      "EMAIL": "البريد الإلكتروني",
-      "SMS": "رسائل SMS",
-      "PUSH": "إشعارات الدفع",
-      "ON_APP": "داخل التطبيق",
-      "WHATSAPP": "واتساب"
-    },
-    "events": {
-      "CLASS_REMINDER": "تذكيرات الحصص",
-      "INVOICE_GENERATED": "إنشاء الفواتير",
-      "COMPLAINT_RESPONSE": "ردود الشكاوى",
-      "PAYMENT_METHOD_CHANGED": "تغيير طريقة الدفع",
-      "NEW_COMPLAINT": "شكاوى جديدة",
-      "NEW_SUGGESTION": "اقتراحات جديدة",
-      "SUGGESTION_ACKNOWLEDGED": "تأكيد استلام الاقتراح",
-      "SUGGESTION_DUPLICATE_MARKED": "اقتراح مكرر",
-      "CLASS_SCHEDULED": "جدولة حصة",
-      "CLASS_ACTIVATED": "تفعيل الحصة",
-      "CLASS_STARTED": "بدء الحصة",
-      "CLASS_COMPLETED": "اكتمال الحصة",
-      "CLASS_MARKED_ABSENT": "تسجيل الغياب",
-      "CLASS_MARKED_MISSED": "تفويت الحصة",
-      "CLASS_LEAVE_REQUESTED": "طلب إجازة",
-      "CLASS_RESCHEDULED": "إعادة جدولة الحصة",
-      "CLASS_CANCELLED": "إلغاء الحصة",
-      "CLASS_RESET": "إعادة ضبط الحصة",
-      "LESSON_REPORT_SUBMITTED": "تقديم تقرير حصة",
-      "LESSON_REPORT_REVIEWED": "مراجعة تقرير حصة",
-      "QUOTA_EXPIRING_SOON": "الحصة ستنتهي قريباً",
-      "QUOTA_EXPIRED": "انتهت صلاحية الحصة",
-      "QUOTA_LOW_BALANCE": "رصيد الحصة منخفض",
-      "ON_DEMAND_INSTANCE_PENDING_CREDIT": "طلب حصة بانتظار الرصيد",
-      "ON_DEMAND_INSTANCE_REMINDER_T3": "تذكير بالحصة (3 أيام)",
-      "ON_DEMAND_INSTANCE_REMINDER_T1": "تذكير بالحصة (يوم واحد)",
-      "ON_DEMAND_TEACHER_DAILY_DIGEST": "ملخص يومي للمعلم"
-    },
-    "connectAccount": {
-      "connectButton": "ربط",
-      "connectingLabel": "جارٍ الربط...",
-      "connectedAs": {
-        "__fn": "(email) => `\\u0645\\u0631\\u062A\\u0628\\u0637 \\u0628\\u0627\\u0633\\u0645 ${email}`"
-      },
-      "disconnectButton": "إلغاء الربط",
-      "disconnectConfirmTitle": "إلغاء ربط مزود الاجتماعات",
-      "disconnectConfirm": "هل أنت متأكد من إلغاء ربط هذا المزود؟ ستحتاج إلى إعادة الربط لاستخدامه مرة أخرى.",
-      "confirmDisconnect": "إلغاء الربط",
-      "cancel": "إلغاء",
-      "reconnectButton": "إعادة الربط",
-      "reconnectCallout": "أعد ربط حسابك"
-    }
-  },
-  "changePassword": {
-    "title": "تغيير كلمة المرور",
-    "currentPassword": "كلمة المرور الحالية",
-    "newPassword": "كلمة المرور الجديدة",
-    "confirmPassword": "تأكيد كلمة المرور الجديدة",
-    "submit": "تحديث كلمة المرور",
-    "success": "تم تحديث كلمة المرور بنجاح"
   }
 }

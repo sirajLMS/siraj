@@ -1,7 +1,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import sharp from "sharp";
+import * as sharpModule from "sharp";
 import toIco from "to-ico";
+
+const sharp = sharpModule.default;
 
 const svgPath = process.argv[2] || "public/favicon.svg";
 const icoSizes = [16, 32, 48, 256];
@@ -27,13 +29,15 @@ async function convertSvgToIco(svgBuffer: Buffer, outputDir: string): Promise<vo
 }
 
 async function convertSvgToPng(svgBuffer: Buffer, outputDir: string): Promise<void> {
-  for (const { size, filename } of pngSizes) {
-    const pngBuffer = await sharp(svgBuffer).resize(size, size).png().toBuffer();
-    const pngPath = resolve(outputDir, filename);
-    ensureDir(pngPath);
-    writeFileSync(pngPath, pngBuffer);
-    console.log(`Generated: ${pngPath}`);
-  }
+  await Promise.all(
+    pngSizes.map(async ({ size, filename }) => {
+      const pngBuffer = await sharp(svgBuffer).resize(size, size).png().toBuffer();
+      const pngPath = resolve(outputDir, filename);
+      ensureDir(pngPath);
+      writeFileSync(pngPath, pngBuffer);
+      console.log(`Generated: ${pngPath}`);
+    })
+  );
 }
 
 async function generateIcons(): Promise<void> {

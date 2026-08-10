@@ -39,6 +39,12 @@ type PayloadMetadata = NotificationMetadata & Record<string, unknown>;
 
 // ─── Helpers ───────────────────────────────────────────────────────────
 
+const VALID_REASSIGNMENT_RECIPIENTS: ReadonlySet<string> = new Set(["parent", "oldTeacher", "newTeacher"]);
+
+function isStudentTeacherReassignmentRecipient(value: unknown): value is StudentTeacherReassignmentRecipient {
+  return typeof value === "string" && VALID_REASSIGNMENT_RECIPIENTS.has(value);
+}
+
 /**
  * Maps `NotificationChannel` enum members to their lowercase string identifiers
  * used in channel comparison and routing. WhatsApp joins the existing four.
@@ -305,9 +311,10 @@ function renderStudentLifecycle(
 ): { title: string; body: string } | null {
   switch (eventType) {
     case NotificationEventType.STUDENT_TEACHER_REASSIGNED: {
-      const recipient = (metadata?.recipient as StudentTeacherReassignmentRecipient | undefined) ?? "parent";
-      const safeRecipient: StudentTeacherReassignmentRecipient =
-        recipient === "parent" || recipient === "oldTeacher" || recipient === "newTeacher" ? recipient : "parent";
+      const rawRecipient = metadata?.recipient;
+      const safeRecipient: StudentTeacherReassignmentRecipient = isStudentTeacherReassignmentRecipient(rawRecipient)
+        ? rawRecipient
+        : "parent";
       const variants = labels.studentTeacherReassigned;
       if (safeRecipient === "newTeacher") {
         const variant = variants.newTeacher;

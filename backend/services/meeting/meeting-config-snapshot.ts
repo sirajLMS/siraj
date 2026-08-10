@@ -15,7 +15,7 @@ import {
 } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { getMeetingChannel, providerKindToSlug } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { buildMeetingProviderCatalogSnapshot } from "@/backend/services/meeting/meeting-config-mask";
-import type { MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails, MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const MAX_RETRY_ATTEMPTS = 3;
@@ -26,12 +26,11 @@ function sleep(ms: number): Promise<void> {
 }
 
 export namespace MeetingConfigSnapshotService {
-  export async function buildSessionSnapshot(
-    configId: string,
+  async function assembleSnapshot(
+    config: { id: string; providerId: string; label: string | null; details: MeetingConfigDetails },
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<MeetingConfigSnapshot> {
-    const config = await UserMeetingConfigRepository.getByIdOrThrow(configId, tErrors, tx);
     const provider = await MeetingProviderRepository.getByIdOrThrow(config.providerId, tErrors, tx);
     const details = parseMeetingConfigDetails(provider, config.details);
 
@@ -45,23 +44,22 @@ export namespace MeetingConfigSnapshotService {
     };
   }
 
+  export async function buildSessionSnapshot(
+    configId: string,
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<MeetingConfigSnapshot> {
+    const config = await UserMeetingConfigRepository.getByIdOrThrow(configId, tErrors, tx);
+    return assembleSnapshot(config, tErrors, tx);
+  }
+
   export async function buildClassSessionSnapshot(
     configId: string,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<MeetingConfigSnapshot> {
     const config = await ClassMeetingConfigRepository.getByIdOrThrow(configId, tErrors, tx);
-    const provider = await MeetingProviderRepository.getByIdOrThrow(config.providerId, tErrors, tx);
-    const details = parseMeetingConfigDetails(provider, config.details);
-
-    return {
-      userMeetingConfigId: config.id,
-      providerId: config.providerId,
-      label: config.label,
-      details,
-      provider: buildMeetingProviderCatalogSnapshot(provider),
-      snapshottedAt: new Date().toISOString(),
-    };
+    return assembleSnapshot(config, tErrors, tx);
   }
 
   // ─── Booking-time generation (post-commit dispatch) ───────────────────
@@ -149,7 +147,12 @@ export namespace MeetingConfigSnapshotService {
     existingSnapshot: MeetingConfigSnapshot | null
   ): Promise<string | null> {
     let lastError: unknown = null;
-    for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+
+    async function attempt(n: number): Promise<string | null> {
+      if (n > MAX_RETRY_ATTEMPTS) {
+        return null;
+      }
+
       try {
         const adapter = await getMeetingChannel(slug);
         const result: GenerateMeetingResult = await adapter.generateMeeting({
@@ -163,7 +166,7 @@ export namespace MeetingConfigSnapshotService {
 
         logger.info("generateAndAttachForClassInstance: success", {
           classInstanceId,
-          attempt,
+          attempt: n,
           joinUrl: result.joinUrl,
           upstreamMeetingId: result.meetingId ?? null,
         });
@@ -173,7 +176,7 @@ export namespace MeetingConfigSnapshotService {
         lastError = error;
         logger.warn("generateAndAttachForClassInstance: attempt failed", {
           classInstanceId,
-          attempt,
+          attempt: n,
           maxAttempts: MAX_RETRY_ATTEMPTS,
           error: error instanceof Error ? error.message : String(error),
           isMeetingChannelError: error instanceof MeetingChannelError,
@@ -182,27 +185,33 @@ export namespace MeetingConfigSnapshotService {
         if (isNonRetryable(error)) {
           logger.warn("generateAndAttachForClassInstance: non-retryable error, skipping retries", {
             classInstanceId,
-            attempt,
+            attempt: n,
             code: error.code,
             error: error.message,
           });
-          break;
+          return null;
         }
 
-        if (attempt < MAX_RETRY_ATTEMPTS) {
-          await sleep(BASE_BACKOFF_MS * 2 ** (attempt - 1));
+        if (n < MAX_RETRY_ATTEMPTS) {
+          await sleep(BASE_BACKOFF_MS * 2 ** (n - 1));
         }
+
+        return attempt(n + 1);
       }
     }
 
-    logger.error("generateAndAttachForClassInstance: meetingGenerationFailed", {
-      classInstanceId,
-      providerKind,
-      attempts: MAX_RETRY_ATTEMPTS,
-      error: lastError instanceof Error ? lastError.message : String(lastError),
-    });
+    const joinUrl = await attempt(1);
 
-    return null;
+    if (joinUrl === null) {
+      logger.error("generateAndAttachForClassInstance: meetingGenerationFailed", {
+        classInstanceId,
+        providerKind,
+        attempts: MAX_RETRY_ATTEMPTS,
+        error: lastError instanceof Error ? lastError.message : String(lastError),
+      });
+    }
+
+    return joinUrl;
   }
 
   /**

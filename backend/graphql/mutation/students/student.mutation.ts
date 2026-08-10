@@ -18,6 +18,13 @@ async function requireStudentManageStatus(userId: string, tErrors: { insufficien
   }
 }
 
+// Type guard: validates that the filtered record matches PartialStudentUpdateInput.
+// Pothos has already validated the GraphQL input shape at the schema boundary;
+// this guard lets TypeScript narrow the runtime-built record to the typed input.
+function isPartialStudentUpdateInput(value: unknown): value is Types.PartialStudentUpdateInput {
+  return typeof value === "object" && value !== null;
+}
+
 gqlSchemaBuilder.mutationFields(t => ({
   partiallyUpdateStudent: t.field({
     type: StudentPothosObject,
@@ -37,15 +44,15 @@ gqlSchemaBuilder.mutationFields(t => ({
           input[key] = value;
         }
       }
-      const typedInput = input as Types.PartialStudentUpdateInput;
-      const { status, ...restInput } = typedInput;
+      if (!isPartialStudentUpdateInput(input)) {
+        throw new Error("invalid_input");
+      }
+      const { status, ...restInput } = input;
       if (status) {
         await requireStudentManageStatus(userId, tErrors);
-        await StudentRepository.changeStatus(typedInput.id, status, tErrors);
+        await StudentRepository.changeStatus(input.id, status, tErrors);
       }
-      return await StudentRepository.partiallyUpdate(restInput as Types.PartialStudentUpdateInput, tErrors).then(s =>
-        StudentUtils.mapEntityToDto(s)
-      );
+      return await StudentRepository.partiallyUpdate(restInput, tErrors).then(s => StudentUtils.mapEntityToDto(s));
     },
   }),
 

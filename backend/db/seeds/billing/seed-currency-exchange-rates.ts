@@ -1,5 +1,5 @@
 import { EXCHANGE_PAIRS, iterateInvoiceMonths, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { FxIngestionService } from "@/backend/services/fx/fx-ingestion.service";
 import type { CurrencyExchangeRateSubmitInput } from "@/backend/types";
 

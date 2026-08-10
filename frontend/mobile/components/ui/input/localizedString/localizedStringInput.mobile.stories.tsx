@@ -6,8 +6,10 @@ import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { LocalizedStringInputMobile } from "@/frontend/mobile/components/ui/input/localizedString/localizedStringInput.mobile";
 import type { LocalizedString } from "@/shared/types";
 
+const DEFAULT_INITIAL_VALUE: LocalizedString = {};
+
 function LocalizedStringInputStory({
-  initialValue = {},
+  initialValue = DEFAULT_INITIAL_VALUE,
   ...props
 }: Readonly<Omit<LocalizedStringInputProps, "value" | "onChangeAction"> & { initialValue?: LocalizedString }>) {
   const [value, setValue] = useState<LocalizedString>(initialValue);

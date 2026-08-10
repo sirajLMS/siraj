@@ -1,4 +1,3 @@
-import type { ClassType, DayOfWeek } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CreateRecurringClassInputPothosObject,
@@ -25,7 +24,7 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
       }
       const tErrors = ctx.t().errorsTranslations;
 
-      return await RecurringClassService.createRecurringClass(
+      return RecurringClassService.createRecurringClass(
         ctx.user.id,
         {
           studentId: args.input.studentId,
@@ -34,15 +33,15 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
           durationMinutes: args.input.durationMinutes,
           defaultStartTime: args.input.defaultStartTime,
           timezone: args.input.timezone,
-          effectiveFrom: args.input.effectiveFrom || undefined,
-          effectiveUntil: args.input.effectiveUntil || undefined,
+          effectiveFrom: args.input.effectiveFrom ?? undefined,
+          effectiveUntil: args.input.effectiveUntil ?? undefined,
           days: args.input.days.map(d => ({
-            dayOfWeek: d.dayOfWeek as DayOfWeek,
+            dayOfWeek: d.dayOfWeek,
             startTime: d.startTime,
             isActive: d.isActive,
           })),
-          classType: args.input.classType as ClassType | undefined,
-          generateInstancesForWeeks: args.input.generateInstancesForWeeks || undefined,
+          classType: args.input.classType,
+          generateInstancesForWeeks: args.input.generateInstancesForWeeks ?? undefined,
           hourlyRate: args.input.hourlyRate || null,
           rateCurrency: args.input.rateCurrency ?? null,
         },

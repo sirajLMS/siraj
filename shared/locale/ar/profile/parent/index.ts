@@ -8,11 +8,12 @@ export const profileParentAr: ProfileParentLabels = {
     `${lockedAmount} ${lockedCurrency} (تقريباً ${convertedApprox} ${displayCurrency})`,
   sections: {
     account: "الحساب",
-    contact: "Contact Information",
-    social: "Social & Communication",
+    contact: "معلومات الاتصال",
+    social: "التواصل الاجتماعي",
     identity: "الهوية",
     billing: "الفوترة",
     students: "الطلاب المرتبطون",
+    adminOnly: "تفاصيل إدارية",
   },
   fields: {
     fullName: "الاسم الكامل",

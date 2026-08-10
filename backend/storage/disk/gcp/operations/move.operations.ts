@@ -53,15 +53,20 @@ export async function moveItems(
     };
   }
 
-  for (const sourcePath of validSources) {
-    const result: GenericOperationResult<Types.FileInfo | Types.DirectoryInfo> = await moveSingleItem(ctx, {
-      sourcePath,
-      destinationPath: input.destinationPath,
-      dbFile: dbFileMap.get(sourcePath),
-      dbDirectory: dbDirectoryMap.get(sourcePath),
-      dbSourceDir: dbSourceDirMap.get(sourcePath.substring(0, sourcePath.lastIndexOf("/"))),
-    });
+  const results = await Promise.all(
+    validSources.map(async sourcePath => {
+      const result = await moveSingleItem(ctx, {
+        sourcePath,
+        destinationPath: input.destinationPath,
+        dbFile: dbFileMap.get(sourcePath),
+        dbDirectory: dbDirectoryMap.get(sourcePath),
+        dbSourceDir: dbSourceDirMap.get(sourcePath.substring(0, sourcePath.lastIndexOf("/"))),
+      });
+      return { sourcePath, result };
+    })
+  );
 
+  for (const { sourcePath, result } of results) {
     if (result.success && result.data) {
       successCount++;
       successfulItems.push(result.data);

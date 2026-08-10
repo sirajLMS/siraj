@@ -18,7 +18,7 @@ export default async function ResourcesPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.RESOURCES_LIST], locale, context);
 

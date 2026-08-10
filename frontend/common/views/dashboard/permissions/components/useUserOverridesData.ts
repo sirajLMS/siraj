@@ -1,7 +1,11 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import type { PermissionGroup, UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  OverrideState,
+  type PermissionGroup,
+  type UserOverride,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 
 export interface UserOverrideInfo {
@@ -28,9 +32,9 @@ function buildConflictDetails(overrides: readonly UserOverride[], inheritedPermi
   for (const override of overrides) {
     if (!override.permissionId) continue;
     const isInherited = inheritedPermissionIds.has(override.permissionId);
-    if (override.state === "DENIED" && isInherited) {
+    if (override.state === OverrideState.Denied && isInherited) {
       details.push(`Deny override for "${override.permissionId}" conflicts with inherited group permission.`);
-    } else if (override.state === "GRANTED" && isInherited) {
+    } else if (override.state === OverrideState.Granted && isInherited) {
       details.push(`Allow override for "${override.permissionId}" overlaps with inherited group permission.`);
     }
   }
@@ -73,8 +77,8 @@ export function useUserOverridesData(userId: string, groups: readonly Permission
   const info = useMemo<UserOverrideInfo | null>(() => {
     if (!data?.userOverrides) return null;
     const overridesList = data.userOverrides as readonly UserOverride[];
-    const grants = overridesList.filter(o => o.state === "GRANTED").length;
-    const revokes = overridesList.filter(o => o.state === "DENIED").length;
+    const grants = overridesList.filter(o => o.state === OverrideState.Granted).length;
+    const revokes = overridesList.filter(o => o.state === OverrideState.Denied).length;
     const userGroups = getUserGroupsForUser(userId, groups);
     const inheritedPermissionIds = computeInheritedPermissionIds(userGroups);
     const conflictDetails = buildConflictDetails(overridesList, inheritedPermissionIds);

@@ -1,4 +1,4 @@
-import { mock } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 
 const mockPush = mock(() => {});
 
@@ -6,7 +6,7 @@ const mockPush = mock(() => {});
 // alphabetically-earlier test files (e.g. ScheduleOverviewSection.test.tsx) bleed
 // into this file. Re-register here to guarantee the shape this file's transitive
 // imports require, regardless of what earlier files may have left behind.
-mock.module("next/navigation", () => ({
+await mock.module("next/navigation", () => ({
   useParams: () => ({ locale: "en" }),
   useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
   usePathname: () => "/dashboard",
@@ -14,7 +14,7 @@ mock.module("next/navigation", () => ({
   redirect: mock(() => {}),
 }));
 
-mock.module("@/shared/i18n/routing", () => ({
+await mock.module("@/shared/i18n/routing", () => ({
   locales: ["ar", "en"] as const,
   defaultLocale: "ar",
   useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
@@ -27,18 +27,17 @@ mock.module("@/shared/i18n/routing", () => ({
   redirect: mock(() => {}),
 }));
 
-mock.module("@/shared/i18n/navigation", () => ({
+await mock.module("@/shared/i18n/navigation", () => ({
   useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
   usePathname: () => "/dashboard",
 }));
 
 // Eliminates dependency on the router-backed language switch hook so this file
 // is immune to any router mock configuration registered by earlier test files.
-mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
+await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
 }));
 
-import { afterEach, describe, expect, test } from "bun:test";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";

@@ -7,7 +7,7 @@ import { EditableTypographyMobile } from "@/frontend/mobile/components/ui/input/
 
 type EditableTypographyStoryProps = {
   readonly initialValue?: string;
-  readonly typographyVariant?: TypographyProps["variant"];
+  readonly typographyVariant?: NonNullable<TypographyProps["variant"]>;
   readonly doubleClickToEdit?: boolean;
   readonly startEditing?: boolean;
   readonly withValidation?: boolean;
@@ -35,6 +35,7 @@ function EditableTypographyStory({
             return "Unable to save right now";
           }
           setValue(newValue);
+          return undefined;
         }}
         doubleClickToEdit={doubleClickToEdit}
         startEditing={startEditing}

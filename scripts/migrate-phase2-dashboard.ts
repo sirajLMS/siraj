@@ -686,14 +686,14 @@ for (const ns of namespaces) {
 }
 legacyToHandle.set("settings.audit", "DashboardSettings");
 
-const sortedLegacyKeys = [...legacyToHandle.keys()].sort((a, b) => b.length - a.length);
+const sortedLegacyKeys = [...legacyToHandle.keys()].toSorted((a, b) => b.length - a.length);
 
 function ensureTranslationImport(content: string): string {
   if (!content.includes("Translation.Dashboard.")) return content;
   if (/import\s*\{[^}]*\bTranslation\b/.test(content)) return content;
 
   const localeImport = /import\s*\{([^}]+)\}\s*from\s*"@\/shared\/locale";?/;
-  const match = content.match(localeImport);
+  const match = localeImport.exec(content);
   if (match) {
     const imports = match[1].trim();
     const newImports = imports.includes("Translation") ? imports : `${imports}, Translation`;
@@ -701,7 +701,7 @@ function ensureTranslationImport(content: string): string {
   }
 
   const clientImport = /import\s*\{([^}]+)\}\s*from\s*"@\/shared\/locale\/client";?/;
-  const clientMatch = content.match(clientImport);
+  const clientMatch = clientImport.exec(content);
   if (clientMatch) {
     const imports = clientMatch[1].trim();
     const newImports = imports.includes("Translation") ? imports : `${imports}, Translation`;

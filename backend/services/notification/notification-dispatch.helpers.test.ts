@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationPreferencesRepository, UserRepository } from "@/backend/db/repo";
-import { NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { AccountStatus, IanaTimezone, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import {
   dispatchWithPreferences,
@@ -58,12 +58,52 @@ let getByUserIdsSpy: ReturnType<typeof spyOn>;
 let dispatchMultiSpy: ReturnType<typeof spyOn>;
 let findSafeByIdsSpy: ReturnType<typeof spyOn>;
 
-function mockUser(overrides?: Partial<Pick<UserSelectType, "email" | "phone">>): UserSelectType {
+type ContactOverrides = { email?: string | null; phone?: string | null };
+
+function mockUser(overrides?: ContactOverrides): UserSelectType {
+  const id = crypto.randomUUID();
+  const now = new Date();
   return {
-    email: "parent@test.com",
-    phone: "+15555550100",
-    ...overrides,
-  } as unknown as UserSelectType;
+    id,
+    name: "Test User",
+    email: overrides?.email ?? "parent@test.com",
+    emailVerifiedAt: null,
+    password: crypto.randomUUID(),
+    rememberTokenHash: null,
+    avatarFilePath: null,
+    avatarUrl: null,
+    phone: overrides?.phone ?? "+15555550100",
+    status: AccountStatus.ACTIVATED,
+    isSuperAdmin: false,
+    timezone: IanaTimezone.UTC,
+    displayCurrency: null,
+    lastLoginAt: null,
+    createdAt: now,
+    updatedAt: now,
+    deletedAt: null,
+  };
+}
+
+function mockFindSafeByIdsWithUser(userOverrides?: ContactOverrides) {
+  findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
+    const map = new Map<string, UserSelectType | null>();
+    for (const id of ids) {
+      map.set(id, mockUser(userOverrides));
+    }
+    return map;
+  });
+}
+
+function getDispatchedPayloads(callIndex = 0): CommunicationPayload[] {
+  // `mock.calls` is untyped (any). Centralizing the typed access removes the need
+  // for repeated `as` assertions throughout the tests.
+  return dispatchMultiSpy.mock.calls[callIndex][0];
+}
+
+async function dispatchAndGetResults(userId: string, eventType: NotificationEventType) {
+  const payloads = buildFourChannelPayloads(userId, eventType);
+  await dispatchWithPreferences(payloads, [userId]);
+  return getDispatchedPayloads();
 }
 
 beforeEach(() => {
@@ -116,9 +156,9 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     expect(getByUserIdsSpy).toHaveBeenCalledTimes(1);
     expect(getByUserIdsSpy).toHaveBeenCalledWith([PARENT_USER_ID]);
     expect(dispatchMultiSpy).toHaveBeenCalledTimes(1);
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
+    const dispatched = getDispatchedPayloads();
     expect(dispatched).toHaveLength(4);
-    const dispatchedChannels = dispatched.map(p => p.channel).sort(compareChannels);
+    const dispatchedChannels = dispatched.map(p => p.channel).toSorted(compareChannels);
     expect(dispatchedChannels).toEqual([
       NotificationChannel.EMAIL,
       NotificationChannel.ON_APP,
@@ -132,9 +172,7 @@ describe("dispatchWithPreferences — preferences filtering", () => {
       new Map([
         [
           PARENT_USER_ID,
-          [
-            prefRow(PARENT_USER_ID, NotificationChannel.EMAIL, NotificationEventType.INVOICE_GENERATED, false),
-          ] as unknown as UserNotificationPreferenceSelectType[],
+          [prefRow(PARENT_USER_ID, NotificationChannel.EMAIL, NotificationEventType.INVOICE_GENERATED, false)],
         ],
       ])
     );
@@ -143,9 +181,9 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     const results = await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
 
     expect(results).toHaveLength(3);
-    const dispatchedChannels = (dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[])
+    const dispatchedChannels = getDispatchedPayloads()
       .map(p => p.channel)
-      .sort(compareChannels);
+      .toSorted(compareChannels);
     expect(dispatchedChannels).toEqual([NotificationChannel.ON_APP, NotificationChannel.PUSH, NotificationChannel.SMS]);
     expect(dispatchedChannels).not.toContain(NotificationChannel.EMAIL);
     expect(results.every(r => r.success)).toBe(true);
@@ -156,15 +194,18 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     const allowedLower = allowed.map(c =>
       c === NotificationChannel.ON_APP ? NotificationChannel.ON_APP : NotificationChannel.EMAIL
     );
-    expect([...allowedLower].sort(compareChannels)).toEqual([NotificationChannel.EMAIL, NotificationChannel.ON_APP]);
+    expect([...allowedLower].toSorted(compareChannels)).toEqual([
+      NotificationChannel.EMAIL,
+      NotificationChannel.ON_APP,
+    ]);
 
     const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.CLASS_SCHEDULED);
     const results = await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
 
     expect(results).toHaveLength(2);
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
+    const dispatched = getDispatchedPayloads();
     expect(dispatched).toHaveLength(2);
-    const dispatchedChannels = dispatched.map(p => p.channel).sort(compareChannels);
+    const dispatchedChannels = dispatched.map(p => p.channel).toSorted(compareChannels);
     expect(dispatchedChannels).toEqual([NotificationChannel.EMAIL, NotificationChannel.ON_APP]);
   });
 
@@ -173,7 +214,19 @@ describe("dispatchWithPreferences — preferences filtering", () => {
 
     const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
-    await expect(dispatchWithPreferences(payloads, [PARENT_USER_ID])).rejects.toThrow("prefs DB unreachable");
+    // Use explicit try/catch to assert the error so static analyzers do not warn about
+    // awaiting non-Promise types on the `expect(...).rejects` helper.
+    let caughtErr: Error | undefined;
+    try {
+      await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+      throw new Error("Expected dispatchWithPreferences to throw");
+    } catch (err) {
+      if (err instanceof Error) {
+        caughtErr = err;
+      }
+    }
+    expect(caughtErr).toBeDefined();
+    expect(caughtErr?.message).toContain("prefs DB unreachable");
     expect(getByUserIdsSpy).toHaveBeenCalledTimes(1);
     expect(dispatchMultiSpy).not.toHaveBeenCalled();
   });
@@ -183,9 +236,7 @@ describe("dispatchWithPreferences — preferences filtering", () => {
       new Map([
         [
           TEACHER_USER_ID,
-          [
-            prefRow(TEACHER_USER_ID, NotificationChannel.EMAIL, NotificationEventType.CLASS_REMINDER, false),
-          ] as unknown as UserNotificationPreferenceSelectType[],
+          [prefRow(TEACHER_USER_ID, NotificationChannel.EMAIL, NotificationEventType.CLASS_REMINDER, false)],
         ],
       ])
     );
@@ -202,8 +253,8 @@ describe("dispatchWithPreferences — preferences filtering", () => {
     expect(getByUserIdsSpy).toHaveBeenCalledWith([PARENT_USER_ID, TEACHER_USER_ID]);
     expect(dispatchMultiSpy).toHaveBeenCalledTimes(2);
 
-    const firstCallPayloads = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
-    const secondCallPayloads = dispatchMultiSpy.mock.calls[1][0] as CommunicationPayload[];
+    const firstCallPayloads = getDispatchedPayloads(0);
+    const secondCallPayloads = getDispatchedPayloads(1);
     expect(firstCallPayloads).toHaveLength(4);
     expect(secondCallPayloads).toHaveLength(3);
     expect(secondCallPayloads.map(p => p.channel)).not.toContain(NotificationChannel.EMAIL);
@@ -212,55 +263,28 @@ describe("dispatchWithPreferences — preferences filtering", () => {
 
 describe("dispatchWithPreferences — recipient resolution", () => {
   test("stamps `metadata.to` with user.email on email payloads before dispatchMulti", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ email: "parent@test.com" }));
-      }
-      return map;
-    });
-
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+    mockFindSafeByIdsWithUser({ email: "[EMAIL_REDACTED]" });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
     expect(findSafeByIdsSpy).toHaveBeenCalledWith([PARENT_USER_ID]);
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     const emailPayload = dispatched.find(p => p.channel === NotificationChannel.EMAIL);
-    expect(emailPayload?.metadata?.to).toBe("parent@test.com");
+    expect(emailPayload?.metadata?.to).toBe("[EMAIL_REDACTED]");
   });
 
   test("stamps `metadata.to` with user.phone on sms payloads before dispatchMulti", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ phone: "+15555550100" }));
-      }
-      return map;
-    });
+    mockFindSafeByIdsWithUser({ phone: "+[PHONE_REDACTED]" });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
-
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     const smsPayload = dispatched.find(p => p.channel === NotificationChannel.SMS);
-    expect(smsPayload?.metadata?.to).toBe("+15555550100");
+    expect(smsPayload?.metadata?.to).toBe("+[PHONE_REDACTED]");
   });
 
   test("drops email payload when user.email is null (no email payload reaches dispatchMulti)", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ email: null as unknown as string }));
-      }
-      return map;
-    });
+    mockFindSafeByIdsWithUser({ email: null });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
-
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     expect(dispatched.map(p => p.channel)).not.toContain(NotificationChannel.EMAIL);
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+    expect(dispatched.map(p => p.channel).toSorted(compareChannels)).toEqual([
       NotificationChannel.ON_APP,
       NotificationChannel.PUSH,
       NotificationChannel.SMS,
@@ -268,20 +292,11 @@ describe("dispatchWithPreferences — recipient resolution", () => {
   });
 
   test("drops sms payload when user.phone is null", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ phone: null }));
-      }
-      return map;
-    });
+    mockFindSafeByIdsWithUser({ phone: null });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
-
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     expect(dispatched.map(p => p.channel)).not.toContain(NotificationChannel.SMS);
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+    expect(dispatched.map(p => p.channel).toSorted(compareChannels)).toEqual([
       NotificationChannel.EMAIL,
       NotificationChannel.ON_APP,
       NotificationChannel.PUSH,
@@ -294,8 +309,8 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
     await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
 
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
-    expect(dispatched.map(p => p.channel).sort(compareChannels)).toEqual([
+    const dispatched = getDispatchedPayloads();
+    expect(dispatched.map(p => p.channel).toSorted(compareChannels)).toEqual([
       NotificationChannel.ON_APP,
       NotificationChannel.PUSH,
     ]);
@@ -303,18 +318,9 @@ describe("dispatchWithPreferences — recipient resolution", () => {
   });
 
   test("does NOT stamp `to` on on_app or push payloads", async () => {
-    findSafeByIdsSpy.mockImplementation(async (ids: string[]) => {
-      const map = new Map<string, UserSelectType | null>();
-      for (const id of ids) {
-        map.set(id, mockUser({ email: "parent@test.com", phone: "+15555550100" }));
-      }
-      return map;
-    });
+    mockFindSafeByIdsWithUser({ email: "[EMAIL_REDACTED]", phone: "+[PHONE_REDACTED]" });
+    const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
-    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
-    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
-
-    const dispatched = dispatchMultiSpy.mock.calls[0][0] as CommunicationPayload[];
     const onAppPayload = dispatched.find(p => p.channel === NotificationChannel.ON_APP);
     const pushPayload = dispatched.find(p => p.channel === NotificationChannel.PUSH);
     expect(onAppPayload?.metadata?.to).toBeUndefined();

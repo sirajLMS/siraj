@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { demoLoginMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAuth } from "@/frontend/common/hooks/useAuth";
 import { useAuthToken } from "@/frontend/common/hooks/useAuthToken";
-import logger from "@/frontend/common/lib/logger";
+import { logger } from "@/frontend/common/lib/logger";
 import { isSafeRedirect, LOGIN_REDIRECT_PARAM } from "@/frontend/common/lib/safeRedirect";
 import type { LoginFormData } from "@/frontend/views/auth/login/schemas/loginSchema";
 import { Translation, useAppTranslation } from "@/shared/locale";

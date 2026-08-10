@@ -29,16 +29,10 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { SessionConfigRepository } from "@/backend/db/repo";
 import { AppPermission } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type {
-  AuditAction,
-  AuditEntityType,
-  CreateAuditLogInput,
-  SessionConfigSelectType,
-  SessionConfigUpsertInput,
-} from "@/backend/types";
+import type { CreateAuditLogInput, SessionConfigSelectType, SessionConfigUpsertInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Minimum allowed session TTL, in seconds (1 minute). */
@@ -109,23 +103,16 @@ async function emitAudit(
   const input: CreateAuditLogInput = {
     actorUserId,
     actorType: "USER",
-    // `SESSION_CONFIG` / `UPSERT` are not yet members of the canonical unions;
-    // cast keeps the runtime payload the task spec requires while the types
-    // file is extended in a follow-up (mirrors `SiteContentService.emitAudit`).
-    entityType: "SESSION_CONFIG" as AuditEntityType,
+    entityType: "SESSION_CONFIG",
     entityId: roleName,
-    action: action as AuditAction,
+    action,
     description: `Session config '${roleName}' ${action.toLowerCase()}`,
   };
 
   try {
     await AuditService.createManyAuditLogs([input], tx);
   } catch (error) {
-    logger.error(
-      `session-config-service: audit log failed for ${action} on "${roleName}". ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+    logger.error(`session-config-service: audit log failed for ${action} on "${roleName}". ${String(error)}`);
   }
 }
 

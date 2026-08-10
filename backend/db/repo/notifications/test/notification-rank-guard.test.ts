@@ -9,8 +9,8 @@ import { runInRollback } from "@/backend/db/test/test-utils";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 
 function notificationTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
-  // eslint-disable-next-line sonarjs/assertions-in-tests -- assertions are inside runInRollback(fn)
   test(name, async () => {
+    expect(fn).toBeDefined();
     await runInRollback(fn);
   });
 }
@@ -51,6 +51,85 @@ async function insertDeliveryWithStatus(
     })
     .returning();
   return row;
+}
+
+/** Input payload for the INSERT-path webhook (creates a new row). */
+interface InsertPayload {
+  providerMessageId: string;
+  status: NotificationDeliveryStatus;
+  userId: string;
+  channel: NotificationChannel;
+  eventType: NotificationEventType;
+}
+
+/** Input payload for the UPDATE-path webhook (updates an existing row). */
+interface UpdatePayload {
+  providerMessageId: string;
+  status: NotificationDeliveryStatus;
+  failureReason?: string;
+}
+
+/**
+ * Run a single-transition rank-guard test: insert a row at `from` status,
+ * send a webhook for `to` status, and assert the result status.
+ * Uses the UPDATE branch of handleDeliveryWebhook.
+ */
+async function assertSingleTransition(
+  tx: DBTransaction,
+  prefix: string,
+  from: NotificationDeliveryStatus,
+  to: NotificationDeliveryStatus,
+  failureReason?: string
+) {
+  const user = await makeUser(tx, prefix);
+  const pmi = `${prefix.toLowerCase()}-${randomUUID()}`;
+  const existing = await insertDeliveryWithStatus(tx, user.id, pmi, from);
+  expect(existing.status).toBe(from);
+
+  const payload: UpdatePayload = { providerMessageId: pmi, status: to };
+  if (failureReason !== undefined) {
+    payload.failureReason = failureReason;
+  }
+
+  const result = await NotificationRepository.handleDeliveryWebhook(payload, tx);
+  expect(result).not.toBeNull();
+  expect(result?.status).toBe(to);
+  return { result, existing, pmi };
+}
+
+/**
+ * Run a two-sequential-webhook test: first webhook creates a row at
+ * `firstStatus` via the INSERT path, second webhook transitions to
+ * `secondStatus` via the UPDATE path, asserting the expected final status.
+ * If `expectUnchanged` is true, the second webhook should be rejected and
+ * the row stays at `firstStatus`.
+ */
+async function assertSequentialWebhooks(
+  tx: DBTransaction,
+  prefix: string,
+  firstStatus: NotificationDeliveryStatus,
+  secondStatus: NotificationDeliveryStatus,
+  expectedFinalStatus: NotificationDeliveryStatus
+) {
+  const user = await makeUser(tx, prefix);
+  const pmi = `${prefix.toLowerCase()}-${randomUUID()}`;
+
+  const insertPayload: InsertPayload = {
+    providerMessageId: pmi,
+    status: firstStatus,
+    userId: user.id,
+    channel: BASE_INPUT.channel,
+    eventType: BASE_INPUT.eventType,
+  };
+  const first = await NotificationRepository.handleDeliveryWebhook(insertPayload, tx);
+  expect(first).not.toBeNull();
+  expect(first?.status).toBe(firstStatus);
+
+  const updatePayload: UpdatePayload = { providerMessageId: pmi, status: secondStatus };
+  const second = await NotificationRepository.handleDeliveryWebhook(updatePayload, tx);
+  expect(second).not.toBeNull();
+  expect(second?.status).toBe(expectedFinalStatus);
+  return { first, second, pmi };
 }
 
 describe("NotificationRepository — handleDeliveryWebhook rank guard", () => {
@@ -120,57 +199,23 @@ describe("NotificationRepository — handleDeliveryWebhook rank guard", () => {
   });
 
   notificationTest("two sequential webhooks: first creates SENT, second upgrades to DELIVERED", async tx => {
-    const user = await makeUser(tx, "RgSeq");
-    const pmi = `rgseq-${randomUUID()}`;
-
-    // First webhook — row doesn't exist, INSERT path creates it with SENT.
-    const first = await NotificationRepository.handleDeliveryWebhook(
-      {
-        providerMessageId: pmi,
-        status: NotificationDeliveryStatus.SENT,
-        userId: user.id,
-        channel: BASE_INPUT.channel,
-        eventType: BASE_INPUT.eventType,
-      },
-      tx
+    await assertSequentialWebhooks(
+      tx,
+      "RgSeq",
+      NotificationDeliveryStatus.SENT,
+      NotificationDeliveryStatus.DELIVERED,
+      NotificationDeliveryStatus.DELIVERED
     );
-    expect(first).not.toBeNull();
-    expect(first?.status).toBe(NotificationDeliveryStatus.SENT);
-
-    // Second webhook — row exists, UPDATE branch upgrades to DELIVERED.
-    const second = await NotificationRepository.handleDeliveryWebhook(
-      { providerMessageId: pmi, status: NotificationDeliveryStatus.DELIVERED },
-      tx
-    );
-    expect(second).not.toBeNull();
-    expect(second?.status).toBe(NotificationDeliveryStatus.DELIVERED);
   });
 
   notificationTest("two sequential webhooks: first creates DELIVERED, second downgrade to SENT rejected", async tx => {
-    const user = await makeUser(tx, "RgSeqDn");
-    const pmi = `rgseqdn-${randomUUID()}`;
-
-    // First webhook — creates row with DELIVERED.
-    const first = await NotificationRepository.handleDeliveryWebhook(
-      {
-        providerMessageId: pmi,
-        status: NotificationDeliveryStatus.DELIVERED,
-        userId: user.id,
-        channel: BASE_INPUT.channel,
-        eventType: BASE_INPUT.eventType,
-      },
-      tx
+    await assertSequentialWebhooks(
+      tx,
+      "RgSeqDn",
+      NotificationDeliveryStatus.DELIVERED,
+      NotificationDeliveryStatus.SENT,
+      NotificationDeliveryStatus.DELIVERED
     );
-    expect(first).not.toBeNull();
-    expect(first?.status).toBe(NotificationDeliveryStatus.DELIVERED);
-
-    // Second webhook — downgrade to SENT is rejected, row stays DELIVERED.
-    const second = await NotificationRepository.handleDeliveryWebhook(
-      { providerMessageId: pmi, status: NotificationDeliveryStatus.SENT },
-      tx
-    );
-    expect(second).not.toBeNull();
-    expect(second?.status).toBe(NotificationDeliveryStatus.DELIVERED);
   });
 
   notificationTest("graceful skip: returns null when row not found and required fields are missing", async tx => {
@@ -294,113 +339,39 @@ describe("NotificationRepository — handleDeliveryWebhook rank guard", () => {
   });
 
   notificationTest("r10-058: OPENED (read) rank relative to DELIVERED — DELIVERED→OPENED succeeds", async tx => {
-    const user = await makeUser(tx, "RgOpened");
-    const pmi = `rgopened-${randomUUID()}`;
-
-    // Start at DELIVERED (rank 2)
-    const existing = await insertDeliveryWithStatus(tx, user.id, pmi, NotificationDeliveryStatus.DELIVERED);
-    expect(existing.status).toBe(NotificationDeliveryStatus.DELIVERED);
-
-    // DELIVERED → OPENED: rank 3 > 2, should succeed
-    const result = await NotificationRepository.handleDeliveryWebhook(
-      { providerMessageId: pmi, status: NotificationDeliveryStatus.OPENED },
-      tx
+    await assertSingleTransition(
+      tx,
+      "RgOpened",
+      NotificationDeliveryStatus.DELIVERED,
+      NotificationDeliveryStatus.OPENED
     );
-
-    expect(result).not.toBeNull();
-    expect(result?.status).toBe(NotificationDeliveryStatus.OPENED);
   });
 
   notificationTest("r10-058: idempotent same-rank status (DELIVERED→DELIVERED) is a no-op", async tx => {
-    const user = await makeUser(tx, "RgIdem");
-    const pmi = `rgidem-${randomUUID()}`;
-
-    // Start at DELIVERED
-    const existing = await insertDeliveryWithStatus(tx, user.id, pmi, NotificationDeliveryStatus.DELIVERED);
-    expect(existing.status).toBe(NotificationDeliveryStatus.DELIVERED);
-
-    // Same-status webhook — no-op, return current row unchanged
-    const result = await NotificationRepository.handleDeliveryWebhook(
-      { providerMessageId: pmi, status: NotificationDeliveryStatus.DELIVERED },
-      tx
+    const { result, existing } = await assertSingleTransition(
+      tx,
+      "RgIdem",
+      NotificationDeliveryStatus.DELIVERED,
+      NotificationDeliveryStatus.DELIVERED
     );
-
-    expect(result).not.toBeNull();
-    expect(result?.status).toBe(NotificationDeliveryStatus.DELIVERED);
     expect(result?.id).toBe(existing.id);
   });
 
   notificationTest("r10-058: FAILED→SENT resurrection is allowed (rank 1 > -1)", async tx => {
-    const user = await makeUser(tx, "RgResurrect");
-    const pmi = `rgresurrect-${randomUUID()}`;
-
-    // Start at FAILED
-    const existing = await insertDeliveryWithStatus(tx, user.id, pmi, NotificationDeliveryStatus.FAILED);
-    expect(existing.status).toBe(NotificationDeliveryStatus.FAILED);
-
-    // FAILED → SENT: currentRank=-1, nextRank=1 > 0 → allowed (resurrection)
-    const result = await NotificationRepository.handleDeliveryWebhook(
-      { providerMessageId: pmi, status: NotificationDeliveryStatus.SENT },
-      tx
-    );
-
-    expect(result).not.toBeNull();
-    expect(result?.status).toBe(NotificationDeliveryStatus.SENT);
+    await assertSingleTransition(tx, "RgResurrect", NotificationDeliveryStatus.FAILED, NotificationDeliveryStatus.SENT);
   });
 
   // r10-059: Additional transition coverage
 
   notificationTest("r10-059: PENDING→SENT transition succeeds (rank 1 > 0)", async tx => {
-    const user = await makeUser(tx, "RgPs");
-    const pmi = `rgps-${randomUUID()}`;
-
-    // Start at PENDING (rank 0)
-    const existing = await insertDeliveryWithStatus(tx, user.id, pmi, NotificationDeliveryStatus.PENDING);
-    expect(existing.status).toBe(NotificationDeliveryStatus.PENDING);
-
-    // PENDING → SENT: rank 1 > 0, should succeed
-    const result = await NotificationRepository.handleDeliveryWebhook(
-      { providerMessageId: pmi, status: NotificationDeliveryStatus.SENT },
-      tx
-    );
-
-    expect(result).not.toBeNull();
-    expect(result?.status).toBe(NotificationDeliveryStatus.SENT);
+    await assertSingleTransition(tx, "RgPs", NotificationDeliveryStatus.PENDING, NotificationDeliveryStatus.SENT);
   });
 
   notificationTest("r10-059: SENT→OPENED transition succeeds (rank 3 > 1)", async tx => {
-    const user = await makeUser(tx, "RgSo");
-    const pmi = `rgso-${randomUUID()}`;
-
-    // Start at SENT (rank 1)
-    const existing = await insertDeliveryWithStatus(tx, user.id, pmi, NotificationDeliveryStatus.SENT);
-    expect(existing.status).toBe(NotificationDeliveryStatus.SENT);
-
-    // SENT → OPENED: rank 3 > 1, should succeed
-    const result = await NotificationRepository.handleDeliveryWebhook(
-      { providerMessageId: pmi, status: NotificationDeliveryStatus.OPENED },
-      tx
-    );
-
-    expect(result).not.toBeNull();
-    expect(result?.status).toBe(NotificationDeliveryStatus.OPENED);
+    await assertSingleTransition(tx, "RgSo", NotificationDeliveryStatus.SENT, NotificationDeliveryStatus.OPENED);
   });
 
   notificationTest("r10-059: DELIVERED→OPENED transition succeeds (rank 3 > 2)", async tx => {
-    const user = await makeUser(tx, "RgDo");
-    const pmi = `rgdo-${randomUUID()}`;
-
-    // Start at DELIVERED (rank 2)
-    const existing = await insertDeliveryWithStatus(tx, user.id, pmi, NotificationDeliveryStatus.DELIVERED);
-    expect(existing.status).toBe(NotificationDeliveryStatus.DELIVERED);
-
-    // DELIVERED → OPENED: rank 3 > 2, should succeed
-    const result = await NotificationRepository.handleDeliveryWebhook(
-      { providerMessageId: pmi, status: NotificationDeliveryStatus.OPENED },
-      tx
-    );
-
-    expect(result).not.toBeNull();
-    expect(result?.status).toBe(NotificationDeliveryStatus.OPENED);
+    await assertSingleTransition(tx, "RgDo", NotificationDeliveryStatus.DELIVERED, NotificationDeliveryStatus.OPENED);
   });
 });

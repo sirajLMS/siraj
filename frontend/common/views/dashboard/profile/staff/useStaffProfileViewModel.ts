@@ -4,7 +4,6 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import {
   type CurrencyCode,
-  type IanaTimezone,
   type ProfileMode,
   ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -14,6 +13,7 @@ import {
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   StaffProfileData,
@@ -27,8 +27,28 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
 
-function buildEditSource(_scope: ProfileScope, profile: ProfileData): StaffProfileData | null {
+const EMPTY_STAFF_DATA: StaffProfileData = {
+  id: null,
+  userId: null,
+  staffProfileId: null,
+  name: null,
+  email: null,
+  avatarUrl: null,
+  phone: null,
+  status: null,
+  roleSlug: null,
+  roleName: null,
+  hourlyRate: null,
+  rateCurrency: null,
+  displayAmount: null,
+};
+
+function buildEditSource(_scope: ProfileScope, profile: ProfileData | null | undefined): StaffProfileData | null {
   return profile?.staffProfile ?? null;
+}
+
+function onTabChange(_tab: string): void {
+  // Tab routing is owned by the profile shell / URL.
 }
 
 export interface StaffProfileViewModel {
@@ -82,7 +102,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
   const [updateUserProfile] = useMutation(updateUserProfileMutationDocument);
 
   const profile = data?.profileByUserId;
-  const staffData = buildEditSource(scope, profile ?? ({} as ProfileData));
+  const staffData = buildEditSource(scope, profile);
   const avatarUrl = profile?.avatarUrl ?? staffData?.avatarUrl;
   const displayCurrency = profile?.displayCurrency;
   const profileTimezone = profile?.timezone ?? null;
@@ -99,7 +119,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
               email: formData.email,
               avatarUrl: formData.avatarUrl,
               displayCurrency: formData.displayCurrency,
-              timezone: (formData.timezone || null) as IanaTimezone | null,
+              timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
             },
             staff: {
               phone: formData.phone || null,
@@ -128,7 +148,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
               email: formData.email,
               avatarUrl: formData.avatarUrl,
               displayCurrency: formData.displayCurrency,
-              timezone: (formData.timezone || null) as IanaTimezone | null,
+              timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
             },
             staff: {
               phone: formData.phone || null,
@@ -148,15 +168,11 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
     }
   };
 
-  const onTabChange = (_tab: string) => {
-    // Tab routing is owned by the profile shell / URL.
-  };
-
   const canView = useMemo(() => (_field: string) => true, []);
 
   return {
     labels,
-    staffData: staffData as StaffProfileData,
+    staffData: staffData ?? EMPTY_STAFF_DATA,
     avatarUrl,
     displayCurrency,
     profileTimezone,

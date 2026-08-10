@@ -39,18 +39,22 @@ export namespace LeaveRequestRepository {
     const existingByClass = new Map(existing.map(r => [r.classInstanceId, r]));
     const results: LeaveRequestRow[] = [...existing];
 
-    for (const input of inputs) {
+    const processNext = async (index: number): Promise<void> => {
+      if (index >= inputs.length) return;
+      const input = inputs[index];
       const found = existingByClass.get(input.classInstanceId);
       if (found) {
         if (!results.some(r => r.id === found.id)) results.push(found);
-        continue;
+        return processNext(index + 1);
       }
       const [row] = await executor.insert(leaveRequests).values(input).returning();
       if (row) {
         results.push(row);
         existingByClass.set(input.classInstanceId, row);
       }
-    }
+      return processNext(index + 1);
+    };
+    await processNext(0);
     return results;
   }
 

@@ -29,24 +29,31 @@ const METRIC_DEFINITIONS = [
   { key: "on_trial" as const, icon: TimerOutlined },
 ];
 
+type StudentMetricKey = keyof StudentDirectoryLabels["metrics"];
+
+const STUDENT_STATUS_VALUES: readonly string[] = Object.values(StudentStatus);
+
+function isStudentStatus(value: string): value is StudentStatus {
+  return STUDENT_STATUS_VALUES.includes(value);
+}
+
 export function mapStudentAccountStatus(status: string | null | undefined): StudentAccountStatus {
   if (!status) return "regular";
-  const enumValue = Object.values(StudentStatus).find(v => v === status.toUpperCase());
-  if (enumValue) {
-    return STUDENT_STATUS_TO_ACCOUNT_STATUS[enumValue] ?? "regular";
-  }
-  return "regular";
+  const upper = status.toUpperCase();
+  if (!isStudentStatus(upper)) return "regular";
+  return STUDENT_STATUS_TO_ACCOUNT_STATUS[upper] ?? "regular";
 }
 
 function getEnrollmentStatus(status: string | null | undefined): StudentEnrollmentStatus {
   if (!status) return EnrollmentEnum.REGULAR;
-  const s = status.toUpperCase();
-  if (s === StudentStatus.Deactivated) return EnrollmentEnum.WITHDRAWN;
-  if (s === StudentStatus.OnTrial) return EnrollmentEnum.PROSPECT;
+  const upper = status.toUpperCase();
+  if (!isStudentStatus(upper)) return EnrollmentEnum.REGULAR;
+  if (upper === StudentStatus.Deactivated) return EnrollmentEnum.WITHDRAWN;
+  if (upper === StudentStatus.OnTrial) return EnrollmentEnum.PROSPECT;
   return EnrollmentEnum.REGULAR;
 }
 
-function getMetricTranslationKey(key: string): string {
+function getMetricTranslationKey(key: StudentAccountStatus): StudentMetricKey {
   if (key === "on_leave") return "onLeave";
   if (key === "on_trial") return "onTrial";
   return key;
@@ -88,10 +95,13 @@ export function buildStatusCounts(rows: StudentDirectoryRowExtended[]): Record<S
   return res;
 }
 
-type StudentMetricKey = keyof StudentDirectoryLabels["metrics"];
-
-function toMetricItem(key: string, count: number, icon: SvgIconComponent, t: StudentDirectoryLabels): MetricItem {
-  const metricKey = getMetricTranslationKey(key) as StudentMetricKey;
+function toMetricItem(
+  key: StudentAccountStatus,
+  count: number,
+  icon: SvgIconComponent,
+  t: StudentDirectoryLabels
+): MetricItem {
+  const metricKey = getMetricTranslationKey(key);
   return {
     key,
     count,

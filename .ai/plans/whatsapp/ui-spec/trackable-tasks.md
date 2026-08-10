@@ -16,7 +16,7 @@
 ## Non-Negotiable Execution Protocol for All Tasks
 
 1. **Pre-Execution Outcome Knowledge Read**: Before executing ANY task, read ALL existing files in `.ai/plans/whatsapp/ui-spec/outcome/` to absorb prior research.
-2. **Per-File Quality Verification Loop**: After modifying any file, run `bun tsgo` + `bun biome:check` + lint queue for that file BEFORE moving to another file.
+2. **Per-File Quality Verification Loop**: After modifying any file, run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on that file BEFORE moving to another file. The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in strict progressive order, short-circuiting at the first failure.
 3. **Global Health Check (Completion Gate)**: Before marking any subtask as complete, run `bun tsgo`, `bun biome:check`, and `bun run lint` globally. All MUST exit with zero errors.
 4. **Post-Execution Outcome File Creation**: Upon completing a task, write `.ai/plans/whatsapp/ui-spec/outcome/<task-id>-outcome.md`.
 5. **Task Progress Tracking**: Update task checkbox `[ ]` -> `[x]` in this file upon completion.
@@ -26,10 +26,9 @@
 ### Quality Loop Subtask (X.Y.QL)
 ```markdown
 - [ ] X.Y.QL **Quality Loop**: Per-file verification on modified files
-  - Run: `bun tsgo`
-  - Run: `bun biome:check`
-  - Run: lint queue for target file
-  - Fix all errors before proceeding
+  - Run: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file
+  - The sub-loop runs tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in strict order, short-circuiting at first failure
+  - Fix all errors before proceeding to the next file
 ```
 
 ### Instruction Verification Subtask (X.Y.IV)
@@ -84,7 +83,7 @@
   - Create `frontend/common/views/dashboard/settings/whatsapp/whatsappTierLabel.ts` — maps tier enum → i18n key
   - Create `frontend/common/views/dashboard/settings/whatsapp/whatsappTemplateStatusLabels.ts` — maps template status → i18n key
   - Verify: `grep -E "tier100K|tier250K|tier1M|qualityOrange" shared/locale/en/whatsapp/index.ts shared/locale/ar/whatsapp/index.ts shared/locale/types/whatsapp/index.ts` returns matches for all 4 keys in each file
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/shared/AGENTS.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/1-i18n-foundations-outcome.md`
@@ -96,7 +95,7 @@
   - Create `frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation.ts` — validates displayName, phoneNumberId, wabaId, accessToken, twoStepPin
   - Activate dead types in `types/whatsappSettingsTypes.ts` — wire `WhatsappAccountFormValues`, `ApiFormValues`, `CredentialFormValues` to actual form usage
   - Create unit tests for validation functions in `test/ui/components/whatsappFormValidation.test.ts`
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/tests.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`, `bun run test:ui:components`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/2-form-validation-outcome.md`
@@ -111,7 +110,7 @@
   - Run `bun run generate:gqlSchema` and `bun codegen` to generate types
   - Create `frontend/common/views/dashboard/settings/whatsapp/whatsappTabUrl.ts` — `useWhatsappTab` hook resolving tab from URL searchParams, with allowlist validation and router.replace
   - Add `TAB_PERMISSIONS` mapping to `whatsappConfig.constants.ts` — maps each tab ID to required permission
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/graphql/sharedDocuments/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/common/graphql/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/3-graphql-tab-url-outcome.md`
@@ -124,7 +123,7 @@
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Create `app/(dashboard)/settings/whatsapp/loading.tsx` — skeleton loader using PageContainer + tab skeleton
   - Create `app/(dashboard)/settings/whatsapp/error.tsx` — "use client" error boundary with retry button, theme palette, i18n labels
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/app/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/4-route-boundaries-outcome.md`
@@ -138,7 +137,7 @@
   - Create `WhatsappTabPanels.tsx` — per-tab Suspense + RequirePermission wrapper, lazy-loads each tab content
   - Modify `WhatsappConfigLayout.tsx` — delegate tab rendering to WhatsappTabPanels (or repurpose as skeleton provider)
   - Remove or repurpose `whatsappConfig.desktop.tsx` and `whatsappConfig.mobile.tsx` (platform views replaced by client-side tab URL sync architecture)
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/mobile-desktop.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/5-url-synced-tabs-outcome.md`
@@ -156,7 +155,7 @@
   - Add `mutationError` state for inline error display
   - Refactor snackbar to use `{ message, severity }` pattern (compatible with FormSuccessSnackbar/FormErrorSnackbar)
   - Expose `refetchTemplates` for manual refresh
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each modified file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/common/graphql/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/6-viewmodel-enhancement-outcome.md`
@@ -171,7 +170,7 @@
   - Replace inline `Chip` + `statusChipColor` in `tabs/shared/TemplatesTabContent.tsx` with `StatusBadge`
   - Update `tabs/shared/statusChipColor.ts` to add PAUSED, PENDING_DELETION, DISABLED cases (currently only handles template statuses: APPROVED/PENDING/REJECTED — these additional statuses are also template-level) (or deprecate in favor of whatsappStatusBadge config)
   - Note: Label wiring (replacing raw enum values with `t` property access) happens in Task 11 (Phase 3). Until then, Badge components will render with raw enum values — this is a known transient state between Phase 2 and Phase 3.
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/common/components/ui/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/7-shared-components-outcome.md`
@@ -188,7 +187,7 @@
   - Wire "Edit Name" menu item to both desktop and mobile NumbersTab variants
   - On success: close dialog + success snackbar + refetch accounts
   - On error: keep dialog open + error snackbar + inline mutationError
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/8-create-edit-dialogs-outcome.md`
@@ -202,7 +201,7 @@
   - Replace raw status enum with localized label via `whatsappTemplateStatusLabels` helper
   - Add "Sync Templates" call-to-action button in empty state (when no templates exist)
   - Add error state with retry button when templates query fails
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/9-templates-persistence-outcome.md`
@@ -215,7 +214,7 @@
   - Wire per-row `LinearProgress` (desktop) or skeleton overlay (mobile) using `deletingId` from ViewModel
   - Wire per-row sync icon spinner using `syncingId` from ViewModel (NEW state — current ViewModel only has boolean `syncing`)
   - Pass `displayName` from ViewModel `dialogState` to `DeleteConfirmDialog`
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/10-delete-confirm-loading-outcome.md`
@@ -232,7 +231,7 @@
   - Wire `throughput24h` label as throughput metric label
   - Wire delivery failure keys to notification error display (if applicable in UI)
   - Wire `permissionDenied` label to RequirePermission fallback
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/shared/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Verify: `grep -rE "\{.*\.(qualityRating|portfolioMessagingLimitTier|throughputLevel|status)\}" --include="*.tsx" frontend/common/views/dashboard/settings/whatsapp/` returns 0 results (audit for raw enum interpolation leaks)
@@ -249,7 +248,7 @@
   - Add date range filter (desktop: FilterButton with date pickers; mobile: simple date filter)
   - Add CSV export for selected entries (desktop: ExportButton; mobile: export button)
   - Add empty state when no audit entries exist
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/12-optin-history-outcome.md`
@@ -263,7 +262,7 @@
   - Mobile: MobileCardList with cards per user
   - Add search filter (by user name)
   - Add admin bulk actions (if applicable per requirements)
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/13-admin-optin-view-outcome.md`
@@ -282,7 +281,7 @@
   - Wire EditNameDialog to mobile
   - Add "Add Account" button on mobile
   - Add per-row loading: skeleton overlay on affected card
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/desktop/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/mobile/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/mobile-desktop.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/14-mobile-crud-outcome.md`
@@ -295,7 +294,7 @@
   - Replace raw status with localized labels (via `whatsappTemplateStatusLabels`)
   - Modify `tabs/OptInTab.mobile.tsx`: add non-admin history as MobileCardList with date filter
   - Modify `tabs/OptInTab.mobile.tsx`: add admin consolidated list view (MobileCardList)
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/desktop/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/mobile/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/mobile-desktop.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/15-mobile-templates-optin-outcome.md`
@@ -314,7 +313,7 @@
   - Verify dialogs use MUI Dialog default transition (fade + scale)
   - Verify snackbars use MUI Snackbar default slide transition
   - Ensure RTL: animations respect RTL direction (slide direction reversed for Arabic locale)
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/16-animations-outcome.md`
@@ -329,7 +328,7 @@
   - Add `aria-label` to icon-only buttons (sync, delete, edit menu)
   - Replace `RequirePermission` `fallback={null}` with actual "Permission Denied" UI (Typography + icon)
   - Add `role="alert"` to error states and `role="status"` to loading skeletons
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for each file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/frontend/common/views/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/frontend/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/frontend.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/17-accessibility-outcome.md`
@@ -352,7 +351,7 @@
     - Snackbar close behavior
     - Opt-in toggle loading state
   - Note: Since `renderHook` is unavailable in `bun:test`, use a consumer-component pattern (render a small component that calls the hook and returns results) for ViewModel hook tests.
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for test file
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each test file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/test/ui/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/tests.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`, `bun run test:ui:components`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/18-viewmodel-tests-outcome.md`
@@ -371,7 +370,7 @@
   - Create `test/ui/components/whatsappUrlTabNav.test.tsx`: tab deep-linking, invalid tab fallback
   - **Note**: Use `renderWithWrapper` from `test/ui/components/TestWrapper.tsx` with mocked Apollo `MockLink` responses for all component tests (per `test/ui/AGENTS.md`).
   - **Note**: All tests use `bun:test` imports and Happy DOM environment (NOT Vitest). Run via `bun run test:ui:components`.
-  - **Quality Loop**: `bun tsgo`, `bun biome:check`, lint queue for test files
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each test file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/test/ui/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/tests.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`, `bun run test:ui:components`
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/19-component-tests-outcome.md`
@@ -390,6 +389,7 @@
   - Update `.agents/instructions/frontend.instructions.md` if new conventions should be enforced
   - Update `.agents/instructions/mobile-desktop.instructions.md` if mobile/desktop patterns changed
   - Update root `AGENTS.md` Important References section with the new doc
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
   - Write outcome file: `.ai/plans/whatsapp/ui-spec/outcome/20-knowledge-propagation-outcome.md`
   - Update progress: Mark task 20 as `[x]`

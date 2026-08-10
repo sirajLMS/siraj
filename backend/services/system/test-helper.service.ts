@@ -74,9 +74,7 @@ export namespace TestHelperService {
 
   async function ensureTestStorageForGraphql(): Promise<void> {
     const fileSeeder = await createFileSeedingService();
-    for (const directory of TEST_STORAGE_DIRECTORIES) {
-      await fileSeeder.ensureDirectory(directory, true);
-    }
+    await Promise.all(TEST_STORAGE_DIRECTORIES.map(directory => fileSeeder.ensureDirectory(directory, true)));
     const tErrors = getServerTranslations("en").errorsTranslations;
     const handbookPdf = Buffer.from("%PDF-1.4\n% test parent handbook\n");
     await SystemSettingsService.uploadParentHandbook(null, "parent-handbook.pdf", handbookPdf, tErrors);
@@ -91,8 +89,8 @@ export namespace TestHelperService {
 
     const groups = await ReferenceDataService.listPermissionGroups();
     const groupMap = new Map(groups.map(group => [group.slug, group.id]));
-    const users = await UserSeedService.upsertManyDemoUsers(INTERNAL_DEMO_USERS.map(toDemoUserInput), groupMap);
-    const userByEmail = new Map(users.map(user => [user.email, user]));
+    const demoUsers = await UserSeedService.upsertManyDemoUsers(INTERNAL_DEMO_USERS.map(toDemoUserInput), groupMap);
+    const userByEmail = new Map(demoUsers.map(user => [user.email, user]));
 
     const teacherUser = userByEmail.get("teacher@siraj.local");
     if (teacherUser) {
@@ -138,7 +136,7 @@ export namespace TestHelperService {
     await ensureTestStorageForGraphql();
 
     logger.info("Demo users ensured for GraphQL integration tests", {
-      userCount: users.length,
+      userCount: demoUsers.length,
     });
     return true;
   }
@@ -322,8 +320,7 @@ export namespace TestHelperService {
     assertTestHelperAllowed();
 
     const now = new Date();
-    // eslint-disable-next-line sonarjs/no-hardcoded-passwords
-    const plainPassword = "Test_Pass1!";
+    const plainPassword = DEFAULT_SEED_ADMIN_PASSWORD;
     const hashedPassword = await hashPassword(plainPassword);
 
     return await db.transaction(async tx => {
@@ -469,8 +466,7 @@ export namespace TestHelperService {
 
     const now = new Date();
     const email = `${prefix}-sa-${randomUUID().slice(0, 8)}@example.com`;
-    // eslint-disable-next-line sonarjs/no-hardcoded-passwords
-    const plainPassword = "Test_Pass1!";
+    const plainPassword = DEFAULT_SEED_ADMIN_PASSWORD;
     const hashedPassword = await hashPassword(plainPassword);
 
     const [userRow] = await db

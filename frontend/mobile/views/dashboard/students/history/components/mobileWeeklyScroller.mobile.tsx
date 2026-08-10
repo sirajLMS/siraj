@@ -6,8 +6,10 @@ import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphq
 import type { ClassSession, MobileWeeklyScrollerProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 
+type CalendarDayKey = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
+
 interface WeekDayData {
-  readonly dayKey: string;
+  readonly dayKey: CalendarDayKey;
   readonly dayOfMonth: number;
   readonly displayDate: number;
   readonly hasSession: boolean;
@@ -15,12 +17,29 @@ interface WeekDayData {
   readonly status: AttendanceStatus | null;
 }
 
+function isCalendarDayKey(value: string): value is CalendarDayKey {
+  return (
+    value === "sun" ||
+    value === "mon" ||
+    value === "tue" ||
+    value === "wed" ||
+    value === "thu" ||
+    value === "fri" ||
+    value === "sat"
+  );
+}
+
+const defaultDotColor = (theme: import("@mui/material/styles").Theme): string => theme.palette.primary.main;
+const selectedDotColor = (theme: import("@mui/material/styles").Theme): string => theme.palette.onPrimaryContainer;
+const absentDotColor = (theme: import("@mui/material/styles").Theme): string => theme.palette.error.main;
+const lateDotColor = (theme: import("@mui/material/styles").Theme): string => theme.palette.warning.main;
+
 function computeWeekDays(
   currentMonth: Date,
   selectedWeek: number,
   classes: Readonly<Partial<Record<number, ClassSession>>>
 ): WeekDayData[] {
-  const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+  const dayKeys: readonly CalendarDayKey[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
 
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
@@ -112,14 +131,13 @@ export function MobileWeeklyScroller({
         {weekDays.map(d => {
           const isSelected = d.isInMonth && d.dayOfMonth === selectedDay && d.hasSession;
 
-          let dotColor: string | ((theme: import("@mui/material/styles").Theme) => string) = theme =>
-            theme.palette.primary.main;
+          let dotColor: (theme: import("@mui/material/styles").Theme) => string = defaultDotColor;
           if (isSelected) {
-            dotColor = theme => theme.palette.onPrimaryContainer;
+            dotColor = selectedDotColor;
           } else if (d.status === AttendanceStatus.Absent) {
-            dotColor = theme => theme.palette.error.main;
+            dotColor = absentDotColor;
           } else if (d.status === AttendanceStatus.Late) {
-            dotColor = theme => theme.palette.warning.main;
+            dotColor = lateDotColor;
           }
 
           return (
@@ -153,7 +171,7 @@ export function MobileWeeklyScroller({
                 variant="labelMd"
                 sx={theme => ({ color: isSelected ? "inherit" : theme.palette.onSurfaceVariant, mb: 0.5 })}
               >
-                {t.days[d.dayKey as keyof typeof t.days]}
+                {isCalendarDayKey(d.dayKey) ? t.days[d.dayKey] : d.dayKey}
               </Typography>
               <Typography variant="titleLg">{d.displayDate}</Typography>
               {d.hasSession && (
@@ -162,7 +180,7 @@ export function MobileWeeklyScroller({
                     width: 6,
                     height: 6,
                     borderRadius: "full",
-                    backgroundColor: typeof dotColor === "function" ? dotColor(theme) : dotColor,
+                    backgroundColor: dotColor(theme),
                     mt: 0.5,
                   })}
                 />

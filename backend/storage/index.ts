@@ -1,4 +1,3 @@
-export type { StorageService } from "@/backend/storage/disk/storage.service.interface";
 export * from "@/backend/storage/disk/storage.service.interface";
 export {
   getStorageService,

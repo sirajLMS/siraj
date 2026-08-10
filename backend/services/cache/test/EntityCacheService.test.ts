@@ -154,7 +154,7 @@ describe("EntityCacheService Unit Tests", () => {
     await invalidateTag("user:1");
 
     expect(pipelineCalls.length).toBeGreaterThan(0);
-    const lastPipeline = pipelineCalls[pipelineCalls.length - 1];
+    const lastPipeline = pipelineCalls.at(-1);
     expect(lastPipeline).toEqual([
       { command: "del", args: ["ec:user:1:roleA", "ec:user:1:roleB"] },
       { command: "del", args: ["tag:user:1"] },
@@ -168,15 +168,14 @@ describe("EntityCacheService Unit Tests", () => {
   it("invalidateTag handles malformed tag index cleanly without throwing", async () => {
     store.set("tag:malformed", "{ bad json");
 
-    await expect(invalidateTag("malformed")).resolves.toBeUndefined();
+    expect(() => invalidateTag("malformed")).not.toThrow();
   });
 
   it("throws error if ttlSeconds > CACHE_TAG_INDEX_TTL", async () => {
-    const invalidTtlCall = () => cachedRead("ec:test", 90000, async () => "data");
-    expect(invalidTtlCall).toThrow("cache TTL exceeds tag index TTL");
-
-    const invalidSingleFlightCall = () => cachedReadSingleFlight("ec:test", 90000, async () => "data");
-    expect(invalidSingleFlightCall).toThrow("cache TTL exceeds tag index TTL");
+    expect(() => cachedRead("ec:test", 90000, async () => "data")).toThrow("cache TTL exceeds tag index TTL");
+    expect(() => cachedReadSingleFlight("ec:test", 90000, async () => "data")).toThrow(
+      "cache TTL exceeds tag index TTL"
+    );
   });
 
   it("cachedReadSingleFlight runs single flight pipeline on miss", async () => {
@@ -222,7 +221,7 @@ describe("EntityCacheService Unit Tests", () => {
 
     // The date reviver must have restored ISO string → Date instance
     expect(result.createdAt).toBeInstanceOf(Date);
-    expect((result.createdAt as Date).toISOString()).toBe("2025-01-15T10:30:00.000Z");
-    expect((result.nested as { updatedAt: Date }).updatedAt).toBeInstanceOf(Date);
+    expect(result.createdAt.toISOString()).toBe("2025-01-15T10:30:00.000Z");
+    expect(result.nested.updatedAt).toBeInstanceOf(Date);
   });
 });

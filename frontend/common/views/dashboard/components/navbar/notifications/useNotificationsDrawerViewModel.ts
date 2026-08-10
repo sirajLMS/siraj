@@ -45,14 +45,16 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 
 const REFETCH_QUERIES = [{ query: notificationAlertsQueryDocument }, { query: meQueryDocument }] as const;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 function isNotificationMetadata(value: unknown): value is NotificationMetadata {
-  if (!value || typeof value !== "object") {
+  if (!isRecord(value)) {
     return false;
   }
 
-  const record = value as Record<string, unknown>;
-
-  return typeof record.entityKind === "string" && typeof record.entityId === "string";
+  return typeof value.entityKind === "string" && typeof value.entityId === "string";
 }
 
 function parseNotificationMetadata(value: unknown): NotificationMetadata | null {
@@ -107,7 +109,7 @@ interface InvoiceProofHandlerDeps {
   readonly errorMessage: string;
 }
 
-async function _runInvoiceProofAction(
+async function runInvoiceProofAction(
   action: "approve" | "reject",
 
   deliveryId: string,
@@ -232,7 +234,7 @@ function useInvoiceProofHandlers(input: Readonly<InvoiceProofHandlersInput>): {
 
   const handleApproveInvoice = useCallback(
     async (deliveryId: string, invoiceId: string) => {
-      await _runInvoiceProofAction(
+      await runInvoiceProofAction(
         "approve",
 
         deliveryId,
@@ -250,7 +252,7 @@ function useInvoiceProofHandlers(input: Readonly<InvoiceProofHandlersInput>): {
 
   const handleRejectInvoice = useCallback(
     async (deliveryId: string, invoiceId: string) => {
-      await _runInvoiceProofAction(
+      await runInvoiceProofAction(
         "reject",
 
         deliveryId,

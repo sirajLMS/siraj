@@ -8,9 +8,10 @@ import {
   users,
 } from "@/backend/db/schema";
 
-import { OnDemandStatus, SchedulingMode, SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
+import { OnDemandStatus, SchedulingMode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";
+import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 /** Maximum number of pending instances to process per digest run (unbounded SELECT guard). */
 const MAX_DIGEST_INSTANCES_PER_RUN = 500;
@@ -216,12 +217,12 @@ export async function runOndemandTeacherDigestCron(): Promise<void> {
     // Batch-fetch all teacher user records
     const teacherNameMap = await buildTeacherNameMap([...teacherMap.keys()]);
 
-    let sentCount = 0;
-
-    for (const [teacherId, info] of teacherMap.entries()) {
-      const sent = await maybeSendTeacherDigest(teacherId, info, targetHour, dateHourStr, nowUtc, teacherNameMap);
-      if (sent) sentCount++;
-    }
+    const sendResults = await Promise.all(
+      [...teacherMap.entries()].map(([teacherId, info]) =>
+        maybeSendTeacherDigest(teacherId, info, targetHour, dateHourStr, nowUtc, teacherNameMap)
+      )
+    );
+    const sentCount = sendResults.filter(Boolean).length;
 
     logger.info(`[OnDemandTeacherDigestCron] Sent ${sentCount} digests.`);
   } catch (error) {

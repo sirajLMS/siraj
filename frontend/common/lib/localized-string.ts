@@ -1,47 +1,24 @@
 import { ALLOWED_LOCALES } from "@/frontend/common/types/localized-string.types";
 import type { AppLocale } from "@/shared/i18n/routing";
+import {
+  localeJsonKey,
+  omitEmptyLocalizedString,
+  resolveLocalizedString,
+  setLocalizedString,
+} from "@/shared/lib/localized-string";
 import type { LocalizedString } from "@/shared/types/localized-string";
 import { DEFAULT_CONTENT_LOCALE, isAppLocale, normalizeContentLocale } from "@/shared/types/localized-string";
 
-export { ALLOWED_LOCALES, DEFAULT_CONTENT_LOCALE, isAppLocale, normalizeContentLocale };
-
-/**
- * Resolve a `LocalizedString` map to a single display string.
- * Mirrors backend `resolveLocalized` fallback chain:
- * request → default `ar` → first available value → "".
- */
-export function resolveLocalizedString(map: LocalizedString | null | undefined, locale?: string): string {
-  if (!map) {
-    return "";
-  }
-  const requested = normalizeContentLocale(locale);
-  const requestedValue = map[requested];
-  if (requestedValue !== undefined && requestedValue !== "") {
-    return requestedValue;
-  }
-  const defaultValue = map[DEFAULT_CONTENT_LOCALE];
-  if (defaultValue !== undefined && defaultValue !== "") {
-    return defaultValue;
-  }
-  for (const value of Object.values(map)) {
-    if (value !== undefined && value !== "") {
-      return value;
-    }
-  }
-  return "";
-}
-
-/** Set one locale's value in the map (returns a new object). */
-export function setLocalizedString(
-  map: LocalizedString | null | undefined,
-  locale: AppLocale,
-  text: string
-): LocalizedString {
-  if (!map) {
-    return { [locale]: text };
-  }
-  return { ...map, [locale]: text };
-}
+export {
+  ALLOWED_LOCALES,
+  DEFAULT_CONTENT_LOCALE,
+  isAppLocale,
+  localeJsonKey,
+  normalizeContentLocale,
+  omitEmptyLocalizedString,
+  resolveLocalizedString,
+  setLocalizedString,
+};
 
 /** Remove a locale entry from the map (returns a new object). */
 export function removeLocalizedString(map: LocalizedString | null | undefined, locale: AppLocale): LocalizedString {
@@ -50,20 +27,6 @@ export function removeLocalizedString(map: LocalizedString | null | undefined, l
   }
   const next: Record<string, string> = { ...map };
   delete next[locale];
-  return next;
-}
-
-/** Drop entries whose value is empty/whitespace. */
-export function omitEmptyLocalizedString(map: LocalizedString | null | undefined): LocalizedString {
-  if (!map) {
-    return {};
-  }
-  const next: LocalizedString = {};
-  for (const [locale, value] of Object.entries(map)) {
-    if (typeof value === "string" && value.trim() !== "") {
-      next[locale as AppLocale] = value;
-    }
-  }
   return next;
 }
 

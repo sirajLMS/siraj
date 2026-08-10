@@ -12,7 +12,7 @@ import {
 } from "@/backend/db/connection-strategy";
 import { relations } from "@/backend/db/drizzleRelations";
 import { getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { isVercelRuntime } from "@/backend/lib/runtime";
 
 export type DatabaseProvider = "postgres" | "neon";

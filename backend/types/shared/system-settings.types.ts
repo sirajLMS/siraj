@@ -1,5 +1,5 @@
 import type { systemSettings } from "@/backend/db/schema";
-import type { SystemSettingCategory, SystemSettingDataType } from "@/backend/enum";
+import type { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 export type SystemSettingSelectType = typeof systemSettings.$inferSelect;
 export type SystemSettingInsertInput = typeof systemSettings.$inferInsert;

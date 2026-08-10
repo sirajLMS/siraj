@@ -1,10 +1,29 @@
 import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import type { db } from "@/backend/db/drizzleDb";
+import type { db, QueryDbHandle } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
-import { type ComplaintCategory, ComplaintStatus } from "@/backend/enum";
+import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
+
+function isComplaintCategory(value: string): value is ComplaintCategory {
+  return (Object.values(ComplaintCategory) as readonly string[]).includes(value);
+}
+
+function isComplaintStatus(value: string): value is ComplaintStatus {
+  return (Object.values(ComplaintStatus) as readonly string[]).includes(value);
+}
+
+function assertComplaintCategory(value: string): ComplaintCategory {
+  if (!isComplaintCategory(value)) throw new Error(`Invalid complaint category: ${value}`);
+  return value;
+}
+
+function assertComplaintStatus(value: string): ComplaintStatus {
+  if (!isComplaintStatus(value)) throw new Error(`Invalid complaint status: ${value}`);
+  return value;
+}
+
 import type {
   ComplaintFileReturnType,
   ComplaintMetrics,
@@ -38,7 +57,7 @@ function buildComplaintQueueConditions(
   const conditions = [isNull(complaints.deletedAt)];
 
   if (options.status) {
-    conditions.push(eq(complaints.status, options.status as ComplaintStatus));
+    conditions.push(eq(complaints.status, assertComplaintStatus(options.status)));
   }
 
   if (options.search) {
@@ -48,8 +67,8 @@ function buildComplaintQueueConditions(
   return and(...conditions);
 }
 
-function buildComplaintQueueSelect(q: ReturnType<typeof queryDb>) {
-  return (q as typeof db)
+function buildComplaintQueueSelect(q: QueryDbHandle | DBTransaction) {
+  return q
     .select({
       id: complaints.id,
       parentId: complaints.parentId,
@@ -91,9 +110,9 @@ function mapComplaintQueueRow(r: {
 }): ComplaintReturnType {
   return {
     id: r.id,
-    category: r.category as ComplaintCategory,
+    category: assertComplaintCategory(r.category),
     body: r.body,
-    status: r.status as ComplaintStatus,
+    status: assertComplaintStatus(r.status),
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
     parentName: r.parentName ?? null,
@@ -205,9 +224,9 @@ export namespace ComplaintRepository {
 
     const complaintsList: ComplaintReturnType[] = rows.map(r => ({
       id: r.id,
-      category: r.category as ComplaintCategory,
+      category: assertComplaintCategory(r.category),
       body: r.body,
-      status: r.status as ComplaintStatus,
+      status: assertComplaintStatus(r.status),
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
       studentName: r.studentName ?? null,
@@ -311,7 +330,7 @@ export namespace ComplaintRepository {
   };
 
   export const getComplaintMetrics = async (
-    whereClause?: SQL | undefined,
+    whereClause?: SQL,
     txOrDb?: DBTransaction | typeof db
   ): Promise<ComplaintMetrics> => {
     const q = queryDb(typeof txOrDb === "function" ? undefined : txOrDb);
@@ -330,8 +349,12 @@ export namespace ComplaintRepository {
       .where(finalWhereClause)
       .groupBy(complaints.status);
 
-    const unanswered = statusCounts.find(r => r.status === ComplaintStatus.UNANSWERED)?.count ?? 0;
-    const answered = statusCounts.find(r => r.status === ComplaintStatus.ANSWERED)?.count ?? 0;
+    const validStatuses = Object.values(ComplaintStatus) as readonly string[];
+    const unansweredStr = ComplaintStatus.UNANSWERED as string;
+    const answeredStr = ComplaintStatus.ANSWERED as string;
+    const unanswered =
+      statusCounts.find(r => validStatuses.includes(r.status) && r.status === unansweredStr)?.count ?? 0;
+    const answered = statusCounts.find(r => validStatuses.includes(r.status) && r.status === answeredStr)?.count ?? 0;
     const totalCount = statusCounts.reduce((sum, r) => sum + r.count, 0);
 
     const [avgResult] = await q

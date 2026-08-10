@@ -29,7 +29,9 @@ export type NotificationEventTypeKey =
   | "ON_DEMAND_INSTANCE_PENDING_CREDIT"
   | "ON_DEMAND_INSTANCE_REMINDER_T3"
   | "ON_DEMAND_INSTANCE_REMINDER_T1"
-  | "ON_DEMAND_TEACHER_DAILY_DIGEST";
+  | "ON_DEMAND_TEACHER_DAILY_DIGEST"
+  | "PASSWORD_RESET_BY_ADMIN"
+  | "USER_STATUS_CHANGED";
 
 export type NotificationPreferenceRole = "student" | "supervisor" | "parent" | "teacher" | "staff" | "admin";
 
@@ -72,12 +74,20 @@ const ROLE_ALLOWLIST_MAP: Readonly<Record<NotificationPreferenceRole, readonly N
   admin: "ALL",
 };
 
+const ALL_ROLES: readonly NotificationPreferenceRole[] = [
+  "student",
+  "supervisor",
+  "parent",
+  "teacher",
+  "staff",
+  "admin",
+];
+
 const ROLE_ALLOWLIST_SETS = new Map<NotificationPreferenceRole, ReadonlySet<NotificationEventTypeKey> | "ALL">(
-  (
-    Object.entries(ROLE_ALLOWLIST_MAP) as Array<
-      [NotificationPreferenceRole, readonly NotificationEventTypeKey[] | "ALL"]
-    >
-  ).map(([role, allowlist]) => [role, allowlist === "ALL" ? "ALL" : new Set(allowlist)])
+  ALL_ROLES.map(role => {
+    const allowlist = ROLE_ALLOWLIST_MAP[role];
+    return [role, allowlist === "ALL" ? "ALL" : new Set(allowlist)];
+  })
 );
 
 export function resolveNotificationEventAllowlist(

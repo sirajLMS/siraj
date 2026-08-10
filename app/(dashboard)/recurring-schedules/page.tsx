@@ -18,7 +18,7 @@ export default async function RecurringSchedulesListPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.SCHEDULE_VIEW_LIST], locale, context);
   return <RecurringSchedulesListContainer />;

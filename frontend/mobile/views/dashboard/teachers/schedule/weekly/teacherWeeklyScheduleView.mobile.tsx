@@ -116,7 +116,7 @@ export function TeacherWeeklyScheduleViewMobile({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelClear}>{t.dialogs.cancel}</Button>
-          <Button onClick={handleConfirmClear} color="error" variant="contained" autoFocus>
+          <Button onClick={handleConfirmClear} color="error" variant="contained">
             {t.actions.clearSchedule}
           </Button>
         </DialogActions>

@@ -17,6 +17,48 @@ import {
 
 type StudentQueryMode = "directory" | "associated" | "viewerAssigned" | "teacherFiltered";
 
+type StudentRow = {
+  readonly id?: string | null;
+  readonly name?: string | null;
+  readonly avatarUrl?: string | null;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isUnknownArray(value: unknown): value is readonly unknown[] {
+  return Array.isArray(value);
+}
+
+function readOptionalString(value: unknown): string | null | undefined {
+  if (typeof value === "string" || value === null) {
+    return value;
+  }
+  return undefined;
+}
+
+function readStudentRow(item: unknown, avatarKey: string): StudentRow | null {
+  if (!isRecord(item)) {
+    return null;
+  }
+  return {
+    id: readOptionalString(item.id),
+    name: readOptionalString(item.name),
+    avatarUrl: readOptionalString(item[avatarKey]),
+  };
+}
+
+function readStudentRows(value: unknown, avatarKey: string): readonly StudentRow[] {
+  if (!isUnknownArray(value)) {
+    return [];
+  }
+  return value.flatMap(item => {
+    const row = readStudentRow(item, avatarKey);
+    return row ? [row] : [];
+  });
+}
+
 function resolveStudentMode(scope?: UserSelectScope | null): StudentQueryMode {
   if (scope?.parentId) {
     return "associated";
@@ -43,75 +85,40 @@ function resolveStudentDocument(mode: StudentQueryMode): DocumentNode {
   }
 }
 
-function buildAssociatedStudentRows(data: unknown): readonly {
-  readonly id?: string | null;
-  readonly name?: string | null;
-  readonly avatarUrl?: string | null;
-}[] {
-  const typed = data as {
-    parentAssociatedStudents?: readonly {
-      id?: string | null;
-      name?: string | null;
-      avatarUrl?: string | null;
-    }[];
-  } | null;
-  return typed?.parentAssociatedStudents ?? [];
+function buildAssociatedStudentRows(data: unknown): readonly StudentRow[] {
+  if (!isRecord(data)) {
+    return [];
+  }
+  return readStudentRows(data.parentAssociatedStudents, "avatarUrl");
 }
 
-function buildViewerAssignedStudentRows(data: unknown): readonly {
-  readonly id?: string | null;
-  readonly name?: string | null;
-  readonly avatarUrl?: string | null;
-}[] {
-  const typed = data as {
-    parentAssignedStudents?: {
-      rows?: readonly {
-        id?: string | null;
-        name?: string | null;
-        studentAvatarUrl?: string | null;
-      }[];
-    } | null;
-  } | null;
-  const rows = typed?.parentAssignedStudents?.rows ?? [];
-  return rows.map(row => ({
-    id: row.id,
-    name: row.name,
-    avatarUrl: row.studentAvatarUrl ?? null,
-  }));
+function buildViewerAssignedStudentRows(data: unknown): readonly StudentRow[] {
+  if (!isRecord(data)) {
+    return [];
+  }
+  const parentAssignedStudents = data.parentAssignedStudents;
+  if (!isRecord(parentAssignedStudents)) {
+    return [];
+  }
+  return readStudentRows(parentAssignedStudents.rows, "studentAvatarUrl");
 }
 
-function buildTeacherFilteredStudentRows(data: unknown): readonly {
-  readonly id?: string | null;
-  readonly name?: string | null;
-  readonly avatarUrl?: string | null;
-}[] {
-  const typed = data as {
-    students?: {
-      data?:
-        | readonly {
-            id?: string | null;
-            name?: string | null;
-            avatarUrl?: string | null;
-          }[]
-        | null;
-    } | null;
-  } | null;
-  return typed?.students?.data ?? [];
+function buildTeacherFilteredStudentRows(data: unknown): readonly StudentRow[] {
+  if (!isRecord(data)) {
+    return [];
+  }
+  const students = data.students;
+  if (!isRecord(students)) {
+    return [];
+  }
+  return readStudentRows(students.data, "avatarUrl");
 }
 
-function buildDirectoryStudentRows(data: unknown): readonly {
-  readonly id?: string | null;
-  readonly name?: string | null;
-  readonly avatarUrl?: string | null;
-}[] {
-  const typed = data as {
-    studentsDirectory?: readonly {
-      id?: string | null;
-      name?: string | null;
-      avatarUrl?: string | null;
-    }[];
-  } | null;
-  return typed?.studentsDirectory ?? [];
+function buildDirectoryStudentRows(data: unknown): readonly StudentRow[] {
+  if (!isRecord(data)) {
+    return [];
+  }
+  return readStudentRows(data.studentsDirectory, "avatarUrl");
 }
 
 function resolveStudentVariables(
@@ -138,14 +145,7 @@ function resolveStudentVariables(
   }
 }
 
-function resolveStudentRows(
-  mode: StudentQueryMode,
-  data: unknown
-): readonly {
-  readonly id?: string | null;
-  readonly name?: string | null;
-  readonly avatarUrl?: string | null;
-}[] {
+function resolveStudentRows(mode: StudentQueryMode, data: unknown): readonly StudentRow[] {
   switch (mode) {
     case "associated":
       return buildAssociatedStudentRows(data);
@@ -185,7 +185,7 @@ export function useStudentAutocomplete(args?: {
 
   const extractRows = useCallback((data: unknown) => resolveStudentRows(mode, data), [mode]);
 
-  const skip = Boolean(args?.skip || shouldSkipStudentQuery(mode, scope));
+  const skip = args?.skip || shouldSkipStudentQuery(mode, scope);
 
   return useAudienceAutocomplete({
     audience: "student",

@@ -30,6 +30,18 @@ import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;
 
+function isRecordArray(value: unknown): value is Record<string, unknown>[] {
+  return Array.isArray(value);
+}
+
+function getResultRows(result: unknown): Record<string, unknown>[] {
+  if (typeof result === "object" && result !== null && "rows" in result && isRecordArray(result.rows)) {
+    return result.rows;
+  }
+  if (isRecordArray(result)) return result;
+  return [];
+}
+
 beforeAll(() => {
   tErrors = getServerTranslations("en").errorsTranslations;
 });
@@ -244,8 +256,8 @@ describe("Timezone Handling & DST Adjustment", () => {
 
     // Run the adjustment job
     const result = await db.execute(sql`SELECT auto_adjust_dst_bookings() as updated_count`);
-    const rows = (result as unknown as { rows: { updated_count: number }[] }).rows;
-    const updatedCount = rows[0].updated_count;
+    const rows = getResultRows(result);
+    const updatedCount = Number(rows[0]?.updated_count ?? 0);
 
     testLogger.info(`Adjusted ${updatedCount} classes.`);
 

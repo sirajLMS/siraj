@@ -1,5 +1,5 @@
 import { loadSeedConfig } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 
 type TableCategory = "seeded" | "migration" | "excluded";

@@ -3,6 +3,7 @@
 import { Fab, type SxProps, type Theme } from "@mui/material";
 import type { ReactNode } from "react";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 export interface MobileFabProps {
   readonly icon: ReactNode;
@@ -26,18 +27,20 @@ export function MobileFab({ icon, label, onClick, disabled, sx }: MobileFabProps
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      sx={{
-        position: "fixed",
-        bottom: "88px",
-        right: 24,
-        zIndex: theme => theme.zIndex.speedDial,
-        backgroundColor: theme => theme.palette.primary.main,
-        color: theme => theme.palette.onPrimary,
-        "&:hover": {
-          backgroundColor: theme => theme.palette.primary.dark,
+      sx={mergeSx(
+        {
+          position: "fixed",
+          bottom: "88px",
+          right: 24,
+          zIndex: theme => theme.zIndex.speedDial,
+          backgroundColor: theme => theme.palette.primary.main,
+          color: theme => theme.palette.onPrimary,
+          "&:hover": {
+            backgroundColor: theme => theme.palette.primary.dark,
+          },
         },
-        ...sx,
-      }}
+        sx
+      )}
     >
       {icon}
     </Fab>

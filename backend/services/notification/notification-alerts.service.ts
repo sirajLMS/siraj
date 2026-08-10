@@ -2,7 +2,13 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { NotificationRepository } from "@/backend/db/repo";
 import { complaints, notificationDeliveries } from "@/backend/db/schema";
-import { AppPermission, ComplaintStatus, NotificationDeliveryStatus } from "@/backend/enum";
+import {
+  AppPermission,
+  ComplaintStatus,
+  NotificationChannel,
+  NotificationDeliveryStatus,
+  NotificationEventType,
+} from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
@@ -18,6 +24,43 @@ import { getServerTranslations } from "@/shared/locale";
 const COMPLAINT_ALERT_BODY_LIMIT = 100;
 const ALERTS_PAGE_SIZE = 20;
 const ALERTS_FEED_ID_PREFIX = "notification-alerts-";
+
+const NOTIFICATION_ENTITY_KINDS: ReadonlySet<string> = new Set([
+  "invoice",
+  "class",
+  "student",
+  "complaint",
+  "suggestion",
+  "paymentMethod",
+  "schedule",
+  "lessonReport",
+]);
+
+const NOTIFICATION_DELIVERY_STATUSES: ReadonlySet<string> = new Set(Object.values(NotificationDeliveryStatus));
+const NOTIFICATION_EVENT_TYPES: ReadonlySet<string> = new Set(Object.values(NotificationEventType));
+const NOTIFICATION_CHANNELS: ReadonlySet<string> = new Set(Object.values(NotificationChannel));
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isNotificationDeliveryStatus(value: string): value is NotificationDeliveryStatus {
+  return NOTIFICATION_DELIVERY_STATUSES.has(value);
+}
+
+function isNotificationEventType(value: string): value is NotificationEventType {
+  return NOTIFICATION_EVENT_TYPES.has(value);
+}
+
+function isNotificationChannel(value: string): value is NotificationChannel {
+  return NOTIFICATION_CHANNELS.has(value);
+}
+
+function isNotificationMetadata(value: unknown): value is NotificationMetadata {
+  if (!isPlainObject(value)) return false;
+  const { entityKind, entityId } = value;
+  return typeof entityKind === "string" && typeof entityId === "string" && NOTIFICATION_ENTITY_KINDS.has(entityKind);
+}
 
 function emptyAlertsResult(userId: string): NotificationAlertsPaginatedReturnType {
   return {
@@ -46,6 +89,30 @@ function fetchUnansweredComplaintRows(): Promise<UnansweredComplaintRow[]> {
     .limit(ALERTS_PAGE_SIZE);
 }
 
+function toRecentNotificationRow(row: {
+  id: string;
+  title: string | null;
+  body: string | null;
+  createdAt: Date;
+  status: string;
+  eventType: string;
+  channel: string;
+  metadata: NotificationMetadata | null;
+  openedAt: Date | null;
+}): RecentNotificationRow {
+  return {
+    id: row.id,
+    title: row.title,
+    body: row.body,
+    createdAt: row.createdAt,
+    status: isNotificationDeliveryStatus(row.status) ? row.status : NotificationDeliveryStatus.PENDING,
+    eventType: isNotificationEventType(row.eventType) ? row.eventType : NotificationEventType.CLASS_REMINDER,
+    channel: isNotificationChannel(row.channel) ? row.channel : NotificationChannel.EMAIL,
+    metadata: row.metadata,
+    openedAt: row.openedAt,
+  };
+}
+
 function fetchRecentNotificationRows(userId: string): Promise<RecentNotificationRow[]> {
   return db
     .select({
@@ -62,7 +129,15 @@ function fetchRecentNotificationRows(userId: string): Promise<RecentNotification
     .from(notificationDeliveries)
     .where(eq(notificationDeliveries.userId, userId))
     .orderBy(desc(notificationDeliveries.createdAt))
-    .limit(ALERTS_PAGE_SIZE) as Promise<RecentNotificationRow[]>;
+    .limit(ALERTS_PAGE_SIZE)
+    .then(rows => rows.map(toRecentNotificationRow));
+}
+
+function toMarkableDeliveryRow(row: { id: string; status: string }): MarkableDeliveryRow {
+  return {
+    id: row.id,
+    status: isNotificationDeliveryStatus(row.status) ? row.status : NotificationDeliveryStatus.PENDING,
+  };
 }
 
 async function fetchMarkableDeliveryRows(userId: string): Promise<MarkableDeliveryRow[]> {
@@ -75,7 +150,7 @@ async function fetchMarkableDeliveryRows(userId: string): Promise<MarkableDelive
     .where(eq(notificationDeliveries.userId, userId))
     .orderBy(desc(notificationDeliveries.createdAt))
     .limit(ALERTS_PAGE_SIZE);
-  return rows as MarkableDeliveryRow[];
+  return rows.map(toMarkableDeliveryRow);
 }
 
 function buildComplaintAlert(complaint: UnansweredComplaintRow, title: string): NotificationAlertReturnType {
@@ -107,7 +182,7 @@ function buildNotificationAlert(
     type: "notification",
     eventType: notification.eventType,
     channel: notification.channel,
-    metadata: notification.metadata as NotificationMetadata | null,
+    metadata: isNotificationMetadata(notification.metadata) ? notification.metadata : null,
     title: notification.title ?? defaultTitle,
     body: notification.body,
     createdAt: notification.createdAt,
@@ -188,17 +263,27 @@ export namespace NotificationAlertsService {
       const recentNotifications = await fetchMarkableDeliveryRows(actorUserId);
       const candidates = recentNotifications.filter(n => n.status !== NotificationDeliveryStatus.OPENED);
 
+      const markResults = await Promise.all(
+        candidates.map(async candidate => {
+          try {
+            await NotificationRepository.recordDeliveryOpened(candidate.id, undefined, undefined, locale);
+            return { success: true as const, candidate };
+          } catch (error) {
+            return { success: false as const, candidate, error };
+          }
+        })
+      );
+
       let updatedCount = 0;
-      for (const candidate of candidates) {
-        try {
-          await NotificationRepository.recordDeliveryOpened(candidate.id, undefined, undefined, locale);
+      for (const result of markResults) {
+        if (result.success) {
           updatedCount++;
-        } catch (error) {
-          logger.warn("markAlertsRead: failed to mark delivery OPENED", {
-            deliveryId: candidate.id,
-            error: error instanceof Error ? error.message : String(error),
-          });
+          continue;
         }
+        logger.warn("markAlertsRead: failed to mark delivery OPENED", {
+          deliveryId: result.candidate.id,
+          error: result.error instanceof Error ? result.error.message : String(result.error),
+        });
       }
 
       return { updatedCount };

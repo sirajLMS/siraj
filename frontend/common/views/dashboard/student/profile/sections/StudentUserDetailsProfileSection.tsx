@@ -10,7 +10,6 @@ import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezon
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { PhoneInput } from "@/frontend/common/components/ui/input/phoneInput/PhoneInput";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
@@ -67,7 +66,7 @@ export function StudentUserDetailsProfileSection({
             fullWidth
           />
           <CurrencySelect
-            currency={draft.displayCurrency ? (getCurrencyByCode(draft.displayCurrency as CurrencyCode) ?? null) : null}
+            currency={draft.displayCurrency ? (getCurrencyByCode(draft.displayCurrency) ?? null) : null}
             setCurrencyAction={selected => onDraftChange({ displayCurrency: selected.code })}
             label={currencyLabel}
             fullWidth

@@ -14,11 +14,13 @@ export type ClassMeetingContextBannerProps = {
   };
 };
 
-function resolveSourceKey(source: EffectiveMeetingSource | string | null | undefined): string {
-  const normalized = String(source ?? "").toLowerCase();
-  if (normalized === EffectiveMeetingSource.Class) return "sourceClass";
-  if (normalized === EffectiveMeetingSource.Recurring) return "sourceRecurring";
-  if (normalized === EffectiveMeetingSource.Teacher) return "sourceTeacher";
+type MeetingSourceKey = "sourceClass" | "sourceNone" | "sourceRecurring" | "sourceTeacher";
+
+function resolveSourceKey(source: EffectiveMeetingSource | string | null | undefined): MeetingSourceKey {
+  const normalized = (source ?? "").toLowerCase();
+  if (normalized === (EffectiveMeetingSource.Class as string)) return "sourceClass";
+  if (normalized === (EffectiveMeetingSource.Recurring as string)) return "sourceRecurring";
+  if (normalized === (EffectiveMeetingSource.Teacher as string)) return "sourceTeacher";
   return "sourceNone";
 }
 
@@ -33,7 +35,7 @@ export function ClassMeetingContextBanner({
   if (!effectiveMeeting && !hasScopeConfigs) return null;
 
   const sourceKey = resolveSourceKey(effectiveMeeting?.source);
-  const sourceLabel = tDisplay[sourceKey as "sourceClass" | "sourceRecurring" | "sourceTeacher" | "sourceNone"];
+  const sourceLabel = tDisplay[sourceKey];
   const isClassOverride = effectiveMeeting?.source === EffectiveMeetingSource.Class;
   const isInherited = effectiveMeeting?.source === EffectiveMeetingSource.Teacher && !hasScopeConfigs;
   const isUrlPending = effectiveMeeting?.supportsAutoGeneration === true && !effectiveMeeting?.joinUrl;

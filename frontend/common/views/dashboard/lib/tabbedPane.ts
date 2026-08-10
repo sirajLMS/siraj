@@ -46,11 +46,7 @@ export function createIsTabId<TabId extends string>(tabIds: readonly TabId[]): (
  * Builds a tab href by preserving all existing search params except the
  * previous tab. Keeps the URL pristine for back/forward and bookmarkability.
  */
-export function buildTabHref<TabId extends string>(
-  pathname: string,
-  searchParams: URLSearchParams,
-  tab: TabId
-): string {
+export function buildTabHref(pathname: string, searchParams: URLSearchParams, tab: string): string {
   const params = new URLSearchParams(searchParams.toString());
   params.set("tab", tab);
   const query = params.toString();
@@ -66,8 +62,11 @@ export function resolveTab<TabId extends string, LabelKey extends string>(
   tabParam: string | null,
   availableTabs: readonly TabDefinition<TabId, LabelKey>[]
 ): TabId | undefined {
-  if (tabParam && availableTabs.some(tab => tab.id === tabParam)) {
-    return tabParam as TabId;
+  if (tabParam) {
+    const matchingTab = availableTabs.find(tab => tab.id === tabParam);
+    if (matchingTab) {
+      return matchingTab.id;
+    }
   }
   return availableTabs[0]?.id;
 }

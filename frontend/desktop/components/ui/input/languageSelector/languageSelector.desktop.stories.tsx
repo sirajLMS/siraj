@@ -11,7 +11,7 @@ import {
 function LanguageSelectorDesktopStory({
   initialLanguageCode,
   ...props
-}: Readonly<Partial<LanguageSelectorProps> & { initialLanguageCode?: string }>) {
+}: Readonly<Partial<LanguageSelectorProps> & { initialLanguageCode?: AppLanguage }>) {
   const [language, setLanguage] = useState<LanguageType | undefined>(() =>
     initialLanguageCode ? languages.find(entry => entry.code === initialLanguageCode) : undefined
   );

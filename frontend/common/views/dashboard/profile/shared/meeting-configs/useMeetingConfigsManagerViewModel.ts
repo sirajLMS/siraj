@@ -4,7 +4,7 @@ import { CombinedGraphQLErrors } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
-import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   connectMeetingProviderOAuthMutationDocument,
@@ -63,6 +63,43 @@ function configLabel(config: UserMeetingConfigFieldsFragment, locale: string): s
 export type UseMeetingConfigsManagerViewModelProps = {
   readonly targetUserId: string;
 };
+
+/** Returns a new bookings-instances map with all configs for the given
+ *  provider slug removed. Used as a state updater for `setBookingsInstances`. */
+function clearProviderBookingsInstances(
+  configs: readonly UserMeetingConfigFieldsFragment[],
+  providerSlug: string,
+  prev: ReadonlyMap<string, readonly LinkedClassInstance[]>
+): Map<string, readonly LinkedClassInstance[]> {
+  const next = new Map(prev);
+  for (const config of configs) {
+    if (config.provider?.slug === providerSlug && config.id) {
+      next.delete(config.id);
+    }
+  }
+  return next;
+}
+
+/** Returns `null` if the currently expanded config belongs to the given
+ *  provider slug (so we collapse it), otherwise returns the previous value
+ *  unchanged. Used as a state updater for `setExpandedBookingsId`. */
+function collapseProviderExpandedId(
+  configById: ReadonlyMap<string, UserMeetingConfigFieldsFragment>,
+  providerSlug: string,
+  prev: string | null
+): string | null {
+  if (prev == null) return null;
+  const config = configById.get(prev);
+  return config?.provider?.slug === providerSlug ? null : prev;
+}
+
+function isUserMeetingConfig(config: MeetingConfigListItem): config is UserMeetingConfigFieldsFragment {
+  return "userId" in config;
+}
+
+function isMeetingIntegrationProviderSlug(value: string): value is MeetingIntegrationProviderSlug {
+  return (Object.values(MeetingIntegrationProviderSlug) as readonly string[]).includes(value);
+}
 
 export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConfigsManagerViewModelProps>) {
   const { targetUserId } = props;
@@ -147,7 +184,8 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
   };
 
   const openEditForm = (config: MeetingConfigListItem) => {
-    setEditConfig(config as UserMeetingConfigFieldsFragment);
+    if (!isUserMeetingConfig(config)) return;
+    setEditConfig(config);
     setFormOpen(true);
   };
 
@@ -245,10 +283,10 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       setGenerationStatus("error");
       setGenerationError(t.saveError);
       return null;
-    } catch (error) {
+    } catch (caughtError) {
       setGenerationStatus("error");
-      if (CombinedGraphQLErrors.is(error)) {
-        const reauthError = error.errors.find(e => e.extensions?.code === PROVIDER_REAUTH_REQUIRED_CODE);
+      if (CombinedGraphQLErrors.is(caughtError)) {
+        const reauthError = caughtError.errors.find(e => e.extensions?.code === PROVIDER_REAUTH_REQUIRED_CODE);
         if (reauthError) {
           const slug = configs.find(c => c.provider?.id === args.providerId)?.provider?.slug;
           if (slug) {
@@ -297,9 +335,9 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
         },
       });
       await refetch();
-    } catch (error) {
-      if (CombinedGraphQLErrors.is(error)) {
-        const reauthError = error.errors.find(e => e.extensions?.code === PROVIDER_REAUTH_REQUIRED_CODE);
+    } catch (caughtError) {
+      if (CombinedGraphQLErrors.is(caughtError)) {
+        const reauthError = caughtError.errors.find(e => e.extensions?.code === PROVIDER_REAUTH_REQUIRED_CODE);
         if (reauthError) {
           const slug = config.provider?.slug;
           if (slug) {
@@ -307,7 +345,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
           }
         }
       }
-      logger.error("regenerateConfig failed", error);
+      logger.error("regenerateConfig failed", caughtError);
       setErrorMessage(t.saveError);
     } finally {
       setGenerating(false);
@@ -462,13 +500,14 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
   };
 
   const handleReconnect = async (providerSlug: string) => {
+    if (!isMeetingIntegrationProviderSlug(providerSlug)) return;
     setConnectingSlugs(prev => new Set(prev).add(providerSlug));
     try {
       const result = await connectMeetingProviderOAuth({
         variables: {
           input: {
-            providerSlug: providerSlug as MeetingIntegrationProviderSlug,
-            returnPath: typeof window !== "undefined" ? window.location.pathname : "/",
+            providerSlug,
+            returnPath: globalThis.window?.location?.pathname ?? "/",
           },
         },
       });
@@ -480,8 +519,8 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
           next.delete(providerSlug);
           return next;
         });
-        if (typeof window !== "undefined") {
-          window.location.href = authorizeUrl;
+        if (globalThis.window) {
+          globalThis.window.location.href = authorizeUrl;
         }
         return;
       }
@@ -492,40 +531,29 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
         return next;
       });
       setErrorMessage(t.saveError);
-    } catch (error) {
+    } catch (caughtError) {
       setConnectingSlugs(prev => {
         const next = new Set(prev);
         next.delete(providerSlug);
         return next;
       });
-      logger.error("handleReconnect OAuth failed", error);
+      logger.error("handleReconnect OAuth failed", caughtError);
       setErrorMessage(t.saveError);
     }
     // Clear cached instances for configs using this provider.
-    setBookingsInstances(prev => {
-      const next = new Map(prev);
-      for (const config of configs) {
-        if (config.provider?.slug === providerSlug && config.id) {
-          next.delete(config.id);
-        }
-      }
-      return next;
-    });
+    setBookingsInstances(prev => clearProviderBookingsInstances(configs, providerSlug, prev));
     // Collapse any expanded view for configs using this provider.
-    setExpandedBookingsId(prev => {
-      if (prev == null) return null;
-      const config = configById.get(prev);
-      return config?.provider?.slug === providerSlug ? null : prev;
-    });
+    setExpandedBookingsId(prev => collapseProviderExpandedId(configById, providerSlug, prev));
   };
 
   const disconnectProvider = async (providerSlug: string) => {
+    if (!isMeetingIntegrationProviderSlug(providerSlug)) return;
     setErrorMessage(null);
     try {
       await disconnectMeetingProviderOAuth({
         variables: {
           input: {
-            providerSlug: providerSlug as MeetingIntegrationProviderSlug,
+            providerSlug,
           },
         },
       });
@@ -536,26 +564,14 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       });
       // Refetch both meeting configs and connected provider tokens.
       await Promise.all([refetch(), connectedProvidersQueryRefetch()]);
-    } catch (error) {
-      logger.error("disconnectProvider OAuth failed", error);
+    } catch (caughtError) {
+      logger.error("disconnectProvider OAuth failed", caughtError);
       setErrorMessage(t.saveError);
     }
     // Clear cached instances for configs using this provider.
-    setBookingsInstances(prev => {
-      const next = new Map(prev);
-      for (const config of configs) {
-        if (config.provider?.slug === providerSlug && config.id) {
-          next.delete(config.id);
-        }
-      }
-      return next;
-    });
+    setBookingsInstances(prev => clearProviderBookingsInstances(configs, providerSlug, prev));
     // Collapse any expanded view for configs using this provider.
-    setExpandedBookingsId(prev => {
-      if (prev == null) return null;
-      const config = configById.get(prev);
-      return config?.provider?.slug === providerSlug ? null : prev;
-    });
+    setExpandedBookingsId(prev => collapseProviderExpandedId(configById, providerSlug, prev));
   };
 
   const submitAutoConfig = useCallback(

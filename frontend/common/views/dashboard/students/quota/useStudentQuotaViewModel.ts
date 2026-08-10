@@ -57,7 +57,7 @@ function buildStudentQuotaData(
   return {
     id: s.id,
     studentName: s.name ?? notSetLabel,
-    dateOfBirth: useUnifiedProfile && profile?.dateOfBirth ? String(profile.dateOfBirth) : "",
+    dateOfBirth: useUnifiedProfile && profile?.dateOfBirth ? profile.dateOfBirth : "",
     language: s.language === "en" ? "en" : "ar",
     gender: resolveGenderLabel(s.gender) ?? "",
     teacher: s.teacherName ?? "",

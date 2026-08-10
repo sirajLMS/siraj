@@ -29,16 +29,10 @@ const lazyViews = createLazyView<GenericTabNavVariantProps<string>>(
  *
  * Supports `variant="date"` for scrollable month-day strips (button mode).
  */
-export function GenericTabNav<TabId extends string>(props: Readonly<GenericTabNavVariantProps<TabId>>) {
+export function GenericTabNav(props: Readonly<GenericTabNavVariantProps<string>>) {
   if (props.tabs.length === 0) {
     return null;
   }
 
-  return (
-    <ResponsiveViewSwitch
-      mobile={lazyViews.mobile as never}
-      desktop={lazyViews.desktop as never}
-      props={props as never}
-    />
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }

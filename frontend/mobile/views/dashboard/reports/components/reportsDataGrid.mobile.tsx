@@ -5,12 +5,15 @@ import type {
   PerformanceLedgerCardLabels,
   ReportsDataGridLabels,
 } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
+import type { LedgerStatus } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import type { ReportsDataGridProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { reportNameHrefForRow } from "@/frontend/common/views/dashboard/reports/utils/reportNameHrefForRow.utils";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { PerformanceLedgerCardMobile } from "@/frontend/mobile/views/dashboard/reports/components/performanceLedgerCard.mobile";
 
 export type ReportsDataGridMobileLabels = ReportsDataGridLabels;
+
+const EMPTY_STATUS_LABELS: Record<LedgerStatus, string> = { active: "", on_break: "" };
 
 export function ReportsDataGridMobile({
   rows,
@@ -28,16 +31,16 @@ export function ReportsDataGridMobile({
   // full `PerformanceLedgerCardLabels` via the `ReportsViewModel.labels.ledgerLabels`
   // field for the canonical path; this component only renders a card-only
   // fallback when used standalone.
-  const ledgerLabels = {
+  const ledgerLabels: PerformanceLedgerCardLabels = {
     studentLabel: () => "",
     paid: labels.paid,
-    statusLabels: {} as never,
+    statusLabels: EMPTY_STATUS_LABELS,
     taken: labels.taken,
     absent: labels.absent,
     leave: labels.leave,
     pending: labels.pending,
     hours: labels.hours,
-  } as PerformanceLedgerCardLabels;
+  };
 
   return (
     <Box sx={{ px: { xs: 0 }, pb: 1 }}>

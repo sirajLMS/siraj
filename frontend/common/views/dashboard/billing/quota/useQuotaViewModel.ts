@@ -35,7 +35,7 @@ export function useQuotaViewModel() {
 
   const { data, loading, refetch } = useQuery(quotasQueryDocument, {
     variables: {
-      filter: (filter.kind ?? filter.search ?? filter.status ?? filter.studentId) !== null ? filter : null,
+      filter: (filter.kind ?? filter.search ?? filter.status ?? filter.studentId) != null ? filter : null,
       pagination: buildPaginationVars(page, pageSize),
     },
     fetchPolicy: "cache-and-network",
@@ -43,7 +43,7 @@ export function useQuotaViewModel() {
 
   const [deleteQuotaMutation] = useMutation(deleteQuotaMutationDocument, {
     onCompleted: () => {
-      refetch();
+      void refetch();
     },
   });
 

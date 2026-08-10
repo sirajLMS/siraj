@@ -100,17 +100,19 @@ export namespace ComplaintService {
       );
 
       if (files.length > 0) {
-        for (const file of files) {
-          await StorageDbRepository.registerFileUsage(
-            {
-              referenceTable: "complaints",
-              referenceId: created.id,
-              usageType: "attachment",
-              filePath: file.path,
-            },
-            locale
-          );
-        }
+        await Promise.all(
+          files.map(file =>
+            StorageDbRepository.registerFileUsage(
+              {
+                referenceTable: "complaints",
+                referenceId: created.id,
+                usageType: "attachment",
+                filePath: file.path,
+              },
+              locale
+            )
+          )
+        );
       }
 
       logger.info("Complaint submitted", {
@@ -384,11 +386,7 @@ export namespace ComplaintService {
   export async function createManyComplaints(
     inputs: Parameters<typeof ComplaintRepository.insertComplaint>[0][]
   ): Promise<ComplaintSelectType[]> {
-    const results: ComplaintSelectType[] = [];
-    for (const input of inputs) {
-      results.push(await ComplaintRepository.insertComplaint(input));
-    }
-    return results;
+    return Promise.all(inputs.map(input => ComplaintRepository.insertComplaint(input)));
   }
 
   export async function ensureComplaintResponse(input: {

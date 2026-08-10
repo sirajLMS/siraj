@@ -42,19 +42,29 @@ const CRON_DEFINITIONS: CronDefinition[] = [
   },
 ];
 
+const VALID_MODES: ReadonlySet<string> = new Set<CronExecutionMode>([
+  "vercel",
+  "vercel-daily",
+  "external",
+  "standalone",
+]);
+
+function isCronExecutionMode(value: string): value is CronExecutionMode {
+  return VALID_MODES.has(value);
+}
+
 function parseMode(raw: string | undefined): CronExecutionMode {
-  const valid: CronExecutionMode[] = ["vercel", "vercel-daily", "external", "standalone"];
   const trimmed = raw?.trim();
   if (!trimmed) {
     return "vercel-daily";
   }
-  if (!valid.includes(trimmed as CronExecutionMode)) {
+  if (!isCronExecutionMode(trimmed)) {
     process.stderr.write(
       `[generate-vercel-config] WARN: Invalid CRON_EXECUTION_MODE="${raw}", defaulting to "vercel-daily"\n`
     );
     return "vercel-daily";
   }
-  return trimmed as CronExecutionMode;
+  return trimmed;
 }
 
 function validateCronExpression(expression: string, name: string): void {

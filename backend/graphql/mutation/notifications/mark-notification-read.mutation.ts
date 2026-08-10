@@ -14,7 +14,7 @@ gqlSchemaBuilder.mutationField("markNotificationRead", t =>
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      await NotificationAlertsService.markOneAlertRead(actorUserId, String(args.deliveryId), ctx.locale);
+      await NotificationAlertsService.markOneAlertRead(actorUserId, args.deliveryId, ctx.locale);
       return true;
     },
   })

@@ -1,6 +1,6 @@
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib";
 import { DstMigrationResult } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
 import type { DstMigrationEntrySelectType, RecurringScheduleSelectType } from "@/backend/types";
 

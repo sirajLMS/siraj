@@ -1,5 +1,5 @@
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
 import type { UserSelectType } from "@/backend/types";
 

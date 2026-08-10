@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import type { LocalContext } from "@/backend/storage/disk/local/types";
 import { getAbsolutePath } from "@/backend/storage/disk/local/utils";
 import {
@@ -39,17 +39,19 @@ async function processFileStats(filePath: string, fileName: string, state: Stats
 async function walkDirectory(dirPath: string, relativePath: string, state: StatsState): Promise<void> {
   const entries = await fs.readdir(dirPath, { withFileTypes: true });
 
-  for (const entry of entries) {
-    const entryAbsolutePath = path.join(dirPath, entry.name);
-    const entryRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
+  await Promise.all(
+    entries.map(async entry => {
+      const entryAbsolutePath = path.join(dirPath, entry.name);
+      const entryRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
 
-    if (entry.isDirectory()) {
-      state.directories.add(entryRelativePath);
-      await walkDirectory(entryAbsolutePath, entryRelativePath, state);
-    } else if (entry.isFile()) {
-      await processFileStats(entryAbsolutePath, entry.name, state);
-    }
-  }
+      if (entry.isDirectory()) {
+        state.directories.add(entryRelativePath);
+        await walkDirectory(entryAbsolutePath, entryRelativePath, state);
+      } else if (entry.isFile()) {
+        await processFileStats(entryAbsolutePath, entry.name, state);
+      }
+    })
+  );
 }
 
 /**

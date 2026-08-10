@@ -167,6 +167,10 @@ export function StudentRecentReportsCardListDesktop({
 }: Readonly<StudentRecentReportsCardListDesktopProps>) {
   const pageCount = Math.max(1, Math.ceil(pagination.totalCount / pagination.pageSize));
 
+  // Extract nested ternary into a separate variable for readability (SonarQube S3358)
+  const isLoadingAndEmpty = loading && rows.length === 0;
+  const isEmpty = rows.length === 0;
+
   return (
     <Box
       sx={theme => ({
@@ -174,11 +178,11 @@ export function StudentRecentReportsCardListDesktop({
         py: 2,
       })}
     >
-      {loading && rows.length === 0 ? (
+      {isLoadingAndEmpty ? (
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, px: 2 })}>
           {labels.loadingMessage}
         </Typography>
-      ) : rows.length === 0 ? (
+      ) : isEmpty ? (
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, px: 2 })}>
           {labels.noLessonReports}
         </Typography>

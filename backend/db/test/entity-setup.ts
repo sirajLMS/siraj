@@ -136,7 +136,7 @@ export async function createTestTeacher(
   overrides: Partial<typeof teachers.$inferInsert> = {}
 ): Promise<TeacherSelectType> {
   const now = new Date();
-  const [teacher] = (await tx
+  const [teacher] = await tx
     .insert(teachers)
     .values({
       userId,
@@ -144,7 +144,7 @@ export async function createTestTeacher(
       updatedAt: now,
       ...overrides,
     })
-    .returning()) as [TeacherSelectType];
+    .returning();
   return teacher;
 }
 
@@ -154,7 +154,7 @@ export async function createTestParent(
   overrides: Partial<typeof parents.$inferInsert> = {}
 ): Promise<ParentEntity> {
   const now = new Date();
-  const [parent] = (await tx
+  const [parent] = await tx
     .insert(parents)
     .values({
       userId,
@@ -163,7 +163,7 @@ export async function createTestParent(
       updatedAt: now,
       ...overrides,
     })
-    .returning()) as [ParentEntity];
+    .returning();
   return parent;
 }
 
@@ -185,7 +185,7 @@ export async function createTestStudent(
     });
     userId = studentUser.id;
   }
-  const [student] = (await tx
+  const [student] = await tx
     .insert(students)
     .values({
       parentId,
@@ -197,12 +197,12 @@ export async function createTestStudent(
       updatedAt: now,
       ...remainingOverrides,
     })
-    .returning()) as [StudentSelectType];
+    .returning();
   return student;
 }
 
 type TeacherSetupOverrides = Partial<typeof teachers.$inferInsert> & {
-  status?: (typeof users.$inferInsert)["status"];
+  status?: Exclude<(typeof users.$inferInsert)["status"], undefined>;
 };
 
 export async function setupTeacher(

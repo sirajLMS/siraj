@@ -3,6 +3,7 @@
 import { Box, Grid, Stack } from "@mui/material";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
+import { AdminOnlySection } from "@/frontend/common/views/dashboard/student/profile/sections/AdminOnlySection";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
 import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileEditBody";
@@ -22,6 +23,7 @@ function StudentOwnProfileView({
 }>) {
   const parentLabels = useAppTranslation(Translation.Profile.Parent);
   const baseLabels = useAppTranslation(Translation.Profile.Base);
+  const teacherLabels = useAppTranslation(Translation.Profile.Teacher);
   const notSetLabel = baseLabels.notSet;
 
   const sectionBase = {
@@ -32,7 +34,13 @@ function StudentOwnProfileView({
     enforceFieldAccess: false,
   };
 
-  const teacherLabels = useAppTranslation(Translation.Profile.Teacher);
+  const adminOnlyLabels = {
+    baseLabels: {
+      notSet: baseLabels.notSet,
+      fieldAccess: baseLabels.fieldAccess,
+      actions: baseLabels.actions,
+    },
+  };
 
   return (
     <Grid container spacing={3}>
@@ -45,7 +53,7 @@ function StudentOwnProfileView({
             phoneLabel={labels.phone}
             timezoneLabel={parentLabels.fields.timezone}
             currencyLabel={teacherLabels.fields.displayCurrency}
-            baseLabels={{ notSet: notSetLabel, fieldAccess: baseLabels.fieldAccess }}
+            baseLabels={{ notSet: notSetLabel, fieldAccess: baseLabels.fieldAccess, actions: baseLabels.actions }}
           />
           <StudentExtensionProfileSection
             {...sectionBase}
@@ -56,6 +64,7 @@ function StudentOwnProfileView({
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>
         <StudentParentAssignmentProfileSection {...sectionBase} sectionTitle={labels.parentInfo} />
+        <AdminOnlySection mode="view" labels={adminOnlyLabels} profile={profile} />
       </Grid>
     </Grid>
   );

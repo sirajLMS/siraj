@@ -1,8 +1,7 @@
 import { DEFAULT_INVOICE_CURRENCY, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
-import { InvoiceStatus } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import type { InvoiceSelectType, PaymentRecordInput } from "@/backend/types";
 import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
@@ -49,7 +48,7 @@ function buildPaymentSnapshot(
 }
 
 function buildPaymentSpecs(invoicesList: InvoiceSelectType[], now: Date, snapshottedAt: string): PaymentSeedSpec[] {
-  const paidInvoices = invoicesList.filter(inv => inv.status === InvoiceStatus.PAID);
+  const paidInvoices = invoicesList.filter(inv => inv.status === "PAID");
 
   return paidInvoices.map((invoice, index) => {
     const { paymentMethodType, paymentMethodSnapshot } = buildPaymentSnapshot(index, snapshottedAt);

@@ -61,6 +61,13 @@ function useStudentHistoryMetricItems(
   );
 }
 
+function navButtonSx(theme: Theme) {
+  return {
+    minWidth: 40,
+    transform: theme.direction === "rtl" ? ("scaleX(-1)" as const) : undefined,
+  };
+}
+
 function MonthNavigator({
   monthLabel,
   canGoNext,
@@ -74,10 +81,6 @@ function MonthNavigator({
   onPrevMonth: () => void;
   onNextMonth: () => void;
 }>): React.ReactNode {
-  const navButtonSx = (theme: Theme) => ({
-    minWidth: 40,
-    transform: theme.direction === "rtl" ? ("scaleX(-1)" as const) : undefined,
-  });
   return (
     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
       <Button aria-label={labels.previousMonth} onClick={onPrevMonth} sx={navButtonSx}>

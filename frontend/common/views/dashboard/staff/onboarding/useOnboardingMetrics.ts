@@ -23,12 +23,12 @@ export function resolveMetricValue(
   metrics: OnboardingMetricsData | null,
   key: OnboardingMetricKey,
   loading: boolean
-): string | number {
+): string {
   if (loading) return "...";
-  if (!metrics) return 0;
-  if (key === "activeStaff") return metrics.activeStaff ?? 0;
-  if (key === "pendingApproval") return metrics.pendingApproval ?? 0;
+  if (!metrics) return "0";
+  if (key === "activeStaff") return String(metrics.activeStaff ?? 0);
+  if (key === "pendingApproval") return String(metrics.pendingApproval ?? 0);
   if (key === "avgOnboarding")
     return metrics.avgOnboardingDays == null ? "0 d" : `${metrics.avgOnboardingDays.toFixed(1)} d`;
-  return 0;
+  return "0";
 }

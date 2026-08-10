@@ -1,5 +1,5 @@
 import { OrderSortDirection } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { STORAGE_CONFIG } from "@/backend/storage/disk/storage.service.interface";
 import * as Types from "@/backend/types";
 import { isAllowedMimeType, validateFileName as sharedValidateFileName } from "@/shared/utils/storage.utils";
@@ -307,7 +307,7 @@ export namespace StorageUtils {
     sortBy: Types.FileSortField,
     direction: OrderSortDirection
   ): Array<Types.FileInfo | Types.DirectoryInfo> => {
-    const sorted = [...items].sort((a, b) => {
+    const sorted = [...items].toSorted((a, b) => {
       let comparison = 0;
 
       switch (sortBy) {

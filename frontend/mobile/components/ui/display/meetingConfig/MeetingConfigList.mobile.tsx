@@ -59,7 +59,8 @@ export function MobileMeetingConfigList({
     <Stack sx={{ gap: 1 }}>
       {title ? <Typography sx={{ typography: "titleSm" }}>{title}</Typography> : null}
       {configs.map(config => {
-        if (!config.id) return null;
+        const configId = config.id;
+        if (!configId) return null;
         const providerName = config.provider
           ? resolveLocalizedString(config.provider.name, locale)
           : (config.providerId ?? "");
@@ -67,7 +68,7 @@ export function MobileMeetingConfigList({
 
         return (
           <Box
-            key={config.id}
+            key={configId}
             sx={theme => ({
               border: `1px solid ${theme.palette.outlineVariant}`,
               borderRadius: 1.5,
@@ -100,17 +101,13 @@ export function MobileMeetingConfigList({
                   <IconButton
                     aria-label={tManager.setDefault}
                     size="small"
-                    onClick={() => onSetDefaultAction(config.id as string)}
+                    onClick={() => onSetDefaultAction(configId)}
                   >
                     <StarOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : null}
                 {onDeleteAction ? (
-                  <IconButton
-                    aria-label={tManager.delete}
-                    size="small"
-                    onClick={() => onDeleteAction(config.id as string)}
-                  >
+                  <IconButton aria-label={tManager.delete} size="small" onClick={() => onDeleteAction(configId)}>
                     <DeleteOutlinedIcon fontSize="small" />
                   </IconButton>
                 ) : null}

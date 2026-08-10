@@ -118,5 +118,5 @@ function luhnChecksumValid(digits: number[]): boolean {
     sum += d;
   }
   const checkDigit = (10 - (sum % 10)) % 10;
-  return checkDigit === digits[digits.length - 1];
+  return checkDigit === digits.at(-1);
 }

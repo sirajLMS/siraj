@@ -124,7 +124,6 @@ function CredentialEditDialog({
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <TextField
-          autoFocus
           fullWidth
           type="password"
           label={fieldLabel}
@@ -141,6 +140,119 @@ function CredentialEditDialog({
         </Button>
       </DialogActions>
     </Dialog>
+  );
+}
+
+function NumbersHeader({
+  labels,
+  syncing,
+  isConfigured,
+  onSyncFromMeta,
+}: Readonly<{
+  readonly labels: WhatsappLabels;
+  readonly syncing: boolean;
+  readonly isConfigured: boolean;
+  readonly onSyncFromMeta: () => void;
+}>) {
+  return (
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+      <Box>
+        <Typography variant="titleLg">{labels.numbersTitle}</Typography>
+        <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
+          {labels.numbersSubtitle}
+        </Typography>
+      </Box>
+      <Button
+        variant="outlined"
+        startIcon={<CloudSyncOutlined />}
+        disabled={syncing || !isConfigured}
+        onClick={onSyncFromMeta}
+      >
+        {syncing ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
+        {labels.syncFromMeta}
+      </Button>
+    </Box>
+  );
+}
+
+function ExtraChipsRow({
+  labels,
+  account,
+}: Readonly<{ readonly labels: WhatsappLabels; readonly account: WhatsappAccountRow }>) {
+  return (
+    <>
+      <Chip size="small" label={`${labels.wabaId}: ${account.wabaId}`} />
+      <Chip size="small" label={`${labels.phoneNumberId}: ${account.phoneNumberId}`} />
+    </>
+  );
+}
+
+function AccountsListSection({
+  labels,
+  accounts,
+  onMenuOpen,
+  onDeleteClick,
+}: Readonly<{
+  readonly labels: WhatsappLabels;
+  readonly accounts: ReadonlyArray<WhatsappAccountRow>;
+  readonly onMenuOpen: (event: React.MouseEvent<HTMLElement>, accountId: string) => void;
+  readonly onDeleteClick: (account: WhatsappAccountRow) => void;
+}>) {
+  if (accounts.length === 0) {
+    return (
+      <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, py: 4, textAlign: "center" }}>
+        {labels.noAccounts}
+      </Typography>
+    );
+  }
+
+  return (
+    <Stack spacing={2}>
+      {accounts.map((account, index) => (
+        <NumberCard
+          key={account.id ?? account.phoneNumberId ?? index}
+          account={account}
+          labels={labels}
+          chipGap={1}
+          action={
+            <Box>
+              <IconButton
+                aria-label={labels.editAccount}
+                onClick={e => {
+                  if (!account.id) return;
+                  onMenuOpen(e, account.id);
+                }}
+              >
+                <MoreVertOutlined />
+              </IconButton>
+              <IconButton aria-label={labels.deleteAccount} color="error" onClick={() => onDeleteClick(account)}>
+                <DeleteOutlined />
+              </IconButton>
+            </Box>
+          }
+          extraChips={<ExtraChipsRow labels={labels} account={account} />}
+        />
+      ))}
+    </Stack>
+  );
+}
+
+function AccountActionMenu({
+  labels,
+  anchorEl,
+  onClose,
+  onOpenCredentialDialog,
+}: Readonly<{
+  readonly labels: WhatsappLabels;
+  readonly anchorEl: null | HTMLElement;
+  readonly onClose: () => void;
+  readonly onOpenCredentialDialog: (field: CredentialDialogField) => void;
+}>) {
+  return (
+    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
+      <MenuItem onClick={() => onOpenCredentialDialog("accessToken")}>{labels.editToken}</MenuItem>
+      <MenuItem onClick={() => onOpenCredentialDialog("twoStepPin")}>{labels.editPin}</MenuItem>
+    </Menu>
   );
 }
 
@@ -223,67 +335,21 @@ export function NumbersTabDesktop({
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Box>
-          <Typography variant="titleLg">{t.numbersTitle}</Typography>
-          <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
-            {t.numbersSubtitle}
-          </Typography>
-        </Box>
-        <Button
-          variant="outlined"
-          startIcon={<CloudSyncOutlined />}
-          disabled={syncing || !isConfigured}
-          onClick={onSyncFromMeta}
-        >
-          {syncing ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
-          {t.syncFromMeta}
-        </Button>
-      </Box>
+      <NumbersHeader labels={t} syncing={syncing} isConfigured={isConfigured} onSyncFromMeta={onSyncFromMeta} />
 
-      {accounts.length === 0 ? (
-        <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary, py: 4, textAlign: "center" }}>
-          {t.noAccounts}
-        </Typography>
-      ) : (
-        <Stack spacing={2}>
-          {accounts.map((account, index) => (
-            <NumberCard
-              key={account.id ?? account.phoneNumberId ?? index}
-              account={account}
-              labels={t}
-              chipGap={1}
-              action={
-                <Box>
-                  <IconButton
-                    aria-label={t.editAccount}
-                    onClick={e => {
-                      if (!account.id) return;
-                      handleMenuOpen(e, account.id);
-                    }}
-                  >
-                    <MoreVertOutlined />
-                  </IconButton>
-                  <IconButton aria-label={t.deleteAccount} color="error" onClick={() => handleDeleteClick(account)}>
-                    <DeleteOutlined />
-                  </IconButton>
-                </Box>
-              }
-              extraChips={
-                <>
-                  <Chip size="small" label={`${t.wabaId}: ${account.wabaId}`} />
-                  <Chip size="small" label={`${t.phoneNumberId}: ${account.phoneNumberId}`} />
-                </>
-              }
-            />
-          ))}
-        </Stack>
-      )}
+      <AccountsListSection
+        labels={t}
+        accounts={accounts}
+        onMenuOpen={handleMenuOpen}
+        onDeleteClick={handleDeleteClick}
+      />
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => openCredentialDialog("accessToken")}>{t.editToken}</MenuItem>
-        <MenuItem onClick={() => openCredentialDialog("twoStepPin")}>{t.editPin}</MenuItem>
-      </Menu>
+      <AccountActionMenu
+        labels={t}
+        anchorEl={anchorEl}
+        onClose={handleMenuClose}
+        onOpenCredentialDialog={openCredentialDialog}
+      />
 
       <CredentialEditDialog
         open={dialogOpen}

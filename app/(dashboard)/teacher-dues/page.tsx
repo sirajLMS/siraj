@@ -20,7 +20,7 @@ export default async function TeacherDuesPage() {
   const { userId, context } = await getServerUserContext();
   if (!userId) {
     await redirectToLogin();
-    return;
+    return undefined;
   }
   await requirePermissionForPage(userId, [AppPermission.TEACHER_DUES_VIEW], locale, context);
   return (

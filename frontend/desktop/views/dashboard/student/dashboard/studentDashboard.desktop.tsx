@@ -82,7 +82,7 @@ export function StudentDashboardDesktopView({
         />
       </Box>
 
-      {!nextLesson ? (
+      {nextLesson ? null : (
         <Box sx={{ ...desktopSectionContentInsetSx, py: 0, mb: 3 }}>
           <Box
             sx={theme => ({
@@ -98,7 +98,7 @@ export function StudentDashboardDesktopView({
             </Typography>
           </Box>
         </Box>
-      ) : null}
+      )}
 
       <DesktopSectionPanel contentPadding={false} title={labels.recentLessonReports} sx={{ mb: 3 }}>
         <StudentRecentReportsCardListDesktop

@@ -2,18 +2,10 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { GroupClassRepository } from "@/backend/db/repo/classes/group-class.repository";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import {
-  AppPermission,
-  ClassExecutionState,
-  ClassOutcome,
-  NotificationChannel,
-  NotificationEventType,
-} from "@/backend/enum";
-import { parseClassExecutionState, parseClassOutcome, parseGroupClassAttendanceStatus } from "@/backend/lib/enum";
+import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import { extractMeetingId } from "@/backend/services/meeting/meeting-url-parser";
 import type {
   ClassCommunicationInsertType,
   ClassCommunicationSelectType,
@@ -27,6 +19,9 @@ import type {
   GroupClassSelectType,
   GroupClassStudentReturnType,
 } from "@/backend/types";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants";
+import { parseClassExecutionState, parseClassOutcome, parseGroupClassAttendanceStatus } from "@/shared/lib/enum";
+import { extractMeetingId } from "@/shared/lib/meeting-config";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace GroupClassService {

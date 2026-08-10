@@ -1,6 +1,6 @@
 import { findAdminUserOrFallback, type SeedConfig } from "@/backend/db/seeds/lib";
 import { ClassExecutionState, CurrencyCode, LessonReportStatus, RateSource, TeacherDueStatus } from "@/backend/enum";
-import logger from "@/backend/lib/logger";
+import { logger } from "@/backend/lib/logger";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type {
   ClassInstanceSelectType,
@@ -101,7 +101,8 @@ export async function seedOrGet(
 
   const results: (TeacherDueReturnType | null)[] = [];
 
-  for (const spec of specs) {
+  await specs.reduce(async (prev, spec) => {
+    await prev;
     const due = await TeacherDueService.seedTeacherDueIfMissing({
       classInstanceId: spec.classInstance.id,
       teacherId: spec.teacherId,
@@ -116,7 +117,7 @@ export async function seedOrGet(
     });
 
     results.push(due);
-  }
+  }, Promise.resolve());
 
   const seeded = results.filter((row): row is TeacherDueReturnType => row != null);
   logger.info(`LMS teacher dues seeded (${seeded.length} rows).`);

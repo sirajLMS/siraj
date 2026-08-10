@@ -20,6 +20,9 @@ const LOW_BALANCE_ABSOLUTE_FLOOR = 3;
 /** Maximum number of expiring quotas to process per sweeper run (unbounded SELECT guard — RP2-9). */
 const MAX_EXPIRING_QUOTAS_PER_RUN = 500;
 
+/** Chunk size for parallel periodic-refresh processing inside the transaction. */
+const PERIODIC_REFRESH_CHUNK_SIZE = 10;
+
 /**
  * Notification target for a single quota: the affected user IDs (parent or
  * student), the quota's display name, and the student's display name.
@@ -63,6 +66,127 @@ async function resolveQuotaNotificationTargets(
   return result;
 }
 
+/**
+ * Queries quotas approaching expiry (ACTIVE, not deleted, validUntil within
+ * the next EXPIRY_NOTICE_DAYS days). Uses UTC date arithmetic (V3-047) to
+ * avoid server-local timezone skew. Guards against unbounded SELECTs via
+ * MAX_EXPIRING_QUOTAS_PER_RUN.
+ */
+async function queryExpiringSoonQuotas(): Promise<QuotaSelectType[]> {
+  const nowUtc = new Date();
+  const todayStr = nowUtc.toISOString().slice(0, 10);
+
+  const cutoffUtc = new Date(
+    Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth(), nowUtc.getUTCDate() + EXPIRY_NOTICE_DAYS)
+  );
+  const cutoffStr = cutoffUtc.toISOString().slice(0, 10);
+
+  return await db
+    .select()
+    .from(quotas)
+    .where(
+      and(
+        eq(quotas.status, QuotaStatus.ACTIVE),
+        isNull(quotas.deletedAt),
+        sql`${quotas.validUntil} > ${todayStr}`,
+        sql`${quotas.validUntil} <= ${cutoffStr}`
+      )
+    )
+    .limit(MAX_EXPIRING_QUOTAS_PER_RUN);
+}
+
+/** Determines whether a refreshed quota qualifies as low-balance. */
+function isLowBalance(quota: QuotaReturnType): boolean {
+  const threshold = Math.max(
+    Math.floor(quota.totalClasses * LOW_BALANCE_THRESHOLD_FRACTION),
+    LOW_BALANCE_ABSOLUTE_FLOOR
+  );
+  return quota.remaining > 0 && quota.remaining <= threshold;
+}
+
+/**
+ * Periodic refresh of all rollover-eligible quotas, executed inside a single
+ * transaction. Processes refresh in parallel chunks of PERIODIC_REFRESH_CHUNK_SIZE
+ * (Verify-6) to balance throughput against transaction limits. Returns the
+ * subset of refreshed quotas that now qualify as low-balance.
+ *
+ * RCOMP-1: Calls QuotaService.listPeriodicForRollover (service layer) rather
+ * than the repository directly, per the single-writer principle.
+ */
+async function refreshPeriodicAndCollectLowBalance(): Promise<QuotaReturnType[]> {
+  const lowBalanceResults: QuotaReturnType[] = [];
+
+  await db.transaction(async tx => {
+    const periodicQuotas = await QuotaService.listPeriodicForRollover(tx);
+
+    // Process in sequential chunks (shared transaction) via recursive helper
+    // to avoid no-await-in-loop while preserving transaction semantics.
+    const processChunk = async (index: number): Promise<void> => {
+      if (index >= periodicQuotas.length) return;
+      const chunk = periodicQuotas.slice(index, index + PERIODIC_REFRESH_CHUNK_SIZE);
+      const refreshedQuotas = await Promise.all(chunk.map(quota => QuotaService.refreshPeriodic(tx, quota.id, null)));
+
+      for (const refreshed of refreshedQuotas) {
+        if (isLowBalance(refreshed)) {
+          lowBalanceResults.push(refreshed);
+        }
+      }
+      return processChunk(index + PERIODIC_REFRESH_CHUNK_SIZE);
+    };
+    await processChunk(0);
+  });
+
+  return lowBalanceResults;
+}
+
+/**
+ * Dispatches notifications for every quota whose target has at least one
+ * affected user, building the notification payload via the supplied builder.
+ * Shared by the expired / expiring-soon / low-balance dispatch paths to keep
+ * the "skip if no affected users" guard logic in one place.
+ */
+async function dispatchQuotaNotifications<T extends QuotaReturnType | QuotaSelectType>(
+  quotasList: T[],
+  targets: Map<string, QuotaNotificationTarget>,
+  buildNotification: (quota: T, target: QuotaNotificationTarget) => Promise<void>
+): Promise<void> {
+  await Promise.all(
+    quotasList.map(async quota => {
+      const target = targets.get(quota.id);
+      if (!target || target.affectedUserIds.length === 0) return;
+      await buildNotification(quota, target);
+    })
+  );
+}
+
+/** Builds an "expired" notification payload from a target's affected users. */
+function buildExpiredNotification(_quota: QuotaReturnType, target: QuotaNotificationTarget): Promise<void> {
+  return QuotaNotificationService.sendQuotaExpired({
+    affectedUserIds: target.affectedUserIds,
+    quotaName: target.quotaName,
+  });
+}
+
+/** Builds an "expiring soon" notification payload from a quota and its target. */
+function buildExpiringSoonNotification(quota: QuotaSelectType, target: QuotaNotificationTarget): Promise<void> {
+  return QuotaNotificationService.sendQuotaExpiringSoon({
+    affectedUserIds: target.affectedUserIds,
+    quotaName: target.quotaName,
+    validUntil: quota.validUntil ?? "",
+    remaining: quota.remaining,
+  });
+}
+
+/** Builds a "low balance" notification payload from a quota and its target. */
+function buildLowBalanceNotification(quota: QuotaReturnType, target: QuotaNotificationTarget): Promise<void> {
+  return QuotaNotificationService.sendQuotaLowBalance({
+    affectedUserIds: target.affectedUserIds,
+    studentName: target.studentName,
+    remaining: quota.remaining,
+    totalClasses: quota.totalClasses,
+  });
+}
+
 export async function runQuotaExpirySweeper(): Promise<void> {
   logger.info("[QuotaExpirySweeper] Starting quota expiry & periodic refresh sweep...");
   try {
@@ -71,117 +195,28 @@ export async function runQuotaExpirySweeper(): Promise<void> {
     logger.info(`[QuotaExpirySweeper] Expired ${expiredQuotas.length} overdue quotas.`);
 
     // ── 2. Query quotas approaching expiry (validUntil within N days) ──────
-    // V3-047: Use UTC date arithmetic to avoid server-local timezone skew.
-    const nowUtc = new Date();
-    const todayStr = nowUtc.toISOString().slice(0, 10);
-
-    const cutoffUtc = new Date(
-      Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth(), nowUtc.getUTCDate() + EXPIRY_NOTICE_DAYS)
-    );
-    const cutoffStr = cutoffUtc.toISOString().slice(0, 10);
-
-    const expiringSoonQuotas: QuotaSelectType[] = await db
-      .select()
-      .from(quotas)
-      .where(
-        and(
-          eq(quotas.status, QuotaStatus.ACTIVE),
-          isNull(quotas.deletedAt),
-          sql`${quotas.validUntil} > ${todayStr}`,
-          sql`${quotas.validUntil} <= ${cutoffStr}`
-        )
-      )
-      .limit(MAX_EXPIRING_QUOTAS_PER_RUN);
+    const expiringSoonQuotas = await queryExpiringSoonQuotas();
 
     // ── 3. Resolve notification targets (parent userIds) for both sets ─────
-    // RP2-7: Parallelise the 3 independent resolveQuotaNotificationTargets calls.
+    // RP2-7: Parallelise the independent resolveQuotaNotificationTargets calls.
     const [expiredTargets, expiringTargets] = await Promise.all([
       resolveQuotaNotificationTargets(expiredQuotas),
       resolveQuotaNotificationTargets(expiringSoonQuotas),
     ]);
 
     // ── 4. Periodic refresh + collect low-balance candidates ───────────────
-    // Collect post-refresh quota snapshots inside the transaction; dispatch
-    // notifications after commit to avoid holding the tx open during dispatch.
-    const lowBalanceQuotas: QuotaSelectType[] = [];
-
-    await db.transaction(async tx => {
-      // RCOMP-1: Call QuotaService.listPeriodicForRollover (service layer) instead
-      // of QuotaRepository.listPeriodicForRollover directly — the service is the
-      // canonical entry point per the single-writer principle.
-      const periodicQuotas = await QuotaService.listPeriodicForRollover(tx);
-
-      // Verify-6: Process periodic refresh in parallel chunks of 10 to avoid
-      // sequential await overhead while staying within transaction limits.
-      const CHUNK_SIZE = 10;
-      const lowBalanceResults: QuotaSelectType[] = [];
-
-      for (let i = 0; i < periodicQuotas.length; i += CHUNK_SIZE) {
-        const chunk = periodicQuotas.slice(i, i + CHUNK_SIZE);
-        const refreshedQuotas = await Promise.all(chunk.map(quota => QuotaService.refreshPeriodic(tx, quota.id, null)));
-
-        for (const refreshed of refreshedQuotas) {
-          const threshold = Math.max(
-            Math.floor(refreshed.totalClasses * LOW_BALANCE_THRESHOLD_FRACTION),
-            LOW_BALANCE_ABSOLUTE_FLOOR
-          );
-          if (refreshed.remaining > 0 && refreshed.remaining <= threshold) {
-            lowBalanceResults.push(refreshed as QuotaSelectType);
-          }
-        }
-      }
-
-      lowBalanceQuotas.push(...lowBalanceResults);
-    });
-
+    const lowBalanceQuotas = await refreshPeriodicAndCollectLowBalance();
     const lowBalanceTargets = await resolveQuotaNotificationTargets(lowBalanceQuotas);
 
     // ── 5. Dispatch notifications (after tx commits) ──────────────────────
     await Promise.all([
-      (async () => {
-        await Promise.all(
-          expiredQuotas.map(quota => {
-            const target = expiredTargets.get(quota.id);
-            if (!target || target.affectedUserIds.length === 0) return Promise.resolve();
-            return QuotaNotificationService.sendQuotaExpired({
-              affectedUserIds: target.affectedUserIds,
-              quotaName: target.quotaName,
-            });
-          })
-        );
-        logger.info(`[QuotaExpirySweeper] Dispatched ${expiredQuotas.length} expired notifications.`);
-      })(),
-      (async () => {
-        await Promise.all(
-          expiringSoonQuotas.map(quota => {
-            const target = expiringTargets.get(quota.id);
-            if (!target || target.affectedUserIds.length === 0) return Promise.resolve();
-            return QuotaNotificationService.sendQuotaExpiringSoon({
-              affectedUserIds: target.affectedUserIds,
-              quotaName: target.quotaName,
-              validUntil: quota.validUntil ?? "",
-              remaining: quota.remaining,
-            });
-          })
-        );
-        logger.info(`[QuotaExpirySweeper] Dispatched ${expiringSoonQuotas.length} expiring-soon notifications.`);
-      })(),
-      (async () => {
-        await Promise.all(
-          lowBalanceQuotas.map(quota => {
-            const target = lowBalanceTargets.get(quota.id);
-            if (!target || target.affectedUserIds.length === 0) return Promise.resolve();
-            return QuotaNotificationService.sendQuotaLowBalance({
-              affectedUserIds: target.affectedUserIds,
-              studentName: target.studentName,
-              remaining: quota.remaining,
-              totalClasses: quota.totalClasses,
-            });
-          })
-        );
-        logger.info(`[QuotaExpirySweeper] Dispatched ${lowBalanceQuotas.length} low-balance notifications.`);
-      })(),
+      dispatchQuotaNotifications(expiredQuotas, expiredTargets, buildExpiredNotification),
+      dispatchQuotaNotifications(expiringSoonQuotas, expiringTargets, buildExpiringSoonNotification),
+      dispatchQuotaNotifications(lowBalanceQuotas, lowBalanceTargets, buildLowBalanceNotification),
     ]);
+    logger.info(`[QuotaExpirySweeper] Dispatched ${expiredQuotas.length} expired notifications.`);
+    logger.info(`[QuotaExpirySweeper] Dispatched ${expiringSoonQuotas.length} expiring-soon notifications.`);
+    logger.info(`[QuotaExpirySweeper] Dispatched ${lowBalanceQuotas.length} low-balance notifications.`);
 
     logger.info("[QuotaExpirySweeper] Completed periodic quota refresh sweep.");
   } catch (error) {

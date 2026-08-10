@@ -51,6 +51,172 @@ export interface CronScheduleCreateEditDialogProps {
   readonly onSave: (data: CronScheduleFormData) => Promise<void>;
 }
 
+interface CronScheduleFormFieldProps {
+  readonly form: CronScheduleFormData;
+  readonly labels: CronLabels;
+  readonly setForm: React.Dispatch<React.SetStateAction<CronScheduleFormData>>;
+  readonly preview: readonly string[];
+}
+
+function CronBasicFields({ form, labels, setForm, preview }: Readonly<CronScheduleFormFieldProps>) {
+  return (
+    <>
+      <TextField
+        label={labels.fieldName}
+        value={form.name}
+        onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
+        required
+        fullWidth
+      />
+      <TextField
+        label={labels.fieldDescription}
+        value={form.description}
+        onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
+        multiline
+        rows={2}
+        fullWidth
+      />
+      <TextField
+        label={labels.fieldCronExpression}
+        value={form.cronExpression}
+        onChange={e => setForm(prev => ({ ...prev, cronExpression: e.target.value }))}
+        required
+        fullWidth
+        helperText={preview.length > 0 ? `${labels.previewNextRuns}: ${preview.join(", ")}` : undefined}
+      />
+    </>
+  );
+}
+
+function CronJobKindSelect({ form, labels, setForm }: Readonly<CronScheduleFormFieldProps>) {
+  return (
+    <TextField
+      select
+      label={labels.fieldJobKind}
+      value={form.jobKind}
+      onChange={e =>
+        setForm(prev => ({
+          ...prev,
+          jobKind: safeEnum(e.target.value, Object.values(CronJobKind)) ?? prev.jobKind,
+        }))
+      }
+      fullWidth
+    >
+      <MenuItem value={CronJobKind.Noop}>{labels.jobKindNoop}</MenuItem>
+    </TextField>
+  );
+}
+
+const TIMEZONES = [
+  "UTC",
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Asia/Dubai",
+  "Asia/Riyadh",
+  "Asia/Tokyo",
+  "Asia/Shanghai",
+  "Asia/Kolkata",
+  "Australia/Sydney",
+] as const;
+
+function CronTimezoneSelect({ form, labels, setForm }: Readonly<CronScheduleFormFieldProps>) {
+  return (
+    <TextField
+      select
+      label={labels.fieldTimezone}
+      value={form.timezone}
+      onChange={e => setForm(prev => ({ ...prev, timezone: e.target.value }))}
+      fullWidth
+    >
+      {TIMEZONES.map(tz => (
+        <MenuItem key={tz} value={tz}>
+          {tz}
+        </MenuItem>
+      ))}
+    </TextField>
+  );
+}
+
+function CronConcurrencyPolicyRadio({ form, labels, setForm }: Readonly<CronScheduleFormFieldProps>) {
+  return (
+    <FormControl>
+      <FormLabel>{labels.fieldConcurrencyPolicy}</FormLabel>
+      <RadioGroup
+        row
+        value={form.concurrencyPolicy}
+        onChange={e =>
+          setForm(prev => ({
+            ...prev,
+            concurrencyPolicy: safeEnum(e.target.value, Object.values(CronConcurrencyPolicy)) ?? prev.concurrencyPolicy,
+          }))
+        }
+      >
+        <FormControlLabel value={CronConcurrencyPolicy.Allow} control={<Radio />} label={labels.concurrencyAllow} />
+        <FormControlLabel value={CronConcurrencyPolicy.Skip} control={<Radio />} label={labels.concurrencySkip} />
+        <FormControlLabel value={CronConcurrencyPolicy.Replace} control={<Radio />} label={labels.concurrencyReplace} />
+      </RadioGroup>
+    </FormControl>
+  );
+}
+
+function CronRetryFields({ form, labels, setForm }: Readonly<CronScheduleFormFieldProps>) {
+  return (
+    <>
+      <Stack direction="row" spacing={2}>
+        <TextField
+          label={labels.fieldMaxRetries}
+          type="number"
+          value={form.maxRetries}
+          onChange={e =>
+            setForm(prev => ({ ...prev, maxRetries: e.target.value === "" ? "" : Number(e.target.value) }))
+          }
+          fullWidth
+        />
+        <TextField
+          label={labels.fieldRetryBackoffSeconds}
+          type="number"
+          value={form.retryBackoffSeconds}
+          onChange={e =>
+            setForm(prev => ({
+              ...prev,
+              retryBackoffSeconds: e.target.value === "" ? "" : Number(e.target.value),
+            }))
+          }
+          fullWidth
+        />
+      </Stack>
+      <TextField
+        label={labels.fieldTimeoutSeconds}
+        type="number"
+        value={form.timeoutSeconds}
+        onChange={e =>
+          setForm(prev => ({ ...prev, timeoutSeconds: e.target.value === "" ? "" : Number(e.target.value) }))
+        }
+        fullWidth
+      />
+    </>
+  );
+}
+
+function CronPayloadField({ form, labels, setForm }: Readonly<CronScheduleFormFieldProps>) {
+  return (
+    <TextField
+      label={labels.fieldPayload}
+      value={form.payload}
+      onChange={e => setForm(prev => ({ ...prev, payload: e.target.value }))}
+      multiline
+      rows={3}
+      fullWidth
+      placeholder='{"key": "value"}'
+    />
+  );
+}
+
 export function CronScheduleCreateEditDialog({
   open,
   editingSchedule,
@@ -82,142 +248,20 @@ export function CronScheduleCreateEditDialog({
     [form, onSave]
   );
 
+  const fieldProps: CronScheduleFormFieldProps = { form, labels, setForm, preview };
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEdit ? labels.dialogEditTitle : labels.dialogCreateTitle}</DialogTitle>
       <form id={FORM_ID} onSubmit={handleSubmit}>
         <DialogContent>
           <Stack spacing={2}>
-            <TextField
-              label={labels.fieldName}
-              value={form.name}
-              onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-              required
-              fullWidth
-            />
-            <TextField
-              label={labels.fieldDescription}
-              value={form.description}
-              onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
-              multiline
-              rows={2}
-              fullWidth
-            />
-            <TextField
-              label={labels.fieldCronExpression}
-              value={form.cronExpression}
-              onChange={e => setForm(prev => ({ ...prev, cronExpression: e.target.value }))}
-              required
-              fullWidth
-              helperText={preview.length > 0 ? `${labels.previewNextRuns}: ${preview.join(", ")}` : undefined}
-            />
-            <TextField
-              select
-              label={labels.fieldJobKind}
-              value={form.jobKind}
-              onChange={e =>
-                setForm(prev => ({
-                  ...prev,
-                  jobKind: safeEnum(e.target.value, Object.values(CronJobKind)) ?? prev.jobKind,
-                }))
-              }
-              fullWidth
-            >
-              <MenuItem value={CronJobKind.Noop}>{labels.jobKindNoop}</MenuItem>
-            </TextField>
-            <TextField
-              label={labels.fieldPayload}
-              value={form.payload}
-              onChange={e => setForm(prev => ({ ...prev, payload: e.target.value }))}
-              multiline
-              rows={3}
-              fullWidth
-              placeholder='{"key": "value"}'
-            />
-            <TextField
-              select
-              label={labels.fieldTimezone}
-              value={form.timezone}
-              onChange={e => setForm(prev => ({ ...prev, timezone: e.target.value }))}
-              fullWidth
-            >
-              <MenuItem value="UTC">UTC</MenuItem>
-              <MenuItem value="America/New_York">America/New_York</MenuItem>
-              <MenuItem value="America/Chicago">America/Chicago</MenuItem>
-              <MenuItem value="America/Denver">America/Denver</MenuItem>
-              <MenuItem value="America/Los_Angeles">America/Los_Angeles</MenuItem>
-              <MenuItem value="Europe/London">Europe/London</MenuItem>
-              <MenuItem value="Europe/Paris">Europe/Paris</MenuItem>
-              <MenuItem value="Europe/Berlin">Europe/Berlin</MenuItem>
-              <MenuItem value="Asia/Dubai">Asia/Dubai</MenuItem>
-              <MenuItem value="Asia/Riyadh">Asia/Riyadh</MenuItem>
-              <MenuItem value="Asia/Tokyo">Asia/Tokyo</MenuItem>
-              <MenuItem value="Asia/Shanghai">Asia/Shanghai</MenuItem>
-              <MenuItem value="Asia/Kolkata">Asia/Kolkata</MenuItem>
-              <MenuItem value="Australia/Sydney">Australia/Sydney</MenuItem>
-            </TextField>
-            <FormControl>
-              <FormLabel>{labels.fieldConcurrencyPolicy}</FormLabel>
-              <RadioGroup
-                row
-                value={form.concurrencyPolicy}
-                onChange={e =>
-                  setForm(prev => ({
-                    ...prev,
-                    concurrencyPolicy:
-                      safeEnum(e.target.value, Object.values(CronConcurrencyPolicy)) ?? prev.concurrencyPolicy,
-                  }))
-                }
-              >
-                <FormControlLabel
-                  value={CronConcurrencyPolicy.Allow}
-                  control={<Radio />}
-                  label={labels.concurrencyAllow}
-                />
-                <FormControlLabel
-                  value={CronConcurrencyPolicy.Skip}
-                  control={<Radio />}
-                  label={labels.concurrencySkip}
-                />
-                <FormControlLabel
-                  value={CronConcurrencyPolicy.Replace}
-                  control={<Radio />}
-                  label={labels.concurrencyReplace}
-                />
-              </RadioGroup>
-            </FormControl>
-            <Stack direction="row" spacing={2}>
-              <TextField
-                label={labels.fieldMaxRetries}
-                type="number"
-                value={form.maxRetries}
-                onChange={e =>
-                  setForm(prev => ({ ...prev, maxRetries: e.target.value === "" ? "" : Number(e.target.value) }))
-                }
-                fullWidth
-              />
-              <TextField
-                label={labels.fieldRetryBackoffSeconds}
-                type="number"
-                value={form.retryBackoffSeconds}
-                onChange={e =>
-                  setForm(prev => ({
-                    ...prev,
-                    retryBackoffSeconds: e.target.value === "" ? "" : Number(e.target.value),
-                  }))
-                }
-                fullWidth
-              />
-            </Stack>
-            <TextField
-              label={labels.fieldTimeoutSeconds}
-              type="number"
-              value={form.timeoutSeconds}
-              onChange={e =>
-                setForm(prev => ({ ...prev, timeoutSeconds: e.target.value === "" ? "" : Number(e.target.value) }))
-              }
-              fullWidth
-            />
+            <CronBasicFields {...fieldProps} />
+            <CronJobKindSelect {...fieldProps} />
+            <CronPayloadField {...fieldProps} />
+            <CronTimezoneSelect {...fieldProps} />
+            <CronConcurrencyPolicyRadio {...fieldProps} />
+            <CronRetryFields {...fieldProps} />
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>

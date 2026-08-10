@@ -41,6 +41,4 @@ export function TeacherWeeklyScheduleContainer(props: Readonly<UseTeacherWeeklyS
     </RequirePermission>
   );
 }
-
-export default TeacherWeeklyScheduleContainer;
 export type { TeacherWeeklyScheduleViewModel, UseTeacherWeeklyScheduleViewModelProps };

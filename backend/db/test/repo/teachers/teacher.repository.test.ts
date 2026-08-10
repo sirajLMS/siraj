@@ -11,6 +11,30 @@ import { AccountStatus, CurrencyCode } from "@/backend/enum";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PaginationArgs } from "@/backend/types";
 
+/**
+ * Type guard that narrows an unknown value to DBTransaction for mock-based tests.
+ */
+function isDbTransaction(value: unknown): value is DBTransaction {
+  return typeof value === "object" && value !== null && "select" in value && "insert" in value;
+}
+
+/**
+ * Catch-and-assert error helper — avoids expect(...).rejects.toThrow() inside runInRollback.
+ */
+async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  expect(errorCaught).not.toBeNull();
+  if (!(errorCaught instanceof Error)) {
+    throw new Error(`Expected an Error instance but got: ${String(errorCaught)}`);
+  }
+  return errorCaught;
+}
+
 describe("TeacherRepository", () => {
   it("getTeacherDirectory returns all non-deleted teachers sorted by name", async () => {
     await runInRollback(async tx => {
@@ -173,15 +197,10 @@ describe("TeacherRepository", () => {
 
         await TeacherRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx);
 
-        let error: unknown = null;
-        try {
-          await TeacherRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx, "ar");
-        } catch (e) {
-          error = e;
-        }
-
-        expect(error).not.toBeNull();
-        expect((error as Error).message).toContain("موجود بالفعل");
+        const error = await expectRepoError(() =>
+          TeacherRepository.create({ userId: user.id, createdAt: new Date(), updatedAt: new Date() }, tx, "ar")
+        );
+        expect(error.message).toContain("موجود بالفعل");
       });
     });
 
@@ -346,26 +365,24 @@ describe("TeacherRepository", () => {
         select: () => ({
           from: () => ({
             where: () => ({
-              limit: () => [],
+              limit: () => [] as unknown[],
             }),
           }),
         }),
         insert: () => ({
           values: () => ({
-            returning: () => [],
+            returning: () => [] as unknown[],
           }),
         }),
-      } as unknown as DBTransaction;
-
-      let error: unknown = null;
-      try {
-        await TeacherRepository.create({ userId: randomUUID(), createdAt: new Date(), updatedAt: new Date() }, mockTx);
-      } catch (e) {
-        error = e;
+      };
+      if (!isDbTransaction(mockTx)) {
+        throw new Error("Mock transaction does not satisfy DBTransaction contract");
       }
 
-      expect(error).not.toBeNull();
-      expect((error as Error).message).toContain("Failed");
+      const error = await expectRepoError(() =>
+        TeacherRepository.create({ userId: randomUUID(), createdAt: new Date(), updatedAt: new Date() }, mockTx)
+      );
+      expect(error.message).toContain("Failed");
     });
   });
 

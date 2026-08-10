@@ -19,7 +19,7 @@ import {
 import { NextClassJoinCard } from "@/frontend/mobile/views/dashboard/student/dashboard/components/nextClassJoinCard.mobile";
 import { RecentLessonReportCardMobile } from "@/frontend/mobile/views/dashboard/student/dashboard/components/recentLessonReportCard.mobile";
 
-function LoadingState({ message }: { message: string }) {
+function LoadingState({ message }: Readonly<{ message: string }>) {
   return (
     <MobilePageContainer>
       <Typography variant="bodyMd" sx={{ p: 3 }}>
@@ -34,12 +34,12 @@ function NextClassSection({
   labels,
   locale,
   onJoin,
-}: {
+}: Readonly<{
   nextLesson: StudentDashboardViewModel["nextLesson"];
   labels: StudentDashboardViewModel["labels"];
   locale: StudentDashboardViewModel["locale"];
   onJoin: StudentDashboardViewModel["onJoinLesson"];
-}) {
+}>) {
   if (!nextLesson) return null;
 
   return (
@@ -52,14 +52,14 @@ function NextClassSection({
 function MetricsSection({
   metrics,
   onMetricClick,
-}: {
+}: Readonly<{
   metrics: readonly MetricItem[];
   onMetricClick: (key: string) => void;
-}) {
+}>) {
   return <MobileMetricCardGrid metrics={metrics} onMetricClick={onMetricClick} />;
 }
 
-function NoUpcomingClassesMessage({ labels }: { labels: StudentDashboardViewModel["labels"] }) {
+function NoUpcomingClassesMessage({ labels }: Readonly<{ labels: StudentDashboardViewModel["labels"] }>) {
   return (
     <MobileContentInset>
       <Box
@@ -86,9 +86,11 @@ function RecentLessonReportsSection({
   lessonReportStatusLabels,
   locale,
   onAddReflection,
-}: Pick<
-  StudentDashboardViewModel,
-  "recentLessonReports" | "reportsPagination" | "labels" | "lessonReportStatusLabels" | "locale" | "onAddReflection"
+}: Readonly<
+  Pick<
+    StudentDashboardViewModel,
+    "recentLessonReports" | "reportsPagination" | "labels" | "lessonReportStatusLabels" | "locale" | "onAddReflection"
+  >
 >) {
   return (
     <MobileSectionPanel title={labels.recentLessonReports} contentInset={false}>

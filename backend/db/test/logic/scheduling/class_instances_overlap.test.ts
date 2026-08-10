@@ -17,67 +17,67 @@ async function setupTestParent(tx: DBTransaction) {
   return createTestParent(tx, user.id);
 }
 
-async function createTestTeachers(tx: DBTransaction, now: Date) {
+async function createTestTeachers(tx: DBTransaction, now: Date): Promise<TeacherSelectType[]> {
   const teachersData = [
     { name: "Overlap Teacher 1", email: `teacher1-${randomUUID()}@example.com` },
     { name: "Overlap Teacher 2", email: `teacher2-${randomUUID()}@example.com` },
   ];
 
-  const createdTeachers: TeacherSelectType[] = [];
-  for (const data of teachersData) {
-    const [user] = await tx
-      .insert(users)
-      .values({
-        name: data.name,
-        email: data.email,
-        password: "password",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+  return Promise.all(
+    teachersData.map(async (data): Promise<TeacherSelectType> => {
+      const [user] = await tx
+        .insert(users)
+        .values({
+          name: data.name,
+          email: data.email,
+          password: "password",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
-    const [teacher] = (await tx
-      .insert(teachers)
-      .values({
-        userId: user.id,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning()) as [TeacherSelectType];
-    createdTeachers.push(teacher);
-  }
-  return createdTeachers;
+      const [teacher] = await tx
+        .insert(teachers)
+        .values({
+          userId: user.id,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
+      return teacher;
+    })
+  );
 }
 
-async function createTestStudents(tx: DBTransaction, parentId: string, now: Date) {
+async function createTestStudents(tx: DBTransaction, parentId: string, now: Date): Promise<StudentSelectType[]> {
   const studentsData = [
     { name: "Overlap Student 1", gender: Gender.MALE },
     { name: "Overlap Student 2", gender: Gender.FEMALE },
   ];
 
-  const createdStudents: StudentSelectType[] = [];
-  for (const data of studentsData) {
-    const studentUser = await createTestUser(tx, {
-      name: `${data.name} User`,
-      email: `student-${randomUUID()}@example.com`,
-    });
-    const [student] = (await tx
-      .insert(students)
-      .values({
-        parentId,
-        userId: studentUser.id,
-        name: data.name,
-        gender: data.gender,
-        status: "REGULAR",
-        classesRemaining: 10,
-        createdAt: now,
-        updatedAt: now,
-        idempotencyKey: randomUUID(),
-      })
-      .returning()) as [StudentSelectType];
-    createdStudents.push(student);
-  }
-  return createdStudents;
+  return Promise.all(
+    studentsData.map(async (data): Promise<StudentSelectType> => {
+      const studentUser = await createTestUser(tx, {
+        name: `${data.name} User`,
+        email: `student-${randomUUID()}@example.com`,
+      });
+      const [student] = await tx
+        .insert(students)
+        .values({
+          parentId,
+          userId: studentUser.id,
+          name: data.name,
+          gender: data.gender,
+          status: "REGULAR",
+          classesRemaining: 10,
+          createdAt: now,
+          updatedAt: now,
+          idempotencyKey: randomUUID(),
+        })
+        .returning();
+      return student;
+    })
+  );
 }
 
 async function setupTestContext(tx: DBTransaction) {
@@ -105,7 +105,10 @@ async function expectOverlapError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (!(errorCaught instanceof Error)) {
+    throw new Error("Expected caught error to be an instance of Error");
+  }
+  return errorCaught;
 }
 
 async function testTeacherOverlaps(tx: DBTransaction, student1Id: string, student2Id: string, teacher1Id: string) {

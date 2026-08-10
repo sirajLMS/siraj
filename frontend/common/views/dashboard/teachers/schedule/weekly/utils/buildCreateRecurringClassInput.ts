@@ -57,7 +57,7 @@ export function buildCreateRecurringClassInput(
     studentId,
     teacherId,
     subjectId,
-    durationMinutes: Number(duration),
+    durationMinutes: duration,
     defaultStartTime,
     timezone: toGraphqlIanaTimezone(timezone),
     classType,

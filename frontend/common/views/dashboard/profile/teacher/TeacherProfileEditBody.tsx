@@ -1,9 +1,9 @@
 "use client";
 
 import { type CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import {
   isTeacherAdminData,
+  type TeacherProfileViewLabels,
   type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 import { TeacherAdminEditForm } from "@/frontend/common/views/dashboard/profile/teacher/TeacherAdminEditForm";
@@ -108,7 +108,7 @@ export function TeacherProfileEditBody({
           timezone: values.timezone ?? "",
           hourlyRate: values.hourlyRate ?? "",
           rateCurrency: values.rateCurrency,
-          status: values.status ?? "",
+          status: values.status ?? null,
           displayCurrency: values.displayCurrency ?? null,
         });
       }}

@@ -8,6 +8,11 @@ import {
   CronRunStatus,
   CronScheduleStatus,
   type CronTriggerSource,
+  isCronConcurrencyPolicy,
+  isCronJobKind,
+  isCronRunStatus,
+  isCronScheduleStatus,
+  isCronTriggerSource,
 } from "@/backend/enum/cron/cron.enums";
 import type {
   CronHeartbeatInsertType,
@@ -29,28 +34,72 @@ import type {
 
 const INFLIGHT_STATUSES = [CronRunStatus.PENDING, CronRunStatus.RUNNING, CronRunStatus.RETRYING] as const;
 
+/**
+ * Execute a runner function either in the provided transaction or in a new
+ * `db.transaction`. Eliminates the `tx ? runner(tx) : db.transaction(runner)`
+ * boilerplate repeated across repository methods.
+ */
+async function withTx<T>(tx: DBTransaction | undefined, runner: (t: DBTransaction) => Promise<T>): Promise<T> {
+  return tx ? runner(tx) : db.transaction(runner);
+}
+
+/** Build a paginated list result (rows + totalCount) for the runs table. */
+async function paginatedRuns(
+  where: ReturnType<typeof eq> | undefined,
+  params: { limit: number; offset: number },
+  tx?: DBTransaction
+): Promise<CronRunListResult> {
+  const { limit, offset } = params;
+  const [rows, totalRows] = await Promise.all([
+    queryDb(tx).select().from(cronRuns).where(where).orderBy(desc(cronRuns.startedAt)).limit(limit).offset(offset),
+    queryDb(tx).select({ count: count() }).from(cronRuns).where(where),
+  ]);
+
+  return {
+    rows: rows.map(toRunReturnType),
+    totalCount: totalRows[0]?.count ?? 0,
+  };
+}
+
 /** Maximum time (in seconds) a PENDING run is allowed to remain un-dispatched
  *  before `reconcileStuckRuns` reaps it as TIMEOUT. This covers the race
  *  where `dispatchDueSchedules` claims a run (commits PENDING + advances
  *  nextRunAt) but the process crashes before `adapter.send` is called. */
 const PENDING_STUCK_TIMEOUT_SECONDS = 300; // 5 minutes
 
+// Drizzle's pgEnum infers enum columns as `string`, but the DB enforces valid
+// enum values. Narrow at runtime via type guards so we avoid an unsafe
+// `as` assertion when constructing the strongly-typed return value.
+
 export function toScheduleReturnType(row: CronScheduleSelectType): CronScheduleReturnType {
-  const { createdByUserId: _createdByUserId, updatedByUserId: _updatedByUserId, ...rest } = row;
-  return rest as CronScheduleReturnType;
+  const {
+    createdByUserId: _createdByUserId,
+    updatedByUserId: _updatedByUserId,
+    jobKind,
+    status,
+    concurrencyPolicy,
+    ...rest
+  } = row;
+  if (!isCronJobKind(jobKind) || !isCronScheduleStatus(status) || !isCronConcurrencyPolicy(concurrencyPolicy)) {
+    throw new Error(`Invalid cron schedule row (id=${row.id}): enum field contains unexpected value`);
+  }
+  return { ...rest, jobKind, status, concurrencyPolicy };
 }
 
 function toRunReturnType(row: CronRunSelectType): CronRunReturnType {
-  const { errorStack: _errorStack, ...rest } = row;
-  return rest as CronRunReturnType;
+  const { errorStack: _errorStack, jobKind, status, triggerSource, ...rest } = row;
+  if (!isCronJobKind(jobKind) || !isCronRunStatus(status) || !isCronTriggerSource(triggerSource)) {
+    throw new Error(`Invalid cron run row (id=${row.id}): enum field contains unexpected value`);
+  }
+  return { ...rest, jobKind, status, triggerSource };
 }
 
 // Internal DB-level audit messages — NOT user-facing strings.
 // The repository has no locale context, so these generic constants are
 // stored as-is in the database. The service layer translates user-facing
 // errors via i18n at the resolver boundary.
-const _REPLACE_MANUAL_TRIGGER_MSG = "Replaced by manual trigger";
-const _HEARTBEAT_TIMEOUT_MSG = "Heartbeat timeout";
+const REPLACE_MANUAL_TRIGGER_MSG = "Replaced by manual trigger";
+const HEARTBEAT_TIMEOUT_MSG = "Heartbeat timeout";
 
 /**
  * Default valid **prior** statuses for each target status, used when `fromStatuses`
@@ -74,11 +123,10 @@ export namespace CronRepository {
     input: CronScheduleInsertType,
     tx?: DBTransaction
   ): Promise<CronScheduleSelectType> => {
-    const runner = async (t: DBTransaction) => {
+    return withTx(tx, async t => {
       const [row] = await t.insert(cronSchedules).values(input).returning();
       return row;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   export const updateSchedule = async (
@@ -86,15 +134,14 @@ export namespace CronRepository {
     input: CronScheduleRepoUpdateInput,
     tx?: DBTransaction
   ): Promise<CronScheduleSelectType | null> => {
-    const runner = async (t: DBTransaction) => {
+    return withTx(tx, async t => {
       const [row] = await t
         .update(cronSchedules)
         .set({ ...input, updatedAt: new Date() })
         .where(eq(cronSchedules.id, id))
         .returning();
       return row ?? null;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   /**
@@ -134,7 +181,7 @@ export namespace CronRepository {
     if (status) conditions.push(eq(cronSchedules.status, status));
     if (jobKind) conditions.push(eq(cronSchedules.jobKind, jobKind));
     if (name) {
-      const escapedName = name.replace(/%/g, "\\%").replace(/_/g, "\\_");
+      const escapedName = name.replaceAll("%", String.raw`\%`).replaceAll("_", String.raw`\_`);
       conditions.push(ilike(cronSchedules.name, `%${escapedName}%`));
     }
 
@@ -199,7 +246,7 @@ export namespace CronRepository {
     forceDue: boolean = false,
     overridePayload?: Record<string, unknown> | null
   ): Promise<{ runId: string } | null> => {
-    const runner = async (t: DBTransaction): Promise<{ runId: string } | null> => {
+    return withTx(tx, async (t): Promise<{ runId: string } | null> => {
       await t.execute(sql`SELECT pg_advisory_xact_lock(hashtext('cron_schedule_claim_' || ${scheduleId}::text))`);
 
       // Check schedule is still active and still due.
@@ -217,7 +264,10 @@ export namespace CronRepository {
       if (!schedule) return null;
 
       // For SKIP policy, check no in-flight run exists
-      if (schedule.concurrencyPolicy === CronConcurrencyPolicy.SKIP) {
+      // `schedule.concurrencyPolicy` is inferred as `string` by drizzle's pgEnum;
+      // widen the enum literal to `string` so the comparison is type-safe and
+      // satisfies `no-unsafe-enum-comparison`.
+      if (schedule.concurrencyPolicy === (CronConcurrencyPolicy.SKIP as string)) {
         const inFlight = await t
           .select({ id: cronRuns.id })
           .from(cronRuns)
@@ -227,12 +277,12 @@ export namespace CronRepository {
       }
 
       // For REPLACE policy, cancel in-flight runs
-      if (schedule.concurrencyPolicy === CronConcurrencyPolicy.REPLACE) {
+      if (schedule.concurrencyPolicy === (CronConcurrencyPolicy.REPLACE as string)) {
         await t
           .update(cronRuns)
           .set({
             status: CronRunStatus.CANCELLED,
-            errorMessage: _REPLACE_MANUAL_TRIGGER_MSG,
+            errorMessage: REPLACE_MANUAL_TRIGGER_MSG,
             updatedAt: now,
           })
           .where(and(eq(cronRuns.scheduleId, scheduleId), inArray(cronRuns.status, [...INFLIGHT_STATUSES])));
@@ -257,9 +307,7 @@ export namespace CronRepository {
       const [run] = await t.insert(cronRuns).values(runInsert).returning();
 
       return run ? { runId: run.id } : null;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   // ── Run lifecycle ──
@@ -267,11 +315,10 @@ export namespace CronRepository {
   /** @internal — kept for testing and future use. Not called by production
    *  dispatch code, which creates runs via `claimNextRun` instead. */
   export const createRun = async (input: CronRunInsertType, tx?: DBTransaction): Promise<CronRunSelectType> => {
-    const runner = async (t: DBTransaction) => {
+    return withTx(tx, async t => {
       const [row] = await t.insert(cronRuns).values(input).returning();
       return row;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   export const updateRunStatus = async (
@@ -281,7 +328,7 @@ export namespace CronRepository {
     fromStatuses?: CronRunStatus[],
     tx?: DBTransaction
   ): Promise<CronRunSelectType | null> => {
-    const runner = async (t: DBTransaction) => {
+    return withTx(tx, async t => {
       const allowedPriorStatuses = fromStatuses ?? DEFAULT_PRIOR_STATUSES[status];
       const whereCondition = and(eq(cronRuns.id, runId), inArray(cronRuns.status, allowedPriorStatuses));
       const [row] = await t
@@ -290,8 +337,7 @@ export namespace CronRepository {
         .where(whereCondition)
         .returning();
       return row ?? null;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   // ── Append run error ──
@@ -317,10 +363,9 @@ export namespace CronRepository {
   // ── Heartbeats ──
 
   export const recordHeartbeat = async (input: CronHeartbeatInsertType, tx?: DBTransaction): Promise<void> => {
-    const runner = async (t: DBTransaction) => {
+    return withTx(tx, async t => {
       await t.insert(cronHeartbeats).values(input);
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   /** @internal — kept for testing and future use. Only exercised by repository
@@ -351,7 +396,7 @@ export namespace CronRepository {
   // ── Reconcile stuck runs ──
 
   export const reconcileStuckRuns = async (now: Date, batch: number, tx?: DBTransaction): Promise<number> => {
-    const runner = async (t: DBTransaction) => {
+    return withTx(tx, async t => {
       // Single LEFT JOIN against an aggregated heartbeat subquery — replaces correlated subqueries
       const stuckRuns = await t
         .select({
@@ -377,7 +422,7 @@ export namespace CronRepository {
       const runIds = stuckRuns.map(r => r.runId);
       const result = await t
         .update(cronRuns)
-        .set({ status: CronRunStatus.TIMEOUT, errorMessage: _HEARTBEAT_TIMEOUT_MSG, updatedAt: now })
+        .set({ status: CronRunStatus.TIMEOUT, errorMessage: HEARTBEAT_TIMEOUT_MSG, updatedAt: now })
         .where(
           and(
             inArray(cronRuns.id, runIds),
@@ -387,8 +432,7 @@ export namespace CronRepository {
         .returning({ id: cronRuns.id });
 
       return result.length;
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+    });
   };
 
   // ── Run queries ──
@@ -400,16 +444,7 @@ export namespace CronRepository {
   ): Promise<CronRunListResult> => {
     const { limit = 25, offset = 0 } = params;
     const where = eq(cronRuns.scheduleId, scheduleId);
-
-    const [rows, totalRows] = await Promise.all([
-      queryDb(tx).select().from(cronRuns).where(where).orderBy(desc(cronRuns.startedAt)).limit(limit).offset(offset),
-      queryDb(tx).select({ count: count() }).from(cronRuns).where(where),
-    ]);
-
-    return {
-      rows: rows.map(toRunReturnType),
-      totalCount: totalRows[0]?.count ?? 0,
-    };
+    return paginatedRuns(where, { limit, offset }, tx);
   };
 
   export const getRunById = async (id: string, tx?: DBTransaction): Promise<CronRunReturnType | null> => {
@@ -427,34 +462,27 @@ export namespace CronRepository {
     if (to) conditions.push(lte(cronRuns.startedAt, to));
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
-
-    const [rows, totalRows] = await Promise.all([
-      queryDb(tx).select().from(cronRuns).where(where).orderBy(desc(cronRuns.startedAt)).limit(limit).offset(offset),
-      queryDb(tx).select({ count: count() }).from(cronRuns).where(where),
-    ]);
-
-    return {
-      rows: rows.map(toRunReturnType),
-      totalCount: totalRows[0]?.count ?? 0,
-    };
+    return paginatedRuns(where, { limit, offset }, tx);
   };
 
   // ── Delete ──
 
-  export const deleteScheduleById = async (id: string, hard: boolean = false, tx?: DBTransaction): Promise<void> => {
-    const runner = async (t: DBTransaction) => {
-      if (hard) {
-        // Delete runs first (FK constraint), then delete schedule
-        await t.delete(cronRuns).where(eq(cronRuns.scheduleId, id));
-        await t.delete(cronSchedules).where(eq(cronSchedules.id, id));
-      } else {
-        // Soft-delete: set status to DISABLED
-        await t
-          .update(cronSchedules)
-          .set({ status: CronScheduleStatus.DISABLED, updatedAt: new Date() })
-          .where(eq(cronSchedules.id, id));
-      }
-    };
-    return tx ? runner(tx) : db.transaction(runner);
+  /** Soft-delete a schedule by setting its status to DISABLED. */
+  export const softDeleteScheduleById = async (id: string, tx?: DBTransaction): Promise<void> => {
+    return withTx(tx, async t => {
+      await t
+        .update(cronSchedules)
+        .set({ status: CronScheduleStatus.DISABLED, updatedAt: new Date() })
+        .where(eq(cronSchedules.id, id));
+    });
+  };
+
+  /** Permanently delete a schedule and its associated runs (hard delete). */
+  export const permanentlyDeleteScheduleById = async (id: string, tx?: DBTransaction): Promise<void> => {
+    return withTx(tx, async t => {
+      // Delete runs first (FK constraint), then delete schedule
+      await t.delete(cronRuns).where(eq(cronRuns.scheduleId, id));
+      await t.delete(cronSchedules).where(eq(cronSchedules.id, id));
+    });
   };
 }

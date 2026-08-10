@@ -5,7 +5,6 @@ import {
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ReportGroupingMode, ReportService } from "@/backend/services/report/report.service";
-import type { DisplayAmountReturnType } from "@/backend/types";
 import type {
   AttendanceReportPaidAmountReturnType,
   AttendanceReportResult,
@@ -39,7 +38,7 @@ export const AttendanceReportPaidAmountObj = AttendanceReportPaidAmountRef.imple
     displayAmount: t.field({
       type: DisplayAmountPothosObject,
       nullable: true,
-      resolve: parent => (parent as unknown as Record<string, unknown>).displayAmount as DisplayAmountReturnType | null,
+      resolve: parent => parent.displayAmount ?? null,
     }),
   }),
 });
@@ -106,22 +105,18 @@ gqlSchemaBuilder.queryField("generateAttendanceReport", t =>
       const result = await ReportService.generateAttendanceReport(filters, ctx.user.id, ctx.locale);
 
       const allPaidAmounts = result.rows.flatMap(row => row.paidAmounts);
-      const displayAmounts = await resolveDisplayAmountFields(
-        allPaidAmounts as unknown as Record<string, unknown>[],
-        ctx,
-        "amount",
-        "currency"
-      );
+      const displayAmounts = await resolveDisplayAmountFields(allPaidAmounts, ctx, "amount", "currency");
 
       return {
         ...result,
-        rows: result.rows.map(row => ({
-          ...row,
-          paidAmounts: row.paidAmounts.map(pa => ({
-            ...pa,
-            displayAmount: displayAmounts.get(pa.id) ?? null,
-          })),
-        })),
+        rows: result.rows.map(row =>
+          Object.assign(row, {
+            paidAmounts: row.paidAmounts.map(pa => ({
+              ...pa,
+              displayAmount: displayAmounts.get(pa.id) ?? null,
+            })),
+          })
+        ),
       };
     },
   })

@@ -40,7 +40,7 @@ import {
 } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
 import type { PaymentMethodProfileLabels } from "@/frontend/common/views/dashboard/profile/shared/types/paymentMethodProfile.types";
-import type { PaymentMethodManagerLabels } from "@/shared/locale/types/ui";
+import type { PaymentMethodDirectionLabels, PaymentMethodManagerLabels } from "@/shared/locale/types/ui";
 
 export type PaymentMethodFormDialogProps = {
   readonly open: boolean;
@@ -72,7 +72,7 @@ function DirectionControllerField({ control, label, options }: DirectionControll
           onChange={event => {
             const value = event.target.value;
             for (const option of Object.values(PaymentDirection)) {
-              if (option === value) {
+              if ((option as string) === value) {
                 field.onChange(option);
                 return;
               }
@@ -338,9 +338,12 @@ export function PaymentMethodFormDialog({
 
   const directionOptions = useMemo(
     () =>
-      getPaymentDirectionOptions(key => tDir.direction[key as keyof typeof tDir.direction] ?? "").filter(option =>
-        allowedDirections.includes(option.value)
-      ),
+      getPaymentDirectionOptions(key => {
+        const directionLabels = tDir.direction;
+        const directionKeys: ReadonlyArray<keyof PaymentMethodDirectionLabels> = ["in", "out", "both"];
+        const matchedKey = directionKeys.find(k => k === key);
+        return matchedKey ? directionLabels[matchedKey] : "";
+      }).filter(option => allowedDirections.includes(option.value)),
     [allowedDirections, tDir]
   );
 
