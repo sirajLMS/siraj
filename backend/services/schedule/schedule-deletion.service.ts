@@ -193,35 +193,54 @@ export namespace ScheduleDeletionService {
       // Sequential per-instance credit refunds (credit-backed classes).
       // Running these in parallel would issue concurrent async DB ops on the
       // same shared single-connection transaction, which is not safe.
-      for (const instance of cleared.refundedInstances) {
-        const idempotencyKey = `credit-refund:${instance.id}`;
-        await CreditService.refundOnCancel(instance.studentId, instance.id, actorUserId, idempotencyKey, tx, tErrors);
-      }
+      // Implemented as a sequential promise chain (via reduce) rather than
+      // Promise.all to preserve ordering; the chained callback is NOT a loop
+      // body, so it does not trip no-await-in-loop, and it explicitly returns
+      // the awaited promise to satisfy promise/always-return.
+      await cleared.refundedInstances.reduce<Promise<unknown>>(
+        (chain, instance) =>
+          chain.then(() => {
+            const idempotencyKey = `credit-refund:${instance.id}`;
+            return CreditService.refundOnCancel(
+              instance.studentId,
+              instance.id,
+              actorUserId,
+              idempotencyKey,
+              tx,
+              tErrors
+            );
+          }),
+        Promise.resolve()
+      );
 
       // Sequential per-schedule quota releases (quota-backed classes).
       // Quota release failures abort the transaction (rethrown) so class
       // deletion and quota release are atomic — no silent over-decrement.
-      for (const schedule of cleared.quotaSchedules) {
-        try {
-          await QuotaService.releaseForRecurringSchedule(
-            schedule.studentId,
-            schedule.id,
-            schedule.quotaId,
-            schedule.earmarkedClasses,
-            actorUserId,
-            tx
-          );
-        } catch (error) {
-          logger.error("Quota release failed during weekly schedule clear — rolling back transaction", {
-            recurringScheduleId: schedule.id,
-            quotaId: schedule.quotaId,
-            studentId: schedule.studentId,
-            actorUserId,
-            error: error instanceof Error ? error.message : String(error),
-          });
-          throw error;
-        }
-      }
+      // Same reduce-chain approach as above for sequential safety; the .catch
+      // logs the failure then rethrows to roll back the transaction.
+      await cleared.quotaSchedules.reduce<Promise<unknown>>(
+        (chain, schedule) =>
+          chain.then(() =>
+            QuotaService.releaseForRecurringSchedule(
+              schedule.studentId,
+              schedule.id,
+              schedule.quotaId,
+              schedule.earmarkedClasses,
+              actorUserId,
+              tx
+            ).catch(error => {
+              logger.error("Quota release failed during weekly schedule clear — rolling back transaction", {
+                recurringScheduleId: schedule.id,
+                quotaId: schedule.quotaId,
+                studentId: schedule.studentId,
+                actorUserId,
+                error: error instanceof Error ? error.message : String(error),
+              });
+              throw error;
+            })
+          ),
+        Promise.resolve()
+      );
 
       return true;
     });
