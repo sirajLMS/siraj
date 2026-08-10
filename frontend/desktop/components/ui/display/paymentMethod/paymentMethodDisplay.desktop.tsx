@@ -25,7 +25,7 @@ import {
   useAppTranslation,
 } from "@/shared/locale";
 
-function isKeyOf<T extends object>(value: string, obj: T): value is keyof T {
+function isKeyOf<T extends object>(value: string | number | symbol, obj: T): value is keyof T {
   return value in obj;
 }
 
@@ -93,9 +93,8 @@ function buildHeaderSpecs(
   }
 
   if (showDirection && method.direction) {
-    const directionLabel = getPaymentMethodDirectionLabel(
-      method.direction,
-      key => (isKeyOf(key, tDirection) ? tDirection[key] : "")
+    const directionLabel = getPaymentMethodDirectionLabel(method.direction, key =>
+      isKeyOf(key, tDirection) ? tDirection[key] : ""
     );
     if (directionLabel) {
       specs.push({

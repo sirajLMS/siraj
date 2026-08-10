@@ -25,8 +25,7 @@ if (process.env.NODE_ENV !== "production") {
   SchemaBuilder.allowPluginReRegistration = true;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 
 // Detects whether an auth-scope failure represents an unauthenticated request
 // (i.e. the `loggedIn` scope failed) so we can emit UNAUTHENTICATED vs FORBIDDEN.
@@ -160,7 +159,7 @@ if (process.env.NODE_ENV !== "production") {
   const globalForPothos = globalThis as typeof globalThis & {
     __sirajGqlSchemaBuilder?: unknown;
   };
-  delete globalForPothos["__sirajGqlSchemaBuilder"];
+  delete globalForPothos.__sirajGqlSchemaBuilder;
 }
 
 // HMR dependency edge (hayes/pothos#49): when any schema definition module

@@ -18,18 +18,25 @@ import {
   teachers,
   users,
 } from "@/backend/db/schema";
-import type { CurrencyCode } from "@/backend/enum";
+import { CountryCode, type CurrencyCode } from "@/backend/enum";
 import type {
   SupportedCurrencyReturnType,
   SupportedCurrencySelectType,
   SupportedCurrencyUpsertInput,
 } from "@/backend/types/billing/currency.types";
 
+const COUNTRY_CODE_VALUES = new Set(Object.values(CountryCode) as string[]);
+
+function isCountryCode(value: string | null): value is CountryCode {
+  return value !== null && COUNTRY_CODE_VALUES.has(value);
+}
+
 function toReturnType(row: SupportedCurrencySelectType): SupportedCurrencyReturnType {
+  const countryCode = isCountryCode(row.countryCode) ? row.countryCode : null;
   return {
     code: row.code,
     symbol: row.symbol,
-    countryCode: row.countryCode as SupportedCurrencyReturnType["countryCode"],
+    countryCode,
     decimals: row.decimals,
     sortOrder: row.sortOrder,
     isActive: row.isActive,
@@ -64,7 +71,9 @@ export namespace SupportedCurrencyRepository {
     const now = new Date();
     const results: SupportedCurrencyReturnType[] = [];
 
-    for (const [index, input] of inputs.entries()) {
+    async function upsertNext(index: number): Promise<void> {
+      if (index >= inputs.length) return;
+      const input = inputs[index];
       const [row] = await client
         .insert(supportedCurrencies)
         .values({
@@ -93,7 +102,10 @@ export namespace SupportedCurrencyRepository {
       if (row) {
         results.push(toReturnType(row));
       }
+      return upsertNext(index + 1);
     }
+
+    await upsertNext(0);
 
     return results;
   }

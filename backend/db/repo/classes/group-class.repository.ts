@@ -22,29 +22,31 @@ import type {
   GroupClassSelectType,
 } from "@/backend/types";
 
-async function insertReturning<T>(
+async function insertReturning(
   table: Parameters<typeof db.insert>[0],
   values: Record<string, unknown>,
   tx?: DBTransaction
-): Promise<T> {
+) {
   const runner = async (t: DBTransaction) => {
     const [created] = await t.insert(table).values(values).returning();
-    return created as T;
+    return created;
   };
   return tx ? runner(tx) : db.transaction(runner);
 }
 
-async function insertManyReturning<T>(
+async function insertManyReturning(
   table: Parameters<typeof db.insert>[0],
   inputs: readonly Record<string, unknown>[],
   tx?: DBTransaction
-): Promise<T[]> {
+) {
   if (inputs.length === 0) return [];
-  const runner = async (t: DBTransaction) =>
-    t
+  const runner = async (t: DBTransaction) => {
+    const rows = await t
       .insert(table)
       .values([...inputs])
-      .returning() as Promise<T[]>;
+      .returning();
+    return rows;
+  };
   return tx ? runner(tx) : db.transaction(runner);
 }
 
@@ -67,7 +69,7 @@ export namespace GroupClassRepository {
   }
 
   export async function create(input: GroupClassCreateInput, tx?: DBTransaction): Promise<GroupClassSelectType> {
-    return insertReturning<GroupClassSelectType>(groupClasses, { ...input }, tx);
+    return insertReturning(groupClasses, { ...input }, tx);
   }
 
   export async function getEnrollments(
@@ -97,7 +99,7 @@ export namespace GroupClassRepository {
     inputs: GroupClassEnrollmentCreateInput[],
     tx?: DBTransaction
   ): Promise<GroupClassEnrollmentSelectType[]> {
-    return insertManyReturning<GroupClassEnrollmentSelectType>(groupClassEnrollments, inputs, tx);
+    return insertManyReturning(groupClassEnrollments, inputs, tx);
   }
 
   export async function getCommunications(
@@ -116,7 +118,7 @@ export namespace GroupClassRepository {
     input: ClassCommunicationCreateInput,
     tx?: DBTransaction
   ): Promise<ClassCommunicationSelectType> {
-    return insertReturning<ClassCommunicationSelectType>(classCommunications, { ...input }, tx);
+    return insertReturning(classCommunications, { ...input }, tx);
   }
 
   export async function updateAdminNote(
@@ -213,7 +215,7 @@ export namespace GroupClassRepository {
     inputs: GroupClassCreateInput[],
     tx?: DBTransaction
   ): Promise<GroupClassSelectType[]> {
-    return insertManyReturning<GroupClassSelectType>(groupClasses, inputs, tx);
+    return insertManyReturning(groupClasses, inputs, tx);
   }
 
   export async function findEnrollmentKeys(
@@ -299,6 +301,6 @@ export namespace GroupClassRepository {
     inputs: ClassCommunicationCreateInput[],
     tx?: DBTransaction
   ): Promise<ClassCommunicationSelectType[]> {
-    return insertManyReturning<ClassCommunicationSelectType>(classCommunications, inputs, tx);
+    return insertManyReturning(classCommunications, inputs, tx);
   }
 }

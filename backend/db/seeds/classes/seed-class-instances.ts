@@ -67,9 +67,7 @@ async function insertClassInstances(
   now: Date
 ): Promise<ClassInstanceSelectType[]> {
   const chunkCount = Math.ceil(allInstances.length / CHUNK_SIZE);
-  const chunks = Array.from({ length: chunkCount }, (_, i) =>
-    allInstances.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
-  );
+  const chunks = Array.from({ length: chunkCount }, (_, i) => allInstances.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE));
   let completed = 0;
   const insertedChunks = await Promise.all(
     chunks.map(async chunk => {
@@ -88,9 +86,7 @@ async function insertClassInstances(
 async function seedClassInstanceFiles(results: ClassInstanceSelectType[], seedConfig: SeedConfig): Promise<void> {
   if (!shouldSeedExtendedFiles(seedConfig)) return;
 
-  const instances = results
-    .slice(0, 3)
-    .filter((instance): instance is ClassInstanceSelectType => Boolean(instance));
+  const instances = results.slice(0, 3).filter((instance): instance is ClassInstanceSelectType => Boolean(instance));
 
   const outcomes = await Promise.allSettled(
     instances.map(instance =>

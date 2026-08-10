@@ -16,40 +16,41 @@ import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
-const SOFT_DELETE_TABLES = {
-  users: {
-    table: users,
-    entityType: "USER" as const,
-  },
-  recurring_schedules: {
-    table: recurringSchedules,
-    entityType: "RECURRING_SCHEDULE" as const,
-  },
-  class_instances: {
-    table: classInstances,
-    entityType: "CLASS_INSTANCE" as const,
-  },
-  complaints: {
-    table: complaints,
-    entityType: "COMPLAINT" as const,
-  },
-  learning_resources: {
-    table: learningResources,
-    entityType: "LEARNING_RESOURCE" as const,
-  },
-  invoices: {
-    table: invoices,
-    entityType: "INVOICE" as const,
-  },
-  suggestions: {
-    table: suggestions,
-    entityType: "SUGGESTION" as const,
-  },
-  books: {
-    table: books,
-    entityType: "BOOK" as const,
-  },
+type SoftDeleteConfigEntry<TName extends Types.SoftDeletableTableName> = {
+  table: {
+    [K in TName]: Types.SoftDeletableEntityMap[K] extends infer _Row
+      ? (typeof SOFT_DELETE_TABLE_RECORDS)[K]
+      : never;
+  }[TName];
+  entityType: string;
+};
+
+const SOFT_DELETE_TABLE_RECORDS = {
+  users,
+  recurring_schedules: recurringSchedules,
+  class_instances: classInstances,
+  complaints,
+  learning_resources: learningResources,
+  invoices,
+  suggestions,
+  books,
 } as const;
+
+const SOFT_DELETE_TABLES: {
+  [K in Types.SoftDeletableTableName]: {
+    table: (typeof SOFT_DELETE_TABLE_RECORDS)[K];
+    entityType: string;
+  };
+} = {
+  users: { table: users, entityType: "USER" },
+  recurring_schedules: { table: recurringSchedules, entityType: "RECURRING_SCHEDULE" },
+  class_instances: { table: classInstances, entityType: "CLASS_INSTANCE" },
+  complaints: { table: complaints, entityType: "COMPLAINT" },
+  learning_resources: { table: learningResources, entityType: "LEARNING_RESOURCE" },
+  invoices: { table: invoices, entityType: "INVOICE" },
+  suggestions: { table: suggestions, entityType: "SUGGESTION" },
+  books: { table: books, entityType: "BOOK" },
+};
 
 export namespace SoftDeleteRepository {
   async function acquireSoftDeleteLock(
@@ -100,10 +101,10 @@ export namespace SoftDeleteRepository {
 
       await t.update(config.table).set(updateValues).where(eq(config.table.id, input.entityId));
 
-      const updated = {
+      const updated: Types.SoftDeletableEntityMap[typeof input.tableName] = {
         ...existing,
         ...updateValues,
-      } as Types.SoftDeletableEntityMap[typeof input.tableName];
+      };
 
       await AuditRepository.createAuditLog(
         {
@@ -206,17 +207,17 @@ export namespace SoftDeleteRepository {
   ): Promise<Types.SoftDeletableEntityMap[T]> => {
     const runner = async (t: DBTransaction) => {
       const config = SOFT_DELETE_TABLES[tableName];
-      const deletedResults = (await t
+      const deletedResults: Types.SoftDeletableEntityMap[T][] = await t
         .delete(config.table)
         .where(eq(config.table.id, entityId))
-        .returning()) as unknown[];
+        .returning();
 
       if (deletedResults.length === 0) {
         const { file } = getServerTranslations(locale ?? "en").errorsTranslations;
         throw new Error(file.recordNotFound({ tableName, entityId }));
       }
 
-      return deletedResults[0] as Types.SoftDeletableEntityMap[T];
+      return deletedResults[0];
     };
 
     return tx ? runner(tx) : db.transaction(runner);

@@ -59,11 +59,7 @@ function isNotificationChannel(value: string): value is NotificationChannel {
 function isNotificationMetadata(value: unknown): value is NotificationMetadata {
   if (!isPlainObject(value)) return false;
   const { entityKind, entityId } = value;
-  return (
-    typeof entityKind === "string" &&
-    typeof entityId === "string" &&
-    NOTIFICATION_ENTITY_KINDS.has(entityKind)
-  );
+  return typeof entityKind === "string" && typeof entityId === "string" && NOTIFICATION_ENTITY_KINDS.has(entityKind);
 }
 
 function emptyAlertsResult(userId: string): NotificationAlertsPaginatedReturnType {

@@ -13,8 +13,18 @@ import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/compone
 import { filterMethodsForDirection } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/utils";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { LocalizedString } from "@/shared/types";
 
 export type { PaymentMethodDefaultsEditorProps } from "./types";
+
+const DEFAULT_INSTRUCTIONS: LocalizedString = {};
+
+function makeLabelResolver(labels: PaymentMethodTypeLabels | PaymentMethodDirectionLabels, prefix: string) {
+  return (messageKey: string) => {
+    const shortKey = messageKey.slice(prefix.length) as keyof typeof labels;
+    return labels[shortKey] ?? "";
+  };
+}
 
 export function PaymentMethodDefaultsEditor({
   methods,
@@ -22,7 +32,7 @@ export function PaymentMethodDefaultsEditor({
   payoutDefaultId,
   onPayinDefaultChangeAction,
   onPayoutDefaultChangeAction,
-  instructions = {},
+  instructions = DEFAULT_INSTRUCTIONS,
   onInstructionsSaveAction,
   displayCurrency,
   onDisplayCurrencyChangeAction,
@@ -44,10 +54,10 @@ export function PaymentMethodDefaultsEditor({
 
   const formatMethodLabel = useCallback(
     (method: PaymentMethodRow) => {
-      const typeLabel = getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "");
+      const typeLabel = getPaymentMethodTypeLabel(method.type, makeLabelResolver(t.type, "type."));
       const directionLabel = getPaymentMethodDirectionLabel(
         method.direction,
-        key => t.direction[key as keyof typeof t.direction] ?? ""
+        makeLabelResolver(t.direction, "direction.")
       );
       const base = method.label?.trim() || method.catalogSlug || typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;

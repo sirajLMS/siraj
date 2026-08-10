@@ -94,7 +94,7 @@ async function moveDirectory(ctx: VercelContext, sourcePath: string, destPath: s
   });
 
   await Promise.all(
-    allBlobs.map(async (blob) => {
+    allBlobs.map(async blob => {
       const relativePath = blob.pathname.slice(prefix.length);
       const newFilePath = `${destPath}/${relativePath}`;
 

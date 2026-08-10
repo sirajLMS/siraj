@@ -90,7 +90,7 @@ export namespace ClassInstanceExpiryService {
       return 1;
     };
 
-    const results = await Promise.all(expiredRows.map((row) => processOne(row)));
+    const results = await Promise.all(expiredRows.map(row => processOne(row)));
     const processedCount = results.reduce((sum, value) => sum + value, 0);
 
     if (processedCount > 0) {

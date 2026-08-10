@@ -40,7 +40,7 @@ async function walkDirectory(dirPath: string, relativePath: string, state: Stats
   const entries = await fs.readdir(dirPath, { withFileTypes: true });
 
   await Promise.all(
-    entries.map(async (entry) => {
+    entries.map(async entry => {
       const entryAbsolutePath = path.join(dirPath, entry.name);
       const entryRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
 
@@ -50,7 +50,7 @@ async function walkDirectory(dirPath: string, relativePath: string, state: Stats
       } else if (entry.isFile()) {
         await processFileStats(entryAbsolutePath, entry.name, state);
       }
-    }),
+    })
   );
 }
 

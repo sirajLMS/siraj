@@ -11,6 +11,34 @@ import type {
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
 
+interface CountRow {
+  count?: number;
+}
+
+interface QueryResultLike {
+  rows?: CountRow[];
+}
+
+function isCountRow(value: unknown): value is CountRow {
+  return typeof value === "object" && value !== null && !Array.isArray(value) && "count" in value;
+}
+
+function isQueryResultLike(value: unknown): value is QueryResultLike {
+  return typeof value === "object" && value !== null && !Array.isArray(value) && "rows" in value;
+}
+
+function extractCount(result: unknown): number {
+  if (Array.isArray(result)) {
+    const row = result[0];
+    return isCountRow(row) ? (row.count ?? 0) : 0;
+  }
+  if (isQueryResultLike(result)) {
+    const rows = result.rows ?? [];
+    return isCountRow(rows[0]) ? (rows[0].count ?? 0) : 0;
+  }
+  return 0;
+}
+
 export namespace ReferenceDataService {
   export async function listTimezones(): Promise<TimezoneSelectType[]> {
     return TimezoneRepository.listAll();
@@ -55,17 +83,12 @@ export namespace ReferenceDataService {
   }
 
   export async function getTableRowCounts(tableNames: string[]): Promise<Record<string, number>> {
-    const counts: Record<string, number> = {};
-    for (const tableName of tableNames) {
-      const result = await db.execute(sql.raw(`SELECT COUNT(*)::int AS count FROM "${tableName}"`));
-      if (Array.isArray(result)) {
-        const row = result[0] as { count?: number } | undefined;
-        counts[tableName] = row?.count ?? 0;
-      } else {
-        const rows = (result as unknown as { rows?: { count: number }[] }).rows ?? [];
-        counts[tableName] = rows[0]?.count ?? 0;
-      }
-    }
-    return counts;
+    const entries = await Promise.all(
+      tableNames.map(async tableName => {
+        const result = await db.execute(sql.raw(`SELECT COUNT(*)::int AS count FROM "${tableName}"`));
+        return [tableName, extractCount(result)] as const;
+      })
+    );
+    return Object.fromEntries(entries);
   }
 }

@@ -95,7 +95,12 @@ export function buildStatusCounts(rows: StudentDirectoryRowExtended[]): Record<S
   return res;
 }
 
-function toMetricItem(key: StudentAccountStatus, count: number, icon: SvgIconComponent, t: StudentDirectoryLabels): MetricItem {
+function toMetricItem(
+  key: StudentAccountStatus,
+  count: number,
+  icon: SvgIconComponent,
+  t: StudentDirectoryLabels
+): MetricItem {
   const metricKey = getMetricTranslationKey(key);
   return {
     key,

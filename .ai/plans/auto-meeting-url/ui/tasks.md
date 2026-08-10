@@ -14,8 +14,8 @@
 ## Non-Negotiable Execution Protocol for All Tasks
 
 1. **Pre-Execution Outcome Knowledge Read**: Read ALL files in `.ai/plans/auto-meeting-url/ui/outcome/` before starting.
-2. **Per-File Quality Verification Loop**: `bun tsgo` + `bun biome:check` + lint queue for target file after each edit.
-3. **Global Health Check**: `bun tsgo`, `bun biome:check`, `bun run lint` — zero errors, zero warnings.
+2. **Per-File Quality Verification Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle lint` for each modified/created file after each edit. The script runs tsgo → biome → oxlint → lint → check:duplicates → codescene progressively, short-circuiting at the first failure — fix and re-run until it exits 0.
+3. **Global Health Check**: After all per-file sub-loop runs pass, run `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` on each modified/created file as a final sweep (adds check:duplicates + codescene on top of lint stage). Alternatively run `bun quality-gate` for full-repo sequential verification.
 4. **Post-Execution Outcome File Creation**: Write `.ai/plans/auto-meeting-url/ui/outcome/<task-id>-outcome.md`.
 5. **Task Progress Tracking**: Update `[ ]` → `[x]` in this file.
 

@@ -29,13 +29,23 @@ export interface CompensationViewData {
 type CompensationTranslations = ProfileTeacherLabels | ProfileStaffLabels;
 
 /**
+ * Type guard: narrows a string to a `FieldPath<TFormValues>` for react-hook-form.
+ * `FieldPath<T>` is a deep path type that TypeScript cannot verify from an arbitrary
+ * string, so a type guard is used instead of an unsafe `as` assertion.
+ */
+function isFieldPath<TFormValues extends FieldValues>(value: string): value is FieldPath<TFormValues> {
+  return typeof value === "string";
+}
+
+/**
  * Wraps a form field name for use with react-hook-form's `useWatch` / `register` / `Controller`.
- * For a generic `TFormValues`, `FieldPath<TFormValues>` resolves to a union of all property paths,
- * so TypeScript cannot verify that an arbitrary string literal is a valid path. This helper
- * provides a single cast site instead of scattering `as` assertions at each call site.
+ * Uses the `isFieldPath` type guard to avoid unsafe type assertions.
  */
 function fieldPath<TFormValues extends FieldValues>(name: string): FieldPath<TFormValues> {
-  return name as FieldPath<TFormValues>;
+  if (!isFieldPath<TFormValues>(name)) {
+    throw new Error(`Invalid field path: ${name}`);
+  }
+  return name;
 }
 
 export function CompensationEditFields<TFormValues extends FieldValues>({

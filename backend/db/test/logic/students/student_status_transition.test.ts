@@ -12,6 +12,18 @@ beforeAll(() => {
   tErrors = getServerTranslations("en").errorsTranslations;
 });
 
+function isErrorWithCause(error: unknown): error is Error & { cause?: { message?: string } } {
+  return error instanceof Error;
+}
+
+function getCauseMessage(error: Error): string {
+  const cause = error.cause;
+  if (typeof cause === "object" && cause !== null && "message" in cause && typeof cause.message === "string") {
+    return cause.message;
+  }
+  return "";
+}
+
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
   try {
@@ -20,12 +32,12 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (isErrorWithCause(errorCaught)) return errorCaught;
+  throw new Error(String(errorCaught));
 }
 
 function getFullErrorMessage(error: Error): string {
-  const cause = error.cause as { message?: string } | undefined;
-  return `${error.message} ${cause?.message ?? ""}`;
+  return `${error.message} ${getCauseMessage(error)}`;
 }
 
 async function setupRegularStudent(

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { ApolloClient, OperationVariables, TypedDocumentNode } from "@apollo/client";
+import type { ApolloClient, DefaultContext, TypedDocumentNode } from "@apollo/client";
 import {
   parentAssignedStudentsQueryDocument,
   parentHandbookUrlQueryDocument,
@@ -9,34 +9,36 @@ import { loginDemoUser } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
 /**
  * Executes an authenticated query for a demo user and returns the result,
  * centralizing login + query setup to avoid duplication across test cases.
  */
-async function queryAsDemoUser<TData, TVars extends OperationVariables = OperationVariables>(
+async function queryAsDemoUser<TData, TVars = Record<string, unknown>>(
   groupSlug: string,
   document: TypedDocumentNode<TData, TVars>
 ): Promise<ApolloClient.QueryResult<TData>> {
   const token = await loginDemoUser(groupSlug);
-  const result = await testClient.query({
-    query: document,
-    context: { headers: { Authorization: `Bearer ${token}` } },
-  } as Parameters<typeof testClient.query>[0]);
-  return result as ApolloClient.QueryResult<TData>;
+  const context: DefaultContext = { headers: { Authorization: `Bearer ${token}` } };
+  return testClient.query({ query: document, context });
 }
 
 /**
  * Asserts that a query is denied for the given role: result.error is defined
  * and result.data is null.
  */
-async function expectQueryDenied<TData, TVars extends OperationVariables = OperationVariables>(
+async function expectQueryDenied<TData, TVars = Record<string, unknown>>(
   groupSlug: string,
   document: TypedDocumentNode<TData, TVars>,
   dataKey: keyof TData
 ) {
   const result = await queryAsDemoUser(groupSlug, document);
   expect(result.error).toBeDefined();
-  expect((result.data as Record<string, unknown> | null | undefined)?.[dataKey as string]).toBeNull();
+  const data: unknown = result.data;
+  expect(isRecord(data) ? data[String(dataKey)] : undefined).toBeNull();
 }
 
 describe("GraphQL Parent Portal Integration Tests", () => {

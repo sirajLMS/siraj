@@ -3,9 +3,20 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
-import type { ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { UpcomingClassRow } from "@/backend/types/scheduling/scheduling.types";
+
+const VALID_EXECUTION_STATES = new Set(Object.values(ClassExecutionState) as string[]);
+const VALID_OUTCOMES = new Set(Object.values(ClassOutcome) as string[]);
+
+function isClassExecutionState(value: string): value is ClassExecutionState {
+  return VALID_EXECUTION_STATES.has(value);
+}
+
+function isClassOutcome(value: string): value is ClassOutcome {
+  return VALID_OUTCOMES.has(value);
+}
 
 export const bulkFreezeStudentClasses = async (
   studentId: string,
@@ -143,8 +154,8 @@ export const getUpcomingClassesForStudent = async (
     scheduledStartAt: r.scheduledStartAt,
     scheduledEndAt: r.scheduledEndAt,
     durationMinutes: r.durationMinutes,
-    executionState: r.executionState as ClassExecutionState,
-    outcome: r.outcome as ClassOutcome | null,
+    executionState: isClassExecutionState(r.executionState) ? r.executionState : ClassExecutionState.NOT_ACTIVATED,
+    outcome: isClassOutcome(r.outcome) ? r.outcome : ClassOutcome.PENDING,
     isFrozen: r.isFrozen,
     instructor: r.instructor,
     teacherId: r.teacherId,

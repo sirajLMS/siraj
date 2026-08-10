@@ -13,6 +13,20 @@ import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/for
 import { CurrencySelectDesktop } from "@/frontend/desktop/components/ui/input/currencySelect";
 import { LocalizedStringDrawerDesktop } from "@/frontend/desktop/components/ui/input/localizedString";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { PaymentMethodDirectionLabels, PaymentMethodTypeLabels } from "@/shared/locale/types/ui";
+import type { LocalizedString } from "@/shared/types";
+
+const DEFAULT_INSTRUCTIONS: LocalizedString = {};
+
+type StringRecordLabels = PaymentMethodTypeLabels | PaymentMethodDirectionLabels;
+
+function makeLabelResolver(labels: StringRecordLabels): (key: string) => string {
+  return key => {
+    const entries: ReadonlyArray<readonly [string, string]> = Object.entries(labels);
+    const entry = entries.find(([k]) => k === key);
+    return entry ? entry[1] : "";
+  };
+}
 
 export function PaymentMethodDefaultsEditorDesktop({
   methods,
@@ -20,7 +34,7 @@ export function PaymentMethodDefaultsEditorDesktop({
   payoutDefaultId,
   onPayinDefaultChangeAction,
   onPayoutDefaultChangeAction,
-  instructions = {},
+  instructions = DEFAULT_INSTRUCTIONS,
   onInstructionsSaveAction,
   displayCurrency,
   onDisplayCurrencyChangeAction,
@@ -39,13 +53,10 @@ export function PaymentMethodDefaultsEditorDesktop({
 
   const formatMethodLabel = useCallback(
     (method: PaymentMethodRow) => {
-      const typeLabel = getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "");
-      const directionLabel = getPaymentMethodDirectionLabel(
-        method.direction,
-        key => t.direction[key as keyof typeof t.direction] ?? ""
-      );
-      const base = method.label?.trim() || method.catalogSlug || typeLabel;
-      return directionLabel ? `${base} (${directionLabel})` : base;
+      const typeLabelResult = getPaymentMethodTypeLabel(method.type, makeLabelResolver(t.type));
+      const directionLabelResult = getPaymentMethodDirectionLabel(method.direction, makeLabelResolver(t.direction));
+      const base = method.label?.trim() || method.catalogSlug || typeLabelResult;
+      return directionLabelResult ? `${base} (${directionLabelResult})` : base;
     },
     [t]
   );

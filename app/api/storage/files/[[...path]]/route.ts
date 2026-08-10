@@ -1,6 +1,7 @@
 import { createReadStream, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { Readable } from "node:stream";
 import { type NextRequest, NextResponse } from "next/server";
 import {
   extractTokenFromHeader,
@@ -73,8 +74,9 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
   const { start, end } = range;
   const chunkSize = end - start + 1;
   const stream = createReadStream(absolutePath, { start, end });
+  const body = new Response(Readable.toWeb(stream)).body;
 
-  return new NextResponse(stream as unknown as BodyInit, {
+  return new NextResponse(body, {
     status: 206,
     headers: {
       "Content-Type": contentType,
@@ -126,7 +128,10 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
   }
 
   const stream = createReadStream(absolutePath);
-  return new NextResponse(stream as unknown as BodyInit, {
+  const webStream = Readable.toWeb(stream);
+  const body = new Response(webStream).body;
+
+  return new NextResponse(body, {
     status: 200,
     headers: {
       "Content-Type": contentType,

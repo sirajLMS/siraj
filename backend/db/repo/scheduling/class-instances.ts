@@ -444,6 +444,10 @@ export async function findOverlappingInstancesForRange(
     .where(and(...conditions));
 }
 
+function _isOnDemandStatus(value: string): value is OnDemandStatus {
+  return (Object.values(OnDemandStatus) as readonly string[]).includes(value);
+}
+
 /**
  * Batch-updates the execution state and on-demand status of multiple class
  * instances in a single UPDATE. Used by `QuotaService.refreshStudentOndemandInstances`
@@ -457,32 +461,32 @@ export async function findOverlappingInstancesForRange(
  */
 export async function updateOndemandStatusBatch(
   instanceIds: string[],
-  updates: { executionState: string; ondemandStatus: string; updatedAt: Date },
-  guardOndemandStatus: string,
+  updates: { executionState: string; ondemandStatus: OnDemandStatus; updatedAt: Date },
+  guardOndemandStatus: OnDemandStatus,
   tx: DBTransaction
 ): Promise<number> {
   if (instanceIds.length === 0) return 0;
-  return t_updateOndemandStatusBatch(tx, instanceIds, updates, guardOndemandStatus);
+  return tUpdateOndemandStatusBatch(tx, instanceIds, updates, guardOndemandStatus);
 }
 
 // Inline helper to keep the exported function signature clean
-async function t_updateOndemandStatusBatch(
+async function tUpdateOndemandStatusBatch(
   tx: DBTransaction,
   instanceIds: string[],
-  updates: { executionState: string; ondemandStatus: string; updatedAt: Date },
-  guardOndemandStatus: string
+  updates: { executionState: string; ondemandStatus: OnDemandStatus; updatedAt: Date },
+  guardOndemandStatus: OnDemandStatus
 ): Promise<number> {
   const updated = await tx
     .update(classInstances)
     .set({
       executionState: updates.executionState,
-      ondemandStatus: updates.ondemandStatus as OnDemandStatus,
+      ondemandStatus: updates.ondemandStatus,
       updatedAt: updates.updatedAt,
     })
     .where(
       and(
         inArray(classInstances.id, instanceIds),
-        eq(classInstances.ondemandStatus, guardOndemandStatus as OnDemandStatus),
+        eq(classInstances.ondemandStatus, guardOndemandStatus),
         isNull(classInstances.deletedAt)
       )
     )

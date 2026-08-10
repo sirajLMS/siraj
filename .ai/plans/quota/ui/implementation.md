@@ -7,24 +7,11 @@
 
 ## Quality Loop Commands
 
-After creating/modifying ANY file, run:
+After creating/modifying ANY file, run the sub-loop script with `--lifecycle codescene`. It handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene progressively, short-circuits at the first failing check, and auto-discovers applicable AGENTS.md + instruction files.
 
 ```bash
-# Type check (safe to run concurrently)
-bun tsgo
-
-# Biome format + lint (safe to run concurrently)
-bun biome:check
-
-# ESLint via lint queue (requires lint queue server running)
-# Start server first (if not running):
-#   ~/.bun/bin/bun run scripts/lint-queue-server.ts
-# Get the port:
-export LINT_QUEUE_PORT=$(grep -oP 'LINT_QUEUE_PORT = \K\d+' scripts/lint-queue-config.ts)
-# Submit lint request for specific files:
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify","files":["<file-path>"]}'
+# Run sub-loop on a single file (recommended for all tasks):
+bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 ```
 
 Fix ALL errors before proceeding to the next file/subtask.

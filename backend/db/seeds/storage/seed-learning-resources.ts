@@ -56,7 +56,7 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
       }
 
       return inserted;
-    }),
+    })
   );
 
   logger.info(`Learning resources seeded (${results.length} rows).`);

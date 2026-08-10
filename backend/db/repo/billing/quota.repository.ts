@@ -81,8 +81,7 @@ export namespace QuotaRepository {
     policy: unknown
   ): policy is { maxRolloverPercent: number | null; accumulationCap: number | null } => {
     if (typeof policy === "object" && policy !== null) {
-      const obj = policy as Record<string, unknown>;
-      return "maxRolloverPercent" in obj && "accumulationCap" in obj;
+      return "maxRolloverPercent" in policy && "accumulationCap" in policy;
     }
     return false;
   };
@@ -100,6 +99,20 @@ export namespace QuotaRepository {
       .limit(1)
       .then(([row]) => row ?? null);
 
+  /** Handles a duplicate idempotency-key hit by logging, returning the current quota row, or throwing. */
+  const handleDuplicateIdempotencyKey = async (
+    tx: DBTransaction,
+    operationName: string,
+    input: { quotaId: string; studentId: string }
+  ): Promise<QuotaSelectType> => {
+    logger.info(
+      `${operationName}: duplicate idempotency key, skipping (quota ${input.quotaId}, student ${input.studentId})`
+    );
+    const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
+    if (!existing) throw new QuotaNotFoundError("Quota not found");
+    return existing;
+  };
+
   /** Computes the period-end date from an anchor + periodDays. */
   const computePeriodEnd = (anchor: Date, periodDays: number): Date =>
     new Date(anchor.getTime() + periodDays * 24 * 60 * 60 * 1000);
@@ -115,11 +128,13 @@ export namespace QuotaRepository {
       const cap = rolloverPolicy.accumulationCap;
       return Math.min(raw, cap ?? raw);
     }
-    const policyStr = (rolloverPolicy as string | null) ?? "GRANT";
-    if (policyStr === "GRANT") {
-      return unused;
+    if (typeof rolloverPolicy === "string") {
+      if (rolloverPolicy === "GRANT") {
+        return unused;
+      }
+      return 0;
     }
-    return 0;
+    return unused;
   };
 
   /** Advances an anchor forward in whole `periodDays` increments until it sits after `now`. */
@@ -539,12 +554,7 @@ export namespace QuotaRepository {
 
     if (ledgerResult.rowCount === 0) {
       // Duplicate idempotency key — operation already applied on a previous call
-      logger.info(
-        `reserveClasses: duplicate idempotency key, skipping (quota ${input.quotaId}, schedule ${input.recurringScheduleId})`
-      );
-      const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
-      if (!existing) throw new QuotaNotFoundError("Quota not found");
-      return existing;
+      return handleDuplicateIdempotencyKey(tx, "reserveClasses", input);
     }
 
     // Only update balance after successful ledger insert
@@ -603,12 +613,7 @@ export namespace QuotaRepository {
 
     if (ledgerResult.rowCount === 0) {
       // Duplicate idempotency key — operation already applied on a previous call
-      logger.info(
-        `releaseForRecurringSchedule: duplicate idempotency key, skipping (quota ${input.quotaId}, schedule ${input.recurringScheduleId})`
-      );
-      const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
-      if (!existing) throw new QuotaNotFoundError("Quota not found");
-      return existing;
+      return handleDuplicateIdempotencyKey(tx, "releaseForRecurringSchedule", input);
     }
 
     // Only update balance after successful ledger insert

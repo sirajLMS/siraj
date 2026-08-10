@@ -85,7 +85,7 @@ async function deleteDirectory(ctx: VercelContext, dirPath: string): Promise<voi
   });
 
   await Promise.all(
-    allBlobs.map(async (blob) => {
+    allBlobs.map(async blob => {
       try {
         await del(blob.url, { token: ctx.token });
 

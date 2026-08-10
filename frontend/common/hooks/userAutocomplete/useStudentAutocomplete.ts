@@ -145,10 +145,7 @@ function resolveStudentVariables(
   }
 }
 
-function resolveStudentRows(
-  mode: StudentQueryMode,
-  data: unknown
-): readonly StudentRow[] {
+function resolveStudentRows(mode: StudentQueryMode, data: unknown): readonly StudentRow[] {
   switch (mode) {
     case "associated":
       return buildAssociatedStudentRows(data);

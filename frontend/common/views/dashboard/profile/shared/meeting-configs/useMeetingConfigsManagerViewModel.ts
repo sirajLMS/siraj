@@ -4,7 +4,7 @@ import { CombinedGraphQLErrors } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
-import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   connectMeetingProviderOAuthMutationDocument,
@@ -63,6 +63,35 @@ function configLabel(config: UserMeetingConfigFieldsFragment, locale: string): s
 export type UseMeetingConfigsManagerViewModelProps = {
   readonly targetUserId: string;
 };
+
+/** Returns a new bookings-instances map with all configs for the given
+ *  provider slug removed. Used as a state updater for `setBookingsInstances`. */
+function clearProviderBookingsInstances(
+  configs: readonly UserMeetingConfigFieldsFragment[],
+  providerSlug: string,
+  prev: ReadonlyMap<string, readonly LinkedClassInstance[]>
+): Map<string, readonly LinkedClassInstance[]> {
+  const next = new Map(prev);
+  for (const config of configs) {
+    if (config.provider?.slug === providerSlug && config.id) {
+      next.delete(config.id);
+    }
+  }
+  return next;
+}
+
+/** Returns `null` if the currently expanded config belongs to the given
+ *  provider slug (so we collapse it), otherwise returns the previous value
+ *  unchanged. Used as a state updater for `setExpandedBookingsId`. */
+function collapseProviderExpandedId(
+  configById: ReadonlyMap<string, UserMeetingConfigFieldsFragment>,
+  providerSlug: string,
+  prev: string | null
+): string | null {
+  if (prev == null) return null;
+  const config = configById.get(prev);
+  return config?.provider?.slug === providerSlug ? null : prev;
+}
 
 function isUserMeetingConfig(config: MeetingConfigListItem): config is UserMeetingConfigFieldsFragment {
   return "userId" in config;
@@ -477,7 +506,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       const result = await connectMeetingProviderOAuth({
         variables: {
           input: {
-            providerSlug: providerSlug as MeetingIntegrationProviderSlug,
+            providerSlug,
             returnPath: globalThis.window?.location?.pathname ?? "/",
           },
         },
@@ -512,21 +541,9 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       setErrorMessage(t.saveError);
     }
     // Clear cached instances for configs using this provider.
-    setBookingsInstances(prev => {
-      const next = new Map(prev);
-      for (const config of configs) {
-        if (config.provider?.slug === providerSlug && config.id) {
-          next.delete(config.id);
-        }
-      }
-      return next;
-    });
+    setBookingsInstances(prev => clearProviderBookingsInstances(configs, providerSlug, prev));
     // Collapse any expanded view for configs using this provider.
-    setExpandedBookingsId(prev => {
-      if (prev == null) return null;
-      const config = configById.get(prev);
-      return config?.provider?.slug === providerSlug ? null : prev;
-    });
+    setExpandedBookingsId(prev => collapseProviderExpandedId(configById, providerSlug, prev));
   };
 
   const disconnectProvider = async (providerSlug: string) => {
@@ -536,7 +553,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       await disconnectMeetingProviderOAuth({
         variables: {
           input: {
-            providerSlug: providerSlug as MeetingIntegrationProviderSlug,
+            providerSlug,
           },
         },
       });
@@ -552,21 +569,9 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       setErrorMessage(t.saveError);
     }
     // Clear cached instances for configs using this provider.
-    setBookingsInstances(prev => {
-      const next = new Map(prev);
-      for (const config of configs) {
-        if (config.provider?.slug === providerSlug && config.id) {
-          next.delete(config.id);
-        }
-      }
-      return next;
-    });
+    setBookingsInstances(prev => clearProviderBookingsInstances(configs, providerSlug, prev));
     // Collapse any expanded view for configs using this provider.
-    setExpandedBookingsId(prev => {
-      if (prev == null) return null;
-      const config = configById.get(prev);
-      return config?.provider?.slug === providerSlug ? null : prev;
-    });
+    setExpandedBookingsId(prev => collapseProviderExpandedId(configById, providerSlug, prev));
   };
 
   const submitAutoConfig = useCallback(

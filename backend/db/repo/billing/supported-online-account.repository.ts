@@ -3,7 +3,7 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { supportedOnlineAccounts } from "@/backend/db/schema";
-import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
+import { IdentifierKind, PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
   SupportedOnlineAccountInsertType,
   SupportedOnlineAccountSelectType,
@@ -13,8 +13,16 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 type AccountRow = typeof supportedOnlineAccounts.$inferSelect;
 
+const VALID_IDENTIFIER_KINDS = new Set<string>(Object.values(IdentifierKind));
+const VALID_PAYMENT_DIRECTIONS = new Set<string>(Object.values(PaymentDirection));
+
+function isSupportedOnlineAccountSelectType(row: AccountRow): row is SupportedOnlineAccountSelectType {
+  return VALID_IDENTIFIER_KINDS.has(row.identifierKind) && VALID_PAYMENT_DIRECTIONS.has(row.supportedDirections);
+}
+
 function toSelectType(row: AccountRow): SupportedOnlineAccountSelectType {
-  return row as SupportedOnlineAccountSelectType;
+  if (isSupportedOnlineAccountSelectType(row)) return row;
+  throw new Error(`Invalid account row: unsupported identifierKind or supportedDirections`);
 }
 
 type ListActiveFilters = {
@@ -146,9 +154,8 @@ export namespace SupportedOnlineAccountRepository {
 
     const run = async (t: DBTransaction): Promise<SupportedOnlineAccountSelectType[]> => {
       const now = new Date();
-      const results: SupportedOnlineAccountSelectType[] = [];
 
-      for (const input of inputs) {
+      const upsertOne = async (input: SupportedOnlineAccountInsertType): Promise<SupportedOnlineAccountSelectType | null> => {
         const [row] = await t
           .insert(supportedOnlineAccounts)
           .values({
@@ -180,12 +187,17 @@ export namespace SupportedOnlineAccountRepository {
           })
           .returning();
 
-        if (row) {
-          results.push(toSelectType(row));
-        }
-      }
+        return row ? toSelectType(row) : null;
+      };
 
-      return results;
+      const upsertNext = async (index: number, acc: SupportedOnlineAccountSelectType[]): Promise<SupportedOnlineAccountSelectType[]> => {
+        if (index >= inputs.length) return acc;
+        const result = await upsertOne(inputs[index]);
+        if (result) acc.push(result);
+        return upsertNext(index + 1, acc);
+      };
+
+      return upsertNext(0, []);
     };
 
     if (tx) {

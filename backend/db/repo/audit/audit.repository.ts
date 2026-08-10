@@ -91,9 +91,7 @@ export namespace AuditRepository {
       const chunks = Array.from({ length: Math.ceil(rows.length / DEFAULT_BULK_CHUNK_SIZE) }, (_, i) =>
         rows.slice(i * DEFAULT_BULK_CHUNK_SIZE, (i + 1) * DEFAULT_BULK_CHUNK_SIZE)
       );
-      const insertedChunks = await Promise.all(
-        chunks.map(chunk => t.insert(auditLogs).values(chunk).returning())
-      );
+      const insertedChunks = await Promise.all(chunks.map(chunk => t.insert(auditLogs).values(chunk).returning()));
       return insertedChunks.flat();
     };
 
@@ -150,9 +148,7 @@ export namespace AuditRepository {
       const chunks = Array.from({ length: Math.ceil(rows.length / DEFAULT_BULK_CHUNK_SIZE) }, (_, i) =>
         rows.slice(i * DEFAULT_BULK_CHUNK_SIZE, (i + 1) * DEFAULT_BULK_CHUNK_SIZE)
       );
-      const insertedChunks = await Promise.all(
-        chunks.map(chunk => t.insert(adminAuditLogs).values(chunk).returning())
-      );
+      const insertedChunks = await Promise.all(chunks.map(chunk => t.insert(adminAuditLogs).values(chunk).returning()));
       return insertedChunks.flat();
     };
 

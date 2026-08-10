@@ -80,7 +80,7 @@ export async function anyPeerHeartbeatsAlive(ownerPid: number): Promise<boolean>
     const entries = await readdir(HEARTBEAT_DIR);
     const now = Date.now();
     const checks = await Promise.all(
-      entries.map(async (filename) => {
+      entries.map(async filename => {
         if (!filename.endsWith(".hb")) return false;
         const pid = heartbeatFilePid(filename);
         if (pid === null || pid === ownerPid) return false;
@@ -93,7 +93,7 @@ export async function anyPeerHeartbeatsAlive(ownerPid: number): Promise<boolean>
           // ignore — file removed concurrently
           return false;
         }
-      }),
+      })
     );
     return checks.some(Boolean);
   } catch {
@@ -107,8 +107,8 @@ export async function resetHeartbeatsForTest(): Promise<void> {
     const entries = await readdir(HEARTBEAT_DIR);
     await Promise.all(
       entries
-        .filter((filename) => filename.endsWith(".hb"))
-        .map((filename) => unlink(join(HEARTBEAT_DIR, filename)).catch(() => {})),
+        .filter(filename => filename.endsWith(".hb"))
+        .map(filename => unlink(join(HEARTBEAT_DIR, filename)).catch(() => {}))
     );
   } catch {
     // dir missing — ignore

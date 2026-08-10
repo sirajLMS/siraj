@@ -10,13 +10,9 @@
 
 ### Quality Loop (Per File)
 
-After creating/modifying ANY file, run:
+After creating/modifying ANY file, run the sub-loop script with `--lifecycle codescene`. It runs tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene progressively and short-circuits at the first failing check. It also auto-discovers and prints the applicable AGENTS.md and instruction files for the target file.
 ```bash
-bun tsgo
-bun biome:check
-curl -s -X POST http://localhost:${LINT_QUEUE_PORT}/lint \
-  -H "Content-Type: application/json" \
-  -d '{"id":"verify","files":["<the-file>"]}'
+bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 ```
 Fix all errors before proceeding.
 
@@ -45,7 +41,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
   - Add `status.PENDING` string and `statuses.PENDING` function to all 3 locale files (types, en, ar)
   - Files: `shared/locale/types/dashboard/billing/quota.ts`, `shared/locale/en/dashboard/billing/quota.ts`, `shared/locale/ar/dashboard/billing/quota.ts`
   - _Requirements: R9 (i18n Completeness)_
-  - - [ ] 1.1.QL Quality Loop: `bun tsgo && bun biome:check` + lint queue on all 3 files
+  - - [ ] 1.1.QL Quality Loop: `bun run scripts/health/sub-loop.ts <file> --lifecycle lint` on all 3 files
   - - [ ] 1.1.IV Instruction Verification: Read `shared/AGENTS.md` + `frontend.instructions.md`
 
 - [ ] 1.2 Add delete confirmation and error keys to billing quota i18n
@@ -674,7 +670,7 @@ After quality loop passes, validate against ALL applicable AGENTS.md + instructi
 - [x] Each task produces testable code
 - [x] Requirements references included
 - [x] Scope is appropriate (2-4 hours each)
-- [x] Quality loop task per file (tsgo + biome:check + lint queue)
+- [x] Quality loop task per file (run scripts/health/sub-loop.ts --lifecycle lint)
 - [x] Instruction verification task per subtask (layer AGENTS.md + .agents/instructions)
 - [x] No Drizzle schema changes (UI-only plan)
 - [x] Knowledge propagation task included

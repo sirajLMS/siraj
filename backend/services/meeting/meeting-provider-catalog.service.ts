@@ -112,12 +112,7 @@ export namespace MeetingProviderCatalogService {
           );
         return Promise.all(
           toUpdate.map(({ input, existing }) =>
-            MeetingProviderRepository.update(
-              existing.id,
-              { ...input, isActive: input.isActive ?? true },
-              tErrors,
-              tx
-            )
+            MeetingProviderRepository.update(existing.id, { ...input, isActive: input.isActive ?? true }, tErrors, tx)
           )
         );
       }

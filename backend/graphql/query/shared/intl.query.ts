@@ -1,5 +1,13 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
 gqlSchemaBuilder.queryFields(t => ({
   welcomeMessage: t.field({
     type: "String",
@@ -16,9 +24,11 @@ gqlSchemaBuilder.queryFields(t => ({
       namespace: t.arg.string({ required: true }),
     },
     resolve: (_parent, { key, namespace }, ctx) => {
-      const translations = ctx.t() as unknown as Record<string, unknown>;
-      const namespaceTranslations = translations[namespace] as Record<string, unknown> | undefined;
-      return (namespaceTranslations?.[key] as string) ?? key;
+      const translations: unknown = ctx.t();
+      if (!isRecord(translations)) return key;
+      const namespaceTranslations = translations[namespace];
+      if (!isRecord(namespaceTranslations)) return key;
+      return isString(namespaceTranslations[key]) ? namespaceTranslations[key] : key;
     },
   }),
 }));

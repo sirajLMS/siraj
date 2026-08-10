@@ -21,7 +21,7 @@ export async function runUpsertMany<TInput, TResult>(
 
   const run = async (t: DBTransaction): Promise<TResult[]> => {
     return Promise.all(
-      inputs.map(async (input) => {
+      inputs.map(async input => {
         const existing = await findExisting(input, t);
         const existingId = existing ? existing.id : null;
         return upsertOne(input, existingId, t, locale);

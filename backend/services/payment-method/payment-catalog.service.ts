@@ -209,14 +209,17 @@ export namespace PaymentCatalogService {
     } catch (error) {
       if (!isDuplicateError(error)) throw error;
 
-      const results = await inputs.reduce(async (accPromise, input) => {
-        const acc = await accPromise;
-        const existing = await getBySlug(input.slug, tx);
-        if (existing && "id" in existing && typeof existing.id === "string") {
-          acc.push(await updateById(existing.id, input, tErrors, tx));
-        }
-        return acc;
-      }, Promise.resolve([] as T[]));
+      const results = await inputs.reduce(
+        async (accPromise, input) => {
+          const acc = await accPromise;
+          const existing = await getBySlug(input.slug, tx);
+          if (existing && "id" in existing && typeof existing.id === "string") {
+            acc.push(await updateById(existing.id, input, tErrors, tx));
+          }
+          return acc;
+        },
+        Promise.resolve([] as T[])
+      );
       return results;
     }
   }

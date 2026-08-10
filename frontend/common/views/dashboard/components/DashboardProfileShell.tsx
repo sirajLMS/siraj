@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { forbidden } from "next/navigation";
 import type { ReactNode } from "react";
-import { UserRole } from "@/backend/enum";
+import { AccountStatus as BackendAccountStatus, UserRole } from "@/backend/enum";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { isPrefetchRequest } from "@/backend/lib/auth/is-prefetch";
 import { mapBackendPermissionsToGraphql } from "@/backend/lib/auth/map-graphql-permissions";
@@ -9,8 +9,8 @@ import { logger } from "@/backend/lib/logger";
 import type { UserPermissionContext } from "@/backend/services/auth/permissions.service";
 import {
   AccountStatus,
-  type AppPermission,
-  type CurrencyCode,
+  AppPermission,
+  CurrencyCode,
   type User,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -113,7 +113,8 @@ export async function DashboardProfileShell({
     emailVerifiedAt: userProfile.emailVerifiedAt?.toISOString() ?? null,
     displayCurrency: mapBackendCurrencyToGraphql(userProfile.displayCurrency),
     phone: userProfile.phone ?? null,
-    status: String(userProfile.status) === String(AccountStatus.Deactivated) ? AccountStatus.Deactivated : AccountStatus.Activated,
+    status:
+      userProfile.status === BackendAccountStatus.DEACTIVATED ? AccountStatus.Deactivated : AccountStatus.Activated,
   };
 
   return (

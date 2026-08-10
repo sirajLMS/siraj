@@ -200,7 +200,7 @@ export namespace TeacherNotesRepository {
     if (inputs.length === 0) return [];
 
     return Promise.all(
-      inputs.map(async (input) => {
+      inputs.map(async input => {
         const existing = await findByTitles([input.title], tx);
         if (existing[0]) {
           return existing[0];

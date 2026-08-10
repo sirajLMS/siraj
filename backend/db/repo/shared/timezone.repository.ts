@@ -23,7 +23,7 @@ export namespace TimezoneRepository {
     const dbToQuery = tx ?? db;
 
     const rows = await Promise.all(
-      inputs.map((input) =>
+      inputs.map(input =>
         dbToQuery
           .insert(timezones)
           .values({
@@ -38,8 +38,8 @@ export namespace TimezoneRepository {
               isDstSupported: input.isDstSupported ?? true,
             },
           })
-          .returning(),
-      ),
+          .returning()
+      )
     );
 
     return rows.map(([row]) => row);

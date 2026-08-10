@@ -4,16 +4,21 @@ import { recurringSchedules, users } from "@/backend/db/schema";
 import { ensureTestSubjectId, setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
-import type { RecurringScheduleSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+
+interface ErrorWithCause extends Error {
+  cause?: { message?: string };
+}
+
+function isErrorWithCause(value: unknown): value is ErrorWithCause {
+  return value instanceof Error;
+}
 
 /**
  * Runs an operation expected to violate a database constraint and asserts an error is thrown.
  * Returns the caught error so the caller can assert on its message.
  */
-async function expectConstraintError(
-  insertFn: () => Promise<unknown>
-): Promise<Error & { cause?: { message?: string } }> {
+async function expectConstraintError(insertFn: () => Promise<unknown>): Promise<ErrorWithCause> {
   let errorCaught: unknown = null;
   try {
     await insertFn();
@@ -21,7 +26,10 @@ async function expectConstraintError(
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error & { cause?: { message?: string } };
+  if (isErrorWithCause(errorCaught)) {
+    return errorCaught;
+  }
+  throw new Error(String(errorCaught));
 }
 
 describe("Timezone Validation Constraints", () => {
@@ -64,7 +72,7 @@ describe("Timezone Validation Constraints", () => {
       const { student } = await setupStudent(tx, { name: "Schedule Parent User" }, {}, { name: "Schedule Student" });
       const { teacher } = await setupTeacher(tx, { name: "Schedule Teacher User" });
 
-      const [schedule] = (await tx
+      const [schedule] = await tx
         .insert(recurringSchedules)
         .values({
           studentId: student.id,
@@ -76,7 +84,7 @@ describe("Timezone Validation Constraints", () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning()) as [RecurringScheduleSelectType];
+        .returning();
 
       expect(schedule).toBeDefined();
       expect(schedule.timezone).toBe(IanaTimezone.Europe_London);

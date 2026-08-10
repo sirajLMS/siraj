@@ -87,7 +87,7 @@ export namespace BookRepository {
       const now = new Date();
 
       const results = await Promise.all(
-        inputs.map(async (input) => {
+        inputs.map(async input => {
           const [existing] = await t
             .select({
               id: books.id,

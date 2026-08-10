@@ -60,17 +60,13 @@ export namespace PersonaSeedService {
 
   /** Read helper for seed / test-helper scripts. */
   export async function listTeachersByUserIds(userIds: string[], tx?: DBTransaction): Promise<TeacherSelectType[]> {
-    const teachers = await Promise.all(
-      userIds.map((userId) => TeacherRepository.findByUserId(userId, tx))
-    );
+    const teachers = await Promise.all(userIds.map(userId => TeacherRepository.findByUserId(userId, tx)));
     return teachers.filter((teacher): teacher is TeacherSelectType => teacher !== undefined && teacher !== null);
   }
 
   /** Read helper for seed / test-helper scripts. */
   export async function listParentsByUserIds(userIds: string[], tx?: DBTransaction): Promise<ParentEntity[]> {
-    const parents = await Promise.all(
-      userIds.map((userId) => ParentRepository.findByUserId(userId, tx))
-    );
+    const parents = await Promise.all(userIds.map(userId => ParentRepository.findByUserId(userId, tx)));
     return parents.filter((parent): parent is ParentEntity => parent !== undefined && parent !== null);
   }
 }

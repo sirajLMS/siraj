@@ -52,7 +52,7 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
           enabled: userIndex % 5 !== 0,
         },
       ]);
-    }),
+    })
   );
   const inserted = results.flat();
 

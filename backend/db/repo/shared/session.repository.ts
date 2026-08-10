@@ -599,13 +599,15 @@ export namespace SessionRepository {
     return updated;
   };
 
+  function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
   function parseSessionPayload(payload: string | null | undefined): Record<string, unknown> {
     if (!payload) return {};
     try {
       const parsed: unknown = JSON.parse(payload);
-      return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
-        ? (parsed as Record<string, unknown>)
-        : {};
+      return isRecord(parsed) ? parsed : {};
     } catch {
       return {};
     }
@@ -613,21 +615,20 @@ export namespace SessionRepository {
 
   function readGroupSimulationFromPayload(payload: string | null | undefined): RedisGroupSimulationSessionData | null {
     const groupSimulation = parseSessionPayload(payload).groupSimulation;
-    if (!groupSimulation || typeof groupSimulation !== "object" || Array.isArray(groupSimulation)) {
+    if (!isRecord(groupSimulation)) {
       return null;
     }
-    const record = groupSimulation as Record<string, unknown>;
     if (
-      typeof record.groupSlug !== "string" ||
-      typeof record.startedAt !== "string" ||
-      typeof record.expiresAt !== "string"
+      typeof groupSimulation.groupSlug !== "string" ||
+      typeof groupSimulation.startedAt !== "string" ||
+      typeof groupSimulation.expiresAt !== "string"
     ) {
       return null;
     }
     return {
-      groupSlug: record.groupSlug,
-      startedAt: record.startedAt,
-      expiresAt: record.expiresAt,
+      groupSlug: groupSimulation.groupSlug,
+      startedAt: groupSimulation.startedAt,
+      expiresAt: groupSimulation.expiresAt,
     };
   }
 

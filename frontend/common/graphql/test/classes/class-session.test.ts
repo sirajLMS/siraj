@@ -44,11 +44,9 @@ async function clearClassesOnDate(token: string, dateVal: string) {
   });
 
   const list = result.data?.dailyScheduleList || [];
-  const idsToDelete = list
-    .map((item) => item?.id)
-    .filter((id): id is string => Boolean(id));
+  const idsToDelete = list.map(item => item?.id).filter((id): id is string => Boolean(id));
   const deleteResults = await Promise.all(
-    idsToDelete.map((classInstanceId) =>
+    idsToDelete.map(classInstanceId =>
       testClient.mutate({
         mutation: deleteClassInstanceMutationDocument,
         variables: {
@@ -142,7 +140,7 @@ describe("GraphQL Class Session Integration Tests", () => {
       const d = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
       dateStrings.push(d.toISOString().split("T")[0]);
     }
-    await Promise.all(dateStrings.map((dateStr) => clearClassesOnDate(token, dateStr)));
+    await Promise.all(dateStrings.map(dateStr => clearClassesOnDate(token, dateStr)));
   });
 
   test("teacher activates class within window successfully", async () => {

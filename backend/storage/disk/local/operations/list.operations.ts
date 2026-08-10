@@ -122,9 +122,7 @@ export async function fetchDirectoryChildren(
       const directoryEntries = entries.filter(entry => entry.isDirectory());
 
       const dirEntryResults = await Promise.allSettled(
-        directoryEntries.map(entry =>
-          processLocalDirectoryEntry(ctx, entry.name, targetPath, dbDirectoriesByPath)
-        )
+        directoryEntries.map(entry => processLocalDirectoryEntry(ctx, entry.name, targetPath, dbDirectoriesByPath))
       );
       dirEntryResults.forEach((result, index) => {
         if (result.status === "fulfilled") {

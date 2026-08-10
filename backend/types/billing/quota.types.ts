@@ -51,8 +51,7 @@ export function mapQuotaToReturnType(row: QuotaSelectType): QuotaReturnType {
   if (!isQuotaStatus(row.status)) {
     throw new Error(`Invalid QuotaStatus value: ${row.status}`);
   }
-  const periodType =
-    row.periodType === null ? null : isQuotaPeriodType(row.periodType) ? row.periodType : null;
+  const periodType = row.periodType === null ? null : isQuotaPeriodType(row.periodType) ? row.periodType : null;
   return {
     ...row,
     kind: row.kind,

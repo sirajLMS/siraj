@@ -29,9 +29,21 @@ import type {
   GenerateMeetingUrlResult,
   MeetingConfigDetails,
   MeetingProviderFieldSchema,
+  MeetingProviderKind,
   MeetingProviderSubmitInput,
 } from "@/backend/types";
 import type { LocalizedString } from "@/shared/types";
+
+const VALID_PROVIDER_KINDS: readonly MeetingProviderKind[] = [
+  "manual",
+  "zoom_oauth",
+  "google_meet_oauth",
+  "microsoft_teams_oauth",
+];
+
+function isMeetingProviderKind(value: string): value is MeetingProviderKind {
+  return (VALID_PROVIDER_KINDS as readonly string[]).includes(value);
+}
 
 function normalizeFieldSchema(input: {
   readonly requiresMeetingUrl: boolean;
@@ -127,7 +139,7 @@ function normalizeProviderCreateInput(input: {
     fieldSchema: normalizeFieldSchema(fieldSchema),
     ...(input.providerKind == null
       ? {}
-      : { providerKind: input.providerKind as MeetingProviderSubmitInput["providerKind"] }),
+      : { providerKind: isMeetingProviderKind(input.providerKind) ? input.providerKind : "manual" }),
     isActive: input.isActive ?? undefined,
   };
 }
@@ -161,7 +173,7 @@ function normalizeProviderUpdateInput(input: {
     ...(input.fieldSchema == null ? {} : { fieldSchema: normalizeFieldSchema(input.fieldSchema) }),
     ...(input.providerKind == null
       ? {}
-      : { providerKind: input.providerKind as MeetingProviderSubmitInput["providerKind"] }),
+      : { providerKind: isMeetingProviderKind(input.providerKind) ? input.providerKind : "manual" }),
     ...(input.isActive == null ? {} : { isActive: input.isActive }),
   };
 }

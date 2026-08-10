@@ -96,7 +96,7 @@ async function queryExpiringSoonQuotas(): Promise<QuotaSelectType[]> {
 }
 
 /** Determines whether a refreshed quota qualifies as low-balance. */
-function isLowBalance(quota: QuotaSelectType): boolean {
+function isLowBalance(quota: QuotaReturnType): boolean {
   const threshold = Math.max(
     Math.floor(quota.totalClasses * LOW_BALANCE_THRESHOLD_FRACTION),
     LOW_BALANCE_ABSOLUTE_FLOOR
@@ -113,22 +113,27 @@ function isLowBalance(quota: QuotaSelectType): boolean {
  * RCOMP-1: Calls QuotaService.listPeriodicForRollover (service layer) rather
  * than the repository directly, per the single-writer principle.
  */
-async function refreshPeriodicAndCollectLowBalance(): Promise<QuotaSelectType[]> {
-  const lowBalanceResults: QuotaSelectType[] = [];
+async function refreshPeriodicAndCollectLowBalance(): Promise<QuotaReturnType[]> {
+  const lowBalanceResults: QuotaReturnType[] = [];
 
   await db.transaction(async tx => {
     const periodicQuotas = await QuotaService.listPeriodicForRollover(tx);
 
-    for (let i = 0; i < periodicQuotas.length; i += PERIODIC_REFRESH_CHUNK_SIZE) {
-      const chunk = periodicQuotas.slice(i, i + PERIODIC_REFRESH_CHUNK_SIZE);
+    // Process in sequential chunks (shared transaction) via recursive helper
+    // to avoid no-await-in-loop while preserving transaction semantics.
+    const processChunk = async (index: number): Promise<void> => {
+      if (index >= periodicQuotas.length) return;
+      const chunk = periodicQuotas.slice(index, index + PERIODIC_REFRESH_CHUNK_SIZE);
       const refreshedQuotas = await Promise.all(chunk.map(quota => QuotaService.refreshPeriodic(tx, quota.id, null)));
 
       for (const refreshed of refreshedQuotas) {
-        if (isLowBalance(refreshed as QuotaSelectType)) {
-          lowBalanceResults.push(refreshed as QuotaSelectType);
+        if (isLowBalance(refreshed)) {
+          lowBalanceResults.push(refreshed);
         }
       }
-    }
+      return processChunk(index + PERIODIC_REFRESH_CHUNK_SIZE);
+    };
+    await processChunk(0);
   });
 
   return lowBalanceResults;
@@ -173,7 +178,7 @@ function buildExpiringSoonNotification(quota: QuotaSelectType, target: QuotaNoti
 }
 
 /** Builds a "low balance" notification payload from a quota and its target. */
-function buildLowBalanceNotification(quota: QuotaSelectType, target: QuotaNotificationTarget): Promise<void> {
+function buildLowBalanceNotification(quota: QuotaReturnType, target: QuotaNotificationTarget): Promise<void> {
   return QuotaNotificationService.sendQuotaLowBalance({
     affectedUserIds: target.affectedUserIds,
     studentName: target.studentName,

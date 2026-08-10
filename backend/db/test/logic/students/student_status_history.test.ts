@@ -8,6 +8,10 @@ import { StudentStatus } from "@/backend/enum";
 import type { StudentStatusHistorySelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
+function isError(value: unknown): value is Error {
+  return value instanceof Error;
+}
+
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;
   try {
@@ -16,12 +20,17 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (isError(errorCaught)) return errorCaught;
+  throw new Error(String(errorCaught));
+}
+
+function getCauseMessage(error: Error): string {
+  if (isError(error.cause)) return error.cause.message;
+  return "";
 }
 
 function getFullErrorMessage(error: Error): string {
-  const cause = error.cause as { message?: string } | undefined;
-  return `${error.message} ${cause?.message ?? ""}`;
+  return `${error.message} ${getCauseMessage(error)}`;
 }
 
 describe("Student Status Transitions & History", () => {

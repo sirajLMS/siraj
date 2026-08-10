@@ -7,12 +7,32 @@ import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/p
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
 import { filterMethodsForDirection } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/utils";
+import type { PaymentMethodDirectionLabels, PaymentMethodTypeLabels } from "@/frontend/common/lib/payment-method";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge/MobileStatusBadge";
 import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar/MobileFormSuccessSnackbar";
 import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect";
 import { LocalizedStringDrawerMobile } from "@/frontend/mobile/components/ui/input/localizedString";
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { LocalizedString } from "@/shared/types";
+
+const DEFAULT_INSTRUCTIONS: LocalizedString = {};
+
+function makeLabelResolver(labels: PaymentMethodTypeLabels): (key: string) => string {
+  return key => {
+    const entries: ReadonlyArray<readonly [string, string]> = Object.entries(labels);
+    const entry = entries.find(([k]) => k === key);
+    return entry ? entry[1] : "";
+  };
+}
+
+function makeDirectionResolver(labels: PaymentMethodDirectionLabels): (key: string) => string {
+  return key => {
+    const entries: ReadonlyArray<readonly [string, string]> = Object.entries(labels);
+    const entry = entries.find(([k]) => k === key);
+    return entry ? entry[1] : "";
+  };
+}
 
 export function PaymentMethodDefaultsEditorMobile({
   methods,
@@ -20,7 +40,7 @@ export function PaymentMethodDefaultsEditorMobile({
   payoutDefaultId,
   onPayinDefaultChangeAction,
   onPayoutDefaultChangeAction,
-  instructions = {},
+  instructions = DEFAULT_INSTRUCTIONS,
   onInstructionsSaveAction,
   displayCurrency,
   onDisplayCurrencyChangeAction,
@@ -39,11 +59,8 @@ export function PaymentMethodDefaultsEditorMobile({
 
   const formatMethodLabel = useCallback(
     (method: PaymentMethodRow) => {
-      const typeLabel = getPaymentMethodTypeLabel(method.type, key => t.type[key as keyof typeof t.type] ?? "");
-      const directionLabel = getPaymentMethodDirectionLabel(
-        method.direction,
-        key => t.direction[key as keyof typeof t.direction] ?? ""
-      );
+      const typeLabel = getPaymentMethodTypeLabel(method.type, makeLabelResolver(t.type));
+      const directionLabel = getPaymentMethodDirectionLabel(method.direction, makeDirectionResolver(t.direction));
       const base = method.label?.trim() || method.catalogSlug || typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;
     },

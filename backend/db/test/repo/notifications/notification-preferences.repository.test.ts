@@ -40,8 +40,8 @@ describe("NotificationPreferencesRepository — getByUserId", () => {
     const results = await NotificationPreferencesRepository.getByUserId(user.id, tx);
 
     expect(results).toHaveLength(2);
-    expect(results.some(row => row.channel === NotificationChannel.EMAIL)).toBe(true);
-    expect(results.some(row => row.channel === NotificationChannel.SMS && !row.enabled)).toBe(true);
+    expect(results.some(row => row.channel === "EMAIL")).toBe(true);
+    expect(results.some(row => row.channel === "SMS" && !row.enabled)).toBe(true);
   });
 
   preferencesTest("returns empty array when user has no preferences", async tx => {

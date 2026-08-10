@@ -5,6 +5,16 @@ import { logger } from "@/backend/lib/logger";
 import { CurrencyHedgeService } from "@/backend/services/fx/currency-hedge.service";
 import type { CurrencyHedgeSelectType } from "@/backend/types";
 
+function createHedgeMap<TKey extends CurrencyCode>(
+  rows: CurrencyHedgeSelectType[]
+): Map<TKey, CurrencyHedgeSelectType> {
+  const map = new Map<TKey, CurrencyHedgeSelectType>();
+  for (const row of rows) {
+    map.set(row.currency as TKey, row);
+  }
+  return map;
+}
+
 const HEDGE_SPECS = [
   { currency: CurrencyCode.USD, amount: "10000.00", hedgeType: "LONG", notes: "USD exposure hedge" },
   { currency: CurrencyCode.EGP, amount: "250000.00", hedgeType: "SHORT", notes: "EGP exposure hedge" },
@@ -27,9 +37,7 @@ export async function seedOrGet(config?: SeedConfig) {
     toKey: spec => spec.currency,
     findExisting: async currencies => {
       const existing = await CurrencyHedgeService.findHedgesByCurrencies(currencies);
-      return new Map(
-        existing.map(row => [row.currency, row] as [(typeof currencies)[number], CurrencyHedgeSelectType])
-      );
+      return createHedgeMap(existing);
     },
     createMany: async toCreate =>
       CurrencyHedgeService.createManyHedges(
@@ -42,9 +50,7 @@ export async function seedOrGet(config?: SeedConfig) {
       ),
     refetchOnRace: async currencies => {
       const existing = await CurrencyHedgeService.findHedgesByCurrencies(currencies);
-      return new Map(
-        existing.map(row => [row.currency, row] as [(typeof currencies)[number], CurrencyHedgeSelectType])
-      );
+      return createHedgeMap(existing);
     },
   });
 
