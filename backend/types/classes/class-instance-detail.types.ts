@@ -1,6 +1,6 @@
 import type { classInstances } from "@/backend/db/schema/classes/scheduling";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 

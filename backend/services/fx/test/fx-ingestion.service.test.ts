@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { FxProvider, FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
-import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 // ---------------------------------------------------------------------------
 // Mocks

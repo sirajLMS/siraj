@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { StaffProfileRepository, UserRepository } from "@/backend/db/repo";
 import { AccountStatus, UserRole } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ManagerProfileService } from "@/backend/services/staff/manager-profile.service";
 import type { UserReturnType, UserSelectType } from "@/backend/types";

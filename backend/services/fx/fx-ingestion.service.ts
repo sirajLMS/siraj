@@ -2,7 +2,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { BillingRepository, FxSyncRepository } from "@/backend/db/repo";
 import { AppPermission, FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
-import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
 import { getFxRateProvider } from "@/backend/services/fx/providers/FxRateProviderFactory";

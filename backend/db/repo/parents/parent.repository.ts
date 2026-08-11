@@ -23,7 +23,7 @@ import {
   type ParentStatus,
   StudentStatus,
 } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type {
   PaginationArgs,
   ParentCreateResult,

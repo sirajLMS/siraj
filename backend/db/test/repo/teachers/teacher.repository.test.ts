@@ -8,7 +8,7 @@ import { teachers, users } from "@/backend/db/schema";
 import { createTestUser, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AccountStatus, CurrencyCode } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { PaginationArgs } from "@/backend/types";
 
 /**

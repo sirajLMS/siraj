@@ -16,8 +16,8 @@ import {
 import { createdAtColumn, primaryKeyColumn, timestampColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import { accountStatusEnum, currencyCodeEnum } from "@/backend/db/schema/enums";
 import { AccountStatus } from "@/backend/enum";
-import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.

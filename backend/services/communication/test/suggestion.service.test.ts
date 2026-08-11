@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { ParentRepository, SoftDeleteRepository, SuggestionRepository, UserRepository } from "@/backend/db/repo";
 import { AccountStatus, AppPermission, NotificationChannel, SuggestionStatus } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { PermissionsService } from "@/backend/services";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";

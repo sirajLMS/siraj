@@ -16,7 +16,7 @@ import {
 } from "@/backend/db/schema";
 import { AccountStatus, CurrencyCode, StudentStatus } from "@/backend/enum";
 import { ParentStatus } from "@/backend/enum/parents/parent.enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { hashPassword } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
 import { assertTestHelperAllowed } from "@/backend/lib/test-helper-gate";

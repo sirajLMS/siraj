@@ -4,7 +4,7 @@ import {
   MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
 } from "@/backend/enum/meeting/meeting-integrations.enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type {
   GenerateMeetingInput,
   GenerateMeetingResult,

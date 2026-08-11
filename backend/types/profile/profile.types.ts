@@ -1,6 +1,6 @@
 import type { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import type { AccountStatus } from "@/backend/enum/auth/auth.enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { PaymentMethodDefaults, UserPaymentMethodReturnType } from "@/backend/types/billing/payment-method.types";
 import type {
   ParentAssignedStudentsResult,

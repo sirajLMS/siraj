@@ -1,6 +1,6 @@
 import type { users } from "@/backend/db/schema/users/users";
 import type { AccountStatus, CurrencyCode, UserRole } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
 
 // Alias AccountStatus as UserStatus for canonical pattern compliance

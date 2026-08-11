@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import { resolveAssetPath } from "@/backend/db/seeds/lib/file-seed-helper";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { ENV_CONFIG_KEYS } from "@/backend/lib/env-config-keys";
 import { logger } from "@/backend/lib/logger";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";

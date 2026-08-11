@@ -1,6 +1,6 @@
 import { BillingRepository, FxSyncRepository } from "@/backend/db/repo";
 import { AppPermission, FxSyncStatus } from "@/backend/enum";
-import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   CurrencyExchangeRateReturnType,

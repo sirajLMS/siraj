@@ -4,7 +4,7 @@ import type {
   teacherVacationRequests,
 } from "@/backend/db/schema";
 import type { AvailabilitySearchSortBy, DayOfWeek, Gender } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { PageInfo, PaginationInput } from "@/backend/types/shared/pagination.types";
 
 export type TeacherAvailabilityWindowSelectType = typeof teacherAvailabilityWindows.$inferSelect;

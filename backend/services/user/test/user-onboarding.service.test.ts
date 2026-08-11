@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   type UserOnboardingService,

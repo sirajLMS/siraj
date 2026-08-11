@@ -3,7 +3,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { mapStatusTrackingQueryRow } from "@/backend/db/repo/scheduling/scheduling-queries.repository/status-tracking.utils";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { StatusTrackingRow } from "@/backend/types/scheduling/scheduling.types";
 
 export const getStatusTrackingRows = async (

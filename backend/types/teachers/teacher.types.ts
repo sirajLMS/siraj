@@ -9,7 +9,7 @@ import type {
   StudentStatus,
   TeacherProgressFeedEventKind,
 } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
 import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type { ClassSessionMetrics } from "@/backend/types/scheduling/schedule.types";

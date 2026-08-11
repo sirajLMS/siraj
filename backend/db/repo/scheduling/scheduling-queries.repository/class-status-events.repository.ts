@@ -3,7 +3,7 @@ import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { resolveTeacherProgressFeedEventKind } from "@/backend/db/repo/scheduling/scheduling-queries.repository/teacher-progress-feed.utils";
 import { classInstances, classStatusEvents, students } from "@/backend/db/schema";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type * as Types from "@/backend/types";
 
 export const getClassStatusEvents = async (classInstanceId: string, tx?: DBTransaction) => {

@@ -10,7 +10,7 @@ import {
   users,
 } from "@/backend/db/schema";
 import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { NotFoundError, ValidationError } from "@/backend/lib/errors";
 import type * as Types from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";

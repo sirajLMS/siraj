@@ -12,7 +12,7 @@ import type {
   StudentStatus,
 } from "@/backend/enum";
 
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import type { PageInfo, PaginationArgs } from "@/backend/types/shared/pagination.types";

@@ -6,7 +6,7 @@ import { classInstances, recurringScheduleDays, recurringSchedules } from "@/bac
 import { ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ScheduleDeletionService } from "@/backend/services/schedule/schedule-deletion.service";
 import type { ErrorsLabels } from "@/shared/locale";

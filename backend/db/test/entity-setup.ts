@@ -29,7 +29,7 @@ import {
   LessonReportStatus,
   TeacherDueStatus,
 } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type {
   ClassInstanceSelectType,
   ClassMeetingConfigSelectType,

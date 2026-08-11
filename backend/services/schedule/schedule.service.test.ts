@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { AppPermission } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import * as resolveViewerTimezoneModule from "@/backend/services/schedule/resolve-viewer-timezone";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";

@@ -8,7 +8,7 @@ import {
   type SeedConfig,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { logger } from "@/backend/lib/logger";
 import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
 import type { UserSelectType } from "@/backend/types";

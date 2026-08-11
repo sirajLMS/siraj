@@ -4,7 +4,7 @@
  */
 import { expect, test } from "bun:test";
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
-import { CurrencyCode } from "@/backend/enum/shared/currency.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { FixerAdapter } from "@/backend/services/fx/providers/fixer/FixerAdapter";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 
