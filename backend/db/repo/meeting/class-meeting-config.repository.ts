@@ -1,7 +1,8 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { labelCondition, requireConfigOrThrow } from "@/backend/db/repo/meeting/__shared__/meetingConfigRepoHelpers";
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { classMeetingConfigs } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
@@ -51,10 +52,7 @@ export namespace ClassMeetingConfigRepository {
     tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType> {
     const row = await getById(id, tx);
-    if (!row) {
-      throw new Error(tErrors.meetingConfigNotFound(id));
-    }
-    return row;
+    return requireConfigOrThrow(row, id, tErrors);
   }
 
   async function getDefaultForScope(
@@ -203,10 +201,6 @@ export namespace ClassMeetingConfigRepository {
     return db.transaction(run);
   }
 
-  function labelCondition(label: string | null | undefined) {
-    return label ? eq(classMeetingConfigs.label, label) : isNull(classMeetingConfigs.label);
-  }
-
   export async function findByScopeProviderLabel(
     scope: ClassMeetingConfigScopeFilter,
     providerId: string,
@@ -217,7 +211,13 @@ export namespace ClassMeetingConfigRepository {
     const [row] = await client
       .select()
       .from(classMeetingConfigs)
-      .where(and(scopeCondition(scope), eq(classMeetingConfigs.providerId, providerId), labelCondition(label)))
+      .where(
+        and(
+          scopeCondition(scope),
+          eq(classMeetingConfigs.providerId, providerId),
+          labelCondition(classMeetingConfigs.label, label)
+        )
+      )
       .limit(1);
     return row ?? null;
   }

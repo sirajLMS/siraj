@@ -1,14 +1,11 @@
 import { Box, CircularProgress } from "@mui/material";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { buildTranslatedMetadata } from "@/app/__shared__/buildEntityPageTitle";
 import { LessonReportDetailContainer } from "@/frontend/common/views/dashboard/supervisor/lesson-report-detail/LessonReportDetailContainer";
-import { getTranslations } from "@/shared/locale";
-import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
-  const t = getTranslations(locale).dashboardTranslations.lmsLessonReports;
-  return { title: t.title };
+  return buildTranslatedMetadata(t => t.dashboardTranslations.lmsLessonReports.title);
 }
 
 export default function LessonReportDetailPage() {

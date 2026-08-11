@@ -118,12 +118,7 @@ async function runErrorTest(
 function setupSuccessMocks(opts: { emailDispatchFails?: boolean } = {}) {
   const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
   const findUserSpy = spyOn(UserRepository, "findUserByIdOrThrow").mockResolvedValue(mockTargetUser());
-  const updatePasswordSpy = spyOn(UserRepository, "updatePassword").mockResolvedValue({
-    id: TARGET_ID,
-    name: "Target User",
-    email: "target@example.com",
-    password: randomUUID(),
-  } as Awaited<ReturnType<typeof UserRepository.updatePassword>>);
+  const updatePasswordSpy = spyOn(UserRepository, "updatePassword").mockResolvedValue(mockTargetUser());
   const auditSpy = spyOn(AuditService, "createManyAdminAuditLogs").mockResolvedValue([]);
 
   let emailSpy: ReturnType<typeof spyOn>;

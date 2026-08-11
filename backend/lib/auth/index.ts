@@ -9,3 +9,4 @@ export * from "./password";
 export * from "./require-permission";
 export * from "./server-auth";
 export * from "./session-hash";
+export * from "./withPageAuth";

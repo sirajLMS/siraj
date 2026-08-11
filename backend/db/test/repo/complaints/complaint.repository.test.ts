@@ -442,17 +442,20 @@ describe("ComplaintRepository — getComplaintFiles", () => {
 
     const file1 = await insertStorageFile(tx, `complaints/test-file-1-${randomUUID()}.pdf`);
     const file2 = await insertStorageFile(tx, `complaints/test-file-2-${randomUUID()}.png`);
+    const now = new Date();
 
     await tx.insert(complaintFiles).values({
       fileId: file1.id,
       complaintId: complaint.id,
       usageType: "attachment",
+      createdAt: now,
     });
 
     await tx.insert(complaintFiles).values({
       fileId: file2.id,
       complaintId: complaint.id,
       usageType: "attachment",
+      createdAt: now,
     });
 
     const result = await ComplaintRepository.getComplaintFiles(complaint.id, tx);
@@ -489,6 +492,7 @@ describe("ComplaintRepository — getComplaintFiles", () => {
       fileId: file.id,
       complaintId: complaint.id,
       usageType: "evidence",
+      createdAt: new Date(),
     });
 
     const result = await ComplaintRepository.getComplaintFiles(complaint.id, tx);

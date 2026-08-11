@@ -13,8 +13,8 @@
  *   1. Get the list of uncommitted files (git status --porcelain)
  *   2. Run each check ONCE project-wide:
  *      - tsgo (project-wide, filter for uncommitted files)
- *      - biome:check (on uncommitted files only)
  *      - oxlint (on uncommitted files only)
+ *      - biome:check (on uncommitted files only)
  *      - lint:type-aware (via lint service, on uncommitted files only)
  *   3. Report per-file results
  *   4. Exit non-zero if ANY file fails ANY check
@@ -24,9 +24,9 @@
  *
  * Lifecycle stages (same as sub-loop.ts):
  *   tsgo          → only run tsgo
- *   biome         → run tsgo, then biome:check
- *   lint          → run tsgo, biome, oxlint, then lint:type-aware (default)
- *   codescene     → run tsgo, biome, oxlint, lint:type-aware, check:duplicates, codescene
+ *   biome         → run tsgo, then oxlint, then biome:check
+ *   lint          → run tsgo, oxlint, biome, then lint:type-aware (default)
+ *   codescene     → run tsgo, oxlint, biome, lint:type-aware, check:duplicates, codescene
  *   sonar-results → same as codescene
  *
  * Exit codes:
@@ -422,6 +422,11 @@ async function main(): Promise<void> {
 
     // biome (depth 1+)
     if (depth >= 1) {
+      results.push(checkOxlintAll(files));
+      if (!results[results.length - 1].passed) {
+        printSummary(results, files);
+        return 1;
+      }
       results.push(checkBiomeAll(files));
       if (!results[results.length - 1].passed) {
         printSummary(results, files);
@@ -429,13 +434,8 @@ async function main(): Promise<void> {
       }
     }
 
-    // oxlint + lint:type-aware (depth 2+)
+    // lint:type-aware (depth 2+)
     if (depth >= 2) {
-      results.push(checkOxlintAll(files));
-      if (!results[results.length - 1].passed) {
-        printSummary(results, files);
-        return 1;
-      }
       results.push(await checkLintTypeAwareAll(files));
       if (!results[results.length - 1].passed) {
         printSummary(results, files);

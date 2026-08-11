@@ -1,40 +1,21 @@
 "use client";
 
-import { Paper, Typography } from "@mui/material";
-import { QuotaAudienceCard } from "@/frontend/common/views/dashboard/students/quota/audience/QuotaAudienceCard";
+import type { QuotaAudienceSection } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceViewShared";
+import { QuotaAudienceViewShared } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceViewShared";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 interface ParentQuotaViewProps {
   readonly t: StudentQuotaLabels;
 }
 
+function buildParentSections(t: StudentQuotaLabels): readonly QuotaAudienceSection[] {
+  return [
+    { label: t.audience.remainingCredits, emptyStateMessage: t.audience.noChildren, highlighted: true },
+    { label: t.audience.activeQuotas, emptyStateMessage: t.audience.noChildren },
+    { label: t.audience.onDemandPending, emptyStateMessage: t.audience.noChildren },
+  ];
+}
+
 export function ParentQuotaView({ t }: Readonly<ParentQuotaViewProps>) {
-  return (
-    <QuotaAudienceCard title={t.audience.parentTitle}>
-      <Paper sx={{ p: 3 }} elevation={4} variant="outlined">
-        <Typography variant="labelMd" sx={{ mb: 1 }}>
-          {t.audience.remainingCredits}
-        </Typography>
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {t.audience.noChildren}
-        </Typography>
-      </Paper>
-      <Paper sx={{ p: 3 }} elevation={0} variant="outlined">
-        <Typography variant="labelMd" sx={{ mb: 1 }}>
-          {t.audience.activeQuotas}
-        </Typography>
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {t.audience.noChildren}
-        </Typography>
-      </Paper>
-      <Paper sx={{ p: 3 }} elevation={0} variant="outlined">
-        <Typography variant="labelMd" sx={{ mb: 1 }}>
-          {t.audience.onDemandPending}
-        </Typography>
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {t.audience.noChildren}
-        </Typography>
-      </Paper>
-    </QuotaAudienceCard>
-  );
+  return <QuotaAudienceViewShared title={t.audience.parentTitle} sections={buildParentSections(t)} />;
 }

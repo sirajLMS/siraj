@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { AppPermission } from "@/backend/enum";
-import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
+import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
 import { QuotaContainer } from "@/frontend/common/views/dashboard/billing/quota/QuotaContainer";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
@@ -13,13 +11,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.title };
 }
 
-export default async function QuotasListPage() {
-  const locale = await getLocale();
-  const { userId, context } = await getServerUserContext();
-  if (!userId) {
-    await redirectToLogin();
-    return undefined;
-  }
-  await requirePermissionForPage(userId, [AppPermission.QUOTAS_VIEW], locale, context);
+export default withPageAuth([AppPermission.QUOTAS_VIEW], async () => {
   return <QuotaContainer />;
-}
+});

@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
+import { buildIdSuffixedTranslatedMetadata } from "@/app/__shared__/buildEntityPageTitle";
 import { AppPermission } from "@/backend/enum";
-import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
+import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
 import { QuotaDetailContainer } from "@/frontend/common/views/dashboard/billing/quota/QuotaDetailContainer";
-import { getTranslations } from "@/shared/locale";
-import { getLocale } from "@/shared/locale/server-cookies";
 
 interface QuotaDetailPageProps {
   readonly params: Promise<{ id: string }>;
@@ -13,19 +10,10 @@ interface QuotaDetailPageProps {
 
 export async function generateMetadata({ params }: Readonly<QuotaDetailPageProps>): Promise<Metadata> {
   const { id } = await params;
-  const locale = await getLocale();
-  const t = getTranslations(locale).dashboardTranslations.billingQuota;
-  return { title: `${t.quotaDetails} — ${id}` };
+  return buildIdSuffixedTranslatedMetadata(t => t.dashboardTranslations.billingQuota.quotaDetails, id);
 }
 
-export default async function QuotaDetailPage({ params }: Readonly<QuotaDetailPageProps>) {
+export default withPageAuth<Readonly<QuotaDetailPageProps>>([AppPermission.QUOTAS_VIEW], async (_auth, { params }) => {
   const { id } = await params;
-  const locale = await getLocale();
-  const { userId, context } = await getServerUserContext();
-  if (!userId) {
-    await redirectToLogin();
-    return undefined;
-  }
-  await requirePermissionForPage(userId, [AppPermission.QUOTAS_VIEW], locale, context);
   return <QuotaDetailContainer quotaId={id} />;
-}
+});

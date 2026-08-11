@@ -1,11 +1,9 @@
 "use client";
 
-import { MenuItem, Stack, TextField, Tooltip } from "@mui/material";
-import { useState } from "react";
-import { SectionPanel } from "@/frontend/common/components/ui";
-import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { Stack, Typography } from "@mui/material";
+import type * as React from "react";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
+import { AdminSectionShared } from "@/frontend/common/views/dashboard/profile/components/__shared__/adminSectionShared";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
@@ -26,6 +24,14 @@ type AdminOnlySectionProps = {
       readonly profile: StudentProfileRow;
     }
 );
+
+const STUDENT_STATUS_OPTIONS = [
+  StudentStatus.Regular,
+  StudentStatus.Suspended,
+  StudentStatus.OnLeave,
+  StudentStatus.OnTrial,
+  StudentStatus.Deactivated,
+] as const;
 
 function getStudentStatusLabel(status: string | null, tStatus: StudentStatusLabels): string {
   const statusLabels: Record<string, string> = {
@@ -57,80 +63,44 @@ function getStudentStatusColor(
   }
 }
 
+function InfoField({ label, value }: { readonly label: string; readonly value: React.ReactNode }) {
+  return (
+    <Stack spacing={0.5}>
+      <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>{label}</Typography>
+      {value}
+    </Stack>
+  );
+}
+
 export function AdminOnlySection(props: AdminOnlySectionProps) {
   const t = useAppTranslation(Translation.Dashboard.StudentPortalProfile);
   const tStatus = useAppTranslation(Translation.Dashboard.StudentStatus);
-  const { baseLabels } = props.labels;
-  const { canAdminResetPassword, canEditStatus } = useProfileFieldAccess({ scope: undefined });
-  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
-  const [sendEmail, setSendEmail] = useState(false);
-
-  if (props.mode === "edit") {
-    const canEditStatusField = canEditStatus();
-    return (
-      <SectionPanel title={t.accountStatus}>
-        <Stack spacing={2}>
-          {canEditStatusField ? (
-            <TextField label={t.accountStatus} fullWidth size="small" select defaultValue={props.profile.status}>
-              <MenuItem value={StudentStatus.Regular}>{tStatus.statusOptions.REGULAR}</MenuItem>
-              <MenuItem value={StudentStatus.Suspended}>{tStatus.statusOptions.SUSPENDED}</MenuItem>
-              <MenuItem value={StudentStatus.OnLeave}>{tStatus.statusOptions.ON_LEAVE}</MenuItem>
-              <MenuItem value={StudentStatus.OnTrial}>{tStatus.statusOptions.ON_TRIAL}</MenuItem>
-              <MenuItem value={StudentStatus.Deactivated}>{tStatus.statusOptions.DEACTIVATED}</MenuItem>
-            </TextField>
-          ) : null}
-        </Stack>
-      </SectionPanel>
-    );
-  }
+  const tBase = useAppTranslation(Translation.Profile.Base);
+  const { canEditStatus } = useProfileFieldAccess({ scope: undefined });
 
   const { profile } = props;
-  const canResetPassword = canAdminResetPassword();
   const targetUserId = profile.parentUserId ?? profile.id;
 
   return (
-    <Stack>
-      <SectionPanel title={t.accountStatus}>
-        <Stack spacing={2}>
-          <Stack spacing={0.5}>
-            <Tooltip title={baseLabels.actions.manageLifecycle}>
-              <Stack spacing={0.5} direction="row" sx={{ alignItems: "center" }}>
-                <StatusBadge
-                  category="studentAccount"
-                  status={getStudentStatusColor(profile.status)}
-                  label={getStudentStatusLabel(profile.status, tStatus)}
-                />
-                {canResetPassword && targetUserId && (
-                  <Tooltip title={baseLabels.actions.manageLifecycle}>
-                    <ResetPasswordDialog
-                      open={resetPasswordOpen}
-                      onClose={() => setResetPasswordOpen(false)}
-                      userName={profile.name}
-                      userEmail={profile.email ?? ""}
-                      isLoading={false}
-                      sendEmail={sendEmail}
-                      setSendEmail={setSendEmail}
-                      onConfirm={() => setResetPasswordOpen(false)}
-                    />
-                  </Tooltip>
-                )}
-              </Stack>
-            </Tooltip>
-          </Stack>
-        </Stack>
-      </SectionPanel>
-      {canResetPassword && targetUserId && (
-        <ResetPasswordDialog
-          open={resetPasswordOpen}
-          onClose={() => setResetPasswordOpen(false)}
-          userName={profile.name}
-          userEmail={profile.email ?? ""}
-          isLoading={false}
-          sendEmail={sendEmail}
-          setSendEmail={setSendEmail}
-          onConfirm={() => setResetPasswordOpen(false)}
-        />
-      )}
-    </Stack>
+    <AdminSectionShared
+      mode={props.mode}
+      sectionTitle={t.accountStatus}
+      accountStatusLabel={t.accountStatus}
+      resetPasswordSuccess={tBase.adminResetPassword.success}
+      resetPasswordError={tBase.adminResetPassword.error}
+      InfoField={InfoField}
+      statusBadgeCategory="studentAccount"
+      statusColor={getStudentStatusColor(profile.status)}
+      statusLabel={getStudentStatusLabel(profile.status, tStatus)}
+      editStatusOptions={STUDENT_STATUS_OPTIONS.map(status => ({
+        value: status,
+        label: tStatus.statusOptions[status],
+      }))}
+      editStatusDefaultValue={profile.status}
+      canEditStatus={canEditStatus()}
+      targetUserId={targetUserId}
+      userName={profile.name}
+      userEmail={profile.email ?? ""}
+    />
   );
 }

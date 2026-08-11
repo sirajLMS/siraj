@@ -60,7 +60,7 @@ bun run scripts/run-test/run-test.ts --last <path>      # View last result (AI-o
 bun run scripts/run-test/run-test.ts --last --focus "<pattern>" <path>  # Filtered view
 
 # Quality Gates
-bun quality-gate               # Automated quality verification (tsgo → biome → lint → codescene → sonar)
+bun quality-gate               # Automated quality verification (tsgo → oxlint → biome → lint → codescene → sonar)
 bun quality-gate:fresh         # Reset state and run fresh
 
 # Database
@@ -166,7 +166,7 @@ All layers use types from `backend/types/{entity}.types.ts`:
 ## Code Quality Workflow
 
 After making changes:
-1. Run `bun quality-gate` - it handles tsgo, biome, lint, codescene sequentially
+1. Run `bun quality-gate` - it handles tsgo, oxlint, biome, lint, codescene sequentially
 2. If CODESCENE fails: run `bun run codescene --file <path>` to fix
 3. Re-run `bun quality-gate` to resume from last failed stage
 4. Use `bun quality-gate:fresh` only for clean-slate verification
@@ -235,11 +235,12 @@ const fullResult = await requestFullRepoLint("cli");
 
 When refactoring or creating code, run a per-file verification loop **BEFORE** using the result elsewhere:
 
-1. **After extracting a function** from one file to another: run tsgo + biome + lint on the **new file containing the extracted function** BEFORE importing or using it elsewhere.
-2. **After creating a new file**: run tsgo + biome + lint on the new file BEFORE importing it anywhere.
+1. **After extracting a function** from one file to another: run tsgo + oxlint + biome + lint on the **new file containing the extracted function** BEFORE importing or using it elsewhere.
+2. **After creating a new file**: run tsgo + oxlint + biome + lint on the new file BEFORE importing it anywhere.
 
 ```bash
 bun tsgo                          # Type check (safe to run concurrently)
+bun oxlint                         # Oxlint (fast linter, fails on warnings)
 bun biome:check                   # Biome (safe to run concurrently)
 # Lint the specific file:
 bun run scripts/lint-service.ts -f <the-file> --id verify
@@ -269,14 +270,14 @@ within each lifecycle stage. Key rules:
 
 - Subagents are dispatched **per lifecycle stage only** — no mixing stages in the same wave
 - Each stage must fully complete before advancing to the next
-- Stage order: `tsgo` → `biome:check` → `lint` → `codescene`
+- Stage order: `tsgo` → `oxlint` → `biome:check` → `lint` → `codescene`
 
 ### Subagent Dispatch Model
 
 - **One subagent per file** — maximum parallelism
 - **tsgo uses grouped parallel**: bundle related files (same import chain, same directory, same type
   dependency) into batches. Fix a batch in parallel, verify, then move to the next batch
-- **biome/lint/codescene**: full parallel — all files at once
+- **oxlint/biome/lint/codescene**: full parallel — all files at once
 
 ### Per-File Verification via `scripts/health/sub-loop.ts`
 
@@ -286,19 +287,19 @@ Each subagent calls the automation script to verify its file:
 bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>
 ```
 
-The script runs a **progressive loop** (tsgo → biome → lint-queue-client → codescene) and
+The script runs a **progressive loop** (tsgo → oxlint → biome → lint-queue-client → codescene) and
 **short-circuits at the first failing check**. The subagent fixes the errors and re-runs until
 the script exits 0. The `--lifecycle` arg controls the target stage:
 
 | `--lifecycle` | Checks run (in order) |
 |---------------|----------------------|
 | `tsgo` | tsgo only |
-| `biome` | tsgo → biome |
-| `lint` | tsgo → biome → lint (via queue client) |
-| `codescene` | tsgo → biome → lint → codescene --file |
+| `biome` | tsgo → oxlint → biome |
+| `lint` | tsgo → oxlint → biome → lint (via queue client) |
+| `codescene` | tsgo → oxlint → biome → lint → codescene --file |
 
 **Progressive enforcement**: no skipping ahead. If tsgo fails, only fix tsgo — don't run
-biome/lint/codescene until tsgo passes.
+oxlint/biome/lint/codescene until tsgo passes.
 
 ### Instruction File & AGENTS.md Discovery (Per-File)
 

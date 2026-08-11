@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { requireTeacherIdForPage } from "@/backend/lib/auth/require-teacher-id";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
 import { getTeacherPageTitle } from "@/backend/lib/titles/cached-page-title";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { TeacherWeeklyScheduleContainer } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/TeacherWeeklyScheduleContainer";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
@@ -28,14 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: nav.regularSchedule };
 }
 
-export default async function ScheduleWeeklyPage() {
-  const locale = await getLocale();
-  const { userId, context } = await getServerUserContext();
-  if (!userId) {
-    await redirectToLogin();
-    return undefined;
-  }
-
+export default withPageAuth(null, async ({ userId, context, locale }) => {
   const teacherId = await requireTeacherIdForPage(userId, locale, context);
   return <TeacherWeeklyScheduleContainer teacherId={teacherId} />;
-}
+});

@@ -90,9 +90,13 @@ async function performStage(stage: QualityStage): Promise<boolean> {
   switch (stage) {
     case "BASIC_CHECKS": {
       const tsgo = await runCommand("bun", ["tsgo"]);
+      if (!tsgo.success) return false;
+      const oxlint = await runCommand("bun", ["oxlint"]);
+      if (!oxlint.success) return false;
       const biome = await runCommand("bun", ["biome:check"]);
+      if (!biome.success) return false;
       const lint = await runCommand("bun", ["lint:type-aware"]);
-      return tsgo.success && biome.success && lint.success;
+      return lint.success;
     }
     case "CODESCENE": {
       const check = await runCommand("bun", ["codescene"]);

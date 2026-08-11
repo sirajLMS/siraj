@@ -8,7 +8,7 @@
       "allowedModels": []
     }
   },
-  "chat.utilitySmallModel": "customendpoint/nvidia/thinkingmachines/inkling",
+  "chat.utilitySmallModel": "customendpoint/nvidia/z-ai/glm-5.2",
   "chat.permissions.default": "autopilot",
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "always"

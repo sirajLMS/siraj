@@ -1,7 +1,6 @@
-import { and, eq, inArray, or } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { makeBillingRepo } from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
 import { supportedPaymentLinks } from "@/backend/db/schema";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
@@ -9,7 +8,6 @@ import type {
   SupportedPaymentLinkSelectType,
   UpdateSupportedPaymentLinkInput,
 } from "@/backend/types/billing/payment-method.types";
-import type { ErrorsLabels } from "@/shared/locale";
 
 type LinkRow = typeof supportedPaymentLinks.$inferSelect;
 
@@ -38,117 +36,34 @@ type ListActiveFilters = {
   readonly direction?: PaymentDirection;
 };
 
-function directionFilter(direction?: PaymentDirection) {
-  if (!direction) return undefined;
-  return or(
-    eq(supportedPaymentLinks.supportedDirections, direction),
-    eq(supportedPaymentLinks.supportedDirections, "BOTH")
-  );
-}
+const baseRepo = makeBillingRepo<
+  LinkRow,
+  SupportedPaymentLinkSelectType,
+  SupportedPaymentLinkInsertType,
+  UpdateSupportedPaymentLinkInput,
+  ListActiveFilters
+>({
+  shape: {
+    table: supportedPaymentLinks,
+    id: supportedPaymentLinks.id,
+    slug: supportedPaymentLinks.slug,
+    isActive: supportedPaymentLinks.isActive,
+    supportedDirections: supportedPaymentLinks.supportedDirections,
+  },
+  tableName: "supported_payment_links",
+  toSelectType,
+  deactivateInput: { isActive: false },
+});
 
 export namespace SupportedPaymentLinkRepository {
-  export async function listAll(tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType[]> {
-    const client = queryDb(tx);
-    return client
-      .select()
-      .from(supportedPaymentLinks)
-      .orderBy(supportedPaymentLinks.slug)
-      .then(rows => rows.map(toSelectType));
-  }
-
-  export async function listActive(
-    filters: ListActiveFilters = {},
-    tx?: DBTransaction
-  ): Promise<SupportedPaymentLinkSelectType[]> {
-    const client = queryDb(tx);
-    const conditions = [eq(supportedPaymentLinks.isActive, true), directionFilter(filters.direction)].filter(Boolean);
-
-    return client
-      .select()
-      .from(supportedPaymentLinks)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(supportedPaymentLinks.slug)
-      .then(rows => rows.map(toSelectType));
-  }
-
-  export async function getById(id: string, tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType | null> {
-    const client = queryDb(tx);
-    const [row] = await client.select().from(supportedPaymentLinks).where(eq(supportedPaymentLinks.id, id)).limit(1);
-    return row ? toSelectType(row) : null;
-  }
-
-  export async function getBySlug(slug: string, tx?: DBTransaction): Promise<SupportedPaymentLinkSelectType | null> {
-    const client = queryDb(tx);
-    const [row] = await client
-      .select()
-      .from(supportedPaymentLinks)
-      .where(eq(supportedPaymentLinks.slug, slug))
-      .limit(1);
-    return row ? toSelectType(row) : null;
-  }
-
-  export async function create(
-    input: SupportedPaymentLinkInsertType,
-    tx?: DBTransaction
-  ): Promise<SupportedPaymentLinkSelectType> {
-    const client = tx ?? db;
-    const now = new Date();
-    const [created] = await client
-      .insert(supportedPaymentLinks)
-      .values({
-        ...input,
-        createdAt: input.createdAt ?? now,
-        updatedAt: input.updatedAt ?? now,
-      })
-      .returning();
-
-    if (!created) {
-      throw new Error("Failed to create supported payment link");
-    }
-
-    return toSelectType(created);
-  }
-
-  export async function update(
-    id: string,
-    input: UpdateSupportedPaymentLinkInput,
-    tErrors: ErrorsLabels,
-    tx?: DBTransaction
-  ): Promise<SupportedPaymentLinkSelectType> {
-    const client = tx ?? db;
-    const [updated] = await client
-      .update(supportedPaymentLinks)
-      .set({ ...input, updatedAt: new Date() })
-      .where(eq(supportedPaymentLinks.id, id))
-      .returning();
-
-    if (!updated) {
-      throw new Error(tErrors.file.recordNotFound({ tableName: "supported_payment_links", entityId: id }));
-    }
-
-    return toSelectType(updated);
-  }
-
-  export async function deactivate(
-    id: string,
-    tErrors: ErrorsLabels,
-    tx?: DBTransaction
-  ): Promise<SupportedPaymentLinkSelectType> {
-    return update(id, { isActive: false }, tErrors, tx);
-  }
-
-  export async function listByIds(
-    ids: readonly string[],
-    tx?: DBTransaction
-  ): Promise<SupportedPaymentLinkSelectType[]> {
-    if (ids.length === 0) return [];
-    const client = queryDb(tx);
-    return client
-      .select()
-      .from(supportedPaymentLinks)
-      .where(inArray(supportedPaymentLinks.id, [...ids]))
-      .then(rows => rows.map(toSelectType));
-  }
+  export const listAll = baseRepo.listAll;
+  export const listActive = baseRepo.listActive;
+  export const getById = baseRepo.getById;
+  export const getBySlug = baseRepo.getBySlug;
+  export const create = baseRepo.create;
+  export const update = baseRepo.update;
+  export const deactivate = baseRepo.deactivate;
+  export const listByIds = baseRepo.listByIds;
 
   export async function upsertMany(
     inputs: readonly SupportedPaymentLinkInsertType[],

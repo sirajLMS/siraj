@@ -1,56 +1,15 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 // Defensive mocks against bleed from earlier test files (e.g. ScheduleOverviewSection.test.tsx).
 // mock.module registrations are process-global in Bun, so a mock registered in a test file that
 // runs earlier alphabetically may bleed into this file if we don't re-register our own versions.
 // These mocks MUST be registered before any imports so they apply before module resolution.
 
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/users/test-user-id/billing-profile",
-  useSearchParams: () => new URLSearchParams(),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/routing", () => ({
+await mockNextNavigation("/users/test-user-id/billing-profile", {
   locales: ["ar", "en"],
   defaultLocale: "en",
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/users/test-user-id/billing-profile",
-  Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({
-    push: mock(() => {}),
-    back: mock(() => {}),
-    forward: mock(() => {}),
-    refresh: mock(() => {}),
-    replace: mock(() => {}),
-    prefetch: mock(() => {}),
-  }),
-  usePathname: () => "/users/test-user-id/billing-profile",
-}));
+});
 
 await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),

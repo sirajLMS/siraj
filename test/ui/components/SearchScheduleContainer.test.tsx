@@ -4,51 +4,9 @@ import {
   AvailabilitySearchSortBy,
   IanaTimezone,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/search-schedule",
-  useSearchParams: () => new URLSearchParams(),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/routing", () => ({
-  useRouter: () => ({
-    push: mock(() => {}),
-    back: mock(() => {}),
-    forward: mock(() => {}),
-    refresh: mock(() => {}),
-    replace: mock(() => {}),
-    prefetch: mock(() => {}),
-  }),
-  usePathname: () => "/search-schedule",
-  Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({
-    push: mock(() => {}),
-    back: mock(() => {}),
-    forward: mock(() => {}),
-    refresh: mock(() => {}),
-    replace: mock(() => {}),
-    prefetch: mock(() => {}),
-  }),
-  usePathname: () => "/search-schedule",
-}));
+await mockNextNavigation("/search-schedule");
 
 await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),

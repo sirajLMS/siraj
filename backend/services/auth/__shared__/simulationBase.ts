@@ -1,7 +1,7 @@
 import { db } from "@/backend/db/drizzleDb";
 import { SessionRepository } from "@/backend/db/repo";
 import { adminAuditLogs } from "@/backend/db/schema";
-import type { SimulationAuditLogParams } from "@/backend/types/simulation.types";
+import type { SimulationAuditLogParams } from "@/backend/types/simulation";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;

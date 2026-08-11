@@ -1,52 +1,11 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 // Defensive mocks against bleed from earlier test files (Bun mock.module is process-global).
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/profile",
-  useSearchParams: () => new URLSearchParams(),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/routing", () => ({
-  locales: ["ar", "en"] as const,
+await mockNextNavigation("/profile", {
+  locales: ["ar", "en"],
   defaultLocale: "en",
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/profile",
-  Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...rest}>
-      {children}
-    </a>
-  ),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({
-    push: mock(() => {}),
-    back: mock(() => {}),
-    forward: mock(() => {}),
-    refresh: mock(() => {}),
-    replace: mock(() => {}),
-    prefetch: mock(() => {}),
-  }),
-  usePathname: () => "/profile",
-}));
+});
 
 await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),

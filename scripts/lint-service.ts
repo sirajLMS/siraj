@@ -339,6 +339,8 @@ Options:
   -i, --id <string>      Caller identifier (default: "cli")
   --fix                  Apply ESLint auto-fixes
   --json                 Output result as JSON (includes metrics)
+  --type-aware           Enable type-aware mode (implies --max-warnings=0)
+  --max-warnings <num>   Fail if warnings exceed this count (default: 0, or -1 to disable)
   -v, --verbose          Log queue state and timing to stderr
   -h, --help             Show this help
 
@@ -348,7 +350,7 @@ Exit codes:
   2 = Invalid arguments or service fault
 
 Examples:
-  bun run scripts/lint-service.ts                         # Full-repo lint
+  bun run scripts/lint-service.ts                         # Full-repo lint (--max-warnings=0)
   bun run scripts/lint-service.ts -f src/foo.ts          # Single file
   bun run scripts/lint-service.ts -f a.ts -f b.ts        # Multiple files
   bun run scripts/lint-service.ts --fix                  # Full-repo with auto-fix
@@ -393,6 +395,7 @@ async function main(): Promise<void> {
         fix: { type: "boolean", default: false },
         json: { type: "boolean", default: false },
         "type-aware": { type: "boolean", default: false },
+        "max-warnings": { type: "string", default: undefined },
         verbose: { type: "boolean", short: "v", default: false },
         help: { type: "boolean", short: "h", default: false },
       },
@@ -412,7 +415,16 @@ async function main(): Promise<void> {
     const typeAware = args.values["type-aware"] ?? false;
     const verbose = args.values.verbose ?? false;
 
-    const result = await requestLintWithMetrics(id, files, { fix, json, verbose, typeAware });
+    // Resolve maxWarnings: CLI flag takes precedence; otherwise default to 0 (fail on any warning).
+    // Use -1 to explicitly allow unlimited warnings.
+    let maxWarnings: number | undefined;
+    if (args.values["max-warnings"] !== undefined) {
+      maxWarnings = Number.parseInt(args.values["max-warnings"], 10);
+    } else {
+      maxWarnings = 0;
+    }
+
+    const result = await requestLintWithMetrics(id, files, { fix, json, verbose, typeAware, maxWarnings });
     writeLintResult(result, json, verbose);
     process.exit(result.exitCode);
   } catch (err: unknown) {

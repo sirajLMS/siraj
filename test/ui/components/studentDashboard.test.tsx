@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 // Defensive mocks against bleed from earlier test files.
 // Bun's mock.module() is process-global, so mocks registered by alphabetically-earlier
@@ -11,52 +12,10 @@ import { afterEach, describe, expect, mock, test } from "bun:test";
 // Re-registering here ensures our file gets the shape it requires, regardless of what
 // earlier files left behind. The LAST mock.module registration for a given path wins.
 
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/dashboard",
-  useSearchParams: () => new URLSearchParams(),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/routing", () => ({
-  locales: ["ar", "en"] as const,
+await mockNextNavigation("/dashboard", {
+  locales: ["ar", "en"],
   defaultLocale: "en",
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/dashboard",
-  Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...rest}>
-      {children}
-    </a>
-  ),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({
-    push: mock(() => {}),
-    back: mock(() => {}),
-    forward: mock(() => {}),
-    refresh: mock(() => {}),
-    replace: mock(() => {}),
-    prefetch: mock(() => {}),
-  }),
-  usePathname: () => "/dashboard",
-}));
+});
 
 // Eliminates dependency on the router-backed language switch hook so this file is
 // immune to any router mock configuration registered by earlier test files.

@@ -1,7 +1,7 @@
-import { and, eq, inArray, or } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
+import { eq, type SQL } from "drizzle-orm";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import { makeBillingRepo } from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
 import { supportedMobileWallets } from "@/backend/db/schema";
 import type { CountryCode } from "@/backend/enum";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
@@ -10,7 +10,6 @@ import type {
   SupportedMobileWalletSelectType,
   UpdateSupportedMobileWalletInput,
 } from "@/backend/types/billing/payment-method.types";
-import type { ErrorsLabels } from "@/shared/locale";
 
 type WalletRow = typeof supportedMobileWallets.$inferSelect;
 
@@ -41,121 +40,38 @@ type ListActiveFilters = {
   readonly direction?: PaymentDirection;
 };
 
-function directionFilter(direction?: PaymentDirection) {
-  if (!direction) return undefined;
-  return or(
-    eq(supportedMobileWallets.supportedDirections, direction),
-    eq(supportedMobileWallets.supportedDirections, "BOTH")
-  );
-}
+const baseRepo = makeBillingRepo<
+  WalletRow,
+  SupportedMobileWalletSelectType,
+  SupportedMobileWalletInsertType,
+  UpdateSupportedMobileWalletInput,
+  ListActiveFilters
+>({
+  shape: {
+    table: supportedMobileWallets,
+    id: supportedMobileWallets.id,
+    slug: supportedMobileWallets.slug,
+    isActive: supportedMobileWallets.isActive,
+    supportedDirections: supportedMobileWallets.supportedDirections,
+  },
+  tableName: "supported_mobile_wallets",
+  toSelectType,
+  deactivateInput: { isActive: false },
+  extraActiveFilters: (filters): SQL | undefined => {
+    if (!filters.countryCode) return undefined;
+    return eq(supportedMobileWallets.countryCode, filters.countryCode);
+  },
+});
 
 export namespace SupportedMobileWalletRepository {
-  export async function listAll(tx?: DBTransaction): Promise<SupportedMobileWalletSelectType[]> {
-    const client = queryDb(tx);
-    return client
-      .select()
-      .from(supportedMobileWallets)
-      .orderBy(supportedMobileWallets.slug)
-      .then(rows => rows.map(toSelectType));
-  }
-
-  export async function listActive(
-    filters: ListActiveFilters = {},
-    tx?: DBTransaction
-  ): Promise<SupportedMobileWalletSelectType[]> {
-    const client = queryDb(tx);
-    const conditions = [
-      eq(supportedMobileWallets.isActive, true),
-      filters.countryCode ? eq(supportedMobileWallets.countryCode, filters.countryCode) : undefined,
-      directionFilter(filters.direction),
-    ].filter(Boolean);
-
-    return client
-      .select()
-      .from(supportedMobileWallets)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(supportedMobileWallets.slug)
-      .then(rows => rows.map(toSelectType));
-  }
-
-  export async function getById(id: string, tx?: DBTransaction): Promise<SupportedMobileWalletSelectType | null> {
-    const client = queryDb(tx);
-    const [row] = await client.select().from(supportedMobileWallets).where(eq(supportedMobileWallets.id, id)).limit(1);
-    return row ? toSelectType(row) : null;
-  }
-
-  export async function getBySlug(slug: string, tx?: DBTransaction): Promise<SupportedMobileWalletSelectType | null> {
-    const client = queryDb(tx);
-    const [row] = await client
-      .select()
-      .from(supportedMobileWallets)
-      .where(eq(supportedMobileWallets.slug, slug))
-      .limit(1);
-    return row ? toSelectType(row) : null;
-  }
-
-  export async function create(
-    input: SupportedMobileWalletInsertType,
-    tx?: DBTransaction
-  ): Promise<SupportedMobileWalletSelectType> {
-    const client = tx ?? db;
-    const now = new Date();
-    const [created] = await client
-      .insert(supportedMobileWallets)
-      .values({
-        ...input,
-        createdAt: input.createdAt ?? now,
-        updatedAt: input.updatedAt ?? now,
-      })
-      .returning();
-
-    if (!created) {
-      throw new Error("Failed to create supported mobile wallet");
-    }
-
-    return toSelectType(created);
-  }
-
-  export async function update(
-    id: string,
-    input: UpdateSupportedMobileWalletInput,
-    tErrors: ErrorsLabels,
-    tx?: DBTransaction
-  ): Promise<SupportedMobileWalletSelectType> {
-    const client = tx ?? db;
-    const [updated] = await client
-      .update(supportedMobileWallets)
-      .set({ ...input, updatedAt: new Date() })
-      .where(eq(supportedMobileWallets.id, id))
-      .returning();
-
-    if (!updated) {
-      throw new Error(tErrors.file.recordNotFound({ tableName: "supported_mobile_wallets", entityId: id }));
-    }
-
-    return toSelectType(updated);
-  }
-
-  export async function deactivate(
-    id: string,
-    tErrors: ErrorsLabels,
-    tx?: DBTransaction
-  ): Promise<SupportedMobileWalletSelectType> {
-    return update(id, { isActive: false }, tErrors, tx);
-  }
-
-  export async function listByIds(
-    ids: readonly string[],
-    tx?: DBTransaction
-  ): Promise<SupportedMobileWalletSelectType[]> {
-    if (ids.length === 0) return [];
-    const client = queryDb(tx);
-    return client
-      .select()
-      .from(supportedMobileWallets)
-      .where(inArray(supportedMobileWallets.id, [...ids]))
-      .then(rows => rows.map(toSelectType));
-  }
+  export const listAll = baseRepo.listAll;
+  export const listActive = baseRepo.listActive;
+  export const getById = baseRepo.getById;
+  export const getBySlug = baseRepo.getBySlug;
+  export const create = baseRepo.create;
+  export const update = baseRepo.update;
+  export const deactivate = baseRepo.deactivate;
+  export const listByIds = baseRepo.listByIds;
 
   export async function upsertMany(
     inputs: readonly SupportedMobileWalletInsertType[],

@@ -53,7 +53,7 @@ bun tsgo
 
 This ensures fixes didn't introduce type errors.
 
-For per-file progressive verification (tsgo → biome → oxlint → lint → duplicates → codescene):
+For per-file progressive verification (tsgo → oxlint → biome → lint → duplicates → codescene):
 
 ```bash
 bun run scripts/health/sub-loop.ts <test-path> --lifecycle lint

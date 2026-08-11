@@ -4,6 +4,28 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import type { QueryDbHandle } from "@/backend/db/drizzleDb";
 import { classInstances, parents, students, teachers, users } from "@/backend/db/schema";
 
+/** Select fields for the single-instance parent-user query. */
+const singleInstanceSelect = {
+  studentId: classInstances.studentId,
+  studentUserId: students.userId,
+  parentUserId: users.id,
+} as const;
+
+/** Select fields for the batch parent-user query. */
+const batchInstanceSelect = {
+  classInstanceId: classInstances.id,
+  studentId: classInstances.studentId,
+  studentUserId: students.userId,
+  parentUserId: users.id,
+} as const;
+
+/** Join condition: classInstances.studentId → students.id */
+const studentJoin = eq(classInstances.studentId, students.id);
+/** Join condition: students.parentId → parents.id */
+const parentJoin = eq(students.parentId, parents.id);
+/** Join condition: parents.userId → users.id */
+const userJoin = eq(parents.userId, users.id);
+
 /**
  * Shared select+join from classInstances → students → parents → users.
  * Extracts the duplicated three-table inner-join chain used by the
@@ -11,15 +33,11 @@ import { classInstances, parents, students, teachers, users } from "@/backend/db
  */
 function selectSingleInstanceParentUser(q: QueryDbHandle | DBTransaction) {
   return q
-    .select({
-      studentId: classInstances.studentId,
-      studentUserId: students.userId,
-      parentUserId: users.id,
-    })
+    .select(singleInstanceSelect)
     .from(classInstances)
-    .innerJoin(students, eq(classInstances.studentId, students.id))
-    .innerJoin(parents, eq(students.parentId, parents.id))
-    .innerJoin(users, eq(parents.userId, users.id));
+    .innerJoin(students, studentJoin)
+    .innerJoin(parents, parentJoin)
+    .innerJoin(users, userJoin);
 }
 
 /**
@@ -29,16 +47,11 @@ function selectSingleInstanceParentUser(q: QueryDbHandle | DBTransaction) {
  */
 function selectBatchInstanceParentUser(q: QueryDbHandle | DBTransaction) {
   return q
-    .select({
-      classInstanceId: classInstances.id,
-      studentId: classInstances.studentId,
-      studentUserId: students.userId,
-      parentUserId: users.id,
-    })
+    .select(batchInstanceSelect)
     .from(classInstances)
-    .innerJoin(students, eq(classInstances.studentId, students.id))
-    .innerJoin(parents, eq(students.parentId, parents.id))
-    .innerJoin(users, eq(parents.userId, users.id));
+    .innerJoin(students, studentJoin)
+    .innerJoin(parents, parentJoin)
+    .innerJoin(users, userJoin);
 }
 
 /**

@@ -1,29 +1,15 @@
 import type { Metadata } from "next";
-import { toGqlProfileAudience, toGqlProfileMode, toGqlProfileScope } from "@/app/(dashboard)/lib/profile-enum-bridge";
+import { buildEntityNamePrefixedTranslatedMetadata } from "@/app/__shared__/buildEntityPageTitle";
 import { ProfileMode } from "@/backend/enum";
-import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { getUserPageTitle } from "@/backend/lib/titles/cached-page-title";
-import type {
-  ProfileMode as GqlProfileMode,
-  ProfileScope as GqlProfileScope,
-  ProfileAudience,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { ProfilePageClient } from "@/frontend/common/views/dashboard/profile/core/ProfilePageClient";
-import { redirect } from "@/shared/i18n/routing";
-import { getTranslations } from "@/shared/locale";
-import { getLocale } from "@/shared/locale/server-cookies";
+import { ProfilePageServer } from "@/frontend/common/views/dashboard/profile/__shared__/profilePageServer";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const locale = await getLocale();
-  const t = getTranslations(locale).profileTranslations.base;
-  const userName = await getUserPageTitle(id);
-  if (userName) {
-    return { title: `${userName} — ${t.editTitle}` };
-  }
-  return { title: t.editTitle };
+  return buildEntityNamePrefixedTranslatedMetadata(
+    () => getUserPageTitle(id),
+    t => t.profileTranslations.base.editTitle
+  );
 }
 
 interface PageProps {
@@ -32,29 +18,5 @@ interface PageProps {
 
 export default async function UserProfileEditPage({ params }: PageProps) {
   const { id } = await params;
-
-  const { userId, context } = await getServerUserContext();
-  if (!userId) {
-    await redirectToLogin();
-    return undefined;
-  }
-
-  const resolution = await resolveProfilePageContext(userId, context, {
-    targetUserId: id,
-    mode: ProfileMode.EDIT,
-  });
-  if ("redirect" in resolution) {
-    redirect({ href: resolution.redirect });
-    return undefined;
-  }
-
-  return (
-    <ProfilePageClient
-      scope={toGqlProfileScope(resolution.scope) satisfies GqlProfileScope}
-      mode={toGqlProfileMode(resolution.mode) satisfies GqlProfileMode}
-      audience={toGqlProfileAudience(resolution.audience) satisfies ProfileAudience}
-      targetUserId={resolution.targetUserId}
-      studentId={resolution.studentId}
-    />
-  );
+  return <ProfilePageServer mode={ProfileMode.EDIT} targetUserId={id} />;
 }

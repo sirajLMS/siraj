@@ -46,7 +46,7 @@
     "lint": "bun run scripts/lint-service.ts",
     "lint:type-aware": "bun run scripts/lint-service.ts --type-aware",
     "lint:fix": "bun run scripts/lint-service.ts --fix",
-    "oxlint": "bun run scripts/lib/run-locked-cmd.ts oxlint oxlint --ignore-path .gitignore",
+    "oxlint": "bun run scripts/lib/run-locked-cmd.ts oxlint oxlint --deny-warnings --ignore-path .gitignore",
     "check:duplicates": "bun run scripts/lib/run-locked-cmd.ts check:duplicates jscpd",
     "check:unused": "knip",
     "check:deps": "bun run scripts/lib/run-locked-cmd.ts check:deps depcruise --config .dependency-cruiser.js app backend frontend shared",

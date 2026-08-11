@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 expect.extend(matchers);
 
@@ -94,32 +94,7 @@ function optInMock(optedIn: boolean): MockLink.MockedResponse {
   };
 }
 
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-}));
-
-await mock.module("@/shared/i18n/routing", () => ({
-  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
-  usePathname: () => "/dashboard",
-  Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({
-    push: mock(() => {}),
-    back: mock(() => {}),
-    forward: mock(() => {}),
-    refresh: mock(() => {}),
-    replace: mock(() => {}),
-    prefetch: mock(() => {}),
-  }),
-  usePathname: () => "/dashboard",
-}));
+await mockNextNavigation("/dashboard", { includeRouter: false, routingIncludeReplaceAndPrefetch: false });
 
 beforeEach(() => {
   captures = [];
