@@ -44,6 +44,15 @@ export type {Entity}ReturnType = Omit<{Entity}SelectType,
 - Add resolved properties that come from joins as optional fields
 - Enums should be properly typed using shared enum types
 
+## Base Interface Pattern (Duplication Elimination)
+
+When multiple entity types share identical fields/methods (e.g., meeting config base, communication base entity), extract a `*Base*` type in a shared types file. See `docs/backend/shared-types-pattern.md` and `docs/frontend/duplication-elimination-patterns.md` Pattern 3 for the extraction process.
+
+Completed extractions:
+- `backend/types/meeting/meeting-config-base.types.ts` — shared shape for class-meeting-config and meeting-config types
+- `backend/types/billing/communication.types.ts` — `BaseEntity`, `BaseRepo<T>`, `DBTx`, `ResolutionResult` for complaint/suggestion types
+- `shared/types/pagination.types.ts` — `PaginationInput` consolidated from 3 duplicate definitions
+
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)
 
 Oxlint is the project's linter (`bun run oxlint`). It uses type-aware mode (`typeAware: true`, `typeCheck: true` in `oxlint.config.mts`). NEVER add `oxlint-disable` comments — fix the root cause instead.

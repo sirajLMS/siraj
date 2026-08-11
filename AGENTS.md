@@ -400,9 +400,14 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines
 - `docs/services/cron-service.md` - Cron service pattern reference
 - `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern for common/desktop/mobile triplication
-- `docs/frontend/duplication-elimination-patterns.md` - Canonical source deletion, scaffold extraction, shared types patterns
+- `docs/frontend/duplication-elimination-patterns.md` - Canonical source deletion, scaffold extraction, shared types, repo factory, adapter base, schema helpers, page auth, test mock patterns
 - `docs/testing/shared-test-runner.md` - Shared parallel test runner pattern
 - `docs/backend/shared-types-pattern.md` - Cross-layer shared types in shared/types/
+- `docs/backend/meeting-adapter-base.md` - Meeting provider adapter base class pattern reference
+- `docs/backend/billing-repo-factory.md` - Billing repo factory with configurable hooks pattern reference
+- `docs/backend/schema-helpers.md` - Schema column and junction table helpers pattern reference
+- `docs/app/with-page-auth.md` - App router page auth wrapper pattern reference
+- `docs/testing/mock-navigation-helpers.md` - Test mock navigation helpers pattern reference
 - `docs/i18n/locale-namespace-migration.md` - Locale namespace migration from monolithic to sub-module directories
 - `docs/auth/permission-architecture.md` - Client-side permission architecture (3-tier model, wrapper removal rationale)
 

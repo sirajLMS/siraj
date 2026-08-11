@@ -127,6 +127,10 @@ Completed consolidations:
 - `backend/lib/auth/permissions.ts` → `backend/services/auth/permissions.service.ts` (Task 2.18)
 - `backend/lib/env-config-resolver.ts` → `backend/services/system/environment-config.service.ts` (Task 2.19)
 
+## Meeting Provider Adapter Base Class (Duplication Elimination)
+
+Multiple meeting provider adapters (Zoom, Google Meet, Teams) share identical getter/setter/logic structure. Use `MeetingProviderAdapterBase` from `__shared__/meetingProviderAdapterBase.ts` as the abstract base class. See `docs/backend/meeting-adapter-base.md` for the complete pattern reference.
+
 
 
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)

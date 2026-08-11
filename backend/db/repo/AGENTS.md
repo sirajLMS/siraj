@@ -99,6 +99,14 @@ All keys follow the pattern `"quota-{operation}:{unique-segment}:..."` hashed wi
 `quota_ledger.quotaId` → `quotas.id` uses `ON DELETE RESTRICT`. Hard-deleting a quota while ledger entries exist will fail. Use soft-delete (`deletedAt`) or archive ledger entries first.
 
 
+## Billing Repository Factory (Duplication Elimination)
+
+Billing repositories (supported-online-accounts, supported-mobile-wallets, supported-payment-links) share identical CRUD/list/deactivate/query structure. Use `makeBillingRepo<TRow, TSelect, TInsert, TUpdate, TFilters>()` from `__shared__/billingRepoFactory.ts`. Entity-specific insert defaults (e.g., `identifierLabel ?? name`) go in the `prepareInsert` hook — NOT in the factory. See `docs/backend/billing-repo-factory.md` for the complete pattern reference.
+
+## Schema Helpers (Duplication Elimination)
+
+Schema tables sharing identical column configurations (timestamps, slugs, active flags) or junction table patterns use helpers from `__shared__/columnHelpers.ts` and `__shared__/junctionTableHelper.ts`. See `docs/backend/schema-helpers.md` for the complete pattern reference.
+
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)
 
 Oxlint is the project's linter (`bun run oxlint`). It uses type-aware mode (`typeAware: true`, `typeCheck: true` in `oxlint.config.mts`). NEVER add `oxlint-disable` comments — fix the root cause instead.

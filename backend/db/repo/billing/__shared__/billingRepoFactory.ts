@@ -53,7 +53,7 @@ export interface BillingTableShape {
  * @template TUpdateInput - Canonical `Update*Input` type for `update` / `deactivate`.
  * @template TFilters - Extra filters consumed by `listActive`.
  */
-export interface BillingRepoConfig<TRow extends BillingRow, TSelect, TUpdateInput, TFilters> {
+export interface BillingRepoConfig<TRow extends BillingRow, TSelect, TInsert, TUpdateInput, TFilters> {
   /** Column references + the Drizzle table. */
   readonly shape: BillingTableShape;
   /** Schema table name used for localized error messages. */
@@ -68,6 +68,16 @@ export interface BillingRepoConfig<TRow extends BillingRow, TSelect, TUpdateInpu
    * Returns `undefined` to add no condition.
    */
   readonly extraActiveFilters?: (filters: TFilters) => SQL | undefined;
+  /**
+   * Optional hook to prepare/normalize the insert payload before `create()`
+   * writes it. Use this to restore entity-specific defaults that were
+   * applied in the original per-repo `create` (e.g. `identifierLabel`).
+   *
+   * The hook receives the original `input` and MUST return a value
+   * assignable to `TInsert`. It is called BEFORE the factory adds
+   * `createdAt`/`updatedAt` defaults.
+   */
+  readonly prepareInsert?: (input: TInsert) => TInsert;
 }
 
 // ---- Output method bag -------------------------------------------------------
@@ -131,9 +141,9 @@ export function makeBillingRepo<
   TUpdateInput,
   TFilters extends Record<string, unknown> = Record<string, unknown>,
 >(
-  config: BillingRepoConfig<TRow, TSelect, TUpdateInput, TFilters>
+  config: BillingRepoConfig<TRow, TSelect, TInsert, TUpdateInput, TFilters>
 ): BillingRepoMethods<TSelect, TInsert, TUpdateInput, TFilters> {
-  const { shape, tableName, toSelectType, deactivateInput, extraActiveFilters } = config;
+  const { shape, tableName, toSelectType, deactivateInput, extraActiveFilters, prepareInsert } = config;
   const { table, id, slug, isActive, supportedDirections } = shape;
 
   function isBillingRow(value: unknown): value is TRow {
@@ -185,12 +195,13 @@ export function makeBillingRepo<
   async function create(input: TInsert, tx?: DBTransaction): Promise<TSelect> {
     const client = tx ?? db;
     const now = new Date();
+    const prepared = prepareInsert ? prepareInsert(input) : input;
     const [created] = await client
       .insert(table)
       .values({
-        ...input,
-        createdAt: getDateField(input, "createdAt") ?? now,
-        updatedAt: getDateField(input, "updatedAt") ?? now,
+        ...prepared,
+        createdAt: getDateField(prepared, "createdAt") ?? now,
+        updatedAt: getDateField(prepared, "updatedAt") ?? now,
       })
       .returning();
 

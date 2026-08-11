@@ -44,6 +44,10 @@ const baseRepo = makeBillingRepo<
   tableName: "supported_online_accounts",
   toSelectType,
   deactivateInput: { isActive: false },
+  prepareInsert: input => ({
+    ...input,
+    identifierLabel: input.identifierLabel ?? input.name,
+  }),
 });
 
 export namespace SupportedOnlineAccountRepository {

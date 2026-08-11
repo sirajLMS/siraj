@@ -128,6 +128,92 @@ This document consolidates the patterns used to eliminate code duplication in th
 - Desktop subject dialogs: shared `subjectFormDialogShared.tsx`
 - Profile links (both tiers): enhanced existing `ProfileLinkBase.tsx` in common
 
+## Pattern 11: Generic Repository Factory with Configurable Hooks
+
+**When to use:** Multiple billing repository classes share identical CRUD/list/deactivate/query structure but differ in table shape, type mapping, and entity-specific insert defaults.
+
+**Process:**
+1. Create a `__shared__/repoFactory.ts` module with a `makeRepo<TRow, TSelect, TInsert, TUpdate, TFilters>()` function
+2. Define a `RepoConfig` interface with: `shape` (column refs), `tableName`, `toSelectType`, `deactivateInput`, optional `extraActiveFilters`, and optional `prepareInsert`
+3. The factory returns standard methods: `listAll`, `listActive`, `getById`, `getBySlug`, `create`, `update`, `deactivate`, `listByIds`
+4. Entity-specific insert defaults (e.g., `identifierLabel ?? name`) go in the `prepareInsert` hook, NOT in the factory
+
+**Example (Phase 3):**
+- Factory: `backend/db/repo/billing/__shared__/billingRepoFactory.ts`
+- Consumers: `supported-online-account.repository.ts`, `supported-mobile-wallet.repository.ts`, `supported-payment-link.repository.ts`
+- Key lesson: The `prepareInsert` hook was added after review found a lost `identifierLabel` default — always check for entity-specific defaults when extracting to a factory
+
+**See:** `docs/backend/billing-repo-factory.md`
+
+## Pattern 12: Meeting Provider Adapter Base Class
+
+**When to use:** Multiple meeting provider adapters (Zoom, Google Meet, Teams) share identical getter/setter/logic structure with provider-specific SDK calls.
+
+**Process:**
+1. Create an abstract `MeetingProviderAdapterBase` class in `__shared__/`
+2. Implement all shared getters (`id`, `name`, `配色`, `supportsRecurring`, etc.) as concrete properties
+3. Implement shared logic (URL validation, timing calculations, metadata extraction) as concrete methods
+4. Declare provider-specific methods (`createMeeting`, `updateMeeting`, `deleteMeeting`) as abstract
+5. Each provider extends the base and implements only its SDK-specific calls
+
+**Example (Phase 3):**
+- Base: `backend/services/meeting-providers/__shared__/meetingProviderAdapterBase.ts`
+- Consumers: `zoom/__shared__/zoomMeetingAdapter.ts`, `googleMeet/__shared__/googleMeetAdapter.ts`, `teams/__shared__/teamsAdapter.ts`
+- Result: 25 clones eliminated
+
+**See:** `docs/backend/meeting-adapter-base.md`
+
+## Pattern 13: Schema Column & Junction Table Helpers
+
+**When to use:** Multiple Drizzle table definitions share identical column configurations (timestamps, slugs, active flags) or junction table patterns.
+
+**Process:**
+1. Create helper functions in `backend/db/schema/__shared__/`
+2. For columns: `withTimestamps()`, `withSlug()`, `withActiveFlag()` return column config objects
+3. For junction tables: `createJunctionTable()` returns a complete table definition with FK columns
+4. Use the helpers in all schema files to ensure consistency
+
+**Example (Phase 3):**
+- Helpers: `backend/db/schema/__shared__/columnHelpers.ts`, `backend/db/schema/__shared__/junctionTableHelper.ts`
+- Result: 18 clones eliminated across 15+ schema files
+
+**See:** `docs/backend/schema-helpers.md`
+
+## Pattern 14: App Router Page Auth Wrapper
+
+**When to use:** 40+ `app/(dashboard)/.../page.tsx` files contain identical auth flow (session check, role redirect, group simulation handling, locale resolution).
+
+**Process:**
+1. Create a `withPageAuth()` higher-order function in a shared module
+2. It accepts a render function and returns a Server Component that handles auth, redirects, and locale
+3. Each page delegates to `withPageAuth((ctx) => <PageContent {...ctx} />)`
+4. The wrapper handles: session validation, role-based redirects, group simulation context, locale binding
+
+**Example (Phase 3):**
+- Wrapper: `app/(dashboard)/__shared__/withPageAuth.ts`
+- Consumers: 40+ dashboard pages
+- Pattern: `export default withPageAuth(async ({ params, session }) => { ... })`
+- Result: 7 clones + 65 semantic clones eliminated
+
+**See:** `docs/app/with-page-auth.md`
+
+## Pattern 15: Test Mock Navigation Helpers
+
+**When to use:** 20+ UI test files contain identical mock navigation setup (Next.js router mock, pathname mock, router state setters).
+
+**Process:**
+1. Extract mock navigation helpers to `test/ui/components/helpers/mockNavigation.tsx`
+2. Extract session activate button test logic to `test/ui/components/helpers/sessionActivateButtonTests.ts`
+3. Extract student history fixtures to `test/ui/components/fixtures/studentHistoryFixtures.ts`
+4. Each test imports the helpers instead of defining inline mocks
+
+**Example (Phase 3):**
+- Helpers: `test/ui/components/helpers/mockNavigation.tsx`, `test/ui/components/helpers/sessionActivateButtonTests.ts`
+- Fixtures: `test/ui/components/fixtures/studentHistoryFixtures.ts`
+- Result: 34 clones eliminated across 20+ test files
+
+**See:** `docs/testing/mock-navigation-helpers.md`
+
 ## CRITICAL: Circular Dependency Prevention
 
 **NEVER** import through barrel `index.ts` re-exports when the importing and imported components live in the same barrel. This causes TDZ (Temporal Dead Zone) errors at runtime.
@@ -165,7 +251,13 @@ After any duplication elimination:
 
 - `.ai/plans/duplications/` — the plan that established these patterns
 - `.ai/plans/duplications-phase2/` — the continuation plan that established view component scaffold patterns
+- `.ai/plans/duplications-phase3/` — the plan that established repo factory, adapter base, schema helpers, page auth, and test mock patterns
 - `docs/frontend/ui-shared-scaffold-pattern.md`
 - `docs/backend/shared-types-pattern.md`
+- `docs/backend/meeting-adapter-base.md`
+- `docs/backend/billing-repo-factory.md`
+- `docs/backend/schema-helpers.md`
+- `docs/app/with-page-auth.md`
+- `docs/testing/mock-navigation-helpers.md`
 - `docs/i18n/locale-namespace-migration.md`
 - `docs/testing/shared-test-runner.md`

@@ -93,6 +93,8 @@ applyTo: "backend/**/*.ts"
 - **Prepared Statements (CRITICAL)**: All simple read-only methods MUST use Drizzle Prepared Statements 2.0 (`sql.placeholder(...)`) at module level. See `docs/drizzle/prepared-statements.md`.
 - **`inArray` + Prepared Statements PROHIBITED**: PostgreSQL prepared statement protocol treats `$1` as a single scalar — cannot expand array parameters for `IN` clauses. Use dynamic queries for `inArray` batch lookups. This caused cascading GraphQL failures (user loading, permissions, impersonation, role resolution).
 - **Batch Lookup Methods**: For DataLoader support, expose `findBy{Key}Ids(ids: string[], tx?)` returning `Map<string, T | null>`. Use `inArray(col, ids)` with plain arrays (NOT `sql.placeholder`). Pre-init map with all keys → null, fill matches. See `docs/graphql/dataloader-batching.md`.
+- **Billing Repo Factory**: Billing repos (supported-online-accounts, supported-mobile-wallets, supported-payment-links) share CRUD structure via `makeBillingRepo()` from `__shared__/billingRepoFactory.ts`. Entity-specific insert defaults go in `prepareInsert` hook. See `docs/backend/billing-repo-factory.md`.
+- **Schema Helpers**: Shared column configs and junction table patterns use helpers from `__shared__/columnHelpers.ts` and `__shared__/junctionTableHelper.ts`. See `docs/backend/schema-helpers.md`.
 
 ### Service Layer
 
@@ -166,6 +168,7 @@ applyTo: "backend/**/*.ts"
 ### Meeting Provider Adapters
 
 - All meeting URL generation MUST go through `MeetingChannelFactory.getMeetingChannel(slug)` — never call adapter implementations directly
+- Adapter implementations extend `MeetingProviderAdapterBase` from `__shared__/meetingProviderAdapterBase.ts` — shared getters/logic in base, SDK-specific calls in subclasses. See `docs/backend/meeting-adapter-base.md`.
 - Consult `docs/services/meeting-providers.md` for the pattern reference and wiring details
 - Adapters implement the `IMeetingChannel` interface from `@/backend/services/meeting/channels/IMeetingChannel` — methods: `generateMeeting`, optional `deleteMeeting`, `validateConfig`, `disconnect`
 - Factory pattern: `MeetingChannelFactory` lazy-creates and memoises adapter singletons per provider slug via `getMeetingChannel(slug)`; `providerKindToSlug(providerKind)` maps catalog `providerKind` → adapter slug; the `meetingChannel` delegating object (`generateMeeting`, `validateConfig`, `disconnect`) wraps both for convenience. There is no `createFromProvider` literal — use `getMeetingChannel` or the `meetingChannel` object

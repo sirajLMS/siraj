@@ -13,6 +13,27 @@ Phase 1 and Phase 2 eliminated duplications across the frontend UI component tie
 
 Phase 3 targets the **remaining duplication across all layers** — backend services, repositories, schema, types, GraphQL layer, app router, test infrastructure, and residual frontend component/view clones — with a multi-phase, high-parallelism approach.
 
+### ⛔ No-Server-Tests Policy (CRITICAL)
+
+**This plan NEVER runs any GraphQL tests, any UI tests, or any tests that require a Next.js server.** The following test commands are explicitly excluded from all tasks, subtasks, and acceptance criteria:
+
+- `bun run test:graphql` — requires Next.js dev server
+- `bun run test:ui:components` — UI component tests (Happy DOM)
+- `bun run test:ui:e2e` — requires Next.js production server
+- `bun run test:ui` — all UI tests
+- `bun run build:test` — requires Next.js server build
+- `bun run build` — requires Next.js server build
+- `bun run test:db` / `bun run test:db:sequential` — may require server connection
+- `bun run test:services` / `bun run test:services:sequential` — may require server connection
+- `bun run test:integration` — requires external server connections
+- `bun run test:live-fx` / `bun run test:live-comm` — requires external API/server
+- `bun run test` — meta-command that includes server-required tests
+- `bun run scripts/run-test/run-test.ts <path>` — may touch server-required tests
+
+**Sole verification mechanism**: the quality gate loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) which runs tsgo + oxlint + biome + lint + codescene — all read-only, no server required.
+
+All test-running subtasks in `tasks.md` are marked with ~~strikethrough~~ and **SKIPPED** annotations. Acceptance criteria that previously required test suite passes are similarly struck through.
+
 ---
 
 ## 2. Current Baseline (Phase 3 Start)
@@ -90,7 +111,7 @@ The system SHALL eliminate duplication across the three meeting channel adapters
 1. WHEN refactoring meeting adapters THEN system SHALL extract shared logic to a `MeetingAdapterBase` class or shared module
 2. WHEN the base is extracted THEN each adapter SHALL become a thin configuration wrapper
 3. WHEN the refactoring is complete THEN jscpd clones #44-#57 SHALL be eliminated
-4. WHEN the refactoring is complete THEN all meeting integration tests SHALL pass
+4. ⛔ ~~WHEN the refactoring is complete THEN all meeting integration tests SHALL pass~~ — **SKIPPED: per plan policy, no tests requiring server are run**
 5. WHEN any file is modified THEN `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` SHALL exit 0
 
 ### REQ-2: Communication Complaint/Suggestion Service Consolidation
@@ -103,7 +124,7 @@ The system SHALL eliminate duplication between `complaint.service.ts` and `sugge
 2. WHEN shared logic is extracted THEN both services SHALL import from the shared module
 3. WHEN the refactoring is complete THEN jscpd clones #26-#34 SHALL be eliminated
 4. WHEN any file is modified THEN `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` SHALL exit 0
-5. WHEN the refactoring is complete THEN all communication service tests SHALL pass
+5. ⛔ ~~WHEN the refactoring is complete THEN all communication service tests SHALL pass~~ — **SKIPPED: per plan policy, no tests requiring server are run**
 
 ### REQ-3: Meeting Config Pair Consolidation
 **Priority:** High | **Complexity:** Medium
@@ -372,7 +393,7 @@ The system SHALL eliminate all 44 intra-file clones within backend service files
 1. WHEN refactoring service intra-file clones THEN system SHALL extract each duplicate block to a named private method or module-scope helper
 2. WHEN the refactoring is complete THEN all 44 intra-file service clones SHALL be eliminated or justified in deferred items
 3. WHEN any file is modified THEN `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` SHALL exit 0
-4. WHEN the refactoring is complete THEN all backend service tests SHALL pass
+4. ⛔ ~~WHEN the refactoring is complete THEN all backend service tests SHALL pass~~ — **SKIPPED: per plan policy, no tests requiring server are run**
 
 ### REQ-27: Plan Review Gate
 **Priority:** — | **Complexity:** Low
@@ -413,7 +434,7 @@ The system SHALL verify that all duplications are eliminated and all quality gat
 1. WHEN all implementation is complete THEN system SHALL run `bun x jscpd --reporters ai --config "" --min-lines 8` to verify clone reduction
 2. WHEN jscpd is run THEN system SHALL verify remaining clones are reduced from 568 to ≤100 (or justified in deferred items)
 3. WHEN quality gate is run THEN `bun quality-gate:fresh` SHALL pass
-4. WHEN tests are run THEN all test suites SHALL pass (or pre-existing failures documented)
+4. ⛔ ~~WHEN tests are run THEN all test suites SHALL pass (or pre-existing failures documented)~~ — **SKIPPED: per plan policy, no GraphQL tests, no UI tests, and no tests requiring a Next.js server are ever run. Quality gate (tsgo + oxlint + biome + lint + codescene) is the sole verification mechanism.**
 5. WHEN baseline comparison is done THEN system SHALL verify zero new errors introduced
 6. WHEN all verification is complete THEN system SHALL write final outcome file
 

@@ -10,11 +10,11 @@
 ## 1. Design Goals
 
 1. **Eliminate ≥70% of remaining clones** — 580→≤175 total (target ≤100), with priority on backend layers not yet addressed
-2. **Zero regressions** — all tests pass, no behavioral changes, tsgo/biome/lint at 0 errors
+2. **Zero regressions** — tsgo/biome/lint at 0 errors; ⛔ no test suites are run (per plan policy: no GraphQL tests, no UI tests, no Next.js server tests)
 3. **Reuse established patterns** — `*Shared.tsx` scaffolds, canonical-source-with-barrel-import, `.jscpd.json` ignore, generic factory functions
 4. **Establish new backend patterns** — `MeetingAdapterBase`, `BillingRepoFactory`, `withPageAuth`, `makeFileJunctionTable`, `mockNextNavigation`
 5. **Maximize parallelism** — 16 subagents per phase where files are independent
-6. **Full test suite** — no deferral (learned from Phase 2's inconclusive 4.3)
+6. **Quality gate verification only** — `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` is the sole verification mechanism (read-only: tsgo + oxlint + biome + lint + codescene)
 
 ---
 
@@ -523,14 +523,14 @@ export function buildPageInfo<T extends { id: string }>(items: T[], totalCount: 
 
 | # | Risk | Likelihood | Impact | Mitigation |
 |---|------|-----------|--------|------------|
-| 1 | Meeting adapter refactoring breaks integration tests | Low | High | Adapter base preserves all API calls; test with `test:integration` |
-| 2 | withPageAuth breaks app router pages | Medium | High | HoF preserves all return types; test with `build:test` + `test:ui:e2e` |
+| 1 | Meeting adapter refactoring breaks integration tests | Low | High | Adapter base preserves all API calls; ⛔ integration tests NOT run per plan policy — quality gate (tsgo + lint + codescene) is sole verification |
+| 2 | withPageAuth breaks app router pages | Medium | High | HoF preserves all return types; ⛔ `build:test` + `test:ui:e2e` NOT run per plan policy — tsgo type inference is sole verification |
 | 3 | Schema helper breaks Drizzle migration generation | Medium | High | Helper uses Drizzle's own `pgTable` return type; run `bun run db generate` to verify |
 | 4 | Billing repo factory loses type safety | Low | Medium | Generic `<TSelect, TInsert>` preserves type inference; tsgo catches regressions |
-| 5 | Test mock helper doesn't match all 15 patterns | Medium | Medium | Helper accepts optional params for all known variations; each file can override |
-| 6 | Frontend scaffold breaks visual parity | Low | Medium | Scaffold holds ALL shared logic; variants only pass slots per Phase 2 proven pattern |
+| 5 | Test mock helper doesn't match all 15 patterns | Medium | Medium | Helper accepts optional params for all known variations; each file can override; ⛔ UI component tests NOT run per plan policy |
+| 6 | Frontend scaffold breaks visual parity | Low | Medium | Scaffold holds ALL shared logic; variants only pass slots per Phase 2 proven pattern; ⛔ UI tests NOT run per plan policy |
 | 7 | Cross-layer circular imports | Low | High | Shared helpers in `shared/` or `__shared__/` directories; direct module imports (not barrels) |
-| 8 | Full test suite timeout (learned from Phase 2) | Medium | Medium | Run tests in layer-specific batches not single monolithic command |
+| 8 | ~~Full test suite timeout~~ (learned from Phase 2) | ~~Medium~~ | ~~Medium~~ | **RESOLVED: No test suites are run at all per plan policy (no GraphQL, no UI, no server tests). Quality gate (tsgo + oxlint + biome + lint + codescene) is the sole verification.** |
 
 ---
 
@@ -553,4 +553,4 @@ export function buildPageInfo<T extends { id: string }>(items: T[], totalCount: 
 - [x] Risk analysis covers all major risks with mitigations
 - [x] Constraints from AGENTS.md reflected (MUI v9, oxlint, i18n, logging, path aliases)
 - [x] No re-exports policy maintained
-- [x] full test suite planned (no deferral)
+- [x] ⛔ No-server-tests policy enforced — quality gate (tsgo + oxlint + biome + lint + codescene) is sole verification mechanism
