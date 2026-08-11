@@ -39,8 +39,8 @@ Despite six prior phases, `bun check:duplicates` reports **504 clones** (68,194 
 | **Unfixable non-structural triage** | TBD | TBD | Phase 6 deferred item D6-2 |
 
 **Also in scope:**
-- Evaluation of the 7 `shared/locale/**` within-file clones to determine: fix (local extraction within rich locale files) vs ignore (extend `.jscpd.json` to `shared/locale/**` which Phase 6 Task 1.1 also proposes)
-- `.jscpd.json` configuration updates for within-file clones that are structural and unfixable
+- Evaluation of the 7 `shared/locale/**` within-file clones to determine: fix via local extraction (extract shared type signatures, repeating translation patterns within each file)
+- Real code extraction for within-file clones that are structural — every clone is resolved by extracting shared code, never by ignoring
 - Final post-Phase 4/5/6 residual jscpd sweep and triage
 
 **Out of scope (explicit — covered by other phases):**
@@ -58,7 +58,7 @@ Within-file clones are a distinct category. Prior phases all address **cross-fil
 |-----------|---------|---------|
 | Cross-file | Extract shared module, both files import it | Phase 1-6 approach |
 | Within-file | Extract local helper function within the same file, both sections call it | **Phase 7 approach** |
-| Within-file (structural) | jscpd-ignore directive if the duplication is by-design | Phase 7 alternative |
+| Within-file (structural) | Extract shared helper/interface within the file — same pattern as all other within-file clones | Phase 7 unified approach |
 
 **17 within-file clones identified:**
 
@@ -93,7 +93,7 @@ The frontend `ClientLogger` class uses browser APIs (`/api/logs` endpoint, `sess
 These require architectural decisions:
 - Can the shared `BaseLogger` be extended by `ClientLogger` (inheritance)?
 - Can the shared `enum.ts` define the canonical types that frontend re-exports?
-- Or are these intentionally parallel implementations that should be jscpd-ignored?
+- Or are these intentionally parallel implementations that should be consolidated by extracting shared logic?
 
 ---
 
@@ -142,8 +142,8 @@ This plan NEVER runs any test requiring a Next.js server, GraphQL dev server, UI
 ### AC-2: Within-file refactoring pattern
 **WHEN** a within-file clone is triaged as "fix", **THE SYSTEM SHALL** extract a local helper function (or component, or constant block) within the same file such that both duplicated sections delegate to it, verified via `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`.
 
-### AC-3: Within-file structural ignore
-**WHEN** a within-file clone is triaged as "structural" (by-design duplication within a single file), **THE SYSTEM SHALL** add a `// jscpd:ignore-start` / `// jscpd:ignore-end` directive around the duplicated region with a comment explaining the structural reason.
+### AC-3: Within-file clone resolution (NO jscpd:ignore)
+**WHEN** a within-file clone exists, **THE SYSTEM SHALL** extract a local helper function, component, or shared interface at module scope within the same file such that both duplicated sections delegate to it. No `// jscpd:ignore` directives are allowed — every clone must be truly resolved by code extraction.
 
 ### AC-4: Cross-layer utility resolution
 **WHEN** the 2 cross-layer utility pairs (enum.ts, logger) are evaluated, **THE SYSTEM SHALL** either:
@@ -159,15 +159,13 @@ This plan NEVER runs any test requiring a Next.js server, GraphQL dev server, UI
 ### AC-7: shared/locale within-file clones
 **WHEN** the 7 `shared/locale/**` within-file clones are evaluated, **THE SYSTEM SHALL** either:
 - Fix by extracting a local type/translation helper within the same file, OR
-- Confirm that Phase 6 Task 1.1's `.jscpd.json` ignore of `shared/locale/**` suppresses these within-file pairs as well (no additional action needed if already ignored at directory level)
+- Confirm if Phase 6 Task 1.1's `.jscpd.json` ignore of `shared/locale/**` has been applied and REVERT it, OR fix the 7 shared/locale within-file clones via local extraction within each file
 
 ### AC-8: Post-implementation residual sweep
 **IF** Phases 4, 5, and 6 are complete when Phase 7 reaches its residual sweep task, **THEN** the executing agent **SHALL** run `bun check:duplicates` and triage all remaining unaddressed clones into "fix", "ignore", or "defer" categories, updating `deferred-items.md`.
 
-### AC-9: Unfixable pair documentation
-**WHEN** the D6-2 unfixable non-structural pairs are triaged, **THE SYSTEM SHALL** either:
-- Add `// jscpd:ignore` directives with "low-value" rationale, OR
-- Document them in `deferred-items.md` as "permanently deferred" with justification
+### AC-9: Unfixable pair resolution
+**WHEN** the D6-2 unfixable non-structural pairs are triaged, **THE SYSTEM SHALL** extract shared code to eliminate the duplication. If a pair is truly too small to extract (e.g., <8 lines), document why extraction is impractical and what shared construct could still eliminate it.
 
 ### AC-10: No code quality regressions
 **WHEN** any file is modified, **THE SYSTEM SHALL** pass `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` with zero errors (tsgo + oxlint + biome + lint + check:duplicates + codescene).
@@ -184,11 +182,11 @@ This plan NEVER runs any test requiring a Next.js server, GraphQL dev server, UI
 
 1. **Within-file clones are the primary novel scope.** No prior phase addresses within-file (self-clone) duplication. Phase 7 introduces the local-helper-within-file pattern as a first-class refactoring strategy. This is distinct from the cross-file shared-module extraction used in Phases 1-6.
 
-2. **Triage before fix.** Each within-file pair is evaluated individually: "fix" (local helper extraction) vs "structural" (jscpd-ignore directive). The approach depends on whether the duplication is actionable or by-design.
+2. **Extract before defer.** Each within-file pair is fixed via local helper extraction. There is no "structural" escape hatch — every clone is resolved by extracting shared code.
 
-3. **Cross-layer utilities need architectural evaluation.** The `enum.ts` and `logger` pairs are not simple copies — they are parallel implementations for different runtime environments (browser vs Node.js). Phase 7 evaluates whether these can be consolidated via inheritance/re-export or whether they are architecturally intentional and should be jscpd-ignored.
+3. **Cross-layer utilities need real consolidation.** The `enum.ts` and `logger` pairs are not simple copies — they are parallel implementations for different runtime environments (browser vs Node.js). Phase 7 consolidates these by extracting shared, runtime-agnostic logic (e.g., pure parsing functions, log-level config) into shared modules that both implementations import. No jscpd:ignore is allowed.
 
-4. **shared/locale within-file may be auto-resolved by Phase 6.** If Phase 6 Task 1.1 adds `shared/locale/**` to `.jscpd.json` ignore patterns, the 7 shared/locale within-file clones are automatically suppressed at the directory level. Phase 7 verifies this and only acts if Phase 6 has not been implemented.
+4. **shared/locale within-file clones are fixed by local extraction.** No `.jscpd.json` ignore patterns are used for `shared/locale/**`. Each of the 7 within-file locale clones is fixed by extracting shared type signatures or translation patterns within the file.
 
 5. **Residual sweep is conditional on Phases 4/5/6.** The final residual sweep task may find that Phases 4, 5, and 6 are still in progress. In that case, Phase 7 documents the current state and defers the sweep to a post-implementation task.
 

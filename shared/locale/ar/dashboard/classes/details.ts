@@ -1,3 +1,4 @@
+import { adminActions, classInfo, metadata, rate } from "@/shared/locale/ar/dashboard/admin/view";
 import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes";
 
 export const dashboardClassDetailsAr: ClassDetailsLabels = {
@@ -13,43 +14,19 @@ export const dashboardClassDetailsAr: ClassDetailsLabels = {
     message: (studentTimezone, teacherTimezone) =>
       `التوقيت المحلي للطالب (${studentTimezone}) يختلف عن توقيت المعلم (${teacherTimezone}). قد يكون تسجيل الحضور متأخراً.`,
   },
+  // Reuse shared sub-objects from admin/view — only adminActions differs
+  // (no overrideRateButton at this type level)
   adminActions: {
-    administrativeActions: "الإجراءات الإدارية",
-    generateLog: "إنشاء سجل",
-    reschedule: "تعديل موعد الحصة",
-    forceActivate: "فرض التفعيل",
-    stopPause: "إيقاف/تعليق",
-    deleteInstance: "حذف الحصة",
-    disabledTooltips: {
-      forceActivate: {
-        activated: "لا يمكنك فرض التفعيل لأن الحصة مفعّلة بالفعل.",
-        running: "لا يمكنك فرض التفعيل لأن الجلسة قيد التشغيل.",
-        completed: "لا يمكنك فرض التفعيل لأن الحصة مكتملة.",
-      },
-      stop: {
-        notActivated: "لا يمكنك الإيقاف لأن الحصة لم تُفعّل بعد.",
-        activated: "لا يمكنك الإيقاف لأن الجلسة لم تبدأ بعد. ابدأ الجلسة أولاً.",
-        completed: "لا يمكنك الإيقاف لأن الحصة مكتملة.",
-      },
-    },
+    administrativeActions: adminActions.administrativeActions,
+    generateLog: adminActions.generateLog,
+    reschedule: adminActions.reschedule,
+    forceActivate: adminActions.forceActivate,
+    stopPause: adminActions.stopPause,
+    deleteInstance: adminActions.deleteInstance,
+    disabledTooltips: adminActions.disabledTooltips,
   },
-  classInfo: {
-    liveInstance: "حصة مباشرة",
-    activeConnection: "اتصال نشط",
-    student: "الطالب",
-    moduleInstructor: "مدرس الوحدة",
-    viewSubject: "عرض المادة",
-  },
-  metadata: {
-    metadata: "البيانات الوصفية",
-    scheduledDate: "التاريخ المجدول",
-    duration: "المدة",
-    latency: "زمن الاستجابة",
-    authorization: "التفويض",
-    minutes: "دقيقة",
-    optimal: "مثالي",
-    unavailable: "—",
-  },
+  classInfo,
+  metadata,
   performance: {
     livePerformanceOverview: "نظرة عامة على الأداء المباشر",
     last30Mins: "آخر 30 دقيقة",
@@ -79,26 +56,7 @@ export const dashboardClassDetailsAr: ClassDetailsLabels = {
     duration: "المدة",
     status: "الحالة",
     viewSubject: "عرض المادة",
-    rateSectionTitle: "السعر الفعلي",
-    effectiveRateLabel: "السعر بالساعة",
-    rateCurrencyLabel: "العملة",
-    rateSourceLabel: "مصدر السعر",
-    rateSourceOverride: "تجاوز",
-    rateSourceRecurring: "متكرر",
-    rateSourceSubject: "المادة",
-    rateSourceTeacher: "المعلم",
-    overrideRateButton: "تجاوز السعر",
-    clearOverrideButton: "مسح التجاوز",
-    overrideRateDialogTitle: "تجاوز سعر الحصة",
-    overrideRateDialogDescription: "تعيين سعر ساعة مخصص لهذه الحصة المحددة. اتركه فارغاً لمسح التجاوز.",
-    hourlyRateLabel: "السعر بالساعة",
-    currencyLabel: "العملة",
-    saveButton: "حفظ",
-    cancelButton: "إلغاء",
-    overrideSuccess: "تم تطبيق تجاوز السعر بنجاح",
-    overrideError: "فشل تطبيق تجاوز السعر",
-    clearSuccess: "تم مسح تجاوز السعر بنجاح",
-    clearError: "فشل مسح تجاوز السعر",
+    ...rate,
   },
   remarks: {
     remarksTitle: "الملاحظات / التعليمات الخاصة",

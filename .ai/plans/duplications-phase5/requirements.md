@@ -27,7 +27,7 @@ These clones arise from the **responsive three-tier architecture** (`common/`, `
 |----------|----------|-------|--------|-------------|
 | P0 (Top 10) | 10 | 146 | 22,648 | Highest-token clusters — `__shared__/` scaffold creation |
 | P1 (Medium 20) | 20 | 140 | ~22,000 | UI component + view scaffolds |
-| P2 (Small 49) | 49 | 49 | 6,242 | Single-pair clusters — case-by-case fix or jscpd-ignore |
+| P2 (Small 49) | 49 | 49 | 6,242 | Single-pair clusters — case-by-case scaffold or consolidation (⛔ NO jscpd:ignore) |
 | P3 (Micro 58) | 58 | 135 | ~14,000 | Low-token clusters — batch or defer |
 
 **Also in scope (6 frontend↔shared cross-layer pairs, 551 tokens):**
@@ -35,8 +35,8 @@ These clones arise from the **responsive three-tier architecture** (`common/`, `
 |------|--------|--------|
 | `frontend/common/lib/enum.ts` ↔ `shared/lib/enum.ts` | 84 | Deduplicate cross-layer enum utility |
 | `frontend/common/lib/logger/index.ts` ↔ `shared/lib/logger/base-logger.ts` | 79 | Consolidate logger (shared is canonical) |
-| `frontend/common/views/.../useClassDetailsLabels.ts` ↔ `shared/locale/types/...` (3 pairs) | 331 | Locale type duplication (structural — may ignore) |
-| `frontend/common/views/.../recurringSchedulesListViewModel.types.ts` ↔ `shared/locale/types/...` | 79 | Locale type (structural — may ignore) |
+| `frontend/common/views/.../useClassDetailsLabels.ts` ↔ `shared/locale/types/...` (3 pairs) | 331 | Locale type duplication (structural — document in deferred-items.md, ⛔ NO jscpd:ignore) |
+| `frontend/common/views/.../recurringSchedulesListViewModel.types.ts` ↔ `shared/locale/types/...` | 79 | Locale type (structural — document in deferred-items.md, ⛔ NO jscpd:ignore) |
 
 **Out of scope (explicit):**
 - Everything Phase 4 covers (backend, shared non-locale, app, scripts, codegen)
@@ -140,6 +140,26 @@ This plan NEVER runs any test requiring a Next.js server, GraphQL dev server, UI
 ### AC-9: MUI v9 compliance
 **WHEN** scaffold code uses MUI components, **THE SYSTEM SHALL** use `sx` prop for all styling. No direct style props (`fontWeight`, `textAlign`, `mb`, `mt`, `p`, `display`, etc.) on Typography, Stack, Box, Grid. Icon naming uses `*Outlined` (not `*Outline`). See `frontend/AGENTS.md`.
 
+### AC-10: ⛔ No jscpd:ignore comments (CRITICAL)
+**THE SYSTEM SHALL NEVER** add `jscpd:ignore-start` / `jscpd:ignore-end` comments (or any jscpd ignore directive) to any file as a means of "resolving" a duplicate. **Every duplicate MUST be truly eliminated** via one of:
+- Pattern A: `*Shared.tsx` scaffold with slot props (for desktop↔mobile↔common triplication)
+- Pattern B: `__shared__/` directory scaffold (for desktop↔mobile duplication with no common tier)
+- Pattern C: Canonical source deletion (for byte-identical pairs — delete one, re-export from other)
+- Consolidation within a tier (for intra-common, intra-desktop, intra-mobile pairs)
+- Cross-layer consolidation to `shared/` (for frontend↔shared pairs)
+
+**If a duplicate cannot be eliminated via these patterns**, it MUST be documented in `deferred-items.md` with a structural justification — **NOT suppressed with jscpd:ignore**.
+
+### AC-11: Cross-tier import rules (ESLint + dependency-cruiser compliance)
+**THE SYSTEM SHALL** place all shared scaffolds in `frontend/common/` (either `components/ui/<category>/<Component>/<Component>Shared.tsx` or `views/dashboard/<domain>/components/__shared__/<name>Shared.tsx`). Desktop and mobile variants **MUST** import scaffolds from `frontend/common/` — never from each other's tier directories.
+
+**Enforced by:**
+- ESLint `no-restricted-imports` regex: `*.mobile.tsx` files cannot import `*.desktop.tsx` and vice versa
+- `.dependency-cruiser.js`: Cross-tier imports are forbidden
+- Scaffolds MUST be tier-agnostic: no `useMediaQuery`, `useViewport`, or `ViewportContext` imports in scaffold files
+
+**Verification**: `bun run scripts/health/sub-loop.ts <scaffold-file> --lifecycle codescene` will fail if scaffold imports from desktop or mobile tier.
+
 ---
 
 ## 5. Key Design Decisions
@@ -149,5 +169,5 @@ This plan NEVER runs any test requiring a Next.js server, GraphQL dev server, UI
 3. **`__shared__/` directory for view scaffolds.** When a desktop↔mobile pair has no tier-neutral `common` variant, create a `__shared__/` directory at `frontend/common/views/dashboard/<domain>/components/__shared__/`.
 4. **Direct imports, no barrels.** Circular dependency prevention per `docs/frontend/ui-shared-scaffold-pattern.md` — always use direct file paths.
 5. **Byte-identical pairs → delete, not scaffold.** If desktop↔mobile files are byte-identical (only function name differs), delete one and re-export from the other (Pattern 1).
-6. **Single-pair clusters → batch or ignore.** 49 clusters have only 1 pair each (6,242 tokens total). Low ROI for individual scaffolds — batch similar ones or add jscpd-ignore if structural.
+6. **Single-pair clusters → batch scaffold.** 49 clusters have only 1 pair each (6,242 tokens total). Low ROI for individual scaffolds — batch similar ones by domain. **⛔ NEVER use `jscpd:ignore` — always create a proper scaffold or consolidate.**
 7. **Cross-layer pairs → consolidate to `shared/`.** 6 frontend↔shared pairs involve `enum.ts`, `logger`, and locale types. Consolidate canonical source to `shared/` per AGENTS.md cross-layer rules.

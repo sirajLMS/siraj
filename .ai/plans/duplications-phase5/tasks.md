@@ -43,6 +43,43 @@ The following commands are **PROHIBITED** in this plan. They require a Next.js s
 | `bun run test:services:sequential` | Service tests — not frontend scope |
 | `bun run test:integration` | Integration tests — not frontend scope |
 
+### ⛔ No jscpd:ignore Policy (CRITICAL)
+
+**NEVER add `jscpd:ignore-start` / `jscpd:ignore-end` or any jscpd ignore directive** to any file. This plan truly eliminates duplicates — it does not suppress them.
+
+**Every duplicate MUST be truly eliminated** via:
+- **Pattern A**: `*Shared.tsx` scaffold with slot props (UI component triplication)
+- **Pattern B**: `__shared__/` directory scaffold (D↔M view duplication)
+- **Pattern C**: Canonical source deletion (byte-identical pairs)
+- **Consolidation**: Within-tier shared extraction or cross-layer consolidation to `shared/`
+
+**If a duplicate cannot be eliminated** via these patterns, document it in `deferred-items.md` with a structural justification — but **NEVER suppress it with `jscpd:ignore`**.
+
+**Verification**: After all changes, `grep -rn "jscpd:ignore" frontend/ --include="*.tsx" --include="*.ts"` MUST return zero results.
+
+### ⛔ Cross-Tier Import Rules (ESLint + dependency-cruiser)
+
+**All shared scaffolds MUST live in `frontend/common/`.** Desktop and mobile variants import scaffolds from `common/` — never from each other.
+
+**ESLint enforces** (in `eslint.config.mjs`):
+- `*.mobile.tsx/ts` files: regex `\.desktop` pattern → **ERROR** (mobile cannot import desktop)
+- `*.desktop.tsx/ts` files: regex `\.mobile` pattern → **ERROR** (desktop cannot import mobile)
+- `*.mobile.tsx` / `*.desktop.tsx` files: `useMediaQuery`, `useViewport`, `ViewportContext` → **ERROR**
+
+**dependency-cruiser enforces** (in `.dependency-cruiser.js`):
+- `shared/` → `frontend/` / `backend/` / `app/` → **ERROR**
+- `frontend/` → `backend/` → **ERROR**
+- `backend/` → `frontend/` → **ERROR**
+
+**Scaffold placement rules:**
+| Pattern | Scaffold Location | Desktop imports from | Mobile imports from |
+|--------|-------------------|---------------------|---------------------|
+| A (UI triplication) | `frontend/common/components/ui/<category>/<Component>/<Component>Shared.tsx` | `@/frontend/common/components/ui/<category>/<Component>/<Component>Shared` | Same |
+| B (D↔M view) | `frontend/common/views/dashboard/<domain>/components/__shared__/<name>Shared.tsx` | `@/frontend/common/views/dashboard/<domain>/components/__shared__/<name>Shared` | Same |
+| C (byte-identical) | `frontend/common/<path>/<component>.tsx` | Import from common | Import from common |
+
+**Scaffolds MUST be tier-agnostic**: no `useMediaQuery`, `useViewport`, `ViewportContext`, or imports from `frontend/desktop/**` or `frontend/mobile/**`.
+
 **Allowed commands:**
 - `bun tsgo` — TypeScript type check (read-only, no server)
 - `bun run oxlint` — Oxlint linter (static analysis, no server)
@@ -79,7 +116,7 @@ All tasks in this plan touch frontend files. The following AGENTS.md files are a
 
 ## Phase 0: Baseline & Plan Review (Serial)
 
-### Task 0.1: Capture Baseline
+### Task 0.1: Capture Baseline ✅ DONE
 **ID:** 0.1 | **Effort:** S | **Parallel:** ✗
 
 Capture the current state of the codebase before any Phase 5 work.
@@ -97,7 +134,7 @@ Capture the current state of the codebase before any Phase 5 work.
 
 ---
 
-### Task 0.2: Plan Review Gate
+### Task 0.2: Plan Review Gate ✅ DONE
 **ID:** 0.2 | **Effort:** S | **Parallel:** ✗
 
 Invoke the `plan-review` skill on the Phase 5 plan.
@@ -117,7 +154,7 @@ Invoke the `plan-review` skill on the Phase 5 plan.
 
 These tasks consolidate cross-layer pairs where frontend duplicates shared-layer utilities. Per AGENTS.md, `shared/` is the canonical location for cross-layer utilities.
 
-### Task 1.1: Consolidate `enum.ts` (Cross-Layer)
+### Task 1.1: Consolidate `enum.ts` (Cross-Layer) ✅ DONE
 **ID:** 1.1 | **Effort:** M | **Parallel:** ✗
 
 Consolidate `frontend/common/lib/enum.ts` (84 tokens duplicate) with `shared/lib/enum.ts`.
@@ -137,7 +174,7 @@ Consolidate `frontend/common/lib/enum.ts` (84 tokens duplicate) with `shared/lib
 
 ---
 
-### Task 1.2: Consolidate `logger` (Cross-Layer)
+### Task 1.2: Consolidate `logger` (Cross-Layer) ✅ DONE — extracted `consoleDispatch` to `shared/lib/logger/console-dispatch.ts`
 **ID:** 1.2 | **Effort:** S | **Parallel:** ✗
 
 Consolidate `frontend/common/lib/logger/index.ts` (79 tokens) with `shared/lib/logger/base-logger.ts`.
@@ -155,7 +192,7 @@ Consolidate `frontend/common/lib/logger/index.ts` (79 tokens) with `shared/lib/l
 
 ---
 
-### Task 1.3: Evaluate Locale Type Pairs (Cross-Layer)
+### Task 1.3: Evaluate Locale Type Pairs (Cross-Layer) ✅ DONE — 4 pairs documented as structural in deferred-items.md (D5-2)
 **ID:** 1.3 | **Effort:** S | **Parallel:** ✗
 
 Evaluate the 4 locale type pairs (331 + 79 tokens) between `frontend` and `shared/locale/types/`.
@@ -163,7 +200,7 @@ Evaluate the 4 locale type pairs (331 + 79 tokens) between `frontend` and `share
 **Steps:**
 1. Run `bun check:duplicates` and identify the specific frontend↔shared locale pairs.
 2. For each pair, determine if it's structural (by-design from i18n compile-time pattern) or accidental duplication.
-3. If structural: document in `deferred-items.md` and add to jscpd ignore if needed.
+3. If structural: document in `deferred-items.md` (⛔ NEVER add jscpd:ignore — these are structural and already documented).
 4. If accidental: consolidate to `shared/locale/types/` and update frontend imports.
 5. **IV:** `bun tsgo`
 6. **IV:** `bun check:duplicates` — verify or document.
@@ -176,12 +213,14 @@ Evaluate the 4 locale type pairs (331 + 79 tokens) between `frontend` and `share
 
 Each task is dispatched as a background subagent (general-purpose). All 10 can run in parallel (pool size 16 max). Each subagent:
 1. Reads applicable AGENTS.md + instruction files (listed in sub-loop output)
-2. Creates `__shared__/` scaffolds or extends existing scaffolds
-3. Converts desktop/mobile variants to thin wrappers
+2. Creates `__shared__/` scaffolds or extends existing scaffolds **in `frontend/common/` only** (⛔ NEVER in desktop/ or mobile/)
+3. Converts desktop/mobile variants to thin wrappers importing from `frontend/common/__shared__/`
 4. Runs `sub-loop.ts --lifecycle codescene` on every modified file
 5. Reports results + any cross-file dependencies
+6. **⛔ NEVER adds `jscpd:ignore` comments** — truly eliminates duplicates via scaffolds only
+7. **Cross-tier rules**: Desktop imports from common, mobile imports from common, desktop↔mobile NEVER import from each other
 
-### Task 2.1: permissions/components (45 pairs, 6,833 tokens, L)
+### Task 2.1: permissions/components (45 pairs, 6,833 tokens, L) ✅ DONE — 12 target clone pairs eliminated. 22 scaffolds/types/utils created in `frontend/common/views/dashboard/permissions/`, 23 desktop/mobile variants converted to thin wrappers. tsgo passes clean, all 35+ files pass sub-loop codescene. No jscpd:ignore.
 **ID:** 2.1 | **Effort:** L | **Parallel:** ✓
 
 **Target:** `frontend/common/views/dashboard/permissions/components/`
@@ -201,7 +240,7 @@ Each task is dispatched as a background subagent (general-purpose). All 10 can r
 
 ---
 
-### Task 2.2: classes/recurring/components (14 pairs, 2,064 tokens, M)
+### Task 2.2: classes/recurring/components (14 pairs, 2,064 tokens, M) ✅ DONE — All 6 component clone pairs eliminated (0 clones). 8 scaffolds + 12 thin wrappers. All 20 files pass sub-loop codescene.
 **ID:** 2.2 | **Effort:** M | **Parallel:** ✓
 
 **Target:** `frontend/common/views/classes/recurring/components/`
@@ -220,7 +259,7 @@ Each task is dispatched as a background subagent (general-purpose). All 10 can r
 
 ---
 
-### Task 2.3: ui/input/localizedString (13 pairs, 2,045 tokens, M)
+### Task 2.3: ui/input/localizedString (13 pairs, 2,045 tokens, M) ✅ DONE — 3 scaffolds created, 9 thin wrappers, 0 clone pairs remaining
 **ID:** 2.3 | **Effort:** M | **Parallel:** ✓
 
 **Target:** `frontend/common/components/ui/input/localizedString/`
@@ -237,7 +276,7 @@ Convert all desktop/mobile/localizedString variants to thin wrappers.
 
 ---
 
-### Task 2.4: reschedule/home/components (12 pairs, 1,726 tokens, M)
+### Task 2.4: reschedule/home/components (12 pairs, 1,726 tokens, M) ✅ DONE — 5 scaffolds created, 10 thin wrappers, 0 clone pairs remaining
 **ID:** 2.4 | **Effort:** M | **Parallel:** ✓
 
 **Target:** `frontend/common/views/reschedule/home/components/`
@@ -253,7 +292,7 @@ Convert all desktop/mobile/localizedString variants to thin wrappers.
 
 ---
 
-### Task 2.5: dashboard/resources/components (10 pairs, 1,670 tokens, M)
+### Task 2.5: dashboard/resources/components (10 pairs, 1,670 tokens, M) ✅ DONE — 6 scaffolds created, 10 thin wrappers, 0 clone pairs remaining
 **ID:** 2.5 | **Effort:** M | **Parallel:** ✓
 
 **Target:** `frontend/common/views/dashboard/resources/components/`
@@ -266,7 +305,7 @@ Convert all desktop/mobile/localizedString variants to thin wrappers.
 
 ---
 
-### Task 2.6: teachers/dashboard/components (8 pairs, 1,651 tokens, M)
+### Task 2.6: teachers/dashboard/components (8 pairs, 1,651 tokens, M) ✅ DONE — 4 scaffolds created, 10 thin wrappers, activationPolicyPanel converted to proper wrappers, 0 clone pairs remaining
 **ID:** 2.6 | **Effort:** M | **Parallel:** ✓
 
 **Target:** `frontend/common/views/teachers/dashboard/components/`
@@ -283,7 +322,7 @@ Convert all desktop/mobile/localizedString variants to thin wrappers.
 
 ---
 
-### Task 2.7: dashboard/search-schedule/components (8 pairs, 1,584 tokens, M)
+### Task 2.7: dashboard/search-schedule/components (8 pairs, 1,584 tokens, M) ✅ DONE — 6/8 pairs eliminated (2 residual: store-vs-VM pre-existing, desktop-vs-mobile structural passthrough). 8 scaffolds + 14 thin wrappers. All 22 files pass sub-loop codescene.
 **ID:** 2.7 | **Effort:** M | **Parallel:** ✓
 
 **Target:** `frontend/common/views/dashboard/search-schedule/components/`
@@ -300,7 +339,7 @@ Convert all desktop/mobile/localizedString variants to thin wrappers.
 
 ---
 
-### Task 2.8: dashboard/reports/components (11 pairs, 1,465 tokens, M)
+### Task 2.8: dashboard/reports/components (11 pairs, 1,465 tokens, M) ✅ DONE — 5 scaffolds created, 8 thin wrappers, 0 clone pairs remaining
 **ID:** 2.8 | **Effort:** M | **Parallel:** ✓
 
 **Target:** `frontend/common/views/dashboard/reports/components/`
@@ -313,7 +352,7 @@ Convert all desktop/mobile/localizedString variants to thin wrappers.
 
 ---
 
-### Task 2.9: subjects/home/components (10 pairs, 1,545 tokens, M)
+### Task 2.9: subjects/home/components (10 pairs, 1,545 tokens, M) ✅ DONE — 10/10 D↔M clone pairs eliminated (0 tokens). 13 scaffolds created in `__shared__/`, 12 thin wrappers. All 18 files pass sub-loop codescene. 1 residual cross-scaffold pair (81 tokens, structural — blocked by TypeScript FieldPath generic constraints). No jscpd:ignore.
 **ID:** 2.9 | **Effort:** M | **Parallel:** ✓
 
 **Target:** `frontend/common/views/subjects/home/components/`
@@ -326,7 +365,7 @@ Convert all desktop/mobile/localizedString variants to thin wrappers.
 
 ---
 
-### Task 2.10: Verify Deprecated `frontend/views/dashboard` Path
+### Task 2.10: Verify Deprecated `frontend/views/dashboard` Path ✅ DONE — path doesn't exist, 0 clones. Outcome: `.ai/plans/duplications-phase5/outcome/2.10-deprecated-path-verification.md`
 **ID:** 2.10 | **Effort:** S | **Parallel:** ✓
 
 **Target:** `frontend/views/dashboard/` (deprecated path)

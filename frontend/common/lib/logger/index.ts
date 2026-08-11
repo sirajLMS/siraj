@@ -191,22 +191,12 @@ class ClientLogger {
       ...args,
     ];
 
-    switch (options.level) {
-      case "log":
-        globalThis.console.log(...consoleArgs);
-        break;
-      case "info":
-        globalThis.console.info(...consoleArgs);
-        break;
-      case "warn":
-        globalThis.console.warn(...consoleArgs);
-        break;
-      case "error":
-        globalThis.console.error(...consoleArgs);
-        break;
-      case "debug":
-        globalThis.console.debug(...consoleArgs);
-        break;
+    // Dispatch to the matching console method dynamically.
+    // Previously a 5-case switch/case that was a structural clone of
+    // `shared/lib/logger/base-logger.ts` (see D7-2 in deferred-items.md).
+    const fn = globalThis.console[options.level];
+    if (typeof fn === "function") {
+      fn.bind(globalThis.console)(...consoleArgs);
     }
 
     // Queue for batch send — accepts both regular and forced logs.

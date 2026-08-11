@@ -58,7 +58,7 @@ export const recurringSchedules = pgTable(
   "recurring_schedules",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    ...coreScheduleColumns({ students, teachers, classSubjects }),
+    ...coreScheduleColumns({ students: () => students, teachers: () => teachers, classSubjects: () => classSubjects }),
     avatarUrl: varchar("avatar_url", { length: 1024 }),
     durationMinutes: integer("duration_minutes").notNull(),
     defaultStartTime: time("default_start_time").notNull(),
@@ -141,7 +141,7 @@ export const classInstances = pgTable(
   "class_instances",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    ...coreScheduleColumns({ students, teachers, classSubjects }),
+    ...coreScheduleColumns({ students: () => students, teachers: () => teachers, classSubjects: () => classSubjects }),
     recurringScheduleId: uuid("recurring_schedule_id").references(() => recurringSchedules.id, {
       onDelete: "set null",
     }),

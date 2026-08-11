@@ -1,3 +1,11 @@
+import type {
+  ClassAdminActionsLabels,
+  ClassDetailsPerformanceLabels,
+  ClassInfoLabels,
+  ClassMetadataLabels,
+  ClassRateLabels,
+} from "@/shared/locale/types/dashboard/admin/view";
+
 export interface ClassDetailsLabels {
   readonly pageSubtitleAdmin: string;
   readonly pageSubtitleTeacher: string;
@@ -10,51 +18,10 @@ export interface ClassDetailsLabels {
     readonly title: string;
     readonly message: (studentTimezone: string, teacherTimezone: string) => string;
   };
-  readonly adminActions: {
-    readonly administrativeActions: string;
-    readonly generateLog: string;
-    readonly reschedule: string;
-    readonly forceActivate: string;
-    readonly stopPause: string;
-    readonly deleteInstance: string;
-    readonly disabledTooltips: {
-      readonly forceActivate: {
-        readonly activated: string;
-        readonly running: string;
-        readonly completed: string;
-      };
-      readonly stop: {
-        readonly notActivated: string;
-        readonly activated: string;
-        readonly completed: string;
-      };
-    };
-  };
-  readonly classInfo: {
-    readonly liveInstance: string;
-    readonly activeConnection: string;
-    readonly student: string;
-    readonly moduleInstructor: string;
-    readonly viewSubject: string;
-  };
-  readonly metadata: {
-    readonly metadata: string;
-    readonly scheduledDate: string;
-    readonly duration: string;
-    readonly latency: string;
-    readonly authorization: string;
-    readonly minutes: string;
-    readonly optimal: string;
-    readonly unavailable: string;
-  };
-  readonly performance: {
-    readonly livePerformanceOverview: string;
-    readonly last30Mins: string;
-    readonly engagementScore: string;
-    readonly assessmentProgress: string;
-    readonly focusLevel: string;
-    readonly sessionHealth: string;
-    readonly noData: string;
+  readonly adminActions: ClassAdminActionsLabels;
+  readonly classInfo: ClassInfoLabels;
+  readonly metadata: ClassMetadataLabels;
+  readonly performance: ClassDetailsPerformanceLabels & {
     readonly previousPerformanceOverview: string;
     readonly attendanceRate: string;
     readonly avgGrade: string;
@@ -76,27 +43,7 @@ export interface ClassDetailsLabels {
     readonly duration: string;
     readonly status: string;
     readonly viewSubject: string;
-    readonly rateSectionTitle: string;
-    readonly effectiveRateLabel: string;
-    readonly rateCurrencyLabel: string;
-    readonly rateSourceLabel: string;
-    readonly rateSourceOverride: string;
-    readonly rateSourceRecurring: string;
-    readonly rateSourceSubject: string;
-    readonly rateSourceTeacher: string;
-    readonly overrideRateButton: string;
-    readonly clearOverrideButton: string;
-    readonly overrideRateDialogTitle: string;
-    readonly overrideRateDialogDescription: string;
-    readonly hourlyRateLabel: string;
-    readonly currencyLabel: string;
-    readonly saveButton: string;
-    readonly cancelButton: string;
-    readonly overrideSuccess: string;
-    readonly overrideError: string;
-    readonly clearSuccess: string;
-    readonly clearError: string;
-  };
+  } & ClassRateLabels;
   readonly remarks: {
     readonly remarksTitle: string;
   };

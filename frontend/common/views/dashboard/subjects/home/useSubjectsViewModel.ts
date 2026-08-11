@@ -26,38 +26,14 @@ import type {
   EditSubjectDialogProps,
   SubjectItem,
   SubjectsDialogLabels,
+  SubjectsViewProps,
 } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { useSubjectMutations } from "@/frontend/common/views/dashboard/subjects/home/useSubjectMutations";
 import { useRouter } from "@/shared/i18n/navigation";
 import type { SubjectsLabels } from "@/shared/locale";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export interface SubjectsViewModel {
-  readonly labels: SubjectsLabels;
-  readonly categories: readonly CategoryItem[];
-  readonly subjects: readonly SubjectItem[];
-  readonly filteredSubjects: readonly SubjectItem[];
-  readonly isLoading: boolean;
-  readonly activeCategoryId: string | null;
-  readonly categoriesSectionOpen: boolean;
-  readonly onToggleCategoriesSection: () => void;
-  readonly onCategoryChange: (categoryId: string | null) => void;
-  readonly onAddSubject: () => void;
-  readonly onEditSubject: (id: string) => void;
-  readonly onDeleteSubject: (id: string) => void;
-  readonly onSubjectClick: (id: string) => void;
-  readonly onCreateCategory: () => void;
-  readonly onEditCategory: (id: string) => void;
-  readonly onDeleteCategory: (id: string) => void;
-  readonly canManageSubjects: boolean;
-  readonly canManageCategories: boolean;
-
-  readonly createSubjectDialog: CreateSubjectDialogProps;
-  readonly editSubjectDialog: EditSubjectDialogProps;
-  readonly deleteSubjectDialog: DeleteSubjectDialogProps;
-  readonly createCategoryDialog: CreateCategoryDialogProps;
-  readonly editCategoryDialog: EditCategoryDialogProps;
-  readonly deleteCategoryDialog: DeleteCategoryDialogProps;
+export interface SubjectsViewModel extends SubjectsViewProps {
   readonly selectedSubject: SubjectItem | null;
   readonly selectedCategory: CategoryItem | null;
 }

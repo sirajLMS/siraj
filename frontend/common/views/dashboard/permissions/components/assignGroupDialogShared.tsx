@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { Controller } from "react-hook-form";
 import { type PersonOption, resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { SharedDialogCancelButton } from "@/frontend/common/views/dashboard/permissions/components/__shared__/sharedDialogButtons";
 import type { AssignGroupDialogSharedProps } from "@/frontend/common/views/dashboard/permissions/types/assignGroupDialogShared.types";
 
 export function AssignGroupDialogShared({ labels, props, slots }: Readonly<AssignGroupDialogSharedProps>) {
@@ -71,18 +72,7 @@ export function AssignGroupDialogShared({ labels, props, slots }: Readonly<Assig
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button
-          onClick={onClose}
-          disabled={isLoading}
-          variant="text"
-          sx={theme => ({
-            color: theme.palette.text.secondary,
-            fontWeight: 700,
-            borderRadius: 1.5,
-          })}
-        >
-          {t.cancel}
-        </Button>
+        <SharedDialogCancelButton label={t.cancel} disabled={isLoading} onClick={onClose} />
         <Button
           type="submit"
           form={formId}

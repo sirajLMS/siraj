@@ -18,9 +18,9 @@ Phase 7 introduces a new refactoring pattern not used in Phases 1-6: **within-fi
 | **Local component extraction** | Within-file clone — two JSX blocks in the same `.tsx` file render similar UI | Extract a small presentational component within the same file; both sections use it |
 | **Config array consolidation** | Within-file clone — repeating config blocks (e.g., `navigationConfig.ts`) | Extract a `make<Type>Config(...)` factory that generates each block from parameters |
 | **Type signature consolidation** | Within-file clone — repeating type definitions | Extract a shared `interface` or `type` at module scope; both sections use it |
-| **jscpd:ignore directive** | Within-file clone that is structural / by-design | Add `// jscpd:ignore-start` / `// jscpd:ignore-end` around the duplicated region |
+| **Shared module extraction** | Within-file clone that is structural / by-design | Extract shared logic into a module-level helper or a separate shared module — every clone is truly resolved, never ignored |
 | **Cross-layer inheritance** | Cross-layer utility duplication (enum, logger) | Shared layer defines base class/interface; frontend extends or re-exports |
-| **Cross-layer jscpd-ignore** | Cross-layer utility that is architecturally intentional | Add `.jscpd.json` ignore or `// jscpd:ignore` with rationale |
+| **Cross-layer shared extraction** | Cross-layer utility duplication (enum, logger) | Extract runtime-agnostic shared logic into `shared/` module; both implementations import it. No jscpd:ignore allowed. |
 
 ### 1.2 Layer-Specific Concerns
 
@@ -32,7 +32,7 @@ Phase 7 introduces a new refactoring pattern not used in Phases 1-6: **within-fi
 | `frontend/.../*.tsx` | Repeating JSX sections | Extract local presentational component within the file |
 | `frontend/.../*.ts` (config) | Repeating config objects | Extract `makeXConfig(params)` factory |
 | `frontend/.../types.ts` | Repeating type definitions | Extract shared `interface` at module scope |
-| `shared/locale/**/*.ts` | Repeating error translation/type signatures | Evaluate if Phase 6 Task 1.1 jscpd-ignore already suppresses; if not, local extraction |
+| `shared/locale/**/*.ts` | Repeating error translation/type signatures | Fix via local extraction (shared type signatures, repeating translation patterns) — no jscpd:ignore |
 
 ---
 
@@ -46,7 +46,7 @@ For each of 17 within-file clone pairs:
   2. Determine: Are the sections identical, or do they differ only in data?
      - Identical → extract local helper, both sections call it
      - Differ in data → extract factory function with parameters
-     - Structurally different but same shape → jscpd:ignore directive
+     - Structurally different but same shape → extract shared helper anyway (same pattern as all other clones)
   3. Apply the fix
   4. Run sub-loop.ts --lifecycle codescene on the file
   5. Verify jscpd no longer reports the pair
@@ -57,16 +57,14 @@ For each of 17 within-file clone pairs:
 ```
 For each of 2 cross-layer utility pairs (enum.ts, logger):
   1. Analyze the type sources and runtime dependencies of each implementation
-  2. Determine: Can the frontend version extend/import from the shared version?
-     - If yes → refactor (inheritance or re-export)
-     - If no (different runtime environments) → jscpd-ignore with architectural rationale
-  3. If refactoring:
-     - Ensure shared/ is canonical per AGENTS.md
-     - Repoint frontend imports
-     - Run sub-loop.ts --lifecycle codescene on both files
-  4. If jscpd-ignore:
-     - Add directive with comment explaining the architectural reason
-     - Document in deferred-items.md
+  2. Extract the runtime-agnostic shared logic into a `shared/` module that both can import:
+     - enum.ts: Extract generic parsing helpers into `shared/lib/enum-core.ts`
+     - logger: Extract pure config logic (isLoggingEnabled, resolveLogLevel) into `shared/lib/logger/config.ts`
+  3. Both implementations import from the new shared module and use the shared logic
+  4. Run sub-loop.ts --lifecycle codescene on all modified files
+  5. Respect dependency-cruiser rules:
+     - shared/ must NOT import from frontend/backend/app
+     - frontend imports from shared via @/shared/lib/... is allowed
 ```
 
 ### 2.3 Residual Sweep Flow
@@ -77,9 +75,9 @@ After Phase 7 within-file and cross-layer tasks are complete:
   2. Compare results to the Phase 4/5/6 baseline (504 clones, 68,194 tokens)
   3. Identify any remaining unaddressed clones
   4. Triage each into:
-     - "fix" → create a task in this phase or defer to a new phase
-     - "ignore" → add jscpd:ignore directive
-     - "defer" → document in deferred-items.md
+     - "fix" → extract shared code to eliminate the clone (create a task or fix immediately)
+     - "defer" → document in deferred-items.md with a real extraction plan for a future phase
+     - NEVER use jscpd:ignore — every clone must be truly solved by code extraction
   5. Write final outcome report
 ```
 
@@ -142,17 +140,14 @@ After Phase 7 within-file and cross-layer tasks are complete:
 
 ### 3.3 shared/locale Within-File Clones (7 pairs, 700 tokens)
 
-These are within-file clones in `shared/locale/` files — the same directory that Phase 6 Task 1.1 proposes to add to `.jscpd.json` ignore patterns.
-
-**Key question:** Does a `.jscpd.json` ignore of `shared/locale/**` suppress within-file clones as well as cross-file clones in that directory?
-
-**Expected answer:** Yes — jscpd's `ignore` patterns exclude all files matching the pattern from analysis entirely, which means both cross-file and within-file clones in those files are suppressed.
+These are within-file clones in `shared/locale/` files.
 
 **Phase 7 disposition:**
-- If Phase 6 Task 1.1 has been implemented (`.jscpd.json` includes `shared/locale/**`): **no action needed** — these 7 pairs are auto-suppressed. Document this in the outcome.
-- If Phase 6 Task 1.1 has NOT been implemented: Phase 7 Task for this evaluates whether to:
-  - (a) Implement the same jscpd-ignore as Phase 6 (redundant but safe), OR
-  - (b) Fix individually via local extraction (if the within-file locale clones are fixable, e.g. repeating error type signatures can be consolidated)
+- These 7 within-file clones are fixed via local extraction within each file — no `.jscpd.json` ignore patterns are used.
+- For `shared/locale/types/errors/index.ts`: extract repeating error type signatures into a shared local helper function at module scope.
+- For `shared/locale/ar/errors/index.ts` and `shared/locale/en/errors/index.ts`: extract repeating Arabic/English error translation patterns into a shared local builder function.
+- For `shared/locale/types/dashboard/parents/onboarding.ts`: extract repeating onboarding type signatures into a shared local helper.
+- **No jscpd:ignore directives are allowed.** Every clone is truly resolved by code extraction.
 
 ---
 
@@ -166,12 +161,12 @@ These are within-file clones in `shared/locale/` files — the same directory th
 
 **Duplicated section (84 tokens):** The overlap is in shared parsing functions (`parseBookingStatus`, `parseIanaTimezone`, etc.) that have the same logic but different type imports.
 
-**Options:**
-1. **Consolidate:** Make `shared/lib/enum.ts` the canonical source. Frontend imports from `@/shared/lib/enum` and re-exports any frontend-specific enums. This requires aligning the `BookingStatus` definition (type vs enum) and resolving the GraphQL codegen type dependency.
-2. **jscpd-ignore:** Add `// jscpd:ignore-start` around the duplicated parsing functions with a comment explaining that the implementations are intentionally parallel (browser GraphQL codegen types vs backend enum types).
-3. **Extract shared interface:** Define a `EnumParser<T>` interface in `shared/` that both implementations satisfy, with the shared structure but different type parameters.
-
-**Recommendation:** Option 2 (jscpd-ignore) is likely the correct approach because the two files serve different runtime environments with different type sources. Forcing consolidation would create a `shared → frontend/common/graphql/generated` dependency, violating `shared/` layer isolation.
+**Approach: Extract runtime-agnostic parsing logic into `shared/lib/enum-core.ts`.**
+- The duplicated parsing functions (like `parseBookingStatus`, `parseIanaTimezone`) have identical logic — they differ only in the type sources used for the enum/value arrays.
+- Extract a generic `parseEnumValue<T>(value: string, validValues: readonly string[], fallback: T): T` function and similar pure parsing helpers into `shared/lib/enum-core.ts`.
+- `shared/lib/enum.ts` imports from `enum-core.ts` and uses it with its enum types.
+- `frontend/common/lib/enum.ts` imports from `@/shared/lib/enum-core` and uses it with its GraphQL codegen types.
+- This respects `shared/` layer isolation (no frontend imports) and eliminates the duplication by extracting the truly shared logic.
 
 ### 4.2 `frontend/common/lib/logger/index.ts` ↔ `shared/lib/logger/base-logger.ts` (79 tokens)
 
@@ -179,16 +174,14 @@ These are within-file clones in `shared/locale/` files — the same directory th
 - `frontend/common/lib/logger/index.ts` (263 lines): `ClientLogger` class with browser APIs (fetch, `/api/logs` endpoint, `sessionId`, `NEXT_PUBLIC_ENABLE_LOGGING`).
 - `shared/lib/logger/base-logger.ts` (99 lines): `BaseLogger` abstract class with Node.js APIs (`fs/promises`, `process.cwd`, `ENABLE_LOGGING`).
 
-**Duplicated section (79 tokens):** The overlap is likely in the log-level configuration and the `enabled` flag logic.
+**Duplicated section (79 tokens):** The overlap is in the log-level configuration and the `enabled` flag logic.
 
-**Options:**
-1. **Inheritance:** Make `ClientLogger extends BaseLogger` — but `BaseLogger` uses `fs/promises` which is not available in the browser. This would import dead code.
-2. **Interface extraction:** Define `ILogger` interface in `shared/` that both implement. No code sharing, just type alignment.
-3. **jscpd-ignore:** Add directives with a comment explaining browser vs Node.js runtime separation.
-
-**Recommendation:** Option 3 (jscpd-ignore) is likely correct because the shared `BaseLogger` uses `node:fs/promises` which cannot be imported in the browser bundle. The frontend `ClientLogger` is a separate implementation.
-
-**Alternatively, Option 2 (interface extraction) could work** if the duplicated section is only the log-level/enabled logic that doesn't depend on `fs`. This would extract a pure function `isLoggingEnabled(env, flag)` to `shared/lib/logger/config.ts` that both implementations call.
+**Approach: Extract pure config logic into `shared/lib/logger/config.ts`.**
+- The duplicated `isLoggingEnabled` / log-level configuration logic does NOT depend on `fs/promises` — it is pure string/boolean logic based on env vars.
+- Extract `isLoggingEnabled(envFlag: string | undefined): boolean` and `resolveLogLevel(level: string): LogLevel` into `shared/lib/logger/config.ts`.
+- `shared/lib/logger/base-logger.ts` imports from `config.ts` and uses it.
+- `frontend/common/lib/logger/index.ts` imports from `@/shared/lib/logger/config` and uses it with its browser-specific `NEXT_PUBLIC_ENABLE_LOGGING` env var.
+- This respects `shared/` layer isolation and eliminates the duplication by extracting the shared pure logic.
 
 ---
 
@@ -197,11 +190,12 @@ These are within-file clones in `shared/locale/` files — the same directory th
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
 | Within-file extraction changes behavior | Low | Medium | Semantic review checklist per task; 12-point checklist |
-| Cross-layer utility consolidation breaks imports | Medium | High | Prefer jscpd-ignore for architecturally intentional duplication |
-| Phase 6 jscpd-ignore not yet implemented | Medium | Low | Phase 7 verifies and handles independently |
-| Residual sweep finds new clones from Phase 4/5/6 refactoring | Medium | Low | Triage into fix/ignore/defer |
+| Cross-layer utility consolidation breaks imports | Medium | High | Extract only runtime-agnostic logic to `shared/`; respect dependency-cruiser rules (shared never imports frontend) |
+| Phase 6 locale ignore not yet implemented | Medium | Low | Phase 7 fixes locale clones via local extraction regardless of Phase 6 status |
+| Residual sweep finds new clones from Phase 4/5/6 refactoring | Medium | Low | Triage into fix/defer — always fix by extracting shared code, never ignore |
 | `navigationConfig.ts` extraction breaks nav rendering | Medium | High | Semantic review; careful parametric factory design |
 | `InvoicePaymentDetailsDialog.tsx` extraction breaks dialog | Medium | High | Visual review checklist; extract as presentational component with slotProps |
+| Frontend cross-tier dependency violation | Medium | High | Respect ESLint `no-restricted-imports` on `.mobile.tsx`/`.desktop.tsx` files; move shared code to `frontend/common/` so mobile/desktop import from common |
 
 ---
 

@@ -1,19 +1,21 @@
 "use client";
 
-import { DeleteOutlined, PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
+import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
-import { AssignedUsersTabShared } from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared";
 import {
-  StyledBulkActionBar,
+  AssignedUsersBulkActionBar,
+  AssignedUsersTabShared,
+} from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared";
+import {
   StyledRemoveButton,
-  StyledRemoveSelectedButton,
   StyledUserToolbar,
 } from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared.styles";
 import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTab.types";
 import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
+import { assignedUsersTabLabels } from "@/frontend/common/views/dashboard/permissions/utils";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n";
 
@@ -84,34 +86,6 @@ function AssignedUsersToolbar({
         {assignUsersLabel}
       </StyledAssignUsersButton>
     </StyledUserToolbar>
-  );
-}
-
-function BulkActionBar({
-  selectedCount,
-  onBulkRevokeUsers,
-  usersSelectedLabel,
-  removeSelectedLabel,
-}: Readonly<{
-  selectedCount: number;
-  onBulkRevokeUsers: () => void;
-  usersSelectedLabel: (count: number) => string;
-  removeSelectedLabel: string;
-}>) {
-  return (
-    <StyledBulkActionBar>
-      <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-        {usersSelectedLabel(selectedCount)}
-      </Typography>
-      <StyledRemoveSelectedButton
-        variant="contained"
-        color="error"
-        startIcon={<DeleteOutlined />}
-        onClick={onBulkRevokeUsers}
-      >
-        {removeSelectedLabel}
-      </StyledRemoveSelectedButton>
-    </StyledBulkActionBar>
   );
 }
 
@@ -242,29 +216,15 @@ function AssignedUsersMobileList({ props, labels }: Readonly<AssignedUsersListSl
 }
 
 export function AssignedUsersTabMobile(props: Readonly<AssignedUsersTabProps>) {
-  const t = props.labels;
-
   return (
     <AssignedUsersTabShared
       props={props}
       slots={{
         Toolbar: AssignedUsersToolbar,
-        BulkActionBar: BulkActionBar,
+        BulkActionBar: AssignedUsersBulkActionBar,
         UsersList: AssignedUsersMobileList,
       }}
-      labels={{
-        usersSelected: t.usersSelected,
-        removeSelected: t.removeSelected,
-        noAssignedUsers: t.noAssignedUsers,
-        searchAssignedUsers: t.searchAssignedUsers,
-        assignUsers: t.assignUsers,
-        assignDate: t.assignedDate,
-        removeUser: t.removeUser,
-        assignedGroupMembers: t.assignedGroupMembers,
-        columnName: t.columnName,
-        assignedBy: t.assignedBy,
-        assignedBySystem: t.assignedBySystem,
-      }}
+      labels={assignedUsersTabLabels(props.labels)}
     />
   );
 }

@@ -23,7 +23,25 @@ export type StudentDirectoryRowExtended = Readonly<Omit<StudentDirectoryRow, "pa
   readonly isDeactivated?: boolean;
 };
 
-export interface StudentsViewLabels {
+/** Shared directory labels reused by both {@link StudentsViewLabels} and {@link StudentDirectoryDataGridLabels}. */
+interface StudentDirectorySharedLabels {
+  readonly index: string;
+  readonly student: string;
+  readonly email: string;
+  readonly status: string;
+  readonly hoursPerWeek: string;
+  readonly classesLeft: string;
+  readonly actions: string;
+  readonly showingOf: (shown: number, total: number) => string;
+  readonly previous: string;
+  readonly next: string;
+  readonly viewProfile: string;
+  readonly viewHistory: string;
+  readonly noEntries: string;
+  readonly statusLabels: Record<StudentAccountStatus, string>;
+}
+
+export interface StudentsViewLabels extends StudentDirectorySharedLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly mobileTitle: string;
@@ -31,41 +49,12 @@ export interface StudentsViewLabels {
   readonly addStudent: string;
   readonly filters: string;
   readonly globalRecord: string;
-  readonly index: string;
-  readonly student: string;
-  readonly email: string;
-  readonly status: string;
-  readonly hoursPerWeek: string;
-  readonly classesLeft: string;
-  readonly actions: string;
-  readonly showingOf: (shown: number, total: number) => string;
-  readonly previous: string;
-  readonly next: string;
-  readonly viewProfile: string;
-  readonly viewHistory: string;
-  readonly noEntries: string;
   readonly weeklyHours: string;
   readonly enrollmentStatus: string;
-  readonly statusLabels: Record<StudentAccountStatus, string>;
   readonly enrollmentLabels: Record<StudentEnrollmentStatus, string>;
 }
 
-export interface StudentDirectoryDataGridLabels {
-  readonly index: string;
-  readonly student: string;
-  readonly email: string;
-  readonly status: string;
-  readonly hoursPerWeek: string;
-  readonly classesLeft: string;
-  readonly actions: string;
-  readonly showingOf: (shown: number, total: number) => string;
-  readonly previous: string;
-  readonly next: string;
-  readonly viewProfile: string;
-  readonly viewHistory: string;
-  readonly noEntries: string;
-  readonly statusLabels: Record<StudentAccountStatus, string>;
-}
+export type StudentDirectoryDataGridLabels = StudentDirectorySharedLabels;
 
 export interface StudentDirectoryCardListLabels {
   readonly weeklyHours: string;

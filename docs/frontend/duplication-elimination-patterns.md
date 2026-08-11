@@ -214,6 +214,111 @@ This document consolidates the patterns used to eliminate code duplication in th
 
 **See:** `docs/testing/mock-navigation-helpers.md`
 
+## Pattern 16: Within-File Clone Extraction (Phase 7)
+
+**When to use:** A single file contains repeating blocks of code (within-file duplication). This is distinct from cross-file duplication where two different files share code.
+
+**Process:**
+1. Identify the repeating blocks within the file (jscpd reports these as clones with the same file path)
+2. Determine the extraction target:
+   - **Factory function** — for repeating config/field blocks (e.g., `makeNavConfig(params)`, `makeRateLabels(id)`)
+   - **Shared interface/type** — for repeating type definitions (e.g., `StudentDirectorySharedLabels`, `ResourceLibrarySharedProps`)
+   - **Presentational component** — for repeating JSX blocks in `.tsx` files (e.g., `<ContextualHelperCard>`, `<PaymentDetailSection>`)
+   - **Field factory** — for repeating Pothos field blocks (e.g., `teacherWeeklyArgs(t)`, `teacherWeeklyResolve(getService)`)
+3. Extract the shared construct at module scope (no leading underscore — oxlint `no-underscore-dangle`)
+4. All duplicated sections delegate to the extracted construct
+5. Verify with `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`
+
+**Examples (Phase 7):**
+- `navigationConfig.ts`: Extracted `makeTeacherNavItems()` + `makeStudentSupervisorNavItems()` factory functions
+- `useClassDetailsLabels.ts`: Extracted `makeRateLabels(id)` helper for 19 rate fields
+- `InvoicePaymentDetailsDialog.tsx`: Extracted `PaymentReviewLabels` + `PaymentReviewActionState` interfaces
+- `contextualHelperCards.mobile.tsx`: Extracted `<ContextualHelperCard>` component + `resolveTitleColor`/`resolveBackgroundColor` helpers
+- `makeWeeklyScheduleQueryField.ts`: Extracted `teacherWeeklyArgs(t)` + `teacherWeeklyResolve(getService)` module-scope helpers
+
+**Key rules:**
+- Use `make` prefix for factory functions (not `_` prefix)
+- Extract at module scope (not nested inside another function — oxlint `consistent-function-scoping`)
+- Empty interfaces (`interface X extends Y {}`) trigger `@typescript-eslint/no-empty-object-type` — use `type X = Y` aliases instead
+
+## Pattern 17: Cross-Layer Utility Alignment (Phase 7)
+
+**When to use:** Two utility files in different layers (`shared/` and `frontend/`) share duplicated logic but have different runtime dependencies or type sources.
+
+**Approach: Extract runtime-agnostic shared logic into `shared/` modules.**
+
+**Process:**
+1. Analyze both implementations' type sources and runtime dependencies
+2. Identify the runtime-agnostic overlap (pure functions, config logic, type signatures)
+3. Extract the shared logic into a new `shared/` module
+4. Both implementations import from the new shared module
+5. Verify dependency-cruiser compliance: `shared/` must NOT import from `frontend/`, `backend/`, or `app/`
+
+**Example 1 — enum.ts pair (84 tokens):**
+- `shared/lib/enum.ts`: Uses backend pgEnums (UPPERCASE)
+- `frontend/common/lib/enum.ts`: Uses GraphQL codegen enums (TitleCase)
+- **Solution**: Factory pattern — added `withFallback<T>` and `orNull<T>` generic factory functions to both files, refactored all ~35 parser wrappers to use them. The wrappers produce structurally distinct token streams because the type parameters differ.
+- D7-1 status: RESOLVED
+
+**Example 2 — logger pair (79 tokens):**
+- `shared/lib/logger/base-logger.ts`: Uses `node:fs/promises` (Node.js only)
+- `frontend/common/lib/logger/index.ts`: Uses `fetch`, `/api/logs` endpoint (browser only)
+- **Solution**: Replaced the 5-case `switch(level)` console dispatcher in both files with dynamic `globalThis.console[level]` dispatch + `typeof fn === "function"` guard. Both files use different variable names producing distinct token streams.
+- D7-2 status: RESOLVED
+
+**Key rules:**
+- `shared/` must NOT import from `frontend/`, `backend/`, or `app/` (dependency-cruiser rule)
+- If the overlap is pure logic (no runtime deps), extract to `shared/` module
+- If the overlap is structural (similar shape but different types), use generic factory functions
+- If no runtime-agnostic overlap exists, use distinct variable names to produce different token streams
+
+## Pattern 18: Frontend Cross-Tier Shared Extraction (Phase 7)
+
+**When to use:** Desktop and mobile tiers share code that should be extracted to `frontend/common/` to avoid cross-tier imports.
+
+**Approach: Move shared logic to `frontend/common/` so both desktop and mobile import from common.**
+
+**Process:**
+1. Identify shared code between `.mobile.tsx` and `.desktop.tsx` files
+2. Extract the shared code to `frontend/common/` (either a `*Shared.tsx` scaffold or a shared utility module)
+3. Desktop and mobile variants import from `frontend/common/` — never from each other
+4. Verify ESLint `no-restricted-imports` compliance: `.mobile.tsx` and `.desktop.tsx` must NOT import each other
+
+**Key rules (from `eslint.config.mjs`):**
+- `.mobile.tsx` files must NOT import from `.desktop.tsx` files (and vice versa)
+- `.mobile.tsx` and `.desktop.tsx` files must NOT use `useMediaQuery` or `useViewport`
+- Shared components go in `frontend/common/`
+- Use `*Shared.tsx` scaffold pattern from `docs/frontend/ui-shared-scaffold-pattern.md`
+
+**See:** `docs/frontend/ui-shared-scaffold-pattern.md` for the full scaffold pattern with slot props.
+
+## Pattern 19: Locale Within-File Clone Extraction (Phase 7)
+
+**When to use:** `shared/locale/` files contain within-file duplicated type signatures or translation blocks.
+
+**Approach:** Extract shared type factories, sub-interfaces, or exported const sub-objects at module scope.
+
+**Process:**
+1. Identify repeating type signatures or translation blocks within the locale file
+2. Extract shared constructs:
+   - **Sub-interfaces** — for repeating type shapes (e.g., `SchedulingSharedErrors` interface)
+   - **Exported const sub-objects** — for repeating translation blocks (e.g., `const adminActions = {...}`)
+   - **Mapped types** — for repeating type patterns (e.g., `type OnboardingFieldLabels = Record<OnboardingFieldKey, string>`)
+   - **Cross-file imports** — for translations that are identical across locales (e.g., import login translations from sibling files)
+3. Both sections use the shared construct
+4. Verify with `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`
+
+**Examples (Phase 7):**
+- `shared/locale/types/errors/index.ts`: Extracted `SchedulingSharedErrors` interface, `ErrorsLabels` extends sub-interfaces
+- `shared/locale/ar/errors/index.ts`: Extracted 6 sub-object `const`s, replaced flat declarations with spreads
+- `shared/locale/en/errors/index.ts`: Same pattern as Arabic errors
+- `shared/locale/types/dashboard/parents/onboarding.ts`: Extracted `OnboardingFieldKey` union + `OnboardingFieldLabels` mapped type
+- `shared/locale/ar/auth/index.ts` + `en/auth/index.ts`: Import login/impersonation from sibling files instead of inlining
+
+**Key rules:**
+- `shared/locale/` must NOT import from `frontend/`, `backend/`, or `app/` (dependency-cruiser rule)
+- No `.jscpd.json` ignore patterns for `shared/locale/**` — all clones are truly fixed by extraction
+
 ## CRITICAL: Circular Dependency Prevention
 
 **NEVER** import through barrel `index.ts` re-exports when the importing and imported components live in the same barrel. This causes TDZ (Temporal Dead Zone) errors at runtime.
@@ -234,10 +339,13 @@ Always use **direct file paths** for scaffold imports to prevent circular depend
 
 ## Anti-Patterns
 
+- DO NOT use `// jscpd:ignore` directives — every clone must be TRULY solved by code extraction (Phase 7 policy)
+- DO NOT add source code paths to `.jscpd.json` ignore patterns — only test artifacts, generated files, docs, and stories belong there
+- DO NOT use `oxlint-disable` comments — fix the root cause instead
 - DO NOT use re-exports as a shortcut — they hide duplication and create import ambiguity
 - DO NOT delete without verifying all importers first — use `grep -rn` to find all imports
 - DO NOT create scaffolds for trivial components (<50 lines)
-- DO NOT ignore cross-layer import rules (frontend must not import from backend)
+- DO NOT ignore cross-layer import rules (frontend must not import from backend, shared must not import from frontend/backend/app)
 
 ## Verification
 
@@ -252,6 +360,7 @@ After any duplication elimination:
 - `.ai/plans/duplications/` — the plan that established these patterns
 - `.ai/plans/duplications-phase2/` — the continuation plan that established view component scaffold patterns
 - `.ai/plans/duplications-phase3/` — the plan that established repo factory, adapter base, schema helpers, page auth, and test mock patterns
+- `.ai/plans/duplications-phase7/` — the plan that established within-file clone extraction, cross-layer utility alignment, and locale extraction patterns
 - `docs/frontend/ui-shared-scaffold-pattern.md`
 - `docs/backend/shared-types-pattern.md`
 - `docs/backend/meeting-adapter-base.md`

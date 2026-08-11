@@ -1,9 +1,39 @@
 import { useMemo } from "react";
 import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/types/dashboard";
 import { type AdminViewLabels, Translation, useAppTranslation } from "@/shared/locale";
+import type { ClassRateLabels } from "@/shared/locale/types/dashboard/admin/view";
 import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes/details";
 
 type ClassDetailsTranslations = ClassDetailsLabels;
+
+/**
+ * Extract the 19 rate-related label fields from `instanceDetails`.
+ * Shared by `buildAdminRateLabels` and `buildTeacherInstanceDetailsLabels`.
+ */
+function makeRateLabels(id: ClassDetailsLabels["instanceDetails"]) {
+  return {
+    rateSectionTitle: id.rateSectionTitle,
+    effectiveRateLabel: id.effectiveRateLabel,
+    rateCurrencyLabel: id.rateCurrencyLabel,
+    rateSourceLabel: id.rateSourceLabel,
+    rateSourceOverride: id.rateSourceOverride,
+    rateSourceRecurring: id.rateSourceRecurring,
+    rateSourceSubject: id.rateSourceSubject,
+    rateSourceTeacher: id.rateSourceTeacher,
+    overrideRateButton: id.overrideRateButton,
+    clearOverrideButton: id.clearOverrideButton,
+    overrideRateDialogTitle: id.overrideRateDialogTitle,
+    overrideRateDialogDescription: id.overrideRateDialogDescription,
+    hourlyRateLabel: id.hourlyRateLabel,
+    currencyLabel: id.currencyLabel,
+    saveButton: id.saveButton,
+    cancelButton: id.cancelButton,
+    overrideSuccess: id.overrideSuccess,
+    overrideError: id.overrideError,
+    clearSuccess: id.clearSuccess,
+    clearError: id.clearError,
+  };
+}
 
 export interface TeacherViewLabels {
   readonly timezone: {
@@ -21,27 +51,7 @@ export interface TeacherViewLabels {
     readonly viewSubject: string;
     readonly minutes: string;
     readonly statusLabels: Record<ClassInstanceStatus, string>;
-    readonly rateSectionTitle: string;
-    readonly effectiveRateLabel: string;
-    readonly rateCurrencyLabel: string;
-    readonly rateSourceLabel: string;
-    readonly rateSourceOverride: string;
-    readonly rateSourceRecurring: string;
-    readonly rateSourceSubject: string;
-    readonly rateSourceTeacher: string;
-    readonly overrideRateButton: string;
-    readonly clearOverrideButton: string;
-    readonly overrideRateDialogTitle: string;
-    readonly overrideRateDialogDescription: string;
-    readonly hourlyRateLabel: string;
-    readonly currencyLabel: string;
-    readonly saveButton: string;
-    readonly cancelButton: string;
-    readonly overrideSuccess: string;
-    readonly overrideError: string;
-    readonly clearSuccess: string;
-    readonly clearError: string;
-  };
+  } & ClassRateLabels;
   readonly remarks: {
     readonly remarksTitle: string;
   };
@@ -100,28 +110,7 @@ function buildAdminActionsLabels(t: ClassDetailsTranslations) {
 }
 
 function buildAdminRateLabels(t: ClassDetailsTranslations) {
-  return {
-    rateSectionTitle: t.instanceDetails.rateSectionTitle,
-    effectiveRateLabel: t.instanceDetails.effectiveRateLabel,
-    rateCurrencyLabel: t.instanceDetails.rateCurrencyLabel,
-    rateSourceLabel: t.instanceDetails.rateSourceLabel,
-    rateSourceOverride: t.instanceDetails.rateSourceOverride,
-    rateSourceRecurring: t.instanceDetails.rateSourceRecurring,
-    rateSourceSubject: t.instanceDetails.rateSourceSubject,
-    rateSourceTeacher: t.instanceDetails.rateSourceTeacher,
-    overrideRateButton: t.instanceDetails.overrideRateButton,
-    clearOverrideButton: t.instanceDetails.clearOverrideButton,
-    overrideRateDialogTitle: t.instanceDetails.overrideRateDialogTitle,
-    overrideRateDialogDescription: t.instanceDetails.overrideRateDialogDescription,
-    hourlyRateLabel: t.instanceDetails.hourlyRateLabel,
-    currencyLabel: t.instanceDetails.currencyLabel,
-    saveButton: t.instanceDetails.saveButton,
-    cancelButton: t.instanceDetails.cancelButton,
-    overrideSuccess: t.instanceDetails.overrideSuccess,
-    overrideError: t.instanceDetails.overrideError,
-    clearSuccess: t.instanceDetails.clearSuccess,
-    clearError: t.instanceDetails.clearError,
-  };
+  return makeRateLabels(t.instanceDetails);
 }
 
 function buildAdminViewLabels(t: ClassDetailsTranslations): AdminViewLabels {
@@ -196,26 +185,7 @@ function buildTeacherInstanceDetailsLabels(
     viewSubject: t.instanceDetails.viewSubject,
     minutes: t.metadata.minutes,
     statusLabels,
-    rateSectionTitle: t.instanceDetails.rateSectionTitle,
-    effectiveRateLabel: t.instanceDetails.effectiveRateLabel,
-    rateCurrencyLabel: t.instanceDetails.rateCurrencyLabel,
-    rateSourceLabel: t.instanceDetails.rateSourceLabel,
-    rateSourceOverride: t.instanceDetails.rateSourceOverride,
-    rateSourceRecurring: t.instanceDetails.rateSourceRecurring,
-    rateSourceSubject: t.instanceDetails.rateSourceSubject,
-    rateSourceTeacher: t.instanceDetails.rateSourceTeacher,
-    overrideRateButton: t.instanceDetails.overrideRateButton,
-    clearOverrideButton: t.instanceDetails.clearOverrideButton,
-    overrideRateDialogTitle: t.instanceDetails.overrideRateDialogTitle,
-    overrideRateDialogDescription: t.instanceDetails.overrideRateDialogDescription,
-    hourlyRateLabel: t.instanceDetails.hourlyRateLabel,
-    currencyLabel: t.instanceDetails.currencyLabel,
-    saveButton: t.instanceDetails.saveButton,
-    cancelButton: t.instanceDetails.cancelButton,
-    overrideSuccess: t.instanceDetails.overrideSuccess,
-    overrideError: t.instanceDetails.overrideError,
-    clearSuccess: t.instanceDetails.clearSuccess,
-    clearError: t.instanceDetails.clearError,
+    ...makeRateLabels(t.instanceDetails),
   };
 }
 

@@ -1,3 +1,22 @@
+export interface TeacherAvailabilityTableLabels {
+  readonly time: string;
+  readonly monday: string;
+  readonly tuesday: string;
+  readonly wednesday: string;
+  readonly thursday: string;
+  readonly friday: string;
+  readonly saturday: string;
+  readonly sunday: string;
+  readonly mon: string;
+  readonly tue: string;
+  readonly wed: string;
+  readonly thu: string;
+  readonly fri: string;
+  readonly sat: string;
+  readonly sun: string;
+  readonly availableSlot: (teacherName: string, time: string) => string;
+}
+
 export interface TeacherAvailabilityLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
@@ -19,24 +38,7 @@ export interface TeacherAvailabilityLabels {
   readonly errors: {
     readonly missingTimeRange: string;
   };
-  readonly table: {
-    readonly time: string;
-    readonly monday: string;
-    readonly tuesday: string;
-    readonly wednesday: string;
-    readonly thursday: string;
-    readonly friday: string;
-    readonly saturday: string;
-    readonly sunday: string;
-    readonly mon: string;
-    readonly tue: string;
-    readonly wed: string;
-    readonly thu: string;
-    readonly fri: string;
-    readonly sat: string;
-    readonly sun: string;
-    readonly availableSlot: (teacherName: string, time: string) => string;
-  };
+  readonly table: TeacherAvailabilityTableLabels;
   readonly insights: {
     readonly peakLoad: string;
     readonly peakLoadDesc: string;

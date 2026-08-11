@@ -1,11 +1,15 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import {
+  StyledBaselineTextShared,
+  StyledPermissionDescriptionShared,
+  StyledPermissionKeyContainerShared,
+  StyledPermissionKeyTextShared,
+} from "@/frontend/common/views/dashboard/permissions/components/__shared__/overridesDataGridShared.styles";
+import { resolveOverrideRow } from "@/frontend/common/views/dashboard/permissions/components/__shared__/resolveOverrideRow";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
@@ -14,28 +18,6 @@ import { OverrideEffectiveDisplayDesktop } from "@/frontend/desktop/views/dashbo
 import { useAppLocale } from "@/shared/locale";
 
 export type { OverrideState };
-
-const StyledPermissionKeyContainer = styled(Box)({
-  display: "flex",
-  flexDirection: "column",
-});
-
-const StyledPermissionKeyText = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.labelMd.fontSize,
-  fontWeight: 600,
-  color: theme.palette.primary.main,
-}));
-
-const StyledPermissionDescription = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  marginTop: theme.spacing(0.5),
-}));
-
-const StyledBaselineText = styled(Typography, {
-  shouldForwardProp: prop => prop !== "isAllowed",
-})<{ isAllowed: boolean }>(({ theme, isAllowed }) => ({
-  color: isAllowed ? theme.palette.success.main : theme.palette.text.secondary,
-}));
 
 export function OverridesDataGridDesktop({
   labels,
@@ -60,10 +42,12 @@ export function OverridesDataGridDesktop({
         renderCell: params => {
           const permission = params.row;
           return (
-            <StyledPermissionKeyContainer>
-              <StyledPermissionKeyText variant="bodyMd">{permission.key}</StyledPermissionKeyText>
-              <StyledPermissionDescription variant="caption">{permission.description}</StyledPermissionDescription>
-            </StyledPermissionKeyContainer>
+            <StyledPermissionKeyContainerShared>
+              <StyledPermissionKeyTextShared variant="bodyMd">{permission.key}</StyledPermissionKeyTextShared>
+              <StyledPermissionDescriptionShared variant="caption">
+                {permission.description}
+              </StyledPermissionDescriptionShared>
+            </StyledPermissionKeyContainerShared>
           );
         },
       },
@@ -75,22 +59,18 @@ export function OverridesDataGridDesktop({
         sortable: false,
         renderCell: params => {
           const permission = params.row;
-          const baselineGroups = userGroups.filter(
-            g =>
-              (permission.id && g.permissionIds?.includes(permission.id)) ||
-              (permission.key && g.permissionIds?.includes(permission.key))
+          const { isAllowedByGroup, baselineText } = resolveOverrideRow(
+            permission,
+            userGroups,
+            localOverrides,
+            t,
+            locale
           );
-          const isAllowedByGroup = baselineGroups.length > 0;
-          const baselineText = isAllowedByGroup
-            ? t.allowedViaGroups(
-                baselineGroups.map(g => resolveLocalizedString(g.name, locale) || g.slug || "").join(", ")
-              )
-            : t.notSet;
 
           return (
-            <StyledBaselineText variant="bodyMd" isAllowed={isAllowedByGroup}>
+            <StyledBaselineTextShared variant="bodyMd" isAllowed={isAllowedByGroup}>
               {baselineText}
-            </StyledBaselineText>
+            </StyledBaselineTextShared>
           );
         },
       },
@@ -103,24 +83,13 @@ export function OverridesDataGridDesktop({
           const permission = params.row;
           if (!permission.id) return null;
 
-          const baselineGroups = userGroups.filter(
-            g =>
-              (permission.id && g.permissionIds?.includes(permission.id)) ||
-              (permission.key && g.permissionIds?.includes(permission.key))
+          const { effectiveState, overrideState } = resolveOverrideRow(
+            permission,
+            userGroups,
+            localOverrides,
+            t,
+            locale
           );
-          const isAllowedByGroup = baselineGroups.length > 0;
-          const overrideState: OverrideState = localOverrides[permission.id] || "INHERIT";
-
-          let effectiveState: "allowed" | "denied" | "not_set";
-          if (overrideState === "GRANTED") {
-            effectiveState = "allowed";
-          } else if (overrideState === "DENIED") {
-            effectiveState = "denied";
-          } else if (isAllowedByGroup) {
-            effectiveState = "allowed";
-          } else {
-            effectiveState = "not_set";
-          }
 
           if (mode === "effective") {
             return (

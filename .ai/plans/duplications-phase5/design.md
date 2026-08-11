@@ -47,16 +47,23 @@ The 470 frontend↔frontend clones arise from:
 
 ### 1.3 Scaffold Patterns
 
+**⛔ CRITICAL: All shared scaffolds MUST live in `frontend/common/` — never in `frontend/desktop/` or `frontend/mobile/`.**
+
+Desktop and mobile variants import scaffolds from `common/`. This respects:
+- **ESLint `no-restricted-imports`**: Mobile files cannot import desktop files (regex `\.desktop`), and vice versa
+- **dependency-cruiser**: Cross-tier imports are forbidden — `frontend/desktop/**` → `frontend/mobile/**` and vice versa
+- **Tier isolation**: Scaffolds are tier-agnostic — no `useMediaQuery`, `useViewport`, or viewport context imports
+
 **Pattern A: UI Component Scaffold (Triplication)**
 
 ```
 frontend/common/components/ui/<category>/<Component>/
-  <Component>Shared.tsx       # Scaffold with slotProps
+  <Component>Shared.tsx       # Scaffold with slotProps (tier-agnostic)
   <Component>.tsx             # Common tier variant (thin wrapper)
 frontend/desktop/components/ui/<category>/<component>/
-  <component>.desktop.tsx     # Desktop tier (imports Shared, passes slots)
+  <component>.desktop.tsx     # Desktop tier (imports Shared from common/, passes slots)
 frontend/mobile/components/ui/<category>/<component>/
-  <component>.mobile.tsx      # Mobile tier (imports Shared, passes slots)
+  <component>.mobile.tsx      # Mobile tier (imports Shared from common/, passes slots)
 ```
 
 **Pattern B: View Component Scaffold (D↔M Duplication)**
@@ -64,13 +71,15 @@ frontend/mobile/components/ui/<category>/<component>/
 ```
 frontend/common/views/dashboard/<domain>/components/
   __shared__/
-    <componentName>Shared.tsx  # Scaffold with slotProps
+    <componentName>Shared.tsx  # Scaffold with slotProps (tier-agnostic, lives in common/)
     <componentName>Shared.types.ts  # (optional) shared types
 frontend/desktop/views/dashboard/<domain>/components/
-  <componentName>.desktop.tsx  # Desktop variant (thin wrapper)
+  <componentName>.desktop.tsx  # Desktop variant (thin wrapper, imports from common/__shared__/)
 frontend/mobile/views/dashboard/<domain>/components/
-  <componentName>.mobile.tsx   # Mobile variant (thin wrapper)
+  <componentName>.mobile.tsx   # Mobile variant (thin wrapper, imports from common/__shared__/)
 ```
+
+**⛔ Both desktop and mobile variants import the scaffold from `frontend/common/views/dashboard/<domain>/components/__shared__/`** — never from each other's tier directories.
 
 **Pattern C: Canonical Source Deletion (Byte-Identical)**
 
@@ -91,6 +100,9 @@ frontend/common/views/dashboard/<domain>/components/
 | **MUI v9 `sx` prop only** | Style props (`fontWeight`, `textAlign`, `mb`, `mt`, `p`, `display`) are NOT valid on Typography, Stack, Box, Grid. |
 | **`*Outlined` icon naming** | `ErrorOutline` → `ErrorOutlined`, `InfoOutline` → `InfoOutlined`. |
 | **No `oxlint-disable` comments** | Fix root cause. Type guards for `no-unsafe-type-assertion`. `Promise.all` for `no-await-in-loop`. Module-scope for `consistent-function-scoping`. |
+| **⛔ No `jscpd:ignore` comments** | **NEVER** add `jscpd:ignore-start`/`jscpd:ignore-end` or any jscpd ignore directive. Always truly eliminate duplicates via scaffolds (Pattern A/B), canonical deletion (Pattern C), or consolidation. If a pair is truly structural (e.g., i18n type shapes), document in `deferred-items.md` — but never suppress with jscpd:ignore. |
+| **Cross-tier import rules (ESLint + dependency-cruiser)** | Mobile files (`*.mobile.tsx/ts`) **MUST NOT** import desktop files (`*.desktop.tsx/ts`) and vice versa. Desktop/mobile variants **MUST** import shared scaffolds from `frontend/common/` only. Scaffolds live in `frontend/common/` (either `components/ui/` or `views/dashboard/<domain>/components/__shared__/`). Both desktop and mobile variants import scaffolds from `common/` — never from each other. |
+| **Scaffolds are tier-agnostic** | Scaffolds in `frontend/common/` must NOT import `useMediaQuery`, `useViewport`, or any viewport context. They must NOT import from `frontend/desktop/**` or `frontend/mobile/**`. Tier-specific hooks/imports stay in the `.desktop.tsx`/`.mobile.tsx` wrappers. |
 | **`logger` not `console.*`** | Use `import { logger } from '@/frontend/utils/logger'` in frontend. |
 | **i18n: no hardcoded strings** | Use `useAppTranslation("namespace")` from `@/shared/locale/client`. Never hardcode user-facing text. |
 | **No server tests** | Only `sub-loop.ts --lifecycle codescene` (read-only static analysis). |
@@ -110,9 +122,9 @@ frontend/common/views/dashboard/<domain>/components/
 | 7 | Component slots for structural diffs | `ComponentType<P>` or render functions for different child components |
 | 8 | Render function slots for type-contravariance | When desktop uses `UiTypographyVariant` and mobile uses `UiTypographyVariantLoose` |
 | 9 |Extend existing scaffolds rather than duplicate | If `*Shared.tsx` exists, extend it — don't create a parallel scaffold |
-| 10 | Batch single-pair clusters by directory | Group single-pair clusters in same domain to amortize context-switch cost |
+| 10 | Batch single-pair clusters by directory | Group single-pair clusters in same domain to amortize context-switch cost. **⛔ Never use jscpd:ignore — always create proper scaffolds or consolidate.** |
 | 11 | Cross-layer `enum.ts` / `logger` → consolidate to `shared/` | Per AGENTS.md cross-layer rules — `shared/` is canonical for cross-layer utilities |
-| 12 | `frontend↔shared` locale type duplicates → likely ignore | Structural duplication from i18n compile-time type pattern — 331 tokens. If Pattern A (consolidate to shared) is feasible without breaking i18n, do it. Otherwise document in `deferred-items.md`. |
+| 12 | `frontend↔shared` locale type duplicates → document as structural | Structural duplication from i18n compile-time type pattern — 331 tokens. If Pattern A (consolidate to shared) is feasible without breaking i18n, do it. Otherwise document in `deferred-items.md`. ⛔ NEVER use jscpd:ignore. |
 
 ---
 
@@ -125,7 +137,7 @@ frontend/common/views/dashboard/<domain>/components/
 ### Phase 1: Cross-Layer Consolidation (serial, 3 tasks)
 - Task 1.1: Consolidate `enum.ts` → `shared/lib/enum.ts` canonical
 - Task 1.2: Consolidate `logger` → `shared/lib/logger/base-logger.ts` canonical
-- Task 1.3: Evaluate `useClassDetailsLabels.ts` ↔ `shared/locale/types/` pairs (fix or ignore)
+- Task 1.3: Evaluate `useClassDetailsLabels.ts` ↔ `shared/locale/types/` pairs (fix or document as structural — ⛔ NO jscpd:ignore)
 
 ### Phase 2: P0 — Top 10 Clusters (parallel subagents, 10 clusters)
 Each cluster gets one subagent that creates `__shared__/` scaffolds and converts variants:
@@ -223,8 +235,8 @@ Each cluster gets one subagent that creates `__shared__/` scaffolds and converts
 | Desktop/mobile variants use different MUI components entirely | Use `ComponentType<P>` slot prop or render function |
 | Variants differ only in `sx` prop values | Use config-object slot (`DESKTOP_SX` / `MOBILE_SX` consts passed as `slotProps`) |
 | Paired files share a barrel `index.ts` that must be updated | Update barrel to re-export from new scaffold location. Verify no TDZ. |
-| Intra-common duplication (C↔C, 45+16 pairs) | Consolidate within common — extract shared helper or merge into existing common component |
-| Intra-desktop (D↔D, 11+1 pairs) / intra-mobile (M↔M, 10+1 pairs) | Consolidate within the tier — extract shared sub-component within same tier |
+| Intra-common duplication (C↔C, 45+16 pairs) | Consolidate within common — extract shared helper or merge into existing common component. **⛔ Never jscpd:ignore.** |
+| Intra-desktop (D↔D, 11+1 pairs) / intra-mobile (M↔M, 10+1 pairs) | Consolidate within the tier — extract shared sub-component within same tier. **⛔ Never jscpd:ignore.** |
 
 ---
 

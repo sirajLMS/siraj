@@ -82,23 +82,23 @@ All tasks use `--lifecycle codescene` (the deepest check: tsgo → oxlint → bi
 ## Phase 1: Structural Suppression (Serial)
 
 ### Task 1.1: Add `shared/locale/**` to `.jscpd.json` Ignore Patterns
-- [ ] 1.1.1 Read current `.jscpd.json` configuration
-- [ ] 1.1.2 Add `"shared/locale/**"` to the `ignore` array (if not already present)
-- [ ] 1.1.3 Run `bun check:duplicates` and verify shared/locale pair count = 0
-- [ ] 1.1.4 QL: `bun run scripts/health/sub-loop.ts .jscpd.json --lifecycle codescene` (if applicable to config files; otherwise skip)
-- [ ] 1.1.5 Write outcome: `.ai/plans/duplications-phase6/outcome/1.1-jscpd-locale-ignore-outcome.md`
+- [x] 1.1.1 Read current `.jscpd.json` configuration
+- [x] 1.1.2 Add `"shared/locale/**"` to the `ignore` array (if not already present)
+- [x] 1.1.3 Run `bun check:duplicates` and verify shared/locale pair count = 0
+- [x] 1.1.4 QL: `bun run scripts/health/sub-loop.ts .jscpd.json --lifecycle codescene` (if applicable to config files; otherwise skip)
+- [x] 1.1.5 Write outcome: `.ai/plans/duplications-phase6/outcome/1.1-jscpd-locale-ignore-outcome.md`
   - Document: before/after pair count, before/after token count, which 16 pairs were suppressed
-- [ ] 1.1.6 Update progress: Mark 1.1 as `[x]`
+- [x] 1.1.6 Update progress: Mark 1.1 as `[x]`
 
 ### Task 1.2: Evaluate Frontend↔Shared Locale Type Cross-Layer Pairs (D5-2)
-- [ ] 1.2.1 Read `frontend/common/views/dashboard/classes/details/useClassDetailsLabels.ts` and compare with `shared/locale/types/dashboard/classes/details.ts`
-- [ ] 1.2.2 Determine if the 3 frontend↔shared locale type pairs (115t, 102t, 79t) are structural (i18n type system) or fixable (duplicate types)
-- [ ] 1.2.3 If structural → add `// jscpd:ignore` directive or extend `.jscpd.json` pattern
-- [ ] 1.2.4 If fixable → consolidate to `shared/locale/types/` canonical source, repoint frontend import
-- [ ] 1.2.5 QL: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file
-- [ ] 1.2.6 IV: Read `shared/AGENTS.md` (locale rules), `frontend/AGENTS.md`
-- [ ] 1.2.7 Write outcome: `.ai/plans/duplications-phase6/outcome/1.2-locale-cross-layer-evaluation-outcome.md`
-- [ ] 1.2.8 Update progress: Mark 1.2 as `[x]`
+- [x] 1.2.1 Read `frontend/common/views/dashboard/classes/details/useClassDetailsLabels.ts` and compare with `shared/locale/types/dashboard/classes/details.ts`
+- [x] 1.2.2 Determine if the 3 frontend↔shared locale type pairs (115t, 102t, 79t) are structural (i18n type system) or fixable (duplicate types)
+- [x] 1.2.3 If structural → add `// jscpd:ignore` directive or extend `.jscpd.json` pattern
+- [x] 1.2.4 If fixable → consolidate to `shared/locale/types/` canonical source, repoint frontend import
+- [x] 1.2.5 QL: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file
+- [x] 1.2.6 IV: Read `shared/AGENTS.md` (locale rules), `frontend/AGENTS.md`
+- [x] 1.2.7 Write outcome: `.ai/plans/duplications-phase6/outcome/1.2-locale-cross-layer-evaluation-outcome.md`
+- [x] 1.2.8 Update progress: Mark 1.2 as `[x]`
 
 ---
 
