@@ -410,6 +410,9 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/testing/mock-navigation-helpers.md` - Test mock navigation helpers pattern reference
 - `docs/i18n/locale-namespace-migration.md` - Locale namespace migration from monolithic to sub-module directories
 - `docs/auth/permission-architecture.md` - Client-side permission architecture (3-tier model, wrapper removal rationale)
+- `docs/i18n/cross-layer-enum-migration.md` - Cross-layer enum delete/codemod pattern (currency/timezone/class-instance-detail workflow)
+- `docs/backend/service-base-pattern.md` - Service base class, shared resolvers, insert payload builders, auth session helpers
+- `docs/graphql/pothos-field-factories.md` - Pothos field helpers, input field helpers, and query field factory idioms
 
 
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)

@@ -53,6 +53,15 @@ Completed extractions:
 - `backend/types/billing/communication.types.ts` — `BaseEntity`, `BaseRepo<T>`, `DBTx`, `ResolutionResult` for complaint/suggestion types
 - `shared/types/pagination.types.ts` — `PaginationInput` consolidated from 3 duplicate definitions
 
+## Cross-Layer Enum Migration
+
+When an enum exists in both `shared/constants/` (canonical) and `backend/enum/` (duplicate), convert the backend file to a re-export shim. See `docs/i18n/cross-layer-enum-migration.md` for the complete migration workflow.
+
+Completed migrations:
+- `IANATimezone` — `backend/enum/shared/timezone.enum.ts` → re-export from `shared/constants/iana-timezone.enum.ts`
+- `CurrencyCode` — `backend/enum/shared/currency.enum.ts` → re-export from `shared/constants/currency.enum.ts`
+- `ClassInstanceDetail` — `backend/enum/shared/class-instance-detail.enum.ts` → re-export from `shared/constants/class-instance-detail.enum.ts`
+
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)
 
 Oxlint is the project's linter (`bun run oxlint`). It uses type-aware mode (`typeAware: true`, `typeCheck: true` in `oxlint.config.mts`). NEVER add `oxlint-disable` comments — fix the root cause instead.

@@ -131,6 +131,17 @@ Completed consolidations:
 
 Multiple meeting provider adapters (Zoom, Google Meet, Teams) share identical getter/setter/logic structure. Use `MeetingProviderAdapterBase` from `__shared__/meetingProviderAdapterBase.ts` as the abstract base class. See `docs/backend/meeting-adapter-base.md` for the complete pattern reference.
 
+## Service Base & Shared Helpers (Duplication Elimination)
+
+When multiple service files share identical helper functions (auth preludes, config upserts, insert payload builders, session creators), extract into `__shared__/` modules. See `docs/backend/service-base-pattern.md` for the complete pattern reference.
+
+Completed extractions:
+- `ParentServiceBase` — `backend/services/parents/__shared__/ParentServiceBase.ts`
+- `resolveTeacherId` — `backend/services/scheduling/__shared__/resolveTeacherId.ts`
+- `prepareMeetingConfigUpsert` — `backend/services/meetings/__shared__/prepareMeetingConfigUpsert.ts`
+- `buildParentInsertPayload` — `backend/services/parents/__shared__/buildParentInsertPayload.ts`
+- `buildTeacherInsertPayload` — `backend/services/teachers/__shared__/buildTeacherInsertPayload.ts`
+- `createAuthSession` — `backend/services/auth/__shared__/createAuthSession.ts`
 
 
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)

@@ -12,6 +12,7 @@
 | ID | Item | Source Task | Target Task | Status | Verified By | Notes |
 |---|------|-------------|-------------|--------|-------------|-------|
 | _(empty — no deferred items yet)_ | | | | | | |
+| D4-1 | `makeBillingUpsertMany` factory — extend `billingRepoFactory.ts` with generic `upsertMany` body extraction | Phase 4 Task 4.1 | Phase 5 (future) | ✅ | Phase 8 outcome review | Plan included this task but was not picked up during Phase 3-6 parallel subagent execution. Carry-forward to a future duplication elimination phase. |
 
 ---
 
