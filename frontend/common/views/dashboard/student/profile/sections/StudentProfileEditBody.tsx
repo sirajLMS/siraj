@@ -1,9 +1,12 @@
 "use client";
 
 import { Box, Button, Stack } from "@mui/material";
+import { useRef } from "react";
 import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";
+import type { AdminResetPasswordSectionRef } from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
+import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentUserDetailsProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentUserDetailsProfileSection";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
@@ -42,6 +45,24 @@ export function StudentProfileEditBody({
 }: Readonly<StudentProfileEditBodyProps>) {
   const parentLabels = useAppTranslation(Translation.Profile.Parent);
   const baseLabels = useAppTranslation(Translation.Profile.Base);
+  const resetPasswordRef = useRef<AdminResetPasswordSectionRef>(null);
+  const { resetPassword } = useAdminResetPassword(
+    baseLabels.adminResetPassword.success,
+    baseLabels.adminResetPassword.error
+  );
+
+  const targetUserId = profile.parentUserId ?? profile.id;
+
+  const handleSave = async () => {
+    const resetData = resetPasswordRef.current?.getResetPasswordData();
+    if (resetData?.isValid && targetUserId) {
+      const success = await resetPassword(targetUserId, resetData.newPassword, resetData.sendNotificationEmail);
+      if (success) {
+        resetPasswordRef.current?.reset();
+      }
+    }
+    await onSave();
+  };
 
   const sectionBase = {
     profile,
@@ -77,6 +98,7 @@ export function StudentProfileEditBody({
         mode="edit"
         studentData={profile}
         labels={{ baseLabels: { actions: { manageLifecycle: baseLabels.actions.manageLifecycle } } }}
+        resetPasswordRef={resetPasswordRef}
       />
 
       <Stack direction="row" spacing={1} sx={{ alignSelf: "flex-start" }}>
@@ -85,7 +107,7 @@ export function StudentProfileEditBody({
             {labels.cancel}
           </Button>
         ) : null}
-        <Button variant="contained" onClick={() => void onSave()} disabled={saving}>
+        <Button variant="contained" onClick={() => void handleSave()} disabled={saving}>
           {labels.saveChanges}
         </Button>
       </Stack>

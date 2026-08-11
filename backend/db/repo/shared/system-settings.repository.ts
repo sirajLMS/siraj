@@ -72,7 +72,8 @@ export namespace SystemSettingsRepository {
     if (setting?.value == null || setting.value === "") {
       return null;
     }
-    return JSON.parse(setting.value) as T;
+    const parsed: T = JSON.parse(setting.value);
+    return parsed;
   }
 
   /**

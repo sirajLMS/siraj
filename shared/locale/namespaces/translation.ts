@@ -102,6 +102,7 @@ import { Sms } from "@/shared/locale/namespaces/sms/sms.namespace";
 import { UiCatalogImageUpload } from "@/shared/locale/namespaces/ui/catalogImageUpload.namespace";
 import { UiCountrySelect } from "@/shared/locale/namespaces/ui/countrySelect.namespace";
 import { UiCurrencySelect } from "@/shared/locale/namespaces/ui/currencySelect.namespace";
+import { UiEditableTypography } from "@/shared/locale/namespaces/ui/editableTypography.namespace";
 import { UiGenderSelector } from "@/shared/locale/namespaces/ui/genderSelector.namespace";
 import { UiLanguageSelector } from "@/shared/locale/namespaces/ui/languageSelector.namespace";
 import { UiLocalizedString } from "@/shared/locale/namespaces/ui/localizedString.namespace";
@@ -226,6 +227,7 @@ export const Translation = {
   },
   Ui: {
     CatalogImageUpload: UiCatalogImageUpload,
+    EditableTypography: UiEditableTypography,
     CountrySelect: UiCountrySelect,
     CurrencySelect: UiCurrencySelect,
     GenderSelector: UiGenderSelector,

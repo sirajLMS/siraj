@@ -1,24 +1,12 @@
 "use client";
 
-import { AddCardOutlined } from "@mui/icons-material";
-import { Typography } from "@mui/material";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import type { UserBillingProfileViewModel } from "@/frontend/common/views/dashboard/users/billing-profile/useUserBillingProfileViewModel";
-import {
-  MobileContentStack,
-  MobileEmptyState,
-  MobileFab,
-  MobilePageContainer,
-  MobilePageHeader,
-} from "@/frontend/mobile/components/ui";
-import { BillingMetricsRowMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMetricsRow.mobile";
-import { BillingMobileSearchBarMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMobileSearchBar.mobile";
-import { ParentInvoicesCardListMobile } from "@/frontend/mobile/views/dashboard/billing/components/parentInvoicesCardList.mobile";
+import { BillingSectionMobile } from "@/frontend/mobile/views/dashboard/billing/components/__shared__/billingSectionShared.mobile";
 
 export function UserBillingProfileMobileView({
   labels,
   metrics,
+  summary,
   summaryLoading = false,
   invoices,
   searchQuery,
@@ -39,53 +27,32 @@ export function UserBillingProfileMobileView({
   onPageChange,
   isSearchPending = false,
 }: Readonly<UserBillingProfileViewModel>) {
-  const showQuickPayFab = canSubmitProof && !billingActionsDisabled;
-  const listLoading = isSearchPending || (loading && invoices.length === 0);
-
   return (
-    <>
-      <MobilePageContainer>
-        <MobilePageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser} edgeToEdge={false} />
-
-        <MobileContentStack gap={3} paddingBottom={4}>
-          <BillingMetricsRowMobile metrics={metrics} compact loading={summaryLoading} />
-          <BillingMobileSearchBarMobile
-            value={searchQuery}
-            placeholder={labels.search.parentPlaceholder}
-            searchingLabel={labels.search.searching}
-            isSearching={isSearchPending}
-            onChange={onSearchChange}
-          />
-          <Typography variant="titleLg">{labels.sections.invoiceHistory}</Typography>
-          {invoices.length === 0 && !listLoading ? (
-            <MobileEmptyState title={labels.parentTable.emptyTitle} subtitle={labels.parentTable.emptySubtitle} />
-          ) : (
-            <ParentInvoicesCardListMobile
-              rows={invoices}
-              canView={canView}
-              canSubmitProof={canSubmitProof}
-              canManage={canManage}
-              billingActionsDisabled={billingActionsDisabled}
-              loading={listLoading}
-              onPayNow={onPayNow}
-              onMarkAsPaid={onMarkAsPaid}
-              onViewPaymentDetails={onViewPaymentDetails}
-              onDownloadPdf={onDownloadPdf}
-              labels={{
-                ...getParentInvoiceGridLabels(labels),
-                hasPaymentProofHint: labels.hasPaymentProofHint,
-              }}
-              paginationOptions={buildServerPaginationOptions({
-                page: page ?? 0,
-                pageSize: pageSize ?? 10,
-                totalCount,
-                onPageChange,
-              })}
-            />
-          )}
-        </MobileContentStack>
-      </MobilePageContainer>
-      {showQuickPayFab ? <MobileFab icon={<AddCardOutlined />} label={labels.quickPay} onClick={onQuickPay} /> : null}
-    </>
+    <BillingSectionMobile
+      labels={labels}
+      pageTitle={labels.billingProfileTitle}
+      pageSubtitle={labels.profileForUser}
+      metrics={metrics}
+      summary={summary}
+      summaryLoading={summaryLoading}
+      invoices={invoices}
+      searchQuery={searchQuery}
+      loading={loading}
+      isSearchPending={isSearchPending}
+      canView={canView}
+      canSubmitProof={canSubmitProof}
+      canManage={canManage}
+      billingActionsDisabled={billingActionsDisabled}
+      onSearchChange={onSearchChange}
+      onPayNow={onPayNow}
+      onMarkAsPaid={onMarkAsPaid}
+      onViewPaymentDetails={onViewPaymentDetails}
+      onDownloadPdf={onDownloadPdf}
+      onQuickPay={onQuickPay}
+      page={page}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      onPageChange={onPageChange}
+    />
   );
 }

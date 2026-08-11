@@ -25,6 +25,13 @@ export interface TeacherReassignmentLabels {
     readonly teacherAvailabilityNotice: string;
     readonly statusUpdate: string;
     readonly currentStatus: (status: string) => string;
+    readonly statusOptions: {
+      readonly REGULAR: string;
+      readonly SUSPENDED: string;
+      readonly ON_LEAVE: string;
+      readonly ON_TRIAL: string;
+      readonly DEACTIVATED: string;
+    };
   };
   readonly historyAndContact: {
     readonly changeHistory: string;

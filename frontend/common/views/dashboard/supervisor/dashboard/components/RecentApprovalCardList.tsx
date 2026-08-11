@@ -7,7 +7,7 @@ import {
   SchoolOutlined,
   VisibilityOutlined,
 } from "@mui/icons-material";
-import { Avatar, Box, Skeleton, type Theme, Tooltip, Typography } from "@mui/material";
+import { Avatar, Box, type Theme, Tooltip, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import type * as React from "react";
 import { ActionIconLink, StatusBadge } from "@/frontend/common/components/ui";
@@ -20,6 +20,10 @@ import {
   studentProfileTabHref,
 } from "@/frontend/common/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
+import {
+  ScheduleSessionCardSkeleton,
+  ScheduleSessionEmptyState,
+} from "@/frontend/common/views/dashboard/components/ScheduleSessionCardStates";
 import type { RecentApproval } from "@/frontend/common/views/dashboard/supervisor/dashboard/types/supervisorDashboardTypes";
 import { Link } from "@/shared/i18n";
 
@@ -433,82 +437,9 @@ export function RecentApprovalCard({ item, labels }: RecentApprovalCardProps) {
 }
 
 export function RecentApprovalCardSkeleton() {
-  return (
-    <Box
-      sx={{
-        paddingBlock: 2,
-        paddingInline: 2,
-        width: "100%",
-        minHeight: 220,
-        boxSizing: "border-box",
-        overflow: "hidden",
-      }}
-    >
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1.5 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flex: 1 }}>
-          <Skeleton variant="circular" width={40} height={40} />
-          <Box sx={{ flex: 1 }}>
-            <Skeleton variant="text" width="60%" height={24} />
-            <Skeleton variant="rectangular" width={80} height={20} sx={{ borderRadius: 1, mt: 0.5 }} />
-          </Box>
-        </Box>
-        <Box sx={{ display: "flex", gap: 0.5 }}>
-          <Skeleton variant="circular" width={28} height={28} />
-          <Skeleton variant="circular" width={28} height={28} />
-          <Skeleton variant="circular" width={28} height={28} />
-        </Box>
-      </Box>
-      <Skeleton variant="rectangular" height={42} sx={{ borderRadius: 1, mb: 1.5 }} />
-      <Skeleton variant="rectangular" height={52} sx={{ borderRadius: 1, mb: 1.5 }} />
-      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, pt: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Skeleton variant="circular" width={32} height={32} />
-          <Skeleton variant="text" width={70} />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Skeleton variant="circular" width={32} height={32} />
-          <Skeleton variant="text" width={70} />
-        </Box>
-      </Box>
-    </Box>
-  );
+  return <ScheduleSessionCardSkeleton actionCount={3} />;
 }
 
 export function RecentApprovalEmptyState({ message }: { readonly message: string }) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        paddingBlock: 2,
-        paddingInline: 2,
-        minHeight: 220,
-        width: "100%",
-        boxSizing: "border-box",
-        textAlign: "center",
-        gap: 1.5,
-        overflow: "hidden",
-      }}
-    >
-      <Box
-        sx={theme => ({
-          width: 48,
-          height: 48,
-          borderRadius: "50%",
-          backgroundColor: alpha(theme.palette.primary.main, 0.08),
-          color: theme.palette.primary.main,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        })}
-      >
-        <CheckCircleOutlined sx={{ fontSize: 24 }} />
-      </Box>
-      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.onSurface })}>
-        {message}
-      </Typography>
-    </Box>
-  );
+  return <ScheduleSessionEmptyState message={message} icon={CheckCircleOutlined} iconColorKey="primary" />;
 }

@@ -34,7 +34,7 @@ import { isTestServerRunning } from "@/frontend/common/graphql/test/testServer";
 
 import { DEFAULT_SEED_ADMIN_PASSWORD } from "@/shared/demo-users";
 
-const TEST_USER_PASSWORD = DEFAULT_SEED_ADMIN_PASSWORD;
+export const TEST_USER_PASSWORD = DEFAULT_SEED_ADMIN_PASSWORD;
 
 let demoUsersReadyPromise: Promise<void> | null = null;
 

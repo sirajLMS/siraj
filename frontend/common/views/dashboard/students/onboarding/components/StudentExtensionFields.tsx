@@ -1,5 +1,3 @@
-"use client";
-
 import { FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
@@ -10,7 +8,7 @@ import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { getLanguageByCode } from "@/frontend/common/lib/locale";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
-export interface StudentPersonalFieldLabels {
+export interface StudentExtensionFieldLabels {
   readonly dateOfBirth: string;
   readonly dateOfBirthPlaceholder: string;
   readonly gender: string;
@@ -23,16 +21,16 @@ export interface StudentPersonalFieldLabels {
   readonly statusRegular: string;
 }
 
-interface StudentPersonalFieldsProps {
+interface StudentExtensionFieldsProps {
   readonly register: UseFormRegister<StudentOnboardingFormData>;
   readonly errors: FieldErrors<StudentOnboardingFormData>;
   readonly control: Control<StudentOnboardingFormData>;
-  readonly labels: StudentPersonalFieldLabels;
+  readonly labels: StudentExtensionFieldLabels;
 }
 
 const statusLabelId = "student-onboarding-status-label";
 
-export function StudentPersonalFields({ register, errors, control, labels }: Readonly<StudentPersonalFieldsProps>) {
+export function StudentExtensionFields({ register, errors, control, labels }: Readonly<StudentExtensionFieldsProps>) {
   return (
     <>
       <Grid size={{ xs: 12, md: 6 }}>

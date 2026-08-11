@@ -36,7 +36,10 @@
     "thu": "Thu",
     "fri": "Fri",
     "sat": "Sat",
-    "sun": "Sun"
+    "sun": "Sun",
+    "availableSlot": {
+      "__fn": "(teacherName, time) => `${teacherName} available at ${time}`"
+    }
   },
   "insights": {
     "peakLoad": "Peak Load",

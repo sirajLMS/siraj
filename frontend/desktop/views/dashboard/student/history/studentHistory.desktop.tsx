@@ -1,68 +1,14 @@
 "use client";
 
-import {
-  CalendarToday,
-  ChevronLeft,
-  ChevronRight,
-  SchoolOutlined,
-  TimerOutlined,
-  TrendingUpOutlined,
-  VerifiedUserOutlined,
-} from "@mui/icons-material";
-import { Box, Button, Typography } from "@mui/material";
+import { SchoolOutlined, TimerOutlined, TrendingUpOutlined, VerifiedUserOutlined } from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { MonthNavigator } from "@/frontend/common/views/dashboard/student/__shared__/MonthNavigator";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { StudentPortalHistoryCalendar } from "@/frontend/desktop/views/dashboard/student/history/components/historyCalendar.desktop";
-
-function MonthNavigator({
-  monthLabel,
-  canGoNext,
-  labels,
-  onPrevMonth,
-  onNextMonth,
-}: Readonly<{
-  monthLabel: string;
-  canGoNext: boolean;
-  labels: StudentHistoryViewModel["labels"];
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
-}>) {
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2, gap: 2 }}>
-      <Button
-        aria-label={labels.previousMonth}
-        onClick={onPrevMonth}
-        sx={theme => ({
-          minWidth: 40,
-          transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined,
-        })}
-      >
-        <ChevronLeft />
-      </Button>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <CalendarToday sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {monthLabel}
-        </Typography>
-      </Box>
-      <Button
-        aria-label={labels.nextMonth}
-        onClick={onNextMonth}
-        disabled={!canGoNext}
-        sx={theme => ({
-          minWidth: 40,
-          transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined,
-          opacity: canGoNext ? 1 : 0.5,
-        })}
-      >
-        <ChevronRight />
-      </Button>
-    </Box>
-  );
-}
 
 function HistoryMetricsRow({
   metrics,
@@ -154,6 +100,9 @@ export function StudentHistoryDesktopView({
         labels={labels}
         onPrevMonth={onPrevMonth}
         onNextMonth={onNextMonth}
+        outerSx={{ mb: 2, gap: 2 }}
+        innerGap={1}
+        iconFontSize={20}
       />
 
       <HistoryMetricsRow metrics={metrics} labels={labels} />

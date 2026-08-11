@@ -32,7 +32,7 @@ if (argIdx >= args.length) {
 
 const cmd = args[argIdx];
 const cmdArgs = args.slice(argIdx + 1);
-const mergedEnv = { ...process.env, ...extraEnv };
+const mergedEnv = { ...process.env, ...extraEnv, SIRAJ_TEST_RUNNER_OK: "1" };
 
 const lowerLockName = lockName.toLowerCase();
 const lowerCmd = cmd.toLowerCase();

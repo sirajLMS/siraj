@@ -1,11 +1,8 @@
 "use client";
 
-import { Avatar, Stack, Typography } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
-import type { ReactNode } from "react";
+import { ClassAvatar } from "@/frontend/common/components/ui/avatar/ClassAvatar";
+import { ProfileLinkBase } from "@/frontend/common/components/ui/display/__shared__/ProfileLinkBase";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
-import { avatarInitials } from "@/frontend/common/utils/avatar";
-import { Link } from "@/shared/i18n";
 
 export type DesktopClassProfileLinkProps = {
   readonly href?: string | null;
@@ -21,118 +18,20 @@ export type DesktopClassProfileLinkProps = {
   readonly emphasizeLink?: boolean;
 };
 
-const ROUNDED_BORDER_RADIUS = 1.5;
-const FALLBACK_SX = {
-  typography: "labelMd",
-  fontWeight: 700,
-} as const;
-
-function getClassAvatarFallbackSx(theme: Theme, src?: string | null) {
-  if (src) {
-    return {};
-  }
-  return {
-    backgroundColor: theme.palette.secondaryContainer,
-    color: theme.palette.onSecondaryContainer,
-    ...FALLBACK_SX,
-  };
-}
-
 /**
  * Desktop-tier class profile link. Renders an inline-rounded ClassAvatar +
  * optional label + class name, linking only when `href` is provided.
- * Self-contained — no shared base, no avatar imports from common.
+ * Consumes the shared `ProfileLinkBase` with desktop spacing defaults.
  */
-export function DesktopClassProfileLink({
-  href,
-  name,
-  avatarUrl,
-  showAvatar = true,
-  avatarSize = 28,
-  fallbackInitial = "?",
-  label,
-  typographyVariant = "bodyMd",
-  fontWeight = 600,
-  emphasizeLink,
-}: DesktopClassProfileLinkProps) {
-  const isLinked = Boolean(href);
-  const useLinkColor = emphasizeLink ?? isLinked;
-
-  const nameTypography = (
-    <Typography
-      sx={theme => ({
-        typography: typographyVariant,
-        fontWeight,
-        color: useLinkColor ? theme.palette.primary.main : theme.palette.text.secondary,
-      })}
-    >
-      {name}
-    </Typography>
-  );
-
-  const avatarNode = showAvatar
-    ? renderClassAvatar({
-        src: avatarUrl ?? null,
-        label: name || fallbackInitial,
-        size: avatarSize,
-        fallbackInitial,
-      })
-    : null;
-
-  const content = (
-    <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", height: "100%" }}>
-      {avatarNode}
-      <Stack spacing={0.25} sx={{ minWidth: 0 }}>
-        {label ? (
-          <Typography sx={{ typography: "labelSm", color: (theme: Theme) => theme.palette.text.secondary }}>
-            {label}
-          </Typography>
-        ) : null}
-        {nameTypography}
-      </Stack>
-    </Stack>
-  );
-
-  if (!href) {
-    return content;
-  }
-
+export function DesktopClassProfileLink(props: DesktopClassProfileLinkProps) {
   return (
-    <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "flex", height: "100%" }}>
-      {content}
-    </Link>
-  );
-}
-
-function renderClassAvatar({
-  src,
-  label,
-  size,
-  fallbackInitial,
-}: {
-  src: string | null;
-  label: string;
-  size: number;
-  fallbackInitial: string;
-}): ReactNode {
-  const initials = label ? avatarInitials(label) : fallbackInitial;
-  const avatarContent = src ? null : initials;
-  return (
-    <Avatar
-      src={src ?? undefined}
-      alt={label || undefined}
-      variant="rounded"
-      sx={[
-        {
-          width: size,
-          height: size,
-          flexShrink: 0,
-          borderRadius: ROUNDED_BORDER_RADIUS,
-        },
-        (theme: Theme) => getClassAvatarFallbackSx(theme, src),
-      ]}
-    >
-      {avatarContent}
-    </Avatar>
+    <ProfileLinkBase
+      {...props}
+      renderAvatar={({ src, name, fallbackInitial, size }) => (
+        <ClassAvatar src={src} label={name || fallbackInitial} size={size}>
+          {name ? null : fallbackInitial}
+        </ClassAvatar>
+      )}
+    />
   );
 }

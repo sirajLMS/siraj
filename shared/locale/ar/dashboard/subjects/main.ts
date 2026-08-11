@@ -34,6 +34,7 @@ export const dashboardSubjectsAr: SubjectsLabels = {
   deleteCategoryConfirm: name => `هل أنت متأكد من حذف الفئة "${name}"؟ سيتم إلغاء تعيين جميع المواد في هذه الفئة.`,
   cancel: "إلغاء",
   saveChanges: "حفظ التغييرات",
+  saving: "جاري الحفظ...",
   subjectCreated: "تم إنشاء المادة بنجاح",
   subjectUpdated: "تم تحديث المادة بنجاح",
   subjectDeleted: "تم حذف المادة بنجاح",

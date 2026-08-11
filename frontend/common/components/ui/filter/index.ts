@@ -1,6 +1,9 @@
 export * from "@/frontend/common/components/ui/filter/DateNavigator";
 export * from "@/frontend/common/components/ui/filter/listPaginationOptions";
-export { PaginationControls } from "@/frontend/common/components/ui/filter/PaginationControls";
+export {
+  PaginationControls,
+  type PaginationControlsProps,
+} from "@/frontend/common/components/ui/filter/PaginationControls";
 export {
   getServerPaginationOptions,
   isServerPagination,

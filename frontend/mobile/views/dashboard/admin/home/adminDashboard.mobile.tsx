@@ -1,8 +1,6 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, Stack, TextField, Typography, useTheme } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, InputAdornment, Stack, TextField, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -26,31 +24,13 @@ import {
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
+import {
+  StyledMobileSectionBody,
+  StyledSearchIcon,
+  StyledSectionTitle,
+  StyledSectionTitleRow,
+} from "@/frontend/mobile/views/dashboard/admin/home/__shared__/scheduleOverviewStyled";
 import { ScheduleOverviewMobileCard } from "@/frontend/mobile/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.mobile";
-
-const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
-  fontSize: 18,
-  color: theme.palette.onSurfaceVariant,
-}));
-
-const StyledSectionTitleRow = styled(Stack)(({ theme }) => ({
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  paddingInline: theme.spacing(2),
-  paddingBlock: theme.spacing(1.5),
-}));
-
-const StyledSectionTitle = styled(Typography)(({ theme }) => ({
-  color: theme.palette.onSurface,
-}));
-
-const StyledMobileSectionBody = styled(Stack)(({ theme }) => ({
-  gap: theme.spacing(2),
-  paddingInline: theme.spacing(2),
-  paddingTop: theme.spacing(2.5),
-  paddingBottom: theme.spacing(2),
-}));
 
 type AdminDashboardMobileViewProps = Readonly<AdminDashboardViewModel>;
 

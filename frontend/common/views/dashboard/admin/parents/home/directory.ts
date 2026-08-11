@@ -1,7 +1,19 @@
-import { AccountStatus, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  ParentAccountStatusKey,
+  ParentCardListLabels,
+  ParentDirectoryRow,
+  ParentsDataGridLabels,
+} from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import type { ParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
 
-export type ParentAccountStatusKey = "activated" | "deactivated";
+export type {
+  ParentAccountStatusKey,
+  ParentCardListLabels,
+  ParentDirectoryRow,
+  ParentLifecycleStatus,
+  ParentsDataGridLabels,
+};
 
 const VALID_PARENT_LIFECYCLE_STATUSES = new Set(Object.values(ParentStatus).map(v => v.toLowerCase()));
 
@@ -17,44 +29,4 @@ export function toParentLifecycleStatus(status: ParentStatus): ParentLifecycleSt
   throw new Error(`Unknown ParentStatus: ${status}`);
 }
 
-export function toParentAccountStatusKey(status: AccountStatus | null | undefined): ParentAccountStatusKey {
-  return status === AccountStatus.Deactivated ? "deactivated" : "activated";
-}
-
-export interface ParentDirectoryRow {
-  readonly id: string;
-  readonly userId: string;
-  readonly index: number;
-  readonly name: string;
-  readonly email: string;
-  readonly avatarUrl?: string;
-  readonly guardianOf: string;
-  readonly time: string;
-  readonly lifecycleStatus: ParentLifecycleStatus;
-  readonly accountStatus: ParentAccountStatusKey;
-  readonly unpaidInvoices: number;
-}
-
-export interface ParentCardListLabels {
-  readonly guardianOf: (name: string) => string;
-  readonly unpaidCount: (count: number) => string;
-  readonly invoicesCleared: string;
-  readonly statusLabels: Record<ParentLifecycleStatus, string>;
-  readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
-}
-
-export interface ParentsDataGridLabels {
-  readonly index: string;
-  readonly image: string;
-  readonly name: string;
-  readonly email: string;
-  readonly time: string;
-  readonly status: string;
-  readonly accountStatus: string;
-  readonly unpaidInvoices: string;
-  readonly options: string;
-  readonly noEntries: string;
-  readonly statusLabels: Record<ParentLifecycleStatus, string>;
-  readonly accountStatusLabels: Record<ParentAccountStatusKey, string>;
-  readonly manageLifecycle: string;
-}
+export { toParentAccountStatusKey } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";

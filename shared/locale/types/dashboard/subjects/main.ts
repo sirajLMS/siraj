@@ -42,6 +42,7 @@ export interface SubjectsLabels {
   readonly deleteCategoryConfirm: (name: string) => string;
   readonly cancel: string;
   readonly saveChanges: string;
+  readonly saving: string;
   readonly subjectCreated: string;
   readonly subjectUpdated: string;
   readonly subjectDeleted: string;

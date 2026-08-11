@@ -12,6 +12,7 @@ export const dashboardMeetingProvidersAr: MeetingProvidersLabels = {
   inactive: "معطّل",
   cancel: "إلغاء",
   save: "حفظ",
+  saving: "جاري الحفظ...",
   edit: "تعديل",
   delete: "حذف",
   emptyCatalogTitle: "لا توجد منصات اجتماعات",

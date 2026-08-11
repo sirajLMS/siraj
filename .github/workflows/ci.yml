@@ -36,7 +36,11 @@
 
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master, prod]
+  pull_request:
+    branches: [master, prod]
 
 concurrency:
   group: ci-${{ github.ref }}

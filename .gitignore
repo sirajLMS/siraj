@@ -111,3 +111,4 @@ scripts/run-test/feedback/feedback*.md
 .oxlint-baseline.json
 .oxlint/
 nohup.out
+report/jscpd-report.json

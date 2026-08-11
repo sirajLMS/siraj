@@ -2,14 +2,19 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { type UseFormReturn, useForm } from "react-hook-form";
 import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
+import {
+  AdminResetPasswordSection,
+  type AdminResetPasswordSectionRef,
+} from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
 import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
+import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
@@ -153,22 +158,46 @@ export function TeacherAdminEditForm({
   const t = labels.teacher;
   const base = labels.base;
   const scope = ProfileScope.Other;
-  const { canEdit } = useProfileFieldAccess({ scope });
+  const { canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
   const { successOpen, errorOpen, setSuccessOpen, setErrorOpen } = useSubmitFeedbackStates();
   const form = useTeacherEditForm(teacherData);
+  const resetPasswordRef = useRef<AdminResetPasswordSectionRef>(null);
+  const { resetPassword } = useAdminResetPassword(base.adminResetPassword.success, base.adminResetPassword.error);
 
-  const onValidSubmit = async (values: TeacherAdminEditFormData) => {
-    try {
-      await onSubmit(values);
-      setSuccessOpen(true);
-    } catch {
-      setErrorOpen(true);
-    }
-  };
+  const onValidSubmit = useCallback(
+    async (values: TeacherAdminEditFormData) => {
+      try {
+        await onSubmit(values);
+        const resetData = resetPasswordRef.current?.getResetPasswordData();
+        if (resetData?.isValid) {
+          const success = await resetPassword(targetUserId, resetData.newPassword, resetData.sendNotificationEmail);
+          if (success) {
+            resetPasswordRef.current?.reset();
+          }
+        }
+        setSuccessOpen(true);
+      } catch {
+        setErrorOpen(true);
+      }
+    },
+    [onSubmit, resetPassword, targetUserId, setSuccessOpen, setErrorOpen]
+  );
+
+  const handleSubmit = useCallback(
+    (e: React.SyntheticEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      void form.handleSubmit(onValidSubmit)(e);
+    },
+    [form, onValidSubmit]
+  );
+
+  const canResetPassword = canAdminResetPassword();
+  const teacherName = teacherData.name ?? "";
+  const teacherEmail = teacherData.email ?? "";
 
   return (
-    <Box component="form" onSubmit={form.handleSubmit(onValidSubmit)}>
+    <Box component="form" onSubmit={handleSubmit}>
       <Stack spacing={3}>
         {canEdit("core_identity") ? (
           <AvatarImageField
@@ -187,6 +216,14 @@ export function TeacherAdminEditForm({
           canEdit={canEdit}
           form={form}
         />
+        {canResetPassword && (
+          <AdminResetPasswordSection
+            ref={resetPasswordRef}
+            targetUserId={targetUserId}
+            userName={teacherName}
+            userEmail={teacherEmail}
+          />
+        )}
         <PrimaryPageAction type="submit" disabled={isSaving}>
           {isSaving ? t.shell.loading : t.actions.save}
         </PrimaryPageAction>

@@ -12,6 +12,7 @@ export const dashboardMeetingProvidersEn: MeetingProvidersLabels = {
   inactive: "Inactive",
   cancel: "Cancel",
   save: "Save",
+  saving: "Saving...",
   edit: "Edit",
   delete: "Delete",
   emptyCatalogTitle: "No Meeting Providers",

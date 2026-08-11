@@ -21,6 +21,25 @@ export interface TeacherFutureScheduleLabels {
   readonly defaultLeaveReason: string;
   readonly supportRequestReason: string;
   readonly students: string;
+  readonly studentCount: (count: number) => string;
+  readonly timeRange: (startTime: string, endTime: string) => string;
+  readonly weekdays: {
+    readonly sun: string;
+    readonly mon: string;
+    readonly tue: string;
+    readonly wed: string;
+    readonly thu: string;
+    readonly fri: string;
+    readonly sat: string;
+  };
+  readonly ariaLabels: {
+    readonly previousDay: string;
+    readonly nextDay: string;
+    readonly previousMonth: string;
+    readonly nextMonth: string;
+    readonly selectDate: string;
+    readonly openCalendar: string;
+  };
   readonly errors: {
     readonly quotaExceeded: string;
     readonly leaveRequestFailed: string;

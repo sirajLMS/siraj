@@ -36,7 +36,10 @@
     "thu": "خ",
     "fri": "ج",
     "sat": "س",
-    "sun": "أ"
+    "sun": "أ",
+    "availableSlot": {
+      "__fn": "(teacherName, time) => `${teacherName} \\u0645\\u062A\\u0627\\u062D \\u0641\\u064A ${time}`"
+    }
   },
   "insights": {
     "peakLoad": "ذروة التحميل",

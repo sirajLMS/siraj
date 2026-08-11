@@ -65,6 +65,7 @@ export function useTeacherAvailabilityViewModel(
       fri: t.table.fri,
       sat: t.table.sat,
       sun: t.table.sun,
+      availableSlot: t.table.availableSlot,
     }),
     [t]
   );

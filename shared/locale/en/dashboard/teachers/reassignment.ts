@@ -27,6 +27,13 @@ export const dashboardTeacherReassignmentEn: TeacherReassignmentLabels = {
     teacherAvailabilityNotice: "Teachers with availability in the student’s timezone",
     statusUpdate: "Update Status",
     currentStatus: status => `Current: ${status}`,
+    statusOptions: {
+      REGULAR: "Regular / Active",
+      SUSPENDED: "Suspended",
+      ON_LEAVE: "On Leave",
+      ON_TRIAL: "On Trial",
+      DEACTIVATED: "Deactivated",
+    },
   },
   historyAndContact: {
     changeHistory: "Change History",

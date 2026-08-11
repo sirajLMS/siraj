@@ -1,58 +1,31 @@
-import type {
-  StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics,
-  StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession,
-} from "@/frontend/common/graphql/generated/gql/operations";
+import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  mapStudentHistoryMetricsShared,
+  mapStudentHistorySessionsShared,
+} from "@/frontend/common/views/dashboard/shared/history/studentHistoryMappersShared";
 import type {
   StudentHistoryMetrics,
   StudentHistorySessionRow,
 } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
-import { resolveSessionDateTime } from "@/shared/lib/datetime/resolveSessionDateTime";
+
+function isEffectiveMeeting(value: unknown): value is EffectiveMeeting {
+  return typeof value === "object" && value !== null && "joinUrl" in value;
+}
 
 export function mapStudentHistoryMetrics(
-  metrics:
-    | StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics
-    | null
-    | undefined
+  metrics: Parameters<typeof mapStudentHistoryMetricsShared>[0]
 ): StudentHistoryMetrics {
-  if (!metrics) {
-    return { totalClasses: 0, attendanceRate: 0, hoursStudied: 0, performance: 0 };
-  }
-  return {
-    totalClasses: metrics.totalClasses ?? 0,
-    attendanceRate: metrics.attendanceRate ?? 0,
-    hoursStudied: metrics.hoursStudied ?? 0,
-    performance: metrics.performance ?? 0,
-  };
+  return mapStudentHistoryMetricsShared(metrics);
 }
 
 export function mapStudentHistorySessions(
-  sessions:
-    | readonly StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession[]
-    | null
-    | undefined,
+  sessions: Parameters<typeof mapStudentHistorySessionsShared>[0],
   year: number,
   month: number
 ): readonly StudentHistorySessionRow[] {
-  if (!sessions) return [];
-  return sessions.map(s => {
-    const dayOfMonth = s.dayOfMonth ?? 0;
-    const rawTime = s.time ?? "";
-    return {
-      id: s.id ?? "",
-      title: s.title ?? "",
-      time: resolveSessionDateTime(rawTime, year, month, dayOfMonth),
-      duration: s.duration ?? 0,
-      status: s.status ?? "",
-      outcome: s.outcome ?? "",
-      isFrozen: s.isFrozen ?? false,
-      instructor: s.instructor ?? "",
-      teacherId: s.teacherId ?? "",
-      timeSlot: s.timeSlot ?? "",
-      room: s.room ?? "",
-      notes: s.notes ?? "",
-      dayOfMonth,
-      meetingJoinUrl: s.meetingJoinUrl ?? null,
-      effectiveMeeting: s.effectiveMeeting ?? null,
-    };
-  });
+  return mapStudentHistorySessionsShared(sessions, year, month).map(row =>
+    Object.assign({}, row, {
+      effectiveMeeting: isEffectiveMeeting(row.effectiveMeeting) ? row.effectiveMeeting : null,
+    })
+  );
 }

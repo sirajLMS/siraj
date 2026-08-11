@@ -1,6 +1,7 @@
 "use client";
 
-import { MenuItem, Stack, TextField, Tooltip } from "@mui/material";
+import { KeyOutlined } from "@mui/icons-material";
+import { IconButton, MenuItem, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui";
@@ -18,7 +19,9 @@ import type {
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
+import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ProfileParentLabels } from "@/shared/locale/types/profile";
 
 type ParentAccountFormFields = {
@@ -61,9 +64,14 @@ type AccountSectionProps =
 export function AccountSection(props: AccountSectionProps) {
   const t = props.labels.parent;
   const { baseLabels } = props.labels;
+  const tBase = useAppTranslation(Translation.Profile.Base);
   const { canView, canEditStatus, canAdminResetPassword } = useProfileFieldAccess({ scope: props.scope });
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
+  const { resetPassword, loading: resetLoading } = useAdminResetPassword(
+    tBase.adminResetPassword.success,
+    tBase.adminResetPassword.error
+  );
 
   if (props.mode === "edit") {
     const canEditStatusField = canEditStatus();
@@ -121,6 +129,14 @@ export function AccountSection(props: AccountSectionProps) {
   const parentName = props.parentData.name ?? "";
   const parentEmail = props.parentData.email ?? "";
 
+  const handleResetConfirm = async (password: string, sendNotificationEmail: boolean) => {
+    if (!targetUserId) return;
+    const success = await resetPassword(targetUserId, password, sendNotificationEmail);
+    if (success) {
+      setResetPasswordOpen(false);
+    }
+  };
+
   return (
     <Stack>
       <CoreIdentitySection
@@ -139,23 +155,17 @@ export function AccountSection(props: AccountSectionProps) {
           <Stack spacing={1}>
             {accountStatusContent}
             {canResetPassword && targetUserId && (
-              <Tooltip title={baseLabels.actions.manageLifecycle}>
-                <InfoField
-                  label={baseLabels.actions.manageLifecycle}
-                  value={
-                    <ResetPasswordDialog
-                      open={resetPasswordOpen}
-                      onClose={() => setResetPasswordOpen(false)}
-                      userName={parentName}
-                      userEmail={parentEmail}
-                      isLoading={false}
-                      sendEmail={sendEmail}
-                      setSendEmail={setSendEmail}
-                      onConfirm={() => setResetPasswordOpen(false)}
-                    />
-                  }
-                />
-              </Tooltip>
+              <InfoField
+                label={tBase.adminResetPassword.title}
+                value={
+                  <IconButton
+                    onClick={() => setResetPasswordOpen(true)}
+                    sx={theme => ({ color: theme.palette.primary.main })}
+                  >
+                    <KeyOutlined />
+                  </IconButton>
+                }
+              />
             )}
           </Stack>
         }
@@ -166,10 +176,10 @@ export function AccountSection(props: AccountSectionProps) {
           onClose={() => setResetPasswordOpen(false)}
           userName={parentName}
           userEmail={parentEmail}
-          isLoading={false}
+          isLoading={resetLoading}
           sendEmail={sendEmail}
           setSendEmail={setSendEmail}
-          onConfirm={() => setResetPasswordOpen(false)}
+          onConfirm={handleResetConfirm}
         />
       )}
     </Stack>
