@@ -1,9 +1,7 @@
-import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { SessionRepository } from "@/backend/db/repo";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
-import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
+import { createAuthSession } from "@/backend/lib/auth/createAuthSession";
 import { logger } from "@/backend/lib/logger";
 import type { SafeUser, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
@@ -125,17 +123,7 @@ export namespace DemoAuthService {
   }
 
   async function proceedWithUser(user: UserSelectType) {
-    const accessToken = await generateAccessToken(user.id, user.email);
-    const refreshToken = await generateRefreshToken(user.id, user.email);
-
-    const sessionId = randomUUID();
-    await SessionRepository.create({
-      hashedId: sessionId,
-      userId: user.id,
-      payload: JSON.stringify({
-        createdAt: new Date().toISOString(),
-      }),
-    });
+    const { accessToken, refreshToken, sessionId } = await createAuthSession(user.id, user.email);
 
     return { user: AuthUtils.toSafeUser(user), accessToken, refreshToken, sessionId };
   }

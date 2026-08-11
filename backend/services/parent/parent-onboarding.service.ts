@@ -1,6 +1,7 @@
 import type { DBTransaction } from "@/backend/db/db.types";
 import { ParentRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
+import { buildParentInsertPayload } from "@/backend/services/parent/__shared__/buildParentInsertPayload";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
@@ -68,23 +69,7 @@ export namespace ParentOnboardingService {
         writeDefaultTimezone: true,
         groupSlug: SystemPermissionGroupSlug.PARENT_DEFAULT,
         createExtension: async (createdUser: UserReturnType, txObj: DBTransaction) => {
-          return ParentRepository.create(
-            {
-              userId: createdUser.id,
-              status: input.status ?? "REGULAR",
-              nationality: input.nationality ?? null,
-              address: input.address ?? null,
-              facebook: input.facebook ?? null,
-              whatsapp: input.whatsapp ?? null,
-              twitter: input.twitter ?? null,
-              invoiceType: input.invoiceType ?? null,
-              feeAmount: input.feeAmount ?? null,
-              currency: input.currency ?? null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-            txObj
-          );
+          return ParentRepository.create(buildParentInsertPayload(input, createdUser.id), txObj);
         },
         afterExtension: async (createdUser: UserReturnType, _parent: ParentCreateResult, txObj: DBTransaction) => {
           if (input.initialPayinMethod) {
