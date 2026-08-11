@@ -1,6 +1,6 @@
-import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { StudentProfilePothosObject } from "@/backend/graphql/pothos/students/student-profile.pothos";
+import { resolveStudentIdFromArgsOrUser } from "@/backend/graphql/query/students/__shared__/resolveStudentIdFromArgsOrUser";
 import { StudentProfileService } from "@/backend/services/student/student-profile.service";
 
 gqlSchemaBuilder.queryField("studentProfile", t =>
@@ -14,18 +14,11 @@ gqlSchemaBuilder.queryField("studentProfile", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const studentId = await resolveStudentIdFromArgsOrUser(args.studentId, ctx);
       const tErrors = ctx.t().errorsTranslations;
-      if (!ctx.user) {
-        throw new Error(tErrors.unauthorized);
-      }
-      let studentId = args.studentId;
-      if (!studentId) {
-        studentId = await StudentRepository.getStudentIdByUserId(ctx.user.id);
-        if (!studentId) {
-          throw new Error(tErrors.studentNotFound(ctx.user.id));
-        }
-      }
-      return StudentProfileService.getProfile(ctx.user.id, studentId, tErrors, {
+      const userId = ctx.user?.id;
+      if (!userId) throw new Error(tErrors.unauthorized);
+      return StudentProfileService.getProfile(userId, studentId, tErrors, {
         year: args.year,
         month: args.month,
         includeUpcomingClasses: args.includeUpcomingClasses ?? true,

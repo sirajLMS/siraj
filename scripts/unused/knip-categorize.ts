@@ -24,6 +24,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { withProcessLock } from "@/scripts/lib/process-lock";
+import type { Summary } from "@/scripts/unused/__shared__/types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -236,22 +237,6 @@ interface CategorizedData {
   byLayer: Record<string, Array<Record<string, unknown>>>;
   byDirectory: Record<string, Array<Record<string, unknown>>>;
   byFile: Record<string, Record<string, number>>; // file -> { type: count }
-}
-
-interface Summary {
-  totalIssues: number;
-  filesAnalyzed: number;
-  filesWithFindings: number;
-  byType: Record<string, number>;
-  byLayer: Record<string, number>;
-  topDirectories: Array<{ directory: string; count: number }>;
-  topFiles: Array<{ file: string; count: number }>;
-  topEnumMembers: Array<Record<string, unknown>>;
-  topExports: Array<Record<string, unknown>>;
-  topUnusedFiles: string[];
-  topDependencies: Array<Record<string, unknown>>;
-  topDevDependencies: Array<Record<string, unknown>>;
-  topTypes: Array<Record<string, unknown>>;
 }
 
 function categorize(report: KnipReport): CategorizedData {

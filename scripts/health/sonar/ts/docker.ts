@@ -1,36 +1,9 @@
 import { spawnSync } from "node:child_process";
-import fs from "node:fs";
-import os from "node:os";
+import { resolveBinOnPATH } from "@/scripts/health/__shared__/bin-resolver";
 import { logError, logInfo, logSuccess, SONAR_DIR } from "@/scripts/health/sonar/ts/config";
 
-let resolvedDockerBin: string | null = null;
-
 function resolveDockerBin(): string {
-  if (resolvedDockerBin) return resolvedDockerBin;
-
-  const bin = "docker";
-  try {
-    const isWin = os.platform() === "win32";
-    const searchCmd = isWin ? String.raw`C:\Windows\System32\where.exe` : "/usr/bin/which";
-
-    const result = spawnSync(searchCmd, [bin], {
-      encoding: "utf8",
-      env: { ...process.env, PATH: process.env.PATH },
-    });
-
-    if (result.status === 0 && result.stdout) {
-      const absolutePath = result.stdout.split("\n")[0].trim();
-      if (fs.existsSync(absolutePath)) {
-        resolvedDockerBin = absolutePath;
-        return absolutePath;
-      }
-    }
-  } catch {
-    // Fallback
-  }
-
-  resolvedDockerBin = bin;
-  return bin;
+  return resolveBinOnPATH("docker");
 }
 
 export function checkDocker(): void {

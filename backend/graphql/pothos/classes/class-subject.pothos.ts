@@ -1,5 +1,6 @@
 import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { classSubjectInputFields } from "@/backend/graphql/pothos/classes/__shared__/classSubjectFieldHelpers";
 import { ClassCategoryPothosObject } from "@/backend/graphql/pothos/classes/class-category.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { ClassSubjectReturnType, SubjectResourceReturnType } from "@/backend/types";
@@ -47,31 +48,11 @@ export const ClassSubjectPothosObject = ClassSubjectRef.implement({
 });
 
 export const ClassSubjectCreateInputPothos = gqlSchemaBuilder.inputType("ClassSubjectCreateInput", {
-  fields: t => ({
-    name: t.string({ required: true }),
-    slug: t.string({ required: true }),
-    categoryId: t.string({ required: true }),
-    description: t.string({ required: false }),
-    avatarUrl: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
-    sortOrder: t.int({ required: false }),
-    hourlyRate: t.string({ required: false }),
-    rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
-  }),
+  fields: t => classSubjectInputFields(t, { name: true, slug: true, categoryId: true }),
 });
 
 export const ClassSubjectUpdateInputPothos = gqlSchemaBuilder.inputType("ClassSubjectUpdateInput", {
-  fields: t => ({
-    name: t.string({ required: false }),
-    slug: t.string({ required: false }),
-    categoryId: t.string({ required: false }),
-    description: t.string({ required: false }),
-    avatarUrl: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
-    sortOrder: t.int({ required: false }),
-    hourlyRate: t.string({ required: false }),
-    rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
-  }),
+  fields: t => classSubjectInputFields(t, { name: false, slug: false, categoryId: false }),
 });
 
 export const AttachSubjectResourceInputPothos = gqlSchemaBuilder.inputType("AttachSubjectResourceInput", {

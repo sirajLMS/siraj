@@ -17,6 +17,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { coreScheduleColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import { quotas } from "@/backend/db/schema/billing/quotas";
 import { classSubjects } from "@/backend/db/schema/classes/class-subject";
 import {
@@ -57,15 +58,7 @@ export const recurringSchedules = pgTable(
   "recurring_schedules",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    studentId: uuid("student_id")
-      .notNull()
-      .references(() => students.id, { onDelete: "restrict" }),
-    teacherId: uuid("teacher_id")
-      .notNull()
-      .references(() => teachers.id, { onDelete: "restrict" }),
-    subjectId: uuid("subject_id")
-      .notNull()
-      .references(() => classSubjects.id, { onDelete: "restrict" }),
+    ...coreScheduleColumns({ students, teachers, classSubjects }),
     avatarUrl: varchar("avatar_url", { length: 1024 }),
     durationMinutes: integer("duration_minutes").notNull(),
     defaultStartTime: time("default_start_time").notNull(),
@@ -148,15 +141,7 @@ export const classInstances = pgTable(
   "class_instances",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    studentId: uuid("student_id")
-      .notNull()
-      .references(() => students.id, { onDelete: "restrict" }),
-    teacherId: uuid("teacher_id")
-      .notNull()
-      .references(() => teachers.id, { onDelete: "restrict" }),
-    subjectId: uuid("subject_id")
-      .notNull()
-      .references(() => classSubjects.id, { onDelete: "restrict" }),
+    ...coreScheduleColumns({ students, teachers, classSubjects }),
     recurringScheduleId: uuid("recurring_schedule_id").references(() => recurringSchedules.id, {
       onDelete: "set null",
     }),

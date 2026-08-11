@@ -18,36 +18,9 @@
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import type { LayerFile, Summary, TypeFile } from "@/scripts/unused/__shared__/types";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-
-interface Summary {
-  totalIssues: number;
-  filesAnalyzed: number;
-  filesWithFindings: number;
-  byType: Record<string, number>;
-  byLayer: Record<string, number>;
-  topDirectories: Array<{ directory: string; count: number }>;
-  topFiles: Array<{ file: string; count: number }>;
-  topEnumMembers: Array<Record<string, unknown>>;
-  topExports: Array<Record<string, unknown>>;
-  topUnusedFiles: string[];
-  topDependencies: Array<Record<string, unknown>>;
-  topDevDependencies: Array<Record<string, unknown>>;
-  topTypes: Array<Record<string, unknown>>;
-}
-
-interface TypeFile {
-  type: string;
-  count: number;
-  issues: Array<Record<string, unknown>>;
-}
-
-interface LayerFile {
-  layer: string;
-  count: number;
-  issues: Array<Record<string, unknown>>;
-}
 
 interface Analysis {
   generatedAt: string;

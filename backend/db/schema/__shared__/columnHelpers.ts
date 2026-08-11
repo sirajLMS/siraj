@@ -1,3 +1,4 @@
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { timestamp, uuid } from "drizzle-orm/pg-core";
 
 /**
@@ -98,4 +99,49 @@ export function createdAtColumn(options: Pick<TimestampColumnsOptions, "withDefa
     ? timestamp("created_at", timestampColumnOptions).notNull().defaultNow()
     : timestamp("created_at", timestampColumnOptions).notNull();
   return { createdAt };
+}
+
+/**
+ * Shape of the table-reference bag accepted by {@link coreScheduleColumns}.
+ *
+ * Each property is the Drizzle table whose `id` column the FK references.
+ * Using `AnyPgColumn` avoids importing concrete table definitions, which
+ * would create circular dependencies between the shared helper module and
+ * the domain schema files it references.
+ */
+interface CoreScheduleColumnsRefs {
+  students: { id: AnyPgColumn };
+  teachers: { id: AnyPgColumn };
+  classSubjects: { id: AnyPgColumn };
+}
+
+/**
+ * Returns the shared FK columns (`studentId`, `teacherId`, `subjectId`) used
+ * by both `recurringSchedules` and `classInstances`.
+ *
+ * All three are non-nullable UUIDs with `onDelete: "restrict"` references.
+ * The target tables are passed in via `refs` (rather than imported here) to
+ * avoid the circular dependency: `students.ts` imports from `scheduling.ts`,
+ * and `scheduling.ts` would import from this module.
+ *
+ * Spread the returned object into a `pgTable` column config:
+ * ```ts
+ * pgTable("example", {
+ *   ...coreScheduleColumns({ students, teachers, classSubjects }),
+ *   // ...
+ * })
+ * ```
+ */
+export function coreScheduleColumns(refs: CoreScheduleColumnsRefs) {
+  return {
+    studentId: uuid("student_id")
+      .notNull()
+      .references(() => refs.students.id, { onDelete: "restrict" }),
+    teacherId: uuid("teacher_id")
+      .notNull()
+      .references(() => refs.teachers.id, { onDelete: "restrict" }),
+    subjectId: uuid("subject_id")
+      .notNull()
+      .references(() => refs.classSubjects.id, { onDelete: "restrict" }),
+  };
 }
