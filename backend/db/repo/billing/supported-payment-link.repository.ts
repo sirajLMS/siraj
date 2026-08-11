@@ -1,6 +1,4 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { makeBillingRepo } from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
+import { makeBillingRepo, makeBillingUpsertMany } from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
 import { supportedPaymentLinks } from "@/backend/db/schema";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
@@ -65,63 +63,37 @@ export namespace SupportedPaymentLinkRepository {
   export const deactivate = baseRepo.deactivate;
   export const listByIds = baseRepo.listByIds;
 
-  export async function upsertMany(
-    inputs: readonly SupportedPaymentLinkInsertType[],
-    tx?: DBTransaction
-  ): Promise<SupportedPaymentLinkSelectType[]> {
-    if (inputs.length === 0) return [];
-
-    const run = async (t: DBTransaction): Promise<SupportedPaymentLinkSelectType[]> => {
-      const now = new Date();
-      const results: SupportedPaymentLinkSelectType[] = [];
-
-      const processNext = async (index: number): Promise<void> => {
-        if (index >= inputs.length) return;
-        const input = inputs[index];
-        const [row] = await t
-          .insert(supportedPaymentLinks)
-          .values({
-            slug: input.slug,
-            name: input.name,
-            description: input.description ?? null,
-            instructions: input.instructions ?? null,
-            urlAllowlist: input.urlAllowlist,
-            urlExample: input.urlExample ?? null,
-            supportedDirections: input.supportedDirections ?? "BOTH",
-            logoUrl: input.logoUrl ?? null,
-            isActive: input.isActive ?? true,
-            createdAt: input.createdAt ?? now,
-            updatedAt: input.updatedAt ?? now,
-          })
-          .onConflictDoUpdate({
-            target: supportedPaymentLinks.slug,
-            set: {
-              name: input.name,
-              description: input.description ?? null,
-              instructions: input.instructions ?? null,
-              urlAllowlist: input.urlAllowlist,
-              urlExample: input.urlExample ?? null,
-              supportedDirections: input.supportedDirections ?? "BOTH",
-              logoUrl: input.logoUrl ?? null,
-              isActive: input.isActive ?? true,
-              updatedAt: now,
-            },
-          })
-          .returning();
-
-        if (row) {
-          results.push(toSelectType(row));
-        }
-        return processNext(index + 1);
-      };
-
-      await processNext(0);
-      return results;
-    };
-
-    if (tx) {
-      return run(tx);
-    }
-    return db.transaction(run);
-  }
+  export const upsertMany = makeBillingUpsertMany<
+    LinkRow,
+    SupportedPaymentLinkSelectType,
+    SupportedPaymentLinkInsertType
+  >({
+    table: supportedPaymentLinks,
+    slug: supportedPaymentLinks.slug,
+    toSelectType,
+    buildInsert: (input, now) => ({
+      slug: input.slug,
+      name: input.name,
+      description: input.description ?? null,
+      instructions: input.instructions ?? null,
+      urlAllowlist: input.urlAllowlist,
+      urlExample: input.urlExample ?? null,
+      supportedDirections: input.supportedDirections ?? "BOTH",
+      logoUrl: input.logoUrl ?? null,
+      isActive: input.isActive ?? true,
+      createdAt: input.createdAt ?? now,
+      updatedAt: input.updatedAt ?? now,
+    }),
+    buildConflictSet: (input, now) => ({
+      name: input.name,
+      description: input.description ?? null,
+      instructions: input.instructions ?? null,
+      urlAllowlist: input.urlAllowlist,
+      urlExample: input.urlExample ?? null,
+      supportedDirections: input.supportedDirections ?? "BOTH",
+      logoUrl: input.logoUrl ?? null,
+      isActive: input.isActive ?? true,
+      updatedAt: now,
+    }),
+  });
 }

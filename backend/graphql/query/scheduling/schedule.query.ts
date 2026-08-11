@@ -15,6 +15,10 @@ import {
 } from "@/backend/graphql/pothos/scheduling/weekly-schedule.pothos";
 import { LeaveRequestStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import {
+  makeTeacherWeeklyScheduleGridField,
+  makeTeacherWorkloadMetricsField,
+} from "@/backend/graphql/query/scheduling/__shared__/makeWeeklyScheduleQueryField";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { RecurringScheduleDetailService } from "@/backend/services/schedule/recurring-schedule-detail.service";
@@ -157,21 +161,7 @@ gqlSchemaBuilder.queryField("rescheduleTrackingMetrics", t =>
   })
 );
 
-gqlSchemaBuilder.queryField("teacherWeeklyScheduleGrid", t =>
-  t.field({
-    type: WeeklyScheduleGridPothosObject,
-    args: {
-      teacherId: t.arg.string({ required: false }),
-      weekDate: t.arg.string({ required: true }),
-    },
-    authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return await WeeklyScheduleService.getWeeklySchedule(userId, args.teacherId || null, args.weekDate, tErrors);
-    },
-  })
-);
+makeTeacherWeeklyScheduleGridField(WeeklyScheduleGridPothosObject, WeeklyScheduleService.getWeeklySchedule);
 
 gqlSchemaBuilder.queryField("recurringSchedule", t =>
   t.field({
@@ -188,18 +178,4 @@ gqlSchemaBuilder.queryField("recurringSchedule", t =>
   })
 );
 
-gqlSchemaBuilder.queryField("teacherWorkloadMetrics", t =>
-  t.field({
-    type: WeeklyWorkloadMetricsPothosObject,
-    args: {
-      teacherId: t.arg.string({ required: false }),
-      weekDate: t.arg.string({ required: true }),
-    },
-    authScopes: { loggedIn: true },
-    resolve: async (_parent, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return await WeeklyScheduleService.getWorkloadMetrics(userId, args.teacherId || null, args.weekDate, tErrors);
-    },
-  })
-);
+makeTeacherWorkloadMetricsField(WeeklyWorkloadMetricsPothosObject, WeeklyScheduleService.getWorkloadMetrics);

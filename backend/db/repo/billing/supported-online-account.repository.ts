@@ -1,6 +1,4 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { makeBillingRepo } from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
+import { makeBillingRepo, makeBillingUpsertMany } from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
 import { supportedOnlineAccounts } from "@/backend/db/schema";
 import { IdentifierKind, PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
@@ -60,68 +58,37 @@ export namespace SupportedOnlineAccountRepository {
   export const deactivate = baseRepo.deactivate;
   export const listByIds = baseRepo.listByIds;
 
-  export async function upsertMany(
-    inputs: readonly SupportedOnlineAccountInsertType[],
-    tx?: DBTransaction
-  ): Promise<SupportedOnlineAccountSelectType[]> {
-    if (inputs.length === 0) return [];
-
-    const run = async (t: DBTransaction): Promise<SupportedOnlineAccountSelectType[]> => {
-      const now = new Date();
-
-      const upsertOne = async (
-        input: SupportedOnlineAccountInsertType
-      ): Promise<SupportedOnlineAccountSelectType | null> => {
-        const [row] = await t
-          .insert(supportedOnlineAccounts)
-          .values({
-            slug: input.slug,
-            name: input.name,
-            description: input.description ?? null,
-            instructions: input.instructions ?? null,
-            identifierKind: input.identifierKind,
-            identifierLabel: input.identifierLabel ?? input.name,
-            supportedDirections: input.supportedDirections ?? "BOTH",
-            logoUrl: input.logoUrl ?? null,
-            isActive: input.isActive ?? true,
-            createdAt: input.createdAt ?? now,
-            updatedAt: input.updatedAt ?? now,
-          })
-          .onConflictDoUpdate({
-            target: supportedOnlineAccounts.slug,
-            set: {
-              name: input.name,
-              description: input.description ?? null,
-              instructions: input.instructions ?? null,
-              identifierKind: input.identifierKind,
-              identifierLabel: input.identifierLabel ?? input.name,
-              supportedDirections: input.supportedDirections ?? "BOTH",
-              logoUrl: input.logoUrl ?? null,
-              isActive: input.isActive ?? true,
-              updatedAt: now,
-            },
-          })
-          .returning();
-
-        return row ? toSelectType(row) : null;
-      };
-
-      const upsertNext = async (
-        index: number,
-        acc: SupportedOnlineAccountSelectType[]
-      ): Promise<SupportedOnlineAccountSelectType[]> => {
-        if (index >= inputs.length) return acc;
-        const result = await upsertOne(inputs[index]);
-        if (result) acc.push(result);
-        return upsertNext(index + 1, acc);
-      };
-
-      return upsertNext(0, []);
-    };
-
-    if (tx) {
-      return run(tx);
-    }
-    return db.transaction(run);
-  }
+  export const upsertMany = makeBillingUpsertMany<
+    AccountRow,
+    SupportedOnlineAccountSelectType,
+    SupportedOnlineAccountInsertType
+  >({
+    table: supportedOnlineAccounts,
+    slug: supportedOnlineAccounts.slug,
+    toSelectType,
+    buildInsert: (input, now) => ({
+      slug: input.slug,
+      name: input.name,
+      description: input.description ?? null,
+      instructions: input.instructions ?? null,
+      identifierKind: input.identifierKind,
+      identifierLabel: input.identifierLabel ?? input.name,
+      supportedDirections: input.supportedDirections ?? "BOTH",
+      logoUrl: input.logoUrl ?? null,
+      isActive: input.isActive ?? true,
+      createdAt: input.createdAt ?? now,
+      updatedAt: input.updatedAt ?? now,
+    }),
+    buildConflictSet: (input, now) => ({
+      name: input.name,
+      description: input.description ?? null,
+      instructions: input.instructions ?? null,
+      identifierKind: input.identifierKind,
+      identifierLabel: input.identifierLabel ?? input.name,
+      supportedDirections: input.supportedDirections ?? "BOTH",
+      logoUrl: input.logoUrl ?? null,
+      isActive: input.isActive ?? true,
+      updatedAt: now,
+    }),
+  });
 }

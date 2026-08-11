@@ -80,9 +80,38 @@ const baseRepo = makeBillingRepo({
 
 export const SupportedMobileWalletRepository = {
   ...baseRepo,
-  upsertMany: async (items, tx?) => { /* entity-specific */ },
+  upsertMany: makeBillingUpsertMany({
+    table: supportedMobileWallets,
+    slug: supportedMobileWallets.slug,
+    toSelectType: (row) => ({ ...row }),
+    buildInsert: (input, now) => ({ ...input, createdAt: now, updatedAt: now }),
+    buildConflictSet: (input, now) => ({ ...input, updatedAt: now }),
+  }),
 };
 ```
+
+### `makeBillingUpsertMany` Factory
+
+The `upsertMany` method is shared across all three billing repos but was
+previously inlined in each consumer. The factory extracts the common
+control flow (empty check, transaction wrapping, recursive sequential
+insert + `onConflictDoUpdate` on slug, `toSelectType` mapping):
+
+```typescript
+function makeBillingUpsertMany<TRow extends BillingRow, TSelect, TInsert>(
+  config: BillingUpsertConfig<TRow, TSelect, TInsert>
+) {
+  // Returns: (inputs: readonly TInsert[], tx?: DBTransaction) => Promise<TSelect[]>
+  // - empty check → return []
+  // - tx ?? db.transaction delegation
+  // - recursive sequential insert+onConflictDoUpdate (avoids no-await-in-loop)
+  // - toSelectType mapping via type guard (validateUpsertRow)
+}
+```
+
+Each consumer provides two entity-specific callbacks:
+- `buildInsert(input, now)` — builds the insert values payload
+- `buildConflictSet(input, now)` — builds the on-conflict update set
 
 ## Stats
 

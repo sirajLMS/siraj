@@ -265,3 +265,108 @@ export function makeBillingRepo<
     listByIds,
   };
 }
+
+// ---- Upsert Many Factory -----------------------------------------------------
+
+/**
+ * Builds the insert values payload for a single upsert row.
+ * Receives the input and `now` (shared timestamp) — returns the
+ * entity-specific record to pass to `.values()`.
+ */
+export type BuildUpsertInsert<TInsert> = (input: TInsert, now: Date) => Record<string, unknown>;
+
+/**
+ * Builds the on-conflict update set for a single upsert row.
+ * Receives the input and `now` — returns the entity-specific
+ * partial record to pass to `.onConflictDoUpdate({ set })`.
+ */
+export type BuildUpsertConflictSet<TInsert> = (input: TInsert, now: Date) => Record<string, unknown>;
+
+/**
+ * Configuration for {@link makeBillingUpsertMany}.
+ *
+ * @template TRow - Inferred select row shape
+ * @template TSelect - Canonical `*SelectType`
+ * @template TInsert - Canonical `*InsertType`
+ */
+export interface BillingUpsertConfig<TRow extends BillingRow, TSelect, TInsert> {
+  /** The Drizzle table to insert into. */
+  readonly table: PgTable;
+  /** The `slug` column (conflict target). */
+  readonly slug: PgColumn;
+  /** Maps a raw DB row to the canonical `*SelectType`. */
+  readonly toSelectType: (row: TRow) => TSelect;
+  /** Builds the insert values payload for a single row. */
+  readonly buildInsert: BuildUpsertInsert<TInsert>;
+  /** Builds the on-conflict update set for a single row. */
+  readonly buildConflictSet: BuildUpsertConflictSet<TInsert>;
+}
+
+/**
+ * Factory that builds a shared `upsertMany` method for billing repositories.
+ *
+ * Eliminates the duplicated control flow across `supported-mobile-wallet`,
+ * `supported-online-account`, and `supported-payment-link` repositories:
+ * empty check, transaction wrapping, recursive sequential insert+onConflictDoUpdate,
+ * `toSelectType` mapping, and `tx ?? db.transaction` delegation.
+ *
+ * Each repo provides entity-specific `buildInsert` and `buildConflictSet`
+ * callbacks that produce the per-row insert/conflict payloads.
+ */
+export function makeBillingUpsertMany<TRow extends BillingRow, TSelect, TInsert>(
+  config: BillingUpsertConfig<TRow, TSelect, TInsert>
+) {
+  const { table, slug, toSelectType, buildInsert, buildConflictSet } = config;
+
+  function isUpsertRow(value: unknown): value is TRow {
+    return isRecord(value);
+  }
+
+  function validateUpsertRow(row: unknown): TRow {
+    if (isUpsertRow(row)) return row;
+    throw new Error("Invalid row shape from database upsert");
+  }
+
+  async function upsertOne(t: DBTransaction, input: TInsert, now: Date): Promise<TSelect | null> {
+    const [row] = await t
+      .insert(table)
+      .values(buildInsert(input, now))
+      .onConflictDoUpdate({
+        target: slug,
+        set: buildConflictSet(input, now),
+      })
+      .returning();
+
+    if (!row) return null;
+    return toSelectType(validateUpsertRow(row));
+  }
+
+  async function processNext(
+    t: DBTransaction,
+    inputs: readonly TInsert[],
+    index: number,
+    acc: TSelect[],
+    now: Date
+  ): Promise<TSelect[]> {
+    if (index >= inputs.length) return acc;
+    const result = await upsertOne(t, inputs[index], now);
+    if (result) acc.push(result);
+    return processNext(t, inputs, index + 1, acc, now);
+  }
+
+  async function upsertMany(inputs: readonly TInsert[], tx?: DBTransaction): Promise<TSelect[]> {
+    if (inputs.length === 0) return [];
+
+    const run = async (t: DBTransaction): Promise<TSelect[]> => {
+      const now = new Date();
+      return processNext(t, inputs, 0, [], now);
+    };
+
+    if (tx) {
+      return run(tx);
+    }
+    return db.transaction(run);
+  }
+
+  return upsertMany;
+}
