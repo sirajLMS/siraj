@@ -1,17 +1,12 @@
 "use client";
 
-import { AddCardOutlined } from "@mui/icons-material";
-import { Box, Button, TextField } from "@mui/material";
-import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import type { UserBillingProfileViewModel } from "@/frontend/common/views/dashboard/users/billing-profile/useUserBillingProfileViewModel";
-import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-import { BillingMetricsRowDesktop } from "@/frontend/desktop/views/dashboard/billing/components/billingMetricsRow.desktop";
-import { ParentInvoicesDataGridDesktop } from "@/frontend/desktop/views/dashboard/billing/components/parentInvoicesDataGrid.desktop";
+import { BillingSectionDesktop } from "@/frontend/desktop/views/dashboard/billing/components/__shared__/billingSectionShared.desktop";
 
 export function UserBillingProfileDesktopView({
   labels,
-  metrics,
+  summary,
   summaryLoading = false,
   invoices,
   searchQuery,
@@ -32,62 +27,32 @@ export function UserBillingProfileDesktopView({
   loading,
   isSearchPending = false,
 }: Readonly<UserBillingProfileViewModel>) {
-  const listLoading = isSearchPending || (loading && invoices.length === 0);
-
   return (
     <DesktopPageContainer>
       <DesktopPageHeader title={labels.billingProfileTitle} subtitle={labels.profileForUser} />
-      <BillingMetricsRowDesktop metrics={metrics} loading={summaryLoading} />
-      <DesktopSectionPanel
-        contentPadding={false}
-        title={labels.sections.invoiceHistory}
-        subTitle={labels.sections.invoiceHistorySubtitle}
-        actions={
-          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignItems: "center" }}>
-            {canSubmitProof && !billingActionsDisabled ? (
-              <Button
-                variant="contained"
-                startIcon={<AddCardOutlined />}
-                onClick={onQuickPay}
-                sx={{ textTransform: "uppercase", fontWeight: 700 }}
-              >
-                {labels.quickPay}
-              </Button>
-            ) : null}
-            <TextField
-              size="small"
-              value={searchQuery}
-              onChange={event => {
-                onSearchChange(event.target.value);
-              }}
-              placeholder={labels.search.parentPlaceholder}
-              helperText={isSearchPending ? labels.search.searching : undefined}
-              slotProps={{ htmlInput: { autoComplete: "off" } }}
-            />
-          </Box>
-        }
-      >
-        <ParentInvoicesDataGridDesktop
-          rows={invoices}
-          canView={canView}
-          canSubmitProof={canSubmitProof}
-          canManage={canManage}
-          billingActionsDisabled={billingActionsDisabled}
-          onPayNow={onPayNow}
-          onMarkAsPaid={onMarkAsPaid}
-          onViewPaymentDetails={onViewPaymentDetails}
-          onDownloadPdf={onDownloadPdf}
-          labels={{
-            ...getParentInvoiceGridLabels(labels),
-            hasPaymentProofHint: labels.hasPaymentProofHint,
-          }}
-          page={page}
-          pageSize={pageSize}
-          totalCount={totalCount}
-          onPageChange={onPageChange}
-          loading={listLoading}
-        />
-      </DesktopSectionPanel>
+      <BillingSectionDesktop
+        labels={labels}
+        summary={summary}
+        summaryLoading={summaryLoading}
+        invoices={invoices}
+        searchQuery={searchQuery}
+        loading={loading}
+        isSearchPending={isSearchPending}
+        canView={canView}
+        canSubmitProof={canSubmitProof}
+        canManage={canManage}
+        billingActionsDisabled={billingActionsDisabled}
+        onSearchChange={onSearchChange}
+        onPayNow={onPayNow}
+        onMarkAsPaid={onMarkAsPaid}
+        onViewPaymentDetails={onViewPaymentDetails}
+        onDownloadPdf={onDownloadPdf}
+        onQuickPay={onQuickPay}
+        page={page}
+        pageSize={pageSize}
+        totalCount={totalCount}
+        onPageChange={onPageChange}
+      />
     </DesktopPageContainer>
   );
 }

@@ -35,6 +35,7 @@ export interface TeacherAvailabilityLabels {
     readonly fri: string;
     readonly sat: string;
     readonly sun: string;
+    readonly availableSlot: (teacherName: string, time: string) => string;
   };
   readonly insights: {
     readonly peakLoad: string;

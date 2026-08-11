@@ -1,4 +1,14 @@
+import type { CellStyle, WorkSheet } from "xlsx-js-style";
 import type { FormatCurrencyMessages } from "@/frontend/common/lib/fx-render";
+import {
+  bodyAltStyle,
+  bodyStyle,
+  EXPORT_FONT,
+  headerStyle,
+  nameAltStyle,
+  nameStyle,
+  titleStyle,
+} from "@/frontend/common/utils/excel-export/shared-export-logic";
 import type { ReportLedgerRow, ReportsSummary } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import {
   aggregatePaidAmountTotals,
@@ -40,54 +50,15 @@ interface ReportExportData {
   readonly fxMessages: FormatCurrencyMessages;
 }
 
-type CellStyle = import("xlsx-js-style").CellStyle;
-
-const FONT = "Cairo";
-
-const titleStyle: CellStyle = {
-  font: { name: FONT, bold: true, sz: 16, color: { rgb: "1A237E" } },
-  alignment: { horizontal: "center", vertical: "center" },
-  fill: { fgColor: { rgb: "E8EAF6" } },
-  border: {
-    bottom: { style: "medium", color: { rgb: "1A237E" } },
-  },
-};
+export type XLSXModule = typeof import("xlsx-js-style");
 
 const subtitleStyle: CellStyle = {
-  font: { name: FONT, sz: 11, color: { rgb: "616161" } },
+  font: { name: EXPORT_FONT, sz: 11, color: { rgb: "616161" } },
   alignment: { horizontal: "center" },
 };
 
-const headerStyle: CellStyle = {
-  font: { name: FONT, bold: true, sz: 11, color: { rgb: "FFFFFF" } },
-  alignment: { horizontal: "center", vertical: "center", wrapText: true },
-  fill: { fgColor: { rgb: "1A237E" } },
-  border: {
-    bottom: { style: "medium", color: { rgb: "0D1642" } },
-    top: { style: "medium", color: { rgb: "0D1642" } },
-    left: { style: "thin", color: { rgb: "3949AB" } },
-    right: { style: "thin", color: { rgb: "3949AB" } },
-  },
-};
-
-const bodyStyle: CellStyle = {
-  font: { name: FONT, sz: 10 },
-  alignment: { horizontal: "center", vertical: "center" },
-  border: {
-    bottom: { style: "thin", color: { rgb: "E0E0E0" } },
-    top: { style: "thin", color: { rgb: "E0E0E0" } },
-    left: { style: "thin", color: { rgb: "E0E0E0" } },
-    right: { style: "thin", color: { rgb: "E0E0E0" } },
-  },
-};
-
-const bodyAltStyle: CellStyle = {
-  ...bodyStyle,
-  fill: { fgColor: { rgb: "F5F5FA" } },
-};
-
 const totalsStyle: CellStyle = {
-  font: { name: FONT, bold: true, sz: 11, color: { rgb: "1A237E" } },
+  font: { name: EXPORT_FONT, bold: true, sz: 11, color: { rgb: "1A237E" } },
   alignment: { horizontal: "center", vertical: "center" },
   fill: { fgColor: { rgb: "E8EAF6" } },
   border: {
@@ -100,7 +71,7 @@ const totalsStyle: CellStyle = {
 
 const financialStyle: CellStyle = {
   ...bodyStyle,
-  font: { name: FONT, sz: 10, color: { rgb: "2E7D32" } },
+  font: { name: EXPORT_FONT, sz: 10, color: { rgb: "2E7D32" } },
   numFmt: "#,##0.00",
 };
 
@@ -109,24 +80,11 @@ const financialAltStyle: CellStyle = {
   fill: { fgColor: { rgb: "F5F5FA" } },
 };
 
-const nameStyle: CellStyle = {
-  ...bodyStyle,
-  alignment: { horizontal: "left" },
-  font: { name: FONT, sz: 10, bold: true },
-};
-
-const nameAltStyle: CellStyle = {
-  ...nameStyle,
-  fill: { fgColor: { rgb: "F5F5FA" } },
-};
-
 function getBodyStyles(rowIndex: number, isFinancial: boolean): CellStyle {
   const isAlt = rowIndex % 2 === 1;
   if (isFinancial) return isAlt ? financialAltStyle : financialStyle;
   return isAlt ? bodyAltStyle : bodyStyle;
 }
-
-type XLSXModule = typeof import("xlsx-js-style");
 
 export async function exportAttendanceReport(data: ReportExportData): Promise<void> {
   const XLSX = await import("xlsx-js-style");
@@ -168,7 +126,7 @@ function buildHeaders(labels: ReportExportLabels, showFinancials: boolean): stri
 
 function writeTitleAndSubtitle(
   XLSX: XLSXModule,
-  ws: import("xlsx-js-style").WorkSheet,
+  ws: WorkSheet,
   pageTitle: string,
   fromDate: string,
   toDate: string,
@@ -188,7 +146,7 @@ function writeTitleAndSubtitle(
   ws["!merges"].push({ s: { r: 1, c: 0 }, e: { r: 1, c: totalCols - 1 } });
 }
 
-function writeHeaderRow(XLSX: XLSXModule, ws: import("xlsx-js-style").WorkSheet, headers: readonly string[]): void {
+function writeHeaderRow(XLSX: XLSXModule, ws: WorkSheet, headers: readonly string[]): void {
   const headerRow = 3;
   headers.forEach((header, col) => {
     const cell = XLSX.utils.encode_cell({ r: headerRow, c: col });
@@ -198,7 +156,7 @@ function writeHeaderRow(XLSX: XLSXModule, ws: import("xlsx-js-style").WorkSheet,
 
 function writeDataRows(
   XLSX: XLSXModule,
-  ws: import("xlsx-js-style").WorkSheet,
+  ws: WorkSheet,
   rows: readonly ReportLedgerRow[],
   showFinancials: boolean,
   financialColStart: number,
@@ -237,7 +195,7 @@ function buildRowValues(
 
 function writeRowCells(
   XLSX: XLSXModule,
-  ws: import("xlsx-js-style").WorkSheet,
+  ws: WorkSheet,
   rowIndex: number,
   dataIdx: number,
   values: readonly (string | number)[],
@@ -263,7 +221,7 @@ function writeRowCells(
 
 function writeTotalsRow(
   XLSX: XLSXModule,
-  ws: import("xlsx-js-style").WorkSheet,
+  ws: WorkSheet,
   rows: readonly ReportLedgerRow[],
   summary: ReportsSummary,
   totalsLabel: string,
@@ -312,7 +270,7 @@ function buildFinancialTotals(
 }
 
 function applyColumnWidths(
-  ws: import("xlsx-js-style").WorkSheet,
+  ws: WorkSheet,
   headers: readonly string[],
   rows: readonly ReportLedgerRow[],
   showFinancials: boolean
@@ -336,6 +294,6 @@ function applyColumnWidths(
   ws["!cols"] = colWidths;
 }
 
-function applyRowHeights(ws: import("xlsx-js-style").WorkSheet): void {
+function applyRowHeights(ws: WorkSheet): void {
   ws["!rows"] = [{ hpt: 30 }, { hpt: 20 }, {}, { hpt: 22 }];
 }

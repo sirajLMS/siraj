@@ -31,9 +31,9 @@ if (!userId || !context) {
 | Missing teacher/parent identity | `requireTeacherIdForPage` / `requireParentIdForPage` | `/dashboard` |
 | Missing `AppPermission`(s) | `requirePermissionForPage` | `/dashboard` |
 | Profile view/edit | `resolveProfilePageContext` | `/dashboard` or `/profile` |
-| Client defense-in-depth | `<RequirePermission>` in Containers | Renders `fallback` (often `null`) |
+| UX-level gating | `<RequirePermission>` on buttons/tabs/sections | Renders `fallback` (often `null`) |
 
-**Permission-gated pages** must call `requirePermissionForPage` in `page.tsx` before rendering the Container. Keep client `<RequirePermission>` as defense-in-depth. Do **not** gate `/dashboard` itself — it is the redirect landing page.
+**Permission-gated pages** must call `requirePermissionForPage` in `page.tsx` before rendering the Container. Do **not** add container-level `<RequirePermission>` wrappers that gate entire page returns — the server guard is the security boundary and the client wrapper is trivially bypassable. Fine-grained `<RequirePermission>` on individual buttons/tabs/sections is encouraged for UX (e.g., hiding buttons users can't use). Do **not** gate `/dashboard` itself — it is the redirect landing page. See `docs/auth/permission-architecture.md` for the full 3-tier model.
 
 ```tsx
 import { AppPermission } from "@/backend/enum";

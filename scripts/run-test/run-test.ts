@@ -144,7 +144,7 @@ async function runTest(testPath: string): Promise<number> {
   const proc = Bun.spawn([BUN_BIN, "--env-file=.env.test", "test", testPath, "--timeout=60000"], {
     stdout: "pipe",
     stderr: "pipe",
-    env: { ...process.env, DATABASE_URL: undefined, FORCE_COLOR: "0", NODE_ENV: "test" },
+    env: { ...process.env, DATABASE_URL: undefined, FORCE_COLOR: "0", NODE_ENV: "test", SIRAJ_TEST_RUNNER_OK: "1" },
     cwd: PROJECT_ROOT,
   });
 

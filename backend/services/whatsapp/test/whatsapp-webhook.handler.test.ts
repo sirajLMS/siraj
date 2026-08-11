@@ -263,10 +263,10 @@ async function processStatusExpectRejection(wamid: string, rawStatus: string, re
  * Extract the first audit-log input object from createManyAuditLogsMock.
  */
 function getFirstAuditInput(): Record<string, unknown> {
-  const calls = createManyAuditLogsMock.mock.calls as unknown[];
-  const firstCall = calls[0];
-  const arg = Array.isArray(firstCall) ? firstCall[0] : undefined;
-  return isRecord(arg) ? arg : {};
+  const calls = createManyAuditLogsMock.mock.calls;
+  const firstArg = calls[0]?.[0];
+  const firstLog = Array.isArray(firstArg) ? firstArg[0] : firstArg;
+  return isRecord(firstLog) ? firstLog : {};
 }
 
 /**

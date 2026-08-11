@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import type { UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
 import { Link } from "@/shared/i18n";
 
 export type ProfileLinkBaseProps = {
@@ -11,10 +11,14 @@ export type ProfileLinkBaseProps = {
   readonly avatarSize?: number;
   readonly fallbackInitial?: string;
   readonly label?: string;
-  readonly typographyVariant?: UiTypographyVariant;
+  readonly typographyVariant?: UiTypographyVariantLoose;
   readonly fontWeight?: number;
   /** When true, use primary color for the name (linked look). Default true when href is set. */
   readonly emphasizeLink?: boolean;
+  /** Horizontal spacing between avatar and text. Default: 1.25 (desktop). Mobile uses 0.75. */
+  readonly spacing?: number;
+  /** When true, adds `minWidth: 0` to the outer Stack for proper text truncation. Default: false. */
+  readonly compact?: boolean;
   /** Renders the avatar node (receives resolved avatar props). */
   readonly renderAvatar: (args: {
     src: string | null;
@@ -40,6 +44,8 @@ export function ProfileLinkBase({
   typographyVariant = "bodyMd",
   fontWeight = 600,
   emphasizeLink,
+  spacing = 1.25,
+  compact = false,
   renderAvatar,
 }: ProfileLinkBaseProps) {
   const isLinked = Boolean(href);
@@ -58,7 +64,11 @@ export function ProfileLinkBase({
   );
 
   const content = (
-    <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", height: "100%" }}>
+    <Stack
+      direction="row"
+      spacing={spacing}
+      sx={{ alignItems: "center", height: "100%", ...(compact ? { minWidth: 0 } : {}) }}
+    >
       {showAvatar ? renderAvatar({ src: avatarUrl ?? null, name, fallbackInitial, size: avatarSize }) : null}
       <Stack spacing={0.25} sx={{ minWidth: 0 }}>
         {label ? (

@@ -2,10 +2,12 @@
 
 import { CloudUploadOutlined, DeleteOutlined, ErrorOutlined, LinkOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Divider, InputAdornment, TextField, Typography } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import Image from "next/image";
 import type * as React from "react";
 import { useCallback, useRef } from "react";
 import type {
+  CatalogImageUploadButtonLayout,
   CatalogImageUploadSharedProps,
   CatalogImageUploadSlotProps,
   ErrorDisplayProps,
@@ -16,7 +18,9 @@ import type {
 import { ACCEPTED_TYPES, DEFAULT_MAX_SIZE_MB, useImageUpload } from "@/frontend/common/hooks/useImageUpload";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export const PREVIEW_SIZE = 96;
+const DEFAULT_PREVIEW_SIZE = 96;
+const DEFAULT_HELPER_TEXT_VARIANT = "bodySm";
+const DEFAULT_BUTTON_LAYOUT: CatalogImageUploadButtonLayout = "vertical";
 
 export const PreviewBox: React.FC<PreviewBoxProps> = ({
   previewUrl,
@@ -25,12 +29,13 @@ export const PreviewBox: React.FC<PreviewBoxProps> = ({
   isUploading,
   previewAlt,
   previewShape,
+  previewSize,
 }): React.ReactNode => (
   <Box
     sx={theme => ({
       position: "relative",
-      width: PREVIEW_SIZE,
-      height: PREVIEW_SIZE,
+      width: previewSize,
+      height: previewSize,
       flexShrink: 0,
       borderRadius: previewShape === "circle" ? "50%" : theme.layout.radius.card,
       overflow: "hidden",
@@ -50,7 +55,9 @@ export const PreviewBox: React.FC<PreviewBoxProps> = ({
         style={{ objectFit: previewShape === "circle" ? "cover" : "contain" }}
       />
     ) : (
-      <CloudUploadOutlined sx={theme => ({ fontSize: 36, color: theme.palette.text.secondary })} />
+      <CloudUploadOutlined
+        sx={theme => ({ fontSize: previewSize >= 128 ? 40 : 36, color: theme.palette.text.secondary })}
+      />
     )}
     {isUploading ? (
       <Box
@@ -63,11 +70,29 @@ export const PreviewBox: React.FC<PreviewBoxProps> = ({
           backgroundColor: "rgba(0,0,0,0.5)",
         }}
       >
-        <CircularProgress size={28} />
+        <CircularProgress size={previewSize >= 128 ? 32 : 28} />
       </Box>
     ) : null}
   </Box>
 );
+
+function getButtonContainerSx(layout: CatalogImageUploadButtonLayout): React.CSSProperties {
+  if (layout === "horizontal") {
+    return { display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 1, alignItems: "center" };
+  }
+  if (layout === "fullWidth") {
+    return { display: "flex", gap: 1, width: "100%" };
+  }
+  return { display: "flex", flexDirection: "column", flexWrap: "wrap", gap: 1, alignItems: "stretch" };
+}
+
+function getButtonSx(layout: CatalogImageUploadButtonLayout) {
+  return (theme: Theme) => ({
+    borderRadius: String(theme.layout.radius.button),
+    ...(layout === "fullWidth" ? { flex: 1 } : {}),
+    ...(layout === "vertical" ? { justifyContent: "flex-start" } : {}),
+  });
+}
 
 export const UploadButtons: React.FC<UploadButtonsProps> = ({
   onUploadClick,
@@ -78,42 +103,31 @@ export const UploadButtons: React.FC<UploadButtonsProps> = ({
   uploadLabel,
   uploadingLabel,
   removeLabel,
-  horizontal = false,
+  buttonSize,
+  buttonLayout,
 }): React.ReactNode => (
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: horizontal ? "row" : "column",
-      flexWrap: "wrap",
-      gap: 1,
-      alignItems: horizontal ? "center" : "stretch",
-    }}
-  >
+  <Box sx={getButtonContainerSx(buttonLayout)}>
     <Button
       variant="contained"
-      size="small"
+      size={buttonSize}
       startIcon={<CloudUploadOutlined />}
       onClick={onUploadClick}
       disabled={disabled || isUploading}
       aria-label={uploadLabel}
-      sx={theme => ({
-        borderRadius: theme.layout.radius.button,
-        ...(horizontal ? {} : { justifyContent: "flex-start" }),
-      })}
+      fullWidth={buttonLayout === "fullWidth"}
+      sx={getButtonSx(buttonLayout)}
     >
       {isUploading ? uploadingLabel : uploadLabel}
     </Button>
     <Button
       variant="outlined"
-      size="small"
+      size={buttonSize}
       startIcon={<DeleteOutlined />}
       onClick={onRemoveClick}
       disabled={disabled || isUploading || !hasPreview}
       aria-label={removeLabel}
-      sx={theme => ({
-        borderRadius: theme.layout.radius.button,
-        ...(horizontal ? {} : { justifyContent: "flex-start" }),
-      })}
+      fullWidth={buttonLayout === "fullWidth"}
+      sx={getButtonSx(buttonLayout)}
     >
       {removeLabel}
     </Button>
@@ -138,6 +152,8 @@ export const UrlFallbackField: React.FC<UrlFallbackFieldProps> = ({
   errorMessage,
   label,
   optionalLabel,
+  urlFieldSize,
+  urlFieldFullWidth,
 }): React.ReactNode => (
   <>
     <Divider sx={{ my: 0 }}>
@@ -153,6 +169,8 @@ export const UrlFallbackField: React.FC<UrlFallbackFieldProps> = ({
       disabled={disabled}
       error={showError}
       helperText={showError && errorMessage ? errorMessage : undefined}
+      size={urlFieldSize}
+      fullWidth={urlFieldFullWidth}
       slotProps={{
         input: {
           startAdornment: (
@@ -183,6 +201,13 @@ interface CatalogImageUploadBodyProps {
   readonly removeLabel: string;
   readonly previewAlt: string;
   readonly previewShape: "square" | "circle";
+  readonly previewSize: number;
+  readonly buttonSize: "small" | "medium" | "large" | undefined;
+  readonly buttonLayout: CatalogImageUploadButtonLayout;
+  readonly helperTextTypography: string;
+  readonly fileInputAriaLabel: boolean;
+  readonly urlFieldSize: "small" | "medium" | undefined;
+  readonly urlFieldFullWidth: boolean;
   readonly onUploadClick: () => void;
   readonly onRemoveClick: () => void;
   readonly disabled: boolean;
@@ -193,6 +218,20 @@ interface CatalogImageUploadBodyProps {
   readonly onUrlChange: (value: string) => void;
   readonly logoUrlLabel: string | undefined;
   readonly optionalLabel: string | undefined;
+}
+
+function getPreviewContentSx(
+  previewShape: "square" | "circle",
+  buttonLayout: CatalogImageUploadButtonLayout
+): React.CSSProperties {
+  const isColumn = previewShape === "circle" || buttonLayout === "vertical";
+  return {
+    display: "flex",
+    flexDirection: isColumn ? "column" : "row",
+    alignItems: isColumn ? "flex-start" : "center",
+    gap: isColumn ? 1.5 : 2,
+    minWidth: 0,
+  };
 }
 
 function CatalogImageUploadBody({
@@ -207,6 +246,13 @@ function CatalogImageUploadBody({
   removeLabel,
   previewAlt,
   previewShape,
+  previewSize,
+  buttonSize,
+  buttonLayout,
+  helperTextTypography,
+  fileInputAriaLabel,
+  urlFieldSize,
+  urlFieldFullWidth,
   onUploadClick,
   onRemoveClick,
   disabled,
@@ -225,25 +271,7 @@ function CatalogImageUploadBody({
           {label}
         </Typography>
       ) : null}
-      <Box
-        sx={
-          previewShape === "circle"
-            ? {
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: 1.5,
-                minWidth: 0,
-              }
-            : {
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 2,
-                minWidth: 0,
-              }
-        }
-      >
+      <Box sx={getPreviewContentSx(previewShape, buttonLayout)}>
         <PreviewBox
           previewUrl={previewUrl}
           label={label}
@@ -251,6 +279,7 @@ function CatalogImageUploadBody({
           isUploading={isUploading}
           previewAlt={previewAlt}
           previewShape={previewShape}
+          previewSize={previewSize}
         />
         <Box
           sx={{
@@ -270,11 +299,13 @@ function CatalogImageUploadBody({
             uploadLabel={uploadLabel}
             uploadingLabel={uploadingLabel}
             removeLabel={removeLabel}
-            horizontal={previewShape === "circle"}
+            buttonSize={buttonSize}
+            buttonLayout={buttonLayout}
           />
           <Typography
+            variant={helperTextTypography === "bodyMd" ? "bodyMd" : undefined}
             sx={theme => ({
-              typography: "bodySm",
+              ...(helperTextTypography !== "bodyMd" ? { typography: helperTextTypography } : {}),
               color: theme.palette.text.secondary,
             })}
           >
@@ -290,7 +321,7 @@ function CatalogImageUploadBody({
         onChange={onFileSelect}
         disabled={disabled}
         hidden
-        aria-label={label ?? uploadLabel}
+        aria-label={fileInputAriaLabel ? (label ?? uploadLabel) : undefined}
       />
       {allowUrlFallback ? (
         <UrlFallbackField
@@ -301,10 +332,27 @@ function CatalogImageUploadBody({
           errorMessage={resolvedError}
           label={logoUrlLabel}
           optionalLabel={optionalLabel}
+          urlFieldSize={urlFieldSize}
+          urlFieldFullWidth={urlFieldFullWidth}
         />
       ) : null}
     </>
   );
+}
+
+function getButtonLayout(
+  slots: CatalogImageUploadSlotProps | undefined,
+  previewShape: "square" | "circle"
+): CatalogImageUploadButtonLayout {
+  if (slots?.buttonLayout !== undefined) return slots.buttonLayout;
+  return previewShape === "circle" ? "horizontal" : DEFAULT_BUTTON_LAYOUT;
+}
+
+function getContainerSx(slots: CatalogImageUploadSlotProps | undefined): React.CSSProperties {
+  if (slots?.ContainerWrapper !== undefined) {
+    return { display: "flex", flexDirection: "column", gap: 1.5 };
+  }
+  return { display: "flex", flexDirection: "column", gap: 1, minWidth: 0 };
 }
 
 export function CatalogImageUploadScaffold({
@@ -344,6 +392,14 @@ export function CatalogImageUploadScaffold({
   const resolvedError = errorMessage ?? upload.localError;
   const resolvedHelperText = helperText ?? t.helperText(maxSizeMb);
 
+  const previewSize = slots?.previewSize ?? DEFAULT_PREVIEW_SIZE;
+  const buttonSize = slots?.buttonSize;
+  const buttonLayout = getButtonLayout(slots, previewShape);
+  const helperTextTypography = slots?.helperTextVariant ?? DEFAULT_HELPER_TEXT_VARIANT;
+  const fileInputAriaLabel = slots?.fileInputAriaLabel ?? true;
+  const urlFieldSize = slots?.urlFieldSize;
+  const urlFieldFullWidth = slots?.urlFieldFullWidth ?? false;
+
   const body = (
     <CatalogImageUploadBody
       previewUrl={resolvedPreview}
@@ -357,6 +413,13 @@ export function CatalogImageUploadScaffold({
       removeLabel={t.remove}
       previewAlt={t.previewAlt}
       previewShape={previewShape}
+      previewSize={previewSize}
+      buttonSize={buttonSize}
+      buttonLayout={buttonLayout}
+      helperTextTypography={helperTextTypography}
+      fileInputAriaLabel={fileInputAriaLabel}
+      urlFieldSize={urlFieldSize}
+      urlFieldFullWidth={urlFieldFullWidth}
       onUploadClick={triggerFileInput}
       onRemoveClick={upload.handleRemove}
       disabled={disabled}
@@ -374,5 +437,5 @@ export function CatalogImageUploadScaffold({
   if (ContainerWrapper !== undefined) {
     return <ContainerWrapper>{body}</ContainerWrapper>;
   }
-  return <Box sx={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0 }}>{body}</Box>;
+  return <Box sx={getContainerSx(slots)}>{body}</Box>;
 }

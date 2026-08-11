@@ -66,6 +66,7 @@ export function TeacherReassignmentViewMobile({
             onSelectedNewStatusChange={controls.onSelectedNewStatusChange}
             onSubmitForm={controls.onSubmitForm}
             labels={{ controls: labels.controls, actions: labels.actions }}
+            statusLabelId="teacher-reassignment-status-label-mobile"
           />
 
           <ReassignmentBentoGridMobile

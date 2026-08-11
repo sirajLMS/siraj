@@ -29,6 +29,29 @@
   "defaultLeaveReason": "Not specified",
   "supportRequestReason": "Not specified",
   "students": "Students",
+  "studentCount": {
+    "__fn": "(count) => count === 1 ? `${count} student` : `${count} students`"
+  },
+  "timeRange": {
+    "__fn": "(startTime, endTime) => `${startTime} - ${endTime}`"
+  },
+  "weekdays": {
+    "sun": "S",
+    "mon": "M",
+    "tue": "T",
+    "wed": "W",
+    "thu": "T",
+    "fri": "F",
+    "sat": "S"
+  },
+  "ariaLabels": {
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "selectDate": "Select date",
+    "openCalendar": "Open calendar"
+  },
   "errors": {
     "quotaExceeded": "Cannot request leave: quota exceeded.",
     "leaveRequestFailed": "Failed to request leave.",

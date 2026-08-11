@@ -4,4 +4,6 @@ export const uiPhoneInputAr = {
   invalidPrefix: "رمز الاتصال غير صالح",
   invalidPhone: "رقم الهاتف غير صالح",
   required: "رقم الهاتف مطلوب",
+  countryCallingCode: "رمز الدولة",
+  phoneNumber: "رقم الهاتف",
 };

@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { forbidden } from "next/navigation";
 import { type ReactNode, Suspense } from "react";
+
+export const dynamic = "force-dynamic";
 import { isPrefetchRequest } from "@/backend/lib/auth/is-prefetch";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";

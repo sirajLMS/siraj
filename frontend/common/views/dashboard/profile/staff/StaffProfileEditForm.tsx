@@ -2,13 +2,18 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
+import {
+  AdminResetPasswordSection,
+  type AdminResetPasswordSectionRef,
+} from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
+import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/staff/sections/CompensationSection";
@@ -90,11 +95,21 @@ function CompensationSectionRenderer({
 function useFormSubmitHandler(
   onSubmit: StaffProfileEditFormProps["onSubmit"],
   setSuccessOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  setErrorOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setErrorOpen: React.Dispatch<React.SetStateAction<boolean>>,
+  resetPasswordRef: React.RefObject<AdminResetPasswordSectionRef | null>,
+  resetPassword: (userId: string, newPassword: string, sendEmail: boolean) => Promise<boolean>,
+  targetUserId: string
 ) {
   return async (values: StaffAdminEditFormData) => {
     try {
       await onSubmit(values);
+      const resetData = resetPasswordRef.current?.getResetPasswordData();
+      if (resetData?.isValid) {
+        const success = await resetPassword(targetUserId, resetData.newPassword, resetData.sendNotificationEmail);
+        if (success) {
+          resetPasswordRef.current?.reset();
+        }
+      }
       setSuccessOpen(true);
     } catch {
       setErrorOpen(true);
@@ -138,10 +153,15 @@ export function StaffProfileEditForm({
   const sectionLabels = buildSectionLabels(labels);
   const compensationViewLabels = buildCompensationViewLabels(labels, errorLabels);
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
-  const { canView, canEdit } = useProfileFieldAccess({ scope });
+  const { canView, canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
+  const resetPasswordRef = useRef<AdminResetPasswordSectionRef>(null);
+  const { resetPassword } = useAdminResetPassword(
+    labels.base.adminResetPassword.success,
+    labels.base.adminResetPassword.error
+  );
   const form = useForm<StaffAdminEditFormData>({
     resolver: zodResolver(isAdminScope ? staffAdminEditSchema : staffOwnEditSchema),
     defaultValues: {
@@ -158,12 +178,23 @@ export function StaffProfileEditForm({
   });
 
   useFormResetEffect(form, staffData, avatarUrl, displayCurrency, profileTimezone);
-  const onValidSubmit = useFormSubmitHandler(onSubmit, setSuccessOpen, setErrorOpen);
+  const onValidSubmit = useFormSubmitHandler(
+    onSubmit,
+    setSuccessOpen,
+    setErrorOpen,
+    resetPasswordRef,
+    resetPassword,
+    targetUserId
+  );
 
   const showAccountSection = canEdit("core_identity") || (isAdminScope && canEdit("staff_role"));
   const showCompensationViewSection =
     canView("staff_role") && (isAdminScope || Boolean(staffData.hourlyRate || staffData.rateCurrency));
   const showCompensationEditSection = isAdminScope && canEdit("staff_role");
+
+  const canResetPassword = isAdminScope && canAdminResetPassword();
+  const staffName = staffData.name ?? "";
+  const staffEmail = staffData.email ?? "";
 
   return (
     <Stack spacing={3}>
@@ -213,6 +244,14 @@ export function StaffProfileEditForm({
               staffData={staffData}
             />
           </Box>
+          {canResetPassword && (
+            <AdminResetPasswordSection
+              ref={resetPasswordRef}
+              targetUserId={targetUserId}
+              userName={staffName}
+              userEmail={staffEmail}
+            />
+          )}
           <PrimaryPageAction type="submit" disabled={isSaving}>
             {labels.base.actions.save}
           </PrimaryPageAction>

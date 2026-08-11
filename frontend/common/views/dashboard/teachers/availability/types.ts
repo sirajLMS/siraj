@@ -43,6 +43,7 @@ export interface WeeklyAvailabilityGridLabels {
   readonly fri: string;
   readonly sat: string;
   readonly sun: string;
+  readonly availableSlot: (teacherName: string, time: string) => string;
 }
 
 export interface WeeklyAvailabilityGridProps {

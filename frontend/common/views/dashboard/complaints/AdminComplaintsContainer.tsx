@@ -1,7 +1,5 @@
 "use client";
 
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AdminComplaintsView } from "@/frontend/common/views/dashboard/complaints/AdminComplaintsView";
 import {
   type UseAdminComplaintsViewModelProps,
@@ -11,9 +9,5 @@ import {
 export function AdminComplaintsContainer(props: UseAdminComplaintsViewModelProps) {
   const viewModel = useAdminComplaintsViewModel(props);
 
-  return (
-    <RequirePermission permissions={[AppPermission.ComplaintsRespond, AppPermission.ComplaintsList]} fallback={null}>
-      <AdminComplaintsView {...viewModel} />
-    </RequirePermission>
-  );
+  return <AdminComplaintsView {...viewModel} />;
 }

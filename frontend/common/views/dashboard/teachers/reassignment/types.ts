@@ -59,6 +59,7 @@ export interface ManagementControlsCardProps {
   readonly onSelectedNewStatusChange: (status: StudentStatus | "") => void;
   readonly onSubmitForm: (e: React.SyntheticEvent<HTMLFormElement>) => Promise<void>;
   readonly labels: Pick<TeacherReassignmentLabels, "controls" | "actions">;
+  readonly statusLabelId: string;
 }
 
 export interface StudentContextCardProps {

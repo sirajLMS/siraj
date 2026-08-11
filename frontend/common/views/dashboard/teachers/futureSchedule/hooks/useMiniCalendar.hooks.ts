@@ -10,20 +10,26 @@
 // `MINI_CALENDAR_WEEKDAYS` constant from here — no state, no `useX` decls,
 // and no lowercase pure-data helpers remain in either tier file.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { MiniCalendarDate } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 
 export type ViewingMonth = { year: number; month: number };
 
-// NEW FOR PLAN v5: useViewingMonth — lifts the previously inline `useState` +
-// `function useViewingMonth` declarations out of the tier files into common.
-// The hook keeps its `useState` legally (common-side); the tier files import
-// this and never call `useState` themselves.
 export function useViewingMonth(selectedDate: string): [ViewingMonth, (delta: number) => void] {
   const [viewingMonth, setViewingMonth] = useState<ViewingMonth>(() => {
     const d = new Date(selectedDate + "T00:00:00");
     return { year: d.getFullYear(), month: d.getMonth() };
   });
+
+  useEffect(() => {
+    const d = new Date(selectedDate + "T00:00:00");
+    const newYear = d.getFullYear();
+    const newMonth = d.getMonth();
+    setViewingMonth(prev => {
+      if (prev.year === newYear && prev.month === newMonth) return prev;
+      return { year: newYear, month: newMonth };
+    });
+  }, [selectedDate]);
 
   const shiftMonth = (delta: number) => {
     setViewingMonth(prev => {

@@ -344,12 +344,19 @@ export interface PaymentMethodLabels {
   readonly typeFields: PaymentMethodTypeFieldsLabels;
 }
 
+export interface EditableTypographyLabels {
+  readonly save: string;
+  readonly cancel: string;
+}
+
 export interface PhoneInputLabels {
   readonly label: string;
   readonly selectCountry: string;
   readonly invalidPrefix: string;
   readonly invalidPhone: string;
   readonly required: string;
+  readonly countryCallingCode: string;
+  readonly phoneNumber: string;
 }
 
 export interface TagInputLabels {
@@ -375,6 +382,7 @@ export interface UserSelectLabels {
 
 export interface UiLabels {
   readonly catalogImageUpload: CatalogImageUploadLabels;
+  readonly editableTypography: EditableTypographyLabels;
   readonly genderSelector: GenderSelectorLabels;
   readonly countrySelect: CountrySelectLabels;
   readonly currencySelect: CurrencySelectLabels;

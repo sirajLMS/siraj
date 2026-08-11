@@ -54,17 +54,91 @@ Each tier variant:
 - DO NOT create scaffold for <50 lines of shared code
 - DO NOT use direct style props
 
-## Rollout Summary
+## View Component Scaffold Pattern (Phase 2-3 Extension)
 
+View component scaffolds follow the same principles but live in `__shared__/` directories alongside the view variants:
+
+```
+frontend/common/views/dashboard/<domain>/components/__shared__/
+  <ComponentName>Shared.tsx     # Scaffold with slot props
+  <ComponentName>Shared.types.ts # (optional) shared types
+frontend/desktop/views/dashboard/<domain>/components/
+  <componentName>.desktop.tsx   # Desktop tier variant (thin wrapper)
+frontend/mobile/views/dashboard/<domain>/components/
+  <componentName>.mobile.tsx    # Mobile tier variant (thin wrapper)
+```
+
+### Key differences from UI component scaffolds:
+1. **Location**: `__shared__/` directory instead of alongside the common component
+2. **Slot types**: View scaffolds often use render functions instead of `ComponentType<P>` to avoid TypeScript contravariance issues (e.g., when desktop uses `UiTypographyVariant` and mobile uses `UiTypographyVariantLoose`)
+3. **Config objects**: Many view scaffolds use options objects (`DESKTOP_OPTIONS`, `MOBILE_OPTIONS`) for purely visual differences instead of component slots
+
+### Rollout Summary (Phases 1-3)
+
+#### Phase 1: UI Component Scaffolds (11 components)
 | Component | Clone Elimination |
 |-----------|-------------------|
-| StatusBadge | 199 lines / 1224 tokens |
-| BaseDeleteDialog | ~180 lines |
-| PaymentMethodTypeFields | 156 lines / 970 tokens |
-| CreateRecurringClassDialog | 150 lines / 747 tokens |
+| CurrencyAutocomplete | ~400 tokens |
+| PhoneInput | ~350 tokens |
+| PaymentMethodDisplay | ~500 tokens |
+| UserPaymentMethodAutocomplete | ~300 tokens |
+| EditableTypography | ~200 tokens |
+| TagInput | ~250 tokens |
+| CountryAutocomplete | ~350 tokens |
+| MeetingJoinAction | ~200 tokens |
+| MeetingConfigDisplay | ~250 tokens |
+| PaymentMethodAutocomplete | ~300 tokens |
+| PaginationControls | ~200 tokens |
+
+#### Phase 2: View Component Scaffolds (19 components)
+| Component | Clone Elimination |
+|-----------|-------------------|
+| localizedStringDrawer | 1,377 tokens (largest cluster) |
+| managementControlsCard | 1,264 tokens |
+| meetingProviderForm | 1,134 tokens |
+| studentStatusHeader | 1,062 tokens |
+| complaintFormFields | 1,055 tokens |
+| complaintQueueCard | 1,053 tokens |
+| jumpToDateHeader | 1,009 tokens |
+| futureClassCard | 977 tokens |
+| miniCalendar | 943 tokens |
+| studentInformationSection | 923 tokens |
+| searchScheduleFilterDrawer | 899 tokens |
+| meetingIntegrationsTab | 829 tokens |
+| courseDetailsSection | 797 tokens |
+| weeklyAvailabilityGrid | 796 tokens |
+| teacherAvailabilityMonthDrawer | 793 tokens |
+| parentProfile | 777 tokens |
+| suspensionAnalytics | 753 tokens |
+| staffProfile | 750 tokens |
+| editCategoryDialog | 735 tokens |
+
+#### Phase 3: Complex Consolidation (4 tasks)
+| Task | Disposition |
+|------|------------|
+| 3.1 CatalogImageUpload | 7 clones eliminated, desktop+mobile variants created |
+| 3.2 Excel export utilities | 4 clones / 810 tokens eliminated |
+| 3.3 Within-common consolidation | 9 clusters eliminated (loading skeletons, onboarding, mappers) |
+| 3.4 Within-tier consolidation | 12 clusters eliminated (catalog grids, dialog forms, billing pages) |
+
+**Total result**: 814→581 clones (28.6% reduction), 115,409→66,776 frontend tokens (42.1% reduction)
+
+## CRITICAL: Circular Dependency Prevention
+
+**NEVER** import through barrel `index.ts` re-exports when the importing and imported components live in the same barrel. This causes TDZ (Temporal Dead Zone) errors at runtime.
+
+**Always use direct file paths** for scaffold imports:
+```typescript
+// WRONG — causes TDZ if barrel exports importing component before the imported one
+import { SomeComponent } from "@/frontend/common/components/ui/display";
+
+// RIGHT — direct path, no circular dependency
+import { SomeComponent } from "@/frontend/common/components/ui/display/someComponent/SomeComponent";
+```
 
 ## Related Documents
 
 - `frontend/common/components/ui/AGENTS.md`
+- `docs/frontend/duplication-elimination-patterns.md`
 - `.agents/skills/refactor-mobile-desktop/SKILL.md`
 - `.agents/instructions/mobile-desktop.instructions.md`

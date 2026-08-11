@@ -21,9 +21,25 @@ export type CatalogImageUploadSharedProps = {
   readonly previewShape?: CatalogImageUploadPreviewShape;
 };
 
+export type CatalogImageUploadButtonLayout = "horizontal" | "vertical" | "fullWidth";
+
 export interface CatalogImageUploadSlotProps {
   /** Optional container wrapper slot (mobile passes MobileContentStack; default tier passes undefined which renders a plain Box). */
   readonly ContainerWrapper?: React.ComponentType<{ children: React.ReactNode }>;
+  /** Preview box size in px (common: 96, desktop/mobile: 128). */
+  readonly previewSize?: number;
+  /** Button `size` prop — "small" for common/mobile, omitted for desktop. */
+  readonly buttonSize?: "small" | "medium" | "large";
+  /** Upload button layout: "horizontal" side-by-side, "vertical" stacked, "fullWidth" stretched side-by-side. */
+  readonly buttonLayout?: CatalogImageUploadButtonLayout;
+  /** Typography variant for the helper text ("bodySm" for common, "bodyMd" for desktop/mobile). */
+  readonly helperTextVariant?: "bodySm" | "bodyMd";
+  /** Whether to render `aria-label` on the hidden file input (common: true, desktop/mobile: true). */
+  readonly fileInputAriaLabel?: boolean;
+  /** Whether URL fallback TextField should be `size="small"` (mobile only). */
+  readonly urlFieldSize?: "small" | "medium";
+  /** Whether URL fallback TextField should be `fullWidth` (mobile only). */
+  readonly urlFieldFullWidth?: boolean;
 }
 
 export type PreviewBoxProps = {
@@ -33,6 +49,7 @@ export type PreviewBoxProps = {
   readonly isUploading: boolean;
   readonly previewAlt: string;
   readonly previewShape: CatalogImageUploadPreviewShape;
+  readonly previewSize: number;
 };
 
 export type UploadButtonsProps = {
@@ -44,7 +61,8 @@ export type UploadButtonsProps = {
   readonly uploadLabel: string;
   readonly uploadingLabel: string;
   readonly removeLabel: string;
-  readonly horizontal?: boolean;
+  readonly buttonSize?: "small" | "medium" | "large";
+  readonly buttonLayout: CatalogImageUploadButtonLayout;
 };
 
 export type ErrorDisplayProps = {
@@ -59,4 +77,6 @@ export type UrlFallbackFieldProps = {
   readonly errorMessage: string | null;
   readonly label: string | undefined;
   readonly optionalLabel: string | undefined;
+  readonly urlFieldSize?: "small" | "medium";
+  readonly urlFieldFullWidth?: boolean;
 };

@@ -20,7 +20,7 @@ export function buildRedisPipeline<TPipeline>(
   for (const cmd of commands) {
     const method = pipeline[cmd.command];
     if (typeof method === "function") {
-      method(...cmd.args);
+      Reflect.apply(method, pipeline, cmd.args);
     }
   }
   return pipeline;

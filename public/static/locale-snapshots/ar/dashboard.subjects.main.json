@@ -38,6 +38,7 @@
   },
   "cancel": "إلغاء",
   "saveChanges": "حفظ التغييرات",
+  "saving": "جاري الحفظ...",
   "subjectCreated": "تم إنشاء المادة بنجاح",
   "subjectUpdated": "تم تحديث المادة بنجاح",
   "subjectDeleted": "تم حذف المادة بنجاح",

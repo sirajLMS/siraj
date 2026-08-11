@@ -3,6 +3,10 @@ export * from "@/frontend/common/components/ui/input/catalogImageUpload/CatalogI
 export * from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 export * from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 export * from "@/frontend/common/components/ui/input/editableTypography/EditableTypography";
+export type {
+  EditableTypographySharedProps,
+  EditableTypographySlotProps,
+} from "@/frontend/common/components/ui/input/editableTypography/EditableTypographyShared";
 export * from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 export * from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 export * from "@/frontend/common/components/ui/input/localizedString";

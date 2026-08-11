@@ -5,11 +5,10 @@ import { Box, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { addDays, format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/common/graphql/generated/gql/graphql";
-import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { logger } from "@/frontend/common/utils/logger";
@@ -227,19 +226,13 @@ export function TeacherAvailabilityContainer({ teacherId }: Readonly<{ teacherId
   if (error) {
     logger.error("Error loading teacher availability:", { error });
     return (
-      <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
-        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-          <Typography sx={theme => ({ color: theme.palette.error.main })}>{commonLabels.loadFailed}</Typography>
-        </Box>
-      </RequirePermission>
+      <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+        <Typography sx={theme => ({ color: theme.palette.error.main })}>{commonLabels.loadFailed}</Typography>
+      </Box>
     );
   }
 
-  return (
-    <RequirePermission permissions={[AppPermission.ScheduleSearchAvailability]}>
-      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-    </RequirePermission>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
 export type { TeacherAvailabilityViewModel, UseTeacherAvailabilityViewModelProps };

@@ -1,8 +1,6 @@
 "use client";
 
 import { Typography } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { AdminBillingView } from "@/frontend/common/views/dashboard/admin/billing/AdminBillingView";
 import { BillingImpersonationNotice } from "@/frontend/common/views/dashboard/billing/components/BillingImpersonationNotice";
@@ -19,7 +17,7 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
   const viewerDisplayCurrency = useUserStore(state => state.displayCurrency);
 
   return (
-    <RequirePermission permissions={[AppPermission.BillingViewHistory]} fallback={null}>
+    <>
       <DisplayCurrencyHint />
       <FxConversionNote />
       {viewerDisplayCurrency ? (
@@ -29,6 +27,6 @@ export function AdminBillingContainer(_props: AdminBillingContainerProps) {
       ) : null}
       <BillingImpersonationNotice />
       <AdminBillingView />
-    </RequirePermission>
+    </>
   );
 }

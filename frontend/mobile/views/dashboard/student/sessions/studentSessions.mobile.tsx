@@ -1,9 +1,9 @@
 "use client";
 
-import { CalendarToday, ChevronLeft, ChevronRight } from "@mui/icons-material";
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, type Theme, Typography } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { scheduleOverviewCardShellSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
+import { MonthNavigator } from "@/frontend/common/views/dashboard/student/__shared__/MonthNavigator";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentSessionsViewModel } from "@/frontend/common/views/dashboard/student/sessions/useStudentSessionsViewModel";
 import {
@@ -16,47 +16,6 @@ import {
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { HistorySessionCardMobile } from "@/frontend/mobile/views/dashboard/student/sessions/components/historySessionCard.mobile";
-
-const navButtonSx = (theme: Theme) => ({
-  minWidth: 40,
-  transform: theme.direction === "rtl" ? ("scaleX(-1)" as const) : undefined,
-});
-
-function MonthNavigator({
-  monthLabel,
-  canGoNext,
-  labels,
-  onPrevMonth,
-  onNextMonth,
-}: Readonly<{
-  monthLabel: string;
-  canGoNext: boolean;
-  labels: StudentSessionsViewModel["labels"];
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
-}>): React.ReactNode {
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-      <Button aria-label={labels.previousMonth} onClick={onPrevMonth} sx={navButtonSx}>
-        <ChevronLeft />
-      </Button>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-        <CalendarToday sx={theme => ({ fontSize: 18, color: theme.palette.primary.main })} />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {monthLabel}
-        </Typography>
-      </Box>
-      <Button
-        aria-label={labels.nextMonth}
-        onClick={onNextMonth}
-        disabled={!canGoNext}
-        sx={theme => ({ ...navButtonSx(theme), opacity: canGoNext ? 1 : 0.5 })}
-      >
-        <ChevronRight />
-      </Button>
-    </Box>
-  );
-}
 
 function SessionsFilters({
   subjectFilter,

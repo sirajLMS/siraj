@@ -28,6 +28,13 @@
     "statusUpdate": "تحديث حالة الطالب",
     "currentStatus": {
       "__fn": "(status) => `\\u0627\\u0644\\u062D\\u0627\\u0644\\u064A: ${status}`"
+    },
+    "statusOptions": {
+      "REGULAR": "نشط / منتظم",
+      "SUSPENDED": "موقوف",
+      "ON_LEAVE": "في إجازة",
+      "ON_TRIAL": "فترة تجريبية",
+      "DEACTIVATED": "غير مفعل"
     }
   },
   "historyAndContact": {

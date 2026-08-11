@@ -72,7 +72,7 @@ function mockUser(overrides?: ContactOverrides): UserSelectType {
     rememberTokenHash: null,
     avatarFilePath: null,
     avatarUrl: null,
-    phone: overrides?.phone ?? "+15555550100",
+    phone: overrides?.phone !== undefined ? overrides.phone : "+15555550100",
     status: AccountStatus.ACTIVATED,
     isSuperAdmin: false,
     timezone: IanaTimezone.UTC,

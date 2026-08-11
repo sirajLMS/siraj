@@ -75,6 +75,7 @@ export function TeacherReassignmentViewDesktop({
               onSelectedNewStatusChange={controls.onSelectedNewStatusChange}
               onSubmitForm={controls.onSubmitForm}
               labels={{ controls: labels.controls, actions: labels.actions }}
+              statusLabelId="teacher-reassignment-status-label-desktop"
             />
 
             <ReassignmentBentoGridDesktop
