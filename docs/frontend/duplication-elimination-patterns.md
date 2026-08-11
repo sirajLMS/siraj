@@ -164,6 +164,7 @@ After any duplication elimination:
 ## Related Documents
 
 - `.ai/plans/duplications/` — the plan that established these patterns
+- `.ai/plans/duplications-phase2/` — the continuation plan that established view component scaffold patterns
 - `docs/frontend/ui-shared-scaffold-pattern.md`
 - `docs/backend/shared-types-pattern.md`
 - `docs/i18n/locale-namespace-migration.md`

@@ -171,6 +171,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - Access control: `<RequirePermission>` wrapper for permission-gated components
 - Client data fetching: Apollo `useQuery` with generated TypedDocumentNodes
 - Server data fetching: call services via cached wrappers (never repos/DB directly)
+- **Duplicate view logic**: When desktop and mobile variants share presentation logic, extract a `*Shared.tsx` scaffold into a `__shared__/` directory at the parent level. Desktop/mobile variants import ONLY from the scaffold — never from each other. See `docs/frontend/ui-shared-scaffold-pattern.md`
 
 ### Code Quality
 

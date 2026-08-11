@@ -142,3 +142,47 @@ import { SomeComponent } from "@/frontend/common/components/ui/display/someCompo
 - `docs/frontend/duplication-elimination-patterns.md`
 - `.agents/skills/refactor-mobile-desktop/SKILL.md`
 - `.agents/instructions/mobile-desktop.instructions.md`
+
+---
+
+## Extension: View Component Scaffolds (`__shared__/` Directory)
+
+The `*Shared.tsx` scaffold pattern extends beyond UI components (common/desktop/mobile tiers) to **view component pairs** (desktop/mobile variants of the same view).
+
+### Placement Convention
+
+When a desktop view (`.desktop.tsx`) and its mobile counterpart (`.mobile.tsx`) share significant presentation logic, the shared scaffold is placed in a `__shared__/` directory at the parent level:
+
+```
+frontend/common/views/dashboard/<domain>/components/
+  __shared__/
+    <componentName>Shared.tsx      # Scaffold with slot props
+  <componentName>.desktop.tsx       # Desktop variant — delegates to scaffold
+  <componentName>.mobile.tsx        # Mobile variant — delegates to scaffold
+```
+
+### When to Use `__shared__/` vs `common/`
+
+| Scenario | Scaffold Placement |
+|----------|-------------------|
+| UI component triplication (common/desktop/mobile) | `frontend/common/components/ui/<group>/*Shared.tsx` |
+| View component pair (desktop/mobile only) | `frontend/common/views/dashboard/<domain>/components/__shared__/*Shared.tsx` |
+| Desktop-specific component pair within desktop tier | `frontend/desktop/views/.../__shared__/*Shared.tsx` |
+
+### Slot Props for View Scaffolds
+
+View scaffolds use the same slot props pattern as UI scaffolds — pass tier-specific components, sx styles, and configuration as props rather than hardcoding them:
+
+```typescript
+type ViewSlotProps = {
+  readonly Footer: React.ComponentType<{ onClose: () => void }>;
+  readonly paperSx: SxProps<Theme>;
+  readonly anchor: "right" | "bottom";
+};
+```
+
+### Import Rules
+
+- Desktop variants import ONLY from `__shared__/` scaffold paths
+- Mobile variants import ONLY from `__shared__/` scaffold paths
+- Never import from sibling tier's `.desktop.tsx` or `.mobile.tsx` files
