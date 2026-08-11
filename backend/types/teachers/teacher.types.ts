@@ -9,11 +9,11 @@ import type {
   StudentStatus,
   TeacherProgressFeedEventKind,
 } from "@/backend/enum";
-import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
 import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type { ClassSessionMetrics } from "@/backend/types/scheduling/schedule.types";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type TeacherSelectType = typeof teachers.$inferSelect;
 export type TeacherInsertType = typeof teachers.$inferInsert;

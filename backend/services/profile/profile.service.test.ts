@@ -9,10 +9,10 @@ import {
   ProfileScope,
   UserRole,
 } from "@/backend/enum";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { isRedirect, ProfileService, toParentRepoInput } from "@/backend/services";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ProfilePageContext } from "@/backend/types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 afterEach(() => {
   spyOn(TeacherRepository, "findByUserId").mockRestore();

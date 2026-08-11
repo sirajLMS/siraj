@@ -1,7 +1,6 @@
 import { GraphQLError } from "graphql";
 import { AppPermission } from "@/backend/enum";
 import { CronConcurrencyPolicy, CronTriggerSource } from "@/backend/enum/cron/cron.enums";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CronConcurrencyPolicyPothosEnum,
@@ -22,6 +21,7 @@ import type {
   CronScheduleSubmitInput,
   CronScheduleUpdateInput,
 } from "@/backend/types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 // ─── Object Types ────────────────────────────────────────────────────────────

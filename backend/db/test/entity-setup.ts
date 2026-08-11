@@ -29,7 +29,6 @@ import {
   LessonReportStatus,
   TeacherDueStatus,
 } from "@/backend/enum";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type {
   ClassInstanceSelectType,
   ClassMeetingConfigSelectType,
@@ -43,6 +42,7 @@ import type {
   UserMeetingConfigSelectType,
   UserSelectType,
 } from "@/backend/types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 /** LocalizedString helper for permission/group JSONB columns in tests. */
 export function loc(en: string, ar?: string): { ar: string; en: string } {

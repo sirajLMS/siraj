@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { AppPermission } from "@/backend/enum";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import * as resolveViewerTimezoneModule from "@/backend/services/schedule/resolve-viewer-timezone";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { getServerTranslations } from "@/shared/locale";
 
 const tErrors = getServerTranslations("en").errorsTranslations;

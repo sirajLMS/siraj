@@ -32,22 +32,17 @@
  *   2 = invalid arguments
  */
 
-import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
+import {
+  type CheckResult,
+  exitCodePassed,
+  type Lifecycle,
+  runCommand,
+} from "@/scripts/health/__shared__/sub-loop-types";
 import { isCodeSceneOutputFailed } from "@/scripts/health/codescene/checker";
 import { withProcessLock } from "@/scripts/lib/process-lock";
 import { type LintResult, requestLint } from "@/scripts/lint-service";
-
-// ─── Types ──────────────────────────────────────────────────────────────────
-
-type Lifecycle = "tsgo" | "biome" | "lint" | "codescene";
-
-interface CheckResult {
-  name: string;
-  passed: boolean;
-  output: string;
-}
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const PROJECT_ROOT = process.cwd();
@@ -57,6 +52,7 @@ const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
   biome: 1,
   lint: 2,
   codescene: 3,
+  "sonar-results": 3,
 };
 
 const RED = "\x1b[31m";
@@ -202,31 +198,6 @@ function logPass(msg: string): void {
 
 function logFail(msg: string): void {
   console.error(`${RED}❌${NC} ${BOLD}${msg}${NC}`);
-}
-
-interface CommandRunResult {
-  exitCode: number | null;
-  output: string;
-}
-
-/**
- * Run a command synchronously and capture its output.
- */
-function runCommand(command: string, args: string[]): CommandRunResult {
-  const result = spawnSync(command, args, {
-    encoding: "utf8",
-    cwd: PROJECT_ROOT,
-    stdio: ["pipe", "pipe", "pipe"],
-  });
-
-  return {
-    exitCode: result.status,
-    output: (result.stdout || "") + (result.stderr || ""),
-  };
-}
-
-function exitCodePassed(exitCode: number | null): boolean {
-  return exitCode === 0;
 }
 
 function toCheckResult(name: string, passed: boolean, output: string): CheckResult {

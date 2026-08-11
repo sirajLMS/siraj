@@ -4,8 +4,8 @@
  */
 import { expect, test } from "bun:test";
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { OpenExchangeRatesAdapter } from "@/backend/services/fx/providers/openexchangerates/OpenExchangeRatesAdapter";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 
 const hasAppId = Boolean(process.env.OPENEXCHANGERATES_APP_ID);

@@ -1,11 +1,11 @@
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
-import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { ClassInstanceDetailReturnType } from "@/backend/types/classes/class-instance-detail.types";
 import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type {
   SupportContactReturnType,
   TeacherImportantNoteReturnType,
 } from "@/backend/types/teachers/teacher-notes.types";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type ClassSessionMetrics = {
   id?: string;

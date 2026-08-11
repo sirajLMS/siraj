@@ -35,20 +35,26 @@
  *   2 = invalid arguments or no uncommitted files
  */
 
-import { spawnSync } from "node:child_process";
 import { relative, resolve } from "node:path";
+import {
+  type CheckResult,
+  exitCodePassed,
+  type Lifecycle,
+  runCommand,
+} from "@/scripts/health/__shared__/sub-loop-types";
 import { isCodeSceneOutputFailed } from "@/scripts/health/codescene/checker";
 import { withProcessLock } from "@/scripts/lib/process-lock";
 import { type LintResult, requestLint } from "@/scripts/lint-service";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type Lifecycle = "tsgo" | "biome" | "lint" | "codescene" | "sonar-results";
-
-interface CheckResult {
-  name: string;
-  passed: boolean;
-  output: string;
+/**
+ * Batch-mode extension of {@link CheckResult} that tracks which specific
+ * uncommitted files failed the check. `sub-loop-uncommitted.ts` runs each
+ * check once across all uncommitted files, so per-file failure attribution
+ * is needed for the summary report.
+ */
+interface BatchCheckResult extends CheckResult {
   failedFiles: string[];
 }
 
@@ -96,28 +102,6 @@ function logWarn(msg: string): void {
 
 function logFile(msg: string): void {
   console.log(`${CYAN}  📄${NC} ${msg}`);
-}
-
-interface CommandRunResult {
-  exitCode: number | null;
-  output: string;
-}
-
-function runCommand(command: string, args: string[]): CommandRunResult {
-  const result = spawnSync(command, args, {
-    encoding: "utf8",
-    cwd: PROJECT_ROOT,
-    stdio: ["pipe", "pipe", "pipe"],
-    maxBuffer: 50 * 1024 * 1024, // 50MB buffer for large outputs
-  });
-  return {
-    exitCode: result.status,
-    output: (result.stdout || "") + (result.stderr || ""),
-  };
-}
-
-function exitCodePassed(exitCode: number | null): boolean {
-  return exitCode === 0;
 }
 
 // ─── Uncommitted Files Discovery ───────────────────────────────────────────
@@ -229,7 +213,7 @@ function extractFailedFiles(filteredOutput: string, allFiles: string[]): string[
 
 // ─── Checks (run once, project-wide, then filter) ──────────────────────────
 
-function checkTsgoAll(files: string[]): CheckResult {
+function checkTsgoAll(files: string[]): BatchCheckResult {
   logInfo(`Running tsgo (project-wide, filtering for ${files.length} uncommitted files)...`);
   const result = runCommand("bun", ["tsgo"]);
 
@@ -252,7 +236,7 @@ function checkTsgoAll(files: string[]): CheckResult {
   return { name: "tsgo", passed: false, output: filtered, failedFiles };
 }
 
-function checkBiomeAll(files: string[]): CheckResult {
+function checkBiomeAll(files: string[]): BatchCheckResult {
   if (files.length === 0) {
     return { name: "biome:check", passed: true, output: "", failedFiles: [] };
   }
@@ -271,7 +255,7 @@ function checkBiomeAll(files: string[]): CheckResult {
   return { name: "biome:check", passed: false, output: result.output, failedFiles };
 }
 
-function checkOxlintAll(files: string[]): CheckResult {
+function checkOxlintAll(files: string[]): BatchCheckResult {
   if (files.length === 0) {
     return { name: "oxlint", passed: true, output: "", failedFiles: [] };
   }
@@ -290,7 +274,7 @@ function checkOxlintAll(files: string[]): CheckResult {
   return { name: "oxlint", passed: false, output: result.output, failedFiles };
 }
 
-async function checkLintTypeAwareAll(files: string[]): Promise<CheckResult> {
+async function checkLintTypeAwareAll(files: string[]): Promise<BatchCheckResult> {
   if (files.length === 0) {
     return { name: "lint:type-aware", passed: true, output: "", failedFiles: [] };
   }
@@ -318,7 +302,7 @@ async function checkLintTypeAwareAll(files: string[]): Promise<CheckResult> {
   }
 }
 
-function checkDuplicatesAll(files: string[]): CheckResult {
+function checkDuplicatesAll(files: string[]): BatchCheckResult {
   if (files.length === 0) {
     return { name: "check:duplicates", passed: true, output: "", failedFiles: [] };
   }
@@ -337,7 +321,7 @@ function checkDuplicatesAll(files: string[]): CheckResult {
   return { name: "check:duplicates", passed: false, output: result.output, failedFiles };
 }
 
-function checkCodesceneAll(files: string[]): CheckResult {
+function checkCodesceneAll(files: string[]): BatchCheckResult {
   if (files.length === 0) {
     return { name: "codescene", passed: true, output: "", failedFiles: [] };
   }
@@ -411,7 +395,7 @@ async function main(): Promise<void> {
     printHeader(lifecycle, files);
 
     const depth = LIFECYCLE_ORDER[lifecycle];
-    const results: CheckResult[] = [];
+    const results: BatchCheckResult[] = [];
 
     // tsgo (depth 0+)
     results.push(checkTsgoAll(files));
@@ -464,7 +448,7 @@ async function main(): Promise<void> {
   process.exit(exitCode);
 }
 
-function printSummary(results: CheckResult[], files: string[]): void {
+function printSummary(results: BatchCheckResult[], files: string[]): void {
   console.log("");
   console.log(`${BOLD}━━━ Summary ━━━${NC}`);
   console.log(`  Files checked: ${files.length}`);

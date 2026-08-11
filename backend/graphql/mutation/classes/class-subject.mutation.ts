@@ -23,12 +23,16 @@ gqlSchemaBuilder.mutationField("createClassSubject", t =>
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
+      const { name, slug, categoryId } = args.input;
+      if (!name || !slug || !categoryId) {
+        throw new Error(tErrors.auth.invalidCredentials);
+      }
       return ClassSubjectService.createSubject(
         userId,
         {
-          name: args.input.name,
-          slug: args.input.slug,
-          categoryId: args.input.categoryId,
+          name,
+          slug,
+          categoryId,
           description: args.input.description,
           isActive: args.input.isActive ?? undefined,
           sortOrder: args.input.sortOrder ?? undefined,

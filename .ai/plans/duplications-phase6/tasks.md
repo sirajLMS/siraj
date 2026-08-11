@@ -74,7 +74,7 @@ All tasks use `--lifecycle codescene` (the deepest check: tsgo → oxlint → bi
 - [x] 0.2.2 Fix all violations reported
 - [x] 0.2.3 Re-run `@plan-review` until output is "Plan passes all AGENTS.md rules"
 - [x] 0.2.4 Write outcome: `.ai/plans/duplications-phase6/outcome/plan-review-R1.md`
-- [ ] 0.2.5 Commit the plan
+- [x] 0.2.5 Commit the plan
 - [x] 0.2.6 Update progress: Mark 0.2 as `[x]`
 
 ---

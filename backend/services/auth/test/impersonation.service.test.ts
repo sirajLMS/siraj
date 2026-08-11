@@ -2,9 +2,9 @@ import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { UserRepository } from "@/backend/db/repo";
 import { AccountStatus, UserRole } from "@/backend/enum";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 /* Test constants */

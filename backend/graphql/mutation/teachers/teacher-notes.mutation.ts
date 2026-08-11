@@ -20,10 +20,14 @@ gqlSchemaBuilder.mutationField("createTeacherImportantNote", t =>
       const teacher = await SchedulingRepository.getTeacherByUserId(userId);
       const teacherId = teacher?.id ?? null;
       const tErrors = ctx.t().errorsTranslations;
+      const { title } = args.input;
+      if (!title) {
+        throw new Error(tErrors.auth.invalidCredentials);
+      }
       return TeacherNotesService.createNote(
         userId,
         {
-          title: args.input.title,
+          title,
           body: args.input.body ?? null,
           isPublished: args.input.isPublished ?? undefined,
           priority: args.input.priority ?? undefined,

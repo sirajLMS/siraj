@@ -60,8 +60,8 @@ import {
   WhatsappTemplateStatus,
 } from "@/backend/enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {

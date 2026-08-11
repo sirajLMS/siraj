@@ -8,10 +8,10 @@ import {
   type SeedConfig,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { logger } from "@/backend/lib/logger";
 import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
 import type { UserSelectType } from "@/backend/types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export async function seedOrGet(users: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding system parents...");
