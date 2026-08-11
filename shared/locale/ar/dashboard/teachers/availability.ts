@@ -37,6 +37,7 @@ export const dashboardTeacherAvailabilityAr: TeacherAvailabilityLabels = {
     fri: "ج",
     sat: "س",
     sun: "أ",
+    availableSlot: (teacherName, time) => `${teacherName} متاح في ${time}`,
   },
   insights: {
     peakLoad: "ذروة التحميل",

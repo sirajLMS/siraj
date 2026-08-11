@@ -22,7 +22,12 @@ export default async function ScheduleTrackingPage() {
   }
   await requirePermissionForPage(
     userId,
-    [AppPermission.SESSION_RESCHEDULE, AppPermission.SCHEDULE_VIEW_ALL, AppPermission.SCHEDULE_VIEW_LIST],
+    [
+      AppPermission.SESSION_RESCHEDULE,
+      AppPermission.SCHEDULE_VIEW_ALL,
+      AppPermission.SCHEDULE_VIEW_LIST,
+      AppPermission.DASHBOARD_VIEW_METRICS,
+    ],
     locale,
     context
   );

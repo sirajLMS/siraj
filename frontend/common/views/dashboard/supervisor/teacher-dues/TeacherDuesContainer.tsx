@@ -1,10 +1,8 @@
 "use client";
 
 import { Alert, Snackbar } from "@mui/material";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   type TeacherDuesViewModel,
   useTeacherDuesViewModel,
@@ -25,7 +23,7 @@ export function TeacherDuesContainer() {
   const viewModel = useTeacherDuesViewModel({});
 
   return (
-    <RequirePermission permissions={[AppPermission.TeacherDuesView]} fallback={null}>
+    <>
       <Snackbar
         open={viewModel.snackbar.open}
         autoHideDuration={4000}
@@ -37,7 +35,7 @@ export function TeacherDuesContainer() {
         </Alert>
       </Snackbar>
       <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-    </RequirePermission>
+    </>
   );
 }
 

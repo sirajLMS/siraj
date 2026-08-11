@@ -8,8 +8,21 @@ import {
   ensureTestSubjectId,
   loginAndProvision,
   loginUser,
+  TEST_USER_PASSWORD,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+
+async function loginWithRetry(email: string, attempts = 3): Promise<string> {
+  try {
+    return await loginUser(email, TEST_USER_PASSWORD);
+  } catch (err) {
+    if (attempts <= 1) {
+      throw new Error(`Failed to login ${email} after retries`, { cause: err });
+    }
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return loginWithRetry(email, attempts - 1);
+  }
+}
 
 describe("GraphQL Class Instance Detail Query", () => {
   setupTestServerLifecycle();
@@ -33,7 +46,7 @@ describe("GraphQL Class Instance Detail Query", () => {
     if (!adminToken || !teacherToken || !studentId || !teacherId) throw new Error("Missing test context");
     const subjectId = await ensureTestSubjectId(adminToken);
     if (!r.parentUserEmail) throw new Error("Parent email not returned");
-    parentToken = await loginUser(r.parentUserEmail, "Test_Pass1!");
+    parentToken = await loginWithRetry(r.parentUserEmail);
 
     const createRes = await authenticatedRequest(
       teacherToken,
@@ -97,7 +110,7 @@ describe("GraphQL Class Instance Detail Query", () => {
   test("student can read own class instance detail", async () => {
     if (!classInstanceId || !studentUserEmail) throw new Error("Missing student context");
 
-    const studentToken = await loginUser(studentUserEmail, "Test_Pass1!");
+    const studentToken = await loginWithRetry(studentUserEmail);
     const data = await authenticatedRequest(studentToken, "query", classInstanceQueryDocument, {
       id: classInstanceId,
     });

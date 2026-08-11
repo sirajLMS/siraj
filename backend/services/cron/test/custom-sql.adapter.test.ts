@@ -182,6 +182,8 @@ describe("custom-sql.adapter", () => {
       attempt: 0,
       timeoutSeconds: 120,
       queueJobId: "cq_1",
+      maxRetries: 3,
+      retryBackoffSeconds: 60,
     });
     expect(result[1]).toEqual({
       runId: "run-b",
@@ -191,6 +193,8 @@ describe("custom-sql.adapter", () => {
       attempt: 1,
       timeoutSeconds: 240,
       queueJobId: "cq_2",
+      maxRetries: 3,
+      retryBackoffSeconds: 60,
     });
   });
 

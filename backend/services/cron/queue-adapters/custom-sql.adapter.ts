@@ -71,10 +71,10 @@ function parseCronQueueRow(row: Record<string, unknown>): CronQueueRow {
     schedule_id: String(row.schedule_id),
     job_kind: String(row.job_kind),
     payload: isRecord(row.payload) ? row.payload : null,
-    attempt: Number(row.attempt),
-    timeout_seconds: Number(row.timeout_seconds),
-    max_retries: Number(row.max_retries),
-    retry_backoff_seconds: Number(row.retry_backoff_seconds),
+    attempt: Number(row.attempt ?? 0),
+    timeout_seconds: Number(row.timeout_seconds ?? 300),
+    max_retries: Number(row.max_retries ?? 3),
+    retry_backoff_seconds: Number(row.retry_backoff_seconds ?? 60),
   };
 }
 

@@ -29,6 +29,29 @@
   "defaultLeaveReason": "المعلم طلب إجازة من الجدول المستقبلي",
   "supportRequestReason": "طلب المعلم الدعم من صفحة الجدول المستقبلي",
   "students": "الطلاب",
+  "studentCount": {
+    "__fn": "(count) => count === 1 ? `${count} \\u0637\\u0627\\u0644\\u0628` : `${count} \\u0637\\u0644\\u0627\\u0628`"
+  },
+  "timeRange": {
+    "__fn": "(startTime, endTime) => `${startTime} - ${endTime}`"
+  },
+  "weekdays": {
+    "sun": "أحد",
+    "mon": "إثن",
+    "tue": "ثلا",
+    "wed": "أرب",
+    "thu": "خمي",
+    "fri": "جمع",
+    "sat": "سبت"
+  },
+  "ariaLabels": {
+    "previousDay": "اليوم السابق",
+    "nextDay": "اليوم التالي",
+    "previousMonth": "الشهر السابق",
+    "nextMonth": "الشهر التالي",
+    "selectDate": "اختيار التاريخ",
+    "openCalendar": "فتح التقويم"
+  },
   "errors": {
     "quotaExceeded": "لقد وصلت إلى الحد الأقصى لطلبات الإجازة لهذا الشهر.",
     "leaveRequestFailed": "فشل طلب الإجازة. يرجى المحاولة مرة أخرى.",

@@ -4,10 +4,9 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, CircularProgress } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -145,10 +144,6 @@ export function RescheduleContainer() {
     return <Box sx={{ p: 3, textAlign: "center" }}>{viewModel.labels.classInstanceNotFound}</Box>;
   }
 
-  return (
-    <RequirePermission permissions={[AppPermission.SessionReschedule]}>
-      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-    </RequirePermission>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 export type { RescheduleViewModel, UseRescheduleViewModelProps };

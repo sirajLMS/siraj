@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type Control, type UseFormRegister, useForm } from "react-hook-form";
 import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
@@ -26,7 +26,12 @@ import {
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
 import { useParentProfileEditFormViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileEditFormViewModel";
+import {
+  AdminResetPasswordSection,
+  type AdminResetPasswordSectionRef,
+} from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
 import { ParentExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/ParentExtensionProfileSection";
+import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 
@@ -104,13 +109,25 @@ function useParentEditForm(parentData: ParentEditData, isAdminScope: boolean) {
   return form;
 }
 
-function useParentSubmitFeedback(onSubmit: ParentEditFormSubmit) {
+function useParentSubmitFeedback(
+  onSubmit: ParentEditFormSubmit,
+  resetPasswordRef: React.RefObject<AdminResetPasswordSectionRef | null>,
+  resetPassword: (userId: string, newPassword: string, sendEmail: boolean) => Promise<boolean>,
+  targetUserId: string
+) {
   const [successOpen, setSuccessOpen] = useState(false);
   const [errorOpen, setErrorOpen] = useState(false);
 
   const onValidSubmit = async (values: ParentAdminEditFormData) => {
     try {
       await onSubmit(values);
+      const resetData = resetPasswordRef.current?.getResetPasswordData();
+      if (resetData?.isValid) {
+        const success = await resetPassword(targetUserId, resetData.newPassword, resetData.sendNotificationEmail);
+        if (success) {
+          resetPasswordRef.current?.reset();
+        }
+      }
       setSuccessOpen(true);
     } catch {
       setErrorOpen(true);
@@ -220,12 +237,17 @@ export function ParentProfileEditForm({
   const { labels } = useParentProfileEditFormViewModel();
   const { base: t, parent: pt } = labels;
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
-  const { canEdit } = useProfileFieldAccess({ scope });
+  const { canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar }: AvatarUploader = useAvatarUpload({ storageOwnerKey: targetUserId });
   const form = useParentEditForm(parentData, isAdminScope);
-  const feedback = useParentSubmitFeedback(onSubmit);
+  const resetPasswordRef = useRef<AdminResetPasswordSectionRef>(null);
+  const { resetPassword } = useAdminResetPassword(t.adminResetPassword.success, t.adminResetPassword.error);
+  const feedback = useParentSubmitFeedback(onSubmit, resetPasswordRef, resetPassword, targetUserId);
 
   const scopeContext: ScopeContext = { scope, isAdminScope, canEdit };
+  const canResetPassword = isAdminScope && canAdminResetPassword();
+  const parentName = parentData.name ?? "";
+  const parentEmail = parentData.email ?? "";
 
   return (
     <Stack spacing={3}>
@@ -248,6 +270,14 @@ export function ParentProfileEditForm({
             control={form.control}
             labels={labels}
           />
+          {canResetPassword && (
+            <AdminResetPasswordSection
+              ref={resetPasswordRef}
+              targetUserId={targetUserId}
+              userName={parentName}
+              userEmail={parentEmail}
+            />
+          )}
           <PrimaryPageAction type="submit" disabled={isSaving}>
             {isSaving ? t.shell.loading : t.actions.save}
           </PrimaryPageAction>

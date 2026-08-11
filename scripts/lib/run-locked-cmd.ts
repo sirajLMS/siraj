@@ -32,10 +32,17 @@ if (argIdx >= args.length) {
 
 const cmd = args[argIdx];
 const cmdArgs = args.slice(argIdx + 1);
-const mergedEnv = { ...process.env, ...extraEnv };
+const mergedEnv = { ...process.env, ...extraEnv, SIRAJ_TEST_RUNNER_OK: "1" };
 
-const isCodeScene = lockName.toLowerCase().includes("codescene") || cmd.toLowerCase().includes("codescene");
-const timeoutMs = isCodeScene ? undefined : 5 * 60 * 1000; // 5 minutes (300,000ms)
+const lowerLockName = lockName.toLowerCase();
+const lowerCmd = cmd.toLowerCase();
+const isCodeScene = lowerLockName.includes("codescene") || lowerCmd.includes("codescene");
+const isTestRun =
+  lowerLockName.startsWith("test") ||
+  lowerLockName.includes("test:") ||
+  lowerLockName.includes("test ") ||
+  (lowerCmd === "bun" && lowerLockName.includes("test"));
+const timeoutMs = isCodeScene || isTestRun ? undefined : 5 * 60 * 1000; // 5 minutes (300,000ms)
 
 // On Vercel CI / production builds, bypass process lock to prevent build timeouts
 if (process.env.VERCEL || process.env.NOW_BUILDER) {

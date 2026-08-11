@@ -155,6 +155,7 @@ async function runSingleTestFile(file: string, timeoutMs: number, acc: RunAccumu
       ...process.env,
       FORCE_COLOR: "1",
       NODE_ENV: "test",
+      SIRAJ_TEST_RUNNER_OK: "1",
     };
 
     // Local: drop parent DATABASE_URL so env-file is authoritative.

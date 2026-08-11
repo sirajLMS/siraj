@@ -66,6 +66,86 @@ This document consolidates the patterns used to eliminate code duplication in th
 **Example (Task 3.6):**
 - Added `**/*.stories.tsx` to ignore — 138 story clones excluded
 
+## Pattern 7: View Component Scaffold in `__shared__/` Directory
+
+**When to use:** Same view component exists in desktop/mobile tiers with shared presentation logic but different layout/styling. Also applies to within-tier duplications (e.g., two desktop dialogs sharing form structure).
+
+**Process:**
+1. Create a `__shared__/` directory alongside the component variants
+2. Extract a `<ComponentName>Shared.tsx` scaffold with all shared presentation logic
+3. Use slot props for tier-specific variations (components, sx styles, layout options)
+4. Refactor each variant to delegate to the scaffold with its specific slots
+
+**Example (Phases 2-3, 30 scaffolds created):**
+- View scaffolds: `frontend/common/views/dashboard/.../__shared__/<Component>Shared.tsx`
+- Desktop variant: `frontend/desktop/views/dashboard/.../<Component>.desktop.tsx` (thin wrapper)
+- Mobile variant: `frontend/mobile/views/dashboard/.../<Component>.mobile.tsx` (thin wrapper)
+
+**Slot prop patterns discovered:**
+- `CardComponent` slot for card wrapping (BaseCard vs MobileBaseCard)
+- `anchor` + `paperSx` for Drawer variants (right/bottom anchoring)
+- Render functions for type-incompatible slots (avoids ComponentType contravariance)
+- Config objects for purely visual differences (spacing, column widths, typography variants)
+
+## Pattern 8: Within-Common Utility Consolidation
+
+**When to use:** Two utility files in `frontend/common/` share logic but serve different domains.
+
+**Process:**
+1. Extract shared logic to a `shared-<domain>-logic.ts` module
+2. Refactor both files to import and use the shared module
+3. Remove duplicated code from both files
+
+**Example (Task 3.2):**
+- Created: `frontend/common/utils/excel-export/shared-export-logic.ts`
+- Refactored: `parent-directory-export.ts`, `tracking-export.ts`, `report-export.ts`
+- Result: 4 clones / 810 tokens eliminated
+
+## Pattern 9: Loading Skeleton Consolidation
+
+**When to use:** Multiple profile/page types have near-identical loading skeletons.
+
+**Process:**
+1. Create a single config-driven skeleton component
+2. Pass config (row count, heights, etc.) as props
+3. Delete per-type skeleton files
+
+**Example (Task 3.3):**
+- Created: shared `ProfileLoadingSkeleton` (config-driven)
+- Deleted: `ParentProfileLoadingSkeleton.tsx`, `StaffProfileLoadingSkeleton.tsx`, `TeacherProfileLoadingSkeleton.tsx`
+
+## Pattern 10: Within-Tier Shared Module Extraction
+
+**When to use:** Two components in the same tier (both desktop or both mobile) share logic.
+
+**Process:**
+1. Create a shared module in the same tier (e.g., `__shared__/` or `components/ui/display/.../__shared__/`)
+2. For cross-tier duplicates (same components in both desktop AND mobile), create a shared scaffold in `common/`
+3. Refactor both consumers to use the shared module
+
+**Example (Task 3.4):**
+- Desktop payment catalog grids: shared `catalogGridShared.tsx`
+- Desktop subject dialogs: shared `subjectFormDialogShared.tsx`
+- Profile links (both tiers): enhanced existing `ProfileLinkBase.tsx` in common
+
+## CRITICAL: Circular Dependency Prevention
+
+**NEVER** import through barrel `index.ts` re-exports when the importing and imported components live in the same barrel. This causes TDZ (Temporal Dead Zone) errors at runtime.
+
+**Wrong:**
+```typescript
+import { MobilePhoneDisplay } from "@/frontend/mobile/components/ui/display";
+// If the barrel exports paymentMethod/ before phoneDisplay/, MobilePhoneDisplay
+// won't be initialized yet when PaymentMethodDisplay tries to use it → TDZ error
+```
+
+**Right:**
+```typescript
+import { MobilePhoneDisplay } from "@/frontend/mobile/components/ui/display/phoneDisplay/phoneDisplay.mobile";
+```
+
+Always use **direct file paths** for scaffold imports to prevent circular dependencies.
+
 ## Anti-Patterns
 
 - DO NOT use re-exports as a shortcut — they hide duplication and create import ambiguity

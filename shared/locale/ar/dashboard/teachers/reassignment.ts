@@ -27,6 +27,13 @@ export const dashboardTeacherReassignmentAr: TeacherReassignmentLabels = {
     teacherAvailabilityNotice: "يتم سرد المعلمين المتاحين فقط في المنطقة الزمنية للطالب أعلاه.",
     statusUpdate: "تحديث حالة الطالب",
     currentStatus: status => `الحالي: ${status}`,
+    statusOptions: {
+      REGULAR: "نشط / منتظم",
+      SUSPENDED: "موقوف",
+      ON_LEAVE: "في إجازة",
+      ON_TRIAL: "فترة تجريبية",
+      DEACTIVATED: "غير مفعل",
+    },
   },
   historyAndContact: {
     changeHistory: "سجل التغييرات",

@@ -177,6 +177,6 @@ export namespace SupportedCurrencyRepository {
         ) AS in_use`
       )
       .limit(1);
-    return row?.exists;
+    return row != null;
   }
 }

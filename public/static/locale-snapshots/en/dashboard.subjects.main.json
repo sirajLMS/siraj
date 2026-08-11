@@ -38,6 +38,7 @@
   },
   "cancel": "Cancel",
   "saveChanges": "Save Changes",
+  "saving": "Saving...",
   "subjectCreated": "Subject created successfully",
   "subjectUpdated": "Subject updated successfully",
   "subjectDeleted": "Subject deleted successfully",

@@ -1,13 +1,9 @@
 "use client";
 
-import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlineOutlined, SendOutlined } from "@mui/icons-material";
-import { Avatar, Box, TextField, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import {
-  type AdminComplaintRow,
-  type ComplaintPriority,
-  ComplaintStatus,
-} from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import type { SxProps, Theme } from "@mui/material/styles";
+import type { ReactNode } from "react";
+import { ComplaintQueueCardShared } from "@/frontend/common/views/dashboard/complaints/components/complaintQueueCardShared";
+import type { AdminComplaintRow } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import {
   MobileCardListItem,
   MobileFilterButton,
@@ -15,111 +11,6 @@ import {
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
-
-const StyledAnsweredResponseBox = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderRadius: theme.layout.radius.card,
-  backgroundColor: theme.palette.surfaceContainerLow,
-  border: `1px solid ${theme.palette.outlineVariant}`,
-}));
-
-const StyledAnsweredResponseHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  marginBottom: theme.spacing(1),
-}));
-
-const StyledAnsweredIcon = styled(CheckCircleOutlined)(({ theme }) => ({
-  color: theme.palette.primary.main,
-  fontSize: 18,
-}));
-
-const StyledAnsweredResponseLabel = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  color: theme.palette.primary.main,
-}));
-
-const StyledAnsweredResponseTime = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  marginLeft: "auto",
-}));
-
-const StyledResponseInputLabel = styled(Typography)({
-  fontWeight: 700,
-  marginBottom: "0.5rem",
-  textTransform: "uppercase",
-});
-
-const StyledResponseActionsBox = styled(Box)(({ theme }) => ({
-  marginTop: theme.spacing(2),
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "flex-end",
-  gap: theme.spacing(1.5),
-}));
-
-const StyledEmailActionButton = styled(MobileFilterButton)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.onPrimary,
-  borderColor: theme.palette.primary.main,
-  "&:hover": { backgroundColor: theme.palette.primary.dark },
-}));
-
-const StyledQueueCardHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  gap: theme.spacing(2),
-  marginBottom: theme.spacing(2),
-}));
-
-const StyledSubmitterInfoBox = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1.5),
-}));
-
-const StyledSubmitterAvatar = styled(Avatar)(({ theme }) => ({
-  width: 40,
-  height: 40,
-  ...theme.typography.labelMd,
-}));
-
-const StyledSubmitterName = styled(Typography)({
-  fontWeight: 700,
-});
-
-const StyledSubmitterRole = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  textTransform: "uppercase",
-}));
-
-const StyledQueueCardStatusBox = styled(Box)(() => ({
-  textAlign: "left",
-}));
-
-const StyledReceivedTimeLabel = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  marginTop: theme.spacing(0.5),
-}));
-
-const StyledComplaintTextBox = styled(Box, {
-  shouldForwardProp: prop => prop !== "isUnanswered",
-})<{ isUnanswered: boolean }>(({ theme, isUnanswered }) => ({
-  marginBottom: theme.spacing(isUnanswered ? 3 : 2),
-  padding: theme.spacing(2),
-  backgroundColor: theme.palette.surfaceContainerLowest,
-  borderRadius: theme.layout.radius.card,
-  borderLeft: `4px solid ${theme.palette.primary.main}`,
-}));
-
-const StyledDeleteButton = styled(MobileFilterButton)(({ theme }) => ({
-  color: theme.palette.error.main,
-  borderColor: theme.palette.error.main,
-  "&:hover": { backgroundColor: theme.palette.errorContainer },
-}));
 
 interface ComplaintQueueCardMobileProps {
   readonly row: AdminComplaintRow;
@@ -132,113 +23,29 @@ interface ComplaintQueueCardMobileProps {
   readonly onDelete: () => void;
 }
 
-function getInitials(name: string | null | undefined): string {
-  if (!name) {
-    return "";
-  }
-  return name
-    .split(" ")
-    .map(part => part.charAt(0))
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-function mapPriorityForBadge(priority: ComplaintPriority): string {
-  if (priority === "urgent") {
-    return "blocked";
-  }
-
-  return "confirmed";
-}
-
-function ComplaintResponseSectionMobile({
-  row,
-  labels,
-  draftResponse,
-  canManage,
-  canDelete,
-  onDraftChange,
-  onAnswer,
-  onDelete,
-}: Readonly<{
-  row: AdminComplaintRow;
-  labels: ComplaintsAdminLabels;
-  draftResponse: string;
-  canManage: boolean;
-  canDelete: boolean;
-  onDraftChange: (text: string) => void;
-  onAnswer: (options: { readonly sendEmail: boolean }) => void;
-  onDelete: () => void;
-}>) {
-  if (row.status === ComplaintStatus.Answered) {
-    return (
-      <StyledAnsweredResponseBox>
-        <StyledAnsweredResponseHeader>
-          <StyledAnsweredIcon />
-          <StyledAnsweredResponseLabel variant="labelMd">{labels.queue.adminResponse}</StyledAnsweredResponseLabel>
-          {row.answeredAt ? (
-            <StyledAnsweredResponseTime variant="labelMd">{row.answeredAt}</StyledAnsweredResponseTime>
-          ) : null}
-        </StyledAnsweredResponseHeader>
-        <Typography variant="bodyMd" sx={{ fontStyle: "italic" }}>
-          {row.adminResponse}
-        </Typography>
-      </StyledAnsweredResponseBox>
-    );
-  }
-
-  if (!canManage) {
-    return null;
-  }
-
+function MobileRoot({ children, isUnanswered }: Readonly<{ children: ReactNode; isUnanswered: boolean }>) {
   return (
-    <Box>
-      <StyledResponseInputLabel variant="labelMd">{labels.queue.yourResponse}</StyledResponseInputLabel>
-      <TextField
-        fullWidth
-        multiline
-        minRows={3}
-        value={draftResponse}
-        placeholder={labels.queue.responsePlaceholder}
-        onChange={event => {
-          onDraftChange(event.target.value);
-        }}
-        slotProps={{ htmlInput: { autoComplete: "off" } }}
-      />
-      <StyledResponseActionsBox>
-        <MobilePrimaryPageAction
-          startIcon={<SendOutlined />}
-          disabled={draftResponse.trim().length === 0}
-          onClick={() => {
-            onAnswer({ sendEmail: false });
-          }}
-        >
-          {labels.queue.answer}
-        </MobilePrimaryPageAction>
-        <StyledEmailActionButton
-          startIcon={<AlternateEmailOutlined />}
-          disabled={draftResponse.trim().length === 0}
-          onClick={() => {
-            onAnswer({ sendEmail: true });
-          }}
-        >
-          {labels.queue.answerAndEmail}
-        </StyledEmailActionButton>
-        {canDelete ? (
-          <StyledDeleteButton
-            startIcon={<DeleteOutlineOutlined />}
-            onClick={() => {
-              onDelete();
-            }}
-          >
-            {labels.queue.deleteConfirmConfirm}
-          </StyledDeleteButton>
-        ) : null}
-      </StyledResponseActionsBox>
-    </Box>
+    <MobileCardListItem
+      variant="rounded"
+      accentBorder={isUnanswered ? { color: "warning", side: "inline-start" } : undefined}
+    >
+      {children}
+    </MobileCardListItem>
   );
 }
+
+const mobileEmailActionSx: SxProps<Theme> = theme => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.onPrimary,
+  borderColor: theme.palette.primary.main,
+  "&:hover": { backgroundColor: theme.palette.primary.dark },
+});
+
+const mobileDeleteActionSx: SxProps<Theme> = theme => ({
+  color: theme.palette.error.main,
+  borderColor: theme.palette.error.main,
+  "&:hover": { backgroundColor: theme.palette.errorContainer },
+});
 
 export function ComplaintQueueCardMobile({
   row,
@@ -250,49 +57,34 @@ export function ComplaintQueueCardMobile({
   onAnswer,
   onDelete,
 }: Readonly<ComplaintQueueCardMobileProps>) {
-  const isUnanswered = row.status === ComplaintStatus.Unanswered;
-
   return (
-    <MobileCardListItem
-      variant="rounded"
-      accentBorder={isUnanswered ? { color: "warning", side: "inline-start" } : undefined}
-    >
-      <StyledQueueCardHeader>
-        <StyledSubmitterInfoBox>
-          <StyledSubmitterAvatar src={row.avatarUrl || undefined}>
-            {getInitials(row.submitterName)}
-          </StyledSubmitterAvatar>
-          <Box>
-            <StyledSubmitterName variant="titleLg">{row.submitterName}</StyledSubmitterName>
-            <StyledSubmitterRole variant="labelMd">{row.submitterRole}</StyledSubmitterRole>
-          </Box>
-        </StyledSubmitterInfoBox>
-        <StyledQueueCardStatusBox>
-          <MobileStatusBadge
-            category="classStatus"
-            status={mapPriorityForBadge(row.priority)}
-            label={labels.priorityLabels[row.priority]}
-          />
-          <StyledReceivedTimeLabel variant="labelMd">
-            {labels.queue.received}: {row.receivedAt}
-          </StyledReceivedTimeLabel>
-        </StyledQueueCardStatusBox>
-      </StyledQueueCardHeader>
-
-      <StyledComplaintTextBox isUnanswered={isUnanswered}>
-        <Typography variant="bodyLg">{row.complaintText}</Typography>
-      </StyledComplaintTextBox>
-
-      <ComplaintResponseSectionMobile
-        row={row}
-        labels={labels}
-        draftResponse={draftResponse}
-        canManage={canManage}
-        canDelete={canDelete}
-        onDraftChange={onDraftChange}
-        onAnswer={onAnswer}
-        onDelete={onDelete}
-      />
-    </MobileCardListItem>
+    <ComplaintQueueCardShared
+      row={row}
+      labels={labels}
+      draftResponse={draftResponse}
+      canManage={canManage}
+      canDelete={canDelete}
+      onDraftChange={onDraftChange}
+      onAnswer={onAnswer}
+      onDelete={onDelete}
+      slots={{
+        Root: MobileRoot,
+        StatusBadge: MobileStatusBadge,
+        PrimaryActionButton: MobilePrimaryPageAction,
+        EmailActionButton: MobileFilterButton,
+        DeleteActionButton: MobileFilterButton,
+        EmailActionSx: mobileEmailActionSx,
+        DeleteActionSx: mobileDeleteActionSx,
+        HeaderDirection: "column",
+        HeaderJustifyContent: "flex-start",
+        HeaderAlignItems: "flex-start",
+        SubmitterGap: 1.5,
+        AvatarSize: 40,
+        StatusTextAlign: "left",
+        ReceivedTimeMarginTop: 0.5,
+        ActionsDirection: "column",
+        ActionsJustifyContent: "flex-end",
+      }}
+    />
   );
 }

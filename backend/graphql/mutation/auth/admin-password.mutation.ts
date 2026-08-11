@@ -31,7 +31,7 @@ gqlSchemaBuilder.mutationField("adminResetPassword", t =>
         return result;
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error));
-        if (err.message === "cannotResetOwnPasswordViaAdmin") {
+        if (err.message.includes(tErrors.auth.cannotResetOwnPasswordViaAdmin)) {
           throw new GraphQLError(tErrors.auth.cannotResetOwnPasswordViaAdmin, {
             extensions: { code: "FORBIDDEN" },
           });

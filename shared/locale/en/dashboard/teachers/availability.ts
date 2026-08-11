@@ -37,6 +37,7 @@ export const dashboardTeacherAvailabilityEn: TeacherAvailabilityLabels = {
     fri: "Fri",
     sat: "Sat",
     sun: "Sun",
+    availableSlot: (teacherName, time) => `${teacherName} available at ${time}`,
   },
   insights: {
     peakLoad: "Peak Load",

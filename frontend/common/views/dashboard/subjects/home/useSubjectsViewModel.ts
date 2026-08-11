@@ -108,6 +108,7 @@ function useSubjectsDialogLabels(): SubjectsDialogLabels {
       currencyLabel: t.currencyLabel,
       cancel: t.cancel,
       saveChanges: t.saveChanges,
+      saving: t.saving,
     }),
     [t]
   );

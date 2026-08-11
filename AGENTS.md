@@ -403,6 +403,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/testing/shared-test-runner.md` - Shared parallel test runner pattern
 - `docs/backend/shared-types-pattern.md` - Cross-layer shared types in shared/types/
 - `docs/i18n/locale-namespace-migration.md` - Locale namespace migration from monolithic to sub-module directories
+- `docs/auth/permission-architecture.md` - Client-side permission architecture (3-tier model, wrapper removal rationale)
 
 
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)

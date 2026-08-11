@@ -46,6 +46,7 @@ export interface SubjectsDialogLabels {
   readonly currencyLabel: string;
   readonly cancel: string;
   readonly saveChanges: string;
+  readonly saving: string;
 }
 
 // NEW FOR PLAN v5: Form-state bundle passed into each subject form dialog

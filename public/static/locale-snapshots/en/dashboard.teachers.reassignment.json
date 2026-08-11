@@ -28,6 +28,13 @@
     "statusUpdate": "Update Status",
     "currentStatus": {
       "__fn": "(status) => `Current: ${status}`"
+    },
+    "statusOptions": {
+      "REGULAR": "Regular / Active",
+      "SUSPENDED": "Suspended",
+      "ON_LEAVE": "On Leave",
+      "ON_TRIAL": "On Trial",
+      "DEACTIVATED": "Deactivated"
     }
   },
   "historyAndContact": {

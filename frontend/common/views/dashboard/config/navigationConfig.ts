@@ -949,7 +949,7 @@ export function getNavItemsForPermissions(
   // Overload 2: (groups, items, permissions[, featureFlags]) => NavGroup[]
   const groups = isNavGroupArray(groupsOrItems) ? groupsOrItems : [];
   const items = isNavItemArray(itemsOrPermissions) ? itemsOrPermissions : [];
-  const permissions = maybePermissionsOrFlags;
+  const permissions = Array.isArray(maybePermissionsOrFlags) ? maybePermissionsOrFlags : [];
   const featureFlags = resolveNavFeatureFlags(undefined, maybeFeatureFlags);
 
   // 1) Filter items (single pass, exactly the same logic as overload 1).

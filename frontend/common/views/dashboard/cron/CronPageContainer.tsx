@@ -1,9 +1,7 @@
 "use client";
 
-import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CronViewModel, useCronViewModel } from "@/frontend/common/views/dashboard/cron/useCronViewModel";
 
 const lazyViews = createLazyView<CronViewModel>(
@@ -19,11 +17,7 @@ const lazyViews = createLazyView<CronViewModel>(
 
 export function CronPageContainer() {
   const viewModel = useCronViewModel();
-  return (
-    <RequirePermission permissions={[AppPermission.CronManage]} fallback={null}>
-      <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />
-    </RequirePermission>
-  );
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
 }
 
 export type { CronViewModel };

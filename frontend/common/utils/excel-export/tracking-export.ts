@@ -1,3 +1,9 @@
+import {
+  resolveStatusValue,
+  writeDataRow,
+  writeHeaderRow,
+  writeMergedTitleCell,
+} from "@/frontend/common/utils/excel-export/shared-export-logic";
 import type { TrackingRow } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 
 interface TrackingExportLabels {
@@ -17,74 +23,10 @@ interface TrackingExportData {
   readonly labels: TrackingExportLabels;
 }
 
-type CellStyle = import("xlsx-js-style").CellStyle;
-
-const FONT = "Cairo";
-
-const titleStyle: CellStyle = {
-  font: { name: FONT, bold: true, sz: 16, color: { rgb: "1A237E" } },
-  alignment: { horizontal: "center", vertical: "center" },
-  fill: { fgColor: { rgb: "E8EAF6" } },
-  border: {
-    bottom: { style: "medium", color: { rgb: "1A237E" } },
-  },
-};
-
-const headerStyle: CellStyle = {
-  font: { name: FONT, bold: true, sz: 11, color: { rgb: "FFFFFF" } },
-  alignment: { horizontal: "center", vertical: "center", wrapText: true },
-  fill: { fgColor: { rgb: "1A237E" } },
-  border: {
-    bottom: { style: "medium", color: { rgb: "0D1642" } },
-    top: { style: "medium", color: { rgb: "0D1642" } },
-    left: { style: "thin", color: { rgb: "3949AB" } },
-    right: { style: "thin", color: { rgb: "3949AB" } },
-  },
-};
-
-const bodyStyle: CellStyle = {
-  font: { name: FONT, sz: 10 },
-  alignment: { horizontal: "center", vertical: "center" },
-  border: {
-    bottom: { style: "thin", color: { rgb: "E0E0E0" } },
-    top: { style: "thin", color: { rgb: "E0E0E0" } },
-    left: { style: "thin", color: { rgb: "E0E0E0" } },
-    right: { style: "thin", color: { rgb: "E0E0E0" } },
-  },
-};
-
-const bodyAltStyle: CellStyle = {
-  ...bodyStyle,
-  fill: { fgColor: { rgb: "F5F5FA" } },
-};
-
-const nameStyle: CellStyle = {
-  ...bodyStyle,
-  alignment: { horizontal: "left" },
-  font: { name: FONT, sz: 10, bold: true },
-};
-
-const nameAltStyle: CellStyle = {
-  ...nameStyle,
-  fill: { fgColor: { rgb: "F5F5FA" } },
-};
-
-const statusStyle: CellStyle = {
-  ...bodyStyle,
-  font: { name: FONT, sz: 10, bold: true },
-};
-
-const statusAltStyle: CellStyle = {
-  ...statusStyle,
-  fill: { fgColor: { rgb: "F5F5FA" } },
-};
-
-function resolveStatusValue(status: string | null | undefined, statusLabels: Record<string, string>): string {
-  if (status === undefined || status === null) {
-    return "";
-  }
-  return statusLabels[status] ?? status;
-}
+const HEADER_ROW = 2;
+const DATA_START_ROW = 3;
+const NAME_COLUMN = 0;
+const STATUS_COLUMN = 4;
 
 export async function exportRescheduleTracking(data: TrackingExportData): Promise<void> {
   const XLSX = await import("xlsx-js-style");
@@ -103,23 +45,10 @@ export async function exportRescheduleTracking(data: TrackingExportData): Promis
 
   const totalCols = headers.length;
 
-  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } }];
+  writeMergedTitleCell(XLSX, ws, labels.pageTitle, totalCols);
+  writeHeaderRow(XLSX, ws, headers, HEADER_ROW);
 
-  const titleCell = XLSX.utils.encode_cell({ r: 0, c: 0 });
-  ws[titleCell] = { v: labels.pageTitle, t: "s", s: titleStyle };
-
-  const headerRow = 2;
-
-  headers.forEach((header, col) => {
-    const cell = XLSX.utils.encode_cell({ r: headerRow, c: col });
-    ws[cell] = { v: header, t: "s", s: headerStyle };
-  });
-
-  const dataStartRow = 3;
   rows.forEach((row, idx) => {
-    const r = dataStartRow + idx;
-    const isAlt = idx % 2 === 1;
-
     const statusValue = resolveStatusValue(row.status, labels.statusLabels);
     const values: string[] = [
       row.teacherName ?? "",
@@ -128,15 +57,9 @@ export async function exportRescheduleTracking(data: TrackingExportData): Promis
       row.timeSlot ?? "",
       statusValue,
     ];
-
-    values.forEach((val, col) => {
-      const cell = XLSX.utils.encode_cell({ r, c: col });
-      let style: CellStyle;
-      if (col === 0) style = isAlt ? nameAltStyle : nameStyle;
-      else if (col === 4) style = isAlt ? statusAltStyle : statusStyle;
-      else style = isAlt ? bodyAltStyle : bodyStyle;
-
-      ws[cell] = { v: val, t: "s", s: style };
+    writeDataRow(XLSX, ws, DATA_START_ROW + idx, idx, values, {
+      nameColumnIndex: NAME_COLUMN,
+      statusColumnIndex: STATUS_COLUMN,
     });
   });
 

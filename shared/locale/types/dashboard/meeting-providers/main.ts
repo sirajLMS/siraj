@@ -10,6 +10,7 @@ export interface MeetingProvidersLabels {
   readonly inactive: string;
   readonly cancel: string;
   readonly save: string;
+  readonly saving: string;
   readonly edit: string;
   readonly delete: string;
   readonly emptyCatalogTitle: string;

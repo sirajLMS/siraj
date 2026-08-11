@@ -1,17 +1,10 @@
 "use client";
 
-import {
-  CalendarToday,
-  ChevronLeft,
-  ChevronRight,
-  SchoolOutlined,
-  TimerOutlined,
-  TrendingUpOutlined,
-  VerifiedUserOutlined,
-} from "@mui/icons-material";
-import { Box, Button, type Theme, Typography } from "@mui/material";
+import { SchoolOutlined, TimerOutlined, TrendingUpOutlined, VerifiedUserOutlined } from "@mui/icons-material";
+import { Typography } from "@mui/material";
 import { useMemo } from "react";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { MonthNavigator } from "@/frontend/common/views/dashboard/student/__shared__/MonthNavigator";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import {
   MobileContentStack,
@@ -58,49 +51,6 @@ function useStudentHistoryMetricItems(
       },
     ],
     [labels, metrics]
-  );
-}
-
-function navButtonSx(theme: Theme) {
-  return {
-    minWidth: 40,
-    transform: theme.direction === "rtl" ? ("scaleX(-1)" as const) : undefined,
-  };
-}
-
-function MonthNavigator({
-  monthLabel,
-  canGoNext,
-  labels,
-  onPrevMonth,
-  onNextMonth,
-}: Readonly<{
-  monthLabel: string;
-  canGoNext: boolean;
-  labels: StudentHistoryViewModel["labels"];
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
-}>): React.ReactNode {
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-      <Button aria-label={labels.previousMonth} onClick={onPrevMonth} sx={navButtonSx}>
-        <ChevronLeft />
-      </Button>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-        <CalendarToday sx={theme => ({ fontSize: 18, color: theme.palette.primary.main })} />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {monthLabel}
-        </Typography>
-      </Box>
-      <Button
-        aria-label={labels.nextMonth}
-        onClick={onNextMonth}
-        disabled={!canGoNext}
-        sx={theme => ({ ...navButtonSx(theme), opacity: canGoNext ? 1 : 0.5 })}
-      >
-        <ChevronRight />
-      </Button>
-    </Box>
   );
 }
 

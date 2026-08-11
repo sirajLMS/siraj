@@ -35,6 +35,7 @@ export const dashboardSubjectsEn: SubjectsLabels = {
     `Are you sure you want to delete the category "${name}"? All subjects in this category will be uncategorized.`,
   cancel: "Cancel",
   saveChanges: "Save Changes",
+  saving: "Saving...",
   subjectCreated: "Subject created successfully",
   subjectUpdated: "Subject updated successfully",
   subjectDeleted: "Subject deleted successfully",

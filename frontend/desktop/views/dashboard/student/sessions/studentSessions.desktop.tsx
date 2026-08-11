@@ -1,12 +1,13 @@
 "use client";
 
-import { CalendarToday, ChevronLeft, ChevronRight, VisibilityOutlined } from "@mui/icons-material";
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
+import { VisibilityOutlined } from "@mui/icons-material";
+import { FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { DateTimeTooltipDisplay } from "@/frontend/common/components/intl/DateTimeTooltipDisplay";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
+import { MonthNavigator } from "@/frontend/common/views/dashboard/student/__shared__/MonthNavigator";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import {
   formatStudentHistoryDuration,
@@ -133,53 +134,6 @@ function buildColumns(
   ];
 }
 
-function MonthNavigator({
-  monthLabel,
-  canGoNext,
-  labels,
-  onPrevMonth,
-  onNextMonth,
-}: Readonly<{
-  monthLabel: string;
-  canGoNext: boolean;
-  labels: StudentSessionsViewModel["labels"];
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
-}>) {
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2, gap: 2 }}>
-      <Button
-        aria-label={labels.previousMonth}
-        onClick={onPrevMonth}
-        sx={theme => ({
-          minWidth: 40,
-          transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined,
-        })}
-      >
-        <ChevronLeft />
-      </Button>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <CalendarToday sx={theme => ({ fontSize: 20, color: theme.palette.primary.main })} />
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {monthLabel}
-        </Typography>
-      </Box>
-      <Button
-        aria-label={labels.nextMonth}
-        onClick={onNextMonth}
-        disabled={!canGoNext}
-        sx={theme => ({
-          minWidth: 40,
-          transform: theme.direction === "rtl" ? "scaleX(-1)" : undefined,
-          opacity: canGoNext ? 1 : 0.5,
-        })}
-      >
-        <ChevronRight />
-      </Button>
-    </Box>
-  );
-}
-
 function SessionsFilters({
   subjectFilter,
   statusFilter,
@@ -288,6 +242,9 @@ export function StudentSessionsDesktopView({
         labels={labels}
         onPrevMonth={onPrevMonth}
         onNextMonth={onNextMonth}
+        outerSx={{ mb: 2, gap: 2 }}
+        innerGap={1}
+        iconFontSize={20}
       />
 
       <DesktopSectionPanel

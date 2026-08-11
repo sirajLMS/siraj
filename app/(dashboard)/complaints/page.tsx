@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { AppPermission } from "@/backend/enum";
 import { getCachedParentIdForComplaints } from "@/backend/lib/auth/cached-parent";
+import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
@@ -15,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ComplaintsPage() {
-  const { userId } = await getServerUserContext();
+  const { userId, context } = await getServerUserContext();
   const locale = await getLocale();
 
   if (!userId) {
@@ -30,5 +32,6 @@ export default async function ComplaintsPage() {
     redirect({ href: "/dashboard" });
   }
 
+  await requirePermissionForPage(userId, [AppPermission.SUPPORT_SUBMIT_COMPLAINT], locale, context);
   return <ParentComplaintsContainer />;
 }

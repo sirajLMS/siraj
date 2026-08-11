@@ -3,6 +3,10 @@ export { LocalizedStringDrawer } from "@/frontend/common/components/ui/input/loc
 export { LocalizedStringFormField } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringFormField";
 export { LocalizedStringInput } from "@/frontend/common/components/ui/input/localizedString/LocalizedStringInput";
 export type {
+  LocaleEmojiComponentProps,
+  LocalizedStringDrawerSlotProps,
+} from "@/frontend/common/components/ui/input/localizedString/localizedStringDrawerShared";
+export type {
   LocaleAdornmentSwitchProps,
   LocalizedStringDrawerProps,
   LocalizedStringInputProps,
