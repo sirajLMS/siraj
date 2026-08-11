@@ -8,7 +8,7 @@
       "allowedModels": []
     }
   },
-  "chat.utilitySmallModel": "customendpoint/nvidia/nvidia/nemotron-3-ultra-550b-a55b",
+  "chat.utilitySmallModel": "customendpoint/nvidia/thinkingmachines/inkling",
   "chat.permissions.default": "autopilot",
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "always"
