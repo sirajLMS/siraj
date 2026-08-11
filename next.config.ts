@@ -55,12 +55,6 @@ const nextConfig: NextConfig = {
   distDir: getEnv("NEXT_DIST_DIR", ".next"),
   reactStrictMode: true,
   generateBuildId: () => buildId,
-  // Production/Vercel omit `test/` via `.vercelignore`. Stories and colocated
-  // `*.test.tsx` files still import `@/test/...`, so Next's build typecheck
-  // must not include them (local `bun tsgo` keeps using tsconfig.json).
-  typescript: {
-    tsconfigPath: "tsconfig.build.json",
-  },
   env: {
     NEXT_PUBLIC_BUILD_ID: buildId,
     NEXT_PUBLIC_LOCALE_SNAPSHOT_BASE: "/static/locale-snapshots",
