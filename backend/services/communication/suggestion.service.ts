@@ -1,7 +1,13 @@
 import { ParentRepository, SoftDeleteRepository, SuggestionRepository, UserRepository } from "@/backend/db/repo";
 import { AppPermission, NotificationChannel, NotificationEventType, SuggestionStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { CommunicationService, PermissionsService } from "@/backend/services";
+import { CommunicationService } from "@/backend/services";
+import {
+  assertPermission,
+  requireParentByActorUserId,
+  resolveEntityById,
+  softDeleteEntityLog,
+} from "@/backend/services/communication/__shared__/complaintSuggestionBase";
 import type {
   ParentSuggestionOptions,
   SuggestionContributorStats,
@@ -24,20 +30,7 @@ export namespace SuggestionService {
     input: SuggestionSubmitInput,
     locale?: string
   ): Promise<SuggestionSelectType> {
-    const hasPermission = await PermissionsService.hasPermission(
-      actorUserId,
-      AppPermission.COMMUNICATION_SUBMIT_SUGGESTION
-    );
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    const parent = await ParentRepository.findByUserId(actorUserId);
-    if (!parent) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.parentNotFound);
-    }
+    const parent = await requireParentByActorUserId(actorUserId, AppPermission.COMMUNICATION_SUBMIT_SUGGESTION, locale);
 
     try {
       const created = await SuggestionRepository.submitSuggestion(
@@ -94,11 +87,7 @@ export namespace SuggestionService {
     options: SuggestionQueueFilter,
     locale?: string
   ): Promise<SuggestionQueueResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_LIST);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertPermission(actorUserId, AppPermission.SUGGESTIONS_LIST, locale);
 
     try {
       const result = await SuggestionRepository.getAdminSuggestionQueue({
@@ -151,11 +140,7 @@ export namespace SuggestionService {
     suggestionId: string,
     locale?: string
   ): Promise<SuggestionSelectType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW, locale);
 
     try {
       const updated = await SuggestionRepository.markSuggestionReviewed(
@@ -184,17 +169,7 @@ export namespace SuggestionService {
     options: ParentSuggestionOptions,
     locale?: string
   ): Promise<ReadonlyArray<SuggestionReturnType>> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    const parent = await ParentRepository.findByUserId(actorUserId);
-    if (!parent) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.parentNotFound);
-    }
+    const parent = await requireParentByActorUserId(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY, locale);
 
     try {
       const suggestions = await SuggestionRepository.getSuggestionsByParent(parent.id, options);
@@ -218,11 +193,7 @@ export namespace SuggestionService {
     excludeId: string,
     locale?: string
   ): Promise<ReadonlyArray<SuggestionSearchResultType>> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW, locale);
 
     try {
       return (await SuggestionRepository.searchSuggestions(query, excludeId)).map(result => ({
@@ -246,17 +217,14 @@ export namespace SuggestionService {
     adminResponse: string,
     locale?: string
   ): Promise<SuggestionSelectType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    const suggestion = await SuggestionRepository.getSuggestionById(suggestionId);
-    if (!suggestion) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.suggestionNotFound);
-    }
+    const suggestion = await resolveEntityById({
+      actorUserId,
+      permission: AppPermission.SUGGESTIONS_REVIEW,
+      entityId: suggestionId,
+      findFn: SuggestionRepository.getSuggestionById,
+      notFoundErrorKey: "suggestionNotFound",
+      locale,
+    });
 
     try {
       const updated = await SuggestionRepository.respondToSuggestion(
@@ -317,12 +285,8 @@ export namespace SuggestionService {
     duplicateOfId: string,
     locale?: string
   ): Promise<SuggestionSelectType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW);
+    await assertPermission(actorUserId, AppPermission.SUGGESTIONS_REVIEW, locale);
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-
-    if (!hasPermission) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
 
     if (suggestionId === duplicateOfId) {
       throw new Error(tErrors.suggestionCannotMarkSelfAsDuplicate);
@@ -390,34 +354,22 @@ export namespace SuggestionService {
     suggestionId: string,
     locale?: string
   ): Promise<{ readonly deletedAt: string }> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUGGESTIONS_DELETE);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await resolveEntityById({
+      actorUserId,
+      permission: AppPermission.SUGGESTIONS_DELETE,
+      entityId: suggestionId,
+      findFn: SuggestionRepository.getSuggestionById,
+      notFoundErrorKey: "suggestionNotFound",
+      locale,
+    });
 
-    const suggestion = await SuggestionRepository.getSuggestionById(suggestionId);
-    if (!suggestion) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.suggestionNotFound);
-    }
-
-    try {
-      const result = await SoftDeleteRepository.softDeleteSuggestion(suggestionId, actorUserId);
-
-      logger.info("Suggestion soft-deleted", {
-        actorUserId,
-        suggestionId,
-        deletedAt: result.deletedAt,
-      });
-
-      return {
-        deletedAt: result.deletedAt.toISOString(),
-      };
-    } catch (error) {
-      logger.error("Failed to delete suggestion", { actorUserId, suggestionId, error });
-      throw error;
-    }
+    return softDeleteEntityLog({
+      actorUserId,
+      entityLabel: "Suggestion",
+      idKey: "suggestionId",
+      entityId: suggestionId,
+      deleteFn: SoftDeleteRepository.softDeleteSuggestion,
+    });
   }
 
   export async function getContributorStats(
@@ -425,14 +377,7 @@ export namespace SuggestionService {
     days: number,
     locale?: string
   ): Promise<SuggestionContributorStats> {
-    const hasPermission = await PermissionsService.hasPermission(
-      actorUserId,
-      AppPermission.COMMUNICATION_SUBMIT_SUGGESTION
-    );
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertPermission(actorUserId, AppPermission.COMMUNICATION_SUBMIT_SUGGESTION, locale);
 
     if (days < 1 || days > 365) {
       const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;

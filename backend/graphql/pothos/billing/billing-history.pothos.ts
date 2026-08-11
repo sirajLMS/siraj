@@ -13,6 +13,7 @@ import {
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { BillingHistoryService } from "@/backend/services/billing/billing-history.service";
 import type {
@@ -22,26 +23,9 @@ import type {
   InvoiceHistoryPaginatedResult,
   InvoiceHistoryRow,
   NextUnpaidInvoiceSummary,
-  PaginationInput,
   ParentBillingSummaryResult,
   StudentCreditRow,
 } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
-
-function parsePaginationArgs(input: PaginationInput | null | undefined): PaginationArgs | null {
-  if (!input) {
-    return null;
-  }
-  return new PaginationArgs({
-    first: input.first ?? null,
-    skip: input.skip ?? null,
-    after: input.after ?? null,
-    before: input.before ?? null,
-    last: input.last ?? null,
-    page: input.page ?? null,
-    maxCount: input.maxCount ?? null,
-  });
-}
 
 function enrichCurrencyTotalsWithDisplay(
   totals: readonly BillingCurrencyTotal[],

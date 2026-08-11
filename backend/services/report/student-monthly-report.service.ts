@@ -9,6 +9,22 @@ import type { StudentHeader, StudentMonthlyReportReturnType } from "@/backend/ty
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace StudentMonthlyReportService {
+  async function fetchStudentRow<T extends Record<string, unknown>>(
+    studentId: string,
+    columns: T,
+    locale?: string
+  ): Promise<{ [K in keyof T]: K extends keyof typeof students.$inferSelect ? (typeof students.$inferSelect)[K] : never }> {
+    const selectColumns = columns as unknown as Parameters<typeof db.select>[0];
+    const [studentRow] = await db.select(selectColumns).from(students).where(eq(students.id, studentId)).limit(1);
+
+    if (!studentRow) {
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.studentNotFound(studentId));
+    }
+
+    return studentRow as { [K in keyof T]: K extends keyof typeof students.$inferSelect ? (typeof students.$inferSelect)[K] : never };
+  }
+
   async function assertCanViewMonthlyReport(actorUserId: string, studentId: string, locale?: string): Promise<void> {
     const hasMonthlyPermission = await PermissionsService.hasPermission(
       actorUserId,
@@ -16,20 +32,15 @@ export namespace StudentMonthlyReportService {
     );
     if (hasMonthlyPermission) return;
 
-    const [studentRow] = await db
-      .select({
+    const studentRow = await fetchStudentRow(
+      studentId,
+      {
         id: students.id,
         userId: students.userId,
         parentId: students.parentId,
-      })
-      .from(students)
-      .where(eq(students.id, studentId))
-      .limit(1);
-
-    if (!studentRow) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.studentNotFound(studentId));
-    }
+      },
+      locale
+    );
 
     // Self: student viewing own report
     if (studentRow.userId === actorUserId) return;
@@ -45,20 +56,15 @@ export namespace StudentMonthlyReportService {
   }
 
   async function loadStudentHeader(studentId: string, locale?: string): Promise<StudentHeader> {
-    const [studentRow] = await db
-      .select({
+    const studentRow = await fetchStudentRow(
+      studentId,
+      {
         studentId: students.id,
         studentName: students.name,
         classesRemaining: students.classesRemaining,
-      })
-      .from(students)
-      .where(eq(students.id, studentId))
-      .limit(1);
-
-    if (!studentRow) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.studentNotFound(studentId));
-    }
+      },
+      locale
+    );
 
     return {
       studentId,

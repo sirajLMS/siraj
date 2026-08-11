@@ -4,9 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { CacheDbRepository } from "@/backend/db/repo/shared/cache.repository";
 import { sessionCache } from "@/backend/db/schema/shared/cache";
 import { logger } from "@/backend/lib/logger";
-import { getEntityCacheStats } from "@/backend/services/cache/EntityCacheService";
-import type { ICacheService } from "@/backend/services/cache/ICacheService";
-import type { CacheStats } from "@/backend/services/shared/CacheInterface";
+import { CacheAdapterBase } from "@/backend/services/cache/__shared__/CacheAdapterBase";
 
 /**
  * PostgreSQL Cache Adapter
@@ -29,10 +27,11 @@ function resolveTtlSeconds(options?: CacheSetOptions): number {
   return 3600;
 }
 
-export class PostgresCacheAdapter implements ICacheService {
+export class PostgresCacheAdapter extends CacheAdapterBase {
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor() {
+    super();
     // Start periodic cleanup of expired entries
     this.startCleanup();
   }
@@ -40,7 +39,7 @@ export class PostgresCacheAdapter implements ICacheService {
   /**
    * Get a value from cache
    */
-  async get(key: string): Promise<string | null> {
+  override async get(key: string): Promise<string | null> {
     try {
       const entry = await CacheDbRepository.get(key);
       if (!entry) {
@@ -56,7 +55,7 @@ export class PostgresCacheAdapter implements ICacheService {
   /**
    * Set a value in cache
    */
-  async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
+  override async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
     try {
       const ttlSeconds = resolveTtlSeconds(options);
       const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
@@ -73,7 +72,7 @@ export class PostgresCacheAdapter implements ICacheService {
    * Returns `"OK"` if the key was inserted (first caller), `null` if it
    * already existed.
    */
-  async setNx(key: string, value: string, pxMs: number): Promise<string | null> {
+  override async setNx(key: string, value: string, pxMs: number): Promise<string | null> {
     try {
       const expiresAt = new Date(Date.now() + pxMs);
       const inserted = await CacheDbRepository.insertIfNotExists(key, value, expiresAt);
@@ -87,7 +86,7 @@ export class PostgresCacheAdapter implements ICacheService {
   /**
    * Increment a value in cache
    */
-  async incr(key: string): Promise<number> {
+  override async incr(key: string): Promise<number> {
     try {
       return await CacheDbRepository.incr(key);
     } catch (error) {
@@ -99,7 +98,7 @@ export class PostgresCacheAdapter implements ICacheService {
   /**
    * Set expiration time on a key
    */
-  async expire(key: string, seconds: number): Promise<void> {
+  override async expire(key: string, seconds: number): Promise<void> {
     try {
       const expiresAt = new Date(Date.now() + seconds * 1000);
       await CacheDbRepository.setExpiry(key, expiresAt);
@@ -112,7 +111,7 @@ export class PostgresCacheAdapter implements ICacheService {
   /**
    * Get time to live for a key
    */
-  async ttl(key: string): Promise<number> {
+  override async ttl(key: string): Promise<number> {
     try {
       return await CacheDbRepository.ttl(key);
     } catch (error) {
@@ -124,7 +123,7 @@ export class PostgresCacheAdapter implements ICacheService {
   /**
    * Delete a key
    */
-  async del(key: string): Promise<void> {
+  override async del(key: string): Promise<void> {
     try {
       await CacheDbRepository.del(key);
     } catch (error) {
@@ -139,7 +138,7 @@ export class PostgresCacheAdapter implements ICacheService {
    * For del-only pipelines, skips the transaction to avoid deadlocks between
    * the transaction connection and the global db connection used by CacheDbRepository.
    */
-  async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
+  override async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
     try {
       // del and set(NX) commands use CacheDbRepository which uses the global db
       // connection — skip transaction to avoid deadlocks
@@ -235,7 +234,7 @@ export class PostgresCacheAdapter implements ICacheService {
   /**
    * Check if cache connection is healthy
    */
-  async ping(): Promise<boolean> {
+  override async ping(): Promise<boolean> {
     try {
       return await CacheDbRepository.ping();
     } catch (error) {
@@ -247,7 +246,7 @@ export class PostgresCacheAdapter implements ICacheService {
   /**
    * Close the connection
    */
-  disconnect(): Promise<void> {
+  override disconnect(): Promise<void> {
     try {
       if (this.cleanupInterval) {
         clearInterval(this.cleanupInterval);
@@ -261,27 +260,16 @@ export class PostgresCacheAdapter implements ICacheService {
     }
   }
 
-  /**
-   * Get cache statistics and metrics
-   */
-  async stats(): Promise<CacheStats> {
-    try {
-      const q = queryDb();
-      const res = await q.select({ count: sql<number>`count(*)::int` }).from(sessionCache);
-      const size = res[0]?.count ?? 0;
-      return {
-        provider: "postgres",
-        size,
-        hitsByPrefix: getEntityCacheStats(),
-      };
-    } catch (error) {
-      logger.error("Postgres cache stats error:", error);
-      return {
-        provider: "postgres",
-        size: 0,
-        hitsByPrefix: getEntityCacheStats(),
-      };
-    }
+  /** Provider name for cache stats. */
+  protected getProviderName(): string {
+    return "postgres";
+  }
+
+  /** Query the total number of entries in the session_cache table. */
+  protected async getCacheSize(): Promise<number> {
+    const q = queryDb();
+    const res = await q.select({ count: sql<number>`count(*)::int` }).from(sessionCache);
+    return res[0]?.count ?? 0;
   }
 
   /**

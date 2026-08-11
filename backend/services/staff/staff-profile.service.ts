@@ -26,6 +26,22 @@ function toMaskedTeacherProfile(profile: TeacherProfileReturnType): TeacherProfi
   };
 }
 
+function assertPermission(hasPermission: boolean, locale?: string): void {
+  if (!hasPermission) {
+    const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+    throw new Error(tFunc.insufficientPermissions);
+  }
+}
+
+async function fetchTeacherProfileOrThrow(teacherId: string, locale?: string): Promise<TeacherProfileReturnType> {
+  const profile = await TeacherRepository.getTeacherProfileForEdit(teacherId);
+  if (!profile) {
+    const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+    throw new Error(tFunc.teacherNotFound(teacherId));
+  }
+  return profile;
+}
+
 export namespace StaffProfileService {
   export async function updateTeacherProfile(
     actorUserId: string,
@@ -33,14 +49,10 @@ export namespace StaffProfileService {
     input: TeacherProfileUpdateInputType,
     locale?: string
   ): Promise<TeacherProfileReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(
-      actorUserId,
-      AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER
+    assertPermission(
+      await PermissionsService.hasPermission(actorUserId, AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER),
+      locale
     );
-    if (!hasPermission) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.insufficientPermissions);
-    }
 
     const { timezone: timezoneInput, status, ...restInput } = input;
 
@@ -69,11 +81,7 @@ export namespace StaffProfileService {
       throw new Error(tFunc.teacherNotFound(teacherId));
     }
 
-    const profile = await TeacherRepository.getTeacherProfileForEdit(teacherId);
-    if (!profile) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.teacherNotFound(teacherId));
-    }
+    const profile = await fetchTeacherProfileOrThrow(teacherId, locale);
 
     try {
       await invalidateTeacherWrite(teacherId, profile.userId);
@@ -90,18 +98,9 @@ export namespace StaffProfileService {
     locale?: string
   ): Promise<TeacherProfileReturnType> {
     const viewOtherKeys = PROFILE_FIELD_GROUPS.map(group => group.viewOther);
-    const hasPermission = await PermissionsService.hasAnyPermission(actorUserId, viewOtherKeys);
-    if (!hasPermission) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.insufficientPermissions);
-    }
+    assertPermission(await PermissionsService.hasAnyPermission(actorUserId, viewOtherKeys), locale);
 
-    const profile = await TeacherRepository.getTeacherProfileForEdit(teacherId);
-    if (!profile) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.teacherNotFound(teacherId));
-    }
-
+    const profile = await fetchTeacherProfileOrThrow(teacherId, locale);
     return toMaskedTeacherProfile(profile);
   }
 
@@ -110,21 +109,12 @@ export namespace StaffProfileService {
     teacherId: string,
     locale?: string
   ): Promise<TeacherProfileReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(
-      actorUserId,
-      AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER
+    assertPermission(
+      await PermissionsService.hasPermission(actorUserId, AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER),
+      locale
     );
-    if (!hasPermission) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.insufficientPermissions);
-    }
 
-    const profile = await TeacherRepository.getTeacherProfileForEdit(teacherId);
-    if (!profile) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.teacherNotFound(teacherId));
-    }
-
+    const profile = await fetchTeacherProfileOrThrow(teacherId, locale);
     return toMaskedTeacherProfile(profile);
   }
 }

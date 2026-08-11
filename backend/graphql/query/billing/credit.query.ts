@@ -5,9 +5,9 @@ import {
   CreditTransactionPothosObject,
 } from "@/backend/graphql/pothos/billing/credit.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { CreditService } from "@/backend/services/billing/credit.service";
-import { PaginationArgs } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("studentCreditBalance", t =>
   t.field({
@@ -41,18 +41,7 @@ gqlSchemaBuilder.queryField("studentCreditTransactions", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      let pagination: PaginationArgs | null = null;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs);
 
       try {
         const result = await CreditService.getStudentTransactions(actorUserId, args.studentId, pagination, tErrors);

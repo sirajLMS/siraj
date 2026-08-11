@@ -39,12 +39,12 @@ async function updateSchedulingOnly(
   return row;
 }
 
-async function promoteSeedShellToTakenCompleted(
-  t: DBTransaction,
-  id: string,
-  instance: ClassInstanceInsertType,
-  updatedAt: Date
-): Promise<void> {
+/**
+ * Shared first step for seed shell promotion: sets ACTIVATED/PENDING with no
+ * actual start/end timestamps. Used by both `promoteSeedShellToTakenCompleted`
+ * and `promoteSeedShellToRunning` as the initial NOT_ACTIVATED → ACTIVATED transition.
+ */
+async function activateSeedShell(t: DBTransaction, id: string, updatedAt: Date): Promise<void> {
   await t
     .update(classInstances)
     .set({
@@ -55,6 +55,15 @@ async function promoteSeedShellToTakenCompleted(
       updatedAt,
     })
     .where(eq(classInstances.id, id));
+}
+
+async function promoteSeedShellToTakenCompleted(
+  t: DBTransaction,
+  id: string,
+  instance: ClassInstanceInsertType,
+  updatedAt: Date
+): Promise<void> {
+  await activateSeedShell(t, id, updatedAt);
 
   await t
     .update(classInstances)
@@ -85,16 +94,7 @@ async function promoteSeedShellToRunning(
   instance: ClassInstanceInsertType,
   updatedAt: Date
 ): Promise<void> {
-  await t
-    .update(classInstances)
-    .set({
-      executionState: "ACTIVATED",
-      outcome: "PENDING",
-      actualStartAt: null,
-      actualEndAt: null,
-      updatedAt,
-    })
-    .where(eq(classInstances.id, id));
+  await activateSeedShell(t, id, updatedAt);
 
   await t
     .update(classInstances)

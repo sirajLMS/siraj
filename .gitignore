@@ -110,5 +110,6 @@ scripts/run-test/feedback/feedback*.md
 .eslintcache-type-aware
 .oxlint-baseline.json
 .oxlint/
+.unused/
 nohup.out
 report/jscpd-report.json

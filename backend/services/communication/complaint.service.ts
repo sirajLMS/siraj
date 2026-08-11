@@ -9,6 +9,11 @@ import {
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";
+import {
+  assertPermission,
+  requireParentByActorUserId,
+  softDeleteEntityLog,
+} from "@/backend/services/communication/__shared__/complaintSuggestionBase";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
 import { buildNewComplaintPayloads } from "@/backend/services/notification/notification-payloads.builders";
 import type {
@@ -41,18 +46,7 @@ async function dispatchNewComplaint(complaint: ComplaintSelectType, locale?: str
 
 export namespace ComplaintService {
   export async function getParentIdForComplaints(actorUserId: string, locale?: string): Promise<string> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    const parent = await ParentRepository.findByUserId(actorUserId);
-    if (!parent) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.parentNotFound);
-    }
-
+    const parent = await requireParentByActorUserId(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT, locale);
     return parent.id;
   }
 
@@ -61,17 +55,7 @@ export namespace ComplaintService {
     input: ComplaintSubmitInput & { files?: ReadonlyArray<FileMetadata> },
     locale?: string
   ): Promise<ComplaintSelectType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    const parent = await ParentRepository.findByUserId(actorUserId);
-    if (!parent) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.parentNotFound);
-    }
+    const parent = await requireParentByActorUserId(actorUserId, AppPermission.SUPPORT_SUBMIT_COMPLAINT, locale);
 
     if (input.studentId) {
       const student = await ParentRepository.getAssociatedStudentById(input.studentId);
@@ -137,17 +121,7 @@ export namespace ComplaintService {
     pagination: PaginationArgs | null = null,
     locale?: string
   ): Promise<ParentComplaintPaginatedResult> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
-    const parent = await ParentRepository.findByUserId(actorUserId);
-    if (!parent) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.parentNotFound);
-    }
+    const parent = await requireParentByActorUserId(actorUserId, AppPermission.SUPPORT_VIEW_HISTORY, locale);
 
     try {
       const result = await ComplaintRepository.getComplaintsByParent(parent.id, pagination);
@@ -185,11 +159,7 @@ export namespace ComplaintService {
     options: ComplaintQueueFilter,
     locale?: string
   ): Promise<{ complaints: ReadonlyArray<ComplaintReturnType> }> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertPermission(actorUserId, AppPermission.COMPLAINTS_LIST, locale);
 
     try {
       const result = await ComplaintRepository.getComplaintQueuePaginated(
@@ -218,11 +188,7 @@ export namespace ComplaintService {
     complaints: ReadonlyArray<ComplaintReturnType>;
     metrics: { id: string; unanswered: number; answered: number; avgResolutionHours: number; totalCount: number };
   }> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertPermission(actorUserId, AppPermission.COMPLAINTS_LIST, locale);
 
     try {
       const [queueResult, metrics] = await Promise.all([
@@ -265,11 +231,7 @@ export namespace ComplaintService {
     pageInfo: ComplaintQueuePaginatedResult["pageInfo"];
     metrics: { id: string; unanswered: number; answered: number; avgResolutionHours: number; totalCount: number };
   }> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_LIST);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertPermission(actorUserId, AppPermission.COMPLAINTS_LIST, locale);
 
     try {
       const [paginatedResult, metrics] = await Promise.all([
@@ -315,28 +277,15 @@ export namespace ComplaintService {
     complaintId: string,
     locale?: string
   ): Promise<{ readonly deletedAt: string }> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.COMPLAINTS_DELETE);
-    if (!hasPermission) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    await assertPermission(actorUserId, AppPermission.COMPLAINTS_DELETE, locale);
 
-    try {
-      const result = await SoftDeleteRepository.softDeleteComplaint(complaintId, actorUserId);
-
-      logger.info("Complaint soft-deleted", {
-        actorUserId,
-        complaintId,
-        deletedAt: result.deletedAt,
-      });
-
-      return {
-        deletedAt: result.deletedAt.toISOString(),
-      };
-    } catch (error) {
-      logger.error("Failed to delete complaint", { actorUserId, complaintId, error });
-      throw error;
-    }
+    return softDeleteEntityLog({
+      actorUserId,
+      entityLabel: "Complaint",
+      idKey: "complaintId",
+      entityId: complaintId,
+      deleteFn: SoftDeleteRepository.softDeleteComplaint,
+    });
   }
 
   export async function getComplaintFiles(

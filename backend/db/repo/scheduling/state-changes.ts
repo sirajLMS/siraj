@@ -4,6 +4,7 @@ import { incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn } from "@/ba
 import {
   createRescheduledSuccessor,
   type DBTransaction,
+  getClassInstanceByIdOrThrow,
   performRescheduleValidations,
 } from "@/backend/db/repo/scheduling/shared";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
@@ -547,10 +548,7 @@ export async function processAutomatedClassLeave(
 ): Promise<{ originalId: string; successorId: string | null }> {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
-    const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
-    if (!existing) {
-      throw new Error(tFuncErrors.classInstanceNotFound({ id }));
-    }
+    const existing = await getClassInstanceByIdOrThrow(t, id, tFuncErrors);
     const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);
     const successor = await createRescheduledSuccessor(
       t,

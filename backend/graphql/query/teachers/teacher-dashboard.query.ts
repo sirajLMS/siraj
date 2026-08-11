@@ -5,20 +5,18 @@ import {
   TeacherDashboardPothosObject,
   TeacherHandbookUrlPothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-dashboard.pothos";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { UnauthorizedError } from "@/backend/lib/errors";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
-import { PaginationArgs } from "@/backend/types";
+import type { PaginationInput } from "@/backend/types";
 
-async function resolveTeacherDashboard(
-  ctx: BaseContext,
-  args: { date: string; pagination?: Record<string, unknown> | null }
-) {
+async function resolveTeacherDashboard(ctx: BaseContext, args: { date: string; pagination?: PaginationInput | null }) {
   if (!ctx.user) {
     const tErrors = ctx.t().errorsTranslations;
     throw new UnauthorizedError(tErrors.unauthorized);
   }
-  const pagination = args.pagination ? new PaginationArgs(args.pagination) : null;
+  const pagination = parsePaginationArgs(args.pagination);
   const result = await TeacherDashboardService.getDashboard(ctx.user.id, args.date, pagination, ctx.locale);
   const tErrors = ctx.t().errorsTranslations;
 

@@ -11,13 +11,10 @@ import type {
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentDashboardService {
-  export async function getSchedule(
+  async function assertScheduleViewPermission(
     actorUserId: string,
-    date: string | null,
-    search: string | null,
-    pagination: PaginationArgs | null,
     locale?: string
-  ): Promise<ParentDashboardSchedulePaginatedResult> {
+  ): Promise<{ parent: { id: string } }> {
     const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SCHEDULE_VIEW_FAMILY);
     if (!hasPermission) {
       const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
@@ -29,6 +26,18 @@ export namespace ParentDashboardService {
       const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
       throw new Error(tFunc.parentNotFound);
     }
+
+    return { parent };
+  }
+
+  export async function getSchedule(
+    actorUserId: string,
+    date: string | null,
+    search: string | null,
+    pagination: PaginationArgs | null,
+    locale?: string
+  ): Promise<ParentDashboardSchedulePaginatedResult> {
+    const { parent } = await assertScheduleViewPermission(actorUserId, locale);
 
     const result = await ParentRepository.getParentDashboardSchedule(parent.id, {
       date: date ? new Date(date) : null,
@@ -60,17 +69,7 @@ export namespace ParentDashboardService {
     actorUserId: string,
     locale?: string
   ): Promise<ParentDashboardMetricsReturnType> {
-    const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.SCHEDULE_VIEW_FAMILY);
-    if (!hasPermission) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.insufficientPermissions);
-    }
-
-    const parent = await ParentRepository.findByUserId(actorUserId);
-    if (!parent) {
-      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(tFunc.parentNotFound);
-    }
+    const { parent } = await assertScheduleViewPermission(actorUserId, locale);
 
     const cacheKey = `ec:parent:dash:metrics:${parent.id}`;
 

@@ -15,25 +15,13 @@ import {
 } from "@/backend/graphql/pothos/scheduling/weekly-schedule.pothos";
 import { LeaveRequestStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { RecurringScheduleDetailService } from "@/backend/services/schedule/recurring-schedule-detail.service";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
-import { type DailyScheduleArgs, PaginationArgs, type PaginationInput } from "@/backend/types";
+import type { DailyScheduleArgs } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
-
-function toPaginationArgs(input?: PaginationInput | null): PaginationArgs | null {
-  if (!input) return null;
-  return new PaginationArgs({
-    first: input.first ?? null,
-    skip: input.skip ?? null,
-    after: input.after ?? null,
-    before: input.before ?? null,
-    last: input.last ?? null,
-    page: input.page ?? null,
-    maxCount: input.maxCount ?? null,
-  });
-}
 
 type AdminDashboardResult = Awaited<ReturnType<typeof ScheduleService.getAdminDashboardSchedule>>;
 
@@ -66,7 +54,7 @@ gqlSchemaBuilder.queryField("adminDashboardSchedule", t =>
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
 
-      const pagination = toPaginationArgs(args.input.paginationArgs);
+      const pagination = parsePaginationArgs(args.input.paginationArgs);
 
       return ScheduleService.getAdminDashboardSchedule(
         userId,
@@ -140,7 +128,7 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
 
-      const pagination = toPaginationArgs(args.paginationArgs);
+      const pagination = parsePaginationArgs(args.paginationArgs);
 
       const result = await ScheduleService.getRescheduleTracking(
         userId,

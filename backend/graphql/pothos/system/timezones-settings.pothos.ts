@@ -1,29 +1,9 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
-import type {
-  PaginationArgs,
-  PaginationInput,
-  SettingsTimezonesPaginatedResult,
-  TimezoneSelectType,
-} from "@/backend/types";
-import { PaginationArgs as PaginationArgsClass } from "@/backend/types";
-
-function parsePaginationArgs(input: PaginationInput | null | undefined): PaginationArgs | null {
-  if (!input) {
-    return null;
-  }
-  return new PaginationArgsClass({
-    first: input.first ?? null,
-    skip: input.skip ?? null,
-    after: input.after ?? null,
-    before: input.before ?? null,
-    last: input.last ?? null,
-    page: input.page ?? null,
-    maxCount: input.maxCount ?? null,
-  });
-}
+import type { SettingsTimezonesPaginatedResult, TimezoneSelectType } from "@/backend/types";
 
 const SettingsTimezoneRef = gqlSchemaBuilder.objectRef<TimezoneSelectType>("SettingsTimezone");
 

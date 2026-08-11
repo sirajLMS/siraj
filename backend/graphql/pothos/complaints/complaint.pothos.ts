@@ -2,6 +2,7 @@ import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enu
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponsePothosObject } from "@/backend/graphql/pothos/complaints/complaintResponses.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { ComplaintService } from "@/backend/services";
 import type {
   ComplaintFileReturnType,
@@ -14,7 +15,6 @@ import type {
   ComplaintSubmitWithFilesInput,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
 
 export const ComplaintCategoryPothosEnum = gqlSchemaBuilder.enumType(ComplaintCategory, {
   name: "ComplaintCategory",
@@ -155,32 +155,6 @@ function isComplaintStatus(value: string): value is ComplaintStatus {
   return (Object.values(ComplaintStatus) as readonly string[]).includes(value);
 }
 
-function buildPaginationArgs(
-  raw:
-    | {
-        first?: number | null;
-        skip?: number | null;
-        after?: string | null;
-        before?: string | null;
-        last?: number | null;
-        page?: number | null;
-        maxCount?: number | null;
-      }
-    | null
-    | undefined
-): PaginationArgs | null {
-  if (!raw) return null;
-  return new PaginationArgs({
-    first: raw.first ?? null,
-    skip: raw.skip ?? null,
-    after: raw.after ?? null,
-    before: raw.before ?? null,
-    last: raw.last ?? null,
-    page: raw.page ?? null,
-    maxCount: raw.maxCount ?? null,
-  });
-}
-
 function normalizeComplaint(complaint: ComplaintReturnType): ComplaintReturnType {
   return {
     ...complaint,
@@ -205,7 +179,7 @@ gqlSchemaBuilder.queryField("parentComplaints", t =>
         throw new Error("unauthenticated");
       }
 
-      const pagination = buildPaginationArgs(args.paginationArgs);
+      const pagination = parsePaginationArgs(args.paginationArgs);
 
       const result = await ComplaintService.getParentComplaints(ctx.user.id, pagination, ctx.locale);
 
@@ -233,7 +207,7 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
         throw new Error("unauthenticated");
       }
 
-      const paginationArgs = buildPaginationArgs(args.paginationArgs);
+      const paginationArgs = parsePaginationArgs(args.paginationArgs);
 
       const result = await ComplaintService.getQueueWithMetricsPaginated(
         ctx.user.id,

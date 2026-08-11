@@ -13,6 +13,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { createdAtColumn, primaryKeyColumn, timestampColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import { accountStatusEnum, currencyCodeEnum } from "@/backend/db/schema/enums";
 import { AccountStatus } from "@/backend/enum";
 import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
@@ -23,7 +24,9 @@ import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 export const users = pgTable(
   "users",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
+    ...timestampColumns(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
     name: varchar("name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true, precision: 3 }),
@@ -37,9 +40,6 @@ export const users = pgTable(
     timezone: varchar("timezone", { length: 100 }).notNull().default(IanaTimezone.UTC),
     displayCurrency: currencyCodeEnum("display_currency").$type<CurrencyCode>(),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true, precision: 3 }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
   table => [
     check("users_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
@@ -81,7 +81,10 @@ export const sessions = pgTable(
 export const sessionMetadata = pgTable(
   "session_metadata",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
+    ...createdAtColumn(),
+    lastActivityAt: timestamp("last_activity_at", { withTimezone: true, precision: 3 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
     sessionId: varchar("session_id", { length: 255 }).notNull().unique(),
     userId: uuid("user_id")
       .notNull()
@@ -90,9 +93,6 @@ export const sessionMetadata = pgTable(
     deviceName: varchar("device_name", { length: 255 }),
     ipAddress: inet("ip_address"),
     userAgent: text("user_agent"),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    lastActivityAt: timestamp("last_activity_at", { withTimezone: true, precision: 3 }).notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [
     index("session_metadata_user_id_idx").on(table.userId),
@@ -104,21 +104,20 @@ export const sessionMetadata = pgTable(
 
 // Session configuration per role - defines TTL and concurrent session limits
 export const sessionConfig = pgTable("session_config", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  ...primaryKeyColumn(),
+  ...timestampColumns(),
   roleName: varchar("role_name", { length: 100 }).notNull().unique(),
   ttlSeconds: integer("ttl_seconds").notNull().default(604800), // 7 days default
   maxConcurrentSessions: integer("max_concurrent_sessions").notNull().default(5),
-  createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
 });
 
 export const passwordResetTokens = pgTable(
   "password_reset_tokens",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
+    ...createdAtColumn(),
     email: varchar("email", { length: 255 }).notNull(),
     hashedToken: varchar("hashed_token", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [
@@ -131,13 +130,12 @@ export const passwordResetTokens = pgTable(
 export const authRateLimits = pgTable(
   "auth_rate_limits",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
+    ...timestampColumns(),
     ipAddress: inet("ip_address"),
     email: varchar("email", { length: 255 }),
     attempts: integer("attempts").notNull().default(1),
     lockedUntil: timestamp("locked_until", { withTimezone: true, precision: 3 }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
   },
   table => [
     index("auth_rate_limits_ip_idx").on(table.ipAddress),

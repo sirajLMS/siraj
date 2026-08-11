@@ -76,13 +76,7 @@ export namespace PermissionManagementService {
 
   // ─── Private Helpers ──────────────────────────────────────────────────────
 
-  async function requireUserExists(userId: string, tErrors: ErrorsLabels) {
-    const [user] = await db.select({ id: users.id }).from(users).where(eq(users.id, userId)).limit(1);
-    if (!user) throw new Error(tErrors.permissionManagement.userNotFound(userId));
-    return user;
-  }
-
-  async function requireUserExistsFull(userId: string, tErrors: ErrorsLabels) {
+  async function fetchUserById(userId: string, tErrors: ErrorsLabels) {
     const [user] = await db
       .select({ id: users.id, isSuperAdmin: users.isSuperAdmin })
       .from(users)
@@ -90,6 +84,14 @@ export namespace PermissionManagementService {
       .limit(1);
     if (!user) throw new Error(tErrors.permissionManagement.userNotFound(userId));
     return user;
+  }
+
+  async function requireUserExists(userId: string, tErrors: ErrorsLabels) {
+    return fetchUserById(userId, tErrors);
+  }
+
+  async function requireUserExistsFull(userId: string, tErrors: ErrorsLabels) {
+    return fetchUserById(userId, tErrors);
   }
 
   async function requireGroupExists(groupId: string, tErrors: ErrorsLabels) {
@@ -359,14 +361,21 @@ export namespace PermissionManagementService {
     return rows.map(r => r.groupId);
   }
 
+  async function requireBulkSetupOrReturn(
+    actorUserId: string,
+    input: { userIds: string[]; groupId: string },
+    tErrors: ErrorsLabels
+  ): Promise<boolean> {
+    await requireBulkGroupSetup(actorUserId, input.groupId, tErrors);
+    return input.userIds.length === 0;
+  }
+
   export async function bulkAssignUsersToGroup(
     actorUserId: string,
     input: { userIds: string[]; groupId: string },
     tErrors: ErrorsLabels
   ): Promise<void> {
-    // Using the new helper
-    await requireBulkGroupSetup(actorUserId, input.groupId, tErrors);
-    if (input.userIds.length === 0) return;
+    if (await requireBulkSetupOrReturn(actorUserId, input, tErrors)) return;
 
     const foundUsers = await db.select({ id: users.id }).from(users).where(inArray(users.id, input.userIds));
     if (foundUsers.length !== input.userIds.length) throw new Error(tErrors.permissionManagement.userNotFound(""));
@@ -380,8 +389,7 @@ export namespace PermissionManagementService {
     input: { userIds: string[]; groupId: string },
     tErrors: ErrorsLabels
   ): Promise<void> {
-    await requireBulkGroupSetup(actorUserId, input.groupId, tErrors);
-    if (input.userIds.length === 0) return;
+    if (await requireBulkSetupOrReturn(actorUserId, input, tErrors)) return;
 
     const targetUsers = await db
       .select({ id: users.id, isSuperAdmin: users.isSuperAdmin })

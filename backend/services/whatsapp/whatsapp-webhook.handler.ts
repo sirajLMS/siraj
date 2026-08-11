@@ -6,7 +6,10 @@ import { sanitizeFailureReason } from "@/backend/lib/whatsapp-sanitize";
 import { AuditService } from "@/backend/services/system/audit.service";
 import { WhatsappAccountService } from "@/backend/services/whatsapp";
 import type { CreateAuditLogInput } from "@/backend/types/audit/audit.types";
-import type { WhatsappAccountUpdateInput } from "@/backend/types/whatsapp/whatsapp-account.types";
+import type {
+  WhatsappAccountReturnType,
+  WhatsappAccountUpdateInput,
+} from "@/backend/types/whatsapp/whatsapp-account.types";
 import { coerceLimitTier, coerceQualityRating } from "@/backend/types/whatsapp/whatsapp-account.types";
 import type {
   WebhookStatusUpdateType as StatusUpdate,
@@ -542,34 +545,44 @@ function buildPhoneNumberUpdate(
   return { update, changes };
 }
 
-async function applyPhoneNumberUpdate(
+async function lookupAccountForWebhook(
   value: Record<string, unknown>,
   description: string,
-  fieldMapping: { throughput?: boolean; maxDaily?: boolean; quality?: boolean },
   webhookWabaId: string
-): Promise<void> {
+): Promise<{ phoneNumberId: string; account: WhatsappAccountReturnType } | null> {
   const phoneNumberId = typeof value.phone_number_id === "string" ? value.phone_number_id : undefined;
   if (!phoneNumberId || !isValidPhoneNumberId(phoneNumberId)) {
-    return;
+    return null;
   }
 
   const account = await WhatsappAccountService.systemFindByPhoneNumberId(phoneNumberId);
   if (!account) {
     logger.warn(`whatsapp-webhook-handler: account not found for ${description}`, { phoneNumberId });
-    return;
+    return null;
   }
 
   // r10-013: Verify that the webhook entry's WABA ID matches the stored account's wabaId.
-  // This prevents cross-tenant data-class integrity issues where phone_number_id alone
-  // could be used to update an account belonging to a different WABA.
   if (webhookWabaId && account.wabaId && webhookWabaId !== account.wabaId) {
     logger.error("Webhook phone_number_id WABA mismatch, skipping update", {
       phoneNumberId,
       webhookWabaId,
       storedWabaId: account.wabaId,
     });
-    return;
+    return null;
   }
+
+  return { phoneNumberId, account };
+}
+
+async function applyPhoneNumberUpdate(
+  value: Record<string, unknown>,
+  description: string,
+  fieldMapping: { throughput?: boolean; maxDaily?: boolean; quality?: boolean },
+  webhookWabaId: string
+): Promise<void> {
+  const resolved = await lookupAccountForWebhook(value, description, webhookWabaId);
+  if (!resolved) return;
+  const { phoneNumberId, account } = resolved;
 
   const { update, changes } = buildPhoneNumberUpdate(value, fieldMapping);
 
@@ -611,26 +624,9 @@ async function handleCapabilityUpdate(value: Record<string, unknown>, wabaId: st
  * Records the verification change in the audit log.
  */
 async function handleAccountUpdate(value: Record<string, unknown>, wabaId: string): Promise<void> {
-  const phoneNumberId = typeof value.phone_number_id === "string" ? value.phone_number_id : undefined;
-  if (!phoneNumberId || !isValidPhoneNumberId(phoneNumberId)) {
-    return;
-  }
-
-  const account = await WhatsappAccountService.systemFindByPhoneNumberId(phoneNumberId);
-  if (!account) {
-    logger.warn("whatsapp-webhook-handler: account not found for account_update", { phoneNumberId });
-    return;
-  }
-
-  // r10-013: Verify that the webhook entry's WABA ID matches the stored account's wabaId.
-  if (wabaId && account.wabaId && wabaId !== account.wabaId) {
-    logger.error("Webhook phone_number_id WABA mismatch, skipping update", {
-      phoneNumberId,
-      webhookWabaId: wabaId,
-      storedWabaId: account.wabaId,
-    });
-    return;
-  }
+  const resolved = await lookupAccountForWebhook(value, "account_update", wabaId);
+  if (!resolved) return;
+  const { phoneNumberId, account } = resolved;
 
   // r10-052: This uses systemUpdateAccount (full service method with transaction)
   // for a simple lastWebhookAt heartbeat update. A simpler repo-level update would

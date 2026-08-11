@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, type QueryDbHandle } from "@/backend/db/drizzleDb";
 import { teachers, users } from "@/backend/db/schema";
 import { recurringScheduleDays, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
 import { students } from "@/backend/db/schema/students/students";
@@ -34,19 +34,27 @@ async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTran
   return tx ? fn(tx) : db.transaction(fn);
 }
 
+/**
+ * Shared inner-join chain from recurringSchedules → students → teachers → users.
+ * Callers add their own `.select()` clause before this builder.
+ */
+function recurringScheduleBaseQuery(q: QueryDbHandle | DBTransaction) {
+  return q
+    .select({
+      schedule: recurringSchedules,
+      studentName: students.name,
+      teacherUserName: users.name,
+    })
+    .from(recurringSchedules)
+    .innerJoin(students, eq(recurringSchedules.studentId, students.id))
+    .innerJoin(teachers, eq(recurringSchedules.teacherId, teachers.id))
+    .innerJoin(users, eq(teachers.userId, users.id));
+}
+
 export namespace RecurringScheduleRepository {
   export async function findById(id: string, tx?: DBTransaction) {
     const q = queryDb(tx);
-    const [row] = await q
-      .select({
-        schedule: recurringSchedules,
-        studentName: students.name,
-        teacherUserName: users.name,
-      })
-      .from(recurringSchedules)
-      .innerJoin(students, eq(recurringSchedules.studentId, students.id))
-      .innerJoin(teachers, eq(recurringSchedules.teacherId, teachers.id))
-      .innerJoin(users, eq(teachers.userId, users.id))
+    const [row] = await recurringScheduleBaseQuery(q)
       .where(and(eq(recurringSchedules.id, id), isNull(recurringSchedules.deletedAt)))
       .limit(1);
 
@@ -234,16 +242,7 @@ export namespace RecurringScheduleRepository {
     }
 
     const [rows, [{ count: totalCount }]] = await Promise.all([
-      q
-        .select({
-          schedule: recurringSchedules,
-          studentName: students.name,
-          teacherUserName: users.name,
-        })
-        .from(recurringSchedules)
-        .innerJoin(students, eq(recurringSchedules.studentId, students.id))
-        .innerJoin(teachers, eq(recurringSchedules.teacherId, teachers.id))
-        .innerJoin(users, eq(teachers.userId, users.id))
+      recurringScheduleBaseQuery(q)
         .where(and(...whereConditions))
         .orderBy(desc(recurringSchedules.createdAt))
         .limit(pageSize)
