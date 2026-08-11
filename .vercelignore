@@ -34,14 +34,9 @@ debug-storybook.log
 /storage/
 /storage
 
-# tests, seeds & dev scripts (not needed for deployment)
-# NOTE: Next build typecheck uses tsconfig.build.json so frontend
-# *.stories.tsx / *.test.tsx that import @/test/... are excluded.
-test/
-backend/db/test/
-backend/db/seeds/
-backend/db/scripts/
-frontend/common/graphql/test/
+# docs / shell helpers (not needed for deployment)
+# Keep test/seed trees uploadable — Next build typecheck imports them
+# from colocated stories, scripts, and frontend *.test.tsx files.
 docs/
 *.md
 *.ps1
