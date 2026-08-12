@@ -351,11 +351,11 @@ These residuals are structurally incompatible for further extraction without maj
 ## Phase 6: Residual Sweep & Knowledge Propagation (Serial)
 
 ### Task 6.1: Post-Implementation Residual Sweep
-- [ ] 6.1.1 Run `bunx jscpd . --config .jscpd.json --reporters json` to get final clone list
-- [ ] 6.1.2 Compare all remaining clones against Phase 6 baseline
-- [ ] 6.1.3 For any remaining P3 pairs not yet resolved: triage and fix (NO jscpd:ignore)
-- [ ] 6.1.4 Write outcome: `.ai/plans/duplications-phase6/outcome/6.1-residual-sweep-outcome.md`
-- [ ] 6.1.5 Update progress: Mark 6.1 as `[x]`
+- [x] 6.1.1 Run `bunx jscpd . --config .jscpd.json --reporters json` to get final clone list
+- [x] 6.1.2 Compare all remaining clones against Phase 6 baseline
+- [x] 6.1.3 For any remaining P3 pairs not yet resolved: triage and fix (NO jscpd:ignore)
+- [x] 6.1.4 Write outcome: `.ai/plans/duplications-phase6/outcome/6.1-residual-sweep-outcome.md`
+- [x] 6.1.5 Update progress: Mark 6.1 as `[x]`
 
 ### Task 6.2: Update Documentation
 - [x] 6.2.1 Update `docs/frontend/duplication-elimination-patterns.md` with Patterns A-G (scaffold extraction, shared utility, dead code deletion, store consolidation, scaffold extension, shared view scaffold, locale type consolidation)
@@ -370,9 +370,19 @@ These residuals are structurally incompatible for further extraction without maj
 - [x] 6.3.4 Update progress: Mark 6.3 as `[x]`
 
 ### Task 6.4: Final Commit
-- [ ] 6.4.1 Verify all outcome files are present
-- [ ] 6.4.2 Verify `tasks.md` shows all tasks as `[x]`
-- [ ] 6.4.3 Verify zero `jscpd:ignore` directives in codebase
-- [ ] 6.4.4 Verify `.jscpd.json` unchanged from pre-Phase 6
-- [ ] 6.4.5 Commit all changes with message: "Phase 6: Eliminate P3 micro clusters via scaffold extraction (no jscpd:ignore)"
-- [ ] 6.4.6 Update progress: Mark 6.4 as `[x]`
+- [x] 6.4.1 Verify all outcome files are present
+- [x] 6.4.2 Verify `tasks.md` shows all tasks as `[x]`
+- [x] 6.4.3 Verify zero `jscpd:ignore` directives in codebase
+- [x] 6.4.4 Verify `.jscpd.json` unchanged from pre-Phase 6
+- [x] 6.4.5 Commit all changes with message: "Phase 6: Eliminate P3 micro clusters via scaffold extraction (no jscpd:ignore)"
+- [x] 6.4.6 Update progress: Mark 6.4 as `[x]`
+
+### Final Results
+- **Baseline**: 475 clones, 62,929 tokens
+- **Final**: 11 clones, 1,111 tokens
+- **Reduction**: 464 clones (97.9%), 61,818 tokens (98.2%)
+- **Zero jscpd:ignore** directives in code
+- **Zero .jscpd.json** modifications
+- **tsgo**: 0 errors (clean)
+- All 25+ outcome files created
+- All tasks marked `[x]`
