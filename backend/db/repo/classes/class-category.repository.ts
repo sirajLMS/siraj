@@ -1,7 +1,7 @@
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBQueryExecutor, DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { runInClassTransaction } from "@/backend/db/repo/classes/shared/runInClassTransaction";
 import { classCategories } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type { ClassCategorySelectType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
@@ -9,22 +9,28 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 // ─── Shared helpers (eliminate intra-file duplication) ──────────────────────
 
-function buildCategoryInsertValues(input: ClassCategorySubmitInput) {
+function buildCategoryFields(input: ClassCategorySubmitInput) {
   return {
     name: input.name,
-    slug: input.slug,
     description: input.description ?? null,
     isActive: input.isActive ?? true,
     sortOrder: input.sortOrder ?? 0,
   };
 }
 
+function buildCategoryInsertValues(input: ClassCategorySubmitInput) {
+  const now = new Date();
+  return {
+    ...buildCategoryFields(input),
+    slug: input.slug,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 function buildCategoryConflictSet(input: ClassCategorySubmitInput, now: Date) {
   return {
-    name: input.name,
-    description: input.description ?? null,
-    isActive: input.isActive ?? true,
-    sortOrder: input.sortOrder ?? 0,
+    ...buildCategoryFields(input),
     updatedAt: now,
   };
 }
@@ -43,20 +49,6 @@ async function findExistingCategory(
     throw new Error(tErrors.categoryNotFound(id));
   }
   return existing;
-}
-
-async function runInTransaction<T>(
-  tx: DBTransaction | undefined,
-  run: (t: DBTransaction) => Promise<T>,
-  errorLabel: string
-): Promise<T> {
-  try {
-    if (tx) return await run(tx);
-    return await db.transaction(run);
-  } catch (error) {
-    logger.error(errorLabel, error);
-    throw error;
-  }
 }
 
 // ─── Repository ──────────────────────────────────────────────────────────────
@@ -129,7 +121,7 @@ export namespace ClassCategoryRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ClassCategorySelectType> {
-    return runInTransaction(
+    return runInClassTransaction(
       tx,
       async (t): Promise<ClassCategorySelectType> => {
         const [result] = await t.insert(classCategories).values(buildCategoryInsertValues(input)).returning();
@@ -152,7 +144,7 @@ export namespace ClassCategoryRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ClassCategorySelectType> {
-    return runInTransaction(
+    return runInClassTransaction(
       tx,
       async (t): Promise<ClassCategorySelectType> => {
         const existing = await findExistingCategory(t, id, tErrors);
@@ -178,7 +170,7 @@ export namespace ClassCategoryRepository {
   }
 
   export async function deleteCategory(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<{ id: string }> {
-    return runInTransaction(
+    return runInClassTransaction(
       tx,
       async (t): Promise<{ id: string }> => {
         await findExistingCategory(t, id, tErrors);
@@ -205,7 +197,7 @@ export namespace ClassCategoryRepository {
   ): Promise<ClassCategorySelectType[]> {
     if (inputs.length === 0) return [];
 
-    return runInTransaction(
+    return runInClassTransaction(
       tx,
       async (t): Promise<ClassCategorySelectType[]> => {
         const now = new Date();

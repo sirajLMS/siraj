@@ -65,6 +65,8 @@ export async function ensureTestSubjectId(tx: TestDb): Promise<string> {
       slug: `test-cat-${randomUUID().slice(0, 8)}`,
       isActive: true,
       sortOrder: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     })
     .returning({ id: classCategories.id });
 
