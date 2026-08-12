@@ -130,6 +130,9 @@ This is NOT standard Next.js. APIs and conventions differ from training data. **
 - **Max one `/` per path**: Each `export * from` path in an `index.ts` MUST NOT contain more than one `/`. Example: `export * from "./requests"` (one `/`) is allowed; `export * from "./requests/get-phone-number.request"` (two `/`) is prohibited — use `export * from "./requests"` and let the `requests/index.ts` barrel handle the rest.
 - **No imports in barrels**: `index.ts` files contain ONLY `export *` (or collision-disambiguation `export { }`) statements — never `import` statements. The only exception is GraphQL mutation/query layers where imports register types in the GraphQL schema (not re-exported).
 - **Unique export names**: When multiple files in the same directory export functions with the same generic name (e.g. `buildRequest`, `parseResponse`), rename them to unique descriptive names in the source files (e.g. `buildGetPhoneNumberRequest`, `parseGetPhoneNumberResponse`) so the barrel can use `export *` without aliasing.
+- **Collision registry**: When `export *` causes a naming collision (TS2308 or ESLint `import-x/export`), keep `export { }` for the colliding symbol and document the exception in `.ai/plans/reexport-elimination/outcome/collisions-registry.md`. See `docs/architecture/import-export-conventions.md` for full rules.
+- **`export type { }` stays**: `export type { X } from "./file"` is NOT converted to `export *` — type-only re-exports are intentional and keep type semantics explicit.
+- **No re-export shims**: Files that only re-export from another directory (`export { X } from "@/other/dir/file"`) are prohibited. Consumers must import directly from the original source. Delete shim files and update consumers.
 
 ### Shared Layer
 - `shared/` is used by both frontend and backend — it must **never** import from `@/frontend/**`, `@/backend/**`, or `@/app/**` (ESLint enforced).
@@ -426,6 +429,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/backend/service-base-pattern.md` - Service base class, shared resolvers, insert payload builders, auth session helpers
 - `docs/backend/types-consolidation.md` - Types consolidation: moving `.types.ts` from service layer to `backend/types/`, split rules, barrel conventions
 - `docs/graphql/pothos-field-factories.md` - Pothos field helpers, input field helpers, and query field factory idioms
+- `docs/architecture/import-export-conventions.md` - Import/export barrel conventions, `export *` rules, collision registry, re-export elimination summary
 
 
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)
