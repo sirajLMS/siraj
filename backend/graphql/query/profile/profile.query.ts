@@ -2,7 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { setBillingFxDisplayCurrencyForSubject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { UnifiedProfilePothosObject } from "@/backend/graphql/pothos/profile/profile.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ProfileService } from "@/backend/services";
+import { ProfileService } from "@/backend/services/profile/profile.service";
 
 gqlSchemaBuilder.queryField("profileByUserId", t =>
   t.field({

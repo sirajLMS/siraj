@@ -2,7 +2,7 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { TeacherDuePothosObject } from "@/backend/graphql/pothos/teachers/teacher-due.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 
 gqlSchemaBuilder.mutationField("markTeacherDuesPaid", t =>

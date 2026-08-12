@@ -4,7 +4,7 @@ import { ParentRepository } from "@/backend/db/repo/parents";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ComplaintService } from "@/backend/services/communication/complaint.service";
 import * as NotificationDispatchHelpers from "@/backend/services/notification/notification-dispatch.helpers";
 import type { ComplaintSelectType } from "@/backend/types";

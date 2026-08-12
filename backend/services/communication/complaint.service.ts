@@ -4,7 +4,7 @@ import { SoftDeleteRepository, SystemSettingsRepository } from "@/backend/db/rep
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   assertPermission,
   requireParentByActorUserId,

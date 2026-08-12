@@ -1,6 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { StudentStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { StudentLifecycleService } from "@/backend/services";
+import { StudentLifecycleService } from "@/backend/services/student/student-lifecycle.service";
 import type { ChangeStudentStatusResult, ReassignStudentTeacherResult } from "@/backend/types";
 
 // ─── ReassignStudentTeacherResult Object ─────────────────────────────────────

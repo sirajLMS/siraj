@@ -7,7 +7,7 @@ import {
   setBillingFxDisplayCurrencyForInvoiceParent,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 
 gqlSchemaBuilder.queryField("invoicePayments", t =>
   t.field({

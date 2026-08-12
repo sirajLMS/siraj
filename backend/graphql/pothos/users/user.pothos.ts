@@ -5,7 +5,7 @@ import {
   AppPermissionPothosEnum,
   CurrencyCodePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type { UserReturnType } from "@/backend/types";

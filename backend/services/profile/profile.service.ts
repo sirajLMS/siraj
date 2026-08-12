@@ -3,16 +3,10 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { StaffProfileRepository, TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
-import {
-  ManagerProfileService,
-  ParentPortalService,
-  ParentProfileService,
-  PermissionsService,
-  StaffProfileService,
-  TeacherPortalService,
-  type UserPermissionContext,
-} from "@/backend/services";
+import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
+import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
+import { ParentProfileService } from "@/backend/services/parent/parent-profile.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import {
   canEditProfileFieldGroup,
@@ -20,7 +14,10 @@ import {
   type FieldFilterContext,
   filterProfileByFieldGroups,
 } from "@/backend/services/profile/profile-field-filter";
+import { ManagerProfileService } from "@/backend/services/staff/manager-profile.service";
+import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 import { AuditService } from "@/backend/services/system/audit.service";
+import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type {
   CoreUserProfileFields,
   ManagerDirectoryRow,

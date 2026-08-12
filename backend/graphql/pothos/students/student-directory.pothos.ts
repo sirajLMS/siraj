@@ -6,7 +6,7 @@ import {
 } from "@/backend/graphql/pothos/students/student.pothos";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { StudentDirectoryService } from "@/backend/services";
+import { StudentDirectoryService } from "@/backend/services/student/student-directory.service";
 import type {
   StudentDirectory,
   StudentDirectoryResult,

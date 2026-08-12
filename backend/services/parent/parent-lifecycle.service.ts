@@ -1,7 +1,7 @@
 import { ParentRepository } from "@/backend/db/repo/parents";
 import { AppPermission, type ParentStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ChangeParentLifecycleResult, ParentProfileResult } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 

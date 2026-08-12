@@ -3,7 +3,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponsePothosObject } from "@/backend/graphql/pothos/complaints/complaintResponses.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
-import { ComplaintService } from "@/backend/services";
+import { ComplaintService } from "@/backend/services/communication/complaint.service";
 import type {
   ComplaintFileReturnType,
   ComplaintMetrics,

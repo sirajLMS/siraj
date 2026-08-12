@@ -78,6 +78,8 @@ The backend follows a consistent pattern for defining and using types across all
 - Follow the naming convention: `{Entity}SelectType`, `{Entity}InsertType`, `{Entity}ReturnType`, `{Entity}SubmitInput`, etc.
 - Use a single canonical GraphQL object type per entity, extending it with resolved properties as needed
 - Never create local type definitions in Pothos files; always use types from `backend/types/`
+- **Service-layer `.types.ts` files are prohibited.** All types live in `backend/types/`. Provider-specific types (e.g., `FixerLatestResponse`, `ZoomTokenResponse`) are in `backend/types/<domain>/`.
+- **`DBTransaction` / `DBQueryExecutor`** now live in `@/backend/types` (moved from `@/backend/db/db.types`). Import from `@/backend/types` only.
 
 ## Important References
 

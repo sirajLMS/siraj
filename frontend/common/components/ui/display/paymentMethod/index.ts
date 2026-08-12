@@ -1,10 +1,10 @@
-export { PaymentMethodDisplay } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay";
+export * from "./PaymentMethodDisplay";
 export {
   PaymentMethodList,
   type PaymentMethodListProps,
-} from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodList";
+} from "./PaymentMethodList";
 export type {
   PaymentMethodDisplayData,
   PaymentMethodDisplayProps,
   PaymentMethodRow,
-} from "@/frontend/common/components/ui/display/paymentMethod/types";
+} from "./types";

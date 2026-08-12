@@ -8,7 +8,7 @@
  *
  * Runtime helpers (buildGraphUrl, buildAuthHeaders, GraphApiError class)
  * remain in the service layer at
- * `backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types.ts`.
+ * `backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers.ts`.
  */
 
 import type { WhatsappTemplateComponent } from "@/backend/types/whatsapp/whatsapp-channel.types";

@@ -1,17 +1,1 @@
-export * from "@/backend/services/auth";
-export * from "@/backend/services/billing";
-export * from "@/backend/services/communication";
-export * from "@/backend/services/fx";
-export * from "@/backend/services/parent";
-export * from "@/backend/services/payment-method";
-export * from "@/backend/services/profile";
-export * from "@/backend/services/redis";
-export * from "@/backend/services/staff";
-export * from "@/backend/services/storage";
-export * from "@/backend/services/student";
-export * from "@/backend/services/system";
-export * from "@/backend/services/teacher";
-export * from "@/backend/services/user";
-export * from "@/backend/services/whatsapp";
-
 export * from "./supervisor";

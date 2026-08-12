@@ -4,7 +4,7 @@ import { SiteContentRepository, StorageDbRepository } from "@/backend/db/repo/st
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   DirectoryPermissionsUpdateInput,
   FileOperationResult,

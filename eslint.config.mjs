@@ -363,7 +363,6 @@ const eslintConfig = defineConfig([
             {
               group: [
                 "@/backend/db/drizzleDb",
-                "@/backend/db/db.types",
                 "@/backend/db/schema",
                 "@/backend/db/schema/**",
                 "@/backend/db/repo",

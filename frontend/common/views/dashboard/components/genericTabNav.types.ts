@@ -1,7 +1,5 @@
 import type { TabNavVariantProps } from "@/frontend/common/views/dashboard/lib/tabbedPane";
 
-export type { TabNavItem } from "@/frontend/common/views/dashboard/lib/tabbedPane";
-
 export interface DateTabNavItem<TabId extends string = string> {
   readonly id: TabId;
   readonly weekdayLabel: string;

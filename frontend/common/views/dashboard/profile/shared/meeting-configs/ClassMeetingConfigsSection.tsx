@@ -4,8 +4,10 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack, Typography } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
-import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar, SectionPanel } from "@/frontend/common/components/ui";
+import { ErrorState, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
+import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classMeetingConfigsQueryDocument,

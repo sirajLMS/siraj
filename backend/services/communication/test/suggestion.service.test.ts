@@ -3,7 +3,7 @@ import { ParentRepository, SuggestionRepository } from "@/backend/db/repo/parent
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AccountStatus, AppPermission, NotificationChannel, SuggestionStatus } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";
 import type { SuggestionSelectType, UserSelectType } from "@/backend/types";

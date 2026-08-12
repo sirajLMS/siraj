@@ -14,7 +14,7 @@ import {
 import { expectRepositoryError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { type AppPermission, TeacherProgressFeedEventKind } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { getServerTranslations } from "@/shared/locale";
 

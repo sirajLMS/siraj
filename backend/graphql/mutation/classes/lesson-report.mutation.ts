@@ -5,7 +5,7 @@ import {
   LessonReportSubmitInput,
 } from "@/backend/graphql/pothos/classes/lesson-report.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
 
 gqlSchemaBuilder.mutationField("submitLessonReport", t =>

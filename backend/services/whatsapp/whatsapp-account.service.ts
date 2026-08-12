@@ -11,14 +11,12 @@ import {
   readErrorBody,
   resolveGraphApiContextFromEnv,
 } from "@/backend/lib/whatsapp-constants";
-import {
-  buildGetPhoneNumberRequest,
-  collectAllPhoneNumbers,
-  collectAllTemplates,
-  GraphApiError,
-  resetWhatsappChannel,
-} from "@/backend/services";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { GraphApiError } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
+import { buildGetPhoneNumberRequest } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
+import { collectAllTemplates } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-message-templates.request";
+import { collectAllPhoneNumbers } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-phone-numbers.request";
+import { resetWhatsappChannel } from "@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory";
 import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
 import { NOTIFICATION_TEMPLATE_MAP } from "@/backend/services/notification/notification-payloads.builders";
 import { resolveEnvConfig } from "@/backend/services/system";

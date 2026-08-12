@@ -5,7 +5,7 @@ import {
   UpdateUserProfileInputPothosObject,
 } from "@/backend/graphql/pothos/profile/profile.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ProfileService } from "@/backend/services";
+import { ProfileService } from "@/backend/services/profile/profile.service";
 import type { UpdateOwnProfileInput, UpdateUserProfileInput } from "@/backend/types";
 
 // Pothos input types are structurally compatible with the backend input types

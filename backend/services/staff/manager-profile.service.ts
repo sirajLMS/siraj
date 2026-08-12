@@ -2,7 +2,7 @@ import { StaffProfileRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
 import { type AccountStatus, AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ManagerDirectoryRow } from "@/backend/types";
 import { parseAccountStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";

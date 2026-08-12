@@ -1,6 +1,6 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { ComplaintResponseService } from "@/backend/services";
+import { ComplaintResponseService } from "@/backend/services/communication/complaintResponses.service";
 import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
 
 const ComplaintResponseRef = gqlSchemaBuilder.objectRef<ComplaintResponseReturnType>("ComplaintResponse");

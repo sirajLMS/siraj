@@ -2,7 +2,7 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CreditPurchaseResultPothosObject } from "@/backend/graphql/pothos/billing/credit.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 
 gqlSchemaBuilder.mutationField("recordCreditPurchase", t =>

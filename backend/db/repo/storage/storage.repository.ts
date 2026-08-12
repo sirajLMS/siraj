@@ -1,13 +1,11 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { db, queryDb } from "@/backend/db";
 import {
   classInstanceFiles,
   complaintFiles,
-  type DBTransaction,
-  db,
   invoiceFiles,
   learningResourceFiles,
   parentFiles,
-  queryDb,
   recurringScheduleFiles,
   staffProfileFiles,
   storageDirectories,
@@ -15,9 +13,10 @@ import {
   studentFiles,
   teacherFiles,
   userFiles,
-} from "@/backend/db";
+} from "@/backend/db/schema";
 import { logger } from "@/backend/lib";
 import type * as StorageTypes from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 

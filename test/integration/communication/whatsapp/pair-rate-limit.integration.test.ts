@@ -14,7 +14,8 @@
 import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
-import { MetaCloudApiAdapter, resetWhatsappChannel } from "@/backend/services";
+import { MetaCloudApiAdapter } from "@/backend/services/communication/channels/whatsapp/cloud-api/MetaCloudApiAdapter";
+import { resetWhatsappChannel } from "@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory";
 import { redisService } from "@/backend/services/redis";
 import type { NotificationDeliverySelectType } from "@/backend/types";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";

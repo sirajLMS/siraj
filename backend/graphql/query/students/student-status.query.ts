@@ -1,6 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { StudentUpcomingClassesResultPothosObject } from "@/backend/graphql/pothos/students/student-status.pothos";
-import { StudentStatusService } from "@/backend/services";
+import { StudentStatusService } from "@/backend/services/student/student-status.service";
 
 gqlSchemaBuilder.queryField("studentUpcomingClasses", t =>
   t.field({

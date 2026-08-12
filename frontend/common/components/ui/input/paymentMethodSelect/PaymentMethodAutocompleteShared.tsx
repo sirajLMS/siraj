@@ -22,9 +22,6 @@ import {
 } from "@/frontend/common/lib/payment-method";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
-export type { PaymentMethodCatalogOption };
-
 export interface PaymentMethodAutocompleteSlots {
   readonly OptionRow: React.FC<{
     readonly option: PaymentMethodCatalogOption;

@@ -1,4 +1,5 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
+import { db } from "@/backend/db/drizzleDb";
 import {
   groupPermissions,
   permissionGroups,
@@ -6,13 +7,12 @@ import {
   userPermissionGroups,
   userPermissionOverrides,
   users,
-} from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
-import { db } from "@/backend/db/drizzleDb";
+} from "@/backend/db/schema";
 import type { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   CreateGroupInput,
+  DBTransaction,
   GroupUserEntity,
   GroupWithPermissionIds,
   PermissionReturnType,

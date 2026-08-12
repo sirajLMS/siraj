@@ -3,7 +3,7 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { WhatsappAccountPothosObject } from "@/backend/graphql/pothos/whatsapp/whatsapp-account.pothos";
 import { withAuthResult } from "@/backend/graphql/utils";
-import { WhatsappAccountService } from "@/backend/services";
+import { WhatsappAccountService } from "@/backend/services/whatsapp/whatsapp-account.service";
 
 gqlSchemaBuilder.queryFields(t => ({
   whatsappAccounts: t.field({

@@ -42,10 +42,10 @@ import {
   TeacherDueStatus,
   VacationRequestStatus,
 } from "@/backend/enum";
-import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { createPgEnumFromEnum } from "@/backend/utils/db.utils";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 export const quotaKindEnum = createPgEnumFromEnum("quota_kind", QuotaKind);

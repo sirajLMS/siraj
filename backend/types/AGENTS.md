@@ -50,8 +50,32 @@ When multiple entity types share identical fields/methods (e.g., meeting config 
 
 Completed extractions:
 - `backend/types/meeting/meeting-config-base.types.ts` — shared shape for class-meeting-config and meeting-config types
-- `backend/types/billing/communication.types.ts` — `BaseEntity`, `BaseRepo<T>`, `DBTx`, `ResolutionResult` for complaint/suggestion types
+- `backend/types/communication/communication.types.ts` — `BaseEntity`, `BaseRepo<T>`, `DBTx`, `ResolutionResult` for complaint/suggestion types
 - `shared/types/pagination.types.ts` — `PaginationInput` consolidated from 3 duplicate definitions
+
+## Types Location Rules (CRITICAL)
+
+- **All `.types.ts` files MUST live in `backend/types/`.** Service-layer files must not define or re-export types — import from `@/backend/types` instead.
+- **If a service file contains both types and runtime code, split:** types → `backend/types/`, runtime → stays in the service layer with a non-`.types` filename (e.g., `.helpers.ts`, `.constants.ts`).
+- **`backend/types/**/index.ts` barrels MUST use `./` relative paths and `export * from "./..."`.** No `@/` aliases, no `../` parent traversal, no explicit per-export `export type { ... }`.
+- **`DBTransaction` and `DBQueryExecutor` live in `@/backend/types`** (moved from `@/backend/db/db.types`). All consumers import from `@/backend/types`.
+
+### Completed Migration: Service-Layer `.types.ts` → `backend/types/`
+
+The following `.types.ts` files were moved from the service layer into `backend/types/`:
+
+| Source (deleted) | Target | Notes |
+|---|---|---|
+| `backend/db/db.types.ts` | `backend/types/db.types.ts` | `DBTransaction`, `DBQueryExecutor` |
+| `backend/services/fx/providers/fixer/fixer.types.ts` | `backend/types/fx/fixer.types.ts` | `FixerLatestResponse` (interface only); `fixerResponseSchema` (Zod) → `fixer.helpers.ts` |
+| `backend/services/fx/providers/openexchangerates/openexchangerates.types.ts` | `backend/types/fx/openexchangerates.types.ts` | `OpenExchangeRatesResponse` |
+| `backend/services/communication/channels/email/resend/resend.types.ts` | `backend/types/communication/resend.types.ts` | `ResendEmailContext`, `ResendSendResponse`, `ResendErrorResponse` |
+| `backend/services/communication/channels/push/fcm/fcm.types.ts` | `backend/types/communication/fcm.types.ts` | Interfaces only; `FCM_*` consts → `fcm.helpers.ts` |
+| `backend/services/communication/channels/sms/twilio/twilio.types.ts` | `backend/types/communication/twilio.types.ts` | `TwilioSmsContext`, `TwilioMessageResponse`, `TwilioRateLimitConfig` |
+| `backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types.ts` | (types already in `backend/types/whatsapp/`) | Runtime helpers → `meta-cloud-api.helpers.ts` |
+| `backend/services/meeting/channels/google-meet/google-meet.types.ts` | `backend/types/meeting/channels/google-meet.types.ts` | Google Meet interfaces |
+| `backend/services/meeting/channels/microsoft-teams/microsoft-teams.types.ts` | `backend/types/meeting/channels/microsoft-teams.types.ts` | Teams interfaces |
+| `backend/services/meeting/channels/zoom/zoom.types.ts` | `backend/types/meeting/channels/zoom.types.ts` | Zoom interfaces |
 
 ## Cross-Layer Enum Migration
 

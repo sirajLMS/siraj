@@ -4,7 +4,8 @@ import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import { getRedisService, SessionRedisService } from "@/backend/services";
+import { getRedisService } from "@/backend/services/redis/RedisServiceFactory";
+import { SessionRedisService } from "@/backend/services/redis/SessionRedisService";
 import type { DBTransaction } from "@/backend/types";
 import type {
   RedisGroupSimulationSessionData,

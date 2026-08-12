@@ -8,7 +8,8 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { invoices } from "@/backend/db/schema";
 import { AppPermission, InvoicePaymentSubmissionStatus } from "@/backend/enum";
 import { logger, NotFoundError } from "@/backend/lib";
-import { NotificationSyncService, PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { NotificationSyncService } from "@/backend/services/system/notification-sync.service";
 import {
   assertInvoiceBelongsToParentUser,
   buildProofSnapshot,

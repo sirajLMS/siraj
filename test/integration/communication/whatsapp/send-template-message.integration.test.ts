@@ -7,7 +7,10 @@
  * Run: `bun run test:live-comm` or `bun run test:integration`
  */
 import { expect, test } from "bun:test";
-import { buildSendTemplateMessageRequest, parseSendTemplateResponse } from "@/backend/services";
+import {
+  buildSendTemplateMessageRequest,
+  parseSendTemplateResponse,
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/send-template-message.request";
 import type { GraphApiRequestContext } from "@/backend/types";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 

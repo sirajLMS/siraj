@@ -6,7 +6,7 @@ import { Gender } from "@/backend/enum/users/user.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import * as Pothos from "@/backend/graphql/pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { StudentDirectoryService } from "@/backend/services";
+import { StudentDirectoryService } from "@/backend/services/student/student-directory.service";
 import * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
 
