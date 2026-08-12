@@ -1,11 +1,3 @@
-export type {
-  ParentOnboardingInput,
-  ParentOnboardingResult,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-export { InvoiceType, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-
-export type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
-
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
 import type { ParentOnboardingViewModel } from "@/frontend/common/views/dashboard/admin/parents/onboarding/useParentOnboardingViewModel";

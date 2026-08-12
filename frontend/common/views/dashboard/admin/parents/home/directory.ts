@@ -1,19 +1,5 @@
 import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  ParentAccountStatusKey,
-  ParentCardListLabels,
-  ParentDirectoryRow,
-  ParentsDataGridLabels,
-} from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import type { ParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
-
-export type {
-  ParentAccountStatusKey,
-  ParentCardListLabels,
-  ParentDirectoryRow,
-  ParentLifecycleStatus,
-  ParentsDataGridLabels,
-};
 
 const VALID_PARENT_LIFECYCLE_STATUSES = new Set(Object.values(ParentStatus).map(v => v.toLowerCase()));
 
@@ -28,5 +14,3 @@ export function toParentLifecycleStatus(status: ParentStatus): ParentLifecycleSt
   }
   throw new Error(`Unknown ParentStatus: ${status}`);
 }
-
-export { toParentAccountStatusKey } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";

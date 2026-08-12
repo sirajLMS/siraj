@@ -34,12 +34,10 @@ import {
   AdminResetPasswordSection,
   type AdminResetPasswordSectionRef,
 } from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
-import { ParentExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/ParentExtensionProfileSection";
+import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
-
-export type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 
 type ParentEditFormSubmit = (values: ParentAdminEditFormData) => Promise<void>;
 type AvatarUploader = Pick<UseAvatarUploadResult, "onUploadAvatar">;
@@ -168,7 +166,7 @@ function ParentEditFormSections({
         <SocialSection mode="edit" labels={pt} register={register} control={control} />
       ) : null}
       {canEdit("parent_identity") ? (
-        <ParentExtensionProfileSection mode="edit" labels={pt} scope={scope} register={register} control={control} />
+        <IdentitySection mode="edit" labels={pt} scope={scope} register={register} control={control} />
       ) : null}
 
       {isAdminScope ? (

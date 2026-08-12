@@ -8,8 +8,6 @@
 
 import type { StudentProfileTab } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
 
-export type { StudentProfileTab } from "@/frontend/common/views/dashboard/students/profile/studentProfileTabs";
-
 export function profileHrefForUser(userId: string): string {
   return `/users/${userId}/profile`;
 }

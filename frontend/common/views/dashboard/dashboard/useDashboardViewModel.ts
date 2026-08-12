@@ -42,8 +42,6 @@ const EMPTY_STATUS_LABELS: ScheduleOverviewData["statusLabels"] = {
   ON_DEMAND_NO_CREDITS_ABSENT: "",
 };
 
-export type { DashboardRole } from "@/frontend/common/views/dashboard/dashboard/dashboardRoleHelpers";
-
 export interface DashboardViewModel {
   readonly role: DashboardRole;
   readonly userName: string;

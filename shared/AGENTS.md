@@ -59,7 +59,7 @@ When frontend and backend both need the same enum values:
 When moving logic from `frontend/` or `backend/` into `shared/`:
 
 1. Place the implementation in the appropriate `shared/` subdirectory (`lib/`, `constants/`, `types/`).
-2. Re-export from the original location if existing consumers should keep their import path (e.g. `frontend/lib/safeRedirect.ts` re-exports `isSafeUrl` from `@/shared/lib/safe-url`).
+2. Update all consumers to import directly from the `shared/` source (e.g. `import { isSafeUrl } from "@/shared/lib/safe-url"`). Do not re-export from `frontend/` or `backend/` locations — consumers must import from `shared/` directly.
 3. Move or define any required enums/types in `shared/` before updating imports in shared files.
 4. Run tests for affected shared modules and verify ESLint passes on changed `shared/**` files.
 

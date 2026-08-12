@@ -9,7 +9,7 @@ import { usePersistMeetingConfig } from "@/frontend/common/hooks/usePersistMeeti
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";
-import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
+import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { formDetailsToInput } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 
 function buildParentInput(formData: ParentOnboardingFormData): ParentOnboardingInput {

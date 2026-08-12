@@ -1,6 +1,6 @@
 import { Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { isSafeUrl } from "@/frontend/common/lib/safeRedirect";
+import { isSafeUrl } from "@/shared/lib/safe-url";
 import type { ParentSocialViewModel } from "@/frontend/common/views/dashboard/parent/social/useParentSocialViewModel";
 
 export interface ParentSocialSharedOptions {

@@ -1,8 +1,6 @@
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { getTestGraphqlUrl } from "@/frontend/common/graphql/test/testPort";
 
-export { getTestApiUrl, getTestBaseUrl, getTestGraphqlUrl, getTestPort } from "@/frontend/common/graphql/test/testPort";
-
 export const TEST_HOST = "http://localhost";
 
 let cookieJar: string[] = [];

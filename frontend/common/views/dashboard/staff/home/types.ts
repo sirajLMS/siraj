@@ -2,8 +2,6 @@ import type { ManagerDirectoryMetrics as GeneratedManagerDirectoryMetrics } from
 import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
 import type { StaffDirectoryLabels } from "@/shared/locale";
 
-export type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
-
 export type ManagerRole = "admin" | "staff" | "supervisor";
 
 export type ManagerStatus = "active" | "offline";

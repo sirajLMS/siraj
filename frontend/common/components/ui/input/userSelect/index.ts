@@ -3,10 +3,6 @@ export * from "./ParentAutocomplete";
 export * from "./StaffAutocomplete";
 export * from "./StudentAutocomplete";
 export * from "./TeacherAutocomplete";
-export * from "./UserAutocomplete";
-export * from "./UserSelectOptionRow";
-export * from "./userSelect.constants";
-export * from "./userSelect.utils";
 export type {
   AudienceAutocompleteProps,
   AudienceAutocompleteSlotProps,
@@ -20,3 +16,7 @@ export type {
   UserSelectAudience,
   UserSelectScope,
 } from "./types";
+export * from "./UserAutocomplete";
+export * from "./UserSelectOptionRow";
+export * from "./userSelect.constants";
+export * from "./userSelect.utils";

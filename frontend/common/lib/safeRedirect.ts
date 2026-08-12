@@ -1,5 +1,3 @@
-export { isSafeUrl } from "@/shared/lib/safe-url";
-
 export const LOGIN_REDIRECT_PARAM = "redirect";
 export const DEFAULT_POST_LOGIN_PATH = "/dashboard";
 const LOGIN_PATH = "/login";

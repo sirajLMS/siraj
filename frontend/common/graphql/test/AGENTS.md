@@ -47,7 +47,7 @@ Sub-directories contain only `*.test.ts` files. They are NOT imported by anythin
 |---|---|---|
 | `helpers.ts` | `import { loginAndProvision } from "@/frontend/common/graphql/test/helpers";` | **Preferred alias** — works from any sub-directory unchanged. |
 | `lifecycle.ts` | `import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";` | **Preferred alias** — works from any sub-directory unchanged. |
-| `testClient.ts` | `import { testClient, clearCookies, getTestApiUrl } from "@/frontend/common/graphql/test/testClient";` | **Preferred alias** — works from any sub-directory unchanged. |
+| `testClient.ts` | `import { testClient, clearCookies, getTestCookie } from "@/frontend/common/graphql/test/testClient";` | **Preferred alias** — works from any sub-directory unchanged. |
 | `testPort.ts` | `import { getTestBaseUrl, getTestGraphqlUrl } from "@/frontend/common/graphql/test/testPort";` | Use for non-GraphQL REST endpoints or E2E `baseURL`. |
 | Documents | `import { fooQueryDocument } from "@/frontend/common/graphql/sharedDocuments/<subdir>/foo.documents";` | Always use the full deep alias, including the `sharedDocuments` sub-directory segment. See `frontend/common/graphql/sharedDocuments/AGENTS.md`. |
 | Generated types | `import { … } from "@/frontend/common/graphql/generated/gql/graphql-types";` or `Operations` | Unchanged. |
@@ -76,7 +76,7 @@ When adding a **new** test:
      ```
    - This automatically handles hooking into Bun's `beforeAll` and `afterAll` lifecycles to spawn the Next.js dev server on a **dynamically allocated port** (prefers `3001` when free, otherwise scans `3020–3199` with PID-skewed ordering), poll until ready, and kill only this process's server tree upon test suite completion. Port allocation uses file locks under `.graphql-test-ports/` plus an in-process TCP hold so multiple agents can run `bun test` concurrently without claiming the same port.
    - Optional env override: `GRAPHQL_TEST_PORT=<port>` pins the port for debugging. The harness does **not** kill existing listeners on startup.
-   - For REST endpoints outside GraphQL (e.g. storage upload), use `getTestApiUrl("/api/...")` from `testClient.ts` or `testPort.ts` — never hardcode `localhost:3001`.
+   - For REST endpoints outside GraphQL (e.g. storage upload), use `getTestApiUrl("/api/...")` from `testPort.ts` — never hardcode `localhost:3001`.
    - The process logic itself is defined separately in `testServer.ts` and `testPort.ts`.
 
 2. **Apollo Shared Client**:

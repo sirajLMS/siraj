@@ -21,7 +21,7 @@ import {
 import type {
   ParentDirectoryRow,
   ParentsDataGridLabels,
-} from "@/frontend/common/views/dashboard/admin/parents/home/directory";
+} from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { Link } from "@/shared/i18n";

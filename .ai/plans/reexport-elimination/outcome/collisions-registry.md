@@ -153,3 +153,16 @@ export { seedOrGet as seedOrGetUsers } from "./seed-users";
 **Date:** 2026-08-12
 **Reason:** `PaymentMethodAutocomplete.tsx` re-exports `PaymentMethodAutocompleteProps` (type) and `PaymentMethodSelect.tsx` re-exports `PaymentMethodSelectProps` (type). Both are also exported by `./types/index.ts`. Using `export *` from both the component files and `./types` causes `TS2308` collision on `PaymentMethodAutocompleteProps` and `PaymentMethodSelectProps`.
 **Resolution:** Used named `export { PaymentMethodSelect } from "./PaymentMethodSelect"` and `export { PaymentMethodAutocomplete } from "./PaymentMethodAutocomplete"` (value-only named exports to avoid pulling the colliding type re-exports). Used `export type { PaymentMethodAutocompleteProps, PaymentMethodSelectProps } from "./types"` to export the canonical types from `./types` only. Used `export *` for `./PaymentMethodOptionRow`, `./paymentMethodOptionRow.utils`, and `./utils` (no collisions).
+
+---
+
+## Entry 30: `frontend/common/views/dashboard/teachers/classes/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `useTeacherClassListViewModel.ts` exports both types (`TeacherClassListLabels`, `TeacherClassListViewModel`, `UseTeacherClassListViewModelProps`) and functions (`formatClassSchedule`, `isRowJoinable`, `useTeacherClassListViewModel`). `TeacherClassListContainer.tsx` re-exports `TeacherClassListViewModel` and `UseTeacherClassListViewModelProps` via `export type { }`. Using `export * from "./useTeacherClassListViewModel"` would collide with the explicit `export type { }` block (which exports the same types from the same file). Using `export * from "./TeacherClassListContainer"` would also collide since the container re-exports the same types. `export *` causes `TS2308: Module has already exported a member named 'TeacherClassListViewModel'/'UseTeacherClassListViewModelProps'`.
+**Fix:** Keep named re-exports as-is:
+```ts
+export { TeacherClassListContainer } from "./TeacherClassListContainer";
+export type { TeacherClassListLabels, TeacherClassListViewModel, UseTeacherClassListViewModelProps } from "./useTeacherClassListViewModel";
+export { useTeacherClassListViewModel } from "./useTeacherClassListViewModel";
+```

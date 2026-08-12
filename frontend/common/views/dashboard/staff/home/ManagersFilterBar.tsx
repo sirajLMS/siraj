@@ -1,6 +1,6 @@
 import { Box, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/views/dashboard/staff/home/types";
+import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
 import type { StaffDirectoryLabels } from "@/shared/locale";
 
 const StyledFilterContainer = styled(Box)(({ theme }) => ({

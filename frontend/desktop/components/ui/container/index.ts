@@ -1,8 +1,5 @@
-export type { DesktopAdminControlPanelProps } from "@/frontend/desktop/components/ui/container/DesktopAdminControlPanel";
-export { DesktopAdminControlPanel } from "@/frontend/desktop/components/ui/container/DesktopAdminControlPanel";
-export type { DesktopHorizontalScrollRowProps } from "@/frontend/desktop/components/ui/container/DesktopHorizontalScrollRow";
-export { DesktopHorizontalScrollRow } from "@/frontend/desktop/components/ui/container/DesktopHorizontalScrollRow";
-export type { DesktopSectionPanelProps } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
-export { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
-export { desktopSectionContentInsetSx } from "@/frontend/desktop/components/ui/container/desktopSectionContentInsetSx";
-export * from "@/frontend/desktop/components/ui/container/page";
+export * from "./DesktopAdminControlPanel";
+export * from "./DesktopHorizontalScrollRow";
+export * from "./DesktopSectionPanel";
+export * from "./desktopSectionContentInsetSx";
+export * from "./page";
