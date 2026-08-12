@@ -1,5 +1,5 @@
 export type { BaseAvatarProps, BaseAvatarVariant } from "./MobileBaseAvatar";
-export { MobileBaseAvatar } from "./MobileBaseAvatar";
+export * from "./MobileBaseAvatar";
 export type { ClassAvatarProps } from "./MobileClassAvatar";
-export { MobileClassAvatar } from "./MobileClassAvatar";
-export { MobileUserAvatar } from "./MobileUserAvatar";
+export * from "./MobileClassAvatar";
+export * from "./MobileUserAvatar";

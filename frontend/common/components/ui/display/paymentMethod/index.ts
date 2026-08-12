@@ -1,8 +1,5 @@
 export * from "./PaymentMethodDisplay";
-export {
-  PaymentMethodList,
-  type PaymentMethodListProps,
-} from "./PaymentMethodList";
+export * from "./PaymentMethodList";
 export type {
   PaymentMethodDisplayData,
   PaymentMethodDisplayProps,

@@ -11,7 +11,7 @@ import * as StateChanges from "./state-changes";
 
 export * from "./class-status-events.repository";
 export * from "./recurring-schedule.repository";
-export { findUpcomingInstances } from "./scheduling-queries.repository.findUpcoming";
+export * from "./scheduling-queries.repository.findUpcoming";
 export type {
   ClassInstanceAffectedUsers,
   ClassInstanceWithAffectedUsers,

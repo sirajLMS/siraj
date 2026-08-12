@@ -1,1 +1,1 @@
-export { outlinedInputSx } from "./formFieldStyles.desktop";
+export * from "./formFieldStyles.desktop";

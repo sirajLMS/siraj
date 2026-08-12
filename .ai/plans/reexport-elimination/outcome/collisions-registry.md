@@ -332,3 +332,44 @@ export { dashboardLmsMonthlyReportsEn as monthlyReports } from "./monthlyReports
 export { dashboardLmsTeacherDuesEn as teacherDues } from "./teacherDues";
 ```
 
+---
+
+## Entry 40: `frontend/common/lib/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** Both `./currency` and `./enum` export `parseCurrencyCode`. Converting `./currency` to `export *` would cause a TS2308 collision with `./enum` (which was successfully converted to `export *`). The original named export for `./currency` deliberately excluded `parseCurrencyCode` to avoid the collision.
+**Exports kept as named:** `./currency` — `type CurrencyOption`, `currencies`, `formatLockedAmount`, `getCurrencyByCode`, `getCurrencyDecimals`, `getCurrencyDisplayName`, `getCurrencyFlag`, `getCurrencyOptionLabel`, `getCurrencyOptions`, `getCurrencySymbol`
+**Successfully converted to `export *`:** `./enum`, `./localized-string`
+
+---
+
+## Entry 41: `frontend/common/components/ui/badge/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `StatusBadge.tsx` re-exports `type StatusBadgeCategory` from `./types/statusBadgeShared.types`, and `StatusBadgeShared.tsx` re-exports `StatusBadgeCategory`, `StatusBadgeSharedProps`, `StatusBadgeSlotProps`, `StatusPaletteKey` from the same types file. Converting either to `export *` causes `import-x/export` "Multiple exports of name" errors because the barrel also has an explicit `export type { } from "./types/statusBadgeShared.types"` for those same types.
+**Exports kept as named:** `./StatusBadge` — `StatusBadge`; `./StatusBadgeShared` — `type StatusBadgeScaffoldProps`, `StatusBadgeShared`
+
+---
+
+## Entry 42: `frontend/common/components/ui/display/meetingConfig/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `MeetingConfigList.tsx` re-exports `type MeetingConfigListItem` and `type MeetingConfigListProps` from `./types`, and `MeetingJoinAction.tsx` re-exports `type MeetingJoinActionProps` and `type MeetingJoinEmptyRole` from `./types`. Converting either to `export *` causes `import-x/export` "Multiple exports of name" errors because the barrel also has an explicit `export type { } from "./types"` for those same types.
+**Exports kept as named:** `./MeetingConfigList` — `MeetingConfigList`; `./MeetingJoinAction` — `MeetingJoinAction`, `type MeetingJoinActionProps`
+
+
+---
+
+## Entry 40: `backend/db/repo/classes/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** The file has both `export type { PendingReviewFilters } from "./lesson-report.repository"` (line 6) and `export { LessonReportRepository } from "./lesson-report.repository"` (line 7). Converting line 7 to `export *` causes `export *` to also re-export `PendingReviewFilters` (an interface in the source file), creating a duplicate export of `PendingReviewFilters` alongside the existing `export type` statement. ESLint `import-x/export` rule flags this as "Multiple exports of name 'PendingReviewFilters'".
+**Exports kept as named:** `LessonReportRepository`
+
+---
+
+## Entry 41: `backend/db/repo/scheduling/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** The file has `export type { ClassInstanceAffectedUsers, ClassInstanceWithAffectedUsers } from "./scheduling-queries.repository.helpers"` (lines 15-18) and `export { classLifecycleAffectedUserIds, getClassInstanceAffectedUsers, getClassInstanceAffectedUsersForTeacher } from "./scheduling-queries.repository.helpers"` (lines 19-23). Converting lines 19-23 to `export *` causes `export *` to also re-export `ClassInstanceAffectedUsers` and `ClassInstanceWithAffectedUsers` (interfaces in the source file), creating duplicate exports alongside the existing `export type` statement. ESLint `import-x/export` flags "Multiple exports of name 'ClassInstanceAffectedUsers'" and "Multiple exports of name 'ClassInstanceWithAffectedUsers'".
+**Exports kept as named:** `classLifecycleAffectedUserIds`, `getClassInstanceAffectedUsers`, `getClassInstanceAffectedUsersForTeacher`

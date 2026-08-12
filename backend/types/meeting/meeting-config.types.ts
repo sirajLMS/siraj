@@ -7,6 +7,9 @@ import type {
 } from "@/backend/types/meeting/meeting-config-base.types";
 import type { LocalizedString } from "@/shared/types";
 
+// Re-export so existing imports from this module continue to work.
+export type { MeetingConfigDetails };
+
 // ============================================================================
 // Session snapshot (frozen on class_instances at booking)
 // ============================================================================

@@ -1,2 +1,2 @@
-export { UserPaymentMethodAutocompleteMobile } from "./userPaymentMethodAutocomplete.mobile";
-export { UserPaymentMethodSelectMobile } from "./userPaymentMethodSelect.mobile";
+export * from "./userPaymentMethodAutocomplete.mobile";
+export * from "./userPaymentMethodSelect.mobile";
