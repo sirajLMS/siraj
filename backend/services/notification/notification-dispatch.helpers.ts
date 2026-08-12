@@ -21,7 +21,8 @@
  * failure does NOT poison the dispatch for other users.
  */
 
-import { NotificationPreferencesRepository, UserRepository } from "@/backend/db/repo";
+import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications";
+import { UserRepository } from "@/backend/db/repo/users";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService } from "@/backend/services/communication/communication.service";

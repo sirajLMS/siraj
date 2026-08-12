@@ -1,5 +1,5 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import { StaffProfileRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { StaffProfileRepository } from "@/backend/db/repo/teachers";
 import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";

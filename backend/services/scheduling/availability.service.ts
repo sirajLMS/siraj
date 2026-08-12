@@ -1,4 +1,4 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import type { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";

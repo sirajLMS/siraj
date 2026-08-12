@@ -1,6 +1,5 @@
 import {
   AccountStatus,
-  ClassType,
   DevicePlatform,
   InvoiceType,
   LeaveRequesterType,
@@ -11,6 +10,7 @@ import {
   ParentStatus,
   StudentStatus,
 } from "@/backend/enum";
+import { ClassType } from "@/shared/constants/class-instance-detail.enum";
 /**
  * Deterministic enum cycling for dev seeds — each index maps to the next enum variant
  * so a small entity count still exercises almost every UI filter/badge state.

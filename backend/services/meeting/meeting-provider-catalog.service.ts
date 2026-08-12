@@ -1,4 +1,4 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting";
 import { AppPermission } from "@/backend/enum";
 import {

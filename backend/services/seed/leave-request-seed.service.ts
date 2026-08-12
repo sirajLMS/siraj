@@ -9,7 +9,7 @@
  * @see backend/db/seeds/teachers/seed-leave-requests.ts
  * @see backend/db/seeds/teachers/seed-leave-quota-usage.ts
  */
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import {
   LeaveQuotaUsageRepository,
   type LeaveQuotaUsageRow,

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { cache } from "react";
-import { UserRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/users";
 import { UserRole } from "@/backend/enum";
 import { type CustomJWTPayload, logger, verifyToken } from "@/backend/lib";
 import {

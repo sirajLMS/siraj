@@ -16,10 +16,7 @@ import type {
   ListMessageTemplatesInput,
   ListMessageTemplatesResponseBody,
   WhatsappMessageTemplate,
-} from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
-
-/** Re-exported from the types layer for backward compatibility. */
-export type { ListMessageTemplatesResponseBody } from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+} from "@/backend/types";
 
 const { buildRequest: factoryBuildRequest, collectAll } = buildPaginatedListRequest<
   WhatsappMessageTemplate,
@@ -36,7 +33,7 @@ const { buildRequest: factoryBuildRequest, collectAll } = buildPaginatedListRequ
  * @param input WABA ID to list templates for.
  * @param afterCursor Optional cursor from a prior page's `paging.cursors.after`.
  */
-export function buildRequest(
+export function buildListMessageTemplatesRequest(
   ctx: GraphApiRequestContext,
   input: ListMessageTemplatesInput,
   afterCursor?: string
@@ -51,7 +48,7 @@ export function buildRequest(
  *
  * Each template's `language.code` is preserved exactly from Meta's payload (B6).
  */
-export function parseResponse(body: ListMessageTemplatesResponseBody): {
+export function parseListMessageTemplatesResponse(body: ListMessageTemplatesResponseBody): {
   templates: readonly WhatsappMessageTemplate[];
   nextCursor: string | undefined;
 } {

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { db, getNeonHttpClient, getNeonHttpDb, queryDb } from "@/backend/db";
+import { db, queryDb } from "@/backend/db";
+import { getNeonHttpClient, getNeonHttpDb } from "@/backend/db/http-client";
 
 const ENV_KEYS = ["DB_CONNECTION_MODE", "DB_PROVIDER", "DB_NEON_HTTP_ENABLED", "DATABASE_URL"] as const;
 

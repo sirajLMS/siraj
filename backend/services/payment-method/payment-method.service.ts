@@ -1,12 +1,6 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import {
-  BillingRepository,
-  SupportedMobileWalletRepository,
-  SupportedOnlineAccountRepository,
-  SupportedPaymentLinkRepository,
-  UserPaymentMethodRepository,
-} from "@/backend/db/repo";
+import { BillingRepository, SupportedMobileWalletRepository, SupportedOnlineAccountRepository, SupportedPaymentLinkRepository, UserPaymentMethodRepository } from "@/backend/db/repo/billing";
 import { teacherPayments } from "@/backend/db/schema";
 import { AppPermission, ProfileScope } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";

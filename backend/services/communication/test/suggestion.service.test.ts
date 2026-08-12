@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { ParentRepository, SoftDeleteRepository, SuggestionRepository, UserRepository } from "@/backend/db/repo";
+import { ParentRepository, SuggestionRepository } from "@/backend/db/repo/parents";
+import { SoftDeleteRepository } from "@/backend/db/repo/shared";
+import { UserRepository } from "@/backend/db/repo/users";
 import { AccountStatus, AppPermission, NotificationChannel, SuggestionStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
 import { CommunicationService } from "@/backend/services/communication/communication.service";

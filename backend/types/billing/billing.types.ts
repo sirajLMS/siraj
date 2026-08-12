@@ -8,8 +8,8 @@ import type {
   invoices,
   payments,
 } from "@/backend/db/schema";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type {
-  CurrencyCode,
   FxProvider,
   FxProviderConfigSource,
   FxSyncStatus,

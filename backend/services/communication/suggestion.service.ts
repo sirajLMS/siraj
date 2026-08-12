@@ -1,4 +1,6 @@
-import { ParentRepository, SoftDeleteRepository, SuggestionRepository, UserRepository } from "@/backend/db/repo";
+import { ParentRepository, SuggestionRepository } from "@/backend/db/repo/parents";
+import { SoftDeleteRepository } from "@/backend/db/repo/shared";
+import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, NotificationChannel, NotificationEventType, SuggestionStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService } from "@/backend/services";

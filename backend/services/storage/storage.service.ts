@@ -1,10 +1,7 @@
-import {
-  ParentRepository,
-  SignedUrlRepository,
-  SiteContentRepository,
-  StorageDbRepository,
-  TeacherRepository,
-} from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { SignedUrlRepository } from "@/backend/db/repo/shared";
+import { SiteContentRepository, StorageDbRepository } from "@/backend/db/repo/storage";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";

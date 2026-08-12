@@ -4,7 +4,7 @@ import { AlternateEmailOutlined, GroupsOutlined } from "@mui/icons-material";
 import { Grid, InputAdornment, TextField } from "@mui/material";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
 import { Translation, useAppTranslation } from "@/shared/locale";

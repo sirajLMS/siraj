@@ -16,6 +16,17 @@ applyTo: "backend/**/*.ts"
 - Server Components call services directly (not GraphQL) - services must not rely on GraphQL-specific contexts
 - Domain-driven services (e.g., `PermissionsService`, `ScheduleService`) - no monolithic services like `DashboardService`
 
+### Barrel Files (`index.ts`) Conventions (CRITICAL)
+
+- **Shortest import path**: Always import from the highest available barrel (e.g. `@/backend/services`, not `@/backend/services/communication/channels/whatsapp/cloud-api`). If a barrel doesn't exist at the needed level, create one.
+- **Nested barrels**: Every nested subdirectory that has exportable modules MUST have its own `index.ts`. Parent barrels re-export from nested barrels (`export * from "./subdir"`), never from nested files directly.
+- **Prefer `export *`**: Use `export * from "./module"` exclusively. Avoid named re-exports unless two source files export the same symbol name (collision) — in that case, rename the function in the source file so `export *` works, rather than aliasing in the barrel.
+- **`./` not `@/` in barrels**: `index.ts` files MUST use relative `./` paths, not `@/` path aliases.
+- **No `../` in barrels**: `index.ts` files MUST NOT use `../` or `./../` — only `./` paths.
+- **Max one `/` per path**: Each `export * from` path in an `index.ts` MUST NOT contain more than one `/`.
+- **No imports in barrels**: `index.ts` files contain ONLY `export *` statements — never `import` statements. The only exception is GraphQL mutation/query layers where imports register types in the GraphQL schema.
+- **Unique export names**: When multiple files in the same directory export functions with the same generic name (e.g. `buildRequest`, `parseResponse`), rename them to unique descriptive names in the source files so the barrel can use `export *` without aliasing.
+
 ### Type Definition Pattern (CRITICAL)
 
 - ALL types from `@/backend/types` - NEVER local definitions in Pothos files

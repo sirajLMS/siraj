@@ -1,6 +1,6 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { CreditRepository } from "@/backend/db/repo";
+import { CreditRepository } from "@/backend/db/repo/billing";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { classLifecycleAffectedUserIds, SchedulingRepository } from "@/backend/db/repo/scheduling";
@@ -11,7 +11,8 @@ import {
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
-import { AppPermission, type CurrencyCode, NotificationEventType, SchedulingMode } from "@/backend/enum";
+import { AppPermission, NotificationEventType, SchedulingMode } from "@/backend/enum";
+import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

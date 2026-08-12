@@ -26,8 +26,8 @@
  *   .errorsTranslations` (the same pattern used by `FxProviderConfigService`).
  */
 
-import type { DBTransaction } from "@/backend/db/db.types";
-import { SessionConfigRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { SessionConfigRepository } from "@/backend/db/repo/users";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

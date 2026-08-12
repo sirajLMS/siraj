@@ -1,6 +1,6 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db, type QueryDbHandle } from "@/backend/db/drizzleDb";
 import { teachers, users } from "@/backend/db/schema";
 import { recurringScheduleDays, recurringSchedules } from "@/backend/db/schema/classes/scheduling";

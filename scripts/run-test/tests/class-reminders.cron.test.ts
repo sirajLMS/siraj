@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { NotificationPreferencesRepository, SchedulingRepository } from "@/backend/db/repo";
+import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { NotificationEventType } from "@/backend/enum";
 import { CommunicationService } from "@/backend/services/communication/communication.service";

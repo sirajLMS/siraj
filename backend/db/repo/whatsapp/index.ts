@@ -1,1 +1,1 @@
-export { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp/whatsapp-account.repository";
+export * from "./whatsapp-account.repository";

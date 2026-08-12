@@ -1,6 +1,6 @@
 import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import type { db, QueryDbHandle } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";

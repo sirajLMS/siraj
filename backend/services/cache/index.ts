@@ -14,20 +14,9 @@
  * ```
  */
 
-export { ApolloCacheAdapter } from "@/backend/services/cache/ApolloCacheAdapter";
-export { cacheService } from "@/backend/services/cache/CacheServiceFactory";
-export {
-  cachedRead,
-  cachedReadSingleFlight,
-  getEntityCacheStats,
-  invalidateClassLifecycle,
-  invalidateParentWrite,
-  invalidateRoleChange,
-  invalidateTag,
-  invalidateTags,
-  invalidateTeacherWrite,
-  stableStringify,
-} from "@/backend/services/cache/EntityCacheService";
-export type { CacheProvider, ICacheService } from "@/backend/services/cache/ICacheService";
-export { PostgresCacheAdapter } from "@/backend/services/cache/PostgresCacheAdapter";
-export { RedisCacheAdapter } from "@/backend/services/cache/RedisCacheAdapter";
+export * from "./ApolloCacheAdapter";
+export * from "./CacheServiceFactory";
+export * from "./EntityCacheService";
+export type { CacheProvider, ICacheService } from "./ICacheService";
+export * from "./PostgresCacheAdapter";
+export * from "./RedisCacheAdapter";

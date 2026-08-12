@@ -1,9 +1,5 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import {
-  SupportedMobileWalletRepository,
-  SupportedOnlineAccountRepository,
-  SupportedPaymentLinkRepository,
-} from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { SupportedMobileWalletRepository, SupportedOnlineAccountRepository, SupportedPaymentLinkRepository } from "@/backend/db/repo/billing";
 import type { CountryCode } from "@/backend/enum";
 import { AppPermission } from "@/backend/enum";
 import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";

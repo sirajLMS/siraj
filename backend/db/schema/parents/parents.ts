@@ -1,7 +1,7 @@
 import { index, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { countryCodeEnum, currencyCodeEnum, invoiceTypeEnum, parentStatusEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export const parents = pgTable(
   "parents",

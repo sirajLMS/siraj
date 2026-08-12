@@ -7,9 +7,6 @@ import {
   AvailabilitySearchSortBy,
   AvailabilityStatus,
   BookingStatus,
-  ClassExecutionState,
-  ClassOutcome,
-  ClassType,
   CountryCode,
   CreditReason,
   CronConcurrencyPolicy,
@@ -17,7 +14,6 @@ import {
   CronRunStatus,
   CronScheduleStatus,
   CronTriggerSource,
-  CurrencyCode,
   DayOfWeek,
   FxProvider,
   FxProviderConfigSource,
@@ -59,6 +55,8 @@ import {
   WhatsappTemplateCategory,
   WhatsappTemplateStatus,
 } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";

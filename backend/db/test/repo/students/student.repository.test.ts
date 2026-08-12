@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { StudentRepository } from "@/backend/db/repo";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { students } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";

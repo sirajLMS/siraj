@@ -3,7 +3,8 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { DstMigrationRepository, SchedulingRepository } from "@/backend/db/repo";
+import { DstMigrationRepository } from "@/backend/db/repo/classes";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import {
   classInstances,
   classStatusEvents,

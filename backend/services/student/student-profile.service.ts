@@ -1,4 +1,7 @@
-import { ParentRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { StudentRepository } from "@/backend/db/repo/students";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
+import { UserRepository } from "@/backend/db/repo/users";
 import { type AppLanguage, AppPermission, type Gender, StudentStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";

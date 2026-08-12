@@ -1,6 +1,6 @@
 import type { Stats } from "node:fs";
 import fs from "node:fs/promises";
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import type { LocalContext } from "@/backend/storage/disk/local/types";
 import { getAbsolutePath } from "@/backend/storage/disk/local/utils";

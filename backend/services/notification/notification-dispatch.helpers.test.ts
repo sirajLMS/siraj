@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { NotificationPreferencesRepository, UserRepository } from "@/backend/db/repo";
-import { AccountStatus, IanaTimezone, NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications";
+import { UserRepository } from "@/backend/db/repo/users";
+import { AccountStatus, NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import {
   dispatchWithPreferences,

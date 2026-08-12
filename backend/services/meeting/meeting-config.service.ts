@@ -1,4 +1,4 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";

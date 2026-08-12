@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import { SchedulingRepository } from "@/backend/db/repo";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling/scheduling-queries.repository.helpers";
 import { classInstances } from "@/backend/db/schema";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";

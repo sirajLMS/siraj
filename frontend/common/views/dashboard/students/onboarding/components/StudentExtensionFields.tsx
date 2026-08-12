@@ -1,7 +1,7 @@
 import { FormControl, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { LanguageSelector } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";

@@ -19,7 +19,7 @@ import type {
   ZoomErrorResponse,
   ZoomMeetingResponse,
   ZoomTokenResponse,
-} from "@/backend/services/meeting/channels/zoom/zoom.types";
+} from "@/backend/types";
 
 export interface ZoomMeetingAdapterOptions {
   readonly accountId?: string;

@@ -1,2 +1,2 @@
-export * from "@/backend/types/complaints/complaint.types";
-export * from "@/backend/types/complaints/complaintResponses.types";
+export * from "./complaint.types";
+export * from "./complaintResponses.types";

@@ -3,7 +3,7 @@
 import { Search } from "@mui/icons-material";
 import { Box, Input, InputAdornment, MenuItem, Select } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { standardInputSx } from "@/frontend/common/components/ui/form";
+import { standardInputSx } from "@/frontend/common/components/ui/form/field";
 import type { PermissionFilterBarProps } from "@/frontend/common/views/dashboard/permissions/types";
 
 export interface PermissionFilterBarSharedOptions {

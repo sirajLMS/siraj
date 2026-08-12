@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";

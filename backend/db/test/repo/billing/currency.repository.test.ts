@@ -1,11 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { SupportedCurrencyRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { SupportedCurrencyRepository } from "@/backend/db/repo/billing";
 import { supportedCurrencies, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode, IanaTimezone } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { SupportedCurrencyReturnType } from "@/backend/types/billing/currency.types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 /** Unlikely to be referenced by other tables, so safe for activate/deactivate checks. */
 const TEST_CURRENCY = CurrencyCode.DJF;

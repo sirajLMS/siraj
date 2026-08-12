@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import { fileInfoByPath } from "@/backend/storage/disk/gcp/operations/file.operations";
 import { directoryInfoByPath } from "@/backend/storage/disk/gcp/operations/folder.operations";

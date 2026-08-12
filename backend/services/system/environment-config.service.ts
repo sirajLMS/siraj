@@ -47,7 +47,7 @@
  * `@/app/**` or `next/*` APIs.
  */
 
-import { SystemSettingsRepository } from "@/backend/db/repo";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import type { EnvConfigKeyDescriptor } from "@/backend/lib/env-config-keys";
 import { ENV_CONFIG_KEYS, isEnvConfigKeyExposedInSettings } from "@/backend/lib/env-config-keys";
 import { logger } from "@/backend/lib/logger";

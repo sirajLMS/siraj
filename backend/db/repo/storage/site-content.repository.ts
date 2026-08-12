@@ -1,7 +1,7 @@
 import type { SQL } from "drizzle-orm";
 import { and, desc, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { siteContent } from "@/backend/db/schema/storage/site-content";
 import type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
 

@@ -91,7 +91,7 @@ void mock.module("@/backend/services/communication/channels/whatsapp", () => ({
   },
 }));
 
-void mock.module("@/backend/services/communication/channels/whatsapp/cloud-api", () => ({
+void mock.module("@/backend/services", () => ({
   buildGetPhoneNumberRequest: () => ({ url: "https://graph.test", init: {} }),
   collectAllPhoneNumbers: async (): Promise<unknown[]> => [],
   collectAllTemplates: async (): Promise<unknown[]> => [],

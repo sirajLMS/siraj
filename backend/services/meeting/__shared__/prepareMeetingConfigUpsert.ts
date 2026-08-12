@@ -1,4 +1,4 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { safeMaybeGenerateUrl } from "@/backend/services/meeting/__shared__/meetingConfigHelpers";

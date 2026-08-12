@@ -1,4 +1,6 @@
-import { ComplaintRepository, ComplaintResponseRepository, ParentRepository, UserRepository } from "@/backend/db/repo";
+import { ComplaintRepository, ComplaintResponseRepository } from "@/backend/db/repo/complaints";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { CommunicationService, PermissionsService } from "@/backend/services";

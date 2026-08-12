@@ -7,11 +7,11 @@
  * Run: `bun run test:live-comm` or `bun run test:integration`
  */
 import { expect, test } from "bun:test";
-import type { GraphApiRequestContext } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types";
+import type { GraphApiRequestContext } from "@/backend/types";
 import {
-  buildRequest,
-  parseResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/send-template-message.request";
+  buildSendTemplateMessageRequest,
+  parseSendTemplateResponse,
+} from "@/backend/services";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 
 const accessToken = process.env.WHATSAPP_ACCESS_TOKEN ?? "";
@@ -26,7 +26,7 @@ const describeLive = describeLiveWhen(hasCreds, "send-template-message @live-com
 describeLive("send-template-message @live-comm", () => {
   test("buildRequest + fetch returns a provider message ID from Meta Graph API", async () => {
     const ctx: GraphApiRequestContext = { accessToken, apiVersion: undefined };
-    const { url, init } = buildRequest(ctx, {
+    const { url, init } = buildSendTemplateMessageRequest(ctx, {
       phoneNumberId,
       to: testToPhone,
       templateName,
@@ -41,7 +41,7 @@ describeLive("send-template-message @live-comm", () => {
     expect(response.ok).toBe(true);
 
     const body = await response.json();
-    const result = parseResponse(body);
+    const result = parseSendTemplateResponse(body);
 
     expect(result.providerMessageId).toBeDefined();
     expect(result.providerMessageId.length).toBeGreaterThan(0);

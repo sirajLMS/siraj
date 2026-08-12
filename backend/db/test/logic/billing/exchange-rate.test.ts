@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { currencyExchangeRates } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { CurrencyExchangeRateInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 

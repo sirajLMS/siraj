@@ -18,8 +18,8 @@
  * compile-time translation system rather than hardcoded strings.
  */
 
-import type { DBTransaction } from "@/backend/db/db.types";
-import { SiteContentRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { SiteContentRepository } from "@/backend/db/repo/storage";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

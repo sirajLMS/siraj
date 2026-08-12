@@ -11,13 +11,13 @@ import { expect, test } from "bun:test";
 import type {
   GraphApiRequestContext,
   GraphApiRequestInit,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types";
-import type { ListMessageTemplatesResponseBody } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-message-templates.request";
+  ListMessageTemplatesResponseBody,
+} from "@/backend/types";
 import {
-  buildRequest,
+  buildListMessageTemplatesRequest,
   collectAllTemplates,
-  parseResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-message-templates.request";
+  parseListMessageTemplatesResponse,
+} from "@/backend/services";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 
 const accessToken = process.env.WHATSAPP_ACCESS_TOKEN ?? "";
@@ -54,13 +54,13 @@ describeLive("list-message-templates @live-comm", () => {
 
   test("first page parseResponse extracts templates with language.code (B6)", async () => {
     const ctx: GraphApiRequestContext = { accessToken, apiVersion: undefined };
-    const { url, init } = buildRequest(ctx, { wabaId });
+    const { url, init } = buildListMessageTemplatesRequest(ctx, { wabaId });
 
     const response = await fetch(url, { ...init, signal: AbortSignal.timeout(10_000) });
     expect(response.ok).toBe(true);
 
     const body: ListMessageTemplatesResponseBody = await response.json();
-    const { templates, nextCursor } = parseResponse(body);
+    const { templates, nextCursor } = parseListMessageTemplatesResponse(body);
 
     expect(templates.length).toBeGreaterThan(0);
     expect(nextCursor).toBeUndefined();

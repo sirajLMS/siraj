@@ -8,7 +8,7 @@ import {
   shouldSeedExtendedFiles,
   TEACHER_AVATAR_FILES,
 } from "@/backend/db/seeds/lib";
-import { CurrencyCode } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { logger } from "@/backend/lib/logger";
 import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
 import type { TimezoneSelectType, UserSelectType } from "@/backend/types";

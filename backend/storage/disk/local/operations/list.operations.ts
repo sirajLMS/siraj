@@ -1,6 +1,6 @@
 import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import { processDirectory, processFile } from "@/backend/storage/disk/local/shared";
 import type { LocalContext } from "@/backend/storage/disk/local/types";

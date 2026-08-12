@@ -1,5 +1,5 @@
 import type { ObjectFieldBuilder, ObjectRef } from "@pothos/core";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {

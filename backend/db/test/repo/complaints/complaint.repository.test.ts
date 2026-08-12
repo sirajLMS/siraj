@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { ComplaintRepository } from "@/backend/db/repo";
+import { ComplaintRepository } from "@/backend/db/repo/complaints";
 import { complaintFiles, complaints, storageFiles } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";

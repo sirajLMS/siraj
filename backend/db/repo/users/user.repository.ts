@@ -1,11 +1,12 @@
 import { hash } from "bcryptjs";
-import { and, asc, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
+import { and, asc, count, eq, ilike, inArray, or, SQL } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { users } from "@/backend/db/schema";
-import type { AccountStatus, CurrencyCode } from "@/backend/enum";
+import type { AccountStatus } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";

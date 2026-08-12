@@ -5,11 +5,11 @@ import { NotificationRepository } from "@/backend/db/repo/notifications/notifica
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type { FcmPushContext } from "@/backend/services/communication/channels/push/fcm/fcm.types";
+import type { FcmPushContext } from "@/backend/types";
 import {
   FCM_INVALID_TOKEN_ERROR,
   FCM_TOKEN_EXPIRED_ERROR,
-} from "@/backend/services/communication/channels/push/fcm/fcm.types";
+} from "@/backend/services/communication/channels/push/fcm/fcm.helpers";
 import type {
   IPushChannel,
   PushPayload,

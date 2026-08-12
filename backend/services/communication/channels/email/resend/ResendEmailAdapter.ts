@@ -8,7 +8,7 @@ import type {
   EmailSendResult,
   IEmailChannel,
 } from "@/backend/services/communication/channels/email/IEmailChannel";
-import type { ResendEmailContext } from "@/backend/services/communication/channels/email/resend/resend.types";
+import type { ResendEmailContext } from "@/backend/types";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 
 /** Resend simulator inboxes — integration tests send here intentionally; never redirect. */

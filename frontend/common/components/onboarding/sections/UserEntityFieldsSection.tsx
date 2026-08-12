@@ -4,7 +4,7 @@ import { Grid, TextField } from "@mui/material";
 import type { Control, FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import type { UserEntityOnboardingFieldsShape } from "@/frontend/common/components/onboarding/sections/types";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";

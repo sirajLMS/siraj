@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { SchedulingRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode, Gender } from "@/backend/enum";
+import { Gender } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ClassInstanceInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 

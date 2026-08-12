@@ -1,2 +1,2 @@
-export { StudentRepository } from "./student.repository";
-export { StudentHistoryRepository } from "./student-history.repository";
+export * from "./student.repository";
+export * from "./student-history.repository";

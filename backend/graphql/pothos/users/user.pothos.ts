@@ -1,4 +1,4 @@
-import { UserRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/users";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AccountStatusPothosObject,

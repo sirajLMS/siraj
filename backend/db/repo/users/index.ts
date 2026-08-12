@@ -1,2 +1,2 @@
-export { SessionConfigRepository } from "@/backend/db/repo/users/session-config.repository";
-export { UserRepository } from "@/backend/db/repo/users/user.repository";
+export * from "./session-config.repository";
+export * from "./user.repository";

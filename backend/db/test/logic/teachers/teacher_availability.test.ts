@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { SchedulingRepository, TeacherAvailabilityRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";

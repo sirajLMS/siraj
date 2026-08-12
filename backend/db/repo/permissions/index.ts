@@ -1,1 +1,1 @@
-export { PermissionManagementRepository } from "./permission-management.repository";
+export * from "./permission-management.repository";

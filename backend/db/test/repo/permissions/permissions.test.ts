@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { permissionGroups, permissions } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";

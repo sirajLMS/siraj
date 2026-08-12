@@ -14,7 +14,7 @@ import type {
   GoogleMeetServiceAccountJson,
   GoogleMeetSpaceResponse,
   GoogleMeetTokenResponse,
-} from "@/backend/services/meeting/channels/google-meet/google-meet.types";
+} from "@/backend/types";
 import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/services/meeting/channels/IMeetingChannel";
 import {
   GoogleMeetApiError,

@@ -1,6 +1,6 @@
+import type { ClassType as BackendClassType } from "@/shared/constants/class-instance-detail.enum";
+import type { CurrencyCode as BackendCurrencyCode } from "@/shared/constants/currency.enum";
 import type {
-  ClassType as BackendClassType,
-  CurrencyCode as BackendCurrencyCode,
   DayOfWeek as BackendDayOfWeek,
   OnDemandNoCreditsOutcome as BackendOnDemandNoCreditsOutcome,
   SchedulingMode as BackendSchedulingMode,

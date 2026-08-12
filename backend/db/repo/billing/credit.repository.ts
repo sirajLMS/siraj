@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import type { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { creditTransactions, students } from "@/backend/db/schema";

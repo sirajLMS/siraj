@@ -1,4 +1,5 @@
-import { TeacherRepository, UserRepository } from "@/backend/db/repo";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
+import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

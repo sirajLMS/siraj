@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import * as Pothos from "@/backend/graphql/pothos";
 import { getStorageService } from "@/backend/storage/storage.service";

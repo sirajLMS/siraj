@@ -1,7 +1,8 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
-import { AppPermission, ClassOutcome } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
+import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

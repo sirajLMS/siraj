@@ -1,6 +1,6 @@
 import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { teacherImportantNotes } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";

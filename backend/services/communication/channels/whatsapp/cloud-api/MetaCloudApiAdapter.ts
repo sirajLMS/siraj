@@ -1,4 +1,4 @@
-import { WhatsappAccountRepository } from "@/backend/db/repo";
+import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { decryptField } from "@/backend/lib/field-encryption";
@@ -8,11 +8,11 @@ import { sanitizeFailureReason } from "@/backend/lib/whatsapp-sanitize";
 import {
   extractMetaErrorCode,
   extractMetaErrorMessage,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types";
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import {
-  buildRequest as buildSendTemplateRequest,
-  parseResponse as parseSendTemplateResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/send-template-message.request";
+  buildSendTemplateMessageRequest,
+  parseSendTemplateResponse,
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 import { redisService } from "@/backend/services/redis";
 import type { CreateNotificationDeliveryInput } from "@/backend/types/notifications/notificationDeliveries.types";
@@ -21,7 +21,7 @@ import type {
   WhatsappPayload,
   WhatsappSendResult,
 } from "@/backend/types/whatsapp/whatsapp-channel.types";
-import type { GraphApiRequestContext } from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+import type { GraphApiRequestContext } from "@/backend/types";
 
 /** Pair-rate-limit window: no two messages to the same recipient within 6 seconds (B2). */
 const PAIR_RATE_LIMIT_MS = 6000;
@@ -249,7 +249,7 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
   }): Promise<WhatsappSendResult> {
     const { deliveryId, payload, e164, accessToken, phoneNumberId, apiVersion, locale, isRetry = false } = params;
     const ctx: GraphApiRequestContext = { accessToken, apiVersion };
-    const { url, init } = buildSendTemplateRequest(ctx, {
+    const { url, init } = buildSendTemplateMessageRequest(ctx, {
       phoneNumberId,
       to: e164,
       templateName: payload.template.name,

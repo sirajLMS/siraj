@@ -2,7 +2,7 @@
 
 import { TextField } from "@mui/material";
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 
 /**
  * Props for the shared labeled text field controller.

@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { and, count, desc, eq, gt, gte, inArray, isNull, lt, or, sql } from "drizzle-orm";
 
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import type { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";

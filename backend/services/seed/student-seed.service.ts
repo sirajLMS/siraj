@@ -10,8 +10,8 @@
  *
  * @see backend/db/seeds/students/
  */
-import type { DBTransaction } from "@/backend/db/db.types";
-import { StudentRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { StudentRepository } from "@/backend/db/repo/students";
 import {
   StudentProgressRepository,
   type StudentProgressUpsertInput,

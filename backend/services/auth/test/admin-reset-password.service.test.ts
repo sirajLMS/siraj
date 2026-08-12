@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { UserRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/users";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum/notifications/notificationDeliveries.enum";
 import { logger } from "@/backend/lib/logger";
 import { AuthPasswordService } from "@/backend/services/auth/auth-password.service";

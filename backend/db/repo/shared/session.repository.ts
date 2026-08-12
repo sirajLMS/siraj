@@ -1,5 +1,5 @@
 import { and, desc, eq, lte, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";

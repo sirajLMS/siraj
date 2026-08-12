@@ -1,4 +1,5 @@
-import { SignedUrlRepository, StorageDbRepository } from "@/backend/db/repo";
+import { SignedUrlRepository } from "@/backend/db/repo/shared";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { STORAGE_CONFIG, StorageValidationError } from "@/backend/storage/disk/storage.service.interface";

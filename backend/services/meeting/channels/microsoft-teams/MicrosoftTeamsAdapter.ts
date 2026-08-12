@@ -21,7 +21,7 @@ import type {
   MicrosoftTeamsErrorResponse,
   MicrosoftTeamsMeetingResponse,
   MicrosoftTeamsTokenResponse,
-} from "@/backend/services/meeting/channels/microsoft-teams/microsoft-teams.types";
+} from "@/backend/types";
 
 export interface MicrosoftTeamsAdapterOptions {
   readonly tenantId?: string;

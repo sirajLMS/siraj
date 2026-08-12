@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { BillingRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { BillingRepository } from "@/backend/db/repo/billing";
 import { currencyExchangeRates } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
 
 describe("FxDisplayService", () => {

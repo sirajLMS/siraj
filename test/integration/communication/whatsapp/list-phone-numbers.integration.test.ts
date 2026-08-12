@@ -11,13 +11,13 @@ import { expect, test } from "bun:test";
 import type {
   GraphApiRequestContext,
   GraphApiRequestInit,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types";
-import type { ListPhoneNumbersResponseBody } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-phone-numbers.request";
+  ListPhoneNumbersResponseBody,
+} from "@/backend/types";
 import {
-  buildRequest,
+  buildListPhoneNumbersRequest,
   collectAllPhoneNumbers,
-  parseResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-phone-numbers.request";
+  parseListPhoneNumbersResponse,
+} from "@/backend/services";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 
 const accessToken = process.env.WHATSAPP_ACCESS_TOKEN ?? "";
@@ -52,13 +52,13 @@ describeLive("list-phone-numbers @live-comm", () => {
 
   test("first page parseResponse extracts phone numbers and cursor", async () => {
     const ctx: GraphApiRequestContext = { accessToken, apiVersion: undefined };
-    const { url, init } = buildRequest(ctx, { wabaId });
+    const { url, init } = buildListPhoneNumbersRequest(ctx, { wabaId });
 
     const response = await fetch(url, { ...init, signal: AbortSignal.timeout(10_000) });
     expect(response.ok).toBe(true);
 
     const body: ListPhoneNumbersResponseBody = await response.json();
-    const { phoneNumbers, nextCursor } = parseResponse(body);
+    const { phoneNumbers, nextCursor } = parseListPhoneNumbersResponse(body);
 
     expect(phoneNumbers.length).toBeGreaterThan(0);
     expect(nextCursor).toBeUndefined();

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { GraphQLError } from "graphql";
 import { cookies, headers } from "next/headers";
-import { RateLimitRepository, SessionRepository } from "@/backend/db/repo";
+import { RateLimitRepository, SessionRepository } from "@/backend/db/repo/shared";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";

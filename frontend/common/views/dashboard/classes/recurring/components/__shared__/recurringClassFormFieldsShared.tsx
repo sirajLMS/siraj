@@ -4,7 +4,7 @@ import { ExpandMoreOutlined } from "@mui/icons-material";
 import { Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import type { ComponentType } from "react";
 import { type Control, Controller, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { getCurrencySymbol } from "@/frontend/common/lib/currency";

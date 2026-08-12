@@ -1,6 +1,6 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { complaints, notificationDeliveries } from "@/backend/db/schema";
 import {
   AppPermission,

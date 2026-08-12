@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { SchedulingRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, students, teacherAssignments, users } from "@/backend/db/schema";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
+import { StudentStatus } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 const NON_EXISTENT_ID = "00000000-0000-0000-0000-000000000000";

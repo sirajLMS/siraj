@@ -1,4 +1,4 @@
-import { ParentRepository } from "@/backend/db";
+import { ParentRepository } from "@/backend/db/repo/parents";
 import { AppPermission } from "@/backend/enum";
 import { ParentServiceBase } from "@/backend/services/parent/__shared__/parentServiceBase";
 import type { ParentProfileResult } from "@/backend/types/parents/parent.types";

@@ -4,8 +4,6 @@
  * Fixer's base currency is EUR. The adapter normalises these EUR-based rates
  * into USD-hub rates before returning, so consumers always see USD -> X.
  */
-import { z } from "zod";
-
 export interface FixerLatestResponse {
   /** Fixer's success flag — false indicates an error payload. */
   success: boolean;
@@ -24,22 +22,3 @@ export interface FixerLatestResponse {
     info?: string;
   };
 }
-
-/**
- * Zod schema for validating FixerLatestResponse at runtime.
- * Used to safely parse the API response instead of unsafe type assertions.
- */
-export const fixerResponseSchema = z.object({
-  success: z.boolean(),
-  timestamp: z.number(),
-  base: z.string(),
-  date: z.string(),
-  rates: z.record(z.string(), z.number()),
-  error: z
-    .object({
-      code: z.number(),
-      type: z.string(),
-      info: z.string().optional(),
-    })
-    .optional(),
-});

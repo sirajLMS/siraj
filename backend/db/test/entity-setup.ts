@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import type { db } from "@/backend/db/drizzleDb";
 import {
   classCategories,
@@ -22,13 +22,12 @@ import {
   AccountStatus,
   type AppPermission,
   AttendanceEvaluation,
-  ClassExecutionState,
-  ClassOutcome,
   CreditReason,
-  CurrencyCode,
   LessonReportStatus,
   TeacherDueStatus,
 } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type {
   ClassInstanceSelectType,
   ClassMeetingConfigSelectType,

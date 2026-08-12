@@ -1,7 +1,3 @@
-// NEW FOR PLAN v5: lifted useJoinContext from
-//   frontend/common/components/ui/display/meetingConfig/hooks/meetingConfigDisplay.hooks.ts
-//   to frontend/common/hooks/useJoinContext.ts so tier importers use a §2.4-allowlisted path.
-
 import type { MeetingJoinActionProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { type JoinContext, resolveJoinUrl, resolveTooltip } from "@/frontend/common/lib/meetingJoinAction";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";

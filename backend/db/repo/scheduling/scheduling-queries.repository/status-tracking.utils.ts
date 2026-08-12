@@ -1,4 +1,5 @@
-import { ClassOutcome, StudentStatus } from "@/backend/enum";
+import { StudentStatus } from "@/backend/enum";
+import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { StatusTrackingRow } from "@/backend/types/scheduling/scheduling.types";
 import { parseClassExecutionState, parseClassOutcome, parseStudentStatus } from "@/shared/lib/enum";

@@ -1,6 +1,7 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import { TeacherRepository } from "@/backend/db/repo";
-import { AppPermission, type CurrencyCode, Gender, SystemPermissionGroupSlug } from "@/backend/enum";
+import type { DBTransaction } from "@/backend/types";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
+import { AppPermission, Gender, SystemPermissionGroupSlug } from "@/backend/enum";
+import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { buildTeacherInsertPayload } from "@/backend/services/teacher/__shared__/buildTeacherInsertPayload";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";

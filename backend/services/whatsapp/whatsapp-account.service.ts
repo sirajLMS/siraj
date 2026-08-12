@@ -1,7 +1,7 @@
 import { z } from "zod";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { WhatsappAccountRepository } from "@/backend/db/repo";
+import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { AppPermission, NotificationChannel, NotificationEventType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { WhatsappTemplateCategory, WhatsappTemplateStatus } from "@/backend/enum/whatsapp/whatsapp.enum";
@@ -13,13 +13,13 @@ import {
   resolveGraphApiContextFromEnv,
 } from "@/backend/lib/whatsapp-constants";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { resetWhatsappChannel } from "@/backend/services/communication/channels/whatsapp";
 import {
   buildGetPhoneNumberRequest,
   collectAllPhoneNumbers,
   collectAllTemplates,
   GraphApiError,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api";
+  resetWhatsappChannel,
+} from "@/backend/services";
 import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
 import { NOTIFICATION_TEMPLATE_MAP } from "@/backend/services/notification/notification-payloads.builders";
 import { resolveEnvConfig } from "@/backend/services/system";
@@ -49,7 +49,7 @@ import type {
   ListMessageTemplatesResponseBody,
   ListPhoneNumbersResponseBody,
   WhatsappPhoneNumber,
-} from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Placeholder string for credentials not yet set via dedicated mutations. */

@@ -1,6 +1,8 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
+import { ImpersonationRepository } from "@/backend/db/repo/auth";
+import { SessionRepository } from "@/backend/db/repo/shared";
+import { UserRepository } from "@/backend/db/repo/users";
 import { permissionGroups } from "@/backend/db/schema";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";

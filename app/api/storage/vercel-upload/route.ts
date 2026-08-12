@@ -1,6 +1,6 @@
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { type NextRequest, NextResponse } from "next/server";
-import { SignedUrlRepository } from "@/backend/db";
+import { SignedUrlRepository } from "@/backend/db/repo/shared";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
 import { SessionService, StorageService } from "@/backend/services";
 

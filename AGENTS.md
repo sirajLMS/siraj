@@ -121,6 +121,16 @@ This is NOT standard Next.js. APIs and conventions differ from training data. **
 - All imports use this pattern: `import { logger } from "@/backend/lib"` (never relative paths)
 - Examples: `@/backend/services/` → `./backend/services/`, `@/frontend/views/` → `./frontend/views/`
 
+### Barrel Files (`index.ts`) Conventions
+- **Shortest import path**: Always import from the highest available barrel (e.g. `@/backend/services`, not `@/backend/services/communication/channels/whatsapp/cloud-api`). If a barrel doesn't exist at the needed level, create one.
+- **Nested barrels**: Every nested subdirectory that has exportable modules MUST have its own `index.ts`. Parent barrels re-export from nested barrels (`export * from "./subdir"`), never from nested files directly (`export * from "./subdir/file"` is prohibited).
+- **Prefer `export *`**: Use `export * from "./module"` exclusively. Avoid named re-exports (`export { A, B } from "./module"`) unless two source files export the same symbol name (collision) — in that case, rename the function in the source file so `export *` works, rather than aliasing in the barrel.
+- **`./` not `@/` in barrels**: `index.ts` files MUST use relative `./` paths, not `@/` path aliases. Example: `export * from "./requests"`, not `export * from "@/backend/services/.../requests"`.
+- **No `../` in barrels**: `index.ts` files MUST NOT use `../` or `./../` — only `./` paths to files/subdirs in the same directory or one level down.
+- **Max one `/` per path**: Each `export * from` path in an `index.ts` MUST NOT contain more than one `/`. Example: `export * from "./requests"` (one `/`) is allowed; `export * from "./requests/get-phone-number.request"` (two `/`) is prohibited — use `export * from "./requests"` and let the `requests/index.ts` barrel handle the rest.
+- **No imports in barrels**: `index.ts` files contain ONLY `export *` (or collision-disambiguation `export { }`) statements — never `import` statements. The only exception is GraphQL mutation/query layers where imports register types in the GraphQL schema (not re-exported).
+- **Unique export names**: When multiple files in the same directory export functions with the same generic name (e.g. `buildRequest`, `parseResponse`), rename them to unique descriptive names in the source files (e.g. `buildGetPhoneNumberRequest`, `parseGetPhoneNumberResponse`) so the barrel can use `export *` without aliasing.
+
 ### Shared Layer
 - `shared/` is used by both frontend and backend — it must **never** import from `@/frontend/**`, `@/backend/**`, or `@/app/**` (ESLint enforced).
 - Cross-layer enums and constants belong in `shared/constants/`; utilities in `shared/lib/`. See `shared/AGENTS.md`.

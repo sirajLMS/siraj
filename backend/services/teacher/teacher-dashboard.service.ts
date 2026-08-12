@@ -1,5 +1,5 @@
 import { db } from "@/backend/db/drizzleDb";
-import { CreditRepository } from "@/backend/db/repo";
+import { CreditRepository } from "@/backend/db/repo/billing";
 import { AuditRepository } from "@/backend/db/repo/audit/audit.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";

@@ -1,8 +1,9 @@
 import { and, eq, gte, inArray, isNull, lt, ne, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { classInstances, classSubjects, recurringSchedules, students } from "@/backend/db/schema";
-import { ClassExecutionState, ClassOutcome, DayOfWeek } from "@/backend/enum";
+import { DayOfWeek } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import type {
   FutureClassRow,
   TeacherAssignedClassRow,

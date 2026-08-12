@@ -7,7 +7,7 @@ import type { ISmsChannel, SmsPayload, SmsSendResult } from "@/backend/services/
 import type {
   TwilioRateLimitConfig,
   TwilioSmsContext,
-} from "@/backend/services/communication/channels/sms/twilio/twilio.types";
+} from "@/backend/types";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 
 const DEFAULT_SMS_RATE_LIMIT_PER_HOUR = 3;

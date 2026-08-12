@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";

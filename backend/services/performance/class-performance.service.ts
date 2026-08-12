@@ -1,4 +1,4 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { ClassPerformanceRepository } from "@/backend/db/repo/classes/class-performance.repository";
 import type { ClassInstancePerformanceInsertType, ClassInstancePerformanceSelectType } from "@/backend/types";
 

@@ -1,6 +1,7 @@
-import { StudentRepository } from "@/backend/db";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { StudentHistoryRepository } from "@/backend/db/repo/students/student-history.repository";
-import { AppPermission, ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { ErrorsLabels } from "@/shared/locale";

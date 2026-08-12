@@ -1,4 +1,5 @@
-import type { AppPermission, CurrencyCode, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
+import type { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { AccountStatus } from "@/backend/enum/auth/auth.enum";
 import type { PaymentMethodDefaults, UserPaymentMethodReturnType } from "@/backend/types/billing/payment-method.types";
 import type {
@@ -81,7 +82,7 @@ export type StaffOwnProfileUpdateInput = {
 export type StaffAdminProfileUpdateInput = {
   readonly status?: string | null;
   readonly hourlyRate?: string | null;
-  readonly rateCurrency?: import("@/backend/enum").CurrencyCode | null;
+  readonly rateCurrency?: import("@/shared/constants/currency.enum").CurrencyCode | null;
 };
 
 export type UpdateOwnProfileInput = {

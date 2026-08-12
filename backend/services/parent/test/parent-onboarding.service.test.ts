@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
+import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
+import { UserRepository } from "@/backend/db/repo/users";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";

@@ -1,4 +1,4 @@
-import { SchedulingRepository } from "@/backend/db/repo";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CreateTeacherNoteInputPothos,

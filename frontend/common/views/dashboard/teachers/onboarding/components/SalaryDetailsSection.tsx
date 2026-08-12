@@ -2,7 +2,7 @@
 
 import { Grid, TextField } from "@mui/material";
 import { type Control, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { CurrencySelectController } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySelectControllerShared";
 import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";

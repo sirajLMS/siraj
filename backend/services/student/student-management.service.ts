@@ -1,4 +1,5 @@
-import { ParentRepository, StudentRepository } from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";

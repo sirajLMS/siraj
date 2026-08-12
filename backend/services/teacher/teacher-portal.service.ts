@@ -1,5 +1,9 @@
-import { SchedulingRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
-import { AppPermission, type CurrencyCode } from "@/backend/enum";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { StudentRepository } from "@/backend/db/repo/students";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
+import { UserRepository } from "@/backend/db/repo/users";
+import { AppPermission } from "@/backend/enum";
+import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";

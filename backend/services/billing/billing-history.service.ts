@@ -1,4 +1,5 @@
-import { BillingRepository, ParentRepository } from "@/backend/db/repo";
+import { BillingRepository } from "@/backend/db/repo/billing";
+import { ParentRepository } from "@/backend/db/repo/parents";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {

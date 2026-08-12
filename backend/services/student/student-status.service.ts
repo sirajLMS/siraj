@@ -1,5 +1,7 @@
-import { SchedulingRepository, StudentRepository } from "@/backend/db/repo";
-import { ClassOutcome, StudentStatus } from "@/backend/enum";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { StudentRepository } from "@/backend/db/repo/students";
+import { StudentStatus } from "@/backend/enum";
+import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { logger } from "@/backend/lib/logger";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { assertStudentFieldView, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";

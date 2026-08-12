@@ -1,5 +1,5 @@
 import { orchestrateSeedMany, type SeedConfig } from "@/backend/db/seeds/lib";
-import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { logger } from "@/backend/lib/logger";
 import { ClassSessionService } from "@/backend/services/session/class-session.service";
 import type { ClassInstanceSelectType, TeacherSelectType } from "@/backend/types";

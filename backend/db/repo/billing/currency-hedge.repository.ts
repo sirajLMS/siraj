@@ -1,9 +1,9 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { currencyHedges } from "@/backend/db/schema";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type {
   CurrencyHedgeInsertType,
   CurrencyHedgeSelectType,

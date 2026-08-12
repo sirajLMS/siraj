@@ -1,4 +1,4 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { GroupClassRepository } from "@/backend/db/repo/classes/group-class.repository";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";

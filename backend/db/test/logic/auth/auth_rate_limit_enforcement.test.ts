@@ -2,7 +2,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, like } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { RateLimitRepository } from "@/backend/db/repo";
+import { RateLimitRepository } from "@/backend/db/repo/shared";
 import { authRateLimits, passwordResetTokens } from "@/backend/db/schema";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 

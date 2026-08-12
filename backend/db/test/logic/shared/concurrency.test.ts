@@ -1,10 +1,11 @@
 import { beforeAll, describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { BillingRepository, StudentRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { BillingRepository } from "@/backend/db/repo/billing";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { invoices, parents, students, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";

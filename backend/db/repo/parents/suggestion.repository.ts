@@ -1,6 +1,6 @@
 import { aliasedTable, and, count, desc, eq, gte, ilike, isNull, ne, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { SuggestionStatus } from "@/backend/enum";

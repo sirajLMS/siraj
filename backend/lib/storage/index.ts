@@ -1,1 +1,1 @@
-export * from "@/backend/lib/storage/local-storage-path";
+export * from "./local-storage-path";

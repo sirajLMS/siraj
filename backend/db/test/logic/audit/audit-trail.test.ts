@@ -13,12 +13,13 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { AuditRepository } from "@/backend/db/repo";
+import { AuditRepository } from "@/backend/db/repo/audit";
 import { auditLogs, users } from "@/backend/db/schema";
 import { IP_ADDRESS_1 } from "@/backend/db/test/const";
-import { AccountStatus, CurrencyCode, StudentStatus, UserRole } from "@/backend/enum";
+import { AccountStatus, StudentStatus, UserRole } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { CreateAuditLogInput } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import { parseIanaTimezone } from "@/shared/lib/enum";

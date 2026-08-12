@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
@@ -18,11 +18,11 @@ import {
 import {
   AccountStatus,
   BookingStatus,
-  ClassOutcome,
-  type CurrencyCode,
   type ParentStatus,
   StudentStatus,
 } from "@/backend/enum";
+import type { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type {
   PaginationArgs,
   ParentCreateResult,

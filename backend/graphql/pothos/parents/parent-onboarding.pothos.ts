@@ -1,4 +1,5 @@
-import type { CurrencyCode, InvoiceType } from "@/backend/enum";
+import type { InvoiceType } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   type UserPaymentMethodInitialGqlInput,

@@ -14,7 +14,7 @@
 import {
   buildAuthHeaders,
   buildGraphUrl,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types";
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import {
   collectAllPages,
   type ParsedPage,
@@ -23,7 +23,7 @@ import type {
   GraphApiPaginatedResponse,
   GraphApiRequestContext,
   GraphApiRequestInit,
-} from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+} from "@/backend/types";
 
 /**
  * Options for {@link buildPaginatedListRequest}.

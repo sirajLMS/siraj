@@ -105,8 +105,4 @@ export function clearDbConnectionSingleton(): void {
   clearHttpClientSingleton();
 }
 
-export { getActiveHttpProvider, isNeonHttpEligible } from "@/backend/db/connection-strategy";
-export { clearHttpClientSingleton, getNeonHttpClient, getNeonHttpDb } from "@/backend/db/http-client";
-export { relations };
-
 export type DrizzleRelations = typeof relations;

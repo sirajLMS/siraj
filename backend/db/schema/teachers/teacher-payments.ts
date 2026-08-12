@@ -2,7 +2,7 @@ import { boolean, index, jsonb, numeric, pgTable, timestamp, uuid } from "drizzl
 import { userPaymentMethods } from "@/backend/db/schema/billing/user-payment-methods";
 import { currencyCodeEnum, paymentMethodTypeEnum } from "@/backend/db/schema/enums";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 

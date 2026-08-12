@@ -10,14 +10,10 @@
  * CI test servers (`TEST_SERVER=1`, `TEST_CI=true`).
  */
 
-export { LeaveRequestSeedService } from "@/backend/services/seed/leave-request-seed.service";
-export { NotificationDeviceSeedService } from "@/backend/services/seed/notification-device-seed.service";
-export {
-  PersonaSeedService,
-  type SeedParentProfileInput,
-  type SeedTeacherProfileInput,
-} from "@/backend/services/seed/persona-seed.service";
-export { type SeedStudentInput, StudentSeedService } from "@/backend/services/seed/student-seed.service";
-export { TeacherAvailabilitySeedService } from "@/backend/services/seed/teacher-availability-seed.service";
-export { TeacherPaymentSeedService } from "@/backend/services/seed/teacher-payment-seed.service";
-export { type SeedDemoUserInput, UserSeedService } from "@/backend/services/seed/user-seed.service";
+export * from "./leave-request-seed.service";
+export * from "./notification-device-seed.service";
+export * from "./persona-seed.service";
+export * from "./student-seed.service";
+export * from "./teacher-availability-seed.service";
+export * from "./teacher-payment-seed.service";
+export * from "./user-seed.service";

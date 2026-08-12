@@ -1,10 +1,13 @@
 /**
- * Shared types and helpers for Meta Cloud API (Graph API v23.0) request builders.
+ * Runtime helpers for Meta Cloud API (Graph API v23.0) request builders.
  *
  * Each `*.request.ts` file under `./requests/` exports `buildRequest(ctx)` →
  * `{ url, init }` and `parseResponse(body)` for one Graph API endpoint.
  * The adapter (Task 5) supplies `accessToken`, `apiVersion`, and other
  * runtime context via `GraphApiRequestContext`.
+ *
+ * Type definitions live in the types layer:
+ * `@/backend/types/whatsapp/whatsapp-cloud-api.types.ts`
  *
  * v1 core builder set (Q1 — no register/deregister/code/template CRUD builders):
  *  - send-template-message.request.ts  (POST /{phone_number_id}/messages)
@@ -12,19 +15,6 @@
  *  - get-phone-number.request.ts        (GET  /{phone_number_id})
  *  - list-message-templates.request.ts  (GET  /{waba_id}/message_templates)
  */
-
-/**
- * Canonical type definitions have been moved to the types layer:
- * `@/backend/types/whatsapp/whatsapp-cloud-api.types.ts`
- *
- * They are re-exported here so existing import sites (request builders, adapter)
- * continue to work without changes.
- */
-export type {
-  GraphApiPaginatedResponse,
-  GraphApiRequestContext,
-  GraphApiRequestInit,
-} from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
 
 /** Base URL for Meta Graph API. */
 const GRAPH_API_BASE_URL = "https://graph.facebook.com";

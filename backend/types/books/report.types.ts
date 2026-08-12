@@ -1,4 +1,4 @@
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
 
 export interface AttendanceReportPaidAmountReturnType {

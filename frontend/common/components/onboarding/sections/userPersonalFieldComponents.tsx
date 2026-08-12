@@ -7,7 +7,7 @@ import type {
   OnboardingSectionTranslations,
   UserPersonalFieldsShape,
 } from "@/frontend/common/components/onboarding/sections/types";
-import { DateOfBirthControllerField, outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { DateOfBirthControllerField, outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { getCountryByCode } from "@/frontend/common/lib/locale";

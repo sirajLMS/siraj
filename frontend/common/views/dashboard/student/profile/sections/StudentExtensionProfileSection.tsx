@@ -6,7 +6,7 @@ import ScheduleOutlined from "@mui/icons-material/ScheduleOutlined";
 import WcOutlined from "@mui/icons-material/WcOutlined";
 import { Stack } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { AppDatePicker } from "@/frontend/common/components/ui/form";
+import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { LanguageSelector } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";

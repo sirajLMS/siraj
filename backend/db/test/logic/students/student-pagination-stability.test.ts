@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { StudentRepository } from "@/backend/db/repo";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { parents, students, users } from "@/backend/db/schema";
 import {
   AccountStatus,

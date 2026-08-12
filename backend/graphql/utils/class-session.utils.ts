@@ -1,5 +1,5 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { ClassExecutionState, type ClassOutcome } from "@/backend/enum";
+import { ClassExecutionState, type ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";

@@ -1,5 +1,5 @@
 import { and, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";

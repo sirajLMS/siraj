@@ -83,7 +83,7 @@ export async function fetchDirectoryChildren(ctx: GcpContext, path?: string | nu
 }
 
 // Keeping original fetchDirectoryChildren logic as it uses parentPath lookup
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 
 async function originalFetchDirectoryChildren(ctx: GcpContext, path?: string | null): Promise<Types.DirectoryInfo[]> {
   const searchPath = !path || path.length === 0 ? "public" : cleanGcsPath(path);

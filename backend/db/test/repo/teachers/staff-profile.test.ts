@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { StaffProfileRepository } from "@/backend/db/repo";
+import { StaffProfileRepository } from "@/backend/db/repo/teachers";
 import type { ManagerProfileUpdateInput } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";

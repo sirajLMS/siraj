@@ -1,3 +1,3 @@
-export { LearningResourceRepository } from "@/backend/db/repo/storage/learning-resource.repository";
-export { SiteContentRepository } from "@/backend/db/repo/storage/site-content.repository";
-export { StorageDbRepository } from "@/backend/db/repo/storage/storage.repository";
+export * from "./learning-resource.repository";
+export * from "./site-content.repository";
+export * from "./storage.repository";

@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import { loadListEntities, paginateStorageItems } from "@/backend/storage/disk/shared/list-operations.helper";
 import { getBlobs } from "@/backend/storage/disk/vercel/shared";

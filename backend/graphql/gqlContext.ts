@@ -1,6 +1,7 @@
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import { UserRepository } from "@/backend/db/repo";
-import { type AppPermission, type CurrencyCode, UserRole } from "@/backend/enum";
+import { UserRepository } from "@/backend/db/repo/users";
+import { UserRole, type AppPermission } from "@/backend/enum";
+import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getServerTranslations, type Translations } from "@/shared/locale";
 

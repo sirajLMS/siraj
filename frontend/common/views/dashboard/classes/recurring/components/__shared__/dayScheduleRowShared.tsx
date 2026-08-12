@@ -4,7 +4,7 @@ import { TuneOutlined } from "@mui/icons-material";
 import { Box, Checkbox, FormControlLabel, IconButton, Tooltip, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { styled } from "@mui/material/styles";
-import { AppTimePicker } from "@/frontend/common/components/ui/form";
+import { AppTimePicker } from "@/frontend/common/components/ui/form/time";
 import type { DayScheduleRowProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
   formatTimeValue,

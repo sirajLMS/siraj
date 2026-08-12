@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
 import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";

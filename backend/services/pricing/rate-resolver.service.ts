@@ -1,4 +1,5 @@
-import { CurrencyCode, RateSource } from "@/backend/enum";
+import { RateSource } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
 import type { ClassSubjectSelectType } from "@/backend/types/classes/class-subject.types";
 import type { RecurringScheduleSelectType } from "@/backend/types/scheduling/scheduling.types";

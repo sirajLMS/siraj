@@ -1,10 +1,7 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import {
-  BillingRepository,
-  InvoicePaymentSubmissionRepository,
-  ParentRepository,
-  StorageDbRepository,
-} from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { BillingRepository, InvoicePaymentSubmissionRepository } from "@/backend/db/repo/billing";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { InvoicePaymentSubmissionStatus } from "@/backend/enum/billing/billing.enum";
 import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { NotFoundError } from "@/backend/lib";

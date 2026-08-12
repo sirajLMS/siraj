@@ -4,29 +4,29 @@
 // `import * as Pothos from "@/backend/graphql/pothos"` (from query/mutation)
 // continue to resolve every Pothos object.
 
-export * from "@/backend/graphql/pothos/auth";
-export * from "@/backend/graphql/pothos/billing";
-export * from "@/backend/graphql/pothos/books";
-export * from "@/backend/graphql/pothos/classes";
-export * from "@/backend/graphql/pothos/complaints";
+export * from "./auth";
+export * from "./billing";
+export * from "./books";
+export * from "./classes";
+export * from "./complaints";
 
 // Side-effect import: registers Cron query/mutation fields with gqlSchemaBuilder.
 // The cron submodule owns no named exports (object/enum types are registered
 // imperatively).
-import "@/backend/graphql/pothos/cron";
+import "./cron";
 
-export * from "@/backend/graphql/pothos/meeting";
-export * from "@/backend/graphql/pothos/notifications";
-export * from "@/backend/graphql/pothos/parents";
-export * from "@/backend/graphql/pothos/permissions";
-export * from "@/backend/graphql/pothos/profile";
-export * from "@/backend/graphql/pothos/reports";
-export * from "@/backend/graphql/pothos/scheduling";
-export * from "@/backend/graphql/pothos/shared";
-export * from "@/backend/graphql/pothos/storage";
-export * from "@/backend/graphql/pothos/students";
-export * from "@/backend/graphql/pothos/supervisor";
-export * from "@/backend/graphql/pothos/system";
-export * from "@/backend/graphql/pothos/teachers";
-export * from "@/backend/graphql/pothos/users";
-export * from "@/backend/graphql/pothos/whatsapp";
+export * from "./meeting";
+export * from "./notifications";
+export * from "./parents";
+export * from "./permissions";
+export * from "./profile";
+export * from "./reports";
+export * from "./scheduling";
+export * from "./shared";
+export * from "./storage";
+export * from "./students";
+export * from "./supervisor";
+export * from "./system";
+export * from "./teachers";
+export * from "./users";
+export * from "./whatsapp";

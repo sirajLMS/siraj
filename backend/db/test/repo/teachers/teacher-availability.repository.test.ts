@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { teacherAvailabilityWindows, teacherRecurringUnavailability } from "@/backend/db/schema";
 import {
   createMockClassInstance,

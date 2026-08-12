@@ -1,10 +1,8 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import {
-  ComplaintRepository,
-  ParentRepository,
-  StorageDbRepository,
-  SystemSettingsRepository,
-} from "@/backend/db/repo";
+import { ComplaintRepository } from "@/backend/db/repo/complaints";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
 import { ComplaintService } from "@/backend/services/communication/complaint.service";

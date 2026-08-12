@@ -1,4 +1,4 @@
-import { StudentRepository } from "@/backend/db/repo";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
 import type { PaginationArgs, StudentDirectoryResult, StudentFilterArgs, StudentsOrderByClause } from "@/backend/types";

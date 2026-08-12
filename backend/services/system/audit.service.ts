@@ -1,5 +1,5 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import { AuditRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { AuditRepository } from "@/backend/db/repo/audit";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
   AdminAuditLogSelectType,

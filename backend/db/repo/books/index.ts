@@ -1,2 +1,2 @@
-export { BookRepository } from "@/backend/db/repo/books/book.repository";
-export { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books/report.repository";
+export * from "./book.repository";
+export * from "./report.repository";

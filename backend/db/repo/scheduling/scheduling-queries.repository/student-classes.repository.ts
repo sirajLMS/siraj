@@ -1,9 +1,9 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
-import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { UpcomingClassRow } from "@/backend/types/scheduling/scheduling.types";
 

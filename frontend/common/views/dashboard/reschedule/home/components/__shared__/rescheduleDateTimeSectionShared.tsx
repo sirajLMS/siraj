@@ -5,7 +5,9 @@ import { Grid, InputAdornment } from "@mui/material";
 import { format, isValid } from "date-fns";
 import type { Control, FieldErrors } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { AppDatePicker, AppTimePicker, timeInputOutlinedSx } from "@/frontend/common/components/ui/form";
+import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
+import { timeInputOutlinedSx } from "@/frontend/common/components/ui/form/field";
+import { AppTimePicker } from "@/frontend/common/components/ui/form/time";
 import type { RescheduleFormData } from "@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema";
 import {
   parseDateValue,

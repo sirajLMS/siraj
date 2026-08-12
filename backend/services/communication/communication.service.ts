@@ -1,11 +1,10 @@
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { NotificationChannel } from "@/backend/enum";
 import { logger } from "@/backend/lib";
-import { OnAppChannel } from "@/backend/services";
+import { OnAppChannel, whatsappChannel } from "@/backend/services";
 import { emailChannel } from "@/backend/services/communication/channels/email";
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
-import { whatsappChannel } from "@/backend/services/communication/channels/whatsapp";
 import type {
   ChannelDispatchResult,
   CommunicationPayload,

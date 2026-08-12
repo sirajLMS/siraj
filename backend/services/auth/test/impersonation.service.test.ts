@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { UserRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/users";
 import { AccountStatus, UserRole } from "@/backend/enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

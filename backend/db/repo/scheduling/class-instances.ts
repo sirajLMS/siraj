@@ -25,8 +25,6 @@ import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 
-export { resolveStudentTimezone } from "@/backend/db/repo/scheduling/shared";
-
 /**
  * Batch lookup for multiple class instances by ID — eliminates N+1 queries
  * when dispatching notifications for every instance in a recurring schedule.

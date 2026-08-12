@@ -1,6 +1,7 @@
 import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
+import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
+import { UserRepository } from "@/backend/db/repo/users";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

@@ -1,6 +1,7 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import { ParentRepository } from "@/backend/db/repo";
-import { AppPermission, type CurrencyCode, SystemPermissionGroupSlug } from "@/backend/enum";
+import type { DBTransaction } from "@/backend/types";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
+import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import { buildParentInsertPayload } from "@/backend/services/parent/__shared__/buildParentInsertPayload";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";

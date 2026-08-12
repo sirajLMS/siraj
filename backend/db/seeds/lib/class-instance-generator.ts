@@ -11,7 +11,7 @@ import { ALL_CLASS_TYPES, cycleAtIndex } from "@/backend/db/seeds/lib/enum-cover
 import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
 import { parseTimeToHoursMinutes, type ScheduleDaySpec } from "@/backend/db/seeds/lib/schedule-factory";
 import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
-import { ClassExecutionState, ClassOutcome, ClassType } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
 import type { ClassInstanceInsertType } from "@/backend/types";
 
 type ClassInstanceInsert = ClassInstanceInsertType;

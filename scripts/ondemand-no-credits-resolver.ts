@@ -2,7 +2,8 @@ import { and, eq, inArray, isNull, lte } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { classInstances, recurringSchedules, systemSettings, users } from "@/backend/db/schema";
 
-import { ClassExecutionState, OnDemandNoCreditsOutcome, OnDemandStatus } from "@/backend/enum";
+import { OnDemandNoCreditsOutcome, OnDemandStatus } from "@/backend/enum";
+import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
 
 import { logger } from "@/backend/lib/logger";
 import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";

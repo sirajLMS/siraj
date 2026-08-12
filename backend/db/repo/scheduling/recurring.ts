@@ -14,7 +14,8 @@ import {
   recurringSchedules,
   teachers,
 } from "@/backend/db/schema";
-import type { CurrencyCode, RateSource } from "@/backend/enum";
+import type { RateSource } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { resolveClassRate } from "@/backend/services/pricing/rate-resolver.service";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";

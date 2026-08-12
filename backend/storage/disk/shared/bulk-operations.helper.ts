@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import type * as Types from "@/backend/types";
 
 /**

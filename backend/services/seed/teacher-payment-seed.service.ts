@@ -8,7 +8,7 @@
  *
  * @see backend/db/seeds/teachers/seed-teacher-payments.ts
  */
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing/user-payment-method.repository";
 import { TeacherPaymentRepository } from "@/backend/db/repo/teachers/teacher-payment.repository";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";

@@ -1,1 +1,1 @@
-export { ImpersonationRepository } from "./impersonation.repository";
+export * from "./impersonation.repository";

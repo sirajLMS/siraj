@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: bulk insert utility */
 
 import type { AnyPgTable } from "drizzle-orm/pg-core";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { logger } from "@/backend/lib/logger";
 

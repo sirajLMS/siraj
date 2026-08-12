@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
-import { TeacherRepository } from "@/backend/db/repo";
-import { AccountStatus, AppPermission, IanaTimezone } from "@/backend/enum";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
+import { AccountStatus, AppPermission } from "@/backend/enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 import type { TeacherProfileReturnType } from "@/backend/types/teachers/teacher.types";

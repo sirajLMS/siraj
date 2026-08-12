@@ -1,9 +1,11 @@
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, students, teacherDues, teachers, users } from "@/backend/db/schema";
-import { ClassExecutionState, ClassOutcome, CurrencyCode, TeacherDueStatus } from "@/backend/enum";
+import { TeacherDueStatus } from "@/backend/enum";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   TeacherDueInsertType,

@@ -41,7 +41,8 @@ import { timezones } from "@/backend/db/schema/shared/timezones";
 import { students } from "@/backend/db/schema/students/students";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
-import type { CurrencyCode, RateSource } from "@/backend/enum";
+import type { RateSource } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
 
 /**

@@ -1,6 +1,6 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { StudentRepository } from "@/backend/db/repo";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";

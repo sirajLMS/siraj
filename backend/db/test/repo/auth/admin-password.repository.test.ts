@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { UserRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { UserRepository } from "@/backend/db/repo/users";
 import { users } from "@/backend/db/schema";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { comparePassword, hashPassword } from "@/backend/lib/auth/password";

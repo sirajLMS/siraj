@@ -1,4 +1,4 @@
-import { SystemSettingsRepository } from "@/backend/db/repo";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system";
 import { parseEnvConfigBoolean, USERS_DIRECTORY_ENV_KEY } from "@/shared/constants/features/sidebarFeatures.constants";
 

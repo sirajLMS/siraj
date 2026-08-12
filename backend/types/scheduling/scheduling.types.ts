@@ -1,9 +1,5 @@
 import type { leaveQuotaUsage, recurringScheduleDays, recurringSchedules, timezones } from "@/backend/db/schema";
 import type {
-  ClassExecutionState,
-  ClassOutcome,
-  ClassType,
-  CurrencyCode,
   DayOfWeek,
   LeaveRequestStatus,
   OnDemandNoCreditsOutcome,
@@ -11,6 +7,8 @@ import type {
   SchedulingMode,
   StudentStatus,
 } from "@/backend/enum";
+import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import type { PageInfo, PaginationArgs } from "@/backend/types/shared/pagination.types";

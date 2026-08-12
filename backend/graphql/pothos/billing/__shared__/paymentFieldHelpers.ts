@@ -1,5 +1,6 @@
 import type { ObjectFieldBuilder } from "@pothos/core";
-import { AppPermission, type CurrencyCode } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
+import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";

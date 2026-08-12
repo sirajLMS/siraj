@@ -6,9 +6,9 @@
  * Logging is structured via `@/backend/lib/logger`.
  */
 
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { CronRepository, toScheduleReturnType } from "@/backend/db/repo";
+import { CronRepository, toScheduleReturnType } from "@/backend/db/repo/cron";
 import {
   CronConcurrencyPolicy,
   CronRunStatus,

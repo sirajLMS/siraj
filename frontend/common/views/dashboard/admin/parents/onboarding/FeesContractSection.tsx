@@ -4,7 +4,7 @@ import { FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, TextFi
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { CurrencySelectController } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySelectControllerShared";
 import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";

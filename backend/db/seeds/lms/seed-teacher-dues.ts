@@ -1,5 +1,7 @@
 import { findAdminUserOrFallback, type SeedConfig } from "@/backend/db/seeds/lib";
-import { ClassExecutionState, CurrencyCode, LessonReportStatus, RateSource, TeacherDueStatus } from "@/backend/enum";
+import { LessonReportStatus, RateSource, TeacherDueStatus } from "@/backend/enum";
+import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { logger } from "@/backend/lib/logger";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type {

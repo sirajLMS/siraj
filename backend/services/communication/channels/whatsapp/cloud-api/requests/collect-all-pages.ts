@@ -13,7 +13,7 @@
  */
 
 import { logger } from "@/backend/lib/logger";
-import type { GraphApiRequestInit } from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+import type { GraphApiRequestInit } from "@/backend/types";
 
 /**
  * Parsed page result: the items on this page and the cursor for the next page

@@ -13,22 +13,22 @@
 import {
   buildAuthHeaders,
   buildGraphUrl,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types";
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import type {
   GetPhoneNumberInput,
   GetPhoneNumberResult,
   GraphApiRequestContext,
   GraphApiRequestInit,
-} from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
-
-/** Re-exported from the types layer for backward compatibility. */
-export type { GetPhoneNumberInput } from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+} from "@/backend/types";
 
 /**
  * Builds the fetch request for GET /{phone_number_id}.
  * The adapter adds `AbortSignal.timeout(10_000)` before executing.
  */
-export function buildRequest(ctx: GraphApiRequestContext, input: GetPhoneNumberInput): GraphApiRequestInit {
+export function buildGetPhoneNumberRequest(
+  ctx: GraphApiRequestContext,
+  input: GetPhoneNumberInput
+): GraphApiRequestInit {
   // Validate phoneNumberId: numeric string, reasonable max length (r6-sec-02)
   if (!input.phoneNumberId || input.phoneNumberId.length > 64 || !/^\d+$/.test(input.phoneNumberId)) {
     // Internal startup error — not user-facing, no i18n needed (invalid config input)
@@ -52,6 +52,6 @@ export function buildRequest(ctx: GraphApiRequestContext, input: GetPhoneNumberI
  * The adapter must NOT transform `portfolioMessagingLimitTier` — it is stored
  * as-is from Meta's response (Q5).
  */
-export function parseResponse(body: GetPhoneNumberResult): GetPhoneNumberResult {
+export function parseGetPhoneNumberResponse(body: GetPhoneNumberResult): GetPhoneNumberResult {
   return body;
 }

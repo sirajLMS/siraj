@@ -1,9 +1,9 @@
 import { afterAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { SessionRepository } from "@/backend/db/repo";
+import { SessionRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
 import { IP_ADDRESS_1, IP_ADDRESS_2 } from "@/backend/db/test/const";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";

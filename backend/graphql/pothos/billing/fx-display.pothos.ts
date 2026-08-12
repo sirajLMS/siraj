@@ -1,5 +1,7 @@
-import { BillingRepository, ParentRepository, UserRepository } from "@/backend/db/repo";
-import type { CurrencyCode } from "@/backend/enum";
+import { BillingRepository } from "@/backend/db/repo/billing";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { UserRepository } from "@/backend/db/repo/users";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";

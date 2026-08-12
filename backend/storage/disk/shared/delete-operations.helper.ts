@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import { formatBulkOperationResult } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import type * as Types from "@/backend/types";

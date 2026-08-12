@@ -1,4 +1,6 @@
-import { ParentRepository, SessionRepository, UserRepository } from "@/backend/db";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { SessionRepository } from "@/backend/db/repo/shared";
+import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, StudentStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services";

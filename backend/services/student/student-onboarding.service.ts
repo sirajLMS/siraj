@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { StudentRepository } from "@/backend/db/repo/students";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission, StudentStatus, SystemPermissionGroupSlug } from "@/backend/enum";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
 import type { StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";

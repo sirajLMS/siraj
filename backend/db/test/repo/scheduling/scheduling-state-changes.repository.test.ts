@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { SchedulingRepository } from "@/backend/db/repo";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, leaveQuotaUsage, students, teacherAssignments } from "@/backend/db/schema";
 import {
   createMockClassInstance,
@@ -13,8 +13,9 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { expectRepositoryError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { type AppPermission, IanaTimezone, TeacherProgressFeedEventKind } from "@/backend/enum";
+import { type AppPermission, TeacherProgressFeedEventKind } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { getServerTranslations } from "@/shared/locale";
 
 describe("Scheduling Repository — State Changes & Leave Quota", () => {

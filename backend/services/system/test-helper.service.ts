@@ -14,7 +14,8 @@ import {
   userPermissionGroups,
   users,
 } from "@/backend/db/schema";
-import { AccountStatus, CurrencyCode, StudentStatus } from "@/backend/enum";
+import { AccountStatus, StudentStatus } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { ParentStatus } from "@/backend/enum/parents/parent.enum";
 import { hashPassword } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";

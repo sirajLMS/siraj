@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { SessionRepository } from "@/backend/db/repo";
+import { SessionRepository } from "@/backend/db/repo/shared";
 import { generateAccessToken, generateRefreshToken } from "@/backend/lib";
 import type { SessionSelectType } from "@/backend/types";
 

@@ -9,7 +9,8 @@ import {
 } from "@/backend/db/repo/scheduling/shared";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { classInstances, classStatusEvents, leaveRequests, parents, teachers } from "@/backend/db/schema";
-import { type CurrencyCode, RateSource } from "@/backend/enum";
+import { RateSource } from "@/backend/enum";
+import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import {
   checkStateChangeAuth,

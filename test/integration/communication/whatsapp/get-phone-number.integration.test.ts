@@ -8,11 +8,11 @@
  * Run: `bun run test:live-comm` or `bun run test:integration`
  */
 import { expect, test } from "bun:test";
-import type { GraphApiRequestContext } from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types";
+import type { GraphApiRequestContext } from "@/backend/types";
 import {
-  buildRequest,
-  parseResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
+  buildGetPhoneNumberRequest,
+  parseGetPhoneNumberResponse,
+} from "@/backend/services";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 
 const accessToken = process.env.WHATSAPP_ACCESS_TOKEN ?? "";
@@ -24,13 +24,13 @@ const describeLive = describeLiveWhen(hasCreds, "get-phone-number @live-comm");
 describeLive("get-phone-number @live-comm", () => {
   test("GET /{phone_number_id} returns verbatim portfolio_messaging_limit_tier (Q5)", async () => {
     const ctx: GraphApiRequestContext = { accessToken, apiVersion: undefined };
-    const { url, init } = buildRequest(ctx, { phoneNumberId });
+    const { url, init } = buildGetPhoneNumberRequest(ctx, { phoneNumberId });
 
     const response = await fetch(url, { ...init, signal: AbortSignal.timeout(10_000) });
     expect(response.ok).toBe(true);
 
     const body = await response.json();
-    const result = parseResponse(body);
+    const result = parseGetPhoneNumberResponse(body);
 
     expect(result.id).toBe(phoneNumberId);
     expect(result.display_phone_number).toBeDefined();

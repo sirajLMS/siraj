@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { CurrencyCode, InvoiceType, NotificationEventType } from "@/backend/enum";
+import { InvoiceType, NotificationEventType } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 // ---------------------------------------------------------------------------

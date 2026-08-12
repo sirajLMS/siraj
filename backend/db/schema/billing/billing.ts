@@ -18,7 +18,7 @@ import { currencyCodeEnum, invoiceStatusEnum, invoiceTypeEnum, paymentMethodType
 import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type {
   PaymentMethodTransactionSnapshot,

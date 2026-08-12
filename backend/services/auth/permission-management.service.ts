@@ -1,6 +1,6 @@
 import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { PermissionManagementRepository } from "@/backend/db/repo";
+import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { AppPermission, parseAppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";

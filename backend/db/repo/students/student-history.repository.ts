@@ -1,6 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { classInstancePerformance, classInstances, teachers, users } from "@/backend/db/schema";
 import type { SessionSummary } from "@/backend/types";
 

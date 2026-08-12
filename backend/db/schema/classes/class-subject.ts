@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { classCategories } from "@/backend/db/schema/classes/class-category";
 import { currencyCodeEnum } from "@/backend/db/schema/enums";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export const classSubjects = pgTable(
   "class_subjects",

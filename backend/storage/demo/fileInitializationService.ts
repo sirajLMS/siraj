@@ -1,8 +1,9 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
-import { getStorageService, type StorageService } from "@/backend/storage/storage.service";
+import type { StorageService } from "@/backend/storage/disk/storage.service.interface";
+import { getStorageService } from "@/backend/storage/storage.service";
 import type { FileOperationResult, FileUploadResult, FolderCreateInput } from "@/backend/types";
 import { extToMime } from "@/shared/utils/storage.utils";
 

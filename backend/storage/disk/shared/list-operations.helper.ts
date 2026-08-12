@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { OrderSortDirection } from "@/backend/enum";
 import * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";

@@ -1,1 +1,1 @@
-export * from "@/backend/graphql/pothos/users/user.pothos";
+export * from "./user.pothos";

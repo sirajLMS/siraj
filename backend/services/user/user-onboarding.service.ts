@@ -1,8 +1,9 @@
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
+import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
+import { UserRepository } from "@/backend/db/repo/users";
 import type { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
-import { CurrencyCode } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { validatePasswordStrength } from "@/backend/lib/auth";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

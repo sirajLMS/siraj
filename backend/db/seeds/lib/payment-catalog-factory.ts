@@ -1,4 +1,5 @@
-import { CountryCode, CurrencyCode, IdentifierKind, PaymentDirection } from "@/backend/enum";
+import { CountryCode, IdentifierKind, PaymentDirection } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { LocalizedString } from "@/shared/types";
 
 export type MobileWalletCatalogSeed = {

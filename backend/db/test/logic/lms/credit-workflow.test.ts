@@ -1,8 +1,9 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { CreditRepository, StudentRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { CreditRepository } from "@/backend/db/repo/billing";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { creditTransactions } from "@/backend/db/schema";
 import {
   createTestCreditTransaction,

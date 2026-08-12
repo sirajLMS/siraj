@@ -2,7 +2,8 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { classInstances, quotas, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
-import { ClassExecutionState, ClassType, DayOfWeek, OnDemandStatus, QuotaStatus, SchedulingMode } from "@/backend/enum";
+import { DayOfWeek, OnDemandStatus, QuotaStatus, SchedulingMode } from "@/backend/enum";
+import { ClassExecutionState, ClassType } from "@/shared/constants/class-instance-detail.enum";
 
 import { logger } from "@/backend/lib/logger";
 import { QuotaService } from "@/backend/services/billing/quota.service";

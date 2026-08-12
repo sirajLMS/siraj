@@ -1,7 +1,7 @@
-export * from "@/backend/db/db.types";
-export * from "@/backend/db/drizzleDb";
-export * from "@/backend/db/factory";
-export * from "@/backend/db/query.extensions";
-export * from "@/backend/db/repo";
-export * from "@/backend/db/schema";
-export * from "@/backend/utils/db.utils";
+export * from "./connection-strategy";
+// db.types moved to backend/types/ — import DBTransaction/DBQueryExecutor from @/backend/types
+export * from "./drizzleDb";
+export * from "./drizzleRelations";
+export * from "./factory";
+export * from "./http-client";
+export * from "./query.extensions";

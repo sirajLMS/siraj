@@ -1,5 +1,5 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import { DstMigrationRepository } from "@/backend/db/repo";
+import type { DBTransaction } from "@/backend/types";
+import { DstMigrationRepository } from "@/backend/db/repo/classes";
 import { AppPermission, DstMigrationResult, MigrationStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {

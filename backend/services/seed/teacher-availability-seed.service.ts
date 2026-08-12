@@ -11,7 +11,7 @@
  * @see backend/db/seeds/teachers/seed-teacher-recurring-unavailability.ts
  * @see backend/db/seeds/teachers/seed-teacher-vacation-requests.ts
  */
-import type { DBTransaction } from "@/backend/db/db.types";
+import type { DBTransaction } from "@/backend/types";
 import {
   type AvailabilityWindowUpsertInput,
   type RecurringUnavailabilityCreateInput,
