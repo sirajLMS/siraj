@@ -1,130 +1,24 @@
 "use client";
 
-import { Box, CircularProgress, Tab, Tabs } from "@mui/material";
-import type { SubTabKey } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
+import { SingleGroupViewShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/singleGroupViewShared";
+import { MOBILE_OPTIONS } from "@/frontend/common/views/dashboard/permissions/components/__shared__/singleGroupViewShared.options";
 import type { SingleGroupViewProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { AddPermissionsTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/addPermissionsTab.mobile";
 import { AssignedUsersTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/assignedUsersTab.mobile";
 import { CurrentPermissionsTabMobile } from "@/frontend/mobile/views/dashboard/permissions/components/currentPermissionsTab.mobile";
 import { SingleGroupHeaderMobile } from "@/frontend/mobile/views/dashboard/permissions/components/singleGroupHeader.mobile";
 
-export function SingleGroupViewMobile({
-  labels,
-  group,
-  permissions,
-  isLoading,
-  onBack,
-  onEditGroup,
-  onAssignGroup,
-  singleGroupState,
-}: Readonly<SingleGroupViewProps>) {
-  const t = labels;
-  const {
-    activeSubTab,
-    setActiveSubTab,
-    searchQuery,
-    setSearchQuery,
-    selectedCategory,
-    setSelectedCategory,
-    selectedAddPermissionIds,
-    selectedAssignedUserIds,
-    groupPermissions,
-    addCategories,
-    filteredAvailablePermissions,
-    filteredAssignedUsers,
-    permissionsCount,
-    assignedUsersCount,
-    handleRevokePermission,
-    handleAssignPermissions,
-    handleRevokeUser,
-    handleBulkRevokeUsers,
-    handleAddPermissionToggle,
-    handleAssignedUserToggle,
-    handleSubTabChange,
-  } = singleGroupState;
-
+export function SingleGroupViewMobile(props: Readonly<SingleGroupViewProps>) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <SingleGroupHeaderMobile labels={labels} group={group} onBack={onBack} onEditGroup={onEditGroup} />
-
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs
-          value={activeSubTab}
-          onChange={(_, val: SubTabKey) => handleSubTabChange(val)}
-          textColor="primary"
-          indicatorColor="primary"
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          <Tab
-            value="current"
-            label={`${t.currentPermissions} (${permissionsCount})`}
-            sx={{ textTransform: "none", fontWeight: 600 }}
-          />
-          {!group.isSystem && (
-            <Tab value="add" label={t.addPermissions} sx={{ textTransform: "none", fontWeight: 600 }} />
-          )}
-          <Tab
-            value="users"
-            label={`${t.assignedUsers} (${assignedUsersCount})`}
-            sx={{ textTransform: "none", fontWeight: 600 }}
-          />
-        </Tabs>
-      </Box>
-
-      {isLoading && !permissions && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress color="primary" />
-        </Box>
-      )}
-
-      {(!isLoading || permissions) && (
-        <Box sx={{ mt: 1 }}>
-          {activeSubTab === "current" && (
-            <CurrentPermissionsTabMobile
-              labels={labels}
-              group={group}
-              groupPermissions={groupPermissions}
-              permissionsCount={permissionsCount}
-              onRevokePermission={handleRevokePermission}
-              onSwitchToAddTab={() => setActiveSubTab("add")}
-              loading={isLoading}
-            />
-          )}
-
-          {activeSubTab === "add" && !group.isSystem && (
-            <AddPermissionsTabMobile
-              labels={labels}
-              filteredAvailablePermissions={filteredAvailablePermissions}
-              selectedAddPermissionIds={selectedAddPermissionIds}
-              searchQuery={searchQuery}
-              selectedCategory={selectedCategory}
-              addCategories={addCategories}
-              onAssignPermissions={handleAssignPermissions}
-              onPermissionToggle={handleAddPermissionToggle}
-              onSearchChange={setSearchQuery}
-              onCategoryChange={setSelectedCategory}
-              loading={isLoading}
-            />
-          )}
-
-          {activeSubTab === "users" && (
-            <AssignedUsersTabMobile
-              labels={labels}
-              group={group}
-              filteredAssignedUsers={filteredAssignedUsers}
-              selectedAssignedUserIds={selectedAssignedUserIds}
-              searchQuery={searchQuery}
-              onBulkRevokeUsers={handleBulkRevokeUsers}
-              onRevokeUser={handleRevokeUser}
-              onUserToggle={handleAssignedUserToggle}
-              onSearchChange={setSearchQuery}
-              onAssignGroup={onAssignGroup}
-              loading={isLoading}
-            />
-          )}
-        </Box>
-      )}
-    </Box>
+    <SingleGroupViewShared
+      {...props}
+      options={MOBILE_OPTIONS}
+      slots={{
+        SingleGroupHeader: SingleGroupHeaderMobile,
+        CurrentPermissionsTab: CurrentPermissionsTabMobile,
+        AddPermissionsTab: AddPermissionsTabMobile,
+        AssignedUsersTab: AssignedUsersTabMobile,
+      }}
+    />
   );
 }

@@ -20,7 +20,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { testRepoError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 interface ClassStatusEventState {

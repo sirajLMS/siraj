@@ -1,7 +1,5 @@
 "use client";
 
-import { VideocamOffOutlined } from "@mui/icons-material";
-import { Box, Tooltip } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
@@ -15,13 +13,16 @@ import {
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import {
+  createStatusActionLabels,
+  renderStatusTrackingJoinCell,
+} from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingGridShared";
 import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileAppDataGrid } from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGrid";
 import { MobileClassProfileLinkCell } from "@/frontend/mobile/components/ui/display/classProfileLink/ClassProfileLinkCell.mobile";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { MobilePersonProfileLinkCell } from "@/frontend/mobile/components/ui/display/personProfileLink/PersonProfileLinkCell.mobile";
-import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import { useAppLocale } from "@/shared/locale";
 
 // Helper to render profile link cells with consistent styling
@@ -162,37 +163,14 @@ function createJoinColumn(labels: StatusTrackingDataGridProps["labels"]) {
     sortable: false,
     align: "center",
     headerAlign: "center",
-    renderCell: ({ row }: { row: StatusTrackingRow }) => {
-      const sessionStatus = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
-      if (sessionStatus !== SessionStatus.REGULAR) return null;
-      if (isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen ?? false })) {
-        return (
-          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}>
-            <MobileMeetingJoinAction
-              variant="icon"
-              joinUrl={row.meetingJoinUrl}
-              meeting={row.effectiveMeeting}
-              emptyRole="class"
-              label={labels.joinSession}
-              setupHref={`/classes/${row.id}#meeting-configs`}
-            />
-          </Box>
-        );
-      }
-      return (
-        <Tooltip title={labels.sessionEnded}>
-          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}>
-            <VideocamOffOutlined sx={theme => ({ fontSize: 20, color: theme.palette.text.disabled })} />
-          </Box>
-        </Tooltip>
-      );
-    },
+    renderCell: ({ row }: { row: StatusTrackingRow }) =>
+      renderStatusTrackingJoinCell(row, labels, MobileMeetingJoinAction),
   } satisfies GridColDef<StatusTrackingRow>;
 }
 
 function createActionsColumn(
   labels: StatusTrackingDataGridProps["labels"],
-  actionLabels: ReturnType<typeof createActionLabels>,
+  actionLabels: ReturnType<typeof createStatusActionLabels>,
   onActivate: StatusTrackingDataGridProps["onActivate"],
   onReschedule: StatusTrackingDataGridProps["onReschedule"],
   onVerify: StatusTrackingDataGridProps["onVerify"]
@@ -217,17 +195,6 @@ function createActionsColumn(
   } satisfies GridColDef<StatusTrackingRow>;
 }
 
-function createActionLabels(labels: StatusTrackingDataGridProps["labels"]) {
-  return {
-    joinSession: labels.joinSession,
-    activate: labels.activate,
-    reschedule: labels.reschedule,
-    verifyDocuments: labels.verifyDocuments,
-    administrativeHold: labels.administrativeHold,
-    holdDescription: labels.holdDescription,
-  };
-}
-
 export function StatusTrackingDataGridMobile({
   rows,
   labels,
@@ -240,7 +207,7 @@ export function StatusTrackingDataGridMobile({
 
   // RENDER OPT JUSTIFICATION: cache `useMemo` to maintain stable column array identity for the MUI MobileAppDataGrid consumer (prevents column re-allocation across renders when labels/locale props are unchanged)
   const columns = useMemo<GridColDef<StatusTrackingRow>[]>(() => {
-    const actionLabels = createActionLabels(labels);
+    const actionLabels = createStatusActionLabels(labels);
 
     return [
       createCourseColumn(labels),

@@ -7,7 +7,7 @@ import type {
   OnboardingSectionTranslations,
   UserPersonalFieldsShape,
 } from "@/frontend/common/components/onboarding/sections/types";
-import { AppDatePicker, outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { DateOfBirthControllerField, outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
@@ -111,47 +111,18 @@ export function UserPersonalAddressField<T extends UserPersonalFieldsShape & Fie
 
 export function UserPersonalDateOfBirthField<T extends UserPersonalFieldsShape & FieldValues>({
   control,
-  errors,
   translate,
-}: Readonly<Pick<PersonalFieldProps<T>, "control" | "errors" | "translate">>) {
+}: Readonly<Pick<PersonalFieldProps<T>, "control" | "translate">>) {
   const dateOfBirthField = personalFieldPath<T>("dateOfBirth");
 
   return (
     <Grid size={{ xs: 12, md: 6 }}>
-      <Controller
+      <DateOfBirthControllerField
         control={control}
         name={dateOfBirthField}
-        render={({ field }) => {
-          const dateValue = field.value ? new Date(field.value) : null;
-          const validDate = dateValue && !Number.isNaN(dateValue.getTime()) ? dateValue : null;
-
-          return (
-            <AppDatePicker
-              value={validDate}
-              onChange={(date: Date | null) => {
-                if (date && !Number.isNaN(date.getTime())) {
-                  const year = date.getFullYear();
-                  const month = String(date.getMonth() + 1).padStart(2, "0");
-                  const day = String(date.getDate()).padStart(2, "0");
-                  field.onChange(`${year}-${month}-${day}`);
-                } else {
-                  field.onChange("");
-                }
-              }}
-              slotProps={{
-                textField: {
-                  label: translate.fields.dateOfBirth,
-                  variant: "outlined",
-                  fullWidth: true,
-                  error: Boolean(errors.dateOfBirth),
-                  helperText: validationMessage(translate, errors.dateOfBirth?.message),
-                  sx: outlinedInputSx,
-                  slotProps: { htmlInput: { autoComplete: "off" } },
-                },
-              }}
-            />
-          );
-        }}
+        label={translate.fields.dateOfBirth}
+        formatError={message => validationMessage(translate, message)}
+        useOutlinedInputSx
       />
     </Grid>
   );

@@ -1,4 +1,5 @@
 import { bigint, boolean, index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { createdAtColumn, primaryKeyColumn } from "@/backend/db/schema/__shared__/columnHelpers";
 import { invoices } from "@/backend/db/schema/billing/billing";
 import { classInstances, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
 import { complaints, learningResources } from "@/backend/db/schema/communications/communications";
@@ -11,7 +12,7 @@ import { users } from "@/backend/db/schema/users/users";
 export const storageFiles = pgTable(
   "storage_file",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     path: text("path").notNull().unique(),
     isProtected: boolean("is_protected").notNull().default(false),
   },
@@ -27,7 +28,7 @@ export const storageFiles = pgTable(
 export const userFiles = pgTable(
   "user_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -35,7 +36,7 @@ export const userFiles = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [index("user_files_file_id_idx").on(table.fileId), index("user_files_user_id_idx").on(table.userId)]
 );
@@ -43,7 +44,7 @@ export const userFiles = pgTable(
 export const teacherFiles = pgTable(
   "teacher_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -51,7 +52,7 @@ export const teacherFiles = pgTable(
       .notNull()
       .references(() => teachers.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
     index("teacher_files_file_id_idx").on(table.fileId),
@@ -62,7 +63,7 @@ export const teacherFiles = pgTable(
 export const studentFiles = pgTable(
   "student_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -70,7 +71,7 @@ export const studentFiles = pgTable(
       .notNull()
       .references(() => students.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
     index("student_files_file_id_idx").on(table.fileId),
@@ -81,7 +82,7 @@ export const studentFiles = pgTable(
 export const parentFiles = pgTable(
   "parent_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -89,7 +90,7 @@ export const parentFiles = pgTable(
       .notNull()
       .references(() => parents.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [index("parent_files_file_id_idx").on(table.fileId), index("parent_files_parent_id_idx").on(table.parentId)]
 );
@@ -97,7 +98,7 @@ export const parentFiles = pgTable(
 export const invoiceFiles = pgTable(
   "invoice_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -105,7 +106,7 @@ export const invoiceFiles = pgTable(
       .notNull()
       .references(() => invoices.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
     index("invoice_files_file_id_idx").on(table.fileId),
@@ -116,7 +117,7 @@ export const invoiceFiles = pgTable(
 export const complaintFiles = pgTable(
   "complaint_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -124,7 +125,7 @@ export const complaintFiles = pgTable(
       .notNull()
       .references(() => complaints.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
     index("complaint_files_file_id_idx").on(table.fileId),
@@ -135,7 +136,7 @@ export const complaintFiles = pgTable(
 export const learningResourceFiles = pgTable(
   "learning_resource_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -143,7 +144,7 @@ export const learningResourceFiles = pgTable(
       .notNull()
       .references(() => learningResources.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
     index("learning_resource_files_file_id_idx").on(table.fileId),
@@ -154,7 +155,7 @@ export const learningResourceFiles = pgTable(
 export const staffProfileFiles = pgTable(
   "staff_profile_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -162,7 +163,7 @@ export const staffProfileFiles = pgTable(
       .notNull()
       .references(() => staffProfiles.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
     index("staff_profile_files_file_id_idx").on(table.fileId),
@@ -173,7 +174,7 @@ export const staffProfileFiles = pgTable(
 export const recurringScheduleFiles = pgTable(
   "recurring_schedule_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -181,7 +182,7 @@ export const recurringScheduleFiles = pgTable(
       .notNull()
       .references(() => recurringSchedules.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
     index("recurring_schedule_files_file_id_idx").on(table.fileId),
@@ -192,7 +193,7 @@ export const recurringScheduleFiles = pgTable(
 export const classInstanceFiles = pgTable(
   "class_instance_files",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     fileId: uuid("file_id")
       .notNull()
       .references(() => storageFiles.id, { onDelete: "cascade" }),
@@ -200,7 +201,7 @@ export const classInstanceFiles = pgTable(
       .notNull()
       .references(() => classInstances.id, { onDelete: "cascade" }),
     usageType: varchar("usage_type", { length: 100 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
     index("class_instance_files_file_id_idx").on(table.fileId),
@@ -211,7 +212,7 @@ export const classInstanceFiles = pgTable(
 export const storageDirectories = pgTable(
   "storage_directory",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     path: varchar("path", { length: 1024 }).notNull().unique(),
     allowUploads: boolean("allow_uploads").notNull().default(true),
     allowDelete: boolean("allow_delete").notNull().default(true),
@@ -237,7 +238,7 @@ export const signedUrls = pgTable(
     fileSize: bigint("file_size", { mode: "bigint" }).notNull(), // File size in bytes
     contentHash: varchar("content_hash", { length: 128 }).notNull(), // base64 or hex encoded hash
     expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    ...createdAtColumn(),
     used: boolean("used").notNull().default(false),
   },
   table => [

@@ -5,10 +5,14 @@ import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { buildAlertMetricItems } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/buildAlertMetricItems";
+import {
+  ScheduleAlertsLoadingIndicator,
+  type ScheduleAlertsViewSharedProps,
+} from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/scheduleAlertsViewShared";
 import type {
   AcademicClassRow,
   AlertsMetric,
-  ScheduleAlert,
   ScheduleAlertsLabels,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
@@ -26,23 +30,7 @@ import {
 import { InstitutionalReportCardMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/institutionalReportCard.mobile";
 import { ScheduleAlertBannersMobile } from "@/frontend/mobile/views/dashboard/schedule/alerts/scheduleAlertBanners.mobile";
 
-export interface ScheduleAlertsViewMobileProps {
-  readonly alerts: readonly ScheduleAlert[];
-  readonly metrics: readonly AlertsMetric[];
-  readonly metricLabels: Record<string, { label: string; subLabel: string }>;
-  readonly classes: readonly AcademicClassRow[];
-  readonly totalClasses?: number;
-  readonly currentPage: number;
-  readonly pageSize: number;
-  readonly labels: ScheduleAlertsLabels;
-  readonly onLeave: (id: string) => void;
-  readonly onViewClassAudit: (id: string) => void;
-  readonly onPageChange: (page: number) => void;
-  readonly loading?: boolean;
-  readonly onDownloadReport: () => void;
-  readonly onFilter: () => void;
-  readonly onExport: () => void;
-}
+export type ScheduleAlertsViewMobileProps = ScheduleAlertsViewSharedProps;
 
 function MobileMetricsSection({
   metrics,
@@ -56,18 +44,7 @@ function MobileMetricsSection({
   readonly onDownloadReport: () => void;
 }) {
   const metricItems: readonly MetricItem[] = useMemo(
-    () =>
-      metrics.map(metric => {
-        const metricLabel = metricLabels[metric.key];
-        return {
-          key: metric.key,
-          count: metric.value,
-          label: metricLabel.label,
-          subLabel: metricLabel.subLabel,
-          icon: metric.icon,
-          labelKey: metric.labelKey,
-        };
-      }),
+    () => buildAlertMetricItems(metrics, metricLabels),
     [metricLabels, metrics]
   );
 
@@ -114,19 +91,7 @@ function MobileAlertsBody({
   readonly cardListLabels: AcademicScheduleCardListMobileLabels;
 }) {
   if (loading) {
-    return (
-      <Box
-        sx={theme => ({
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          py: 8,
-          color: theme.palette.text.secondary,
-        })}
-      >
-        <Typography variant="bodyLg">{labels.loading}</Typography>
-      </Box>
-    );
+    return <ScheduleAlertsLoadingIndicator loading={labels.loading} />;
   }
   return (
     <Box>

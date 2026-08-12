@@ -3,9 +3,9 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { TeacherDirectoryPothosObject } from "@/backend/graphql/pothos/teachers/staff-directory.pothos";
 import { TeacherSimplePothosObject } from "@/backend/graphql/pothos/teachers/teacher.pothos";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { StaffDirectoryService } from "@/backend/services/teacher/staff-directory.service";
 import { TeacherService } from "@/backend/services/teacher/teacher.service";
-import { PaginationArgs } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("teachers", t =>
   t.field({
@@ -33,18 +33,7 @@ gqlSchemaBuilder.queryField("teacherDirectory", t =>
       ctx.permissions.includes(AppPermission.TEACHERS_LIST) ||
       ctx.permissions.includes(AppPermission.STAFF_VIEW_DIRECTORY),
     resolve: async (_parent, args, ctx) => {
-      let pagination: PaginationArgs | null = null;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs);
 
       return await StaffDirectoryService.getDirectory(
         ctx.user?.id || "",

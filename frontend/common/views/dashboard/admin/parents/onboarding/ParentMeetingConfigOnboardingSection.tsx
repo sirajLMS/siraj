@@ -2,11 +2,10 @@
 
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
-import {
-  MeetingConfigFields,
-  type MeetingConfigFieldsLabels,
-} from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigFields";
+import type { MeetingConfigFieldsLabels } from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigFields";
+import { MeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigOnboardingSection";
 
 type ParentMeetingConfigOnboardingSectionProps = {
   readonly register: UseFormRegister<ParentOnboardingFormData>;
@@ -26,13 +25,13 @@ export function ParentMeetingConfigOnboardingSection({
       control={control}
       name="meetingProvider"
       render={({ field }) => (
-        <MeetingConfigFields
-          labels={labels}
+        <MeetingConfigOnboardingSection
           meetingProviderValue={field.value ?? null}
-          onMeetingProviderChange={value => field.onChange(value)}
+          onMeetingProviderChange={(value: MeetingProviderFieldsFragment | null) => field.onChange(value)}
           meetingLabelInputProps={{ ...register("meetingLabel") }}
           meetingUrlInputProps={{ ...register("meetingUrl") }}
           meetingUrlError={errors.meetingUrl}
+          labels={labels}
         />
       )}
     />

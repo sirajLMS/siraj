@@ -11,5 +11,5 @@ export interface BaseManualInvoiceFeeFieldProps {
 
 export interface ManualInvoiceFeeFieldMobileProps extends BaseManualInvoiceFeeFieldProps {
   // VARIANT JUSTIFICATION: extra field draftCurrency — mobile fee field shows the drafted currency symbol inline (desktop tier shows a generic Payments icon instead)
-  readonly draftCurrency: CurrencyCode;
+  readonly draftCurrency?: CurrencyCode;
 }

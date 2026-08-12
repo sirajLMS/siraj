@@ -70,6 +70,11 @@ import { MobileCardList } from "@/frontend/common/components/ui";
 import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MobileMetricCard";
 ```
 
+### 3a. Scaffold Import Rule (Cross-Tier)
+- Mobile view variants (`.mobile.tsx`) that share logic with desktop variants MUST import the shared scaffold from `__shared__/` directories — never from sibling desktop paths
+- Scaffold files (`*Shared.tsx`) live in `frontend/common/views/.../components/__shared__/` or `frontend/mobile/views/.../__shared__/`
+- See `docs/frontend/ui-shared-scaffold-pattern.md` for the complete pattern
+
 ### 4. Switcher Pattern (ResponsiveViewSwitch)
 - Parent switchers live at `frontend/common/views/dashboard/<domain>/XxView.tsx` (the tier-neutral home)
 - Mobile variants: dynamically imported from `frontend/mobile/views/dashboard/<domain>/*.mobile.tsx`

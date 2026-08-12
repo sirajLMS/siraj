@@ -2,12 +2,12 @@ import {
   getWeeklyScheduleGrid,
   getWeeklyWorkloadMetrics,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
-import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { resolveTeacherId } from "@/backend/services/schedule/__shared__/resolveTeacherId";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { parseClassExecutionState, parseClassOutcome, parseClassType } from "@/shared/lib/enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -24,28 +24,6 @@ export namespace WeeklyScheduleService {
     const weekEnd = new Date(weekStart);
     weekEnd.setUTCDate(weekStart.getUTCDate() + 7);
     return { weekStart, weekEnd };
-  }
-
-  async function resolveTeacherId(
-    userId: string,
-    requestedTeacherId: string | null,
-    tErrors: ErrorsLabels
-  ): Promise<string> {
-    const isAdmin = await PermissionsService.hasAnyPermission(userId, [
-      AppPermission.STAFF_VIEW_DIRECTORY,
-      AppPermission.SCHEDULE_VIEW_ALL,
-    ]);
-
-    if (isAdmin && requestedTeacherId) {
-      return requestedTeacherId;
-    }
-
-    const actorTeacher = await TeacherRepository.findByUserId(userId);
-    if (actorTeacher) {
-      return actorTeacher.id;
-    }
-
-    throw new Error(tErrors.unauthorizedAction);
   }
 
   export async function getWeeklySchedule(

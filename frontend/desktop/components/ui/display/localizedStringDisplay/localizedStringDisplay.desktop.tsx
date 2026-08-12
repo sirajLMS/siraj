@@ -1,10 +1,8 @@
 "use client";
 
 import type { SxProps, Theme } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display/localizedStringDisplay/LocalizedStringDisplay";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import type { LocalizedString } from "@/shared/types";
 
@@ -20,11 +18,8 @@ export type DesktopLocalizedStringDisplayProps = {
 /**
  * Desktop-tier resolved-string-only display for a JSONB `LocalizedString` map.
  *
- * Self-contained — no shared base. Mirrors the backend `resolveLocalized`
- * fallback chain (request → default `ar` → first available value → empty).
- * Renders *only* the resolved text — no `ar`/`en` chip, no flag, no language
- * label — so it stays clean for lists, previews, and user-facing pickers
- * where the raw map is available.
+ * Delegates to the shared {@link LocalizedStringDisplay} with a desktop default
+ * `typographyVariant` of `"bodyMd"`.
  */
 export const DesktopLocalizedStringDisplay: React.FC<DesktopLocalizedStringDisplayProps> = ({
   value,
@@ -34,20 +29,14 @@ export const DesktopLocalizedStringDisplay: React.FC<DesktopLocalizedStringDispl
   sx,
   onClick,
 }): React.ReactNode => {
-  const uiLocale = useAppLocale();
-  const displayLocale = locale ?? uiLocale;
-
-  const resolved = resolveLocalizedString(value, displayLocale);
-
-  if (resolved === "") {
-    return <>{fallback ?? null}</>;
-  }
-
-  const isRtl = displayLocale === "ar";
-
   return (
-    <Typography variant={typographyVariant} dir={isRtl ? "rtl" : "ltr"} onClick={onClick} sx={sx}>
-      {resolved}
-    </Typography>
+    <LocalizedStringDisplay
+      value={value}
+      locale={locale}
+      fallback={fallback}
+      typographyVariant={typographyVariant}
+      sx={sx}
+      onClick={onClick}
+    />
   );
 };

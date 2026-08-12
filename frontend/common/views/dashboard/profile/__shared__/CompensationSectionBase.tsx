@@ -2,16 +2,16 @@
 
 import { InputAdornment, Stack, TextField } from "@mui/material";
 import type { Control, FieldPath, FieldValues, UseFormRegister } from "react-hook-form";
-import { Controller, useWatch } from "react-hook-form";
+import { useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
+import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
+import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
+import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { ProfileLabels, ProfileStaffLabels, ProfileTeacherLabels } from "@/shared/locale/types/profile";
@@ -77,26 +77,7 @@ export function CompensationEditFields<TFormValues extends FieldValues>({
             },
           }}
         />
-        <Controller
-          name={rateCurrencyName}
-          control={control}
-          render={({ field, fieldState }) => {
-            const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
-            return (
-              <CurrencySelect
-                currency={option}
-                setCurrencyAction={selected => {
-                  field.onChange(selected.code);
-                }}
-                onBlurAction={field.onBlur}
-                label={t.fields.currency}
-                error={Boolean(fieldState.error)}
-                helperText={fieldState.error?.message}
-                fullWidth
-              />
-            );
-          }}
-        />
+        <CurrencyControllerField control={control} name={rateCurrencyName} label={t.fields.currency} />
       </Stack>
     </SectionPanel>
   );

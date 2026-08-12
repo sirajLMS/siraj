@@ -1,6 +1,6 @@
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { parseIanaTimezone } from "@/shared/lib/enum";
 
 /**

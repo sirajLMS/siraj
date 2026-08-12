@@ -1,85 +1,21 @@
 "use client";
 
-import Box from "@mui/material/Box";
-import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
-import type { PhoneInputSlotProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
-import { PhoneInputShared } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
+import { BoxPrefixInput } from "@/frontend/common/components/ui/input/phoneInput/BoxPrefixInput";
+import type { PhoneInputSharedProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
+import { createPhoneInputVariant } from "@/frontend/common/components/ui/input/phoneInput/phoneInputFactory";
+import { createResolveHelperText } from "@/frontend/common/components/ui/input/phoneInput/phoneInputSharedUtils";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
 import { PhoneCountryPickerMobile } from "@/frontend/mobile/components/ui/input/phoneInput/phoneCountryPicker.mobile";
 
-export type PhoneInputProps = {
-  readonly value: string | null;
-  readonly onChangeAction: (e164: string | null) => void;
-  readonly onBlurAction?: () => void;
-  readonly defaultRegion?: string;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly fullWidth?: boolean;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly hideLabel?: boolean;
-};
+export type PhoneInputProps = PhoneInputSharedProps;
 
-const BoxPrefixInput: React.FC<
-  React.InputHTMLAttributes<HTMLInputElement> & {
-    readonly sx?: SxProps<Theme>;
-    readonly ref?: React.Ref<HTMLInputElement>;
-  }
-> = ({ sx, ref, ...props }): React.ReactNode => <Box component="input" ref={ref} sx={sx} {...(props as object)} />;
+const mobileResolveHelperText = createResolveHelperText(true);
 
-const mobileResolveHelperText: PhoneInputSlotProps["resolveHelperText"] = ({
-  prefixInvalid,
-  showRequiredError,
-  phoneInvalid,
-  helperText,
-  t,
-}) => {
-  if (prefixInvalid) {
-    return t.invalidPrefix;
-  }
-  if (showRequiredError) {
-    return t.required;
-  }
-  if (phoneInvalid) {
-    return t.invalidPhone;
-  }
-  return helperText;
-};
-
-export const PhoneInput: React.FC<PhoneInputProps> = ({
-  value,
-  onChangeAction,
-  onBlurAction,
-  defaultRegion = "EG",
-  label,
-  placeholder,
-  required,
-  disabled,
-  fullWidth = true,
-  error,
-  helperText,
-  hideLabel,
-}: PhoneInputProps): React.ReactNode => (
-  <PhoneInputShared
-    value={value}
-    onChangeAction={onChangeAction}
-    onBlurAction={onBlurAction}
-    defaultRegion={defaultRegion}
-    label={label}
-    placeholder={placeholder}
-    required={required}
-    disabled={disabled}
-    fullWidth={fullWidth}
-    error={error}
-    helperText={helperText}
-    hideLabel={hideLabel}
-    LocaleEmojiComponent={MobileLocaleEmoji}
-    PhoneCountryPickerComponent={PhoneCountryPickerMobile}
-    PrefixInputElement={BoxPrefixInput}
-    resolveHelperText={mobileResolveHelperText}
-    useOnNationalInput={false}
-  />
-);
+export const PhoneInput: React.FC<PhoneInputProps> = createPhoneInputVariant({
+  LocaleEmojiComponent: MobileLocaleEmoji,
+  PhoneCountryPickerComponent: PhoneCountryPickerMobile,
+  PrefixInputElement: BoxPrefixInput,
+  resolveHelperText: mobileResolveHelperText,
+  useOnNationalInput: false,
+});

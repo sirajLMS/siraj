@@ -1,6 +1,6 @@
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { logger } from "@/backend/lib/logger";
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export async function seedOrGet() {
   logger.log("Seeding common timezones...");

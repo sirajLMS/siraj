@@ -1,52 +1,12 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 // Defensive mocks against bleed from earlier test files (Bun mock.module is process-global).
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/profile",
-  useSearchParams: () => new URLSearchParams("tab=profile"),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/routing", () => ({
-  locales: ["ar", "en"] as const,
+await mockNextNavigation("/profile", {
+  locales: ["ar", "en"],
   defaultLocale: "en",
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/profile",
-  Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...rest}>
-      {children}
-    </a>
-  ),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({
-    push: mock(() => {}),
-    back: mock(() => {}),
-    forward: mock(() => {}),
-    refresh: mock(() => {}),
-    replace: mock(() => {}),
-    prefetch: mock(() => {}),
-  }),
-  usePathname: () => "/profile",
-}));
+  searchParams: "tab=profile",
+});
 
 await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
@@ -63,6 +23,7 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { useStudentPortalProfileStore } from "@/frontend/common/stores/studentPortalProfileStore";
 import { useStudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
 import { StudentProfileDesktopView } from "@/frontend/desktop/views/dashboard/student/profile/studentProfile.desktop";
+import { createProfileMockData } from "@/test/ui/components/fixtures/studentHistoryFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const studentId = "student-profile-1";
@@ -77,36 +38,18 @@ function StudentProfileContainerImpl() {
   return <StudentProfileDesktopView {...viewModel} />;
 }
 
-const profileMockData = {
-  studentProfile: {
-    id: studentId,
-    name: "Ahmed Student",
-    status: "ACTIVE",
-    avatarUrl: null,
-    dateOfBirth: "2012-05-15T00:00:00.000Z",
-    gender: "MALE",
-    language: "en",
-    email: "ahmed@example.com",
-    phone: "+201000000001",
-    parentId: "parent-1",
-    parentUserId: "parent-user-1",
-    parentName: "Parent One",
-    parentEmail: "parent@example.com",
-    parentPhone: "+201000000002",
-    isAssociatedViewer: true,
-    primaryTeacherId: "teacher-1",
-    teacherUserId: "teacher-1",
-    teacherName: "Ustadh Yusuf",
-    hoursPerWeek: 4,
-    classesRemaining: 12,
-    classesTotal: 16,
-    version: 1,
-    createdAt: null,
-    updatedAt: null,
-    upcomingClasses: null,
-    classHistory: null,
-  },
-};
+const profileMockData = createProfileMockData(studentId, {
+  dateOfBirth: "2012-05-15T00:00:00.000Z",
+  gender: "MALE",
+  language: "en",
+  email: "ahmed@example.com",
+  phone: "+201000000001",
+  parentId: "parent-1",
+  parentUserId: "parent-user-1",
+  parentName: "Parent One",
+  parentEmail: "parent@example.com",
+  parentPhone: "+201000000002",
+});
 
 function createMocks(): MockLink.MockedResponse[] {
   return [

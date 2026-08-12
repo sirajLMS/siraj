@@ -1,8 +1,8 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
+import { classExecutionFields } from "@/backend/graphql/pothos/scheduling/__shared__/classExecutionFields";
+import { classSessionMetricsFields } from "@/backend/graphql/pothos/scheduling/__shared__/classSessionMetricsFields";
 import {
   ClassExecutionStatePothosObject,
-  ClassOutcomePothosObject,
   IanaTimezonePothosObject,
   LeaveRequestStatusPothosObject,
   RescheduleDateLabelPothosObject,
@@ -27,19 +27,16 @@ const DailyScheduleMetricsObjectRef = gqlSchemaBuilder.objectRef<ClassSessionMet
 
 export const DailyScheduleMetricsPothosObject = DailyScheduleMetricsObjectRef.implement({
   fields: t => ({
-    id: t.exposeString("id", { nullable: true }),
+    ...classSessionMetricsFields(t, { idNullable: true }),
     total: t.exposeInt("total"),
     regular: t.exposeInt("regular"),
     trial: t.exposeInt("trial"),
     advance: t.exposeInt("advance"),
-    rescheduled: t.exposeInt("rescheduled"),
     suspended: t.exposeInt("suspended"),
     taken: t.exposeInt("taken"),
-    pending: t.exposeInt("pending"),
     activated: t.exposeInt("activated"),
     running: t.exposeInt("running"),
     absent: t.exposeInt("absent"),
-    leave: t.exposeInt("leave"),
   }),
 });
 
@@ -64,17 +61,13 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
     status: t.expose("status", { type: ClassExecutionStatePothosObject }),
-    outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
-    executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
-    isFrozen: t.exposeBoolean("isFrozen"),
+    ...classExecutionFields(t),
     student: t.expose("student", { type: DailyScheduleListUserItemObject }),
     teacher: t.expose("teacher", { type: DailyScheduleListUserItemObject }),
     courseName: t.exposeString("courseName", { nullable: true }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
     teacherTimezone: t.expose("teacherTimezone", { type: IanaTimezonePothosObject, nullable: true }),
     studentTimezone: t.expose("studentTimezone", { type: IanaTimezonePothosObject, nullable: true }),
-    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
-    effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
   }),
 });
 
@@ -126,11 +119,8 @@ const RescheduleTrackingMetricsRef = gqlSchemaBuilder.objectRef<RescheduleTracki
 
 export const RescheduleTrackingMetricsPothosObject = RescheduleTrackingMetricsRef.implement({
   fields: t => ({
-    id: t.exposeString("id"),
-    pending: t.exposeInt("pending"),
+    ...classSessionMetricsFields(t),
     approved: t.exposeInt("approved"),
-    leave: t.exposeInt("leave"),
-    rescheduled: t.exposeInt("rescheduled"),
     cancelled: t.exposeInt("cancelled"),
   }),
 });
@@ -182,11 +172,7 @@ export const StatusTrackingScheduleRowPothosObject = StatusTrackingScheduleRowRe
     scheduledStartAt: t.expose("scheduledStartAt", { type: "DateTime" }),
     scheduledEndAt: t.expose("scheduledEndAt", { type: "DateTime" }),
     durationMinutes: t.exposeInt("durationMinutes"),
-    executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject }),
-    outcome: t.expose("outcome", { type: ClassOutcomePothosObject }),
-    isFrozen: t.exposeBoolean("isFrozen"),
-    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
-    effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
+    ...classExecutionFields(t),
   }),
 });
 

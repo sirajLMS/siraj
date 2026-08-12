@@ -5,7 +5,7 @@ description: >
   backend services, GraphQL integration, UI components, and E2E tests). Asks scoping
   questions to confirm targeted test files or domains, checks existing skills, executes
   log-captured test runs, applies domain-specific fixes, verifies code quality via per-file
-  sub-loop (tsgo → biome → oxlint → lint:type-aware), and confirms clean type-checking. Use when any test fails
+  sub-loop (tsgo → oxlint → biome → lint:type-aware), and confirms clean type-checking. Use when any test fails
   or when asked to fix tests.
 allowed-tools: shell
 ---
@@ -22,7 +22,7 @@ Before diagnosing or editing code:
 
 1. **Check Existing Skills**:
    - `fix-db-tests`: Used specifically for database repository tests (`backend/db/test/`). `fix-tests` extends this to cover all domains.
-   - `quality-loop`: Runs project quality gates repeatedly (`tsgo`, `biome:check`, `oxlint`, `lint`) plus file-scoped verification via `sub-loop.ts`.
+   - `quality-loop`: Runs project quality gates repeatedly (`tsgo`, `oxlint`, `biome:check`, `lint`) plus file-scoped verification via `sub-loop.ts`.
    - `fix-codescene`: Used specifically for CodeScene health scan warnings.
    - `plan-review`: Used for reviewing architectural plans before large refactors.
 
@@ -122,11 +122,11 @@ Follow the project's **code quality rules** after making any code edits:
    bun run biome:check           # Biome format & lint
    ```
 2. **Sub-Loop Verification** (preferred over manual lint):
-   For file-scoped progressive verification (tsgo → biome → oxlint → lint → duplicates → codescene):
+   For file-scoped progressive verification (tsgo → oxlint → biome → lint → duplicates → codescene):
    ```bash
    bun run scripts/health/sub-loop.ts <modified-file-path> --lifecycle lint
    ```
-   This runs tsgo, biome, oxlint, and ESLint (type-aware) in order, short-circuiting at first failure.
+   This runs tsgo, oxlint, biome, and ESLint (type-aware) in order, short-circuiting at first failure.
    The script also prints which instruction files and AGENTS.md files apply to the target file.
 3. **Lint Service (in-process, no HTTP server)**:
    For direct file-scoped lint without the full sub-loop:

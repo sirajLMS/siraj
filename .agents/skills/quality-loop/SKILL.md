@@ -1,7 +1,7 @@
 ---
 name: quality-loop
 description: >
-  Run the project quality gate loop (tsgo, biome:check, oxlint, lint) repeatedly until all pass clean.
+  Run the project quality gate loop (tsgo, oxlint, biome:check, lint) repeatedly until all pass clean.
   Use when asked to run quality checks, fix lint issues, clean up the code, or validate changes.
   Supports both full-repo and file-scoped verification via sub-loop.ts and sub-loop-uncommitted.ts.
 allowed-tools: shell
@@ -11,7 +11,7 @@ allowed-tools: shell
 
 Run these checks in sequence. If any fails, fix the issues and re-run from the failed step. Continue until a complete round has zero issues.
 
-All commands use Bun (`~/.bun/bin/bun` in some environments). All commands are safe to run concurrently with other processes (tsgo, biome, and lint all use internal serialization).
+All commands use Bun (`~/.bun/bin/bun` in some environments). All commands are safe to run concurrently with other processes (tsgo, oxlint, biome, and lint all use internal serialization).
 
 ### Step 1: TypeScript
 
@@ -21,19 +21,7 @@ bun tsgo
 
 Fix all type errors before proceeding. `tsgo` is safe to run concurrently. It runs project-wide — there is no file-scoped mode.
 
-### Step 2: Biome
-
-```bash
-bun biome:check
-```
-
-Fix formatting and lint issues. `biome:check` is safe to run concurrently. For file-scoped biome:
-
-```bash
-bunx @biomejs/biome check --write --unsafe <file>
-```
-
-### Step 3: Oxlint
+### Step 2: Oxlint
 
 ```bash
 bun run oxlint
@@ -46,6 +34,18 @@ bunx oxlint --deny-warnings --ignore-path .gitignore <file>
 ```
 
 **Critical**: NEVER add `oxlint-disable` comments — fix the root cause instead. See the "Oxlint Rules" section in `AGENTS.md` for fix patterns per rule.
+
+### Step 3: Biome
+
+```bash
+bun biome:check
+```
+
+Fix formatting and lint issues. `biome:check` is safe to run concurrently. For file-scoped biome:
+
+```bash
+bunx @biomejs/biome check --write --unsafe <file>
+```
 
 ### Step 4: Lint (ESLint via in-process lint service)
 
@@ -100,15 +100,15 @@ If any step reports issues, fix them and restart the loop from the failing step.
 When you only need to verify specific files (not the whole repo), use the per-file progressive quality loop:
 
 ```bash
-# Single file — runs tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene
+# Single file — runs tsgo → oxlint → biome → lint:type-aware → check:duplicates → codescene
 # Short-circuits at first failure. Prints applicable rule files (instruction files + AGENTS.md).
 bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>
 
 # Lifecycle stages (controls depth):
 #   tsgo      → only tsgo
-#   biome     → tsgo + biome
-#   lint      → tsgo + biome + oxlint + lint:type-aware
-#   codescene → tsgo + biome + oxlint + lint:type-aware + check:duplicates + codescene --file
+#   biome     → tsgo + oxlint + biome
+#   lint      → tsgo + oxlint + biome + lint:type-aware
+#   codescene → tsgo + oxlint + biome + lint:type-aware + check:duplicates + codescene --file
 ```
 
 Note: The `lint` and `codescene` lifecycle stages include `lint:type-aware` (ESLint with TypeScript

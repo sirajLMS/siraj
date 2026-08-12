@@ -22,6 +22,7 @@ import {
 } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
 import { ScheduleTimezoneOffsetCell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleTimezoneOffsetCell";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import type { ScheduleOverviewHeaders } from "@/frontend/common/views/dashboard/admin/home/types/scheduleColumns.types";
 import {
   formatDurationMinutes,
   formatScheduleYourTime,
@@ -30,20 +31,7 @@ import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecut
 import { useAppLocale } from "@/shared/locale";
 
 interface UseScheduleColumnsParams {
-  readonly headers: {
-    readonly className: string;
-    readonly student: string;
-    readonly teacher: string;
-    readonly time: string;
-    readonly yourTime: string;
-    readonly teacherTime: string;
-    readonly studentTime: string;
-    readonly duration: string;
-    readonly status: string;
-    readonly actions: string;
-    readonly history: string;
-    readonly joinVideo: string;
-  };
+  readonly headers: ScheduleOverviewHeaders;
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
   readonly showTimezones: boolean;

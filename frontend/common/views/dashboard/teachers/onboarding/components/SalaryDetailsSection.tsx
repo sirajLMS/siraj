@@ -1,11 +1,12 @@
 "use client";
 
-import { Grid, InputAdornment, TextField, Typography } from "@mui/material";
-import { type Control, Controller, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
+import { Grid, TextField } from "@mui/material";
+import { type Control, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
-import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
+import { CurrencySelectController } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySelectControllerShared";
+import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
+import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
 interface SalaryDetailsSectionProps {
@@ -48,44 +49,20 @@ export function SalaryDetailsSection({ register, control, errors, labels }: Read
           sx={outlinedInputSx}
           slotProps={{
             input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Typography
-                    variant="bodyMd"
-                    sx={theme => ({
-                      fontWeight: 700,
-                      color: theme.palette.onSurfaceVariant,
-                    })}
-                  >
-                    {currencySymbol}
-                  </Typography>
-                </InputAdornment>
-              ),
+              startAdornment: <CurrencySymbolAdornment symbol={currencySymbol} variant="typography" />,
             },
           }}
         />
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
-        <Controller
+        <CurrencySelectController
           name="rateCurrency"
           control={control}
-          render={({ field }) => {
-            const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
-            return (
-              <CurrencySelect
-                currency={option}
-                setCurrencyAction={selected => {
-                  field.onChange(selected.code);
-                }}
-                onBlurAction={field.onBlur}
-                label={labels.fields.currency}
-                required
-                error={!!errors.rateCurrency}
-                helperText={errors.rateCurrency?.message}
-                fullWidth
-              />
-            );
-          }}
+          label={labels.fields.currency}
+          required
+          error={!!errors.rateCurrency}
+          helperText={errors.rateCurrency?.message}
+          fullWidth
         />
       </Grid>
     </Grid>

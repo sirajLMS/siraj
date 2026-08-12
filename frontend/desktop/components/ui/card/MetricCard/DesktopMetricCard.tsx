@@ -3,18 +3,23 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import type { SxProps } from "@mui/material";
 import {
+  MetricCardIconWrap,
+  MetricCardMotionWrapper,
+} from "@/frontend/common/components/ui/card/MetricCard/metricCardShared";
+import { buildMotionWrapperProps } from "@/frontend/common/components/ui/card/MetricCard/metricCardSharedUtils";
+import {
   MotionStyledCard,
   StyledCard,
   StyledDefaultContentRoot,
-  StyledIcon,
-  StyledIconWrap,
   StyledLabel,
   StyledSubLabel,
   StyledValue,
-} from "@/frontend/desktop/components/ui/card/MetricCard/styled";
-import { formatValue, type MetricCardVariant } from "@/frontend/desktop/components/ui/card/MetricCard/utils";
-
-export type MetricCardDensity = "default" | "compact";
+} from "@/frontend/common/components/ui/card/MetricCard/styled";
+import {
+  formatValue,
+  type MetricCardDensity,
+  type MetricCardVariant,
+} from "@/frontend/common/components/ui/card/MetricCard/utils";
 
 export interface DesktopMetricCardProps {
   readonly icon: SvgIconComponent;
@@ -67,9 +72,13 @@ export function DesktopMetricCard({
   );
 
   const iconWrap = (
-    <StyledIconWrap className="metric-icon-wrap" iconSize={iconSize} isError={isError} isHighlight={isHighlight}>
-      <StyledIcon icon={Icon} fontSizeValue={iconFontSize} isError={isError} />
-    </StyledIconWrap>
+    <MetricCardIconWrap
+      icon={Icon}
+      iconSize={iconSize}
+      iconFontSize={iconFontSize}
+      isError={isError}
+      isHighlight={isHighlight}
+    />
   );
 
   const cardContent = (
@@ -78,7 +87,7 @@ export function DesktopMetricCard({
         {labelTypography}
         {valueTypography}
         {subLabel ? (
-          <StyledSubLabel variant="labelMd" density={density}>
+          <StyledSubLabel variant="labelMd" density={density} useSecondaryColor>
             {subLabel}
           </StyledSubLabel>
         ) : null}
@@ -87,40 +96,22 @@ export function DesktopMetricCard({
     </>
   );
 
-  if (animated) {
-    return (
-      <MotionStyledCard
-        interactive={false}
-        onClick={onClick}
-        isHighlight={isHighlight}
-        isError={isError}
-        isInteractive={Boolean(onClick)}
-        density={density}
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.4,
-          delay: animationIndex * 0.04,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        }}
-        sx={sx}
-      >
-        {cardContent}
-      </MotionStyledCard>
-    );
-  }
-
   return (
-    <StyledCard
-      interactive={false}
-      onClick={onClick}
-      isHighlight={isHighlight}
-      isError={isError}
-      isInteractive={Boolean(onClick)}
-      density={density}
-      sx={sx}
+    <MetricCardMotionWrapper
+      {...buildMotionWrapperProps({
+        isHighlight,
+        isError,
+        onClick,
+        animated,
+        animationIndex,
+        sx,
+        MotionComponent: MotionStyledCard,
+        StaticComponent: StyledCard,
+        delayMultiplier: 0.04,
+        extraProps: { density },
+      })}
     >
       {cardContent}
-    </StyledCard>
+    </MetricCardMotionWrapper>
   );
 }

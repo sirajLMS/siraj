@@ -1,29 +1,16 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { InputAdornment, TextField } from "@mui/material";
+import { SuggestionsSearchBarShared } from "@/frontend/common/views/dashboard/suggestions/components/__shared__/suggestionsSearchBarShared";
 import type { SuggestionsSearchBarProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
 
 export function SuggestionsSearchBarDesktop({ value, placeholder, onChange }: Readonly<SuggestionsSearchBarProps>) {
   return (
-    <TextField
-      size="small"
+    <SuggestionsSearchBarShared
       value={value}
       placeholder={placeholder}
-      onChange={event => {
-        onChange(event.target.value);
-      }}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchOutlined fontSize="small" />
-            </InputAdornment>
-          ),
-        },
-        htmlInput: { autoComplete: "off" },
-      }}
-      sx={{ minWidth: 240 }}
+      onChange={onChange}
+      fullWidth={false}
+      minWidth={240}
     />
   );
 }

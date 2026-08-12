@@ -1,16 +1,6 @@
 import type { Metadata } from "next";
-import { toGqlProfileAudience, toGqlProfileMode, toGqlProfileScope } from "@/app/(dashboard)/lib/profile-enum-bridge";
 import { ProfileMode } from "@/backend/enum";
-import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import type {
-  ProfileMode as GqlProfileMode,
-  ProfileScope as GqlProfileScope,
-  ProfileAudience,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { ProfilePageClient } from "@/frontend/common/views/dashboard/profile/core/ProfilePageClient";
-import { redirect } from "@/shared/i18n/routing";
+import { ProfilePageServer } from "@/frontend/common/views/dashboard/profile/__shared__/profilePageServer";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
 
@@ -21,25 +11,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ProfilePage() {
-  const { userId, context } = await getServerUserContext();
-  if (!userId) {
-    await redirectToLogin();
-    return null;
-  }
-
-  const resolution = await resolveProfilePageContext(userId, context, { mode: ProfileMode.VIEW });
-  if ("redirect" in resolution) {
-    redirect({ href: resolution.redirect });
-    return undefined;
-  }
-
-  return (
-    <ProfilePageClient
-      scope={toGqlProfileScope(resolution.scope) satisfies GqlProfileScope}
-      mode={toGqlProfileMode(resolution.mode) satisfies GqlProfileMode}
-      audience={toGqlProfileAudience(resolution.audience) satisfies ProfileAudience}
-      targetUserId={resolution.targetUserId}
-      studentId={resolution.studentId}
-    />
-  );
+  return <ProfilePageServer mode={ProfileMode.VIEW} />;
 }

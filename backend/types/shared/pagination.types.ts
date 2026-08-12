@@ -11,10 +11,12 @@ export type PageInfo = {
   endCursor?: string | null;
 };
 
-export class PaginationArgs {
-  public static readonly DEFAULT_COUNT = 10;
-  public static readonly MAX_COUNT = 5000;
-
+/**
+ * Canonical shape for all pagination parameters. The class instance
+ * properties, the constructor parameter, and `PaginationInput` all derive
+ * from this single definition to eliminate intra-file duplication.
+ */
+export type PaginationArgsShape = {
   first?: number | null;
   skip?: number | null;
   after?: string | null;
@@ -23,6 +25,20 @@ export class PaginationArgs {
   page?: number | null;
   defaultCount?: number | null;
   maxCount?: number | null;
+};
+
+export class PaginationArgs {
+  public static readonly DEFAULT_COUNT = 10;
+  public static readonly MAX_COUNT = 5000;
+
+  first: number | null;
+  skip: number | null;
+  after: string | null;
+  before: string | null;
+  last: number | null;
+  page: number | null;
+  defaultCount: number | null;
+  maxCount: number | null;
 
   constructor({
     first = null,
@@ -33,16 +49,7 @@ export class PaginationArgs {
     page = null,
     defaultCount = PaginationArgs.DEFAULT_COUNT,
     maxCount = PaginationArgs.MAX_COUNT,
-  }: {
-    first?: number | null;
-    skip?: number | null;
-    after?: string | null;
-    before?: string | null;
-    last?: number | null;
-    page?: number | null;
-    defaultCount?: number | null;
-    maxCount?: number | null;
-  } = {}) {
+  }: PaginationArgsShape = {}) {
     this.first = first;
     this.skip = skip;
     this.after = after;
@@ -88,16 +95,11 @@ export class PaginationArgs {
  * exception policy, input/wrapper types are allowed as separate definitions,
  * but they should import base types from `@/backend/types` rather than
  * redefining fields inline across Pothos files.
+ *
+ * Derived from `PaginationArgsShape` (omitting `defaultCount` which is a
+ * server-side concern, not a GraphQL input field).
  */
-export type PaginationInput = {
-  first?: number | null;
-  skip?: number | null;
-  after?: string | null;
-  before?: string | null;
-  last?: number | null;
-  page?: number | null;
-  maxCount?: number | null;
-};
+export type PaginationInput = Omit<PaginationArgsShape, "defaultCount">;
 
 /** Default GraphQL PaginationArgs values (also used by repositories — keep out of pothos). */
 export const PaginationArgsDefault = {

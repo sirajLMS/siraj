@@ -5,6 +5,7 @@
 // `import { teachers, users, ... } from "@/backend/db/schema"` resolves
 // every Drizzle table.
 
+export * from "./__shared__";
 export * from "./audit";
 export * from "./auth";
 export * from "./billing";

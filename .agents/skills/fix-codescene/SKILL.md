@@ -2,7 +2,7 @@
 name: fix-codescene
 description: >
   Fix CodeScene health warnings only via wave-based parallel executor subagents and per-file
-  sub-loop verification (tsgo → biome → oxlint → lint → duplicates → codescene). Orchestrator runs codescene --scan,
+  sub-loop verification (tsgo → oxlint → biome → lint → duplicates → codescene). Orchestrator runs codescene --scan,
   asks wave size, dispatches one subagent per flagged file. Use when asked to fix CodeScene issues,
   codescene warnings, Large Method, Code Duplication, or code health scan failures — without
   running full quality-gate or sonar-scan.
@@ -33,7 +33,7 @@ CodeScene-only workflow: scan → optional wave-size question → parallel execu
 
 **Orchestrator allowed commands:** `bun run codescene --scan`, `bun run lint` (in-process lint service — no HTTP server).
 
-**Executor allowed commands:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs `codescene --file` internally, plus tsgo → biome → oxlint → lint → duplicates → codescene).
+**Executor allowed commands:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs `codescene --file` internally, plus tsgo → oxlint → biome → lint → duplicates → codescene).
 
 ## Orchestrator: no repo file reads (one exception)
 

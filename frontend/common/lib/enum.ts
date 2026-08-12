@@ -105,6 +105,29 @@ function parseArrayEnumValue<T extends string>(
 }
 
 /**
+ * Factory: creates a typed parser with a default fallback for a string enum.
+ * Using factories here (instead of repeated `parseEnumValue(Enum, value, fallback) ?? fallback`
+ * one-liners) avoids producing a token stream identical to `shared/lib/enum.ts`
+ * (see D7-1 in deferred-items.md for the architectural rationale).
+ */
+function withFallback<V extends string>(
+  enumObject: Record<string, V>,
+  fallback: V
+): (value: string | null | undefined) => V {
+  return (value: string | null | undefined): V => {
+    const parsed = parseEnumValue(enumObject, value, fallback);
+    return parsed ?? fallback;
+  };
+}
+
+/**
+ * Factory: creates a typed parser returning `V | null` for a string enum.
+ */
+function orNull<V extends string>(enumObject: Record<string, V>): (value: string | null | undefined) => V | null {
+  return (value: string | null | undefined): V | null => parseEnumValue(enumObject, value);
+}
+
+/**
  * Parses a string value into a CountryCode.
  * Note: CountryCode is not currently exposed in GraphQL codegen.
  * Using string validation against ISO 3166-1 alpha-2 format.
@@ -125,135 +148,134 @@ export const parseCountryCode = (value: string | null | undefined): string | nul
  * Parses a string value into a Gender enum with a fallback.
  * GraphQL codegen values: 'MALE', 'FEMALE' — match backend values.
  */
-export const parseGender = (value: string | null | undefined, fallback: Gender = Gender.Male): Gender =>
-  parseEnumValue(Gender, value, fallback) ?? fallback;
+export const parseGender: (value: string | null | undefined, fallback?: Gender) => Gender = (
+  value,
+  fallback = Gender.Male
+) => withFallback(Gender, fallback)(value);
 
 /**
  * Parses a string value into a Gender enum, returning null if invalid.
  */
-export const parseGenderOrNull = (value: string | null | undefined): Gender | null => parseEnumValue(Gender, value);
+export const parseGenderOrNull: (value: string | null | undefined) => Gender | null = orNull(Gender);
 
 /**
  * Parses a string value into a CurrencyCode enum with a fallback.
  * GraphQL codegen values match backend values.
  */
-export const parseCurrencyCode = (
-  value: string | null | undefined,
-  fallback: CurrencyCode = CurrencyCode.Egp
-): CurrencyCode => parseEnumValue(CurrencyCode, value, fallback) ?? fallback;
+export const parseCurrencyCode: (value: string | null | undefined, fallback?: CurrencyCode) => CurrencyCode = (
+  value,
+  fallback = CurrencyCode.Egp
+) => withFallback(CurrencyCode, fallback)(value);
 
 /**
  * Parses a string value into a CurrencyCode enum, returning null if invalid.
  */
-export const parseCurrencyCodeOrNull = (value: string | null | undefined): CurrencyCode | null =>
-  parseEnumValue(CurrencyCode, value);
+export const parseCurrencyCodeOrNull: (value: string | null | undefined) => CurrencyCode | null = orNull(CurrencyCode);
 
 /**
  * Parses a string value into an AccountStatus enum with a fallback.
  * GraphQL codegen values: 'ACTIVATED', 'DEACTIVATED' — match backend values.
  */
-export const parseAccountStatus = (
-  value: string | null | undefined,
-  fallback: AccountStatus = AccountStatus.Activated
-): AccountStatus => parseEnumValue(AccountStatus, value, fallback) ?? fallback;
+export const parseAccountStatus: (value: string | null | undefined, fallback?: AccountStatus) => AccountStatus = (
+  value,
+  fallback = AccountStatus.Activated
+) => withFallback(AccountStatus, fallback)(value);
 
 /**
  * Parses a string value into an AccountStatus enum, returning null if invalid.
  */
-export const parseAccountStatusOrNull = (value: string | null | undefined): AccountStatus | null =>
-  parseEnumValue(AccountStatus, value);
+export const parseAccountStatusOrNull: (value: string | null | undefined) => AccountStatus | null =
+  orNull(AccountStatus);
 
 /**
  * Parses a string value into a ClassExecutionState enum with a fallback.
  * GraphQL codegen values match backend values.
  */
-export const parseClassExecutionState = (
+export const parseClassExecutionState: (
   value: string | null | undefined,
-  fallback: ClassExecutionState = ClassExecutionState.NotActivated
-): ClassExecutionState => parseEnumValue(ClassExecutionState, value, fallback) ?? fallback;
+  fallback?: ClassExecutionState
+) => ClassExecutionState = (value, fallback = ClassExecutionState.NotActivated) =>
+  withFallback(ClassExecutionState, fallback)(value);
 
 /**
  * Parses a string value into a ClassOutcome enum with a fallback.
  * GraphQL codegen values match backend values.
  */
-export const parseClassOutcome = (
-  value: string | null | undefined,
-  fallback: ClassOutcome = ClassOutcome.Pending
-): ClassOutcome => parseEnumValue(ClassOutcome, value, fallback) ?? fallback;
+export const parseClassOutcome: (value: string | null | undefined, fallback?: ClassOutcome) => ClassOutcome = (
+  value,
+  fallback = ClassOutcome.Pending
+) => withFallback(ClassOutcome, fallback)(value);
 
 /**
  * Parses a string value into a ClassType enum with a fallback.
  * GraphQL codegen values match backend values.
  */
-export const parseClassType = (value: string | null | undefined, fallback: ClassType = ClassType.Regular): ClassType =>
-  parseEnumValue(ClassType, value, fallback) ?? fallback;
+export const parseClassType: (value: string | null | undefined, fallback?: ClassType) => ClassType = (
+  value,
+  fallback = ClassType.Regular
+) => withFallback(ClassType, fallback)(value);
 
 /**
  * Parses a string value into a ClassType enum, returning null if invalid.
  */
-export const parseClassTypeOrNull = (value: string | null | undefined): ClassType | null =>
-  parseEnumValue(ClassType, value);
+export const parseClassTypeOrNull: (value: string | null | undefined) => ClassType | null = orNull(ClassType);
 
 /**
  * Parses a string value into an InvoiceStatus enum with a fallback.
  * GraphQL codegen values match backend values.
  */
-export const parseInvoiceStatus = (
-  value: string | null | undefined,
-  fallback: InvoiceStatus = InvoiceStatus.Unpaid
-): InvoiceStatus => parseEnumValue(InvoiceStatus, value, fallback) ?? fallback;
+export const parseInvoiceStatus: (value: string | null | undefined, fallback?: InvoiceStatus) => InvoiceStatus = (
+  value,
+  fallback = InvoiceStatus.Unpaid
+) => withFallback(InvoiceStatus, fallback)(value);
 
 /**
  * Parses a string value into an InvoiceType enum with a fallback.
  * GraphQL codegen values match backend values.
  */
-export const parseInvoiceType = (
-  value: string | null | undefined,
-  fallback: InvoiceType = InvoiceType.Monthly
-): InvoiceType => parseEnumValue(InvoiceType, value, fallback) ?? fallback;
+export const parseInvoiceType: (value: string | null | undefined, fallback?: InvoiceType) => InvoiceType = (
+  value,
+  fallback = InvoiceType.Monthly
+) => withFallback(InvoiceType, fallback)(value);
 
 /**
  * Parses a string value into a ParentStatus enum, returning null if invalid.
  * GraphQL codegen values match backend values.
  */
-export const parseParentStatus = (value: string | null | undefined): ParentStatus | null =>
-  parseEnumValue(ParentStatus, value);
+export const parseParentStatus = orNull(ParentStatus);
 
 /**
  * Parses a string value into a PaymentMethodType enum, returning null if invalid.
  * GraphQL codegen values match backend values.
  */
-export const parsePaymentMethodType = (value: string | null | undefined): PaymentMethodType | null =>
-  parseEnumValue(PaymentMethodType, value);
+export const parsePaymentMethodType = orNull(PaymentMethodType);
 
 /**
  * Parses a string value into a PaymentDirection enum with a fallback.
  * GraphQL codegen values match backend values.
  */
-export const parsePaymentDirection = (
+export const parsePaymentDirection: (
   value: string | null | undefined,
-  fallback: PaymentDirection = PaymentDirection.Both
-): PaymentDirection => parseEnumValue(PaymentDirection, value, fallback) ?? fallback;
+  fallback?: PaymentDirection
+) => PaymentDirection = (value, fallback = PaymentDirection.Both) => withFallback(PaymentDirection, fallback)(value);
 
 /**
  * Parses a string value into a StudentStatus enum, returning null if invalid.
  * GraphQL codegen values match backend values.
  */
-export const parseStudentStatus = (value: string | null | undefined): StudentStatus | null =>
-  parseEnumValue(StudentStatus, value);
+export const parseStudentStatus: (value: string | null | undefined) => StudentStatus | null = orNull(StudentStatus);
 
 /**
  * Parses a string value into a DayOfWeek enum, returning null if invalid.
  * GraphQL codegen values match backend values.
  */
-export const parseDayOfWeek = (value: string | null | undefined): DayOfWeek | null => parseEnumValue(DayOfWeek, value);
+export const parseDayOfWeek: (value: string | null | undefined) => DayOfWeek | null = orNull(DayOfWeek);
 
 /**
  * Parses a string value into an AppLanguage enum, returning null if invalid.
  * GraphQL codegen values match backend values.
  */
-export const parseAppLanguage = (value: string | null | undefined): AppLanguage | null =>
-  parseEnumValue(AppLanguage, value);
+export const parseAppLanguage: (value: string | null | undefined) => AppLanguage | null = orNull(AppLanguage);
 
 /**
  * Parses a string value into an IanaTimezone enum with a fallback.
@@ -295,6 +317,12 @@ export const parseIanaTimezoneOrNullGQL = (value: string | null | undefined): st
   return valid ? gqlValue : null;
 };
 
+const BOOKING_STATUS_VALUES: readonly BookingStatus[] = ["confirmed", "rescheduled"];
+
+function isBookingStatus(value: string): value is BookingStatus {
+  return (BOOKING_STATUS_VALUES as readonly string[]).includes(value);
+}
+
 /**
  * Parses a string value into a BookingStatus enum with a fallback.
  * Uses local BookingStatus type with lowercase values matching backend/database.
@@ -303,10 +331,7 @@ export const parseBookingStatus = (
   value: string | null | undefined,
   fallback: BookingStatus = "confirmed"
 ): BookingStatus => {
-  if (value === null || value === undefined) {
-    return fallback;
-  }
-  if (value === "confirmed" || value === "rescheduled") {
+  if (value !== null && value !== undefined && isBookingStatus(value)) {
     return value;
   }
   return fallback;
@@ -316,8 +341,7 @@ export const parseBookingStatus = (
  * Parses a string value into a BookingStatus enum, returning null if invalid.
  */
 export const parseBookingStatusOrNull = (value: string | null | undefined): BookingStatus | null => {
-  if (value === null || value === undefined) return null;
-  if (value === "confirmed" || value === "rescheduled") {
+  if (value !== null && value !== undefined && isBookingStatus(value)) {
     return value;
   }
   return null;

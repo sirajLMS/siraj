@@ -1,0 +1,57 @@
+import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+
+/**
+ * User meeting config details (JSONB on `user_meeting_configs`).
+ * Validated against provider `field_schema` + `url_allowlist` at service boundary.
+ *
+ * Defined here (not in `meeting-config.types.ts`) to avoid a circular import:
+ * `meeting-config.types.ts` imports base types from this file, so the shared
+ * `MeetingConfigDetails` type must live here. It is re-exported from
+ * `meeting-config.types.ts` for backwards compatibility.
+ */
+export type MeetingConfigDetails = {
+  readonly meetingUrl?: string | null;
+  readonly username?: string;
+  readonly tenantId?: string;
+};
+
+/**
+ * Shared fields between `ClassMeetingConfigSelectType` and
+ * `UserMeetingConfigSelectType` — extracted to eliminate cross-file
+ * type duplication. Both consumer types extend this base.
+ */
+export type MeetingConfigBaseSelectType = {
+  readonly id: string;
+  readonly providerId: string;
+  readonly label: string | null;
+  readonly isDefault: boolean;
+  readonly details: MeetingConfigDetails;
+  readonly encryptedSecret: string | null;
+  readonly providerMetadata: Record<string, unknown> | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+};
+
+export type MeetingConfigBaseInsertType = {
+  readonly id?: string;
+  readonly providerId: string;
+  readonly label?: string | null;
+  readonly isDefault: boolean;
+  readonly details: MeetingConfigDetails;
+  readonly encryptedSecret?: string | null;
+  readonly providerMetadata?: Record<string, unknown> | null;
+  readonly createdAt?: Date;
+  readonly updatedAt?: Date;
+};
+
+export type MeetingConfigBaseReturnType = MeetingConfigBaseSelectType & {
+  readonly hasSecret?: boolean;
+  readonly provider?: MeetingProviderSelectType;
+};
+
+export type MeetingConfigBaseSubmitInput = Omit<
+  MeetingConfigBaseInsertType,
+  "id" | "createdAt" | "updatedAt" | "encryptedSecret" | "providerMetadata"
+> & {
+  readonly password?: string | null;
+};

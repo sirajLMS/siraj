@@ -1,7 +1,13 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
+import {
+  buildMeetingConfigInsertValues,
+  buildMeetingConfigUpdatePayload,
+  labelCondition,
+  requireConfigOrThrow,
+} from "@/backend/db/repo/meeting/__shared__/meetingConfigRepoHelpers";
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { userMeetingConfigs } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
@@ -39,10 +45,7 @@ export namespace UserMeetingConfigRepository {
     locale?: string
   ): Promise<UserMeetingConfigSelectType> {
     const row = await getById(id, tx, locale);
-    if (!row) {
-      throw new Error(tErrors.meetingConfigNotFound(id));
-    }
-    return row;
+    return requireConfigOrThrow(row, id, tErrors);
   }
 
   export async function getDefaultForUser(
@@ -80,14 +83,7 @@ export namespace UserMeetingConfigRepository {
         .insert(userMeetingConfigs)
         .values({
           userId: input.userId,
-          providerId: input.providerId,
-          label: input.label ?? null,
-          isDefault: input.isDefault,
-          details: input.details,
-          encryptedSecret: input.encryptedSecret ?? null,
-          providerMetadata: input.providerMetadata ?? null,
-          createdAt: now,
-          updatedAt: now,
+          ...buildMeetingConfigInsertValues(input, now),
         })
         .returning();
 
@@ -202,10 +198,6 @@ export namespace UserMeetingConfigRepository {
     await db.transaction(run);
   }
 
-  function labelCondition(label: string | null | undefined) {
-    return label ? eq(userMeetingConfigs.label, label) : isNull(userMeetingConfigs.label);
-  }
-
   export async function findByUserProviderLabel(
     userId: string,
     providerId: string,
@@ -217,7 +209,11 @@ export namespace UserMeetingConfigRepository {
       .select()
       .from(userMeetingConfigs)
       .where(
-        and(eq(userMeetingConfigs.userId, userId), eq(userMeetingConfigs.providerId, providerId), labelCondition(label))
+        and(
+          eq(userMeetingConfigs.userId, userId),
+          eq(userMeetingConfigs.providerId, providerId),
+          labelCondition(userMeetingConfigs.label, label)
+        )
       )
       .limit(1);
     return row ?? null;
@@ -232,20 +228,7 @@ export namespace UserMeetingConfigRepository {
       inputs,
       (input, t) => findByUserProviderLabel(input.userId, input.providerId, input.label, t),
       (input, t) => create(input, tErrors, t),
-      (id, input, t) =>
-        update(
-          id,
-          {
-            label: input.label,
-            isDefault: input.isDefault,
-            details: input.details,
-            encryptedSecret: input.encryptedSecret,
-            providerId: input.providerId,
-            providerMetadata: input.providerMetadata,
-          },
-          tErrors,
-          t
-        ),
+      (id, input, t) => update(id, buildMeetingConfigUpdatePayload(input), tErrors, t),
       tErrors,
       tx
     );

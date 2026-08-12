@@ -1,10 +1,13 @@
 "use client";
 
-import { SearchOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls } from "@/frontend/common/components/ui";
-import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
+import {
+  ScheduleOverviewFilterSection,
+  ScheduleOverviewSearchField,
+} from "@/frontend/common/views/dashboard/admin/home/components/__shared__/scheduleOverviewShared";
+import { buildScheduleOverviewPageCount } from "@/frontend/common/views/dashboard/admin/home/components/__shared__/scheduleOverviewShared.options";
 import {
   ScheduleOverviewCardSkeleton,
   ScheduleOverviewEmptyState,
@@ -32,14 +35,16 @@ const StyledFilterContainer = styled(Box)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.outlineVariant}`,
 }));
 
-const StyledSearchIcon = styled(SearchOutlined)(({ theme }) => ({
-  fontSize: 18,
-  color: theme.palette.onSurfaceVariant,
-}));
-
 const StyledSectionTitle = styled(Typography)(({ theme }) => ({
   color: theme.palette.onSurface,
 }));
+
+const DESKTOP_SEARCH_SX = {
+  maxWidth: { md: 280 },
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 2,
+  },
+} as const;
 
 function ScheduleOverviewTitle({
   title,
@@ -55,78 +60,6 @@ function ScheduleOverviewTitle({
         <DesktopStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
       ) : null}
     </>
-  );
-}
-
-type ScheduleOverviewSearchFieldProps = Pick<ScheduleOverviewViewModel, "searchValue" | "onSearchChange"> & {
-  readonly searchPlaceholder: string;
-};
-
-function ScheduleOverviewSearchField({
-  searchPlaceholder,
-  searchValue,
-  onSearchChange,
-}: Readonly<ScheduleOverviewSearchFieldProps>) {
-  return (
-    <TextField
-      placeholder={searchPlaceholder}
-      value={searchValue}
-      onChange={event => {
-        onSearchChange(event.target.value);
-      }}
-      size="small"
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <StyledSearchIcon />
-            </InputAdornment>
-          ),
-        },
-      }}
-      sx={{
-        maxWidth: { md: 280 },
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 2,
-        },
-      }}
-    />
-  );
-}
-
-type ScheduleOverviewFilterSectionProps = Pick<
-  ScheduleOverviewViewModel,
-  "dateValue" | "selectedTeacher" | "onDateChange" | "onTeacherChange"
-> & {
-  readonly filters: ScheduleOverviewLabelsBySection["filters"];
-};
-
-function ScheduleOverviewFilterSection({
-  filters,
-  dateValue,
-  selectedTeacher,
-  onDateChange,
-  onTeacherChange,
-}: Readonly<ScheduleOverviewFilterSectionProps>) {
-  return (
-    <StyledFilterContainer>
-      <ScheduleFilters
-        centerOnDesktop
-        dateLabel={filters.dateLabel}
-        dateValue={dateValue}
-        todayLabel={filters.todayLabel}
-        previousDayLabel={filters.previousDayLabel}
-        nextDayLabel={filters.nextDayLabel}
-        onDateChange={onDateChange}
-        teacherSelect={
-          <TeacherAutocompleteDesktop
-            value={selectedTeacher}
-            onChange={onTeacherChange}
-            label={filters.teacherPlaceholder}
-          />
-        }
-      />
-    </StyledFilterContainer>
   );
 }
 
@@ -203,7 +136,7 @@ function ScheduleOverviewPaginationSection({
     return null;
   }
 
-  const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
+  const pageCount = buildScheduleOverviewPageCount(totalCount, pageSize);
 
   return (
     <PaginationControls
@@ -252,18 +185,26 @@ export function ScheduleOverviewDesktopView({
               searchPlaceholder={filters.searchPlaceholder}
               searchValue={searchValue}
               onSearchChange={onSearchChange}
+              sx={DESKTOP_SEARCH_SX}
             />
           ) : null
         }
       >
         {canScheduleFilterAdvanced ? (
-          <ScheduleOverviewFilterSection
-            filters={filters}
-            dateValue={dateValue}
-            selectedTeacher={selectedTeacher}
-            onDateChange={onDateChange}
-            onTeacherChange={onTeacherChange}
-          />
+          <StyledFilterContainer>
+            <ScheduleOverviewFilterSection
+              filters={filters}
+              dateValue={dateValue}
+              onDateChange={onDateChange}
+              teacherSelect={
+                <TeacherAutocompleteDesktop
+                  value={selectedTeacher}
+                  onChange={onTeacherChange}
+                  label={filters.teacherPlaceholder}
+                />
+              }
+            />
+          </StyledFilterContainer>
         ) : null}
 
         <ScheduleOverviewListSection

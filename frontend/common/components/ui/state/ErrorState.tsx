@@ -1,14 +1,27 @@
-import { Alert, Box, Button } from "@mui/material";
+import { Alert, Box, Button, type SxProps, type Theme } from "@mui/material";
+import type { ComponentType, ReactNode } from "react";
 import { Translation, useAppTranslation } from "@/shared/locale";
+
+type ErrorStateContainerComponent = ComponentType<{
+  readonly children: ReactNode;
+  readonly sx?: SxProps<Theme>;
+}>;
 
 type ErrorStateProps = {
   readonly message?: string;
   readonly onRetry?: () => void;
   readonly retryLabel?: string;
   readonly embedded?: boolean;
+  readonly ContainerComponent?: ErrorStateContainerComponent;
 };
 
-export function ErrorState({ message, onRetry, retryLabel, embedded = false }: ErrorStateProps) {
+export function ErrorState({
+  message,
+  onRetry,
+  retryLabel,
+  embedded = false,
+  ContainerComponent = Box,
+}: ErrorStateProps) {
   const tDefault = useAppTranslation(Translation.Common);
   const displayMessage = message ?? tDefault.loadFailed ?? "";
 
@@ -31,5 +44,5 @@ export function ErrorState({ message, onRetry, retryLabel, embedded = false }: E
     return alert;
   }
 
-  return <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>{alert}</Box>;
+  return <ContainerComponent sx={{ p: 3, display: "flex", justifyContent: "center" }}>{alert}</ContainerComponent>;
 }

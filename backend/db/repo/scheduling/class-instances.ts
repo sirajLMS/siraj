@@ -237,10 +237,7 @@ export const deleteClassInstance = async (
 ): Promise<Types.ClassInstanceSelectType> => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
-    const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
-    if (!existing) {
-      throw new Error(tFuncErrors.classInstanceNotFound({ id }));
-    }
+    await getClassInstanceByIdOrThrow(t, id, tFuncErrors);
 
     const { entity: deleted } = await SoftDeleteRepository.softDeleteClassInstance(id, null, t);
 

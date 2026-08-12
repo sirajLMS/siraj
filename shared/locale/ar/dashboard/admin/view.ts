@@ -1,5 +1,72 @@
 import type { AdminViewLabels } from "@/shared/locale/types/dashboard/admin/view";
 
+// Shared sub-objects — also used by classes/details.ts to avoid duplicate translations
+const adminActions = {
+  administrativeActions: "الإجراءات الإدارية",
+  generateLog: "إنشاء سجل",
+  reschedule: "تعديل موعد الحصة",
+  forceActivate: "فرض التفعيل",
+  stopPause: "إيقاف/تعليق",
+  deleteInstance: "حذف الحصة",
+  overrideRateButton: "تجاوز السعر",
+  disabledTooltips: {
+    forceActivate: {
+      activated: "لا يمكنك فرض التفعيل لأن الحصة مفعّلة بالفعل.",
+      running: "لا يمكنك فرض التفعيل لأن الجلسة قيد التشغيل.",
+      completed: "لا يمكنك فرض التفعيل لأن الحصة مكتملة.",
+    },
+    stop: {
+      notActivated: "لا يمكنك الإيقاف لأن الحصة لم تُفعّل بعد.",
+      activated: "لا يمكنك الإيقاف لأن الجلسة لم تبدأ بعد. ابدأ الجلسة أولاً.",
+      completed: "لا يمكنك الإيقاف لأن الحصة مكتملة.",
+    },
+  },
+} as const;
+
+const classInfo = {
+  liveInstance: "حصة مباشرة",
+  activeConnection: "اتصال نشط",
+  student: "الطالب",
+  moduleInstructor: "مدرس الوحدة",
+  viewSubject: "عرض المادة",
+} as const;
+
+const metadata = {
+  metadata: "البيانات الوصفية",
+  scheduledDate: "التاريخ المجدول",
+  duration: "المدة",
+  latency: "زمن الاستجابة",
+  authorization: "التفويض",
+  minutes: "دقيقة",
+  optimal: "مثالي",
+  unavailable: "—",
+} as const;
+
+const rate = {
+  rateSectionTitle: "السعر الفعري",
+  effectiveRateLabel: "السعر بالساعة",
+  rateCurrencyLabel: "العملة",
+  rateSourceLabel: "مصدر السعر",
+  rateSourceOverride: "تجاوز",
+  rateSourceRecurring: "متكرر",
+  rateSourceSubject: "المادة",
+  rateSourceTeacher: "المعلم",
+  overrideRateButton: "تجاوز السعر",
+  clearOverrideButton: "مسح التجاوز",
+  overrideRateDialogTitle: "تجاوز سعر الحصة",
+  overrideRateDialogDescription: "تعيين سعر ساعة مخصص لهذه الحصة المحددة. اتركه فارغاً لمسح التجاوز.",
+  hourlyRateLabel: "السعر بالساعة",
+  currencyLabel: "العملة",
+  saveButton: "حفظ",
+  cancelButton: "إلغاء",
+  overrideSuccess: "تم تطبيق تجاوز السعر بنجاح",
+  overrideError: "فشل تطبيق تجاوز السعر",
+  clearSuccess: "تم مسح تجاوز السعر بنجاح",
+  clearError: "فشل مسح تجاوز السعر",
+} as const;
+
+export { adminActions, classInfo, metadata, rate };
+
 export const dashboardAdminViewAr: AdminViewLabels = {
   admin: {
     pageTitle: "لوحة تحكم المسؤول",
@@ -10,44 +77,9 @@ export const dashboardAdminViewAr: AdminViewLabels = {
     message: (studentTimezone, teacherTimezone) =>
       `التوقيت المحلي للطالب (${studentTimezone}) يختلف عن توقيت المعلم (${teacherTimezone}). قد يكون تسجيل الحضور متأخراً.`,
   },
-  adminActions: {
-    administrativeActions: "الإجراءات الإدارية",
-    generateLog: "إنشاء سجل",
-    reschedule: "تعديل موعد الحصة",
-    forceActivate: "فرض التفعيل",
-    stopPause: "إيقاف/تعليق",
-    deleteInstance: "حذف الحصة",
-    overrideRateButton: "تجاوز السعر",
-    disabledTooltips: {
-      forceActivate: {
-        activated: "لا يمكنك فرض التفعيل لأن الحصة مفعّلة بالفعل.",
-        running: "لا يمكنك فرض التفعيل لأن الجلسة قيد التشغيل.",
-        completed: "لا يمكنك فرض التفعيل لأن الحصة مكتملة.",
-      },
-      stop: {
-        notActivated: "لا يمكنك الإيقاف لأن الحصة لم تُفعّل بعد.",
-        activated: "لا يمكنك الإيقاف لأن الجلسة لم تبدأ بعد. ابدأ الجلسة أولاً.",
-        completed: "لا يمكنك الإيقاف لأن الحصة مكتملة.",
-      },
-    },
-  },
-  classInfo: {
-    liveInstance: "حصة مباشرة",
-    activeConnection: "اتصال نشط",
-    student: "الطالب",
-    moduleInstructor: "مدرس الوحدة",
-    viewSubject: "عرض المادة",
-  },
-  metadata: {
-    metadata: "البيانات الوصفية",
-    scheduledDate: "التاريخ المجدول",
-    duration: "المدة",
-    latency: "زمن الاستجابة",
-    authorization: "التفويض",
-    minutes: "دقيقة",
-    optimal: "مثالي",
-    unavailable: "—",
-  },
+  adminActions,
+  classInfo,
+  metadata,
   performance: {
     livePerformanceOverview: "نظرة عامة على الأداء المباشر",
     last30Mins: "آخر 30 دقيقة",
@@ -63,26 +95,5 @@ export const dashboardAdminViewAr: AdminViewLabels = {
     teacherResponse: "استجابة المعلم",
     noData: "لا تتوفر بيانات نشاط لهذه الجلسة.",
   },
-  rate: {
-    rateSectionTitle: "السعر الفعلي",
-    effectiveRateLabel: "السعر بالساعة",
-    rateCurrencyLabel: "العملة",
-    rateSourceLabel: "مصدر السعر",
-    rateSourceOverride: "تجاوز",
-    rateSourceRecurring: "متكرر",
-    rateSourceSubject: "المادة",
-    rateSourceTeacher: "المعلم",
-    overrideRateButton: "تجاوز السعر",
-    clearOverrideButton: "مسح التجاوز",
-    overrideRateDialogTitle: "تجاوز سعر الحصة",
-    overrideRateDialogDescription: "تعيين سعر ساعة مخصص لهذه الحصة المحددة. اتركه فارغاً لمسح التجاوز.",
-    hourlyRateLabel: "السعر بالساعة",
-    currencyLabel: "العملة",
-    saveButton: "حفظ",
-    cancelButton: "إلغاء",
-    overrideSuccess: "تم تطبيق تجاوز السعر بنجاح",
-    overrideError: "فشل تطبيق تجاوز السعر",
-    clearSuccess: "تم مسح تجاوز السعر بنجاح",
-    clearError: "فشل مسح تجاوز السعر",
-  },
+  rate,
 };

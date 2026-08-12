@@ -12,6 +12,7 @@ import {
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
   type SearchScheduleDraftFilters,
+  type SearchScheduleGapItem,
   type SearchScheduleMonthDrawerTeacher,
   type SearchScheduleTeacherOption,
   useSearchScheduleStore,
@@ -32,19 +33,7 @@ export interface SearchScheduleResultItem {
   readonly gender?: string | null;
   readonly timezone?: string | null;
   readonly availableDaysCount?: number | null;
-  readonly gaps?:
-    | readonly ({
-        readonly id?: string | null;
-        readonly teacherId?: string | null;
-        readonly teacherName?: string | null;
-        readonly teacherGender?: string | null;
-        readonly dayOfWeek?: string | null;
-        readonly calendarDate?: string | null;
-        readonly gapStartTime?: string | null;
-        readonly gapEndTime?: string | null;
-        readonly timezone?: string | null;
-      } | null)[]
-    | null;
+  readonly gaps?: readonly (SearchScheduleGapItem | null)[] | null;
 }
 
 export interface SearchSchedulePageInfo {

@@ -9,6 +9,7 @@ import {
   type CurrencyCode,
   type ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { InfoField } from "@/frontend/common/views/dashboard/profile/components/__shared__/infoFieldShared";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
@@ -53,15 +54,6 @@ function StaffRoleStatusView({
         {statusFieldLabel}
       </Typography>
       <StatusBadge category="staffAccount" status={status} label={statusLabel} size="small" />
-    </Stack>
-  );
-}
-
-function InfoField({ label, value }: { readonly label: string; readonly value: React.ReactNode }) {
-  return (
-    <Stack spacing={0.25}>
-      <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>{label}</Typography>
-      {value}
     </Stack>
   );
 }

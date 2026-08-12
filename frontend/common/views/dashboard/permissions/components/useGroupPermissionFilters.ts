@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { matchesPermissionSearch } from "@/frontend/common/views/dashboard/permissions/utils";
 
 interface UseGroupPermissionFiltersProps {
   readonly group: PermissionGroup;
@@ -33,15 +34,7 @@ export function useGroupPermissionFilters({
 
     return available.filter(p => {
       if (selectedCategory !== "all" && p.category !== selectedCategory) return false;
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        return (
-          (p.key?.toLowerCase().includes(q) ?? false) ||
-          (p.category?.toLowerCase().includes(q) ?? false) ||
-          (p.description?.toLowerCase().includes(q) ?? false)
-        );
-      }
-      return true;
+      return matchesPermissionSearch(p, searchQuery);
     });
   }, [permissions, group.permissionIds, selectedCategory, searchQuery]);
 

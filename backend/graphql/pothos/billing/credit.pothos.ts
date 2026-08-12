@@ -1,24 +1,12 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { CreditReasonPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { creditTransactionFields } from "@/backend/graphql/pothos/billing/__shared__/creditFieldHelpers";
 import type { CreditBalanceReturnType, CreditTransactionReturnType } from "@/backend/types";
 
 const CreditTransactionRef = gqlSchemaBuilder.objectRef<CreditTransactionReturnType>("CreditTransaction");
 
 export const CreditTransactionPothosObject = CreditTransactionRef.implement({
   description: "A credit ledger transaction for a student (purchase, deduction, refund, or adjustment)",
-  fields: t => ({
-    id: t.exposeString("id"),
-    studentId: t.exposeString("studentId"),
-    changeAmount: t.exposeInt("changeAmount"),
-    reason: t.expose("reason", { type: CreditReasonPothosEnum }),
-    sourcePaymentId: t.exposeString("sourcePaymentId", { nullable: true }),
-    classInstanceId: t.exposeString("classInstanceId", { nullable: true }),
-    notes: t.exposeString("notes", { nullable: true }),
-    creditedByUserId: t.exposeString("creditedByUserId"),
-    idempotencyKey: t.exposeString("idempotencyKey"),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
-  }),
+  fields: t => creditTransactionFields(t),
 });
 
 const CreditBalanceRef = gqlSchemaBuilder.objectRef<CreditBalanceReturnType>("CreditBalance");
@@ -36,19 +24,7 @@ const PurchaseResultRef = gqlSchemaBuilder.objectRef<CreditTransactionReturnType
 
 export const CreditPurchaseResultPothosObject = PurchaseResultRef.implement({
   description: "Result of recording a credit purchase for a student",
-  fields: t => ({
-    id: t.exposeString("id"),
-    studentId: t.exposeString("studentId"),
-    changeAmount: t.exposeInt("changeAmount"),
-    reason: t.expose("reason", { type: CreditReasonPothosEnum }),
-    sourcePaymentId: t.exposeString("sourcePaymentId", { nullable: true }),
-    classInstanceId: t.exposeString("classInstanceId", { nullable: true }),
-    notes: t.exposeString("notes", { nullable: true }),
-    creditedByUserId: t.exposeString("creditedByUserId"),
-    idempotencyKey: t.exposeString("idempotencyKey"),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
-  }),
+  fields: t => creditTransactionFields(t),
 });
 
 export const RecordPurchaseInput = gqlSchemaBuilder

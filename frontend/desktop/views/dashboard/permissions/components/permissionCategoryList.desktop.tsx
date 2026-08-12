@@ -1,43 +1,11 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { PermissionCategoryListShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionCategoryListShared";
 import type { PermissionCategoryListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { PermissionCategoryGroupDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/permissionCategoryGroup.desktop";
-export function PermissionCategoryListDesktop({
-  groupedPermissions,
-  selectedPermissionIds,
-  isGroupSelected,
-  isGroupIndeterminate,
-  onSelectAllCategory,
-  onTogglePermission,
-  isLoading,
-  t,
-}: Readonly<PermissionCategoryListProps>) {
+
+export function PermissionCategoryListDesktop(props: Readonly<PermissionCategoryListProps>) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {Object.keys(groupedPermissions).length === 0 ? (
-        <Typography
-          variant="bodyMd"
-          sx={theme => ({ textAlign: "center", color: theme.palette.text.secondary, py: 4 })}
-        >
-          {t.noPermissionsFound}
-        </Typography>
-      ) : (
-        Object.entries(groupedPermissions).map(([categoryName, perms]) => (
-          <PermissionCategoryGroupDesktop
-            key={categoryName}
-            categoryName={categoryName}
-            perms={perms}
-            selectedPermissionIds={selectedPermissionIds}
-            allChecked={isGroupSelected(perms)}
-            indeterminate={isGroupIndeterminate(perms)}
-            onSelectAllCategory={onSelectAllCategory}
-            onTogglePermission={onTogglePermission}
-            isLoading={isLoading}
-            t={t}
-          />
-        ))
-      )}
-    </Box>
+    <PermissionCategoryListShared {...props} slots={{ PermissionCategoryGroup: PermissionCategoryGroupDesktop }} />
   );
 }

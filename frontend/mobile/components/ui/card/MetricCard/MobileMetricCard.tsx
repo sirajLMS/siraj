@@ -3,18 +3,19 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import type { SxProps } from "@mui/material";
 import {
+  MetricCardIconWrap,
+  MetricCardMotionWrapper,
+} from "@/frontend/common/components/ui/card/MetricCard/metricCardShared";
+import { buildMotionWrapperProps } from "@/frontend/common/components/ui/card/MetricCard/metricCardSharedUtils";
+import { StyledLabel, StyledSubLabel, StyledValue } from "@/frontend/common/components/ui/card/MetricCard/styled";
+import { formatValue, type MetricCardVariant } from "@/frontend/common/components/ui/card/MetricCard/utils";
+import {
   MotionStyledCard,
   StyledCard,
   StyledCompactContentRoot,
   StyledCompactMiddleRow,
-  StyledIcon,
-  StyledIconWrap,
-  StyledLabel,
-  StyledSubLabel,
-  StyledValue,
   StyledValueContainer,
 } from "@/frontend/mobile/components/ui/card/MetricCard/styled";
-import { formatValue, type MetricCardVariant } from "@/frontend/mobile/components/ui/card/MetricCard/utils";
 
 export interface MobileMetricCardProps {
   readonly icon: SvgIconComponent;
@@ -45,7 +46,7 @@ export function MobileMetricCard({
   const iconFontSize = 18;
 
   const labelTypography = (
-    <StyledLabel variant="labelUppercase" title={label} isError={isError}>
+    <StyledLabel variant="labelUppercase" title={label} isError={isError} mbOverride={0}>
       {label}
     </StyledLabel>
   );
@@ -57,9 +58,13 @@ export function MobileMetricCard({
   );
 
   const iconWrap = (
-    <StyledIconWrap className="metric-icon-wrap" iconSize={iconSize} isError={isError} isHighlight={isHighlight}>
-      <StyledIcon icon={Icon} fontSizeValue={iconFontSize} isError={isError} />
-    </StyledIconWrap>
+    <MetricCardIconWrap
+      icon={Icon}
+      iconSize={iconSize}
+      iconFontSize={iconFontSize}
+      isError={isError}
+      isHighlight={isHighlight}
+    />
   );
 
   const cardContent = (
@@ -69,42 +74,29 @@ export function MobileMetricCard({
         <StyledValueContainer>{valueTypography}</StyledValueContainer>
         {iconWrap}
       </StyledCompactMiddleRow>
-      {subLabel ? <StyledSubLabel variant="labelMd">{subLabel}</StyledSubLabel> : null}
+      {subLabel ? (
+        <StyledSubLabel variant="labelMd" mtOverride={0}>
+          {subLabel}
+        </StyledSubLabel>
+      ) : null}
     </StyledCompactContentRoot>
   );
 
-  if (animated) {
-    return (
-      <MotionStyledCard
-        interactive={false}
-        onClick={onClick}
-        isHighlight={isHighlight}
-        isError={isError}
-        isInteractive={Boolean(onClick)}
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.4,
-          delay: animationIndex * 0.02,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        }}
-        sx={sx}
-      >
-        {cardContent}
-      </MotionStyledCard>
-    );
-  }
-
   return (
-    <StyledCard
-      interactive={false}
-      onClick={onClick}
-      isHighlight={isHighlight}
-      isError={isError}
-      isInteractive={Boolean(onClick)}
-      sx={sx}
+    <MetricCardMotionWrapper
+      {...buildMotionWrapperProps({
+        isHighlight,
+        isError,
+        onClick,
+        animated,
+        animationIndex,
+        sx,
+        MotionComponent: MotionStyledCard,
+        StaticComponent: StyledCard,
+        delayMultiplier: 0.02,
+      })}
     >
       {cardContent}
-    </StyledCard>
+    </MetricCardMotionWrapper>
   );
 }

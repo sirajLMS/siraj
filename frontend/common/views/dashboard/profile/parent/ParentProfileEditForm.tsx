@@ -9,6 +9,8 @@ import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarIm
 import { ParentStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type UseAvatarUploadResult, useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
+import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
+import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
 import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
 import {
   type ParentAdminEditFormData,
@@ -45,17 +47,6 @@ type ScopeContext = {
   readonly isAdminScope: boolean;
   readonly canEdit: (group: ProfileFieldGroupKey) => boolean;
 };
-
-const SECTION_GRID_SX = {
-  display: "grid",
-  gap: 3,
-  minWidth: 0,
-  width: "100%",
-  gridTemplateColumns: {
-    xs: "minmax(0, 1fr)",
-    lg: "repeat(2, minmax(0, 1fr))",
-  },
-} as const;
 
 const EMPTY_DEFAULTS: ParentAdminEditFormData = {
   name: "",
@@ -119,19 +110,14 @@ function useParentSubmitFeedback(
   const [errorOpen, setErrorOpen] = useState(false);
 
   const onValidSubmit = async (values: ParentAdminEditFormData) => {
-    try {
-      await onSubmit(values);
-      const resetData = resetPasswordRef.current?.getResetPasswordData();
-      if (resetData?.isValid) {
-        const success = await resetPassword(targetUserId, resetData.newPassword, resetData.sendNotificationEmail);
-        if (success) {
-          resetPasswordRef.current?.reset();
-        }
-      }
-      setSuccessOpen(true);
-    } catch {
-      setErrorOpen(true);
-    }
+    await executeProfileSubmit(values, {
+      onSubmit,
+      resetPasswordRef,
+      resetPassword,
+      targetUserId,
+      setSuccessOpen,
+      setErrorOpen,
+    });
   };
 
   return { successOpen, errorOpen, setSuccessOpen, setErrorOpen, onValidSubmit };
@@ -162,7 +148,7 @@ function ParentEditFormSections({
   const { parent: pt } = sectionLabels;
 
   return (
-    <Box sx={SECTION_GRID_SX}>
+    <Box sx={PROFILE_SECTION_GRID_SX}>
       {canEdit("core_identity") ? (
         <AccountSection
           mode="edit"

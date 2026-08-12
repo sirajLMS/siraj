@@ -1,11 +1,9 @@
 "use client";
 
-import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
+import { RecurringViewShellShared } from "@/frontend/common/views/dashboard/classes/recurring/__shared__/recurringViewShellShared";
 import { RecurringRateSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringRateSection";
 import type { RecurringScheduleDetailViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringScheduleDetailViewModel";
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
-import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page/MobilePageContainer";
-import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page/MobilePageHeader";
 
 export function RecurringScheduleDetailMobileView({
   labelsBySection,
@@ -22,36 +20,17 @@ export function RecurringScheduleDetailMobileView({
 }: Readonly<RecurringScheduleDetailViewModel>) {
   const { shell, form } = labelsBySection;
 
-  if (!recurringScheduleId) {
-    return (
-      <MobilePageContainer>
-        <MobilePageHeader title={shell.pageTitle} edgeToEdge={false} />
-        <ErrorState embedded message={shell.invalidId} retryLabel="" onRetry={onRetry} />
-      </MobilePageContainer>
-    );
-  }
-
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
-    return (
-      <MobilePageContainer>
-        <MobilePageHeader title={shell.pageTitle} edgeToEdge={false} />
-        <ErrorState embedded message={error} retryLabel="Retry" onRetry={onRetry} />
-      </MobilePageContainer>
-    );
-  }
-
   return (
-    <MobilePageContainer>
-      <MobilePageHeader
-        title={shell.pageTitle}
-        subtitle={shell.subtitle}
-        breadcrumbs={shell.breadcrumbs}
-        edgeToEdge={false}
-      />
+    <RecurringViewShellShared
+      variant="mobile"
+      loading={loading}
+      error={error}
+      invalidIdMessage={recurringScheduleId ? null : shell.invalidId}
+      onRetry={onRetry}
+      pageTitle={shell.pageTitle}
+      subtitle={shell.subtitle}
+      mobileBreadcrumbs={shell.breadcrumbs}
+    >
       <RecurringRateSection
         hourlyRate={hourlyRate}
         rateCurrency={rateCurrency}
@@ -62,6 +41,6 @@ export function RecurringScheduleDetailMobileView({
         onSave={onUpdateRate}
       />
       <ClassMeetingConfigsSection recurringScheduleId={recurringScheduleId} />
-    </MobilePageContainer>
+    </RecurringViewShellShared>
   );
 }

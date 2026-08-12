@@ -1,4 +1,4 @@
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 // DEV ONLY: Never use these credentials in production
 
 import { getAvatarFileNameForPersona } from "@/backend/db/seeds/lib/avatar-file-registry";

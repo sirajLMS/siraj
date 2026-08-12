@@ -2,6 +2,10 @@
 
 import { Dialog, DialogTitle } from "@mui/material";
 import { CreateRecurringClassDialogShared } from "@/frontend/common/components/ui/dialog/CreateRecurringClassDialogShared";
+import {
+  resolveClassTypeChange,
+  resolveSchedulingModeChange,
+} from "@/frontend/common/components/ui/dialog/createRecurringClassDialogUtils";
 import type {
   CreateRecurringClassDialogShellSlotProps,
   CreateRecurringClassStudentSelectSlotProps,
@@ -9,21 +13,12 @@ import type {
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ClassType, SchedulingMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type {
   CreateRecurringClassDialogProps,
   CreateRecurringClassDialogViewModel,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { StudentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
-
-function isValidSchedulingMode(v: string): v is SchedulingMode {
-  return (
-    v === SchedulingMode.NumberOfClasses.toString() ||
-    v === SchedulingMode.OnDemand.toString() ||
-    v === SchedulingMode.Quota.toString()
-  );
-}
 
 function DesktopDialogShell({ open, onClose, title, children }: Readonly<CreateRecurringClassDialogShellSlotProps>) {
   return (
@@ -128,20 +123,8 @@ function CreateRecurringClassDialogDesktopBody({
       meetingLabels={tMeeting}
       recurringScheduleLabels={tRecurringSchedule}
       onGoToCreatedClass={onGoToCreatedClass}
-      onClassTypeChange={(value, setClassType) => {
-        const mapping: Record<string, ClassType> = {
-          REGULAR: ClassType.Regular,
-          TRIAL: ClassType.Trial,
-          ADVANCE: ClassType.Advance,
-        };
-        const mapped = mapping[value];
-        if (mapped) {
-          setClassType(mapped);
-        }
-      }}
-      onSchedulingModeChange={(value, setSchedulingMode) => {
-        setSchedulingMode(isValidSchedulingMode(value) ? value : null);
-      }}
+      onClassTypeChange={resolveClassTypeChange}
+      onSchedulingModeChange={resolveSchedulingModeChange}
       slots={{
         DialogShell: DesktopDialogShell,
         StudentSelect: DesktopStudentSelect,

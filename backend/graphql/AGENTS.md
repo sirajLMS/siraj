@@ -102,6 +102,20 @@ export const {Entity}PothosObject = {Entity}Ref.implement({
 - **Delete behavior**: `deleteWhatsappAccount` deactivates (`isActive = false`), does not hard-delete.
 - **Side-effect barrels**: `import "./whatsapp-account.mutation";` registers resolvers via side-effect imports.
 
+## Pothos Field Factories (Duplication Elimination)
+
+When multiple Pothos object types, input types, or query fields share identical field definitions, extract into `__shared__/` helper modules. See `docs/graphql/pothos-field-factories.md` for the complete pattern reference.
+
+Completed extractions:
+- `paymentFields` — `backend/graphql/pothos/billing/__shared__/paymentFieldHelpers.ts`
+- `creditTransactionFields` — `backend/graphql/pothos/billing/__shared__/creditFieldHelpers.ts`
+- `classSubjectInputFields` — `backend/graphql/pothos/classes/__shared__/classSubjectFieldHelpers.ts`
+- `teacherNoteInputFields` — `backend/graphql/pothos/teachers/__shared__/teacherNoteFieldHelpers.ts`
+- `whatsappAccountSharedInputFields` — `backend/graphql/pothos/whatsapp/__shared__/whatsappAccountFieldHelpers.ts`
+- `supportedListArgs` / `supportedListResolve` — `backend/graphql/query/billing/__shared__/makeSupportedPaymentListQueryField.ts`
+- `makeTeacherMonthlyReportQueryField` / `makeStudentMonthlyReportQueryField` — `backend/graphql/query/reports/__shared__/makeMonthlyReportQueryField.ts`
+- `resolveStudentIdFromArgsOrUser` — `backend/graphql/query/students/__shared__/resolveStudentIdFromArgsOrUser.ts`
+
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)
 
 Oxlint is the project's linter (`bun run oxlint`). It uses type-aware mode (`typeAware: true`, `typeCheck: true` in `oxlint.config.mts`). NEVER add `oxlint-disable` comments — fix the root cause instead.

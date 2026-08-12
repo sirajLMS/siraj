@@ -68,6 +68,8 @@ export const dashboardTeacherOnboardingAr: TeacherOnboardingLabels = {
     salaryAmountRequired: "سعر الساعة مطلوب",
     currencyRequired: "العملة مطلوبة",
     urlInvalid: "رابط غير صالح",
+    meetingProviderRequired: "مقدم الاجتماع مطلوب",
+    meetingUrlRequired: "رابط الاجتماع مطلوب",
   },
   optionalHint: "اختياري",
 };

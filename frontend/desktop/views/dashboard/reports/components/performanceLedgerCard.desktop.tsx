@@ -4,39 +4,12 @@ import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
+import { StatGrid } from "@/frontend/common/views/dashboard/reports/components/__shared__/PerformanceLedgerCardShared";
 import type { PerformanceLedgerCardLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { PerformanceLedgerCardProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { getLedgerBadgeStatus } from "@/frontend/common/views/dashboard/reports/utils/performanceLedgerStatus.utils";
 
 export type PerformanceLedgerCardDesktopLabels = PerformanceLedgerCardLabels;
-
-function StatCell({
-  label,
-  value,
-  tone = "default",
-}: Readonly<{ label: string; value: string | number; tone?: "default" | "error" | "primary" }>) {
-  return (
-    <Box sx={{ textAlign: "center", px: 1 }}>
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, textTransform: "uppercase" })}>
-        {label}
-      </Typography>
-      <Typography
-        variant="titleLg"
-        sx={theme => {
-          if (tone === "error") {
-            return { color: theme.palette.error.main, fontWeight: 700 };
-          }
-          if (tone === "primary") {
-            return { color: theme.palette.primary.main, fontWeight: 700 };
-          }
-          return { color: theme.palette.text.primary, fontWeight: 700 };
-        }}
-      >
-        {value}
-      </Typography>
-    </Box>
-  );
-}
 
 export function PerformanceLedgerCardDesktop({
   row,
@@ -104,41 +77,16 @@ export function PerformanceLedgerCardDesktop({
         />
       </Box>
 
-      <Box
-        sx={{
-          p: 1.5,
-          display: "grid",
-          gridTemplateColumns: showFinancials ? "repeat(6, minmax(0, 1fr))" : "repeat(4, minmax(0, 1fr))",
-          gap: 1.5,
-        }}
-      >
-        <StatCell label={labels.taken} value={row.taken} tone="primary" />
-        <StatCell label={labels.absent} value={row.absent} tone="error" />
-        <StatCell label={labels.leave} value={row.leave} />
-        <StatCell label={labels.pending} value={row.pending} tone="primary" />
-        {showFinancials && <StatCell label={labels.hours} value={row.hours} />}
-        {showFinancials && (
-          <Box
-            sx={theme => ({
-              textAlign: "center",
-              backgroundColor: theme.palette.surfaceContainerHigh,
-              borderRadius: theme.layout.radius.badge,
-              p: 1,
-              gridColumn: "span 1",
-            })}
-          >
-            <Typography
-              variant="labelMd"
-              sx={theme => ({ color: theme.palette.primary.main, textTransform: "uppercase" })}
-            >
-              {labels.paid}
-            </Typography>
-            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-              {paidLabel}
-            </Typography>
-          </Box>
-        )}
-      </Box>
+      <StatGrid
+        labels={labels}
+        values={row}
+        paidDisplay={paidLabel}
+        showFinancials={showFinancials}
+        hasHorizontalPadding
+        columns={showFinancials ? "repeat(6, minmax(0, 1fr))" : "repeat(4, minmax(0, 1fr))"}
+        gap={1.5}
+        padding={1.5}
+      />
     </BaseCard>
   );
 }

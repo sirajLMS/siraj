@@ -1,11 +1,12 @@
 "use client";
 
-import { Box } from "@mui/material";
-import { DataGrid, type DataGridProps, type GridValidRowModel } from "@mui/x-data-grid";
-import { useMemo } from "react";
-import { mapPaginationOptionsToDataGridProps } from "@/frontend/common/components/ui/dataGrid/mapPaginationOptionsToDataGridProps";
+import type { DataGridProps, GridValidRowModel } from "@mui/x-data-grid";
+import { AppDataGridChrome } from "@/frontend/common/components/ui/dataGrid/appDataGridShared";
+import type {
+  AppDataGridSharedProps,
+  AppDataGridSlotProps,
+} from "@/frontend/common/components/ui/dataGrid/types/appDataGridShared.types";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DesktopAppDataGridLoadingOverlay } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGridLoadingOverlay";
 import { DesktopAppDataGridNoRowsOverlay } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGridNoRowsOverlay";
 import { DesktopGridPagination } from "@/frontend/desktop/components/ui/filter/paginationControls.desktop";
@@ -27,14 +28,8 @@ export interface DesktopAppDataGridProps<R extends GridValidRowModel>
   readonly slots?: Omit<NonNullable<DataGridProps<R>["slots"]>, "pagination">;
 }
 
-function createNoRowsOverlay(message: string) {
-  return function NoRowsOverlay() {
-    return <DesktopAppDataGridNoRowsOverlay message={message} />;
-  };
-}
-
 export function DesktopAppDataGrid<R extends GridValidRowModel>({
-  emptyMessage = "No entries found",
+  emptyMessage,
   ariaLabel,
   paginationOptions,
   initialState,
@@ -43,43 +38,22 @@ export function DesktopAppDataGrid<R extends GridValidRowModel>({
   sx,
   ...props
 }: Readonly<DesktopAppDataGridProps<R>>) {
-  const defaultGridSx = {
-    border: "none",
-    borderRadius: 0,
-    "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
-      outline: "none",
-    },
-    "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
-      outline: "none",
-    },
+  const sharedProps: AppDataGridSharedProps<R> = {
+    emptyMessage,
+    ariaLabel,
+    paginationOptions,
+    initialState,
+    slots,
+    slotProps,
+    sx,
+    ...props,
   };
 
-  const NoRowsOverlay = useMemo(() => createNoRowsOverlay(emptyMessage), [emptyMessage]);
-  const paginationProps = mapPaginationOptionsToDataGridProps(paginationOptions);
+  const desktopSlots: AppDataGridSlotProps<R> = {
+    LoadingOverlay: DesktopAppDataGridLoadingOverlay,
+    NoRowsOverlay: DesktopAppDataGridNoRowsOverlay,
+    GridPagination: DesktopGridPagination,
+  };
 
-  return (
-    <Box sx={{ width: "100%" }} aria-label={ariaLabel}>
-      <DataGrid<R>
-        disableRowSelectionOnClick
-        {...paginationProps}
-        initialState={{
-          ...paginationProps.initialState,
-          ...initialState,
-          pagination: {
-            ...paginationProps.initialState?.pagination,
-            ...initialState?.pagination,
-          },
-        }}
-        slots={{
-          noRowsOverlay: NoRowsOverlay,
-          loadingOverlay: DesktopAppDataGridLoadingOverlay,
-          ...slots,
-          pagination: DesktopGridPagination,
-        }}
-        slotProps={slotProps}
-        sx={mergeSx(defaultGridSx, sx)}
-        {...props}
-      />
-    </Box>
-  );
+  return <AppDataGridChrome props={sharedProps} slots={desktopSlots} />;
 }

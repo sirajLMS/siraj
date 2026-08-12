@@ -14,6 +14,7 @@ export function UserBillingProfileMobileView({
   canView,
   canSubmitProof,
   canManage,
+  canCreate,
   billingActionsDisabled = false,
   onSearchChange,
   onPayNow,
@@ -42,6 +43,7 @@ export function UserBillingProfileMobileView({
       canView={canView}
       canSubmitProof={canSubmitProof}
       canManage={canManage}
+      canCreate={canCreate}
       billingActionsDisabled={billingActionsDisabled}
       onSearchChange={onSearchChange}
       onPayNow={onPayNow}

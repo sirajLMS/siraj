@@ -5,6 +5,7 @@ import {
   WhatsappTemplateCategoryPothosEnum,
   WhatsappTemplateStatusPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { whatsappAccountSharedInputFields } from "@/backend/graphql/pothos/whatsapp/__shared__/whatsappAccountFieldHelpers";
 import type {
   WhatsappAccountReturnType,
   WhatsappSyncFromMetaReturnType,
@@ -47,24 +48,12 @@ export const WhatsappAccountCreateInputPothosObject = gqlSchemaBuilder.inputType
   fields: t => ({
     wabaId: t.string({ required: true, description: "WhatsApp Business Account ID (max 64 chars)" }),
     phoneNumberId: t.string({ required: true, description: "Phone number ID (max 64 chars)" }),
-    displayPhoneNumber: t.string({ required: false, description: "Display phone number (max 32 chars)" }),
-    displayName: t.field({ type: "LocalizedString", required: false }),
-    qualityRating: t.field({ type: WhatsappQualityRatingPothosEnum, required: false }),
-    portfolioMessagingLimitTier: t.field({ type: WhatsappLimitTierPothosEnum, required: false }),
-    throughputLevel: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
+    ...whatsappAccountSharedInputFields(t),
   }),
 });
 
 export const WhatsappAccountUpdateInputPothosObject = gqlSchemaBuilder.inputType("WhatsappAccountUpdateInput", {
-  fields: t => ({
-    displayPhoneNumber: t.string({ required: false }),
-    displayName: t.field({ type: "LocalizedString", required: false }),
-    qualityRating: t.field({ type: WhatsappQualityRatingPothosEnum, required: false }),
-    portfolioMessagingLimitTier: t.field({ type: WhatsappLimitTierPothosEnum, required: false }),
-    throughputLevel: t.string({ required: false }),
-    isActive: t.boolean({ required: false }),
-  }),
+  fields: t => whatsappAccountSharedInputFields(t),
 });
 
 // ─── Sync Result Types (BL3) ──────────────────────────────────────────────────

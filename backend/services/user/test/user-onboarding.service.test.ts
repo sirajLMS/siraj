@@ -3,7 +3,6 @@ import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   type UserOnboardingService,
@@ -11,6 +10,7 @@ import {
 } from "@/backend/services/user/user-onboarding.service";
 import type { GroupWithPermissionIds } from "@/backend/types/permissions/permission-management.types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;

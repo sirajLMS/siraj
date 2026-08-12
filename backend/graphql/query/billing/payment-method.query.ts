@@ -6,6 +6,10 @@ import {
   UserPaymentMethodPothosObject,
 } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { CountryCodePothosObject, PaymentDirectionPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  supportedListArgs,
+  supportedListResolve,
+} from "@/backend/graphql/query/billing/__shared__/makeSupportedPaymentListQueryField";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
@@ -51,8 +55,7 @@ gqlSchemaBuilder.queryField("supportedMobileWallets", t =>
     authScopes: { loggedIn: true },
     args: {
       countryCode: t.arg({ type: CountryCodePothosObject, required: false }),
-      direction: t.arg({ type: PaymentDirectionPothosEnum, required: false }),
-      activeOnly: t.arg.boolean({ required: false, defaultValue: true }),
+      ...supportedListArgs(t),
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
@@ -70,18 +73,10 @@ gqlSchemaBuilder.queryField("supportedPaymentLinks", t =>
   t.field({
     type: [SupportedPaymentLinkPothosObject],
     authScopes: { loggedIn: true },
-    args: {
-      direction: t.arg({ type: PaymentDirectionPothosEnum, required: false }),
-      activeOnly: t.arg.boolean({ required: false, defaultValue: true }),
-    },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return PaymentCatalogService.listPaymentLinks(actorUserId, tErrors, {
-        direction: args.direction ?? undefined,
-        activeOnly: args.activeOnly ?? true,
-      });
-    },
+    args: supportedListArgs(t),
+    resolve: supportedListResolve((actorUserId, tErrors, filters) =>
+      PaymentCatalogService.listPaymentLinks(actorUserId, tErrors, filters)
+    ),
   })
 );
 
@@ -89,17 +84,9 @@ gqlSchemaBuilder.queryField("supportedOnlineAccounts", t =>
   t.field({
     type: [SupportedOnlineAccountPothosObject],
     authScopes: { loggedIn: true },
-    args: {
-      direction: t.arg({ type: PaymentDirectionPothosEnum, required: false }),
-      activeOnly: t.arg.boolean({ required: false, defaultValue: true }),
-    },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return PaymentCatalogService.listOnlineAccounts(actorUserId, tErrors, {
-        direction: args.direction ?? undefined,
-        activeOnly: args.activeOnly ?? true,
-      });
-    },
+    args: supportedListArgs(t),
+    resolve: supportedListResolve((actorUserId, tErrors, filters) =>
+      PaymentCatalogService.listOnlineAccounts(actorUserId, tErrors, filters)
+    ),
   })
 );

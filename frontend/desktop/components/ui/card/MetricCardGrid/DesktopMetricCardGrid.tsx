@@ -6,9 +6,9 @@ import Grid, { type GridSize } from "@mui/material/Grid";
 import { useMetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelSources";
 import type { MetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
+import type { MetricCardDensity } from "@/frontend/common/components/ui/card/MetricCard/utils";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard/DesktopMetricCard";
-import type { MetricCardDensity } from "@/frontend/desktop/components/ui/card/MetricCard/utils";
 import { DesktopHorizontalScrollRow } from "@/frontend/desktop/components/ui/container/DesktopHorizontalScrollRow";
 
 type ResponsiveStyleValue<T> = T | Array<T | null> | { [key in Breakpoint]?: T | null };

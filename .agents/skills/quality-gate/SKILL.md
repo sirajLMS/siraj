@@ -5,7 +5,7 @@ description: >
   all reported issues across stages (BASIC_CHECKS, CODESCENE).
   Dispatches parallel subagents (one per file) within each lifecycle stage — no interleaving
   across stages. Each subagent calls `scripts/health/sub-loop.ts` for progressive per-file
-  verification (tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene, in strict
+  verification (tsgo → oxlint → biome → lint:type-aware → check:duplicates → codescene, in strict
   order, short-circuiting at first failure). Use when asked to run quality gates, fix quality-gate
   issues, or resolve CodeScene failures. Supports parallel pool orchestration with up to 16
   subagents for large-scale cleanup campaigns.
@@ -54,7 +54,7 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while BASIC_CHECK
    ```bash
    bun run scripts/health/sub-loop.ts <file> --lifecycle <stage>
    ```
-   The sub-loop script runs checks in strict order (tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene) and
+   The sub-loop script runs checks in strict order (tsgo → oxlint → biome → lint:type-aware → check:duplicates → codescene) and
    **short-circuits at the first failure** — it stops and prints errors for the subagent to fix.
    The subagent fixes the errors and re-runs the script until it passes (exit 0).
 
@@ -63,11 +63,11 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while BASIC_CHECK
    checks (tsgo, oxlint, lint) automatically — no manual coordination needed.
 
 4. **Progressive loop — no skipping ahead.** The sub-loop always checks in order:
-   - If tsgo fails → only fix tsgo. Don't run biome/oxlint/lint/codescene until tsgo passes.
-   - If tsgo passes but biome fails → only fix biome.
-   - If tsgo+biome pass but oxlint fails → only fix oxlint.
-   - If tsgo+biome+oxlint pass but lint fails → only fix lint.
-   - If tsgo+biome+oxlint+lint pass but check:duplicates fails → only fix duplicates.
+   - If tsgo fails → only fix tsgo. Don't run oxlint/biome/lint/codescene until tsgo passes.
+   - If tsgo passes but oxlint fails → only fix oxlint.
+   - If tsgo+oxlint pass but biome fails → only fix biome.
+   - If tsgo+oxlint+biome pass but lint fails → only fix lint.
+   - If tsgo+oxlint+biome+lint pass but check:duplicates fails → only fix duplicates.
    - If all pass but codescene fails → only fix codescene.
 
 5. **Use the run-test script for test files.** When fixing or refactoring a test file:
@@ -163,7 +163,7 @@ Map the failed stage to the correct remediation workflow:
 
 | Failed Stage | Owner | What to Do |
 |---|---|---|
-| `BASIC_CHECKS` | `quality-gate` | Fix tsgo (grouped parallel) → biome (parallel) → lint (parallel) |
+| `BASIC_CHECKS` | `quality-gate` | Fix tsgo (grouped parallel) → oxlint (parallel) → biome (parallel) → lint (parallel) |
 | `CODESCENE` | `codescene` | Fix CodeScene warnings — dispatch parallel subagents per file |
 
 If the owner is NOT `quality-gate`, the recovery check runs automatically on the next `bun quality-gate`
@@ -203,7 +203,31 @@ in one file breaks another file.
 
 ---
 
-### Phase 4: Fix BASIC_CHECKS — biome (Parallel)
+### Phase 4: Fix BASIC_CHECKS — oxlint (Parallel)
+
+1. Run `bun run oxlint` to get all oxlint violations.
+
+2. Get the list of files with oxlint issues from the output.
+
+3. **Dispatch one subagent per file** — launch all subagents in a SINGLE response (parallel).
+   Pool size: **16 subagents max** (24 causes rate-limiting in some environments). For dedicated large-scale oxlint-only sweeps (100+ files), use the `fix-oxlint` skill which supports a pool of 36.
+   Each subagent receives:
+   - `lifecycle: biome`
+   - The oxlint violations for that file
+
+4. Each subagent: reads instruction file + AGENTS.md, fixes oxlint violations, then runs:
+   ```bash
+   bun run scripts/health/sub-loop.ts <file> --lifecycle biome
+   ```
+   (This runs tsgo → oxlint in order, short-circuiting if tsgo fails.)
+
+5. **Wait for all subagents to complete.**
+
+6. Re-run `bun run oxlint` to verify clean.
+
+---
+
+### Phase 5: Fix BASIC_CHECKS — biome (Parallel)
 
 1. Run `bun biome:check` to get all biome issues.
 
@@ -218,7 +242,7 @@ in one file breaks another file.
    ```bash
    bun run scripts/health/sub-loop.ts <file> --lifecycle biome
    ```
-   (This runs tsgo → biome in order, short-circuiting if tsgo fails.)
+   (This runs tsgo → oxlint → biome in order, short-circuiting if tsgo or oxlint fails.)
 
 5. **Wait for all subagents to complete.**
 
@@ -226,43 +250,39 @@ in one file breaks another file.
 
 ---
 
-### Phase 5: Fix BASIC_CHECKS — oxlint + lint (Parallel)
+### Phase 6: Fix BASIC_CHECKS — lint (Parallel)
 
-The sub-loop's `lint` lifecycle stage covers **oxlint + ESLint (type-aware)** sequentially.
-Both are dispatched as parallel subagents — one per file.
+The sub-loop's `lint` lifecycle stage covers **ESLint (type-aware)**.
+Dispatched as parallel subagents — one per file.
 
-1. Run `bun run oxlint` project-wide to discover files with oxlint violations.
+1. Run `bun run lint` (full-repo) to discover files with ESLint violations.
 
-2. Run `bun run lint` (full-repo) to discover files with ESLint violations.
+2. Get the list of files with ESLint issues.
 
-3. Merge the file lists (a file may have both oxlint and ESLint issues).
-
-4. **Dispatch one subagent per file** — launch all in a SINGLE response (parallel).
-   Pool size: **16 subagents max** (24 causes rate-limiting in some environments). For dedicated large-scale oxlint-only sweeps (100+ files), use the `fix-oxlint` skill which supports a pool of 36.
+3. **Dispatch one subagent per file** — launch all in a SINGLE response (parallel).
    Each subagent receives:
    - `lifecycle: lint`
-   - The oxlint violations for that file
    - The ESLint errors for that file
 
-5. Each subagent: reads instruction file + AGENTS.md, fixes oxlint violations AND ESLint errors,
+4. Each subagent: reads instruction file + AGENTS.md, fixes ESLint errors,
    then runs:
    ```bash
    bun run scripts/health/sub-loop.ts <file> --lifecycle lint
    ```
-   (This runs tsgo → biome → oxlint → lint:type-aware in order, short-circuiting at first failure.)
+   (This runs tsgo → oxlint → biome → lint:type-aware in order, short-circuiting at first failure.)
 
-6. **Wait for all subagents to complete.**
+5. **Wait for all subagents to complete.**
 
-7. Re-run `bun run oxlint` and `bun run scripts/lint-service.ts` to verify clean.
+6. Re-run `bun run scripts/lint-service.ts` to verify clean.
 
-8. Resume: re-run `bun quality-gate` — it advances to CODESCENE stage.
+7. Resume: re-run `bun quality-gate` — it advances to CODESCENE stage.
 
 **No HTTP server needed.** The former `lint-queue-server.ts` / `lint-queue-client.ts` / `LINT_QUEUE_PORT`
 architecture is gone. All lint is now in-process via `scripts/lint-service.ts`.
 
 ---
 
-### Phase 6: Fix CODESCENE (Parallel)
+### Phase 7: Fix CODESCENE (Parallel)
 
 1. Run `bun run codescene --scan` to get the list of flagged files.
 
@@ -277,7 +297,7 @@ architecture is gone. All lint is now in-process via `scripts/lint-service.ts`.
    ```bash
    bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
    ```
-   (This runs tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file in order, short-circuiting at any failure.)
+   (This runs tsgo → oxlint → biome → lint:type-aware → check:duplicates → codescene --file in order, short-circuiting at any failure.)
 
 4. **Wait for all subagents to complete.**
 
@@ -287,7 +307,7 @@ architecture is gone. All lint is now in-process via `scripts/lint-service.ts`.
 
 ---
 
-### Phase 7: Resume / Loop
+### Phase 8: Resume / Loop
 
 Re-run `bun quality-gate` until all stages pass.
 
@@ -297,7 +317,7 @@ The state machine behavior:
 - If the recovery check fails, the script exits — fix remaining issues and re-run.
 - When all stages pass: `✨✨ ALL QUALITY GATES PASSED! ✨✨` and lifecycle = DONE.
 
-If the same stage fails again after fixes, repeat the relevant fix phase (3–6).
+If the same stage fails again after fixes, repeat the relevant fix phase (3–7).
 Continue the loop until the quality gate passes completely.
 
 ---
@@ -392,7 +412,7 @@ Report your results to the orchestrator:
 - NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section for fix patterns.
 
 ERRORS TO FIX:
-<paste errors from tsgo/biome/oxlint/lint/codescene output for this file>
+<paste errors from tsgo/oxlint/biome/lint/codescene output for this file>
 ```
 
 ### Oxlint Fix Patterns Reference
@@ -433,7 +453,7 @@ When dispatching many subagents (e.g., fixing 100+ files with oxlint violations)
 1. **Pool size: 16 max** for quality-gate. 24 can cause rate-limiting in some environments. 8-16 is the sweet spot. For dedicated large-scale oxlint-only sweeps (100+ files), use the `fix-oxlint` skill which supports a pool of 36.
 2. **One file per agent.** Each subagent owns one file completely — fixes ALL violations in that file, not just one rule.
 3. **Always keep the pool full.** As each subagent completes, dispatch the next pending file immediately.
-4. **Use `--lifecycle codescene`** for full verification (tsgo → biome → oxlint → lint → duplicates → codescene).
+4. **Use `--lifecycle codescene`** for full verification (tsgo → oxlint → biome → lint → duplicates → codescene).
 5. **Stage files when sub-loop exits 0.** Subagents should `git add <file>` after sub-loop passes.
 6. **Handle device crashes.** After a crash, check `git diff` to find files with partial changes. Reset broken
   files with `git checkout -- <file>` before re-dispatching. Use `sub-loop-uncommitted.ts` to validate all

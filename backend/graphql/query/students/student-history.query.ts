@@ -1,9 +1,9 @@
-import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   StudentClassHistoryPothosObject,
   StudentSessionDetailPothosObject,
 } from "@/backend/graphql/pothos/students/student-history.pothos";
+import { resolveStudentIdFromArgsOrUser } from "@/backend/graphql/query/students/__shared__/resolveStudentIdFromArgsOrUser";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
 
 gqlSchemaBuilder.queryField("studentClassHistory", t =>
@@ -16,18 +16,11 @@ gqlSchemaBuilder.queryField("studentClassHistory", t =>
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
+      const studentId = await resolveStudentIdFromArgsOrUser(args.studentId, ctx);
       const tErrors = ctx.t().errorsTranslations;
-      if (!ctx.user) {
-        throw new Error(tErrors.unauthorized);
-      }
-      let studentId = args.studentId;
-      if (!studentId) {
-        studentId = await StudentRepository.getStudentIdByUserId(ctx.user.id);
-        if (!studentId) {
-          throw new Error(tErrors.studentNotFound(ctx.user.id));
-        }
-      }
-      return StudentHistoryService.getStudentClassHistory(ctx.user.id, studentId, args.year, args.month, tErrors);
+      const userId = ctx.user?.id;
+      if (!userId) throw new Error(tErrors.unauthorized);
+      return StudentHistoryService.getStudentClassHistory(userId, studentId, args.year, args.month, tErrors);
     },
   })
 );

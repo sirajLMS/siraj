@@ -9,6 +9,8 @@ import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarIm
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
+import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
+import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
 import {
   AdminResetPasswordSection,
   type AdminResetPasswordSectionRef,
@@ -86,18 +88,7 @@ function TeacherFormSectionsGrid({ labels, teacherData, targetUserId, scope, can
   const personalFieldLabels = toTeacherPersonalFieldLabels(labels);
 
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gap: 3,
-        minWidth: 0,
-        width: "100%",
-        gridTemplateColumns: {
-          xs: "minmax(0, 1fr)",
-          lg: "repeat(2, minmax(0, 1fr))",
-        },
-      }}
-    >
+    <Box sx={PROFILE_SECTION_GRID_SX}>
       {canEdit("core_identity") ? (
         <AccountSection
           labels={sectionLabels}
@@ -167,19 +158,14 @@ export function TeacherAdminEditForm({
 
   const onValidSubmit = useCallback(
     async (values: TeacherAdminEditFormData) => {
-      try {
-        await onSubmit(values);
-        const resetData = resetPasswordRef.current?.getResetPasswordData();
-        if (resetData?.isValid) {
-          const success = await resetPassword(targetUserId, resetData.newPassword, resetData.sendNotificationEmail);
-          if (success) {
-            resetPasswordRef.current?.reset();
-          }
-        }
-        setSuccessOpen(true);
-      } catch {
-        setErrorOpen(true);
-      }
+      await executeProfileSubmit(values, {
+        onSubmit,
+        resetPasswordRef,
+        resetPassword,
+        targetUserId,
+        setSuccessOpen,
+        setErrorOpen,
+      });
     },
     [onSubmit, resetPassword, targetUserId, setSuccessOpen, setErrorOpen]
   );

@@ -8,9 +8,9 @@ import TextField from "@mui/material/TextField";
 import type * as React from "react";
 import { useCallback, useState } from "react";
 import {
-  getCountryAutocompletePaperSlotProps,
-  getCountryAutocompletePopperSlotProps,
-} from "@/frontend/common/components/ui/input/countrySelect/countryAutocompletePopper";
+  createAutocompletePaperSlotProps,
+  createAutocompletePopperSlotProps,
+} from "@/frontend/common/components/ui/input/autocompletePopperSlotProps";
 import { getCountryOptionLabel } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.utils";
 import type { CountryAutocompleteProps } from "@/frontend/common/components/ui/input/countrySelect/types";
 import type { CountryAutocompleteSlots } from "@/frontend/common/components/ui/input/countrySelect/types/countryAutocompleteShared.types";
@@ -180,12 +180,12 @@ export function CountryAutocompleteShared({
       isOptionEqualToValue={(option, value) => option.code === value.code}
       getOptionLabel={getOptionLabel}
       slotProps={{
-        popper: getCountryAutocompletePopperSlotProps({
+        popper: createAutocompletePopperSlotProps<CountryType>({
           matchAnchorWidth,
           disablePortal,
           listAttached,
         }),
-        paper: getCountryAutocompletePaperSlotProps(listAttached),
+        paper: createAutocompletePaperSlotProps<CountryType>(listAttached),
       }}
       renderOption={(props, option) => {
         const { key, ...optionProps } = props;

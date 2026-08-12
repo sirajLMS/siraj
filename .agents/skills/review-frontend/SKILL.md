@@ -470,7 +470,7 @@ skill:
   skill: "quality-loop"
 ```
 
-This runs `tsgo → biome:check → lint` in sequence and loops until clean.
+This runs `tsgo → oxlint → biome:check → lint` in sequence and loops until clean.
 
 ### If quality-loop reports issues:
 1. Read the error output

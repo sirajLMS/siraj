@@ -1,7 +1,6 @@
-import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import type { SessionConfigRow } from "@/frontend/common/views/dashboard/settings/types/sessionConfig.types";
+import { buildEditDeleteActionsColumn } from "@/frontend/common/views/dashboard/settings/utils/editDeleteActionsColumn";
 import type { SettingsSessionTabLabels } from "@/shared/locale/types/dashboard/settings/session";
 
 type ColumnLabels = Pick<
@@ -29,22 +28,14 @@ export function buildSessionConfigColumns(
   ];
 
   if (canManage) {
-    columns.push({
-      field: "actions",
-      headerName: labels.actionsColumn,
-      width: 120,
-      sortable: false,
-      renderCell: ({ row }) => (
-        <Stack direction="row" spacing={0.5}>
-          <IconButton size="small" aria-label={labels.editLabel} onClick={() => handlers.onEdit(row)}>
-            <EditOutlined fontSize="small" />
-          </IconButton>
-          <IconButton size="small" aria-label={labels.deleteLabel} onClick={() => handlers.onDelete(row)}>
-            <DeleteOutlined fontSize="small" />
-          </IconButton>
-        </Stack>
-      ),
-    });
+    columns.push(
+      buildEditDeleteActionsColumn<SessionConfigRow>(
+        labels.actionsColumn,
+        labels.editLabel,
+        labels.deleteLabel,
+        handlers
+      )
+    );
   }
 
   return columns;

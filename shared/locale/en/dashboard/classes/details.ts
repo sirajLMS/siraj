@@ -1,3 +1,4 @@
+import { classInfo, rate } from "@/shared/locale/en/dashboard/admin/view";
 import type { ClassDetailsLabels } from "@/shared/locale/types/dashboard/classes";
 
 export const dashboardClassDetailsEn: ClassDetailsLabels = {
@@ -33,13 +34,7 @@ export const dashboardClassDetailsEn: ClassDetailsLabels = {
       },
     },
   },
-  classInfo: {
-    liveInstance: "Live Instance",
-    activeConnection: "Active Connection",
-    student: "Student",
-    moduleInstructor: "Module Instructor",
-    viewSubject: "View subject",
-  },
+  classInfo,
   metadata: {
     metadata: "Metadata",
     scheduledDate: "Scheduled Date",
@@ -79,27 +74,7 @@ export const dashboardClassDetailsEn: ClassDetailsLabels = {
     duration: "Duration",
     status: "Status",
     viewSubject: "View subject",
-    rateSectionTitle: "Effective Rate",
-    effectiveRateLabel: "Hourly Rate",
-    rateCurrencyLabel: "Currency",
-    rateSourceLabel: "Rate Source",
-    rateSourceOverride: "Override",
-    rateSourceRecurring: "Recurring",
-    rateSourceSubject: "Subject",
-    rateSourceTeacher: "Teacher",
-    overrideRateButton: "Override Rate",
-    clearOverrideButton: "Clear Override",
-    overrideRateDialogTitle: "Override Class Instance Rate",
-    overrideRateDialogDescription:
-      "Set a custom hourly rate for this specific class instance. Leave empty to clear override.",
-    hourlyRateLabel: "Hourly Rate",
-    currencyLabel: "Currency",
-    saveButton: "Save",
-    cancelButton: "Cancel",
-    overrideSuccess: "Rate override applied successfully",
-    overrideError: "Failed to apply rate override",
-    clearSuccess: "Rate override cleared successfully",
-    clearError: "Failed to clear rate override",
+    ...rate,
   },
   remarks: {
     remarksTitle: "Remarks / Special Instructions",

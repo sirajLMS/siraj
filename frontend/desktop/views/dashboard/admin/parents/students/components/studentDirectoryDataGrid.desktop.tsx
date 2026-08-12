@@ -7,12 +7,17 @@ import type { GridColDef, GridRowParams } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { studentHref } from "@/frontend/common/utils/profileHref";
+import {
+  buildDirectoryEmailColumn,
+  buildDirectoryIndexColumn,
+  buildDirectoryNameColumn,
+} from "@/frontend/common/views/dashboard/admin/parents/__shared__/directoryDataGridShared";
 import { ClassesLeftProgress } from "@/frontend/common/views/dashboard/admin/parents/students/components/ClassesLeftProgress";
 import type {
   StudentDirectoryDataGridLabels,
   StudentDirectoryRowExtended,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
-import { DesktopAppDataGrid, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui";
+import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 
 interface StudentDirectoryDataGridProps {
@@ -44,44 +49,11 @@ export function StudentDirectoryDataGrid({
 }: Readonly<StudentDirectoryDataGridProps>) {
   const columns = useMemo<GridColDef<StudentDirectoryRowExtended>[]>(
     () => [
-      {
-        field: "index",
-        headerName: labels.index,
-        width: 72,
-        sortable: false,
-        renderCell: ({ row }) => (
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {String(row.index).padStart(2, "0")}
-          </Typography>
-        ),
-      },
-      {
-        field: "name",
-        headerName: labels.student,
-        flex: 1.2,
-        minWidth: 200,
-        renderCell: ({ row }) => (
-          <DesktopPersonProfileLinkCell
-            href={row.id ? studentHref(row.id) : undefined}
-            name={row.name ?? ""}
-            avatarUrl={row.avatarUrl}
-            avatarSize={40}
-            typographyVariant="bodyLg"
-            fontWeight={600}
-          />
-        ),
-      },
-      {
-        field: "email",
-        headerName: labels.email,
-        flex: 1.2,
-        minWidth: 180,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {row.email}
-          </Typography>
-        ),
-      },
+      buildDirectoryIndexColumn<StudentDirectoryRowExtended>(labels.index, index => String(index).padStart(2, "0")),
+      buildDirectoryNameColumn<StudentDirectoryRowExtended>(labels.student, row =>
+        row.id ? studentHref(row.id) : undefined
+      ),
+      buildDirectoryEmailColumn<StudentDirectoryRowExtended>(labels.email),
       {
         field: "accountStatus",
         headerName: labels.status,

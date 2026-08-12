@@ -2,21 +2,9 @@
 
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { ProfileLinkBase } from "@/frontend/common/components/ui/display/__shared__/ProfileLinkBase";
-import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import type { PersonProfileLinkProps } from "@/frontend/common/components/ui/display/personProfileLink/types/personProfileLink.types";
 
-export type PersonProfileLinkProps = {
-  readonly href?: string | null;
-  readonly name: string;
-  readonly avatarUrl?: string | null;
-  readonly showAvatar?: boolean;
-  readonly avatarSize?: number;
-  readonly fallbackInitial?: string;
-  readonly label?: string;
-  readonly typographyVariant?: UiTypographyVariant;
-  readonly fontWeight?: number;
-  /** When true, use primary color for the name (linked look). Default true when href is set. */
-  readonly emphasizeLink?: boolean;
-};
+export type { PersonProfileLinkProps };
 
 /**
  * Name (optional avatar) that links to a profile/person page when `href` is provided.

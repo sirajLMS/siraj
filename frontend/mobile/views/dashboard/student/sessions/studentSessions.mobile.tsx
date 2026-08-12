@@ -1,18 +1,15 @@
 "use client";
 
-import { FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, Stack } from "@mui/material";
 import { useMemo } from "react";
 import { scheduleOverviewCardShellSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
-import { MonthNavigator } from "@/frontend/common/views/dashboard/student/__shared__/MonthNavigator";
+import { StudentViewShellShared } from "@/frontend/common/views/dashboard/student/__shared__/studentViewShellShared";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import type { StudentSessionsViewModel } from "@/frontend/common/views/dashboard/student/sessions/useStudentSessionsViewModel";
 import {
   MobileCardList,
   MobileCardListItem,
   MobileContentInset,
-  MobileContentStack,
-  MobilePageContainer,
-  MobilePageHeader,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { HistorySessionCardMobile } from "@/frontend/mobile/views/dashboard/student/sessions/components/historySessionCard.mobile";
@@ -129,42 +126,30 @@ export function StudentSessionsMobileView({
     return filteredSessions.filter(s => s.dayOfMonth === selectedDay);
   }, [filteredSessions, selectedDay]);
 
-  if (loading && filteredSessions.length === 0) {
-    return (
-      <MobilePageContainer>
-        <Typography variant="bodyMd" sx={{ p: 3 }}>
-          {labels.loadingMessage}
-        </Typography>
-      </MobilePageContainer>
-    );
-  }
-
   return (
-    <MobilePageContainer>
-      <MobileContentStack>
-        <MobilePageHeader title={labels.pageTitle} titleVariant="headlineMd" />
-
-        <MonthNavigator
-          monthLabel={monthLabel}
-          canGoNext={canGoNext}
+    <StudentViewShellShared
+      variant="mobile"
+      pageTitle={labels.pageTitle}
+      loading={loading && filteredSessions.length === 0}
+      loadingMessage={labels.loadingMessage}
+      monthLabel={monthLabel}
+      canGoNext={canGoNext}
+      monthNavigatorLabels={labels}
+      onPrevMonth={onPrevMonth}
+      onNextMonth={onNextMonth}
+    >
+      <MobileSectionPanel title={labels.pageTitle} contentInset={false} sx={{ mt: 2 }}>
+        <SessionsFilters
+          subjectFilter={subjectFilter}
+          statusFilter={statusFilter}
+          subjectOptions={subjectOptions}
+          statusOptions={statusOptions}
           labels={labels}
-          onPrevMonth={onPrevMonth}
-          onNextMonth={onNextMonth}
+          onSubjectFilterChange={onSubjectFilterChange}
+          onStatusFilterChange={onStatusFilterChange}
         />
-
-        <MobileSectionPanel title={labels.pageTitle} contentInset={false} sx={{ mt: 2 }}>
-          <SessionsFilters
-            subjectFilter={subjectFilter}
-            statusFilter={statusFilter}
-            subjectOptions={subjectOptions}
-            statusOptions={statusOptions}
-            labels={labels}
-            onSubjectFilterChange={onSubjectFilterChange}
-            onStatusFilterChange={onStatusFilterChange}
-          />
-          <SessionsList listRows={listRows} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
-        </MobileSectionPanel>
-      </MobileContentStack>
-    </MobilePageContainer>
+        <SessionsList listRows={listRows} labels={labels} locale={locale} onOpenMeetingUrl={onOpenMeetingUrl} />
+      </MobileSectionPanel>
+    </StudentViewShellShared>
   );
 }

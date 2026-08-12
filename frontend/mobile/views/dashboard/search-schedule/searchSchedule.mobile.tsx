@@ -1,23 +1,20 @@
 import { Box, Typography } from "@mui/material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { SearchScheduleFormSectionShared } from "@/frontend/common/views/dashboard/search-schedule/components/searchScheduleFormSectionShared";
 import type {
   SearchScheduleMobileBodyProps,
   SearchScheduleMobileResultsProps,
 } from "@/frontend/common/views/dashboard/search-schedule/types";
-import type {
-  SearchScheduleResultItem,
-  SearchScheduleViewModel,
-} from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
-import {
-  buildDateColumns,
-  getColumnCount,
-  groupGapsByDate,
-} from "@/frontend/common/views/dashboard/search-schedule/utils";
+import type { SearchScheduleViewModel } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
+import { getColumnCount } from "@/frontend/common/views/dashboard/search-schedule/utils";
+import { computeSearchScheduleResults } from "@/frontend/common/views/dashboard/search-schedule/utils/searchScheduleResults.utils";
 import { MobileCardList, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { SearchScheduleFormMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleForm.mobile";
 import { SearchScheduleResultsSkeletonMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleResultsSkeleton.mobile";
 import { TeacherAvailabilityGridMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityGrid.mobile";
 import { TeacherAvailabilityMonthDrawerMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.mobile";
+
+const MOBILE_ERROR_SX = { px: 2 } as const;
 
 function SearchScheduleMobileBody({
   isInitialLoading,
@@ -66,15 +63,10 @@ function SearchScheduleMobileResults({
   onPageChange,
   showPagination,
 }: Readonly<SearchScheduleMobileResultsProps>) {
-  if (!searchResult) {
-    return null;
-  }
+  if (!searchResult) return null;
 
-  const teachers = searchResult.teachers ?? [];
-  const totalGaps = searchResult.totalGaps ?? 0;
-  const activeTeachers = teachers.filter((teacher): teacher is SearchScheduleResultItem => teacher != null);
+  const { totalGaps, activeTeachers, teacherSlots } = computeSearchScheduleResults(searchResult, fromDate, toDate);
 
-  const dateColumns = buildDateColumns(fromDate, toDate);
   const paginationOptions =
     showPagination && pageInfo
       ? buildServerPaginationOptions({
@@ -98,18 +90,18 @@ function SearchScheduleMobileResults({
       </Typography>
 
       <MobileCardList
-        rows={activeTeachers}
+        rows={teacherSlots}
         emptyMessage={labels.noResults}
-        getKey={teacher => teacher.id ?? ""}
+        getKey={({ teacher }) => teacher.id ?? ""}
         paginationOptions={paginationOptions}
         layout="edge-to-edge"
-        renderItem={teacher => (
+        renderItem={({ teacher, dateColumns, gapsByDate }) => (
           <TeacherAvailabilityGridMobile
             labels={labels}
             teacher={teacher}
             fromDate={fromDate}
             dateColumns={dateColumns}
-            gapsByDate={groupGapsByDate(teacher.gaps)}
+            gapsByDate={gapsByDate}
             onOpenMonthDrawer={onOpenMonthDrawer}
           />
         )}
@@ -128,28 +120,7 @@ export function SearchScheduleMobileView({
   pageInfo,
   teacherCount,
   showPaginationFooter,
-  draft,
-  onDraftChange,
-  onSearch,
-  onPageChange,
-  selectedTeacher,
-  onSelectTeacher,
-  formFilterDrawerOpen,
-  onOpenFormFilterDrawer,
-  onCloseFormFilterDrawer,
-  sortMenuAnchorEl,
-  onSortMenuOpen,
-  onSortMenuClose,
-  onSortChange,
-  monthDrawerOpen,
-  monthDrawerTeacher,
-  monthDrawerCurrentMonth,
-  monthDrawerLoading,
-  monthDrawerError,
-  monthDrawerDaysByDate,
-  onOpenMonthDrawer,
-  onCloseMonthDrawer,
-  onMonthDrawerChangeMonth,
+  ...rest
 }: Readonly<SearchScheduleViewModel>) {
   const columnCount = getColumnCount(fromDate, toDate);
 
@@ -174,28 +145,25 @@ export function SearchScheduleMobileView({
           minHeight: 0,
         }}
       >
-        <SearchScheduleFormMobile
+        <SearchScheduleFormSectionShared
+          FormComponent={SearchScheduleFormMobile}
+          error={error ? labels.errorLoading : null}
+          errorSx={MOBILE_ERROR_SX}
           labels={labels}
-          draft={draft}
+          draft={rest.draft}
           isSearching={isInitialLoading}
-          onDraftChange={onDraftChange}
-          onSearch={onSearch}
-          formFilterDrawerOpen={formFilterDrawerOpen}
-          onOpenFormFilterDrawer={onOpenFormFilterDrawer}
-          onCloseFormFilterDrawer={onCloseFormFilterDrawer}
-          sortMenuAnchorEl={sortMenuAnchorEl}
-          onSortMenuOpen={onSortMenuOpen}
-          onSortMenuClose={onSortMenuClose}
-          onSortChange={onSortChange}
-          selectedTeacher={selectedTeacher}
-          onSelectTeacher={onSelectTeacher}
+          onDraftChange={rest.onDraftChange}
+          onSearch={rest.onSearch}
+          formFilterDrawerOpen={rest.formFilterDrawerOpen}
+          onOpenFormFilterDrawer={rest.onOpenFormFilterDrawer}
+          onCloseFormFilterDrawer={rest.onCloseFormFilterDrawer}
+          sortMenuAnchorEl={rest.sortMenuAnchorEl}
+          onSortMenuOpen={rest.onSortMenuOpen}
+          onSortMenuClose={rest.onSortMenuClose}
+          onSortChange={rest.onSortChange}
+          selectedTeacher={rest.selectedTeacher}
+          onSelectTeacher={rest.onSelectTeacher}
         />
-
-        {error ? (
-          <Typography color="error" sx={{ px: 2 }}>
-            {labels.errorLoading}
-          </Typography>
-        ) : null}
 
         <SearchScheduleMobileBody
           isInitialLoading={isInitialLoading}
@@ -204,24 +172,24 @@ export function SearchScheduleMobileView({
           fromDate={fromDate}
           toDate={toDate}
           labels={labels}
-          onOpenMonthDrawer={onOpenMonthDrawer}
+          onOpenMonthDrawer={rest.onOpenMonthDrawer}
           pageInfo={pageInfo}
           teacherCount={teacherCount}
-          onPageChange={onPageChange}
+          onPageChange={rest.onPageChange}
           showPaginationFooter={showPaginationFooter}
         />
       </Box>
 
       <TeacherAvailabilityMonthDrawerMobile
         labels={labels}
-        open={monthDrawerOpen}
-        teacher={monthDrawerTeacher}
-        currentMonth={monthDrawerCurrentMonth}
-        monthDrawerLoading={monthDrawerLoading}
-        monthDrawerError={monthDrawerError}
-        daysByDate={monthDrawerDaysByDate}
-        onClose={onCloseMonthDrawer}
-        onMonthChange={onMonthDrawerChangeMonth}
+        open={rest.monthDrawerOpen}
+        teacher={rest.monthDrawerTeacher}
+        currentMonth={rest.monthDrawerCurrentMonth}
+        monthDrawerLoading={rest.monthDrawerLoading}
+        monthDrawerError={rest.monthDrawerError}
+        daysByDate={rest.monthDrawerDaysByDate}
+        onClose={rest.onCloseMonthDrawer}
+        onMonthChange={rest.onMonthDrawerChangeMonth}
       />
     </MobilePageContainer>
   );

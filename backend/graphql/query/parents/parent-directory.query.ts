@@ -5,9 +5,9 @@ import {
 } from "@/backend/graphql/pothos/parents/parent-directory.pothos";
 import { ParentStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ParentDirectoryService } from "@/backend/services/parent/parent-directory.service";
-import { PaginationArgs } from "@/backend/types";
 
 const PARENTS_DIRECTORY_DEFAULT_LIMIT = 20;
 const PARENTS_DIRECTORY_MAX_LIMIT = 100;
@@ -24,18 +24,7 @@ gqlSchemaBuilder.queryField("parentDirectory", t =>
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
 
-      let pagination: PaginationArgs | null = null;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs);
 
       return ParentDirectoryService.getParentDirectory(
         userId,

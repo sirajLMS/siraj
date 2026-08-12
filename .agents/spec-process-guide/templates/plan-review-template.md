@@ -73,7 +73,7 @@
 **Verification command:**
 ```bash
 # Run the unified per-file quality loop on modified plan files
-# (runs tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file)
+# (runs tsgo → oxlint → biome → lint:type-aware → check:duplicates → codescene --file)
 bun run scripts/health/sub-loop.ts specs.md --lifecycle codescene
 bun run scripts/health/sub-loop.ts implementation.md --lifecycle codescene
 bun run scripts/health/sub-loop.ts trackable-tasks.md --lifecycle codescene

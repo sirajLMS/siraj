@@ -1,5 +1,78 @@
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
+const student = {
+  studentNotFound: (id: string) => `Student not found: ${id}`,
+  studentCreateFailed: "Failed to create student.",
+  studentUpdateFailed: (id: string) => `Failed to update student (id: ${id}).`,
+  studentVersionMismatch: ({
+    id,
+    expectedVersion,
+    gotVersion,
+  }: {
+    id: string;
+    expectedVersion: number;
+    gotVersion: number;
+  }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
+  insufficientClasses: ({ id, remaining, required }: { id: string; remaining: number; required: number }) =>
+    `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`,
+  invalidStatusTransition: ({ currentStatus, newStatus }: { currentStatus: string; newStatus: string }) =>
+    `Invalid status transition: ${currentStatus} -> ${newStatus}.`,
+  studentEmailRequired: "Student email is required.",
+  studentPasswordRequired: "Student password is required.",
+} as const;
+
+const category = {
+  categoryNotFound: (id: string) => `Category not found: ${id}`,
+  categoryCreateFailed: "Failed to create class category.",
+  categoryHasSubjects: "Cannot delete category because it has associated subjects.",
+} as const;
+
+const user = {
+  userNotFound: (id: string) => `User not found: ${id}`,
+  userEmailExists: "User with this email already exists.",
+  cannotModifyBankingFields: "Cannot modify banking fields.",
+  parentNotFound: "Parent not found.",
+} as const;
+
+const scheduling = {
+  cannotRescheduleToSelf: "Cannot reschedule to self.",
+  cannotRescheduleCompleted: "Cannot reschedule a completed session.",
+  cannotRescheduleAlreadyRescheduled: "Cannot reschedule a session that has already been rescheduled.",
+  outOfQuota: "Out of quota.",
+  leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
+    `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`,
+  classInstanceNotFound: ({ id }: { id: string }) => `Class instance not found: ${id}`,
+  originalClassNotFound: "Original class not found.",
+  invalidTransition: "Invalid transition.",
+  teacherNotAssigned: ({
+    teacherId,
+    studentId,
+    startTime,
+  }: {
+    teacherId: string;
+    studentId: string;
+    startTime: string;
+  }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`,
+  teacherBooked: "Teacher is already booked at this time.",
+  studentBooked: "Student is already booked at this time.",
+  meetingUrlInUse: "Meeting URL is already in use.",
+  sessionNotActivated: "Session is not activated.",
+  missedClassTime: "You have missed the class time.",
+} as const;
+
+const permissionGroup = {
+  permissionGroupNotFound: "Permission group not found.",
+} as const;
+
+const teacher = {
+  alreadyExists: "Teacher profile for this user already exists.",
+  teacherNotFound: (id: string) => `Teacher not found: ${id}`,
+  staffProfileNotFound: "Staff profile not found.",
+  quotaMustBeNonNegative: "Quota must be a non-negative number.",
+  quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
+    `Quota (${requested}) exceeds total (${total}).`,
+} as const;
+
 export const errorsEn: ErrorsLabels = {
   auth: {
     // ─── No-param strings ────────────────────────────────────────────
@@ -108,73 +181,12 @@ export const errorsEn: ErrorsLabels = {
   staff: {
     alreadyExists: "Staff profile for this user already exists.",
   },
-  teacher: {
-    alreadyExists: "Teacher profile for this user already exists.",
-    teacherNotFound: (id: string) => `Teacher not found: ${id}`,
-    staffProfileNotFound: "Staff profile not found.",
-    quotaMustBeNonNegative: "Quota must be a non-negative number.",
-    quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
-      `Quota (${requested}) exceeds total (${total}).`,
-  },
-  student: {
-    studentNotFound: (id: string) => `Student not found: ${id}`,
-    studentCreateFailed: "Failed to create student.",
-    studentUpdateFailed: (id: string) => `Failed to update student (id: ${id}).`,
-    studentVersionMismatch: ({
-      id,
-      expectedVersion,
-      gotVersion,
-    }: {
-      id: string;
-      expectedVersion: number;
-      gotVersion: number;
-    }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
-    insufficientClasses: ({ id, remaining, required }: { id: string; remaining: number; required: number }) =>
-      `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`,
-    invalidStatusTransition: ({ currentStatus, newStatus }: { currentStatus: string; newStatus: string }) =>
-      `Invalid status transition: ${currentStatus} -> ${newStatus}.`,
-    studentEmailRequired: "Student email is required.",
-    studentPasswordRequired: "Student password is required.",
-  },
-  category: {
-    categoryNotFound: (id: string) => `Category not found: ${id}`,
-    categoryCreateFailed: "Failed to create class category.",
-    categoryHasSubjects: "Cannot delete category because it has associated subjects.",
-  },
-  user: {
-    userNotFound: (id: string) => `User not found: ${id}`,
-    userEmailExists: "User with this email already exists.",
-    cannotModifyBankingFields: "Cannot modify banking fields.",
-    parentNotFound: "Parent not found.",
-  },
-  scheduling: {
-    cannotRescheduleToSelf: "Cannot reschedule to self.",
-    cannotRescheduleCompleted: "Cannot reschedule a completed session.",
-    cannotRescheduleAlreadyRescheduled: "Cannot reschedule a session that has already been rescheduled.",
-    outOfQuota: "Out of quota.",
-    leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
-      `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`,
-    classInstanceNotFound: ({ id }: { id: string }) => `Class instance not found: ${id}`,
-    originalClassNotFound: "Original class not found.",
-    invalidTransition: "Invalid transition.",
-    teacherNotAssigned: ({
-      teacherId,
-      studentId,
-      startTime,
-    }: {
-      teacherId: string;
-      studentId: string;
-      startTime: string;
-    }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`,
-    teacherBooked: "Teacher is already booked at this time.",
-    studentBooked: "Student is already booked at this time.",
-    meetingUrlInUse: "Meeting URL is already in use.",
-    sessionNotActivated: "Session is not activated.",
-    missedClassTime: "You have missed the class time.",
-  },
-  permissionGroup: {
-    permissionGroupNotFound: "Permission group not found.",
-  },
+  teacher,
+  student,
+  category,
+  user,
+  scheduling,
+  permissionGroup,
   sessionConfig: {
     roleNameRequired: "Role name is required.",
     ttlOutOfRange: "TTL must be between 60 and 2,419,200 seconds.",
@@ -209,7 +221,6 @@ export const errorsEn: ErrorsLabels = {
   unknownName: "Unknown",
   invalidInput: "Invalid input.",
   invalidNationalId: "The national ID is invalid for the selected nationality.",
-  permissionGroupNotFound: "Permission group not found.",
 
   // ─── Lesson Report errors ─────────────────────────────────────────
   rejectedReportsRequireReason: "REJECTED reports must include a rejection reason.",
@@ -224,9 +235,14 @@ export const errorsEn: ErrorsLabels = {
     `Mixed display currencies detected. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`,
 
   // ─── Flattened error properties for backward compatibility ───────────
-  categoryNotFound: (id: string) => `Category not found: ${id}`,
-  categoryCreateFailed: "Failed to create class category.",
-  categoryHasSubjects: "Cannot delete category because it has associated subjects.",
+  // Spread the nested sub-objects to provide flat top-level keys
+  // (avoids re-declaring ~30 identical properties).
+  ...student,
+  ...category,
+  ...user,
+  ...scheduling,
+  ...permissionGroup,
+  ...teacher,
   meetingProviderNotFound: (id: string) => `Meeting provider not found: ${id}`,
   meetingProviderCreateFailed: "Failed to create meeting provider.",
   meetingProviderUpdateFailed: "Failed to update meeting provider.",
@@ -235,62 +251,13 @@ export const errorsEn: ErrorsLabels = {
   meetingConfigNotFound: (id: string) => `Meeting config not found: ${id}`,
   meetingConfigCreateFailed: "Failed to create meeting config.",
   meetingConfigUpdateFailed: "Failed to update meeting config.",
-  studentNotFound: (id: string) => `Student not found: ${id}`,
-  studentCreateFailed: "Failed to create student.",
-  studentUpdateFailed: (id: string) => `Failed to update student (id: ${id}).`,
-  studentVersionMismatch: ({
-    id,
-    expectedVersion,
-    gotVersion,
-  }: {
-    id: string;
-    expectedVersion: number;
-    gotVersion: number;
-  }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
-  insufficientClasses: ({ id, remaining, required }: { id: string; remaining: number; required: number }) =>
-    `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`,
-  invalidStatusTransition: ({ currentStatus, newStatus }: { currentStatus: string; newStatus: string }) =>
-    `Invalid status transition: ${currentStatus} -> ${newStatus}.`,
-  studentEmailRequired: "Student email is required.",
-  studentPasswordRequired: "Student password is required.",
-  teacherNotFound: (id: string) => `Teacher not found: ${id}`,
-  staffProfileNotFound: "Staff profile not found.",
-  quotaMustBeNonNegative: "Quota must be a non-negative number.",
-  quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
-    `Quota (${requested}) exceeds total (${total}).`,
-  userNotFound: (id: string) => `User not found: ${id}`,
-  userEmailExists: "User with this email already exists.",
-  cannotModifyBankingFields: "Cannot modify banking fields.",
-  parentNotFound: "Parent not found.",
   parentAlreadyDeactivated: "Parent account is already deactivated.",
   parentAlreadyActivated: "Parent account is already activated.",
   exchangeRateStale: ({ fromCurrency, toCurrency }: { fromCurrency: string; toCurrency: string }) =>
     `Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`,
-  cannotRescheduleToSelf: "Cannot reschedule to self.",
-  cannotRescheduleCompleted: "Cannot reschedule a completed session.",
-  cannotRescheduleAlreadyRescheduled: "Cannot reschedule a session that has already been rescheduled.",
-  outOfQuota: "Out of quota.",
   quotaExpired: "Quota has expired.",
   quotaNotFound: "Quota not found.",
   invalidQuotaState: "Invalid quota state.",
-  leaveQuotaExceeded: ({ maxLeaves }: { maxLeaves: string }) =>
-    `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`,
-  classInstanceNotFound: ({ id }: { id: string }) => `Class instance not found: ${id}`,
-  originalClassNotFound: "Original class not found.",
-  invalidTransition: "Invalid transition.",
-  teacherNotAssigned: ({
-    teacherId,
-    studentId,
-    startTime,
-  }: {
-    teacherId: string;
-    studentId: string;
-    startTime: string;
-  }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`,
-  teacherBooked: "Teacher is already booked at this time.",
-  studentBooked: "Student is already booked at this time.",
-  meetingUrlInUse: "Meeting URL is already in use.",
-  sessionNotActivated: "Session is not activated.",
   outsideAvailability: "Booking is outside teacher availability windows.",
   teacherUnavailabilityConflict: "Booking blocked by recurring unavailability pattern.",
   teacherOnVacation: "Booking blocked by approved vacation period.",

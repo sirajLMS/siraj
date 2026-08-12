@@ -6,16 +6,17 @@ import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-pro
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
-import { logger } from "@/backend/lib/logger";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import {
+  resolveProvidersForConfigs,
+  safeMaybeGenerateUrl,
+} from "@/backend/services/meeting/__shared__/meetingConfigHelpers";
 import {
   buildMaskedClassMeetingConfig,
   buildMaskedClassMeetingConfigs,
 } from "@/backend/services/meeting/class-meeting-config-mask";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
-import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
-import { isMeetingChannelError, maybeGenerateUrl } from "@/backend/services/meeting/utils/maybe-generate-url";
 import type {
   ClassMeetingConfigReturnType,
   ClassMeetingConfigSelectType,
@@ -24,47 +25,7 @@ import type {
   UpdateClassMeetingConfigInput,
 } from "@/backend/types/meeting/class-meeting-config.types";
 import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import type { ErrorsLabels } from "@/shared/locale";
-
-/**
- * Wraps `maybeGenerateUrl` with typed error handling for class meeting configs.
- *
- * - `MeetingChannelError` subclasses are logged at `warn` and re-thrown as-is.
- * - Unexpected errors are logged at `error` and re-thrown as a user-friendly error.
- */
-async function safeClassMaybeGenerateUrl(
-  provider: MeetingProviderSelectType,
-  details: MeetingConfigDetails,
-  options: {
-    readonly topic: string;
-    readonly actorUserId?: string;
-  },
-  friendlyMessage: string
-): Promise<{
-  details: MeetingConfigDetails;
-  providerMetadata: Record<string, unknown> | null;
-}> {
-  try {
-    return await maybeGenerateUrl(provider, details, options);
-  } catch (error) {
-    if (isMeetingChannelError(error)) {
-      logger.warn("safeClassMaybeGenerateUrl: typed adapter error", {
-        providerKind: provider.providerKind,
-        slug: provider.slug,
-        code: error.code,
-        message: error.message,
-      });
-      throw error;
-    }
-    logger.error("safeClassMaybeGenerateUrl: unexpected error during URL generation", {
-      providerKind: provider.providerKind,
-      slug: provider.slug,
-      error: error instanceof Error ? error.message : String(error),
-    });
-    throw new Error(friendlyMessage, { cause: error });
-  }
-}
 
 export namespace ClassMeetingConfigService {
   async function assertCanManageClass(actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
@@ -74,15 +35,8 @@ export namespace ClassMeetingConfigService {
     }
   }
 
-  async function resolveProvidersForClassConfigs(
-    configs: ClassMeetingConfigSelectType[]
-  ): Promise<Map<string, MeetingProviderSelectType>> {
-    const ids = [...new Set(configs.map(c => c.providerId))];
-    return MeetingProviderCatalogService.getProvidersByIds(ids);
-  }
-
   async function resolveAndMaskConfig(config: ClassMeetingConfigSelectType): Promise<ClassMeetingConfigReturnType> {
-    const providerMap = await resolveProvidersForClassConfigs([config]);
+    const providerMap = await resolveProvidersForConfigs([config]);
     return buildMaskedClassMeetingConfig(config, true, providerMap);
   }
 
@@ -93,7 +47,7 @@ export namespace ClassMeetingConfigService {
   ): Promise<ClassMeetingConfigReturnType[]> {
     await assertCanManageClass(actorUserId, tErrors);
     const rows = await ClassMeetingConfigRepository.listByScope(scope);
-    const providerMap = await resolveProvidersForClassConfigs(rows);
+    const providerMap = await resolveProvidersForConfigs(rows);
     return buildMaskedClassMeetingConfigs(rows, true, providerMap);
   }
 
@@ -141,7 +95,7 @@ export namespace ClassMeetingConfigService {
     }
 
     const parsedDetails = parseMeetingConfigDetails(provider, input.details);
-    const { details, providerMetadata } = await safeClassMaybeGenerateUrl(
+    const { details, providerMetadata } = await safeMaybeGenerateUrl(
       provider,
       parsedDetails,
       {
@@ -190,7 +144,7 @@ export namespace ClassMeetingConfigService {
 
       const shouldRegenerate = !parsed.meetingUrl && provider.providerKind !== "manual" && detailsChanged;
 
-      const result = await safeClassMaybeGenerateUrl(
+      const result = await safeMaybeGenerateUrl(
         provider,
         parsed,
         {

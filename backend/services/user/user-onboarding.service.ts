@@ -3,7 +3,6 @@ import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
 import type { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { CurrencyCode } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import { validatePasswordStrength } from "@/backend/lib/auth";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -12,6 +11,7 @@ import type {
   UserCreateProfileFieldsInput,
   UserReturnType,
 } from "@/backend/types/users/user.types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const CURRENCY_CODES = new Set<string>(Object.values(CurrencyCode));

@@ -1,13 +1,11 @@
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
 import { logger } from "@/backend/lib/logger";
+import { FxAdapterBase } from "@/backend/services/fx/providers/__shared__/fxAdapterBase";
 import { fixerResponseSchema } from "@/backend/services/fx/providers/fixer/fixer.types";
-import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
-import type { FxProviderFetchResult } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-import { parseCurrencyCode } from "@/shared/lib/enum";
+import { parseCurrencyCodeOrNull } from "@/shared/lib/enum";
 
 const FIXER_LATEST_ENDPOINT = "https://api.apilayer.com/fixer/latest";
-const REQUEST_TIMEOUT_MS = 10_000;
 
 /**
  * ISO 4217 symbols to request from Fixer. Excludes the base currency (EUR)
@@ -17,10 +15,6 @@ const REQUEST_TIMEOUT_MS = 10_000;
 const TARGET_SYMBOLS: readonly CurrencyCode[] = Object.values(CurrencyCode).filter(
   (code): code is CurrencyCode => code !== CurrencyCode.EUR
 );
-
-function buildSymbolsParam(): string {
-  return TARGET_SYMBOLS.join(",");
-}
 
 /**
  * Normalise Fixer's EUR-hub rates into a USD-hub map.
@@ -34,7 +28,7 @@ function buildSymbolsParam(): string {
  *  - For X = EUR (not present in the Fixer symbols), EUR->EUR = 1, so
  *    USD->EUR = 1 / (EUR->USD) — same formula as the USD->EUR entry.
  */
-function normaliseToUsdHub(eurRates: Record<string, number>): ReadonlyMap<CurrencyCode, string> {
+function normaliseToUsdHub(eurRates: Record<string, number>): Map<CurrencyCode, string> {
   const eurToUsd = eurRates[CurrencyCode.USD];
   if (typeof eurToUsd !== "number" || eurToUsd === 0 || Number.isNaN(eurToUsd)) {
     throw new Error("Fixer response missing valid EUR->USD rate required for USD-hub normalisation");
@@ -51,13 +45,12 @@ function normaliseToUsdHub(eurRates: Record<string, number>): ReadonlyMap<Curren
       continue;
     }
 
-    const code = parseCurrencyCode(symbol);
+    const code = parseCurrencyCodeOrNull(symbol);
     if (!code) {
       continue;
     }
 
     if (code === CurrencyCode.USD) {
-      // USD->USD is always 1, regardless of provider numbers.
       usdHub.set(CurrencyCode.USD, "1");
       continue;
     }
@@ -80,12 +73,19 @@ function normaliseToUsdHub(eurRates: Record<string, number>): ReadonlyMap<Curren
   return usdHub;
 }
 
-export class FixerAdapter implements IFxRateProvider {
+/**
+ * Fixer (api.apilayer.com) adapter. Fixer's base is EUR — rates are
+ * normalised to the USD hub before returning so all providers share a
+ * consistent shape.
+ */
+export class FixerAdapter extends FxAdapterBase {
   readonly name = FxProvider.Fixer;
+  protected readonly apiBase = CurrencyCode.EUR;
 
   private readonly apiKey: string;
 
   constructor() {
+    super();
     const apiKey = process.env.FIXER_API_KEY;
     if (!apiKey) {
       throw new Error("FIXER_API_KEY environment variable is required for FixerAdapter");
@@ -93,43 +93,30 @@ export class FixerAdapter implements IFxRateProvider {
     this.apiKey = apiKey;
   }
 
-  validateConfig(): boolean {
-    try {
-      return Boolean(process.env.FIXER_API_KEY);
-    } catch (error) {
-      logger.error("Fixer configuration validation failed", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return false;
-    }
+  protected validateConfigImpl(): boolean {
+    return Boolean(process.env.FIXER_API_KEY);
   }
 
-  async fetchLatestRates(_locale?: string): Promise<FxProviderFetchResult> {
-    const symbols = buildSymbolsParam();
-    const url =
+  protected allSymbols(): readonly CurrencyCode[] {
+    return TARGET_SYMBOLS;
+  }
+
+  protected buildApiUrl(): string {
+    const symbols = this.buildSymbolsParam();
+    return (
       `${FIXER_LATEST_ENDPOINT}?access_key=${encodeURIComponent(this.apiKey)}` +
-      `&base=EUR&symbols=${encodeURIComponent(symbols)}`;
+      `&base=EUR&symbols=${encodeURIComponent(symbols)}`
+    );
+  }
 
-    logger.debug("Fixer fetchLatestRates: requesting", {
-      symbolCount: TARGET_SYMBOLS.length,
-    });
+  protected customFetchHeaders(): Record<string, string> {
+    // apilayer.com requires the access key in the `apikey` header; the
+    // legacy data.fixer.io hostname ignores it. Sending both keeps the
+    // adapter working against either hostname.
+    return { apikey: this.apiKey };
+  }
 
-    const response = await fetch(url, {
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-      headers: {
-        Accept: "application/json",
-        // apilayer.com requires the access key in the `apikey` header; the
-        // legacy data.fixer.io hostname ignores it. Sending both keeps the
-        // adapter working against either hostname.
-        apikey: this.apiKey,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Fixer request failed: HTTP ${response.status} ${response.statusText}`);
-    }
-
-    const parsed = await response.json();
+  protected validateResponse(parsed: unknown): void {
     const fixerResponse = fixerResponseSchema.parse(parsed);
 
     if (!fixerResponse.success) {
@@ -141,23 +128,15 @@ export class FixerAdapter implements IFxRateProvider {
     if (!fixerResponse.rates || typeof fixerResponse.rates !== "object") {
       throw new Error("Fixer response missing rates object");
     }
+  }
 
-    const rates = normaliseToUsdHub(fixerResponse.rates);
+  protected parseRates(parsed: unknown): Map<CurrencyCode, string> {
+    const fixerResponse = fixerResponseSchema.parse(parsed);
+    return normaliseToUsdHub(fixerResponse.rates);
+  }
 
-    const timestamp = new Date(fixerResponse.timestamp * 1000);
-
-    logger.info("Fixer fetchLatestRates: succeeded", {
-      base: fixerResponse.base,
-      timestamp: timestamp.toISOString(),
-      rateCount: rates.size,
-    });
-
-    return {
-      provider: this.name,
-      base: CurrencyCode.USD,
-      timestamp,
-      rates,
-      rawResponse: fixerResponse,
-    };
+  protected extractTimestamp(parsed: unknown): Date {
+    const fixerResponse = fixerResponseSchema.parse(parsed);
+    return new Date(fixerResponse.timestamp * 1000);
   }
 }

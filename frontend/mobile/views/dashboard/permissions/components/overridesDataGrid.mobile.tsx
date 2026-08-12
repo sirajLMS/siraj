@@ -1,32 +1,18 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
+import {
+  StyledBaselineTextShared,
+  StyledPermissionDescriptionShared,
+  StyledPermissionKeyTextShared,
+} from "@/frontend/common/views/dashboard/permissions/components/__shared__/overridesDataGridShared.styles";
+import { resolveOverrideRow } from "@/frontend/common/views/dashboard/permissions/components/__shared__/resolveOverrideRow";
 import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { OverrideEditControlsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEditControls.mobile";
 import { OverrideEffectiveDisplayMobile } from "@/frontend/mobile/views/dashboard/permissions/components/overrideEffectiveDisplay.mobile";
 import { useAppLocale } from "@/shared/locale";
-
-const StyledPermissionKeyText = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.labelMd.fontSize,
-  fontWeight: 600,
-  color: theme.palette.primary.main,
-}));
-
-const StyledPermissionDescription = styled(Typography)(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  marginTop: theme.spacing(0.5),
-}));
-
-const StyledBaselineText = styled(Typography, {
-  shouldForwardProp: prop => prop !== "isAllowed",
-})<{ isAllowed: boolean }>(({ theme, isAllowed }) => ({
-  color: isAllowed ? theme.palette.success.main : theme.palette.text.secondary,
-}));
 
 export function OverridesDataGridMobile({
   labels,
@@ -49,29 +35,13 @@ export function OverridesDataGridMobile({
         paginationOptions={{ mode: "client" }}
         layout="edge-to-edge"
         renderItem={permission => {
-          const baselineGroups = userGroups.filter(
-            g =>
-              (permission.id && g.permissionIds?.includes(permission.id)) ||
-              (permission.key && g.permissionIds?.includes(permission.key))
+          const { isAllowedByGroup, baselineText, effectiveState, overrideState } = resolveOverrideRow(
+            permission,
+            userGroups,
+            localOverrides,
+            t,
+            locale
           );
-          const isAllowedByGroup = baselineGroups.length > 0;
-          const baselineText = isAllowedByGroup
-            ? t.allowedViaGroups(
-                baselineGroups.map(g => resolveLocalizedString(g.name, locale) || g.slug || "").join(", ")
-              )
-            : t.notSet;
-          const overrideState: OverrideState = (permission.id && localOverrides[permission.id]) || "INHERIT";
-
-          let effectiveState: "allowed" | "denied" | "not_set";
-          if (overrideState === "GRANTED") {
-            effectiveState = "allowed";
-          } else if (overrideState === "DENIED") {
-            effectiveState = "denied";
-          } else if (isAllowedByGroup) {
-            effectiveState = "allowed";
-          } else {
-            effectiveState = "not_set";
-          }
 
           let overrideControls: ReactNode = null;
           if (permission.id) {
@@ -97,11 +67,11 @@ export function OverridesDataGridMobile({
             <MobileCardListItem variant="edge-to-edge">
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Box>
-                  <StyledPermissionKeyText variant="bodyMd">{permission.key}</StyledPermissionKeyText>
+                  <StyledPermissionKeyTextShared variant="bodyMd">{permission.key}</StyledPermissionKeyTextShared>
                   {permission.description && (
-                    <StyledPermissionDescription variant="caption">
+                    <StyledPermissionDescriptionShared variant="caption">
                       {permission.description}
-                    </StyledPermissionDescription>
+                    </StyledPermissionDescriptionShared>
                   )}
                 </Box>
 
@@ -109,9 +79,9 @@ export function OverridesDataGridMobile({
                   <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.text.secondary, mb: 0.5 })}>
                     {t.columnGroupBaseline}
                   </Typography>
-                  <StyledBaselineText variant="bodyMd" isAllowed={isAllowedByGroup}>
+                  <StyledBaselineTextShared variant="bodyMd" isAllowed={isAllowedByGroup}>
                     {baselineText}
-                  </StyledBaselineText>
+                  </StyledBaselineTextShared>
                 </Box>
 
                 <Box>

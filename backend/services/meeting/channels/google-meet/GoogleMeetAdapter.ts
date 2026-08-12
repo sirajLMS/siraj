@@ -1,18 +1,21 @@
 import { SignJWT } from "jose";
-import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
+import {
+  type CachedToken,
+  isRecord,
+  isTokenExpired,
+  MeetingAdapterBase,
+  REQUEST_TIMEOUT_MS,
+  withTimeout,
+} from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
 import type {
   GoogleMeetErrorResponse,
   GoogleMeetServiceAccountJson,
   GoogleMeetSpaceResponse,
   GoogleMeetTokenResponse,
 } from "@/backend/services/meeting/channels/google-meet/google-meet.types";
-import type {
-  GenerateMeetingInput,
-  GenerateMeetingResult,
-  IMeetingChannel,
-} from "@/backend/services/meeting/channels/IMeetingChannel";
+import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/services/meeting/channels/IMeetingChannel";
 import {
   GoogleMeetApiError,
   InvalidServiceAccountJsonError,
@@ -23,7 +26,6 @@ import {
   ProviderUnavailableError,
   RateLimitedError,
 } from "@/backend/services/meeting/channels/IMeetingChannel";
-import { refreshAccessToken } from "@/backend/services/meeting/integrations/token-refresh";
 
 export interface GoogleMeetAdapterOptions {
   readonly serviceAccountJson?: string;
@@ -33,38 +35,13 @@ export interface GoogleMeetAdapterOptions {
 
 const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_MEET_SPACES_URL = "https://meet.googleapis.com/v2/spaces";
-const REQUEST_TIMEOUT_MS = 30_000;
 const TOKEN_REFRESH_MARGIN_MS = 60_000;
 const SCOPE = "https://www.googleapis.com/auth/meetings.space.created";
-
-interface CachedToken {
-  accessToken: string;
-  expiresAt: number;
-}
 
 interface ParsedServiceAccount {
   readonly clientEmail: string;
   readonly privateKey: string;
   readonly privateKeyId: string;
-}
-
-function withTimeout(ms: number): { signal: AbortSignal; cancel: () => void } {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ms);
-  return { signal: controller.signal, cancel: () => clearTimeout(timer) };
-}
-
-function jitterDelay(baseMs: number): number {
-  return baseMs + (Date.now() % 100);
-}
-
-function isExpired(token: CachedToken | null): boolean {
-  if (!token) return true;
-  return Date.now() >= token.expiresAt - TOKEN_REFRESH_MARGIN_MS;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }
 
 function isServiceAccountJson(value: unknown): value is GoogleMeetServiceAccountJson {
@@ -97,19 +74,22 @@ function isErrorResponse(value: unknown): value is GoogleMeetErrorResponse {
   return typeof value.error.code === "number" && typeof value.error.message === "string";
 }
 
-export class GoogleMeetAdapter implements IMeetingChannel {
+export class GoogleMeetAdapter extends MeetingAdapterBase {
   static readonly ENDPOINTS: readonly string[] = [
     "https://oauth2.googleapis.com/token",
     "https://www.googleapis.com/auth/meetings.space.created",
     "https://meet.googleapis.com/v2/spaces",
   ];
+  protected readonly providerSlug = "google_meet" as const;
+  protected readonly tokenRefreshMarginMs = TOKEN_REFRESH_MARGIN_MS;
+
   private readonly rawServiceAccountJson?: string;
   private readonly impersonateSubject?: string;
   private readonly defaultAccessType: number;
   private parsedServiceAccount: ParsedServiceAccount | null = null;
-  private cachedToken: CachedToken | null = null;
 
   constructor(opts?: GoogleMeetAdapterOptions) {
+    super();
     // If the caller provided a service account JSON explicitly, do not read env
     // config; otherwise load runtime environment configuration.
     const envConfig = opts?.serviceAccountJson != null ? null : getEnvironmentConfig();
@@ -140,22 +120,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
     }
   }
 
-  async generateMeeting(input: GenerateMeetingInput): Promise<GenerateMeetingResult> {
-    const accessToken = await this.resolveAccessToken(input);
-
-    try {
-      return await this.createSpace(accessToken, input);
-    } catch (error) {
-      if (!(error instanceof ProviderUnavailableError)) {
-        throw error;
-      }
-    }
-
-    await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
-    return this.createSpace(accessToken, input);
-  }
-
-  private async resolveAccessToken(input: GenerateMeetingInput): Promise<string> {
+  protected async resolveAccessToken(input: GenerateMeetingInput): Promise<string> {
     const hasOrgCreds = !!(this.rawServiceAccountJson && this.impersonateSubject);
 
     if (hasOrgCreds) {
@@ -176,6 +141,10 @@ export class GoogleMeetAdapter implements IMeetingChannel {
     throw new MissingImpersonationSubjectError();
   }
 
+  protected async callProviderApi(accessToken: string, _input: GenerateMeetingInput): Promise<GenerateMeetingResult> {
+    return this.createSpace(accessToken);
+  }
+
   async disconnect(token?: { accessToken: string; refreshToken: string | null }): Promise<void> {
     if (token) {
       try {
@@ -188,7 +157,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
         });
       }
     }
-    this.cachedToken = null;
+    this.clearCachedToken();
     this.parsedServiceAccount = null;
   }
 
@@ -229,7 +198,7 @@ export class GoogleMeetAdapter implements IMeetingChannel {
   }
 
   private async getAccessToken(sa: ParsedServiceAccount): Promise<string> {
-    if (this.cachedToken && !isExpired(this.cachedToken)) {
+    if (this.cachedToken && !isTokenExpired(this.cachedToken, this.tokenRefreshMarginMs)) {
       return this.cachedToken.accessToken;
     }
 
@@ -299,46 +268,11 @@ export class GoogleMeetAdapter implements IMeetingChannel {
     this.cachedToken = {
       accessToken: tokenData.access_token,
       expiresAt: Date.now() + tokenData.expires_in * 1000,
-    };
+    } satisfies CachedToken;
     return tokenData.access_token;
   }
 
-  /**
-   * Per-user OAuth fallback: exchange the stored refresh token for an access
-   * token. Unlike the org-level JWT-bearer flow, the per-user path skips the
-   * `sub` claim (the user token grants scope directly) and skips DWD
-   * (Domain-Wide Delegation).
-   */
-  private async getPerUserAccessToken(actorUserId: string): Promise<string> {
-    const tokenRow = await MeetingProviderTokenRepository.getByUserAndProvider(actorUserId, "google_meet");
-    if (!tokenRow?.refreshToken) {
-      throw new NoOrgCredentialsNoUserTokenError("google_meet");
-    }
-
-    logger.debug("GoogleMeetAdapter: using per-user token fallback", { actorUserId });
-
-    // Return the stored access token if it is still valid (within the refresh
-    // margin) to avoid racing concurrent calls on the single-use refresh token.
-    const storedExpiry = tokenRow.expiresAt ? tokenRow.expiresAt.getTime() : 0;
-    if (tokenRow.accessToken && Date.now() < storedExpiry - TOKEN_REFRESH_MARGIN_MS) {
-      return tokenRow.accessToken;
-    }
-
-    const refreshed = await refreshAccessToken("google_meet", tokenRow.refreshToken, actorUserId);
-
-    await MeetingProviderTokenRepository.upsert({
-      userId: actorUserId,
-      providerSlug: "google_meet",
-      accessToken: refreshed.accessToken,
-      refreshToken: refreshed.refreshToken ?? tokenRow.refreshToken,
-      expiresAt: refreshed.expiresAt,
-      scopes: tokenRow.scopes,
-    });
-
-    return refreshed.accessToken;
-  }
-
-  private async createSpace(accessToken: string, _input: GenerateMeetingInput): Promise<GenerateMeetingResult> {
+  private async createSpace(accessToken: string): Promise<GenerateMeetingResult> {
     const spaceBody = {
       config: {
         accessType: this.defaultAccessType,

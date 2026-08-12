@@ -3,8 +3,7 @@
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { SessionConfigDeleteDialog } from "@/frontend/common/views/dashboard/settings/tabs/session/components/SessionConfigDeleteDialog";
-import { SessionConfigFormDialog } from "@/frontend/common/views/dashboard/settings/tabs/session/components/SessionConfigFormDialog";
+import { SessionConfigDialogsShared } from "@/frontend/common/views/dashboard/settings/tabs/session/__shared__/sessionConfigDialogsShared";
 import type {
   SessionConfigRow,
   SessionConfigTabViewModel,
@@ -94,22 +93,16 @@ export function SessionConfigTabMobileView({
 
       {canManage ? (
         <>
-          <SessionConfigFormDialog
-            open={formOpen}
-            row={editRow}
+          <SessionConfigDialogsShared
+            formOpen={formOpen}
+            editRow={editRow}
+            deleteRow={deleteRow}
+            isDeleting={isDeleting}
             labels={labels}
-            onClose={onFormClose}
+            onFormClose={onFormClose}
             onSaved={onSaved}
-          />
-          <SessionConfigDeleteDialog
-            open={deleteRow != null}
-            row={deleteRow}
-            labels={labels}
-            isLoading={isDeleting}
-            onClose={onDeleteClose}
-            onConfirm={() => {
-              void onConfirmDelete();
-            }}
+            onDeleteClose={onDeleteClose}
+            onConfirmDelete={onConfirmDelete}
           />
           <MobileFab icon={<AddOutlined />} label={labels.addLabel} onClick={onAdd} />
         </>

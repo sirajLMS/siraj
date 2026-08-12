@@ -103,6 +103,14 @@ function toStudentResult(student: {
   };
 }
 
+async function invalidateParentCacheFailOpen(parentId: string, userId: string): Promise<void> {
+  try {
+    await invalidateParentWrite(parentId, userId);
+  } catch (cacheErr) {
+    logger.error("Failed to invalidate parent cache tags", { parentId, userId, error: cacheErr });
+  }
+}
+
 export namespace ParentProfileService {
   /**
    * Retrieves the full profile for a specific parent.
@@ -190,11 +198,7 @@ export namespace ParentProfileService {
       });
     }
 
-    try {
-      await invalidateParentWrite(parentId, result.userId);
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate parent cache tags", { parentId, userId: result.userId, error: cacheErr });
-    }
+    await invalidateParentCacheFailOpen(parentId, result.userId);
 
     return {
       id: result.id,
@@ -216,11 +220,7 @@ export namespace ParentProfileService {
 
     const result = await ParentRepository.reactivateParent(parentId, undefined, locale);
 
-    try {
-      await invalidateParentWrite(parentId, result.userId);
-    } catch (cacheErr) {
-      logger.error("Failed to invalidate parent cache tags", { parentId, userId: result.userId, error: cacheErr });
-    }
+    await invalidateParentCacheFailOpen(parentId, result.userId);
 
     return {
       id: result.id,

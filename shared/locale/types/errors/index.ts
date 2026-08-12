@@ -177,13 +177,11 @@ export interface UserErrors {
 }
 
 /**
- * SchedulingErrors — scheduling specific errors.
+ * SchedulingSharedErrors — properties shared between the SchedulingErrors
+ * sub-interface and the flattened top-level ErrorsLabels. Extracted to avoid
+ * within-file type-signature duplication.
  */
-export interface SchedulingErrors {
-  readonly cannotRescheduleToSelf: string;
-  readonly cannotRescheduleCompleted: string;
-  readonly cannotRescheduleAlreadyRescheduled: string;
-  readonly outOfQuota: string;
+interface SchedulingSharedErrors {
   readonly leaveQuotaExceeded: (params: { maxLeaves: string }) => string;
   readonly classInstanceNotFound: (params: { id: string }) => string;
   readonly originalClassNotFound: string;
@@ -193,6 +191,16 @@ export interface SchedulingErrors {
   readonly studentBooked: string;
   readonly meetingUrlInUse: string;
   readonly sessionNotActivated: string;
+}
+
+/**
+ * SchedulingErrors — scheduling specific errors.
+ */
+export interface SchedulingErrors extends SchedulingSharedErrors {
+  readonly cannotRescheduleToSelf: string;
+  readonly cannotRescheduleCompleted: string;
+  readonly cannotRescheduleAlreadyRescheduled: string;
+  readonly outOfQuota: string;
   readonly missedClassTime: string;
 }
 
@@ -231,7 +239,12 @@ export interface QuotaErrors {
  * Only the subset needed by the login GraphQL mutation is defined here.
  * Grow this interface as more errors are migrated.
  */
-export interface ErrorsLabels {
+export interface ErrorsLabels
+  extends StudentErrors,
+    CategoryErrors,
+    UserErrors,
+    PermissionGroupErrors,
+    SchedulingSharedErrors {
   readonly auth: AuthErrors;
   readonly permissionManagement: PermissionManagementErrors;
   readonly billing: BillingErrors;
@@ -262,7 +275,6 @@ export interface ErrorsLabels {
   readonly unknownName: string;
   readonly invalidInput: string;
   readonly invalidNationalId: string;
-  readonly permissionGroupNotFound: string;
 
   // ─── Lesson Report errors ─────────────────────────────────────────
   readonly rejectedReportsRequireReason: string;
@@ -274,10 +286,9 @@ export interface ErrorsLabels {
   readonly displayCurrencyMixed: (values: { lockedAmount: string; lockedCurrency: string }) => string;
 
   // ─── Flattened error properties for backward compatibility ───────────
-  // These are proxies to the nested namespace properties
-  readonly categoryNotFound: (id: string) => string;
-  readonly categoryCreateFailed: string;
-  readonly categoryHasSubjects: string;
+  // Sub-interface properties are inherited via `extends` (StudentErrors,
+  // CategoryErrors, UserErrors, PermissionGroupErrors, SchedulingSharedErrors).
+  // Only properties NOT covered by sub-interfaces are declared here.
   readonly meetingProviderNotFound: (id: string) => string;
   readonly meetingProviderCreateFailed: string;
   readonly meetingProviderUpdateFailed: string;
@@ -286,22 +297,10 @@ export interface ErrorsLabels {
   readonly meetingConfigNotFound: (id: string) => string;
   readonly meetingConfigCreateFailed: string;
   readonly meetingConfigUpdateFailed: string;
-  readonly studentNotFound: (id: string) => string;
-  readonly studentCreateFailed: string;
-  readonly studentUpdateFailed: (id: string) => string;
-  readonly studentVersionMismatch: (params: { id: string; expectedVersion: number; gotVersion: number }) => string;
-  readonly insufficientClasses: (params: { id: string; remaining: number; required: number }) => string;
-  readonly invalidStatusTransition: (params: { currentStatus: string; newStatus: string }) => string;
-  readonly studentEmailRequired: string;
-  readonly studentPasswordRequired: string;
   readonly teacherNotFound: (id: string) => string;
   readonly staffProfileNotFound: string;
   readonly quotaMustBeNonNegative: string;
   readonly quotaExceedsTotal: (params: { requested: number; total: number }) => string;
-  readonly userNotFound: (id: string) => string;
-  readonly userEmailExists: string;
-  readonly cannotModifyBankingFields: string;
-  readonly parentNotFound: string;
   readonly parentAlreadyDeactivated: string;
   readonly parentAlreadyActivated: string;
   readonly cannotRescheduleToSelf: string;
@@ -311,16 +310,6 @@ export interface ErrorsLabels {
   readonly quotaExpired: string;
   readonly quotaNotFound: string;
   readonly invalidQuotaState: string;
-  readonly leaveQuotaExceeded: (params: { maxLeaves: string }) => string;
-
-  readonly classInstanceNotFound: (params: { id: string }) => string;
-  readonly originalClassNotFound: string;
-  readonly invalidTransition: string;
-  readonly teacherNotAssigned: (params: { teacherId: string; studentId: string; startTime: string }) => string;
-  readonly teacherBooked: string;
-  readonly studentBooked: string;
-  readonly meetingUrlInUse: string;
-  readonly sessionNotActivated: string;
   readonly exchangeRateStale: (params: { fromCurrency: string; toCurrency: string }) => string;
   readonly outsideAvailability: string;
   readonly teacherUnavailabilityConflict: string;

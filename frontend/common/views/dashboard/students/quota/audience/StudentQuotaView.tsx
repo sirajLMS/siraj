@@ -1,40 +1,21 @@
 "use client";
 
-import { Paper, Typography } from "@mui/material";
-import { QuotaAudienceCard } from "@/frontend/common/views/dashboard/students/quota/audience/QuotaAudienceCard";
+import type { QuotaAudienceSection } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceViewShared";
+import { QuotaAudienceViewShared } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceViewShared";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 interface StudentQuotaViewProps {
   readonly t: StudentQuotaLabels;
 }
 
+function buildStudentSections(t: StudentQuotaLabels): readonly QuotaAudienceSection[] {
+  return [
+    { label: t.audience.remainingCredits, emptyStateMessage: t.audience.noData, highlighted: true },
+    { label: t.audience.activeQuotas, emptyStateMessage: t.audience.noData },
+    { label: t.audience.onDemandPending, emptyStateMessage: t.audience.noData },
+  ];
+}
+
 export function StudentQuotaAudienceView({ t }: Readonly<StudentQuotaViewProps>) {
-  return (
-    <QuotaAudienceCard title={t.audience.studentTitle}>
-      <Paper sx={{ p: 3 }} elevation={4} variant="outlined">
-        <Typography variant="labelMd" sx={{ mb: 1 }}>
-          {t.audience.remainingCredits}
-        </Typography>
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {t.audience.noData}
-        </Typography>
-      </Paper>
-      <Paper sx={{ p: 3 }} elevation={0} variant="outlined">
-        <Typography variant="labelMd" sx={{ mb: 1 }}>
-          {t.audience.activeQuotas}
-        </Typography>
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {t.audience.noData}
-        </Typography>
-      </Paper>
-      <Paper sx={{ p: 3 }} elevation={0} variant="outlined">
-        <Typography variant="labelMd" sx={{ mb: 1 }}>
-          {t.audience.onDemandPending}
-        </Typography>
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
-          {t.audience.noData}
-        </Typography>
-      </Paper>
-    </QuotaAudienceCard>
-  );
+  return <QuotaAudienceViewShared title={t.audience.studentTitle} sections={buildStudentSections(t)} />;
 }

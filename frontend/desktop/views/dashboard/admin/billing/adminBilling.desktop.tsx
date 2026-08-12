@@ -3,6 +3,7 @@
 import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { StudentCreditFooterShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/studentCreditFooterShared";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import { BillingSearchBar } from "@/frontend/common/views/dashboard/billing/components/BillingSearchBar";
 import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
@@ -19,12 +20,6 @@ import { Link } from "@/shared/i18n";
 const StyledAttentionChip = styled(Chip)(({ theme }) => ({
   backgroundColor: theme.palette.error.main,
   color: theme.palette.onError,
-}));
-
-const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "center",
-  borderTop: `1px solid ${theme.palette.outlineVariant}`,
 }));
 
 function AdminBillingHeaderActions({
@@ -102,17 +97,14 @@ function StudentCreditSection({
         loading={creditLoading && creditRows.length === 0}
         sendingReminderId={sendingReminderId}
       />
-      <StyledCreditFooterBox sx={{ py: 2, flexDirection: "column", gap: 1 }}>
-        {isNegativeFilter ? (
-          <Button variant="text" sx={{ fontWeight: 700 }} onClick={onClearCreditFilter}>
-            {labels.creditTable.clearFilter}
-          </Button>
-        ) : (
-          <Button variant="text" sx={{ fontWeight: 700 }} onClick={onViewAllNegativeBalance}>
-            {labels.viewAllNegativeBalance}
-          </Button>
-        )}
-      </StyledCreditFooterBox>
+      <StudentCreditFooterShared
+        isNegativeFilter={isNegativeFilter}
+        clearFilterLabel={labels.creditTable.clearFilter}
+        viewAllNegativeBalanceLabel={labels.viewAllNegativeBalance}
+        onClearCreditFilter={onClearCreditFilter}
+        onViewAllNegativeBalance={onViewAllNegativeBalance}
+        config={{ paddingInlineSx: undefined }}
+      />
     </DesktopSectionPanel>
   );
 }

@@ -1,26 +1,3 @@
-import { getServerUserContext } from "@/backend/lib";
-import { ProfileService } from "@/backend/services";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { redirect } from "@/shared/i18n";
+import { makeParentProfileRedirectPage } from "@/app/(dashboard)/parents/[id]/profile/__shared__/makeParentProfileRedirectPage";
 
-interface PageProps {
-  readonly params: Promise<{ readonly id: string }>;
-}
-
-export default async function ParentProfileEditRedirectPage({ params }: PageProps) {
-  const { id } = await params;
-
-  const { userId } = await getServerUserContext();
-  if (!userId) {
-    await redirectToLogin();
-    return;
-  }
-
-  const targetUserId = await ProfileService.resolveUserIdForParentId(id);
-  if (!targetUserId) {
-    redirect({ href: "/dashboard" });
-    return;
-  }
-
-  redirect({ href: `/users/${targetUserId}/profile/edit` });
-}
+export default makeParentProfileRedirectPage("/profile/edit");

@@ -4,14 +4,14 @@ import {
   StudentFilterArgsPothosObject,
   StudentsOrderByClausePothosObject,
 } from "@/backend/graphql/pothos/students/student.pothos";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { StudentDirectoryService } from "@/backend/services";
-import {
-  PaginationArgs,
-  type StudentDirectory,
-  type StudentDirectoryResult,
-  type StudentFilterArgs,
-  type StudentsOrderByClause,
+import type {
+  StudentDirectory,
+  StudentDirectoryResult,
+  StudentFilterArgs,
+  StudentsOrderByClause,
 } from "@/backend/types";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
@@ -63,19 +63,7 @@ gqlSchemaBuilder.queryField("studentDirectory", t =>
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
 
-      // Construct PaginationArgs from GraphQL input
-      let pagination: PaginationArgs | null = null;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs);
 
       // Convert GraphQL filter args to typed Service args
       let filters: StudentFilterArgs | null = null;

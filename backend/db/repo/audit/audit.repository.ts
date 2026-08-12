@@ -31,35 +31,18 @@ export namespace AuditRepository {
     tx?: DBTransaction
   ): Promise<Types.AuditLogSelectType> => {
     return runInTransaction(tx, async t => {
-      const [created] = await t
-        .insert(auditLogs)
-        .values({
-          actorUserId: input.actorUserId ?? null,
-          actorType: input.actorType,
-          entityType: input.entityType,
-          entityId: input.entityId,
-          action: input.action,
-          description: input.description ?? null,
-          previousState: input.previousState ?? null,
-          newState: input.newState ?? null,
-          changes: input.changes ?? null,
-          ipAddress: sanitizeIpAddress(input.ipAddress),
-          userAgent: input.userAgent ?? null,
-          metadata: input.metadata ?? null,
-          createdAt: new Date(),
-        })
-        .returning();
+      const [created] = await t.insert(auditLogs).values(mapSingleAuditLogRow(input)).returning();
 
       return created;
     });
   };
 
   /**
-   * Maps CreateAuditLogInput[] to insert row objects.
+   * Maps a single CreateAuditLogInput to an insert row object.
+   * Shared by `createAuditLog` (single insert) and `mapAuditLogRows` (bulk insert).
    */
-  function mapAuditLogRows(inputs: readonly Types.CreateAuditLogInput[]) {
-    const now = new Date();
-    return inputs.map(input => ({
+  function mapSingleAuditLogRow(input: Types.CreateAuditLogInput) {
+    return {
       actorUserId: input.actorUserId ?? null,
       actorType: input.actorType,
       entityType: input.entityType,
@@ -72,8 +55,15 @@ export namespace AuditRepository {
       ipAddress: sanitizeIpAddress(input.ipAddress),
       userAgent: input.userAgent ?? null,
       metadata: input.metadata ?? null,
-      createdAt: input.createdAt ?? now,
-    }));
+      createdAt: input.createdAt ?? new Date(),
+    };
+  }
+
+  /**
+   * Maps CreateAuditLogInput[] to insert row objects.
+   */
+  function mapAuditLogRows(inputs: readonly Types.CreateAuditLogInput[]) {
+    return inputs.map(mapSingleAuditLogRow);
   }
 
   /**

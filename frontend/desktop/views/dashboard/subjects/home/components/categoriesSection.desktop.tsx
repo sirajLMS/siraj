@@ -1,10 +1,12 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Chip, IconButton, Stack } from "@mui/material";
-import { CategoryChip } from "@/frontend/common/views/dashboard/subjects/home/components/categoryChip";
+import { IconButton, Stack } from "@mui/material";
+import { CategoryChipListShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/categoryChipListShared";
 import type { CategoriesSectionProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
+
+const DESKTOP_CHIP_SLOTS = { chipSx: undefined } as const;
 
 /**
  * CategoriesSectionDesktop — desktop-tier category management panel.
@@ -37,24 +39,16 @@ export function CategoriesSectionDesktop({
       }
     >
       <Stack sx={{ flexDirection: "row", flexWrap: "wrap", gap: 1, p: 2 }}>
-        <Chip
-          label={t.allCategories}
-          variant={activeCategoryId === null ? "filled" : "outlined"}
-          color={activeCategoryId === null ? "primary" : "default"}
-          onClick={() => onCategoryChange(null)}
+        <CategoryChipListShared
+          labels={labels}
+          categories={categories}
+          activeCategoryId={activeCategoryId}
+          onCategoryChange={onCategoryChange}
+          onEditCategory={onEditCategory}
+          onDeleteCategory={onDeleteCategory}
+          canManage={canManage}
+          slots={DESKTOP_CHIP_SLOTS}
         />
-        {categories.map(cat => (
-          <CategoryChip
-            key={cat.id}
-            label={cat.name}
-            isActive={activeCategoryId === cat.id}
-            onClick={() => onCategoryChange(cat.id ?? null)}
-            onDelete={() => onDeleteCategory(cat.id ?? "")}
-            onEdit={() => onEditCategory(cat.id ?? "")}
-            canManage={canManage}
-            editAriaLabel={t.editCategory}
-          />
-        ))}
       </Stack>
     </DesktopSectionPanel>
   );

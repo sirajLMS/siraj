@@ -1,12 +1,15 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/common/components/ui";
 import type { ClassInstanceTeacherInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { TeacherEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
-import { Link } from "@/shared/i18n";
+import {
+  StyledTopAccentBar,
+  StyledViewProfileButton,
+  viewProfileButtonSx,
+} from "@/frontend/common/views/dashboard/classes/details/teacher/profileCardShared";
 
 interface TeacherProfileCardProps {
   readonly teacher: ClassInstanceTeacherInfo;
@@ -14,28 +17,6 @@ interface TeacherProfileCardProps {
     readonly viewFullProfile: string;
   };
 }
-
-const StyledTopAccentBar = styled(Box)(({ theme }) => ({
-  height: 4,
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  backgroundColor: theme.palette.primary.main,
-}));
-
-const StyledViewProfileButton = styled(Link)(() => ({
-  display: "block",
-  width: "100%",
-  textAlign: "center",
-  borderRadius: 6,
-  fontWeight: 700,
-  letterSpacing: "0.08em",
-  paddingBlock: 1.25,
-  textDecoration: "none",
-  typography: "labelUppercase",
-  transition: "all 0.2s ease",
-}));
 
 export function TeacherProfileCard({ teacher, labels }: TeacherProfileCardProps) {
   if (!teacher.id) {
@@ -64,20 +45,7 @@ export function TeacherProfileCard({ teacher, labels }: TeacherProfileCardProps)
       </Box>
 
       {profileHref ? (
-        <StyledViewProfileButton
-          href={profileHref}
-          id="view-teacher-profile-btn"
-          sx={theme => ({
-            border: `1px solid ${theme.palette.outline}`,
-            color: theme.palette.primary.main,
-            paddingBlock: theme.spacing(1.25),
-            "&:hover": {
-              backgroundColor: theme.palette.action.hover,
-              borderColor: theme.palette.primary.main,
-              color: theme.palette.primary.main,
-            },
-          })}
-        >
+        <StyledViewProfileButton href={profileHref} id="view-teacher-profile-btn" sx={viewProfileButtonSx}>
           {labels.viewFullProfile}
         </StyledViewProfileButton>
       ) : null}

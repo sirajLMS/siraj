@@ -4,7 +4,7 @@
  * This script is called by subagents dispatched by the quality-gate skill. It runs a progressive
  * quality loop on a single file, checking in strict order:
  *
- *   tsgo → biome:check → oxlint → lint:type-aware (via lint service) → check:duplicates → codescene --file
+ *   tsgo → oxlint → biome:check → lint:type-aware (via lint service) → check:duplicates → codescene --file
  *
  * It SHORT-CIRCUITS at the first failing check — stops and prints the errors for the subagent
  * to fix. The subagent fixes the errors and re-runs this script until it passes all checks.
@@ -22,9 +22,9 @@
  *
  * Lifecycle stages (controls how deep the loop goes):
  *   tsgo          → only run tsgo (type checking only)
- *   biome         → run tsgo, then biome:check (stop if tsgo fails)
- *   lint          → run tsgo, biome, oxlint, then lint:type-aware via lint service (stop if earlier check fails)
- *   codescene     → run tsgo, biome, oxlint, lint:type-aware, check:duplicates, then codescene --file
+ *   biome         → run tsgo, then oxlint, then biome:check (stop if tsgo or oxlint fails)
+ *   lint          → run tsgo, oxlint, biome, then lint:type-aware via lint service (stop if earlier check fails)
+ *   codescene     → run tsgo, oxlint, biome, lint:type-aware, check:duplicates, then codescene --file
  *
  * Exit codes:
  *   0 = all checks up to the lifecycle stage passed
@@ -32,39 +32,30 @@
  *   2 = invalid arguments
  */
 
-import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
+import {
+  BOLD,
+  type CheckResult,
+  CYAN,
+  exitCodePassed,
+  GREEN,
+  isLifecycle,
+  LIFECYCLE_ORDER,
+  type Lifecycle,
+  logFail,
+  logInfo,
+  logPass,
+  NC,
+  runCommand,
+  YELLOW,
+} from "@/scripts/health/__shared__/sub-loop-types";
 import { isCodeSceneOutputFailed } from "@/scripts/health/codescene/checker";
 import { withProcessLock } from "@/scripts/lib/process-lock";
 import { type LintResult, requestLint } from "@/scripts/lint-service";
 
-// ─── Types ──────────────────────────────────────────────────────────────────
-
-type Lifecycle = "tsgo" | "biome" | "lint" | "codescene";
-
-interface CheckResult {
-  name: string;
-  passed: boolean;
-  output: string;
-}
-
 // ─── Constants ──────────────────────────────────────────────────────────────
 const PROJECT_ROOT = process.cwd();
-
-const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
-  tsgo: 0,
-  biome: 1,
-  lint: 2,
-  codescene: 3,
-};
-
-const RED = "\x1b[31m";
-const GREEN = "\x1b[32m";
-const YELLOW = "\x1b[33m";
-const CYAN = "\x1b[36m";
-const BOLD = "\x1b[1m";
-const NC = "\x1b[0m";
 
 // ─── Instruction & AGENTS.md Discovery ──────────────────────────────────────
 
@@ -192,43 +183,6 @@ function printApplicableRuleFiles(filePath: string): void {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
-function logInfo(msg: string): void {
-  console.log(`${CYAN}ℹ${NC}  ${msg}`);
-}
-
-function logPass(msg: string): void {
-  console.log(`${GREEN}✅${NC} ${msg}`);
-}
-
-function logFail(msg: string): void {
-  console.error(`${RED}❌${NC} ${BOLD}${msg}${NC}`);
-}
-
-interface CommandRunResult {
-  exitCode: number | null;
-  output: string;
-}
-
-/**
- * Run a command synchronously and capture its output.
- */
-function runCommand(command: string, args: string[]): CommandRunResult {
-  const result = spawnSync(command, args, {
-    encoding: "utf8",
-    cwd: PROJECT_ROOT,
-    stdio: ["pipe", "pipe", "pipe"],
-  });
-
-  return {
-    exitCode: result.status,
-    output: (result.stdout || "") + (result.stderr || ""),
-  };
-}
-
-function exitCodePassed(exitCode: number | null): boolean {
-  return exitCode === 0;
-}
-
 function toCheckResult(name: string, passed: boolean, output: string): CheckResult {
   return { name, passed, output };
 }
@@ -334,7 +288,7 @@ function checkBiome(filePath: string): CheckResult {
 function checkOxlint(filePath: string): CheckResult {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath));
   logInfo(`Running oxlint on ${relPath}...`);
-  const result = runCommand("bun", ["oxlint", "--deny-warnings", relPath]);
+  const result = runCommand("bunx", ["oxlint", "--deny-warnings", "--ignore-path", ".gitignore", relPath]);
   const passed = exitCodePassed(result.exitCode) && !oxlintOutputHasDiagnostics(result.output);
   return toCheckResult("oxlint", passed, result.output);
 }
@@ -410,12 +364,6 @@ function checkCodescene(filePath: string): CheckResult {
 
 // ─── Argument Parsing ──────────────────────────────────────────────────────
 
-const VALID_LIFECYCLES = ["tsgo", "biome", "lint", "codescene", "sonar-results"] as const;
-
-function isLifecycle(value: string): value is Lifecycle {
-  return (VALID_LIFECYCLES as readonly string[]).includes(value);
-}
-
 interface ParsedArgs {
   filePath: string | null;
   lifecycle: string | null;
@@ -451,7 +399,7 @@ function validateArgs(filePath: string | null, lifecycle: string | null): Valida
     process.exit(2);
   }
 
-  const validLifecycles = VALID_LIFECYCLES.join(", ");
+  const validLifecycles = Object.keys(LIFECYCLE_ORDER).join(", ");
   if (!lifecycle || !isLifecycle(lifecycle)) {
     logFail(`Invalid or missing --lifecycle argument.`);
     console.error(`Valid stages: ${validLifecycles}`);
@@ -494,7 +442,12 @@ async function runProgressiveChecks(
     return 0;
   }
 
-  // Step 2: biome:check (file-level)
+  // Step 2: oxlint (file-level)
+  const oxlintResult = checkOxlint(filePath);
+  if (failOnResult(oxlintResult, "oxlint FAILED — stopping here. Fix oxlint errors before proceeding.")) return 1;
+  logPass("oxlint passed");
+
+  // Step 3: biome:check (file-level)
   const biomeResult = checkBiome(filePath);
   if (failOnResult(biomeResult, "biome:check FAILED — stopping here. Fix formatting/biome issues before proceeding."))
     return 1;
@@ -504,11 +457,6 @@ async function runProgressiveChecks(
     console.log(`\n${GREEN}✅ All checks for lifecycle "biome" passed.${NC}`);
     return 0;
   }
-
-  // Step 3: oxlint (file-level)
-  const oxlintResult = checkOxlint(filePath);
-  if (failOnResult(oxlintResult, "oxlint FAILED — stopping here. Fix oxlint errors before proceeding.")) return 1;
-  logPass("oxlint passed");
 
   // Step 4: lint:type-aware via lint service (file-level)
   const lintResult = await checkLint(filePath);
@@ -552,15 +500,15 @@ ${BOLD}Usage:${NC}
 
 ${BOLD}Lifecycle stages (controls depth of checks):${NC}
   tsgo          Only run tsgo (type checking)
-  biome         Run tsgo, then biome:check
-  lint          Run tsgo, biome, oxlint, then lint:type-aware via lint service
-  codescene     Run tsgo, biome, oxlint, lint:type-aware, check:duplicates, then codescene --file
+  biome         Run tsgo, then oxlint, then biome:check
+  lint          Run tsgo, oxlint, biome, then lint:type-aware via lint service
+  codescene     Run tsgo, oxlint, biome, lint:type-aware, check:duplicates, then codescene --file
   sonar-results Same as codescene (no sonar for subagents — EVER)
 
 ${BOLD}Check order (always strict, no skipping):${NC}
   1. tsgo (project-wide, filtered for this file)
-  2. biome:check (file-level)
-  3. oxlint (file-level)
+  2. oxlint (file-level)
+  3. biome:check (file-level)
   4. lint:type-aware via lint service (file-level)
   5. check:duplicates via jscpd (intra-file clones only)
   6. codescene --file (file-level)

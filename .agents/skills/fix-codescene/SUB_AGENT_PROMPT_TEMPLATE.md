@@ -1,7 +1,7 @@
 You are fixing CodeScene health warnings in a SINGLE file. You may ONLY read and edit THIS file.
 
 File: <file-path>
-Lifecycle stage: codescene (full progressive verification: tsgo → biome → lint → codescene --file)
+Lifecycle stage: codescene (full progressive verification: tsgo → oxlint → biome → lint → codescene --file)
 
 CodeScene warnings for this file (from `bun run codescene --scan`):
 <paste warning lines>
@@ -57,7 +57,7 @@ NEVER modify a file you were not assigned to.
 
   bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene
 
-If it fails at tsgo → fix only tsgo. Re-run. Once tsgo passes it advances to biome → fix biome → re-run → advances to oxlint → fix oxlint → re-run → advances to lint:type-aware → fix lint → re-run → advances to check:duplicates → fix duplicates → re-run → advances to codescene --file → fix any remaining warnings → re-run. Repeat until the script exits 0.
+If it fails at tsgo → fix only tsgo. Re-run. Once tsgo passes it advances to oxlint → fix oxlint → re-run → advances to biome → fix biome → re-run → advances to lint:type-aware → fix lint → re-run → advances to check:duplicates → fix duplicates → re-run → advances to codescene --file → fix any remaining warnings → re-run. Repeat until the script exits 0.
 
 For test files, use `bun run scripts/run-test/run-test.ts <test-path>` when sub-loop passes but you need to validate behavior.
 

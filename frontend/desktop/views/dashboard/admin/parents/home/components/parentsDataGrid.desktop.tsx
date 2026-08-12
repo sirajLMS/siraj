@@ -13,13 +13,17 @@ import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
+import {
+  buildDirectoryEmailColumn,
+  buildDirectoryIndexColumn,
+  buildDirectoryNameColumn,
+} from "@/frontend/common/views/dashboard/admin/parents/__shared__/directoryDataGridShared";
 import type {
   ParentDirectoryRow,
   ParentsDataGridLabels,
 } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
-import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display";
 import { Link } from "@/shared/i18n";
 
 export type { ParentsDataGridLabels };
@@ -57,44 +61,13 @@ export function ParentsDataGridDesktop({
 }: Readonly<ParentsDataGridDesktopProps>) {
   const columns = useMemo<GridColDef<ParentDirectoryRow>[]>(
     () => [
-      {
-        field: "index",
-        headerName: labels.index,
-        width: 72,
-        sortable: false,
-        renderCell: ({ row }) => (
-          <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {row.index}
-          </Typography>
-        ),
-      },
-      {
-        field: "name",
-        headerName: labels.name,
-        flex: 1.5,
-        minWidth: 200,
-        renderCell: ({ row }) => (
-          <DesktopPersonProfileLinkCell
-            href={profileHrefForParent({ userId: row.userId, parentId: row.id })}
-            name={row.name}
-            avatarUrl={row.avatarUrl}
-            avatarSize={40}
-            typographyVariant="bodyLg"
-            fontWeight={600}
-          />
-        ),
-      },
-      {
-        field: "email",
-        headerName: labels.email,
-        flex: 1.2,
-        minWidth: 180,
-        renderCell: ({ row }) => (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {row.email}
-          </Typography>
-        ),
-      },
+      buildDirectoryIndexColumn<ParentDirectoryRow>(labels.index),
+      buildDirectoryNameColumn<ParentDirectoryRow>(
+        labels.name,
+        row => profileHrefForParent({ userId: row.userId, parentId: row.id }),
+        1.5
+      ),
+      buildDirectoryEmailColumn<ParentDirectoryRow>(labels.email),
       {
         field: "time",
         headerName: labels.time,

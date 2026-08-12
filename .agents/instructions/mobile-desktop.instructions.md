@@ -179,6 +179,22 @@ These non-versioned components are used BY mobile views, not by both tiers:
 
 ### Commands
 
+### Scaffold Import Convention (`__shared__/` Directories)
+
+When desktop and mobile view variants share presentation logic, the shared scaffold (`*Shared.tsx`) lives in a `__shared__/` directory:
+
+```
+frontend/common/views/dashboard/<domain>/components/
+  __shared__/
+    <componentName>Shared.tsx      # Scaffold with slot props
+  <componentName>.desktop.tsx       # Imports from __shared__/
+  <componentName>.mobile.tsx        # Imports from __shared__/
+```
+
+- Desktop and mobile variants import ONLY from `__shared__/` — never from each other
+- Scaffold accepts slot props for tier-specific components, sx styles, configuration
+- See `docs/frontend/ui-shared-scaffold-pattern.md` for the full pattern
+
 - Verify ESLint rules: `~/.bun/bin/bun run lint` (this script calls `requestFullRepoLint` from `scripts/lint-queue-client.ts` and serializes through the lint queue server). Ensure `bun run lint:server` is running first.
 - Type check: `~/.bun/bin/bun tsgo`
 - Format: `~/.bun/bin/bun biome:check`

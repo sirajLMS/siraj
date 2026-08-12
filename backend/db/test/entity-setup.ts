@@ -29,7 +29,6 @@ import {
   LessonReportStatus,
   TeacherDueStatus,
 } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   ClassInstanceSelectType,
   ClassMeetingConfigSelectType,
@@ -43,6 +42,7 @@ import type {
   UserMeetingConfigSelectType,
   UserSelectType,
 } from "@/backend/types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 /** LocalizedString helper for permission/group JSONB columns in tests. */
 export function loc(en: string, ar?: string): { ar: string; en: string } {
@@ -65,6 +65,8 @@ export async function ensureTestSubjectId(tx: TestDb): Promise<string> {
       slug: `test-cat-${randomUUID().slice(0, 8)}`,
       isActive: true,
       sortOrder: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     })
     .returning({ id: classCategories.id });
 

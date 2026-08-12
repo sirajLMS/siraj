@@ -1,7 +1,58 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
+import type { QueryDbHandle } from "@/backend/db/drizzleDb";
 import { classInstances, parents, students, teachers, users } from "@/backend/db/schema";
+
+/** Select fields for the single-instance parent-user query. */
+const singleInstanceSelect = {
+  studentId: classInstances.studentId,
+  studentUserId: students.userId,
+  parentUserId: users.id,
+} as const;
+
+/** Select fields for the batch parent-user query. */
+const batchInstanceSelect = {
+  classInstanceId: classInstances.id,
+  studentId: classInstances.studentId,
+  studentUserId: students.userId,
+  parentUserId: users.id,
+} as const;
+
+/** Join condition: classInstances.studentId → students.id */
+const studentJoin = eq(classInstances.studentId, students.id);
+/** Join condition: students.parentId → parents.id */
+const parentJoin = eq(students.parentId, parents.id);
+/** Join condition: parents.userId → users.id */
+const userJoin = eq(parents.userId, users.id);
+
+/**
+ * Shared select+join from classInstances → students → parents → users.
+ * Extracts the duplicated three-table inner-join chain used by the
+ * single-instance affected-users resolver.
+ */
+function selectSingleInstanceParentUser(q: QueryDbHandle | DBTransaction) {
+  return q
+    .select(singleInstanceSelect)
+    .from(classInstances)
+    .innerJoin(students, studentJoin)
+    .innerJoin(parents, parentJoin)
+    .innerJoin(users, userJoin);
+}
+
+/**
+ * Shared select+join from classInstances → students → parents → users.
+ * Extracts the duplicated three-table inner-join chain used by the
+ * batch affected-users resolver.
+ */
+function selectBatchInstanceParentUser(q: QueryDbHandle | DBTransaction) {
+  return q
+    .select(batchInstanceSelect)
+    .from(classInstances)
+    .innerJoin(students, studentJoin)
+    .innerJoin(parents, parentJoin)
+    .innerJoin(users, userJoin);
+}
 
 /**
  * Affected-user set resolved for a single class instance.
@@ -98,18 +149,7 @@ export async function getClassInstanceAffectedUsers(
   const q = queryDb(tx);
   const liveInstanceFilter = and(eq(classInstances.id, classInstanceId), isNull(classInstances.deletedAt));
 
-  const [parentRow] = await q
-    .select({
-      studentId: classInstances.studentId,
-      studentUserId: students.userId,
-      parentUserId: users.id,
-    })
-    .from(classInstances)
-    .innerJoin(students, eq(classInstances.studentId, students.id))
-    .innerJoin(parents, eq(students.parentId, parents.id))
-    .innerJoin(users, eq(parents.userId, users.id))
-    .where(liveInstanceFilter)
-    .limit(1);
+  const [parentRow] = await selectSingleInstanceParentUser(q).where(liveInstanceFilter).limit(1);
 
   if (!parentRow) return null;
 
@@ -175,18 +215,9 @@ export async function getClassInstanceAffectedUsersForTeacher(
 
   const ids = futureInstanceIds.map(row => row.id);
 
-  const parentRows = await q
-    .select({
-      classInstanceId: classInstances.id,
-      studentId: classInstances.studentId,
-      studentUserId: students.userId,
-      parentUserId: users.id,
-    })
-    .from(classInstances)
-    .innerJoin(students, eq(classInstances.studentId, students.id))
-    .innerJoin(parents, eq(students.parentId, parents.id))
-    .innerJoin(users, eq(parents.userId, users.id))
-    .where(and(inArray(classInstances.id, ids), isNull(classInstances.deletedAt)));
+  const parentRows = await selectBatchInstanceParentUser(q).where(
+    and(inArray(classInstances.id, ids), isNull(classInstances.deletedAt))
+  );
 
   const [teacherUser] = await q
     .select({ teacherUserId: users.id })

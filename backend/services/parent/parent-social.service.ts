@@ -1,33 +1,15 @@
 import { ParentRepository } from "@/backend/db";
 import { AppPermission } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services";
+import { ParentServiceBase } from "@/backend/services/parent/__shared__/parentServiceBase";
 import type { ParentProfileResult } from "@/backend/types/parents/parent.types";
-import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentSocialService {
-  async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
-    const isAuthorized = await PermissionsService.hasPermission(userId, permission);
-    if (!isAuthorized) {
-      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(t.unauthorizedAction);
-    }
-  }
-
-  async function resolveParentForUser(userId: string, locale?: string) {
-    const parent = await ParentRepository.findByUserId(userId);
-    if (!parent) {
-      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(t.notFound);
-    }
-    return parent;
-  }
-
   export async function getSocialProfile(
     userId: string,
     locale?: string
   ): Promise<Pick<ParentProfileResult, "phone" | "facebook" | "whatsapp" | "twitter"> | null> {
-    await assertPermission(userId, AppPermission.PROFILE_PARENT_SOCIAL_VIEW_OWN, locale);
-    const parent = await resolveParentForUser(userId, locale);
+    await ParentServiceBase.assertPermission(userId, AppPermission.PROFILE_PARENT_SOCIAL_VIEW_OWN, locale);
+    const parent = await ParentServiceBase.resolveParentForUser(userId, locale);
     const profile = await ParentRepository.getParentProfile(parent.id);
     if (!profile) {
       return null;
@@ -46,7 +28,7 @@ export namespace ParentSocialService {
     parentId: string,
     locale?: string
   ): Promise<Pick<ParentProfileResult, "phone" | "facebook" | "whatsapp" | "twitter"> | null> {
-    await assertPermission(actorUserId, AppPermission.PROFILE_PARENT_SOCIAL_VIEW_OTHER, locale);
+    await ParentServiceBase.assertPermission(actorUserId, AppPermission.PROFILE_PARENT_SOCIAL_VIEW_OTHER, locale);
     const profile = await ParentRepository.getParentProfile(parentId);
     if (!profile) {
       return null;

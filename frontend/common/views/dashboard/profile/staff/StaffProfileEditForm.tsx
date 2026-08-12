@@ -8,6 +8,8 @@ import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/fro
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
+import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
+import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
 import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
 import {
   AdminResetPasswordSection,
@@ -101,19 +103,14 @@ function useFormSubmitHandler(
   targetUserId: string
 ) {
   return async (values: StaffAdminEditFormData) => {
-    try {
-      await onSubmit(values);
-      const resetData = resetPasswordRef.current?.getResetPasswordData();
-      if (resetData?.isValid) {
-        const success = await resetPassword(targetUserId, resetData.newPassword, resetData.sendNotificationEmail);
-        if (success) {
-          resetPasswordRef.current?.reset();
-        }
-      }
-      setSuccessOpen(true);
-    } catch {
-      setErrorOpen(true);
-    }
+    await executeProfileSubmit(values, {
+      onSubmit,
+      resetPasswordRef,
+      resetPassword,
+      targetUserId,
+      setSuccessOpen,
+      setErrorOpen,
+    });
   };
 }
 
@@ -209,18 +206,7 @@ export function StaffProfileEditForm({
               onUploadAvatar={onUploadAvatar}
             />
           ) : null}
-          <Box
-            sx={{
-              display: "grid",
-              gap: 3,
-              minWidth: 0,
-              width: "100%",
-              gridTemplateColumns: {
-                xs: "minmax(0, 1fr)",
-                lg: "repeat(2, minmax(0, 1fr))",
-              },
-            }}
-          >
+          <Box sx={PROFILE_SECTION_GRID_SX}>
             {showAccountSection ? (
               <AccountSection
                 mode="edit"

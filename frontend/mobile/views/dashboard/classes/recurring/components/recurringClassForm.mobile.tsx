@@ -1,47 +1,11 @@
 "use client";
 
-import { Alert, Box, Button } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import {
+  RecurringClassFormShared,
+  type RecurringClassFormSharedOptions,
+} from "@/frontend/common/views/dashboard/classes/recurring/components/__shared__/recurringClassFormShared";
 import type { BaseRecurringClassFormProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { RecurringClassFormFieldsMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/recurringClassFormFields.mobile";
-
-const StyledScrollableFormBody = styled(Box)(({ theme }) => ({
-  flex: 1,
-  overflowY: "auto",
-  padding: theme.spacing(2),
-  display: "flex",
-  flexDirection: "column",
-  gap: theme.spacing(4),
-  "&::-webkit-scrollbar": { width: 4 },
-  "&::-webkit-scrollbar-thumb": {
-    backgroundColor: theme.palette.divider,
-    borderRadius: 2,
-  },
-}));
-
-const StyledFormActions = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "stretch",
-  gap: theme.spacing(2),
-}));
-
-const StyledSubmitButton = styled(Button)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.onPrimary,
-  borderRadius: 10,
-  px: 4,
-  py: 1.75,
-  typography: "labelUppercase",
-  boxShadow: theme.palette.shadow.button,
-  "&:hover": {
-    backgroundColor: theme.palette.primary.main,
-    filter: "brightness(1.1)",
-  },
-  maxWidth: 480,
-  alignSelf: "center",
-  width: "100%",
-}));
 
 // VARIANT JUSTIFICATION: Mobile tier does not render the success badge inline
 // (snackbar handled by Container-level ViewModel). Desktop variant adds the
@@ -53,66 +17,15 @@ const StyledSubmitButton = styled(Button)(({ theme }) => ({
 // touching call sites.
 export type RecurringClassFormMobileProps = BaseRecurringClassFormProps;
 
-export function RecurringClassFormMobile({
-  register,
-  errors,
-  watch,
-  setValue,
-  control,
-  handleSubmit,
-  isSubmitting,
-  meetingConfigWarning = false,
-  meetingConfigWarningMessage,
-  goToClassLabel,
-  onGoToCreatedClass,
-  formLabels,
-  onSubmit,
-  meetingConfig,
-  onMeetingConfigChangeAction,
-}: RecurringClassFormMobileProps) {
-  return (
-    <Box
-      component="form"
-      onSubmit={e => {
-        e.preventDefault();
-        void handleSubmit(onSubmit)(e);
-      }}
-      sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
-    >
-      <StyledScrollableFormBody>
-        <RecurringClassFormFieldsMobile
-          register={register}
-          errors={errors}
-          watch={watch}
-          setValue={setValue}
-          control={control}
-          isSubmitting={isSubmitting}
-          labels={formLabels}
-          meetingConfig={meetingConfig}
-          onMeetingConfigChangeAction={onMeetingConfigChangeAction}
-        />
+const MOBILE_FORM_OPTIONS: RecurringClassFormSharedOptions = {
+  scrollableBodyPaddingScale: 2,
+  formActionsAlignItems: "stretch",
+  submitButtonSx: () => ({ px: 4, py: 1.75, maxWidth: 480, alignSelf: "center", width: "100%" }),
+  submitButtonFullWidth: true,
+  showSuccessBadgeInline: false,
+  fieldsComponent: RecurringClassFormFieldsMobile,
+};
 
-        <StyledFormActions>
-          {meetingConfigWarning && meetingConfigWarningMessage ? (
-            <Alert
-              severity="warning"
-              sx={{ width: "100%" }}
-              action={
-                onGoToCreatedClass && goToClassLabel ? (
-                  <Button color="inherit" size="small" onClick={onGoToCreatedClass}>
-                    {goToClassLabel}
-                  </Button>
-                ) : undefined
-              }
-            >
-              {meetingConfigWarningMessage}
-            </Alert>
-          ) : null}
-          <StyledSubmitButton type="submit" variant="contained" disabled={isSubmitting} fullWidth>
-            {formLabels.addClass}
-          </StyledSubmitButton>
-        </StyledFormActions>
-      </StyledScrollableFormBody>
-    </Box>
-  );
+export function RecurringClassFormMobile(props: RecurringClassFormMobileProps) {
+  return <RecurringClassFormShared {...props} options={MOBILE_FORM_OPTIONS} />;
 }

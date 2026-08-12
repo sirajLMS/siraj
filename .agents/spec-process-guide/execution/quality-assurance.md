@@ -32,7 +32,7 @@ Foundation: Requirements Validation
 ### Phase 0: Baseline Validation (NEW)
 
 #### Baseline Quality Checklist
-- [ ] **Error Counts Recorded**: tsgo, biome, lint baseline counts documented
+- [ ] **Error Counts Recorded**: tsgo, oxlint, biome, lint baseline counts documented
 - [ ] **Deferred Ledger Created**: `deferred-items.md` exists with proper structure
 - [ ] **Baseline Outcome Written**: Baseline counts documented in outcome file
 

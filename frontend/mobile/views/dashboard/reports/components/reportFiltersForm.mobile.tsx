@@ -1,54 +1,28 @@
 "use client";
 
 import { QueryStatsOutlined } from "@mui/icons-material";
-import type { SelectChangeEvent } from "@mui/material";
-import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { useState } from "react";
+import { Box } from "@mui/material";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
-import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
-import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
-import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
-import type { ReportFiltersFormProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import {
-  formatReportFilterDate,
-  parseReportFilterDate,
-} from "@/frontend/common/views/dashboard/reports/utils/reportFiltersDate.utils";
+  ReportTypeSelect,
+  SubmitButtonWrapper,
+} from "@/frontend/common/views/dashboard/reports/components/__shared__/ReportFiltersFormShared";
+import {
+  formatDateChange,
+  useReportFilterFormState,
+} from "@/frontend/common/views/dashboard/reports/components/__shared__/reportFiltersFormShared.utils";
+import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
+import type { ReportFiltersFormProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileAppDatePicker } from "@/frontend/mobile/components/ui/form/date";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 
 export type ReportFiltersFormMobileLabels = ReportFiltersFormLabels;
 
-const VALID_REPORT_TYPES = new Set<string>(["by_teacher", "by_student", "by_date"]);
-
-function isReportType(value: string): value is ReportType {
-  return VALID_REPORT_TYPES.has(value);
-}
-
-export function ReportFiltersFormMobile({
-  fromDate,
-  toDate,
-  teacherId,
-  reportType,
-  labels,
-  canGenerate,
-  onFromDateChange,
-  onToDateChange,
-  onTeacherChange,
-  onReportTypeChange,
-  onSubmit,
-}: Readonly<ReportFiltersFormProps>) {
-  const selectedFromDate = parseReportFilterDate(fromDate);
-  const selectedToDate = parseReportFilterDate(toDate);
-  const [selectedTeacher, setSelectedTeacher] = useState<PersonOption | null>(null);
-  const teacherValue = selectedTeacher ?? resolvePersonOption(teacherId, [], selectedTeacher);
-
-  const handleReportTypeSelect = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    if (isReportType(value)) {
-      onReportTypeChange(value);
-    }
-  };
+export function ReportFiltersFormMobile(props: Readonly<ReportFiltersFormProps>) {
+  const { selectedFromDate, selectedToDate, teacherValue, setSelectedTeacher, handleReportTypeSelect } =
+    useReportFilterFormState(props);
+  const { reportType, labels, canGenerate, onFromDateChange, onToDateChange, onTeacherChange, onSubmit } = props;
 
   return (
     <Box
@@ -62,7 +36,7 @@ export function ReportFiltersFormMobile({
         label={labels.fromDate}
         value={selectedFromDate}
         onChange={(date: Date | null) => {
-          onFromDateChange(formatReportFilterDate(date));
+          onFromDateChange(formatDateChange(date));
         }}
         slotProps={{
           textField: {
@@ -77,7 +51,7 @@ export function ReportFiltersFormMobile({
         label={labels.toDate}
         value={selectedToDate}
         onChange={(date: Date | null) => {
-          onToDateChange(formatReportFilterDate(date));
+          onToDateChange(formatDateChange(date));
         }}
         slotProps={{
           textField: {
@@ -98,23 +72,14 @@ export function ReportFiltersFormMobile({
         placeholder={labels.allTeachers}
       />
 
-      <FormControl size="small" fullWidth>
-        <InputLabel id="reports-mobile-type-label" shrink>
-          {labels.reportType}
-        </InputLabel>
-        <Select
-          labelId="reports-mobile-type-label"
-          value={reportType}
-          label={labels.reportType}
-          onChange={handleReportTypeSelect}
-        >
-          <MenuItem value="by_teacher">{labels.reportTypes.byTeacher}</MenuItem>
-          <MenuItem value="by_student">{labels.reportTypes.byStudent}</MenuItem>
-          <MenuItem value="by_date">{labels.reportTypes.byDate}</MenuItem>
-        </Select>
-      </FormControl>
+      <ReportTypeSelect
+        reportType={reportType}
+        labels={labels}
+        labelId="reports-mobile-type-label"
+        onChange={handleReportTypeSelect}
+      />
 
-      <Box sx={{ pt: 1 }}>
+      <SubmitButtonWrapper layout="flex">
         <MobilePrimaryPageAction
           startIcon={<QueryStatsOutlined />}
           disabled={!canGenerate}
@@ -123,7 +88,7 @@ export function ReportFiltersFormMobile({
         >
           {labels.submit}
         </MobilePrimaryPageAction>
-      </Box>
+      </SubmitButtonWrapper>
     </Box>
   );
 }

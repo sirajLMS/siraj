@@ -1,142 +1,27 @@
 "use client";
 
-import { Alert, Box } from "@mui/material";
+import { PermissionManagementViewShared } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionManagementViewShared";
+import { MOBILE_OPTIONS } from "@/frontend/common/views/dashboard/permissions/components/__shared__/permissionManagementViewShared.options";
 import type { PermissionManagementViewModel } from "@/frontend/common/views/dashboard/permissions/usePermissionManagementViewModel";
-import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { PermissionManagementDialogsMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionManagementDialogs.mobile";
 import { PermissionTabContentMobile } from "@/frontend/mobile/views/dashboard/permissions/components/permissionTabContent.mobile";
 import { SingleGroupViewMobile } from "@/frontend/mobile/views/dashboard/permissions/components/singleGroupView.mobile";
-import type { PermissionsLabels } from "@/shared/locale";
 
-function PermissionErrorAlert({ error, t }: { readonly error: string | null; readonly t: PermissionsLabels }) {
-  if (!error) return null;
+export function PermissionManagementMobileView(props: Readonly<PermissionManagementViewModel>) {
   return (
-    <Alert severity="error" sx={{ mb: 2 }}>
-      {error === "operationFailed" ? t.errors.operationFailed : error}
-    </Alert>
-  );
-}
-
-export function PermissionManagementMobileView({
-  labels,
-  permissions,
-  groups,
-  users,
-  selectedGroupId,
-  isLoading,
-  error,
-  isCreateDialogOpen,
-  isEditDialogOpen,
-  isDeleteDialogOpen,
-  isAssignDialogOpen,
-  isManageOverridesOpen,
-  setSelectedGroupId,
-  openCreateDialog,
-  closeCreateDialog,
-  openEditDialog,
-  closeEditDialog,
-  openDeleteDialog,
-  closeDeleteDialog,
-  openAssignDialog,
-  closeAssignDialog,
-  openManageOverrides,
-  closeManageOverrides,
-  onDeleteGroup,
-  onAssignGroup,
-  activeGroup,
-  activeTab,
-  setActiveTab,
-  setSelectedUserIdForOverrides,
-  catalogFilter,
-  createGroupForm,
-  editGroupForm,
-  assignGroupForm,
-  singleGroupState,
-  manageOverridesState,
-  groupRowMenuAnchor,
-}: Readonly<PermissionManagementViewModel>) {
-  const t = labels;
-
-  const tabs = [
-    { key: "groups" as const, label: t.groupsTab },
-    { key: "catalog" as const, label: t.catalogTab },
-    { key: "overrides" as const, label: t.overridesTab },
-  ];
-
-  const headerActions =
-    activeTab === "groups" ? (
-      <MobilePrimaryPageAction id="create-group-btn" onClick={openCreateDialog}>
-        {t.addPermissions}
-      </MobilePrimaryPageAction>
-    ) : null;
-
-  return (
-    <MobilePageContainer>
-      {activeGroup ? (
-        <SingleGroupViewMobile
-          labels={labels}
-          group={activeGroup}
-          permissions={permissions}
-          isLoading={isLoading}
-          onBack={() => setSelectedGroupId(null)}
-          onEditGroup={openEditDialog}
-          onAssignGroup={openAssignDialog}
-          singleGroupState={singleGroupState}
-        />
-      ) : (
-        <>
-          <MobilePageHeader title={t.title} subtitle={t.subtitle} actions={headerActions} />
-
-          <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
-            <PermissionErrorAlert error={error} t={t} />
-
-            <AdminQueueTabBar activeTab={activeTab} tabs={tabs} onTabChange={setActiveTab} />
-
-            <PermissionTabContentMobile
-              labels={labels}
-              activeTab={activeTab}
-              isLoading={isLoading}
-              permissions={permissions}
-              groups={groups}
-              users={users}
-              setSelectedGroupId={setSelectedGroupId}
-              openEditDialog={openEditDialog}
-              openDeleteDialog={openDeleteDialog}
-              openAssignDialog={openAssignDialog}
-              openManageOverrides={openManageOverrides}
-              setSelectedUserIdForOverrides={setSelectedUserIdForOverrides}
-              catalogFilter={catalogFilter}
-              groupRowMenuAnchor={groupRowMenuAnchor}
-            />
-          </Box>
-        </>
-      )}
-
-      <PermissionManagementDialogsMobile
-        labels={labels}
-        isLoading={isLoading}
-        activeGroup={activeGroup}
-        selectedGroupId={selectedGroupId}
-        isCreateDialogOpen={isCreateDialogOpen}
-        isEditDialogOpen={isEditDialogOpen}
-        isDeleteDialogOpen={isDeleteDialogOpen}
-        isAssignDialogOpen={isAssignDialogOpen}
-        isManageOverridesOpen={isManageOverridesOpen}
-        closeCreateDialog={closeCreateDialog}
-        closeEditDialog={closeEditDialog}
-        closeDeleteDialog={closeDeleteDialog}
-        closeAssignDialog={closeAssignDialog}
-        closeManageOverrides={closeManageOverrides}
-        setSelectedUserIdForOverrides={setSelectedUserIdForOverrides}
-        onDeleteGroup={onDeleteGroup}
-        onAssignGroup={onAssignGroup}
-        createGroupForm={createGroupForm}
-        editGroupForm={editGroupForm}
-        assignGroupForm={assignGroupForm}
-        manageOverridesState={manageOverridesState}
-      />
-    </MobilePageContainer>
+    <PermissionManagementViewShared
+      {...props}
+      options={MOBILE_OPTIONS}
+      slots={{
+        PageContainer: MobilePageContainer,
+        PageHeader: MobilePageHeader,
+        PrimaryPageAction: MobilePrimaryPageAction,
+        SingleGroupView: SingleGroupViewMobile,
+        PermissionTabContent: PermissionTabContentMobile,
+        PermissionManagementDialogs: PermissionManagementDialogsMobile,
+      }}
+    />
   );
 }

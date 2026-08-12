@@ -2,10 +2,10 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { AdminComplaintRow } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import type { ComplaintQueueCardListSharedProps } from "@/frontend/common/views/dashboard/complaints/components/__shared__/complaintQueueCardListShared";
+import { buildQueueCardProps } from "@/frontend/common/views/dashboard/complaints/components/__shared__/complaintQueueCardListShared";
 import { DesktopPaginationControls } from "@/frontend/desktop/components/ui/filter";
 import { ComplaintQueueCardDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintQueueCard.desktop";
-import type { ComplaintsAdminLabels } from "@/shared/locale";
 
 const StyledEmptyStateMessage = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -20,21 +20,6 @@ const StyledQueueCardContainer = styled(Box)(({ theme }) => ({
   gap: theme.spacing(2),
 }));
 
-interface ComplaintQueueCardListDesktopProps {
-  readonly rows: readonly AdminComplaintRow[];
-  readonly labels: ComplaintsAdminLabels;
-  readonly draftResponses: Readonly<Record<string, string>>;
-  readonly canManage: boolean;
-  readonly canDelete: boolean;
-  readonly page: number;
-  readonly pageSize: number;
-  readonly totalCount: number;
-  readonly onDraftChange: (id: string, text: string) => void;
-  readonly onAnswer: (id: string, options: { readonly sendEmail: boolean }) => void;
-  readonly onDelete: (id: string) => void;
-  readonly onPageChange: (page: number) => void;
-}
-
 export function ComplaintQueueCardListDesktop({
   rows,
   labels,
@@ -48,7 +33,7 @@ export function ComplaintQueueCardListDesktop({
   onAnswer,
   onDelete,
   onPageChange,
-}: Readonly<ComplaintQueueCardListDesktopProps>) {
+}: Readonly<ComplaintQueueCardListSharedProps>) {
   if (rows.length === 0) {
     return <StyledEmptyStateMessage variant="bodyMd">{labels.queue.noEntries}</StyledEmptyStateMessage>;
   }
@@ -61,20 +46,16 @@ export function ComplaintQueueCardListDesktop({
         {rows.map(row => (
           <ComplaintQueueCardDesktop
             key={row.id}
-            row={row}
-            labels={labels}
-            draftResponse={draftResponses[row.id] ?? ""}
-            canManage={canManage}
-            canDelete={canDelete}
-            onDraftChange={text => {
-              onDraftChange(row.id, text);
-            }}
-            onAnswer={options => {
-              onAnswer(row.id, options);
-            }}
-            onDelete={() => {
-              onDelete(row.id);
-            }}
+            {...buildQueueCardProps(
+              row,
+              labels,
+              draftResponses,
+              canManage,
+              canDelete,
+              onDraftChange,
+              onAnswer,
+              onDelete
+            )}
           />
         ))}
       </StyledQueueCardContainer>

@@ -1,8 +1,8 @@
 "use client";
 
-import { Box, type SxProps, type Theme } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material";
 import type { ReactNode } from "react";
-import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 
 type ShowScrollbarOption = boolean | "desktop";
 
@@ -19,51 +19,11 @@ export interface DesktopHorizontalScrollRowProps {
   readonly showScrollbar?: ShowScrollbarOption;
 }
 
-function hiddenScrollbarStyles() {
-  return {
-    scrollbarWidth: "none" as const,
-    "&::-webkit-scrollbar": { display: "none" },
-  };
-}
-
-function visibleScrollbarStyles(theme: Theme) {
-  return {
-    scrollbarWidth: "thin" as const,
-    scrollbarColor: `${theme.palette.outlineVariant} transparent`,
-    "&::-webkit-scrollbar": {
-      display: "block",
-      height: 6,
-    },
-    "&::-webkit-scrollbar-thumb": {
-      backgroundColor: theme.palette.outlineVariant,
-      borderRadius: 3,
-    },
-    "&::-webkit-scrollbar-track": {
-      backgroundColor: "transparent",
-    },
-  };
-}
-
-function scrollbarStyles(theme: Theme, showScrollbar: ShowScrollbarOption) {
-  if (showScrollbar === true) {
-    return visibleScrollbarStyles(theme);
-  }
-
-  if (showScrollbar === "desktop") {
-    return {
-      ...hiddenScrollbarStyles(),
-      [theme.breakpoints.up("md")]: visibleScrollbarStyles(theme),
-    };
-  }
-
-  return hiddenScrollbarStyles();
-}
-
 /**
  * Desktop horizontal scroll container for card rows.
- * Uses 3-unit gap and 3-unit inline padding tuned for desktop row layouts.
- * Defaults `showScrollbar` to "desktop" so the scrollbar appears on the
- * desktop tier and is hidden on smaller viewports.
+ * Delegates to the shared {@link HorizontalScrollRow} with desktop-tuned
+ * defaults: 3-unit gap/padding, 1-unit lead spacing, and scrollbar visible
+ * from the `md` breakpoint up.
  */
 export function DesktopHorizontalScrollRow({
   children,
@@ -72,27 +32,15 @@ export function DesktopHorizontalScrollRow({
   showScrollbar = "desktop",
 }: DesktopHorizontalScrollRowProps) {
   return (
-    <Box
-      sx={mergeSx(
-        theme => ({
-          display: "flex",
-          gap: theme.spacing(3),
-          overflowX: "auto",
-          overflowY: "hidden",
-          scrollSnapType: "x proximity",
-          paddingInlineStart: theme.spacing(3),
-          paddingInlineEnd: theme.spacing(3),
-          scrollPaddingInlineStart: theme.spacing(3 + leadSpacing),
-          paddingBottom: theme.spacing(1),
-          ...scrollbarStyles(theme, showScrollbar),
-          "& > *:first-of-type": {
-            marginInlineStart: theme.spacing(leadSpacing),
-          },
-        }),
-        sx
-      )}
+    <HorizontalScrollRow
+      sx={sx}
+      leadSpacing={leadSpacing}
+      gap={3}
+      padding={3}
+      paddingBottom={1}
+      showScrollbar={showScrollbar}
     >
       {children}
-    </Box>
+    </HorizontalScrollRow>
   );
 }

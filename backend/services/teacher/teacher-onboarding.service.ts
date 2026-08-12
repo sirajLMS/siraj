@@ -2,6 +2,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { TeacherRepository } from "@/backend/db/repo";
 import { AppPermission, type CurrencyCode, Gender, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import { buildTeacherInsertPayload } from "@/backend/services/teacher/__shared__/buildTeacherInsertPayload";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
 import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
 import type { TeacherCreateReturnType } from "@/backend/types/teachers/teacher.types";
@@ -75,25 +76,7 @@ export namespace TeacherOnboardingService {
         validatePassword: true,
         groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
         createExtension: async (createdUser: UserReturnType, txObj: DBTransaction) => {
-          return TeacherRepository.create(
-            {
-              userId: createdUser.id,
-              nationality: input.nationality ?? null,
-              nationalId: input.nationalId ?? null,
-              phone: input.phone ?? null,
-              dateOfBirth: input.dateOfBirth ?? null,
-              gender: input.gender ?? null,
-              address: input.address ?? null,
-              qualifications: input.qualifications ?? null,
-              countryCode: input.countryCode ?? null,
-              hourlyRate: input.hourlyRate ?? null,
-              rateCurrency: input.rateCurrency ?? null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-            txObj,
-            locale
-          );
+          return TeacherRepository.create(buildTeacherInsertPayload(input, createdUser.id), txObj, locale);
         },
         afterExtension: async (_user: UserReturnType, _teacher: TeacherCreateReturnType, txObj: DBTransaction) => {
           if (input.initialPayoutMethod) {

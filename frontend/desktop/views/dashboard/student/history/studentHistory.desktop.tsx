@@ -1,13 +1,12 @@
 "use client";
 
 import { SchoolOutlined, TimerOutlined, TrendingUpOutlined, VerifiedUserOutlined } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import { MonthNavigator } from "@/frontend/common/views/dashboard/student/__shared__/MonthNavigator";
+import { StudentViewShellShared } from "@/frontend/common/views/dashboard/student/__shared__/studentViewShellShared";
 import type { StudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { StudentPortalHistoryCalendar } from "@/frontend/desktop/views/dashboard/student/history/components/historyCalendar.desktop";
 
 function HistoryMetricsRow({
@@ -55,16 +54,6 @@ function HistoryMetricsRow({
   );
 }
 
-function LoadingHistoryView({ labels }: Readonly<{ labels: StudentHistoryViewModel["labels"] }>) {
-  return (
-    <DesktopPageContainer>
-      <Typography variant="bodyMd" sx={{ p: 3 }}>
-        {labels.loadingMessage}
-      </Typography>
-    </DesktopPageContainer>
-  );
-}
-
 function calendarWeekdayLabels(labels: StudentHistoryViewModel["labels"]): readonly string[] {
   const weekdays = labels.calendarWeekdays;
   return [weekdays.sun, weekdays.mon, weekdays.tue, weekdays.wed, weekdays.thu, weekdays.fri, weekdays.sat];
@@ -86,25 +75,18 @@ export function StudentHistoryDesktopView({
 }: Readonly<StudentHistoryViewModel>) {
   const weekdayLabels = calendarWeekdayLabels(labels);
 
-  if (loading && metrics.totalClasses === 0) {
-    return <LoadingHistoryView labels={labels} />;
-  }
-
   return (
-    <DesktopPageContainer>
-      <DesktopPageHeader title={labels.pageTitle} />
-
-      <MonthNavigator
-        monthLabel={monthLabel}
-        canGoNext={canGoNext}
-        labels={labels}
-        onPrevMonth={onPrevMonth}
-        onNextMonth={onNextMonth}
-        outerSx={{ mb: 2, gap: 2 }}
-        innerGap={1}
-        iconFontSize={20}
-      />
-
+    <StudentViewShellShared
+      variant="desktop"
+      pageTitle={labels.pageTitle}
+      loading={loading && metrics.totalClasses === 0}
+      loadingMessage={labels.loadingMessage}
+      monthLabel={monthLabel}
+      canGoNext={canGoNext}
+      monthNavigatorLabels={labels}
+      onPrevMonth={onPrevMonth}
+      onNextMonth={onNextMonth}
+    >
       <HistoryMetricsRow metrics={metrics} labels={labels} />
 
       <DesktopSectionPanel title={labels.lessonHistory} contentPadding={false} sx={{ mb: 2, borderRadius: 0 }}>
@@ -118,6 +100,6 @@ export function StudentHistoryDesktopView({
           locale={locale}
         />
       </DesktopSectionPanel>
-    </DesktopPageContainer>
+    </StudentViewShellShared>
   );
 }

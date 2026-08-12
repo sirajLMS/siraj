@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { toGqlProfileAudience, toGqlProfileMode, toGqlProfileScope } from "@/app/(dashboard)/lib/profile-enum-bridge";
 import { ProfileAudience as BackendProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import type {
-  ProfileAudience as GqlProfileAudience,
-  ProfileMode as GqlProfileMode,
-  ProfileScope as GqlProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   buildTeacherProfileEditHref,
   hasForceCompleteSearchParam,
   TEACHER_PROFILE_COMPLETION_EDIT_HREF,
 } from "@/frontend/common/lib/profileCompletion";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
-import { ProfilePageClient } from "@/frontend/common/views/dashboard/profile/core/ProfilePageClient";
+import { renderProfilePageClient } from "@/frontend/common/views/dashboard/profile/__shared__/renderProfilePageClient";
 import { redirect } from "@/shared/i18n/routing";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";
@@ -67,14 +61,5 @@ export default async function ProfileEditPage({ searchParams }: ProfileEditPageP
     }
   }
 
-  return (
-    <ProfilePageClient
-      scope={toGqlProfileScope(resolution.scope) satisfies GqlProfileScope}
-      mode={toGqlProfileMode(resolution.mode) satisfies GqlProfileMode}
-      audience={toGqlProfileAudience(resolution.audience) satisfies GqlProfileAudience}
-      targetUserId={resolution.targetUserId}
-      studentId={resolution.studentId}
-      nationalIdComplete={nationalIdComplete}
-    />
-  );
+  return renderProfilePageClient(resolution, nationalIdComplete);
 }
