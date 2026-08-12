@@ -167,21 +167,21 @@ jobs:
           git remote add fork \
             "https://x-access-token:${{ secrets[matrix.pat_secret] }}@github.com/${{ matrix.fork_owner }}/${{ matrix.fork_repo }}.git"
 
-      - name: Fetch fork default branch
-        # Fetch the fork's current state to compare trees.
-        # "|| true" handles the case where the fork doesn't exist
+      - name: Fetch fork prod branch
+        # Fetch the fork's prod branch state to compare trees.
+        # "|| true" handles the case where the branch doesn't exist
         # yet or has no commits (first run).
         run: |
-          git fetch fork HEAD || true
+          git fetch fork refs/heads/prod:refs/remotes/fork/prod || true
 
       - name: Check if sync is needed
         id: check
         # Compare the tree SHA (file-content fingerprint) of prod
-        # vs the fork's HEAD. If they match, content is identical
+        # vs the fork's prod branch. If they match, content is identical
         # and no sync or Vercel deployment is needed.
         run: |
           PROD_TREE=$(git rev-parse origin/prod^{tree})
-          FORK_TREE=$(git rev-parse FETCH_HEAD^{tree} 2>/dev/null || echo "none")
+          FORK_TREE=$(git rev-parse refs/remotes/fork/prod^{tree} 2>/dev/null || echo "none")
 
           echo "prod tree: $PROD_TREE"
           echo "fork tree: $FORK_TREE"
@@ -196,24 +196,25 @@ jobs:
 
       - name: Configure git identity
         if: steps.check.outputs.skip == 'false'
-        # Set the committer identity to the fork owner's email.
-        # This keeps the git log in the fork clean and consistent
-        # with the Vercel-linked account.
+        # Set the author identity to the target fork owner's email & name.
         run: |
           git config user.email "${{ matrix.email }}"
           git config user.name "${{ matrix.fork_owner }}"
 
+      - name: Rewrite top commit author
+        if: steps.check.outputs.skip == 'false'
+        # Amend top commit author metadata to match the fork owner.
+        # --reset-author uses the git config set above.
+        # --no-edit keeps original commit message intact.
+        run: |
+          git commit --amend --reset-author --no-edit
+
       - name: Push prod to fork
         if: steps.check.outputs.skip == 'false'
-        # Force-push prod to the fork's default branch (HEAD).
-        # Force is needed to keep the fork as an exact mirror of
-        # prod (overwriting any diverged history in the fork).
-        # Because this push uses the fork owner's PAT, Vercel's
-        # GitHub App registers the pusher as the fork owner account.
+        # Force-push to the fork's `prod` branch.
+        # Uses the fork owner's PAT and rewritten author email.
         run: |
-          git push --force fork "HEAD:refs/heads/main"
-          # NOTE: If the fork's default branch is not "main",
-          # change "main" above to match (e.g., "master").
+          git push --force fork "HEAD:refs/heads/prod"
 
       - name: Summary
         run: |
