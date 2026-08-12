@@ -1,7 +1,7 @@
 import type { AdminResetPasswordSectionRef } from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
 
-export interface ProfileSubmitHandlerOptions {
-  readonly onSubmit: (values: unknown) => Promise<void>;
+export interface ProfileSubmitHandlerOptions<T = unknown> {
+  readonly onSubmit: (values: T) => Promise<void>;
   readonly resetPasswordRef: React.RefObject<AdminResetPasswordSectionRef | null>;
   readonly resetPassword: (userId: string, newPassword: string, sendEmail: boolean) => Promise<boolean>;
   readonly targetUserId: string;
@@ -9,7 +9,10 @@ export interface ProfileSubmitHandlerOptions {
   readonly setErrorOpen: (value: boolean) => void;
 }
 
-export async function executeProfileSubmit(values: unknown, options: ProfileSubmitHandlerOptions): Promise<void> {
+export async function executeProfileSubmit<T = unknown>(
+  values: T,
+  options: ProfileSubmitHandlerOptions<T>
+): Promise<void> {
   const { onSubmit, resetPasswordRef, resetPassword, targetUserId, setSuccessOpen, setErrorOpen } = options;
   try {
     await onSubmit(values);

@@ -1,7 +1,7 @@
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { runInClassTransaction } from "@/backend/db/repo/classes/shared/runInClassTransaction";
 import { classSubjects } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type { ClassSubjectSelectType, ClassSubjectSubmitInput, ClassSubjectUpdateInput } from "@/backend/types";
@@ -44,20 +44,6 @@ async function findExistingSubject(t: DBTransaction, id: string): Promise<ClassS
     throw new Error(`Subject ${id} not found`);
   }
   return existing;
-}
-
-async function runInTransaction<T>(
-  tx: DBTransaction | undefined,
-  run: (t: DBTransaction) => Promise<T>,
-  errorLabel: string
-): Promise<T> {
-  try {
-    if (tx) return await run(tx);
-    return await db.transaction(run);
-  } catch (error) {
-    logger.error(errorLabel, error);
-    throw error;
-  }
 }
 
 // ─── Repository ──────────────────────────────────────────────────────────────
@@ -119,7 +105,7 @@ export namespace ClassSubjectRepository {
     _locale?: string,
     tx?: DBTransaction
   ): Promise<ClassSubjectSelectType> {
-    return runInTransaction(
+    return runInClassTransaction(
       tx,
       async (t): Promise<ClassSubjectSelectType> => {
         const [result] = await t.insert(classSubjects).values(buildSubjectInsertValues(input)).returning();
@@ -142,7 +128,7 @@ export namespace ClassSubjectRepository {
     _locale?: string,
     tx?: DBTransaction
   ): Promise<ClassSubjectSelectType> {
-    return runInTransaction(
+    return runInClassTransaction(
       tx,
       async (t): Promise<ClassSubjectSelectType> => {
         const existing = await findExistingSubject(t, id);
@@ -172,7 +158,7 @@ export namespace ClassSubjectRepository {
   }
 
   export async function deleteSubject(id: string, _locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
-    return runInTransaction(
+    return runInClassTransaction(
       tx,
       async (t): Promise<{ id: string }> => {
         await findExistingSubject(t, id);
@@ -206,7 +192,7 @@ export namespace ClassSubjectRepository {
   ): Promise<ClassSubjectSelectType[]> {
     if (inputs.length === 0) return [];
 
-    return runInTransaction(
+    return runInClassTransaction(
       tx,
       async (t): Promise<ClassSubjectSelectType[]> => {
         const now = new Date();

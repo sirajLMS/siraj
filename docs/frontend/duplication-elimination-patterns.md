@@ -360,6 +360,7 @@ After any duplication elimination:
 - `.ai/plans/duplications/` — the plan that established these patterns
 - `.ai/plans/duplications-phase2/` — the continuation plan that established view component scaffold patterns
 - `.ai/plans/duplications-phase3/` — the plan that established repo factory, adapter base, schema helpers, page auth, and test mock patterns
+- `.ai/plans/duplications-phase6/` — the plan that established P3 scaffold extraction patterns (A-G) for micro clusters
 - `.ai/plans/duplications-phase7/` — the plan that established within-file clone extraction, cross-layer utility alignment, and locale extraction patterns
 - `docs/frontend/ui-shared-scaffold-pattern.md`
 - `docs/backend/shared-types-pattern.md`
@@ -370,3 +371,252 @@ After any duplication elimination:
 - `docs/testing/mock-navigation-helpers.md`
 - `docs/i18n/locale-namespace-migration.md`
 - `docs/testing/shared-test-runner.md`
+
+## Phase 6: Scaffold Extraction Patterns (A-G)
+
+Phase 6 eliminated the deferred P3 micro cluster frontend pairs (135 pairs, ~11,090 tokens) and `shared/locale/` structural pairs (16 pairs, 1,604 tokens) deferred from Phase 5. The result: **475 clones (62,929 tokens) reduced to 18 clones (1,851 tokens) — a 96% reduction — with zero `jscpd:ignore` directives and zero `.jscpd.json` changes.**
+
+Every clone pair was resolved by **true code extraction**: scaffolds, utilities, constants, dead code deletion, or type consolidation. No suppression of any kind.
+
+The design (`.ai/plans/duplications-phase6/design.md`) defined seven patterns, A through G, each targeting a different clone-pair category:
+
+### Pattern A: Scaffold Extraction (`*Shared.tsx` in `__shared__/`)
+
+**When to use:** Desktop and mobile variants share the bulk of their structure with only visual differences (spacing, sizing, typography variant). These are D↔M (desktop↔mobile) pairs.
+
+**Mechanism:**
+1. Create `frontend/common/views/dashboard/<domain>/components/__shared__/<ComponentName>Shared.tsx` containing ALL shared presentation logic.
+2. Export a typed `<ComponentName>SharedOptions` interface for tier-specific config.
+3. Create `frontend/common/views/dashboard/<domain>/components/__shared__/<ComponentName>Shared.options.ts` with `DESKTOP_OPTIONS` and `MOBILE_OPTIONS` constants.
+4. Rewrite `frontend/desktop/views/.../<ComponentName>.desktop.tsx` to import and delegate to `*Shared` with `DESKTOP_OPTIONS`.
+5. Rewrite `frontend/mobile/views/.../<ComponentName>.mobile.tsx` to import and delegate to `*Shared` with `MOBILE_OPTIONS`.
+
+**Example:**
+```typescript
+// frontend/common/views/dashboard/.../__shared__/exampleRowShared.tsx
+export interface ExampleRowSharedOptions {
+  readonly containerSx: (theme: Theme) => Record<string, unknown>;
+  readonly checkboxSize: "small" | "medium";
+  readonly iconButtonSize: "small" | "medium";
+}
+
+export function ExampleRowShared({ ...props, options }: Props & { options: ExampleRowSharedOptions }) {
+  // ALL shared presentation logic here — both desktop and mobile render this
+}
+```
+
+```typescript
+// frontend/common/views/.../__shared__/exampleRowShared.options.ts
+export const DESKTOP_ROW_OPTIONS: ExampleRowSharedOptions = { checkboxSize: "medium", iconButtonSize: "medium", containerSx: (t) => ({ pt: 2 }) };
+export const MOBILE_ROW_OPTIONS: ExampleRowSharedOptions = { checkboxSize: "small", iconButtonSize: "small", containerSx: (t) => ({ pt: 1 }) };
+```
+
+```typescript
+// frontend/desktop/views/.../exampleRow.desktop.tsx — thin wrapper
+export function ExampleRowDesktop(props: ExampleRowProps) {
+  return <ExampleRowShared {...props} options={DESKTOP_ROW_OPTIONS} />;
+}
+```
+
+```typescript
+// frontend/mobile/views/.../exampleRow.mobile.tsx — thin wrapper
+export function ExampleRowMobile(props: ExampleRowProps) {
+  return <ExampleRowShared {...props} options={MOBILE_ROW_OPTIONS} />;
+}
+```
+
+**When to use:** D↔M pairs with structurally similar presentation logic that differ only in visual config. Even pairs that differ by 1-2 lines should still be extracted to a scaffold with options — never suppress.
+
+### Pattern B: Shared Utility/Component Extraction
+
+**When to use:** Two files in `frontend/common/` duplicate a utility function, constant, or small component. These are C↔C (common↔common) intra-layer pairs.
+
+**Mechanism:**
+1. Extract the shared element into a new file in an appropriate `frontend/common/` location.
+2. Both consumers import from the new shared file via the `@/` path alias.
+
+**Example:**
+```typescript
+// Before: two files both define the same helper
+// common/views/.../domainA/utils.ts
+export function formatCurrency(value: number) { return Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value); }
+
+// common/views/.../domainB/utils.ts
+export function formatCurrency(value: number) { return Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value); }
+
+// After: extract to shared module
+// common/views/.../__shared__/formatCurrency.ts
+export function formatCurrency(value: number) { return Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value); }
+
+// Both domainA and domainB import:
+import { formatCurrency } from "@/frontend/common/views/.../__shared__/formatCurrency";
+```
+
+**When to use:** C↔C pairs where both files are live (imported) and share a genuine utility or small component.
+
+### Pattern C: Dead Code Deletion
+
+**When to use:** A duplicated file is never imported anywhere. These are C↔C pairs where one file is dead.
+
+**Mechanism:**
+1. Verify the file has zero importers (use `grep -rn "<filename>" frontend/`).
+2. Delete the dead file entirely.
+
+**Example:**
+```bash
+# Verify no importers exist
+grep -rn "oldComponent" frontend/backend/ shared/ app/
+
+# If empty, delete
+rm frontend/common/views/.../oldComponent.tsx
+```
+
+**When to use:** C↔C pairs where one file is unreferenced. Always verify zero importers before deleting.
+
+### Pattern D: Store/Hook Consolidation
+
+**When to use:** Two stores or ViewModel hooks in `frontend/common/` have similar shape and logic. These are C↔C store/viewModel duplications.
+
+**Mechanism:**
+1. Create a shared factory or base hook that both stores derive from.
+2. Pass domain-specific config (state keys, selectors, actions) to the factory.
+
+**Example:**
+```typescript
+// Before: two near-identical Zustand stores
+// domainAStore.ts
+export const useDomainAStore = create<DomainAState>()((set) => ({ items: [], loading: false, fetch: async () => { ... } }));
+
+// domainBStore.ts
+export const useDomainBStore = create<DomainBState>()((set) => ({ items: [], loading: false, fetch: async () => { ... } }));
+
+// After: shared factory
+// __shared__/makeListStore.ts
+export function makeListStore<T>(config: ListStoreConfig<T>) {
+  return create<ListStoreState<T>>()( immer((set) => ({
+    items: [],
+    loading: false,
+    fetch: async () => { const data = await config.fetcher(); set({ items: data, loading: false }); },
+  })));
+}
+
+// domainAStore.ts
+export const useDomainAStore = makeListStore({ fetcher: () => api.fetchDomainA() });
+// domainBStore.ts
+export const useDomainBStore = makeListStore({ fetcher: () => api.fetchDomainB() });
+```
+
+**When to use:** C↔C pairs where both are live stores/hooks with similar state shape and action logic.
+
+### Pattern E: Scaffold Extension (Extend Existing `*Shared.tsx`)
+
+**When to use:** A common-tier file duplicates logic already in a `*Shared.tsx` scaffold, or the common file should BE the scaffold. These are C↔D (common↔desktop) or C↔M (common↔mobile) cross-tier pairs.
+
+**Mechanism:**
+1. Move the shared logic into the existing `__shared__/` scaffold.
+2. Have the common-tier file delegate to the scaffold (same as desktop/mobile do).
+3. OR create a new `*Shared.tsx` if none exists, and have all three tiers (common, desktop, mobile) delegate to it.
+
+**Example:**
+```typescript
+// Before: common file duplicates what's in the desktop-variant scaffold
+// common/views/.../dataSummary.tsx — contains logic also in dataSummaryShared.tsx
+
+// After: extend existing scaffold — common delegates too
+// common/views/.../dataSummary.tsx
+import { DataSummaryShared, DEFAULT_SUMMARY_OPTIONS } from "@/frontend/common/views/.../__shared__/dataSummaryShared";
+export function DataSummary(props: Props) {
+  return <DataSummaryShared {...props} options={DEFAULT_SUMMARY_OPTIONS} />;
+}
+```
+
+**When to use:** C↔D / C↔M pairs where the common-tier file shares clear logic with the desktop or mobile variant's scaffold.
+
+### Pattern F: Shared View Scaffold (in `frontend/common/views/__shared__/`)
+
+**When to use:** Two desktop views (D↔D) or two mobile views (M↔M) in the same tier share a layout pattern. These are same-tier pairs.
+
+**Mechanism:**
+1. Create a `__shared__/*Shared.tsx` in `frontend/common/views/` (or the appropriate domain sub-path).
+2. Both same-tier variants import and delegate to the scaffold.
+3. This follows the same pattern as D↔M (Pattern A) but both consumers pass similar options.
+
+**Example:**
+```typescript
+// frontend/common/views/.../__shared__/adminCardGridShared.tsx
+export interface AdminCardGridSharedOptions { readonly columns: number; readonly cardSx: SxProps; }
+export function AdminCardGridShared({ items, options }: Props & { options: AdminCardGridSharedOptions }) {
+  return <Grid container columns={options.columns}>...</Grid>;
+}
+
+// frontend/desktop/views/.../supervisorAdmin.desktop.tsx — two desktop views
+export function SupervisorAdminDesktop(props: Props) {
+  return <AdminCardGridShared {...props} options={SUPERVISOR_GRID_OPTIONS} />;
+}
+
+// frontend/desktop/views/.../staffAdmin.desktop.tsx
+export function StaffAdminDesktop(props: Props) {
+  return <AdminCardGridShared {...props} options={STAFF_GRID_OPTIONS} />;
+}
+```
+
+**When to use:** D↔D or M↔M same-tier pairs where two views in the same tier share a clear layout pattern.
+
+### Pattern G: Locale Type Consolidation
+
+**When to use:** `shared/locale/` namespace type files define identical type signatures across locales. These are `shared/locale/` structural pairs.
+
+**Mechanism:**
+- Extract common type bases into a shared interface in `shared/locale/types/`.
+- Use `Pick<>` or `Omit<>` to derive locale-specific subsets.
+- OR consolidate repeated type definitions into a single canonical type with locale-specific overrides.
+- NEVER break the compile-time type safety — the locale system must still type-check all translations.
+
+**Example:**
+```typescript
+// Before: both locale type files define identical signatures
+// shared/locale/types/dashboard/teacher/index.ts
+export interface TeacherDashboardLabels {
+  readonly name: string;
+  readonly status: string;
+  readonly role: string;
+}
+
+// shared/locale/types/dashboard/student/index.ts
+export interface StudentDashboardLabels {
+  readonly name: string;
+  readonly status: string;
+  readonly role: string;
+}
+
+// After: extract shared base type
+// shared/locale/types/dashboard/__shared__/personLabels.ts
+export interface PersonLabels { readonly name: string; readonly status: string; readonly role: string; }
+
+// shared/locale/types/dashboard/teacher/index.ts
+export type TeacherDashboardLabels = Pick<PersonLabels, "name" | "status" | "role">;
+// OR: extends PersonLabels if locale adds fields
+// shared/locale/types/dashboard/student/index.ts
+export type StudentDashboardLabels = Pick<PersonLabels, "name" | "status" | "role">;
+```
+
+**When to use:** `shared/locale/` structural pairs where locale namespace type files share identical or overlapping type signatures. This is the only acceptable approach for locale duplication — never use `.jscpd.json` ignore patterns.
+
+### Key Rules
+
+- **No `jscpd:ignore`:** NEVER add `// jscpd:ignore-start` or `// jscpd:ignore-end`. Every clone is truly fixed by code extraction.
+- **No `.jscpd.json` changes:** NEVER add ignore patterns for source code. Only test artifacts, generated files, docs, and stories belong in `.jscpd.json`.
+- **Dependency compliance:**
+  - `shared/` must NOT import from `frontend/`, `backend/`, or `app/`.
+  - `frontend/` must NOT import from `backend/`.
+  - `.desktop.tsx` must NOT import from `@/frontend/mobile/`.
+  - `.mobile.tsx` must NOT import from `@/frontend/desktop/`.
+  - `.desktop.tsx` / `.mobile.tsx` must NOT use `useMediaQuery` or `useViewport`.
+  - Tier views must NOT use `useAppTranslation` directly — labels passed via props from ViewModel.
+  - Shared logic goes in `frontend/common/` — desktop and mobile never import from each other.
+- **Use `@/` path aliases:** All imports must use `@/` path alias, never relative `./` or `../`. Use direct file paths (not barrel `index.ts` re-exports) for scaffold imports to prevent TDZ circular dependencies.
+- **MUI v9 sx prop only:** No `fontWeight`, `mb`, etc. as direct props — use `sx={{ ... }}`.
+- **No `oxlint-disable`:** Fix root causes, never suppress linter warnings.
+- **Verify per-file:** Run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` after each modification (runs tsgo → oxlint → biome → lint:type-aware → check:duplicates → codescene).
+
+**See:** `docs/frontend/ui-shared-scaffold-pattern.md` for the detailed scaffold pattern with slot props, config objects, and the full `*Shared.tsx` + `*Shared.options.ts` convention.

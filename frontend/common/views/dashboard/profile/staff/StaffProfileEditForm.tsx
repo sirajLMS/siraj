@@ -8,6 +8,7 @@ import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/fro
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
+import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
 import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
 import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile/core/components/ChangePasswordSection";
 import {
@@ -102,19 +103,14 @@ function useFormSubmitHandler(
   targetUserId: string
 ) {
   return async (values: StaffAdminEditFormData) => {
-    try {
-      await onSubmit(values);
-      const resetData = resetPasswordRef.current?.getResetPasswordData();
-      if (resetData?.isValid) {
-        const success = await resetPassword(targetUserId, resetData.newPassword, resetData.sendNotificationEmail);
-        if (success) {
-          resetPasswordRef.current?.reset();
-        }
-      }
-      setSuccessOpen(true);
-    } catch {
-      setErrorOpen(true);
-    }
+    await executeProfileSubmit(values, {
+      onSubmit,
+      resetPasswordRef,
+      resetPassword,
+      targetUserId,
+      setSuccessOpen,
+      setErrorOpen,
+    });
   };
 }
 

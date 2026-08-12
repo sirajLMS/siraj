@@ -400,7 +400,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `.github/CODE_REVIEW_CHECKLIST.md` - Code review guidelines
 - `docs/services/cron-service.md` - Cron service pattern reference
 - `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern for common/desktop/mobile triplication
-- `docs/frontend/duplication-elimination-patterns.md` - Canonical source deletion, scaffold extraction, shared types, repo factory, adapter base, schema helpers, page auth, test mock patterns
+- `docs/frontend/duplication-elimination-patterns.md` - Duplication elimination patterns A-G (scaffold extraction, shared utility, dead code deletion, store consolidation, scaffold extension, shared view scaffold, locale type consolidation) — Phase 6 eliminated 96% of duplications (475→18 pairs) with zero jscpd:ignore
 - `docs/testing/shared-test-runner.md` - Shared parallel test runner pattern
 - `docs/backend/shared-types-pattern.md` - Cross-layer shared types in shared/types/
 - `docs/backend/meeting-adapter-base.md` - Meeting provider adapter base class pattern reference

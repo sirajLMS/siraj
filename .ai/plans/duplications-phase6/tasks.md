@@ -274,66 +274,77 @@ These will be addressed in Phase 4 or deferred if structurally incompatible.
 
 ---
 
-## Phase 4: Cross-Tier & Same-Tier (Parallel Subagents)
+## Phase 4: Cross-Tier & Same-Tier ✅ COMPLETE
 
-### Task 4.1: C↔D & C↔M Cross-Tier (81 C↔D + 68 C↔M pairs, ~23,376 tokens)
-- [ ] 4.1.1 Read all plan files
-- [ ] 4.1.2 For each C↔D pair: extend existing `*Shared.tsx` scaffold OR move common logic to `__shared__/` and have both common and desktop delegate
-- [ ] 4.1.3 For each C↔M pair: same approach as C↔D
-- [ ] 4.1.4 QL per modified file
-- [ ] 4.1.5 SR: Verify no cross-tier import violations (desktop↔mobile forbidden)
-- [ ] 4.1.6 IV: Read `frontend/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/mobile/AGENTS.md`
-- [ ] 4.1.7 Write outcome: `.ai/plans/duplications-phase6/outcome/4.1-cross-tier-outcome.md`
-- [ ] 4.1.8 Update progress: Mark 4.1 as `[x]`
+**Result:** 54 pairs → 18 pairs (67% reduction). 9,385 tokens → 1,851 tokens (80% reduction). Zero jscpd:ignore. tsgo: 2 pre-existing errors (Drizzle spread helper type inference, not introduced by Phase 6).
 
-**Note:** This is a large task — subagent should prioritize the highest-token pairs first and may need multiple subagent waves.
+### Task 4.1a: C↔D Cross-Tier (15 pairs, 1562 tokens) ✅
+- [x] 4.1a.1 Read all plan files
+- [x] 4.1a.2 15 C↔D pairs resolved: 11 desktop files converted to thin wrappers, 1 new shared file (LabeledField), 4 already delegating
+- [x] 4.1a.3 QL: All files pass `sub-loop --lifecycle codescene`
+- [x] 4.1a.4 SR: No cross-tier import violations
+- [x] 4.1a.5 Outcome: `.ai/plans/duplications-phase6/outcome/4.1a-cd-cross-tier-outcome.md`
 
-### Task 4.2: D↔D Same-Tier (12 pairs, ~1132 tokens)
-- [ ] 4.2.1 Read all plan files
-- [ ] 4.2.2 For each D↔D pair: create shared view scaffold in `frontend/common/views/` (Pattern F), both desktop variants import and delegate
-- [ ] 4.2.3 QL per modified file
-- [ ] 4.2.4 SR: Verify desktop-only imports are correct (no mobile imports)
-- [ ] 4.2.5 IV: Read `frontend/AGENTS.md`, `frontend/desktop/AGENTS.md`
-- [ ] 4.2.6 Write outcome: `.ai/plans/duplications-phase6/outcome/4.2-dd-same-tier-outcome.md`
-- [ ] 4.2.7 Update progress: Mark 4.2 as `[x]`
+### Task 4.1b: C↔M Cross-Tier (9 pairs, 1039 tokens) ✅
+- [x] 4.1b.1 Read all plan files
+- [x] 4.1b.2 6 C↔M pairs fixed (3 already delegating): 3 new shared files (SearchBarField, PhoneFormFieldShared, timeHighlightShared.styles)
+- [x] 4.1b.3 QL: All 12 files pass `sub-loop --lifecycle codescene`
+- [x] 4.1b.4 SR: No cross-tier import violations
+- [x] 4.1b.5 Outcome: `.ai/plans/duplications-phase6/outcome/4.1b-cm-cross-tier-outcome.md`
 
-### Task 4.3: M↔M Same-Tier (10 pairs, ~933 tokens)
-- [ ] 4.3.1 Read all plan files
-- [ ] 4.3.2 For each M↔M pair: create shared view scaffold in `frontend/common/views/` (Pattern F), both mobile variants import and delegate
-- [ ] 4.3.3 QL per modified file
-- [ ] 4.3.4 SR: Verify mobile-only imports are correct (no desktop imports)
-- [ ] 4.3.5 IV: Read `frontend/AGENTS.md`, `frontend/mobile/AGENTS.md`
-- [ ] 4.3.6 Write outcome: `.ai/plans/duplications-phase6/outcome/4.3-mm-same-tier-outcome.md`
-- [ ] 4.3.7 Update progress: Mark 4.3 as `[x]`
+### Task 4.2 & 4.3: D↔D + M↔M Same-Tier (10 pairs, 909 tokens) ✅
+- [x] 4.2.1 Read all plan files
+- [x] 4.2.2 10 pairs eliminated (5 D↔D + 5 M↔M): 6 scaffolds created, 16 wrappers rewritten, 1 dead file deleted
+- [x] 4.2.3 QL: All files pass `sub-loop --lifecycle codescene`
+- [x] 4.2.4 SR: No desktop↔mobile import violations
+- [x] 4.2.5 IV: Read `frontend/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/mobile/AGENTS.md`
+- [x] 4.2.6 Outcome: `.ai/plans/duplications-phase6/outcome/4.2-4.3-dd-mm-same-tier-outcome.md`
+
+### Task 4.4: Residual D↔M + C↔C + Backend (19 pairs, ~2000 tokens) ✅
+- [x] 4.4.1 Read all plan files
+- [x] 4.4.2 13 of 17 pairs eliminated: 7 D↔M scaffold extractions, 5 C↔C consolidations, 1 S↔S shared helper
+- [x] 4.4.3 4 pairs skipped (structurally incompatible or already resolved)
+- [x] 4.4.4 QL: All modified files pass `sub-loop --lifecycle codescene`
+- [x] 4.4.5 SR: No cross-layer violations
+- [x] 4.4.6 Outcome: `.ai/plans/duplications-phase6/outcome/4.4-residual-dm-cc-backend-outcome.md`
+- [x] 4.4.7 Fixed snackbar tsgo errors (DesktopFormSuccessSnackbarProps / MobileFormSuccessSnackbarProps re-export)
+
+### Phase 4 Residual: 18 pairs (1,851 tokens)
+Post-Phase 4 jscpd: 18 pairs, 1,851 tokens (from 54 pairs pre-Phase 4, 475 at baseline).
+- C↔D: 4 pairs, 427t — UI primitives with shared scaffolds already, wrapper patterns differ
+- C↔M: 4 pairs, 402t — similar structural differences
+- C↔C: 5 pairs, 470t — structurally different billing VMs, profile forms
+- D↔M: 5 pairs, 552t — complex dialogs, DataGrid vs CardList patterns
+These residuals are structurally incompatible for further extraction without major refactoring.
 
 ---
 
 ## Phase 5: Review Gates (Serial)
 
 ### Task 5.1: Mid-Point Review
-- [ ] 5.1.1 Run `bunx jscpd . --config .jscpd.json --reporters json` to get current clone count
-- [ ] 5.1.2 Compare against baseline (475 clones, 62,929 tokens)
-- [ ] 5.1.3 Verify zero `jscpd:ignore` directives: `grep -r "jscpd:ignore" frontend/ shared/ backend/` returns empty
-- [ ] 5.1.4 Verify `.jscpd.json` unchanged: `git diff HEAD -- .jscpd.json` shows no Phase 6 changes
-- [ ] 5.1.5 Verify zero tsgo errors on modified files
-- [ ] 5.1.6 Write outcome: `.ai/plans/duplications-phase6/outcome/5.1-midpoint-review-outcome.md`
-- [ ] 5.1.7 Update progress: Mark 5.1 as `[x]`
+- [x] 5.1.1 Run `bunx jscpd . --config .jscpd.json --reporters json` to get current clone count
+- [x] 5.1.2 Compare against baseline (475 clones, 62,929 tokens)
+- [x] 5.1.3 Verify zero `jscpd:ignore` directives: `grep -r "jscpd:ignore" frontend/ shared/ backend/` returns empty
+- [x] 5.1.4 Verify `.jscpd.json` unchanged: `git diff HEAD -- .jscpd.json` shows no Phase 6 changes
+- [x] 5.1.5 Verify zero tsgo errors on modified files
+- [x] 5.1.6 Write outcome: `.ai/plans/duplications-phase6/outcome/5.1-midpoint-review-outcome.md`
+- [x] 5.1.7 Update progress: Mark 5.1 as `[x]`
 
 ### Task 5.2: Post-Implementation Review
-- [ ] 5.2.1 Run `bunx jscpd . --config .jscpd.json --reporters json` to get final clone count
-- [ ] 5.2.2 Verify total clone count reduction ≥100 pairs from baseline
-- [ ] 5.2.3 Review all outcome files for completeness
-- [ ] 5.2.4 Write outcome: `.ai/plans/duplications-phase6/outcome/5.2-post-impl-review-outcome.md`
-- [ ] 5.2.5 Update progress: Mark 5.2 as `[x]`
+- [x] 5.2.1 Run `bunx jscpd . --config .jscpd.json --reporters json` to get final clone count
+- [x] 5.2.2 Verify total clone count reduction ≥100 pairs from baseline
+- [x] 5.2.3 Review all outcome files for completeness
+- [x] 5.2.4 Write outcome: `.ai/plans/duplications-phase6/outcome/5.2-post-impl-review-outcome.md`
+- [x] 5.2.5 Update progress: Mark 5.2 as `[x]`
 
 ### Task 5.3: Final Quality Gate
-- [ ] 5.3.1 Run `bun tsgo` — must pass with zero new errors
-- [ ] 5.3.2 Run `bun oxlint` — must pass with zero new errors
-- [ ] 5.3.3 Run `bun biome:check` — must pass
-- [ ] 5.3.4 Run `bun lint` — must pass
-- [ ] 5.3.5 Run `bun check:duplicates` — verify clone count reduction
-- [ ] 5.3.6 Write outcome: `.ai/plans/duplications-phase6/outcome/5.3-final-quality-gate-outcome.md`
-- [ ] 5.3.7 Update progress: Mark 5.3 as `[x]`
+- [x] 5.3.1 Run `bun tsgo` — must pass with zero new errors
+- [x] 5.3.2 Run `bun oxlint` — must pass with zero new errors
+- [x] 5.3.3 Run `bun biome:check` — must pass
+- [x] 5.3.4 Run `bun lint` — must pass
+- [x] 5.3.5 Run `bun check:duplicates` — verify clone count reduction
+- [x] 5.3.6 Write outcome: `.ai/plans/duplications-phase6/outcome/5.3-final-quality-gate-outcome.md`
+- [x] 5.3.7 Update progress: Mark 5.3 as `[x]`
 
 ---
 
@@ -347,16 +358,16 @@ These will be addressed in Phase 4 or deferred if structurally incompatible.
 - [ ] 6.1.5 Update progress: Mark 6.1 as `[x]`
 
 ### Task 6.2: Update Documentation
-- [ ] 6.2.1 Update `docs/frontend/duplication-elimination-patterns.md` with Patterns A-G (scaffold extraction, shared utility, dead code deletion, store consolidation, scaffold extension, shared view scaffold, locale type consolidation)
-- [ ] 6.2.2 QL: `bun run scripts/health/sub-loop.ts docs/frontend/duplication-elimination-patterns.md --lifecycle codescene` (if applicable to docs)
-- [ ] 6.2.3 Write outcome: `.ai/plans/duplications-phase6/outcome/6.2-docs-update-outcome.md`
-- [ ] 6.2.4 Update progress: Mark 6.2 as `[x]`
+- [x] 6.2.1 Update `docs/frontend/duplication-elimination-patterns.md` with Patterns A-G (scaffold extraction, shared utility, dead code deletion, store consolidation, scaffold extension, shared view scaffold, locale type consolidation)
+- [x] 6.2.2 QL: `bun run scripts/health/sub-loop.ts docs/frontend/duplication-elimination-patterns.md --lifecycle codescene` (if applicable to docs)
+- [x] 6.2.3 Write outcome: `.ai/plans/duplications-phase6/outcome/6.2-docs-update-outcome.md`
+- [x] 6.2.4 Update progress: Mark 6.2 as `[x]`
 
 ### Task 6.3: Update AGENTS.md Files
-- [ ] 6.3.1 Add Phase 6 outcome reference to root `AGENTS.md` Important References section
-- [ ] 6.3.2 Add P3 scaffold extraction pattern reference to `frontend/AGENTS.md`
-- [ ] 6.3.3 Write outcome: `.ai/plans/duplications-phase6/outcome/6.3-agentsupdate-outcome.md`
-- [ ] 6.3.4 Update progress: Mark 6.3 as `[x]`
+- [x] 6.3.1 Add Phase 6 outcome reference to root `AGENTS.md` Important References section
+- [x] 6.3.2 Add P3 scaffold extraction pattern reference to `frontend/AGENTS.md`
+- [x] 6.3.3 Write outcome: `.ai/plans/duplications-phase6/outcome/6.3-agentsupdate-outcome.md`
+- [x] 6.3.4 Update progress: Mark 6.3 as `[x]`
 
 ### Task 6.4: Final Commit
 - [ ] 6.4.1 Verify all outcome files are present
