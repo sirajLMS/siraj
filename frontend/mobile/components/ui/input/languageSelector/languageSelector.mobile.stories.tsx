@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import type { LanguageSelectorProps } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type LanguageType, languages } from "@/frontend/common/lib/locale";
-import type { LanguageSelectorProps } from "@/frontend/mobile/components/ui/input/languageSelector/LanguageSelector";
 import { LanguageSelectorMobile } from "@/frontend/mobile/components/ui/input/languageSelector/languageSelector.mobile";
 
 const LANGUAGE_BY_CODE: Readonly<Record<string, LanguageType>> = Object.fromEntries(

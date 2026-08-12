@@ -8,8 +8,6 @@ import {
 import type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 import { PaymentMethodOptionRowMobile } from "@/frontend/mobile/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.mobile";
 
-export type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
-
 const MOBILE_OPTION_SX: PaymentMethodAutocompleteSlots["optionRowSx"] = { px: 1.5, py: 1.25, minHeight: 48 };
 
 const mobileSlots: PaymentMethodAutocompleteSlots = {

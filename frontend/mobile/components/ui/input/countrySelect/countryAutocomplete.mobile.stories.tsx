@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import type { CountryAutocompleteProps } from "@/frontend/common/components/ui/input/countrySelect/types";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
-import type { CountryAutocompleteProps } from "@/frontend/mobile/components/ui/input/countrySelect";
 import { CountryAutocompleteMobile } from "@/frontend/mobile/components/ui/input/countrySelect/countryAutocomplete.mobile";
 
 function CountryAutocompleteStory({

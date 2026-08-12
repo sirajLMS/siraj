@@ -4,7 +4,7 @@ import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import type { ResourceLibraryCardProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
-import { ResourceFileTypeIconMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceFileTypeIcon.mobile";
+import { ResourceFileTypeIconShared as ResourceFileTypeIconMobile } from "@/frontend/common/views/dashboard/resources/components/__shared__/resourceFileTypeIconShared";
 
 export function ResourceLibraryCardMobile({
   resource,

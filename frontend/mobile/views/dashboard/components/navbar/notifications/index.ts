@@ -1,1 +1,1 @@
-export { NotificationDrawerMobile } from "./notificationDrawer.mobile";
+export * from "./notificationDrawer.mobile";

@@ -2,8 +2,8 @@
 
 import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
+import { ResourceFileTypeIconShared as ResourceFileTypeIconDesktop } from "@/frontend/common/views/dashboard/resources/components/__shared__/resourceFileTypeIconShared";
 import type { ResourceLibraryCardProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
-import { ResourceFileTypeIconDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceFileTypeIcon.desktop";
 
 export function ResourceLibraryCardDesktop({
   resource,

@@ -181,6 +181,18 @@ export { DesktopStatusBadge } from "./DesktopStatusBadge";
 
 ---
 
+## Entry 32: `frontend/desktop/components/ui/card/MetricCard/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `DesktopMetricCard.tsx` exports both `DesktopMetricCardProps` (interface) and `DesktopMetricCard` (function). The index uses `export type { DesktopMetricCardProps } from "./DesktopMetricCard"` alongside `export { DesktopMetricCard } from "./DesktopMetricCard"`. Using `export * from "./DesktopMetricCard"` would cause `TS2308` collision because `export *` also picks up `DesktopMetricCardProps` from the same module, duplicating the explicit `export type { }` block.
+**Fix:** Keep named re-exports as-is (with `./` path instead of `@/` path):
+```ts
+export type { DesktopMetricCardProps } from "./DesktopMetricCard";
+export { DesktopMetricCard } from "./DesktopMetricCard";
+```
+
+---
+
 ## Entry 32: `frontend/desktop/components/ui/form/time/index.ts`
 
 **Date:** 2026-08-12
@@ -203,4 +215,105 @@ export { DesktopAppTimeRangePicker } from "./DesktopAppTimeRangePicker";
 ```ts
 export type { CatalogImageUploadProps } from "./catalogImageUpload.desktop";
 export { CatalogImageUploadDesktop } from "./catalogImageUpload.desktop";
+```
+
+---
+
+## Entry 34: `frontend/mobile/components/ui/avatar/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** Multiple source files in this directory export both types and values. `MobileBaseAvatar.tsx` exports `BaseAvatarProps` and `BaseAvatarVariant` (via `export type`) alongside `MobileBaseAvatar` (function). `MobileClassAvatar.tsx` exports `ClassAvatarProps` (via `export type`) alongside `MobileClassAvatar` (function). Using `export *` for any of these would also re-export the types, duplicating the explicit `export type { }` blocks and causing `import-x/export` collision.
+**Fix:** Keep named re-exports as-is:
+```ts
+export type { BaseAvatarProps, BaseAvatarVariant } from "./MobileBaseAvatar";
+export { MobileBaseAvatar } from "./MobileBaseAvatar";
+export type { ClassAvatarProps } from "./MobileClassAvatar";
+export { MobileClassAvatar } from "./MobileClassAvatar";
+export { MobileUserAvatar } from "./MobileUserAvatar";
+```
+
+---
+
+## Entry 35: `frontend/mobile/components/ui/badge/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `MobileStatusBadge.tsx` exports both `MobileStatusBadgeCategory` (type alias) and `MobileStatusBadgeProps` (interface) alongside `MobileStatusBadge` (function). Using `export *` would also re-export the types, duplicating the explicit `export type { }` block and causing `import-x/export` collision.
+**Fix:** Keep named re-exports as-is:
+```ts
+export type {
+  MobileStatusBadgeCategory,
+  MobileStatusBadgeProps,
+} from "./MobileStatusBadge";
+export { MobileStatusBadge } from "./MobileStatusBadge";
+```
+
+---
+
+## Entry 36: `frontend/mobile/components/ui/button/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `MobileFab.tsx` exports both `MobileFabProps` (interface) and `MobileFab` (function). Using `export *` would also re-export the type, duplicating the explicit `export type { }` block and causing `import-x/export` collision. Additionally, `MobileActionButtons.tsx` re-exports `ButtonProps` from `@mui/material` — `export *` from that file would bring in `ButtonProps` as well, but the barrel intentionally did not re-export it (dead `MobileActionButtonsButtonProps` alias was removed).
+**Fix:** Keep named re-exports as-is:
+```ts
+export {
+  MobileExportButton,
+  MobileFilterButton,
+  MobilePrimaryPageAction,
+} from "./MobileActionButtons";
+export { MobileActionIconLink } from "./MobileActionIconLink";
+export type { MobileFabProps } from "./MobileFab";
+export { MobileFab } from "./MobileFab";
+```
+
+---
+
+## Entry 37: `frontend/desktop/components/ui/input/userPaymentMethodSelect/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** Both `userPaymentMethodAutocomplete.desktop.tsx` and `userPaymentMethodSelect.desktop.tsx` re-export `UserPaymentMethodAutocompleteProps` type (from different source paths). `export *` causes duplicate type export.
+**Fix:** Keep named re-exports with `./` paths (already converted from `@/` to `./`):
+```ts
+export { UserPaymentMethodAutocompleteDesktop } from "./userPaymentMethodAutocomplete.desktop";
+export { UserPaymentMethodSelectDesktop } from "./userPaymentMethodSelect.desktop";
+```
+
+---
+
+## Entry 34: `frontend/mobile/components/ui/display/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `paymentMethodList.mobile.tsx` re-exports `MobilePaymentMethodDisplay` (line 162), and `paymentMethodDisplay.mobile.tsx` also exports `MobilePaymentMethodDisplay`. Using `export *` for both files would cause `TS2308: Module has already exported a member named 'MobilePaymentMethodDisplay'`.
+**Fix:** Keep named exports for `paymentMethodList.mobile` (the re-exporting file) and use `export *` for `paymentMethodDisplay.mobile` (the original source):
+```ts
+export * from "./paymentMethod/paymentMethodDisplay.mobile";
+export {
+  MobilePaymentMethodList,
+  type PaymentMethodRow,
+} from "./paymentMethod/paymentMethodList.mobile";
+```
+
+---
+
+## Entry 35: `frontend/mobile/components/ui/container/page/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `MobilePageContainer.tsx` exports both `MobilePageContainerProps` (interface) and `MobilePageContainer` (function). The index uses `export type { MobilePageContainerProps } from "./MobilePageContainer"` alongside a value export. Using `export * from "./MobilePageContainer"` alongside the explicit `export type { }` block would cause `TS2308` collision because `export *` also picks up `MobilePageContainerProps`. Same situation with `MobilePageHeader.tsx` which exports both `MobilePageHeaderProps` (interface) and `MobilePageHeader` (function).
+**Fix:** Keep named re-exports as-is (with `./` paths instead of `@/` paths):
+```ts
+export type { MobilePageContainerProps } from "./MobilePageContainer";
+export { MobilePageContainer } from "./MobilePageContainer";
+export type { MobilePageHeaderProps } from "./MobilePageHeader";
+export { MobilePageHeader } from "./MobilePageHeader";
+```
+
+---
+
+## Entry 38: `frontend/mobile/components/ui/input/userPaymentMethodSelect/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** Both `userPaymentMethodAutocomplete.mobile.tsx` and `userPaymentMethodSelect.mobile.tsx` re-export `UserPaymentMethodAutocompleteProps` type (from different source paths). `export *` causes duplicate type export.
+**Fix:** Keep named re-exports with `./` paths (converted from `@/` to `./`):
+```ts
+export { UserPaymentMethodAutocompleteMobile } from "./userPaymentMethodAutocomplete.mobile";
+export { UserPaymentMethodSelectMobile } from "./userPaymentMethodSelect.mobile";
 ```

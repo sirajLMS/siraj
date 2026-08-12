@@ -3,6 +3,7 @@
 import { AccessTimeOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { ActionIconLink } from "@/frontend/common/components/ui/button/ActionIconLink";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";

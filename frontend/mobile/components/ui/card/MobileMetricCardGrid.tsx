@@ -4,7 +4,7 @@ import { Box, type SxProps, type Theme } from "@mui/material";
 import { useMetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelSources";
 import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MobileMetricCard";
+import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MetricCard/MobileMetricCard";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container/MobileHorizontalScrollRow";
 
 export interface MobileMetricCardGridProps {

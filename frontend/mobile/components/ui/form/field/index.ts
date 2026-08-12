@@ -1,1 +1,1 @@
-export { standardInputSx } from "./formFieldStyles.mobile";
+export * from "./formFieldStyles.mobile";

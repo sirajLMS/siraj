@@ -1,1 +1,1 @@
-export { TagInputMobile } from "@/frontend/mobile/components/ui/input/tagInput/tagInput.mobile";
+export * from "./tagInput.mobile";

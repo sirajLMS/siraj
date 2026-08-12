@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { BaseCard } from "@/frontend/common/components/ui/card/BaseCard";
 import { createMobileStoryMeta, mobileBaseCardCorePreview } from "@/frontend/common/stories";
-import { BaseCard } from "@/frontend/mobile/components/ui/card/BaseCard";
 
 /**
  * Low-level mobile BaseCard (not barrel-exported as MobileBaseCard).

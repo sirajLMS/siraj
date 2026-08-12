@@ -3,7 +3,7 @@ import WarningIcon from "@mui/icons-material/Warning";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect } from "storybook/test";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
-import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MobileMetricCard";
+import { MobileMetricCard } from "@/frontend/mobile/components/ui/card/MetricCard/MobileMetricCard";
 
 const meta: Meta<typeof MobileMetricCard> = {
   title: "UI/MetricCard/Mobile",
