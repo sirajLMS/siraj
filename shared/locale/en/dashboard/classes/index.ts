@@ -1,6 +1,6 @@
-export { dashboardClassAuditEn } from "./audit";
-export { dashboardCreateRecurringClassEn } from "./createRecurringClass";
-export { dashboardClassDetailsEn } from "./details";
-export { dashboardClassesMainEn } from "./main";
-export { dashboardRescheduleFormEn } from "./rescheduleForm";
-export { dashboardRescheduleTrackingEn } from "./rescheduleTracking";
+export * from "./audit";
+export * from "./createRecurringClass";
+export * from "./details";
+export * from "./main";
+export * from "./rescheduleForm";
+export * from "./rescheduleTracking";
