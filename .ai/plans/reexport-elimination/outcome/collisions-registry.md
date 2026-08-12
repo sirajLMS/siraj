@@ -373,3 +373,29 @@ export { dashboardLmsTeacherDuesEn as teacherDues } from "./teacherDues";
 **Date:** 2026-08-12
 **Reason:** The file has `export type { ClassInstanceAffectedUsers, ClassInstanceWithAffectedUsers } from "./scheduling-queries.repository.helpers"` (lines 15-18) and `export { classLifecycleAffectedUserIds, getClassInstanceAffectedUsers, getClassInstanceAffectedUsersForTeacher } from "./scheduling-queries.repository.helpers"` (lines 19-23). Converting lines 19-23 to `export *` causes `export *` to also re-export `ClassInstanceAffectedUsers` and `ClassInstanceWithAffectedUsers` (interfaces in the source file), creating duplicate exports alongside the existing `export type` statement. ESLint `import-x/export` flags "Multiple exports of name 'ClassInstanceAffectedUsers'" and "Multiple exports of name 'ClassInstanceWithAffectedUsers'".
 **Exports kept as named:** `classLifecycleAffectedUserIds`, `getClassInstanceAffectedUsers`, `getClassInstanceAffectedUsersForTeacher`
+
+## Entry 43: `frontend/common/views/dashboard/teachers/classes/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `TeacherClassListContainer.tsx` re-exports `type TeacherClassListViewModel` and `type UseTeacherClassListViewModelProps` from `./useTeacherClassListViewModel`, and the barrel also has an explicit `export type { TeacherClassListLabels, TeacherClassListViewModel, UseTeacherClassListViewModelProps } from "./useTeacherListViewModel"`. Converting `export { TeacherClassListContainer } from "./TeacherClassListContainer"` to `export *` causes `export *` to also re-export those types from `TeacherClassListContainer.tsx`, creating duplicate exports alongside the existing `export type` statement. Converting `export { useTeacherClassListViewModel } from "./useTeacherClassListViewModel"` to `export *` also re-exports those same types. ESLint `import-x/export` flags "Multiple exports of name" for `TeacherClassListViewModel`, `UseTeacherClassListViewModelProps`, and `TeacherClassListLabels`.
+**Exports kept as named:** `TeacherClassListContainer` from `./TeacherClassListContainer`; `useTeacherClassListViewModel` from `./useTeacherClassListViewModel`
+
+---
+
+## Entry 44: `frontend/desktop/components/ui/input/userPaymentMethodSelect/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** Both source files re-export `UserPaymentMethodAutocompleteProps`: `userPaymentMethodAutocomplete.desktop.tsx` has `export type { UserPaymentMethodAutocompleteProps }` (re-exported from `UserPaymentMethodAutocompleteShared`), and `userPaymentMethodSelect.desktop.tsx` has `export type { ..., UserPaymentMethodAutocompleteProps, ... }` (re-exported from `userPaymentMethodSelectShared`). Converting both value exports to `export *` causes both `export *` statements to re-export `UserPaymentMethodAutocompleteProps`, creating a cross-file type collision. ESLint `import-x/export` flags "Multiple exports of name 'UserPaymentMethodAutocompleteProps'".
+**Exports kept as named:** `UserPaymentMethodAutocompleteDesktop` from `./userPaymentMethodAutocomplete.desktop`; `UserPaymentMethodSelectDesktop` from `./userPaymentMethodSelect.desktop`
+
+## Entry 42: `frontend/desktop/components/ui/badge/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** The file has `export type { DesktopStatusBadgeProps, StatusBadgeCategory as DesktopStatusBadgeCategory } from "./DesktopStatusBadge"` (lines 1-4) and `export { DesktopStatusBadge } from "./DesktopStatusBadge"` (line 5). Converting line 5 to `export *` causes `export *` to also re-export `DesktopStatusBadgeProps` (an interface in the source file), creating a duplicate export alongside the existing `export type` statement. ESLint `import-x/export` flags "Multiple exports of name 'DesktopStatusBadgeProps'".
+**Exports kept as named:** `DesktopStatusBadge`
+
+## Entry 43: `frontend/mobile/components/ui/input/userPaymentMethodSelect/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** Converting both `export { UserPaymentMethodAutocompleteMobile } from "./userPaymentMethodAutocomplete.mobile"` and `export { UserPaymentMethodSelectMobile } from "./userPaymentMethodSelect.mobile"` to `export *` causes both star exports to re-export `UserPaymentMethodAutocompleteProps` (a type re-exported by both source files, from `UserPaymentMethodAutocompleteShared`). ESLint `import-x/export` flags "Multiple exports of name 'UserPaymentMethodAutocompleteProps'".
+**Exports kept as named:** `UserPaymentMethodAutocompleteMobile`, `UserPaymentMethodSelectMobile`

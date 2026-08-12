@@ -1,4 +1,4 @@
-export { PaymentMethodAutocomplete } from "./PaymentMethodAutocomplete";
+export * from "./PaymentMethodAutocomplete";
 export * from "./PaymentMethodOptionRow";
 export { PaymentMethodSelect } from "./PaymentMethodSelect";
 export type { PaymentMethodOptionRowProps } from "./paymentMethodOptionRow.types";
