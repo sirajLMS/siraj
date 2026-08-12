@@ -1,7 +1,7 @@
 import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 
 /** Shared props that both desktop and mobile UserBillingProfile views forward to their BillingSection*. */
-export type UserBillingSectionSharedProps = Pick<
+export type UserBillingSectionProps = Pick<
   UserBillingProfileViewProps,
   | "labels"
   | "summary"
@@ -28,9 +28,9 @@ export type UserBillingSectionSharedProps = Pick<
 >;
 
 /** Extract the shared billing-section props from a UserBillingProfileViewModel. */
-export function pickUserBillingSectionProps(
+export function useUserBillingSectionProps(
   vm: Readonly<UserBillingProfileViewProps>
-): Readonly<UserBillingSectionSharedProps> {
+): Readonly<UserBillingSectionProps> {
   return {
     labels: vm.labels,
     summary: vm.summary,

@@ -6,7 +6,7 @@ import type { CreateRecurringClassDialogSharedProps } from "@/frontend/common/co
 import type { CreateRecurringClassDialogViewModel } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 
 /** Extract the shared (non-slot) props for CreateRecurringClassDialogShared from the ViewModel. */
-export function buildCreateRecurringClassDialogProps(
+export function useCreateRecurringClassDialogProps(
   teacherId: string,
   viewModel: CreateRecurringClassDialogViewModel
 ): Readonly<CreateRecurringClassDialogSharedProps> {

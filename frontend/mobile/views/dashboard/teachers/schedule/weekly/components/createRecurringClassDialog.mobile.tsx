@@ -11,7 +11,7 @@ import type {
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
 import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
-import { buildCreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/createRecurringClassDialogProps";
+import { useCreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/useCreateRecurringClassDialogProps";
 import type {
   CreateRecurringClassDialogProps,
   CreateRecurringClassDialogViewModel,
@@ -106,7 +106,7 @@ function CreateRecurringClassDialogMobileBody({
 }) {
   return (
     <CreateRecurringClassDialogShared
-      {...buildCreateRecurringClassDialogProps(teacherId, viewModel)}
+      {...useCreateRecurringClassDialogProps(teacherId, viewModel)}
       slots={{
         DialogShell: MobileDialogShell,
         StudentSelect: MobileStudentSelect,

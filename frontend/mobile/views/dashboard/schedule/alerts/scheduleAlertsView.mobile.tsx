@@ -5,9 +5,9 @@ import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import type { ScheduleAlertsViewCommonProps } from "@/frontend/common/views/dashboard/schedule/alerts/__shared__/scheduleAlertsViewSharedProps";
 import { buildAlertMetricItems } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/buildAlertMetricItems";
 import {
-  type ScheduleAlertsBodyCommonProps,
   ScheduleAlertsLoadingIndicator,
   type ScheduleAlertsViewSharedProps,
 } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/scheduleAlertsViewShared";
@@ -73,7 +73,7 @@ function MobileAlertsBody({
   onViewClassAudit,
   onPageChange,
   contentLabels,
-}: ScheduleAlertsBodyCommonProps<AcademicScheduleCardListMobileLabels>) {
+}: ScheduleAlertsViewCommonProps<AcademicScheduleCardListMobileLabels>) {
   if (loading) {
     return <ScheduleAlertsLoadingIndicator loading={labels.loading} />;
   }

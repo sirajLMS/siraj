@@ -3,9 +3,9 @@
 import { FileDownloadOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import type { ScheduleAlertsViewCommonProps } from "@/frontend/common/views/dashboard/schedule/alerts/__shared__/scheduleAlertsViewSharedProps";
 import { buildAlertMetricItems } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/buildAlertMetricItems";
 import {
-  type ScheduleAlertsBodyCommonProps,
   ScheduleAlertsLoadingIndicator,
   type ScheduleAlertsViewSharedProps,
 } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/scheduleAlertsViewShared";
@@ -70,7 +70,7 @@ function DesktopAlertsBody({
   onViewClassAudit,
   onPageChange,
   contentLabels,
-}: ScheduleAlertsBodyCommonProps<AcademicScheduleDataGridDesktopLabels>) {
+}: ScheduleAlertsViewCommonProps<AcademicScheduleDataGridDesktopLabels>) {
   if (loading) {
     return <ScheduleAlertsLoadingIndicator loading={labels.loading} />;
   }

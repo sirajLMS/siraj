@@ -24,21 +24,6 @@ export interface ScheduleAlertsViewSharedProps {
   readonly onExport: () => void;
 }
 
-export interface ScheduleAlertsBodyCommonProps<TLabels> {
-  readonly loading: boolean | undefined;
-  readonly labels: ScheduleAlertsLabels;
-  readonly classes: readonly AcademicClassRow[];
-  readonly totalClasses?: number;
-  readonly currentPage: number;
-  readonly pageSize: number;
-  readonly onFilter: () => void;
-  readonly onExport: () => void;
-  readonly onLeave: (id: string) => void;
-  readonly onViewClassAudit: (id: string) => void;
-  readonly onPageChange: (page: number) => void;
-  readonly contentLabels: TLabels;
-}
-
 export function ScheduleAlertsLoadingIndicator({ loading }: { readonly loading: string }) {
   return (
     <Box

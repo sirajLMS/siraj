@@ -701,8 +701,8 @@ The patterns below represent advanced extraction techniques for cases where scaf
 
 **Variants:**
 - **Simple picker:** `pickSearchScheduleFormProps(vm)` — maps one field rename, returns `Pick<ViewModel, ...fields...>`
-- **Builder:** `buildCreateRecurringClassDialogProps(teacherId, vm)` — destructures 15 fields, maps 3 label renames, adds static resolvers, returns `Readonly<SharedProps>`
-- **Bag picker with type:** `pickUserBillingSectionProps(vm)` — returns 22 shared fields; mobile adds 3 extra props explicitly
+- **Builder:** `useCreateRecurringClassDialogProps(teacherId, vm)` — destructures 15 fields, maps 3 label renames, adds static resolvers, returns `Readonly<SharedProps>`
+- **Bag picker with type:** `useUserBillingSectionProps(vm)` — returns 22 shared fields; mobile adds 3 extra props explicitly
 
 **Example (Phase 8, Tasks 2.5–2.7):**
 - Created: `searchScheduleFormPropsPicker.ts`, `createRecurringClassDialogProps.ts`, `userBillingProfileSharedProps.ts`
