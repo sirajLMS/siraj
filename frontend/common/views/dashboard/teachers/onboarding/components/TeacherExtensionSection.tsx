@@ -47,7 +47,7 @@ export function TeacherExtensionSection({ register, control, errors, labels }: R
       </Grid>
       <UserPersonalNationalityField register={register} control={control} errors={errors} translate={translate} />
       <UserPersonalAddressField register={register} translate={translate} />
-      <UserPersonalDateOfBirthField control={control} errors={errors} translate={translate} />
+      <UserPersonalDateOfBirthField control={control} translate={translate} />
       <UserPersonalGenderField control={control} errors={errors} translate={translate} />
       <UserPersonalQualificationsField register={register} translate={translate} />
     </Grid>

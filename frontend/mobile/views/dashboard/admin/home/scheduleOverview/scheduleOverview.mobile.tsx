@@ -1,26 +1,23 @@
 "use client";
 
-import { Box, InputAdornment, Stack, TextField, useTheme } from "@mui/material";
+import { Box, Stack, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import {
-  ScheduleOverviewCardSkeleton,
-  ScheduleOverviewEmptyState,
-} from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
+  ScheduleOverviewFilterSection,
+  ScheduleOverviewSearchField,
+} from "@/frontend/common/views/dashboard/admin/home/components/__shared__/scheduleOverviewShared";
 import {
   scheduleOverviewCardShellSx,
-  scheduleOverviewListCanvasSx,
   scheduleOverviewMobileChromeSx,
 } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
-import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
+import { ScheduleOverviewMobileCardList } from "@/frontend/mobile/views/dashboard/admin/home/__shared__/scheduleOverviewMobileCardList";
 import {
   StyledMobileSectionBody,
-  StyledSearchIcon,
   StyledSectionTitle,
   StyledSectionTitleRow,
 } from "@/frontend/mobile/views/dashboard/admin/home/__shared__/scheduleOverviewStyled";
@@ -30,19 +27,19 @@ type ScheduleOverviewMobileViewProps = Readonly<ScheduleOverviewViewModel>;
 
 function renderScheduleOverviewItem(
   row: DailyScheduleRow,
-  labelsBySection: ScheduleOverviewLabelsBySection,
+  columns: ScheduleOverviewLabelsBySection["columns"],
+  status: ScheduleOverviewLabelsBySection["status"],
+  detailsLabel: string,
   showTimezones: ScheduleOverviewMobileViewProps["showTimezones"],
   locale: ScheduleOverviewMobileViewProps["locale"]
 ): ReactNode {
-  const { columns, status, actions } = labelsBySection;
-
   return (
     <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
       <ScheduleOverviewMobileCard
         row={row}
         headers={columns}
         statusLabels={status}
-        detailsLabel={actions.detailsLabel}
+        detailsLabel={detailsLabel}
         showTimezones={showTimezones}
         locale={locale}
       />
@@ -92,12 +89,9 @@ function ScheduleOverviewMobileToolbar({
   return (
     <StyledMobileSectionBody>
       {canScheduleFilterAdvanced ? (
-        <ScheduleFilters
-          dateLabel={filters.dateLabel}
+        <ScheduleOverviewFilterSection
+          filters={filters}
           dateValue={dateValue}
-          todayLabel={filters.todayLabel}
-          previousDayLabel={filters.previousDayLabel}
-          nextDayLabel={filters.nextDayLabel}
           onDateChange={onDateChange}
           teacherSelect={
             <TeacherAutocompleteMobile
@@ -110,23 +104,11 @@ function ScheduleOverviewMobileToolbar({
       ) : null}
 
       {canDashboardSearch ? (
-        <TextField
-          placeholder={filters.searchPlaceholder}
-          value={searchValue}
-          onChange={event => {
-            onSearchChange(event.target.value);
-          }}
+        <ScheduleOverviewSearchField
+          searchPlaceholder={filters.searchPlaceholder}
+          searchValue={searchValue}
+          onSearchChange={onSearchChange}
           fullWidth
-          size="small"
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <StyledSearchIcon />
-                </InputAdornment>
-              ),
-            },
-          }}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: 2,
@@ -155,34 +137,18 @@ function ScheduleOverviewMobileList({
 > & {
   readonly labelsBySection: ScheduleOverviewLabelsBySection;
 }) {
-  const { shell } = labelsBySection;
+  const { columns, status, actions, shell } = labelsBySection;
 
   return (
-    <MobileCardList<DailyScheduleRow>
+    <ScheduleOverviewMobileCardList
       rows={rows}
-      loading={loading}
+      loading={loading ?? false}
       emptyMessage={shell.emptyMessage}
-      renderSkeleton={() => (
-        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
-          <ScheduleOverviewCardSkeleton />
-        </MobileCardListItem>
-      )}
-      renderEmptyState={msg => (
-        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
-          <ScheduleOverviewEmptyState message={msg} />
-        </MobileCardListItem>
-      )}
-      gap={0}
-      layout="edge-to-edge"
-      sx={scheduleOverviewListCanvasSx}
-      getKey={row => row.id ?? ""}
-      renderItem={row => renderScheduleOverviewItem(row, labelsBySection, showTimezones, locale)}
-      paginationOptions={buildServerPaginationOptions({
-        page,
-        pageSize,
-        totalCount: totalCount ?? 0,
-        onPageChange,
-      })}
+      page={page}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      onPageChange={onPageChange}
+      renderItem={row => renderScheduleOverviewItem(row, columns, status, actions.detailsLabel, showTimezones, locale)}
     />
   );
 }

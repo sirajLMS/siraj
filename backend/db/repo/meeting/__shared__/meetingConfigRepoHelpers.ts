@@ -1,5 +1,6 @@
 import type { Column } from "drizzle-orm";
 import { eq, isNull } from "drizzle-orm";
+import type { MeetingConfigDetails } from "@/backend/types/meeting";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**
@@ -23,4 +24,62 @@ export function labelCondition(labelColumn: Column, label: string | null | undef
 export function requireConfigOrThrow<TSelect>(row: TSelect | null, id: string, tErrors: ErrorsLabels): TSelect {
   if (row) return row;
   throw new Error(tErrors.meetingConfigNotFound(id));
+}
+
+interface MeetingConfigInsertInput {
+  readonly providerId: string;
+  readonly label?: string | null;
+  readonly isDefault: boolean;
+  readonly details: MeetingConfigDetails;
+  readonly encryptedSecret?: string | null;
+  readonly providerMetadata?: Record<string, unknown> | null;
+}
+
+/**
+ * Shared insert values builder for meeting config repos.
+ *
+ * Both `class-meeting-config` and `user-meeting-config` repos build the
+ * same core insert payload (providerId, label, isDefault, details,
+ * encryptedSecret, providerMetadata, createdAt, updatedAt). Extracting
+ * this eliminates the jscpd clone between the two `create` methods.
+ */
+export function buildMeetingConfigInsertValues(input: MeetingConfigInsertInput, now: Date) {
+  return {
+    providerId: input.providerId,
+    label: input.label ?? null,
+    isDefault: input.isDefault,
+    details: input.details,
+    encryptedSecret: input.encryptedSecret ?? null,
+    providerMetadata: input.providerMetadata ?? null,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+interface MeetingConfigUpdateInput {
+  readonly providerId: string;
+  readonly label?: string | null;
+  readonly isDefault: boolean;
+  readonly details: MeetingConfigDetails;
+  readonly encryptedSecret?: string | null;
+  readonly providerMetadata?: Record<string, unknown> | null;
+}
+
+/**
+ * Shared update payload builder for meeting config repos.
+ *
+ * Both repos' `upsertMany` pass the same set of fields to `update`:
+ * label, isDefault, details, encryptedSecret, providerId, providerMetadata.
+ * Extracting this eliminates the jscpd clone between the two `upsertMany`
+ * methods.
+ */
+export function buildMeetingConfigUpdatePayload(input: MeetingConfigUpdateInput) {
+  return {
+    label: input.label ?? null,
+    isDefault: input.isDefault,
+    details: input.details,
+    encryptedSecret: input.encryptedSecret ?? null,
+    providerId: input.providerId,
+    providerMetadata: input.providerMetadata ?? null,
+  };
 }

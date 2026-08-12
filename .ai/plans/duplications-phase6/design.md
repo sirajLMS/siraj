@@ -1,116 +1,156 @@
 # Design: Code Duplication Elimination — Phase 6
 
-**Feature:** Code Duplication Elimination Phase 6 — Deferred P3 Micro Clusters & Structural Noise Suppression
-**Version:** 1.0
+**Feature:** Code Duplication Elimination Phase 6 — Deferred P3 Micro Clusters & True Duplicate Resolution
+**Version:** 2.0
 **Date:** 2026-08-11
 
 ---
 
 ## Overview
 
-Phase 6 addresses the items that all prior phases **explicitly deferred**: the 135 P3 micro cluster frontend pairs (11,090 tokens, deferred as D5-3 in Phase 5) and the 16 `shared/locale/` structural pairs (1,604 tokens, deferred as D5-1 "never" across all phases). Phase 6 introduces a **two-strategy approach** — jscpd-ignore for structural duplication and micro-scaffold/shared utility extraction for fixable duplication — and concludes with a **post-Phase 4/5 residual sweep** to triage any remaining unaddressed clones.
+Phase 6 addresses the items that all prior phases **explicitly deferred**: the 135 P3 micro cluster frontend pairs (11,090 tokens, deferred as D5-3 in Phase 5) and the 16 `shared/locale/` structural pairs (1,604 tokens, deferred as D5-1 "never" across all phases).
 
-This design builds on the established patterns from Phase 2 (`docs/frontend/duplication-elimination-patterns.md`) and the Phase 5 design (`design.md`), adding the jscpd-ignore strategy as a first-class tool.
+**CRITICAL:** Phase 6 uses a **single strategy — true code extraction**. No `jscpd:ignore` directives. No `.jscpd.json` ignore additions. Every clone pair is resolved by actual code changes: extracting shared scaffolds, utilities, constants, or deleting dead code.
+
+This design builds on the established `*Shared.tsx` / `__shared__/` scaffold patterns from Phase 1-5 (see `docs/frontend/ui-shared-scaffold-pattern.md`), applying them to the small-clone residuals that prior phases deferred.
 
 ---
 
 ## Design Goals
 
-- **G1:** Eliminate or suppress ≥100 of the 135 deferred P3 pairs without introducing new technical debt
-- **G2:** Permanently suppress `shared/locale/` structural noise via `.jscpd.json` configuration (zero code changes)
+- **G1:** Eliminate ≥100 of the 135 deferred P3 pairs via true code extraction (no suppression)
+- **G2:** Reduce `shared/locale/` structural pairs by ≥50% via type consolidation
 - **G3:** Maintain zero new errors across tsgo, oxlint, biome, lint, check:duplicates, codescene
-- **G4:** Reduce total clone count to ≤300 after Phases 4, 5, and 6 are all complete
-- **G5:** Document the jscpd-ignore strategy for future phases and projects
+- **G4:** Zero `jscpd:ignore` directives in the entire codebase
+- **G5:** Zero changes to `.jscpd.json` (no new ignore patterns)
+- **G6:** Document the scaffold extraction patterns for P3 micro clusters
 
 ---
 
 ## Architecture
 
-### Two-Strategy Model
+### Single-Strategy Model: True Code Extraction
 
-Unlike Phases 4 and 5 (which used scaffolds as the primary strategy), Phase 6 uses two strategies depending on the nature of the duplication:
+Unlike the original plan (which used two strategies including jscpd-ignore), Phase 6 uses **one strategy only**:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│              P3 Pair Triage Decision Tree               │
-│                                                         │
-│  For each P3 pair:                                     │
-│    Is the duplication STRUCTURAL?                      │
-│    (locale type signatures, MUI sx boilerplate,       │
-│     similar-but-different configs, by-design pattern) │
-│         │                                               │
-│    YES → jscpd-ignore (Strategy A)                     │
-│    NO  → Is the duplication FIXABLE with minimal effort?│
-│         │                                               │
-│    YES → Micro-scaffold / shared utility (Strategy B)  │
-│    NO  → jscpd-ignore with documented rationale (A)   │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│              P3 Pair Triage Decision Tree                    │
+│                                                             │
+│  For each P3 pair:                                         │
+│    Is the duplication a D↔M (desktop↔mobile) pair?          │
+│         │                                                   │
+│    YES → Create __shared__/*Shared.tsx scaffold             │
+│         │  + *Shared.options.ts with DESKTOP/MOBILE_OPTIONS │
+│         │  + Desktop/mobile become thin wrappers            │
+│         │                                                   │
+│    NO  → Is it a C↔C (common↔common) pair?                │
+│         │                                                   │
+│    YES → Extract shared utility/component to common/        │
+│         │  OR delete dead code                              │
+│         │  OR consolidate stores/hooks                     │
+│         │                                                   │
+│    NO  → Is it a C↔D or C↔M cross-tier pair?              │
+│         │                                                   │
+│    YES → Extend existing *Shared.tsx scaffold               │
+│         │  OR create new shared component in common/        │
+│         │                                                   │
+│    NO  → Is it a D↔D or M↔M same-tier pair?               │
+│         │                                                   │
+│    YES → Create shared view scaffold in common/views/       │
+│         │                                                   │
+│    NO  → Is it a shared/locale structural pair?            │
+│         │                                                   │
+│    YES → Consolidate type definitions (Pick, base types)   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Strategy A: jscpd-ignore (Structural Suppression)
+### Pattern A: `__shared__/*Shared.tsx` Scaffold (for D↔M pairs)
 
-**When to use:** The duplicated code is structurally required by a pattern or framework and cannot be eliminated without breaking the pattern.
+**When to use:** Desktop and mobile variants share the bulk of their structure with only visual differences (spacing, sizing, typography variant).
 
-**Mechanism 1: `.jscpd.json` ignore patterns (directory-level)**
+**Mechanism:**
+1. Create `frontend/common/views/dashboard/<domain>/components/__shared__/<componentName>Shared.tsx` containing ALL shared presentation logic.
+2. Export a typed `<ComponentName>SharedOptions` interface for tier-specific config.
+3. Create `frontend/common/views/dashboard/<domain>/components/__shared__/<componentName>Shared.options.ts` with `DESKTOP_OPTIONS` and `MOBILE_OPTIONS` constants.
+4. Rewrite `frontend/desktop/views/.../<componentName>.desktop.tsx` to import and delegate to `*Shared` with `DESKTOP_OPTIONS`.
+5. Rewrite `frontend/mobile/views/.../<componentName>.mobile.tsx` to import and delegate to `*Shared` with `MOBILE_OPTIONS`.
 
-```json
-{
-  "ignore": [
-    "**/node_modules/**",
-    "**/.next/**",
-    "**/*.test.*",
-    "**/*.spec.*",
-    "shared/locale/**"
-  ]
+**Example (proven pattern from Phase 2):**
+
+```typescript
+// frontend/common/views/dashboard/classes/recurring/components/__shared__/dayScheduleRowShared.tsx
+export interface DayScheduleRowSharedOptions {
+  readonly containerSx: (theme: Theme) => Record<string, unknown>;
+  readonly checkboxSize: "small" | "medium";
+  readonly iconButtonSize: "small" | "medium";
+  // ...
+}
+
+export function DayScheduleRowShared({ ...props, options }: Props & { options: Options }) {
+  // ALL shared presentation logic here
 }
 ```
 
-**Mechanism 2: Inline `// jscpd:ignore` directives (file-level)**
-
 ```typescript
-// jscpd:ignore-start
-// Structural code that must be duplicated (e.g., MUI sx boilerplate)
-// jscpd:ignore-end
+// frontend/common/views/dashboard/classes/recurring/components/__shared__/dayScheduleRowShared.options.ts
+export const DESKTOP_ROW_OPTIONS: DayScheduleRowSharedOptions = { /* desktop sizing */ };
+export const MOBILE_ROW_OPTIONS: DayScheduleRowSharedOptions = { /* mobile sizing */ };
 ```
 
-**Mechanism 3: `.jscpd.json` `ignorePatterns` (code-level)**
-
-```json
-{
-  "ignorePatterns": ["// jscpd:ignore-start[\\s\\S]*?// jscpd:ignore-end"]
+```typescript
+// frontend/desktop/views/dashboard/classes/recurring/components/dayScheduleRow.desktop.tsx
+export function DayScheduleRowDesktop(props: DayScheduleRowProps) {
+  return <DayScheduleRowShared {...props} options={DESKTOP_ROW_OPTIONS} />;
 }
 ```
 
-### Strategy B: Micro-Scaffold / Shared Utility Extraction
-
-**When to use:** The duplicated code is a function, constant, or small component that can be extracted and shared between the two consumers with minimal effort.
-
-**Pattern B1: Shared utility function**
-
 ```typescript
-// Before: CountryDisplay.tsx and LanguageDisplay.tsx both have identical Autocomplete boilerplate
-// After: Extract shared displayAutocompleteShared.ts
-
-// frontend/common/components/ui/display/displayAutocompleteShared.ts
-export function renderDisplayAutocomplete<T>({ items, getValue, ...props }) { ... }
+// frontend/mobile/views/dashboard/classes/recurring/components/dayScheduleRow.mobile.tsx
+export function DayScheduleRowMobile(props: DayScheduleRowProps) {
+  return <DayScheduleRowShared {...props} options={MOBILE_ROW_OPTIONS} />;
+}
 ```
 
-**Pattern B2: Shared presentational component (micro-scaffold)**
+### Pattern B: Shared Utility/Component Extraction (for C↔C pairs)
 
-```typescript
-// Before: teacherClassListView.desktop.tsx and teacherStudentsView.desktop.tsx have similar DataGrid layout
-// After: Extract shared TeacherEntityListViewShared.tsx with config props
+**When to use:** Two files in `frontend/common/` duplicate a utility function, constant, or small component.
 
-// frontend/common/views/dashboard/teachers/components/__shared__/TeacherEntityListViewShared.tsx
-export function TeacherEntityListViewShared({ columns, rows, title }) { ... }
-```
+**Mechanism:** Extract the shared element into a new file in an appropriate `frontend/common/` location and have both consumers import from it.
 
-**Pattern B3: Shared constant/config**
+### Pattern C: Dead Code Deletion (for C↔C pairs where one file is unused)
 
-```typescript
-// Before: Two files both define identical GRID_COLUMN_CONFIG
-// After: Extract to shared constants file, import in both
-```
+**When to use:** A duplicated file is never imported anywhere.
+
+**Mechanism:** Delete the dead file.
+
+### Pattern D: Store/Hook Consolidation (for C↔C store/viewModel duplications)
+
+**When to use:** Two stores or ViewModel hooks have similar shape and logic.
+
+**Mechanism:** Create a shared factory or base hook that both derive from.
+
+### Pattern E: Extend Existing Scaffold (for C↔D / C↔M pairs)
+
+**When to use:** A common-tier file duplicates logic already in a `*Shared.tsx` scaffold, or the common file should BE the scaffold.
+
+**Mechanism:** Move the shared logic into the existing `__shared__/` scaffold, or create a new one and have the common-tier file delegate to it.
+
+### Pattern F: Shared View Scaffold (for D↔D / M↔M same-tier pairs)
+
+**When to use:** Two desktop (or two mobile) views share a layout pattern.
+
+**Mechanism:** Create a `__shared__/*Shared.tsx` in `frontend/common/views/` that both same-tier variants import. This follows the same pattern as D↔M but both consumers pass similar options.
+
+### Pattern G: Locale Type Consolidation (for shared/locale pairs)
+
+**When to use:** Locale namespace type files define identical type signatures across locales.
+
+**Mechanism:**
+- Extract common type bases into a shared interface in `shared/locale/types/`
+- Use `Pick<>` or `Omit<>` to derive locale-specific subsets
+- OR consolidate repeated type definitions into a single canonical type with locale-specific overrides
+- NEVER break the compile-time type safety — the locale system must still type-check all translations
 
 ---
 
@@ -118,115 +158,125 @@ export function TeacherEntityListViewShared({ columns, rows, title }) { ... }
 
 ### Category 1: Desktop↔Mobile Triplication Residuals (70 pairs, 5,791 tokens)
 
-These are D↔M pairs where the desktop and mobile variants have small differences (a breakpoint `sx` prop, a label, or a layout variant) but share the bulk of their structure.
+D↔M pairs where desktop and mobile variants have small differences but share the bulk of their structure.
 
 **Triage criteria:**
-- If the D↔M pair differs by ≤3 lines → **jscpd-ignore** (the difference is too small to scaffold)
-- If the D↔M pair shares a clear presentational structure with 1-2 config differences → **micro-scaffold** (config-object variant from Phase 5 design.md)
-- If the D↔M pair is structurally different with only surface similarity → **jscpd-ignore** (false positive)
+- If the D↔M pair shares a clear presentational structure with config differences → **create `__shared__/*Shared.tsx` scaffold** (Pattern A)
+- If the D↔M pair is structurally different with only surface similarity → **extract the genuinely shared sub-block** into a smaller scaffold
+- If the D↔M pair differs by only 1-2 lines that are truly visual config → **still extract to scaffold** with options (never suppress)
 
-**Example pairs:**
-- `resourceFileTypeIcon.desktop.tsx` ↔ `resourceFileTypeIcon.mobile.tsx` (91 tokens) — likely identical icon + different wrapper → ignore
-- `suggestionSocialProof.desktop.tsx` ↔ `suggestionSocialProof.mobile.tsx` (91 tokens) — similar → evaluate
-- `studentQuota.desktop.tsx` ↔ `studentQuota.mobile.tsx` (90 tokens, multiple overlapping pairs) → micro-scaffold candidate
+**Domain groupings (20 domains, ~104 unique desktop files):**
+- permissions (15 files, 4812 tokens), teachers (16 files, 3785 tokens), components (11 files, 2240 tokens), students (8 files, 2145 tokens), billing (7 files, 1442 tokens), parent (6 files, 1440 tokens), complaints (6 files, 1131 tokens), profile (4 files, 1155 tokens), suggestions (4 files, 777 tokens), supervisor (4 files, 670 tokens), settings (5 files, 763 tokens), resources (3 files, 582 tokens), classes (3 files, 521 tokens), schedule (2 files, 568 tokens), tools (2 files, 372 tokens), reschedule (2 files, 378 tokens), cron (1 file, 265 tokens), search-schedule (1 file, 98 tokens), admin (3 files, 463 tokens), student (1 file, 428 tokens)
 
 ### Category 2: Common↔Common Intra-Layer (31 pairs, 2,527 tokens)
 
-Files within `frontend/common/` from different domains duplicating each other. Phase 2 Task 3.3 already established this pattern — extract shared utilities or delete dead code.
+Files within `frontend/common/` from different domains duplicating each other.
 
 **Triage criteria:**
-- If the C↔C pair is dead code (one file never imported) → **delete dead file** (Phase 2 pattern)
-- If the C↔C pair shares a utility function → **extract shared function**
-- If the C↔C pair has similar but domain-specific logic → **jscpd-ignore**
-- If the C↔C pair is a store/model duplication → **extract shared hooks or types**
-
-**Example pairs:**
-- `CountryDisplay.tsx` ↔ `LanguageDisplay.tsx` (89 tokens) — similar display component pattern → shared utility
-- `useCreateParentOnboarding.ts` ↔ `useCreateTeacherOnboarding.ts` (88 tokens) — similar onboarding hooks → shared hook
-- `dashboardStore.ts` ↔ `teacherDashboardStore.ts` (82 tokens) — similar store shape → shared store factory
-- `searchScheduleStore.ts` ↔ `useSearchScheduleViewModel.ts` (81 tokens) — store↔viewmodel → evaluate (may be structural)
+- Dead code (one file never imported) → **delete dead file** (Pattern C)
+- Shared utility function → **extract shared function** (Pattern B)
+- Similar store/viewModel shape → **shared factory or base hook** (Pattern D)
+- Similar component pattern → **extract shared component** (Pattern B)
 
 ### Category 3: Common↔Desktop Cross-Tier (12 pairs, 1,001 tokens)
 
-Common tier base logic duplicated in desktop tier visual variants. These are NOT triplication residuals — they are common↔desktop pairs where the common tier has the base logic and the desktop tier adds visual variants.
+Common tier base logic duplicated in desktop tier visual variants.
 
 **Triage criteria:**
-- If the C↔D pair shares clear logic with minor visual variant → extend existing `*Shared.tsx` scaffold or config
-- If structural (MUI variant boilerplate) → jscpd-ignore
+- Shares clear logic with minor visual variant → **extend existing `*Shared.tsx` scaffold** (Pattern E)
+- Common file should BE the scaffold → **move to `__shared__/` and have both common and desktop delegate**
 
 ### Category 4: Common↔Mobile Cross-Tier (11 pairs, 887 tokens)
 
 Same as C↔D but in mobile tier.
 
-**Triage criteria:**
-- Same as C↔D above — extend existing scaffold or jscpd-ignore
-
 ### Category 5: Desktop↔Desktop Same-Tier (7 pairs, 567 tokens)
 
-Different desktop views with similar layouts. These are NOT triplication residuals — they are two unrelated desktop views that happen to share code structure.
+Different desktop views with similar layouts.
 
 **Triage criteria:**
-- If the D↔D pair is structurally required by MUI DataGrid/Table conventions → **jscpd-ignore**
-- If the D↔D pair shares a clear view pattern → **shared view scaffold**
-- If the D↔D pair is the same component family (e.g., two billing views) → **shared view scaffold**
-
-**Example pairs:**
-- `teacherClassListView.desktop.tsx` ↔ `teacherStudentsView.desktop.tsx` (151 tokens) — teacher entity list views → shared scaffold
-- `parentBilling.desktop.tsx` ↔ `userBillingProfile.desktop.tsx` (114 tokens) — billing views → shared scaffold
-- `parentsDataGrid.desktop.tsx` ↔ `studentDirectoryDataGrid.desktop.tsx` (98 tokens) — admin data grids → shared DataGrid config
+- Shares a clear view pattern → **shared view scaffold in `frontend/common/views/`** (Pattern F)
+- Same component family → **shared scaffold**
 
 ### Category 6: Mobile↔Mobile Same-Tier (4 pairs, 317 tokens)
 
 Same as D↔D but in mobile tier.
 
-**Example pairs:**
-- `createSubjectDialog.mobile.tsx` ↔ `editSubjectDialog.mobile.tsx` (348 tokens!) — create/edit dialogs → shared dialog scaffold (high-value fix)
-- `teacherClassListView.mobile.tsx` ↔ `teacherStudentsView.mobile.tsx` (129 tokens) — teacher entity list views → shared scaffold
-- `recurringScheduleDetailView.mobile.tsx` ↔ `recurringSchedulesListView.mobile.tsx` (104 tokens) — schedule views → evaluate
-
 ### Category 7: `shared/locale/` Structural (16 pairs, 1,604 tokens)
 
-**Approach: `.jscpd.json` config-only change.** Add `shared/locale/**` to the ignore patterns in `.jscpd.json`. Zero code changes. Zero risk.
+**Approach: True type consolidation.** The compile-time TypeScript i18n system requires each locale namespace to define identical type signatures. The duplication is by design BUT can be reduced by:
+- Extracting common type bases into shared interfaces
+- Using `Pick<>` / `Omit<>` to derive locale-specific subsets
+- Consolidating repeated type definitions
 
-This is the compile-time TypeScript i18n system where each locale namespace must define identical type signatures. The duplication is by design — eliminating it would break the type system. See `shared/AGENTS.md` for the i18n pattern.
+This requires careful analysis of each locale pair to find which type signatures can be consolidated without breaking the compile-time type safety.
 
 ---
 
-## Critical Policies (Same as Phase 5)
+## Dependency Rules (from `.dependency-cruiser.js` and `eslint.config.mjs`)
+
+| Rule | Enforcement |
+|------|------------|
+| `shared/` must NOT import from `frontend/`, `backend/`, `app/` | ESLint + dependency-cruiser |
+| `frontend/` must NOT import from `backend/` | ESLint + dependency-cruiser |
+| `.desktop.tsx` must NOT import from `@/frontend/mobile/` | ESLint |
+| `.mobile.tsx` must NOT import from `@/frontend/desktop/` | ESLint |
+| `.desktop.tsx` / `.mobile.tsx` must NOT use `useMediaQuery` or `useViewport` | ESLint |
+| Tier views must NOT use `useAppTranslation` — labels via props | ESLint |
+| All imports must use `@/` path alias | ESLint |
+
+**Shared logic placement:**
+- View scaffolds → `frontend/common/views/dashboard/<domain>/components/__shared__/`
+- UI scaffolds → `frontend/common/components/ui/<category>/`
+- Both desktop and mobile import from `common/` — never from each other
+
+---
+
+## Critical Policies
 
 | Policy | Rule | Source |
 |--------|------|--------|
+| No `jscpd:ignore` | NEVER add `// jscpd:ignore-start/end` — fix by code extraction | User requirement |
+| No `.jscpd.json` changes | NEVER add ignore patterns for existing code | User requirement |
 | No barrel re-exports | Avoid `export * from` — TDZ risk in ESM | `frontend/AGENTS.md` |
 | MUI v9 sx prop only | No `fontWeight`, `mb`, etc. as direct props | `frontend/AGENTS.md` |
 | `*Outlined` icon naming | `ErrorOutline` → `ErrorOutlined` | `frontend/AGENTS.md` |
-| No oxlint-disable | Fix root cause, never suppress | `AGENTS.md` |
+| No `oxlint-disable` | Fix root cause, never suppress | `AGENTS.md` |
 | logger not console | `import { logger } from '@/frontend/utils/logger'` | `AGENTS.md` |
 | i18n via useAppTranslation | No hardcoded user-facing strings | `shared/AGENTS.md` |
 | No server tests | See No-Server-Tests Policy in requirements.md | requirements.md |
-| jscpd-ignore is allowed | Unlike `oxlint-disable`, jscpd-ignore is a configuration directive, not a lint suppression. It tells the duplication scanner to skip structural code that must be repeated. | This plan |
 
 ---
 
 ## Task Architecture
 
 ### Phase 0: Baseline & Plan Review (Serial)
-- Task 0.1: Capture baseline (jscpd, tsgo, biome)
-- Task 0.2: Plan review via `@plan-review` skill
+- Task 0.1: Capture baseline (jscpd, tsgo, biome) — already complete
+- Task 0.2: Plan review via `@plan-review` skill — already complete
 
-### Phase 1: Structural Suppression (Serial)
-- Task 1.1: `.jscpd.json` configuration — add `shared/locale/**` ignore
-- Task 1.2: Verify locale pairs suppressed (jscpd reports 0 locale clones)
+### Phase 1: `shared/locale/` Type Consolidation (Serial)
+- Task 1.1: Analyze and consolidate `shared/locale/` type definitions to reduce structural duplication
+- Task 1.2: Verify locale pairs reduced via `bun check:duplicates`
 
-### Phase 2: P3 Triage & Fix — D↔M Residuals (Parallel Subagents)
-- Task 2.1–2.4: 4 waves of ~15 pairs each, parallel subagents triage and fix/ignore
+### Phase 2: D↔M Triplication Residuals — Scaffold Extraction (Parallel Subagents)
+- Task 2.1–2.9: 9 domain-grouped batches, each creating `__shared__/` scaffolds:
+  - 2.1: permissions (15 files)
+  - 2.2: teachers (16 files)
+  - 2.3: components (11 files)
+  - 2.4: students + student (9 files)
+  - 2.5: billing (7 files)
+  - 2.6: parent (6 files)
+  - 2.7: complaints + suggestions (10 files)
+  - 2.8: profile + settings + supervisor (13 files)
+  - 2.9: resources + classes + schedule + tools + reschedule + cron + search-schedule + admin (15 files)
 
-### Phase 3: P3 Triage & Fix — C↔C Intra-Layer (Parallel Subagents)
-- Task 3.1–3.2: 2 waves of ~20 pairs each
+### Phase 3: C↔C Intra-Layer — Utility Extraction (Parallel Subagents)
+- Task 3.1–3.4: 4 batches of ~8 pairs each
 
-### Phase 4: P3 Triage & Fix — C↔D, C↔M, D↔D & M↔M (Parallel Subagents)
-- Task 4.1: C↔D & C↔M cross-tier pairs (23 pairs, 1,888 tokens)
-- Task 4.2: D↔D same-tier pairs (7 pairs, 567 tokens)
-- Task 4.3: M↔M same-tier pairs (4 pairs, 317 tokens)
+### Phase 4: Cross-Tier & Same-Tier (Parallel Subagents)
+- Task 4.1: C↔D & C↔M cross-tier pairs (23 pairs)
+- Task 4.2: D↔D same-tier pairs (7 pairs) — shared view scaffolds
+- Task 4.3: M↔M same-tier pairs (4 pairs) — shared view scaffolds
 
 ### Phase 5: Review Gates
 - Task 5.1: Mid-point review after Phase 4
@@ -234,10 +284,10 @@ This is the compile-time TypeScript i18n system where each locale namespace must
 - Task 5.3: Final quality gate
 
 ### Phase 6: Residual Sweep & Knowledge Propagation
-- Task 6.1: Post-Phase 4/5 residual sweep (conditional — may defer)
-- Task 6.2: Update `.jscpd.json` documentation
-- Task 6.3: Update `docs/frontend/duplication-elimination-patterns.md` with jscpd-ignore strategy
-- Task 6.4: Update AGENTS.md files and root AGENTS.md
+- Task 6.1: Post-implementation residual sweep
+- Task 6.2: Update `docs/frontend/duplication-elimination-patterns.md` with scaffold extraction patterns
+- Task 6.3: Update AGENTS.md files with P3 resolution patterns
+- Task 6.4: Final jscpd comparison vs baseline
 
 ---
 
@@ -245,22 +295,23 @@ This is the compile-time TypeScript i18n system where each locale namespace must
 
 ### Subagent Pool: 8 max concurrent
 
-Phase 6 uses fewer parallel subagents than Phase 5 (8 vs 16) because P3 pairs are small and triage is quick. Each subagent handles a batch of ~8-10 pairs:
+Each subagent handles one domain group (for Phase 2) or one batch of pairs (for Phases 3-4):
 
 ```
-Phase 2 (D↔M): 4 waves × 2 subagents = 8 concurrent max
-Phase 3 (C↔C): 2 waves × 2 subagents = 4 concurrent max
-Phase 4 (C↔D+C↔M, D↔D, M↔M): 3 tasks × 1 subagent = 3 concurrent max
+Phase 2 (D↔M): 9 domain batches, 4-5 concurrent max
+Phase 3 (C↔C): 4 batches, 4 concurrent max
+Phase 4 (cross-tier + same-tier): 3 tasks, 3 concurrent max
 ```
 
 ### Subagent Task Template
 
 Each subagent receives:
-1. A list of 8-10 P3 pairs with file paths, token counts, and line ranges
+1. A list of clone pairs with file paths, token counts, and line ranges
 2. The triage decision tree (from this design)
-3. Instruction to either "fix" (extract shared element) or "ignore" (add jscpd-ignore directive)
+3. Instruction to **extract shared code** (create scaffold, utility, or delete dead code)
 4. Quality verification: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file
 5. Outcome file: `.ai/plans/duplications-phase6/outcome/<task-id>-outcome.md`
+6. **MUST read ALL plan files** in `.ai/plans/duplications-phase6/` before starting work
 
 ---
 
@@ -268,23 +319,23 @@ Each subagent receives:
 
 | Risk | Probability | Impact | Mitigation |
 |------|------------|--------|------------|
-| R1: jscpd-ignore overuse — suppressing real duplication that should be fixed | Medium | Medium | Triage criteria require explicit structural justification for each ignore. Mid-point review checks ignore-to-fix ratio. |
-| R2: Breaking the i18n type system with locale ignores | Very Low | High | `.jscpd.json` ignore is a scanner config change — it does NOT modify any code. The i18n compile-time system is untouched. |
-| R3: Phase 4/5 not complete when residual sweep runs | High | Low | Residual sweep task is conditional — it may be deferred until Phases 4/5 complete. The P3 triage (Phase 6's main work) is independent. |
-| R4: P3 pairs too small to fix meaningfully | Medium | Low | jscpd-ignore is the fallback. For pairs where extraction would add more complexity than the duplication itself, ignore with rationale. |
-| R5: `shared/locale/**` ignore too broad — may suppress non-structural locale duplication | Low | Low | Verify with `bun check:duplicates` before/after. All 16 current locale pairs are structural. Monitor for future regressions. |
-| R6: Duplicate effort with Phase 5 (which also covers P3 frontend pairs) | Low | Medium | Phase 5 defers P3 explicitly (D5-3). Phase 6 picks up only what Phase 5 defers. No overlap. |
+| R1: Scaffold extraction too aggressive — breaking component behavior | Medium | High | Each scaffold MUST preserve exact rendering. Verify with sub-loop (tsgo + oxlint + biome + lint + codescene). Desktop/mobile wrappers must produce identical output. |
+| R2: Breaking the i18n type system with locale consolidation | Low | High | Locale type consolidation MUST preserve compile-time type safety. Use `Pick<>`/`Omit<>` not type erasure. Verify with tsgo. |
+| R3: Cross-dependency violations | Medium | High | All shared code goes to `common/`. Desktop/mobile import from common only. Sub-loop includes lint which enforces dependency rules. |
+| R4: P3 pairs too small to scaffold meaningfully | Medium | Low | Even small pairs can be scaffolded — the options pattern handles 1-line differences. Every pair gets a real fix. |
+| R5: Subagent edit conflicts (same file in multiple pairs) | Medium | Medium | Group by file, not by pair. Fix all pairs touching the same file in a single subagent task. |
+| R6: Phase 4/5 not complete when residual sweep runs | High | Low | Residual sweep task is conditional — may be deferred. P3 triage is independent. |
 
 ---
 
 ## Edge Cases
 
-1. **A P3 pair that Phase 5 already fixed** — Check git diff before starting. If Phase 5 already fixed a pair, skip it and note in the outcome.
-2. **A P3 pair where one file is deleted by Phase 4** — Phase 4 modifies backend/shared/app/scripts. If Phase 4 deletes a file that participates in a P3 pair, the pair disappears from jscpd output. Skip it.
-3. **jscpd-ignore directive conflicts with oxlint** — `// jscpd:ignore` is a comment directive, not an oxlint suppression. It does NOT trigger `no-oxlint-disable` rules. Verify with sub-loop.
-4. **.`jscpd.json` already ignores `shared/locale/**`** — Check current config before adding. If already present, skip Task 1.1.
-5. **P3 pair token count increased after Phase 5 changes** — Phase 5 may increase some clone sizes by consolidating pairs. Re-run jscpd before triage to get current counts, not the baseline counts.
-6. **Multiple P3 pairs sharing the same file** — Group by file, not by pair. Fix all pairs touching the same file in a single subagent task to avoid edit conflicts.
+1. **A P3 pair that Phase 5 already fixed** — Check git diff before starting. If already fixed, skip and note in outcome.
+2. **A P3 pair where one file is deleted by Phase 4** — If Phase 4 deletes a file, the pair disappears. Skip it.
+3. **Multiple P3 pairs sharing the same file** — Group by file, not by pair. Fix all pairs touching the same file in a single subagent task.
+4. **A D↔M pair where the scaffold already exists** — Extend the existing scaffold rather than creating a new one.
+5. **A locale pair where consolidation would break type safety** — Document as deferred with technical rationale. This is the ONLY acceptable deferral.
+6. **P3 pair token count changed after Phase 5** — Re-run jscpd before triage to get current counts.
 
 ---
 
@@ -292,7 +343,6 @@ Each subagent receives:
 
 | Artifact | Update |
 |----------|--------|
-| `docs/frontend/duplication-elimination-patterns.md` | Add "jscpd-ignore Strategy" section with config and inline directive patterns |
-| `AGENTS.md` (root) | Add `.jscpd.json` configuration reference to Important References |
-| `.jscpd.json` | Add `shared/locale/**` to ignore patterns (Task 1.1) |
-| `.ai/plans/duplications-phase6/outcome/` | Per-task outcome files documenting triage decisions |
+| `docs/frontend/duplication-elimination-patterns.md` | Add "P3 Micro Cluster Scaffold Extraction" section with patterns A-G |
+| `AGENTS.md` (root) | Add Phase 6 outcome reference to Important References |
+| `.ai/plans/duplications-phase6/outcome/` | Per-task outcome files documenting extraction decisions |

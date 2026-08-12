@@ -17,7 +17,7 @@ export function ManualInvoiceFeeFieldMobile({
   labels,
   draftCurrency,
 }: Readonly<ManualInvoiceFeeFieldMobileProps>) {
-  const currencySymbol = getCurrencySymbol(draftCurrency);
+  const currencySymbol = getCurrencySymbol(draftCurrency ?? "SAR");
 
   return (
     <Controller

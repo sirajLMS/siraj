@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { DateRangePickerChrome } from "@/frontend/common/components/ui/form/date/dateRangePickerShared";
 import { useDateRangePickerState } from "@/frontend/common/components/ui/form/date/dateRangePickerSharedUtils";
-import type {
-  AppDateRangePickerProps,
-  DateRangePickerSlotProps,
-} from "@/frontend/common/components/ui/form/date/types/dateRangePickerShared.types";
+import type { AppDateRangePickerProps } from "@/frontend/common/components/ui/form/date/types/dateRangePickerShared.types";
+import type { RangePickerSlotProps } from "@/frontend/common/components/ui/form/rangePickerShared";
 import { MobileAppDatePicker } from "@/frontend/mobile/components/ui/form/date/MobileAppDatePicker";
 
 export type MobileAppDateRangePickerProps = AppDateRangePickerProps;
@@ -15,7 +13,7 @@ export function MobileAppDateRangePicker(props: Readonly<MobileAppDateRangePicke
   const [open, setOpen] = useState(false);
   const state = useDateRangePickerState(props);
 
-  const slots: DateRangePickerSlotProps = {
+  const slots: RangePickerSlotProps = {
     renderFromPicker: args => (
       <MobileAppDatePicker
         label={args.label}

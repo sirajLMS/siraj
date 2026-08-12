@@ -186,3 +186,33 @@ type ViewSlotProps = {
 - Desktop variants import ONLY from `__shared__/` scaffold paths
 - Mobile variants import ONLY from `__shared__/` scaffold paths
 - Never import from sibling tier's `.desktop.tsx` or `.mobile.tsx` files
+
+## Phase 5 Rollout Summary
+
+The duplications-phase5 plan applied this pattern at scale across the entire frontend:
+
+- **214** `*Shared.tsx`/`*Shared.ts` scaffold files created across `frontend/common/`
+- **68** `__shared__/` directories established for domain-level scaffold organization
+- **55** shared helper files in `backend/db/__shared__/` directories
+- **415** clone pairs eliminated (from 505 total clones → 90)
+- **58,894** duplicated tokens removed (from 68,279 → 9,385, −86.3%)
+
+### Patterns discovered during rollout
+
+1. **Config-object slots**: `DESKTOP_OPTIONS` / `MOBILE_OPTIONS` module-level consts passed to shared scaffold for minor visual diffs (e.g., `spacing`, `defaultTypographyVariant`). Avoids re-creating objects per render.
+2. **Component-type slots**: `ComponentType<P>` or render functions for different child components (e.g., `renderAvatar` for desktop/mobile avatar variants). The scaffold calls the slot; the tier provides the implementation.
+3. **Factory functions for logic dedup**: `createResolveHelperText(condition)` factory in PhoneInput — returns a function with the tier-specific precedence baked in. Avoids `useMediaQuery` / `useViewport` while preserving behavioral differences.
+4. **View-level `__shared__/` dirs**: For D↔M view pairs, scaffolds live in `frontend/common/views/dashboard/<domain>/components/__shared__/` — not in `desktop/` or `mobile/`.
+5. **Backend repo helpers**: `buildMeetingConfigInsertValues()` / `buildMeetingConfigUpdatePayload()` in `backend/db/repo/meeting/__shared__/` — extract common `.values()` / `.update()` payload construction across parallel repository namespaces.
+6. **Billing repo factory**: `makeBillingRepo<TRow, TSelect, TInsert, TUpdate, TFilters>()` — generic factory that generates the entire CRUD/list/deactivate/query structure for billing repos. Entity-specific insert defaults go in `prepareInsert` hook.
+7. **Schema column helpers**: `primaryKeyColumn()` + `timestampColumns()` — extract common column definitions. NOTE: spreading these into `pgTable()` breaks Drizzle's type inference for `.values()` calls; use them only when the table doesn't use `.values()` or when the inference can be manually asserted.
+
+### Scaffold inventory by domain
+
+| Domain | Scaffolds created |
+|--------|-------------------|
+| UI components (avatar, buttons, form, display, input) | ~30 |
+| Dashboard views (billing, classes, students, teachers, admin) | ~120 |
+| Backend repos (meeting, billing, classes) | ~15 |
+| Shared utilities (locale, logger, enum, scripts) | ~5 |
+| Other (payment, permissions, resources, complaints) | ~44 |

@@ -1,16 +1,16 @@
 "use client";
 
-import { Box, Chip, Grid, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
 import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
-import { ClassAuditGrid } from "@/frontend/common/views/dashboard/classes/audit/components/classAuditGrid";
-import { buildDetailsLabels } from "@/frontend/common/views/dashboard/classes/audit/utils";
+import {
+  ClassAuditViewGridShared,
+  type ClassAuditViewGridSlotConfig,
+} from "@/frontend/common/views/dashboard/classes/audit/components/__shared__/classAuditViewGridShared";
 import { MobileFilterButton, MobilePageContainer, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import { AdminNoteCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/adminNoteCard.mobile";
 import { CommunicationLogCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/communicationLogCard.mobile";
 import { OnlineMeetingCardMobile } from "@/frontend/mobile/views/dashboard/classes/audit/onlineMeetingCard.mobile";
-import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const StyledMobileClassTitle = styled(Typography)(({ theme }) => ({
   fontFamily: '"Hanken Grotesk", sans-serif',
@@ -50,7 +50,13 @@ export function ClassAuditViewMobile({
   onEditAdminNote,
   isResending,
 }: Readonly<ClassAuditViewProps>) {
-  const detailsLabels = buildDetailsLabels(labels);
+  const gridSlots: ClassAuditViewGridSlotConfig = {
+    OnlineMeetingCard: OnlineMeetingCardMobile,
+    gridSlots: {
+      CommunicationLogCard: CommunicationLogCardMobile,
+      AdminNoteCard: AdminNoteCardMobile,
+    },
+  };
 
   return (
     <MobilePageContainer>
@@ -67,39 +73,17 @@ export function ClassAuditViewMobile({
         <StyledMobileStatusChip label={labels.statusRescheduled} size="small" />
       </Box>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, lg: 8 }} sx={{ order: { xs: 1, lg: 1 } }}>
-          <ClassAuditDetailsCard audit={audit} labels={detailsLabels} />
-        </Grid>
-
-        <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 2, lg: 2 } }}>
-          <OnlineMeetingCardMobile
-            meetingInfo={audit.meetingInfo}
-            labels={labels.meetingInfo}
-            showJoin={isJoinableClassInstance(audit.status, audit.outcome, { isFrozen: audit.isFrozen ?? false })}
-          />
-        </Grid>
-
-        <ClassAuditGrid
-          communications={audit.communications}
-          communicationLogLabels={labels.communicationLog}
-          onResendNotifications={onResendNotifications}
-          isResending={isResending}
-          students={audit.students}
-          registeredStudentCount={audit.registeredStudentCount ?? 0}
-          registeredStudentsLabels={labels.registeredStudents}
-          onExportStudents={onExportStudents}
-          onViewStudent={onViewStudent}
-          adminNote={audit.adminNote}
-          adminNoteLabels={labels.adminNote}
-          onUpdateAdminNote={onUpdateAdminNote}
-          onEditAdminNote={onEditAdminNote}
-          slots={{
-            CommunicationLogCard: CommunicationLogCardMobile,
-            AdminNoteCard: AdminNoteCardMobile,
-          }}
-        />
-      </Grid>
+      <ClassAuditViewGridShared
+        audit={audit}
+        labels={labels}
+        onResendNotifications={onResendNotifications}
+        isResending={isResending}
+        onExportStudents={onExportStudents}
+        onViewStudent={onViewStudent}
+        onUpdateAdminNote={onUpdateAdminNote}
+        onEditAdminNote={onEditAdminNote}
+        slots={gridSlots}
+      />
     </MobilePageContainer>
   );
 }

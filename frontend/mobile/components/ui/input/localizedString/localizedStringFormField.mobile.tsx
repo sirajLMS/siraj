@@ -1,17 +1,11 @@
 "use client";
 
-import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import type { LocalizedStringInputProps } from "@/frontend/common/components/ui/input/localizedString/types";
+import type { FieldValues } from "react-hook-form";
+import {
+  type LocalizedStringFormFieldProps,
+  LocalizedStringFormFieldShared,
+} from "@/frontend/common/components/ui/input/localizedString/localizedStringFormFieldShared";
 import { LocalizedStringInputMobile } from "@/frontend/mobile/components/ui/input/localizedString/localizedStringInput.mobile";
-import type { LocalizedString } from "@/shared/types";
-
-type LocalizedStringFormFieldProps<T extends FieldValues> = Omit<
-  LocalizedStringInputProps,
-  "value" | "onChangeAction" | "onBlurAction"
-> & {
-  readonly name: FieldPath<T>;
-  readonly control: Control<T>;
-};
 
 export function LocalizedStringFormFieldMobile<T extends FieldValues>({
   name,
@@ -19,31 +13,11 @@ export function LocalizedStringFormFieldMobile<T extends FieldValues>({
   ...inputProps
 }: LocalizedStringFormFieldProps<T>) {
   return (
-    <Controller
+    <LocalizedStringFormFieldShared
       name={name}
       control={control}
-      render={({ field, fieldState }) => {
-        const rawValue = field.value;
-        let normalized: LocalizedString;
-
-        if (typeof rawValue === "string") {
-          normalized = rawValue === "" ? {} : { en: rawValue };
-        } else if (rawValue !== null && typeof rawValue === "object") {
-          normalized = rawValue;
-        } else {
-          normalized = {};
-        }
-        return (
-          <LocalizedStringInputMobile
-            {...inputProps}
-            value={normalized}
-            onChangeAction={next => field.onChange(next)}
-            onBlurAction={field.onBlur}
-            error={inputProps.error ?? Boolean(fieldState.error)}
-            errorMessage={inputProps.errorMessage ?? fieldState.error?.message}
-          />
-        );
-      }}
+      {...inputProps}
+      LocalizedStringInput={LocalizedStringInputMobile}
     />
   );
 }

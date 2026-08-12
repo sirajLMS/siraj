@@ -5,14 +5,15 @@ import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
+import type { SxProps, Theme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import {
-  getPaymentMethodAutocompletePaperSlotProps,
-  getPaymentMethodAutocompletePopperSlotProps,
-} from "@/frontend/common/components/ui/input/paymentMethodSelect/paymentMethodAutocompletePopper";
+  createAutocompletePaperSlotProps,
+  createAutocompletePopperSlotProps,
+} from "@/frontend/common/components/ui/input/autocompletePopperSlotProps";
 import type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
 import type { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -30,6 +31,12 @@ export interface PaymentMethodAutocompleteSlots {
     readonly type?: PaymentMethodType | null;
     readonly showSlug: boolean;
   }>;
+  /** sx applied to each option row <Box component="li"> wrapper (mobile uses larger touch targets) */
+  readonly optionRowSx?: SxProps<Theme>;
+  /** TextField `size` prop — mobile passes "small" for denser layout */
+  readonly textFieldSize?: "small" | "medium";
+  /** Default value for the `fullWidth` prop (mobile defaults to true) */
+  readonly fullWidthDefault?: boolean;
 }
 
 const filterOptions = createFilterOptions<PaymentMethodCatalogOption>({
@@ -104,6 +111,7 @@ const AutocompleteTextField: React.FC<{
   readonly autoFocus?: boolean;
   readonly autoComplete: string;
   readonly option?: PaymentMethodCatalogOption | null;
+  readonly textFieldSize?: "small" | "medium";
 }> = ({
   params,
   label,
@@ -115,11 +123,13 @@ const AutocompleteTextField: React.FC<{
   autoFocus,
   autoComplete,
   option,
+  textFieldSize,
 }) => {
   const slotProps = resolveSlotProps(params.slotProps);
   return (
     <TextField
       {...params}
+      size={textFieldSize}
       autoFocus={autoFocus}
       label={label}
       placeholder={placeholder}
@@ -171,16 +181,16 @@ function buildSlotProps(
   disablePortal: boolean,
   listAttached: boolean
 ): {
-  readonly popper: ReturnType<typeof getPaymentMethodAutocompletePopperSlotProps>;
-  readonly paper: ReturnType<typeof getPaymentMethodAutocompletePaperSlotProps>;
+  readonly popper: ReturnType<typeof createAutocompletePopperSlotProps<PaymentMethodCatalogOption>>;
+  readonly paper: ReturnType<typeof createAutocompletePaperSlotProps<PaymentMethodCatalogOption>>;
 } {
   return {
-    popper: getPaymentMethodAutocompletePopperSlotProps({
+    popper: createAutocompletePopperSlotProps<PaymentMethodCatalogOption>({
       matchAnchorWidth,
       disablePortal: disablePortal || listAttached,
       listAttached,
     }),
-    paper: getPaymentMethodAutocompletePaperSlotProps(listAttached),
+    paper: createAutocompletePaperSlotProps<PaymentMethodCatalogOption>(listAttached),
   };
 }
 
@@ -265,6 +275,7 @@ interface InputFieldValues {
   readonly onBlur: (() => void) | undefined;
   readonly autoFocus: boolean | undefined;
   readonly autoComplete: string;
+  readonly textFieldSize: "small" | "medium" | undefined;
 }
 
 interface AutocompleteContentProps {
@@ -333,6 +344,7 @@ const AutocompleteContent: React.FC<AutocompleteContentProps> = ({
           autoFocus={inputFields.autoFocus}
           autoComplete={inputFields.autoComplete}
           option={inputFields.option}
+          textFieldSize={inputFields.textFieldSize}
         />
       )}
     />
@@ -351,7 +363,7 @@ function useRenderOption(
     (props: React.HTMLAttributes<HTMLLIElement> & { readonly key?: React.Key }, entry: PaymentMethodCatalogOption) => {
       const { key, ...optionProps } = props;
       return (
-        <Box key={key} component="li" sx={{ px: 2, py: 1 }} {...optionProps}>
+        <Box key={key} component="li" sx={slots.optionRowSx ?? { px: 2, py: 1 }} {...optionProps}>
           <slots.OptionRow option={entry} type={type} showSlug={showSlug} />
         </Box>
       );
@@ -369,7 +381,8 @@ function useInputFields(
   resolvedHelperText: string | undefined,
   onBlur: (() => void) | undefined,
   autoFocus: boolean | undefined,
-  autoComplete: string
+  autoComplete: string,
+  textFieldSize: "small" | "medium" | undefined
 ): InputFieldValues {
   return useMemo(
     () => ({
@@ -382,6 +395,7 @@ function useInputFields(
       onBlur,
       autoFocus,
       autoComplete,
+      textFieldSize,
     }),
     [
       option,
@@ -393,6 +407,7 @@ function useInputFields(
       onBlur,
       autoFocus,
       autoComplete,
+      textFieldSize,
     ]
   );
 }
@@ -430,6 +445,7 @@ export function PaymentMethodAutocompleteShared({
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = openProp ?? internalOpen;
 
+  const resolvedFullWidth = fullWidth ?? slots.fullWidthDefault ?? false;
   const options = useMemo(() => filterByAllowedSlugs(allOptionsProp, allowedSlugs), [allOptionsProp, allowedSlugs]);
   const { handleOpen, handleClose, handleChange } = useChangeHandlers(
     openProp,
@@ -466,12 +482,13 @@ export function PaymentMethodAutocompleteShared({
     resolvedHelperText,
     onBlur,
     autoFocus,
-    autoComplete
+    autoComplete,
+    slots.textFieldSize
   );
 
   return (
     <AutocompleteContent
-      fullWidth={fullWidth}
+      fullWidth={resolvedFullWidth}
       options={options}
       disabled={disabled}
       isOpen={isOpen}

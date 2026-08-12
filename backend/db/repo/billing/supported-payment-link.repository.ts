@@ -1,4 +1,9 @@
-import { makeBillingRepo, makeBillingUpsertMany } from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
+import {
+  buildCommonConflictFields,
+  buildCommonInsertFields,
+  makeBillingRepo,
+  makeBillingUpsertMany,
+} from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
 import { supportedPaymentLinks } from "@/backend/db/schema";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
@@ -74,26 +79,15 @@ export namespace SupportedPaymentLinkRepository {
     buildInsert: (input, now) => ({
       slug: input.slug,
       name: input.name,
-      description: input.description ?? null,
-      instructions: input.instructions ?? null,
       urlAllowlist: input.urlAllowlist,
       urlExample: input.urlExample ?? null,
-      supportedDirections: input.supportedDirections ?? "BOTH",
-      logoUrl: input.logoUrl ?? null,
-      isActive: input.isActive ?? true,
-      createdAt: input.createdAt ?? now,
-      updatedAt: input.updatedAt ?? now,
+      ...buildCommonInsertFields(input, now),
     }),
     buildConflictSet: (input, now) => ({
       name: input.name,
-      description: input.description ?? null,
-      instructions: input.instructions ?? null,
       urlAllowlist: input.urlAllowlist,
       urlExample: input.urlExample ?? null,
-      supportedDirections: input.supportedDirections ?? "BOTH",
-      logoUrl: input.logoUrl ?? null,
-      isActive: input.isActive ?? true,
-      updatedAt: now,
+      ...buildCommonConflictFields(input, now),
     }),
   });
 }

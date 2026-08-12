@@ -1,5 +1,10 @@
 import { eq, type SQL } from "drizzle-orm";
-import { makeBillingRepo, makeBillingUpsertMany } from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
+import {
+  buildCommonConflictFields,
+  buildCommonInsertFields,
+  makeBillingRepo,
+  makeBillingUpsertMany,
+} from "@/backend/db/repo/billing/__shared__/billingRepoFactory";
 import { supportedMobileWallets } from "@/backend/db/schema";
 import type { CountryCode } from "@/backend/enum";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
@@ -82,28 +87,17 @@ export namespace SupportedMobileWalletRepository {
     buildInsert: (input, now) => ({
       slug: input.slug,
       name: input.name,
-      description: input.description ?? null,
-      instructions: input.instructions ?? null,
       countryCode: input.countryCode ?? null,
       currencyCode: input.currencyCode ?? null,
       phoneRegion: input.phoneRegion ?? null,
-      supportedDirections: input.supportedDirections ?? "BOTH",
-      logoUrl: input.logoUrl ?? null,
-      isActive: input.isActive ?? true,
-      createdAt: input.createdAt ?? now,
-      updatedAt: input.updatedAt ?? now,
+      ...buildCommonInsertFields(input, now),
     }),
     buildConflictSet: (input, now) => ({
       name: input.name,
-      description: input.description ?? null,
-      instructions: input.instructions ?? null,
       countryCode: input.countryCode ?? null,
       currencyCode: input.currencyCode ?? null,
       phoneRegion: input.phoneRegion ?? null,
-      supportedDirections: input.supportedDirections ?? "BOTH",
-      logoUrl: input.logoUrl ?? null,
-      isActive: input.isActive ?? true,
-      updatedAt: now,
+      ...buildCommonConflictFields(input, now),
     }),
   });
 }

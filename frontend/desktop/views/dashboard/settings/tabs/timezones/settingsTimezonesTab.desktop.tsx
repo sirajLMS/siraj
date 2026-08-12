@@ -1,32 +1,9 @@
 "use client";
 
-import { Stack } from "@mui/material";
-import { SettingsTimezonesDataGrid } from "@/frontend/common/views/dashboard/settings/components/timezones/SettingsTimezonesDataGrid";
-import { SettingsTimezonesSearchBar } from "@/frontend/common/views/dashboard/settings/components/timezones/SettingsTimezonesSearchBar";
+import { DESKTOP_TAB_OPTIONS } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsTabShared.options";
+import { SettingsTimezonesTabShared } from "@/frontend/common/views/dashboard/settings/tabs/timezones/__shared__/settingsTimezonesTabShared";
 import type { SettingsTimezonesViewModel } from "@/frontend/common/views/dashboard/settings/types/settingsTimezones.types";
 
 export function SettingsTimezonesTabDesktopView(viewModel: Readonly<SettingsTimezonesViewModel>) {
-  return (
-    <Stack sx={{ gap: 3 }}>
-      <SettingsTimezonesSearchBar
-        value={viewModel.searchQuery}
-        placeholder={viewModel.labels.searchPlaceholder}
-        searchingLabel={viewModel.labels.searchingLabel}
-        isSearching={viewModel.isSearchPending}
-        onChange={viewModel.onSearchChange}
-      />
-
-      <SettingsTimezonesDataGrid
-        rows={viewModel.rows}
-        columns={viewModel.columns}
-        loading={viewModel.loading}
-        emptyMessage={viewModel.labels.emptyMessage}
-        paginationMode={viewModel.paginationMode}
-        page={viewModel.page}
-        pageSize={viewModel.pageSize}
-        totalCount={viewModel.totalCount}
-        onPageChange={viewModel.onPageChange}
-      />
-    </Stack>
-  );
+  return <SettingsTimezonesTabShared viewModel={viewModel} options={DESKTOP_TAB_OPTIONS} />;
 }

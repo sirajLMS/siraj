@@ -1,136 +1,34 @@
 "use client";
 
 import { Stack } from "@mui/material";
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
-import { AdminOnlySection } from "@/frontend/common/views/dashboard/student/profile/sections/AdminOnlySection";
-import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
-import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
-import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileEditBody";
-import { StudentProfileUserDetailsSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileUserDetailsSection";
-import { StudentUserProfileTabContent } from "@/frontend/common/views/dashboard/student/profile/sections/StudentUserProfileTabContent";
+import type { ReactNode } from "react";
+import {
+  type StudentOwnProfileSections,
+  type StudentProfileSharedOptions,
+  StudentProfileSharedView,
+} from "@/frontend/common/views/dashboard/student/profile/__shared__/studentProfileShared";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
-import { Translation, useAppTranslation } from "@/shared/locale";
 
-function StudentOwnProfileView({
-  profile,
-  labels,
-  formattedDateOfBirth,
-}: Readonly<{
-  profile: NonNullable<StudentProfileViewModel["profile"]>;
-  labels: StudentProfileViewModel["labels"];
-  formattedDateOfBirth: string;
-}>) {
-  const parentLabels = useAppTranslation(Translation.Profile.Parent);
-  const baseLabels = useAppTranslation(Translation.Profile.Base);
-  const teacherLabels = useAppTranslation(Translation.Profile.Teacher);
-
-  const sectionBase = {
-    profile,
-    labels,
-    notSetLabel: baseLabels.notSet,
-    timezoneLabel: parentLabels.fields.timezone,
-    enforceFieldAccess: false,
-  };
-
-  const adminOnlyLabels = {
-    baseLabels: {
-      notSet: baseLabels.notSet,
-      fieldAccess: baseLabels.fieldAccess,
-      actions: baseLabels.actions,
-    },
-  };
-
+function renderMobileOwnView(sections: StudentOwnProfileSections): ReactNode {
   return (
     <Stack spacing={3}>
-      <StudentProfileUserDetailsSection
-        profile={profile}
-        scope={ProfileScope.Own}
-        sectionTitle={parentLabels.sections.contact}
-        phoneLabel={labels.phone}
-        timezoneLabel={parentLabels.fields.timezone}
-        currencyLabel={teacherLabels.fields.displayCurrency}
-        baseLabels={{ notSet: baseLabels.notSet, fieldAccess: baseLabels.fieldAccess, actions: baseLabels.actions }}
-      />
-      <StudentExtensionProfileSection
-        {...sectionBase}
-        sectionTitle={labels.personalInfo}
-        formattedDateOfBirth={formattedDateOfBirth}
-      />
-      {profile.parentName ? (
-        <StudentParentAssignmentProfileSection {...sectionBase} sectionTitle={labels.parentInfo} />
-      ) : null}
-      <AdminOnlySection mode="view" labels={adminOnlyLabels} profile={profile} />
+      {sections.userDetails}
+      {sections.extension}
+      {sections.hasParentName ? sections.parentAssignment : null}
+      {sections.adminOnly}
     </Stack>
   );
 }
 
-export function StudentProfileMobileView({
-  profile,
-  labels,
-  loading,
-  saving,
-  draft,
-  formattedDateOfBirth,
-  snackbarOpen,
-  snackbarMessage,
-  snackbarSeverity,
-  scope,
-  mode,
-  activeTab,
-  isOtherScope,
-  onDraftChange,
-  onSave,
-  onSnackbarClose,
-  onUploadAvatar,
-}: Readonly<StudentProfileViewModel>) {
-  const parentLabels = useAppTranslation(Translation.Profile.Parent);
-  const baseLabels = useAppTranslation(Translation.Profile.Base);
-  const teacherLabels = useAppTranslation(Translation.Profile.Teacher);
+function renderMobileLoading(message: string): ReactNode {
+  return <Stack sx={{ p: 3 }}>{message}</Stack>;
+}
 
-  if (activeTab === "notifications" && scope === ProfileScope.Own) {
-    return <NotificationPreferencesTab isActive />;
-  }
+const MOBILE_OPTIONS: StudentProfileSharedOptions = {
+  renderOwnView: renderMobileOwnView,
+  renderLoading: renderMobileLoading,
+};
 
-  if (activeTab !== "profile") {
-    return null;
-  }
-
-  if (loading || !profile) {
-    return <Stack sx={{ p: 3 }}>{labels.loadingMessage}</Stack>;
-  }
-
-  if (isOtherScope) {
-    return (
-      <StudentUserProfileTabContent
-        profile={profile}
-        scope={ProfileScope.Other}
-        labels={labels}
-        parentLabels={parentLabels}
-        teacherLabels={teacherLabels}
-        baseLabels={baseLabels}
-        formattedDateOfBirth={formattedDateOfBirth}
-      />
-    );
-  }
-
-  if (mode === ProfileMode.Edit) {
-    return (
-      <StudentProfileEditBody
-        profile={profile}
-        labels={labels}
-        draft={draft}
-        saving={saving}
-        snackbarOpen={snackbarOpen}
-        snackbarMessage={snackbarMessage}
-        snackbarSeverity={snackbarSeverity}
-        onDraftChange={onDraftChange}
-        onSave={onSave}
-        onSnackbarClose={onSnackbarClose}
-        onUploadAvatar={onUploadAvatar}
-      />
-    );
-  }
-
-  return <StudentOwnProfileView profile={profile} labels={labels} formattedDateOfBirth={formattedDateOfBirth} />;
+export function StudentProfileMobileView(props: Readonly<StudentProfileViewModel>) {
+  return <StudentProfileSharedView viewModel={props} options={MOBILE_OPTIONS} />;
 }

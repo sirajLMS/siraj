@@ -1,7 +1,13 @@
 "use client";
 
 import { CheckCircleOutlined } from "@mui/icons-material";
-import { alpha, Box, Typography } from "@mui/material";
+import { DstMigrationPanelShared } from "@/frontend/common/views/dashboard/tools/dst-migration/components/__shared__/dstMigrationPanelShared";
+import {
+  getOnSuccessColor,
+  getSuccessColor,
+  getSuccessHeaderAlpha,
+  getSuccessTitleColor,
+} from "@/frontend/common/views/dashboard/tools/dst-migration/components/__shared__/dstMigrationPanelShared.options";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { UpdatedSessionsCardListMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updatedSessionsCardList.mobile";
@@ -16,50 +22,19 @@ interface Props {
 
 export function UpdatedSessionsSectionMobile({ labels, sessions, successfulCount }: Readonly<Props>) {
   return (
-    <Box
-      sx={theme => ({
-        backgroundColor: theme.palette.surfaceContainerLowest,
-        borderRadius: 3,
-        border: `1px solid ${theme.palette.outlineVariant}`,
-        overflow: "hidden",
-        boxShadow: theme.palette.shadow.card,
-      })}
-    >
-      <Box
-        sx={theme => ({
-          px: 3,
-          py: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          backgroundColor: alpha(theme.palette.success.main, 0.08),
-          borderBottom: `1px solid ${theme.palette.outlineVariant}`,
-        })}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box
-            sx={theme => ({
-              width: 32,
-              height: 32,
-              borderRadius: "50%",
-              backgroundColor: theme.palette.success.main,
-              color: theme.palette.onSuccess,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            })}
-          >
-            <CheckCircleOutlined sx={{ fontSize: 18 }} />
-          </Box>
-          <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
-            {labels.sections.updated}
-          </Typography>
-        </Box>
+    <DstMigrationPanelShared
+      getColor={getSuccessColor}
+      getOnColor={getOnSuccessColor}
+      getHeaderAlpha={getSuccessHeaderAlpha}
+      getTitleColor={getSuccessTitleColor}
+      icon={<CheckCircleOutlined sx={{ fontSize: 18 }} />}
+      title={labels.sections.updated}
+      headerActions={
         <MobileStatusBadge category="session" status="completed" label={labels.table.sessionsCount(successfulCount)} />
-      </Box>
-      <Box sx={{ p: 2 }}>
-        <UpdatedSessionsCardListMobile sessions={sessions} successfulCount={successfulCount} />
-      </Box>
-    </Box>
+      }
+      contentPadding={2}
+    >
+      <UpdatedSessionsCardListMobile sessions={sessions} successfulCount={successfulCount} />
+    </DstMigrationPanelShared>
   );
 }

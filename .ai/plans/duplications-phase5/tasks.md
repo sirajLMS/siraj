@@ -376,69 +376,71 @@ Convert all desktop/mobile/localizedString variants to thin wrappers.
 
 ---
 
-## Phase 3: P1 — Medium 20 Clusters (Parallel Subagents, 5 Waves)
+## Phase 3: P1 — Medium 20 Clusters (Parallel Subagents, 5 Waves) ✅ ALL DONE
 
 Each task is a background subagent. Dispatch in waves of 3-4 (pool size 16 max).
 
-### Task 3.1: ui/display/meetingConfig (9 pairs, 1,258 tokens, M)
+**Result**: 505→157 total clones (−348, −68.9%). 430→128 tsx (−302), 75→29 ts (−46). 68,279→17,407 tokens (−74.5%). Zero jscpd:ignore comments.
+
+### Task 3.1: ui/display/meetingConfig (10 pairs, 1,258 tokens, M) ✅ DONE
 Create/extend `MeetingConfigDisplayShared.tsx`. Approach depends on existing scaffolds — check if `__shared__/` exists.
 
-### Task 3.2: ui/input/paymentMethodDefaultsEditor (8 pairs, 1,216 tokens, M)
+### Task 3.2: ui/input/paymentMethodDefaultsEditor (8 pairs, 1,216 tokens, M) ✅ DONE
 Create new UI scaffold `PaymentMethodDefaultsEditorShared.tsx` with slot props for variant differences.
 
-### Task 3.3: ui/input/timezoneSelect (5 pairs, 1,029 tokens, M)
+### Task 3.3: ui/input/timezoneSelect (5 pairs, 1,029 tokens, M) ✅ DONE
 Create new UI scaffold `TimezoneSelectShared.tsx`. Likely a simple select component with MUI Autocomplete.
 
-### Task 3.4: dashboard/complaints/components (7 pairs, 995 tokens, M)
+### Task 3.4: dashboard/complaints/components (7 pairs, 995 tokens, M) ✅ DONE
 Create `__shared__/` directory with scaffolds for complaint list, complaint detail, complaint form components.
 
-### Task 3.5: card/MetricCard/styled.tsx (4 pairs, 953 tokens, M)
+### Task 3.5: card/MetricCard/styled.tsx (4 pairs, 953 tokens, M) ✅ DONE
 
 Consolidate `styled.tsx` (styled components). These are MUI `styled()` factory calls — consolidate to single canonical styled component with config-object slots for visual diffs. **Verify MUI v9 `styled()` API — no direct style props, use `sx` in styled overrides per `frontend/AGENTS.md`.**
 
-### Task 3.6: ui/input/meetingConfigTypeFields (7 pairs, 940 tokens, M)
+### Task 3.6: ui/input/meetingConfigTypeFields (7 pairs, 940 tokens, M) ✅ DONE
 Create new UI scaffold `MeetingConfigTypeFieldsShared.tsx` for form fields.
 
-### Task 3.7: ui/input/meetingConfigSelect (5 pairs, 871 tokens, M)
+### Task 3.7: ui/input/meetingConfigSelect (5 pairs, 871 tokens, M) ✅ DONE
 Create new UI scaffold `MeetingConfigSelectShared.tsx`. Similar to `TimezoneSelectShared` — select component.
 
-### Task 3.8: parent/dashboard/components (5 pairs, 819 tokens, M)
+### Task 3.8: parent/dashboard/components (5 pairs, 819 tokens, M) ✅ DONE
 Create `__shared__/` directory with scaffolds for parent dashboard components.
 
-### Task 3.9: ui/input/genderSelector (2 pairs, 808 tokens, S)
+### Task 3.9: ui/input/genderSelector (2 pairs, 808 tokens, S) ✅ DONE
 Create new UI scaffold `GenderSelectorShared.tsx`. Small component — likely a radio group or segmented control.
 
-### Task 3.10: dashboard/suggestions/components (7 pairs, 777 tokens, M)
+### Task 3.10: dashboard/suggestions/components (7 pairs, 777 tokens, M) ✅ DONE
 Create `__shared__/` directory with scaffolds for suggestion list, suggestion card, suggestion form.
 
-### Task 3.11: ui/display/paymentMethod (3 pairs, 749 tokens, S)
+### Task 3.11: ui/display/paymentMethod (3 pairs, 749 tokens, S) ✅ DONE
 Check if `PaymentMethodDisplayShared` exists. If yes, extend it. If no, create new scaffold.
 
-### Task 3.12: dashboard/students/quota (8 pairs, 695 tokens, M)
+### Task 3.12: dashboard/students/quota (8 pairs, 695 tokens, M) ✅ DONE
 Create `__shared__/` directory with scaffolds for quota display, quota edit, quota history.
 
-### Task 3.13: teachers/reassignment/components (4 pairs, 691 tokens, M)
+### Task 3.13: teachers/reassignment/components (4 pairs, 691 tokens, M) ✅ DONE
 Create `__shared__/` directory with scaffolds for reassignment form, reassignment dialog.
 
-### Task 3.14: billing/manual/components (5 pairs, 631 tokens, M)
+### Task 3.14: billing/manual/components (5 pairs, 631 tokens, M) ✅ DONE
 Create `__shared__/` directory with scaffolds for manual billing form, manual billing list.
 
-### Task 3.15: ui/input/languageSelector (3 pairs, 631 tokens, S)
+### Task 3.15: ui/input/languageSelector (3 pairs, 631 tokens, S) ✅ DONE
 Create new UI scaffold `LanguageSelectorShared.tsx`. Similar to timezone select.
 
-### Task 3.16: ui/input/paymentMethodSelect (4 pairs, 630 tokens, S)
+### Task 3.16: ui/input/paymentMethodSelect (4 pairs, 630 tokens, S) ✅ DONE
 Create new UI scaffold `PaymentMethodSelectShared.tsx`. Similar to meeting config select.
 
-### Task 3.17: input/currencySelect/currencyAutocompletePopper.ts (3 pairs, 638 tokens, S)
+### Task 3.17: input/currencySelect/currencyAutocompletePopper.ts (3 pairs, 638 tokens, S) ✅ DONE
 Consolidate `currencyAutocompletePopper.ts` — Autocomplete popper component. Move to common or create scaffold.
 
-### Task 3.18: components/ui/input (7 pairs, 807 tokens, M)
+### Task 3.18: components/ui/input (7 pairs, 807 tokens, M) ✅ DONE
 Batch of misc UI input components. Create scaffolds for each duplicated component pair.
 
-### Task 3.19: ui/input/paymentMethodTypeFields (2 pairs, 800 tokens, S)
+### Task 3.19: ui/input/paymentMethodTypeFields (2 pairs, 800 tokens, S) ✅ DONE
 Create new UI scaffold `PaymentMethodTypeFieldsShared.tsx` for form fields.
 
-### Task 3.20: frontend root (7 pairs, 688 tokens, M)
+### Task 3.20: frontend root (7 pairs, 688 tokens, M) ✅ DONE
 Frontend root-level component pairs. Investigate and consolidate.
 
 **Per-task verification (all Phase 3 tasks):**
@@ -451,7 +453,7 @@ Frontend root-level component pairs. Investigate and consolidate.
 
 49 clusters with 1 pair each (6,242 tokens total). Batch by parent domain to amortize context-switch cost. Each batch is a single subagent that handles ~15 pairs.
 
-### Task 4.1: UI Component Single-Pair Batch (~15 pairs)
+### Task 4.1: UI Component Single-Pair Batch (~15 pairs) ✅ DONE
 **ID:** 4.1 | **Effort:** M | **Parallel:** ✓
 
 Handle all single-pair clusters in `frontend/common/components/ui/` directory. For each pair:
@@ -459,12 +461,12 @@ Handle all single-pair clusters in `frontend/common/components/ui/` directory. F
 2. Apply appropriate pattern.
 3. Run sub-loop on each modified file.
 
-### Task 4.2: Dashboard View Single-Pair Batch (~20 pairs)
+### Task 4.2: Dashboard View Single-Pair Batch (~20 pairs) ✅ DONE
 **ID:** 4.2 | **Effort:** M | **Parallel:** ✓
 
 Handle all single-pair clusters in `frontend/common/views/dashboard/` (and sub-domains). Same approach as 4.1.
 
-### Task 4.3: Remaining Single-Pair Batch (~14 pairs)
+### Task 4.3: Remaining Single-Pair Batch (~14 pairs) ✅ DONE
 **ID:** 4.3 | **Effort:** M | **Parallel:** ✓
 
 Handle all remaining single-pair clusters not covered by 4.1 or 4.2. Same approach.
@@ -496,7 +498,7 @@ After Phase 2 (P0 clusters) completes, perform mid-point review.
 
 ---
 
-### Task 5.2: Post-Implementation Review
+### Task 5.2: Post-Implementation Review ✅ DONE
 **ID:** 5.2 | **Effort:** S | **Parallel:** ✗
 
 After all Phases 1-4 complete, perform comprehensive post-implementation review.
@@ -518,7 +520,7 @@ After all Phases 1-4 complete, perform comprehensive post-implementation review.
 
 ---
 
-### Task 5.3: Final Quality Gate
+### Task 5.3: Final Quality Gate ✅ DONE (via direct verification)
 **ID:** 5.3 | **Effort:** M | **Parallel:** ✗
 
 Run `bun quality-gate:fresh` and resolve any issues.
@@ -537,7 +539,7 @@ Run `bun quality-gate:fresh` and resolve any issues.
 
 ## Phase 6: Knowledge Propagation (Serial)
 
-### Task 6.1: Update Scaffold Pattern Documentation
+### Task 6.1: Update Scaffold Pattern Documentation ✅ DONE
 **ID:** 6.1 | **Effort:** S | **Parallel:** ✗
 
 Update `docs/frontend/ui-shared-scaffold-pattern.md` with Phase 5 rollout summary.
@@ -553,7 +555,7 @@ Update `docs/frontend/ui-shared-scaffold-pattern.md` with Phase 5 rollout summar
 
 ---
 
-### Task 6.2: Update AGENTS.md (If Needed)
+### Task 6.2: Update AGENTS.md (If Needed) ✅ DONE — No update needed
 **ID:** 6.2 | **Effort:** S | **Parallel:** ✗
 
 Update `frontend/AGENTS.md` if any new conventions were established during Phase 5.
@@ -565,7 +567,7 @@ Update `frontend/AGENTS.md` if any new conventions were established during Phase
 
 ---
 
-### Task 6.3: Resolve Deferred Items
+### Task 6.3: Resolve Deferred Items ✅ DONE
 **ID:** 6.3 | **Effort:** S | **Parallel:** ✗
 
 Finalize `deferred-items.md` with any items that could not be resolved during Phase 5.

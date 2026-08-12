@@ -2,7 +2,12 @@ import { and, asc, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { labelCondition, requireConfigOrThrow } from "@/backend/db/repo/meeting/__shared__/meetingConfigRepoHelpers";
+import {
+  buildMeetingConfigInsertValues,
+  buildMeetingConfigUpdatePayload,
+  labelCondition,
+  requireConfigOrThrow,
+} from "@/backend/db/repo/meeting/__shared__/meetingConfigRepoHelpers";
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { classMeetingConfigs } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
@@ -117,14 +122,7 @@ export namespace ClassMeetingConfigRepository {
         .values({
           classInstanceId: input.classInstanceId ?? null,
           recurringScheduleId: input.recurringScheduleId ?? null,
-          providerId: input.providerId,
-          label: input.label ?? null,
-          isDefault: input.isDefault,
-          details: input.details,
-          encryptedSecret: input.encryptedSecret ?? null,
-          providerMetadata: input.providerMetadata ?? null,
-          createdAt: now,
-          updatedAt: now,
+          ...buildMeetingConfigInsertValues(input, now),
         })
         .returning();
 
@@ -234,20 +232,7 @@ export namespace ClassMeetingConfigRepository {
         return findByScopeProviderLabel(scope, input.providerId, input.label, t);
       },
       (input, t) => create(input, tErrors, t),
-      (id, input, t) =>
-        update(
-          id,
-          {
-            label: input.label,
-            isDefault: input.isDefault,
-            details: input.details,
-            encryptedSecret: input.encryptedSecret,
-            providerId: input.providerId,
-            providerMetadata: input.providerMetadata,
-          },
-          tErrors,
-          t
-        ),
+      (id, input, t) => update(id, buildMeetingConfigUpdatePayload(input), tErrors, t),
       tErrors,
       tx
     );

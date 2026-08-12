@@ -113,3 +113,9 @@ scripts/run-test/feedback/feedback*.md
 .unused/
 nohup.out
 report/jscpd-report.json
+
+report/jscpd-report.html
+jscpd-admin
+jscpd-intra
+jscpd-output
+jscpd-all

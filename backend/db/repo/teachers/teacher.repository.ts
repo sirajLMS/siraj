@@ -41,19 +41,9 @@ export namespace TeacherRepository {
     const [created] = await executor
       .insert(teachers)
       .values({
-        userId: input.userId,
-        nationality: input.nationality ?? null,
-        nationalId: input.nationalId ?? null,
-        phone: input.phone ?? null,
-        dateOfBirth: input.dateOfBirth ?? null,
-        gender: input.gender ?? null,
-        address: input.address ?? null,
-        qualifications: input.qualifications ?? null,
-        countryCode: input.countryCode ?? null,
-        hourlyRate: input.hourlyRate ?? null,
-        rateCurrency: input.rateCurrency ?? null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        ...input,
+        createdAt: input.createdAt ?? new Date(),
+        updatedAt: input.updatedAt ?? new Date(),
       })
       .returning();
 

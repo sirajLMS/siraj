@@ -4,17 +4,15 @@ import { useState } from "react";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
 import { DateRangePickerChrome } from "@/frontend/common/components/ui/form/date/dateRangePickerShared";
 import { useDateRangePickerState } from "@/frontend/common/components/ui/form/date/dateRangePickerSharedUtils";
-import type {
-  AppDateRangePickerProps,
-  DateRangePickerSlotProps,
-} from "@/frontend/common/components/ui/form/date/types/dateRangePickerShared.types";
+import type { AppDateRangePickerProps } from "@/frontend/common/components/ui/form/date/types/dateRangePickerShared.types";
+import type { RangePickerSlotProps } from "@/frontend/common/components/ui/form/rangePickerShared";
 
 export function AppDateRangePicker(props: Readonly<AppDateRangePickerProps>) {
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
   const state = useDateRangePickerState(props);
 
-  const slots: DateRangePickerSlotProps = {
+  const slots: RangePickerSlotProps = {
     renderFromPicker: args => (
       <AppDatePicker
         label={args.label}

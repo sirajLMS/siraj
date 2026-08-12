@@ -3,14 +3,7 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import type {
-  MarkPaidInvoiceTarget,
-  PaymentDetailsTarget,
-} from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
-import type {
-  ParentBillingSummary,
-  ParentInvoiceRow,
-} from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
+import type { BillingSectionSharedProps } from "@/frontend/common/views/dashboard/billing/types/billingSection.types";
 import type { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import {
@@ -23,33 +16,11 @@ import {
 import { BillingMetricsRowMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMetricsRow.mobile";
 import { BillingMobileSearchBarMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMobileSearchBar.mobile";
 import { ParentInvoicesCardListMobile } from "@/frontend/mobile/views/dashboard/billing/components/parentInvoicesCardList.mobile";
-import type { BillingLabels } from "@/shared/locale";
 
-export interface BillingSectionMobileProps {
-  readonly labels: BillingLabels;
+export interface BillingSectionMobileProps extends BillingSectionSharedProps {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
   readonly metrics: ReturnType<typeof buildParentMetrics>;
-  readonly summary: ParentBillingSummary;
-  readonly summaryLoading?: boolean;
-  readonly invoices: readonly ParentInvoiceRow[];
-  readonly searchQuery: string;
-  readonly loading?: boolean;
-  readonly isSearchPending?: boolean;
-  readonly canView: boolean;
-  readonly canSubmitProof: boolean;
-  readonly canManage: boolean;
-  readonly billingActionsDisabled?: boolean;
-  readonly onSearchChange: (value: string) => void;
-  readonly onPayNow: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onMarkAsPaid?: (invoice: MarkPaidInvoiceTarget) => void;
-  readonly onViewPaymentDetails?: (target: PaymentDetailsTarget) => void;
-  readonly onDownloadPdf: (id: string) => void;
-  readonly onQuickPay: () => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
 }
 
 /**

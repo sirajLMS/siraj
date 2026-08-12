@@ -1,0 +1,131 @@
+"use client";
+
+import Autocomplete from "@mui/material/Autocomplete";
+import Box from "@mui/material/Box";
+import InputAdornment from "@mui/material/InputAdornment";
+import type { SxProps, Theme } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
+import type * as React from "react";
+import { useCallback } from "react";
+import { getLanguageDisplayName, languages } from "@/frontend/common/lib/locale";
+import type { LanguageType } from "@/frontend/common/lib/locale/language/types";
+import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { Translation, useAppTranslation } from "@/shared/locale";
+
+export type LanguageSelectorSharedProps = {
+  readonly language?: LanguageType | null;
+  readonly setLanguageAction: (language: LanguageType) => void;
+  readonly fullWidth?: boolean;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly label?: string;
+  readonly error?: boolean;
+  readonly helperText?: string;
+  readonly onBlurAction?: () => void;
+  readonly style?: React.CSSProperties;
+};
+
+export type LanguageSelectorSlotProps = {
+  /** Emoji component for the current tier (DesktopLocaleEmoji / MobileLocaleEmoji / LocaleEmoji). */
+  readonly LocaleEmojiComponent: React.FC<{ readonly emoji: string }>;
+  /** sx for the option row Box in renderOption. */
+  readonly optionBoxSx: SxProps<Theme>;
+  /** Extra slotProps.inputLabel entries (mobile injects shrink: true). Undefined for tiers that don't need it. */
+  readonly inputLabelSlotProps?: Readonly<Record<string, unknown>>;
+};
+
+const DEFAULT_OPTION_BOX_SX = { display: "flex", alignItems: "center", gap: 1 } as const;
+
+/**
+ * Shared scaffold for language selector Autocomplete.
+ * Desktop and mobile tiers pass their tier-specific LocaleEmoji and styling via slotProps.
+ */
+export const LanguageSelectorShared: React.FC<
+  LanguageSelectorSharedProps & { readonly slots: LanguageSelectorSlotProps }
+> = ({
+  language,
+  setLanguageAction: setLanguage,
+  fullWidth,
+  required,
+  disabled,
+  label,
+  error,
+  helperText,
+  onBlurAction: onBlur,
+  style,
+  slots,
+}): React.ReactNode => {
+  const { LocaleEmojiComponent, optionBoxSx, inputLabelSlotProps } = slots;
+  const t = useAppTranslation(Translation.Ui.LanguageSelector);
+  const locale = useAppLocale();
+
+  const getLanguageName = useCallback((code: string) => getLanguageDisplayName(code, locale), [locale]);
+
+  const showRequiredError = Boolean(required) && !language;
+  const showError = Boolean(error) || showRequiredError;
+  const resolvedHelperText = helperText ?? (showRequiredError ? t.required : undefined);
+
+  return (
+    <Autocomplete
+      fullWidth={fullWidth}
+      options={languages}
+      autoHighlight
+      disabled={disabled}
+      value={language ?? null}
+      sx={{ ...style }}
+      onChange={(_, newValue) => {
+        if (newValue) {
+          setLanguage(newValue);
+        }
+      }}
+      onBlur={onBlur}
+      isOptionEqualToValue={(option, value) => option.code === value.code}
+      getOptionLabel={option => getLanguageName(option.code)}
+      renderOption={(props, option) => {
+        const { key, ...optionProps } = props;
+        return (
+          <Box key={key} component="li" sx={optionBoxSx} {...optionProps}>
+            <LocaleEmojiComponent emoji={option.emoji} />
+            {getLanguageName(option.code)}
+          </Box>
+        );
+      }}
+      renderInput={params => (
+        <TextField
+          {...params}
+          label={label ?? t.selectLanguage}
+          required={required}
+          error={showError}
+          helperText={resolvedHelperText}
+          onBlur={onBlur}
+          slotProps={{
+            ...params.slotProps,
+            ...(inputLabelSlotProps
+              ? {
+                  inputLabel: {
+                    ...params.slotProps.inputLabel,
+                    ...inputLabelSlotProps,
+                  },
+                }
+              : {}),
+            input: {
+              ...params.slotProps.input,
+              startAdornment: language ? (
+                <>
+                  <InputAdornment position="start">
+                    <LocaleEmojiComponent emoji={language.emoji} />
+                  </InputAdornment>
+                  {params.slotProps.input?.startAdornment}
+                </>
+              ) : (
+                params.slotProps.input?.startAdornment
+              ),
+            },
+          }}
+        />
+      )}
+    />
+  );
+};
+
+export const DEFAULT_LANGUAGE_SELECTOR_OPTION_SX = DEFAULT_OPTION_BOX_SX;

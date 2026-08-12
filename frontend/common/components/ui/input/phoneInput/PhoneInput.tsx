@@ -1,56 +1,16 @@
 "use client";
 
-import Box from "@mui/material/Box";
-import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
+import { BoxPrefixInput } from "@/frontend/common/components/ui/input/phoneInput/BoxPrefixInput";
 import { PhoneCountryPicker } from "@/frontend/common/components/ui/input/phoneInput/PhoneCountryPicker";
-import type { PhoneInputSlotProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
+import type { PhoneInputSharedProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
 import { PhoneInputShared } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
+import { createResolveHelperText } from "@/frontend/common/components/ui/input/phoneInput/phoneInputSharedUtils";
 
-export type PhoneInputProps = {
-  readonly value: string | null;
-  readonly onChangeAction: (e164: string | null) => void;
-  readonly onBlurAction?: () => void;
-  readonly defaultRegion?: string;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly fullWidth?: boolean;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly hideLabel?: boolean;
-};
+export type PhoneInputProps = PhoneInputSharedProps;
 
-const BoxPrefixInput: React.FC<
-  React.InputHTMLAttributes<HTMLInputElement> & {
-    readonly sx?: SxProps<Theme>;
-    readonly ref?: React.Ref<HTMLInputElement>;
-  }
-> = ({ sx, ref, ...props }): React.ReactNode => <Box component="input" ref={ref} sx={sx} {...(props as object)} />;
-
-const commonResolveHelperText: PhoneInputSlotProps["resolveHelperText"] = ({
-  prefixInvalid,
-  showRequiredError,
-  phoneInvalid,
-  helperText,
-  t,
-}) => {
-  if (prefixInvalid) {
-    return t.invalidPrefix;
-  }
-  if (showRequiredError) {
-    return t.required;
-  }
-  if (helperText) {
-    return helperText;
-  }
-  if (phoneInvalid) {
-    return t.invalidPhone;
-  }
-  return undefined;
-};
+const commonResolveHelperText = createResolveHelperText(false);
 
 export const PhoneInput: React.FC<PhoneInputProps> = ({
   value,

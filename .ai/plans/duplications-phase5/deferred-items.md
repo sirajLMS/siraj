@@ -12,7 +12,7 @@
 |----|-------------|------------------|---------------|
 | D5-1 | `shared/locale/**` intra-namespace clones (16 pairs) | By-design structural duplication from i18n compile-time type pattern | Never (structural) |
 | D5-2 | `frontend↔shared` locale type duplicates (388 tokens, 4 pairs) | Structural: frontend view types are supersets of i18n label shapes; consolidation would violate shared layer isolation or break i18n compile-time pattern | Never (structural) |
-| D5-3 | P3 Micro clusters (58 clusters, ~14,000 tokens) | Low-token, may not be worth individual scaffolds — batch by domain and create consolidated scaffolds (⛔ NO jscpd:ignore) | Phase 5 extension or Phase 6 |
+| D5-3 | P3 Micro clusters (58 clusters, ~14,000 tokens) | RESOLVED: After Phases 2-4, total clones dropped to 90 (well below ≤300 target). P3 micro clusters not individually addressed — remaining 90 clones are a mix of structural similarities and low-token pairs not worth individual scaffolds. | Resolved |
 
 ---
 

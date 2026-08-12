@@ -125,3 +125,51 @@ export function runCommand(command: string, args: string[]): CommandRunResult {
 export function exitCodePassed(exitCode: number | null): boolean {
   return exitCode === 0;
 }
+
+// ─── Shared Log Helpers & Constants ──────────────────────────────────────────
+
+/**
+ * ANSI colour codes shared by `sub-loop.ts` and `sub-loop-uncommitted.ts`.
+ */
+export const RED = "\x1b[31m";
+export const GREEN = "\x1b[32m";
+export const YELLOW = "\x1b[33m";
+export const CYAN = "\x1b[36m";
+export const BOLD = "\x1b[1m";
+export const NC = "\x1b[0m";
+
+/**
+ * Lifecycle ordering map shared by both sub-loop scripts.
+ */
+export const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
+  tsgo: 0,
+  biome: 1,
+  lint: 2,
+  codescene: 3,
+  "sonar-results": 3,
+};
+
+/** Type guard: checks if a string is a valid Lifecycle stage. */
+export function isLifecycle(value: string): value is Lifecycle {
+  return value in LIFECYCLE_ORDER;
+}
+
+/** Info-level log helper (cyan info icon). */
+export function logInfo(msg: string): void {
+  console.log(`${CYAN}ℹ${NC}  ${msg}`);
+}
+
+/** Success-level log helper (green checkmark). */
+export function logPass(msg: string): void {
+  console.log(`${GREEN}✅${NC} ${msg}`);
+}
+
+/** Failure-level log helper (red cross, bold message). */
+export function logFail(msg: string): void {
+  console.error(`${RED}❌${NC} ${BOLD}${msg}${NC}`);
+}
+
+/** Warning-level log helper (yellow warning icon). */
+export function logWarn(msg: string): void {
+  console.log(`${YELLOW}⚠${NC}  ${msg}`);
+}

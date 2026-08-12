@@ -1,12 +1,15 @@
 "use client";
 
 import { FileDownloadOutlined, FilterListOutlined } from "@mui/icons-material";
-import { Box, Grid, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import {
+  ScheduleAlertsLoadingIndicator,
+  type ScheduleAlertsViewSharedProps,
+} from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/scheduleAlertsViewShared";
 import type {
   AcademicClassRow,
   AlertsMetric,
-  ScheduleAlert,
   ScheduleAlertsLabels,
 } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
@@ -24,23 +27,7 @@ import {
 import { InstitutionalReportCardDesktop } from "@/frontend/desktop/views/dashboard/schedule/alerts/institutionalReportCard.desktop";
 import { ScheduleAlertBannersDesktop } from "@/frontend/desktop/views/dashboard/schedule/alerts/scheduleAlertBanners.desktop";
 
-export interface ScheduleAlertsViewDesktopProps {
-  readonly alerts: readonly ScheduleAlert[];
-  readonly metrics: readonly AlertsMetric[];
-  readonly metricLabels: Record<string, { label: string; subLabel: string }>;
-  readonly classes: readonly AcademicClassRow[];
-  readonly totalClasses?: number;
-  readonly currentPage: number;
-  readonly pageSize: number;
-  readonly labels: ScheduleAlertsLabels;
-  readonly onLeave: (id: string) => void;
-  readonly onViewClassAudit: (id: string) => void;
-  readonly onPageChange: (page: number) => void;
-  readonly loading?: boolean;
-  readonly onDownloadReport: () => void;
-  readonly onFilter: () => void;
-  readonly onExport: () => void;
-}
+export type ScheduleAlertsViewDesktopProps = ScheduleAlertsViewSharedProps;
 
 function DesktopMetricsSection({
   metrics,
@@ -110,19 +97,7 @@ function DesktopAlertsBody({
   readonly gridLabels: AcademicScheduleDataGridDesktopLabels;
 }) {
   if (loading) {
-    return (
-      <Box
-        sx={theme => ({
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          py: 8,
-          color: theme.palette.text.secondary,
-        })}
-      >
-        <Typography variant="bodyLg">{labels.loading}</Typography>
-      </Box>
-    );
+    return <ScheduleAlertsLoadingIndicator loading={labels.loading} />;
   }
   return (
     <DesktopSectionPanel

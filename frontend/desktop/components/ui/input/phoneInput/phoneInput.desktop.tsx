@@ -2,46 +2,17 @@
 
 import { styled } from "@mui/material/styles";
 import type * as React from "react";
-import type { PhoneInputSlotProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
+import type { PhoneInputSharedProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
 import { PhoneInputShared } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
+import { createResolveHelperText } from "@/frontend/common/components/ui/input/phoneInput/phoneInputSharedUtils";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 import { PhoneCountryPickerDesktop } from "@/frontend/desktop/components/ui/input/phoneInput/phoneCountryPicker.desktop";
 
-export type PhoneInputProps = {
-  readonly value: string | null;
-  readonly onChangeAction: (e164: string | null) => void;
-  readonly onBlurAction?: () => void;
-  readonly defaultRegion?: string;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly fullWidth?: boolean;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly hideLabel?: boolean;
-};
+export type PhoneInputProps = PhoneInputSharedProps;
 
 const StyledInput = styled("input")();
 
-const desktopResolveHelperText: PhoneInputSlotProps["resolveHelperText"] = ({
-  prefixInvalid,
-  showRequiredError,
-  phoneInvalid,
-  helperText,
-  t,
-}) => {
-  if (prefixInvalid) {
-    return t.invalidPrefix;
-  }
-  if (showRequiredError) {
-    return t.required;
-  }
-  if (phoneInvalid) {
-    return t.invalidPhone;
-  }
-  return helperText;
-};
+const desktopResolveHelperText = createResolveHelperText(true);
 
 export const PhoneInputDesktop: React.FC<PhoneInputProps> = ({
   value,

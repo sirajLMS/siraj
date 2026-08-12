@@ -1,128 +1,99 @@
 "use client";
 
 import { AddOutlined, DeleteOutlined, TimerOutlined } from "@mui/icons-material";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  Stack,
-} from "@mui/material";
-import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
+import { IconButton, Stack } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import {
+  TeacherWeeklyScheduleViewShared,
+  type TeacherWeeklyScheduleViewSharedSlots,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/__shared__/teacherWeeklyScheduleViewShared";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import MobileScheduleList from "@/frontend/mobile/views/dashboard/teachers/schedule/weekly/mobileScheduleList.mobile";
+import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 
-export function TeacherWeeklyScheduleViewMobile({
-  schedule,
-  onRemoveClass,
-  onClearSchedule,
-  onAddClass,
+type ScheduleLabels = TeacherWeeklyScheduleLabels;
+type Schedule = NonNullable<TeacherWeeklyScheduleViewProps["schedule"]>;
+
+function MobileHeaderActions({
+  labels,
   hasScheduleCreateClass,
   hasScheduleClearWeekly,
-  hasScheduleViewWorkload,
-  hasScheduleDeleteClass,
-  labels,
-  meetingJoinLabels,
-}: Readonly<TeacherWeeklyScheduleViewProps>) {
-  const t = labels;
-  const clearDialogOpen = useWeeklyScheduleStore(state => state.clearDialogOpen);
-  const setClearDialogOpen = useWeeklyScheduleStore(state => state.setClearDialogOpen);
+  onAddClass,
+  onOpenClearDialog,
+}: Readonly<{
+  labels: ScheduleLabels;
+  hasScheduleCreateClass: boolean;
+  hasScheduleClearWeekly: boolean;
+  onAddClass: TeacherWeeklyScheduleViewProps["onAddClass"];
+  onOpenClearDialog: () => void;
+}>) {
+  return (
+    <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+      <Stack sx={{ flex: 1 }}>
+        {hasScheduleCreateClass ? (
+          <MobilePrimaryPageAction startIcon={<AddOutlined />} onClick={onAddClass} sx={{ width: "100%", py: 1.5 }}>
+            {labels.actions.addSlot}
+          </MobilePrimaryPageAction>
+        ) : null}
+      </Stack>
+      {hasScheduleClearWeekly ? (
+        <IconButton
+          onClick={onOpenClearDialog}
+          sx={theme => ({
+            backgroundColor: theme.palette.error.main,
+            color: theme.palette.onError,
+            borderRadius: 2,
+            px: 4,
+            "&:hover": { backgroundColor: theme.palette.error.dark },
+          })}
+        >
+          <DeleteOutlined />
+        </IconButton>
+      ) : null}
+    </Stack>
+  );
+}
 
-  if (!schedule) return null;
-
-  const handleConfirmClear = () => {
-    setClearDialogOpen(false);
-    onClearSchedule?.();
-  };
-
-  const handleCancelClear = () => {
-    setClearDialogOpen(false);
-  };
-
-  const breadcrumbs = [{ label: t.breadcrumbs.teachers, href: "/teachers" }, { label: t.breadcrumbs.schedule }];
-
+function MobileWorkloadMetrics({ labels, schedule }: Readonly<{ labels: ScheduleLabels; schedule: Schedule }>) {
   const workloadMetrics: readonly MetricItem[] = [
     {
       key: "weeklyHoursWorked",
-      label: t.metrics.weeklyHoursWorkedTitle,
+      label: labels.metrics.weeklyHoursWorkedTitle,
       count: schedule.weeklyHoursWorked,
       icon: TimerOutlined,
       labelKey: "weeklyHoursWorked",
       variant: "default",
     },
   ];
+  return <MobileMetricCardGrid metrics={workloadMetrics} />;
+}
 
-  return (
-    <MobilePageContainer>
-      <MobilePageHeader
-        title={t.pageTitle(schedule.teacherName)}
-        breadcrumbs={breadcrumbs}
-        edgeToEdge={false}
-        actions={
-          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-            <Stack sx={{ flex: 1 }}>
-              {hasScheduleCreateClass ? (
-                <MobilePrimaryPageAction
-                  startIcon={<AddOutlined />}
-                  onClick={onAddClass}
-                  sx={{ width: "100%", py: 1.5 }}
-                >
-                  {t.actions.addSlot}
-                </MobilePrimaryPageAction>
-              ) : null}
-            </Stack>
-            {hasScheduleClearWeekly ? (
-              <IconButton
-                onClick={() => setClearDialogOpen(true)}
-                sx={theme => ({
-                  backgroundColor: theme.palette.error.main,
-                  color: theme.palette.onError,
-                  borderRadius: 2,
-                  px: 4,
-                  "&:hover": { backgroundColor: theme.palette.error.dark },
-                })}
-              >
-                <DeleteOutlined />
-              </IconButton>
-            ) : null}
-          </Stack>
-        }
+const MOBILE_SLOTS: TeacherWeeklyScheduleViewSharedSlots = {
+  PageContainer: MobilePageContainer,
+  PageHeader: ({ title, breadcrumbs, actions }) => (
+    <MobilePageHeader title={title} breadcrumbs={breadcrumbs} edgeToEdge={false} actions={actions} />
+  ),
+  HeaderActions: MobileHeaderActions,
+  WorkloadMetrics: MobileWorkloadMetrics,
+  ScheduleGrid: ({ schedule, onRemoveClass, hasScheduleDeleteClass, labels, meetingJoinLabels }) => (
+    <MobileSectionPanel contentInset={false}>
+      <MobileScheduleList
+        classes={schedule.classes}
+        onRemoveClass={onRemoveClass}
+        hasScheduleDeleteClass={hasScheduleDeleteClass}
+        labels={labels}
+        meetingJoinLabels={meetingJoinLabels}
       />
+    </MobileSectionPanel>
+  ),
+};
 
-      {hasScheduleViewWorkload ? <MobileMetricCardGrid metrics={workloadMetrics} /> : null}
-
-      <MobileSectionPanel contentInset={false}>
-        <MobileScheduleList
-          classes={schedule.classes}
-          onRemoveClass={onRemoveClass}
-          hasScheduleDeleteClass={hasScheduleDeleteClass}
-          labels={labels}
-          meetingJoinLabels={meetingJoinLabels}
-        />
-      </MobileSectionPanel>
-
-      <Dialog open={clearDialogOpen} onClose={handleCancelClear}>
-        <DialogTitle>{t.dialogs.clearScheduleTitle}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{t.dialogs.clearScheduleMessage}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelClear}>{t.dialogs.cancel}</Button>
-          <Button onClick={handleConfirmClear} color="error" variant="contained">
-            {t.actions.clearSchedule}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </MobilePageContainer>
-  );
+export function TeacherWeeklyScheduleViewMobile(props: Readonly<TeacherWeeklyScheduleViewProps>) {
+  return <TeacherWeeklyScheduleViewShared {...props} slots={MOBILE_SLOTS} />;
 }
 
 export default TeacherWeeklyScheduleViewMobile;

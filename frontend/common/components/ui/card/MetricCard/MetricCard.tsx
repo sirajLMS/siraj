@@ -3,11 +3,14 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import type { SxProps } from "@mui/material";
 import {
+  MetricCardIconWrap,
+  MetricCardMotionWrapper,
+} from "@/frontend/common/components/ui/card/MetricCard/metricCardShared";
+import { buildMotionWrapperProps } from "@/frontend/common/components/ui/card/MetricCard/metricCardSharedUtils";
+import {
   MotionStyledCard,
   StyledCard,
   StyledDefaultContentRoot,
-  StyledIcon,
-  StyledIconWrap,
   StyledLabel,
   StyledSubLabel,
   StyledValue,
@@ -55,9 +58,13 @@ export function MetricCard({
   );
 
   const iconWrap = (
-    <StyledIconWrap className="metric-icon-wrap" iconSize={iconSize} isError={isError} isHighlight={isHighlight}>
-      <StyledIcon icon={Icon} fontSizeValue={iconFontSize} isError={isError} />
-    </StyledIconWrap>
+    <MetricCardIconWrap
+      icon={Icon}
+      iconSize={iconSize}
+      iconFontSize={iconFontSize}
+      isError={isError}
+      isHighlight={isHighlight}
+    />
   );
 
   const cardContent = (
@@ -71,38 +78,21 @@ export function MetricCard({
     </>
   );
 
-  if (animated) {
-    return (
-      <MotionStyledCard
-        interactive={false}
-        onClick={onClick}
-        isHighlight={isHighlight}
-        isError={isError}
-        isInteractive={Boolean(onClick)}
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.4,
-          delay: animationIndex * 0.04,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        }}
-        sx={sx}
-      >
-        {cardContent}
-      </MotionStyledCard>
-    );
-  }
-
   return (
-    <StyledCard
-      interactive={false}
-      onClick={onClick}
-      isHighlight={isHighlight}
-      isError={isError}
-      isInteractive={Boolean(onClick)}
-      sx={sx}
+    <MetricCardMotionWrapper
+      {...buildMotionWrapperProps({
+        isHighlight,
+        isError,
+        onClick,
+        animated,
+        animationIndex,
+        sx,
+        MotionComponent: MotionStyledCard,
+        StaticComponent: StyledCard,
+        delayMultiplier: 0.04,
+      })}
     >
       {cardContent}
-    </StyledCard>
+    </MetricCardMotionWrapper>
   );
 }

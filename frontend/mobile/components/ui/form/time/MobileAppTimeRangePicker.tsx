@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import type { RangePickerSlotProps } from "@/frontend/common/components/ui/form/rangePickerShared";
 import { TimeRangePickerChrome } from "@/frontend/common/components/ui/form/time/appTimeRangePickerShared";
 import { useTimeRangePickerState } from "@/frontend/common/components/ui/form/time/appTimeRangePickerSharedUtils";
-import type {
-  AppTimeRangePickerProps,
-  TimeRangePickerSlotProps,
-} from "@/frontend/common/components/ui/form/time/types/appTimeRangePickerShared.types";
+import type { AppTimeRangePickerProps } from "@/frontend/common/components/ui/form/time/types/appTimeRangePickerShared.types";
 import { MobileAppTimePicker } from "@/frontend/mobile/components/ui/form/time/MobileAppTimePicker";
 
 export type MobileAppTimeRangePickerProps = AppTimeRangePickerProps;
@@ -15,7 +13,7 @@ export function MobileAppTimeRangePicker(props: Readonly<MobileAppTimeRangePicke
   const [open, setOpen] = useState(false);
   const state = useTimeRangePickerState(props);
 
-  const slots: TimeRangePickerSlotProps = {
+  const slots: RangePickerSlotProps = {
     renderFromPicker: args => (
       <MobileAppTimePicker
         label={args.label}

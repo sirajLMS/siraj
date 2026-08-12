@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
+import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import {
   MeetingConfigSelectDesktop,
-  type MeetingConfigSelectOption,
   type MeetingConfigSelectProps,
 } from "@/frontend/desktop/components/ui/input/meetingConfigSelect/meetingConfigSelect.desktop";
 
@@ -16,7 +16,22 @@ const mockOptions: MeetingConfigSelectOption[] = [
       id: "provider-zoom",
       slug: "zoom",
       name: { en: "Zoom", ar: "زووم" },
+      description: null,
+      instructions: null,
+      urlAllowlist: ["zoom.us"],
+      urlExample: "https://zoom.us/j/123456789",
       logoUrl: null,
+      fieldSchema: {
+        requiresMeetingUrl: true,
+        supportsAutoGeneration: false,
+        supportsUsername: true,
+        supportsPassword: true,
+        supportsTenantId: null,
+      },
+      providerKind: "manual",
+      isActive: true,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
     },
   },
   {
@@ -27,7 +42,22 @@ const mockOptions: MeetingConfigSelectOption[] = [
       id: "provider-gmeet",
       slug: "google-meet",
       name: { en: "Google Meet", ar: "جوجل ميت" },
+      description: null,
+      instructions: null,
+      urlAllowlist: ["meet.google.com"],
+      urlExample: "https://meet.google.com/abc-defg-hij",
       logoUrl: null,
+      fieldSchema: {
+        requiresMeetingUrl: true,
+        supportsAutoGeneration: false,
+        supportsUsername: false,
+        supportsPassword: false,
+        supportsTenantId: null,
+      },
+      providerKind: "manual",
+      isActive: true,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
     },
   },
 ];

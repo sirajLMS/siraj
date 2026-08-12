@@ -1,19 +1,14 @@
 "use client";
 
-import { EmailOutlined } from "@mui/icons-material";
-import { alpha, Box, Button, CircularProgress, Typography } from "@mui/material";
+import { alpha, Box, Button, CircularProgress } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CommunicationLogCardProps } from "@/frontend/common/views/dashboard/classes/audit/communicationLogCard.types";
+import { StyledSectionTitle } from "@/frontend/common/views/dashboard/classes/audit/components";
 import {
-  StyledDeliveredIcon,
-  StyledEntryDescription,
-  StyledEntryTimestamp,
-  StyledSectionTitle,
-  StyledUndeliveredIcon,
-} from "@/frontend/common/views/dashboard/classes/audit/components";
-import { COMMUNICATION_ICONS } from "@/frontend/common/views/dashboard/classes/audit/constants";
-import type { CommunicationType } from "@/frontend/common/views/dashboard/classes/audit/types";
+  type CommunicationLogEntryItemConfig,
+  CommunicationLogEntryItemShared,
+} from "@/frontend/common/views/dashboard/classes/audit/components/__shared__/communicationLogEntryItemShared";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 
 const StyledMobileResendButton = styled(Button)(({ theme }) => ({
@@ -27,63 +22,20 @@ const StyledMobileResendButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-function isCommunicationType(value: string): value is CommunicationType {
-  return (Object.keys(COMMUNICATION_ICONS) as readonly string[]).includes(value);
-}
+const MOBILE_ENTRY_CONFIG: CommunicationLogEntryItemConfig = {
+  iconContainerSize: 40,
+  iconFontSize: 20,
+  alignItems: "center",
+  entryExtras: theme => ({
+    p: 2,
+    backgroundColor: theme.palette.action.hover,
+    borderRadius: 3,
+  }),
+};
 
-function MobileLogEntryItem({ entry }: Readonly<{ entry: CommunicationLogEntry }>) {
-  const rawType = entry.type ?? "email";
-  const type = isCommunicationType(rawType) ? rawType : "email";
-  const Icon = COMMUNICATION_ICONS[type] ?? EmailOutlined;
-  const deliveryIcon = entry.isDelivered ? <StyledDeliveredIcon /> : <StyledUndeliveredIcon />;
-
-  return (
-    <Box
-      sx={theme => ({
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 1.5,
-        p: 2,
-        backgroundColor: theme.palette.action.hover,
-        borderRadius: 3,
-        opacity: entry.isActive ? 1 : 0.6,
-      })}
-    >
-      <Box sx={{ display: "flex", gap: 1.5 }}>
-        <Box
-          sx={theme => ({
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            backgroundColor: entry.isActive ? theme.palette.secondaryContainer : theme.palette.action.selected,
-            color: entry.isActive ? theme.palette.onSecondaryContainer : theme.palette.text.secondary,
-          })}
-        >
-          <Icon sx={{ fontSize: 20 }} />
-        </Box>
-        <Box>
-          <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-            {entry.title}
-          </Typography>
-          {entry.description ? (
-            <StyledEntryDescription variant="labelMd">{entry.description}</StyledEntryDescription>
-          ) : null}
-          {entry.timestamp ? (
-            <StyledEntryTimestamp variant="labelUppercase" sx={{ mt: 0.5 }}>
-              {entry.timestamp}
-            </StyledEntryTimestamp>
-          ) : null}
-        </Box>
-      </Box>
-      {deliveryIcon}
-    </Box>
-  );
-}
+const MobileLogEntryItem = ({ entry }: Readonly<{ entry: CommunicationLogEntry }>) => (
+  <CommunicationLogEntryItemShared entry={entry} config={MOBILE_ENTRY_CONFIG} />
+);
 
 export function CommunicationLogCardMobile({
   entries,

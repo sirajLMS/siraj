@@ -1,1 +1,4 @@
-export { MeetingConfigSelectDesktop } from "@/frontend/desktop/components/ui/input/meetingConfigSelect/meetingConfigSelect.desktop";
+export {
+  MeetingConfigSelectDesktop,
+  type MeetingConfigSelectProps,
+} from "@/frontend/desktop/components/ui/input/meetingConfigSelect/meetingConfigSelect.desktop";

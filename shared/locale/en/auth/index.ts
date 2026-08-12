@@ -1,6 +1,6 @@
-import type { AuthLabels } from "@/shared/locale/types/auth";
-import { authLoginEn } from "@/shared/locale/en/auth/login";
 import { authImpersonationEn } from "@/shared/locale/en/auth/impersonation";
+import { authLoginEn } from "@/shared/locale/en/auth/login";
+import type { AuthLabels } from "@/shared/locale/types/auth";
 
 export const authEn: AuthLabels = {
   login: authLoginEn,

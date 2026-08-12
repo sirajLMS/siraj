@@ -2,8 +2,7 @@
 
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, FormControlLabel, IconButton, Stack, Switch, Typography } from "@mui/material";
-import { SiteContentEntryDeleteDialog } from "@/frontend/common/views/dashboard/settings/tabs/siteContent/components/SiteContentEntryDeleteDialog";
-import { SiteContentEntryFormDialog } from "@/frontend/common/views/dashboard/settings/tabs/siteContent/components/SiteContentEntryFormDialog";
+import { SiteContentDialogsShared } from "@/frontend/common/views/dashboard/settings/tabs/siteContent/__shared__/siteContentDialogsShared";
 import type {
   SiteContentRow,
   SiteContentSettingsViewModel,
@@ -132,25 +131,17 @@ export function SiteContentSettingsTabMobileView({
       />
 
       {canManage ? (
-        <>
-          <SiteContentEntryFormDialog
-            open={formOpen}
-            row={editRow}
-            labels={labels}
-            onClose={onFormClose}
-            onSaved={onSaved}
-          />
-          <SiteContentEntryDeleteDialog
-            open={deleteRow != null}
-            row={deleteRow}
-            labels={labels}
-            isLoading={isDeleting}
-            onClose={onDeleteClose}
-            onConfirm={() => {
-              void onConfirmDelete();
-            }}
-          />
-        </>
+        <SiteContentDialogsShared
+          formOpen={formOpen}
+          editRow={editRow}
+          deleteRow={deleteRow}
+          isDeleting={isDeleting}
+          labels={labels}
+          onFormClose={onFormClose}
+          onSaved={onSaved}
+          onDeleteClose={onDeleteClose}
+          onConfirmDelete={onConfirmDelete}
+        />
       ) : null}
     </Box>
   );

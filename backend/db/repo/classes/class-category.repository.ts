@@ -7,6 +7,60 @@ import { logger } from "@/backend/lib/logger";
 import type { ClassCategorySelectType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
+// ─── Shared helpers (eliminate intra-file duplication) ──────────────────────
+
+function buildCategoryInsertValues(input: ClassCategorySubmitInput) {
+  return {
+    name: input.name,
+    slug: input.slug,
+    description: input.description ?? null,
+    isActive: input.isActive ?? true,
+    sortOrder: input.sortOrder ?? 0,
+  };
+}
+
+function buildCategoryConflictSet(input: ClassCategorySubmitInput, now: Date) {
+  return {
+    name: input.name,
+    description: input.description ?? null,
+    isActive: input.isActive ?? true,
+    sortOrder: input.sortOrder ?? 0,
+    updatedAt: now,
+  };
+}
+
+async function findExistingCategory(
+  t: DBTransaction,
+  id: string,
+  tErrors: ErrorsLabels
+): Promise<ClassCategorySelectType> {
+  const [existing] = await t
+    .select()
+    .from(classCategories)
+    .where(and(eq(classCategories.id, id), isNull(classCategories.deletedAt)))
+    .limit(1);
+  if (!existing) {
+    throw new Error(tErrors.categoryNotFound(id));
+  }
+  return existing;
+}
+
+async function runInTransaction<T>(
+  tx: DBTransaction | undefined,
+  run: (t: DBTransaction) => Promise<T>,
+  errorLabel: string
+): Promise<T> {
+  try {
+    if (tx) return await run(tx);
+    return await db.transaction(run);
+  } catch (error) {
+    logger.error(errorLabel, error);
+    throw error;
+  }
+}
+
+// ─── Repository ──────────────────────────────────────────────────────────────
+
 export namespace ClassCategoryRepository {
   /**
    * Shared base query builder for non-deleted class categories.
@@ -75,36 +129,21 @@ export namespace ClassCategoryRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ClassCategorySelectType> {
-    const run = async (t: DBTransaction): Promise<ClassCategorySelectType> => {
-      const [result] = await t
-        .insert(classCategories)
-        .values({
-          name: input.name,
-          slug: input.slug,
-          description: input.description ?? null,
-          isActive: input.isActive ?? true,
-          sortOrder: input.sortOrder ?? 0,
-        })
-        .returning();
+    return runInTransaction(
+      tx,
+      async (t): Promise<ClassCategorySelectType> => {
+        const [result] = await t.insert(classCategories).values(buildCategoryInsertValues(input)).returning();
 
-      if (!result) {
-        throw new Error(tErrors.categoryCreateFailed);
-      }
+        if (!result) {
+          throw new Error(tErrors.categoryCreateFailed);
+        }
 
-      logger.info("Class category created", { categoryId: result.id, slug: result.slug });
+        logger.info("Class category created", { categoryId: result.id, slug: result.slug });
 
-      return result;
-    };
-
-    try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
-    } catch (error) {
-      logger.error("Error creating class category:", error);
-      throw error;
-    }
+        return result;
+      },
+      "Error creating class category:"
+    );
   }
 
   export async function updateCategory(
@@ -113,72 +152,44 @@ export namespace ClassCategoryRepository {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ClassCategorySelectType> {
-    const run = async (t: DBTransaction): Promise<ClassCategorySelectType> => {
-      const [existing] = await t
-        .select()
-        .from(classCategories)
-        .where(and(eq(classCategories.id, id), isNull(classCategories.deletedAt)))
-        .limit(1);
+    return runInTransaction(
+      tx,
+      async (t): Promise<ClassCategorySelectType> => {
+        const existing = await findExistingCategory(t, id, tErrors);
 
-      if (!existing) {
-        throw new Error(tErrors.categoryNotFound(id));
-      }
+        const now = new Date();
+        const [updated] = await t
+          .update(classCategories)
+          .set({
+            name: input.name ?? existing.name,
+            slug: input.slug ?? existing.slug,
+            description: input.description === undefined ? existing.description : input.description,
+            isActive: input.isActive ?? existing.isActive,
+            sortOrder: input.sortOrder ?? existing.sortOrder,
+            updatedAt: now,
+          })
+          .where(eq(classCategories.id, id))
+          .returning();
 
-      const now = new Date();
-      const [updated] = await t
-        .update(classCategories)
-        .set({
-          name: input.name ?? existing.name,
-          slug: input.slug ?? existing.slug,
-          description: input.description === undefined ? existing.description : input.description,
-          isActive: input.isActive ?? existing.isActive,
-          sortOrder: input.sortOrder ?? existing.sortOrder,
-          updatedAt: now,
-        })
-        .where(eq(classCategories.id, id))
-        .returning();
-
-      return updated;
-    };
-
-    try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
-    } catch (error) {
-      logger.error(`Error updating class category with ID ${id}:`, error);
-      throw error;
-    }
+        return updated;
+      },
+      `Error updating class category with ID ${id}:`
+    );
   }
 
   export async function deleteCategory(id: string, tErrors: ErrorsLabels, tx?: DBTransaction): Promise<{ id: string }> {
-    const run = async (t: DBTransaction): Promise<{ id: string }> => {
-      const [existing] = await t
-        .select()
-        .from(classCategories)
-        .where(and(eq(classCategories.id, id), isNull(classCategories.deletedAt)))
-        .limit(1);
+    return runInTransaction(
+      tx,
+      async (t): Promise<{ id: string }> => {
+        await findExistingCategory(t, id, tErrors);
 
-      if (!existing) {
-        throw new Error(tErrors.categoryNotFound(id));
-      }
+        const now = new Date();
+        await t.update(classCategories).set({ deletedAt: now, updatedAt: now }).where(eq(classCategories.id, id));
 
-      const now = new Date();
-      await t.update(classCategories).set({ deletedAt: now, updatedAt: now }).where(eq(classCategories.id, id));
-
-      return { id };
-    };
-
-    try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
-    } catch (error) {
-      logger.error(`Error deleting class category with ID ${id}:`, error);
-      throw error;
-    }
+        return { id };
+      },
+      `Error deleting class category with ID ${id}:`
+    );
   }
 
   export async function findBySlugs(slugs: readonly string[], tx?: DBTransaction): Promise<ClassCategorySelectType[]> {
@@ -194,52 +205,36 @@ export namespace ClassCategoryRepository {
   ): Promise<ClassCategorySelectType[]> {
     if (inputs.length === 0) return [];
 
-    const run = async (t: DBTransaction): Promise<ClassCategorySelectType[]> => {
-      const now = new Date();
-      const results: ClassCategorySelectType[] = [];
+    return runInTransaction(
+      tx,
+      async (t): Promise<ClassCategorySelectType[]> => {
+        const now = new Date();
+        const results: ClassCategorySelectType[] = [];
 
-      const upsertOne = async (input: ClassCategorySubmitInput): Promise<void> => {
-        const [row] = await t
-          .insert(classCategories)
-          .values({
-            name: input.name,
-            slug: input.slug,
-            description: input.description ?? null,
-            isActive: input.isActive ?? true,
-            sortOrder: input.sortOrder ?? 0,
-            createdAt: now,
-            updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: classCategories.slug,
-            set: {
-              name: input.name,
-              description: input.description ?? null,
-              isActive: input.isActive ?? true,
-              sortOrder: input.sortOrder ?? 0,
+        const upsertOne = async (input: ClassCategorySubmitInput): Promise<void> => {
+          const [row] = await t
+            .insert(classCategories)
+            .values({
+              ...buildCategoryInsertValues(input),
+              createdAt: now,
               updatedAt: now,
-            },
-          })
-          .returning();
+            })
+            .onConflictDoUpdate({
+              target: classCategories.slug,
+              set: buildCategoryConflictSet(input, now),
+            })
+            .returning();
 
-        if (row) {
-          results.push(row);
-        }
-      };
+          if (row) {
+            results.push(row);
+          }
+        };
 
-      await inputs.reduce((chain, input) => chain.then(() => upsertOne(input)), Promise.resolve());
+        await inputs.reduce((chain, input) => chain.then(() => upsertOne(input)), Promise.resolve());
 
-      return results;
-    };
-
-    try {
-      if (tx) {
-        return await run(tx);
-      }
-      return await db.transaction(run);
-    } catch (error) {
-      logger.error("Error upserting class categories:", error);
-      throw error;
-    }
+        return results;
+      },
+      "Error upserting class categories:"
+    );
   }
 }

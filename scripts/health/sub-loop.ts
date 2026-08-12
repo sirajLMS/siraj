@@ -35,10 +35,20 @@
 import { existsSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import {
+  BOLD,
   type CheckResult,
+  CYAN,
   exitCodePassed,
+  GREEN,
+  isLifecycle,
+  LIFECYCLE_ORDER,
   type Lifecycle,
+  logFail,
+  logInfo,
+  logPass,
+  NC,
   runCommand,
+  YELLOW,
 } from "@/scripts/health/__shared__/sub-loop-types";
 import { isCodeSceneOutputFailed } from "@/scripts/health/codescene/checker";
 import { withProcessLock } from "@/scripts/lib/process-lock";
@@ -46,21 +56,6 @@ import { type LintResult, requestLint } from "@/scripts/lint-service";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const PROJECT_ROOT = process.cwd();
-
-const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
-  tsgo: 0,
-  biome: 1,
-  lint: 2,
-  codescene: 3,
-  "sonar-results": 3,
-};
-
-const RED = "\x1b[31m";
-const GREEN = "\x1b[32m";
-const YELLOW = "\x1b[33m";
-const CYAN = "\x1b[36m";
-const BOLD = "\x1b[1m";
-const NC = "\x1b[0m";
 
 // ─── Instruction & AGENTS.md Discovery ──────────────────────────────────────
 
@@ -187,18 +182,6 @@ function printApplicableRuleFiles(filePath: string): void {
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
-
-function logInfo(msg: string): void {
-  console.log(`${CYAN}ℹ${NC}  ${msg}`);
-}
-
-function logPass(msg: string): void {
-  console.log(`${GREEN}✅${NC} ${msg}`);
-}
-
-function logFail(msg: string): void {
-  console.error(`${RED}❌${NC} ${BOLD}${msg}${NC}`);
-}
 
 function toCheckResult(name: string, passed: boolean, output: string): CheckResult {
   return { name, passed, output };
@@ -381,12 +364,6 @@ function checkCodescene(filePath: string): CheckResult {
 
 // ─── Argument Parsing ──────────────────────────────────────────────────────
 
-const VALID_LIFECYCLES = ["tsgo", "biome", "lint", "codescene", "sonar-results"] as const;
-
-function isLifecycle(value: string): value is Lifecycle {
-  return (VALID_LIFECYCLES as readonly string[]).includes(value);
-}
-
 interface ParsedArgs {
   filePath: string | null;
   lifecycle: string | null;
@@ -422,7 +399,7 @@ function validateArgs(filePath: string | null, lifecycle: string | null): Valida
     process.exit(2);
   }
 
-  const validLifecycles = VALID_LIFECYCLES.join(", ");
+  const validLifecycles = Object.keys(LIFECYCLE_ORDER).join(", ");
   if (!lifecycle || !isLifecycle(lifecycle)) {
     logFail(`Invalid or missing --lifecycle argument.`);
     console.error(`Valid stages: ${validLifecycles}`);

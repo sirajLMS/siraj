@@ -283,6 +283,63 @@ export type BuildUpsertInsert<TInsert> = (input: TInsert, now: Date) => Record<s
 export type BuildUpsertConflictSet<TInsert> = (input: TInsert, now: Date) => Record<string, unknown>;
 
 /**
+ * Common upsert fields shared by all supported-* billing entities
+ * (mobile-wallet, online-account, payment-link).
+ *
+ * Both the insert and conflict-set payloads repeat the same default
+ * assignments for `description`, `instructions`, `supportedDirections`,
+ * `logoUrl`, and `isActive`. Extracting them here eliminates the jscpd
+ * clone that spans the three repository files.
+ */
+interface CommonUpsertInput {
+  readonly name: unknown;
+  readonly description?: unknown;
+  readonly instructions?: unknown;
+  readonly supportedDirections?: string;
+  readonly logoUrl?: unknown;
+  readonly isActive?: boolean;
+  readonly createdAt?: Date;
+  readonly updatedAt?: Date;
+}
+
+/**
+ * Shared field assignments used by both insert and conflict-set payloads.
+ * Extracted to eliminate the jscpd clone between the two functions below.
+ */
+function buildCommonUpsertFields(input: CommonUpsertInput): Record<string, unknown> {
+  return {
+    description: input.description ?? null,
+    instructions: input.instructions ?? null,
+    supportedDirections: input.supportedDirections ?? "BOTH",
+    logoUrl: input.logoUrl ?? null,
+    isActive: input.isActive ?? true,
+  };
+}
+
+/**
+ * Returns the common insert fields (excluding `slug` which is the conflict
+ * target and entity-specific fields).
+ */
+export function buildCommonInsertFields(input: CommonUpsertInput, now: Date): Record<string, unknown> {
+  return {
+    ...buildCommonUpsertFields(input),
+    createdAt: input.createdAt ?? now,
+    updatedAt: input.updatedAt ?? now,
+  };
+}
+
+/**
+ * Returns the common conflict-set fields (the `onConflictDoUpdate` update
+ * payload excluding entity-specific fields).
+ */
+export function buildCommonConflictFields(input: CommonUpsertInput, now: Date): Record<string, unknown> {
+  return {
+    ...buildCommonUpsertFields(input),
+    updatedAt: now,
+  };
+}
+
+/**
  * Configuration for {@link makeBillingUpsertMany}.
  *
  * @template TRow - Inferred select row shape

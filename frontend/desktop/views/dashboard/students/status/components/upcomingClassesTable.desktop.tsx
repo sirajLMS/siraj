@@ -4,6 +4,10 @@ import type { GridColDef } from "@mui/x-data-grid";
 import type { ComponentProps, ComponentType } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
+import {
+  formatDateTime,
+  formatTime,
+} from "@/frontend/common/views/dashboard/students/status/components/__shared__/upcomingClassesTableShared";
 import type {
   UpcomingClassDisplay,
   UpcomingClassesTableProps,
@@ -14,7 +18,6 @@ import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/De
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
-import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 type ProfileLinkCellProps = ComponentProps<typeof DesktopClassProfileLinkCell>;
@@ -50,24 +53,6 @@ function profileLinkColumn(config: ProfileLinkColumnConfig): GridColDef<Upcoming
       />
     ),
   };
-}
-
-function formatDateTime(locale: string, dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(getLatnLocaleTag(locale), { weekday: "short", month: "short", day: "numeric" });
-  } catch {
-    return dateStr;
-  }
-}
-
-function formatTime(locale: string, dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString(getLatnLocaleTag(locale), { hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return dateStr;
-  }
 }
 
 function DesktopHeader({ pendingCount }: Readonly<{ pendingCount: number }>) {
