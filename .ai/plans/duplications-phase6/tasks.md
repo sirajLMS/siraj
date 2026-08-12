@@ -223,32 +223,54 @@ These will be addressed in Phase 4 (cross-tier & same-tier) or deferred if struc
 
 ---
 
-## Phase 3: C↔C Intra-Layer — Utility Extraction (Parallel Subagents)
+## Phase 3: C↔C Intra-Layer — Utility Extraction ✅ COMPLETE
 
-**Scope:** 78 C↔C pairs, ~8,492 tokens. Grouped into 4 batches. Max 4 subagents concurrent.
-**Approach:** For each C↔C pair, extract shared utility/component to `frontend/common/`, delete dead code, or consolidate stores/hooks.
+**Result:** 45 C↔C pairs → 9 residual pairs (80% reduction). Total clones 90 → 54 (40%). Zero jscpd:ignore. tsgo 0 errors.
 
-### Task 3.1: C↔C Batch 1 — Display Components & Stores (~20 pairs)
-- [ ] 3.1.1 Read all plan files
-- [ ] 3.1.2 Extract shared display component patterns to `frontend/common/components/ui/`
-- [ ] 3.1.3 Delete dead code (files never imported)
-- [ ] 3.1.4 QL per modified file
-- [ ] 3.1.5 SR: Verify no cross-layer import violations
-- [ ] 3.1.6 IV: Read `frontend/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`
-- [ ] 3.1.7 Write outcome: `.ai/plans/duplications-phase6/outcome/3.1-cc-batch1-outcome.md`
-- [ ] 3.1.8 Update progress: Mark 3.1 as `[x]`
+### Task 3.1: C↔C Batch 1 — Display Components & Stores (15 pairs, 2126 tokens) ✅
+- [x] 3.1.1 Read all plan files
+- [x] 3.1.2 Resolved: 4 dead code deletions, 7 shared module extractions (8 new shared files), 2 merges, 2 consolidations, 1 shared base extraction
+- [x] 3.1.3 QL: All files pass `sub-loop --lifecycle codescene` (exit 0)
+- [x] 3.1.4 SR: Verified no cross-layer import violations
+- [x] 3.1.5 IV: Read `frontend/AGENTS.md`, `frontend/common/components/ui/AGENTS.md`
+- [x] 3.1.6 No jscpd:ignore, no .jscpd.json changes, no oxlint-disable
+- [x] 3.1.7 Outcome: `.ai/plans/duplications-phase6/outcome/3.1-cc-batch1-outcome.md`
+- [x] 3.1.8 Update progress: Mark 3.1 as `[x]`
 
-### Task 3.2: C↔C Batch 2 — ViewModel Hooks & Onboarding (~20 pairs)
-- [ ] 3.2.1–3.2.8 Same pattern
-- Extract shared hook factories, consolidate similar ViewModel logic
+### Task 3.2: C↔C Batch 2 — Billing, Schedule, Settings, Staff (15 pairs, 1363 tokens) ✅
+- [x] 3.2.1 Read all plan files
+- [x] 3.2.2 Resolved: 9 files created, 5 deleted, 20+ modified (shared hooks, merged type files, consolidated VMs, extracted SettingsTabShell)
+- [x] 3.2.3 QL: All files pass `sub-loop --lifecycle codescene` (exit 0)
+- [x] 3.2.4 SR: Verified no cross-layer import violations
+- [x] 3.2.5 IV: Read `frontend/AGENTS.md`
+- [x] 3.2.6 No jscpd:ignore, no .jscpd.json changes, no oxlint-disable
+- [x] 3.2.7 Outcome: `.ai/plans/duplications-phase6/outcome/3.2-cc-batch2-outcome.md`
+- [x] 3.2.8 Update progress: Mark 3.2 as `[x]`
 
-### Task 3.3: C↔C Batch 3 — DataGrid Configs & Table Components (~20 pairs)
-- [ ] 3.3.1–3.3.8 Same pattern
-- Extract shared column configs, table layout constants
+### Task 3.3: C↔C Batch 3 — Profile, Settings, Payment, Classes (15 pairs, 1172 tokens) ✅
+- [x] 3.3.1 Read all plan files
+- [x] 3.3.2 Resolved: 8 new shared files created (infoFieldShared, executionStateToStatusShared, useTabbedPane, profileFormConstantsShared, configTabLoadingGuardShared, panelCardSxShared, dialogCommonTextFieldsShared, currencySymbolAdornmentShared), 22 files modified
+- [x] 3.3.3 QL: All files pass `sub-loop --lifecycle codescene` (exit 0)
+- [x] 3.3.4 SR: Verified no cross-layer import violations
+- [x] 3.3.5 IV: Read `frontend/AGENTS.md`
+- [x] 3.3.6 No jscpd:ignore, no .jscpd.json changes, no oxlint-disable
+- [x] 3.3.7 Outcome: `.ai/plans/duplications-phase6/outcome/3.4-cc-batch3-outcome.md`
+- [x] 3.3.8 Update progress: Mark 3.3 as `[x]`
 
-### Task 3.4: C↔C Batch 4 — Forms, Filters & Remaining (~18 pairs)
-- [ ] 3.4.1–3.4.8 Same pattern
-- Extract shared form field configs, filter bar components
+### Task 3.4: C↔C Batch 4 — Merged into Batches 1-3 ✅
+- [x] 3.4.1 All 45 C↔C pairs were distributed across batches 1-3 (15 per batch). No separate batch 4 needed.
+- [x] 3.4.2 Residual 9 C↔C pairs (821t) documented for Phase 4/5 evaluation
+- [x] 3.4.3 Update progress: Mark 3.4 as `[x]`
+
+### Phase 3 Residual: 9 C↔C pairs (821 tokens)
+1. report-export.ts ↔ shared-export-logic.ts (84t)
+2. FeesContractSection ↔ SalaryDetailsSection (75t)
+3. useParentBillingViewModel ↔ useUserBillingProfileViewModel (117t, 96t, 90t — 3 overlaps)
+4. ParentProfileEditForm ↔ StaffProfileEditForm (77t)
+5. ParentProfileEditForm ↔ TeacherAdminEditForm (76t)
+6. ParentProfileLoadingSkeleton ↔ StaffProfileLoadingSkeleton (83t)
+7. ManagersContainerView ↔ ManagersView (123t)
+These will be addressed in Phase 4 or deferred if structurally incompatible.
 
 ---
 

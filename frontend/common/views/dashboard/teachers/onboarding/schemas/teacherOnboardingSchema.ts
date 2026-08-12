@@ -3,24 +3,9 @@ import { CountryCode, CurrencyCode, Gender, IanaTimezone } from "@/frontend/comm
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { validateMeetingProviderFields } from "@/frontend/common/views/dashboard/profile/shared/meetingProviderValidation";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
+import type { TeacherOnboardingLabels } from "@/shared/locale";
 
-export const teacherOnboardingSchema = (validationLabels: {
-  readonly fullNameRequired: string;
-  readonly emailRequired: string;
-  readonly emailInvalid: string;
-  readonly passwordRequired: string;
-  readonly nationalIdRequired: string;
-  readonly phoneRequired: string;
-  readonly phoneMaxLength: string;
-  readonly genderRequired: string;
-  readonly countryRequired: string;
-  readonly timezoneRequired: string;
-  readonly salaryAmountRequired: string;
-  readonly currencyRequired: string;
-  readonly urlInvalid: string;
-  readonly meetingProviderRequired: string;
-  readonly meetingUrlRequired: string;
-}) =>
+export const teacherOnboardingSchema = (validationLabels: TeacherOnboardingLabels["validation"]) =>
   z
     .object({
       name: z.string().min(1, validationLabels.fullNameRequired),

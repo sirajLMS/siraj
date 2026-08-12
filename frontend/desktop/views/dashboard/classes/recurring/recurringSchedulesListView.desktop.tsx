@@ -2,10 +2,10 @@
 
 import { Box, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { AppDataGrid, ErrorState, LoadingState } from "@/frontend/common/components/ui";
+import { AppDataGrid } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { RecurringViewShellShared } from "@/frontend/common/views/dashboard/classes/recurring/__shared__/recurringViewShellShared";
 import type { RecurringSchedulesListViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringSchedulesListViewModel";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 export function RecurringSchedulesListDesktopView({
   labelsBySection,
@@ -23,21 +23,17 @@ export function RecurringSchedulesListDesktopView({
   const { shell, columns, filters } = labelsBySection;
   const router = useRouter();
 
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
-    return (
-      <DesktopPageContainer>
-        <ErrorState embedded message={error} retryLabel="Retry" onRetry={onRetry} />
-      </DesktopPageContainer>
-    );
-  }
-
   return (
-    <DesktopPageContainer>
-      <DesktopPageHeader title={shell.pageTitle} subtitle={shell.subtitle} breadcrumbs={shell.breadcrumbs} />
+    <RecurringViewShellShared
+      variant="desktop"
+      loading={loading}
+      error={error}
+      invalidIdMessage={null}
+      onRetry={onRetry}
+      pageTitle={shell.pageTitle}
+      subtitle={shell.subtitle}
+      desktopBreadcrumbs={shell.breadcrumbs}
+    >
       <Box sx={{ mb: 2 }}>
         <TextField
           size="small"
@@ -79,6 +75,6 @@ export function RecurringSchedulesListDesktopView({
           })}
         />
       )}
-    </DesktopPageContainer>
+    </RecurringViewShellShared>
   );
 }

@@ -36,3 +36,21 @@ export function buildTeacherScheduleSlots(
 export function getTotalGaps(searchResult: SearchScheduleResultSummary | null | undefined): number {
   return searchResult?.totalGaps ?? 0;
 }
+
+export interface SearchScheduleResultsData {
+  readonly totalGaps: number;
+  readonly activeTeachers: readonly SearchScheduleResultItem[];
+  readonly teacherSlots: readonly SearchScheduleActiveTeacher[];
+}
+
+export function computeSearchScheduleResults(
+  searchResult: SearchScheduleResultSummary | null | undefined,
+  fromDate: string,
+  toDate: string
+): SearchScheduleResultsData {
+  return {
+    totalGaps: getTotalGaps(searchResult),
+    activeTeachers: getActiveTeachers(searchResult),
+    teacherSlots: buildTeacherScheduleSlots(searchResult, fromDate, toDate),
+  };
+}

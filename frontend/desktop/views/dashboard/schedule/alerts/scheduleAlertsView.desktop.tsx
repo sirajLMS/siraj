@@ -3,6 +3,7 @@
 import { FileDownloadOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Grid } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { buildAlertMetricItems } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/buildAlertMetricItems";
 import {
   ScheduleAlertsLoadingIndicator,
   type ScheduleAlertsViewSharedProps,
@@ -40,17 +41,7 @@ function DesktopMetricsSection({
   readonly labels: ScheduleAlertsLabels;
   readonly onDownloadReport: () => void;
 }) {
-  const metricItems: MetricItem[] = metrics.map(metric => {
-    const metricLabel = metricLabels[metric.key];
-    return {
-      key: metric.key,
-      count: metric.value,
-      labelKey: metric.labelKey,
-      label: metricLabel.label,
-      icon: metric.icon,
-      subLabel: metricLabel.subLabel,
-    };
-  });
+  const metricItems: MetricItem[] = buildAlertMetricItems(metrics, metricLabels);
 
   return (
     <Grid container spacing={2}>

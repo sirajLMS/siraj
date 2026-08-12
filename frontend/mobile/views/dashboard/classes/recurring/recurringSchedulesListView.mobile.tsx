@@ -2,15 +2,10 @@
 
 import { Box, Stack, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { RecurringViewShellShared } from "@/frontend/common/views/dashboard/classes/recurring/__shared__/recurringViewShellShared";
 import type { RecurringSchedulesListViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringSchedulesListViewModel";
-import {
-  MobileCardList,
-  MobileCardListItem,
-  MobilePageContainer,
-  MobilePageHeader,
-} from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileContentInset } from "@/frontend/mobile/components/ui/container/MobileContentInset";
 
 export function RecurringSchedulesListMobileView({
@@ -29,27 +24,17 @@ export function RecurringSchedulesListMobileView({
   const { shell, columns, filters } = labelsBySection;
   const router = useRouter();
 
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
-    return (
-      <MobilePageContainer>
-        <MobilePageHeader title={shell.pageTitle} edgeToEdge={false} />
-        <ErrorState embedded message={error} retryLabel="Retry" onRetry={onRetry} />
-      </MobilePageContainer>
-    );
-  }
-
   return (
-    <MobilePageContainer>
-      <MobilePageHeader
-        title={shell.pageTitle}
-        subtitle={shell.subtitle}
-        breadcrumbs={shell.breadcrumbs}
-        edgeToEdge={false}
-      />
+    <RecurringViewShellShared
+      variant="mobile"
+      loading={loading}
+      error={error}
+      invalidIdMessage={null}
+      onRetry={onRetry}
+      pageTitle={shell.pageTitle}
+      subtitle={shell.subtitle}
+      mobileBreadcrumbs={shell.breadcrumbs}
+    >
       <MobileContentInset>
         <TextField
           fullWidth
@@ -97,6 +82,6 @@ export function RecurringSchedulesListMobileView({
           </MobileCardListItem>
         )}
       />
-    </MobilePageContainer>
+    </RecurringViewShellShared>
   );
 }

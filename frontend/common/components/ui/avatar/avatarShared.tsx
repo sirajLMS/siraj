@@ -11,17 +11,33 @@ function isSxProps(value: SxProps<Theme> | undefined | null | false): value is S
   return Boolean(value);
 }
 
+export interface BaseAvatarScaffoldOptions {
+  /** Default avatar pixel size when the `size` prop is not explicitly passed. */
+  readonly defaultSize?: number;
+  /** When true, circular avatars receive a 1px divider outline (mobile tier). */
+  readonly showCircularOutline?: boolean;
+}
+
+const DEFAULT_DESKTOP_OPTIONS: BaseAvatarScaffoldOptions = { defaultSize: 40, showCircularOutline: false };
+const DEFAULT_MOBILE_OPTIONS: BaseAvatarScaffoldOptions = { defaultSize: 36, showCircularOutline: true };
+
 export function BaseAvatarScaffold({
   src,
   label = "",
-  size = 40,
+  size,
   variant = "circular",
   sx,
   children,
-}: BaseAvatarProps) {
+  options = DEFAULT_DESKTOP_OPTIONS,
+}: BaseAvatarProps & { readonly options?: BaseAvatarScaffoldOptions }) {
+  const effectiveSize = size ?? options.defaultSize ?? 40;
   const initials = children ?? avatarInitials(label);
   const normalizedSx = Array.isArray(sx) ? sx : [sx].filter(isSxProps);
   const roundedStyle = variant === "rounded" ? { borderRadius: ROUNDED_BORDER_RADIUS } : {};
+  const circularOutlineSx: SxProps<Theme> =
+    variant === "circular" && options.showCircularOutline
+      ? theme => ({ outline: `1px solid ${theme.palette.divider}` })
+      : [];
   const avatarContent = getAvatarContent(src, initials);
 
   return (
@@ -31,11 +47,12 @@ export function BaseAvatarScaffold({
       variant={variant}
       sx={[
         {
-          width: size,
-          height: size,
+          width: effectiveSize,
+          height: effectiveSize,
           flexShrink: 0,
           ...roundedStyle,
         },
+        circularOutlineSx,
         ...normalizedSx,
       ]}
     >
@@ -43,3 +60,5 @@ export function BaseAvatarScaffold({
     </Avatar>
   );
 }
+
+export { DEFAULT_DESKTOP_OPTIONS as DESKTOP_AVATAR_OPTIONS, DEFAULT_MOBILE_OPTIONS as MOBILE_AVATAR_OPTIONS };

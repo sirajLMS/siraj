@@ -141,7 +141,7 @@
       "__fn": "(id) => `Failed to update student (id: ${id}).`"
     },
     "studentVersionMismatch": {
-      "__fn": "({\n      id,\n      expectedVersion,\n      gotVersion\n    }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
+      "__fn": "({\n    id,\n    expectedVersion,\n    gotVersion\n  }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`"
     },
     "insufficientClasses": {
       "__fn": "({ id, remaining, required }) => `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`"
@@ -181,7 +181,7 @@
     "originalClassNotFound": "Original class not found.",
     "invalidTransition": "Invalid transition.",
     "teacherNotAssigned": {
-      "__fn": "({\n      teacherId,\n      studentId,\n      startTime\n    }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`"
+      "__fn": "({\n    teacherId,\n    studentId,\n    startTime\n  }) => `Teacher ${teacherId} is not assigned to student ${studentId} at ${startTime}.`"
     },
     "teacherBooked": "Teacher is already booked at this time.",
     "studentBooked": "Student is already booked at this time.",
@@ -236,7 +236,6 @@
   "unknownName": "Unknown",
   "invalidInput": "Invalid input.",
   "invalidNationalId": "The national ID is invalid for the selected nationality.",
-  "permissionGroupNotFound": "Permission group not found.",
   "rejectedReportsRequireReason": "REJECTED reports must include a rejection reason.",
   "approvedReportsNoRejectionReason": "APPROVED reports must not include a rejection reason.",
   "displayCurrencyNotSet": {
@@ -248,23 +247,6 @@
   "displayCurrencyMixed": {
     "__fn": "(values) => `Mixed display currencies detected. Amount locked: ${values.lockedAmount} ${values.lockedCurrency}`"
   },
-  "categoryNotFound": {
-    "__fn": "(id) => `Category not found: ${id}`"
-  },
-  "categoryCreateFailed": "Failed to create class category.",
-  "categoryHasSubjects": "Cannot delete category because it has associated subjects.",
-  "meetingProviderNotFound": {
-    "__fn": "(id) => `Meeting provider not found: ${id}`"
-  },
-  "meetingProviderCreateFailed": "Failed to create meeting provider.",
-  "meetingProviderUpdateFailed": "Failed to update meeting provider.",
-  "meetingProviderInUse": "Meeting provider is in use and cannot be deleted.",
-  "meetingProviderInactive": "Meeting provider is inactive.",
-  "meetingConfigNotFound": {
-    "__fn": "(id) => `Meeting config not found: ${id}`"
-  },
-  "meetingConfigCreateFailed": "Failed to create meeting config.",
-  "meetingConfigUpdateFailed": "Failed to update meeting config.",
   "studentNotFound": {
     "__fn": "(id) => `Student not found: ${id}`"
   },
@@ -283,32 +265,21 @@
   },
   "studentEmailRequired": "Student email is required.",
   "studentPasswordRequired": "Student password is required.",
-  "teacherNotFound": {
-    "__fn": "(id) => `Teacher not found: ${id}`"
+  "categoryNotFound": {
+    "__fn": "(id) => `Category not found: ${id}`"
   },
-  "staffProfileNotFound": "Staff profile not found.",
-  "quotaMustBeNonNegative": "Quota must be a non-negative number.",
-  "quotaExceedsTotal": {
-    "__fn": "({ requested, total }) => `Quota (${requested}) exceeds total (${total}).`"
-  },
+  "categoryCreateFailed": "Failed to create class category.",
+  "categoryHasSubjects": "Cannot delete category because it has associated subjects.",
   "userNotFound": {
     "__fn": "(id) => `User not found: ${id}`"
   },
   "userEmailExists": "User with this email already exists.",
   "cannotModifyBankingFields": "Cannot modify banking fields.",
   "parentNotFound": "Parent not found.",
-  "parentAlreadyDeactivated": "Parent account is already deactivated.",
-  "parentAlreadyActivated": "Parent account is already activated.",
-  "exchangeRateStale": {
-    "__fn": "({ fromCurrency, toCurrency }) => `Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`"
-  },
   "cannotRescheduleToSelf": "Cannot reschedule to self.",
   "cannotRescheduleCompleted": "Cannot reschedule a completed session.",
   "cannotRescheduleAlreadyRescheduled": "Cannot reschedule a session that has already been rescheduled.",
   "outOfQuota": "Out of quota.",
-  "quotaExpired": "Quota has expired.",
-  "quotaNotFound": "Quota not found.",
-  "invalidQuotaState": "Invalid quota state.",
   "leaveQuotaExceeded": {
     "__fn": "({ maxLeaves }) => `Leave quota exceeded: maximum ${maxLeaves} leaves allowed.`"
   },
@@ -324,6 +295,37 @@
   "studentBooked": "Student is already booked at this time.",
   "meetingUrlInUse": "Meeting URL is already in use.",
   "sessionNotActivated": "Session is not activated.",
+  "missedClassTime": "You have missed the class time.",
+  "permissionGroupNotFound": "Permission group not found.",
+  "alreadyExists": "Teacher profile for this user already exists.",
+  "teacherNotFound": {
+    "__fn": "(id) => `Teacher not found: ${id}`"
+  },
+  "staffProfileNotFound": "Staff profile not found.",
+  "quotaMustBeNonNegative": "Quota must be a non-negative number.",
+  "quotaExceedsTotal": {
+    "__fn": "({ requested, total }) => `Quota (${requested}) exceeds total (${total}).`"
+  },
+  "meetingProviderNotFound": {
+    "__fn": "(id) => `Meeting provider not found: ${id}`"
+  },
+  "meetingProviderCreateFailed": "Failed to create meeting provider.",
+  "meetingProviderUpdateFailed": "Failed to update meeting provider.",
+  "meetingProviderInUse": "Meeting provider is in use and cannot be deleted.",
+  "meetingProviderInactive": "Meeting provider is inactive.",
+  "meetingConfigNotFound": {
+    "__fn": "(id) => `Meeting config not found: ${id}`"
+  },
+  "meetingConfigCreateFailed": "Failed to create meeting config.",
+  "meetingConfigUpdateFailed": "Failed to update meeting config.",
+  "parentAlreadyDeactivated": "Parent account is already deactivated.",
+  "parentAlreadyActivated": "Parent account is already activated.",
+  "exchangeRateStale": {
+    "__fn": "({ fromCurrency, toCurrency }) => `Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`"
+  },
+  "quotaExpired": "Quota has expired.",
+  "quotaNotFound": "Quota not found.",
+  "invalidQuotaState": "Invalid quota state.",
   "outsideAvailability": "Booking is outside teacher availability windows.",
   "teacherUnavailabilityConflict": "Booking blocked by recurring unavailability pattern.",
   "teacherOnVacation": "Booking blocked by approved vacation period.",

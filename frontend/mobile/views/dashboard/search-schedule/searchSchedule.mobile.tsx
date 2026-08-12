@@ -7,11 +7,7 @@ import type {
 } from "@/frontend/common/views/dashboard/search-schedule/types";
 import type { SearchScheduleViewModel } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
 import { getColumnCount } from "@/frontend/common/views/dashboard/search-schedule/utils";
-import {
-  buildTeacherScheduleSlots,
-  getActiveTeachers,
-  getTotalGaps,
-} from "@/frontend/common/views/dashboard/search-schedule/utils/searchScheduleResults.utils";
+import { computeSearchScheduleResults } from "@/frontend/common/views/dashboard/search-schedule/utils/searchScheduleResults.utils";
 import { MobileCardList, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { SearchScheduleFormMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleForm.mobile";
 import { SearchScheduleResultsSkeletonMobile } from "@/frontend/mobile/views/dashboard/search-schedule/components/searchScheduleResultsSkeleton.mobile";
@@ -69,9 +65,7 @@ function SearchScheduleMobileResults({
 }: Readonly<SearchScheduleMobileResultsProps>) {
   if (!searchResult) return null;
 
-  const totalGaps = getTotalGaps(searchResult);
-  const activeTeachers = getActiveTeachers(searchResult);
-  const teacherSlots = buildTeacherScheduleSlots(searchResult, fromDate, toDate);
+  const { totalGaps, activeTeachers, teacherSlots } = computeSearchScheduleResults(searchResult, fromDate, toDate);
 
   const paginationOptions =
     showPagination && pageInfo

@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { DateTimeTooltipDisplay } from "@/frontend/common/components/intl/DateTimeTooltipDisplay";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
-import { MonthNavigator } from "@/frontend/common/views/dashboard/student/__shared__/MonthNavigator";
+import { StudentViewShellShared } from "@/frontend/common/views/dashboard/student/__shared__/studentViewShellShared";
 import type { StudentHistorySessionRow } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import {
   formatStudentHistoryDuration,
@@ -18,7 +18,6 @@ import type { StudentSessionsViewModel } from "@/frontend/common/views/dashboard
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopActionIconLink } from "@/frontend/desktop/components/ui/button";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
 import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
@@ -193,16 +192,6 @@ function SessionsFilters({
   );
 }
 
-function LoadingSessionsView({ labels }: Readonly<{ labels: StudentSessionsViewModel["labels"] }>) {
-  return (
-    <DesktopPageContainer>
-      <Typography variant="bodyMd" sx={{ p: 3 }}>
-        {labels.loadingMessage}
-      </Typography>
-    </DesktopPageContainer>
-  );
-}
-
 export function StudentSessionsDesktopView({
   filteredSessions,
   subjectOptions,
@@ -228,25 +217,18 @@ export function StudentSessionsDesktopView({
     return filteredSessions.filter(s => s.dayOfMonth === selectedDay);
   }, [filteredSessions, selectedDay]);
 
-  if (loading && filteredSessions.length === 0) {
-    return <LoadingSessionsView labels={labels} />;
-  }
-
   return (
-    <DesktopPageContainer>
-      <DesktopPageHeader title={labels.pageTitle} />
-
-      <MonthNavigator
-        monthLabel={monthLabel}
-        canGoNext={canGoNext}
-        labels={labels}
-        onPrevMonth={onPrevMonth}
-        onNextMonth={onNextMonth}
-        outerSx={{ mb: 2, gap: 2 }}
-        innerGap={1}
-        iconFontSize={20}
-      />
-
+    <StudentViewShellShared
+      variant="desktop"
+      pageTitle={labels.pageTitle}
+      loading={loading && filteredSessions.length === 0}
+      loadingMessage={labels.loadingMessage}
+      monthLabel={monthLabel}
+      canGoNext={canGoNext}
+      monthNavigatorLabels={labels}
+      onPrevMonth={onPrevMonth}
+      onNextMonth={onNextMonth}
+    >
       <DesktopSectionPanel
         contentPadding={false}
         sx={{ borderRadius: 0 }}
@@ -275,6 +257,6 @@ export function StudentSessionsDesktopView({
           sx={{ borderRadius: 0 }}
         />
       </DesktopSectionPanel>
-    </DesktopPageContainer>
+    </StudentViewShellShared>
   );
 }

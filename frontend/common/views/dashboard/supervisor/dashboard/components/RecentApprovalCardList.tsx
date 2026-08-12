@@ -25,6 +25,7 @@ import {
   getPersonAccentColor,
   type PersonAccentTone,
 } from "@/frontend/common/views/dashboard/admin/home/utils/scheduleCardHelpers";
+import { StyledTimeHighlight } from "@/frontend/common/views/dashboard/components/__shared__/timeHighlightShared.styles";
 import {
   ScheduleSessionCardSkeleton,
   ScheduleSessionEmptyState,
@@ -82,19 +83,6 @@ const StyledCardActions = styled(Box)(({ theme }) => ({
   padding: theme.spacing(0.25),
   borderRadius: theme.layout.radius.card,
   backgroundColor: alpha(theme.palette.onSurface, 0.04),
-}));
-
-const StyledTimeHighlight = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  marginBottom: theme.spacing(1.5),
-  padding: theme.spacing(1.25, 1.5),
-  borderRadius: theme.layout.radius.card,
-  backgroundColor: alpha(theme.palette.primary.main, 0.08),
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.16)}`,
-  minWidth: 0,
-  overflow: "hidden",
 }));
 
 const StyledTimeHighlightContent = styled(Box)({

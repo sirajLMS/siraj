@@ -3,6 +3,7 @@
 import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField/LabeledField";
 import { SupervisorAdminSection } from "@/frontend/common/views/dashboard/supervisor/profile/sections/SupervisorAdminSection";
 import type { SupervisorProfileViewModel } from "@/frontend/common/views/dashboard/supervisor/profile/useSupervisorProfileViewModel";
 
@@ -43,7 +44,7 @@ export function SupervisorProfileShared({
           <ProfileSection>
             <Typography sx={{ typography: "titleLg", mb: 2 }}>{labels.sections.account}</Typography>
             <Stack spacing={1.5}>
-              <ProfileField label={labels.fields.fullName} value={profile.name || labels.notSet} />
+              <LabeledField label={labels.fields.fullName} value={profile.name || labels.notSet} />
               <SupervisorAdminSection
                 mode="view"
                 labels={{
@@ -65,7 +66,7 @@ export function SupervisorProfileShared({
           <ProfileSection>
             <Typography sx={{ typography: "titleLg", mb: 2 }}>{labels.sections.contact}</Typography>
             <Stack spacing={1.5}>
-              <ProfileField label={labels.fields.email} value={profile.email ?? labels.notSet} />
+              <LabeledField label={labels.fields.email} value={profile.email ?? labels.notSet} />
               <Stack spacing={0.25}>
                 <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
                   {labels.fields.phone}
@@ -81,23 +82,10 @@ export function SupervisorProfileShared({
           </ProfileSection>
           <ProfileSection>
             <Typography sx={{ typography: "titleLg", mb: 2 }}>{labels.sections.role}</Typography>
-            <ProfileField label={labels.fields.roleName} value={profile.roleName ?? labels.notSet} />
+            <LabeledField label={labels.fields.roleName} value={profile.roleName ?? labels.notSet} />
           </ProfileSection>
         </ProfileLayout>
       ) : null}
     </PageContainer>
-  );
-}
-
-function ProfileField({ label, value }: { readonly label: string; readonly value: string }) {
-  return (
-    <Stack spacing={0.25}>
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-        {label}
-      </Typography>
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface, fontWeight: 500 })}>
-        {value}
-      </Typography>
-    </Stack>
   );
 }

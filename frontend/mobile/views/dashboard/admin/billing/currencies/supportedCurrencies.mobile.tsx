@@ -4,6 +4,7 @@ import { AddOutlined, EditOutlined, ToggleOffOutlined } from "@mui/icons-materia
 import { Alert, Box, IconButton, Stack } from "@mui/material";
 import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
+import { BillingMobileListShellShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/billingMobileListShellShared";
 import {
   SupportedCurrencyActivateDialog,
   type SupportedCurrencyActivateDialogProps,
@@ -13,13 +14,7 @@ import type {
   SupportedCurrenciesViewModel,
   SupportedCurrencyRow,
 } from "@/frontend/common/views/dashboard/admin/billing/currencies/useSupportedCurrenciesViewModel";
-import {
-  MobileCardList,
-  MobileCardListItem,
-  MobilePageContainer,
-  MobilePageHeader,
-  MobilePrimaryPageAction,
-} from "@/frontend/mobile/components/ui";
+import { MobileCardListItem, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import { useAppLocale } from "@/shared/locale";
 
 function SupportedCurrencyCard({
@@ -116,11 +111,10 @@ export function SupportedCurrenciesMobileView({
   };
 
   return (
-    <MobilePageContainer>
-      <MobilePageHeader
-        title={shell.pageTitle}
-        subtitle={shell.pageSubtitle}
-        edgeToEdge={false}
+    <>
+      <BillingMobileListShellShared<SupportedCurrencyRow>
+        pageTitle={shell.pageTitle}
+        pageSubtitle={shell.pageSubtitle}
         actions={
           canManage ? (
             <MobilePrimaryPageAction onClick={onActivate} startIcon={<AddOutlined />}>
@@ -128,32 +122,27 @@ export function SupportedCurrenciesMobileView({
             </MobilePrimaryPageAction>
           ) : null
         }
+        rows={rows}
+        loading={loading}
+        emptyMessage={shell.empty}
+        getKey={row => row.id}
+        renderItem={row => (
+          <SupportedCurrencyCard
+            row={row}
+            locale={locale}
+            canManage={canManage}
+            editLabel={actions.editLabel}
+            deactivateLabel={actions.deactivateLabel}
+            onEdit={onEdit}
+            onDeactivate={onDeactivate}
+          />
+        )}
+        footer={
+          <Alert severity="info" sx={{ mt: 2 }}>
+            {shell.footerNote}
+          </Alert>
+        }
       />
-      <Box sx={{ px: { xs: 2, md: 0 }, pb: 2 }}>
-        <MobileCardList
-          rows={rows}
-          loading={loading}
-          emptyMessage={shell.empty}
-          getKey={row => row.id}
-          paginationOptions={{ mode: "client" }}
-          layout="edge-to-edge"
-          renderItem={row => (
-            <SupportedCurrencyCard
-              row={row}
-              locale={locale}
-              canManage={canManage}
-              editLabel={actions.editLabel}
-              deactivateLabel={actions.deactivateLabel}
-              onEdit={onEdit}
-              onDeactivate={onDeactivate}
-            />
-          )}
-        />
-        <Alert severity="info" sx={{ mt: 2 }}>
-          {shell.footerNote}
-        </Alert>
-      </Box>
-
       {canManage ? (
         <>
           <SupportedCurrencyActivateDialog {...activateDialogProps} />
@@ -166,6 +155,6 @@ export function SupportedCurrenciesMobileView({
           />
         </>
       ) : null}
-    </MobilePageContainer>
+    </>
   );
 }

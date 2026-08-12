@@ -1,8 +1,7 @@
 "use client";
 
-import { Alert, Button } from "@mui/material";
+import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page";
-import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface DesktopErrorStateProps {
   readonly message?: string;
@@ -12,32 +11,18 @@ export interface DesktopErrorStateProps {
 }
 
 /**
- * Desktop error state. When `embedded` is true, renders the Alert inline;
- * otherwise wraps it in `DesktopPageContainer` (which renders the
+ * Desktop error state. Delegates to the shared {@link ErrorState} with
+ * `DesktopPageContainer` as the non-embedded wrapper (which renders the
  * fixed-position LinearProgress while the theme/language is changing).
  */
 export function DesktopErrorState({ message, onRetry, retryLabel, embedded = false }: DesktopErrorStateProps) {
-  const tDefault = useAppTranslation(Translation.Common);
-  const displayMessage = message ?? tDefault.loadFailed ?? "";
-
-  const alert = (
-    <Alert
-      severity="error"
-      action={
-        onRetry ? (
-          <Button color="inherit" size="small" onClick={onRetry}>
-            {retryLabel}
-          </Button>
-        ) : undefined
-      }
-    >
-      {displayMessage}
-    </Alert>
+  return (
+    <ErrorState
+      message={message}
+      onRetry={onRetry}
+      retryLabel={retryLabel}
+      embedded={embedded}
+      ContainerComponent={DesktopPageContainer}
+    />
   );
-
-  if (embedded) {
-    return alert;
-  }
-
-  return <DesktopPageContainer>{alert}</DesktopPageContainer>;
 }

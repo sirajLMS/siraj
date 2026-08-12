@@ -10,6 +10,8 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
+type LocaleEmojiComponentType = typeof LocaleEmoji;
+
 export type LanguageDisplayProps = {
   readonly code?: string | null;
   readonly language?: LanguageType;
@@ -18,6 +20,10 @@ export type LanguageDisplayProps = {
   readonly fallback?: string;
   readonly typographyVariant?: UiTypographyVariant;
   readonly sx?: SxProps<Theme>;
+  /** Slot for the emoji component (defaults to common `LocaleEmoji`). */
+  readonly EmojiComponent?: LocaleEmojiComponentType;
+  /** Extra sx to merge into the Stack container (e.g. `flexWrap: "nowrap"`). */
+  readonly stackSx?: SxProps<Theme>;
 };
 
 export const LanguageDisplay = ({
@@ -28,6 +34,8 @@ export const LanguageDisplay = ({
   fallback,
   typographyVariant,
   sx,
+  EmojiComponent = LocaleEmoji,
+  stackSx,
 }: LanguageDisplayProps): React.JSX.Element | null => {
   const locale = useAppLocale();
   const fallbackNode = fallback ? (
@@ -45,8 +53,8 @@ export const LanguageDisplay = ({
   const name = getLanguageDisplayName(resolvedCode, locale);
 
   return (
-    <Stack direction="row" spacing={1} sx={mergeSx({ alignItems: "center" }, sx)}>
-      {showEmoji && <LocaleEmoji emoji={emoji} />}
+    <Stack direction="row" spacing={1} sx={mergeSx({ alignItems: "center" }, stackSx, sx)}>
+      {showEmoji && <EmojiComponent emoji={emoji} />}
       {showLabel && (
         <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
           {name}

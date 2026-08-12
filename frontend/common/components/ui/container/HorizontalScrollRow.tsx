@@ -11,6 +11,12 @@ interface HorizontalScrollRowProps {
   readonly sx?: SxProps<Theme>;
   /** Extra inline-start inset before the first item (RTL/LTR safe). */
   readonly leadSpacing?: number;
+  /** Gap between items in theme spacing units (default 1.5). */
+  readonly gap?: number;
+  /** Inline padding in theme spacing units (default 2). */
+  readonly padding?: number;
+  /** Bottom padding in theme spacing units (default 0.5). */
+  readonly paddingBottom?: number;
   /**
    * When false (default), scrollbar is hidden.
    * When true, scrollbar is always visible when overflowing.
@@ -67,6 +73,9 @@ export function HorizontalScrollRow({
   children,
   sx,
   leadSpacing = 0.5,
+  gap = 1.5,
+  padding = 2,
+  paddingBottom = 0.5,
   showScrollbar = false,
 }: HorizontalScrollRowProps) {
   return (
@@ -74,14 +83,14 @@ export function HorizontalScrollRow({
       sx={mergeSx(
         theme => ({
           display: "flex",
-          gap: theme.spacing(1.5),
+          gap: theme.spacing(gap),
           overflowX: "auto",
           overflowY: "hidden",
           scrollSnapType: "x proximity",
-          paddingInlineStart: theme.spacing(2),
-          paddingInlineEnd: theme.spacing(2),
-          scrollPaddingInlineStart: theme.spacing(2 + leadSpacing),
-          paddingBottom: theme.spacing(0.5),
+          paddingInlineStart: theme.spacing(padding),
+          paddingInlineEnd: theme.spacing(padding),
+          scrollPaddingInlineStart: theme.spacing(padding + leadSpacing),
+          paddingBottom: theme.spacing(paddingBottom),
           ...scrollbarStyles(theme, showScrollbar),
           "& > *:first-of-type": {
             marginInlineStart: theme.spacing(leadSpacing),

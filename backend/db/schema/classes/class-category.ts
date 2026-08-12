@@ -1,16 +1,16 @@
-import { boolean, index, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { primaryKeyColumn, timestampColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 
 export const classCategories = pgTable(
   "class_categories",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    ...primaryKeyColumn(),
     name: varchar("name", { length: 200 }).notNull(),
     slug: varchar("slug", { length: 100 }).notNull().unique(),
     description: text("description"),
     isActive: boolean("is_active").notNull().default(true),
     sortOrder: integer("sort_order").notNull().default(0),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ...timestampColumns({ withDefaultNow: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
   },
   table => [

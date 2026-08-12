@@ -1,9 +1,8 @@
 "use client";
-import { ErrorState, LoadingState } from "@/frontend/common/components/ui";
+import { RecurringViewShellShared } from "@/frontend/common/views/dashboard/classes/recurring/__shared__/recurringViewShellShared";
 import { RecurringRateSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringRateSection";
 import type { RecurringScheduleDetailViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringScheduleDetailViewModel";
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
-import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 
 export function RecurringScheduleDetailDesktopView({
   labelsBySection,
@@ -20,29 +19,17 @@ export function RecurringScheduleDetailDesktopView({
 }: Readonly<RecurringScheduleDetailViewModel>) {
   const { shell, form } = labelsBySection;
 
-  if (!recurringScheduleId) {
-    return (
-      <DesktopPageContainer>
-        <ErrorState embedded message={shell.invalidId} retryLabel="" onRetry={onRetry} />
-      </DesktopPageContainer>
-    );
-  }
-
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
-    return (
-      <DesktopPageContainer>
-        <ErrorState embedded message={error} retryLabel="Retry" onRetry={onRetry} />
-      </DesktopPageContainer>
-    );
-  }
-
   return (
-    <DesktopPageContainer>
-      <DesktopPageHeader title={shell.pageTitle} subtitle={shell.subtitle} breadcrumbs={shell.breadcrumbs} />
+    <RecurringViewShellShared
+      variant="desktop"
+      loading={loading}
+      error={error}
+      invalidIdMessage={recurringScheduleId ? null : shell.invalidId}
+      onRetry={onRetry}
+      pageTitle={shell.pageTitle}
+      subtitle={shell.subtitle}
+      desktopBreadcrumbs={shell.breadcrumbs}
+    >
       <RecurringRateSection
         hourlyRate={hourlyRate}
         rateCurrency={rateCurrency}
@@ -53,6 +40,6 @@ export function RecurringScheduleDetailDesktopView({
         onSave={onUpdateRate}
       />
       <ClassMeetingConfigsSection recurringScheduleId={recurringScheduleId} />
-    </DesktopPageContainer>
+    </RecurringViewShellShared>
   );
 }

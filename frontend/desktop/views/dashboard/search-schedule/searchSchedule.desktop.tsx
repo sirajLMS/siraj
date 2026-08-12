@@ -8,11 +8,7 @@ import type {
   SearchScheduleViewModel,
 } from "@/frontend/common/views/dashboard/search-schedule/useSearchScheduleViewModel";
 import { getColumnCount } from "@/frontend/common/views/dashboard/search-schedule/utils";
-import {
-  buildTeacherScheduleSlots,
-  getActiveTeachers,
-  getTotalGaps,
-} from "@/frontend/common/views/dashboard/search-schedule/utils/searchScheduleResults.utils";
+import { computeSearchScheduleResults } from "@/frontend/common/views/dashboard/search-schedule/utils/searchScheduleResults.utils";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { SearchScheduleFormDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/searchScheduleForm.desktop";
 import { SearchSchedulePaginationFooterDesktop } from "@/frontend/desktop/views/dashboard/search-schedule/components/searchSchedulePaginationFooter.desktop";
@@ -38,8 +34,7 @@ function SearchScheduleDesktopResults({
 }: Readonly<SearchScheduleDesktopResultsProps>) {
   if (!searchResult) return null;
 
-  const totalGaps = getTotalGaps(searchResult);
-  const activeTeachers = getActiveTeachers(searchResult);
+  const { totalGaps, activeTeachers, teacherSlots } = computeSearchScheduleResults(searchResult, fromDate, toDate);
 
   if (activeTeachers.length === 0) {
     return (
@@ -50,8 +45,6 @@ function SearchScheduleDesktopResults({
       </Box>
     );
   }
-
-  const teacherSlots = buildTeacherScheduleSlots(searchResult, fromDate, toDate);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>

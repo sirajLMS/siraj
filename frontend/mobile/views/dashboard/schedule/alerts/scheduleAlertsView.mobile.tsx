@@ -5,6 +5,7 @@ import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { buildAlertMetricItems } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/buildAlertMetricItems";
 import {
   ScheduleAlertsLoadingIndicator,
   type ScheduleAlertsViewSharedProps,
@@ -43,18 +44,7 @@ function MobileMetricsSection({
   readonly onDownloadReport: () => void;
 }) {
   const metricItems: readonly MetricItem[] = useMemo(
-    () =>
-      metrics.map(metric => {
-        const metricLabel = metricLabels[metric.key];
-        return {
-          key: metric.key,
-          count: metric.value,
-          label: metricLabel.label,
-          subLabel: metricLabel.subLabel,
-          icon: metric.icon,
-          labelKey: metric.labelKey,
-        };
-      }),
+    () => buildAlertMetricItems(metrics, metricLabels),
     [metricLabels, metrics]
   );
 
