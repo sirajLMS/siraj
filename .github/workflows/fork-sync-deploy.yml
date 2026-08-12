@@ -211,7 +211,7 @@ jobs:
         # Because this push uses the fork owner's PAT, Vercel's
         # GitHub App registers the pusher as the fork owner account.
         run: |
-          git push --force fork "HEAD:refs/heads/main"
+          git push --force fork "HEAD:refs/heads/prod"
           # NOTE: If the fork's default branch is not "main",
           # change "main" above to match (e.g., "master").
 
