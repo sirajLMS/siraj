@@ -1,4 +1,4 @@
-import type { DBTransaction } from "../db.types";
+import type { DBTransaction } from "@/backend/types";
 
 /**
  * Shared types for communication-domain service helpers used by both

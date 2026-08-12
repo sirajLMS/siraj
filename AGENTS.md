@@ -424,6 +424,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/auth/permission-architecture.md` - Client-side permission architecture (3-tier model, wrapper removal rationale)
 - `docs/i18n/cross-layer-enum-migration.md` - Cross-layer enum delete/codemod pattern (currency/timezone/class-instance-detail workflow)
 - `docs/backend/service-base-pattern.md` - Service base class, shared resolvers, insert payload builders, auth session helpers
+- `docs/backend/types-consolidation.md` - Types consolidation: moving `.types.ts` from service layer to `backend/types/`, split rules, barrel conventions
 - `docs/graphql/pothos-field-factories.md` - Pothos field helpers, input field helpers, and query field factory idioms
 
 

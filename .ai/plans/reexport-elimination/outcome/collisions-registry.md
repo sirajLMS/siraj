@@ -317,3 +317,18 @@ export { MobilePageHeader } from "./MobilePageHeader";
 export { UserPaymentMethodAutocompleteMobile } from "./userPaymentMethodAutocomplete.mobile";
 export { UserPaymentMethodSelectMobile } from "./userPaymentMethodSelect.mobile";
 ```
+
+---
+
+## Entry 39: `shared/locale/en/dashboard/lms/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** Each source file exports with unique original names (`dashboardLmsCreditEn`, `dashboardLmsLessonReportsEn`, etc.), but the barrel restructures them via `as` aliases (`credit`, `lessonReports`, `monthlyReports`, `teacherDues`). `export *` cannot apply `as` renaming — it would export the original verbose names, not the short aliased names that consumers depend on. This is a semantic aliasing requirement, not a collision.
+**Fix:** Keep named re-exports with `as` aliases as-is:
+```ts
+export { dashboardLmsCreditEn as credit } from "./credit";
+export { dashboardLmsLessonReportsEn as lessonReports } from "./lessonReports";
+export { dashboardLmsMonthlyReportsEn as monthlyReports } from "./monthlyReports";
+export { dashboardLmsTeacherDuesEn as teacherDues } from "./teacherDues";
+```
+

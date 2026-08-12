@@ -2,9 +2,9 @@
 
 import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
+import { ResourceFileTypeIconShared as ResourceFileTypeIconMobile } from "@/frontend/common/views/dashboard/resources/components/__shared__/resourceFileTypeIconShared";
 import type { ResourceLibraryCardProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
-import { ResourceFileTypeIconShared as ResourceFileTypeIconMobile } from "@/frontend/common/views/dashboard/resources/components/__shared__/resourceFileTypeIconShared";
 
 export function ResourceLibraryCardMobile({
   resource,

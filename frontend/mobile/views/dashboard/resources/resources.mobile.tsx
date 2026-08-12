@@ -2,11 +2,11 @@
 
 import { CloudUploadOutlined, ExpandMoreOutlined } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, Box } from "@mui/material";
+import { ResourceGovernancePanelShared as ResourceGovernancePanelMobile } from "@/frontend/common/views/dashboard/resources/components/__shared__/resourceGovernancePanelShared";
 import type { ResourcesViewModel } from "@/frontend/common/views/dashboard/resources/useResourcesViewModel";
 import { MobileContentStack, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { ResourceDeleteDialogMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceDeleteDialog.mobile";
-import { ResourceGovernancePanelShared as ResourceGovernancePanelMobile } from "@/frontend/common/views/dashboard/resources/components/__shared__/resourceGovernancePanelShared";
 import { ResourceLibraryListMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceLibraryList.mobile";
 import { ResourceUploadFormMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceUploadForm.mobile";
 import { ResourceUploadGuidelinesMobile } from "@/frontend/mobile/views/dashboard/resources/components/resourceUploadGuidelines.mobile";
