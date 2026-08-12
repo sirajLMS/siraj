@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CountryCode, CurrencyCode, Gender, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { validateMeetingProviderFields } from "@/frontend/common/views/dashboard/profile/shared/meetingProviderValidation";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
 export const teacherOnboardingSchema = (validationLabels: {
@@ -17,6 +18,8 @@ export const teacherOnboardingSchema = (validationLabels: {
   readonly salaryAmountRequired: string;
   readonly currencyRequired: string;
   readonly urlInvalid: string;
+  readonly meetingProviderRequired: string;
+  readonly meetingUrlRequired: string;
 }) =>
   z
     .object({
@@ -55,24 +58,11 @@ export const teacherOnboardingSchema = (validationLabels: {
       meetingLabel: z.string().optional(),
     })
     .superRefine((data, ctx) => {
-      const hasUrl = Boolean(data.meetingUrl?.trim());
-      const hasProvider = Boolean(data.meetingProvider?.id);
-      if (hasUrl && !hasProvider) {
-        ctx.addIssue({
-          code: "custom",
-          message: validationLabels.urlInvalid,
-          path: ["meetingProvider"],
-        });
-      }
-      if (hasUrl && data.meetingUrl) {
-        if (!URL.canParse(data.meetingUrl)) {
-          ctx.addIssue({
-            code: "custom",
-            message: validationLabels.urlInvalid,
-            path: ["meetingUrl"],
-          });
-        }
-      }
+      validateMeetingProviderFields(data, ctx, {
+        meetingProviderRequired: validationLabels.meetingProviderRequired,
+        meetingUrlRequired: validationLabels.meetingUrlRequired,
+        meetingUrlInvalid: validationLabels.urlInvalid,
+      });
     });
 
 export type TeacherOnboardingFormData = z.infer<ReturnType<typeof teacherOnboardingSchema>>;

@@ -1,8 +1,9 @@
 "use client";
 
-import { Grid, InputAdornment, TextField, Typography } from "@mui/material";
+import { Grid, TextField } from "@mui/material";
 import { type Control, Controller, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
@@ -48,19 +49,7 @@ export function SalaryDetailsSection({ register, control, errors, labels }: Read
           sx={outlinedInputSx}
           slotProps={{
             input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Typography
-                    variant="bodyMd"
-                    sx={theme => ({
-                      fontWeight: 700,
-                      color: theme.palette.onSurfaceVariant,
-                    })}
-                  >
-                    {currencySymbol}
-                  </Typography>
-                </InputAdornment>
-              ),
+              startAdornment: <CurrencySymbolAdornment symbol={currencySymbol} variant="typography" />,
             },
           }}
         />

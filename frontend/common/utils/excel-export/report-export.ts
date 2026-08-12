@@ -7,6 +7,7 @@ import {
   nameAltStyle,
   nameStyle,
   titleStyle,
+  writeCell as writeSharedCell,
   writeHeaderRow as writeSharedHeaderRow,
   type XLSXModule,
 } from "@/frontend/common/utils/excel-export/shared-export-logic";
@@ -198,7 +199,6 @@ function writeRowCells(
   financialColStart: number
 ): void {
   values.forEach((val, col) => {
-    const cell = XLSX.utils.encode_cell({ r: rowIndex, c: col });
     const isFinancial = showFinancials && col >= financialColStart;
     const isName = col === 0;
 
@@ -206,11 +206,7 @@ function writeRowCells(
     if (isName) style = dataIdx % 2 === 1 ? nameAltStyle : nameStyle;
     else style = getBodyStyles(dataIdx, isFinancial);
 
-    ws[cell] = {
-      v: val,
-      t: typeof val === "number" ? "n" : "s",
-      s: style,
-    };
+    writeSharedCell(XLSX, ws, rowIndex, col, val, style);
   });
 }
 
@@ -240,12 +236,7 @@ function writeTotalsRow(
     : baseTotals;
 
   totalsValues.forEach((val, col) => {
-    const cell = XLSX.utils.encode_cell({ r: totalsRow, c: col });
-    ws[cell] = {
-      v: val,
-      t: typeof val === "number" ? "n" : "s",
-      s: totalsStyle,
-    };
+    writeSharedCell(XLSX, ws, totalsRow, col, val, totalsStyle);
   });
 }
 

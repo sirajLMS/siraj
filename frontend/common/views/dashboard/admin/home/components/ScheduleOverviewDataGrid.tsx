@@ -7,6 +7,7 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useScheduleColumns } from "@/frontend/common/views/dashboard/admin/home/components/useScheduleColumns";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import type { ScheduleOverviewHeaders } from "@/frontend/common/views/dashboard/admin/home/types/scheduleColumns.types";
 
 interface ScheduleOverviewDataGridProps {
   readonly rows: readonly DailyScheduleRow[];
@@ -14,20 +15,7 @@ interface ScheduleOverviewDataGridProps {
   readonly pageSize: number;
   readonly totalCount?: number;
   readonly onPageChange: (page: number) => void;
-  readonly headers: {
-    readonly className: string;
-    readonly student: string;
-    readonly teacher: string;
-    readonly time: string;
-    readonly yourTime: string;
-    readonly teacherTime: string;
-    readonly studentTime: string;
-    readonly duration: string;
-    readonly status: string;
-    readonly actions: string;
-    readonly history: string;
-    readonly joinVideo: string;
-  };
+  readonly headers: ScheduleOverviewHeaders;
   readonly statusLabels: Record<ClassOutcome | ClassExecutionState, string>;
   readonly detailsLabel: string;
   readonly emptyMessage: string;

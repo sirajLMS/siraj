@@ -1,20 +1,11 @@
 "use client";
 
-import {
-  Box,
-  FormControl,
-  FormHelperText,
-  Grid,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
+import { FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
@@ -84,20 +75,7 @@ export function FeesContractSection({ register, control, errors }: SectionProps)
             sx={outlinedInputSx}
             slotProps={{
               input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Box
-                      component="span"
-                      sx={theme => ({
-                        fontWeight: "bold",
-                        color: theme.palette.primary.main,
-                        opacity: 0.6,
-                      })}
-                    >
-                      {currencySymbol}
-                    </Box>
-                  </InputAdornment>
-                ),
+                startAdornment: <CurrencySymbolAdornment symbol={currencySymbol} />,
               },
             }}
           />

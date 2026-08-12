@@ -7,7 +7,7 @@ export interface MeetingValidationMessages {
 }
 
 export function validateMeetingProviderFields(
-  data: { readonly meetingUrl?: string | null; readonly meetingProvider?: { readonly id: string } | null },
+  data: { meetingUrl?: string | null; meetingProvider?: { id: string | null } | null },
   ctx: z.RefinementCtx,
   messages: MeetingValidationMessages
 ): void {
