@@ -16,7 +16,7 @@ import {
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistorySessionPresentation";
 import type { StudentSessionsViewModel } from "@/frontend/common/views/dashboard/student/sessions/useStudentSessionsViewModel";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { DesktopActionIconLink } from "@/frontend/desktop/components/ui/button";
+import { ActionIconLink } from "@/frontend/common/components/ui/button/ActionIconLink";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
@@ -124,9 +124,9 @@ function buildColumns(
           );
         }
         return (
-          <DesktopActionIconLink href={classHref(row.id)} aria-label={labels.viewClass}>
+          <ActionIconLink href={classHref(row.id)} aria-label={labels.viewClass}>
             <VisibilityOutlined fontSize="small" />
-          </DesktopActionIconLink>
+          </ActionIconLink>
         );
       },
     },

@@ -8,8 +8,8 @@ import { createParentMutationDocument } from "@/frontend/common/graphql/sharedDo
 import { usePersistMeetingConfig } from "@/frontend/common/hooks/usePersistMeetingConfig";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
-import { logger } from "@/frontend/common/utils/logger";
 import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
+import { logger } from "@/frontend/common/utils/logger";
 import { formDetailsToInput } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 
 function buildParentInput(formData: ParentOnboardingFormData): ParentOnboardingInput {

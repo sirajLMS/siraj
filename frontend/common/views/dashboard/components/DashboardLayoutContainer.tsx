@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { isUsersDirectoryEnabled } from "@/backend/lib/features/is-users-directory-enabled";
 import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { DashboardClientProviders } from "@/frontend/common/providers/DashboardClientProviders";
+import { AppClientProviders as DashboardClientProviders } from "@/frontend/common/providers/AppClientProviders";
 import { DashboardClientBridge } from "@/frontend/common/views/dashboard/components/DashboardClientBridge";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";

@@ -1,4 +1,4 @@
-export type { DesktopAppDatePickerProps } from "@/frontend/desktop/components/ui/form/date/DesktopAppDatePicker";
-export { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date/DesktopAppDatePicker";
-export type { DesktopAppDateRangePickerProps } from "@/frontend/desktop/components/ui/form/date/DesktopAppDateRangePicker";
-export { DesktopAppDateRangePicker } from "@/frontend/desktop/components/ui/form/date/DesktopAppDateRangePicker";
+export type { DesktopAppDatePickerProps } from "./DesktopAppDatePicker";
+export { DesktopAppDatePicker } from "./DesktopAppDatePicker";
+export type { DesktopAppDateRangePickerProps } from "./DesktopAppDateRangePicker";
+export { DesktopAppDateRangePicker } from "./DesktopAppDateRangePicker";

@@ -166,3 +166,15 @@ export { TeacherClassListContainer } from "./TeacherClassListContainer";
 export type { TeacherClassListLabels, TeacherClassListViewModel, UseTeacherClassListViewModelProps } from "./useTeacherClassListViewModel";
 export { useTeacherClassListViewModel } from "./useTeacherClassListViewModel";
 ```
+
+---
+
+## Entry 31: `frontend/desktop/components/ui/badge/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `DesktopStatusBadge.tsx` exports both `DesktopStatusBadgeProps` (interface) and `DesktopStatusBadge` (function), and re-exports `StatusBadgeCategory` via `export type { }`. The index uses `export type { DesktopStatusBadgeProps, StatusBadgeCategory as DesktopStatusBadgeCategory } from "./DesktopStatusBadge"` alongside `export { DesktopStatusBadge } from "./DesktopStatusBadge"`. Using `export * from "./DesktopStatusBadge"` would cause `TS2308` collision because `export *` also picks up `DesktopStatusBadgeProps` and `StatusBadgeCategory` from the same module, duplicating the explicit `export type { }` block.
+**Fix:** Keep named re-exports as-is (with `./` path instead of `@/` path):
+```ts
+export type { DesktopStatusBadgeProps, StatusBadgeCategory as DesktopStatusBadgeCategory } from "./DesktopStatusBadge";
+export { DesktopStatusBadge } from "./DesktopStatusBadge";
+```

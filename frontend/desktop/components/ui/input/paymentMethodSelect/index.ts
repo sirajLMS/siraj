@@ -1,3 +1,3 @@
-export { PaymentMethodAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodSelect/paymentMethodAutocomplete.desktop";
-export { PaymentMethodOptionRowDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.desktop";
-export { PaymentMethodSelectDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodSelect/paymentMethodSelect.desktop";
+export * from "./paymentMethodAutocomplete.desktop";
+export * from "./paymentMethodOptionRow.desktop";
+export * from "./paymentMethodSelect.desktop";

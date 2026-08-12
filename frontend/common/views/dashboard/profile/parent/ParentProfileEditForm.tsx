@@ -24,6 +24,7 @@ import { AccountSection } from "@/frontend/common/views/dashboard/profile/parent
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/parent/sections/AdminOnlySection";
 import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/parent/sections/ContactSection";
+import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
 import {
   type ParentProfileViewLabels,
   toParentSharedBaseLabels,
@@ -34,7 +35,6 @@ import {
   AdminResetPasswordSection,
   type AdminResetPasswordSectionRef,
 } from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
-import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";

@@ -153,7 +153,9 @@ This is NOT standard Next.js. APIs and conventions differ from training data. **
 All layers use types from `backend/types/{entity}.types.ts`:
 - `{Entity}SelectType`, `{Entity}InsertType` - database types
 - `{Entity}ReturnType`, `{Entity}SubmitInput` - service/API types
+- `DBTransaction`, `DBQueryExecutor` - database transaction/executor types (now in `@/backend/types`, moved from `@/backend/db/db.types`)
 - **Never create local type definitions in Pothos files** - always import from `@/backend/types`
+- **Service-layer `.types.ts` files are prohibited** - all types live in `backend/types/`; split runtime code into `.helpers.ts`/`.constants.ts`
 - Single canonical GraphQL object type per entity
 
 ### i18n / Localized Errors
