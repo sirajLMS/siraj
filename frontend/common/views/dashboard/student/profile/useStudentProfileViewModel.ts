@@ -3,50 +3,26 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useRef } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
-import { AppLanguage, Gender, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   recordStudentProfileEditMutationDocument,
   studentProfileQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
-import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import {
   type StudentPortalProfileEditDraft,
   useStudentPortalProfileStore,
 } from "@/frontend/common/stores/studentPortalProfileStore";
 import { logger } from "@/frontend/common/utils/logger";
+import {
+  buildStudentProfileEditVariables,
+  profileToDraft,
+} from "@/frontend/common/views/dashboard/student/profile/__shared__/studentProfileDraftHelpers";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import { useRouter } from "@/shared/i18n/navigation";
 import { type StudentPortalProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
-
-function toDateInputValue(value: string | null | undefined): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 10);
-}
-
-const isGender = (val: string | null | undefined): val is Gender =>
-  val !== null && val !== undefined && (Object.values(Gender) as readonly string[]).includes(val);
-
-const isAppLanguage = (val: string | null | undefined): val is AppLanguage =>
-  val !== null && val !== undefined && (Object.values(AppLanguage) as readonly string[]).includes(val);
-
-function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDraft {
-  return {
-    phone: profile.phone ?? "",
-    timezone: profile.timezone ?? "",
-    displayCurrency: parseCurrencyCode(profile.displayCurrency) ?? "",
-    dateOfBirth: toDateInputValue(profile.dateOfBirth),
-    gender: isGender(profile.gender) ? profile.gender : "",
-    language: isAppLanguage(profile.language) ? profile.language : "",
-    timezoneOverride: profile.timezoneOverride ?? "",
-    parentPhone: profile.parentPhone ?? "",
-    avatarUrl: profile.avatarUrl ?? null,
-  };
-}
 
 export type StudentProfileViewLabels = StudentPortalProfileLabels & {
   readonly editAvatarTitle: string;
@@ -233,19 +209,7 @@ export function useStudentProfileViewModel({
   const onSave = async () => {
     try {
       await recordEdit({
-        variables: {
-          input: {
-            phone: draft.phone.trim() || null,
-            timezone: draft.timezone.trim() || null,
-            displayCurrency: draft.displayCurrency || null,
-            dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString() : null,
-            gender: draft.gender || null,
-            language: draft.language || null,
-            timezoneOverride: draft.timezoneOverride?.trim() || null,
-            parentPhone: draft.parentPhone.trim() || null,
-            avatarUrl: draft.avatarUrl,
-          },
-        },
+        variables: buildStudentProfileEditVariables(null, draft),
       });
       await refetch();
       if (mode === ProfileMode.Edit) {

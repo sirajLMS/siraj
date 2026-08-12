@@ -2,7 +2,6 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useCallback, useState } from "react";
-import { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { recordStudentProfileEditMutationDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import type {
@@ -10,6 +9,10 @@ import type {
   StudentPortalProfileSnackbar,
 } from "@/frontend/common/stores/studentPortalProfileStore";
 import { logger } from "@/frontend/common/utils/logger";
+import {
+  buildStudentProfileEditVariables,
+  profileToDraft,
+} from "@/frontend/common/views/dashboard/student/profile/__shared__/studentProfileDraftHelpers";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
@@ -27,75 +30,6 @@ const EMPTY_DRAFT: StudentPortalProfileEditDraft = {
   avatarUrl: null,
 };
 
-const VALID_CURRENCY_CODES = new Set(Object.values(CurrencyCode) as readonly string[]);
-const VALID_GENDERS = new Set(Object.values(Gender) as readonly string[]);
-const VALID_LANGUAGES = new Set(Object.values(AppLanguage) as readonly string[]);
-
-function toDateInputValue(value: string | null | undefined): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 10);
-}
-
-function isCurrencyCode(value: string): value is CurrencyCode {
-  return VALID_CURRENCY_CODES.has(value);
-}
-
-function isGender(value: string): value is Gender {
-  return VALID_GENDERS.has(value);
-}
-
-function isAppLanguage(value: string): value is AppLanguage {
-  return VALID_LANGUAGES.has(value);
-}
-
-function toCurrencyCode(value: string | null): CurrencyCode | "" {
-  if (value && isCurrencyCode(value)) return value;
-  return "";
-}
-
-function toGender(value: string | null): Gender | "" {
-  if (value && isGender(value)) return value;
-  return "";
-}
-
-function toAppLanguage(value: string | null): AppLanguage | "" {
-  if (value && isAppLanguage(value)) return value;
-  return "";
-}
-
-function profileToDraft(profile: StudentProfileRow): StudentPortalProfileEditDraft {
-  return {
-    phone: profile.phone ?? "",
-    timezone: profile.timezone ?? "",
-    displayCurrency: toCurrencyCode(profile.displayCurrency),
-    dateOfBirth: toDateInputValue(profile.dateOfBirth),
-    gender: toGender(profile.gender),
-    language: toAppLanguage(profile.language),
-    timezoneOverride: profile.timezoneOverride ?? "",
-    parentPhone: profile.parentPhone ?? "",
-    avatarUrl: profile.avatarUrl ?? null,
-  };
-}
-
-function buildEditVariables(studentId: string, draft: StudentPortalProfileEditDraft) {
-  return {
-    input: {
-      studentId,
-      phone: draft.phone.trim() || null,
-      timezone: draft.timezone.trim() || null,
-      displayCurrency: draft.displayCurrency || null,
-      dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString() : null,
-      gender: draft.gender || null,
-      language: draft.language || null,
-      timezoneOverride: draft.timezoneOverride?.trim() || null,
-      parentPhone: draft.parentPhone.trim() || null,
-      avatarUrl: draft.avatarUrl,
-    },
-  };
-}
-
 async function performSave(
   recordEdit: ReturnType<typeof useMutation>[0],
   profileContext: ReturnType<typeof useStudentProfileContext> | undefined,
@@ -104,7 +38,7 @@ async function performSave(
 ) {
   if (!profileContext || !studentId) return;
 
-  await recordEdit({ variables: buildEditVariables(studentId, draft) });
+  await recordEdit({ variables: buildStudentProfileEditVariables(studentId, draft) });
   await profileContext.refetch();
 }
 
