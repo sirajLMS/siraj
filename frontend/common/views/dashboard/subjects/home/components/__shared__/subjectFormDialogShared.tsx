@@ -3,6 +3,7 @@
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField/AvatarImageField";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import type { DialogActionSlotProps } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogActionButtonsShared";
+import { DialogCommonTextFields } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogCommonTextFieldsShared";
 import { DialogShellShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogShellShared";
 import {
   ActiveToggleField,
@@ -72,21 +73,12 @@ export function SubjectFormDialogShared({
         onUploadAvatar={onUploadAvatar}
         disabled={isLoading}
       />
-      <LabeledTextField
-        name="name"
+      <DialogCommonTextFields
         control={control}
-        label={labels.nameLabel}
-        required
-        error={errors.name ? labels.nameRequired : undefined}
-        disabled={isLoading}
-      />
-      <LabeledTextField
-        name="slug"
-        control={control}
-        label={labels.slugLabel}
-        required
-        error={errors.slug ? labels.slugRequired : undefined}
-        disabled={isLoading}
+        errors={errors}
+        labels={labels}
+        isLoading={isLoading}
+        paths={{ name: "name", slug: "slug", description: "description" }}
       />
       <CategorySelectField
         name="categoryId"
@@ -96,14 +88,6 @@ export function SubjectFormDialogShared({
         error={errors.categoryId ? labels.categoryRequired : undefined}
         disabled={isLoading}
         categories={categories}
-      />
-      <LabeledTextField
-        name="description"
-        control={control}
-        label={labels.descriptionLabel}
-        disabled={isLoading}
-        multiline
-        rows={3}
       />
       <ActiveToggleField name="isActive" control={control} label={labels.activeLabel} disabled={isLoading} />
       <LabeledTextField name="hourlyRate" control={control} label={labels.hourlyRateLabel} disabled={isLoading} />

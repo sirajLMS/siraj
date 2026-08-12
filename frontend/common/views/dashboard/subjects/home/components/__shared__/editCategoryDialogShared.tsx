@@ -4,8 +4,8 @@ import { Box, Switch, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
 import type { ClassCategoryUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { DialogActionSlotProps } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogActionButtonsShared";
+import { DialogCommonTextFields } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogCommonTextFieldsShared";
 import { DialogShellShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogShellShared";
-import { LabeledTextField } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/index";
 import type { EditCategoryFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/category.schema";
 import type { EditCategoryDialogProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 
@@ -63,29 +63,12 @@ export function EditCategoryDialogShared({
       slots={slots}
       onSubmit={handleSubmit(handleFormSubmit)}
     >
-      <LabeledTextField
-        name="name"
+      <DialogCommonTextFields
         control={control}
-        label={labels.nameLabel}
-        required
-        error={errors.name ? labels.nameRequired : undefined}
-        disabled={isLoading}
-      />
-      <LabeledTextField
-        name="slug"
-        control={control}
-        label={labels.slugLabel}
-        required
-        error={errors.slug ? labels.slugRequired : undefined}
-        disabled={isLoading}
-      />
-      <LabeledTextField
-        name="description"
-        control={control}
-        label={labels.descriptionLabel}
-        disabled={isLoading}
-        multiline
-        rows={3}
+        errors={errors}
+        labels={labels}
+        isLoading={isLoading}
+        paths={{ name: "name", slug: "slug", description: "description" }}
       />
       <Controller
         name="isActive"

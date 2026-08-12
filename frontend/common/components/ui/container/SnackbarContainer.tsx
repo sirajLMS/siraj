@@ -13,8 +13,8 @@ export interface SnackbarContainerProps<TViewModel> {
     };
     readonly onCloseSnackbar: () => void;
   };
-  readonly mobile: React.ComponentType<React.PropsWithChildren<{ viewModel: TViewModel }>>;
-  readonly desktop: React.ComponentType<React.PropsWithChildren<{ viewModel: TViewModel }>>;
+  readonly mobile: React.ComponentType<Readonly<TViewModel>>;
+  readonly desktop: React.ComponentType<Readonly<TViewModel>>;
 }
 
 export function SnackbarContainer<TViewModel>({ viewModel, mobile, desktop }: SnackbarContainerProps<TViewModel>) {
@@ -30,7 +30,7 @@ export function SnackbarContainer<TViewModel>({ viewModel, mobile, desktop }: Sn
           {viewModel.snackbar.message}
         </Alert>
       </Snackbar>
-      <ResponsiveViewSwitch mobile={mobile} desktop={desktop} props={{ viewModel }} />
+      <ResponsiveViewSwitch mobile={mobile} desktop={desktop} props={viewModel} />
     </>
   );
 }

@@ -2,13 +2,12 @@
 
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import {
-  MeetingConfigFields,
-  type MeetingConfigFieldsLabels,
-} from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigFields";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { MeetingConfigFieldsLabels } from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigFields";
+import { MeetingConfigOnboardingSection as SharedMeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigOnboardingSection";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 
-type MeetingConfigOnboardingSectionProps = {
+type MeetingConfigOnboardingSectionForTeacherProps = {
   readonly register: UseFormRegister<TeacherOnboardingFormData>;
   readonly control: Control<TeacherOnboardingFormData>;
   readonly errors: FieldErrors<TeacherOnboardingFormData>;
@@ -20,19 +19,19 @@ export function MeetingConfigOnboardingSection({
   control,
   errors,
   labels,
-}: Readonly<MeetingConfigOnboardingSectionProps>) {
+}: Readonly<MeetingConfigOnboardingSectionForTeacherProps>) {
   return (
     <Controller
       control={control}
       name="meetingProvider"
       render={({ field }) => (
-        <MeetingConfigFields
-          labels={labels}
+        <SharedMeetingConfigOnboardingSection
           meetingProviderValue={field.value ?? null}
-          onMeetingProviderChange={value => field.onChange(value)}
+          onMeetingProviderChange={(value: MeetingProviderFieldsFragment | null) => field.onChange(value)}
           meetingLabelInputProps={{ ...register("meetingLabel") }}
           meetingUrlInputProps={{ ...register("meetingUrl") }}
           meetingUrlError={errors.meetingUrl}
+          labels={labels}
         />
       )}
     />

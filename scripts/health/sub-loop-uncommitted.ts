@@ -99,30 +99,53 @@ function logFile(msg: string): void {
  * Returns relative paths, filtered to .ts/.tsx/.mts/.mts files only.
  * Excludes deleted files (status 'D').
  */
+/**
+ * Get the list of uncommitted files (staged + unstaged, modified + added + untracked).
+ * Returns relative paths, filtered to .ts/.tsx/.mts/.mjs/.js/.jsx files only.
+ * Excludes deleted files (status 'D').
+ */
 function getUncommittedFiles(): string[] {
-  const result = runCommand("git", ["status", "--porcelain", "-z"]);
+  // -uall ensures untracked directories are expanded to individual files
+  const result = runCommand("git", ["status", "--porcelain", "-uall", "-z"]);
   if (result.exitCode !== 0) {
     throw new Error(`git status failed: ${result.output}`);
   }
 
   const files: string[] = [];
-  // -z separates entries with NUL bytes; each entry is "XY PATH\0"
-  // where XY is the 2-char status code
   const entries = result.output.split("\0");
-  for (const entry of entries) {
-    if (!entry) continue;
-    // Status code is first 2 chars, then a space, then the path
-    const status = entry.substring(0, 2);
-    const path = entry.substring(3);
-    // Skip deleted files (D in either position)
-    if (status[0] === "D" || status[1] === "D") continue;
-    // Skip renames source (R) — the new path is a separate entry
-    if (status[0] === "R" && entry.includes(" -> ")) continue;
-    // Filter to TypeScript/JavaScript files
-    if (/\.(ts|tsx|mts|mjs|js|jsx)$/.test(path)) {
-      files.push(path);
+  let i = 0;
+
+  while (i < entries.length) {
+    const entry = entries[i];
+    if (!entry) {
+      i++;
+      continue;
     }
+
+    const status = entry.substring(0, 2);
+    const isRename = status[0] === "R" || status[1] === "R";
+
+    if (isRename) {
+      // For renames in NUL format, entry i is "R  old/path.ts", entry i+1 is "new/path.ts"
+      const newPath = entries[i + 1];
+      if (newPath && /\.(ts|tsx|mts|mjs|js|jsx)$/.test(newPath)) {
+        files.push(newPath);
+      }
+      i += 2;
+      continue;
+    }
+
+    // Skip deleted files
+    const isDeleted = status[0] === "D" || status[1] === "D";
+    if (!isDeleted) {
+      const path = entry.substring(3);
+      if (/\.(ts|tsx|mts|mjs|js|jsx)$/.test(path)) {
+        files.push(path);
+      }
+    }
+    i++;
   }
+
   return [...new Set(files)];
 }
 
