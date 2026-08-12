@@ -1,17 +1,6 @@
-"use client";
-
-import { AddOutlined } from "@mui/icons-material";
-import { Box, Button, Typography } from "@mui/material";
 import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
+import { QuickAdjustSectionShared } from "@/frontend/common/views/dashboard/reschedule/home/components/__shared__/quickAdjustSectionShared";
 import type { RescheduleFormData } from "@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema";
-import {
-  addOneDay,
-  addOneHour,
-  addOneWeek,
-  combineDateTime,
-  toDateString,
-  toTimeString,
-} from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
 import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
 
@@ -21,68 +10,21 @@ interface Props {
   readonly getValues: UseFormGetValues<RescheduleFormData>;
 }
 
-const QUICK_OPTIONS = [
-  { key: "oneHour", apply: addOneHour },
-  { key: "oneDay", apply: addOneDay },
-  { key: "oneWeek", apply: addOneWeek },
-] as const;
+const mobileScrollSx = { paddingInlineStart: 0, paddingInlineEnd: 0 } as const;
+const MobileOptionsContainer: React.ComponentType<Readonly<{ children: React.ReactNode }>> = ({ children }) => (
+  <MobileHorizontalScrollRow sx={mobileScrollSx}>{children}</MobileHorizontalScrollRow>
+);
 
-function applyQuickAdjust(
-  getValues: UseFormGetValues<RescheduleFormData>,
-  setValue: UseFormSetValue<RescheduleFormData>,
-  adjust: (date: Date) => Date
-): void {
-  const { newDate, newTime } = getValues();
-  const current = combineDateTime(newDate, newTime);
-  if (!current) return;
-  const adjusted = adjust(current);
-  setValue("newDate", toDateString(adjusted), { shouldValidate: true });
-  setValue("newTime", toTimeString(adjusted), { shouldValidate: true });
-}
+const mobileButtonExtraSx = { flexShrink: 0 } as const;
 
 export function QuickAdjustSectionMobile({ labels, setValue, getValues }: Readonly<Props>) {
-  const quickAdjustLabels = labels.quickAdjust;
-
   return (
-    <Box
-      sx={theme => ({
-        p: 2,
-        borderRadius: 3,
-        border: `1px dashed ${theme.palette.outlineVariant}`,
-        backgroundColor: theme.palette.surface,
-      })}
-    >
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mb: 1.5, display: "block" })}>
-        {quickAdjustLabels.label}:
-      </Typography>
-      <MobileHorizontalScrollRow sx={{ paddingInlineStart: 0, paddingInlineEnd: 0 }}>
-        {QUICK_OPTIONS.map(option => (
-          <Button
-            key={option.key}
-            type="button"
-            variant="outlined"
-            startIcon={<AddOutlined />}
-            onClick={() => {
-              applyQuickAdjust(getValues, setValue, option.apply);
-            }}
-            sx={theme => ({
-              flexShrink: 0,
-              borderRadius: 99,
-              textTransform: "none",
-              fontWeight: 700,
-              borderColor: theme.palette.outlineVariant,
-              color: theme.palette.onSurface,
-              "&:hover": {
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.onPrimary,
-                borderColor: theme.palette.primary.main,
-              },
-            })}
-          >
-            {quickAdjustLabels[option.key]}
-          </Button>
-        ))}
-      </MobileHorizontalScrollRow>
-    </Box>
+    <QuickAdjustSectionShared
+      labels={labels}
+      setValue={setValue}
+      getValues={getValues}
+      optionsContainerSlot={MobileOptionsContainer}
+      buttonSxSlot={mobileButtonExtraSx}
+    />
   );
 }

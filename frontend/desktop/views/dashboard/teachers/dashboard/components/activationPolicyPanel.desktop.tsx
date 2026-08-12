@@ -1,74 +1,13 @@
 "use client";
 
-import { InfoOutlined } from "@mui/icons-material";
-import { Box, Link, Paper, Typography } from "@mui/material";
+import { ActivationPolicyPanelShared } from "@/frontend/common/views/dashboard/teachers/dashboard/components/activationPolicyPanelShared";
 import type { ActivationPolicyPanelProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
 /**
  * Desktop variant of the activation policy panel.
- * Defaults to the full layout (dashed border, long description, inline
- * handbook + coordinator action links). Desktop has room for the full copy.
- *
- * Plan v5: per specs.md §3 N15 + §4.1 Class B, the byte-identical inline
- * `ActivationPolicyPanelDesktopProps` interface was deleted; both tiers now
- * import the shared `ActivationPolicyPanelProps` declared once in
- * `frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps.ts`.
+ * Defaults to the full layout (non-compact): dashed border, long description,
+ * inline handbook + coordinator action links.
  */
-export function ActivationPolicyPanelDesktop({
-  labels,
-  compact = false,
-  onDownloadHandbook,
-  onContactCoordinator,
-  actionLabels,
-}: Readonly<ActivationPolicyPanelProps>) {
-  const description = compact ? labels.descriptionMobile : labels.description;
-
-  return (
-    <Paper
-      variant="outlined"
-      sx={theme => ({
-        p: compact ? 2 : 3,
-        borderStyle: compact ? "solid" : "dashed",
-        borderColor: theme.palette.border.light,
-        backgroundColor: theme.palette.surfaceContainerLowest,
-        display: "flex",
-        gap: 2,
-        alignItems: "flex-start",
-      })}
-    >
-      <Box
-        sx={theme => ({
-          width: 48,
-          height: 48,
-          borderRadius: "50%",
-          backgroundColor: theme.palette.primaryContainer,
-          color: theme.palette.onPrimaryContainer,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        })}
-      >
-        <InfoOutlined />
-      </Box>
-      <Box>
-        <Typography sx={{ typography: "titleLg", color: theme => theme.palette.primary.main, mb: 1 }}>
-          {labels.title}
-        </Typography>
-        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, mb: compact ? 0 : 2 }}>
-          {description}
-        </Typography>
-        {!compact && (
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <Link component="button" onClick={onDownloadHandbook} sx={{ typography: "labelUppercase" }}>
-              {actionLabels.downloadHandbook}
-            </Link>
-            <Link component="button" onClick={onContactCoordinator} sx={{ typography: "labelUppercase" }}>
-              {actionLabels.contactCoordinator}
-            </Link>
-          </Box>
-        )}
-      </Box>
-    </Paper>
-  );
+export function ActivationPolicyPanelDesktop(props: Readonly<ActivationPolicyPanelProps>) {
+  return <ActivationPolicyPanelShared {...props} compact={props.compact ?? false} />;
 }

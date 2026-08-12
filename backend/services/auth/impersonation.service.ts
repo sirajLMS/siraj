@@ -1,10 +1,13 @@
-import { db } from "@/backend/db/drizzleDb";
 import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
-import { adminAuditLogs } from "@/backend/db/schema";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { generateAccessToken, generateImpersonationAccessToken } from "@/backend/lib/auth/jwt";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { logger } from "@/backend/lib/logger";
+import {
+  assertSessionOwnership,
+  getSimulationExpiresAt,
+  writeSimulationAuditLog,
+} from "@/backend/services/auth/__shared__/simulationBase";
 import { clearOptionalRedisGroupSimulation } from "@/backend/services/auth/permission-group-simulation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
@@ -12,23 +15,14 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 export const IMPERSONATION_TTL_MS = 30 * 60 * 1000;
 
-const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-
 function omit<T extends Record<string, unknown>, K extends keyof T>(obj: T, key: K): Omit<T, K> {
   const result = { ...obj };
   delete result[key];
   return result;
 }
 
-function sanitizeIpAddress(ip: string | null | undefined): string | null {
-  if (!ip) return null;
-  const parts = ip.split(":");
-  const cleanIp = parts.length === 2 ? parts[0] : ip;
-  return IPV4_REGEX.test(cleanIp) ? cleanIp : "127.0.0.1";
-}
-
 function getExpiresAt(startedAt: Date): Date {
-  return new Date(startedAt.getTime() + IMPERSONATION_TTL_MS);
+  return getSimulationExpiresAt(startedAt, IMPERSONATION_TTL_MS);
 }
 
 async function writeAdminAuditLog(
@@ -38,23 +32,15 @@ async function writeAdminAuditLog(
   metadata: Record<string, unknown>,
   ipAddress?: string | null
 ): Promise<void> {
-  await db.insert(adminAuditLogs).values({
+  await writeSimulationAuditLog({
     actorUserId,
     targetUserId,
     action,
     description:
       action === "IMPERSONATION_START" ? "Started user impersonation session" : "Ended user impersonation session",
-    newState: metadata,
-    ipAddress: sanitizeIpAddress(ipAddress),
-    createdAt: new Date(),
+    metadata,
+    ipAddress,
   });
-}
-
-async function assertActorOwnsSession(rawSessionId: string, actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
-  const session = await SessionRepository.findSessionById(rawSessionId);
-  if (session?.userId !== actorUserId) {
-    throw new Error(tErrors.auth.impersonationSessionInvalid);
-  }
 }
 
 async function getActiveDbImpersonation(rawSessionId: string, actorUserId: string) {
@@ -126,7 +112,7 @@ export namespace ImpersonationService {
     tErrors: ErrorsLabels
   ): Promise<Types.StartImpersonationReturnType> {
     await assertCanImpersonate(input.actorUserId, input.targetUserId, tErrors);
-    await assertActorOwnsSession(input.sessionId, input.actorUserId, tErrors);
+    await assertSessionOwnership(input.sessionId, input.actorUserId, "impersonationSessionInvalid", tErrors);
 
     const targetUser = await UserRepository.findById(input.targetUserId);
     if (!targetUser) {
@@ -193,7 +179,7 @@ export namespace ImpersonationService {
     tErrors: ErrorsLabels,
     ipAddress?: string | null
   ): Promise<Types.EndImpersonationReturnType> {
-    await assertActorOwnsSession(rawSessionId, actorUserId, tErrors);
+    await assertSessionOwnership(rawSessionId, actorUserId, "impersonationSessionInvalid", tErrors);
 
     const active = await getActiveDbImpersonation(rawSessionId, actorUserId);
     if (!active) {

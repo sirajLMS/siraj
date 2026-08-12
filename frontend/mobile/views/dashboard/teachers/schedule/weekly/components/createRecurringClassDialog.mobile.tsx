@@ -4,12 +4,16 @@ import CloseOutlined from "@mui/icons-material/CloseOutlined";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { CreateRecurringClassDialogShared } from "@/frontend/common/components/ui/dialog/CreateRecurringClassDialogShared";
+import {
+  resolveClassTypeChange,
+  resolveSchedulingModeChange,
+} from "@/frontend/common/components/ui/dialog/createRecurringClassDialogUtils";
 import type {
   CreateRecurringClassDialogShellSlotProps,
   CreateRecurringClassStudentSelectSlotProps,
   CreateRecurringClassTimezoneSelectSlotProps,
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
-import { ClassType, type IanaTimezone, SchedulingMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type {
   CreateRecurringClassDialogProps,
@@ -17,14 +21,6 @@ import type {
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { TimezoneSelectMobile } from "@/frontend/mobile/components/ui/input/timezoneSelect";
 import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
-
-function isValidSchedulingMode(v: string): v is SchedulingMode {
-  return (
-    v === SchedulingMode.NumberOfClasses.toString() ||
-    v === SchedulingMode.OnDemand.toString() ||
-    v === SchedulingMode.Quota.toString()
-  );
-}
 
 function MobileDialogShell({
   onClose,
@@ -149,20 +145,8 @@ function CreateRecurringClassDialogMobileBody({
       meetingLabels={tMeeting}
       recurringScheduleLabels={tRecurringSchedule}
       onGoToCreatedClass={onGoToCreatedClass}
-      onClassTypeChange={(value, setClassType) => {
-        const mapping: Record<string, ClassType> = {
-          REGULAR: ClassType.Regular,
-          TRIAL: ClassType.Trial,
-          ADVANCE: ClassType.Advance,
-        };
-        const mapped = mapping[value];
-        if (mapped) {
-          setClassType(mapped);
-        }
-      }}
-      onSchedulingModeChange={(value, setSchedulingMode) => {
-        setSchedulingMode(isValidSchedulingMode(value) ? value : null);
-      }}
+      onClassTypeChange={resolveClassTypeChange}
+      onSchedulingModeChange={resolveSchedulingModeChange}
       slots={{
         DialogShell: MobileDialogShell,
         StudentSelect: MobileStudentSelect,

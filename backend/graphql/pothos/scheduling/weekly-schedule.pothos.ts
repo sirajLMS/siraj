@@ -1,10 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
-import {
-  ClassExecutionStatePothosObject,
-  ClassOutcomePothosObject,
-  ClassTypePothosObject,
-} from "@/backend/graphql/pothos/shared/enum.pothos";
+import { classExecutionFields } from "@/backend/graphql/pothos/scheduling/__shared__/classExecutionFields";
+import { ClassTypePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   WeeklyScheduleClassReturnType,
   WeeklyScheduleGridReturnType,
@@ -21,14 +17,10 @@ export const WeeklyScheduleClassPothosObject = WeeklyScheduleClassRef.implement(
     duration: t.exposeInt("duration"),
     startTime: t.exposeString("startTime"),
     day: t.exposeString("day"),
-    executionState: t.expose("executionState", { type: ClassExecutionStatePothosObject, nullable: true }),
-    outcome: t.expose("outcome", { type: ClassOutcomePothosObject, nullable: true }),
-    isFrozen: t.exposeBoolean("isFrozen"),
+    ...classExecutionFields(t, { executionStateNullable: true, outcomeNullable: true }),
     subjectId: t.exposeString("subjectId", { nullable: true }),
     subjectName: t.exposeString("subjectName", { nullable: true }),
     classType: t.expose("classType", { type: ClassTypePothosObject, nullable: true }),
-    meetingJoinUrl: t.exposeString("meetingJoinUrl", { nullable: true }),
-    effectiveMeeting: t.expose("effectiveMeeting", { type: EffectiveMeetingPothosObject, nullable: true }),
   }),
 });
 

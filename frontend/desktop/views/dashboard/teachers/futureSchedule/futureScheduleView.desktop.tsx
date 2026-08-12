@@ -1,6 +1,9 @@
 "use client";
 
-import { Box, Grid, Stack, Typography } from "@mui/material";
+import {
+  ClassListWrapperPassthrough,
+  FutureScheduleViewShared,
+} from "@/frontend/common/views/dashboard/teachers/futureSchedule/components/__shared__/futureScheduleViewShared";
 import type { FutureScheduleViewModel } from "@/frontend/common/views/dashboard/teachers/futureSchedule/useFutureScheduleViewModel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { FutureClassCardDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/futureClassCard.desktop";
@@ -9,105 +12,25 @@ import { JumpToDateHeaderDesktop } from "@/frontend/desktop/views/dashboard/teac
 import { MiniCalendarDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/miniCalendar.desktop";
 import { SupportContactDesktop } from "@/frontend/desktop/views/dashboard/teachers/futureSchedule/components/supportContact.desktop";
 
-export function FutureScheduleViewDesktop({
-  classes,
-  leaveQuotaUsed,
-  leaveQuotaTotal,
-  totalClasses,
-  onRequestLeave,
-  selectedDate,
-  onDateChange,
-  notes,
-  contact,
-  classDates,
-  onSupportContact,
-  labelsBySection,
-}: Readonly<FutureScheduleViewModel>) {
-  const { schedule: labels, supportContact } = labelsBySection;
-
+export function FutureScheduleViewDesktop(props: Readonly<FutureScheduleViewModel>) {
   return (
-    <DesktopPageContainer>
-      <DesktopPageHeader title={labels.pageTitle} />
-
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12 }}>
-          <JumpToDateHeaderDesktop
-            leaveQuotaUsed={leaveQuotaUsed}
-            leaveQuotaTotal={leaveQuotaTotal}
-            totalClasses={totalClasses}
-            selectedDate={selectedDate}
-            onDateChange={onDateChange}
-            labels={labels}
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12, lg: 8 }}>
-          <Stack spacing={2}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-              <Typography variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-                {labels.futureClasses}
-              </Typography>
-              <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box
-                    sx={theme => ({
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      backgroundColor: theme.palette.status.active,
-                    })}
-                  />
-                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {labels.available}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Box
-                    sx={theme => ({
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      backgroundColor: theme.palette.status.blocked,
-                    })}
-                  />
-                  <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-                    {labels.regular}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Box>
-
-            {classes.map(item => (
-              <FutureClassCardDesktop
-                key={item.id ?? ""}
-                item={item}
-                labels={labels}
-                onRequestLeave={() => {
-                  if (item.id) void onRequestLeave(item.id);
-                }}
-              />
-            ))}
-          </Stack>
-        </Grid>
-
-        <Grid size={{ xs: 12, lg: 4 }}>
-          <Stack spacing={3}>
-            <MiniCalendarDesktop
-              selectedDate={selectedDate}
-              onSelectDate={onDateChange}
-              classDates={classDates}
-              labels={labels}
-            />
-            <ImportantNotesDesktop notes={notes} labels={labels} />
-            <SupportContactDesktop
-              contact={contact}
-              onContactAdmin={onSupportContact}
-              supportContactLabel={supportContact.supportContact}
-              contactAdminLabel={supportContact.contactAdmin}
-            />
-          </Stack>
-        </Grid>
-      </Grid>
-    </DesktopPageContainer>
+    <FutureScheduleViewShared
+      {...props}
+      slots={{
+        PageContainer: DesktopPageContainer,
+        PageHeader: DesktopPageHeader,
+        JumpToDateHeader: JumpToDateHeaderDesktop,
+        FutureClassCard: FutureClassCardDesktop,
+        ClassListWrapper: ClassListWrapperPassthrough,
+        MiniCalendar: MiniCalendarDesktop,
+        ImportantNotes: ImportantNotesDesktop,
+        SupportContact: SupportContactDesktop,
+      }}
+      options={{
+        mainGridSize: { xs: 12, lg: 8 },
+        sidebarGridSize: { xs: 12, lg: 4 },
+        legendSecondColorLabel: "regular",
+      }}
+    />
   );
 }

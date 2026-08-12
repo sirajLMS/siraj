@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { CurrencyCode } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 function buildAdminParentInput(formData: {
   phone?: string;

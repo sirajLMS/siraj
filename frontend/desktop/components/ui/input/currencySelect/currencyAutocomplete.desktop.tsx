@@ -1,12 +1,13 @@
 "use client";
 
+import {
+  createAutocompletePaperSlotProps,
+  createAutocompletePopperSlotProps,
+} from "@/frontend/common/components/ui/input/autocompletePopperSlotProps";
 import { CurrencyAutocompleteShared } from "@/frontend/common/components/ui/input/currencySelect/CurrencyAutocompleteShared";
 import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/input/currencySelect/types";
+import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
-import {
-  getCurrencyAutocompletePaperSlotPropsDesktop,
-  getCurrencyAutocompletePopperSlotPropsDesktop,
-} from "@/frontend/desktop/components/ui/input/currencySelect/currencyAutocompletePopper";
 import { CurrencyOptionRowDesktop } from "@/frontend/desktop/components/ui/input/currencySelect/currencyOptionRow.desktop";
 
 export const CurrencyAutocompleteDesktop: React.FC<CurrencyAutocompleteProps> = (
@@ -17,8 +18,8 @@ export const CurrencyAutocompleteDesktop: React.FC<CurrencyAutocompleteProps> = 
       {...props}
       LocaleEmojiComponent={DesktopLocaleEmoji}
       CurrencyOptionRowComponent={CurrencyOptionRowDesktop}
-      getPopperSlotProps={getCurrencyAutocompletePopperSlotPropsDesktop}
-      getPaperSlotProps={getCurrencyAutocompletePaperSlotPropsDesktop}
+      getPopperSlotProps={createAutocompletePopperSlotProps<CurrencyOption>}
+      getPaperSlotProps={createAutocompletePaperSlotProps<CurrencyOption>}
       optionRowSx={{ px: 2, py: 1 }}
     />
   );

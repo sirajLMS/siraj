@@ -1,11 +1,13 @@
-import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type {
-  GenerateMeetingInput,
-  GenerateMeetingResult,
-  IMeetingChannel,
-} from "@/backend/services/meeting/channels/IMeetingChannel";
+import {
+  type CachedToken,
+  fetchWithTimeout,
+  isRecord,
+  isTokenExpired,
+  MeetingAdapterBase,
+} from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
+import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/services/meeting/channels/IMeetingChannel";
 import {
   InsufficientScopesError,
   NoOrgCredentialsNoUserTokenError,
@@ -18,7 +20,6 @@ import type {
   ZoomMeetingResponse,
   ZoomTokenResponse,
 } from "@/backend/services/meeting/channels/zoom/zoom.types";
-import { refreshAccessToken } from "@/backend/services/meeting/integrations/token-refresh";
 
 export interface ZoomMeetingAdapterOptions {
   readonly accountId?: string;
@@ -28,38 +29,13 @@ export interface ZoomMeetingAdapterOptions {
 
 const ZOOM_TOKEN_URL = "https://zoom.us/oauth/token";
 const ZOOM_API_BASE = "https://api.zoom.us/v2";
-const REQUEST_TIMEOUT_MS = 30_000;
 const TOKEN_REFRESH_MARGIN_MS = 60_000;
-
-interface CachedToken {
-  accessToken: string;
-  expiresAt: number;
-}
 
 function base64Encode(str: string): string {
   if (typeof Buffer !== "undefined") {
     return Buffer.from(str, "utf-8").toString("base64");
   }
   return btoa(str);
-}
-
-function withTimeout(ms: number): { signal: AbortSignal; cancel: () => void } {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ms);
-  return { signal: controller.signal, cancel: () => clearTimeout(timer) };
-}
-
-function jitterDelay(baseMs: number): number {
-  return baseMs + (Date.now() % 100);
-}
-
-function isExpired(token: CachedToken | null): boolean {
-  if (!token) return true;
-  return Date.now() >= token.expiresAt - TOKEN_REFRESH_MARGIN_MS;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }
 
 function isZoomTokenResponse(value: unknown): value is ZoomTokenResponse {
@@ -84,18 +60,21 @@ function isZoomErrorResponse(value: unknown): value is ZoomErrorResponse {
 
 const ZOOM_REQUIRED_SCOPES = ["meeting:write:meeting", "user:read:user"] as const;
 
-export class ZoomMeetingAdapter implements IMeetingChannel {
+export class ZoomMeetingAdapter extends MeetingAdapterBase {
   static readonly ENDPOINTS: readonly string[] = [
     "https://zoom.us/oauth/token",
     "https://api.zoom.us/v2/users/me",
     "https://api.zoom.us/v2/meetings",
   ];
+  protected readonly providerSlug = "zoom" as const;
+  protected readonly tokenRefreshMarginMs = TOKEN_REFRESH_MARGIN_MS;
+
   private readonly accountId?: string;
   private readonly clientId?: string;
   private readonly clientSecret?: string;
-  private cachedToken: CachedToken | null = null;
 
   constructor(opts?: ZoomMeetingAdapterOptions) {
+    super();
     const envConfig =
       opts?.accountId !== undefined && opts?.clientId !== undefined && opts?.clientSecret !== undefined
         ? null
@@ -118,193 +97,19 @@ export class ZoomMeetingAdapter implements IMeetingChannel {
     return true;
   }
 
-  async generateMeeting(input: GenerateMeetingInput): Promise<GenerateMeetingResult> {
-    const hasOrgCreds = !!(this.accountId && this.clientId && this.clientSecret);
-
-    let accessToken: string;
-
-    if (hasOrgCreds) {
-      accessToken = await this.mintToken();
-    } else if (input.actorUserId) {
-      accessToken = await this.getPerUserAccessToken(input.actorUserId);
-    } else {
-      throw new NoOrgCredentialsNoUserTokenError("zoom");
-    }
-
-    return this.createMeetingWithRetry(accessToken, input, 0);
-  }
-
-  private async createMeetingWithRetry(
-    accessToken: string,
-    input: GenerateMeetingInput,
-    attempt: number
-  ): Promise<GenerateMeetingResult> {
-    if (attempt > 0) {
-      await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
-    }
-    try {
-      return await this.createMeeting(accessToken, input);
-    } catch (error) {
-      if (error instanceof ProviderUnavailableError && attempt < 1) {
-        return this.createMeetingWithRetry(accessToken, input, attempt + 1);
-      }
-      throw error;
-    }
-  }
-
-  async deleteMeeting(meetingId: string): Promise<void> {
-    let accessToken: string;
+  protected async resolveAccessToken(input: GenerateMeetingInput): Promise<string> {
     const hasOrgCreds = !!(this.accountId && this.clientId && this.clientSecret);
 
     if (hasOrgCreds) {
-      accessToken = await this.mintToken();
-    } else {
-      throw new NoOrgCredentialsNoUserTokenError("zoom");
+      return this.mintToken();
     }
-
-    const { signal, cancel } = withTimeout(REQUEST_TIMEOUT_MS);
-    try {
-      const response = await fetch(`${ZOOM_API_BASE}/meetings/${meetingId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        signal,
-      });
-      if (!response.ok && response.status !== 204) {
-        const errorBody = await this.parseErrorBody(response);
-        logger.warn("ZoomMeetingAdapter: deleteMeeting failed", {
-          status: response.status,
-          message: errorBody?.message,
-        });
-      }
-    } catch (error) {
-      logger.warn("ZoomMeetingAdapter: deleteMeeting network error", {
-        message: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      cancel();
+    if (input.actorUserId) {
+      return this.getPerUserAccessToken(input.actorUserId);
     }
+    throw new NoOrgCredentialsNoUserTokenError("zoom");
   }
 
-  async disconnect(token?: { accessToken: string; refreshToken: string | null }): Promise<void> {
-    if (token) {
-      try {
-        const body = new URLSearchParams({ token: token.accessToken });
-        await fetch("https://zoom.us/oauth/revoke", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: body.toString(),
-        });
-      } catch (error) {
-        logger.warn("ZoomMeetingAdapter: token revocation failed", {
-          message: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-    this.cachedToken = null;
-  }
-
-  private async mintToken(): Promise<string> {
-    if (this.cachedToken && !isExpired(this.cachedToken)) {
-      return this.cachedToken.accessToken;
-    }
-
-    if (!this.accountId || !this.clientId || !this.clientSecret) {
-      throw new NoOrgCredentialsNoUserTokenError("zoom");
-    }
-
-    const credentials = base64Encode(`${this.clientId}:${this.clientSecret}`);
-    const body = new URLSearchParams({
-      grant_type: "account_credentials",
-      account_id: this.accountId,
-    });
-
-    const { signal, cancel } = withTimeout(REQUEST_TIMEOUT_MS);
-    let response: Response;
-    try {
-      response = await fetch(ZOOM_TOKEN_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${credentials}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: body.toString(),
-        signal,
-      });
-    } catch (error) {
-      cancel();
-      throw new ProviderUnavailableError("zoom", undefined, error instanceof Error ? error.message : String(error));
-    }
-    cancel();
-
-    if (response.status === 429) {
-      const retryAfter = response.headers.get("Retry-After");
-      throw new RateLimitedError("zoom", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
-    }
-
-    if (!response.ok) {
-      const errorBody = await this.parseErrorBody(response);
-      throw new ZoomApiError(
-        errorBody?.message ?? `Zoom token request failed (${response.status})`,
-        errorBody?.code,
-        response.status
-      );
-    }
-
-    const tokenData: unknown = await response.json();
-    if (!isZoomTokenResponse(tokenData)) {
-      throw new ZoomApiError("Zoom token response was malformed", undefined, response.status);
-    }
-
-    const grantedScopes = tokenData.scope.split(" ");
-    const missingScopes = ZOOM_REQUIRED_SCOPES.filter(scope => !grantedScopes.includes(scope));
-    if (missingScopes.length > 0) {
-      throw new InsufficientScopesError(
-        [...ZOOM_REQUIRED_SCOPES],
-        grantedScopes,
-        `Missing scopes: ${missingScopes.join(", ")}`
-      );
-    }
-
-    this.cachedToken = {
-      accessToken: tokenData.access_token,
-      expiresAt: Date.now() + tokenData.expires_in * 1000,
-    };
-    return tokenData.access_token;
-  }
-
-  private async getPerUserAccessToken(actorUserId: string): Promise<string> {
-    const tokenRow = await MeetingProviderTokenRepository.getByUserAndProvider(actorUserId, "zoom");
-    if (!tokenRow?.refreshToken) {
-      throw new NoOrgCredentialsNoUserTokenError("zoom");
-    }
-
-    logger.debug("ZoomMeetingAdapter: using per-user token fallback", { actorUserId });
-
-    // Return the stored access token if it is still valid (within the refresh
-    // margin) to avoid racing concurrent calls on the single-use refresh token.
-    const storedExpiry = tokenRow.expiresAt ? tokenRow.expiresAt.getTime() : 0;
-    if (tokenRow.accessToken && Date.now() < storedExpiry - TOKEN_REFRESH_MARGIN_MS) {
-      return tokenRow.accessToken;
-    }
-
-    const refreshed = await refreshAccessToken("zoom", tokenRow.refreshToken, actorUserId);
-
-    // Persist the refreshed tokens for subsequent calls.
-    await MeetingProviderTokenRepository.upsert({
-      userId: actorUserId,
-      providerSlug: "zoom",
-      accessToken: refreshed.accessToken,
-      refreshToken: refreshed.refreshToken ?? tokenRow.refreshToken,
-      expiresAt: refreshed.expiresAt,
-      scopes: tokenRow.scopes,
-    });
-
-    return refreshed.accessToken;
-  }
-
-  private async createMeeting(accessToken: string, input: GenerateMeetingInput): Promise<GenerateMeetingResult> {
+  protected async callProviderApi(accessToken: string, input: GenerateMeetingInput): Promise<GenerateMeetingResult> {
     const meetingBody: Record<string, unknown> = {
       topic: input.topic,
       type: 2,
@@ -325,42 +130,20 @@ export class ZoomMeetingAdapter implements IMeetingChannel {
       meetingBody.duration = input.durationMinutes;
     }
 
-    const { signal, cancel } = withTimeout(REQUEST_TIMEOUT_MS);
-    let response: Response;
-    try {
-      response = await fetch(`${ZOOM_API_BASE}/users/me/meetings`, {
+    const response = await fetchWithTimeout(
+      `${ZOOM_API_BASE}/users/me/meetings`,
+      {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(meetingBody),
-        signal,
-      });
-    } catch (error) {
-      cancel();
-      throw new ProviderUnavailableError("zoom", undefined, error instanceof Error ? error.message : String(error));
-    }
-    cancel();
+      },
+      this.providerSlug
+    );
 
-    if (response.status === 429) {
-      const retryAfter = response.headers.get("Retry-After");
-      throw new RateLimitedError("zoom", retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
-    }
-
-    if (response.status >= 500) {
-      const errorBody = await this.parseErrorBody(response);
-      throw new ProviderUnavailableError("zoom", response.status, errorBody?.message);
-    }
-
-    if (!response.ok) {
-      const errorBody = await this.parseErrorBody(response);
-      throw new ZoomApiError(
-        errorBody?.message ?? `Zoom meeting creation failed (${response.status})`,
-        errorBody?.code,
-        response.status
-      );
-    }
+    await this.assertResponseOk(response, "Zoom meeting creation failed");
 
     const meeting: unknown = await response.json();
     if (!isZoomMeetingResponse(meeting)) {
@@ -376,6 +159,128 @@ export class ZoomMeetingAdapter implements IMeetingChannel {
         zoomUuid: meeting.uuid,
       },
     };
+  }
+
+  async deleteMeeting(meetingId: string): Promise<void> {
+    let accessToken: string;
+    const hasOrgCreds = !!(this.accountId && this.clientId && this.clientSecret);
+
+    if (hasOrgCreds) {
+      accessToken = await this.mintToken();
+    } else {
+      throw new NoOrgCredentialsNoUserTokenError("zoom");
+    }
+
+    try {
+      const response = await fetchWithTimeout(
+        `${ZOOM_API_BASE}/meetings/${meetingId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+        this.providerSlug
+      );
+      if (!response.ok && response.status !== 204) {
+        const errorBody = await this.parseErrorBody(response);
+        logger.warn("ZoomMeetingAdapter: deleteMeeting failed", {
+          status: response.status,
+          message: errorBody?.message,
+        });
+      }
+    } catch (error) {
+      logger.warn("ZoomMeetingAdapter: deleteMeeting network error", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  async disconnect(token?: { accessToken: string; refreshToken: string | null }): Promise<void> {
+    if (token) {
+      try {
+        const body = new URLSearchParams({ token: token.accessToken });
+        await fetch("https://zoom.us/oauth/revoke", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString(),
+        });
+      } catch (error) {
+        logger.warn("ZoomMeetingAdapter: token revocation failed", {
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+    this.clearCachedToken();
+  }
+
+  private async mintToken(): Promise<string> {
+    if (this.cachedToken && !isTokenExpired(this.cachedToken, this.tokenRefreshMarginMs)) {
+      return this.cachedToken.accessToken;
+    }
+
+    if (!this.accountId || !this.clientId || !this.clientSecret) {
+      throw new NoOrgCredentialsNoUserTokenError("zoom");
+    }
+
+    const credentials = base64Encode(`${this.clientId}:${this.clientSecret}`);
+    const body = new URLSearchParams({
+      grant_type: "account_credentials",
+      account_id: this.accountId,
+    });
+
+    const response = await fetchWithTimeout(
+      ZOOM_TOKEN_URL,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${credentials}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: body.toString(),
+      },
+      this.providerSlug
+    );
+
+    await this.assertResponseOk(response, "Zoom token request failed");
+
+    const tokenData: unknown = await response.json();
+    if (!isZoomTokenResponse(tokenData)) {
+      throw new ZoomApiError("Zoom token response was malformed", undefined, response.status);
+    }
+
+    const grantedScopes = tokenData.scope.split(" ");
+    const missingScopes = ZOOM_REQUIRED_SCOPES.filter(scope => !grantedScopes.includes(scope));
+    if (missingScopes.length > 0) {
+      throw new InsufficientScopesError(
+        [...ZOOM_REQUIRED_SCOPES],
+        grantedScopes,
+        `Missing scopes: ${missingScopes.join(", ")}`
+      );
+    }
+
+    this.cachedToken = {
+      accessToken: tokenData.access_token,
+      expiresAt: Date.now() + tokenData.expires_in * 1000,
+    } satisfies CachedToken;
+    return tokenData.access_token;
+  }
+
+  private async assertResponseOk(response: Response, failureMessage: string): Promise<void> {
+    if (response.status === 429) {
+      const retryAfter = response.headers.get("Retry-After");
+      throw new RateLimitedError(this.providerSlug, retryAfter ? Number.parseInt(retryAfter, 10) : undefined);
+    }
+
+    if (!response.ok) {
+      const errorBody = await this.parseErrorBody(response);
+      if (response.status >= 500) {
+        throw new ProviderUnavailableError(this.providerSlug, response.status, errorBody?.message);
+      }
+      throw new ZoomApiError(
+        errorBody?.message ?? `${failureMessage} (${response.status})`,
+        errorBody?.code,
+        response.status
+      );
+    }
   }
 
   private async parseErrorBody(response: Response): Promise<ZoomErrorResponse | null> {

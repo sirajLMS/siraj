@@ -1,49 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { createRangePickerVariant } from "@/frontend/common/components/ui/form/rangePickerFactory";
 import { AppTimePicker } from "@/frontend/common/components/ui/form/time/AppTimePicker";
 import { TimeRangePickerChrome } from "@/frontend/common/components/ui/form/time/appTimeRangePickerShared";
 import { useTimeRangePickerState } from "@/frontend/common/components/ui/form/time/appTimeRangePickerSharedUtils";
-import type {
+import type { AppTimeRangePickerProps } from "@/frontend/common/components/ui/form/time/types/appTimeRangePickerShared.types";
+
+const AppTimeRangePickerInner = createRangePickerVariant<
   AppTimeRangePickerProps,
-  TimeRangePickerSlotProps,
-} from "@/frontend/common/components/ui/form/time/types/appTimeRangePickerShared.types";
+  ReturnType<typeof useTimeRangePickerState>
+>({
+  SinglePicker: AppTimePicker,
+  Chrome: TimeRangePickerChrome,
+  useState: useTimeRangePickerState,
+  includeMinDate: false,
+});
 
 export function AppTimeRangePicker(props: Readonly<AppTimeRangePickerProps>) {
-  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
-  const [open, setOpen] = useState(false);
-  const state = useTimeRangePickerState(props);
-
-  const slots: TimeRangePickerSlotProps = {
-    renderFromPicker: args => (
-      <AppTimePicker
-        label={args.label}
-        value={args.value}
-        onChange={args.onChange}
-        slotProps={{ textField: { size: args.size, fullWidth: true } }}
-      />
-    ),
-    renderToPicker: args => (
-      <AppTimePicker
-        label={args.label}
-        value={args.value}
-        onChange={args.onChange}
-        slotProps={{ textField: { size: args.size, fullWidth: true } }}
-      />
-    ),
-  };
-
-  return (
-    <TimeRangePickerChrome
-      props={props}
-      state={state}
-      slots={slots}
-      open={open}
-      onOpen={() => setOpen(true)}
-      onClose={() => setOpen(false)}
-      container="popover"
-      anchorEl={anchorEl}
-      setAnchorEl={setAnchorEl}
-    />
-  );
+  return <AppTimeRangePickerInner props={props} container="popover" />;
 }

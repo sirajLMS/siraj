@@ -1,18 +1,10 @@
-import { logger } from "@/backend/lib/logger";
-import { getEntityCacheStats } from "@/backend/services/cache/EntityCacheService";
-import type { ICacheService } from "@/backend/services/cache/ICacheService";
+import { CacheAdapterBase } from "@/backend/services/cache/__shared__/CacheAdapterBase";
 import { getRedisService } from "@/backend/services/redis";
-import type { CacheStats } from "@/backend/services/shared/CacheInterface";
 
 const DBSIZE_KEY = "dbsize";
-const PROVIDER_NAME_KEY = "providerName";
 
 function hasDbsize(redis: object): redis is { dbsize: () => Promise<number> } {
   return DBSIZE_KEY in redis && typeof redis[DBSIZE_KEY] === "function";
-}
-
-function hasProviderName(redis: object): redis is { providerName: () => string } {
-  return PROVIDER_NAME_KEY in redis && typeof redis[PROVIDER_NAME_KEY] === "function";
 }
 
 /**
@@ -20,11 +12,11 @@ function hasProviderName(redis: object): redis is { providerName: () => string }
  * Wrapper around existing IRedisService to match ICacheService interface
  * Simply delegates to redisService singleton
  */
-export class RedisCacheAdapter implements ICacheService {
+export class RedisCacheAdapter extends CacheAdapterBase {
   /**
    * Get a value from cache
    */
-  async get(key: string): Promise<string | null> {
+  override async get(key: string): Promise<string | null> {
     const redis = await getRedisService();
     return await redis.get(key);
   }
@@ -32,7 +24,7 @@ export class RedisCacheAdapter implements ICacheService {
   /**
    * Set a value in cache
    */
-  async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
+  override async set(key: string, value: string, options?: { ex?: number; px?: number }): Promise<void> {
     const redis = await getRedisService();
     await redis.set(key, value, options);
   }
@@ -41,7 +33,7 @@ export class RedisCacheAdapter implements ICacheService {
    * Atomically set a value only if the key does NOT exist, with a TTL in ms.
    * Returns `"OK"` if set (first caller), `null` if key already exists.
    */
-  async setNx(key: string, value: string, pxMs: number): Promise<string | null> {
+  override async setNx(key: string, value: string, pxMs: number): Promise<string | null> {
     const redis = await getRedisService();
     return await redis.setNx(key, value, pxMs);
   }
@@ -49,7 +41,7 @@ export class RedisCacheAdapter implements ICacheService {
   /**
    * Increment a value in cache
    */
-  async incr(key: string): Promise<number> {
+  override async incr(key: string): Promise<number> {
     const redis = await getRedisService();
     return await redis.incr(key);
   }
@@ -57,7 +49,7 @@ export class RedisCacheAdapter implements ICacheService {
   /**
    * Set expiration time on a key
    */
-  async expire(key: string, seconds: number): Promise<void> {
+  override async expire(key: string, seconds: number): Promise<void> {
     const redis = await getRedisService();
     await redis.expire(key, seconds);
   }
@@ -65,7 +57,7 @@ export class RedisCacheAdapter implements ICacheService {
   /**
    * Get time to live for a key
    */
-  async ttl(key: string): Promise<number> {
+  override async ttl(key: string): Promise<number> {
     const redis = await getRedisService();
     return await redis.ttl(key);
   }
@@ -73,7 +65,7 @@ export class RedisCacheAdapter implements ICacheService {
   /**
    * Delete a key
    */
-  async del(key: string): Promise<void> {
+  override async del(key: string): Promise<void> {
     const redis = await getRedisService();
     await redis.del(key);
   }
@@ -81,7 +73,7 @@ export class RedisCacheAdapter implements ICacheService {
   /**
    * Execute a pipeline of commands (for atomic operations)
    */
-  async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
+  override async pipeline(commands: Array<{ command: string; args: (string | number)[] }>): Promise<unknown[]> {
     const redis = await getRedisService();
     return await redis.pipeline(commands);
   }
@@ -89,7 +81,7 @@ export class RedisCacheAdapter implements ICacheService {
   /**
    * Check if cache connection is healthy
    */
-  async ping(): Promise<boolean> {
+  override async ping(): Promise<boolean> {
     const redis = await getRedisService();
     return await redis.ping();
   }
@@ -97,37 +89,22 @@ export class RedisCacheAdapter implements ICacheService {
   /**
    * Close the connection
    */
-  async disconnect(): Promise<void> {
+  override async disconnect(): Promise<void> {
     const redis = await getRedisService();
     await redis.disconnect();
   }
 
-  /**
-   * Get cache statistics and metrics
-   */
-  async stats(): Promise<CacheStats> {
-    try {
-      const redis = await getRedisService();
-      let size = 0;
-      let providerName = "redis";
-      if (hasDbsize(redis)) {
-        size = await redis.dbsize();
-      }
-      if (hasProviderName(redis)) {
-        providerName = redis.providerName();
-      }
-      return {
-        provider: providerName,
-        size,
-        hitsByPrefix: getEntityCacheStats(),
-      };
-    } catch (error) {
-      logger.error("Redis cache stats error:", error);
-      return {
-        provider: "redis",
-        size: 0,
-        hitsByPrefix: getEntityCacheStats(),
-      };
+  /** Provider name for cache stats. */
+  protected getProviderName(): string {
+    return "redis";
+  }
+
+  /** Get the dbsize from Redis if available, otherwise return 0. */
+  protected async getCacheSize(): Promise<number> {
+    const redis = await getRedisService();
+    if (hasDbsize(redis)) {
+      return await redis.dbsize();
     }
+    return 0;
   }
 }

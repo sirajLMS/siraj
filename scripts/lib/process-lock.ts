@@ -1,12 +1,26 @@
 /**
- * PROCESS LOCK — Cross-Process Mutual Exclusion & FIFO Queueing
+ * PROCESS LOCK — Per-Tool Cross-Process Mutual Exclusion & FIFO Queueing
  *
  * Provides cross-process synchronization for resource-heavy operations
  * (tsgo, biome, oxlint, lint-service, sub-loop quality checks).
  *
+ * Architecture: PER-TOOL locks (not a single global lock)
+ *   Each tool class has its own independent lock namespace:
+ *   - `.quality-gate-lock/tsgo/`        → serializes: tsgo, sub-loop tsgo, restore-next-env-dts
+ *   - `.quality-gate-lock/biome/`       → serializes: biome:check (per-file & full-repo)
+ *   - `.quality-gate-lock/oxlint/`      → serializes: oxlint (per-file & full-repo)
+ *   - `.quality-gate-lock/lint/`        → serializes: lint-service (type-aware ESLint)
+ *   - `.quality-gate-lock/codescene/`   → serializes: CodeScene scans
+ *   - `.quality-gate-lock/build/`       → serializes: next build, build:test
+ *   - `.quality-gate-lock/test/`        → serializes: bun test runs
+ *   - `.quality-gate-lock/default/`     → fallback for uncategorized tasks
+ *
+ * This allows tsgo and biome to run concurrently across parallel subagents,
+ * while still serializing same-tool calls to prevent CPU/RAM contention.
+ *
  * Features:
- *   - Atomic OS lockfile (`.quality-gate-lock/active.json`)
- *   - Guaranteed FIFO queuing via timestamped ticket files in `.quality-gate-lock/queue/`
+ *   - Atomic OS lockfile per tool class (`<tool>/active.json`)
+ *   - Guaranteed FIFO queuing via timestamped ticket files in `<tool>/queue/`
  *   - In-process re-entrancy (nested lock calls within the same PID proceed immediately)
  *   - Deadlock recovery (stale lock/ticket cleanup for dead PIDs or expired locks)
  *   - Process signal/exit handlers to clean up locks on termination
@@ -32,15 +46,38 @@ export interface QueueTicketInfo {
   description: string;
 }
 
+// ─── Tool Classification ─────────────────────────────────────────────────────
+
+/**
+ * Derive the lock namespace (tool class) from the task description.
+ * Each namespace gets its own independent lock directory.
+ */
+function getLockNamespace(description: string): string {
+  const d = description.toLowerCase();
+  if (d.includes("tsgo") || d.includes("restore-next-env-dts") || d.includes("typescript")) return "tsgo";
+  if (d.includes("biome")) return "biome";
+  if (d.includes("oxlint")) return "oxlint";
+  if (
+    d.includes("lint-service") ||
+    d.includes("lint:type-aware") ||
+    d.includes("lint:fix") ||
+    d === "lint" ||
+    d.startsWith("lint ")
+  )
+    return "lint";
+  if (d.includes("codescene")) return "codescene";
+  if (d.includes("build")) return "build";
+  if (d.startsWith("test") || d.includes("test:") || d.includes("test ")) return "test";
+  return "default";
+}
+
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const PROJECT_ROOT = process.cwd();
-const LOCK_DIR = resolve(PROJECT_ROOT, ".quality-gate-lock");
-const QUEUE_DIR = join(LOCK_DIR, "queue");
-const ACTIVE_LOCK_FILE = join(LOCK_DIR, "active.json");
+const LOCK_BASE_DIR = resolve(PROJECT_ROOT, ".quality-gate-lock");
 
-/** Maximum age for a lock before considering it stale (30 minutes) */
-const MAX_LOCK_AGE_MS = 30 * 60 * 1000;
+/** Maximum age for a lock before considering it stale (5 minutes) */
+const MAX_LOCK_AGE_MS = 5 * 60 * 1000;
 
 /** Queue polling interval in milliseconds */
 const POLL_INTERVAL_MS = 250;
@@ -50,11 +87,42 @@ const GREEN = "\x1b[32m";
 const CYAN = "\x1b[36m";
 const NC = "\x1b[0m";
 
-// ─── State ──────────────────────────────────────────────────────────────────
+// ─── Per-namespace path helpers ──────────────────────────────────────────────
 
-let inMemoryReentryCount = 0;
-const activeReleases = new Set<() => void>();
+function getLockDir(namespace: string): string {
+  return join(LOCK_BASE_DIR, namespace);
+}
+
+function getQueueDir(namespace: string): string {
+  return join(getLockDir(namespace), "queue");
+}
+
+function getActiveLockFile(namespace: string): string {
+  return join(getLockDir(namespace), "active.json");
+}
+
+// ─── State (per-namespace) ───────────────────────────────────────────────────
+
+// Reentry tracking: namespace → count
+const reentryCountByNs = new Map<string, number>();
+// Release callbacks: namespace → Set<() => void>
+const activeReleasesByNs = new Map<string, Set<() => void>>();
 let exitHandlersAttached = false;
+
+function getReentryCount(ns: string): number {
+  return reentryCountByNs.get(ns) ?? 0;
+}
+function setReentryCount(ns: string, val: number): void {
+  reentryCountByNs.set(ns, val);
+}
+function getReleases(ns: string): Set<() => void> {
+  let set = activeReleasesByNs.get(ns);
+  if (!set) {
+    set = new Set();
+    activeReleasesByNs.set(ns, set);
+  }
+  return set;
+}
 
 // ─── Helper Functions ───────────────────────────────────────────────────────
 
@@ -85,26 +153,29 @@ export function isPidAlive(pid: number): boolean {
 }
 
 /**
- * Ensure lock directories exist.
+ * Ensure lock directories exist for a given namespace.
  */
-function ensureLockDirs(): void {
-  if (!existsSync(LOCK_DIR)) {
-    mkdirSync(LOCK_DIR, { recursive: true });
+function ensureLockDirs(ns: string): void {
+  const lockDir = getLockDir(ns);
+  const queueDir = getQueueDir(ns);
+  if (!existsSync(lockDir)) {
+    mkdirSync(lockDir, { recursive: true });
   }
-  if (!existsSync(QUEUE_DIR)) {
-    mkdirSync(QUEUE_DIR, { recursive: true });
+  if (!existsSync(queueDir)) {
+    mkdirSync(queueDir, { recursive: true });
   }
 }
 
 /**
- * Create a timestamped ticket file in the queue directory.
+ * Create a timestamped ticket file in the queue directory for a namespace.
  */
-function createQueueTicket(description: string): { ticketPath: string; ticketInfo: QueueTicketInfo } {
-  ensureLockDirs();
+function createQueueTicket(ns: string, description: string): { ticketPath: string; ticketInfo: QueueTicketInfo } {
+  ensureLockDirs(ns);
+  const queueDir = getQueueDir(ns);
   const timestamp = Date.now();
   const ticketId = randomUUID().substring(0, 8);
   const fileName = `${timestamp}_${process.pid}_${ticketId}.json`;
-  const ticketPath = join(QUEUE_DIR, fileName);
+  const ticketPath = join(queueDir, fileName);
 
   const ticketInfo: QueueTicketInfo = {
     pid: process.pid,
@@ -121,7 +192,7 @@ function createQueueTicket(description: string): { ticketPath: string; ticketInf
     if (err !== null) {
       // Retry once if file exists (extremely unlikely)
       const altFileName = `${timestamp + 1}_${process.pid}_${ticketId}.json`;
-      const altPath = join(QUEUE_DIR, altFileName);
+      const altPath = join(queueDir, altFileName);
       const fd = openSync(altPath, "wx");
       writeSync(fd, JSON.stringify(ticketInfo, null, 2));
       closeSync(fd);
@@ -133,18 +204,19 @@ function createQueueTicket(description: string): { ticketPath: string; ticketInf
 }
 
 /**
- * Scan queue directory, remove stale tickets (dead PID or expired),
+ * Scan queue directory for a namespace, remove stale tickets,
  * and return valid tickets sorted by timestamp ascending (FIFO).
  */
-function getValidQueueTickets(): { file: string; info: QueueTicketInfo }[] {
-  ensureLockDirs();
+function getValidQueueTickets(ns: string): { file: string; info: QueueTicketInfo }[] {
+  ensureLockDirs(ns);
+  const queueDir = getQueueDir(ns);
   try {
-    const files = readdirSync(QUEUE_DIR);
+    const files = readdirSync(queueDir);
     const valid: { file: string; info: QueueTicketInfo }[] = [];
 
     for (const file of files) {
       if (!file.endsWith(".json")) continue;
-      const ticketPath = join(QUEUE_DIR, file);
+      const ticketPath = join(queueDir, file);
       try {
         const content = readFileSync(ticketPath, "utf8");
         const info: QueueTicketInfo = JSON.parse(content);
@@ -180,17 +252,18 @@ function getValidQueueTickets(): { file: string; info: QueueTicketInfo }[] {
 }
 
 /**
- * Read the current active lock, cleaning it up if stale.
+ * Read the current active lock for a namespace, cleaning it up if stale.
  */
-function getActiveLock(): ActiveLockInfo | null {
-  if (!existsSync(ACTIVE_LOCK_FILE)) return null;
+function getActiveLock(ns: string): ActiveLockInfo | null {
+  const activeLockFile = getActiveLockFile(ns);
+  if (!existsSync(activeLockFile)) return null;
   try {
-    const content = readFileSync(ACTIVE_LOCK_FILE, "utf8");
+    const content = readFileSync(activeLockFile, "utf8");
     const info: ActiveLockInfo = JSON.parse(content);
     if (!isPidAlive(info.pid) || Date.now() - info.acquiredAt > MAX_LOCK_AGE_MS) {
       console.log(`${YELLOW}[process-lock]${NC} Cleaning up stale lock held by PID ${info.pid} (${info.description})`);
       try {
-        unlinkSync(ACTIVE_LOCK_FILE);
+        unlinkSync(activeLockFile);
       } catch {
         /* ignore stale lock cleanup error */
       }
@@ -199,7 +272,7 @@ function getActiveLock(): ActiveLockInfo | null {
     return info;
   } catch {
     try {
-      unlinkSync(ACTIVE_LOCK_FILE);
+      unlinkSync(activeLockFile);
     } catch {
       /* ignore stale lock cleanup error */
     }
@@ -208,10 +281,11 @@ function getActiveLock(): ActiveLockInfo | null {
 }
 
 /**
- * Atomically claim the active lock file (`active.json`).
+ * Atomically claim the active lock file for a namespace.
  */
-function claimActiveLock(description: string): ActiveLockInfo | null {
-  ensureLockDirs();
+function claimActiveLock(ns: string, description: string): ActiveLockInfo | null {
+  ensureLockDirs(ns);
+  const activeLockFile = getActiveLockFile(ns);
   const info: ActiveLockInfo = {
     pid: process.pid,
     acquiredAt: Date.now(),
@@ -219,7 +293,7 @@ function claimActiveLock(description: string): ActiveLockInfo | null {
     reentryCount: 1,
   };
   try {
-    const fd = openSync(ACTIVE_LOCK_FILE, "wx");
+    const fd = openSync(activeLockFile, "wx");
     writeSync(fd, JSON.stringify(info, null, 2));
     closeSync(fd);
     return info;
@@ -232,44 +306,49 @@ function claimActiveLock(description: string): ActiveLockInfo | null {
 }
 
 /**
- * Create a release callback that cleans up active lock when count reaches 0.
+ * Create a release callback that cleans up the active lock for a namespace.
  */
-function createReleaseCallback(description: string): () => void {
+function createReleaseCallback(ns: string, description: string): () => void {
+  const activeLockFile = getActiveLockFile(ns);
+  const releases = getReleases(ns);
   let released = false;
   const release = () => {
     if (released) return;
     released = true;
-    inMemoryReentryCount--;
-    activeReleases.delete(release);
-    if (inMemoryReentryCount <= 0) {
-      inMemoryReentryCount = 0;
+    const count = getReentryCount(ns) - 1;
+    setReentryCount(ns, count);
+    releases.delete(release);
+    if (count <= 0) {
+      setReentryCount(ns, 0);
       try {
-        unlinkSync(ACTIVE_LOCK_FILE);
+        unlinkSync(activeLockFile);
       } catch {
         /* ignore active lock release error */
       }
       console.log(`${CYAN}[process-lock]${NC} Released lock for "${description}" (PID: ${process.pid})`);
     }
   };
-  activeReleases.add(release);
+  releases.add(release);
   return release;
 }
 
 const activeTickets = new Set<string>();
 
 /**
- * Attach process exit handlers to clean up active lock on crash/exit.
+ * Attach process exit handlers to clean up all active locks on crash/exit.
  */
 function attachExitHandlers(): void {
   if (exitHandlersAttached) return;
   exitHandlersAttached = true;
 
   const cleanupAll = () => {
-    for (const release of activeReleases) {
-      try {
-        release();
-      } catch {
-        /* ignore process exit cleanup error */
+    for (const releases of activeReleasesByNs.values()) {
+      for (const release of releases) {
+        try {
+          release();
+        } catch {
+          /* ignore process exit cleanup error */
+        }
       }
     }
     for (const ticketPath of activeTickets) {
@@ -293,8 +372,8 @@ function attachExitHandlers(): void {
   });
 }
 
-function getQueuePosition(ticketInfo: QueueTicketInfo): { pos: number; total: number } {
-  const validTickets = getValidQueueTickets();
+function getQueuePosition(ns: string, ticketInfo: QueueTicketInfo): { pos: number; total: number } {
+  const validTickets = getValidQueueTickets(ns);
   const myIndex = validTickets.findIndex(t => t.info.ticketId === ticketInfo.ticketId);
   const pos = myIndex >= 0 ? myIndex + 1 : validTickets.length + 1;
   return { pos, total: validTickets.length };
@@ -308,12 +387,13 @@ function logIfStateChanged(stateStr: string, lastLoggedState: string, message: s
 }
 
 function checkQueuePosition(
+  ns: string,
   ticketInfo: QueueTicketInfo,
   activePid: number,
   activeDesc: string,
   lastLoggedState: string
 ): string {
-  const { pos, total } = getQueuePosition(ticketInfo);
+  const { pos, total } = getQueuePosition(ns, ticketInfo);
   const stateStr = `held_by_${activePid}_pos_${pos}_total_${total}`;
   return logIfStateChanged(
     stateStr,
@@ -322,8 +402,8 @@ function checkQueuePosition(
   );
 }
 
-function checkWaitingPosition(ticketInfo: QueueTicketInfo, lastLoggedState: string): string {
-  const { pos, total } = getQueuePosition(ticketInfo);
+function checkWaitingPosition(ns: string, ticketInfo: QueueTicketInfo, lastLoggedState: string): string {
+  const { pos, total } = getQueuePosition(ns, ticketInfo);
   const stateStr = `waiting_pos_${pos}_total_${total}`;
   return logIfStateChanged(
     stateStr,
@@ -359,22 +439,23 @@ function isProcessDescendantOf(activePid: number): boolean {
 // ─── Core Lock API ──────────────────────────────────────────────────────────
 
 /**
- * Acquire cross-process lock for a heavy task.
+ * Acquire cross-process lock for a specific tool namespace.
  * Returns a release function that MUST be called when done.
  */
 export async function acquireProcessLock(description: string): Promise<() => void> {
-  ensureLockDirs();
+  const ns = getLockNamespace(description);
+  ensureLockDirs(ns);
   attachExitHandlers();
 
   // 1. Re-entrancy check (same process or descendant process spawned by lock owner)
-  const currentActive = getActiveLock();
+  const currentActive = getActiveLock(ns);
   if (currentActive && isProcessDescendantOf(currentActive.pid)) {
-    inMemoryReentryCount++;
-    return createReleaseCallback(description);
+    setReentryCount(ns, getReentryCount(ns) + 1);
+    return createReleaseCallback(ns, description);
   }
 
   // 2. Queue registration
-  const { ticketPath, ticketInfo } = createQueueTicket(description);
+  const { ticketPath, ticketInfo } = createQueueTicket(ns, description);
   activeTickets.add(ticketPath);
   console.log(`${CYAN}[process-lock]${NC} Enqueued request for "${description}" (PID: ${process.pid})`);
 
@@ -390,28 +471,28 @@ export async function acquireProcessLock(description: string): Promise<() => voi
 
   // 3. Wait loop
   while (true) {
-    const active = getActiveLock();
+    const active = getActiveLock(ns);
 
     if (active) {
       if (active.pid === process.pid) {
         cleanupTicket();
-        inMemoryReentryCount = 1;
-        return createReleaseCallback(description);
+        setReentryCount(ns, 1);
+        return createReleaseCallback(ns, description);
       }
-      lastLoggedState = checkQueuePosition(ticketInfo, active.pid, active.description, lastLoggedState);
+      lastLoggedState = checkQueuePosition(ns, ticketInfo, active.pid, active.description, lastLoggedState);
     } else {
-      const validTickets = getValidQueueTickets();
+      const validTickets = getValidQueueTickets(ns);
       const isFirst = validTickets.length === 0 || validTickets[0].info.ticketId === ticketInfo.ticketId;
 
-      if (isFirst && claimActiveLock(description)) {
+      if (isFirst && claimActiveLock(ns, description)) {
         cleanupTicket();
-        inMemoryReentryCount = 1;
+        setReentryCount(ns, 1);
         console.log(
           `${GREEN}[process-lock]${NC} Acquired lock for "${description}" (PID: ${process.pid}). Executing...`
         );
-        return createReleaseCallback(description);
+        return createReleaseCallback(ns, description);
       }
-      lastLoggedState = checkWaitingPosition(ticketInfo, lastLoggedState);
+      lastLoggedState = checkWaitingPosition(ns, ticketInfo, lastLoggedState);
     }
 
     syncSleep(POLL_INTERVAL_MS);
@@ -420,7 +501,7 @@ export async function acquireProcessLock(description: string): Promise<() => voi
 
 /**
  * Wrap an async function in process lock execution.
- * Enforces a 5-minute timeout (300,000ms) for all tasks EXCEPT CodeScene.
+ * Enforces a 5-minute timeout for all tasks EXCEPT CodeScene and test runs.
  */
 export async function withProcessLock<T>(description: string, fn: () => Promise<T>): Promise<T> {
   const release = await acquireProcessLock(description);
@@ -456,7 +537,6 @@ export async function withProcessLock<T>(description: string, fn: () => Promise<
     return await fn();
   } catch (error) {
     if (timedOut) {
-      // Clean up & propagate the timeout error cleanly
       throw error;
     }
     throw error;

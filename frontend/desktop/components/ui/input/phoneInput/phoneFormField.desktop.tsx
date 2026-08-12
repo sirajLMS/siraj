@@ -1,25 +1,12 @@
 "use client";
 
-import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
+import type { Control, FieldPath, FieldValues } from "react-hook-form";
+import { PhoneFormFieldShared } from "@/frontend/common/components/ui/input/phoneInput/PhoneFormFieldShared";
+import type { PhoneInputSharedProps } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
 import { PhoneInputDesktop } from "@/frontend/desktop/components/ui/input/phoneInput/phoneInput.desktop";
 
-type PhoneInputProps = {
-  readonly value: string | null;
-  readonly onChangeAction: (e164: string | null) => void;
-  readonly onBlurAction?: () => void;
-  readonly defaultRegion?: string;
-  readonly label?: string;
-  readonly placeholder?: string;
-  readonly required?: boolean;
-  readonly disabled?: boolean;
-  readonly fullWidth?: boolean;
-  readonly error?: boolean;
-  readonly helperText?: string;
-  readonly hideLabel?: boolean;
-};
-
 type PhoneFormFieldDesktopProps<T extends FieldValues> = Omit<
-  PhoneInputProps,
+  PhoneInputSharedProps,
   "value" | "onChangeAction" | "onBlurAction"
 > & {
   readonly name: FieldPath<T>;
@@ -30,23 +17,8 @@ export function PhoneFormFieldDesktop<T extends FieldValues>({
   name,
   control,
   ...phoneInputProps
-}: PhoneFormFieldDesktopProps<T>) {
+}: Readonly<PhoneFormFieldDesktopProps<T>>) {
   return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field, fieldState }) => (
-        <PhoneInputDesktop
-          {...phoneInputProps}
-          value={field.value || null}
-          onChangeAction={value => {
-            field.onChange(value ?? "");
-          }}
-          onBlurAction={field.onBlur}
-          error={phoneInputProps.error ?? Boolean(fieldState.error)}
-          helperText={phoneInputProps.helperText ?? fieldState.error?.message}
-        />
-      )}
-    />
+    <PhoneFormFieldShared name={name} control={control} PhoneInputComponent={PhoneInputDesktop} {...phoneInputProps} />
   );
 }

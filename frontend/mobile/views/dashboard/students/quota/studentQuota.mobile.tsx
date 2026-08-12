@@ -1,11 +1,13 @@
 "use client";
 
-import { CheckCircleOutlined, EditOutlined, Save, ScheduleOutlined, SyncOutlined } from "@mui/icons-material";
-import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
-import { FormProvider } from "react-hook-form";
-import { QuotaFormAccessProvider } from "@/frontend/common/views/dashboard/students/quota/QuotaFormAccessProvider";
+import { EditOutlined } from "@mui/icons-material";
+import type { Theme } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
+import type { ReactElement } from "react";
+import { StudentQuotaView } from "@/frontend/common/views/dashboard/students/quota/components/__shared__/studentQuotaShared";
+import type { StudentQuotaTierConfig } from "@/frontend/common/views/dashboard/students/quota/components/__shared__/studentQuotaShared.types";
+import { wrapContextualHelperCardsDefault } from "@/frontend/common/views/dashboard/students/quota/components/__shared__/studentQuotaSharedUtils";
 import type {
-  FormActionsProps,
   MobileProfileHeaderProps,
   StudentProfileData,
 } from "@/frontend/common/views/dashboard/students/quota/types";
@@ -25,7 +27,7 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
           src={studentData.profileImage}
           label={studentData.studentName}
           size={96}
-          sx={theme => ({
+          sx={(theme: Theme) => ({
             border: `4px solid ${theme.palette.background.paper}`,
             boxShadow: theme.palette.shadow.card,
           })}
@@ -33,7 +35,7 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
         {showAvatarEdit ? (
           <IconButton
             onClick={onEditAvatar}
-            sx={theme => ({
+            sx={(theme: Theme) => ({
               position: "absolute",
               bottom: 0,
               right: 0,
@@ -48,261 +50,52 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
           </IconButton>
         ) : null}
       </Box>
-      <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main })}>
+      <Typography variant="titleLg" sx={(theme: Theme) => ({ color: theme.palette.primary.main })}>
         {studentData.studentName}
       </Typography>
     </Box>
   );
 }
 
-function FormActionsMobile({
-  labels,
-  isSaving,
-  isSaved,
+function renderMobileHeader({
   studentData,
-  onCancel,
-  readOnly = false,
-  showCancel = true,
-}: Readonly<FormActionsProps & { readonly labels: StudentQuotaViewModel["t"] }>) {
-  let saveIcon = <Save />;
-  if (isSaving) saveIcon = <SyncOutlined sx={{ animation: "spin 1s linear infinite" }} />;
-  else if (isSaved) saveIcon = <CheckCircleOutlined />;
-
-  let saveText = labels.actions.save;
-  if (isSaving) saveText = labels.actions.saving;
-  else if (isSaved) saveText = labels.actions.saved;
-
-  return (
-    <Box
-      sx={{
-        pt: 3,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 3,
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.5,
-          width: "100%",
-        }}
-      >
-        {readOnly ? null : (
-          <MobilePrimaryPageAction
-            type="submit"
-            disabled={isSaving || isSaved}
-            startIcon={saveIcon}
-            sx={theme => ({
-              height: 56,
-              px: 0,
-              backgroundColor: isSaved ? theme.palette.primary.main : theme.palette.success.main,
-              color: isSaved ? theme.palette.onPrimary : theme.palette.onSuccess,
-              "&:hover": { backgroundColor: isSaved ? theme.palette.primary.dark : theme.palette.success.dark },
-              "&.Mui-disabled": {
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.onPrimary,
-                opacity: 0.8,
-              },
-              width: "100%",
-            })}
-          >
-            {saveText}
-          </MobilePrimaryPageAction>
-        )}
-        {showCancel ? (
-          <MobilePrimaryPageAction
-            type="button"
-            variant="text"
-            onClick={onCancel}
-            disabled={isSaving}
-            sx={theme => ({
-              height: 48,
-              px: 0,
-              color: theme.palette.onSurfaceVariant,
-              "&:hover": {
-                color: theme.palette.error.main,
-                backgroundColor: theme.palette.surfaceContainerLow,
-              },
-              width: "100%",
-            })}
-          >
-            {labels.actions.cancel}
-          </MobilePrimaryPageAction>
-        ) : null}
-      </Box>
-
-      {studentData.lastEditedTime ? (
-        <Box
-          sx={theme => ({
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            color: theme.palette.onSurfaceVariant,
-          })}
-        >
-          <ScheduleOutlined sx={{ fontSize: 14 }} />
-          <Typography variant="labelMd">{labels.actions.lastEditedAt(studentData.lastEditedTime)}</Typography>
-        </Box>
-      ) : null}
-    </Box>
-  );
+}: Readonly<{
+  t: { readonly breadcrumbs: { readonly students: string; readonly adjustQuota: string } };
+  readonly studentData: StudentProfileData;
+}>): ReactElement {
+  return <MobileProfileHeader studentData={studentData} showAvatarEdit={false} onEditAvatar={undefined} />;
 }
 
-function QuotaFormCardMobile({
-  t,
-  tc,
-  methods,
-  onSubmit,
-  studentData,
-  isSaving,
-  isSaved,
-  readOnly,
-  embedded,
-  onCancel,
-  canEditIdentity,
-  canEditQuota,
-  canViewQuota,
-  canViewTeacher,
-}: Readonly<
-  Pick<
-    StudentQuotaViewModel,
-    | "t"
-    | "tc"
-    | "methods"
-    | "onSubmit"
-    | "isSaving"
-    | "isSaved"
-    | "readOnly"
-    | "embedded"
-    | "onCancel"
-    | "canEditIdentity"
-    | "canEditQuota"
-    | "canViewQuota"
-    | "canViewTeacher"
-  > & {
-    readonly studentData: StudentProfileData;
-  }
->) {
-  const showAvatarEdit = false;
+const MOBILE_TIER: StudentQuotaTierConfig = {
+  PrimaryAction: MobilePrimaryPageAction,
+  sections: {
+    StudentInformationSection: StudentInformationSectionMobile,
+    CourseDetailsSection: CourseDetailsSectionMobile,
+    ContextualHelperCards: ContextualHelperCardsMobile,
+  },
+  renderHeader: renderMobileHeader,
+  cardSx: {
+    useCardStyling: false,
+    formPadding: 0,
+    formGap: 4,
+  },
+  actionsSx: {
+    containerPaddingTop: 3,
+    containerDirection: "column",
+    innerDirection: "column",
+    innerGap: 1.5,
+    innerWidth: "100%",
+    saveButtonHeight: 56,
+    saveButtonPx: 0,
+    saveButtonWidth: "100%",
+    cancelButtonHeight: 48,
+    cancelButtonPx: 0,
+    cancelButtonHoverBg: "surfaceContainerLow",
+    cancelButtonWidth: "100%",
+  },
+  wrapContextualHelperCards: wrapContextualHelperCardsDefault,
+};
 
-  return (
-    <>
-      {embedded ? null : (
-        <MobileProfileHeader studentData={studentData} showAvatarEdit={showAvatarEdit} onEditAvatar={undefined} />
-      )}
-
-      <Box
-        sx={{
-          backgroundColor: "transparent",
-          borderRadius: 0,
-          overflow: "hidden",
-          maxWidth: "4xl",
-          mx: "auto",
-        }}
-      >
-        <FormProvider {...methods}>
-          <QuotaFormAccessProvider
-            value={{
-              readOnly,
-              canEditIdentity,
-              canEditQuota,
-              canViewQuota,
-              canViewTeacher,
-              labels: t,
-              commonLabels: tc,
-            }}
-          >
-            <Box
-              component="form"
-              onSubmit={e => {
-                e.preventDefault();
-                if (!readOnly) {
-                  void methods.handleSubmit(onSubmit)(e);
-                }
-              }}
-              sx={{
-                p: 0,
-                display: "flex",
-                flexDirection: "column",
-                gap: 4,
-              }}
-            >
-              <StudentInformationSectionMobile />
-              <CourseDetailsSectionMobile />
-              <FormActionsMobile
-                labels={t}
-                isSaving={isSaving}
-                isSaved={isSaved}
-                studentData={studentData}
-                onCancel={onCancel}
-                readOnly={readOnly}
-                showCancel={!embedded}
-              />
-            </Box>
-          </QuotaFormAccessProvider>
-        </FormProvider>
-      </Box>
-
-      {embedded ? null : (
-        <Box sx={{ maxWidth: "4xl", mx: "auto" }}>
-          <ContextualHelperCardsMobile />
-        </Box>
-      )}
-    </>
-  );
-}
-
-export function StudentQuotaMobileView({
-  t,
-  tc,
-  studentData,
-  embedded,
-  readOnly,
-  isSaving,
-  isSaved,
-  canEditIdentity,
-  canEditQuota,
-  canViewQuota,
-  canViewTeacher,
-  methods,
-  onSubmit,
-  onCancel,
-}: Readonly<StudentQuotaViewModel>) {
-  if (!studentData) {
-    const loadingContent = (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
-    return embedded ? loadingContent : <MobilePageContainer>{loadingContent}</MobilePageContainer>;
-  }
-
-  const formContent = (
-    <QuotaFormCardMobile
-      t={t}
-      tc={tc}
-      methods={methods}
-      onSubmit={onSubmit}
-      studentData={studentData}
-      isSaving={isSaving}
-      isSaved={isSaved}
-      readOnly={readOnly}
-      embedded={embedded}
-      onCancel={onCancel}
-      canEditIdentity={canEditIdentity}
-      canEditQuota={canEditQuota}
-      canViewQuota={canViewQuota}
-      canViewTeacher={canViewTeacher}
-    />
-  );
-
-  if (embedded) {
-    return formContent;
-  }
-
-  return <MobilePageContainer>{formContent}</MobilePageContainer>;
+export function StudentQuotaMobileView(props: Readonly<StudentQuotaViewModel>) {
+  return <StudentQuotaView props={props} tier={MOBILE_TIER} PageContainer={MobilePageContainer} />;
 }

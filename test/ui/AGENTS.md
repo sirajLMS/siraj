@@ -63,6 +63,16 @@ E2E reuses the GraphQL test harness in `frontend/common/graphql/test/`:
 - Use `TestWrapper` for Apollo mocks — never hit a real server
 - See `frontend/common/components/ui/AGENTS.md` for component test structure
 
+## Shared Test Helpers (Duplication Elimination)
+
+Test files sharing identical mock setup (navigation, router, session activation) should import from shared helpers instead of defining inline mocks:
+
+- **Navigation mocks:** `test/ui/components/helpers/mockNavigation.tsx` — Next.js router mock, pathname mock, router state
+- **Session activate button tests:** `test/ui/components/helpers/sessionActivateButtonTests.ts` — shared test logic for activate/deactivate button
+- **Student history fixtures:** `test/ui/components/fixtures/studentHistoryFixtures.ts` — shared test data shapes
+
+See `docs/testing/mock-navigation-helpers.md` for the complete pattern reference.
+
 
 ## Oxlint Rules (CRITICAL — NO `oxlint-disable` comments allowed)
 

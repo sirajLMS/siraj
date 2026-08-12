@@ -8,6 +8,7 @@ import type {
   Pagination,
   TeacherFilterItem,
 } from "@/frontend/common/types/shared.types";
+import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 
 export interface DashboardState {
   readonly filters: DashboardFilters;
@@ -27,17 +28,9 @@ export interface DashboardState {
   readonly setPage: (page: number) => void;
 }
 
-const getTodayString = () => {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-};
-
 export const useDashboardStore = create<DashboardState>(set => ({
   filters: {
-    date: getTodayString(),
+    date: getTodayScheduleFilterDate(),
     teacherId: "",
     selectedTeacher: null,
     searchQuery: "",
@@ -60,7 +53,7 @@ export const useDashboardStore = create<DashboardState>(set => ({
   resetFilters: () =>
     set({
       filters: {
-        date: getTodayString(),
+        date: getTodayScheduleFilterDate(),
         teacherId: "",
         selectedTeacher: null,
         searchQuery: "",

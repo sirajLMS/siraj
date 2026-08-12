@@ -1,10 +1,9 @@
 "use client";
 
-import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
-import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { getTrackingStatusLabel } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
+import { Box } from "@mui/material";
+import { buildTrackingTableLabels } from "@/frontend/common/views/dashboard/reschedule/tracking/__shared__/rescheduleTrackingShared";
+import { TrackingFilterSelect } from "@/frontend/common/views/dashboard/reschedule/tracking/__shared__/trackingFilterShared";
 import type { RescheduleTrackingViewProps } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
-import { STATUS_FILTER_OPTIONS } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card/MobileMetricCardGrid";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
@@ -26,46 +25,7 @@ export function RescheduleTrackingViewMobile({
   onPageChange,
   loading: _loading,
 }: Readonly<RescheduleTrackingViewProps>) {
-  const tableLabels = {
-    newDate: labels.newDate,
-    leaveRequest: labels.leaveRequest,
-    rescheduled: labels.rescheduled,
-    pendingLeave: labels.pendingLeave,
-    viewDetails: labels.viewDetails,
-    approveLeave: labels.approveLeave,
-    rejectLeave: labels.rejectLeave,
-    noEntries: labels.noEntries,
-    statusPending: labels.statusPending,
-    statusRescheduled: labels.statusRescheduled,
-    statusApproved: labels.statusApproved,
-    statusCancelled: labels.statusCancelled,
-  };
-
-  const handleStatusFilterChange = (e: SelectChangeEvent<LeaveRequestStatus | "">) => {
-    const value = e.target.value;
-    onFilterChange(value === "" ? null : value);
-  };
-
-  const filterSelect = (
-    <Select<LeaveRequestStatus | "">
-      value={statusFilter ?? ""}
-      onChange={handleStatusFilterChange}
-      size="small"
-      displayEmpty
-      sx={theme => ({
-        minWidth: 140,
-        typography: "bodyMd",
-        backgroundColor: theme.palette.surfaceContainerLow,
-        "& .MuiSelect-select": { py: 0.5 },
-      })}
-    >
-      {STATUS_FILTER_OPTIONS.map(status => (
-        <MenuItem key={status} value={status}>
-          {getTrackingStatusLabel(status, labels)}
-        </MenuItem>
-      ))}
-    </Select>
-  );
+  const tableLabels = buildTrackingTableLabels(labels);
 
   return (
     <MobilePageContainer>
@@ -76,7 +36,11 @@ export function RescheduleTrackingViewMobile({
       <MobileSectionPanel
         title={labels.sectionTitle}
         contentInset={false}
-        actions={<Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>{filterSelect}</Box>}
+        actions={
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <TrackingFilterSelect statusFilter={statusFilter} onFilterChange={onFilterChange} labels={labels} />
+          </Box>
+        }
       >
         <Box sx={{ p: 2 }}>
           <RescheduleTrackingCardListMobile

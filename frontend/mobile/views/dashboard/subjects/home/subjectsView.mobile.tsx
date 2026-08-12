@@ -1,7 +1,8 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Box, Tab, Tabs } from "@mui/material";
+import { SubjectCategoryTabsShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/subjectCategoryTabsShared";
+import { SubjectDialogsShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/subjectDialogsShared";
 import type { SubjectsViewProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { MobileCardList, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
@@ -79,19 +80,12 @@ export function SubjectsViewMobile({
 
       {categoriesSectionOpen && canManageCategories ? categoriesSection : null}
 
-      <Box sx={{ borderBottom: 1, borderColor: theme => theme.palette.outlineVariant }}>
-        <Tabs
-          value={activeCategoryId ?? false}
-          onChange={(_e, val: string | false) => onCategoryChange(val === false ? null : val)}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          <Tab label={t.allCategories} value={false} />
-          {categories.map(cat => (
-            <Tab key={cat.id} label={cat.name ?? ""} value={cat.id ?? ""} />
-          ))}
-        </Tabs>
-      </Box>
+      <SubjectCategoryTabsShared
+        labels={labels}
+        categories={categories}
+        activeCategoryId={activeCategoryId}
+        onCategoryChange={onCategoryChange}
+      />
 
       <MobileCardList
         rows={filteredSubjects}
@@ -112,12 +106,20 @@ export function SubjectsViewMobile({
         )}
       />
 
-      <CreateSubjectDialogMobile {...createSubjectDialog} />
-      <EditSubjectDialogMobile {...editSubjectDialog} />
-      <DeleteSubjectDialogMobile {...deleteSubjectDialog} />
-      <CreateCategoryDialogMobile {...createCategoryDialog} />
-      <EditCategoryDialogMobile {...editCategoryDialog} />
-      <DeleteCategoryDialogMobile {...deleteCategoryDialog} />
+      <SubjectDialogsShared
+        createSubjectDialog={createSubjectDialog}
+        editSubjectDialog={editSubjectDialog}
+        deleteSubjectDialog={deleteSubjectDialog}
+        createCategoryDialog={createCategoryDialog}
+        editCategoryDialog={editCategoryDialog}
+        deleteCategoryDialog={deleteCategoryDialog}
+        CreateSubjectDialog={CreateSubjectDialogMobile}
+        EditSubjectDialog={EditSubjectDialogMobile}
+        DeleteSubjectDialog={DeleteSubjectDialogMobile}
+        CreateCategoryDialog={CreateCategoryDialogMobile}
+        EditCategoryDialog={EditCategoryDialogMobile}
+        DeleteCategoryDialog={DeleteCategoryDialogMobile}
+      />
     </MobilePageContainer>
   );
 }

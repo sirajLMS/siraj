@@ -3,6 +3,7 @@ import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-ty
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { InvoiceType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
+import { validateMeetingProviderFields } from "@/frontend/common/views/dashboard/profile/shared/meetingProviderValidation";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
 export type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
@@ -38,24 +39,9 @@ export const parentOnboardingSchema = z
     meetingLabel: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    const hasUrl = Boolean(data.meetingUrl?.trim());
-    const hasProvider = Boolean(data.meetingProvider?.id);
-    if (hasUrl && !hasProvider) {
-      ctx.addIssue({ code: "custom", message: "meetingProviderRequired", path: ["meetingProvider"] });
-    }
-    if (hasProvider && !hasUrl) {
-      ctx.addIssue({ code: "custom", message: "meetingUrlRequired", path: ["meetingUrl"] });
-    }
-    if (hasUrl && data.meetingUrl) {
-      const isValidUrl = (() => {
-        try {
-          return Boolean(new URL(data.meetingUrl));
-        } catch {
-          return false;
-        }
-      })();
-      if (!isValidUrl) {
-        ctx.addIssue({ code: "custom", message: "meetingUrlInvalid", path: ["meetingUrl"] });
-      }
-    }
+    validateMeetingProviderFields(data, ctx, {
+      meetingProviderRequired: "meetingProviderRequired",
+      meetingUrlRequired: "meetingUrlRequired",
+      meetingUrlInvalid: "meetingUrlInvalid",
+    });
   });

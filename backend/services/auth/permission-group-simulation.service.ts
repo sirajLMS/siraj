@@ -1,11 +1,16 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
-import { adminAuditLogs, permissionGroups } from "@/backend/db/schema";
+import { permissionGroups } from "@/backend/db/schema";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { generateAccessToken, generateGroupSimulationAccessToken } from "@/backend/lib/auth/jwt";
 import { logger } from "@/backend/lib/logger";
+import {
+  assertSessionOwnership,
+  getSimulationExpiresAt,
+  writeSimulationAuditLog,
+} from "@/backend/services/auth/__shared__/simulationBase";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
 import type { RedisGroupSimulationSessionData } from "@/backend/types/auth/auth.types";
@@ -17,42 +22,25 @@ export const GROUP_SIMULATION_TTL_MS = 30 * 60 * 1000;
 
 const NON_SIMULATABLE_GROUP_SLUGS = new Set<string>(["system_automated"]);
 
-const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-
-function sanitizeIpAddress(ip: string | null | undefined): string | null {
-  if (!ip) return null;
-  const parts = ip.split(":");
-  const cleanIp = parts.length === 2 ? parts[0] : ip;
-  return IPV4_REGEX.test(cleanIp) ? cleanIp : "127.0.0.1";
-}
-
 function getExpiresAt(startedAt: Date): Date {
-  return new Date(startedAt.getTime() + GROUP_SIMULATION_TTL_MS);
+  return getSimulationExpiresAt(startedAt, GROUP_SIMULATION_TTL_MS);
 }
 
-async function writeAdminAuditLog(
+async function writeGroupSimulationAuditLog(
   actorUserId: string,
   action: Types.GroupSimulationAuditAction,
   metadata: Record<string, unknown>,
   ipAddress?: string | null
 ): Promise<void> {
-  await db.insert(adminAuditLogs).values({
+  await writeSimulationAuditLog({
     actorUserId,
     targetUserId: actorUserId,
     action,
     description:
       action === "GROUP_SIMULATION_START" ? "Started permission group simulation" : "Ended permission group simulation",
-    newState: metadata,
-    ipAddress: sanitizeIpAddress(ipAddress),
-    createdAt: new Date(),
+    metadata,
+    ipAddress,
   });
-}
-
-async function assertActorOwnsSession(rawSessionId: string, actorUserId: string, tErrors: ErrorsLabels): Promise<void> {
-  const session = await SessionRepository.findSessionById(rawSessionId);
-  if (session?.userId !== actorUserId) {
-    throw new Error(tErrors.auth.groupSimulationSessionInvalid);
-  }
 }
 
 async function getActiveGroupSimulation(
@@ -152,7 +140,7 @@ export namespace PermissionGroupSimulationService {
     tErrors: ErrorsLabels
   ): Promise<Types.StartPermissionGroupSimulationReturnType> {
     await assertCanSimulateGroup(input.actorUserId, input.groupSlug, tErrors);
-    await assertActorOwnsSession(input.sessionId, input.actorUserId, tErrors);
+    await assertSessionOwnership(input.sessionId, input.actorUserId, "groupSimulationSessionInvalid", tErrors);
 
     const actorUser = await UserRepository.findById(input.actorUserId);
     if (!actorUser) {
@@ -179,7 +167,7 @@ export namespace PermissionGroupSimulationService {
       groupSimulationExpiresAt
     );
 
-    await writeAdminAuditLog(
+    await writeGroupSimulationAuditLog(
       input.actorUserId,
       "GROUP_SIMULATION_START",
       { groupSlug: input.groupSlug },
@@ -205,7 +193,7 @@ export namespace PermissionGroupSimulationService {
     ipAddress?: string | null,
     activeGroupSlug?: string | null
   ): Promise<Types.EndPermissionGroupSimulationReturnType> {
-    await assertActorOwnsSession(rawSessionId, actorUserId, tErrors);
+    await assertSessionOwnership(rawSessionId, actorUserId, "groupSimulationSessionInvalid", tErrors);
 
     const active = await getActiveGroupSimulation(rawSessionId, actorUserId);
     const groupSlug = active?.data.groupSlug ?? activeGroupSlug ?? undefined;
@@ -223,7 +211,7 @@ export namespace PermissionGroupSimulationService {
 
     const token = await generateAccessToken(actorUser.id, actorUser.email);
 
-    await writeAdminAuditLog(actorUserId, "GROUP_SIMULATION_END", { groupSlug }, ipAddress);
+    await writeGroupSimulationAuditLog(actorUserId, "GROUP_SIMULATION_END", { groupSlug }, ipAddress);
 
     logger.info("Permission group simulation ended", {
       actorUserId,

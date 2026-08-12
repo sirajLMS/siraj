@@ -21,23 +21,25 @@ export interface SearchScheduleTeacherOption {
 // used by TeacherAvailabilityMonthDrawer (id + name + timezone + gender + availableDaysCount +
 // gaps). Kept in the store so the drawer state survives tier switches. Nullable to structurally
 // satisfy SearchScheduleResultItem's optional-null field shapes from the GraphQL layer.
+export interface SearchScheduleGapItem {
+  readonly id?: string | null;
+  readonly teacherId?: string | null;
+  readonly teacherName?: string | null;
+  readonly teacherGender?: string | null;
+  readonly dayOfWeek?: string | null;
+  readonly calendarDate?: string | null;
+  readonly gapStartTime?: string | null;
+  readonly gapEndTime?: string | null;
+  readonly timezone?: string | null;
+}
+
 export interface SearchScheduleMonthDrawerTeacher {
   readonly id?: string | null;
   readonly name?: string | null;
   readonly gender?: string | null;
   readonly timezone?: string | null;
   readonly availableDaysCount?: number | null;
-  readonly gaps?: readonly ({
-    readonly id?: string | null;
-    readonly teacherId?: string | null;
-    readonly teacherName?: string | null;
-    readonly teacherGender?: string | null;
-    readonly dayOfWeek?: string | null;
-    readonly calendarDate?: string | null;
-    readonly gapStartTime?: string | null;
-    readonly gapEndTime?: string | null;
-    readonly timezone?: string | null;
-  } | null)[];
+  readonly gaps?: readonly (SearchScheduleGapItem | null)[];
 }
 
 function getDefaultFromDate(): string {

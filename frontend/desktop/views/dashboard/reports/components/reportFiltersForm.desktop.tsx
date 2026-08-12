@@ -1,54 +1,28 @@
 "use client";
 
 import { QueryStatsOutlined } from "@mui/icons-material";
-import type { SelectChangeEvent } from "@mui/material";
-import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
-import { useState } from "react";
+import { Box } from "@mui/material";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
-import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
-import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
-import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
-import type { ReportFiltersFormProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import {
-  formatReportFilterDate,
-  parseReportFilterDate,
-} from "@/frontend/common/views/dashboard/reports/utils/reportFiltersDate.utils";
+  ReportTypeSelect,
+  SubmitButtonWrapper,
+} from "@/frontend/common/views/dashboard/reports/components/__shared__/ReportFiltersFormShared";
+import {
+  formatDateChange,
+  useReportFilterFormState,
+} from "@/frontend/common/views/dashboard/reports/components/__shared__/reportFiltersFormShared.utils";
+import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
+import type { ReportFiltersFormProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopAppDatePicker } from "@/frontend/desktop/components/ui/form/date";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 
 export type ReportFiltersFormDesktopLabels = ReportFiltersFormLabels;
 
-const REPORT_TYPE_VALUES = new Set<string>(["by_teacher", "by_student", "by_date"]);
-
-function isReportType(value: string): value is ReportType {
-  return REPORT_TYPE_VALUES.has(value);
-}
-
-export function ReportFiltersFormDesktop({
-  fromDate,
-  toDate,
-  teacherId,
-  reportType,
-  labels,
-  canGenerate,
-  onFromDateChange,
-  onToDateChange,
-  onTeacherChange,
-  onReportTypeChange,
-  onSubmit,
-}: Readonly<ReportFiltersFormProps>) {
-  const selectedFromDate = parseReportFilterDate(fromDate);
-  const selectedToDate = parseReportFilterDate(toDate);
-  const [selectedTeacher, setSelectedTeacher] = useState<PersonOption | null>(null);
-  const teacherValue = selectedTeacher ?? resolvePersonOption(teacherId, [], selectedTeacher);
-
-  const handleReportTypeSelect = (event: SelectChangeEvent) => {
-    const value = event.target.value;
-    if (isReportType(value)) {
-      onReportTypeChange(value);
-    }
-  };
+export function ReportFiltersFormDesktop(props: Readonly<ReportFiltersFormProps>) {
+  const { selectedFromDate, selectedToDate, teacherValue, setSelectedTeacher, handleReportTypeSelect } =
+    useReportFilterFormState(props);
+  const { reportType, labels, canGenerate, onFromDateChange, onToDateChange, onTeacherChange, onSubmit } = props;
 
   return (
     <Box
@@ -63,7 +37,7 @@ export function ReportFiltersFormDesktop({
         label={labels.fromDate}
         value={selectedFromDate}
         onChange={(date: Date | null) => {
-          onFromDateChange(formatReportFilterDate(date));
+          onFromDateChange(formatDateChange(date));
         }}
         slotProps={{
           textField: {
@@ -78,7 +52,7 @@ export function ReportFiltersFormDesktop({
         label={labels.toDate}
         value={selectedToDate}
         onChange={(date: Date | null) => {
-          onToDateChange(formatReportFilterDate(date));
+          onToDateChange(formatDateChange(date));
         }}
         slotProps={{
           textField: {
@@ -99,23 +73,14 @@ export function ReportFiltersFormDesktop({
         placeholder={labels.allTeachers}
       />
 
-      <FormControl size="small" fullWidth>
-        <InputLabel id="reports-type-label" shrink>
-          {labels.reportType}
-        </InputLabel>
-        <Select
-          labelId="reports-type-label"
-          value={reportType}
-          label={labels.reportType}
-          onChange={handleReportTypeSelect}
-        >
-          <MenuItem value="by_teacher">{labels.reportTypes.byTeacher}</MenuItem>
-          <MenuItem value="by_student">{labels.reportTypes.byStudent}</MenuItem>
-          <MenuItem value="by_date">{labels.reportTypes.byDate}</MenuItem>
-        </Select>
-      </FormControl>
+      <ReportTypeSelect
+        reportType={reportType}
+        labels={labels}
+        labelId="reports-type-label"
+        onChange={handleReportTypeSelect}
+      />
 
-      <Box sx={{ gridColumn: { xs: "1 / -1", md: "1 / -1" }, pt: 1 }}>
+      <SubmitButtonWrapper layout="grid">
         <DesktopPrimaryPageAction
           startIcon={<QueryStatsOutlined />}
           disabled={!canGenerate}
@@ -124,7 +89,7 @@ export function ReportFiltersFormDesktop({
         >
           {labels.submit}
         </DesktopPrimaryPageAction>
-      </Box>
+      </SubmitButtonWrapper>
     </Box>
   );
 }

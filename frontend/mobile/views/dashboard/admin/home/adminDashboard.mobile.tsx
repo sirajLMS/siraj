@@ -2,28 +2,18 @@
 
 import { Box, InputAdornment, Stack, TextField, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
-import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import {
-  ScheduleOverviewCardSkeleton,
-  ScheduleOverviewEmptyState,
-} from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
-import {
   scheduleOverviewCardShellSx,
-  scheduleOverviewListCanvasSx,
   scheduleOverviewMobileChromeSx,
 } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
-import {
-  MobileCardList,
-  MobileCardListItem,
-  MobileMetricCardGrid,
-  MobileStatusBadge,
-} from "@/frontend/mobile/components/ui";
+import { MobileCardListItem, MobileMetricCardGrid, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
+import { ScheduleOverviewMobileCardList } from "@/frontend/mobile/views/dashboard/admin/home/__shared__/scheduleOverviewMobileCardList";
 import {
   StyledMobileSectionBody,
   StyledSearchIcon,
@@ -164,31 +154,15 @@ function AdminDashboardMobileScheduleList({
   );
 
   return (
-    <MobileCardList<DailyScheduleRow>
+    <ScheduleOverviewMobileCardList
       rows={rows}
-      loading={loading}
+      loading={loading ?? false}
       emptyMessage={emptyMessage}
-      renderSkeleton={() => (
-        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
-          <ScheduleOverviewCardSkeleton />
-        </MobileCardListItem>
-      )}
-      renderEmptyState={msg => (
-        <MobileCardListItem variant="edge-to-edge" sx={scheduleOverviewCardShellSx}>
-          <ScheduleOverviewEmptyState message={msg} />
-        </MobileCardListItem>
-      )}
-      gap={0}
-      layout="edge-to-edge"
-      sx={scheduleOverviewListCanvasSx}
-      getKey={row => row.id ?? ""}
+      page={page}
+      pageSize={pageSize}
+      totalCount={totalCount}
+      onPageChange={onPageChange}
       renderItem={renderItem}
-      paginationOptions={buildServerPaginationOptions({
-        page,
-        pageSize,
-        totalCount: totalCount ?? 0,
-        onPageChange,
-      })}
     />
   );
 }

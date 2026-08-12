@@ -55,22 +55,10 @@ export abstract class BaseLogger {
     // Console output with timestamp
     const consoleArgs = [`[${timestamp}] [${level.toUpperCase()}]`, ...args];
 
-    switch (level) {
-      case "log":
-        globalThis.console.log(...consoleArgs);
-        break;
-      case "info":
-        globalThis.console.info(...consoleArgs);
-        break;
-      case "warn":
-        globalThis.console.warn(...consoleArgs);
-        break;
-      case "error":
-        globalThis.console.error(...consoleArgs);
-        break;
-      case "debug":
-        globalThis.console.debug(...consoleArgs);
-        break;
+    // Dispatch by indexing the console object with the level key.
+    const fn = globalThis.console[level];
+    if (typeof fn === "function") {
+      fn.bind(globalThis.console)(...consoleArgs);
     }
 
     // Write to file

@@ -2,6 +2,7 @@
 
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+import { LabeledField } from "@/frontend/common/components/ui/display/labeledField/LabeledField";
 import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { PendingReviewRow } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/types/pendingReviewsTypes";
 import { DesktopClassProfileLink } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLink.desktop";
@@ -105,13 +106,13 @@ function LessonReportDetailGrid({
         </Stack>
       </Grid>
       <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-        <DetailField label={labels.completionColumn} value={String(report.completionPercentage)} />
+        <LabeledField label={labels.completionColumn} value={String(report.completionPercentage)} />
       </Grid>
       <Grid size={{ xs: 6, md: 12, lg: 6 }}>
-        <DetailField label={labels.attendanceColumn} value={report.attendanceEvaluation ?? ""} />
+        <LabeledField label={labels.attendanceColumn} value={report.attendanceEvaluation ?? ""} />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <DetailField label={labels.submittedAtColumn} value={report.submittedAt} />
+        <LabeledField label={labels.submittedAtColumn} value={report.submittedAt} />
       </Grid>
     </Grid>
   );
@@ -148,19 +149,6 @@ function NotesBlock({ label, value, isError }: Readonly<NotesBlockProps>) {
         {value}
       </Typography>
     </Box>
-  );
-}
-
-function DetailField({ label, value }: { readonly label: string; readonly value: string }) {
-  return (
-    <Stack sx={{ gap: 0.25 }}>
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onSurfaceVariant })}>
-        {label}
-      </Typography>
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurface, fontWeight: 500 })}>
-        {value}
-      </Typography>
-    </Stack>
   );
 }
 

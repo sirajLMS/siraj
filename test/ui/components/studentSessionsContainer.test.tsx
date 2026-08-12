@@ -1,51 +1,10 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/students/sessions",
-  useSearchParams: () => new URLSearchParams(),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/routing", () => ({
-  locales: ["ar", "en"] as const,
+await mockNextNavigation("/students/sessions", {
+  locales: ["ar", "en"],
   defaultLocale: "en",
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/students/sessions",
-  Link: ({ children, href, ...rest }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...rest}>
-      {children}
-    </a>
-  ),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({
-    push: mock(() => {}),
-    back: mock(() => {}),
-    forward: mock(() => {}),
-    refresh: mock(() => {}),
-    replace: mock(() => {}),
-    prefetch: mock(() => {}),
-  }),
-  usePathname: () => "/students/sessions",
-}));
+});
 
 await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
   useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
@@ -63,10 +22,14 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { useStudentPortalHistoryStore } from "@/frontend/common/stores/studentPortalHistoryStore";
 import { useStudentSessionsViewModel } from "@/frontend/common/views/dashboard/student/sessions/useStudentSessionsViewModel";
 import { StudentSessionsDesktopView } from "@/frontend/desktop/views/dashboard/student/sessions/studentSessions.desktop";
+import {
+  createProfileMockData,
+  createTwoSessionHistoryMockData,
+  HISTORY_MONTH,
+  HISTORY_YEAR,
+} from "@/test/ui/components/fixtures/studentHistoryFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
-const HISTORY_YEAR = 2026;
-const HISTORY_MONTH = 7;
 const studentId = "student-sessions-1";
 
 function StudentSessionsContainerImpl() {
@@ -74,85 +37,9 @@ function StudentSessionsContainerImpl() {
   return <StudentSessionsDesktopView {...viewModel} />;
 }
 
-const profileMockData = {
-  studentProfile: {
-    id: studentId,
-    name: "Ahmed Student",
-    status: "ACTIVE",
-    avatarUrl: null,
-    dateOfBirth: null,
-    gender: null,
-    language: null,
-    email: null,
-    phone: null,
-    parentId: null,
-    parentUserId: null,
-    parentName: null,
-    parentEmail: null,
-    parentPhone: null,
-    isAssociatedViewer: true,
-    primaryTeacherId: "teacher-1",
-    teacherUserId: "teacher-1",
-    teacherName: "Ustadh Yusuf",
-    hoursPerWeek: 4,
-    classesRemaining: 12,
-    classesTotal: 16,
-    version: 1,
-    createdAt: null,
-    updatedAt: null,
-    upcomingClasses: null,
-    classHistory: null,
-  },
-};
+const profileMockData = createProfileMockData(studentId);
 
-const historyMockData = {
-  studentClassHistory: {
-    id: "history-1",
-    studentName: "Ahmed Student",
-    metrics: {
-      totalClasses: 3,
-      attendanceRate: 90,
-      hoursStudied: 4.5,
-      performance: 85,
-    },
-    sessions: [
-      {
-        id: "session-1",
-        title: "Quran Recitation",
-        time: "2026-07-10T10:00:00.000Z",
-        duration: 60,
-        status: "COMPLETED",
-        outcome: "TAKEN",
-        isFrozen: false,
-        instructor: "Ustadh Yusuf",
-        teacherId: "teacher-1",
-        timeSlot: "10:00",
-        room: null,
-        notes: "Strong progress",
-        dayOfMonth: 10,
-        meetingJoinUrl: "https://meet.example.com/session-1",
-        effectiveMeeting: null,
-      },
-      {
-        id: "session-2",
-        title: "Tajweed",
-        time: "2026-07-12T11:00:00.000Z",
-        duration: 45,
-        status: "COMPLETED",
-        outcome: "TAKEN",
-        isFrozen: false,
-        instructor: "Ustadh Yusuf",
-        teacherId: "teacher-1",
-        timeSlot: "11:00",
-        room: null,
-        notes: null,
-        dayOfMonth: 12,
-        meetingJoinUrl: null,
-        effectiveMeeting: null,
-      },
-    ],
-  },
-};
+const historyMockData = createTwoSessionHistoryMockData();
 
 function createMocks(): MockLink.MockedResponse[] {
   return [

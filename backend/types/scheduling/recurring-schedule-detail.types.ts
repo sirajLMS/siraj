@@ -1,6 +1,6 @@
 import type { CurrencyCode } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type RecurringScheduleDayDetailReturnType = {
   readonly id: string;

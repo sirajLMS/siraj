@@ -1,11 +1,9 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Alert, Box, Snackbar, Stack } from "@mui/material";
-import { CronManualTriggerDialog } from "@/frontend/common/views/dashboard/cron/components/CronManualTriggerDialog";
-import { CronRunsDialog } from "@/frontend/common/views/dashboard/cron/components/CronRunsDialog";
-import { CronScheduleCreateEditDialog } from "@/frontend/common/views/dashboard/cron/components/CronScheduleCreateEditDialog";
-import type { CronNotificationState, CronViewProps } from "@/frontend/common/views/dashboard/cron/types";
+import { Alert, Box, Stack } from "@mui/material";
+import { CronDialogsAndNotificationsShared } from "@/frontend/common/views/dashboard/cron/components/__shared__/cronDialogsAndNotificationsShared";
+import type { CronViewProps } from "@/frontend/common/views/dashboard/cron/types";
 import {
   DesktopAppDataGrid,
   DesktopFormErrorSnackbar,
@@ -57,64 +55,8 @@ function CronEmptyStateBanner({
   );
 }
 
-function CronNotificationToasts({ notifications }: Readonly<{ notifications: CronNotificationState }>) {
-  return (
-    <>
-      <DesktopFormErrorSnackbar
-        open={notifications.errorOpen}
-        message={notifications.errorMsg}
-        onClose={notifications.closeError}
-      />
-      <DesktopFormSuccessSnackbar
-        open={notifications.successOpen}
-        message={notifications.successMsg}
-        onClose={notifications.closeSuccess}
-      />
-      <Snackbar
-        open={notifications.infoOpen}
-        autoHideDuration={6000}
-        onClose={notifications.closeInfo}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert severity="info" onClose={notifications.closeInfo} sx={{ width: "100%" }}>
-          {notifications.infoMsg}
-        </Alert>
-      </Snackbar>
-    </>
-  );
-}
-
-export function CronDesktopView({
-  labels,
-  rows,
-  columns,
-  loading,
-  queueStats,
-  queueStatsLoading,
-  createOpen,
-  editingSchedule,
-  deletingSchedule,
-  deleting,
-  saving,
-  triggering,
-  triggeringSchedule,
-  runsOpen,
-  runsSchedule,
-  runs,
-  runsLoading,
-  notifications,
-  canManage,
-  onCreateOpen,
-  onCreateClose,
-  onEditClose,
-  onSave,
-  onDeleteClose,
-  onDeleteConfirm,
-  onTriggerClose,
-  onTriggerConfirm,
-  onRunsClose,
-  onPreviewNextRuns,
-}: Readonly<CronViewProps>) {
+export function CronDesktopView(props: Readonly<CronViewProps>) {
+  const { labels, rows, columns, loading, queueStats, queueStatsLoading, canManage, onCreateOpen } = props;
   return (
     <DesktopPageContainer>
       <DesktopPageHeader
@@ -142,46 +84,16 @@ export function CronDesktopView({
         />
       </Box>
 
-      <DesktopBaseDeleteDialog
-        open={Boolean(deletingSchedule)}
-        onClose={onDeleteClose}
-        onConfirm={onDeleteConfirm}
-        isLoading={deleting}
-        title={labels.actionDelete}
-        body={`${labels.actionDelete}: ${deletingSchedule?.name ?? ""}`}
-        cancelLabel={labels.actionCancel}
-        confirmLabel={labels.actionDelete}
+      <CronDialogsAndNotificationsShared
+        props={props}
+        config={{
+          dialogs: { BaseDeleteDialog: DesktopBaseDeleteDialog },
+          notifications: {
+            FormErrorSnackbar: DesktopFormErrorSnackbar,
+            FormSuccessSnackbar: DesktopFormSuccessSnackbar,
+          },
+        }}
       />
-
-      <CronScheduleCreateEditDialog
-        open={createOpen || editingSchedule != null}
-        editingSchedule={editingSchedule}
-        labels={labels}
-        saving={saving}
-        previewNextRuns={onPreviewNextRuns}
-        onClose={editingSchedule ? onEditClose : onCreateClose}
-        onSave={onSave}
-      />
-
-      <CronRunsDialog
-        open={runsOpen}
-        scheduleName={runsSchedule?.name ?? null}
-        labels={labels}
-        runs={runs}
-        loading={runsLoading}
-        onClose={onRunsClose}
-      />
-
-      <CronManualTriggerDialog
-        open={triggering}
-        schedule={triggeringSchedule ?? null}
-        labels={labels}
-        triggering={triggering}
-        onConfirm={onTriggerConfirm}
-        onClose={onTriggerClose}
-      />
-
-      <CronNotificationToasts notifications={notifications} />
     </DesktopPageContainer>
   );
 }

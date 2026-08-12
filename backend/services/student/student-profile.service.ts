@@ -53,12 +53,12 @@ async function resolveIsAssociatedViewer(actorUserId: string, studentId: string)
   }
 
   const parent = await ParentRepository.findByUserId(actorUserId);
-  if (parent?.id === profile.parentId) {
+  if (parent && parent.id === profile.parentId) {
     return true;
   }
 
   const teacher = await TeacherRepository.findByUserId(actorUserId);
-  if (profile.primaryTeacherId === teacher?.id) {
+  if (teacher && profile.primaryTeacherId === teacher.id) {
     return true;
   }
 

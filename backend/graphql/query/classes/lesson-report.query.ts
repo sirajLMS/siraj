@@ -5,6 +5,7 @@ import {
   PendingReviewCountPothosObject,
 } from "@/backend/graphql/pothos/classes/lesson-report.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
 import { PaginationArgs } from "@/backend/types";
@@ -57,20 +58,7 @@ gqlSchemaBuilder.queryField("pendingLessonReports", t =>
       if (args.teacherId) filters.teacherId = args.teacherId;
       if (args.studentId) filters.studentId = args.studentId;
 
-      let pagination: PaginationArgs;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      } else {
-        pagination = new PaginationArgs();
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs) ?? new PaginationArgs();
 
       return LessonReportService.getPendingReviews(actorUserId, filters, pagination, ctx.locale);
     },
@@ -88,20 +76,7 @@ gqlSchemaBuilder.queryField("recentApprovedLessonReports", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
 
-      let pagination: PaginationArgs;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      } else {
-        pagination = new PaginationArgs();
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs) ?? new PaginationArgs();
 
       return LessonReportService.getRecentApprovedLessonReports(actorUserId, pagination, ctx.locale);
     },
@@ -119,20 +94,7 @@ gqlSchemaBuilder.queryField("studentRecentLessonReports", t =>
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
 
-      let pagination: PaginationArgs;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      } else {
-        pagination = new PaginationArgs();
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs) ?? new PaginationArgs();
 
       return LessonReportService.getStudentRecentLessonReports(actorUserId, pagination, ctx.locale);
     },

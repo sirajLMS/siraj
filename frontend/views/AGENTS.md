@@ -83,6 +83,22 @@ Student quota tab views live under `frontend/common/views/dashboard/students/quo
 - Student quota tab is registered in `studentProfileTabs.ts` with `QUOTA_TAB_GROUPS`
 - Tab shows per-audience rendering: student/parent see PENDING_CREDIT prominently; teacher sees CONFLICT_HELD
 
+## __shared__/ Directory Convention for View Component Scaffolds
+
+When a desktop view component (`.desktop.tsx`) and its mobile counterpart (`.mobile.tsx`) share significant presentation logic, extract the shared logic into a `*Shared.tsx` scaffold placed in a `__shared__/` directory at the parent level:
+
+```
+frontend/common/views/dashboard/<domain>/components/
+  __shared__/
+    <componentName>Shared.tsx      # Scaffold with slot props
+  <componentName>.desktop.tsx       # Desktop variant delegates to scaffold
+  <componentName>.mobile.tsx        # Mobile variant delegates to scaffold
+```
+
+- Desktop and mobile variants import ONLY from `__shared__/` scaffold paths — never from each other
+- Scaffold uses slot props for tier-specific components, sx styles, and configuration
+- See `docs/frontend/ui-shared-scaffold-pattern.md` for the complete pattern reference
+
 ## Storybook Best Practices
 
 - **Permission Seeding**: Components wrapped in `<RequirePermission>` will default to admin permissions in Storybook via the global `StoryWrapper`. If you need to test a specific permission state (e.g., Parent vs Teacher), use `useUserStore.setState()` within the story or a local decorator to seed the required permissions.

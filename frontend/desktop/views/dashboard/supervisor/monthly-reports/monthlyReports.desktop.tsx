@@ -1,10 +1,10 @@
 "use client";
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
-import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { Grid, Stack, Typography } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { PeriodFieldsShared } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/__shared__/periodFieldsShared";
 import type {
-  DateRangeSelectorProps,
   FilterPanelProps,
   GenerateActionProps,
   MetricsOutputProps,
@@ -20,8 +20,6 @@ import {
   StudentAutocompleteDesktop,
   TeacherAutocompleteDesktop,
 } from "@/frontend/desktop/components/ui/input/userSelect";
-
-const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
 function ReportTypeFilter({ reportType, teacherReport, studentReport, onReportTypeChange }: ReportTypeFilterProps) {
   return (
@@ -47,43 +45,6 @@ function ReportTypeFilter({ reportType, teacherReport, studentReport, onReportTy
         {studentReport}
       </DesktopFilterButton>
     </Stack>
-  );
-}
-
-function DateRangeSelector({ year, month, labels, onYearChange, onMonthChange }: DateRangeSelectorProps) {
-  return (
-    <>
-      <Grid size={{ xs: 12, sm: 6 }}>
-        <TextField
-          select
-          fullWidth
-          label={labels.selectYear}
-          value={year}
-          onChange={e => onYearChange(Number(e.target.value))}
-        >
-          {YEARS.map(y => (
-            <MenuItem key={y} value={y}>
-              {y}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Grid>
-      <Grid size={{ xs: 12, sm: 6 }}>
-        <TextField
-          select
-          fullWidth
-          label={labels.selectMonth}
-          value={month}
-          onChange={e => onMonthChange(Number(e.target.value))}
-        >
-          {labels.monthNames.map((name, index) => (
-            <MenuItem key={name} value={index + 1}>
-              {name}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Grid>
-    </>
   );
 }
 
@@ -152,12 +113,14 @@ function FilterPanel({
         onReportTypeChange={onReportTypeChange}
       />
       <Grid container spacing={2} sx={{ alignItems: "center" }}>
-        <DateRangeSelector
+        <PeriodFieldsShared
           year={year}
           month={month}
           labels={labels}
           onYearChange={onYearChange}
           onMonthChange={onMonthChange}
+          gridSize={{ xs: 12, sm: 6 }}
+          wrapInContainer={false}
         />
         <TargetSelectSection
           reportType={reportType}

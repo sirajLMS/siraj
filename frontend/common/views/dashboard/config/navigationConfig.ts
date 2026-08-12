@@ -13,6 +13,118 @@ export const DEFAULT_NAV_FEATURE_FLAGS: NavFeatureFlags = {
 export const SIDEBAR_END_NAV_ITEM_KEYS = new Set(["teacher-rules", "parent-rules"]);
 
 /**
+ * Factory: teacher nav items shared between sidebar and bottom nav.
+ * These three items (today-classes, regular-schedule, your-students) are
+ * identical in both arrays.
+ */
+function makeTeacherNavItems(): readonly NavItem[] {
+  return [
+    {
+      key: "today-classes",
+      labelKey: "todayClasses",
+      iconKey: "calendarToday",
+      href: "/dashboard",
+      section: "main",
+      permission: PAGE_PERMISSIONS.teacherDashboard,
+      audience: "teacher",
+    },
+    {
+      key: "regular-schedule",
+      labelKey: "regularSchedule",
+      iconKey: "eventRepeat",
+      href: "/schedule/weekly",
+      section: "main",
+      permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
+      audience: "teacher",
+    },
+    {
+      key: "your-students",
+      labelKey: "yourStudents",
+      iconKey: "group",
+      href: "/students",
+      section: "main",
+      permission: PAGE_PERMISSIONS.teacherStudents,
+      audience: "teacher",
+    },
+  ];
+}
+
+/**
+ * Factory: student + supervisor nav items shared between sidebar and bottom nav.
+ * The only difference is `teacher-dues` includes a `groupId` in the sidebar
+ * (for visual grouping) but not in the bottom nav (which ignores groups).
+ */
+function makeStudentSupervisorNavItems(includeGroupId: boolean): readonly NavItem[] {
+  return [
+    {
+      key: "student-today-classes",
+      labelKey: "studentTodayClasses",
+      iconKey: "calendarToday",
+      href: "/dashboard",
+      section: "main",
+      permission: PAGE_PERMISSIONS.studentSelfDashboard,
+      audience: "student",
+    },
+    {
+      key: "student-schedule",
+      labelKey: "studentLessonHistory",
+      iconKey: "eventRepeat",
+      href: "/students/history",
+      section: "main",
+      permission: PAGE_PERMISSIONS.studentOwnHistory,
+      audience: "student",
+    },
+    {
+      key: "student-sessions",
+      labelKey: "studentSessions",
+      iconKey: "history",
+      href: "/students/sessions",
+      section: "main",
+      permission: PAGE_PERMISSIONS.studentSessions,
+      audience: "student",
+    },
+    {
+      key: "student-credits",
+      labelKey: "studentCredits",
+      iconKey: "accountBalanceWallet",
+      href: "/students/credits",
+      section: "main",
+      permission: PAGE_PERMISSIONS.studentCredits,
+      audience: "student",
+    },
+    {
+      key: "supervisor-home",
+      labelKey: "supervisorHome",
+      iconKey: "dashboard",
+      href: "/dashboard",
+      section: "main",
+      permission: PAGE_PERMISSIONS.supervisorDashboard,
+      audience: "supervisor",
+    },
+    {
+      key: "pending-reviews",
+      labelKey: "pendingReviews",
+      iconKey: "rateReview",
+      href: "/lesson-reports",
+      section: "main",
+      permission: PAGE_PERMISSIONS.lessonReportsReview,
+      audience: "supervisor",
+      groupId: "grp_reports",
+    },
+    {
+      key: "teacher-dues",
+      labelKey: "teacherDues",
+      iconKey: "payments",
+      href: "/teacher-dues",
+      section: "main",
+      permission: PAGE_PERMISSIONS.teacherDuesView,
+      audience: "supervisor",
+      ...(includeGroupId ? { groupId: "grp_finance" } : {}),
+    },
+  ];
+}
+
+/**
  * Sidebar navigation GROUPS — labelled, optionally-collapsible clusters of
  * nav items. Each item in {@link SIDEBAR_NAV_ITEMS} can reference a group
  * via its `groupId` field; the renderer groups items under their matching
@@ -154,33 +266,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.dashboard,
   },
-  {
-    key: "today-classes",
-    labelKey: "todayClasses",
-    iconKey: "calendarToday",
-    href: "/dashboard",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherDashboard,
-    audience: "teacher",
-  },
-  {
-    key: "regular-schedule",
-    labelKey: "regularSchedule",
-    iconKey: "eventRepeat",
-    href: "/schedule/weekly",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
-    audience: "teacher",
-  },
-  {
-    key: "your-students",
-    labelKey: "yourStudents",
-    iconKey: "group",
-    href: "/students",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherStudents,
-    audience: "teacher",
-  },
+  ...makeTeacherNavItems(),
   {
     key: "teacher-class-details",
     labelKey: "teacherClassList",
@@ -253,71 +339,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.parentOwnProfile,
     audience: "parent",
   },
-  {
-    key: "student-today-classes",
-    labelKey: "studentTodayClasses",
-    iconKey: "calendarToday",
-    href: "/dashboard",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentSelfDashboard,
-    audience: "student",
-  },
-  {
-    key: "student-schedule",
-    labelKey: "studentLessonHistory",
-    iconKey: "eventRepeat",
-    href: "/students/history",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentOwnHistory,
-    audience: "student",
-  },
-  {
-    key: "student-sessions",
-    labelKey: "studentSessions",
-    iconKey: "history",
-    href: "/students/sessions",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentSessions,
-    audience: "student",
-  },
-  {
-    key: "student-credits",
-    labelKey: "studentCredits",
-    iconKey: "accountBalanceWallet",
-    href: "/students/credits",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentCredits,
-    audience: "student",
-  },
-  {
-    key: "supervisor-home",
-    labelKey: "supervisorHome",
-    iconKey: "dashboard",
-    href: "/dashboard",
-    section: "main",
-    permission: PAGE_PERMISSIONS.supervisorDashboard,
-    audience: "supervisor",
-  },
-  {
-    key: "pending-reviews",
-    labelKey: "pendingReviews",
-    iconKey: "rateReview",
-    href: "/lesson-reports",
-    section: "main",
-    permission: PAGE_PERMISSIONS.lessonReportsReview,
-    audience: "supervisor",
-    groupId: "grp_reports",
-  },
-  {
-    key: "teacher-dues",
-    labelKey: "teacherDues",
-    iconKey: "payments",
-    href: "/teacher-dues",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherDuesView,
-    audience: "supervisor",
-    groupId: "grp_finance",
-  },
+  ...makeStudentSupervisorNavItems(true),
   {
     key: "monthly-reports",
     labelKey: "monthlyReports",
@@ -575,33 +597,7 @@ export const SIDEBAR_NAV_ITEMS: readonly NavItem[] = [
  * entry so callers can use the same `getActiveNavKey` against this list.
  */
 export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
-  {
-    key: "today-classes",
-    labelKey: "todayClasses",
-    iconKey: "calendarToday",
-    href: "/dashboard",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherDashboard,
-    audience: "teacher",
-  },
-  {
-    key: "regular-schedule",
-    labelKey: "regularSchedule",
-    iconKey: "eventRepeat",
-    href: "/schedule/weekly",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherWeeklySchedule,
-    audience: "teacher",
-  },
-  {
-    key: "your-students",
-    labelKey: "yourStudents",
-    iconKey: "group",
-    href: "/students",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherStudents,
-    audience: "teacher",
-  },
+  ...makeTeacherNavItems(),
   {
     key: "home",
     labelKey: "home",
@@ -727,70 +723,7 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     permission: PAGE_PERMISSIONS.parentSuggest,
     audience: "parent",
   },
-  {
-    key: "student-today-classes",
-    labelKey: "studentTodayClasses",
-    iconKey: "calendarToday",
-    href: "/dashboard",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentSelfDashboard,
-    audience: "student",
-  },
-  {
-    key: "student-schedule",
-    labelKey: "studentLessonHistory",
-    iconKey: "eventRepeat",
-    href: "/students/history",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentOwnHistory,
-    audience: "student",
-  },
-  {
-    key: "student-sessions",
-    labelKey: "studentSessions",
-    iconKey: "history",
-    href: "/students/sessions",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentSessions,
-    audience: "student",
-  },
-  {
-    key: "student-credits",
-    labelKey: "studentCredits",
-    iconKey: "accountBalanceWallet",
-    href: "/students/credits",
-    section: "main",
-    permission: PAGE_PERMISSIONS.studentCredits,
-    audience: "student",
-  },
-  {
-    key: "supervisor-home",
-    labelKey: "supervisorHome",
-    iconKey: "dashboard",
-    href: "/dashboard",
-    section: "main",
-    permission: PAGE_PERMISSIONS.supervisorDashboard,
-    audience: "supervisor",
-  },
-  {
-    key: "pending-reviews",
-    labelKey: "pendingReviews",
-    iconKey: "rateReview",
-    href: "/lesson-reports",
-    section: "main",
-    permission: PAGE_PERMISSIONS.lessonReportsReview,
-    audience: "supervisor",
-    groupId: "grp_reports",
-  },
-  {
-    key: "teacher-dues",
-    labelKey: "teacherDues",
-    iconKey: "payments",
-    href: "/teacher-dues",
-    section: "main",
-    permission: PAGE_PERMISSIONS.teacherDuesView,
-    audience: "supervisor",
-  },
+  ...makeStudentSupervisorNavItems(false),
   {
     key: "complaints-submit",
     labelKey: "complaintsSubmit",

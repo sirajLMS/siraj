@@ -1,23 +1,11 @@
 import { z } from "zod";
 import { CountryCode, CurrencyCode, Gender, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { validateMeetingProviderFields } from "@/frontend/common/views/dashboard/profile/shared/meetingProviderValidation";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
+import type { TeacherOnboardingLabels } from "@/shared/locale";
 
-export const teacherOnboardingSchema = (validationLabels: {
-  readonly fullNameRequired: string;
-  readonly emailRequired: string;
-  readonly emailInvalid: string;
-  readonly passwordRequired: string;
-  readonly nationalIdRequired: string;
-  readonly phoneRequired: string;
-  readonly phoneMaxLength: string;
-  readonly genderRequired: string;
-  readonly countryRequired: string;
-  readonly timezoneRequired: string;
-  readonly salaryAmountRequired: string;
-  readonly currencyRequired: string;
-  readonly urlInvalid: string;
-}) =>
+export const teacherOnboardingSchema = (validationLabels: TeacherOnboardingLabels["validation"]) =>
   z
     .object({
       name: z.string().min(1, validationLabels.fullNameRequired),
@@ -55,24 +43,11 @@ export const teacherOnboardingSchema = (validationLabels: {
       meetingLabel: z.string().optional(),
     })
     .superRefine((data, ctx) => {
-      const hasUrl = Boolean(data.meetingUrl?.trim());
-      const hasProvider = Boolean(data.meetingProvider?.id);
-      if (hasUrl && !hasProvider) {
-        ctx.addIssue({
-          code: "custom",
-          message: validationLabels.urlInvalid,
-          path: ["meetingProvider"],
-        });
-      }
-      if (hasUrl && data.meetingUrl) {
-        if (!URL.canParse(data.meetingUrl)) {
-          ctx.addIssue({
-            code: "custom",
-            message: validationLabels.urlInvalid,
-            path: ["meetingUrl"],
-          });
-        }
-      }
+      validateMeetingProviderFields(data, ctx, {
+        meetingProviderRequired: validationLabels.meetingProviderRequired,
+        meetingUrlRequired: validationLabels.meetingUrlRequired,
+        meetingUrlInvalid: validationLabels.urlInvalid,
+      });
     });
 
 export type TeacherOnboardingFormData = z.infer<ReturnType<typeof teacherOnboardingSchema>>;

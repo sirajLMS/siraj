@@ -2,10 +2,15 @@
 
 import { CloudUploadOutlined, DeleteOutlined, DescriptionOutlined, EditOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, CircularProgress, IconButton, Typography } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import Image from "next/image";
 import { useCallback, useRef } from "react";
 import type { Control, FieldPath, FieldValues } from "react-hook-form";
 import { Controller } from "react-hook-form";
+import {
+  AvatarConicRing,
+  AvatarFrostedContainer,
+} from "@/frontend/common/components/ui/input/avatarImageField/avatarRingShared";
 import { ACCEPTED_TYPES, DEFAULT_MAX_SIZE_MB, useImageUpload } from "@/frontend/common/hooks/useImageUpload";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -42,31 +47,21 @@ type UploadStatusTexts = {
   readonly remove: string;
 };
 
+function avatarHeadingSx(theme: Theme, displayValue: Record<string, string>) {
+  return {
+    typography: "titleMd" as const,
+    color: theme.palette.onSurface,
+    mb: { xs: 2, md: 2.5 },
+    textAlign: { xs: "center", md: "start" } as const,
+    display: displayValue,
+  };
+}
+
 function FieldHeading({ label, title }: { readonly label: string; readonly title: string }): React.ReactNode {
   return (
     <>
-      <Typography
-        sx={theme => ({
-          typography: "titleMd",
-          color: theme.palette.onSurface,
-          mb: { xs: 2, md: 2.5 },
-          textAlign: { xs: "center", md: "start" },
-          display: { xs: "block", md: "none" },
-        })}
-      >
-        {label}
-      </Typography>
-      <Typography
-        sx={theme => ({
-          typography: "titleMd",
-          color: theme.palette.onSurface,
-          mb: { xs: 2, md: 2.5 },
-          textAlign: { xs: "center", md: "start" },
-          display: { xs: "none", md: "block" },
-        })}
-      >
-        {title}
-      </Typography>
+      <Typography sx={theme => avatarHeadingSx(theme, { xs: "block", md: "none" })}>{label}</Typography>
+      <Typography sx={theme => avatarHeadingSx(theme, { xs: "none", md: "block" })}>{title}</Typography>
     </>
   );
 }
@@ -103,37 +98,14 @@ type AvatarRingProps = {
 
 function AvatarRing({ previewUrl, isUploading, alt }: Readonly<AvatarRingProps>): React.ReactNode {
   return (
-    <Box
-      sx={theme => ({
-        width: { xs: 112, md: AVATAR_SIZE_PX },
-        height: { xs: 112, md: AVATAR_SIZE_PX },
-        borderRadius: "50%",
-        p: "3px",
-        background: `conic-gradient(from 210deg, ${theme.palette.primary.main} 0 62%, transparent 62% 100%)`,
-      })}
-    >
-      <Box
-        sx={theme => ({
-          width: "100%",
-          height: "100%",
-          borderRadius: "50%",
-          overflow: "hidden",
-          backgroundColor: theme.palette.surfaceContainerHighest,
-          border: `2px solid ${theme.palette.surface}`,
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        })}
-      >
-        {previewUrl ? (
-          <Image src={previewUrl} alt={alt} fill priority unoptimized style={{ objectFit: "cover" }} />
-        ) : (
-          <CloudUploadOutlined sx={theme => ({ fontSize: 40, color: theme.palette.text.secondary })} />
-        )}
-        <UploadProgressOverlay isUploading={isUploading} />
-      </Box>
-    </Box>
+    <AvatarConicRing size={{ xs: 112, md: AVATAR_SIZE_PX }}>
+      {previewUrl ? (
+        <Image src={previewUrl} alt={alt} fill priority unoptimized style={{ objectFit: "cover" }} />
+      ) : (
+        <CloudUploadOutlined sx={theme => ({ fontSize: 40, color: theme.palette.text.secondary })} />
+      )}
+      <UploadProgressOverlay isUploading={isUploading} />
+    </AvatarConicRing>
   );
 }
 
@@ -327,17 +299,7 @@ function AvatarEditorBody({
   const editDisabled = disabled || upload.isUploading;
 
   return (
-    <Box
-      sx={theme => ({
-        width: "100%",
-        borderRadius: theme.layout.radius.section,
-        border: `1px solid ${alpha(theme.palette.outlineVariant, 0.6)}`,
-        backgroundColor: alpha(theme.palette.surfaceContainer, 0.72),
-        backdropFilter: "blur(16px)",
-        px: { xs: 2, md: 3 },
-        py: { xs: 2.5, md: 3 },
-      })}
-    >
+    <AvatarFrostedContainer px={{ xs: 2, md: 3 }} py={{ xs: 2.5, md: 3 }}>
       <FieldHeading label={label} title={title} />
       <Box
         sx={{
@@ -374,7 +336,7 @@ function AvatarEditorBody({
         disabled={disabled}
         hidden
       />
-    </Box>
+    </AvatarFrostedContainer>
   );
 }
 

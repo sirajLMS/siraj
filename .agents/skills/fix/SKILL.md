@@ -1,6 +1,6 @@
 ---
 name: fix
-description: Use when you have lint errors, formatting issues, or before committing code to ensure it passes CI. Runs the project's quality checks (tsgo, biome, oxlint, lint) and follows the progressive verification loop.
+description: Use when you have lint errors, formatting issues, or before committing code to ensure it passes CI. Runs the project's quality checks (tsgo, oxlint, biome, lint) and follows the progressive verification loop.
 allowed-tools: shell
 ---
 
@@ -25,13 +25,13 @@ bun run scripts/lint-service.ts -f <file> --id fix
 
 ## Per-File Progressive Verification
 
-For thorough per-file verification (tsgo → biome → oxlint → lint → duplicates → codescene):
+For thorough per-file verification (tsgo → oxlint → biome → lint → duplicates → codescene):
 
 ```bash
 # Full verification (all checks):
 bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
 
-# Just lint checks (tsgo + biome + oxlint + lint):
+# Just lint checks (tsgo + oxlint + biome + lint):
 bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 
 # Just type checking:

@@ -48,6 +48,37 @@ export type InvoicePaymentDetailsDialogProps = {
 type SubmissionRow = NonNullable<InvoicePaymentSubmissionQuery["invoicePaymentSubmission"]>;
 type PaymentRow = NonNullable<NonNullable<InvoicePaymentsQuery["invoicePayments"]>[number]>;
 
+/** Shared labels shape for the payment proof review UI. */
+interface PaymentReviewLabels {
+  readonly reviewActions: string;
+  readonly rejectionReason: string;
+  readonly rejectionReasonPlaceholder: string;
+  readonly close: string;
+  readonly reject: string;
+  readonly rejecting: string;
+  readonly approve: string;
+  readonly approving: string;
+  readonly confirmReject: string;
+  readonly confirmRejectMessage: string;
+}
+
+/** Shared state + handlers for the payment proof review actions. */
+interface PaymentReviewActionState {
+  readonly actionError: string | null;
+  readonly rejectionReason: string;
+  readonly showRejectForm: boolean;
+  readonly showRejectConfirm: boolean;
+  readonly reviewBusy: boolean;
+  readonly rejecting: boolean;
+  readonly approving: boolean;
+  readonly onRejectionReasonChange: (value: string) => void;
+  readonly onShowRejectForm: () => void;
+  readonly onCancelReject: () => void;
+  readonly onApprove: () => void;
+  readonly onRequestReject: () => void;
+  readonly onConfirmReject: () => void;
+}
+
 function formatPaymentDate(dateStr: string | null, locale: string): string {
   if (!dateStr) {
     return "—";
@@ -191,32 +222,8 @@ function PaymentProofReviewActions({
   onRequestReject,
   onConfirmReject,
 }: {
-  readonly labels: {
-    readonly reviewActions: string;
-    readonly rejectionReason: string;
-    readonly rejectionReasonPlaceholder: string;
-    readonly close: string;
-    readonly reject: string;
-    readonly rejecting: string;
-    readonly approve: string;
-    readonly approving: string;
-    readonly confirmReject: string;
-    readonly confirmRejectMessage: string;
-  };
-  readonly actionError: string | null;
-  readonly rejectionReason: string;
-  readonly showRejectForm: boolean;
-  readonly showRejectConfirm: boolean;
-  readonly reviewBusy: boolean;
-  readonly rejecting: boolean;
-  readonly approving: boolean;
-  readonly onRejectionReasonChange: (value: string) => void;
-  readonly onShowRejectForm: () => void;
-  readonly onCancelReject: () => void;
-  readonly onApprove: () => void;
-  readonly onRequestReject: () => void;
-  readonly onConfirmReject: () => void;
-}): React.ReactNode {
+  readonly labels: PaymentReviewLabels;
+} & PaymentReviewActionState): React.ReactNode {
   return (
     <Stack spacing={1.5}>
       <Typography variant="titleLg">{labels.reviewActions}</Typography>
@@ -396,37 +403,14 @@ type PaymentDetailsContentProps = {
     readonly viewProofFailed: string;
   };
   readonly showReviewActions: boolean;
-  readonly reviewLabels: {
-    readonly reviewActions: string;
-    readonly rejectionReason: string;
-    readonly rejectionReasonPlaceholder: string;
-    readonly close: string;
-    readonly reject: string;
-    readonly rejecting: string;
-    readonly approve: string;
-    readonly approving: string;
-    readonly confirmReject: string;
-    readonly confirmRejectMessage: string;
+  readonly reviewLabels: PaymentReviewLabels;
+} & PaymentReviewActionState & {
+    readonly amountLabel: string;
+    readonly dateLabel: string;
+    readonly emptyLabel: string;
+    readonly fxMessages: FormatCurrencyMessages;
+    readonly viewerDisplayCurrency?: string | null;
   };
-  readonly actionError: string | null;
-  readonly rejectionReason: string;
-  readonly showRejectForm: boolean;
-  readonly showRejectConfirm: boolean;
-  readonly reviewBusy: boolean;
-  readonly rejecting: boolean;
-  readonly approving: boolean;
-  readonly onRejectionReasonChange: (value: string) => void;
-  readonly onShowRejectForm: () => void;
-  readonly onCancelReject: () => void;
-  readonly onApprove: () => void;
-  readonly onRequestReject: () => void;
-  readonly onConfirmReject: () => void;
-  readonly amountLabel: string;
-  readonly dateLabel: string;
-  readonly emptyLabel: string;
-  readonly fxMessages: FormatCurrencyMessages;
-  readonly viewerDisplayCurrency?: string | null;
-};
 
 function PaymentDetailsDialogContent({
   loading,

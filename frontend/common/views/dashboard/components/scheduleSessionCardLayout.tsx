@@ -16,7 +16,7 @@ import type {
   ScheduleSessionCardPersonCellProps,
   ScheduleSessionMetaStatItem,
 } from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout.types";
-import { getScheduleSessionNameInitials } from "@/frontend/common/views/dashboard/components/scheduleSessionCardLayout.utils";
+import { getNameInitials } from "@/frontend/common/views/dashboard/utils/nameInitials";
 import { Link } from "@/shared/i18n";
 
 export type {
@@ -60,7 +60,7 @@ export function ScheduleSessionCardPersonCell({
       </StyledScheduleSessionPersonLabel>
       <StyledScheduleSessionPersonContentRow>
         <StyledScheduleSessionPersonAvatar src={avatarUrl ?? undefined} alt={name} aria-hidden={!avatarUrl}>
-          {getScheduleSessionNameInitials(name)}
+          {getNameInitials(name)}
         </StyledScheduleSessionPersonAvatar>
         <StyledScheduleSessionPersonText>
           <StyledScheduleSessionPersonName

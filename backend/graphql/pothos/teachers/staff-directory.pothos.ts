@@ -5,6 +5,7 @@ import {
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { AccountStatusPothosObject, CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
 import type {
@@ -19,7 +20,6 @@ import type {
   TeacherDirectoryRow,
   UpdateManagerProfileInput,
 } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 
@@ -167,18 +167,7 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
       const userId = await requireAuth(ctx);
       const locale = ctx.locale || "en";
 
-      let pagination: PaginationArgs | null = null;
-      if (args.paginationArgs) {
-        pagination = new PaginationArgs({
-          first: args.paginationArgs.first ?? null,
-          skip: args.paginationArgs.skip ?? null,
-          after: args.paginationArgs.after ?? null,
-          before: args.paginationArgs.before ?? null,
-          last: args.paginationArgs.last ?? null,
-          page: args.paginationArgs.page ?? null,
-          maxCount: args.paginationArgs.maxCount ?? null,
-        });
-      }
+      const pagination = parsePaginationArgs(args.paginationArgs);
 
       const filters = {
         roleFilter: args.roleFilter ?? null,

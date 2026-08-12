@@ -13,5 +13,5 @@ export interface BaseManualInvoiceFormFieldsProps {
 }
 
 export interface ManualInvoiceFormFieldsMobileProps extends BaseManualInvoiceFormFieldsProps {
-  readonly draftCurrency: CurrencyCode;
+  readonly draftCurrency?: CurrencyCode;
 }

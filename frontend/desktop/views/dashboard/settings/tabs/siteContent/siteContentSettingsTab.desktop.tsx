@@ -2,8 +2,7 @@
 
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { SiteContentEntryDeleteDialog } from "@/frontend/common/views/dashboard/settings/tabs/siteContent/components/SiteContentEntryDeleteDialog";
-import { SiteContentEntryFormDialog } from "@/frontend/common/views/dashboard/settings/tabs/siteContent/components/SiteContentEntryFormDialog";
+import { SiteContentDialogsShared } from "@/frontend/common/views/dashboard/settings/tabs/siteContent/__shared__/siteContentDialogsShared";
 import type { SiteContentSettingsViewModel } from "@/frontend/common/views/dashboard/settings/types/siteContentSettings.types";
 import { buildSiteContentColumns } from "@/frontend/common/views/dashboard/settings/utils/siteContentColumns";
 import { SettingsTabGridShared } from "@/frontend/desktop/views/dashboard/settings/tabs/__shared__/settingsTabGridShared";
@@ -56,25 +55,17 @@ export function SiteContentSettingsTabDesktopView({
       onAdd={onAdd}
       columns={columns}
       dialogs={
-        <>
-          <SiteContentEntryFormDialog
-            open={formOpen}
-            row={editRow}
-            labels={labels}
-            onClose={onFormClose}
-            onSaved={onSaved}
-          />
-          <SiteContentEntryDeleteDialog
-            open={deleteRow != null}
-            row={deleteRow}
-            labels={labels}
-            isLoading={isDeleting}
-            onClose={onDeleteClose}
-            onConfirm={() => {
-              void onConfirmDelete();
-            }}
-          />
-        </>
+        <SiteContentDialogsShared
+          formOpen={formOpen}
+          editRow={editRow}
+          deleteRow={deleteRow}
+          isDeleting={isDeleting}
+          labels={labels}
+          onFormClose={onFormClose}
+          onSaved={onSaved}
+          onDeleteClose={onDeleteClose}
+          onConfirmDelete={onConfirmDelete}
+        />
       }
     />
   );

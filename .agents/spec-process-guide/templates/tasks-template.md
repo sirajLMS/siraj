@@ -37,7 +37,7 @@ Use this template to create actionable implementation plans that break down your
    ```bash
    bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
    ```
-   This single script runs `tsgo → biome:check → oxlint → lint:type-aware → check:duplicates → codescene --file` in strict progressive order, short-circuiting at the first failing check. It also auto-discovers and prints the applicable `.github/instructions/*.instructions.md` and layer `AGENTS.md` files for the target file. Exit code `0` = all checks passed.
+   This single script runs `tsgo → oxlint → biome:check → lint:type-aware → check:duplicates → codescene --file` in strict progressive order, short-circuiting at the first failing check. It also auto-discovers and prints the applicable `.github/instructions/*.instructions.md` and layer `AGENTS.md` files for the target file. Exit code `0` = all checks passed.
 3. **Semantic Review Checklist (Pre-Completion Gate):**  
    Before marking any subtask as complete, execute agent self-review against semantic checklist (race conditions, env-config, dead code, cross-layer, enums, deferred items). The `sub-loop.ts` script handles mechanical checks but cannot detect semantic bugs — this checklist covers what the script cannot.
 4. **Global Health Check (Completion Gate):**  
@@ -55,7 +55,7 @@ Use this template to create actionable implementation plans that break down your
 ```markdown
 - [ ] X.Y.QL **Quality Loop**: Per-file verification on `<file-path>`
   - Run: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene`
-  - The script runs: tsgo → biome:check → oxlint → lint:type-aware → check:duplicates → codescene --file
+  - The script runs: tsgo → oxlint → biome:check → lint:type-aware → check:duplicates → codescene --file
   - It auto-discovers & prints applicable AGENTS.md + .agents/instructions files
   - It enforces the Fix-Or-Report rule (fix within same file; report cross-file deps to orchestrator)
   - Exit code 0 = all checks passed; 1 = stopped at failing check (errors printed)

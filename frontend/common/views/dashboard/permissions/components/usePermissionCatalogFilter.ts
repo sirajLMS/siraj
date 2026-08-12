@@ -2,6 +2,7 @@
 import { useMemo } from "react";
 import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
+import { matchesPermissionSearch } from "@/frontend/common/views/dashboard/permissions/utils";
 
 export interface PermissionCatalogFilterResult {
   readonly searchQuery: string;
@@ -39,15 +40,7 @@ export function usePermissionCatalogFilter(permissions: readonly Permission[]): 
     () =>
       permissions.filter(p => {
         if (selectedCategory !== "all" && p.category !== selectedCategory) return false;
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          return (
-            (p.key?.toLowerCase().includes(q) ?? false) ||
-            (p.category?.toLowerCase().includes(q) ?? false) ||
-            (p.description?.toLowerCase().includes(q) ?? false)
-          );
-        }
-        return true;
+        return matchesPermissionSearch(p, searchQuery);
       }),
     [permissions, searchQuery, selectedCategory]
   );

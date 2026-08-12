@@ -2,9 +2,9 @@
 
 import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
+import { StudentCreditFooterShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/studentCreditFooterShared";
 import type { AdminBillingViewModel } from "@/frontend/common/views/dashboard/admin/billing/useAdminBillingViewModel";
 import { buildAdminMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import {
@@ -22,13 +22,6 @@ import { BillingMetricsRowMobile } from "@/frontend/mobile/views/dashboard/billi
 import { BillingMobileSearchBarMobile } from "@/frontend/mobile/views/dashboard/billing/components/billingMobileSearchBar.mobile";
 import { StudentCreditCardListMobile } from "@/frontend/mobile/views/dashboard/billing/components/studentCreditCardList.mobile";
 import { Link } from "@/shared/i18n";
-
-const StyledCreditFooterBox = styled(Box)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "center",
-  borderTop: `1px solid ${theme.palette.outlineVariant}`,
-  paddingInline: theme.spacing(2),
-}));
 
 function ExchangeRatesLink({ labels }: { readonly labels: AdminBillingViewModel["labels"] }) {
   return (
@@ -179,17 +172,14 @@ function StudentCreditSection({
           creditStatusLabels: labels.creditStatus,
         }}
       />
-      <StyledCreditFooterBox sx={{ py: 2, flexDirection: "column", gap: 1 }}>
-        {creditFilter === "negative_balance" ? (
-          <Button variant="text" sx={{ fontWeight: 700 }} onClick={onClearCreditFilter}>
-            {labels.creditTable.clearFilter}
-          </Button>
-        ) : (
-          <Button variant="text" sx={{ fontWeight: 700 }} onClick={onViewAllNegativeBalance}>
-            {labels.viewAllNegativeBalance}
-          </Button>
-        )}
-      </StyledCreditFooterBox>
+      <StudentCreditFooterShared
+        isNegativeFilter={creditFilter === "negative_balance"}
+        clearFilterLabel={labels.creditTable.clearFilter}
+        viewAllNegativeBalanceLabel={labels.viewAllNegativeBalance}
+        onClearCreditFilter={onClearCreditFilter}
+        onViewAllNegativeBalance={onViewAllNegativeBalance}
+        config={{ paddingInlineSx: { px: 2 } }}
+      />
     </MobileSectionPanel>
   );
 }

@@ -7,10 +7,9 @@ import type { UserEntityOnboardingFieldsShape } from "@/frontend/common/componen
 import { outlinedInputSx } from "@/frontend/common/components/ui/form";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
-import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import type { UserEntityOnboardingLabels } from "@/shared/locale/types/onboarding/userEntity";
 
 type OnboardingFields = UserEntityOnboardingFieldsShape & FieldValues;
@@ -234,25 +233,11 @@ function CurrencyField<T extends OnboardingFields>({ control, labels }: Currency
   const displayCurrencyField = fieldPath<T>("displayCurrency");
   return (
     <Grid size={{ xs: 12, md: 6 }}>
-      <Controller
-        name={displayCurrencyField}
+      <CurrencyControllerField
         control={control}
-        render={({ field, fieldState }) => {
-          const option: CurrencyOption | null = field.value ? (getCurrencyByCode(field.value) ?? null) : null;
-          return (
-            <CurrencySelect
-              currency={option}
-              setCurrencyAction={selected => {
-                field.onChange(selected.code);
-              }}
-              onBlurAction={field.onBlur}
-              label={labels.fields.displayCurrency}
-              error={Boolean(fieldState.error)}
-              helperText={validationMessage(labels, fieldState.error?.message)}
-              fullWidth
-            />
-          );
-        }}
+        name={displayCurrencyField}
+        label={labels.fields.displayCurrency}
+        formatError={message => validationMessage(labels, message)}
       />
     </Grid>
   );

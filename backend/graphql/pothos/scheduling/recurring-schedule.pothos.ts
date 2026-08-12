@@ -1,5 +1,9 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import {
+  recurringScheduleDetailFields,
+  recurringScheduleListItemFields,
+} from "@/backend/graphql/pothos/scheduling/__shared__/recurringScheduleSharedFields";
+import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
   RecurringScheduleDayDetailReturnType,
@@ -25,17 +29,7 @@ const RecurringScheduleDetailRef =
 
 export const RecurringScheduleDetailPothosObject = RecurringScheduleDetailRef.implement({
   fields: t => ({
-    id: t.exposeString("id"),
-    studentId: t.exposeString("studentId"),
-    studentName: t.exposeString("studentName"),
-    teacherId: t.exposeString("teacherId"),
-    teacherName: t.exposeString("teacherName"),
-    durationMinutes: t.exposeInt("durationMinutes"),
-    defaultStartTime: t.exposeString("defaultStartTime"),
-    timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
-    days: t.expose("days", { type: [RecurringScheduleDayDetailPothosObject] }),
-    hourlyRate: t.exposeString("hourlyRate", { nullable: true }),
-    rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
+    ...recurringScheduleDetailFields(t, RecurringScheduleDayDetailPothosObject),
   }),
 });
 
@@ -43,18 +37,7 @@ const RecurringScheduleListItemRef = gqlSchemaBuilder.objectRef<RecurringSchedul
 
 export const RecurringScheduleListItemPothosObject = RecurringScheduleListItemRef.implement({
   fields: t => ({
-    id: t.exposeString("id"),
-    studentId: t.exposeString("studentId"),
-    studentName: t.exposeString("studentName"),
-    teacherId: t.exposeString("teacherId"),
-    teacherName: t.exposeString("teacherName"),
-    durationMinutes: t.exposeInt("durationMinutes"),
-    defaultStartTime: t.exposeString("defaultStartTime"),
-    timezone: t.exposeString("timezone"),
-    hourlyRate: t.exposeString("hourlyRate", { nullable: true }),
-    rateCurrency: t.expose("rateCurrency", { type: CurrencyCodePothosObject, nullable: true }),
-    createdAt: t.expose("createdAt", { type: "DateTime" }),
-    updatedAt: t.expose("updatedAt", { type: "DateTime" }),
+    ...recurringScheduleListItemFields(t),
   }),
 });
 

@@ -1,39 +1,34 @@
-import type { ComplaintFormData } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
 import type {
   AdminComplaintRow,
   AdminComplaintsSummary,
   ComplaintTab,
-  ParentComplaintRecord,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsLabels } from "@/shared/locale/types/dashboard/complaints";
+
+export interface DeleteComplaintDialogLabels {
+  readonly deleteConfirmTitle: string;
+  readonly deleteConfirmBody: string;
+  readonly deleteConfirmCancel: string;
+  readonly deleteConfirmConfirm: string;
+}
 
 export interface DeleteComplaintDialogProps {
   readonly open: boolean;
   readonly onClose: () => void;
   readonly onConfirm: () => void;
   readonly isDeleting: boolean;
-  readonly labels: {
-    readonly deleteConfirmTitle: string;
-    readonly deleteConfirmBody: string;
-    readonly deleteConfirmCancel: string;
-    readonly deleteConfirmConfirm: string;
-  };
+  readonly labels: DeleteComplaintDialogLabels;
 }
 
-export interface ParentComplaintsViewProps {
-  readonly labels: ComplaintsLabels["parent"];
-  readonly records: readonly ParentComplaintRecord[];
-  readonly hasOlderRecords: boolean;
-  readonly isSubmitting: boolean;
-  readonly showSuccess: boolean;
-  readonly canSubmit: boolean;
-  readonly onSubmit: (data: ComplaintFormData) => void;
-  readonly onDismissSuccess: () => void;
-  readonly onLoadOlderRecords: () => void;
-  readonly page?: number;
-  readonly pageSize?: number;
-  readonly totalCount?: number;
-  readonly onPageChange?: (page: number) => void;
+export function buildDeleteComplaintDialogLabels(
+  queueLabels: ComplaintsLabels["admin"]["queue"]
+): DeleteComplaintDialogLabels {
+  return {
+    deleteConfirmTitle: queueLabels.deleteConfirmTitle,
+    deleteConfirmBody: queueLabels.deleteConfirmBody,
+    deleteConfirmCancel: queueLabels.deleteConfirmCancel,
+    deleteConfirmConfirm: queueLabels.deleteConfirmConfirm,
+  };
 }
 
 export interface AdminComplaintsViewProps {

@@ -1,5 +1,10 @@
 export { CurrencyDisplay, type CurrencyDisplayProps } from "./CurrencyDisplay";
 export {
+  CurrencyDisplayShared,
+  type CurrencyDisplaySharedProps,
+  type LocaleEmojiComponentType,
+} from "./CurrencyDisplayShared";
+export {
   CURRENCY_DISPLAY_PART_ORDER,
   CurrencyDisplayPart,
   type CurrencyDisplayPartValue,

@@ -11,6 +11,7 @@
 
 - Use `getServerUserContext()` from `@/backend/lib/auth/server-auth` to verify authentication in layout files.
 - Redirect unauthenticated users with `redirectToLogin()` from `@/frontend/common/lib/redirectToLogin` (or `redirect()` from `next/navigation`).
+- For dashboard pages, use the shared `withPageAuth()` wrapper from `app/(dashboard)/__shared__/withPageAuth.ts` instead of inline auth checks. See `docs/app/with-page-auth.md` for the complete pattern reference.
 
 ```tsx
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";

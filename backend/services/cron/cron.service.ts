@@ -363,6 +363,10 @@ export namespace CronService {
     return true;
   }
 
+  function calcDurationMs(updated: { startedAt: string | Date | null } | null, now: Date): number | undefined {
+    return updated?.startedAt ? now.getTime() - new Date(updated.startedAt).getTime() : undefined;
+  }
+
   export async function completeRun(runId: string, _result?: { success?: boolean }): Promise<void> {
     const now = new Date();
 
@@ -386,8 +390,7 @@ export namespace CronService {
 
     const updated = await db.transaction(runner);
     if (updated) {
-      const durationMs = updated.startedAt ? now.getTime() - new Date(updated.startedAt).getTime() : undefined;
-      logger.info("cron.run.completed", { runId, durationMs });
+      logger.info("cron.run.completed", { runId, durationMs: calcDurationMs(updated, now) });
     }
   }
 
@@ -416,8 +419,7 @@ export namespace CronService {
 
     const updated = await db.transaction(runner);
     if (updated) {
-      const durationMs = updated.startedAt ? now.getTime() - new Date(updated.startedAt).getTime() : undefined;
-      logger.error("cron.run.failed", { runId, errorMessage, durationMs });
+      logger.error("cron.run.failed", { runId, errorMessage, durationMs: calcDurationMs(updated, now) });
     }
   }
 

@@ -15,6 +15,7 @@ import {
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { extractTokenFromHeader, generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
 import { setAuthCookies as applyAuthCookies, clearAuthCookies } from "@/backend/lib/auth/cookies";
+import { createAuthSession } from "@/backend/lib/auth/createAuthSession";
 import { comparePassword } from "@/backend/lib/auth/password";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
@@ -248,20 +249,9 @@ gqlSchemaBuilder.mutationFields(t => ({
       // 3. Successful login - reset attempts
       await RateLimitRepository.resetAttempts(ipAddress, email.value);
 
-      // Generate tokens
-      const accessToken = await generateAccessToken(user.id, user.email);
-      const refreshToken = await generateRefreshToken(user.id, user.email);
-
-      // Create session in database
-      const sessionId = randomUUID();
-      await SessionRepository.create({
-        hashedId: sessionId,
-        userId: user.id,
-        payload: JSON.stringify({
-          createdAt: new Date().toISOString(),
-          // Store session metadata only, not sensitive tokens
-        }),
-      });
+      // Generate tokens and create session in database.
+      // Store session metadata only, not sensitive tokens.
+      const { accessToken, refreshToken, sessionId } = await createAuthSession(user.id, user.email);
 
       // Set httpOnly cookies for session and refresh token
       setAuthCookies(ctx, sessionId, refreshToken, accessToken);

@@ -5,9 +5,9 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo";
 import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type { ParentEntity, StudentSelectType, TeacherSelectType } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("hoursPerWeek Recalculation Triggers", () => {

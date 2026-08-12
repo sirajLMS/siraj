@@ -1,9 +1,8 @@
 "use client";
 
-import { Box } from "@mui/material";
 import type { Control, FieldErrors } from "react-hook-form";
-import { Controller } from "react-hook-form";
-import { type PersonOption, resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect";
+import type { ParentAssignmentSectionSharedOptions } from "@/frontend/common/views/dashboard/students/onboarding/components/__shared__/parentAssignmentSectionShared";
+import { ParentAssignmentSectionShared } from "@/frontend/common/views/dashboard/students/onboarding/components/__shared__/parentAssignmentSectionShared";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { ParentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
@@ -20,6 +19,13 @@ interface ParentAssignmentSectionProps {
   };
 }
 
+const MOBILE_OPTIONS: ParentAssignmentSectionSharedOptions = {
+  Panel: MobileSectionPanel,
+  ParentAutocomplete: ParentAutocompleteMobile,
+  panelContentInset: false,
+  boxSx: theme => ({ p: theme.layout.cardPadding }),
+};
+
 export function ParentAssignmentSection({
   control,
   errors,
@@ -28,32 +34,13 @@ export function ParentAssignmentSection({
   labels,
 }: Readonly<ParentAssignmentSectionProps>) {
   return (
-    <MobileSectionPanel title={sectionTitle} contentInset={false}>
-      <Box sx={theme => ({ p: theme.layout.cardPadding })}>
-        <Controller
-          control={control}
-          name="parentId"
-          render={({ field }) => {
-            const selectedParent: PersonOption | null = field.value
-              ? resolvePersonOption(field.value, [], { id: field.value, name: "" })
-              : null;
-
-            return (
-              <ParentAutocompleteMobile
-                value={selectedParent}
-                disabled={parentLocked}
-                label={labels.parent}
-                placeholder={labels.parentPlaceholder}
-                error={Boolean(errors.parentId)}
-                helperText={errors.parentId ? labels.parentRequired : undefined}
-                onChange={person => {
-                  field.onChange(person?.id ?? "");
-                }}
-              />
-            );
-          }}
-        />
-      </Box>
-    </MobileSectionPanel>
+    <ParentAssignmentSectionShared
+      control={control}
+      errors={errors}
+      parentLocked={parentLocked}
+      sectionTitle={sectionTitle}
+      labels={labels}
+      options={MOBILE_OPTIONS}
+    />
   );
 }

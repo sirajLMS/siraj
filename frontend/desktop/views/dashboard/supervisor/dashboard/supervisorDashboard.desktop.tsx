@@ -4,7 +4,7 @@ import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
 import { scheduleOverviewListCanvasSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
-import type { RecentApprovalCardLabels } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/RecentApprovalCardList";
+import { buildRecentApprovalCardLabels } from "@/frontend/common/views/dashboard/supervisor/dashboard/__shared__/recentApprovalCardLabels";
 import {
   RecentApprovalCardSkeleton,
   RecentApprovalEmptyState,
@@ -15,21 +15,6 @@ import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/comp
 import { DuesSummaryCardDesktop } from "@/frontend/desktop/views/dashboard/supervisor/dashboard/components/duesSummaryCard.desktop";
 import { PendingReviewsHeroCardDesktop } from "@/frontend/desktop/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.desktop";
 import { RecentApprovalDesktopCard } from "@/frontend/desktop/views/dashboard/supervisor/dashboard/components/recentApprovalCard.desktop";
-
-function buildRecentApprovalCardLabels(labels: SupervisorDashboardViewModel["labels"]): RecentApprovalCardLabels {
-  return {
-    approvedTime: labels.approvedTime,
-    lessonDate: labels.lessonDate,
-    duration: labels.duration,
-    completion: labels.completion,
-    teacher: labels.teacher,
-    student: labels.student,
-    viewReport: labels.viewReport,
-    viewClass: labels.viewClass,
-    history: labels.history,
-    approvedStatus: labels.approvedStatus,
-  };
-}
 
 export function SupervisorDashboardDesktopView({
   userName,

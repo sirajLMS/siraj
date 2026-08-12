@@ -1,13 +1,10 @@
 "use client";
 
-import Stack from "@mui/material/Stack";
 import type { SxProps, Theme } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { getLanguageDisplayName, getLanguageEmoji, type LanguageType } from "@/frontend/common/lib/locale";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { LanguageDisplay } from "@/frontend/common/components/ui/display/language/LanguageDisplay";
+import type { LanguageType } from "@/frontend/common/lib/locale";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
-import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 
 export type DesktopLanguageDisplayProps = {
@@ -29,29 +26,17 @@ export const DesktopLanguageDisplay = ({
   typographyVariant = "bodyMd",
   sx,
 }: DesktopLanguageDisplayProps): React.JSX.Element | null => {
-  const locale = useAppLocale();
-  const fallbackNode = fallback ? (
-    <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
-      {fallback}
-    </Typography>
-  ) : null;
-
-  const resolvedCode = language?.code ?? code;
-  if (!resolvedCode) {
-    return fallbackNode;
-  }
-
-  const emoji = language?.emoji ?? getLanguageEmoji(resolvedCode);
-  const name = getLanguageDisplayName(resolvedCode, locale);
-
   return (
-    <Stack direction="row" spacing={1} sx={mergeSx({ alignItems: "center", flexWrap: "nowrap" }, sx)}>
-      {showEmoji && <DesktopLocaleEmoji emoji={emoji} />}
-      {showLabel && (
-        <Typography variant={typographyVariant} sx={{ whiteSpace: "nowrap" }}>
-          {name}
-        </Typography>
-      )}
-    </Stack>
+    <LanguageDisplay
+      code={code}
+      language={language}
+      showEmoji={showEmoji}
+      showLabel={showLabel}
+      fallback={fallback}
+      typographyVariant={typographyVariant}
+      sx={sx}
+      EmojiComponent={DesktopLocaleEmoji}
+      stackSx={{ flexWrap: "nowrap" }}
+    />
   );
 };

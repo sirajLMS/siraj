@@ -67,7 +67,7 @@ Ready-to-use template for 1-3 day features that need requirements and tasks but 
 1. **[Task Name]** - [Brief description]
    - **Estimate:** [X hours]
    - **Details:** [Specific implementation notes]
-   - **Quality Loop:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs tsgo → biome → oxlint → lint → duplicates → codescene; auto-discovers applicable AGENTS.md + instructions; exit code 0 = pass)
+   - **Quality Loop:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs tsgo → oxlint → biome → lint → duplicates → codescene; auto-discovers applicable AGENTS.md + instructions; exit code 0 = pass)
    - **Semantic Review:** Check race conditions, env-config, cross-layer, enums, deferred items (sub-loop.ts handles mechanical checks; this covers semantic bugs it can't detect)
 
 2. **[Task Name]** - [Brief description]

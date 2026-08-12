@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 const mockPush = mock(() => {});
 
@@ -6,31 +7,13 @@ const mockPush = mock(() => {});
 // alphabetically-earlier test files (e.g. ScheduleOverviewSection.test.tsx) bleed
 // into this file. Re-register here to guarantee the shape this file's transitive
 // imports require, regardless of what earlier files may have left behind.
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-  useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
-  usePathname: () => "/dashboard",
-  useSearchParams: () => new URLSearchParams(),
-  redirect: mock(() => {}),
-}));
-
-await mock.module("@/shared/i18n/routing", () => ({
-  locales: ["ar", "en"] as const,
+await mockNextNavigation("/dashboard", {
+  mockPush,
+  locales: ["ar", "en"],
   defaultLocale: "ar",
-  useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
-  usePathname: () => "/dashboard",
-  Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-  redirect: mock(() => {}),
-}));
-
-await mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({ push: mockPush, back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
-  usePathname: () => "/dashboard",
-}));
+  routingIncludeReplaceAndPrefetch: false,
+  includeReplaceAndPrefetch: false,
+});
 
 // Eliminates dependency on the router-backed language switch hook so this file
 // is immune to any router mock configuration registered by earlier test files.

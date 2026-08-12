@@ -5,6 +5,7 @@ import type {
   TeacherScheduleRow,
 } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 
 export type TeacherDashboardMode = "standard" | "active";
 export type SnackbarSeverity = "success" | "error" | "info";
@@ -124,17 +125,9 @@ export interface TeacherDashboardUIState {
   readonly setHandlers: (handlers: Partial<TeacherDashboardHandlers>) => void;
 }
 
-const getTodayString = () => {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-};
-
 export const useTeacherDashboardStore = create<TeacherDashboardUIState>(set => ({
   mode: "standard",
-  filterDate: getTodayString(),
+  filterDate: getTodayScheduleFilterDate(),
   page: 0,
   pageSize: DEFAULT_PAGE_SIZE,
   setMode: mode => set({ mode }),

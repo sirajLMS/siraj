@@ -587,7 +587,7 @@ After creating/modifying ANY file, the executing agent MUST run the **unified pe
 
 **Unified Quality Gate (replaces individual tsgo/biome/lint commands):**
 ```bash
-# Run the progressive per-file quality loop (tsgo → biome → oxlint → lint → duplicates → codescene)
+# Run the progressive per-file quality loop (tsgo → oxlint → biome → lint → duplicates → codescene)
 bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 ```
 
@@ -596,9 +596,9 @@ bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 | `--lifecycle` | Checks run (in strict order, short-circuit at first failure) |
 |---------------|-------------------------------------------------------------|
 | `tsgo` | tsgo only |
-| `biome` | tsgo → biome:check |
-| `lint` | tsgo → biome:check → oxlint → lint:type-aware (via lint service) |
-| `codescene` | tsgo → biome:check → oxlint → lint:type-aware → check:duplicates → codescene --file |
+| `biome` | tsgo → oxlint → biome:check |
+| `lint` | tsgo → oxlint → biome:check → lint:type-aware (via lint service) |
+| `codescene` | tsgo → oxlint → biome:check → lint:type-aware → check:duplicates → codescene --file |
 | `sonar-results` | same as `codescene` (subagents never run sonar-scan — hardcoded exclusion) |
 
 **What the script handles automatically (no manual steps needed):**

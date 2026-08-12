@@ -1,13 +1,6 @@
-import { getServerUserContext } from "@/backend/lib";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
+import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
 import { redirect } from "@/shared/i18n/routing";
 
-export default async function TeacherMeProfileRedirectPage() {
-  const { userId } = await getServerUserContext();
-  if (!userId) {
-    await redirectToLogin();
-    return;
-  }
-
+export default withPageAuth(null, async () => {
   redirect({ href: "/profile" });
-}
+});

@@ -23,7 +23,6 @@ import {
   type ParentStatus,
   StudentStatus,
 } from "@/backend/enum";
-import type { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   PaginationArgs,
   ParentCreateResult,
@@ -39,6 +38,7 @@ import type {
   WorkshopPromoReturnType,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import {
   parseAccountStatus,
   parseClassExecutionState,
@@ -73,18 +73,9 @@ export namespace ParentRepository {
     const [created] = await executor
       .insert(parents)
       .values({
-        userId: input.userId,
-        status: input.status,
-        nationality: input.nationality ?? null,
-        address: input.address ?? null,
-        facebook: input.facebook ?? null,
-        whatsapp: input.whatsapp ?? null,
-        twitter: input.twitter ?? null,
-        invoiceType: input.invoiceType ?? null,
-        feeAmount: input.feeAmount ?? null,
-        currency: input.currency ?? null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        ...input,
+        createdAt: input.createdAt ?? new Date(),
+        updatedAt: input.updatedAt ?? new Date(),
       })
       .returning();
 

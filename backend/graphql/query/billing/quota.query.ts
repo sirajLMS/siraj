@@ -9,11 +9,11 @@ import {
   QuotaPothosObject,
 } from "@/backend/graphql/pothos/billing/quota.pothos";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { assertAssociatedOrManage } from "@/backend/services/billing/permission-utils";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
-import { PaginationArgs } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("quotaLedger", t =>
   t.field({
@@ -26,7 +26,7 @@ gqlSchemaBuilder.queryField("quotaLedger", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const pagination = PaginationArgs.fromArgs(args.pagination);
+      const pagination = parsePaginationArgs(args.pagination);
       try {
         return await QuotaService.getQuotaLedger(args.quotaId, pagination, actorUserId, ctx.locale);
       } catch (error) {
@@ -66,7 +66,7 @@ gqlSchemaBuilder.queryField("quotas", t =>
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
-      const pagination = PaginationArgs.fromArgs(args.pagination);
+      const pagination = parsePaginationArgs(args.pagination);
       try {
         return await QuotaService.listQuotas(args.filter ?? null, pagination, undefined, actorUserId, ctx.locale);
       } catch (error) {

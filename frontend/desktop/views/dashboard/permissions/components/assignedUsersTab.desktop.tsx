@@ -1,6 +1,6 @@
 "use client";
 
-import { DeleteOutlined, PersonAddOutlined, PersonRemoveOutlined, SearchOutlined } from "@mui/icons-material";
+import { PersonAddOutlined, PersonRemoveOutlined, SearchOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
@@ -8,15 +8,17 @@ import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import type { GroupUser } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
-import { AssignedUsersTabShared } from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared";
 import {
-  StyledBulkActionBar,
+  AssignedUsersBulkActionBar,
+  AssignedUsersTabShared,
+} from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared";
+import {
   StyledRemoveButton,
-  StyledRemoveSelectedButton,
   StyledUserToolbar,
 } from "@/frontend/common/views/dashboard/permissions/components/assignedUsersTabShared.styles";
 import type { AssignedUsersTabProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTab.types";
 import type { AssignedUsersListSlotProps } from "@/frontend/common/views/dashboard/permissions/types/assignedUsersTabShared.types";
+import { assignedUsersTabLabels } from "@/frontend/common/views/dashboard/permissions/utils";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { Link } from "@/shared/i18n";
 
@@ -88,34 +90,6 @@ function AssignedUsersDesktopToolbar({
         {assignUsersLabel}
       </StyledAssignUsersButton>
     </StyledDesktopToolbar>
-  );
-}
-
-function DesktopBulkActionBar({
-  selectedCount,
-  onBulkRevokeUsers,
-  usersSelectedLabel,
-  removeSelectedLabel,
-}: Readonly<{
-  selectedCount: number;
-  onBulkRevokeUsers: () => void;
-  usersSelectedLabel: (count: number) => string;
-  removeSelectedLabel: string;
-}>) {
-  return (
-    <StyledBulkActionBar>
-      <Typography variant="titleLg" sx={{ fontWeight: 600 }}>
-        {usersSelectedLabel(selectedCount)}
-      </Typography>
-      <StyledRemoveSelectedButton
-        variant="contained"
-        color="error"
-        startIcon={<DeleteOutlined />}
-        onClick={onBulkRevokeUsers}
-      >
-        {removeSelectedLabel}
-      </StyledRemoveSelectedButton>
-    </StyledBulkActionBar>
   );
 }
 
@@ -257,29 +231,15 @@ function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlot
 }
 
 export function AssignedUsersTabDesktop(props: Readonly<AssignedUsersTabProps>) {
-  const t = props.labels;
-
   return (
     <AssignedUsersTabShared
       props={props}
       slots={{
         Toolbar: AssignedUsersDesktopToolbar,
-        BulkActionBar: DesktopBulkActionBar,
+        BulkActionBar: AssignedUsersBulkActionBar,
         UsersList: AssignedUsersDataGrid,
       }}
-      labels={{
-        usersSelected: t.usersSelected,
-        removeSelected: t.removeSelected,
-        noAssignedUsers: t.noAssignedUsers,
-        searchAssignedUsers: t.searchAssignedUsers,
-        assignUsers: t.assignUsers,
-        assignDate: t.assignedDate,
-        removeUser: t.removeUser,
-        assignedGroupMembers: t.assignedGroupMembers,
-        columnName: t.columnName,
-        assignedBy: t.assignedBy,
-        assignedBySystem: t.assignedBySystem,
-      }}
+      labels={assignedUsersTabLabels(props.labels)}
     />
   );
 }

@@ -1,5 +1,10 @@
 import type { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { TeacherAvailabilityLabels } from "@/shared/locale/types/dashboard/teachers/availability";
+import type {
+  TeacherAvailabilityLabels,
+  TeacherAvailabilityTableLabels,
+} from "@/shared/locale/types/dashboard/teachers/availability";
+
+export type WeeklyAvailabilityGridLabels = TeacherAvailabilityTableLabels;
 
 export interface AvailabilityEntry {
   readonly id: string;
@@ -25,25 +30,6 @@ export interface TeacherAvailabilityViewProps {
   readonly defaultFilters: AvailabilitySearchFormData;
   readonly loading?: boolean;
   readonly onExportPdf?: () => void;
-}
-
-export interface WeeklyAvailabilityGridLabels {
-  readonly time: string;
-  readonly monday: string;
-  readonly tuesday: string;
-  readonly wednesday: string;
-  readonly thursday: string;
-  readonly friday: string;
-  readonly saturday: string;
-  readonly sunday: string;
-  readonly mon: string;
-  readonly tue: string;
-  readonly wed: string;
-  readonly thu: string;
-  readonly fri: string;
-  readonly sat: string;
-  readonly sun: string;
-  readonly availableSlot: (teacherName: string, time: string) => string;
 }
 
 export interface WeeklyAvailabilityGridProps {

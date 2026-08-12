@@ -10,7 +10,7 @@ import type { Control, FieldPath, FieldValues, UseFormRegister } from "react-hoo
 import { Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { CountryDisplay } from "@/frontend/common/components/ui/display";
-import { AppDatePicker } from "@/frontend/common/components/ui/form";
+import { DateOfBirthControllerField } from "@/frontend/common/components/ui/form/field";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
 import { Gender, type ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -188,40 +188,11 @@ function ProfilePersonalSectionEdit<T extends ProfilePersonalFormFields & FieldV
           />
         ) : null}
         {canViewField("dateOfBirth") ? (
-          <Controller
-            name={personalFieldPath<T>("dateOfBirth")}
+          <DateOfBirthControllerField
             control={control}
-            render={({ field, fieldState }) => {
-              const dateValue = field.value ? new Date(field.value) : null;
-              const validDate = dateValue && !Number.isNaN(dateValue.getTime()) ? dateValue : null;
-
-              return (
-                <AppDatePicker
-                  value={validDate}
-                  onChange={(date: Date | null) => {
-                    if (date && !Number.isNaN(date.getTime())) {
-                      const year = date.getFullYear();
-                      const month = String(date.getMonth() + 1).padStart(2, "0");
-                      const day = String(date.getDate()).padStart(2, "0");
-                      field.onChange(`${year}-${month}-${day}`);
-                    } else {
-                      field.onChange("");
-                    }
-                  }}
-                  disabled={!canEditField("dateOfBirth")}
-                  slotProps={{
-                    textField: {
-                      label: labels.dateOfBirth,
-                      variant: "outlined",
-                      fullWidth: true,
-                      error: Boolean(fieldState.error),
-                      helperText: fieldState.error?.message,
-                      slotProps: { htmlInput: { autoComplete: "off" } },
-                    },
-                  }}
-                />
-              );
-            }}
+            name={personalFieldPath<T>("dateOfBirth")}
+            label={labels.dateOfBirth}
+            disabled={!canEditField("dateOfBirth")}
           />
         ) : null}
         {canViewField("gender") ? (

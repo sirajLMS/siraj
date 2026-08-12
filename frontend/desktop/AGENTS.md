@@ -47,6 +47,11 @@ import { DateNavigatorDesktop } from "@/frontend/common/components/ui/filter";
 // ❌ WRONG - DesktopCardGrid does NOT exist — there are no standalone Desktop*-prefixed primitives
 ```
 
+### 3a. Scaffold Import Rule (Cross-Tier)
+- Desktop view variants (`.desktop.tsx`) that share logic with mobile variants MUST import the shared scaffold from `__shared__/` directories — never from sibling mobile paths
+- Scaffold files (`*Shared.tsx`) live in `frontend/common/views/.../components/__shared__/` or `frontend/desktop/views/.../__shared__/`
+- See `docs/frontend/ui-shared-scaffold-pattern.md` for the complete pattern
+
 ### 4. Switcher Pattern (ResponsiveViewSwitch)
 - Parent switchers live at `frontend/common/views/dashboard/<domain>/XxView.tsx` (the tier-neutral home)
 - Desktop variants: dynamically imported from `frontend/desktop/views/dashboard/<domain>/*.desktop.tsx`

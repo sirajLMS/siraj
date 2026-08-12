@@ -1,6 +1,7 @@
 import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import type { DBTransaction } from "@/backend/db/db.types";
+import type { QueryDbHandle } from "@/backend/db/drizzleDb";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
 import type { CurrencyCode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
@@ -91,6 +92,27 @@ async function fetchPaidAmountsByGroup(
   return paidByGroup;
 }
 
+/**
+ * Builds the shared attendance aggregation SELECT query fragment.
+ * Used by both the STUDENT-grouped and teacher/date-grouped branches of
+ * `generateAttendanceReport` to avoid column-mapping duplication.
+ */
+function buildAttendanceSelectQuery(
+  q: QueryDbHandle | DBTransaction,
+  groupKeyExpr: ReturnType<typeof buildGroupingExpressions>["groupKeyExpr"],
+  groupLabelExpr: ReturnType<typeof buildGroupingExpressions>["groupLabelExpr"]
+) {
+  return q.select({
+    groupKey: sql<string>`${groupKeyExpr}::text`,
+    groupLabel: sql<string>`COALESCE(${groupLabelExpr}, ${groupKeyExpr}::text)`,
+    takenClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)::int`,
+    absentClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)::int`,
+    leaveClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)::int`,
+    pendingClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'PENDING' THEN 1 ELSE 0 END)::int`,
+    totalHours: sql<number>`SUM(${classInstances.durationMinutes}::float / 60.0)::float`,
+  });
+}
+
 function buildGroupingExpressions(groupBy: ReportGroupingMode) {
   if (groupBy === ReportGroupingMode.DATE) {
     return {
@@ -141,16 +163,7 @@ export namespace ReportRepository {
       const { groupKeyExpr, groupLabelExpr } = buildGroupingExpressions(filters.groupBy);
 
       if (filters.groupBy === ReportGroupingMode.STUDENT) {
-        const results = await q
-          .select({
-            groupKey: sql<string>`${groupKeyExpr}::text`,
-            groupLabel: sql<string>`COALESCE(${groupLabelExpr}, ${groupKeyExpr}::text)`,
-            takenClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)::int`,
-            absentClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)::int`,
-            leaveClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)::int`,
-            pendingClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'PENDING' THEN 1 ELSE 0 END)::int`,
-            totalHours: sql<number>`SUM(${classInstances.durationMinutes}::float / 60.0)::float`,
-          })
+        const results = await buildAttendanceSelectQuery(q, groupKeyExpr, groupLabelExpr)
           .from(classInstances)
           .leftJoin(students, eq(students.id, classInstances.studentId))
           .leftJoin(teachers, eq(teachers.id, classInstances.teacherId))
@@ -169,16 +182,7 @@ export namespace ReportRepository {
         );
       }
 
-      const results = await q
-        .select({
-          groupKey: sql<string>`${groupKeyExpr}::text`,
-          groupLabel: sql<string>`COALESCE(${groupLabelExpr}, ${groupKeyExpr}::text)`,
-          takenClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)::int`,
-          absentClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)::int`,
-          leaveClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)::int`,
-          pendingClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'PENDING' THEN 1 ELSE 0 END)::int`,
-          totalHours: sql<number>`SUM(${classInstances.durationMinutes}::float / 60.0)::float`,
-        })
+      const results = await buildAttendanceSelectQuery(q, groupKeyExpr, groupLabelExpr)
         .from(classInstances)
         .leftJoin(teachers, eq(teachers.id, classInstances.teacherId))
         .leftJoin(users, eq(users.id, teachers.userId))

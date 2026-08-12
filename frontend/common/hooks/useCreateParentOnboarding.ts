@@ -1,12 +1,11 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import { useState } from "react";
 import {
   type ParentOnboardingInput,
   type ParentOnboardingResult,
   PaymentDirection,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { createParentMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { createUserMeetingConfigMutationDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
+import { usePersistMeetingConfig } from "@/frontend/common/hooks/usePersistMeetingConfig";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -44,37 +43,9 @@ function buildParentInput(formData: ParentOnboardingFormData): ParentOnboardingI
 
 export function useCreateParentOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createParentMutationDocument);
-  const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
   const client = useApolloClient();
   const { cache } = client;
-
-  const persistMeetingConfig = async (formData: ParentOnboardingFormData, userId: string) => {
-    if (!formData.meetingProvider?.id || !formData.meetingUrl?.trim()) {
-      return;
-    }
-    try {
-      await client.mutate({
-        mutation: createUserMeetingConfigMutationDocument,
-        variables: {
-          input: {
-            userId,
-            providerId: formData.meetingProvider.id,
-            label: formData.meetingLabel?.trim() || null,
-            isDefault: true,
-            password: null,
-            details: {
-              meetingUrl: formData.meetingUrl.trim(),
-              username: null,
-              tenantId: null,
-            },
-          },
-        },
-      });
-    } catch (meetingErr) {
-      logger.warn("Parent created but meeting config failed", { meetingErr });
-      setMeetingConfigWarning(true);
-    }
-  };
+  const { persistMeetingConfig, meetingConfigWarning, clearMeetingConfigWarning } = usePersistMeetingConfig();
 
   const persistCreatedParent = (created: ParentOnboardingResult) => {
     cache.evict({ id: "ROOT_QUERY", fieldName: "parentDirectory" });
@@ -94,7 +65,7 @@ export function useCreateParentOnboarding() {
       const created = result.data?.createParent;
       if (created) {
         if (created.userId) {
-          await persistMeetingConfig(formData, created.userId);
+          await persistMeetingConfig(formData, created.userId, "Parent");
         }
         return persistCreatedParent(created);
       }
@@ -116,6 +87,6 @@ export function useCreateParentOnboarding() {
     error,
     data,
     meetingConfigWarning,
-    clearMeetingConfigWarning: () => setMeetingConfigWarning(false),
+    clearMeetingConfigWarning,
   };
 }

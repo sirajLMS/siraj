@@ -3,25 +3,23 @@
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   userBillingProfileInvoiceHistoryQueryDocument,
   userBillingProfileSummaryQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
-import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import type { FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import {
   formatBillingCurrencyTotals,
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserBillingProfileStore } from "@/frontend/common/stores/userBillingProfileStore";
-import { useUserStore } from "@/frontend/common/stores/userStore";
+import { useBillingPermissions } from "@/frontend/common/views/dashboard/billing/hooks/useBillingPermissions";
 import { useBillingPollInterval } from "@/frontend/common/views/dashboard/billing/hooks/useBillingPollInterval";
+import { useDownloadInvoicePdf } from "@/frontend/common/views/dashboard/billing/hooks/useDownloadInvoicePdf";
 import { useRefetchOnWindowFocus } from "@/frontend/common/views/dashboard/billing/hooks/useRefetchOnWindowFocus";
 import type {
   MarkPaidInvoiceTarget,
@@ -32,14 +30,17 @@ import type {
   ParentInvoiceRow,
 } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
-import { buildBillingLabels } from "@/frontend/common/views/dashboard/billing/utils/buildBillingLabels";
+import {
+  useBillingFxMessages,
+  useBillingTranslationBase,
+} from "@/frontend/common/views/dashboard/billing/utils/billingTranslationBase";
 import {
   formatBillingDate,
   formatBillingMonth,
 } from "@/frontend/common/views/dashboard/billing/utils/formatBillingDate";
 import { deriveParentInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
-import { type BillingLabels, type ErrorsLabels, Translation, useAppTranslation } from "@/shared/locale";
+import { type BillingLabels, type ErrorsLabels, Translation } from "@/shared/locale";
 
 export type UserBillingProfileViewModel = UserBillingProfileViewProps;
 
@@ -106,37 +107,13 @@ function buildSummary(
   };
 }
 
-/** Translations, locale, and labels shared by both tiers. */
-function useBillingProfileTranslations() {
-  const t = useAppTranslation(Translation.Dashboard.Billing);
-  const tProfile = useAppTranslation(Translation.Profile.Teacher);
-  const tProfileRoot = useAppTranslation(Translation.Profile.Base);
-  const tErrors = useAppTranslation(Translation.Errors);
-  const tc = useAppTranslation(Translation.Common);
-  const locale = useAppLocale();
-  const labels = buildBillingLabels(t);
-  const isImpersonating = useImpersonation().isImpersonating;
-  const billingActionsDisabled = isImpersonating;
-  return {
-    t,
-    tProfile,
-    tProfileRoot,
-    tErrors,
-    tc,
-    locale,
-    labels,
-    isImpersonating,
-    billingActionsDisabled,
-  };
-}
-
 /** FX display message cache memoized on the translation slices that feed it. */
 function useBillingProfileFxMessages(
   tProfile: { convertedAmount: (a: string, b: string, c: string, d: string) => string },
   tErrors: ErrorsLabels,
   tProfileRoot: { convertedTotalApprox: (a: string, b: string) => string }
 ): FxDisplayMessages {
-  return useMemo(() => buildFxDisplayMessages(tProfile, tErrors, tProfileRoot), [tProfile, tErrors, tProfileRoot]);
+  return useBillingFxMessages(tProfile, tErrors, tProfileRoot);
 }
 
 /** Local search input + debounced search-string derivation. */
@@ -275,13 +252,7 @@ function useBillingProfileSummary(
 
 /** Permission gates derived once from the user store. */
 function useBillingProfilePermissions() {
-  const hasPermission = useUserStore(state => state.hasPermission);
-  return {
-    canManage: hasPermission(AppPermission.BillingUpdateStatusPaid),
-    canSubmitProof: hasPermission(AppPermission.BillingSubmitPaymentProof),
-    canCreate: hasPermission(AppPermission.BillingCreateInvoice),
-    canView: hasPermission(AppPermission.BillingViewHistory),
-  };
+  return useBillingPermissions();
 }
 
 /** Pagination slice from the shared Zustand store. */
@@ -447,15 +418,10 @@ function useBillingProfileActions({
     [refreshBillingData, showFeedback, labels]
   );
 
-  const handleDownloadPdf = useCallback(
-    (invoiceId: string) => {
-      const popup = window.open(`/api/invoices/${invoiceId}/download`, "_blank", "noopener,noreferrer");
-      if (!popup) {
-        showFeedback(labels.notifications.popupBlocked, "error");
-      }
-    },
-    [showFeedback, labels]
-  );
+  const handleDownloadPdf = useDownloadInvoicePdf({
+    showFeedback,
+    popupBlockedLabel: labels.notifications.popupBlocked,
+  });
 
   const handleQuickPay = useCallback(() => {
     runQuickPayFlow({
@@ -501,8 +467,7 @@ export function useUserBillingProfileViewModel(
 ): UserBillingProfileViewModel {
   const { userId } = props;
 
-  const { tProfile, tProfileRoot, tErrors, tc, locale, labels, billingActionsDisabled } =
-    useBillingProfileTranslations();
+  const { tProfile, tProfileRoot, tErrors, tc, locale, labels, billingActionsDisabled } = useBillingTranslationBase();
   useDocumentTitle(null, Translation.Dashboard.Billing, "billingProfileTitle");
 
   const { searchQuery, debouncedSearch, isSearchPending, handleSearchChange } = useBillingProfileSearch();

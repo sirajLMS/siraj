@@ -1,47 +1,22 @@
 "use client";
 
-import type { SxProps, Theme } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
-import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
-import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import {
+  TimezoneDisplay,
+  type TimezoneDisplayProps,
+} from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 
-export type DesktopTimezoneDisplayProps = {
-  readonly timezone?: string | null;
-  readonly showOffset?: boolean;
-  readonly fallback?: string;
-  readonly typographyVariant?: UiTypographyVariant;
-  readonly sx?: SxProps<Theme>;
-};
+export type DesktopTimezoneDisplayProps = TimezoneDisplayProps;
 
+const DEFAULT_TYPOGRAPHY_VARIANT = "bodyMd" as const;
+
+/**
+ * Desktop-tier timezone display. Delegates to the shared `TimezoneDisplay`
+ * with a desktop default `typographyVariant` of `"bodyMd"`.
+ */
 export const DesktopTimezoneDisplay = ({
-  timezone,
-  showOffset = true,
-  fallback,
-  typographyVariant = "bodyMd",
-  sx,
-}: DesktopTimezoneDisplayProps): React.JSX.Element | null => {
-  const locale = useAppLocale();
-  const fallbackNode = fallback ? (
-    <Typography component="span" variant={typographyVariant} sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
-      {fallback}
-    </Typography>
-  ) : null;
-
-  if (!timezone) {
-    return fallbackNode;
-  }
-
-  const normalizedTimezone = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
-  const display = showOffset
-    ? getTimezoneSelectLabel(normalizedTimezone, locale)
-    : getTimezonePathLabel(normalizedTimezone, locale);
-
-  return (
-    <Typography component="span" variant={typographyVariant} sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
-      {display}
-    </Typography>
-  );
+  typographyVariant = DEFAULT_TYPOGRAPHY_VARIANT,
+  ...props
+}: Readonly<DesktopTimezoneDisplayProps>): React.JSX.Element | null => {
+  return <TimezoneDisplay {...props} typographyVariant={typographyVariant} />;
 };

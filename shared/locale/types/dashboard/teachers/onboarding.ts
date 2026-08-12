@@ -66,6 +66,8 @@ export interface TeacherOnboardingLabels {
     readonly salaryAmountRequired: string;
     readonly currencyRequired: string;
     readonly urlInvalid: string;
+    readonly meetingProviderRequired: string;
+    readonly meetingUrlRequired: string;
   };
   readonly optionalHint: string;
 }

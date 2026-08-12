@@ -68,6 +68,8 @@ export const dashboardTeacherOnboardingEn: TeacherOnboardingLabels = {
     salaryAmountRequired: "Hourly rate is required",
     currencyRequired: "Currency is required",
     urlInvalid: "Invalid URL format",
+    meetingProviderRequired: "Meeting provider is required",
+    meetingUrlRequired: "Meeting URL is required",
   },
   optionalHint: "Optional",
 };

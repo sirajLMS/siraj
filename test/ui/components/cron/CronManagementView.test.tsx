@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { CronRunStatus, CronScheduleStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 const mockLabels: CronLabels = {
   pageTitle: "Cron Schedules",
@@ -167,18 +168,7 @@ await mock.module("@/frontend/common/views/dashboard/cron/useCronViewModel", () 
   useCronViewModel: () => mockViewModel,
 }));
 
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-  useRouter: () => ({
-    push: () => {},
-    back: () => {},
-    forward: () => {},
-    refresh: () => {},
-    replace: () => {},
-    prefetch: () => {},
-  }),
-  usePathname: () => "/dashboard",
-}));
+await mockNextNavigation("/dashboard", { includeI18nMocks: false, includeRedirect: false, includeSearchParams: false });
 
 await mock.module("@/frontend/common/utils/logger", () => ({
   logger: {

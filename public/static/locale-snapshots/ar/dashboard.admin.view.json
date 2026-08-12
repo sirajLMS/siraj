@@ -63,7 +63,7 @@
     "noData": "لا تتوفر بيانات نشاط لهذه الجلسة."
   },
   "rate": {
-    "rateSectionTitle": "السعر الفعلي",
+    "rateSectionTitle": "السعر الفعري",
     "effectiveRateLabel": "السعر بالساعة",
     "rateCurrencyLabel": "العملة",
     "rateSourceLabel": "مصدر السعر",

@@ -106,10 +106,24 @@ export function writeDataRow(
 ): void {
   const isAlt = idx % 2 === 1;
   values.forEach((val, col) => {
-    const cell = XLSX.utils.encode_cell({ r: row, c: col });
-    const style = getCellStyle(col, isAlt, spec);
-    ws[cell] = { v: val, t: typeof val === "number" ? "n" : "s", s: style };
+    writeCell(XLSX, ws, row, col, val, getCellStyle(col, isAlt, spec));
   });
+}
+
+export function writeCell(
+  XLSX: XLSXModule,
+  ws: WorkSheet,
+  row: number,
+  col: number,
+  value: string | number,
+  style: CellStyle
+): void {
+  const cell = XLSX.utils.encode_cell({ r: row, c: col });
+  ws[cell] = { v: value, t: typeof value === "number" ? "n" : "s", s: style };
+}
+
+export function appendMergedRow(ws: WorkSheet, row: number, totalCols: number): void {
+  ws["!merges"]?.push({ s: { r: row, c: 0 }, e: { r: row, c: totalCols - 1 } });
 }
 
 export function resolveStatusValue(status: string | null | undefined, statusLabels: Record<string, string>): string {

@@ -7,7 +7,7 @@ import { classInstances, students, teacherAssignments, users } from "@/backend/d
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/backend/enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 const NON_EXISTENT_ID = "00000000-0000-0000-0000-000000000000";
 

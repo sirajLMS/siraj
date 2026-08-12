@@ -4,10 +4,12 @@ import {
   bodyAltStyle,
   bodyStyle,
   EXPORT_FONT,
-  headerStyle,
   nameAltStyle,
   nameStyle,
   titleStyle,
+  writeCell as writeSharedCell,
+  writeHeaderRow as writeSharedHeaderRow,
+  type XLSXModule,
 } from "@/frontend/common/utils/excel-export/shared-export-logic";
 import type { ReportLedgerRow, ReportsSummary } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import {
@@ -49,8 +51,6 @@ interface ReportExportData {
   readonly locale: string;
   readonly fxMessages: FormatCurrencyMessages;
 }
-
-export type XLSXModule = typeof import("xlsx-js-style");
 
 const subtitleStyle: CellStyle = {
   font: { name: EXPORT_FONT, sz: 11, color: { rgb: "616161" } },
@@ -99,7 +99,7 @@ export async function exportAttendanceReport(data: ReportExportData): Promise<vo
   const financialsCtx: FinancialsContext = { locale, fxMessages };
 
   writeTitleAndSubtitle(XLSX, ws, labels.pageTitle, fromDate, toDate, totalCols);
-  writeHeaderRow(XLSX, ws, headers);
+  writeHeaders(XLSX, ws, headers);
   writeDataRows(XLSX, ws, rows, showFinancials, financialColStart, financialsCtx);
   writeTotalsRow(XLSX, ws, rows, summary, labels.totalsLabel, showFinancials, financialsCtx);
   applyColumnWidths(ws, headers, rows, showFinancials);
@@ -146,12 +146,8 @@ function writeTitleAndSubtitle(
   ws["!merges"].push({ s: { r: 1, c: 0 }, e: { r: 1, c: totalCols - 1 } });
 }
 
-function writeHeaderRow(XLSX: XLSXModule, ws: WorkSheet, headers: readonly string[]): void {
-  const headerRow = 3;
-  headers.forEach((header, col) => {
-    const cell = XLSX.utils.encode_cell({ r: headerRow, c: col });
-    ws[cell] = { v: header, t: "s", s: headerStyle };
-  });
+function writeHeaders(XLSX: XLSXModule, ws: WorkSheet, headers: readonly string[]): void {
+  writeSharedHeaderRow(XLSX, ws, headers, 3);
 }
 
 function writeDataRows(
@@ -203,7 +199,6 @@ function writeRowCells(
   financialColStart: number
 ): void {
   values.forEach((val, col) => {
-    const cell = XLSX.utils.encode_cell({ r: rowIndex, c: col });
     const isFinancial = showFinancials && col >= financialColStart;
     const isName = col === 0;
 
@@ -211,11 +206,7 @@ function writeRowCells(
     if (isName) style = dataIdx % 2 === 1 ? nameAltStyle : nameStyle;
     else style = getBodyStyles(dataIdx, isFinancial);
 
-    ws[cell] = {
-      v: val,
-      t: typeof val === "number" ? "n" : "s",
-      s: style,
-    };
+    writeSharedCell(XLSX, ws, rowIndex, col, val, style);
   });
 }
 
@@ -245,12 +236,7 @@ function writeTotalsRow(
     : baseTotals;
 
   totalsValues.forEach((val, col) => {
-    const cell = XLSX.utils.encode_cell({ r: totalsRow, c: col });
-    ws[cell] = {
-      v: val,
-      t: typeof val === "number" ? "n" : "s",
-      s: totalsStyle,
-    };
+    writeSharedCell(XLSX, ws, totalsRow, col, val, totalsStyle);
   });
 }
 

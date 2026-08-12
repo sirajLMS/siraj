@@ -1,4 +1,9 @@
 import type { RecurringSchedulesPaginatedResult } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  RecurringSchedulesListActionLabels,
+  RecurringSchedulesListColumnLabels,
+  RecurringSchedulesListFilterLabels,
+} from "@/shared/locale/types/dashboard/classes/recurringSchedulesList";
 
 export interface RecurringSchedulesListShellLabels {
   readonly pageTitle: string;
@@ -6,25 +11,6 @@ export interface RecurringSchedulesListShellLabels {
   readonly breadcrumbs: readonly { readonly label: string; readonly href?: string }[];
   readonly emptyMessage: string;
   readonly loadError: string;
-}
-
-export interface RecurringSchedulesListColumnLabels {
-  readonly student: string;
-  readonly teacher: string;
-  readonly schedule: string;
-  readonly duration: string;
-  readonly rate: string;
-  readonly actions: string;
-}
-
-export interface RecurringSchedulesListActionLabels {
-  readonly view: string;
-  readonly edit: string;
-}
-
-export interface RecurringSchedulesListFilterLabels {
-  readonly searchPlaceholder: string;
-  readonly searchLabel: string;
 }
 
 export interface RecurringSchedulesListLabelsBySection {

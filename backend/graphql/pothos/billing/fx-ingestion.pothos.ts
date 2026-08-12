@@ -7,6 +7,7 @@ import {
   FxSyncStatusPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import {
   FxIngestionService,
@@ -22,27 +23,9 @@ import type {
   FxProviderConfigReturnType,
   FxSyncHealthReturnType,
   FxSyncRunReturnType,
-  PaginationArgs,
-  PaginationInput,
   RefreshExchangeRatesResult,
   UpsertManualExchangeRateResult,
 } from "@/backend/types";
-import { PaginationArgs as PaginationArgsClass } from "@/backend/types";
-
-function parsePaginationArgs(input: PaginationInput | null | undefined): PaginationArgs | null {
-  if (!input) {
-    return null;
-  }
-  return new PaginationArgsClass({
-    first: input.first ?? null,
-    skip: input.skip ?? null,
-    after: input.after ?? null,
-    before: input.before ?? null,
-    last: input.last ?? null,
-    page: input.page ?? null,
-    maxCount: input.maxCount ?? null,
-  });
-}
 
 function isFxProvider(value: string): value is FxProvider {
   return (Object.values(FxProvider) as readonly string[]).includes(value);

@@ -1,17 +1,16 @@
 "use client";
 
-import { Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { ClassAuditDetailsCard } from "@/frontend/common/views/dashboard/classes/audit/ClassAuditDetailsCard";
 import type { ClassAuditViewProps } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
-import { ClassAuditGrid } from "@/frontend/common/views/dashboard/classes/audit/components/classAuditGrid";
-import { buildDetailsLabels } from "@/frontend/common/views/dashboard/classes/audit/utils";
+import {
+  ClassAuditViewGridShared,
+  type ClassAuditViewGridSlotConfig,
+} from "@/frontend/common/views/dashboard/classes/audit/components/__shared__/classAuditViewGridShared";
 import { DesktopFilterButton, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { AdminNoteCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/adminNoteCard.desktop";
 import { CommunicationLogCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/communicationLogCard.desktop";
 import { OnlineMeetingCardDesktop } from "@/frontend/desktop/views/dashboard/classes/audit/onlineMeetingCard.desktop";
-import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 const StyledGenerateReportButton = styled(DesktopFilterButton)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -33,7 +32,13 @@ export function ClassAuditViewDesktop({
   onEditAdminNote,
   isResending,
 }: Readonly<ClassAuditViewProps>) {
-  const detailsLabels = buildDetailsLabels(labels);
+  const gridSlots: ClassAuditViewGridSlotConfig = {
+    OnlineMeetingCard: OnlineMeetingCardDesktop,
+    gridSlots: {
+      CommunicationLogCard: CommunicationLogCardDesktop,
+      AdminNoteCard: AdminNoteCardDesktop,
+    },
+  };
 
   return (
     <DesktopPageContainer>
@@ -56,39 +61,17 @@ export function ClassAuditViewDesktop({
         }
       />
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, lg: 8 }} sx={{ order: { xs: 1, lg: 1 } }}>
-          <ClassAuditDetailsCard audit={audit} labels={detailsLabels} />
-        </Grid>
-
-        <Grid size={{ xs: 12, lg: 4 }} sx={{ order: { xs: 2, lg: 2 } }}>
-          <OnlineMeetingCardDesktop
-            meetingInfo={audit.meetingInfo}
-            labels={labels.meetingInfo}
-            showJoin={isJoinableClassInstance(audit.status, audit.outcome, { isFrozen: audit.isFrozen ?? false })}
-          />
-        </Grid>
-
-        <ClassAuditGrid
-          communications={audit.communications}
-          communicationLogLabels={labels.communicationLog}
-          onResendNotifications={onResendNotifications}
-          isResending={isResending}
-          students={audit.students}
-          registeredStudentCount={audit.registeredStudentCount ?? 0}
-          registeredStudentsLabels={labels.registeredStudents}
-          onExportStudents={onExportStudents}
-          onViewStudent={onViewStudent}
-          adminNote={audit.adminNote}
-          adminNoteLabels={labels.adminNote}
-          onUpdateAdminNote={onUpdateAdminNote}
-          onEditAdminNote={onEditAdminNote}
-          slots={{
-            CommunicationLogCard: CommunicationLogCardDesktop,
-            AdminNoteCard: AdminNoteCardDesktop,
-          }}
-        />
-      </Grid>
+      <ClassAuditViewGridShared
+        audit={audit}
+        labels={labels}
+        onResendNotifications={onResendNotifications}
+        isResending={isResending}
+        onExportStudents={onExportStudents}
+        onViewStudent={onViewStudent}
+        onUpdateAdminNote={onUpdateAdminNote}
+        onEditAdminNote={onEditAdminNote}
+        slots={gridSlots}
+      />
     </DesktopPageContainer>
   );
 }

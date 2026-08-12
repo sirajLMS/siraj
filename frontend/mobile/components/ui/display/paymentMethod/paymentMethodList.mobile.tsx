@@ -4,6 +4,10 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import { IconButton, Stack, Typography } from "@mui/material";
+import {
+  isPaymentDirectionLabelKey,
+  isPaymentMethodTypeLabelKey,
+} from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodLabelHelpers";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
@@ -12,28 +16,6 @@ import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display";
 import { MobilePaymentMethodDisplay } from "@/frontend/mobile/components/ui/display/paymentMethod/paymentMethodDisplay.mobile";
 import { Translation, useAppTranslation } from "@/shared/locale";
-import type { PaymentMethodDirectionLabels, PaymentMethodTypeLabels } from "@/shared/locale/types/ui";
-
-type PaymentMethodTypeLabelKey = keyof PaymentMethodTypeLabels;
-type PaymentDirectionLabelKey = keyof PaymentMethodDirectionLabels;
-
-const PAYMENT_METHOD_TYPE_LABEL_KEYS: readonly PaymentMethodTypeLabelKey[] = [
-  "mobileWallet",
-  "paymentLink",
-  "onlineAccount",
-  "bankTransfer",
-  "cash",
-  "proofUpload",
-];
-const PAYMENT_DIRECTION_LABEL_KEYS: readonly PaymentDirectionLabelKey[] = ["in", "out", "both"];
-
-function isPaymentMethodTypeLabelKey(value: string): value is PaymentMethodTypeLabelKey {
-  return (PAYMENT_METHOD_TYPE_LABEL_KEYS as readonly string[]).includes(value);
-}
-
-function isPaymentDirectionLabelKey(value: string): value is PaymentDirectionLabelKey {
-  return (PAYMENT_DIRECTION_LABEL_KEYS as readonly string[]).includes(value);
-}
 
 export type { PaymentMethodRow };
 

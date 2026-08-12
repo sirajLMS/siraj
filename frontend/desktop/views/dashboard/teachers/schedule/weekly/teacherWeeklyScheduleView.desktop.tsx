@@ -1,21 +1,15 @@
 "use client";
 
 import { AddOutlined, DeleteOutlined, TimerOutlined } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import { useWeeklyScheduleStore } from "@/frontend/common/stores/weeklyScheduleStore";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import {
+  ClearScheduleDialogShared,
+  ScheduleLastUpdatedShared,
+  TeacherWeeklyScheduleViewShared,
+  type TeacherWeeklyScheduleViewSharedSlots,
+} from "@/frontend/common/views/dashboard/teachers/schedule/weekly/__shared__/teacherWeeklyScheduleViewShared";
 import type { TeacherWeeklyScheduleViewProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
@@ -25,7 +19,7 @@ import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboar
 type ScheduleLabels = TeacherWeeklyScheduleLabels;
 type Schedule = NonNullable<TeacherWeeklyScheduleViewProps["schedule"]>;
 
-function ScheduleHeaderActions({
+function DesktopHeaderActions({
   labels,
   hasScheduleCreateClass,
   hasScheduleClearWeekly,
@@ -62,7 +56,7 @@ function ScheduleHeaderActions({
   );
 }
 
-function ScheduleWorkloadMetrics({ labels, schedule }: Readonly<{ labels: ScheduleLabels; schedule: Schedule }>) {
+function DesktopWorkloadMetrics({ labels, schedule }: Readonly<{ labels: ScheduleLabels; schedule: Schedule }>) {
   return (
     <DesktopMetricCardGrid
       metrics={
@@ -109,7 +103,7 @@ function LegendSwatch({ variant, labels }: Readonly<{ variant: "booked" | "avail
   );
 }
 
-function ScheduleLegend({ labels, schedule }: Readonly<{ labels: ScheduleLabels; schedule: Schedule }>) {
+function DesktopLegendBar({ labels, schedule }: Readonly<{ labels: ScheduleLabels; schedule: Schedule }>) {
   return (
     <Box
       sx={{
@@ -125,100 +119,33 @@ function ScheduleLegend({ labels, schedule }: Readonly<{ labels: ScheduleLabels;
         <LegendSwatch variant="booked" labels={labels} />
         <LegendSwatch variant="available" labels={labels} />
       </Box>
-      <Typography variant="caption" sx={theme => ({ color: theme.palette.text.disabled })}>
-        {labels.grid.lastUpdated(schedule.lastUpdated)}
-      </Typography>
+      <ScheduleLastUpdatedShared labels={labels} schedule={schedule} />
     </Box>
   );
 }
 
-function ClearScheduleDialog({
-  labels,
-  open,
-  onCancel,
-  onConfirm,
-}: Readonly<{ labels: ScheduleLabels; open: boolean; onCancel: () => void; onConfirm: () => void }>) {
-  return (
-    <Dialog open={open} onClose={onCancel}>
-      <DialogTitle>{labels.dialogs.clearScheduleTitle}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{labels.dialogs.clearScheduleMessage}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onCancel}>{labels.dialogs.cancel}</Button>
-        <Button onClick={onConfirm} color="error" variant="contained">
-          {labels.actions.clearSchedule}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
+const DESKTOP_SLOTS: TeacherWeeklyScheduleViewSharedSlots = {
+  PageContainer: DesktopPageContainer,
+  PageHeader: DesktopPageHeader,
+  HeaderActions: DesktopHeaderActions,
+  WorkloadMetrics: DesktopWorkloadMetrics,
+  ScheduleGrid: ({ schedule, onRemoveClass, hasScheduleDeleteClass, labels, meetingJoinLabels }) => (
+    <WeeklyScheduleGrid
+      classes={schedule.classes}
+      onRemoveClass={onRemoveClass}
+      hasScheduleDeleteClass={hasScheduleDeleteClass}
+      labels={labels}
+      meetingJoinLabels={meetingJoinLabels}
+    />
+  ),
+  LegendBar: DesktopLegendBar,
+};
 
-export function TeacherWeeklyScheduleViewDesktop({
-  schedule,
-  onRemoveClass,
-  onClearSchedule,
-  onAddClass,
-  hasScheduleCreateClass,
-  hasScheduleClearWeekly,
-  hasScheduleViewWorkload,
-  hasScheduleDeleteClass,
-  labels,
-  meetingJoinLabels,
-}: Readonly<TeacherWeeklyScheduleViewProps>) {
-  const t = labels;
-  const clearDialogOpen = useWeeklyScheduleStore(state => state.clearDialogOpen);
-  const setClearDialogOpen = useWeeklyScheduleStore(state => state.setClearDialogOpen);
-
-  if (!schedule) return null;
-
-  const handleConfirmClear = () => {
-    setClearDialogOpen(false);
-    onClearSchedule?.();
-  };
-
-  const handleCancelClear = () => {
-    setClearDialogOpen(false);
-  };
-
-  const breadcrumbs = [{ label: t.breadcrumbs.teachers, href: "/teachers" }, { label: t.breadcrumbs.schedule }];
-
-  return (
-    <DesktopPageContainer>
-      <DesktopPageHeader
-        title={t.pageTitle(schedule.teacherName)}
-        breadcrumbs={breadcrumbs}
-        actions={
-          <ScheduleHeaderActions
-            labels={t}
-            hasScheduleCreateClass={hasScheduleCreateClass}
-            hasScheduleClearWeekly={hasScheduleClearWeekly}
-            onAddClass={onAddClass}
-            onOpenClearDialog={() => setClearDialogOpen(true)}
-          />
-        }
-      />
-
-      {hasScheduleViewWorkload ? <ScheduleWorkloadMetrics labels={t} schedule={schedule} /> : null}
-
-      <WeeklyScheduleGrid
-        classes={schedule.classes}
-        onRemoveClass={onRemoveClass}
-        hasScheduleDeleteClass={hasScheduleDeleteClass}
-        labels={labels}
-        meetingJoinLabels={meetingJoinLabels}
-      />
-
-      <ScheduleLegend labels={t} schedule={schedule} />
-
-      <ClearScheduleDialog
-        labels={t}
-        open={clearDialogOpen}
-        onCancel={handleCancelClear}
-        onConfirm={handleConfirmClear}
-      />
-    </DesktopPageContainer>
-  );
+export function TeacherWeeklyScheduleViewDesktop(props: Readonly<TeacherWeeklyScheduleViewProps>) {
+  return <TeacherWeeklyScheduleViewShared {...props} slots={DESKTOP_SLOTS} />;
 }
 
 export default TeacherWeeklyScheduleViewDesktop;
+
+// Re-export shared component for potential reuse
+export { ClearScheduleDialogShared };

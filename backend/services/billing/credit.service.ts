@@ -89,12 +89,7 @@ export namespace CreditService {
    * admin user) and the `randomUUID`-based idempotency key generator used by
    * the public `recordPurchase` method.
    */
-  export async function recordPurchaseIfMissing(
-    actorUserId: string,
-    input: CreditTransactionSubmitInput,
-    idempotencyKey: string,
-    tErrors: ErrorsLabels
-  ): Promise<CreditTransactionReturnType | null> {
+  function validatePurchaseInput(input: CreditTransactionSubmitInput, tErrors: ErrorsLabels): void {
     if (!input.studentId || input.studentId.trim().length === 0) {
       throw new ValidationError(tErrors.credit.invalidInput);
     }
@@ -102,6 +97,15 @@ export namespace CreditService {
     if (!Number.isFinite(input.hours) || input.hours <= 0) {
       throw new ValidationError(tErrors.credit.invalidInput);
     }
+  }
+
+  export async function recordPurchaseIfMissing(
+    actorUserId: string,
+    input: CreditTransactionSubmitInput,
+    idempotencyKey: string,
+    tErrors: ErrorsLabels
+  ): Promise<CreditTransactionReturnType | null> {
+    validatePurchaseInput(input, tErrors);
 
     // V3-078: Idempotency check is INSIDE the transaction to eliminate the
     // TOCTOU race — a concurrent purchase with the same key could insert
@@ -148,13 +152,7 @@ export namespace CreditService {
   ): Promise<CreditTransactionReturnType> {
     await requirePermission(actorUserId, AppPermission.CREDITS_MANAGE, tErrors);
 
-    if (!input.studentId || input.studentId.trim().length === 0) {
-      throw new ValidationError(tErrors.credit.invalidInput);
-    }
-
-    if (!Number.isFinite(input.hours) || input.hours <= 0) {
-      throw new ValidationError(tErrors.credit.invalidInput);
-    }
+    validatePurchaseInput(input, tErrors);
 
     const idempotencyKey = CreditRepository.generateIdempotencyKey({
       studentId: input.studentId,

@@ -1,13 +1,11 @@
 import { z } from "zod";
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
 import { logger } from "@/backend/lib/logger";
-import type { IFxRateProvider } from "@/backend/services/fx/providers/IFxRateProvider";
-import type { FxProviderFetchResult } from "@/backend/types";
+import { FxAdapterBase } from "@/backend/services/fx/providers/__shared__/fxAdapterBase";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-import { parseCurrencyCode } from "@/shared/lib/enum";
+import { parseCurrencyCodeOrNull } from "@/shared/lib/enum";
 
 const OER_LATEST_ENDPOINT = "https://openexchangerates.org/api/latest.json";
-const REQUEST_TIMEOUT_MS = 10_000;
 
 /**
  * Zod schema for validating OpenExchangeRatesResponse at runtime.
@@ -21,8 +19,6 @@ const openExchangeRatesResponseSchema = z.object({
   rates: z.record(z.string(), z.number()),
 });
 
-export type OpenExchangeRatesResponse = z.infer<typeof openExchangeRatesResponseSchema>;
-
 /**
  * ISO 4217 symbols to request from OER. Excludes the base currency (USD) —
  * OER rejects `symbols=USD` because USD->USD is trivially 1 and would skew
@@ -32,16 +28,19 @@ const TARGET_SYMBOLS: readonly CurrencyCode[] = Object.values(CurrencyCode).filt
   (code): code is CurrencyCode => code !== CurrencyCode.USD
 );
 
-function buildSymbolsParam(): string {
-  return TARGET_SYMBOLS.join(",");
-}
-
-export class OpenExchangeRatesAdapter implements IFxRateProvider {
+/**
+ * OpenExchangeRates adapter. OER's base is USD, so rates are already in the
+ * USD hub — no normalisation needed beyond filtering non-numeric entries
+ * and ensuring the `USD -> USD = 1` entry is present.
+ */
+export class OpenExchangeRatesAdapter extends FxAdapterBase {
   readonly name = FxProvider.OpenExchangeRates;
+  protected readonly apiBase = CurrencyCode.USD;
 
   private readonly appId: string;
 
   constructor() {
+    super();
     const appId = process.env.OPENEXCHANGERATES_APP_ID;
     if (!appId) {
       throw new Error("OPENEXCHANGERATES_APP_ID environment variable is required for OpenExchangeRatesAdapter");
@@ -49,46 +48,36 @@ export class OpenExchangeRatesAdapter implements IFxRateProvider {
     this.appId = appId;
   }
 
-  validateConfig(): boolean {
-    try {
-      return Boolean(process.env.OPENEXCHANGERATES_APP_ID);
-    } catch (error) {
-      logger.error("OpenExchangeRates configuration validation failed", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return false;
+  protected validateConfigImpl(): boolean {
+    return Boolean(process.env.OPENEXCHANGERATES_APP_ID);
+  }
+
+  protected allSymbols(): readonly CurrencyCode[] {
+    return TARGET_SYMBOLS;
+  }
+
+  protected buildApiUrl(): string {
+    const symbols = this.buildSymbolsParam();
+    return (
+      `${OER_LATEST_ENDPOINT}?app_id=${encodeURIComponent(this.appId)}` +
+      `&base=USD&symbols=${encodeURIComponent(symbols)}`
+    );
+  }
+
+  protected validateResponse(parsed: unknown): void {
+    const oerResponse = openExchangeRatesResponseSchema.parse(parsed);
+
+    if (!oerResponse || typeof oerResponse.rates !== "object" || oerResponse.rates == null) {
+      throw new Error("OpenExchangeRates response missing rates object");
     }
   }
 
-  async fetchLatestRates(_locale?: string): Promise<FxProviderFetchResult> {
-    const symbols = buildSymbolsParam();
-    const url =
-      `${OER_LATEST_ENDPOINT}?app_id=${encodeURIComponent(this.appId)}` +
-      `&base=USD&symbols=${encodeURIComponent(symbols)}`;
-
-    logger.debug("OpenExchangeRates fetchLatestRates: requesting", {
-      symbolCount: TARGET_SYMBOLS.length,
-    });
-
-    const response = await fetch(url, {
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-      headers: { Accept: "application/json" },
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenExchangeRates request failed: HTTP ${response.status} ${response.statusText}`);
-    }
-
-    const raw = await response.json();
-    const parsed = openExchangeRatesResponseSchema.parse(raw);
-
-    if (!parsed || typeof parsed.rates !== "object" || parsed.rates == null) {
-      throw new Error("OpenExchangeRates response missing rates object");
-    }
+  protected parseRates(parsed: unknown): Map<CurrencyCode, string> {
+    const oerResponse = openExchangeRatesResponseSchema.parse(parsed);
 
     const rates = new Map<CurrencyCode, string>();
-    for (const [symbol, rate] of Object.entries(parsed.rates)) {
-      const code = parseCurrencyCode(symbol);
+    for (const [symbol, rate] of Object.entries(oerResponse.rates)) {
+      const code = parseCurrencyCodeOrNull(symbol);
       if (!code) {
         continue;
       }
@@ -108,20 +97,11 @@ export class OpenExchangeRatesAdapter implements IFxRateProvider {
     // OER base is USD, so USD->USD is implicitly 1.
     rates.set(CurrencyCode.USD, "1");
 
-    const timestamp = new Date(parsed.timestamp * 1000);
+    return rates;
+  }
 
-    logger.info("OpenExchangeRates fetchLatestRates: succeeded", {
-      base: parsed.base,
-      timestamp: timestamp.toISOString(),
-      rateCount: rates.size,
-    });
-
-    return {
-      provider: this.name,
-      base: CurrencyCode.USD,
-      timestamp,
-      rates,
-      rawResponse: parsed,
-    };
+  protected extractTimestamp(parsed: unknown): Date {
+    const oerResponse = openExchangeRatesResponseSchema.parse(parsed);
+    return new Date(oerResponse.timestamp * 1000);
   }
 }

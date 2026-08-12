@@ -1,47 +1,8 @@
 "use client";
 
-import { Box, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import { TotalsAmount } from "@/frontend/common/views/dashboard/reports/components/__shared__/ReportsTotalsShared";
 import type { ReportsTotalsSectionProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
-import type { ReportsTotalsDisplay } from "@/frontend/common/views/dashboard/reports/useReportsViewModel";
-
-function TotalsAmount({ display }: { readonly display: ReportsTotalsDisplay }) {
-  if (!display.breakdown) {
-    return (
-      <Typography
-        variant="bodyMd"
-        sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}
-        aria-label={display.ariaLabel}
-      >
-        {display.primary}
-      </Typography>
-    );
-  }
-
-  return (
-    <Stack spacing={0.25} sx={{ alignItems: "flex-end", maxWidth: "100%" }}>
-      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.primary.main, textAlign: "end" })}>
-        {display.primary}
-      </Typography>
-      <Tooltip title={display.breakdown} arrow>
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-            textAlign: "end",
-            maxWidth: 240,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          {display.breakdown}
-        </Typography>
-      </Tooltip>
-    </Stack>
-  );
-}
 
 export function ReportsTotalsSectionDesktop({
   summary,
@@ -74,7 +35,7 @@ export function ReportsTotalsSectionDesktop({
             {summary.totalHours}
           </Typography>
           <Box sx={{ textAlign: "end" }}>
-            <TotalsAmount display={totalsDisplay} />
+            <TotalsAmount display={totalsDisplay} breakdownMaxWidth={240} />
           </Box>
         </>
       )}

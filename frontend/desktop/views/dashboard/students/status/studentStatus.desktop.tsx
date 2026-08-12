@@ -1,13 +1,14 @@
 "use client";
 
-import { Box, Paper, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { FormProvider } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
+import type { ReadOnlyStatusCardSharedOptions } from "@/frontend/common/views/dashboard/students/status/components/__shared__/studentStatusShared";
+import { ReadOnlyStatusCardShared } from "@/frontend/common/views/dashboard/students/status/components/__shared__/studentStatusShared";
 import { StudentStatusLabelsProvider } from "@/frontend/common/views/dashboard/students/status/studentStatusLabelsContext";
 import type { StudentStatusPageData } from "@/frontend/common/views/dashboard/students/status/types";
-import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 import type { StudentStatusViewModel } from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui/container/page/DesktopPageContainer";
 import { DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page/DesktopPageHeader";
@@ -18,51 +19,12 @@ import {
 } from "@/frontend/desktop/views/dashboard/students/status/components/policyOverviewCard.desktop";
 import { StudentStatusHeaderDesktop } from "@/frontend/desktop/views/dashboard/students/status/components/studentStatusHeader.desktop";
 
-const STATUS_BADGE_MAP: Record<string, string> = {
-  [StudentStatus.Regular]: "regular",
-  [StudentStatus.Suspended]: "suspended",
-  [StudentStatus.OnLeave]: "on_leave",
-  [StudentStatus.OnTrial]: "on_trial",
-  [StudentStatus.Deactivated]: "deactivated",
+const DESKTOP_READ_ONLY_OPTIONS: ReadOnlyStatusCardSharedOptions = {
+  StatusBadge,
+  headerSxPadding: { px: 3, py: 2.5, p: 3 },
+  titleVariant: "titleLg",
+  titleSxTypography: undefined,
 };
-
-function getBadgeStatusKey(status: StudentStatus): string {
-  return STATUS_BADGE_MAP[status] ?? "regular";
-}
-
-function ReadOnlyStatusCardDesktop({ status }: Readonly<{ status: StudentStatus }>) {
-  const t = useStudentStatusLabels();
-
-  return (
-    <Paper
-      elevation={0}
-      sx={theme => ({
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: "xl",
-        boxShadow: theme.palette.shadow.card,
-        border: `1px solid ${theme.palette.border.main}`,
-        overflow: "hidden",
-        width: "100%",
-      })}
-    >
-      <Box
-        sx={theme => ({
-          px: 3,
-          py: 2.5,
-          borderBottom: `1px solid ${theme.palette.border.main}`,
-          backgroundColor: theme.palette.background.default,
-        })}
-      >
-        <Typography variant="titleLg" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 700 })}>
-          {t.fields.accountStatus}
-        </Typography>
-      </Box>
-      <Box sx={{ p: 3 }}>
-        <StatusBadge category="studentAccount" status={getBadgeStatusKey(status)} label={t.statusOptions[status]} />
-      </Box>
-    </Paper>
-  );
-}
 
 function StudentStatusBodyDesktop({
   t,
@@ -120,7 +82,7 @@ function StudentStatusBodyDesktop({
             <PolicyOverviewCardDesktop />
           </Box>
         ) : (
-          <ReadOnlyStatusCardDesktop status={student.status} />
+          <ReadOnlyStatusCardShared status={student.status} options={DESKTOP_READ_ONLY_OPTIONS} />
         )}
       </Box>
     </>

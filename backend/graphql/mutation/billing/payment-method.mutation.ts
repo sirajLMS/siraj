@@ -1,5 +1,6 @@
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { makePaymentMethodIdMutationField } from "@/backend/graphql/mutation/billing/__shared__/makePaymentMethodListMutationField";
 import {
   normalizePaymentMethodDetailsInput,
   SupportedMobileWalletCreateInputPothos,
@@ -147,35 +148,20 @@ gqlSchemaBuilder.mutationField("deleteUserPaymentMethod", t =>
   })
 );
 
-gqlSchemaBuilder.mutationField("setDefaultUserPaymentMethod", t =>
-  t.field({
-    type: UserPaymentMethodPothosObject,
-    authScopes: { loggedIn: true },
-    args: {
-      id: t.arg.id({ required: true }),
-    },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return PaymentMethodService.setDefaultUserPaymentMethod(actorUserId, args.id, tErrors);
-    },
-  })
-);
+makePaymentMethodIdMutationField({
+  fieldName: "setDefaultUserPaymentMethod",
+  returnType: UserPaymentMethodPothosObject,
+  description: "Set a user payment method as default",
+  getService: (actorUserId, id, tErrors) => PaymentMethodService.setDefaultUserPaymentMethod(actorUserId, id, tErrors),
+});
 
-gqlSchemaBuilder.mutationField("verifyBankTransferPaymentMethod", t =>
-  t.field({
-    type: UserPaymentMethodPothosObject,
-    authScopes: { loggedIn: true },
-    args: {
-      id: t.arg.id({ required: true }),
-    },
-    resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
-      return PaymentMethodService.verifyBankTransferPaymentMethod(actorUserId, args.id, tErrors);
-    },
-  })
-);
+makePaymentMethodIdMutationField({
+  fieldName: "verifyBankTransferPaymentMethod",
+  returnType: UserPaymentMethodPothosObject,
+  description: "Verify a bank transfer payment method",
+  getService: (actorUserId, id, tErrors) =>
+    PaymentMethodService.verifyBankTransferPaymentMethod(actorUserId, id, tErrors),
+});
 
 gqlSchemaBuilder.mutationField("createSupportedMobileWallet", t =>
   t.field({

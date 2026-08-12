@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
+import { buildEntityNameOnlyTranslatedMetadata } from "@/app/__shared__/buildEntityPageTitle";
 import { AppPermission } from "@/backend/enum";
-import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
+import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
 import { getStudentPageTitle } from "@/backend/lib/titles/cached-page-title";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { StudentProfilePageClient } from "@/frontend/common/views/dashboard/students/profile/StudentProfilePageClient";
-import { getTranslations } from "@/shared/locale";
-import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata({
   params,
@@ -14,27 +11,12 @@ export async function generateMetadata({
   readonly params: Promise<{ readonly id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const locale = await getLocale();
-  const t = getTranslations(locale).dashboardTranslations.studentProfile;
-  const studentName = await getStudentPageTitle(id);
-  if (studentName) {
-    return { title: studentName };
-  }
-  return { title: t.title };
+  return buildEntityNameOnlyTranslatedMetadata(
+    () => getStudentPageTitle(id),
+    t => t.dashboardTranslations.studentProfile.title
+  );
 }
 
-export default async function StudentProfilePage() {
-  const locale = await getLocale();
-  const { userId, context } = await getServerUserContext();
-  if (!userId) {
-    await redirectToLogin();
-    return undefined;
-  }
-  await requirePermissionForPage(
-    userId,
-    [AppPermission.STUDENTS_LIST, AppPermission.STUDENT_VIEW_ASSOCIATED],
-    locale,
-    context
-  );
+export default withPageAuth([AppPermission.STUDENTS_LIST, AppPermission.STUDENT_VIEW_ASSOCIATED], async () => {
   return <StudentProfilePageClient />;
-}
+});

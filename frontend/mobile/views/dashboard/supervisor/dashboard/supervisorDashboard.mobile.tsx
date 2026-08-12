@@ -3,7 +3,7 @@
 import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import type { RecentApprovalCardLabels } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/RecentApprovalCardList";
+import { buildRecentApprovalCardLabels } from "@/frontend/common/views/dashboard/supervisor/dashboard/__shared__/recentApprovalCardLabels";
 import {
   RecentApprovalCardSkeleton,
   RecentApprovalEmptyState,
@@ -20,21 +20,6 @@ import {
 import { DuesSummaryCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/duesSummaryCard.mobile";
 import { PendingReviewsHeroCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/pendingReviewsHeroCard.mobile";
 import { RecentApprovalCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/recentApprovalCard.mobile";
-
-function buildRecentApprovalCardLabels(labels: SupervisorDashboardViewModel["labels"]): RecentApprovalCardLabels {
-  return {
-    approvedTime: labels.approvedTime,
-    lessonDate: labels.lessonDate,
-    duration: labels.duration,
-    completion: labels.completion,
-    teacher: labels.teacher,
-    student: labels.student,
-    viewReport: labels.viewReport,
-    viewClass: labels.viewClass,
-    history: labels.history,
-    approvedStatus: labels.approvedStatus,
-  };
-}
 
 export function SupervisorDashboardMobileView({
   userName,

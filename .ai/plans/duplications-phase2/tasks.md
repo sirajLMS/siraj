@@ -147,7 +147,7 @@ Each parallel subagent receives:
 
 ### Task 0: Pre-Implementation Baseline (MANDATORY)
 
-- [ ] 0. Establish error baseline and create deferred-items ledger
+- [x] 0. Establish error baseline and create deferred-items ledger
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/` (will be empty — first task)
   - Read all existing files in `../duplications/outcome/` (predecessor plan — 41 outcome files) to absorb prior context
   - Record baseline error counts BEFORE any implementation:
@@ -169,9 +169,9 @@ Each parallel subagent receives:
   - Update progress: Mark task 0 as `[x]` in `tasks.md`
   - _Requirements: REQ-0_
 
-  - [ ] 0.QL **Quality Loop**: N/A (baseline task — no files modified)
+  - [x] 0.QL **Quality Loop**: N/A (baseline task — no files modified)
 
-  - [ ] 0.OUT **Outcome File**: Write `outcome/0-baseline-outcome.md`
+  - [x] 0.OUT **Outcome File**: Write `outcome/0-baseline-outcome.md`
     - Document: baseline tsgo=0, biome=0, lint=4 (OOS), jscpd=823 (718 frontend)
     - Document: tier-pair breakdown from jscpd JSON analysis
     - Document: top 40 frontend clone clusters (full list in `outcome/0-baseline-outcome.md`)
@@ -184,7 +184,7 @@ Each parallel subagent receives:
 
 **PARALLEL EXECUTION**: Tasks 1.1–1.11 are dispatched **simultaneously** as 11 background `general-purpose` subagents. Each operates on an independent component directory — no file conflicts. Wait for all to complete before running Task 1.12 (verification).
 
-- [ ] 1.1 Create CurrencyAutocompleteShared scaffold and refactor 3 variants
+- [x] 1.1 Create CurrencyAutocompleteShared scaffold and refactor 3 variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.1) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Read predecessor plan outcome: `../duplications/outcome/2.1-statusbadge-shared-outcome.md` (scaffold pattern reference)
@@ -199,15 +199,15 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.1.QL **Quality Loop**: Per-file verification on `CurrencyAutocompleteShared.tsx`, `CurrencyAutocomplete.tsx`, `currencyAutocomplete.desktop.tsx`, `currencyAutocomplete.mobile.tsx`
+  - [x] 1.1.QL **Quality Loop**: Per-file verification on `CurrencyAutocompleteShared.tsx`, `CurrencyAutocomplete.tsx`, `currencyAutocomplete.desktop.tsx`, `currencyAutocomplete.mobile.tsx`
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
 
-  - [ ] 1.1.OUT **Outcome File**: Write `outcome/1.1-currency-autocomplete-shared-outcome.md`
+  - [x] 1.1.OUT **Outcome File**: Write `outcome/1.1-currency-autocomplete-shared-outcome.md`
     - Document: scaffold interface, slot props, behavioral changes (if any), cross-file dependencies
 
-- [ ] 1.2 Create PhoneInputShared scaffold and refactor 3 variants
+- [x] 1.2 Create PhoneInputShared scaffold and refactor 3 variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.2) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/input/phoneInput/PhoneInput.tsx`, `frontend/desktop/components/ui/input/phoneInput/phoneInput.desktop.tsx`, `frontend/mobile/components/ui/input/phoneInput/PhoneInput.tsx` (1119 tokens / 253 lines common↔desktop, 998 tokens / 229 lines common↔mobile)
@@ -219,13 +219,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.2.QL **Quality Loop**: Per-file verification on all 4 files (scaffold + 3 variants)
+  - [x] 1.2.QL **Quality Loop**: Per-file verification on all 4 files (scaffold + 3 variants)
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.2.OUT **Outcome File**: Write `outcome/1.2-phone-input-shared-outcome.md`
+  - [x] 1.2.OUT **Outcome File**: Write `outcome/1.2-phone-input-shared-outcome.md`
 
-- [ ] 1.3 Create PaymentMethodDisplayShared scaffold and refactor 3 variants
+- [x] 1.3 Create PaymentMethodDisplayShared scaffold and refactor 3 variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.3) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay.tsx`, `frontend/desktop/components/ui/display/paymentMethod/paymentMethodDisplay.desktop.tsx`, `frontend/mobile/components/ui/display/paymentMethod/paymentMethodDisplay.mobile.tsx` (1110 tokens / 172 lines common↔desktop, 788 tokens / 132 lines common↔mobile)
@@ -235,13 +235,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.3.QL **Quality Loop**: Per-file verification on all 4 files
+  - [x] 1.3.QL **Quality Loop**: Per-file verification on all 4 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.3.OUT **Outcome File**: Write `outcome/1.3-payment-method-display-shared-outcome.md`
+  - [x] 1.3.OUT **Outcome File**: Write `outcome/1.3-payment-method-display-shared-outcome.md`
 
-- [ ] 1.4 Create UserPaymentMethodAutocompleteShared scaffold and refactor 3 variants
+- [x] 1.4 Create UserPaymentMethodAutocompleteShared scaffold and refactor 3 variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.4) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/input/userPaymentMethodSelect/UserPaymentMethodAutocomplete.tsx`, `frontend/desktop/components/ui/input/userPaymentMethodSelect/userPaymentMethodAutocomplete.desktop.tsx`, `frontend/mobile/components/ui/input/userPaymentMethodSelect/userPaymentMethodAutocomplete.mobile.tsx` (1047 tokens / 190 lines common↔mobile, 1043 tokens / 190 lines common↔desktop)
@@ -251,13 +251,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.4.QL **Quality Loop**: Per-file verification on all 4 files
+  - [x] 1.4.QL **Quality Loop**: Per-file verification on all 4 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.4.OUT **Outcome File**: Write `outcome/1.4-user-payment-method-autocomplete-shared-outcome.md`
+  - [x] 1.4.OUT **Outcome File**: Write `outcome/1.4-user-payment-method-autocomplete-shared-outcome.md`
 
-- [ ] 1.5 Create EditableTypographyShared scaffold and refactor 3 variants
+- [x] 1.5 Create EditableTypographyShared scaffold and refactor 3 variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.5) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/input/editableTypography/EditableTypography.tsx`, `frontend/desktop/components/ui/input/editableTypography/editableTypography.desktop.tsx`, `frontend/mobile/components/ui/input/editableTypography/editableTypography.mobile.tsx` (974 tokens / 194 lines common↔desktop, 854 tokens / 165 lines common↔mobile)
@@ -267,13 +267,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.5.QL **Quality Loop**: Per-file verification on all 4 files
+  - [x] 1.5.QL **Quality Loop**: Per-file verification on all 4 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.5.OUT **Outcome File**: Write `outcome/1.5-editable-typography-shared-outcome.md`
+  - [x] 1.5.OUT **Outcome File**: Write `outcome/1.5-editable-typography-shared-outcome.md`
 
-- [ ] 1.6 Create TagInputShared scaffold and refactor 3 variants
+- [x] 1.6 Create TagInputShared scaffold and refactor 3 variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.6) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/input/tagInput/TagInput.tsx`, `frontend/desktop/components/ui/input/tagInput/tagInput.desktop.tsx`, `frontend/mobile/components/ui/input/tagInput/tagInput.mobile.tsx` (946 tokens / 149 lines desktop↔mobile, 738 tokens / 109 lines common↔desktop)
@@ -284,13 +284,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.6.QL **Quality Loop**: Per-file verification on all 4 files
+  - [x] 1.6.QL **Quality Loop**: Per-file verification on all 4 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.6.OUT **Outcome File**: Write `outcome/1.6-tag-input-shared-outcome.md`
+  - [x] 1.6.OUT **Outcome File**: Write `outcome/1.6-tag-input-shared-outcome.md`
 
-- [ ] 1.7 Create CountryAutocompleteShared scaffold and refactor 3 variants
+- [x] 1.7 Create CountryAutocompleteShared scaffold and refactor 3 variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.7) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/input/countrySelect/CountryAutocomplete.tsx`, `frontend/desktop/components/ui/input/countrySelect/countryAutocomplete.desktop.tsx`, `frontend/mobile/components/ui/input/countrySelect/countryAutocomplete.mobile.tsx` (776 tokens / 155 lines common↔desktop, 770 tokens / 157 lines common↔mobile)
@@ -300,13 +300,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.7.QL **Quality Loop**: Per-file verification on all 4 files
+  - [x] 1.7.QL **Quality Loop**: Per-file verification on all 4 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.7.OUT **Outcome File**: Write `outcome/1.7-country-autocomplete-shared-outcome.md`
+  - [x] 1.7.OUT **Outcome File**: Write `outcome/1.7-country-autocomplete-shared-outcome.md`
 
-- [ ] 1.8 Create MeetingJoinActionShared scaffold and refactor 2 variants (common + desktop)
+- [x] 1.8 Create MeetingJoinActionShared scaffold and refactor 2 variants (common + desktop)
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.8) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/display/meetingConfig/MeetingJoinAction.tsx`, `frontend/desktop/components/ui/display/meetingConfig/MeetingJoinAction.desktop.tsx` (915 tokens / 137 lines common↔desktop — only 2 variants, no mobile)
@@ -316,13 +316,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.8.QL **Quality Loop**: Per-file verification on all 3 files (scaffold + 2 variants)
+  - [x] 1.8.QL **Quality Loop**: Per-file verification on all 3 files (scaffold + 2 variants)
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.8.OUT **Outcome File**: Write `outcome/1.8-meeting-join-action-shared-outcome.md`
+  - [x] 1.8.OUT **Outcome File**: Write `outcome/1.8-meeting-join-action-shared-outcome.md`
 
-- [ ] 1.9 Create MeetingConfigDisplayShared scaffold and refactor 2 variants (common + desktop)
+- [x] 1.9 Create MeetingConfigDisplayShared scaffold and refactor 2 variants (common + desktop)
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.9) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay.tsx`, `frontend/desktop/components/ui/display/meetingConfig/MeetingConfigDisplay.desktop.tsx` (747 tokens / 109 lines common↔desktop)
@@ -332,13 +332,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.9.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 1.9.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.9.OUT **Outcome File**: Write `outcome/1.9-meeting-config-display-shared-outcome.md`
+  - [x] 1.9.OUT **Outcome File**: Write `outcome/1.9-meeting-config-display-shared-outcome.md`
 
-- [ ] 1.10 Create PaymentMethodAutocompleteShared scaffold and refactor 2 variants (common + desktop)
+- [x] 1.10 Create PaymentMethodAutocompleteShared scaffold and refactor 2 variants (common + desktop)
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.10) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - **NOTE:** Predecessor plan already created `PaymentMethodTypeFieldsShared.tsx` (task 2.11-2.13) — verify this is a different component (autocomplete vs type fields)
@@ -349,13 +349,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.10.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 1.10.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.10.OUT **Outcome File**: Write `outcome/1.10-payment-method-autocomplete-shared-outcome.md`
+  - [x] 1.10.OUT **Outcome File**: Write `outcome/1.10-payment-method-autocomplete-shared-outcome.md`
 
-- [ ] 1.11 Create PaginationControlsShared scaffold and refactor 2 variants (common + mobile)
+- [x] 1.11 Create PaginationControlsShared scaffold and refactor 2 variants (common + mobile)
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 1 Wave, subagent-1.11) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/filter/PaginationControls.tsx`, `frontend/mobile/components/ui/filter/paginationControls.mobile.tsx` (719 tokens / 120 lines common↔mobile — only 2 variants, no desktop)
@@ -365,13 +365,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-1, REQ-5, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 1.11.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 1.11.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.11.OUT **Outcome File**: Write `outcome/1.11-pagination-controls-shared-outcome.md`
+  - [x] 1.11.OUT **Outcome File**: Write `outcome/1.11-pagination-controls-shared-outcome.md`
 
-- [ ] 1.12 Phase 1 verification — run `bun check:duplicates` and `bun run test:ui:components`
+- [x] 1.12 Phase 1 verification — run `bun check:duplicates` and `bun run test:ui:components`
   <!-- DISPATCH: SEQUENTIAL (orchestrator-executed, runs AFTER all Phase 1 subagents complete) -->
   - **PREREQUISITE:** All 11 Phase 1 parallel subagents (tasks 1.1–1.11) have completed and their outcome files exist in `.ai/plans/duplications-phase2/outcome/`
   - Read all outcome files in `.ai/plans/duplications-phase2/outcome/` (including all 1.*-outcome.md files from parallel subagents)
@@ -383,15 +383,15 @@ Each parallel subagent receives:
   - **CONFLICT RESOLUTION:** If any subagent introduced tsgo/lint errors in shared files (unlikely — each task targets independent directories), fix here
   - _Requirements: REQ-1, REQ-6, REQ-8_
 
-  - [ ] 1.12.QL **Quality Loop**: Per-file verification on any test files modified
+  - [x] 1.12.QL **Quality Loop**: Per-file verification on any test files modified
     - Run: `bun run scripts/health/sub-loop.ts <each-test-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 1.12.OUT **Outcome File**: Write `outcome/1.12-phase1-verification-outcome.md`
+  - [x] 1.12.OUT **Outcome File**: Write `outcome/1.12-phase1-verification-outcome.md`
 
 ### Phase 1.5: Plan Review Gate (MANDATORY)
 
-- [ ] 1.5 Review complete plan using @plan-review skill
+- [x] 1.5 Review complete plan using @plan-review skill
   <!-- DISPATCH: SEQUENTIAL (orchestrator-executed, runs AFTER Phase 1 verification completes) -->
   - **Input files:** `requirements.md`, `design.md`, `tasks.md`
   - **Invoke:** `@plan-review` skill on complete plan
@@ -404,8 +404,8 @@ Each parallel subagent receives:
   - Mark complete ONLY when plan passes all checks
   - _Requirements: REQ-4_
 
-  - [ ] 1.5.QL **Quality Loop**: N/A (plan files, no code modifications)
-  - [ ] 1.5.OUT **Outcome File**: Write `outcome/plan-review-R1.md`
+  - [x] 1.5.QL **Quality Loop**: N/A (plan files, no code modifications)
+  - [x] 1.5.OUT **Outcome File**: Write `outcome/plan-review-R1.md`
 
 ### Phase 2: Desktop↔Mobile View Component Pairs (Medium Risk, High Impact)
 
@@ -419,7 +419,7 @@ Each parallel subagent receives:
 
 **Dependency note**: Phase 2 tasks may import Phase 1 UI components (e.g., a view component may use `CurrencyAutocomplete`). However, Phase 1 scaffolds are **additive** — new files alongside existing components with existing exports unchanged. Therefore Phase 2 subagents rely on pre-existing imports, which remain valid regardless of Phase 1 progress. Both phases CAN be dispatched in parallel for maximum speed. If strict ordering is preferred, dispatch Phase 2 after Phase 1 verification (1.12) passes.
 
-- [ ] 2.1 Create localizedStringDrawerShared scaffold and refactor desktop + mobile variants
+- [x] 2.1 Create localizedStringDrawerShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.1) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/.../localizedStringDrawer.desktop.tsx` and `frontend/mobile/views/dashboard/.../localizedStringDrawer.mobile.tsx` (1377 tokens / 218 lines — top frontend clone cluster)
@@ -431,14 +431,14 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.1.QL **Quality Loop**: Per-file verification on all 3 files (scaffold + 2 variants)
+  - [x] 2.1.QL **Quality Loop**: Per-file verification on all 3 files (scaffold + 2 variants)
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.1.OUT **Outcome File**: Write `outcome/2.1-localized-string-drawer-shared-outcome.md`
+  - [x] 2.1.OUT **Outcome File**: Write `outcome/2.1-localized-string-drawer-shared-outcome.md`
     - Include "Behavioral Changes" section if consolidation changed behavior
 
-- [ ] 2.2 Create managementControlsCardShared scaffold and refactor desktop + mobile variants
+- [x] 2.2 Create managementControlsCardShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.2) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/teachers/reassignment/components/managementControlsCard.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/reassignment/components/managementControlsCard.mobile.tsx` (1264 tokens / 198 lines)
@@ -448,13 +448,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.2.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.2.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.2.OUT **Outcome File**: Write `outcome/2.2-management-controls-card-shared-outcome.md`
+  - [x] 2.2.OUT **Outcome File**: Write `outcome/2.2-management-controls-card-shared-outcome.md`
 
-- [ ] 2.3 Create meetingProviderFormShared scaffold and refactor desktop + mobile variants
+- [x] 2.3 Create meetingProviderFormShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.3) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/admin/meeting-providers/form/meetingProviderForm.desktop.tsx` and `frontend/mobile/views/dashboard/admin/meeting-providers/form/meetingProviderForm.mobile.tsx` (1134 tokens / 183 lines)
@@ -464,13 +464,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.3.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.3.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.3.OUT **Outcome File**: Write `outcome/2.3-meeting-provider-form-shared-outcome.md`
+  - [x] 2.3.OUT **Outcome File**: Write `outcome/2.3-meeting-provider-form-shared-outcome.md`
 
-- [ ] 2.4 Create studentStatusHeaderShared scaffold and refactor desktop + mobile variants
+- [x] 2.4 Create studentStatusHeaderShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.4) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/students/status/components/studentStatusHeader.desktop.tsx` and `frontend/mobile/views/dashboard/students/status/components/studentStatusHeader.mobile.tsx` (1062 tokens / 167 lines)
@@ -480,13 +480,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.4.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.4.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.4.OUT **Outcome File**: Write `outcome/2.4-student-status-header-shared-outcome.md`
+  - [x] 2.4.OUT **Outcome File**: Write `outcome/2.4-student-status-header-shared-outcome.md`
 
-- [ ] 2.5 Create complaintFormFieldsShared scaffold and refactor desktop + mobile variants
+- [x] 2.5 Create complaintFormFieldsShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.5) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/complaints/components/complaintFormFields.desktop.tsx` and `frontend/mobile/views/dashboard/complaints/components/complaintFormFields.mobile.tsx` (1055 tokens / 205 lines)
@@ -496,13 +496,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.5.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.5.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.5.OUT **Outcome File**: Write `outcome/2.5-complaint-form-fields-shared-outcome.md`
+  - [x] 2.5.OUT **Outcome File**: Write `outcome/2.5-complaint-form-fields-shared-outcome.md`
 
-- [ ] 2.6 Create complaintQueueCardShared scaffold and refactor desktop + mobile variants
+- [x] 2.6 Create complaintQueueCardShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.6) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/complaints/components/complaintQueueCard.desktop.tsx` and `frontend/mobile/views/dashboard/complaints/components/complaintQueueCard.mobile.tsx` (1053 tokens / 186 lines)
@@ -512,13 +512,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.6.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.6.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.6.OUT **Outcome File**: Write `outcome/2.6-complaint-queue-card-shared-outcome.md`
+  - [x] 2.6.OUT **Outcome File**: Write `outcome/2.6-complaint-queue-card-shared-outcome.md`
 
-- [ ] 2.7 Create jumpToDateHeaderShared scaffold and refactor desktop + mobile variants
+- [x] 2.7 Create jumpToDateHeaderShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.7) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/futureSchedule/components/jumpToDateHeader.mobile.tsx` (1009 tokens / 145 lines)
@@ -528,13 +528,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.7.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.7.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.7.OUT **Outcome File**: Write `outcome/2.7-jump-to-date-header-shared-outcome.md`
+  - [x] 2.7.OUT **Outcome File**: Write `outcome/2.7-jump-to-date-header-shared-outcome.md`
 
-- [ ] 2.8 Create futureClassCardShared scaffold and refactor desktop + mobile variants
+- [x] 2.8 Create futureClassCardShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.8) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/teachers/futureSchedule/components/futureClassCard.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/futureSchedule/components/futureClassCard.mobile.tsx` (977 tokens / 157 lines)
@@ -544,13 +544,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.8.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.8.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.8.OUT **Outcome File**: Write `outcome/2.8-future-class-card-shared-outcome.md`
+  - [x] 2.8.OUT **Outcome File**: Write `outcome/2.8-future-class-card-shared-outcome.md`
 
-- [ ] 2.9 Create miniCalendarShared scaffold and refactor desktop + mobile variants
+- [x] 2.9 Create miniCalendarShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.9) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/teachers/futureSchedule/components/miniCalendar.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/futureSchedule/components/miniCalendar.mobile.tsx` (943 tokens / 148 lines)
@@ -560,13 +560,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.9.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.9.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.9.OUT **Outcome File**: Write `outcome/2.9-mini-calendar-shared-outcome.md`
+  - [x] 2.9.OUT **Outcome File**: Write `outcome/2.9-mini-calendar-shared-outcome.md`
 
-- [ ] 2.10 Create studentInformationSectionShared scaffold and refactor desktop + mobile variants
+- [x] 2.10 Create studentInformationSectionShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.10) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/students/quota/components/studentInformationSection.desktop.tsx` and `frontend/mobile/views/dashboard/students/quota/components/studentInformationSection.mobile.tsx` (923 tokens / 160 lines)
@@ -576,13 +576,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.10.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.10.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.10.OUT **Outcome File**: Write `outcome/2.10-student-information-section-shared-outcome.md`
+  - [x] 2.10.OUT **Outcome File**: Write `outcome/2.10-student-information-section-shared-outcome.md`
 
-- [ ] 2.11 Create searchScheduleFilterDrawerShared scaffold and refactor desktop + mobile variants
+- [x] 2.11 Create searchScheduleFilterDrawerShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.11) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/search-schedule/searchScheduleFilterDrawer.desktop.tsx` and `frontend/mobile/views/dashboard/search-schedule/searchScheduleFilterDrawer.mobile.tsx` (899 tokens / 151 lines)
@@ -593,13 +593,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.11.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.11.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.11.OUT **Outcome File**: Write `outcome/2.11-search-schedule-filter-drawer-shared-outcome.md`
+  - [x] 2.11.OUT **Outcome File**: Write `outcome/2.11-search-schedule-filter-drawer-shared-outcome.md`
 
-- [ ] 2.12 Create meetingIntegrationsTabShared scaffold and refactor desktop + mobile variants
+- [x] 2.12 Create meetingIntegrationsTabShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.12) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/settings/tabs/meetingIntegrations/meetingIntegrationsTab.desktop.tsx` and `frontend/mobile/views/dashboard/settings/tabs/meetingIntegrations/meetingIntegrationsTab.mobile.tsx` (829 tokens / 137 lines)
@@ -609,13 +609,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.12.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.12.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.12.OUT **Outcome File**: Write `outcome/2.12-meeting-integrations-tab-shared-outcome.md`
+  - [x] 2.12.OUT **Outcome File**: Write `outcome/2.12-meeting-integrations-tab-shared-outcome.md`
 
-- [ ] 2.13 Create courseDetailsSectionShared scaffold and refactor desktop + mobile variants
+- [x] 2.13 Create courseDetailsSectionShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.13) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/students/quota/components/courseDetailsSection.desktop.tsx` and `frontend/mobile/views/dashboard/students/quota/components/courseDetailsSection.mobile.tsx` (797 tokens / 150 lines)
@@ -625,13 +625,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.13.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.13.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.13.OUT **Outcome File**: Write `outcome/2.13-course-details-section-shared-outcome.md`
+  - [x] 2.13.OUT **Outcome File**: Write `outcome/2.13-course-details-section-shared-outcome.md`
 
-- [ ] 2.14 Create weeklyAvailabilityGridShared scaffold and refactor desktop + mobile variants
+- [x] 2.14 Create weeklyAvailabilityGridShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.14) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/teachers/availability/components/weeklyAvailabilityGrid.desktop.tsx` and `frontend/mobile/views/dashboard/teachers/availability/components/weeklyAvailabilityGrid.mobile.tsx` (796 tokens / 154 lines)
@@ -641,13 +641,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.14.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.14.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.14.OUT **Outcome File**: Write `outcome/2.14-weekly-availability-grid-shared-outcome.md`
+  - [x] 2.14.OUT **Outcome File**: Write `outcome/2.14-weekly-availability-grid-shared-outcome.md`
 
-- [ ] 2.15 Create teacherAvailabilityMonthDrawerShared scaffold and refactor desktop + mobile variants
+- [x] 2.15 Create teacherAvailabilityMonthDrawerShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.15) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.desktop.tsx` and `frontend/mobile/views/dashboard/search-schedule/components/teacherAvailabilityMonthDrawer.mobile.tsx` (793 tokens / 123 lines)
@@ -657,13 +657,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.15.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.15.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.15.OUT **Outcome File**: Write `outcome/2.15-teacher-availability-month-drawer-shared-outcome.md`
+  - [x] 2.15.OUT **Outcome File**: Write `outcome/2.15-teacher-availability-month-drawer-shared-outcome.md`
 
-- [ ] 2.16 Create parentProfileShared scaffold and refactor desktop + mobile variants
+- [x] 2.16 Create parentProfileShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.16) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/profile/parent/parentProfile.desktop.tsx` and `frontend/mobile/views/dashboard/profile/parent/parentProfile.mobile.tsx` (777 tokens / 149 lines)
@@ -673,13 +673,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.16.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.16.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.16.OUT **Outcome File**: Write `outcome/2.16-parent-profile-shared-outcome.md`
+  - [x] 2.16.OUT **Outcome File**: Write `outcome/2.16-parent-profile-shared-outcome.md`
 
-- [ ] 2.17 Create suspensionAnalyticsShared scaffold and refactor desktop + mobile variants
+- [x] 2.17 Create suspensionAnalyticsShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.17) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/classes/status/tracking/components/suspensionAnalytics.desktop.tsx` and `frontend/mobile/views/dashboard/classes/status/tracking/components/suspensionAnalytics.mobile.tsx` (753 tokens / 110 lines)
@@ -689,13 +689,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.17.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.17.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.17.OUT **Outcome File**: Write `outcome/2.17-suspension-analytics-shared-outcome.md`
+  - [x] 2.17.OUT **Outcome File**: Write `outcome/2.17-suspension-analytics-shared-outcome.md`
 
-- [ ] 2.18 Create staffProfileShared scaffold and refactor desktop + mobile variants
+- [x] 2.18 Create staffProfileShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.18) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - **NOTE:** Predecessor plan already deleted `common/views/dashboard/profile/staff/StaffProfileContainer.tsx` (task 1.4) — verify no stale references
@@ -706,13 +706,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.18.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.18.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.18.OUT **Outcome File**: Write `outcome/2.18-staff-profile-shared-outcome.md`
+  - [x] 2.18.OUT **Outcome File**: Write `outcome/2.18-staff-profile-shared-outcome.md`
 
-- [ ] 2.19 Create editCategoryDialogShared scaffold and refactor desktop + mobile variants
+- [x] 2.19 Create editCategoryDialogShared scaffold and refactor desktop + mobile variants
   <!-- DISPATCH: PARALLEL SUBAGENT (Phase 2 Wave, subagent-2.19) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/desktop/views/dashboard/subjects/home/components/editCategoryDialog.desktop.tsx` and `frontend/mobile/views/dashboard/subjects/home/components/editCategoryDialog.mobile.tsx` (735 tokens / 153 lines)
@@ -722,13 +722,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-2, REQ-6, REQ-7, REQ-11, REQ-12, REQ-13_
 
-  - [ ] 2.19.QL **Quality Loop**: Per-file verification on all 3 files
+  - [x] 2.19.QL **Quality Loop**: Per-file verification on all 3 files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.19.OUT **Outcome File**: Write `outcome/2.19-edit-category-dialog-shared-outcome.md`
+  - [x] 2.19.OUT **Outcome File**: Write `outcome/2.19-edit-category-dialog-shared-outcome.md`
 
-- [ ] 2.20 Phase 2 verification — run `bun check:duplicates` and `bun run test:ui:components`
+- [x] 2.20 Phase 2 verification — run `bun check:duplicates` and `bun run test:ui:components`
   <!-- DISPATCH: SEQUENTIAL (orchestrator-executed, runs AFTER all Phase 2 subagents complete) -->
   - **PREREQUISITE:** All 19 Phase 2 parallel subagents (tasks 2.1–2.19) have completed and their outcome files exist in `.ai/plans/duplications-phase2/outcome/`
   - Read all outcome files in `.ai/plans/duplications-phase2/outcome/` (including all 2.*-outcome.md files from parallel subagents)
@@ -740,15 +740,15 @@ Each parallel subagent receives:
   - **CONFLICT RESOLUTION:** If any subagent introduced errors in shared files (unlikely — each task targets independent view directories), fix here
   - _Requirements: REQ-2, REQ-6, REQ-8_
 
-  - [ ] 2.20.QL **Quality Loop**: Per-file verification on any test files modified
+  - [x] 2.20.QL **Quality Loop**: Per-file verification on any test files modified
     - Run: `bun run scripts/health/sub-loop.ts <each-test-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 2.20.OUT **Outcome File**: Write `outcome/2.20-phase2-verification-outcome.md`
+  - [x] 2.20.OUT **Outcome File**: Write `outcome/2.20-phase2-verification-outcome.md`
 
 ### Phase 2.5: Mid-Point Review Gate (CONDITIONAL — Plan has >15 tasks AND distinct frontend phases)
 
-- [ ] 2.5 Frontend architecture review checkpoint
+- [x] 2.5 Frontend architecture review checkpoint
   <!-- DISPATCH: SEQUENTIAL via review subagents (review-frontend + review-types in parallel, then fix phase) -->
   - **Scope:** All `frontend/` files modified in Phases 1-2 (scaffolds + variants)
   - **Dispatch review subagents in parallel:**
@@ -762,13 +762,13 @@ Each parallel subagent receives:
   - Mark complete ONLY when frontend review is clean
   - _Requirements: REQ-5_
 
-  - [ ] 2.5.QL **Quality Loop**: N/A (review task — no code modifications during review itself)
-  - [ ] 2.5.OUT **Outcome File**: Write `outcome/midpoint-review-R1.md`
+  - [x] 2.5.QL **Quality Loop**: N/A (review task — no code modifications during review itself)
+  - [x] 2.5.OUT **Outcome File**: Write `outcome/midpoint-review-R1.md`
 
 ### Phase 3: Complex Consolidation — Within-Common Duplications (Higher Risk)
 
 **PARTIAL PARALLELISM**: Tasks 3.1 and 3.2 operate on different directories (`catalogImageUpload/` vs `excel-export/`) and can be dispatched in parallel. Tasks 3.3 and 3.4 depend on jscpd re-analysis after prior tasks complete, so they run sequentially.
-  - [ ] 3.1 Complete CatalogImageUpload partial extraction
+  - [x] 3.1 Complete CatalogImageUpload partial extraction
   <!-- DISPATCH: PARALLEL with 3.2 (different directories — catalogImageUpload vs excel-export) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/components/ui/input/catalogImageUpload/CatalogImageUpload.tsx` ↔ `frontend/common/components/ui/input/catalogImageUpload/catalogImageUploadShared.tsx` (1083 tokens / 209 lines — 7 clones — partial extraction was started but not completed)
@@ -778,13 +778,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm clone elimination
   - _Requirements: REQ-3, REQ-6, REQ-7, REQ-12, REQ-13_
 
-  - [ ] 3.1.QL **Quality Loop**: Per-file verification on `CatalogImageUpload.tsx`, `catalogImageUploadShared.tsx`, `catalogImageUpload.desktop.tsx`
+  - [x] 3.1.QL **Quality Loop**: Per-file verification on `CatalogImageUpload.tsx`, `catalogImageUploadShared.tsx`, `catalogImageUpload.desktop.tsx`
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 3.1.OUT **Outcome File**: Write `outcome/3.1-catalog-image-upload-completion-outcome.md`
+  - [x] 3.1.OUT **Outcome File**: Write `outcome/3.1-catalog-image-upload-completion-outcome.md`
 
-- [ ] 3.2 Consolidate excel-export utilities (parent-directory-export ↔ tracking-export)
+- [x] 3.2 Consolidate excel-export utilities (parent-directory-export ↔ tracking-export)
   <!-- DISPATCH: PARALLEL with 3.1 (different directories — excel-export vs catalogImageUpload) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Analyze `frontend/common/utils/excel-export/parent-directory-export.ts` ↔ `frontend/common/utils/excel-export/tracking-export.ts` (810 tokens / 121 lines — 4 clones)
@@ -794,13 +794,13 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm elimination or documented exclusion
   - _Requirements: REQ-3, REQ-6, REQ-7_
 
-  - [ ] 3.2.QL **Quality Loop**: Per-file verification on modified files
+  - [x] 3.2.QL **Quality Loop**: Per-file verification on modified files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 3.2.OUT **Outcome File**: Write `outcome/3.2-excel-export-consolidation-outcome.md`
+  - [x] 3.2.OUT **Outcome File**: Write `outcome/3.2-excel-export-consolidation-outcome.md`
 
-- [ ] 3.3 Investigate and consolidate top 10 within-common duplications
+- [x] 3.3 Investigate and consolidate top 10 within-common duplications
   <!-- DISPATCH: SEQUENTIAL (depends on 3.1 and 3.2 completing — re-runs jscpd on remaining clusters) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Run `bun check:duplicates` and identify the top 10 remaining `common↔common` clone clusters (excluding CatalogImageUpload from 3.1 and excel-export from 3.2)
@@ -811,14 +811,14 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm eliminations or documented exclusions
   - _Requirements: REQ-3, REQ-6, REQ-7_
 
-  - [ ] 3.3.QL **Quality Loop**: Per-file verification on all modified files
+  - [x] 3.3.QL **Quality Loop**: Per-file verification on all modified files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 3.3.OUT **Outcome File**: Write `outcome/3.3-within-common-consolidation-outcome.md`
+  - [x] 3.3.OUT **Outcome File**: Write `outcome/3.3-within-common-consolidation-outcome.md`
     - Include table of all 10 clusters with disposition (eliminated / documented / deferred)
 
-- [ ] 3.4 Address remaining desktop↔desktop and mobile↔mobile duplications
+- [x] 3.4 Address remaining desktop↔desktop and mobile↔mobile duplications
   <!-- DISPATCH: SEQUENTIAL (depends on 3.3 completing — re-runs jscpd on remaining clusters) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Run `bun check:duplicates` and identify the top 10 remaining `desktop↔desktop` (24 clusters, 4086 tokens) and `mobile↔mobile` (14 clusters, 2169 tokens) clone clusters
@@ -829,26 +829,26 @@ Each parallel subagent receives:
   - Run `bun check:duplicates` to confirm eliminations or documented exclusions
   - _Requirements: REQ-3, REQ-6, REQ-7_
 
-  - [ ] 3.4.QL **Quality Loop**: Per-file verification on all modified files
+  - [x] 3.4.QL **Quality Loop**: Per-file verification on all modified files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 3.4.OUT **Outcome File**: Write `outcome/3.4-within-tier-consolidation-outcome.md`
+  - [x] 3.4.OUT **Outcome File**: Write `outcome/3.4-within-tier-consolidation-outcome.md`
 
 ### Phase 4: Final Verification & Knowledge Propagation
 
-- [ ] 4.1 Final jscpd verification
+- [x] 4.1 Final jscpd verification
   <!-- DISPATCH: SEQUENTIAL (orchestrator-executed, depends on all Phase 3 completion) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Run `bun check:duplicates` — verify clone count is ≤323 (target: ≥500 of 718 frontend clones eliminated, ≥70% reduction per NFR-4)
   - Document any remaining clones in `deferred-items.md` with justification
   - _Requirements: REQ-8.1, NFR-4_
 
-  - [ ] 4.1.QL **Quality Loop**: N/A (verification only)
+  - [x] 4.1.QL **Quality Loop**: N/A (verification only)
   - No file modifications — this task only runs verification commands
-  - [ ] 4.1.OUT **Outcome File**: Write `outcome/4.1-final-jscpd-verification-outcome.md`
+  - [x] 4.1.OUT **Outcome File**: Write `outcome/4.1-final-jscpd-verification-outcome.md`
 
-- [ ] 4.2 Run full quality gate
+- [x] 4.2 Run full quality gate
   <!-- DISPATCH: SEQUENTIAL (depends on 4.1) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Run `bun tsgo` — must be 0 errors (baseline was 0)
@@ -857,11 +857,11 @@ Each parallel subagent receives:
   - If any stage fails, fix and re-run
   - _Requirements: REQ-8.2, NFR-1, NFR-2, NFR-3_
 
-  - [ ] 4.2.QL **Quality Loop**: N/A (global gate)
+  - [x] 4.2.QL **Quality Loop**: N/A (global gate)
   - This task runs the full quality gate via `bun quality-gate` which orchestrates all stages
-  - [ ] 4.2.OUT **Outcome File**: Write `outcome/4.2-quality-gate-outcome.md`
+  - [x] 4.2.OUT **Outcome File**: Write `outcome/4.2-quality-gate-outcome.md`
 
-- [ ] 4.3 Run full test suite (NO DEFERRAL — actually run all suites this time)
+- [x] 4.3 Run full test suite (NO DEFERRAL — actually run all suites this time)
   <!-- DISPATCH: SEQUENTIAL (depends on 4.2) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Run `bun run build:test` (required before E2E — should succeed since tsgo is clean)
@@ -874,12 +874,12 @@ Each parallel subagent receives:
   - If any test fails, fix the failure (either the code or the test, per REQ-11) before proceeding
   - _Requirements: REQ-8.3, REQ-11, NFR-5_
 
-  - [ ] 4.3.QL **Quality Loop**: N/A (test execution)
+  - [x] 4.3.QL **Quality Loop**: N/A (test execution)
   - This task runs the full test suite — no per-file quality loop needed
-  - [ ] 4.3.OUT **Outcome File**: Write `outcome/4.3-full-test-suite-outcome.md`
+  - [x] 4.3.OUT **Outcome File**: Write `outcome/4.3-full-test-suite-outcome.md`
     - Document: actual test results (pass/fail counts), any test updates made, behavioral changes verified
 
-- [ ] 4.4 Baseline comparison and deferred items enforcement
+- [x] 4.4 Baseline comparison and deferred items enforcement
   <!-- DISPATCH: SEQUENTIAL (depends on 4.3) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Compare current error counts vs `/tmp/baseline-phase2-*.txt` — document new errors introduced (expected: 0 new tsgo, 0 new biome, 0 new lint for plan-modified files)
@@ -891,9 +891,9 @@ Each parallel subagent receives:
   - All deferred items MUST be ✅ Done with verification references
   - _Requirements: REQ-8.4, REQ-10_
 
-  - [ ] 4.4.OUT **Outcome File**: Write `outcome/4.4-baseline-comparison-outcome.md`
+  - [x] 4.4.OUT **Outcome File**: Write `outcome/4.4-baseline-comparison-outcome.md`
 
-- [ ] 4.5 Knowledge Propagation & Documentation (MANDATORY FINAL TASK)
+- [x] 4.5 Knowledge Propagation & Documentation (MANDATORY FINAL TASK)
   <!-- DISPATCH: SEQUENTIAL (depends on 4.4) -->
   - Read all existing files in `.ai/plans/duplications-phase2/outcome/`
   - Synthesize all learnings from outcome files
@@ -912,11 +912,11 @@ Each parallel subagent receives:
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run scripts/lint-service.ts --json --id final-check` (0 errors, 0 warnings for plan-modified files; 4 pre-existing out-of-scope sonarjs errors acceptable)
   - _Requirements: REQ-9_
 
-  - [ ] 4.5.QL **Quality Loop**: Per-file verification on all modified docs and AGENTS.md files
+  - [x] 4.5.QL **Quality Loop**: Per-file verification on all modified docs and AGENTS.md files
     - Run: `bun run scripts/health/sub-loop.ts <each-file> --lifecycle codescene`
     - The sub-loop script handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene --file progressively, short-circuiting at first failure
     - Fix all errors before proceeding
-  - [ ] 4.5.OUT **Outcome File**: Write `outcome/4.5-knowledge-propagation-outcome.md`
+  - [x] 4.5.OUT **Outcome File**: Write `outcome/4.5-knowledge-propagation-outcome.md`
   - Update progress: Mark task 4.5 as `[x]` in `tasks.md`
 ---
 

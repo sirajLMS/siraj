@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   markInvoicePaidMutationDocument,
@@ -11,16 +11,18 @@ import {
   parentInvoiceHistoryQueryDocument,
   submitPaymentProofMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
-import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import {
   formatBillingCurrencyTotals,
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { type ParentBillingState, useParentBillingStore } from "@/frontend/common/stores/parentBillingStore";
-import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
+import {
+  type BillingPermissions,
+  useBillingPermissions,
+} from "@/frontend/common/views/dashboard/billing/hooks/useBillingPermissions";
+import { useDownloadInvoicePdf } from "@/frontend/common/views/dashboard/billing/hooks/useDownloadInvoicePdf";
 import type {
   MarkPaidInvoiceTarget,
   ParentBillingViewProps,
@@ -29,16 +31,16 @@ import type {
   ParentBillingSummary,
   ParentInvoiceRow,
 } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
-import { buildBillingLabels } from "@/frontend/common/views/dashboard/billing/utils/buildBillingLabels";
+import {
+  type BillingTranslationBase,
+  useBillingFxMessages,
+  useBillingTranslationBase,
+} from "@/frontend/common/views/dashboard/billing/utils/billingTranslationBase";
 import {
   formatBillingDate,
   formatBillingMonth,
 } from "@/frontend/common/views/dashboard/billing/utils/formatBillingDate";
 import { deriveParentInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
-import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
-import type { CommonLabels } from "@/shared/locale/types/common";
-import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
 // NEW FOR PLAN v5 (parent-billing wave): ViewModel now owns all state for the
 // §6.1+§6.2 contract — the Server Component Page renders the Container with
@@ -52,48 +54,14 @@ export type UseParentBillingViewModelProps = Record<string, never>;
 // ParentBillingViewProps.
 export type ParentBillingViewModel = ParentBillingViewProps;
 
-interface BillingTranslations {
-  t: BillingLabels;
-  tErrors: ErrorsLabels;
-  tc: CommonLabels;
-  locale: ReturnType<typeof useAppLocale>;
-  labels: ReturnType<typeof buildBillingLabels>;
-  fxMessages: ReturnType<typeof buildFxDisplayMessages>;
+interface BillingTranslations extends BillingTranslationBase {
+  fxMessages: ReturnType<typeof useBillingFxMessages>;
 }
 
 function useBillingTranslations(): BillingTranslations {
-  const t = useAppTranslation(Translation.Dashboard.Billing);
-  const tProfile = useAppTranslation(Translation.Profile.Teacher);
-  const tProfileRoot = useAppTranslation(Translation.Profile.Base);
-  const tErrors = useAppTranslation(Translation.Errors);
-  const tc = useAppTranslation(Translation.Common);
-  const locale = useAppLocale();
-  const labels = buildBillingLabels(t);
-  const fxMessages = useMemo(
-    () => buildFxDisplayMessages(tProfile, tErrors, tProfileRoot),
-    [tProfile, tErrors, tProfileRoot]
-  );
-  return { t, tErrors, tc, locale, labels, fxMessages };
-}
-
-interface BillingPermissions {
-  canManage: boolean;
-  canSubmitProof: boolean;
-  canView: boolean;
-  canCreate: boolean;
-  billingActionsDisabled: boolean;
-}
-
-function useBillingPermissions(): BillingPermissions {
-  const { isImpersonating } = useImpersonation();
-  const hasPermission = useUserStore(state => state.hasPermission);
-  return {
-    canManage: hasPermission(AppPermission.BillingUpdateStatusPaid),
-    canSubmitProof: hasPermission(AppPermission.BillingSubmitPaymentProof),
-    canView: hasPermission(AppPermission.BillingViewHistory),
-    canCreate: hasPermission(AppPermission.BillingCreateInvoice),
-    billingActionsDisabled: isImpersonating,
-  };
+  const base = useBillingTranslationBase();
+  const fxMessages = useBillingFxMessages(base.tProfile, base.tErrors, base.tProfileRoot);
+  return { ...base, fxMessages };
 }
 
 type BillingStoreState = ParentBillingState;
@@ -407,15 +375,10 @@ function useBillingActionHandlers(
 
   const handleQuickPay = useQuickPayHandler(translations, permissions, store, data, handlePayNow);
 
-  const handleDownloadPdf = useCallback(
-    (invoiceId: string) => {
-      const popup = window.open(`/api/invoices/${invoiceId}/download`, "_blank", "noopener,noreferrer");
-      if (!popup) {
-        showFeedback(labels.notifications.popupBlocked, "error");
-      }
-    },
-    [labels.notifications.popupBlocked, showFeedback]
-  );
+  const handleDownloadPdf = useDownloadInvoicePdf({
+    showFeedback,
+    popupBlockedLabel: labels.notifications.popupBlocked,
+  });
 
   const handleMarkAsPaid = useCallback(
     (invoice: MarkPaidInvoiceTarget) => {

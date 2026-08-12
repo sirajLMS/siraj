@@ -1,16 +1,14 @@
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+import type {
+  MeetingConfigBaseInsertType,
+  MeetingConfigBaseReturnType,
+  MeetingConfigBaseSelectType,
+  MeetingConfigBaseSubmitInput,
+  MeetingConfigDetails,
+} from "@/backend/types/meeting/meeting-config-base.types";
 import type { LocalizedString } from "@/shared/types";
 
-// ============================================================================
-// User meeting config details (JSONB on `user_meeting_configs`)
-// Validated against provider `field_schema` + `url_allowlist` at service boundary.
-// ============================================================================
-
-export type MeetingConfigDetails = {
-  readonly meetingUrl?: string | null;
-  readonly username?: string;
-  readonly tenantId?: string;
-};
+// Re-export so existing imports from this module continue to work.
+export type { MeetingConfigDetails };
 
 // ============================================================================
 // Session snapshot (frozen on class_instances at booking)
@@ -43,42 +41,20 @@ export type MeetingConfigSnapshot = {
 // `user_meeting_configs` — live/mutable saved configs per user
 // ============================================================================
 
-export type UserMeetingConfigSelectType = {
-  readonly id: string;
+export type UserMeetingConfigSelectType = MeetingConfigBaseSelectType & {
   readonly userId: string;
-  readonly providerId: string;
-  readonly label: string | null;
-  readonly isDefault: boolean;
-  readonly details: MeetingConfigDetails;
-  readonly encryptedSecret: string | null;
-  readonly providerMetadata: Record<string, unknown> | null;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
 };
 
-export type UserMeetingConfigInsertType = {
-  readonly id?: string;
+export type UserMeetingConfigInsertType = MeetingConfigBaseInsertType & {
   readonly userId: string;
-  readonly providerId: string;
-  readonly label?: string | null;
-  readonly isDefault: boolean;
-  readonly details: MeetingConfigDetails;
-  readonly encryptedSecret?: string | null;
-  readonly providerMetadata?: Record<string, unknown> | null;
-  readonly createdAt?: Date;
-  readonly updatedAt?: Date;
 };
 
-export type UserMeetingConfigReturnType = UserMeetingConfigSelectType & {
-  readonly hasSecret?: boolean;
-  readonly provider?: MeetingProviderSelectType;
+export type UserMeetingConfigReturnType = MeetingConfigBaseReturnType & {
+  readonly userId: string;
 };
 
-export type UserMeetingConfigSubmitInput = Omit<
-  UserMeetingConfigInsertType,
-  "id" | "createdAt" | "updatedAt" | "encryptedSecret" | "providerMetadata"
-> & {
-  readonly password?: string | null;
+export type UserMeetingConfigSubmitInput = MeetingConfigBaseSubmitInput & {
+  readonly userId: string;
 };
 
 export type UpdateUserMeetingConfigInput = Partial<Omit<UserMeetingConfigSubmitInput, "userId">> & {

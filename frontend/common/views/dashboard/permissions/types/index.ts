@@ -22,6 +22,12 @@ export type {
 export type { CurrentPermissionsTabProps } from "./currentPermissionsTab.types";
 export type { DeleteGroupDialogProps } from "./deleteGroupDialog.types";
 export type { ManageOverridesDialogProps } from "./manageOverridesDialog.types";
+export type {
+  ManageOverridesDialogSharedProps,
+  ManageOverridesDialogSlotProps,
+  ManageOverridesDialogVariant,
+  ManageOverridesDialogVariantKind,
+} from "./manageOverridesDialogShared.types";
 export type { OverrideEditControlsProps } from "./overrideEditControls.types";
 export type {
   OverrideEffectiveDisplayProps,

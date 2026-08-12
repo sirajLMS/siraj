@@ -1,33 +1,13 @@
 import type { Metadata } from "next";
+import { buildTranslatedMetadata } from "@/app/__shared__/buildEntityPageTitle";
 import { AppPermission } from "@/backend/enum";
-import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
-import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
+import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
 import { TeacherReassignmentContainer } from "@/frontend/common/views/dashboard/teachers/reassignment/TeacherReassignmentContainer";
-import { getTranslations } from "@/shared/locale";
-import { getLocale } from "@/shared/locale/server-cookies";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
-  const t = getTranslations(locale).dashboardTranslations.teacherReassignment;
-  return { title: t.pageTitle };
+  return buildTranslatedMetadata(t => t.dashboardTranslations.teacherReassignment.pageTitle);
 }
 
-export default async function TeacherReassignmentPage() {
-  const locale = await getLocale();
-  const { userId, context } = await getServerUserContext();
-
-  if (!userId) {
-    await redirectToLogin();
-    return undefined;
-  }
-
-  await requirePermissionForPage(
-    userId,
-    [AppPermission.STUDENT_REASSIGN_TEACHER, AppPermission.STUDENT_MANAGE_STATUS],
-    locale,
-    context
-  );
-
+export default withPageAuth([AppPermission.STUDENT_REASSIGN_TEACHER, AppPermission.STUDENT_MANAGE_STATUS], async () => {
   return <TeacherReassignmentContainer />;
-}
+});

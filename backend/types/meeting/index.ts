@@ -19,6 +19,12 @@ export type {
   UserMeetingConfigSubmitInput,
 } from "@/backend/types/meeting/meeting-config.types";
 export type {
+  MeetingConfigBaseInsertType,
+  MeetingConfigBaseReturnType,
+  MeetingConfigBaseSelectType,
+  MeetingConfigBaseSubmitInput,
+} from "@/backend/types/meeting/meeting-config-base.types";
+export type {
   AdminRevokeTokenReturnType,
   AdminRevokeTokenSubmitInput,
   ConnectMeetingProviderOAuthReturnType,

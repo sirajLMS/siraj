@@ -44,7 +44,7 @@ runs sub-loop, stages it → final re-run of categorization to verify 0 issues.
 - `git add` (via executor subagents only)
 
 **Executor allowed commands:**
-- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs tsgo → biome → oxlint → lint → duplicates → codescene)
+- `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (runs tsgo → oxlint → biome → lint → duplicates → codescene)
 - `git add <file>` (ONLY after sub-loop exits 0)
 - Read commands (`view`, `cat`, `grep`, `glob`) for understanding code
 

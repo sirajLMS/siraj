@@ -4,13 +4,13 @@ import {
   MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
 } from "@/backend/enum/meeting/meeting-integrations.enum";
-import { IanaTimezone } from "@/backend/enum/shared/timezone.enum";
 import type {
   GenerateMeetingInput,
   GenerateMeetingResult,
   IMeetingChannel,
 } from "@/backend/services/meeting/channels/IMeetingChannel";
 import type { CreateAuditLogInput, MeetingProviderTokenSelectType, UserSelectType } from "@/backend/types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { errorsEn } from "@/shared/locale/en/errors";
 
 // ---------------------------------------------------------------------------

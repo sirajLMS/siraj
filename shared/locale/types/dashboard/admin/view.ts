@@ -8,6 +8,71 @@ export interface ClassDetailsPerformanceLabels {
   readonly noData: string;
 }
 
+// ─── Shared label sub-types (extracted to deduplicate admin/view & classes/details) ──
+
+export interface ClassAdminActionsLabels {
+  readonly administrativeActions: string;
+  readonly generateLog: string;
+  readonly reschedule: string;
+  readonly forceActivate: string;
+  readonly stopPause: string;
+  readonly deleteInstance: string;
+  readonly disabledTooltips: {
+    readonly forceActivate: {
+      readonly activated: string;
+      readonly running: string;
+      readonly completed: string;
+    };
+    readonly stop: {
+      readonly notActivated: string;
+      readonly activated: string;
+      readonly completed: string;
+    };
+  };
+}
+
+export interface ClassInfoLabels {
+  readonly liveInstance: string;
+  readonly activeConnection: string;
+  readonly student: string;
+  readonly moduleInstructor: string;
+  readonly viewSubject: string;
+}
+
+export interface ClassMetadataLabels {
+  readonly metadata: string;
+  readonly scheduledDate: string;
+  readonly duration: string;
+  readonly latency: string;
+  readonly authorization: string;
+  readonly minutes: string;
+  readonly optimal: string;
+  readonly unavailable: string;
+}
+
+export interface ClassRateLabels {
+  readonly rateSectionTitle: string;
+  readonly effectiveRateLabel: string;
+  readonly rateCurrencyLabel: string;
+  readonly rateSourceLabel: string;
+  readonly rateSourceOverride: string;
+  readonly rateSourceRecurring: string;
+  readonly rateSourceSubject: string;
+  readonly rateSourceTeacher: string;
+  readonly overrideRateButton: string;
+  readonly clearOverrideButton: string;
+  readonly overrideRateDialogTitle: string;
+  readonly overrideRateDialogDescription: string;
+  readonly hourlyRateLabel: string;
+  readonly currencyLabel: string;
+  readonly saveButton: string;
+  readonly cancelButton: string;
+  readonly overrideSuccess: string;
+  readonly overrideError: string;
+  readonly clearSuccess: string;
+  readonly clearError: string;
+}
+
 export interface AdminViewLabels {
   readonly admin: {
     readonly pageTitle: string;
@@ -17,44 +82,11 @@ export interface AdminViewLabels {
     readonly title: string;
     readonly message: (studentTimezone: string, teacherTimezone: string) => string;
   };
-  readonly adminActions: {
-    readonly administrativeActions: string;
-    readonly generateLog: string;
-    readonly reschedule: string;
-    readonly forceActivate: string;
-    readonly stopPause: string;
-    readonly deleteInstance: string;
+  readonly adminActions: ClassAdminActionsLabels & {
     readonly overrideRateButton: string;
-    readonly disabledTooltips: {
-      readonly forceActivate: {
-        readonly activated: string;
-        readonly running: string;
-        readonly completed: string;
-      };
-      readonly stop: {
-        readonly notActivated: string;
-        readonly activated: string;
-        readonly completed: string;
-      };
-    };
   };
-  readonly classInfo: {
-    readonly liveInstance: string;
-    readonly activeConnection: string;
-    readonly student: string;
-    readonly moduleInstructor: string;
-    readonly viewSubject: string;
-  };
-  readonly metadata: {
-    readonly metadata: string;
-    readonly scheduledDate: string;
-    readonly duration: string;
-    readonly latency: string;
-    readonly authorization: string;
-    readonly minutes: string;
-    readonly optimal: string;
-    readonly unavailable: string;
-  };
+  readonly classInfo: ClassInfoLabels;
+  readonly metadata: ClassMetadataLabels;
   readonly performance: ClassDetailsPerformanceLabels;
   readonly heatmap: {
     readonly activityHeatmap: string;
@@ -62,26 +94,5 @@ export interface AdminViewLabels {
     readonly teacherResponse: string;
     readonly noData: string;
   };
-  readonly rate: {
-    readonly rateSectionTitle: string;
-    readonly effectiveRateLabel: string;
-    readonly rateCurrencyLabel: string;
-    readonly rateSourceLabel: string;
-    readonly rateSourceOverride: string;
-    readonly rateSourceRecurring: string;
-    readonly rateSourceSubject: string;
-    readonly rateSourceTeacher: string;
-    readonly overrideRateButton: string;
-    readonly clearOverrideButton: string;
-    readonly overrideRateDialogTitle: string;
-    readonly overrideRateDialogDescription: string;
-    readonly hourlyRateLabel: string;
-    readonly currencyLabel: string;
-    readonly saveButton: string;
-    readonly cancelButton: string;
-    readonly overrideSuccess: string;
-    readonly overrideError: string;
-    readonly clearSuccess: string;
-    readonly clearError: string;
-  };
+  readonly rate: ClassRateLabels;
 }

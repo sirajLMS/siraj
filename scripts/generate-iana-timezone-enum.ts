@@ -14,7 +14,7 @@ const ROOT = join(import.meta.dir, "..");
 const SHARED_IDS_OUTPUT = join(ROOT, "shared/constants/iana-timezones.ts");
 const SHARED_LABELS_OUTPUT = join(ROOT, "shared/constants/iana-timezone-labels.ts");
 const SHARED_TERRITORIES_OUTPUT = join(ROOT, "shared/constants/iana-timezone-territories.ts");
-const BACKEND_OUTPUT = join(ROOT, "backend/enum/timezone.enum.ts");
+const SHARED_ENUM_OUTPUT = join(ROOT, "shared/constants/iana-timezone.enum.ts");
 
 const CLDR_AR_TIMEZONES_PATH = join(ROOT, "node_modules/cldr-dates-full/main/ar/timeZoneNames.json");
 const CLDR_AR_TERRITORIES_PATH = join(ROOT, "node_modules/cldr-localenames-full/main/ar/territories.json");
@@ -428,18 +428,18 @@ async function main(): Promise<void> {
   const territories = buildIanaTimezoneTerritories(ids);
 
   await mkdir(dirname(SHARED_IDS_OUTPUT), { recursive: true });
-  await mkdir(dirname(BACKEND_OUTPUT), { recursive: true });
+  await mkdir(dirname(SHARED_ENUM_OUTPUT), { recursive: true });
 
   await writeFile(SHARED_IDS_OUTPUT, buildSharedConstantsFile(ids), "utf8");
   await writeFile(SHARED_LABELS_OUTPUT, buildSharedLabelsFile(labels), "utf8");
   await writeFile(SHARED_TERRITORIES_OUTPUT, buildSharedTerritoriesFile(territories), "utf8");
-  await writeFile(BACKEND_OUTPUT, buildBackendEnumFile(ids), "utf8");
+  await writeFile(SHARED_ENUM_OUTPUT, buildBackendEnumFile(ids), "utf8");
 
   console.log(`Generated ${ids.length} IANA timezones:`);
   console.log(`  ${SHARED_IDS_OUTPUT}`);
   console.log(`  ${SHARED_LABELS_OUTPUT}`);
   console.log(`  ${SHARED_TERRITORIES_OUTPUT}`);
-  console.log(`  ${BACKEND_OUTPUT}`);
+  console.log(`  ${SHARED_ENUM_OUTPUT}`);
 }
 
 await main();

@@ -2,32 +2,17 @@ import type {
   StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics,
   StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession,
 } from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  StudentHistoryMetrics,
+  StudentHistorySessionRow,
+} from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 import { resolveSessionDateTime } from "@/shared/lib/datetime/resolveSessionDateTime";
 
-export interface StudentHistoryMetricsShared {
-  readonly totalClasses: number;
-  readonly attendanceRate: number;
-  readonly hoursStudied: number;
-  readonly performance: number;
-}
+export type StudentHistoryMetricsShared = StudentHistoryMetrics;
 
-export interface StudentHistorySessionRowShared {
-  readonly id: string;
-  readonly title: string;
-  readonly time: string;
-  readonly duration: number;
-  readonly status: string;
-  readonly outcome: string;
-  readonly isFrozen: boolean;
-  readonly instructor: string;
-  readonly teacherId: string;
-  readonly timeSlot: string;
-  readonly room: string;
-  readonly notes: string;
-  readonly dayOfMonth: number;
-  readonly meetingJoinUrl: string | null;
+export type StudentHistorySessionRowShared = Omit<StudentHistorySessionRow, "effectiveMeeting"> & {
   readonly effectiveMeeting: unknown;
-}
+};
 
 const EMPTY_METRICS: StudentHistoryMetricsShared = {
   totalClasses: 0,

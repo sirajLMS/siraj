@@ -9,6 +9,11 @@ import type { StudentHeader, StudentMonthlyReportReturnType } from "@/backend/ty
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace StudentMonthlyReportService {
+  function throwStudentNotFound(studentId: string, locale?: string): never {
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(tErrors.studentNotFound(studentId));
+  }
+
   async function assertCanViewMonthlyReport(actorUserId: string, studentId: string, locale?: string): Promise<void> {
     const hasMonthlyPermission = await PermissionsService.hasPermission(
       actorUserId,
@@ -27,8 +32,7 @@ export namespace StudentMonthlyReportService {
       .limit(1);
 
     if (!studentRow) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.studentNotFound(studentId));
+      throwStudentNotFound(studentId, locale);
     }
 
     // Self: student viewing own report
@@ -56,8 +60,7 @@ export namespace StudentMonthlyReportService {
       .limit(1);
 
     if (!studentRow) {
-      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.studentNotFound(studentId));
+      throwStudentNotFound(studentId, locale);
     }
 
     return {

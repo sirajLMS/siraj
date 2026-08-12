@@ -1,3 +1,24 @@
+type OnboardingFieldKey =
+  | "fullName"
+  | "email"
+  | "password"
+  | "phone"
+  | "nationality"
+  | "address"
+  | "whatsapp"
+  | "facebook"
+  | "twitter"
+  | "zoomId"
+  | "invoiceType"
+  | "feeAmount"
+  | "paymentMethod"
+  | "currency"
+  | "timezone"
+  | "meetingUrl"
+  | "meetingLabel";
+
+type OnboardingFieldLabels = { readonly [K in OnboardingFieldKey]: string };
+
 export interface ParentOnboardingLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
@@ -10,46 +31,11 @@ export interface ParentOnboardingLabels {
     readonly meetingConfig: string;
     readonly addPaymentMethod: string;
   };
-  readonly fields: {
-    readonly fullName: string;
-    readonly email: string;
-    readonly password: string;
-    readonly phone: string;
-    readonly nationality: string;
-    readonly address: string;
-    readonly whatsapp: string;
-    readonly facebook: string;
-    readonly twitter: string;
-    readonly zoomId: string;
-    readonly invoiceType: string;
-    readonly feeAmount: string;
-    readonly paymentMethod: string;
-    readonly currency: string;
-    readonly timezone: string;
+  readonly fields: OnboardingFieldLabels & {
     readonly meetingProvider: string;
-    readonly meetingUrl: string;
-    readonly meetingLabel: string;
     readonly avatar: string;
   };
-  readonly placeholders: {
-    readonly fullName: string;
-    readonly email: string;
-    readonly password: string;
-    readonly phone: string;
-    readonly nationality: string;
-    readonly address: string;
-    readonly whatsapp: string;
-    readonly facebook: string;
-    readonly twitter: string;
-    readonly zoomId: string;
-    readonly invoiceType: string;
-    readonly feeAmount: string;
-    readonly paymentMethod: string;
-    readonly currency: string;
-    readonly timezone: string;
-    readonly meetingUrl: string;
-    readonly meetingLabel: string;
-  };
+  readonly placeholders: OnboardingFieldLabels;
   readonly options: {
     readonly invoiceType: {
       readonly perClass: string;

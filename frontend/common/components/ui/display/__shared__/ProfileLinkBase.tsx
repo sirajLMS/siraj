@@ -1,20 +1,9 @@
 import { Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import type { UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
+import type { ProfileLinkSharedProps } from "@/frontend/common/components/ui/display/__shared__/profileLinkShared.types";
 import { Link } from "@/shared/i18n";
 
-export type ProfileLinkBaseProps = {
-  readonly href?: string | null;
-  readonly name: string;
-  readonly avatarUrl?: string | null;
-  readonly showAvatar?: boolean;
-  readonly avatarSize?: number;
-  readonly fallbackInitial?: string;
-  readonly label?: string;
-  readonly typographyVariant?: UiTypographyVariantLoose;
-  readonly fontWeight?: number;
-  /** When true, use primary color for the name (linked look). Default true when href is set. */
-  readonly emphasizeLink?: boolean;
+export type ProfileLinkBaseProps = ProfileLinkSharedProps & {
   /** Horizontal spacing between avatar and text. Default: 1.25 (desktop). Mobile uses 0.75. */
   readonly spacing?: number;
   /** When true, adds `minWidth: 0` to the outer Stack for proper text truncation. Default: false. */

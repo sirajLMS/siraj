@@ -2,16 +2,7 @@
 
 import { ExpandMoreOutlined } from "@mui/icons-material";
 import type { SxProps, Theme } from "@mui/material";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  Typography,
-} from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Typography } from "@mui/material";
 import { useState } from "react";
 import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ConnectedAccountsTable } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectedAccountsTable";
@@ -21,6 +12,7 @@ import { MeetingProviderCredentialForm } from "@/frontend/common/views/dashboard
 import { RevokeTokenDialog } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/RevokeTokenDialog";
 import { TestConnectionResultPanel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TestConnectionResultPanel";
 import { TokenMetadataDialog } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TokenMetadataDialog";
+import { SettingsTabShell } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/SettingsTabShell";
 import type {
   MeetingIntegrationConnectedAccount,
   MeetingIntegrationsViewModel,
@@ -65,27 +57,15 @@ export function MeetingIntegrationsTabShared(props: MeetingIntegrationsTabShared
   const { labels, providers, loading, error } = viewModel;
   const [revokeTarget, setRevokeTarget] = useState<RevokeTarget | null>(null);
 
-  if (loading && providers.length === 0) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-        <CircularProgress size={28} />
-        <Typography sx={{ typography: "bodyMd", color: "text.secondary", ml: 2 }}>{labels.loading}</Typography>
-      </Box>
-    );
-  }
-
-  if (error && providers.length === 0 && !loading) {
-    return (
-      <Alert severity="error" sx={{ mt: 1 }}>
-        {labels.loadError}
-      </Alert>
-    );
-  }
-
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.description}</Typography>
-
+    <SettingsTabShell
+      loading={loading}
+      error={error}
+      hasItems={providers.length > 0}
+      loadingLabel={labels.loading}
+      errorLabel={labels.loadError}
+      description={labels.description}
+    >
       <MeetingIntegrationsHealthHeaders viewModel={viewModel} />
 
       {providers.map(provider => (
@@ -162,6 +142,6 @@ export function MeetingIntegrationsTabShared(props: MeetingIntegrationsTabShared
         open={viewModel.metadataDialogAccount !== null}
         onClose={viewModel.onMetadataDialogClose}
       />
-    </Box>
+    </SettingsTabShell>
   );
 }

@@ -1,47 +1,31 @@
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+import type {
+  MeetingConfigBaseInsertType,
+  MeetingConfigBaseReturnType,
+  MeetingConfigBaseSelectType,
+  MeetingConfigBaseSubmitInput,
+} from "@/backend/types/meeting/meeting-config-base.types";
 import type { LocalizedString } from "@/shared/types";
 
 export type ClassMeetingConfigScope = "class_instance" | "recurring_schedule";
 
-export type ClassMeetingConfigSelectType = {
-  readonly id: string;
+export type ClassMeetingConfigSelectType = MeetingConfigBaseSelectType & {
   readonly classInstanceId: string | null;
   readonly recurringScheduleId: string | null;
-  readonly providerId: string;
-  readonly label: string | null;
-  readonly isDefault: boolean;
-  readonly details: MeetingConfigDetails;
-  readonly encryptedSecret: string | null;
-  readonly providerMetadata: Record<string, unknown> | null;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
 };
 
-export type ClassMeetingConfigInsertType = {
-  readonly id?: string;
+export type ClassMeetingConfigInsertType = MeetingConfigBaseInsertType & {
   readonly classInstanceId?: string | null;
   readonly recurringScheduleId?: string | null;
-  readonly providerId: string;
-  readonly label?: string | null;
-  readonly isDefault: boolean;
-  readonly details: MeetingConfigDetails;
-  readonly encryptedSecret?: string | null;
-  readonly providerMetadata?: Record<string, unknown> | null;
-  readonly createdAt?: Date;
-  readonly updatedAt?: Date;
 };
 
-export type ClassMeetingConfigReturnType = ClassMeetingConfigSelectType & {
-  readonly hasSecret?: boolean;
-  readonly provider?: MeetingProviderSelectType;
+export type ClassMeetingConfigReturnType = MeetingConfigBaseReturnType & {
+  readonly classInstanceId: string | null;
+  readonly recurringScheduleId: string | null;
 };
 
-export type ClassMeetingConfigSubmitInput = Omit<
-  ClassMeetingConfigInsertType,
-  "id" | "createdAt" | "updatedAt" | "encryptedSecret" | "providerMetadata"
-> & {
-  readonly password?: string | null;
+export type ClassMeetingConfigSubmitInput = MeetingConfigBaseSubmitInput & {
+  readonly classInstanceId?: string | null;
+  readonly recurringScheduleId?: string | null;
 };
 
 export type UpdateClassMeetingConfigInput = Partial<

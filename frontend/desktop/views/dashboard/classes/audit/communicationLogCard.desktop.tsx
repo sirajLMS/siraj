@@ -1,26 +1,22 @@
 "use client";
 
-import { EmailOutlined } from "@mui/icons-material";
-import { alpha, Box, Button, CircularProgress, Typography } from "@mui/material";
+import { alpha, Box, Button, CircularProgress } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { BaseCard } from "@/frontend/common/components/ui";
 import type { CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CommunicationLogCardProps } from "@/frontend/common/views/dashboard/classes/audit/communicationLogCard.types";
+import { StyledSectionTitle } from "@/frontend/common/views/dashboard/classes/audit/components";
 import {
-  StyledDeliveredIcon,
-  StyledEntryDescription,
-  StyledEntryTimestamp,
-  StyledSectionTitle,
-  StyledUndeliveredIcon,
-} from "@/frontend/common/views/dashboard/classes/audit/components";
-import { COMMUNICATION_ICONS } from "@/frontend/common/views/dashboard/classes/audit/constants";
-import type { CommunicationType } from "@/frontend/common/views/dashboard/classes/audit/types";
+  type CommunicationLogEntryItemConfig,
+  CommunicationLogEntryItemShared,
+} from "@/frontend/common/views/dashboard/classes/audit/components/__shared__/communicationLogEntryItemShared";
 
-const VALID_COMMUNICATION_TYPES = new Set<string>(Object.keys(COMMUNICATION_ICONS));
-
-function isCommunicationType(value: string | null | undefined): value is CommunicationType {
-  return value != null && VALID_COMMUNICATION_TYPES.has(value);
-}
+const DESKTOP_ENTRY_CONFIG: CommunicationLogEntryItemConfig = {
+  iconContainerSize: 32,
+  iconFontSize: 18,
+  alignItems: "flex-start",
+  entryExtras: {},
+};
 
 const StyledDesktopResendButton = styled(Button)(({ theme }) => ({
   borderColor: theme.palette.border.light,
@@ -34,54 +30,9 @@ const StyledDesktopResendButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-function DesktopLogEntryItem({ entry }: Readonly<{ entry: CommunicationLogEntry }>) {
-  const type = isCommunicationType(entry.type) ? entry.type : "email";
-  const Icon = COMMUNICATION_ICONS[type] ?? EmailOutlined;
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: 1.5,
-        opacity: entry.isActive ? 1 : 0.6,
-      }}
-    >
-      <Box sx={{ display: "flex", gap: 1.5 }}>
-        <Box
-          sx={theme => ({
-            width: 32,
-            height: 32,
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            backgroundColor: entry.isActive ? theme.palette.secondaryContainer : theme.palette.action.selected,
-            color: entry.isActive ? theme.palette.onSecondaryContainer : theme.palette.text.secondary,
-          })}
-        >
-          <Icon sx={{ fontSize: 18 }} />
-        </Box>
-        <Box>
-          <Typography variant="bodyMd" sx={{ fontWeight: 700 }}>
-            {entry.title}
-          </Typography>
-          {entry.description ? (
-            <StyledEntryDescription variant="labelMd">{entry.description}</StyledEntryDescription>
-          ) : null}
-          {entry.timestamp ? (
-            <StyledEntryTimestamp variant="labelUppercase" sx={{ mt: 0.5 }}>
-              {entry.timestamp}
-            </StyledEntryTimestamp>
-          ) : null}
-        </Box>
-      </Box>
-      {entry.isDelivered ? <StyledDeliveredIcon /> : <StyledUndeliveredIcon />}
-    </Box>
-  );
-}
+const DesktopLogEntryItem = ({ entry }: Readonly<{ entry: CommunicationLogEntry }>) => (
+  <CommunicationLogEntryItemShared entry={entry} config={DESKTOP_ENTRY_CONFIG} />
+);
 
 export function CommunicationLogCardDesktop({
   entries,

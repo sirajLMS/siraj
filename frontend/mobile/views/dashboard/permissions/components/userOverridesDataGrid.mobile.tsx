@@ -1,42 +1,26 @@
 "use client";
 
-import { EditOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, Typography } from "@mui/material";
 import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
-import { OverridesCell } from "@/frontend/common/views/dashboard/permissions/components/OverridesCell";
+import {
+  EditOverridesButton,
+  OverridesCellBox,
+  StatisticBox,
+  StyledUserAvatar,
+  UserGroupsChips,
+} from "@/frontend/common/views/dashboard/permissions/components/__shared__/userOverridesDataGridShared";
+import { getAvatarInitials } from "@/frontend/common/views/dashboard/permissions/components/__shared__/userOverridesDataGridShared.helpers";
 import type { UserOverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { getUserGroupsForUser } from "@/frontend/common/views/dashboard/permissions/utils";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { Link } from "@/shared/i18n";
-
-const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
-  width: 40,
-  height: 40,
-  backgroundColor: theme.palette.primaryContainer,
-  color: theme.palette.onPrimaryContainer,
-  typography: "bodyMd",
-  fontWeight: 600,
-}));
 
 interface UserOverridesCardProps {
   readonly labels: UserOverridesDataGridProps["labels"];
   readonly user: User;
   readonly groups: readonly PermissionGroup[];
   readonly onManageOverrides: (userId: string) => void;
-}
-
-function StatisticBoxMobile({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-        {label}
-      </Typography>
-      {children}
-    </Box>
-  );
 }
 
 function UserOverridesCardMobile({ labels, user, groups, onManageOverrides }: Readonly<UserOverridesCardProps>) {
@@ -48,14 +32,7 @@ function UserOverridesCardMobile({ labels, user, groups, onManageOverrides }: Re
     <MobileCardListItem variant="edge-to-edge">
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <StyledUserAvatar>
-            {user.name
-              ?.split(" ")
-              .map(w => w[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase()}
-          </StyledUserAvatar>
+          <StyledUserAvatar>{getAvatarInitials(user)}</StyledUserAvatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             {userId && (
               <Link href={profileHrefForUser(userId)} style={{ textDecoration: "none", color: "inherit" }}>
@@ -78,64 +55,21 @@ function UserOverridesCardMobile({ labels, user, groups, onManageOverrides }: Re
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-          {userGroups.length === 0 ? (
-            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.disabled, fontStyle: "italic" })}>
-              -
-            </Typography>
-          ) : (
-            userGroups.map(group => {
-              const name = resolveLocalizedString(group.name);
-              if (!name) return null;
-              return (
-                <Box
-                  key={group.id || group.slug}
-                  sx={theme => ({
-                    typography: "labelMd",
-                    fontWeight: 500,
-                    backgroundColor: theme.palette.secondaryContainer,
-                    color: theme.palette.onSecondaryContainer,
-                    px: 1,
-                    py: 0.25,
-                    borderRadius: 1,
-                    border: `1px solid ${theme.palette.border?.light ?? theme.palette.divider}`,
-                  })}
-                >
-                  {name}
-                </Box>
-              );
-            })
-          )}
-        </Box>
+        <UserGroupsChips userGroups={userGroups} />
 
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <StatisticBoxMobile label={t.explicitGrant}>
-            <OverridesCell userId={userId} userGroups={userGroups} type="grants" />
-          </StatisticBoxMobile>
-          <StatisticBoxMobile label={t.explicitDeny}>
-            <OverridesCell userId={userId} userGroups={userGroups} type="revokes" />
-          </StatisticBoxMobile>
-          <StatisticBoxMobile label="Status">
-            <OverridesCell userId={userId} userGroups={userGroups} type="status" />
-          </StatisticBoxMobile>
+          <StatisticBox label={t.explicitGrant}>
+            <OverridesCellBox userId={userId} userGroups={userGroups} type="grants" />
+          </StatisticBox>
+          <StatisticBox label={t.explicitDeny}>
+            <OverridesCellBox userId={userId} userGroups={userGroups} type="revokes" />
+          </StatisticBox>
+          <StatisticBox label="Status">
+            <OverridesCellBox userId={userId} userGroups={userGroups} type="status" />
+          </StatisticBox>
         </Box>
 
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={() => onManageOverrides(userId)}
-          sx={theme => ({
-            textTransform: "uppercase",
-            typography: "labelMd",
-            fontWeight: 700,
-            letterSpacing: "0.05em",
-            color: theme.palette.primary.main,
-            borderColor: theme.palette.primary.main,
-          })}
-          startIcon={<EditOutlined fontSize="small" />}
-        >
-          {t.editOverrides}
-        </Button>
+        <EditOverridesButton labels={t} userId={userId} onManageOverrides={onManageOverrides} showIcon />
       </Box>
     </MobileCardListItem>
   );

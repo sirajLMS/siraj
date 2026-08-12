@@ -1,6 +1,5 @@
 import { BillingRepository, FxSyncRepository } from "@/backend/db/repo";
 import { AppPermission, FxSyncStatus } from "@/backend/enum";
-import type { CurrencyCode } from "@/backend/enum/shared/currency.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   CurrencyExchangeRateReturnType,
@@ -8,6 +7,7 @@ import type {
   FxSyncHealthReturnType,
   PaginationArgs,
 } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { getServerTranslations } from "@/shared/locale";
 
 const FX_STALE_MS = 24 * 60 * 60 * 1000;

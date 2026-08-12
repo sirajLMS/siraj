@@ -6,9 +6,10 @@ import {
   BillingRepository,
   InvoicePaymentSubmissionRepository,
   ParentRepository,
+  PermissionManagementRepository,
   StudentRepository,
 } from "@/backend/db/repo";
-import { groupPermissions, invoices, permissions, userPermissionGroups } from "@/backend/db/schema";
+import { invoices } from "@/backend/db/schema";
 import { AppPermission, type CurrencyCode, InvoicePaymentSubmissionStatus } from "@/backend/enum";
 import { logger, NotFoundError } from "@/backend/lib";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
@@ -136,15 +137,7 @@ async function resolveParentUserId(parentId: string): Promise<string | null> {
  */
 async function resolveUsersWithPermission(permissionKey: AppPermission): Promise<string[]> {
   try {
-    const rows = await db
-      .select({ userId: userPermissionGroups.userId })
-      .from(userPermissionGroups)
-      .innerJoin(groupPermissions, eq(groupPermissions.groupId, userPermissionGroups.groupId))
-      .innerJoin(permissions, eq(permissions.id, groupPermissions.permissionId))
-      .where(eq(permissions.key, permissionKey));
-    const unique = new Set<string>();
-    for (const row of rows) unique.add(row.userId);
-    return [...unique];
+    return await PermissionManagementRepository.listUserIdsWithPermission(permissionKey);
   } catch (error) {
     logger.error("resolveUsersWithPermission: lookup failed", { permissionKey, error });
     return [];

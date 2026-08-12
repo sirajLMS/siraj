@@ -1,12 +1,13 @@
 "use client";
 
-import { Box, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField/AvatarImageField";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
+import type { DialogActionSlotProps } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogActionButtonsShared";
+import { DialogCommonTextFields } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogCommonTextFieldsShared";
+import { DialogShellShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogShellShared";
 import {
   ActiveToggleField,
   CategorySelectField,
-  EntityFormDialogActions,
   LabeledTextField,
 } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/index";
 import type { SubjectFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/subject.schema";
@@ -15,6 +16,8 @@ import type {
   SubjectFormStateProps,
   SubjectsDialogLabels,
 } from "@/frontend/common/views/dashboard/subjects/home/types";
+
+export type SubjectFormDialogSlotProps = DialogActionSlotProps;
 
 export interface SubjectFormDialogSharedProps {
   readonly open: boolean;
@@ -29,9 +32,8 @@ export interface SubjectFormDialogSharedProps {
   readonly titleId: string;
   readonly dialogTitle: string;
   readonly saveLabel: string;
+  readonly slots: SubjectFormDialogSlotProps;
 }
-
-const FORM_SX = { mt: 1, display: "flex", flexDirection: "column", gap: 3 } as const;
 
 export function SubjectFormDialogShared({
   open,
@@ -46,66 +48,50 @@ export function SubjectFormDialogShared({
   titleId,
   dialogTitle,
   saveLabel,
+  slots,
 }: Readonly<SubjectFormDialogSharedProps>) {
   const { control, errors, handleSubmit } = form;
 
   return (
-    <Dialog open={open} onClose={isLoading ? undefined : onClose} fullWidth maxWidth="sm" aria-labelledby={titleId}>
-      <DialogTitle id={titleId}>{dialogTitle}</DialogTitle>
-      <DialogContent sx={{ pt: 1 }}>
-        <Box component="form" id={formId} onSubmit={handleSubmit(onSubmit)} sx={FORM_SX}>
-          <AvatarImageField
-            control={control}
-            name="avatarUrl"
-            label={labels.avatarLabel}
-            onUploadAvatar={onUploadAvatar}
-            disabled={isLoading}
-          />
-          <LabeledTextField
-            name="name"
-            control={control}
-            label={labels.nameLabel}
-            required
-            error={errors.name ? labels.nameRequired : undefined}
-            disabled={isLoading}
-          />
-          <LabeledTextField
-            name="slug"
-            control={control}
-            label={labels.slugLabel}
-            required
-            error={errors.slug ? labels.slugRequired : undefined}
-            disabled={isLoading}
-          />
-          <CategorySelectField
-            name="categoryId"
-            control={control}
-            label={labels.categoryLabel}
-            placeholder={labels.selectCategory}
-            error={errors.categoryId ? labels.categoryRequired : undefined}
-            disabled={isLoading}
-            categories={categories}
-          />
-          <LabeledTextField
-            name="description"
-            control={control}
-            label={labels.descriptionLabel}
-            disabled={isLoading}
-            multiline
-            rows={3}
-          />
-          <ActiveToggleField name="isActive" control={control} label={labels.activeLabel} disabled={isLoading} />
-          <LabeledTextField name="hourlyRate" control={control} label={labels.hourlyRateLabel} disabled={isLoading} />
-          <CurrencyControllerField control={control} name="rateCurrency" label={labels.currencyLabel} />
-        </Box>
-      </DialogContent>
-      <EntityFormDialogActions
-        formId={formId}
-        cancelLabel={labels.cancel}
-        saveLabel={saveLabel}
-        onClose={onClose}
-        isLoading={isLoading}
+    <DialogShellShared
+      open={open}
+      onClose={onClose}
+      isLoading={isLoading}
+      titleId={titleId}
+      dialogTitle={dialogTitle}
+      cancelLabel={labels.cancel}
+      saveLabel={saveLabel}
+      savingLabel={labels.saving}
+      formId={formId}
+      slots={slots}
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <AvatarImageField
+        control={control}
+        name="avatarUrl"
+        label={labels.avatarLabel}
+        onUploadAvatar={onUploadAvatar}
+        disabled={isLoading}
       />
-    </Dialog>
+      <DialogCommonTextFields
+        control={control}
+        errors={errors}
+        labels={labels}
+        isLoading={isLoading}
+        paths={{ name: "name", slug: "slug", description: "description" }}
+      />
+      <CategorySelectField
+        name="categoryId"
+        control={control}
+        label={labels.categoryLabel}
+        placeholder={labels.selectCategory}
+        error={errors.categoryId ? labels.categoryRequired : undefined}
+        disabled={isLoading}
+        categories={categories}
+      />
+      <ActiveToggleField name="isActive" control={control} label={labels.activeLabel} disabled={isLoading} />
+      <LabeledTextField name="hourlyRate" control={control} label={labels.hourlyRateLabel} disabled={isLoading} />
+      <CurrencyControllerField control={control} name="rateCurrency" label={labels.currencyLabel} />
+    </DialogShellShared>
   );
 }

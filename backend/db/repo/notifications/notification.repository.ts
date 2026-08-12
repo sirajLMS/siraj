@@ -4,6 +4,7 @@ import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";
+import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 import type {
   CreateNotificationDeliveryInput,
   NotificationDeliveryAnalyticsFilter,
@@ -58,6 +59,49 @@ export namespace NotificationRepository {
     updatedAt?: Date;
   };
 
+  /**
+   * Shared mapping from a notification delivery input to an insert row object.
+   * Used by `createManyDeliveries` and `createDeliveriesBatch` to avoid duplicate field mapping.
+   */
+  function mapDeliveryInput(
+    input: {
+      userId: string;
+      deviceTokenId?: string | null;
+      channel: NotificationChannel | string;
+      eventType: NotificationEventType | string;
+      title?: string | null;
+      body?: string | null;
+      metadata?: NotificationMetadata | null;
+    },
+    status: NotificationDeliveryStatus,
+    extras: {
+      sentAt?: Date | null;
+      deliveredAt?: Date | null;
+      failedAt?: Date | null;
+      failureReason?: string | null;
+      createdAt?: Date;
+      updatedAt?: Date;
+    },
+    now: Date
+  ) {
+    return {
+      userId: input.userId,
+      deviceTokenId: input.deviceTokenId ?? null,
+      channel: input.channel,
+      eventType: input.eventType,
+      status,
+      title: input.title ?? null,
+      body: input.body ?? null,
+      metadata: input.metadata ?? null,
+      sentAt: extras.sentAt ?? null,
+      deliveredAt: extras.deliveredAt ?? null,
+      failedAt: extras.failedAt ?? null,
+      failureReason: extras.failureReason ?? null,
+      createdAt: extras.createdAt ?? now,
+      updatedAt: extras.updatedAt ?? now,
+    };
+  }
+
   export const createManyDeliveries = async (
     inputs: NotificationDeliveryInsertInput[],
     tx?: DBTransaction
@@ -66,21 +110,21 @@ export namespace NotificationRepository {
 
     const runner = async (t: DBTransaction) => {
       const now = new Date();
-      const values = inputs.map(input => ({
-        userId: input.userId,
-        deviceTokenId: input.deviceTokenId ?? null,
-        channel: input.channel,
-        eventType: input.eventType,
-        status: input.status,
-        title: input.title ?? null,
-        body: input.body ?? null,
-        sentAt: input.sentAt ?? null,
-        deliveredAt: input.deliveredAt ?? null,
-        failedAt: input.failedAt ?? null,
-        failureReason: input.failureReason ?? null,
-        createdAt: input.createdAt ?? now,
-        updatedAt: input.updatedAt ?? now,
-      }));
+      const values = inputs.map(input =>
+        mapDeliveryInput(
+          input,
+          input.status,
+          {
+            sentAt: input.sentAt,
+            deliveredAt: input.deliveredAt,
+            failedAt: input.failedAt,
+            failureReason: input.failureReason,
+            createdAt: input.createdAt,
+            updatedAt: input.updatedAt,
+          },
+          now
+        )
+      );
 
       return t.insert(notificationDeliveries).values(values).returning();
     };
@@ -830,18 +874,7 @@ export namespace NotificationRepository {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
-      const values = inputs.map(input => ({
-        userId: input.userId,
-        deviceTokenId: input.deviceTokenId ?? null,
-        channel: input.channel,
-        eventType: input.eventType,
-        status: NotificationDeliveryStatus.PENDING,
-        title: input.title ?? null,
-        body: input.body ?? null,
-        metadata: input.metadata ?? null,
-        createdAt: now,
-        updatedAt: now,
-      }));
+      const values = inputs.map(input => mapDeliveryInput(input, NotificationDeliveryStatus.PENDING, {}, now));
 
       const created = await t.insert(notificationDeliveries).values(values).returning();
 

@@ -72,7 +72,8 @@ export interface ResourceLibraryHeaderProps {
   readonly onSortByChange: (sort: ResourceSortBy) => void;
 }
 
-export interface ResourceLibraryGridProps {
+/** Shared props for both {@link ResourceLibraryGridProps} and {@link ResourceLibraryListProps}. */
+interface ResourceLibrarySharedProps {
   readonly resources: readonly LearningResourceRow[];
   readonly labels: ResourcesLabels;
   readonly filterType: ResourceFilterType;
@@ -84,17 +85,9 @@ export interface ResourceLibraryGridProps {
   readonly onCardClick: (id: string) => void;
 }
 
-export interface ResourceLibraryListProps {
-  readonly resources: readonly LearningResourceRow[];
-  readonly labels: ResourcesLabels;
-  readonly filterType: ResourceFilterType;
-  readonly sortBy: ResourceSortBy;
-  readonly canManage: boolean;
-  readonly onFilterTypeChange: (type: ResourceFilterType) => void;
-  readonly onSortByChange: (sort: ResourceSortBy) => void;
-  readonly onDeleteRequest: (id: string) => void;
-  readonly onCardClick: (id: string) => void;
-}
+export type ResourceLibraryGridProps = ResourceLibrarySharedProps;
+
+export type ResourceLibraryListProps = ResourceLibrarySharedProps;
 
 export interface ResourceFileTypeIconProps {
   readonly fileType: ResourceFileType;

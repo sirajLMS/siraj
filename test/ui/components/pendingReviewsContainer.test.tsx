@@ -1,31 +1,7 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
-await mock.module("next/navigation", () => ({
-  useParams: () => ({ locale: "en" }),
-}));
-
-await mock.module("@/shared/i18n/routing", () => ({
-  useRouter: () => ({ push: mock(() => {}), back: mock(() => {}), forward: mock(() => {}), refresh: mock(() => {}) }),
-  usePathname: () => "/dashboard",
-  Link: ({ children, href, ...props }: { children: React.ReactNode; href: string }) => (
-    <a href={href} {...props}>
-      {children}
-    </a>
-  ),
-  redirect: () => {},
-}));
-
-await mock.module("@/shared/i18n/navigation", () => ({
-  useRouter: () => ({
-    push: mock(() => {}),
-    back: mock(() => {}),
-    forward: mock(() => {}),
-    refresh: mock(() => {}),
-    replace: mock(() => {}),
-    prefetch: mock(() => {}),
-  }),
-  usePathname: () => "/dashboard",
-}));
+await mockNextNavigation("/dashboard", { includeRouter: false, routingIncludeReplaceAndPrefetch: false });
 
 // Bypass ResponsiveViewSwitch / next/dynamic preload races (same pattern as studentDashboard).
 await mock.module("@/frontend/common/views/dashboard/supervisor/lesson-reviews/PendingReviewsContainer", () => ({

@@ -1,10 +1,11 @@
 "use client";
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
-import { Grid, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { useMemo } from "react";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import { PeriodFieldsShared } from "@/frontend/common/views/dashboard/supervisor/monthly-reports/__shared__/periodFieldsShared";
 import type {
   MonthlyReportsViewModel,
   PeriodFieldsProps,
@@ -22,8 +23,6 @@ import {
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { StudentAutocompleteMobile, TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
-
-const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
 function buildActiveToggleSx(isActive: boolean): SxProps<Theme> {
   let sx: SxProps<Theme>;
@@ -59,38 +58,16 @@ function ReportTypeToggle({ reportType, labels, onReportTypeChange }: ReportType
 
 function PeriodFields({ year, month, labels, onYearChange, onMonthChange }: PeriodFieldsProps) {
   return (
-    <Grid container spacing={1}>
-      <Grid size={6}>
-        <TextField
-          select
-          fullWidth
-          label={labels.selectYear}
-          value={year}
-          onChange={e => onYearChange(Number(e.target.value))}
-        >
-          {YEARS.map(y => (
-            <MenuItem key={y} value={y}>
-              {y}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Grid>
-      <Grid size={6}>
-        <TextField
-          select
-          fullWidth
-          label={labels.selectMonth}
-          value={month}
-          onChange={e => onMonthChange(Number(e.target.value))}
-        >
-          {labels.monthNames.map((name, index) => (
-            <MenuItem key={name} value={index + 1}>
-              {name}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Grid>
-    </Grid>
+    <PeriodFieldsShared
+      year={year}
+      month={month}
+      labels={labels}
+      onYearChange={onYearChange}
+      onMonthChange={onMonthChange}
+      gridSize={6}
+      containerSpacing={1}
+      wrapInContainer
+    />
   );
 }
 

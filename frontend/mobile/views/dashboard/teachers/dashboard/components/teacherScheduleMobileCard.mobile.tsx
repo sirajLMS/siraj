@@ -1,12 +1,13 @@
 "use client";
 
 import { AccessTimeOutlined, AcUnitOutlined, VisibilityOutlined } from "@mui/icons-material";
-import { alpha, Box, Button, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Paper, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
+import { StyledTimeHighlight } from "@/frontend/common/views/dashboard/components/__shared__/timeHighlightShared.styles";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 import { resolveTeacherScheduleActionTooltips } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/resolveTeacherScheduleActionTooltips";
 import {
@@ -33,19 +34,6 @@ const StyledScheduleCard = styled(Paper, {
   width: "100%",
   opacity: 1,
   borderInlineStart: isLive ? `4px solid ${theme.palette.primary.main}` : undefined,
-}));
-
-const StyledTimeHighlight = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: theme.spacing(1),
-  marginBottom: theme.spacing(1.5),
-  padding: theme.spacing(1.25, 1.5),
-  borderRadius: theme.layout.radius.card,
-  backgroundColor: alpha(theme.palette.primary.main, 0.08),
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.16)}`,
-  minWidth: 0,
-  overflow: "hidden",
 }));
 
 interface TeacherScheduleMobileCardProps {

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { COLORS, logError, logInfo, logSuccess, logWarning } from "@/scripts/health/__shared__/log";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 export const SONAR_DIR = join(currentDir, "..");
@@ -42,28 +43,4 @@ export const CONFIG = {
   SCANNER_DIR: join(process.env.HOME || process.env.USERPROFILE || "", ".sonar-scanner"),
 };
 
-export const COLORS = {
-  RED: "\x1b[0;31m",
-  GREEN: "\x1b[0;32m",
-  YELLOW: "\x1b[1;33m",
-  BLUE: "\x1b[0;34m",
-  CYAN: "\x1b[0;36m",
-  MAGENTA: "\x1b[0;35m",
-  NC: "\x1b[0m",
-};
-
-export function logInfo(msg: string) {
-  globalThis.console.log(`${COLORS.BLUE}ℹ${COLORS.NC} ${msg}`);
-}
-
-export function logSuccess(msg: string) {
-  globalThis.console.log(`${COLORS.GREEN}✓${COLORS.NC} ${msg}`);
-}
-
-export function logWarning(msg: string) {
-  globalThis.console.log(`${COLORS.YELLOW}⚠${COLORS.NC} ${msg}`);
-}
-
-export function logError(msg: string) {
-  globalThis.console.log(`${COLORS.RED}✖${COLORS.NC} ${msg}`);
-}
+export { COLORS, logError, logInfo, logSuccess, logWarning };

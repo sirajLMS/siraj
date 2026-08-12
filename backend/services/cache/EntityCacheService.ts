@@ -161,16 +161,20 @@ export async function safeIndexTags(key: string, tags: string[]): Promise<void> 
   }
 }
 
-export async function cachedRead<T>(
-  key: string,
-  ttlSeconds: number,
-  loader: () => Promise<T>,
-  tags: string[] = []
-): Promise<T> {
-  if (ttlSeconds > CACHE_TAG_INDEX_TTL) {
-    throw new Error("cache TTL exceeds tag index TTL");
-  }
+/**
+ * Attempt a cache read and return a typed hit result.
+ *
+ * This is the shared implementation extracted from {@link cachedRead} and
+ * {@link cachedReadSingleFlight}. Both functions previously duplicated the
+ * same ~24-line block: cache get → deserialize → validate → index tags →
+ * record hit → return data (with error handling for both JSON parse and
+ * cache get failures).
+ *
+ * @param callerName - Function name used in log messages for diagnostics.
+ */
+type CacheHit<T> = { hit: true; data: T } | { hit: false };
 
+async function readFromCache<T>(key: string, tags: string[], callerName: string): Promise<CacheHit<T>> {
   try {
     const raw = await cacheService.get(key);
     if (raw) {
@@ -181,14 +185,31 @@ export async function cachedRead<T>(
             await safeIndexTags(key, tags);
           }
           recordHit(prefixOf(key));
-          return parsed.data;
+          return { hit: true, data: parsed.data };
         }
       } catch (pErr) {
-        logger.warn(`cachedRead JSON parse error for key ${key}:`, pErr);
+        logger.warn(`${callerName} JSON parse error for key ${key}:`, pErr);
       }
     }
   } catch (err) {
-    logger.error(`cachedRead cache get failed for key ${key}:`, err);
+    logger.error(`${callerName} cache get failed for key ${key}:`, err);
+  }
+  return { hit: false };
+}
+
+export async function cachedRead<T>(
+  key: string,
+  ttlSeconds: number,
+  loader: () => Promise<T>,
+  tags: string[] = []
+): Promise<T> {
+  if (ttlSeconds > CACHE_TAG_INDEX_TTL) {
+    throw new Error("cache TTL exceeds tag index TTL");
+  }
+
+  const cached = await readFromCache<T>(key, tags, "cachedRead");
+  if (cached.hit) {
+    return cached.data;
   }
 
   const data = await loader();
@@ -227,24 +248,9 @@ export async function cachedReadSingleFlight<T>(
     throw new Error("cache TTL exceeds tag index TTL");
   }
 
-  try {
-    const raw = await cacheService.get(key);
-    if (raw) {
-      try {
-        const parsed = cacheDeserialize(raw);
-        if (validateEntry<T>(parsed)) {
-          if (tags.length > 0) {
-            await safeIndexTags(key, tags);
-          }
-          recordHit(prefixOf(key));
-          return parsed.data;
-        }
-      } catch (pErr) {
-        logger.warn(`cachedReadSingleFlight JSON parse error for key ${key}:`, pErr);
-      }
-    }
-  } catch (err) {
-    logger.error(`cachedReadSingleFlight cache get failed for key ${key}:`, err);
+  const cached = await readFromCache<T>(key, tags, "cachedReadSingleFlight");
+  if (cached.hit) {
+    return cached.data;
   }
 
   const data = await loader();

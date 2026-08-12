@@ -1,11 +1,14 @@
-import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type {
-  GenerateMeetingInput,
-  GenerateMeetingResult,
-  IMeetingChannel,
-} from "@/backend/services/meeting/channels/IMeetingChannel";
+import {
+  type CachedToken,
+  isRecord,
+  isTokenExpired,
+  MeetingAdapterBase,
+  REQUEST_TIMEOUT_MS,
+  withTimeout,
+} from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
+import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/services/meeting/channels/IMeetingChannel";
 import {
   InsufficientScopesError,
   MicrosoftTeamsApiError,
@@ -19,7 +22,6 @@ import type {
   MicrosoftTeamsMeetingResponse,
   MicrosoftTeamsTokenResponse,
 } from "@/backend/services/meeting/channels/microsoft-teams/microsoft-teams.types";
-import { refreshAccessToken } from "@/backend/services/meeting/integrations/token-refresh";
 
 export interface MicrosoftTeamsAdapterOptions {
   readonly tenantId?: string;
@@ -30,7 +32,6 @@ export interface MicrosoftTeamsAdapterOptions {
 
 const MS_TOKEN_URL_TEMPLATE = "https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token";
 const MS_GRAPH_BASE = "https://graph.microsoft.com/v1.0";
-const REQUEST_TIMEOUT_MS = 30_000;
 const TOKEN_REFRESH_MARGIN_MS = 120_000;
 
 const MS_TEAMS_REQUIRED_SCOPES = ["OnlineMeetings.ReadWrite.All"] as const;
@@ -39,10 +40,6 @@ const MS_GRAPH_SCOPE_PREFIX = "https://graph.microsoft.com/";
 
 function normalizeScope(scope: string): string {
   return scope.startsWith(MS_GRAPH_SCOPE_PREFIX) ? scope.slice(MS_GRAPH_SCOPE_PREFIX.length) : scope;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }
 
 function isMicrosoftTeamsTokenResponse(value: unknown): value is MicrosoftTeamsTokenResponse {
@@ -67,39 +64,22 @@ function isMicrosoftTeamsErrorResponse(value: unknown): value is MicrosoftTeamsE
   return typeof value.error.code === "string" && typeof value.error.message === "string";
 }
 
-interface CachedToken {
-  accessToken: string;
-  expiresAt: number;
-}
-
-function withTimeout(ms: number): { signal: AbortSignal; cancel: () => void } {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ms);
-  return { signal: controller.signal, cancel: () => clearTimeout(timer) };
-}
-
-function jitterDelay(baseMs: number): number {
-  return baseMs + (Date.now() % 100);
-}
-
-function isExpired(token: CachedToken | null): boolean {
-  if (!token) return true;
-  return Date.now() >= token.expiresAt - TOKEN_REFRESH_MARGIN_MS;
-}
-
-export class MicrosoftTeamsAdapter implements IMeetingChannel {
+export class MicrosoftTeamsAdapter extends MeetingAdapterBase {
   static readonly ENDPOINTS: readonly string[] = [
     "https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token",
     "https://graph.microsoft.com/v1.0/users/{organizer}/onlineMeetings",
     "https://graph.microsoft.com/.default",
   ];
+  protected readonly providerSlug = "microsoft_teams" as const;
+  protected readonly tokenRefreshMarginMs = TOKEN_REFRESH_MARGIN_MS;
+
   private readonly tenantId?: string;
   private readonly clientId?: string;
   private readonly clientSecret?: string;
   private readonly organizerUserId?: string;
-  private cachedToken: CachedToken | null = null;
 
   constructor(opts?: MicrosoftTeamsAdapterOptions) {
+    super();
     const envConfig = opts?.tenantId != null ? null : getEnvironmentConfig();
     this.tenantId = opts?.tenantId ?? envConfig?.msTeamsTenantId;
     this.clientId = opts?.clientId ?? envConfig?.msTeamsClientId;
@@ -120,45 +100,37 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
     return true;
   }
 
-  async generateMeeting(input: GenerateMeetingInput): Promise<GenerateMeetingResult> {
+  protected async resolveAccessToken(input: GenerateMeetingInput): Promise<string> {
     const hasOrgCreds = !!(this.tenantId && this.clientId && this.clientSecret && this.organizerUserId);
 
-    let accessToken: string;
-    let organizerUserId: string;
-
     if (hasOrgCreds) {
-      accessToken = await this.getAccessToken();
-      organizerUserId = this.organizerUserId ?? "";
-    } else if (input.actorUserId) {
-      accessToken = await this.getPerUserAccessToken(input.actorUserId);
-      // For per-user delegates tokens, use "me" — Graph API resolves the
-      // token holder's identity from the access token.
-      organizerUserId = "me";
-    } else {
-      throw new NoOrgCredentialsNoUserTokenError("microsoft_teams");
+      return this.getAccessToken();
     }
-
-    return this.createMeetingWithRetry(accessToken, organizerUserId, input, 0, 2);
+    if (input.actorUserId) {
+      return this.getPerUserAccessToken(input.actorUserId);
+    }
+    throw new NoOrgCredentialsNoUserTokenError("microsoft_teams");
   }
 
-  private async createMeetingWithRetry(
-    accessToken: string,
-    organizerUserId: string,
-    input: GenerateMeetingInput,
-    attempt: number,
-    maxAttempts: number
-  ): Promise<GenerateMeetingResult> {
-    if (attempt > 0) {
-      await new Promise(resolve => setTimeout(resolve, jitterDelay(200)));
+  protected async callProviderApi(accessToken: string, input: GenerateMeetingInput): Promise<GenerateMeetingResult> {
+    // For per-user delegates, use "me" — Graph API resolves the token holder's
+    // identity from the access token. For org credentials, use the configured organizer.
+    const hasOrgCreds = !!(this.tenantId && this.organizerUserId);
+    const organizerUserId = hasOrgCreds ? (this.organizerUserId ?? "") : "me";
+
+    const meetingBody = this.buildMeetingRequestBody(input);
+    const url = this.buildMeetingUrl(organizerUserId);
+    const response = await this.postMeetingRequest(url, accessToken, meetingBody);
+    await this.assertMeetingResponseOk(response);
+    const rawMeeting: unknown = await response.json();
+    if (!isMicrosoftTeamsMeetingResponse(rawMeeting)) {
+      throw new MicrosoftTeamsApiError(
+        `Teams meeting response was malformed (${response.status})`,
+        undefined,
+        response.status
+      );
     }
-    try {
-      return await this.createOnlineMeeting(accessToken, organizerUserId, input);
-    } catch (error) {
-      if (error instanceof ProviderUnavailableError && attempt + 1 < maxAttempts) {
-        return this.createMeetingWithRetry(accessToken, organizerUserId, input, attempt + 1, maxAttempts);
-      }
-      throw error;
-    }
+    return this.mapMeetingResponse(rawMeeting);
   }
 
   async deleteMeeting(meetingId: string): Promise<void> {
@@ -210,11 +182,11 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
         }
       }
     }
-    this.cachedToken = null;
+    this.clearCachedToken();
   }
 
   private async getAccessToken(): Promise<string> {
-    if (this.cachedToken && !isExpired(this.cachedToken)) {
+    if (this.cachedToken && !isTokenExpired(this.cachedToken, this.tokenRefreshMarginMs)) {
       return this.cachedToken.accessToken;
     }
 
@@ -290,37 +262,8 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
     this.cachedToken = {
       accessToken: tokenData.access_token,
       expiresAt: Date.now() + tokenData.expires_in * 1000,
-    };
+    } satisfies CachedToken;
     return tokenData.access_token;
-  }
-
-  private async getPerUserAccessToken(actorUserId: string): Promise<string> {
-    const tokenRow = await MeetingProviderTokenRepository.getByUserAndProvider(actorUserId, "microsoft_teams");
-    if (!tokenRow?.refreshToken) {
-      throw new NoOrgCredentialsNoUserTokenError("microsoft_teams");
-    }
-
-    logger.debug("MicrosoftTeamsAdapter: using per-user token fallback", { actorUserId });
-
-    // Return the stored access token if it is still valid (within the refresh
-    // margin) to avoid racing concurrent calls on the single-use refresh token.
-    const storedExpiry = tokenRow.expiresAt ? tokenRow.expiresAt.getTime() : 0;
-    if (tokenRow.accessToken && Date.now() < storedExpiry - TOKEN_REFRESH_MARGIN_MS) {
-      return tokenRow.accessToken;
-    }
-
-    const refreshed = await refreshAccessToken("microsoft_teams", tokenRow.refreshToken, actorUserId);
-
-    await MeetingProviderTokenRepository.upsert({
-      userId: actorUserId,
-      providerSlug: "microsoft_teams",
-      accessToken: refreshed.accessToken,
-      refreshToken: refreshed.refreshToken ?? tokenRow.refreshToken,
-      expiresAt: refreshed.expiresAt,
-      scopes: tokenRow.scopes,
-    });
-
-    return refreshed.accessToken;
   }
 
   private buildMeetingRequestBody(input: GenerateMeetingInput): {
@@ -421,27 +364,6 @@ export class MicrosoftTeamsAdapter implements IMeetingChannel {
         subject: meeting.subject,
       },
     };
-  }
-
-  private async createOnlineMeeting(
-    accessToken: string,
-    organizerUserId: string,
-    input: GenerateMeetingInput
-  ): Promise<GenerateMeetingResult> {
-    const meetingBody = this.buildMeetingRequestBody(input);
-    const url = this.buildMeetingUrl(organizerUserId);
-    const response = await this.postMeetingRequest(url, accessToken, meetingBody);
-    await this.assertMeetingResponseOk(response);
-    const rawMeeting: unknown = await response.json();
-    if (!isMicrosoftTeamsMeetingResponse(rawMeeting)) {
-      throw new MicrosoftTeamsApiError(
-        `Teams meeting response was malformed (${response.status})`,
-        undefined,
-        response.status
-      );
-    }
-    const meeting = rawMeeting;
-    return this.mapMeetingResponse(meeting);
   }
 
   private async parseErrorBody(response: Response): Promise<MicrosoftTeamsErrorResponse | null> {

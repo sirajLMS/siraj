@@ -3,6 +3,10 @@ import { Box, Button, Typography } from "@mui/material";
 import { useCallback } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { classHref, profileHrefForTeacher, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
+import {
+  formatDateTime,
+  formatTime,
+} from "@/frontend/common/views/dashboard/students/status/components/__shared__/upcomingClassesTableShared";
 import type {
   UpcomingClassDisplay,
   UpcomingClassesTableProps,
@@ -13,27 +17,8 @@ import { MobileClassProfileLink } from "@/frontend/mobile/components/ui/display/
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";
 import { useRouter } from "@/shared/i18n/navigation";
-import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
-
-function formatDateTime(locale: string, dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(getLatnLocaleTag(locale), { weekday: "short", month: "short", day: "numeric" });
-  } catch {
-    return dateStr;
-  }
-}
-
-function formatTime(locale: string, dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString(getLatnLocaleTag(locale), { hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return dateStr;
-  }
-}
 
 function UpcomingClassCard({
   cls,

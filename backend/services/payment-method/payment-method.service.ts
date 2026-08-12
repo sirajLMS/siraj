@@ -45,6 +45,18 @@ function slotsForDirection(direction: PaymentDirection): DefaultSlot[] {
   return ["PAYOUT"];
 }
 
+async function getPaymentMethodOrThrow(
+  id: string,
+  tErrors: ErrorsLabels,
+  tx?: DBTransaction
+): Promise<NonNullable<Awaited<ReturnType<typeof UserPaymentMethodRepository.getById>>>> {
+  const method = await UserPaymentMethodRepository.getById(id, tx);
+  if (method === null) {
+    throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
+  }
+  return method;
+}
+
 function supportsTransactionDirection(
   methodDirection: PaymentDirection,
   transactionDirection: PaymentDirection
@@ -308,10 +320,7 @@ export namespace PaymentMethodService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
-    const existing = await UserPaymentMethodRepository.getById(id, tx);
-    if (existing === null) {
-      throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
-    }
+    const existing = await getPaymentMethodOrThrow(id, tErrors, tx);
 
     await assertActorCanManageTarget(actorUserId, existing.userId, tErrors);
 
@@ -354,10 +363,7 @@ export namespace PaymentMethodService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<void> {
-    const existing = await UserPaymentMethodRepository.getById(id, tx);
-    if (!existing) {
-      throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
-    }
+    const existing = await getPaymentMethodOrThrow(id, tErrors, tx);
 
     await assertActorCanManageTarget(actorUserId, existing.userId, tErrors);
     await UserPaymentMethodRepository.deleteById(id, tErrors, tx);
@@ -372,10 +378,7 @@ export namespace PaymentMethodService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
-    const existing = await UserPaymentMethodRepository.getById(id, tx);
-    if (existing === null) {
-      throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
-    }
+    const existing = await getPaymentMethodOrThrow(id, tErrors, tx);
 
     const result = await updateUserPaymentMethodCore(
       actorUserId,
@@ -405,10 +408,7 @@ export namespace PaymentMethodService {
       throw new Error(tErrors.insufficientPermissions);
     }
 
-    const existing = await UserPaymentMethodRepository.getById(id, tx);
-    if (!existing) {
-      throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
-    }
+    const existing = await getPaymentMethodOrThrow(id, tErrors, tx);
 
     if (existing.type !== PaymentMethodType.BANK_TRANSFER) {
       throw new Error(tErrors.billing.invoiceAlreadyPaid({ id, status: "PAID" }));
@@ -436,12 +436,7 @@ export namespace PaymentMethodService {
       | { inline: Pick<UserPaymentMethodSubmitInput, "type" | "label" | "details"> };
 
     if (input.userPaymentMethodId) {
-      const method = await UserPaymentMethodRepository.getById(input.userPaymentMethodId, tx);
-      if (method === null) {
-        throw new Error(
-          tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: input.userPaymentMethodId })
-        );
-      }
+      const method = await getPaymentMethodOrThrow(input.userPaymentMethodId, tErrors, tx);
       if (!supportsTransactionDirection(method.direction, PaymentDirection.PAYIN)) {
         throw new Error(tErrors.insufficientPermissions);
       }
@@ -481,12 +476,7 @@ export namespace PaymentMethodService {
       throw new Error(tErrors.billing.invoiceNotFound(input.teacherId));
     }
 
-    const method = await UserPaymentMethodRepository.getById(input.userPaymentMethodId, tx);
-    if (method === null) {
-      throw new Error(
-        tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: input.userPaymentMethodId })
-      );
-    }
+    const method = await getPaymentMethodOrThrow(input.userPaymentMethodId, tErrors, tx);
 
     if (!supportsTransactionDirection(method.direction, PaymentDirection.PAYOUT)) {
       throw new Error(tErrors.insufficientPermissions);
