@@ -1,6 +1,5 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBQueryExecutor, DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import {
@@ -14,6 +13,8 @@ import {
 import { AccountStatus, OverrideState } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
+  DBQueryExecutor,
+  DBTransaction,
   ManagerDirectoryFilters,
   ManagerDirectoryMetrics,
   ManagerDirectoryResult,

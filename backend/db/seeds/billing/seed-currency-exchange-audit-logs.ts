@@ -1,8 +1,8 @@
-import { findAdminUser, loadSeedConfig, SeedConfig } from "@/backend/db/seeds/lib";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
+import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
 import { FxIngestionService } from "@/backend/services/fx/fx-ingestion.service";
 import type { ExchangeAuditLogInput, UserSelectType } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 type ExchangeRateRow = {
   fromCurrency: CurrencyCode;

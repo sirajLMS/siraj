@@ -1,10 +1,9 @@
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { StudentRepository } from "@/backend/db/repo/students";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { AppPermission, OnDemandStatus } from "@/backend/enum";
 import { QuotaNotFoundError, UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
@@ -15,6 +14,7 @@ import {
   resolveAssociatedViewer,
   requirePermission as sharedRequirePermission,
 } from "@/backend/services/billing/permission-utils";
+import type { DBTransaction } from "@/backend/types";
 import {
   mapQuotaLedgerToReturnType,
   mapQuotaToReturnType,

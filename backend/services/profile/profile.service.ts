@@ -1,6 +1,6 @@
 import { ParentRepository } from "@/backend/db/repo/parents";
-import { StaffProfileRepository, TeacherRepository } from "@/backend/db/repo/teachers";
 import { StudentRepository } from "@/backend/db/repo/students";
+import { StaffProfileRepository, TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import {

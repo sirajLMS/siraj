@@ -1,5 +1,5 @@
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
+import type { DBTransaction } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**

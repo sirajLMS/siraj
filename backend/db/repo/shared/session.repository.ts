@@ -1,11 +1,11 @@
 import { and, desc, eq, lte, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { getRedisService, SessionRedisService } from "@/backend/services";
+import type { DBTransaction } from "@/backend/types";
 import type {
   RedisGroupSimulationSessionData,
   RedisSessionData,

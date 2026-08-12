@@ -1,12 +1,17 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { LeaveQuotaUsageSelectType, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
+import type {
+  DBTransaction,
+  LeaveQuotaUsageSelectType,
+  StudentSelectType,
+  TeacherSelectType,
+  UserSelectType,
+} from "@/backend/types";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { getServerTranslations } from "@/shared/locale";

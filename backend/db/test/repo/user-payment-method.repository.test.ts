@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import type { DBTransaction } from "@/backend/types";
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
+import type { DBTransaction } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 

@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { SupportedCurrencyRepository } from "@/backend/db/repo/billing";
 import { supportedCurrencies, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
+import type { DBTransaction } from "@/backend/types";
 import type { SupportedCurrencyReturnType } from "@/backend/types/billing/currency.types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 /** Unlikely to be referenced by other tables, so safe for activate/deactivate checks. */

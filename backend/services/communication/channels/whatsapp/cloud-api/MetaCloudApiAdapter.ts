@@ -1,5 +1,5 @@
-import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
+import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { decryptField } from "@/backend/lib/field-encryption";
 import { logger } from "@/backend/lib/logger";
@@ -15,13 +15,13 @@ import {
 } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
 import { redisService } from "@/backend/services/redis";
+import type { GraphApiRequestContext } from "@/backend/types";
 import type { CreateNotificationDeliveryInput } from "@/backend/types/notifications/notificationDeliveries.types";
 import type {
   IWhatsappChannel,
   WhatsappPayload,
   WhatsappSendResult,
 } from "@/backend/types/whatsapp/whatsapp-channel.types";
-import type { GraphApiRequestContext } from "@/backend/types";
 
 /** Pair-rate-limit window: no two messages to the same recipient within 6 seconds (B2). */
 const PAIR_RATE_LIMIT_MS = 6000;

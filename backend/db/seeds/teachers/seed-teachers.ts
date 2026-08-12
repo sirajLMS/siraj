@@ -8,10 +8,10 @@ import {
   shouldSeedExtendedFiles,
   TEACHER_AVATAR_FILES,
 } from "@/backend/db/seeds/lib";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { logger } from "@/backend/lib/logger";
 import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
 import type { TimezoneSelectType, UserSelectType } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 function resolveTimezone(timezones: TimezoneSelectType[], ianaId: string): TimezoneSelectType {
   const match = timezones.find(t => t.ianaId === ianaId);

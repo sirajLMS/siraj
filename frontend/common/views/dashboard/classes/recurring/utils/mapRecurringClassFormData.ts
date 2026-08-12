@@ -1,5 +1,3 @@
-import type { ClassType as BackendClassType } from "@/shared/constants/class-instance-detail.enum";
-import type { CurrencyCode as BackendCurrencyCode } from "@/shared/constants/currency.enum";
 import type {
   DayOfWeek as BackendDayOfWeek,
   OnDemandNoCreditsOutcome as BackendOnDemandNoCreditsOutcome,
@@ -14,6 +12,8 @@ import type {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import type { ClassType as BackendClassType } from "@/shared/constants/class-instance-detail.enum";
+import type { CurrencyCode as BackendCurrencyCode } from "@/shared/constants/currency.enum";
 
 const CLASS_TYPE_VALUES: readonly string[] = ["REGULAR", "TRIAL", "ADVANCE"];
 const CURRENCY_CODE_VALUES: readonly string[] = [

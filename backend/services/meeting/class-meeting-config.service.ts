@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
@@ -17,6 +16,7 @@ import {
   buildMaskedClassMeetingConfigs,
 } from "@/backend/services/meeting/class-meeting-config-mask";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
+import type { DBTransaction } from "@/backend/types";
 import type {
   ClassMeetingConfigReturnType,
   ClassMeetingConfigSelectType,

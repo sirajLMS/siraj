@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
 import {
@@ -13,6 +12,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { DayOfWeek } from "@/backend/enum/teachers/teacher-availability.enum";
+import type { DBTransaction } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 async function expectRepositoryError(fn: () => Promise<unknown>) {

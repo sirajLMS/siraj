@@ -19,10 +19,10 @@ import { withAuthResult, withAuthVoid } from "@/backend/graphql/utils";
 import { handleMeetingChannelError } from "@/backend/graphql/utils/handle-meeting-channel-error";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { meetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { ClassMeetingConfigService } from "@/backend/services/meeting/class-meeting-config.service";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
-import { meetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import type {
   GenerateMeetingUrlResult,
   MeetingConfigDetails,

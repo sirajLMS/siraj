@@ -1,4 +1,3 @@
-import type { DBTransaction } from "@/backend/types";
 import { AuditRepository } from "@/backend/db/repo/audit";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
@@ -8,6 +7,7 @@ import type {
   AuditLogSelectType,
   CreateAdminAuditLogInput,
   CreateAuditLogInput,
+  DBTransaction,
 } from "@/backend/types";
 
 export namespace AuditService {

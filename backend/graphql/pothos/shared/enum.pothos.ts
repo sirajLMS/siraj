@@ -55,10 +55,10 @@ import {
   WhatsappTemplateCategory,
   WhatsappTemplateStatus,
 } from "@/backend/enum";
-import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 

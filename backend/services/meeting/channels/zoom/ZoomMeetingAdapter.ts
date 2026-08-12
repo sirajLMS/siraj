@@ -15,11 +15,7 @@ import {
   RateLimitedError,
   ZoomApiError,
 } from "@/backend/services/meeting/channels/IMeetingChannel";
-import type {
-  ZoomErrorResponse,
-  ZoomMeetingResponse,
-  ZoomTokenResponse,
-} from "@/backend/types";
+import type { ZoomErrorResponse, ZoomMeetingResponse, ZoomTokenResponse } from "@/backend/types";
 
 export interface ZoomMeetingAdapterOptions {
   readonly accountId?: string;

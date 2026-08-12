@@ -19,11 +19,7 @@ import {
   collectAllPages,
   type ParsedPage,
 } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/collect-all-pages";
-import type {
-  GraphApiPaginatedResponse,
-  GraphApiRequestContext,
-  GraphApiRequestInit,
-} from "@/backend/types";
+import type { GraphApiPaginatedResponse, GraphApiRequestContext, GraphApiRequestInit } from "@/backend/types";
 
 /**
  * Options for {@link buildPaginatedListRequest}.

@@ -1,7 +1,6 @@
 import { afterAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { SessionRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
@@ -10,6 +9,7 @@ import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { resetEnvironmentCache } from "@/backend/lib/env";
 import { resetCacheService } from "@/backend/services/cache/CacheServiceFactory";
 import { checkRedisHealth, getRedisService, resetRedisService } from "@/backend/services/redis";
+import type { DBTransaction } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 config({ path: ".env.redis", override: true });

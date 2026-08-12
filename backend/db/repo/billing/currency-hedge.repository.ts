@@ -1,14 +1,14 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { currencyHedges } from "@/backend/db/schema";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
+import type { DBTransaction } from "@/backend/types";
 import type {
   CurrencyHedgeInsertType,
   CurrencyHedgeSelectType,
   CurrencyHedgeUpdateInput,
 } from "@/backend/types/billing/billing.types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace CurrencyHedgeRepository {

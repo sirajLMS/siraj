@@ -8,7 +8,6 @@ import type {
   invoices,
   payments,
 } from "@/backend/db/schema";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type {
   FxProvider,
   FxProviderConfigSource,
@@ -19,6 +18,7 @@ import type {
   InvoiceType,
 } from "@/backend/enum";
 import type { PageInfo } from "@/backend/types/shared/pagination.types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
 export type InvoiceInsertType = typeof invoices.$inferInsert;

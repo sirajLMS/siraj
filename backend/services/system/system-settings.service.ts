@@ -1,4 +1,3 @@
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { systemSettings } from "@/backend/db/schema";
@@ -7,7 +6,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
 import { getStorageService } from "@/backend/storage/storage.service";
-import type { CreateAuditLogInput, SystemSettingSelectType } from "@/backend/types";
+import type { CreateAuditLogInput, DBTransaction, SystemSettingSelectType } from "@/backend/types";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 

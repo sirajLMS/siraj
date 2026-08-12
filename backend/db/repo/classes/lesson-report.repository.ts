@@ -1,7 +1,6 @@
 import { and, count, desc, eq, inArray, type SQL } from "drizzle-orm";
 import type { PgColumn } from "drizzle-orm/pg-core";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   classInstances,
@@ -14,7 +13,7 @@ import {
 } from "@/backend/db/schema";
 import { LessonReportStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import type { LessonReportInsertType, LessonReportSelectType } from "@/backend/types";
+import type { DBTransaction, LessonReportInsertType, LessonReportSelectType } from "@/backend/types";
 import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
 
 export interface PendingReviewFilters {

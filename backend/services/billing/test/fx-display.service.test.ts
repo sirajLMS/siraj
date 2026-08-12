@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import type { DBTransaction } from "@/backend/types";
 import { BillingRepository } from "@/backend/db/repo/billing";
 import { currencyExchangeRates } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
+import type { DBTransaction } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 describe("FxDisplayService", () => {
   test("convertForDisplay returns identity when locked equals display currency", async () => {

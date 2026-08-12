@@ -1,9 +1,9 @@
 import { and, eq, gte, isNull, lte } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { classInstances } from "@/backend/db/schema";
-import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
+import type { DBTransaction } from "@/backend/types";
 import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
+import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
 
 /**
  * Resolve the upcoming class instances whose `scheduledStartAt` falls within

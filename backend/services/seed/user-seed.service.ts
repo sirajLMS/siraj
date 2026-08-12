@@ -11,7 +11,7 @@
  * @see backend/db/seeds/users/seed-users.ts
  * @see backend/services/system/test-helper.service.ts
  */
-import type { DBTransaction } from "@/backend/types";
+
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { StaffProfileRepository } from "@/backend/db/repo/teachers";
@@ -19,7 +19,7 @@ import { UserRepository } from "@/backend/db/repo/users";
 import { hashPassword } from "@/backend/lib/auth/password";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { logger } from "@/backend/lib/logger";
-import type { UserSelectType } from "@/backend/types";
+import type { DBTransaction, UserSelectType } from "@/backend/types";
 
 const STAFF_GROUP_SLUGS = new Set(["super_admin", "academy_admin", "staff_default", "supervisor_default"]);
 

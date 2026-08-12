@@ -1,6 +1,5 @@
 import type { ObjectFieldBuilder } from "@pothos/core";
 import { AppPermission } from "@/backend/enum";
-import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -14,6 +13,7 @@ import type {
   PaymentMethodTransactionSnapshot,
   PaymentProofTransactionSnapshot,
 } from "@/backend/types/billing/payment-method.types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 type SnapshotUnion = PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot;
 

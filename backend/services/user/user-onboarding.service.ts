@@ -1,17 +1,17 @@
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
 import type { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { validatePasswordStrength } from "@/backend/lib/auth";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { DBTransaction } from "@/backend/types";
 import type {
   UserCreateCoreInput,
   UserCreateProfileFieldsInput,
   UserReturnType,
 } from "@/backend/types/users/user.types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 

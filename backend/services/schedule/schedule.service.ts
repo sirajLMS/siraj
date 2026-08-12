@@ -2,7 +2,6 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { AppPermission } from "@/backend/enum";
-import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -19,6 +18,7 @@ import type {
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
 import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
+import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { parseClassExecutionState, parseClassOutcome, parseClassTypeOrNull } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 

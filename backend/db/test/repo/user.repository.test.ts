@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { UserRepository } from "@/backend/db/repo/users";
 import { users } from "@/backend/db/schema";
 import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import type { DBTransaction } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { getErrorMessage } from "@/shared/utils/error";
 

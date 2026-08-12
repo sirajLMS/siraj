@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo/billing";
 import { StudentRepository } from "@/backend/db/repo/students";
@@ -12,6 +11,7 @@ import type {
   CreditTransactionReturnType,
   CreditTransactionSelectType,
   CreditTransactionSubmitInput,
+  DBTransaction,
   PaginationArgs,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";

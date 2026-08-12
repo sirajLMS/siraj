@@ -10,15 +10,15 @@
  * @see backend/db/seeds/teachers/seed-teachers.ts
  * @see backend/db/seeds/parents/seed-parents.ts
  */
-import type { DBTransaction } from "@/backend/types";
+
 import { ParentRepository } from "@/backend/db/repo/parents";
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
 import type { AccountStatus } from "@/backend/enum";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ParentStatus } from "@/backend/enum/parents/parent.enum";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
-import type { ParentEntity, TeacherSelectType } from "@/backend/types";
+import type { DBTransaction, ParentEntity, TeacherSelectType } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export type SeedTeacherProfileInput = {
   userId: string;

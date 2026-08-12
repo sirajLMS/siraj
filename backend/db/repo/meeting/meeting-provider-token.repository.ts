@@ -1,9 +1,8 @@
 import { and, desc, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { meetingProviderTokens } from "@/backend/db/schema";
-import type { MeetingProviderTokenSelectType, MeetingProviderTokenUpsertInput } from "@/backend/types";
+import type { DBTransaction, MeetingProviderTokenSelectType, MeetingProviderTokenUpsertInput } from "@/backend/types";
 
 export namespace MeetingProviderTokenRepository {
   export async function getByUserAndProvider(

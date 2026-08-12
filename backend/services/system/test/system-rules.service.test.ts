@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { and, eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { leaveQuotaUsage, systemSettings } from "@/backend/db/schema";
 import { setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
+import type { DBTransaction } from "@/backend/types";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 

@@ -1,5 +1,4 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository } from "@/backend/db/repo/audit/audit.repository";
 import {
@@ -14,6 +13,7 @@ import {
 } from "@/backend/db/schema";
 import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 import type { AuditEntityType } from "@/backend/types/audit/audit.types";
 import { getServerTranslations } from "@/shared/locale";
 

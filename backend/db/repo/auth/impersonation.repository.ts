@@ -1,8 +1,8 @@
 import { and, eq, type SQL } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { impersonationSessions } from "@/backend/db/schema/auth/impersonation";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 
 const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
 

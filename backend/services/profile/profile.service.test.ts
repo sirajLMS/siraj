@@ -1,19 +1,12 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { ParentRepository } from "@/backend/db/repo/parents";
-import { StaffProfileRepository, TeacherRepository } from "@/backend/db/repo/teachers";
 import { StudentRepository } from "@/backend/db/repo/students";
-import {
-  AccountStatus,
-  AppPermission,
-  ProfileAudience,
-  ProfileMode,
-  ProfileScope,
-  UserRole,
-} from "@/backend/enum";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
+import { StaffProfileRepository, TeacherRepository } from "@/backend/db/repo/teachers";
+import { AccountStatus, AppPermission, ProfileAudience, ProfileMode, ProfileScope, UserRole } from "@/backend/enum";
 import { isRedirect, ProfileService, toParentRepoInput } from "@/backend/services";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ProfilePageContext } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 afterEach(() => {

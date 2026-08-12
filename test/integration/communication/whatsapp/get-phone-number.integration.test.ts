@@ -8,11 +8,8 @@
  * Run: `bun run test:live-comm` or `bun run test:integration`
  */
 import { expect, test } from "bun:test";
+import { buildGetPhoneNumberRequest, parseGetPhoneNumberResponse } from "@/backend/services";
 import type { GraphApiRequestContext } from "@/backend/types";
-import {
-  buildGetPhoneNumberRequest,
-  parseGetPhoneNumberResponse,
-} from "@/backend/services";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 
 const accessToken = process.env.WHATSAPP_ACCESS_TOKEN ?? "";

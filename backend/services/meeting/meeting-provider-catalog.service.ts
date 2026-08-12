@@ -1,4 +1,3 @@
-import type { DBTransaction } from "@/backend/types";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting";
 import { AppPermission } from "@/backend/enum";
 import {
@@ -8,6 +7,7 @@ import {
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
+  DBTransaction,
   MeetingProviderSelectType,
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,

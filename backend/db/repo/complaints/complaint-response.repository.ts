@@ -1,8 +1,8 @@
 import { desc, eq, inArray } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { ComplaintStatus } from "@/backend/enum";
+import type { DBTransaction } from "@/backend/types";
 import type {
   ComplaintResponseInput,
   ComplaintResponseReturnType,

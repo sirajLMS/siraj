@@ -2,11 +2,7 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
-import {
-  getWhatsappChannel,
-  resetWhatsappChannel,
-  whatsappChannel,
-} from "@/backend/services";
+import { getWhatsappChannel, resetWhatsappChannel, whatsappChannel } from "@/backend/services";
 import { redisService } from "@/backend/services/redis";
 import { invalidateEnvConfigCache } from "@/backend/services/system";
 import type { NotificationDeliverySelectType } from "@/backend/types";

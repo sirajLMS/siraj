@@ -1,12 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { invoices, students } from "@/backend/db/schema";
 import { createTestParent, createTestUser, setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import type { DBTransaction, InvoiceInsertType } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-import type { InvoiceInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function insertInvoice(

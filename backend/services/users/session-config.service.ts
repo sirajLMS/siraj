@@ -26,13 +26,17 @@
  *   .errorsTranslations` (the same pattern used by `FxProviderConfigService`).
  */
 
-import type { DBTransaction } from "@/backend/types";
 import { SessionConfigRepository } from "@/backend/db/repo/users";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { CreateAuditLogInput, SessionConfigSelectType, SessionConfigUpsertInput } from "@/backend/types";
+import type {
+  CreateAuditLogInput,
+  DBTransaction,
+  SessionConfigSelectType,
+  SessionConfigUpsertInput,
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Minimum allowed session TTL, in seconds (1 minute). */

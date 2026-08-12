@@ -1,12 +1,11 @@
 import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { teachers, users } from "@/backend/db/schema";
 import { AccountStatus, type Gender } from "@/backend/enum";
-import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import type {
+  DBTransaction,
   PaginationArgs,
   TeacherCreateReturnType,
   TeacherDirectoryMetrics,
@@ -17,6 +16,7 @@ import type {
   TeacherSelectType,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseAccountStatus, parseGender, parseIanaTimezone } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 

@@ -1,2 +1,2 @@
-export * from "./WhatsappChannelFactory";
 export * from "./cloud-api";
+export * from "./WhatsappChannelFactory";

@@ -23,7 +23,10 @@ import type {
  * Builds the fetch request for POST /{phone_number_id}/messages (type template).
  * The adapter adds `AbortSignal.timeout(10_000)` before executing the `fetch`.
  */
-export function buildSendTemplateMessageRequest(ctx: GraphApiRequestContext, input: SendTemplateMessageInput): GraphApiRequestInit {
+export function buildSendTemplateMessageRequest(
+  ctx: GraphApiRequestContext,
+  input: SendTemplateMessageInput
+): GraphApiRequestInit {
   // Validate inputs before interpolation
   // These are internal developer-facing validation errors caught by the adapter and wrapped into structured error codes
   if (!input.phoneNumberId || input.phoneNumberId.length > 128) {

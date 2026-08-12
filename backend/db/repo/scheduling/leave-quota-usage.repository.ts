@@ -1,8 +1,8 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { leaveQuotaUsage } from "@/backend/db/schema/classes/scheduling";
+import type { DBTransaction } from "@/backend/types";
 import type { UpsertStudentLeaveQuotaInput } from "@/backend/types/scheduling/scheduling.types";
 
 export type LeaveQuotaUsageRow = typeof leaveQuotaUsage.$inferSelect;

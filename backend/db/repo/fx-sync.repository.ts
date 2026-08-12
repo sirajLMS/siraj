@@ -1,10 +1,10 @@
 import { desc, eq, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { fxSyncRuns } from "@/backend/db/schema";
 import { type FxProvider, FxSyncStatus } from "@/backend/enum/fx/fx-provider.enum";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 
 export namespace FxSyncRepository {
   type SyncRunInsertInput = {

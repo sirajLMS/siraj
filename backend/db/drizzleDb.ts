@@ -1,5 +1,5 @@
 import { getActiveHttpProvider, resolveConnectionStrategy } from "@/backend/db/connection-strategy";
-import { relations } from "@/backend/db/drizzleRelations";
+import type { relations } from "@/backend/db/drizzleRelations";
 import { createDatabase, createPool } from "@/backend/db/factory";
 import { clearHttpClientSingleton, getNeonHttpDb } from "@/backend/db/http-client";
 import { ensureEnvironmentValidated, getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";

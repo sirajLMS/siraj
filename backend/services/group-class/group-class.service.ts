@@ -1,4 +1,3 @@
-import type { DBTransaction } from "@/backend/types";
 import { GroupClassRepository } from "@/backend/db/repo/classes/group-class.repository";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
@@ -9,6 +8,7 @@ import { EffectiveMeetingService } from "@/backend/services/meeting/class-meetin
 import type {
   ClassCommunicationInsertType,
   ClassCommunicationSelectType,
+  DBTransaction,
   GroupClassAdminNoteReturnType,
   GroupClassAuditReturnType,
   GroupClassCommunicationLogEntryReturnType,

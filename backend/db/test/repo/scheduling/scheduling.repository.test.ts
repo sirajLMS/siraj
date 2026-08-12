@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import {
   classInstances,
@@ -20,6 +19,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { testRepoError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import type { DBTransaction } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 

@@ -1,15 +1,15 @@
 import { and, eq, gte, inArray, isNull, lt, ne, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { classInstances, classSubjects, recurringSchedules, students } from "@/backend/db/schema";
 import { DayOfWeek } from "@/backend/enum";
-import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
+import type { DBTransaction } from "@/backend/types";
 import type {
   FutureClassRow,
   TeacherAssignedClassRow,
   WeeklyScheduleGridRow,
   WeeklyWorkloadMetrics,
 } from "@/backend/types/scheduling/scheduling.types";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 
 function isClassExecutionState(value: string): value is ClassExecutionState {
   const values: string[] = Object.values(ClassExecutionState);

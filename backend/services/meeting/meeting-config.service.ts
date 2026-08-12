@@ -1,4 +1,3 @@
-import type { DBTransaction } from "@/backend/types";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
@@ -11,6 +10,7 @@ import {
 } from "@/backend/services/meeting/__shared__/meetingConfigHelpers";
 import { prepareMeetingConfigUpsert } from "@/backend/services/meeting/__shared__/prepareMeetingConfigUpsert";
 import { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/services/meeting/meeting-config-mask";
+import type { DBTransaction } from "@/backend/types";
 import type {
   ClassMeetingConfigInsertType,
   ClassMeetingConfigSelectType,

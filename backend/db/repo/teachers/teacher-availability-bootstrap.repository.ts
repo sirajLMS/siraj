@@ -1,6 +1,5 @@
 import { and, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   teacherAvailabilityWindows,
@@ -9,6 +8,7 @@ import {
 } from "@/backend/db/schema";
 import type { DayOfWeek, VacationRequestStatus } from "@/backend/enum";
 import type {
+  DBTransaction,
   TeacherAvailabilityWindowSelectType,
   TeacherRecurringUnavailabilitySelectType,
   TeacherVacationRequestSelectType,

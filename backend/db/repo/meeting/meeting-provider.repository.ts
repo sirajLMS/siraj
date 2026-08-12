@@ -1,10 +1,10 @@
 import { asc, eq, inArray } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { meetingProviders, userMeetingConfigs } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type {
+  DBTransaction,
   MeetingProviderSelectType,
   MeetingProviderSubmitInput,
   UpdateMeetingProviderInput,

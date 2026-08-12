@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import type { DBTransaction } from "@/backend/types";
 import {
   createMockClassInstance,
   createTestClassMeetingConfig,
@@ -10,6 +9,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import type { DBTransaction } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 function resolutionTest(name: string, fn: (tx: DBTransaction, tErrors: ErrorsLabels) => Promise<void>) {

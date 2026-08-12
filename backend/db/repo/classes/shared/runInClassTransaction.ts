@@ -1,6 +1,6 @@
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { logger } from "@/backend/lib/logger";
+import type { DBTransaction } from "@/backend/types";
 
 export async function runInClassTransaction<T>(
   tx: DBTransaction | undefined,

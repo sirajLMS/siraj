@@ -1,8 +1,7 @@
 import { z } from "zod";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
-import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
+import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { AppPermission, NotificationChannel, NotificationEventType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { WhatsappTemplateCategory, WhatsappTemplateStatus } from "@/backend/enum/whatsapp/whatsapp.enum";
 import { logger } from "@/backend/lib/logger";
@@ -12,7 +11,6 @@ import {
   readErrorBody,
   resolveGraphApiContextFromEnv,
 } from "@/backend/lib/whatsapp-constants";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   buildGetPhoneNumberRequest,
   collectAllPhoneNumbers,
@@ -20,11 +18,24 @@ import {
   GraphApiError,
   resetWhatsappChannel,
 } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
 import { NOTIFICATION_TEMPLATE_MAP } from "@/backend/services/notification/notification-payloads.builders";
 import { resolveEnvConfig } from "@/backend/services/system";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { AuditAction, CreateAuditLogInput } from "@/backend/types";
+// r10-043/r10-044/r10-045: Canonical types imported from the types layer,
+// not from service-layer barrels or request builders.
+import type {
+  AuditAction,
+  CreateAuditLogInput,
+  DBTransaction,
+  GetPhoneNumberResult,
+  GraphApiRequestContext,
+  GraphApiRequestInit,
+  ListMessageTemplatesResponseBody,
+  ListPhoneNumbersResponseBody,
+  WhatsappPhoneNumber,
+} from "@/backend/types";
 import type { NotificationPreferenceUpdateInput } from "@/backend/types/notifications/notification-preferences.types";
 import type {
   WhatsappAccountCreateSubmitInput,
@@ -40,16 +51,6 @@ import {
   isValidLimitTier,
   isValidQualityRating,
 } from "@/backend/types/whatsapp/whatsapp-account.types";
-// r10-043/r10-044/r10-045: Canonical types imported from the types layer,
-// not from service-layer barrels or request builders.
-import type {
-  GetPhoneNumberResult,
-  GraphApiRequestContext,
-  GraphApiRequestInit,
-  ListMessageTemplatesResponseBody,
-  ListPhoneNumbersResponseBody,
-  WhatsappPhoneNumber,
-} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Placeholder string for credentials not yet set via dedicated mutations. */

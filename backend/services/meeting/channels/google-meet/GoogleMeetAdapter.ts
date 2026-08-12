@@ -9,12 +9,6 @@ import {
   REQUEST_TIMEOUT_MS,
   withTimeout,
 } from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
-import type {
-  GoogleMeetErrorResponse,
-  GoogleMeetServiceAccountJson,
-  GoogleMeetSpaceResponse,
-  GoogleMeetTokenResponse,
-} from "@/backend/types";
 import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/services/meeting/channels/IMeetingChannel";
 import {
   GoogleMeetApiError,
@@ -26,6 +20,12 @@ import {
   ProviderUnavailableError,
   RateLimitedError,
 } from "@/backend/services/meeting/channels/IMeetingChannel";
+import type {
+  GoogleMeetErrorResponse,
+  GoogleMeetServiceAccountJson,
+  GoogleMeetSpaceResponse,
+  GoogleMeetTokenResponse,
+} from "@/backend/types";
 
 export interface GoogleMeetAdapterOptions {
   readonly serviceAccountJson?: string;

@@ -1,8 +1,8 @@
 import { asc, desc, eq, inArray } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { whatsappAccounts } from "@/backend/db/schema";
+import type { DBTransaction } from "@/backend/types";
 import type {
   SetWhatsappAccessTokenInput,
   SetWhatsappTwoStepPinInput,

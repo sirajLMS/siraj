@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { BillingRepository, InvoicePaymentSubmissionRepository } from "@/backend/db/repo/billing";
 import { ParentRepository } from "@/backend/db/repo/parents";
@@ -8,7 +7,6 @@ import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { invoices } from "@/backend/db/schema";
 import { AppPermission, InvoicePaymentSubmissionStatus } from "@/backend/enum";
-import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import { logger, NotFoundError } from "@/backend/lib";
 import { NotificationSyncService, PermissionsService } from "@/backend/services";
 import {
@@ -25,6 +23,8 @@ import {
   buildInvoiceStatusChangedPayloads,
 } from "@/backend/services/notification/notification-payloads.builders";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseInvoiceStatus, parseInvoiceType } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 

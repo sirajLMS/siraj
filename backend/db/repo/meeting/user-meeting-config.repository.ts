@@ -1,6 +1,5 @@
 import { and, asc, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   buildMeetingConfigInsertValues,
@@ -11,6 +10,7 @@ import {
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { userMeetingConfigs } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
+import type { DBTransaction } from "@/backend/types";
 import type {
   UpdateUserMeetingConfigInput,
   UserMeetingConfigInsertType,

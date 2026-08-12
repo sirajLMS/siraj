@@ -1,9 +1,9 @@
 import { and, eq, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { resolveTeacherProgressFeedEventKind } from "@/backend/db/repo/scheduling/scheduling-queries.repository/teacher-progress-feed.utils";
 import { classInstances, classStatusEvents, students } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export const getClassStatusEvents = async (classInstanceId: string, tx?: DBTransaction) => {

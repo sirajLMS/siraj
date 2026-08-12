@@ -18,12 +18,12 @@ import { currencyCodeEnum, invoiceStatusEnum, invoiceTypeEnum, paymentMethodType
 import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type {
   PaymentMethodTransactionSnapshot,
   PaymentProofTransactionSnapshot,
 } from "@/backend/types/billing/payment-method.types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.

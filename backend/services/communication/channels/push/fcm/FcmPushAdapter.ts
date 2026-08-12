@@ -5,7 +5,6 @@ import { NotificationRepository } from "@/backend/db/repo/notifications/notifica
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type { FcmPushContext } from "@/backend/types";
 import {
   FCM_INVALID_TOKEN_ERROR,
   FCM_TOKEN_EXPIRED_ERROR,
@@ -16,6 +15,7 @@ import type {
   PushSendResult,
 } from "@/backend/services/communication/channels/push/IPushChannel";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
+import type { FcmPushContext } from "@/backend/types";
 import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
 import type { UserDeviceTokenSelectType } from "@/backend/types/users/userDeviceTokens.types";
 

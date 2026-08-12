@@ -1,6 +1,5 @@
 import { desc, eq, inArray } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { bulkInsertOnConflictDoNothing } from "@/backend/db/repo/shared/bulk-upsert";
 import {
@@ -15,6 +14,7 @@ import {
 import type {
   ClassCommunicationCreateInput,
   ClassCommunicationSelectType,
+  DBTransaction,
   GroupClassCreateInput,
   GroupClassEnrollmentCreateInput,
   GroupClassEnrollmentSelectType,

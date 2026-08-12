@@ -1,5 +1,4 @@
 import { and, eq, gte, ilike, inArray, isNull, lte, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   classInstances,
@@ -12,6 +11,7 @@ import {
 import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
 import { NotFoundError, ValidationError } from "@/backend/lib/errors";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";

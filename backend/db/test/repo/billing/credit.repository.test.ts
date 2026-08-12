@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { CreditRepository } from "@/backend/db/repo/billing";
 import { creditTransactions, invoices, payments, students } from "@/backend/db/schema";
 import {
@@ -13,11 +12,11 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CreditReason, PaymentMethodType } from "@/backend/enum";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import type { ClassInstanceSelectType, InvoiceInsertType, PaymentInsertType } from "@/backend/types";
+import type { ClassInstanceSelectType, DBTransaction, InvoiceInsertType, PaymentInsertType } from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
 import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
  * Resolves the nullable `instance` returned from `setupTestEntities` to a

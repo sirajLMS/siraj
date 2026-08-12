@@ -1,8 +1,8 @@
-import type { DBTransaction } from "@/backend/types";
 import { StaffProfileRepository } from "@/backend/db/repo/teachers";
 import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
+import type { DBTransaction } from "@/backend/types";
 import type { StaffProfileCreateResult } from "@/backend/types/staff/staff-profile.types";
 import type {
   UserCreateCoreInput,

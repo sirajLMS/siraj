@@ -1,8 +1,8 @@
 import { eq, inArray, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { userNotificationPreferences } from "@/backend/db/schema";
+import type { DBTransaction } from "@/backend/types";
 import type { NotificationPreferenceUpdateInput } from "@/backend/types/notifications/notification-preferences.types";
 import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
 

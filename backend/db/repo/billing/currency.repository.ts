@@ -1,6 +1,5 @@
 import { asc, eq, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   classInstances,
@@ -19,12 +18,13 @@ import {
   users,
 } from "@/backend/db/schema";
 import { CountryCode } from "@/backend/enum";
-import { type CurrencyCode } from "@/shared/constants/currency.enum";
+import type { DBTransaction } from "@/backend/types";
 import type {
   SupportedCurrencyReturnType,
   SupportedCurrencySelectType,
   SupportedCurrencyUpsertInput,
 } from "@/backend/types/billing/currency.types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 const COUNTRY_CODE_VALUES = new Set(Object.values(CountryCode) as string[]);
 

@@ -1,5 +1,4 @@
 import type { InvoiceType } from "@/backend/enum";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   type UserPaymentMethodInitialGqlInput,
@@ -16,6 +15,7 @@ import type {
   ParentOnboardingInput,
   ParentOnboardingResult,
 } from "@/backend/services/parent/parent-onboarding.service";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export interface ParentOnboardingGqlInput
   extends Omit<ParentOnboardingInput, "email" | "invoiceType" | "currency" | "initialPayinMethod"> {

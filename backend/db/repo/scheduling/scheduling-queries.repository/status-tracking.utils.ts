@@ -1,7 +1,7 @@
 import { StudentStatus } from "@/backend/enum";
-import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { StatusTrackingRow } from "@/backend/types/scheduling/scheduling.types";
+import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { parseClassExecutionState, parseClassOutcome, parseStudentStatus } from "@/shared/lib/enum";
 
 export function mapStatusTrackingQueryRow(r: {

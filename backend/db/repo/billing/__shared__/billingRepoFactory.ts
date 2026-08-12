@@ -1,10 +1,10 @@
 import { and, eq, inArray, type SQL } from "drizzle-orm";
 import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { directionFilter } from "@/backend/db/repo/billing/__shared__/directionFilter";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
+import type { DBTransaction } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 // ---- Shared row shape -------------------------------------------------------

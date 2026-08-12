@@ -1,4 +1,3 @@
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import {
@@ -11,7 +10,6 @@ import { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, NotificationEventType, OnDemandStatus } from "@/backend/enum";
-import { type CurrencyCode } from "@/shared/constants/currency.enum";
 import { buildClassInstanceDetail } from "@/backend/graphql/utils/class-session.utils";
 import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
@@ -28,8 +26,10 @@ import type {
   ClassInstanceInsertType,
   ClassInstanceSelectType,
   ClassStatusEventReturnType,
+  DBTransaction,
 } from "@/backend/types";
 import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { type ErrorsLabels, getServerTranslations, type SessionLabels } from "@/shared/locale";
 
 /**

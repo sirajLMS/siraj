@@ -2,11 +2,11 @@ import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AccountStatus, AppPermission } from "@/backend/enum";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
 import type { TeacherProfileReturnType, TeacherSelectType } from "@/backend/types/teachers/teacher.types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { getServerTranslations } from "@/shared/locale";
 

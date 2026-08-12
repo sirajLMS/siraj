@@ -1,10 +1,15 @@
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBQueryExecutor, DBTransaction } from "@/backend/types";
 import { runInClassTransaction } from "@/backend/db/repo/classes/shared/runInClassTransaction";
 import { classCategories } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
-import type { ClassCategorySelectType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
+import type {
+  ClassCategorySelectType,
+  ClassCategorySubmitInput,
+  ClassCategoryUpdateInput,
+  DBQueryExecutor,
+  DBTransaction,
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 // ─── Shared helpers (eliminate intra-file duplication) ──────────────────────

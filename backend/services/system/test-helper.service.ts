@@ -15,7 +15,6 @@ import {
   users,
 } from "@/backend/db/schema";
 import { AccountStatus, StudentStatus } from "@/backend/enum";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { ParentStatus } from "@/backend/enum/parents/parent.enum";
 import { hashPassword } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
@@ -29,6 +28,7 @@ import {
 import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import { getServerTranslations } from "@/shared/locale";

@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { FxSyncRepository } from "@/backend/db/repo/fx-sync.repository";
 import { fxSyncRuns } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { FxProvider, FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
+import type { DBTransaction } from "@/backend/types";
 
 async function insertSyncRun(
   tx: DBTransaction,

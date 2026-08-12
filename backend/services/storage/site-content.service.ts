@@ -18,13 +18,12 @@
  * compile-time translation system rather than hardcoded strings.
  */
 
-import type { DBTransaction } from "@/backend/types";
 import { SiteContentRepository } from "@/backend/db/repo/storage";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { AuditAction, CreateAuditLogInput } from "@/backend/types";
+import type { AuditAction, CreateAuditLogInput, DBTransaction } from "@/backend/types";
 import type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
 import type { ErrorsLabels } from "@/shared/locale";
 

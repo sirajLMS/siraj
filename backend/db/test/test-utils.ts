@@ -1,10 +1,10 @@
 import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
+import type { DBTransaction } from "@/backend/types";
 import type { UserReturnType } from "@/backend/types/users/user.types";
 import { parseIanaTimezone } from "@/shared/lib/enum";
 

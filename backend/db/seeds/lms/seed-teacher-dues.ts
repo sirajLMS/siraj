@@ -1,7 +1,5 @@
 import { findAdminUserOrFallback, type SeedConfig } from "@/backend/db/seeds/lib";
 import { LessonReportStatus, RateSource, TeacherDueStatus } from "@/backend/enum";
-import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
-import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { logger } from "@/backend/lib/logger";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
 import type {
@@ -11,6 +9,8 @@ import type {
   TeacherSelectType,
   UserSelectType,
 } from "@/backend/types";
+import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 type SeededDueSpec = {
   classInstance: ClassInstanceSelectType;

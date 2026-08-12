@@ -1,8 +1,7 @@
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/types";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances } from "@/backend/db/schema";
-import type { ClassInstanceInsertType, ClassInstanceSelectType } from "@/backend/types";
+import type { ClassInstanceInsertType, ClassInstanceSelectType, DBTransaction } from "@/backend/types";
 
 export type ClassInstanceUpsertManyOptions = {
   chunkSize?: number;

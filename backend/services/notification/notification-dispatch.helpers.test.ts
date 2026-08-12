@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AccountStatus, NotificationChannel, NotificationEventType } from "@/backend/enum";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import {
   dispatchWithPreferences,
@@ -10,6 +9,7 @@ import {
 } from "@/backend/services/notification/notification-dispatch.helpers";
 import type { ChannelDispatchResult, CommunicationPayload, UserSelectType } from "@/backend/types";
 import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 const PARENT_USER_ID = "00000000-0000-0000-0000-000000000001";
 const TEACHER_USER_ID = "00000000-0000-0000-0000-000000000002";

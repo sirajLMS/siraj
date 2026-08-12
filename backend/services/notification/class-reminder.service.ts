@@ -1,6 +1,5 @@
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { classLifecycleAffectedUserIds, SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { StudentRepository } from "@/backend/db/repo/students";
-import { classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling";
 import { NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { formatError } from "@/backend/services/cron/cron-utils";

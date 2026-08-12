@@ -1,10 +1,9 @@
-import type { DBTransaction } from "@/backend/types";
 import type { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
-import type { AvailableClassSlot } from "@/backend/types";
+import type { AvailableClassSlot, DBTransaction } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 type ReadExecutor = DBTransaction | typeof db;
