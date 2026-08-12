@@ -2,8 +2,7 @@ import crypto from "node:crypto";
 import { after, type NextRequest, NextResponse } from "next/server";
 import { logger } from "@/backend/lib/logger";
 import { apiRateLimiter, checkRateLimit, getClientIdentifier } from "@/backend/lib/ratelimit";
-import { resolveEnvConfig } from "@/backend/services/system";
-import { WhatsappWebhookHandler } from "@/backend/services/whatsapp/whatsapp-webhook.handler";
+import { resolveEnvConfig, WhatsappWebhookHandler } from "@/backend/services";
 
 /**
  * Meta WhatsApp Cloud API webhook endpoint.

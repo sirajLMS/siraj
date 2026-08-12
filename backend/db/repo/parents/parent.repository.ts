@@ -31,8 +31,8 @@ import type {
   WorkshopPromoReturnType,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import {
   parseAccountStatus,

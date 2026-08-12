@@ -1,5 +1,5 @@
 import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
-import { ProfileService } from "@/backend/services/profile/profile.service";
+import { ProfileService } from "@/backend/services";
 import { redirect } from "@/shared/i18n";
 
 interface PageProps {

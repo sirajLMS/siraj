@@ -7,8 +7,7 @@ import {
   CreateManualClassEntryInputPothosObject,
   LogSupportRequestInputPothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-dashboard.pothos";
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
-import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
+import { ClassSessionService, TeacherDashboardService } from "@/backend/services";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 

@@ -6,7 +6,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { StudentProfilePothosObject } from "@/backend/graphql/pothos/students/student-profile.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { StudentProfileService } from "@/backend/services/student/student-profile.service";
+import { StudentProfileService } from "@/backend/services";
 import type { StudentProfileEditInput } from "@/backend/types/students/student-profile.types";
 
 const StudentProfileEditInputPothosObject = gqlSchemaBuilder

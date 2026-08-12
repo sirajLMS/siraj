@@ -2,8 +2,7 @@ import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { SignedUrlRepository } from "@/backend/db/repo/shared";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
-import { SessionService } from "@/backend/services/auth/session.service";
-import { StorageService } from "@/backend/services/storage/storage.service";
+import { SessionService, StorageService } from "@/backend/services";
 
 export type VercelUploadUrlClientPlayload = {
   sessionId: string;

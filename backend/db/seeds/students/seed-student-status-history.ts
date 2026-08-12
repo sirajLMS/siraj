@@ -1,7 +1,7 @@
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { StudentStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
+import { StudentSeedService } from "@/backend/services";
 import type { StudentSelectType, UserSelectType } from "@/backend/types";
 import { parseStudentStatus } from "@/shared/lib/enum";
 

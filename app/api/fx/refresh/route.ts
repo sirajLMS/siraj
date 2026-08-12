@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { FxSyncTrigger } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { verifyCronSecretAuth } from "@/backend/lib/cron-auth";
-import { FxIngestionService } from "@/backend/services/fx/fx-ingestion.service";
+import { FxIngestionService } from "@/backend/services";
 
 /**
  * Vercel Cron entry point for FX rate refresh.

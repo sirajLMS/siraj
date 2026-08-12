@@ -12,7 +12,7 @@ import {
   buildListMessageTemplatesRequest,
   collectAllTemplates,
   parseListMessageTemplatesResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-message-templates.request";
+} from "@/backend/services";
 import type { GraphApiRequestContext, GraphApiRequestInit, ListMessageTemplatesResponseBody } from "@/backend/types";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 

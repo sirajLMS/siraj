@@ -1,5 +1,5 @@
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
-import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system";
+import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services";
 import { parseEnvConfigBoolean, USERS_DIRECTORY_ENV_KEY } from "@/shared/constants/features/sidebarFeatures.constants";
 
 const LEGACY_PEOPLE_DIRECTORY_ENV_KEY = "NEXT_PUBLIC_ENABLE_PEOPLE_DIRECTORY" as const;

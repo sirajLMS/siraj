@@ -2,7 +2,7 @@ import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-pro
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { safeMaybeGenerateUrl } from "@/backend/services/meeting/__shared__/meetingConfigHelpers";
 import type { DBTransaction } from "@/backend/types";
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails } from "@/backend/types/meeting";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import type { ErrorsLabels } from "@/shared/locale";
 

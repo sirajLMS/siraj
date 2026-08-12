@@ -4,8 +4,7 @@ import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { classInstances, quotas, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
 import { DayOfWeek, OnDemandStatus, QuotaStatus, SchedulingMode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { QuotaService } from "@/backend/services/billing/quota.service";
-import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
+import { AvailabilityService, QuotaService } from "@/backend/services";
 import type { ClassInstanceInsertType } from "@/backend/types";
 import { ClassExecutionState, ClassType } from "@/shared/constants/class-instance-detail.enum";
 

@@ -1,7 +1,7 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import { logger } from "@/backend/lib/logger";
-import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
+import { BillingManagementService } from "@/backend/services";
 import type { InvoiceCoverageMonthInput, InvoiceSelectType } from "@/backend/types";
 
 type CoverageSeedSpec = InvoiceCoverageMonthInput & { readonly key: string };

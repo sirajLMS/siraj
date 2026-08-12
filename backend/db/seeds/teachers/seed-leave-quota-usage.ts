@@ -1,6 +1,6 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { LeaveRequestSeedService } from "@/backend/services/seed/leave-request-seed.service";
+import { LeaveRequestSeedService } from "@/backend/services";
 import type { StudentSelectType } from "@/backend/types";
 
 type LeaveRequestRow = {

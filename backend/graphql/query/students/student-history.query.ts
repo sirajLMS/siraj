@@ -4,7 +4,7 @@ import {
   StudentSessionDetailPothosObject,
 } from "@/backend/graphql/pothos/students/student-history.pothos";
 import { resolveStudentIdFromArgsOrUser } from "@/backend/graphql/query/students/__shared__/resolveStudentIdFromArgsOrUser";
-import { StudentHistoryService } from "@/backend/services/history/student-history.service";
+import { StudentHistoryService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("studentClassHistory", t =>
   t.field({

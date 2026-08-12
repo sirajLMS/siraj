@@ -1,6 +1,6 @@
 import { SuggestionStatus } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { SuggestionService } from "@/backend/services/communication/suggestion.service";
+import { SuggestionService } from "@/backend/services";
 import type {
   DuplicateSuggestionInput,
   ParentSuggestionOptions,

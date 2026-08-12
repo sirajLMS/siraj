@@ -14,7 +14,7 @@ import {
   InvoiceTypePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
+import { BillingManagementService } from "@/backend/services";
 import type {
   DeleteInvoiceResult,
   DeleteInvoiceReturnType,

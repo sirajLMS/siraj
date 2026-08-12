@@ -11,8 +11,7 @@ import {
   supportedListResolve,
 } from "@/backend/graphql/query/billing/__shared__/makeSupportedPaymentListQueryField";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
-import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import { PaymentCatalogService, PaymentMethodService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("userPaymentMethods", t =>
   t.field({

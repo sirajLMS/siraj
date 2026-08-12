@@ -9,8 +9,7 @@ import {
   resolvePublicStoragePath,
   verifyToken,
 } from "@/backend/lib";
-import { SessionService } from "@/backend/services/auth/session.service";
-import { StorageService } from "@/backend/services/storage/storage.service";
+import { SessionService, StorageService } from "@/backend/services";
 import { extToMime } from "@/shared/utils";
 
 /**

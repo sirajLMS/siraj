@@ -4,10 +4,6 @@ import CloseOutlined from "@mui/icons-material/CloseOutlined";
 import { AppBar, IconButton, Toolbar, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { CreateRecurringClassDialogShared } from "@/frontend/common/components/ui/dialog/CreateRecurringClassDialogShared";
-import {
-  resolveClassTypeChange,
-  resolveSchedulingModeChange,
-} from "@/frontend/common/components/ui/dialog/createRecurringClassDialogUtils";
 import type {
   CreateRecurringClassDialogShellSlotProps,
   CreateRecurringClassStudentSelectSlotProps,
@@ -15,6 +11,7 @@ import type {
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
 import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { buildCreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/createRecurringClassDialogProps";
 import type {
   CreateRecurringClassDialogProps,
   CreateRecurringClassDialogViewModel,
@@ -107,46 +104,9 @@ function CreateRecurringClassDialogMobileBody({
   readonly teacherId: string;
   readonly viewModel: CreateRecurringClassDialogViewModel;
 }) {
-  const {
-    formState: state,
-    days,
-    toggleDay,
-    toggleTimeOverride,
-    setTimeOverride,
-    isDialogOpen,
-    mutationLoading,
-    meetingConfigWarning,
-    completedClassInstanceId,
-    closeDialog,
-    handleSubmit,
-    hasSessionCreateClass,
-    labels: t,
-    meetingLabels: tMeeting,
-    recurringScheduleLabels: tRecurringSchedule,
-    onGoToCreatedClass,
-  } = viewModel;
-
   return (
     <CreateRecurringClassDialogShared
-      teacherId={teacherId}
-      state={state}
-      days={days}
-      toggleDay={toggleDay}
-      toggleTimeOverride={toggleTimeOverride}
-      setTimeOverride={setTimeOverride}
-      isDialogOpen={isDialogOpen}
-      mutationLoading={mutationLoading}
-      meetingConfigWarning={meetingConfigWarning}
-      completedClassInstanceId={completedClassInstanceId}
-      closeDialog={closeDialog}
-      handleSubmit={handleSubmit}
-      hasSessionCreateClass={hasSessionCreateClass}
-      labels={t}
-      meetingLabels={tMeeting}
-      recurringScheduleLabels={tRecurringSchedule}
-      onGoToCreatedClass={onGoToCreatedClass}
-      onClassTypeChange={resolveClassTypeChange}
-      onSchedulingModeChange={resolveSchedulingModeChange}
+      {...buildCreateRecurringClassDialogProps(teacherId, viewModel)}
       slots={{
         DialogShell: MobileDialogShell,
         StudentSelect: MobileStudentSelect,

@@ -4,8 +4,7 @@ import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination
 import { TeacherDirectoryPothosObject } from "@/backend/graphql/pothos/teachers/staff-directory.pothos";
 import { TeacherSimplePothosObject } from "@/backend/graphql/pothos/teachers/teacher.pothos";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
-import { StaffDirectoryService } from "@/backend/services/teacher/staff-directory.service";
-import { TeacherService } from "@/backend/services/teacher/teacher.service";
+import { StaffDirectoryService, TeacherService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("teachers", t =>
   t.field({

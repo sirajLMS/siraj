@@ -4,7 +4,7 @@ import {
   makeStudentMonthlyReportQueryField,
   makeTeacherMonthlyReportQueryField,
 } from "@/backend/graphql/query/reports/__shared__/makeMonthlyReportQueryField";
-import { StudentMonthlyReportService, TeacherMonthlyReportService } from "@/backend/services/report";
+import { StudentMonthlyReportService, TeacherMonthlyReportService } from "@/backend/services";
 
 makeTeacherMonthlyReportQueryField({
   fieldName: "teacherMonthlyReport",

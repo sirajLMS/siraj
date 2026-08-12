@@ -1,9 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import type {
-  MeetingConfigDetails,
-  MeetingConfigSnapshot,
-  UserMeetingConfigSelectType,
-} from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails } from "@/backend/types/meeting";
+import type { MeetingConfigSnapshot, UserMeetingConfigSelectType } from "@/backend/types/meeting/meeting-config.types";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import { errorsEn } from "@/shared/locale/en/errors";
 

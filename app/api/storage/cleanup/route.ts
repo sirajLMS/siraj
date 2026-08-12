@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
 import { getEnvironmentConfig } from "@/backend/lib/env";
-import { SessionService } from "@/backend/services/auth/session.service";
-import { StorageService } from "@/backend/services/storage/storage.service";
+import { SessionService, StorageService } from "@/backend/services";
 
 /**
  * Validates that the request is from an admin user

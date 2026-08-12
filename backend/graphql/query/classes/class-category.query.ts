@@ -2,8 +2,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ClassCategoryPothosObject } from "@/backend/graphql/pothos/classes/class-category.pothos";
 import { ClassSubjectPothosObject } from "@/backend/graphql/pothos/classes/class-subject.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ClassCategoryService } from "@/backend/services/subject/class-category.service";
-import { ClassSubjectService } from "@/backend/services/subject/class-subject.service";
+import { ClassCategoryService, ClassSubjectService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("classCategories", t =>
   t.field({

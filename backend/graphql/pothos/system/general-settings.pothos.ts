@@ -4,7 +4,7 @@ import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { SystemSettingCategoryPothos, SystemSettingDataTypePothos } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
+import { SystemSettingsService } from "@/backend/services";
 import type { SystemSettingSelectType, SystemSettingUpsertInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 

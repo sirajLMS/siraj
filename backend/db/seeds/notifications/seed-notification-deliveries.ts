@@ -9,7 +9,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { NotificationDeliveryStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { CommunicationService } from "@/backend/services/communication/communication.service";
+import { CommunicationService } from "@/backend/services";
 import type { UserSelectType } from "@/backend/types";
 
 type DeviceTokenRow = { id: string; userId: string };

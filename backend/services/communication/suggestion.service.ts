@@ -3,13 +3,13 @@ import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, NotificationChannel, NotificationEventType, SuggestionStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { CommunicationService } from "@/backend/services/communication/communication.service";
 import {
   assertPermission,
   requireParentByActorUserId,
   resolveEntityById,
   softDeleteEntityLog,
 } from "@/backend/services/communication/__shared__/complaintSuggestionBase";
+import { CommunicationService } from "@/backend/services/communication/communication.service";
 import type {
   ParentSuggestionOptions,
   SuggestionContributorStats,

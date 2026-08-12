@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { localizedStringRequiredSchema } from "@/backend/lib/payment-method.validation";
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails } from "@/backend/types/meeting";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 import { isUrlAllowedByProvider } from "@/shared/lib/meeting-config";
 

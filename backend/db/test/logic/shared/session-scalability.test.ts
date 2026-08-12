@@ -7,8 +7,7 @@ import { users } from "@/backend/db/schema";
 import { IP_ADDRESS_1, IP_ADDRESS_2 } from "@/backend/db/test/const";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { resetEnvironmentCache } from "@/backend/lib/env";
-import { resetCacheService } from "@/backend/services/cache/CacheServiceFactory";
-import { checkRedisHealth, getRedisService, resetRedisService } from "@/backend/services/redis";
+import { checkRedisHealth, getRedisService, resetCacheService, resetRedisService } from "@/backend/services";
 import type { DBTransaction } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 

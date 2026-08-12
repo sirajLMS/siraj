@@ -7,7 +7,7 @@ import {
   SessionConfigService,
   SessionConfigValidationError,
   type SessionConfigValidationErrorCode,
-} from "@/backend/services/users/session-config.service";
+} from "@/backend/services";
 import type { SessionConfigSelectType, SessionConfigUpsertInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 

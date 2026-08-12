@@ -1,6 +1,6 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { ClassSessionService, EffectiveMeetingService } from "@/backend/services";
 import type { ClassInstanceDetailReturnType } from "@/backend/types";
 import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
 import { ClassExecutionState, type ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
@@ -122,8 +122,6 @@ export async function buildClassInstanceDetail(
     performance: buildPerformanceBlock(perf),
   };
 }
-
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
 
 export async function resolveDetail(
   userId: string,

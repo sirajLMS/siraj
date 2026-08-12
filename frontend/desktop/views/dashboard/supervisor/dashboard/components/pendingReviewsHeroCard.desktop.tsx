@@ -2,6 +2,7 @@
 
 import { PendingActionsOutlined } from "@mui/icons-material";
 import { HeroSummaryCardShared } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/__shared__/heroSummaryCardShared";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 interface PendingReviewsHeroCardDesktopProps {
@@ -24,6 +25,7 @@ export function PendingReviewsHeroCardDesktop({
       showAction={count > 0}
       actionLabel={labels.goToReviews}
       onAction={onGoToReviews}
+      PrimaryActionComponent={DesktopPrimaryPageAction}
     />
   );
 }

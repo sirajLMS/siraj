@@ -16,8 +16,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
 import { ensureEnvironmentValidated, getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type { MeetingProvider } from "@/backend/services/meeting/channels/IMeetingChannel";
-import { verifyOAuthState } from "@/backend/services/meeting/integrations/meeting-oauth.service";
+import type { MeetingProvider } from "@/backend/services";
+import { verifyOAuthState } from "@/backend/services";
 
 ensureEnvironmentValidated();
 

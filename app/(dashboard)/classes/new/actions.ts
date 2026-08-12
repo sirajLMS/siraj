@@ -2,7 +2,7 @@
 
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import { logger } from "@/backend/lib/logger";
-import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
+import { RecurringClassService } from "@/backend/services";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import { mapFormDataToServiceInput } from "@/frontend/common/views/dashboard/classes/recurring/utils/mapRecurringClassFormData";
 import { parseIanaTimezone } from "@/shared/lib/enum";

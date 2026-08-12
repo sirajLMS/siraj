@@ -7,7 +7,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { SuggestionStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { SuggestionService } from "@/backend/services/communication/suggestion.service";
+import { SuggestionService } from "@/backend/services";
 import type { ParentEntity, UserSelectType } from "@/backend/types";
 
 function resolveAdminResponse(status: SuggestionStatus): string | null {

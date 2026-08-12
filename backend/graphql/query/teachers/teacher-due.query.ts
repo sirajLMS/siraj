@@ -5,7 +5,7 @@ import {
   TeacherPendingDuesSummaryPothosObject,
 } from "@/backend/graphql/pothos/teachers/teacher-due.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
+import { TeacherDueService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("teacherPendingDues", t =>
   t.field({

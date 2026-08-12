@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
+import { pickSearchScheduleFormProps } from "@/frontend/common/views/dashboard/search-schedule/components/searchScheduleFormPropsPicker";
 import { SearchScheduleFormSectionShared } from "@/frontend/common/views/dashboard/search-schedule/components/searchScheduleFormSectionShared";
 import type {
   SearchScheduleResultItem,
@@ -107,20 +108,7 @@ export function SearchScheduleDesktopView({
         <SearchScheduleFormSectionShared
           FormComponent={SearchScheduleFormDesktop}
           error={error ? labels.errorLoading : null}
-          labels={labels}
-          draft={rest.draft}
-          isSearching={isInitialLoading}
-          onDraftChange={rest.onDraftChange}
-          onSearch={rest.onSearch}
-          formFilterDrawerOpen={rest.formFilterDrawerOpen}
-          onOpenFormFilterDrawer={rest.onOpenFormFilterDrawer}
-          onCloseFormFilterDrawer={rest.onCloseFormFilterDrawer}
-          sortMenuAnchorEl={rest.sortMenuAnchorEl}
-          onSortMenuOpen={rest.onSortMenuOpen}
-          onSortMenuClose={rest.onSortMenuClose}
-          onSortChange={rest.onSortChange}
-          selectedTeacher={rest.selectedTeacher}
-          onSelectTeacher={rest.onSelectTeacher}
+          {...pickSearchScheduleFormProps({ labels, isInitialLoading, ...rest })}
         />
 
         {(() => {

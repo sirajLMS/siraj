@@ -9,9 +9,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { handleMeetingChannelError } from "@/backend/graphql/utils/handle-meeting-channel-error";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import type { MeetingProvider } from "@/backend/services/meeting/channels/IMeetingChannel";
-import { MeetingIntegrationService } from "@/backend/services/meeting/integrations/meeting-integrations.service";
-import { MeetingOAuthService } from "@/backend/services/meeting/integrations/meeting-oauth.service";
+import { MeetingIntegrationService, MeetingOAuthService, type MeetingProvider } from "@/backend/services";
 import type {
   AdminRevokeTokenReturnType,
   AdminRevokeTokenSubmitInput,

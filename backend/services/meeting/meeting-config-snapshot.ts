@@ -15,7 +15,7 @@ import {
 import { getMeetingChannel, providerKindToSlug } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { buildMeetingProviderCatalogSnapshot } from "@/backend/services/meeting/meeting-config-mask";
 import type { DBTransaction } from "@/backend/types";
-import type { MeetingConfigDetails, MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails, MeetingConfigSnapshot } from "@/backend/types/meeting";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const MAX_RETRY_ATTEMPTS = 3;

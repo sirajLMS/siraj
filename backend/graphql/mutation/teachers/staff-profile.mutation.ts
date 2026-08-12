@@ -6,7 +6,7 @@ import {
   TeacherProfileUpdateInputPothosObject,
 } from "@/backend/graphql/pothos/teachers/staff-profile.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
+import { StaffProfileService } from "@/backend/services";
 import type { TeacherProfileReturnType } from "@/backend/types";
 
 async function enrichWithDisplayAmount(

@@ -1,6 +1,6 @@
 import { EXCHANGE_PAIRS, iterateInvoiceMonths, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { FxIngestionService } from "@/backend/services/fx/fx-ingestion.service";
+import { FxIngestionService } from "@/backend/services";
 import type { CurrencyExchangeRateSubmitInput } from "@/backend/types";
 
 export async function seedOrGet(config?: SeedConfig) {

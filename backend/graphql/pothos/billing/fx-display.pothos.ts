@@ -4,7 +4,7 @@ import { UserRepository } from "@/backend/db/repo/users";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
+import { FxDisplayService } from "@/backend/services";
 import type { DisplayAmountReturnType } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCode } from "@/shared/lib/enum";

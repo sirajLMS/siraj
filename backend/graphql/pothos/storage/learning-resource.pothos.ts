@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { LearningResourceService } from "@/backend/services/resource/learning-resource.service";
+import { LearningResourceService } from "@/backend/services";
 import type { LearningResourceReturnType } from "@/backend/types";
 
 // ─── Input Types ──────────────────────────────────────────────────────────────

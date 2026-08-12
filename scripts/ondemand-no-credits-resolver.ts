@@ -4,8 +4,7 @@ import { classInstances, recurringSchedules, systemSettings, users } from "@/bac
 
 import { OnDemandNoCreditsOutcome, OnDemandStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
+import { ClassSessionService, QuotaNotificationService } from "@/backend/services";
 import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 

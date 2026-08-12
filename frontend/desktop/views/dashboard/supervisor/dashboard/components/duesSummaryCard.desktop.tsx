@@ -3,6 +3,7 @@
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Stack, Typography } from "@mui/material";
 import { HeroSummaryCardShared } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/__shared__/heroSummaryCardShared";
+import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 interface DuesSummaryCardDesktopProps {
@@ -27,6 +28,7 @@ export function DuesSummaryCardDesktop({ summary, labels, onGoToDues }: Readonly
       showAction={summary.totalCount > 0}
       actionLabel={labels.goToDues}
       onAction={onGoToDues}
+      PrimaryActionComponent={DesktopPrimaryPageAction}
     >
       <Stack sx={{ flexDirection: "row", alignItems: "flex-end", gap: 4, flex: 1 }}>
         <Stack sx={{ gap: 0.5, minWidth: 0 }}>

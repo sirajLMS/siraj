@@ -20,11 +20,13 @@ import { comparePassword } from "@/backend/lib/auth/password";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
-import { AuthPasswordService } from "@/backend/services/auth/auth-password.service";
-import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
-import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
-import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
-import { SessionService } from "@/backend/services/auth/session.service";
+import {
+  AuthPasswordService,
+  DemoAuthService,
+  ImpersonationService,
+  PermissionGroupSimulationService,
+  SessionService,
+} from "@/backend/services";
 import type { SafeUser, SessionSelectType, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 

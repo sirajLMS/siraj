@@ -2,7 +2,7 @@ import { CLASS_SUBJECT_SEEDS } from "@/backend/db/seeds/lib/class-catalog-factor
 import { seedCatalogLogoUrl } from "@/backend/db/seeds/lib/logo-seed-helper";
 import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import { logger } from "@/backend/lib/logger";
-import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
+import { ClassCatalogService } from "@/backend/services";
 
 export async function seedOrGet() {
   logger.info("Seeding class subjects...");

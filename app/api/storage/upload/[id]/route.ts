@@ -6,7 +6,7 @@ import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import { logger, resolveLocalStoragePath } from "@/backend/lib";
-import { StorageService } from "@/backend/services/storage/storage.service";
+import { StorageService } from "@/backend/services";
 
 /**
  * Bridge DOM ReadableStream to a Node Readable via async iteration.

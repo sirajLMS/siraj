@@ -17,8 +17,7 @@ import {
   UserPaymentMethodUpdateInputPothos,
 } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
-import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import { PaymentCatalogService, PaymentMethodService } from "@/backend/services";
 import type {
   SupportedMobileWalletSubmitInput,
   SupportedOnlineAccountSubmitInput,

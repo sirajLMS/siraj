@@ -5,14 +5,11 @@ import { Grid } from "@mui/material";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { buildAlertMetricItems } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/buildAlertMetricItems";
 import {
+  type ScheduleAlertsBodyCommonProps,
   ScheduleAlertsLoadingIndicator,
   type ScheduleAlertsViewSharedProps,
 } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/scheduleAlertsViewShared";
-import type {
-  AcademicClassRow,
-  AlertsMetric,
-  ScheduleAlertsLabels,
-} from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import type { AlertsMetric, ScheduleAlertsLabels } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
   DesktopExportButton,
   DesktopFilterButton,
@@ -72,21 +69,8 @@ function DesktopAlertsBody({
   onLeave,
   onViewClassAudit,
   onPageChange,
-  gridLabels,
-}: {
-  readonly loading: boolean | undefined;
-  readonly labels: ScheduleAlertsLabels;
-  readonly classes: readonly AcademicClassRow[];
-  readonly totalClasses?: number;
-  readonly currentPage: number;
-  readonly pageSize: number;
-  readonly onFilter: () => void;
-  readonly onExport: () => void;
-  readonly onLeave: (id: string) => void;
-  readonly onViewClassAudit: (id: string) => void;
-  readonly onPageChange: (page: number) => void;
-  readonly gridLabels: AcademicScheduleDataGridDesktopLabels;
-}) {
+  contentLabels,
+}: ScheduleAlertsBodyCommonProps<AcademicScheduleDataGridDesktopLabels>) {
   if (loading) {
     return <ScheduleAlertsLoadingIndicator loading={labels.loading} />;
   }
@@ -111,7 +95,7 @@ function DesktopAlertsBody({
         page={currentPage}
         pageSize={pageSize}
         totalClasses={totalClasses}
-        labels={gridLabels}
+        labels={contentLabels}
         onLeave={onLeave}
         onViewClassAudit={onViewClassAudit}
         onPageChange={onPageChange}
@@ -181,7 +165,7 @@ export function ScheduleAlertsViewDesktop({
         onLeave={onLeave}
         onViewClassAudit={onViewClassAudit}
         onPageChange={onPageChange}
-        gridLabels={gridLabels}
+        contentLabels={gridLabels}
       />
     </DesktopPageContainer>
   );

@@ -8,7 +8,7 @@ export type { DBTransaction };
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { EffectiveMeetingService } from "@/backend/services";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 

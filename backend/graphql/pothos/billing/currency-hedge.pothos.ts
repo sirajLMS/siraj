@@ -2,7 +2,7 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { CurrencyHedgeService } from "@/backend/services/fx/currency-hedge.service";
+import { CurrencyHedgeService } from "@/backend/services";
 import type { CurrencyHedgeSelectType } from "@/backend/types";
 
 const CurrencyHedgeRef = gqlSchemaBuilder.objectRef<CurrencyHedgeSelectType>("CurrencyHedge");

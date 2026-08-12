@@ -10,12 +10,12 @@ import {
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { classInstances, classStatusEvents, leaveRequests, parents, teachers } from "@/backend/db/schema";
 import { RateSource } from "@/backend/enum";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import {
   checkStateChangeAuth,
+  EffectiveMeetingService,
   validateRescheduleState,
   validateStateTransition,
-} from "@/backend/services/scheduling/state-change-validation.service";
+} from "@/backend/services";
 import type * as Types from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";

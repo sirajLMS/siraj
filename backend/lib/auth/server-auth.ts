@@ -3,10 +3,13 @@ import { cache } from "react";
 import { UserRepository } from "@/backend/db/repo/users";
 import { UserRole } from "@/backend/enum";
 import { type CustomJWTPayload, logger, verifyToken } from "@/backend/lib";
-import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
-import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
-import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
-import { SessionService } from "@/backend/services/auth/session.service";
+import {
+  ImpersonationService,
+  PermissionGroupSimulationService,
+  PermissionsService,
+  SessionService,
+  type UserPermissionContext,
+} from "@/backend/services";
 
 type ServerUserContextResult = {
   userId: string | null;

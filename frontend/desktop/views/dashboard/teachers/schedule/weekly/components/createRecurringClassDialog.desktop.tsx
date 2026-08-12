@@ -2,10 +2,6 @@
 
 import { Dialog, DialogTitle } from "@mui/material";
 import { CreateRecurringClassDialogShared } from "@/frontend/common/components/ui/dialog/CreateRecurringClassDialogShared";
-import {
-  resolveClassTypeChange,
-  resolveSchedulingModeChange,
-} from "@/frontend/common/components/ui/dialog/createRecurringClassDialogUtils";
 import type {
   CreateRecurringClassDialogShellSlotProps,
   CreateRecurringClassStudentSelectSlotProps,
@@ -14,6 +10,7 @@ import type {
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { buildCreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/createRecurringClassDialogProps";
 import type {
   CreateRecurringClassDialogProps,
   CreateRecurringClassDialogViewModel,
@@ -85,46 +82,9 @@ function CreateRecurringClassDialogDesktopBody({
   readonly teacherId: string;
   readonly viewModel: CreateRecurringClassDialogViewModel;
 }) {
-  const {
-    formState: state,
-    days,
-    toggleDay,
-    toggleTimeOverride,
-    setTimeOverride,
-    isDialogOpen,
-    mutationLoading,
-    meetingConfigWarning,
-    completedClassInstanceId,
-    closeDialog,
-    handleSubmit,
-    hasSessionCreateClass,
-    labels: t,
-    meetingLabels: tMeeting,
-    recurringScheduleLabels: tRecurringSchedule,
-    onGoToCreatedClass,
-  } = viewModel;
-
   return (
     <CreateRecurringClassDialogShared
-      teacherId={teacherId}
-      state={state}
-      days={days}
-      toggleDay={toggleDay}
-      toggleTimeOverride={toggleTimeOverride}
-      setTimeOverride={setTimeOverride}
-      isDialogOpen={isDialogOpen}
-      mutationLoading={mutationLoading}
-      meetingConfigWarning={meetingConfigWarning}
-      completedClassInstanceId={completedClassInstanceId}
-      closeDialog={closeDialog}
-      handleSubmit={handleSubmit}
-      hasSessionCreateClass={hasSessionCreateClass}
-      labels={t}
-      meetingLabels={tMeeting}
-      recurringScheduleLabels={tRecurringSchedule}
-      onGoToCreatedClass={onGoToCreatedClass}
-      onClassTypeChange={resolveClassTypeChange}
-      onSchedulingModeChange={resolveSchedulingModeChange}
+      {...buildCreateRecurringClassDialogProps(teacherId, viewModel)}
       slots={{
         DialogShell: DesktopDialogShell,
         StudentSelect: DesktopStudentSelect,

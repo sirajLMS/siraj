@@ -3,7 +3,7 @@ import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CountryCodePothosObject, CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { CurrencyCatalogService as CurrencyService } from "@/backend/services/billing/currency.service";
+import { CurrencyCatalogService as CurrencyService } from "@/backend/services";
 import type { SupportedCurrencyReturnType } from "@/backend/types/billing/currency.types";
 
 type ErrorsTranslations = ReturnType<BaseContext["t"]>["errorsTranslations"];

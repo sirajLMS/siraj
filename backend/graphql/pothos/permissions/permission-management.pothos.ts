@@ -1,7 +1,7 @@
 import { AppPermission, OverrideState } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { OverrideStatePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
+import { PermissionManagementService } from "@/backend/services";
 import type {
   BulkGroupMembershipInput,
   GroupMembershipInput,

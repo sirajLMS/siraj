@@ -4,7 +4,7 @@ import {
   type PaymentLinkCatalogSeed,
 } from "@/backend/db/seeds/lib/payment-catalog-factory";
 import { logger } from "@/backend/lib/logger";
-import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
+import { PaymentCatalogService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet() {

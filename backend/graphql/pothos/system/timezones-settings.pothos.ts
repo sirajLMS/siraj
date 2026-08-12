@@ -2,7 +2,7 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
-import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
+import { ReferenceDataService } from "@/backend/services";
 import type { SettingsTimezonesPaginatedResult, TimezoneSelectType } from "@/backend/types";
 
 const SettingsTimezoneRef = gqlSchemaBuilder.objectRef<TimezoneSelectType>("SettingsTimezone");

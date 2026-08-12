@@ -8,8 +8,8 @@ import type { AccountStatus } from "@/backend/enum";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
-import type { DBTransaction } from "@/backend/types";
 import {
+  type DBTransaction,
   type PaginatedUsersResponseSelectType,
   PaginationArgsDefault,
   type PaginationInput,

@@ -1,7 +1,9 @@
 "use client";
 
 import { PendingActionsOutlined } from "@mui/icons-material";
-import { SupervisorHeroCardShared } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/__shared__/supervisorHeroCardShared";
+import { MOBILE_HERO_CARD_SX } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/__shared__/heroCardSx.constants";
+import { HeroSummaryCardShared } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/__shared__/heroSummaryCardShared";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 interface PendingReviewsHeroCardMobileProps {
@@ -16,17 +18,20 @@ export function PendingReviewsHeroCardMobile({
   onGoToReviews,
 }: Readonly<PendingReviewsHeroCardMobileProps>) {
   return (
-    <SupervisorHeroCardShared
+    <HeroSummaryCardShared
       icon={<PendingActionsOutlined fontSize="small" />}
-      iconSx={theme => ({
-        backgroundColor: theme.palette.primaryContainer,
-        color: theme.palette.onPrimaryContainer,
-      })}
+      iconBgPaletteKey="primaryContainer"
       title={labels.pendingReviewsHero(count)}
       subtitle={labels.pendingReviewsSubtitle}
       actionLabel={labels.goToReviews}
       onAction={onGoToReviews}
       showAction={count > 0}
+      PrimaryActionComponent={MobilePrimaryPageAction}
+      cardSx={MOBILE_HERO_CARD_SX}
+      iconCircleSize={40}
+      stackGap={1.5}
+      titleSubtitleGap={0.5}
+      actionSx={{ alignSelf: "flex-start" }}
     />
   );
 }

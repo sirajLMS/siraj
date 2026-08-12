@@ -1,5 +1,5 @@
 import { GraphQLError } from "graphql";
-import { MeetingChannelError } from "@/backend/services/meeting/channels/IMeetingChannel";
+import { MeetingChannelError } from "@/backend/services";
 
 /**
  * Maps a {@link MeetingChannelError} (which extends `Error`, not `GraphQLError`)

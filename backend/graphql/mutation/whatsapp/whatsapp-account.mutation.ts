@@ -7,7 +7,7 @@ import {
   WhatsappSyncFromMetaResultPothosObject,
 } from "@/backend/graphql/pothos/whatsapp/whatsapp-account.pothos";
 import { withAuthResult } from "@/backend/graphql/utils";
-import { WhatsappAccountService } from "@/backend/services/whatsapp/whatsapp-account.service";
+import { WhatsappAccountService } from "@/backend/services";
 import type {
   WhatsappAccountCreateSubmitInput,
   WhatsappAccountUpdateInput,

@@ -7,7 +7,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { logger } from "@/backend/lib/logger";
-import { TeacherPaymentSeedService } from "@/backend/services/seed/teacher-payment-seed.service";
+import { TeacherPaymentSeedService } from "@/backend/services";
 import type { PaymentMethodTransactionSnapshot, TeacherSelectType, UserSelectType } from "@/backend/types";
 
 function buildBankTransferSnapshot(

@@ -4,7 +4,19 @@ import type { db, QueryDbHandle } from "@/backend/db/drizzleDb";
 import { queryWithPagination } from "@/backend/db/query.extensions";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
 import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
-import type { DBTransaction } from "@/backend/types";
+import type {
+  ComplaintFileReturnType,
+  ComplaintMetrics,
+  ComplaintQueuePaginatedResult,
+  ComplaintQueueResult,
+  ComplaintResponseReturnType,
+  ComplaintReturnType,
+  ComplaintSelectType,
+  ComplaintSubmitInput,
+  DBTransaction,
+  PaginationArgs,
+  ParentComplaintPaginatedResult,
+} from "@/backend/types";
 
 function isComplaintCategory(value: string): value is ComplaintCategory {
   return (Object.values(ComplaintCategory) as readonly string[]).includes(value);
@@ -24,18 +36,6 @@ function assertComplaintStatus(value: string): ComplaintStatus {
   return value;
 }
 
-import type {
-  ComplaintFileReturnType,
-  ComplaintMetrics,
-  ComplaintQueuePaginatedResult,
-  ComplaintQueueResult,
-  ComplaintResponseReturnType,
-  ComplaintReturnType,
-  ComplaintSelectType,
-  ComplaintSubmitInput,
-  PaginationArgs,
-  ParentComplaintPaginatedResult,
-} from "@/backend/types";
 import { escapeLikeWildcards, PaginationUtils } from "@/backend/utils";
 
 function formatDuration(hours: number): string {

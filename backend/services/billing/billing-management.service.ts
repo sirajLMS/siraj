@@ -9,7 +9,6 @@ import { invoices } from "@/backend/db/schema";
 import { AppPermission, InvoicePaymentSubmissionStatus } from "@/backend/enum";
 import { logger, NotFoundError } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { NotificationSyncService } from "@/backend/services/system/notification-sync.service";
 import {
   assertInvoiceBelongsToParentUser,
   buildProofSnapshot,
@@ -23,6 +22,7 @@ import {
   buildInvoiceGeneratedPayloads,
   buildInvoiceStatusChangedPayloads,
 } from "@/backend/services/notification/notification-payloads.builders";
+import { NotificationSyncService } from "@/backend/services/system/notification-sync.service";
 import type * as Types from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";

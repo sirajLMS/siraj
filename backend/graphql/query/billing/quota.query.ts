@@ -11,9 +11,7 @@ import {
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { assertAssociatedOrManage } from "@/backend/services/billing/permission-utils";
-import { QuotaService } from "@/backend/services/billing/quota.service";
-import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
+import { AvailabilityService, assertAssociatedOrManage, QuotaService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("quotaLedger", t =>
   t.field({

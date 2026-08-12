@@ -8,10 +8,7 @@
  * Run: `bun run test:live-comm` or `bun run test:integration`
  */
 import { expect, test } from "bun:test";
-import {
-  buildGetPhoneNumberRequest,
-  parseGetPhoneNumberResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
+import { buildGetPhoneNumberRequest, parseGetPhoneNumberResponse } from "@/backend/services";
 import type { GraphApiRequestContext } from "@/backend/types";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 

@@ -2,8 +2,7 @@ import { cookies, headers } from "next/headers";
 import { type BaseContext, createContext } from "@/backend/graphql/gqlContext";
 import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import { logger } from "@/backend/lib/logger";
-import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
-import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
+import { ImpersonationService, PermissionGroupSimulationService } from "@/backend/services";
 
 async function resolveAuthFromRequest(
   headersList: Headers,

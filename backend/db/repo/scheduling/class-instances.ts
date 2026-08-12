@@ -20,7 +20,7 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teache
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { OnDemandStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { EffectiveMeetingService } from "@/backend/services";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";

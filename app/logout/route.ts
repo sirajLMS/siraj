@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { extractTokenFromHeader } from "@/backend/lib/auth/jwt";
 import { logger } from "@/backend/lib/logger";
-import { SessionService } from "@/backend/services/auth/session.service";
+import { SessionService } from "@/backend/services";
 
 const LOGIN_PATH = "/login";
 

@@ -8,7 +8,7 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { ComplaintService } from "@/backend/services/communication/complaint.service";
+import { ComplaintService } from "@/backend/services";
 import type { ParentEntity, StudentSelectType, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(

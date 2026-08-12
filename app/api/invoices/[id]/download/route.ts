@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { ForbiddenError, getServerUserContext, logger, NotFoundError } from "@/backend/lib";
-import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
-import { StorageService } from "@/backend/services/storage/storage.service";
+import { BillingManagementService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

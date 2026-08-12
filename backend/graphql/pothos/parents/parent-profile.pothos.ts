@@ -7,8 +7,7 @@ import {
   IanaTimezonePothosObject,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { ParentProfileService } from "@/backend/services/parent/parent-profile.service";
-import { StudentManagementService } from "@/backend/services/student/student-management.service";
+import { ParentProfileService, StudentManagementService } from "@/backend/services";
 import type { AssociatedStudentResult, DeactivateParentResult, ReactivateParentResult } from "@/backend/types";
 import type { ParentProfileResult } from "@/backend/types/parents/parent.types";
 import type { EditQuotaResult } from "@/backend/types/students/student.types";

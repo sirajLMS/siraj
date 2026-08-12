@@ -10,20 +10,14 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import {
   buildGetPhoneNumberRequest,
-  parseGetPhoneNumberResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
-import {
   buildListMessageTemplatesRequest,
-  parseListMessageTemplatesResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-message-templates.request";
-import {
   buildListPhoneNumbersRequest,
-  parseListPhoneNumbersResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-phone-numbers.request";
-import {
   buildSendTemplateMessageRequest,
+  parseGetPhoneNumberResponse,
+  parseListMessageTemplatesResponse,
+  parseListPhoneNumbersResponse,
   parseSendTemplateResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/send-template-message.request";
+} from "@/backend/services";
 import type { GraphApiRequestContext } from "@/backend/types";
 
 const CTX: GraphApiRequestContext = {

@@ -6,8 +6,7 @@ import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { buildMaskedTransactionSnapshot } from "@/backend/services/payment-method/payment-method-mask";
+import { buildMaskedTransactionSnapshot, PermissionsService } from "@/backend/services";
 import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
 import type {
   PaymentMethodTransactionSnapshot,

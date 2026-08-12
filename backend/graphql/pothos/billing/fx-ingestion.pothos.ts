@@ -9,11 +9,13 @@ import {
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { FxIngestionService } from "@/backend/services/fx/fx-ingestion.service";
-import { FxProviderConfigService } from "@/backend/services/fx/fx-provider-config.service";
-import { FxRateAdminService } from "@/backend/services/fx/fx-rate-admin.service";
-import { FxRateLimitService } from "@/backend/services/fx/fx-rate-limit.service";
-import { FxRateQueryService } from "@/backend/services/fx/fx-rate-query.service";
+import {
+  FxIngestionService,
+  FxProviderConfigService,
+  FxRateAdminService,
+  FxRateLimitService,
+  FxRateQueryService,
+} from "@/backend/services";
 import type {
   CurrencyExchangeRateReturnType,
   ExchangeRateHistoryPaginatedResult,

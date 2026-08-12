@@ -1,6 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ScheduleDeletionService } from "@/backend/services/schedule/schedule-deletion.service";
+import { ScheduleDeletionService } from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("deleteRecurringClass", t =>
   t.field({

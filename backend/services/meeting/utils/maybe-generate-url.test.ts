@@ -2,7 +2,7 @@ import { afterEach, describe, expect, mock, spyOn, test } from "bun:test";
 import { MeetingChannelError } from "@/backend/services/meeting/channels/IMeetingChannel";
 import * as MeetingChannelFactory from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { isMeetingChannelError, maybeGenerateUrl } from "@/backend/services/meeting/utils/maybe-generate-url";
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails } from "@/backend/types/meeting";
 import type { MeetingProviderKind, MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 
 function buildProvider(overrides: Partial<MeetingProviderSelectType> = {}): MeetingProviderSelectType {

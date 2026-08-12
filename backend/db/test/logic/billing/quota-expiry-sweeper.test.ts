@@ -7,7 +7,7 @@ import { quotas } from "@/backend/db/schema";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
-import { QuotaService } from "@/backend/services/billing/quota.service";
+import { QuotaService } from "@/backend/services";
 import type { QuotaSelectType, QuotaSubmitInput } from "@/backend/types";
 
 describe("Quota Expiry Sweeper Logic", () => {

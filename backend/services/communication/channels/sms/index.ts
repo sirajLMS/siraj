@@ -1,7 +1,2 @@
-export type {
-  ISmsChannel,
-  SmsPayload,
-  SmsProvider,
-  SmsSendResult,
-} from "@/backend/services/communication/channels/sms/ISmsChannel";
+export * from "./ISmsChannel";
 export * from "./SmsChannelFactory";

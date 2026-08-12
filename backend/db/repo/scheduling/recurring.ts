@@ -15,8 +15,7 @@ import {
   teachers,
 } from "@/backend/db/schema";
 import type { RateSource } from "@/backend/enum";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import { resolveClassRate } from "@/backend/services/pricing/rate-resolver.service";
+import { EffectiveMeetingService, resolveClassRate } from "@/backend/services";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { ErrorsLabels } from "@/shared/locale";

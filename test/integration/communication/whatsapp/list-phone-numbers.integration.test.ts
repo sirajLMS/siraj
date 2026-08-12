@@ -12,7 +12,7 @@ import {
   buildListPhoneNumbersRequest,
   collectAllPhoneNumbers,
   parseListPhoneNumbersResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-phone-numbers.request";
+} from "@/backend/services";
 import type { GraphApiRequestContext, GraphApiRequestInit, ListPhoneNumbersResponseBody } from "@/backend/types";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 

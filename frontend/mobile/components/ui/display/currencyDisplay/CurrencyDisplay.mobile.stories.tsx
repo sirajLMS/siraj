@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { currencies } from "@/frontend/common/lib/currency";
-import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import {
   CurrencyDisplayPart,
   DEFAULT_CURRENCY_DISPLAY_PARTS,
 } from "@/frontend/common/components/ui/display/currencyDisplay/constants";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { currencies } from "@/frontend/common/lib/currency";
+import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { MobileCurrencyDisplay } from "@/frontend/mobile/components/ui/display/currencyDisplay/CurrencyDisplay.mobile";
 
 const currencyCodeOptions = currencies.map(currency => currency.code);

@@ -3,7 +3,6 @@
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   userBillingProfileInvoiceHistoryQueryDocument,
@@ -11,12 +10,12 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import type { FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import {
-  formatBillingCurrencyTotals,
-  mapBillingCurrencyBuckets,
-} from "@/frontend/common/lib/formatBillingCurrencyTotals";
-import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useUserBillingProfileStore } from "@/frontend/common/stores/userBillingProfileStore";
+import {
+  buildInvoiceRow,
+  buildParentBillingSummary,
+  resolveQuickPayAction,
+} from "@/frontend/common/views/dashboard/billing/__shared__/billingViewModelHelpers";
 import { useBillingPermissions } from "@/frontend/common/views/dashboard/billing/hooks/useBillingPermissions";
 import { useBillingPollInterval } from "@/frontend/common/views/dashboard/billing/hooks/useBillingPollInterval";
 import { useDownloadInvoicePdf } from "@/frontend/common/views/dashboard/billing/hooks/useDownloadInvoicePdf";
@@ -34,11 +33,6 @@ import {
   useBillingFxMessages,
   useBillingTranslationBase,
 } from "@/frontend/common/views/dashboard/billing/utils/billingTranslationBase";
-import {
-  formatBillingDate,
-  formatBillingMonth,
-} from "@/frontend/common/views/dashboard/billing/utils/formatBillingDate";
-import { deriveParentInvoiceDisplayStatus } from "@/frontend/common/views/dashboard/billing/utils/invoiceDisplayStatus";
 import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { type BillingLabels, type ErrorsLabels, Translation } from "@/shared/locale";
 
@@ -54,31 +48,7 @@ type SummaryRow =
   | undefined;
 
 function mapInvoiceRow(inv: NonNullable<SummaryRow>, locale: string, fxMessages: FxDisplayMessages): ParentInvoiceRow {
-  const id = inv.id ?? "";
-  return {
-    id,
-    invoiceNumber: id.slice(0, 8).toUpperCase(),
-    month: formatBillingMonth(inv.issueDate, locale),
-    issueDate: formatBillingDate(inv.issueDate, locale),
-    dueDate: formatBillingDate(inv.dueDate, locale),
-    paidDate: inv.paidDate ? formatBillingDate(inv.paidDate, locale) : "\u2014",
-    hasPaymentProof: inv.hasPaymentProof ?? false,
-    hasRejectedSubmission: inv.hasRejectedSubmission ?? false,
-    fee: formatCurrencyForDisplay(
-      inv.amount ?? "0",
-      inv.currency ?? CurrencyCode.Usd,
-      inv.displayAmount
-        ? {
-            amount: inv.displayAmount.amount,
-            currency: inv.displayAmount.currency ?? null,
-            stale: inv.displayAmount.stale ?? null,
-          }
-        : null,
-      locale,
-      fxMessages
-    ),
-    status: deriveParentInvoiceDisplayStatus(inv.status, inv.dueDate),
-  };
+  return buildInvoiceRow(inv, locale, fxMessages, { staleDefault: null, currencyDefault: null });
 }
 
 function buildSummary(
@@ -86,25 +56,7 @@ function buildSummary(
   locale: string,
   fxMessages: FxDisplayMessages
 ): ParentBillingSummary {
-  const outstandingTotals = formatBillingCurrencyTotals(
-    mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.outstandingByCurrency),
-    locale,
-    fxMessages
-  );
-  const paidThisTermTotals = formatBillingCurrencyTotals(
-    mapBillingCurrencyBuckets(summaryData?.parentBillingSummary?.paidThisTermByCurrency),
-    locale,
-    fxMessages
-  );
-
-  return {
-    outstandingBalance: outstandingTotals.primary,
-    outstandingBalanceSubLabel: outstandingTotals.breakdown,
-    paidThisTerm: paidThisTermTotals.primary,
-    paidThisTermSubLabel: paidThisTermTotals.breakdown,
-    nextDueDate: formatBillingDate(summaryData?.parentBillingSummary?.nextDueDate ?? null, locale),
-    activeStudents: String(summaryData?.parentBillingSummary?.activeStudents ?? 0),
-  };
+  return buildParentBillingSummary(summaryData, locale, fxMessages);
 }
 
 /** FX display message cache memoized on the translation slices that feed it. */
@@ -275,54 +227,7 @@ function runQuickPayFlow(args: {
   readonly showFeedback: (message: string, severity: SnackbarSeverity) => void;
   readonly handlePayNow: (invoice: MarkPaidInvoiceTarget) => void;
 }): void {
-  const {
-    billingActionsDisabled,
-    summaryLoading,
-    summaryData,
-    locale,
-    fxMessages,
-    labels,
-    tErrors,
-    tc,
-    showFeedback,
-    handlePayNow,
-  } = args;
-
-  if (billingActionsDisabled) {
-    showFeedback(tErrors.auth.impersonationNotAllowedDuringSession, "error");
-    return;
-  }
-
-  if (summaryLoading) {
-    showFeedback(tc.loading, "info");
-    return;
-  }
-
-  const nextUnpaid = summaryData?.parentBillingSummary?.nextUnpaidInvoice;
-  if (nextUnpaid?.id) {
-    handlePayNow({
-      id: nextUnpaid.id,
-      amount: formatCurrencyForDisplay(
-        nextUnpaid.amount ?? "0",
-        nextUnpaid.currency ?? CurrencyCode.Usd,
-        null,
-        locale,
-        fxMessages
-      ),
-      dueDate: formatBillingDate(nextUnpaid.dueDate, locale),
-      invoiceNumber: nextUnpaid.id.slice(0, 8).toUpperCase(),
-      studentName: nextUnpaid.studentName,
-    });
-    return;
-  }
-
-  const pendingCount = summaryData?.parentBillingSummary?.pendingPaymentCount ?? 0;
-  if (pendingCount > 0) {
-    showFeedback(labels.notifications.paymentPendingReview, "info");
-    return;
-  }
-
-  showFeedback(labels.noUnpaidInvoices, "info");
+  resolveQuickPayAction({ ...args, tcLoading: args.tc.loading });
 }
 
 /** Mutating handlers and refresh callbacks. */

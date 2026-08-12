@@ -1,7 +1,6 @@
 import { cache } from "react";
-import type { UserPermissionContext } from "@/backend/services/auth/permissions.service";
-import { SessionService } from "@/backend/services/auth/session.service";
-import { cachedRead } from "@/backend/services/cache";
+import type { UserPermissionContext } from "@/backend/services";
+import { cachedRead, SessionService } from "@/backend/services";
 import type { CurrentUserProfile } from "@/backend/types";
 
 export const getCurrentUser = cache(

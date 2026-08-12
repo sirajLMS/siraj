@@ -9,7 +9,7 @@ import {
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
-import { ScheduleQueryService } from "@/backend/services/schedule/schedule-query.service";
+import { ScheduleQueryService } from "@/backend/services";
 import type {
   AdminDashboardScheduleReturnType,
   ClassSessionMetrics,

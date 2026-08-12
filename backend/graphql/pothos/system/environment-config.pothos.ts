@@ -9,7 +9,7 @@ import {
   EnvConfigServiceError,
   listEnvConfigEntries,
   upsertEnvConfigOverride,
-} from "@/backend/services/system/environment-config.service";
+} from "@/backend/services";
 import type {
   EnvConfigDeleteReturnType,
   EnvConfigEntry,

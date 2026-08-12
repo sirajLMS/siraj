@@ -1,7 +1,7 @@
 import { logger } from "@/backend/lib/logger";
 import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
 import { isMeetingChannelError, maybeGenerateUrl } from "@/backend/services/meeting/utils/maybe-generate-url";
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails } from "@/backend/types/meeting";
 import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
 
 /**

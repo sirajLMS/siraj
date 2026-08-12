@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
-import { cacheService } from "@/backend/services/cache";
+import { cacheService } from "@/backend/services";
 
 /**
  * Rate limiting configuration for API endpoints

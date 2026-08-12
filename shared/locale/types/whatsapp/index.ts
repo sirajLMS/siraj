@@ -15,7 +15,6 @@
 /** Meta throughput level values. */
 export type WhatsappThroughputLevel = "STANDARD" | "COEXISTENCE" | "HIGH" | "UNKNOWN";
 
-
 export interface WhatsappLabels {
   // ─── Page / Tab labels ──────────────────────────────────────────────
   readonly pageTitle: string;

@@ -9,7 +9,7 @@ import {
   ClassCategoryUpdateInputPothos,
 } from "@/backend/graphql/pothos/classes/class-category.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ClassCategoryService } from "@/backend/services/subject/class-category.service";
+import { ClassCategoryService } from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("createClassCategory", t =>
   t.field({

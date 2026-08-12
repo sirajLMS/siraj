@@ -1,7 +1,7 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ParentStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { ParentLifecycleService } from "@/backend/services/parent/parent-lifecycle.service";
+import { ParentLifecycleService } from "@/backend/services";
 import type { ChangeParentLifecycleResult } from "@/backend/types";
 
 const ChangeParentLifecycleResultRef =

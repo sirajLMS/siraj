@@ -1,7 +1,7 @@
 import { forbidden } from "next/navigation";
 import type { AppPermission } from "@/backend/enum";
 import { isPrefetchRequest } from "@/backend/lib/auth/is-prefetch";
-import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
+import { PermissionsService, type UserPermissionContext } from "@/backend/services";
 import { redirect } from "@/shared/i18n/routing";
 
 /**

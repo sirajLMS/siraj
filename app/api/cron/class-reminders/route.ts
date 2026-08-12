@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { withCronAuth } from "@/backend/lib/cron-auth";
 import { logger } from "@/backend/lib/logger";
-import { formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
-import { ClassReminderService } from "@/backend/services/notification/class-reminder.service";
+import { ClassReminderService, formatError, getCronErrorT } from "@/backend/services";
 
 /**
  * Vercel Cron entry point for daily class reminders.

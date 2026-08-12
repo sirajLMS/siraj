@@ -1,6 +1,6 @@
 import { toSupportedCurrencyUpsertInputs } from "@/backend/db/seeds/lib/currency-catalog-factory";
 import { logger } from "@/backend/lib/logger";
-import { CurrencyCatalogService } from "@/backend/services/billing/currency.service";
+import { CurrencyCatalogService } from "@/backend/services";
 
 export async function seedOrGet() {
   logger.info("Seeding supported currencies...");

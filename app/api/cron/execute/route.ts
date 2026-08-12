@@ -3,8 +3,7 @@ import { CronTriggerSource } from "@/backend/enum/cron/cron.enums";
 import { withCronAuth } from "@/backend/lib/cron-auth";
 import { DomainError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
-import { CronService } from "@/backend/services/cron/cron.service";
-import { extractLocale, formatError, getCronErrorT } from "@/backend/services/cron/cron-utils";
+import { CronService, extractLocale, formatError, getCronErrorT } from "@/backend/services";
 
 /**
  * Manual / per-schedule execute endpoint. Allows external schedulers to trigger

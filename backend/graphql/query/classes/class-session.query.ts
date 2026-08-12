@@ -4,8 +4,7 @@ import {
   ClassStatusEventPothosObject,
   TeacherFutureSchedulePothosObject,
 } from "@/backend/graphql/pothos/classes/class-session.pothos";
-import { ScheduleService } from "@/backend/services/schedule/schedule.service";
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
+import { ClassSessionService, ScheduleService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("classInstance", t =>
   t.field({

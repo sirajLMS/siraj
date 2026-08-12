@@ -1,6 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { NotificationAlertsService } from "@/backend/services/notification/notification-alerts.service";
+import { NotificationAlertsService } from "@/backend/services";
 
 /**
  * `markNotificationRead` — mark a single delivery as OPENED by deliveryId.
