@@ -178,3 +178,29 @@ export { useTeacherClassListViewModel } from "./useTeacherClassListViewModel";
 export type { DesktopStatusBadgeProps, StatusBadgeCategory as DesktopStatusBadgeCategory } from "./DesktopStatusBadge";
 export { DesktopStatusBadge } from "./DesktopStatusBadge";
 ```
+
+---
+
+## Entry 32: `frontend/desktop/components/ui/form/time/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `DesktopAppTimePicker.tsx` exports both `DesktopAppTimePickerProps` (type) and `DesktopAppTimePicker` (function). The index uses `export type { DesktopAppTimePickerProps } from "./DesktopAppTimePicker"` alongside `export { DesktopAppTimePicker } from "./DesktopAppTimePicker"`. Using `export * from "./DesktopAppTimePicker"` would cause `import-x/export` collision (Multiple exports of name 'DesktopAppTimePickerProps') because `export *` also picks up the type, duplicating the explicit `export type { }` block. Same situation with `DesktopAppTimeRangePicker.tsx` which exports both `DesktopAppTimeRangePickerProps` (type) and `DesktopAppTimeRangePicker` (function).
+**Fix:** Keep named re-exports as-is:
+```ts
+export type { DesktopAppTimePickerProps } from "./DesktopAppTimePicker";
+export { DesktopAppTimePicker } from "./DesktopAppTimePicker";
+export type { DesktopAppTimeRangePickerProps } from "./DesktopAppTimeRangePicker";
+export { DesktopAppTimeRangePicker } from "./DesktopAppTimeRangePicker";
+```
+
+---
+
+## Entry 33: `frontend/desktop/components/ui/input/catalogImageUpload/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `catalogImageUpload.desktop.tsx` exports both `CatalogImageUploadProps` (type) and `CatalogImageUploadDesktop` (const). The index uses `export type { CatalogImageUploadProps } from "./catalogImageUpload.desktop"` alongside `export { CatalogImageUploadDesktop } from "./catalogImageUpload.desktop"`. Using `export * from "./catalogImageUpload.desktop"` would cause `import-x/export` collision (Multiple exports of name 'CatalogImageUploadProps') because `export *` also picks up the type, duplicating the explicit `export type { }` block.
+**Fix:** Keep named re-exports as-is:
+```ts
+export type { CatalogImageUploadProps } from "./catalogImageUpload.desktop";
+export { CatalogImageUploadDesktop } from "./catalogImageUpload.desktop";
+```

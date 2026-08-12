@@ -11,11 +11,7 @@ import {
   getStatusLabel,
   resolveTeacherStatusBadge,
 } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/sessionStatusUtils";
-import {
-  DesktopActionIconLink,
-  DesktopPersonProfileLinkCell,
-  DesktopStatusBadge,
-} from "@/frontend/desktop/components/ui";
+import { DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 import { TeacherScheduleSessionActionsCellDesktop } from "@/frontend/desktop/views/dashboard/teachers/dashboard/components/teacherScheduleSessionActionsCell.desktop";
 import { resolveTeacherScheduleSessionActions } from "@/shared/lib/schedule/teacher-schedule-session-actions";
 
@@ -80,9 +76,9 @@ export function TeacherScheduleCardDesktop({
         onRequestLeave={onRequestLeave}
       />
       <Tooltip title={labels.schedule.classId}>
-        <DesktopActionIconLink href={`/classes/${row.id}`} aria-label={labels.schedule.classId}>
+        <ActionIconLink href={`/classes/${row.id}`} aria-label={labels.schedule.classId}>
           <VisibilityOutlined fontSize="small" />
-        </DesktopActionIconLink>
+        </ActionIconLink>
       </Tooltip>
     </Paper>
   );

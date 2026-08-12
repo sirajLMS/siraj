@@ -5,6 +5,7 @@ import { FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@m
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { DateTimeTooltipDisplay } from "@/frontend/common/components/intl/DateTimeTooltipDisplay";
+import { ActionIconLink } from "@/frontend/common/components/ui/button/ActionIconLink";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { StudentViewShellShared } from "@/frontend/common/views/dashboard/student/__shared__/studentViewShellShared";
@@ -16,7 +17,6 @@ import {
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistorySessionPresentation";
 import type { StudentSessionsViewModel } from "@/frontend/common/views/dashboard/student/sessions/useStudentSessionsViewModel";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
-import { ActionIconLink } from "@/frontend/common/components/ui/button/ActionIconLink";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
