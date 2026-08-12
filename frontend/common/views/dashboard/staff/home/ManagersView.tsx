@@ -2,13 +2,9 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import {
-  type ManagersViewModel,
-  type UseManagersViewModelProps,
-  useManagersViewModel,
-} from "@/frontend/common/views/dashboard/staff/home/useManagersViewModel";
+import type { ManagersContainerViewModel } from "@/frontend/common/views/dashboard/staff/home/useManagersContainerViewModel";
 
-const lazyViews = createLazyView<ManagersViewModel>(
+const lazyViews = createLazyView<ManagersContainerViewModel>(
   () =>
     import("@/frontend/mobile/views/dashboard/staff/home/managersView.mobile").then(m => ({
       default: m.ManagersViewMobile,
@@ -19,8 +15,7 @@ const lazyViews = createLazyView<ManagersViewModel>(
     }))
 );
 
-export function ManagersView(props: Readonly<UseManagersViewModelProps>) {
-  const viewModel = useManagersViewModel(props);
-  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;
+export function ManagersView(props: Readonly<ManagersContainerViewModel>) {
+  return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={props} />;
 }
-export type { ManagersViewModel, UseManagersViewModelProps };
+export type { ManagersContainerViewModel as ManagersViewModel };

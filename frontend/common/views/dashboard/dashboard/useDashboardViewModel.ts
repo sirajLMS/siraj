@@ -2,39 +2,15 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useMemo } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import {
+  type DashboardRole,
+  resolveDashboardRole,
+} from "@/frontend/common/views/dashboard/dashboard/dashboardRoleHelpers";
 import type { ScheduleOverviewData } from "@/frontend/common/views/dashboard/types/dashboard";
 import { Translation, useAppTranslation } from "@/shared/locale";
-
-function shouldShowParentDashboard(permissions: readonly AppPermission[]): boolean {
-  return (
-    permissions.includes(AppPermission.ScheduleViewFamily) && !permissions.includes(AppPermission.DashboardViewMetrics)
-  );
-}
-
-function shouldShowTeacherDashboard(permissions: readonly AppPermission[]): boolean {
-  return (
-    permissions.includes(AppPermission.TeacherViewDashboard) &&
-    !permissions.includes(AppPermission.DashboardViewMetrics)
-  );
-}
-
-function shouldShowStudentDashboard(permissions: readonly AppPermission[]): boolean {
-  return (
-    permissions.includes(AppPermission.StudentViewOwnDashboard) &&
-    !permissions.includes(AppPermission.DashboardViewMetrics)
-  );
-}
-
-function shouldShowSupervisorDashboard(permissions: readonly AppPermission[]): boolean {
-  return (
-    permissions.includes(AppPermission.SupervisorViewDashboard) &&
-    !permissions.includes(AppPermission.DashboardViewMetrics)
-  );
-}
 
 const EMPTY_HEADERS: ScheduleOverviewData["headers"] = {
   className: "",
@@ -66,7 +42,7 @@ const EMPTY_STATUS_LABELS: ScheduleOverviewData["statusLabels"] = {
   ON_DEMAND_NO_CREDITS_ABSENT: "",
 };
 
-export type DashboardRole = "parent" | "teacher" | "student" | "supervisor" | "admin";
+export type { DashboardRole } from "@/frontend/common/views/dashboard/dashboard/dashboardRoleHelpers";
 
 export interface DashboardViewModel {
   readonly role: DashboardRole;
@@ -132,17 +108,7 @@ export function useDashboardViewModel(_: Readonly<UseDashboardViewModelProps>): 
   const permissions = user?.permissions || [];
   const userName = user?.name || "";
 
-  let role: DashboardRole = "admin";
-
-  if (shouldShowParentDashboard(permissions)) {
-    role = "parent";
-  } else if (shouldShowTeacherDashboard(permissions)) {
-    role = "teacher";
-  } else if (shouldShowStudentDashboard(permissions)) {
-    role = "student";
-  } else if (shouldShowSupervisorDashboard(permissions)) {
-    role = "supervisor";
-  }
+  const role: DashboardRole = resolveDashboardRole(permissions);
 
   const adminDashboardProps: Partial<DashboardViewModel> = useMemo(() => {
     if (role !== "admin") return {};

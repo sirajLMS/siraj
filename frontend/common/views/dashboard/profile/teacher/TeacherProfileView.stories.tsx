@@ -3,11 +3,11 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { TeacherProfileView } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileView";
+import { TeacherProfileContainer } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileContainer";
 
-const meta: Meta<typeof TeacherProfileView> = {
+const meta: Meta<typeof TeacherProfileContainer> = {
   title: "Profile/Teacher/TeacherProfileView",
-  component: TeacherProfileView,
+  component: TeacherProfileContainer,
   decorators: [
     Story => (
       <Box sx={{ maxWidth: 960, mx: "auto", p: 3 }}>
@@ -19,7 +19,7 @@ const meta: Meta<typeof TeacherProfileView> = {
 
 export default meta;
 
-type Story = StoryObj<typeof TeacherProfileView>;
+type Story = StoryObj<typeof TeacherProfileContainer>;
 
 export const OwnView: Story = {
   args: {

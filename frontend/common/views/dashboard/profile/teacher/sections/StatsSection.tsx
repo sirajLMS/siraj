@@ -2,7 +2,7 @@
 
 import { Stack } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
+import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import {
   isTeacherAdminData,
   type TeacherProfileViewLabels,

@@ -1,7 +1,7 @@
-import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Chip, IconButton, Stack, Switch } from "@mui/material";
+import { Chip, Switch } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import type { SiteContentRow } from "@/frontend/common/views/dashboard/settings/types/siteContentSettings.types";
+import { buildEditDeleteActionsColumn } from "@/frontend/common/views/dashboard/settings/utils/editDeleteActionsColumn";
 import type { SettingsSiteContentTabLabels } from "@/shared/locale/types/dashboard/settings/siteContent";
 
 type ColumnLabels = Pick<
@@ -73,22 +73,12 @@ export function buildSiteContentColumns(
   ];
 
   if (canManage) {
-    columns.push({
-      field: "actions",
-      headerName: labels.actionsColumn,
-      width: 120,
-      sortable: false,
-      renderCell: ({ row }) => (
-        <Stack direction="row" spacing={0.5}>
-          <IconButton size="small" aria-label={labels.editLabel} onClick={() => handlers.onEdit(row)}>
-            <EditOutlined fontSize="small" />
-          </IconButton>
-          <IconButton size="small" aria-label={labels.deleteLabel} onClick={() => handlers.onDelete(row)}>
-            <DeleteOutlined fontSize="small" />
-          </IconButton>
-        </Stack>
-      ),
-    });
+    columns.push(
+      buildEditDeleteActionsColumn<SiteContentRow>(labels.actionsColumn, labels.editLabel, labels.deleteLabel, {
+        onEdit: handlers.onEdit,
+        onDelete: handlers.onDelete,
+      })
+    );
   }
 
   return columns;

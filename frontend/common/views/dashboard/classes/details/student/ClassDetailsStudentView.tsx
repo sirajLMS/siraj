@@ -1,7 +1,7 @@
 "use client";
 
 import { Grid, Stack } from "@mui/material";
-import { ClassExecutionState } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { EXECUTION_STATE_TO_STATUS } from "@/frontend/common/views/dashboard/classes/details/__shared__/executionStateToStatusShared";
 import { ClassDetailsToolbarArea } from "@/frontend/common/views/dashboard/classes/details/components/ClassDetailsToolbarArea";
 import { ClassInstanceDetailsCard } from "@/frontend/common/views/dashboard/classes/details/teacher/ClassInstanceDetailsCard";
 import { RemarksCard } from "@/frontend/common/views/dashboard/classes/details/teacher/RemarksCard";
@@ -13,17 +13,6 @@ import type { ClassInstanceStatus } from "@/frontend/common/views/dashboard/type
 interface ClassDetailsStudentViewProps extends StudentViewProps {
   readonly labels: StudentViewLabels;
 }
-
-const EXECUTION_STATE_TO_STATUS: Record<ClassExecutionState, ClassInstanceStatus> = {
-  [ClassExecutionState.Activated]: "active",
-  [ClassExecutionState.Running]: "active",
-  [ClassExecutionState.Completed]: "completed",
-  [ClassExecutionState.NotActivated]: "scheduled",
-  [ClassExecutionState.OnDemandConflictHeld]: "pending",
-  [ClassExecutionState.OnDemandNoCreditsAbsent]: "cancelled",
-  [ClassExecutionState.OnDemandNoCreditsCancelled]: "cancelled",
-  [ClassExecutionState.OnDemandPendingCredits]: "pending",
-};
 
 const NULL_TEACHER = {
   id: null,

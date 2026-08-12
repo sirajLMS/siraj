@@ -11,16 +11,29 @@
  *
  * Workflow:
  *   1. Get the list of uncommitted files (git status --porcelain)
- *   2. Run each check ONCE project-wide:
+ *   2. Run EVERY check across ALL files (no short-circuit on failure):
  *      - tsgo (project-wide, filter for uncommitted files)
  *      - oxlint (on uncommitted files only)
  *      - biome:check (on uncommitted files only)
  *      - lint:type-aware (via lint service, on uncommitted files only)
- *   3. Report per-file results
- *   4. Exit non-zero if ANY file fails ANY check
+ *   3. Derive "clean files" — files that appear in ZERO failedFiles sets
+ *   4. Stage clean files with `git add --` (enabled by default; pass --no-stage for dry run)
+ *   5. Report per-file pass/fail status
+ *   6. Exit non-zero if ANY file fails ANY check
+ *
+ * Safe Staging (Enabled by default):
+ *   Files with zero issues across ALL checks are automatically staged with
+ *   `git add --` after checks complete. Files that failed ANY check are left
+ *   untouched. No commits are ever made.
+ *
+ *   Safety guarantees:
+ *     - A file is only staged if it appears in ZERO failedFiles sets
+ *     - git add is called with `--` to prevent path/flag ambiguity
+ *     - All checks always run to completion before any staging occurs
+ *     - Nothing is ever committed (git add only)
  *
  * Usage:
- *   bun run scripts/health/sub-loop-uncommitted.ts [--lifecycle <stage>]
+ *   bun run scripts/health/sub-loop-uncommitted.ts [--lifecycle <stage>] [--no-stage]
  *
  * Lifecycle stages (same as sub-loop.ts):
  *   tsgo          → only run tsgo
@@ -37,9 +50,20 @@
 
 import { relative, resolve } from "node:path";
 import {
+  BOLD,
   type CheckResult,
+  CYAN,
   exitCodePassed,
+  GREEN,
+  isLifecycle,
+  LIFECYCLE_ORDER,
   type Lifecycle,
+  logFail,
+  logInfo,
+  logPass,
+  logWarn,
+  NC,
+  RED,
   runCommand,
 } from "@/scripts/health/__shared__/sub-loop-types";
 import { isCodeSceneOutputFailed } from "@/scripts/health/codescene/checker";
@@ -62,43 +86,7 @@ interface BatchCheckResult extends CheckResult {
 
 const PROJECT_ROOT = process.cwd();
 
-const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
-  tsgo: 0,
-  biome: 1,
-  lint: 2,
-  codescene: 3,
-  "sonar-results": 3,
-};
-
-const RED = "\x1b[31m";
-const GREEN = "\x1b[32m";
-const YELLOW = "\x1b[33m";
-const CYAN = "\x1b[36m";
-const BOLD = "\x1b[1m";
-const NC = "\x1b[0m";
-
 // ─── Helpers ───────────────────────────────────────────────────────────────
-
-/** Type guard: checks if a string is a valid Lifecycle stage. */
-function isLifecycle(value: string): value is Lifecycle {
-  return value in LIFECYCLE_ORDER;
-}
-
-function logInfo(msg: string): void {
-  console.log(`${CYAN}ℹ${NC}  ${msg}`);
-}
-
-function logPass(msg: string): void {
-  console.log(`${GREEN}✅${NC} ${msg}`);
-}
-
-function logFail(msg: string): void {
-  console.error(`${RED}❌${NC} ${BOLD}${msg}${NC}`);
-}
-
-function logWarn(msg: string): void {
-  console.log(`${YELLOW}⚠${NC}  ${msg}`);
-}
 
 function logFile(msg: string): void {
   console.log(`${CYAN}  📄${NC} ${msg}`);
@@ -326,33 +314,86 @@ function checkCodesceneAll(files: string[]): BatchCheckResult {
     return { name: "codescene", passed: true, output: "", failedFiles: [] };
   }
   logInfo(`Running codescene on uncommitted files...`);
-  // codescene runs per-file; run sequentially
-  const failedFiles: string[] = [];
-  let combinedOutput = "";
+  // Run codescene --scan ONCE project-wide (zero per-file loops) and filter for uncommitted files
+  const result = runCommand("bun", ["run", "scripts/health/codescene/main.ts", "--scan"]);
 
-  for (const file of files) {
-    const result = runCommand("bun", ["run", "scripts/health/codescene/main.ts", "--file", file]);
-    if (!exitCodePassed(result.exitCode) || isCodeSceneOutputFailed(result.output, result.exitCode)) {
-      failedFiles.push(file);
-      combinedOutput += `\n--- ${file} ---\n${result.output}\n`;
-    }
-  }
-
-  if (failedFiles.length === 0) {
+  if (exitCodePassed(result.exitCode) && !isCodeSceneOutputFailed(result.output, result.exitCode)) {
     logPass("codescene passed for all uncommitted files");
     return { name: "codescene", passed: true, output: "", failedFiles: [] };
   }
 
+  const failedFiles = extractFailedFiles(result.output, files);
+  if (failedFiles.length === 0) {
+    logPass("codescene passed (issues exist but not in uncommitted files)");
+    return { name: "codescene", passed: true, output: "", failedFiles: [] };
+  }
+
   logFail(`codescene FAILED — ${failedFiles.length} file(s) have issues`);
-  console.log(combinedOutput);
-  return { name: "codescene", passed: false, output: combinedOutput, failedFiles };
+  console.log(result.output);
+  return { name: "codescene", passed: false, output: result.output, failedFiles };
 }
 
 // ─── Main ──────────────────────────────────────────────────────────────────
 
-/** Parse the --lifecycle flag from CLI args. */
-function parseLifecycle(args: string[]): Lifecycle {
+/**
+ * Derive the set of files that have ZERO issues across all completed checks.
+ * A file is clean iff it never appears in any BatchCheckResult.failedFiles.
+ * Files that were not reached (due to short-circuit in a previous loop) are
+ * NOT included — we only call this after all checks have run to completion.
+ */
+function computeCleanFiles(allFiles: string[], results: BatchCheckResult[]): string[] {
+  const failedEverywhere = new Set<string>();
+  for (const r of results) {
+    for (const f of r.failedFiles) {
+      failedEverywhere.add(f);
+    }
+  }
+  return allFiles.filter(f => !failedEverywhere.has(f));
+}
+
+/**
+ * Print a staging preview: which files would be staged.
+ * Does NOT call `git add` — that is gated by STAGING_ENABLED.
+ */
+function printStagingPreview(cleanFiles: string[], stageEnabled: boolean): void {
+  console.log("");
+  console.log(`${BOLD}━━━ Staging Preview ━━━${NC}`);
+
+  if (cleanFiles.length === 0) {
+    logWarn("No zero-issue files to stage.");
+    return;
+  }
+
+  const verb = stageEnabled ? "Will stage" : "Would stage (dry run — pass --stage to enable)";
+  console.log(`  ${verb} ${cleanFiles.length} zero-issue file(s):`);
+  for (const f of cleanFiles) {
+    logFile(f);
+  }
+}
+
+/**
+ * Stage the given files using `git add -- <files>`.
+ * Called ONLY when stageEnabled is true and cleanFiles is non-empty.
+ * Uses `--` to prevent any path from being misinterpreted as a flag.
+ */
+function stageCleanFiles(cleanFiles: string[]): void {
+  if (cleanFiles.length === 0) return;
+  logInfo(`Staging ${cleanFiles.length} zero-issue file(s)...`);
+  // `git add --` ensures no path can be interpreted as a git flag.
+  const result = runCommand("git", ["add", "--", ...cleanFiles]);
+  if (result.exitCode !== 0) {
+    logFail(`git add failed:\n${result.output}`);
+    // Do NOT throw — the quality checks already completed. Just report.
+  } else {
+    logPass(`Successfully staged ${cleanFiles.length} file(s).`);
+  }
+}
+
+/** Parse CLI flags: --lifecycle <stage> and --no-stage / --dry-run / --stage. */
+function parseCLIArgs(args: string[]): { lifecycle: Lifecycle; stageEnabled: boolean } {
   let lifecycle: Lifecycle = "lint";
+  let stageEnabled = true;
+
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--lifecycle" && i + 1 < args.length) {
       const val = args[i + 1];
@@ -364,15 +405,22 @@ function parseLifecycle(args: string[]): Lifecycle {
         process.exit(2);
       }
       i++;
+    } else if (args[i] === "--no-stage" || args[i] === "--dry-run") {
+      stageEnabled = false;
+    } else if (args[i] === "--stage") {
+      stageEnabled = true;
     }
   }
-  return lifecycle;
+
+  return { lifecycle, stageEnabled };
 }
 
 /** Print the header and uncommitted files list. */
-function printHeader(lifecycle: Lifecycle, files: string[]): void {
+function printHeader(lifecycle: Lifecycle, stageEnabled: boolean, files: string[]): void {
+  const stagingLabel = stageEnabled ? `${GREEN}enabled${NC}` : "disabled (--no-stage / --dry-run)";
   console.log(`${BOLD}━━━ SUB-LOOP-UNCOMMITTED ━━━${NC}`);
-  console.log(`  Lifecycle: ${lifecycle} (depth: ${LIFECYCLE_ORDER[lifecycle]})`);
+  console.log(`  Lifecycle:  ${lifecycle} (depth: ${LIFECYCLE_ORDER[lifecycle]})`);
+  console.log(`  Staging:    ${stagingLabel}`);
   console.log("");
   console.log(`${BOLD}Uncommitted files (${files.length}):${NC}`);
   for (const f of files) {
@@ -381,74 +429,61 @@ function printHeader(lifecycle: Lifecycle, files: string[]): void {
   console.log("");
 }
 
-async function main(): Promise<void> {
-  const args = process.argv.slice(2);
-  const lifecycle = parseLifecycle(args);
+/** Collect BatchCheckResults for all lifecycle stages up to `depth`. */
+async function collectResults(depth: number, files: string[]): Promise<BatchCheckResult[]> {
+  const results: BatchCheckResult[] = [];
 
-  const files = getUncommittedFiles();
-  if (files.length === 0) {
-    logWarn("No uncommitted TypeScript/JavaScript files found.");
-    process.exit(0);
+  // tsgo (depth 0+)
+  results.push(checkTsgoAll(files));
+
+  // oxlint + biome (depth 1+)
+  if (depth >= 1) {
+    results.push(checkOxlintAll(files));
+    results.push(checkBiomeAll(files));
   }
 
-  const exitCode = await withProcessLock("sub-loop-uncommitted", async () => {
-    printHeader(lifecycle, files);
+  // lint:type-aware (depth 2+)
+  if (depth >= 2) {
+    results.push(await checkLintTypeAwareAll(files));
+  }
 
-    const depth = LIFECYCLE_ORDER[lifecycle];
-    const results: BatchCheckResult[] = [];
+  // check:duplicates + codescene (depth 3+)
+  if (depth >= 3) {
+    results.push(checkDuplicatesAll(files));
+    results.push(checkCodesceneAll(files));
+  }
 
-    // tsgo (depth 0+)
-    results.push(checkTsgoAll(files));
-    if (!results[results.length - 1].passed) {
-      printSummary(results, files);
-      return 1;
-    }
-
-    // biome (depth 1+)
-    if (depth >= 1) {
-      results.push(checkOxlintAll(files));
-      if (!results[results.length - 1].passed) {
-        printSummary(results, files);
-        return 1;
-      }
-      results.push(checkBiomeAll(files));
-      if (!results[results.length - 1].passed) {
-        printSummary(results, files);
-        return 1;
-      }
-    }
-
-    // lint:type-aware (depth 2+)
-    if (depth >= 2) {
-      results.push(await checkLintTypeAwareAll(files));
-      if (!results[results.length - 1].passed) {
-        printSummary(results, files);
-        return 1;
-      }
-    }
-
-    // check:duplicates + codescene (depth 3+)
-    if (depth >= 3) {
-      results.push(checkDuplicatesAll(files));
-      if (!results[results.length - 1].passed) {
-        printSummary(results, files);
-        return 1;
-      }
-      results.push(checkCodesceneAll(files));
-      if (!results[results.length - 1].passed) {
-        printSummary(results, files);
-        return 1;
-      }
-    }
-
-    printSummary(results, files);
-    return 0;
-  });
-
-  process.exit(exitCode);
+  return results;
 }
 
-function printSummary(results: BatchCheckResult[], files: string[]): void {
+/** Print hint when one or more checks/files failed. */
+function printFailureHint(
+  cleanCount: number,
+  failedCount: number,
+  firstFailedCheck: string,
+  stageEnabled: boolean
+): void {
+  const stagedStatus = stageEnabled
+    ? `Staged ${cleanCount} zero-issue file(s)`
+    : `Identified ${cleanCount} zero-issue file(s) for staging (dry run — pass --stage to stage)`;
+
+  console.log(`${RED}${BOLD}  First failing check: ${firstFailedCheck}${NC}`);
+  console.log(
+    `${CYAN}${BOLD}💡 Hint: ${stagedStatus}, while ${failedCount} file(s) are failing. First failing check: ${firstFailedCheck}.${NC}`
+  );
+}
+
+function printSummary(results: BatchCheckResult[], files: string[], cleanFiles: string[], stageEnabled: boolean): void {
+  // Build a set of all files that failed at least one check.
+  const failedSet = new Set<string>();
+  for (const r of results) {
+    for (const f of r.failedFiles) {
+      failedSet.add(f);
+    }
+  }
+
+  const firstFailedCheck = results.find(r => !r.passed)?.name;
+
   console.log("");
   console.log(`${BOLD}━━━ Summary ━━━${NC}`);
   console.log(`  Files checked: ${files.length}`);
@@ -457,14 +492,68 @@ function printSummary(results: BatchCheckResult[], files: string[]): void {
     const failedInfo = r.failedFiles.length > 0 ? ` (${r.failedFiles.length} failed)` : "";
     console.log(`  ${mark} ${r.name}${failedInfo}`);
   }
-  const allPassed = results.every(r => r.passed);
-  if (allPassed) {
-    console.log("");
-    console.log(`${GREEN}${BOLD}✅ All checks passed for all uncommitted files.${NC}`);
-  } else {
-    console.log("");
-    console.log(`${RED}${BOLD}❌ Some checks failed. Fix the errors above before committing.${NC}`);
+
+  console.log("");
+  console.log(`${BOLD}Per-file status:${NC}`);
+  for (const f of files) {
+    if (failedSet.has(f)) {
+      console.log(`  ${RED}❌${NC} ${f}`);
+    } else {
+      console.log(`  ${GREEN}✅${NC} ${f}`);
+    }
   }
+
+  const allPassed = cleanFiles.length === files.length && !firstFailedCheck;
+  console.log("");
+  if (allPassed) {
+    console.log(`${GREEN}${BOLD}✅ All checks passed for all ${files.length} uncommitted file(s).${NC}`);
+  } else {
+    console.log(
+      `${GREEN}${BOLD}✅ ${cleanFiles.length}/${files.length} file(s) are clean.${NC}` +
+        `  ${RED}${BOLD}❌ ${failedSet.size}/${files.length} file(s) have issues.${NC}`
+    );
+    printFailureHint(cleanFiles.length, failedSet.size, firstFailedCheck ?? "unknown", stageEnabled);
+  }
+}
+
+/**
+ * Run all quality checks and return the exit code.
+ * All checks run to completion (no short-circuit) so we can derive the
+ * complete per-file pass/fail picture needed for safe staging.
+ */
+async function runChecks(lifecycle: Lifecycle, stageEnabled: boolean, files: string[]): Promise<number> {
+  printHeader(lifecycle, stageEnabled, files);
+
+  const results = await collectResults(LIFECYCLE_ORDER[lifecycle], files);
+
+  // Derive zero-issue files from the union of all failedFiles sets.
+  const cleanFiles = computeCleanFiles(files, results);
+
+  printStagingPreview(cleanFiles, stageEnabled);
+
+  if (stageEnabled) {
+    stageCleanFiles(cleanFiles);
+  }
+
+  printSummary(results, files, cleanFiles, stageEnabled);
+
+  const anyFailed = results.some(r => !r.passed) || cleanFiles.length < files.length;
+  return anyFailed ? 1 : 0;
+}
+
+async function main(): Promise<void> {
+  const args = process.argv.slice(2);
+  const { lifecycle, stageEnabled } = parseCLIArgs(args);
+
+  const files = getUncommittedFiles();
+  if (files.length === 0) {
+    logWarn("No uncommitted TypeScript/JavaScript files found.");
+    process.exit(0);
+  }
+
+  const exitCode = await withProcessLock("sub-loop-uncommitted", async () => runChecks(lifecycle, stageEnabled, files));
+
+  process.exit(exitCode);
 }
 
 main().catch(err => {

@@ -113,3 +113,5 @@ export interface ParentBillingViewProps extends BillingCapabilityProps {
   readonly totalCount?: number;
   readonly onPageChange?: (page: number) => void;
 }
+
+export type BillingSectionSharedProps = ParentBillingViewProps;

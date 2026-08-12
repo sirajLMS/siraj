@@ -6,11 +6,11 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
+import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffAdminEditFormData } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/teacher/sections/InfoField";
 
 type StaffAdminData = {
   readonly userId: string;

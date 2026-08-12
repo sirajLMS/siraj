@@ -11,7 +11,6 @@ import {
   type ParentStatus,
   type ProfileScope,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
 import type {
   ParentAdminData,
   ParentSectionLabelsBundle,
@@ -19,6 +18,7 @@ import type {
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
+import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { Translation, useAppTranslation } from "@/shared/locale";

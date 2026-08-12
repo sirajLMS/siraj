@@ -1,15 +1,6 @@
-import {
-  NotificationChannel,
-  NotificationEventType,
-  ProfileAudience,
-  UserRole,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
-import {
-  isEventAllowedForRole,
-  type NotificationPreferenceRole,
-  resolveNotificationEventAllowlist,
-} from "@/shared/constants/notification-event-allowlists";
+import { preferenceKey } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceUtils";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 /** Mirrors backend enum NotificationEventCategory — frontend-local copy for prefs UI grouping. */
@@ -196,100 +187,13 @@ export interface NotificationPreferencesTabVariantProps {
   readonly onCategoryToggle?: (category: NotificationEventCategory, enabled: boolean) => void;
 }
 
-/**
- * Maps viewer `UserRole` / `ProfileAudience` to the shared prefs allowlist role.
- * Prefer `role` from the auth user store; fall back to profile audience.
- */
-export function resolveNotificationPreferenceRole(params: {
-  readonly role?: string | null;
-  readonly audience?: ProfileAudience | null;
-}): NotificationPreferenceRole {
-  const { role, audience } = params;
-
-  switch (role) {
-    case UserRole.Student:
-      return "student";
-    case UserRole.Supervisor:
-      return "supervisor";
-    case UserRole.Parent:
-      return "parent";
-    case UserRole.Teacher:
-      return "teacher";
-    case UserRole.Staff:
-      return "staff";
-    case UserRole.SuperAdmin:
-    case UserRole.AcademyAdmin:
-      return "admin";
-    default:
-      break;
-  }
-
-  switch (audience) {
-    case ProfileAudience.Student:
-      return "student";
-    case ProfileAudience.Parent:
-      return "parent";
-    case ProfileAudience.Teacher:
-      return "teacher";
-    case ProfileAudience.Staff:
-      return "staff";
-    default:
-      return "staff";
-  }
-}
-
-/** Event types visible in the prefs matrix for a prefs role. */
-export function getNotificationEventTypesForRole(role: NotificationPreferenceRole): readonly NotificationEventType[] {
-  const allowlist = resolveNotificationEventAllowlist(role);
-  if (allowlist === "ALL") {
-    return NOTIFICATION_EVENT_TYPES;
-  }
-
-  return NOTIFICATION_EVENT_TYPES.filter(eventType => isEventAllowedForRole(role, eventType));
-}
-
-export function preferenceKey(channel: NotificationChannel, eventType: NotificationEventType): string {
-  return `${channel}:${eventType}`;
-}
-
-export function buildPreferenceMap(preferences: readonly NotificationPrefRow[]): Map<string, NotificationPrefRow> {
-  const entries: Array<[string, NotificationPrefRow]> = [];
-
-  for (const pref of preferences) {
-    if (pref.channel && pref.eventType) {
-      entries.push([preferenceKey(pref.channel, pref.eventType), pref]);
-    }
-  }
-
-  return new Map(entries);
-}
-
-// NEW FOR PLAN v5: buildPreferenceMatrixRows — pure-data row-shaping for the
-// desktop matrix grid. Lifted to common so the desktop tier view no longer
-// derives data (specs.md §6.1 — the ViewModel owns data shaping).
-export function buildPreferenceMatrixRows(
-  preferenceMap: ReadonlyMap<string, NotificationPrefRow>,
-  eventTypes: readonly NotificationEventType[] = NOTIFICATION_EVENT_TYPES
-): PreferenceMatrixRow[] {
-  return eventTypes.map(eventType => {
-    const enabledMap: Record<string, boolean> = {};
-    for (const channel of NOTIFICATION_CHANNELS) {
-      const pref = preferenceMap.get(preferenceKey(channel, eventType));
-      enabledMap[channel] = pref?.enabled ?? true;
-    }
-    return { id: eventType, eventType, enabledMap };
-  });
-}
-
-export function buildDefaultPreferences(
-  eventTypes: readonly NotificationEventType[] = NOTIFICATION_EVENT_TYPES
-): NotificationPrefRow[] {
-  return NOTIFICATION_CHANNELS.flatMap(channel =>
-    eventTypes.map(eventType => ({
-      id: preferenceKey(channel, eventType),
-      channel,
-      eventType,
-      enabled: true,
-    }))
-  );
-}
+// Re-exported from notificationPreferenceUtils for backward compatibility.
+// The canonical implementations live in notificationPreferenceUtils.ts.
+export {
+  buildDefaultPreferences,
+  buildPreferenceMap,
+  buildPreferenceMatrixRows,
+  getNotificationEventTypesForRole,
+  preferenceKey,
+  resolveNotificationPreferenceRole,
+} from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceUtils";

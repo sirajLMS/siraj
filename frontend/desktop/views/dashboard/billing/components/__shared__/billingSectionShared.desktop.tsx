@@ -2,7 +2,7 @@
 
 import { AddCardOutlined } from "@mui/icons-material";
 import { Box, Button, TextField } from "@mui/material";
-import type { BillingSectionSharedProps } from "@/frontend/common/views/dashboard/billing/types/billingSection.types";
+import type { BillingSectionSharedProps } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";

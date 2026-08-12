@@ -1,9 +1,8 @@
 "use client";
 
-import { Stack, Typography } from "@mui/material";
-import type * as React from "react";
 import { AccountStatus, type ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AdminSectionShared } from "@/frontend/common/views/dashboard/profile/components/__shared__/adminSectionShared";
+import { InfoField } from "@/frontend/common/views/dashboard/profile/components/__shared__/infoFieldShared";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -34,15 +33,6 @@ const SUPERVISOR_STATUS_OPTIONS = [AccountStatus.Activated, AccountStatus.Deacti
 
 function getAccountStatusColor(status: string | null): "activated" | "deactivated" {
   return status === AccountStatus.Deactivated ? "deactivated" : "activated";
-}
-
-function InfoField({ label, value }: { readonly label: string; readonly value: React.ReactNode }) {
-  return (
-    <Stack spacing={0.25}>
-      <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>{label}</Typography>
-      {value}
-    </Stack>
-  );
 }
 
 export function SupervisorAdminSection(props: SupervisorAdminSectionProps) {

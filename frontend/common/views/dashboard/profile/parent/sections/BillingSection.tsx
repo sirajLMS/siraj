@@ -10,7 +10,6 @@ import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMess
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
 import {
   type ParentAdminData,
   type ParentBillingViewLabels,
@@ -18,6 +17,7 @@ import {
   toDisplayValue,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
+import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import { Link } from "@/shared/i18n";
 
 type BillingSectionProps =

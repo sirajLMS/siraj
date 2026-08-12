@@ -7,7 +7,7 @@ import {
   SchoolOutlined,
   VisibilityOutlined,
 } from "@mui/icons-material";
-import { Avatar, Box, type Theme, Tooltip, Typography } from "@mui/material";
+import { Avatar, Box, Tooltip, Typography } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 import type * as React from "react";
 import { ActionIconLink, StatusBadge } from "@/frontend/common/components/ui";
@@ -20,6 +20,11 @@ import {
   studentProfileTabHref,
 } from "@/frontend/common/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
+import {
+  getNameInitials,
+  getPersonAccentColor,
+  type PersonAccentTone,
+} from "@/frontend/common/views/dashboard/admin/home/utils/scheduleCardHelpers";
 import {
   ScheduleSessionCardSkeleton,
   ScheduleSessionEmptyState,
@@ -43,31 +48,6 @@ export interface RecentApprovalCardLabels {
 export interface RecentApprovalCardProps {
   readonly item: RecentApproval;
   readonly labels: RecentApprovalCardLabels;
-}
-
-function getNameInitials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) {
-    return "?";
-  }
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-  return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
-}
-
-type PersonAccentTone = "teacher" | "student" | "default";
-
-function getPersonAccentColor(tone: PersonAccentTone, theme: Theme): string {
-  switch (tone) {
-    case "teacher":
-      return theme.palette.text.secondary;
-    case "student":
-      return theme.palette.onSurface;
-    case "default":
-      return theme.palette.onSurface;
-  }
-  throw new Error(`Unhandled case in getPersonAccentColor`);
 }
 
 function resolveApprovalStatusKey(status: LessonReportStatus | null): string {

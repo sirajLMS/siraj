@@ -3,7 +3,7 @@
 import { AddCardOutlined } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import type { BillingSectionSharedProps } from "@/frontend/common/views/dashboard/billing/types/billingSection.types";
+import type { BillingSectionSharedProps } from "@/frontend/common/views/dashboard/billing/types/billingViewTypes";
 import type { buildParentMetrics } from "@/frontend/common/views/dashboard/billing/utils/billingMetrics";
 import { getParentInvoiceGridLabels } from "@/frontend/common/views/dashboard/billing/utils/label-mappers";
 import {

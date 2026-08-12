@@ -2,7 +2,7 @@ import { Stack } from "@mui/material";
 import type { Control, FieldPath, FieldValues } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display";
-import { InfoField } from "@/frontend/common/views/dashboard/profile/parent/sections/InfoField";
+import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 
 type PhoneContactSectionProps<T extends FieldValues> =
   | {
