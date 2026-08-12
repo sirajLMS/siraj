@@ -1,0 +1,154 @@
+# ============================================================
+# Fan-Out Deploy Workflow
+# ============================================================
+#
+# PURPOSE:
+#   Syncs the `prod` branch to multiple "ambassador branches",
+#   each with a rewritten commit author email. This allows
+#   multiple Vercel accounts (each linked to a different GitHub
+#   account) to deploy from the same codebase.
+#
+# HOW IT WORKS:
+#   1. A push to `prod` triggers this workflow.
+#   2. For each Vercel account (matrix entry), the workflow:
+#      a. Checks out the `prod` branch content.
+#      b. Creates/resets the ambassador branch to match `prod`.
+#      c. Amends the top commit author to the target email.
+#      d. Force-pushes the ambassador branch.
+#   3. Each Vercel account is configured to watch its own
+#      ambassador branch -> Vercel triggers a deployment.
+#
+# WHY AMEND THE COMMIT AUTHOR?
+#   Vercel's GitHub integration verifies that the push comes
+#   from the GitHub account linked to the Vercel account.
+#   By rewriting the commit author to the linked email, Vercel
+#   accepts the push as authorised.
+#
+# ============================================================
+# SETUP CHECKLIST (do this before enabling the workflow):
+# ============================================================
+#
+# 1. CREATE A PERSONAL ACCESS TOKEN (PAT):
+#    - Go to GitHub -> Settings -> Developer Settings ->
+#      Personal Access Tokens -> Tokens (classic)
+#    - Generate a new token with scope: `repo` (full control)
+#    - The token must belong to an account that has WRITE
+#      access to THIS repository (e.g., the org owner or a
+#      repo admin).
+#    - Store it as a repository secret named: DEPLOY_PAT
+#      (Settings -> Secrets and variables -> Actions -> New secret)
+#
+# 2. VERCEL ACCOUNT SETUP (per ambassador account):
+#    a. Log in to the target Vercel account.
+#    b. Import the GitHub repository.
+#    c. In Vercel project settings -> Git -> "Production Branch",
+#       set it to the ambassador branch for that account:
+#         - Account mfdfdfo            -> deploy/mfdfdfo
+#         - Account ahmedhosnyspace3   -> deploy/ahmedhosnyspace3-stack
+#    d. Optionally disable "Preview Deployments" to avoid
+#       noise from other branches.
+#
+# 3. AMBASSADOR BRANCHES:
+#    The following ambassador branches are pre-created and
+#    should already exist in the remote:
+#      - deploy/mfdfdfo                (for ahmedhosnyspace@gmail.com)
+#      - deploy/ahmedhosnyspace3-stack (for ahmedhosnyspace3@gmail.com)
+#    The `prod` branch itself serves Account 1 (ahmedhosnypro).
+#
+# 4. ENABLE THE WORKFLOW:
+#    - Remove the `if: false` line from the job below, OR
+#    - Change `on: workflow_dispatch` back to `on: push`.
+#    - Commit and push to activate.
+#
+# ============================================================
+
+# DISABLED: Change to the block below to enable on prod push:
+#
+# on:
+#   push:
+#     branches: [prod]
+#
+on:
+  workflow_dispatch: # Manual trigger only -- remove this and uncomment above to enable
+
+jobs:
+  fan-out-deploy:
+    # ----------------------------------------------------------
+    # DISABLED GUARD -- remove this line to enable the workflow
+    # ----------------------------------------------------------
+    if: false
+
+    name: "Sync -> ${{ matrix.branch }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Run each account deployment independently -- don't cancel
+      # all if one fails.
+      fail-fast: false
+      matrix:
+        include:
+          # ----------------------------------------------------------
+          # Account 2: mfdfdfo
+          # Vercel account email: ahmedhosnyspace@gmail.com
+          # GitHub username:      mfdfdfo
+          # Ambassador branch:    deploy/mfdfdfo
+          # ----------------------------------------------------------
+          - branch: deploy/mfdfdfo
+            email: ahmedhosnyspace@gmail.com
+            name: mfdfdfo
+
+          # ----------------------------------------------------------
+          # Account 3: ahmedhosnyspace3-stack
+          # Vercel account email: ahmedhosnyspace3@gmail.com
+          # GitHub username:      ahmedhosnyspace3-stack
+          # Ambassador branch:    deploy/ahmedhosnyspace3-stack
+          # ----------------------------------------------------------
+          - branch: deploy/ahmedhosnyspace3-stack
+            email: ahmedhosnyspace3@gmail.com
+            name: ahmedhosnyspace3-stack
+
+    steps:
+      - name: Checkout prod branch
+        uses: actions/checkout@v4
+        with:
+          ref: prod
+          fetch-depth: 0
+          # Use the PAT so the push step has write access.
+          # GITHUB_TOKEN cannot push to branches that trigger
+          # other workflows (e.g., Vercel's GitHub App).
+          token: ${{ secrets.DEPLOY_PAT }}
+
+      - name: Configure git identity
+        # Set the author identity to the target account's email.
+        # This is the key step -- Vercel checks the commit author
+        # against the GitHub account linked to its project.
+        run: |
+          git config user.email "${{ matrix.email }}"
+          git config user.name "${{ matrix.name }}"
+
+      - name: Create/reset ambassador branch from prod
+        # Force-reset the ambassador branch to exactly match prod.
+        # This ensures the branch is always a clean mirror of prod,
+        # regardless of any previous state.
+        run: |
+          git checkout -B "${{ matrix.branch }}" origin/prod
+
+      - name: Rewrite top commit author
+        # Amend only the commit metadata (author + email).
+        # The tree (code content) is identical to prod -- nothing changes.
+        # --reset-author uses the git config identity set above.
+        # --no-edit keeps the original commit message intact.
+        run: |
+          git commit --amend --reset-author --no-edit
+
+      - name: Force-push ambassador branch
+        # Force push is required because we rewrote the commit SHA.
+        # Vercel's GitHub App webhook fires on any push event,
+        # including force pushes, so the deployment will trigger.
+        run: |
+          git push --force origin "${{ matrix.branch }}"
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "Synced prod -> ${{ matrix.branch }} (author: ${{ matrix.email }})"
