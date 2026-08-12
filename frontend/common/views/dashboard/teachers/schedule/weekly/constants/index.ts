@@ -1,1 +1,1 @@
-export * from "@/frontend/common/views/dashboard/teachers/schedule/weekly/constants/createRecurringClassDialog.constants";
+export * from "./createRecurringClassDialog.constants";

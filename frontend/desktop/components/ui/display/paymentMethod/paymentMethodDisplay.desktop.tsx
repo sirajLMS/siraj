@@ -8,7 +8,7 @@ import {
 import type { PaymentMethodDisplayProps } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
 import { DesktopCountryDisplay } from "@/frontend/desktop/components/ui/display/countryDisplay/countryDisplay.desktop";
-import { DesktopCurrencyDisplay } from "@/frontend/desktop/components/ui/display/currencyDisplay";
+import { DesktopCurrencyDisplay } from "@/frontend/desktop/components/ui/display/currencyDisplay/CurrencyDisplay.desktop";
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
 import { DesktopPhoneDisplay } from "@/frontend/desktop/components/ui/display/phoneDisplay/phoneDisplay.desktop";
 import { Translation, useAppTranslation } from "@/shared/locale";

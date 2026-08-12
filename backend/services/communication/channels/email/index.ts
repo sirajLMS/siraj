@@ -1,4 +1,4 @@
-export * from "@/backend/services/communication/channels/email/EmailChannelFactory";
+export * from "./EmailChannelFactory";
 export type {
   EmailPayload,
   EmailProvider,

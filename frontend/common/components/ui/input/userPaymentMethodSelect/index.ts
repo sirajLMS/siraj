@@ -1,2 +1,2 @@
-export * from "@/frontend/common/components/ui/input/userPaymentMethodSelect/UserPaymentMethodAutocomplete";
-export * from "@/frontend/common/components/ui/input/userPaymentMethodSelect/UserPaymentMethodSelect";
+export * from "./UserPaymentMethodAutocomplete";
+export * from "./UserPaymentMethodSelect";

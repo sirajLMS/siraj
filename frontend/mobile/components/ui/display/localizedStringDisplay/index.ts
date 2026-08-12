@@ -1,1 +1,1 @@
-export * from "@/frontend/mobile/components/ui/display/localizedStringDisplay/localizedStringDisplay.mobile";
+export * from "./localizedStringDisplay.mobile";

@@ -1,1 +1,1 @@
-export * from "@/frontend/mobile/components/ui/input/meetingConfigSelect/meetingConfigSelect.mobile";
+export * from "./meetingConfigSelect.mobile";

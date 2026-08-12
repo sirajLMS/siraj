@@ -6,8 +6,8 @@ import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import {
   CurrencyDisplayPart,
   DEFAULT_CURRENCY_DISPLAY_PARTS,
-  MobileCurrencyDisplay,
-} from "@/frontend/mobile/components/ui/display/currencyDisplay";
+} from "@/frontend/common/components/ui/display/currencyDisplay/constants";
+import { MobileCurrencyDisplay } from "@/frontend/mobile/components/ui/display/currencyDisplay/CurrencyDisplay.mobile";
 
 const currencyCodeOptions = currencies.map(currency => currency.code);
 const currencyDisplayPartOptions = Object.values(CurrencyDisplayPart);

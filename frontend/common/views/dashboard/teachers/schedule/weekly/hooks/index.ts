@@ -1,2 +1,2 @@
-export * from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks/useCreateRecurringClassDialog.hooks";
-export * from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks/useWeeklyScheduleGrid.hooks";
+export * from "./useCreateRecurringClassDialog.hooks";
+export * from "./useWeeklyScheduleGrid.hooks";

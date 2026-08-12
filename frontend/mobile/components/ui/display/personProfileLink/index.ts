@@ -1,2 +1,2 @@
-export * from "@/frontend/mobile/components/ui/display/personProfileLink/PersonProfileLink.mobile";
-export * from "@/frontend/mobile/components/ui/display/personProfileLink/PersonProfileLinkCell.mobile";
+export * from "./PersonProfileLink.mobile";
+export * from "./PersonProfileLinkCell.mobile";

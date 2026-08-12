@@ -399,3 +399,9 @@ export { dashboardLmsTeacherDuesEn as teacherDues } from "./teacherDues";
 **Date:** 2026-08-12
 **Reason:** Converting both `export { UserPaymentMethodAutocompleteMobile } from "./userPaymentMethodAutocomplete.mobile"` and `export { UserPaymentMethodSelectMobile } from "./userPaymentMethodSelect.mobile"` to `export *` causes both star exports to re-export `UserPaymentMethodAutocompleteProps` (a type re-exported by both source files, from `UserPaymentMethodAutocompleteShared`). ESLint `import-x/export` flags "Multiple exports of name 'UserPaymentMethodAutocompleteProps'".
 **Exports kept as named:** `UserPaymentMethodAutocompleteMobile`, `UserPaymentMethodSelectMobile`
+
+## Entry 45: `frontend/common/components/ui/index/paymentMethodSelect/index.ts`
+
+**Date:** 2026-08-12
+**Reason:** `PaymentMethodSelect.tsx` re-exports the type `PaymentMethodSelectProps` via `export type { PaymentMethodSelectProps } from "./types"`. Converting `export { PaymentMethodSelect } from "./PaymentMethodSelect"` to `export *` would re-export `PaymentMethodSelectProps` from the component file. The barrel also has `export type { ..., PaymentMethodSelectProps } from "./types"`, creating a duplicate export of the same type name from two different source paths. ESLint `import-x/export` flags "Multiple exports of name 'PaymentMethodSelectProps'".
+**Exports kept as named:** `PaymentMethodSelect` from `./PaymentMethodSelect`
