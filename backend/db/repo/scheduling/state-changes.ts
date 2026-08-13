@@ -18,8 +18,7 @@ import {
 } from "@/backend/services";
 import type * as Types from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 export async function updateInstanceState(
   t: DBTransaction,

@@ -1,8 +1,14 @@
 "use client";
 
 import { Grid, TextField } from "@mui/material";
-import type { Control, FieldErrors, FieldValues, Path, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import {
+  type Control,
+  Controller,
+  type FieldErrors,
+  type FieldValues,
+  type Path,
+  type UseFormRegister,
+} from "react-hook-form";
 import type { UserEntityOnboardingFieldsShape } from "@/frontend/common/components/onboarding/sections/types";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";

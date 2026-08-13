@@ -1,7 +1,6 @@
 "use client";
 
-import type { SxProps, Theme } from "@mui/material";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, type SxProps, type Theme, Typography } from "@mui/material";
 import type { ComponentType, ReactElement, ReactNode } from "react";
 
 export interface HeroSummaryCardSharedProps {

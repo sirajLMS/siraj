@@ -1,18 +1,18 @@
 // NEW FOR PLAN v5: predicates that previously leaked as lowercase helpers in both
 // teacherProfile.mobile.tsx and teacherProfile.desktop.tsx (specs.md §3 N9). Lifted here
 // so both tiers import the same pure-data helpers instead of re-declaring them inline.
-import type {
-  TeacherAdminData,
-  TeacherViewData,
+import {
+  isTeacherAdminData,
+  type TeacherAdminData,
+  type TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
-import { isTeacherAdminData } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
 
 export function hasTeacherProfessionalData(teacherData: TeacherViewData): boolean {
   return hasTeacherCompensationData(teacherData) || hasTeacherStatsData(teacherData);
 }
 
 export function hasTeacherCompensationData(teacherData: TeacherViewData): boolean {
-  return Boolean(teacherData.hourlyRate?.trim() || teacherData.rateCurrency);
+  return teacherData.hourlyRate != null ? teacherData.hourlyRate.trim() !== "" : teacherData.rateCurrency != null;
 }
 
 export function hasTeacherStatsData(teacherData: TeacherViewData): boolean {
@@ -22,17 +22,17 @@ export function hasTeacherStatsData(teacherData: TeacherViewData): boolean {
 
 export function hasTeacherPersonalData(teacherData: TeacherViewData): boolean {
   const adminData = isTeacherAdminData(teacherData) ? teacherData : null;
-  return Boolean(
-    teacherData.nationality?.trim() ||
-      adminData?.address?.trim() ||
-      adminData?.dateOfBirth?.trim() ||
-      adminData?.gender ||
-      adminData?.qualifications?.trim()
-  );
+  return [
+    teacherData.nationality?.trim(),
+    adminData?.address?.trim(),
+    adminData?.dateOfBirth?.trim(),
+    adminData?.gender,
+    adminData?.qualifications?.trim(),
+  ].some(Boolean);
 }
 
 export function hasTeacherAdminOnlyData(adminData: TeacherAdminData): boolean {
-  return Boolean(adminData.nationalId?.trim() || adminData.status);
+  return [adminData.nationalId?.trim(), adminData.status].some(Boolean);
 }
 
 export function hasTeacherIdentityData(adminData: TeacherAdminData): boolean {

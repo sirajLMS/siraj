@@ -1,8 +1,10 @@
 "use client";
 
 import { Stack, Typography } from "@mui/material";
-import type { StudentOnboardingSharedOptions } from "@/frontend/common/views/dashboard/students/onboarding/__shared__/studentOnboardingShared";
-import { StudentOnboardingFormBodyShared } from "@/frontend/common/views/dashboard/students/onboarding/__shared__/studentOnboardingShared";
+import {
+  StudentOnboardingFormBodyShared,
+  type StudentOnboardingSharedOptions,
+} from "@/frontend/common/views/dashboard/students/onboarding/__shared__/studentOnboardingShared";
 import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
 import { DesktopFormSuccessSnackbar, DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";

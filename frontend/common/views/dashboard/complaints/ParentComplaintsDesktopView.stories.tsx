@@ -10,8 +10,10 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import type { ComplaintFormData } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
-import { complaintFormSchema } from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
+import {
+  type ComplaintFormData,
+  complaintFormSchema,
+} from "@/frontend/common/views/dashboard/complaints/schemas/complaintFormSchema";
 import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { ParentComplaintsDesktopView } from "@/frontend/desktop/views/dashboard/complaints/parentComplaints.desktop";

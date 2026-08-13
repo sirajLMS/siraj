@@ -6,8 +6,12 @@ import {
   resolveLocalizedString,
   setLocalizedString,
 } from "@/shared/lib/localized-string";
-import type { LocalizedString } from "@/shared/types/localized-string";
-import { DEFAULT_CONTENT_LOCALE, isAppLocale, normalizeContentLocale } from "@/shared/types/localized-string";
+import {
+  DEFAULT_CONTENT_LOCALE,
+  isAppLocale,
+  type LocalizedString,
+  normalizeContentLocale,
+} from "@/shared/types/localized-string";
 
 export {
   ALLOWED_LOCALES,

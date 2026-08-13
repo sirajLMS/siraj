@@ -2,8 +2,7 @@
 
 import type { FieldPath, FieldValues } from "react-hook-form";
 import { PhoneFormFieldShared } from "@/frontend/common/components/ui/input/phoneInput/PhoneFormFieldShared";
-import type { PhoneInputProps } from "@/frontend/mobile/components/ui/input/phoneInput/PhoneInput";
-import { PhoneInput } from "@/frontend/mobile/components/ui/input/phoneInput/PhoneInput";
+import { PhoneInput, type PhoneInputProps } from "@/frontend/mobile/components/ui/input/phoneInput/PhoneInput";
 
 type PhoneFormFieldMobileProps<T extends FieldValues> = Omit<
   PhoneInputProps,

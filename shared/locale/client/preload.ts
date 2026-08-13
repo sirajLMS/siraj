@@ -1,5 +1,4 @@
-import type { AppLocale } from "@/shared/locale/AppLocale";
-import { locales } from "@/shared/locale/AppLocale";
+import { type AppLocale, locales } from "@/shared/locale/AppLocale";
 import { ensureNamespaceLoading } from "@/shared/locale/client/translation-cache-store";
 import type { NamespaceHandle } from "@/shared/locale/namespaces/define-namespace";
 

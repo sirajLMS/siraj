@@ -3,8 +3,7 @@
 import { useMutation } from "@apollo/client/react";
 import { useCallback, useEffect } from "react";
 import { logTeacherSupportRequestMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
-import type { SupportRequestType } from "@/frontend/common/stores/teacherDashboardStore";
-import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
+import { type SupportRequestType, useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 

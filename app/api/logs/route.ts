@@ -1,7 +1,6 @@
 import { mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse  } from "next/server";
 import { getBooleanEnv } from "@/backend/lib/env";
 
 interface LogEntry {

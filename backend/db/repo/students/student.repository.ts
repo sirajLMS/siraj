@@ -10,8 +10,7 @@ import type { DBTransaction } from "@/backend/types";
 import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
 import { parseStudentStatus } from "@/shared/lib/enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 function decodeCursor(after: string): { createdAt: string; id: string } | null {
   try {

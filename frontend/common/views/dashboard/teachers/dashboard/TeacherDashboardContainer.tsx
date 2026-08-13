@@ -12,8 +12,10 @@ import { TeacherManualEntryIsland } from "@/frontend/common/views/dashboard/teac
 import { TeacherScheduleActionsIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherScheduleActionsIsland";
 import { TeacherSupportIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherSupportIsland";
 import { TeacherDashboardView } from "@/frontend/common/views/dashboard/teachers/dashboard/TeacherDashboardView";
-import type { UseTeacherDashboardViewModelProps } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
-import { useTeacherDashboardTranslations } from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
+import {
+  type UseTeacherDashboardViewModelProps,
+  useTeacherDashboardTranslations,
+} from "@/frontend/common/views/dashboard/teachers/dashboard/useTeacherDashboardViewModel";
 import { useRouter } from "@/shared/i18n/navigation";
 
 const noop = (): void => {};

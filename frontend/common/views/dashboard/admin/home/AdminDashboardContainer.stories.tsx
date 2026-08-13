@@ -11,8 +11,7 @@ import {
 import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
 import { AdminDashboardDesktopView } from "@/frontend/desktop/views/dashboard/admin/home/adminDashboard.desktop";
 import { computeDailyScheduleMetricsFromRows } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
-import type { AdminDashboardLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { type AdminDashboardLabels, Translation, useAppTranslation } from "@/shared/locale";
 import { MOCK_SCHEDULE, MOCK_TEACHERS } from "@/test/ui/components/fixtures/adminDashboardFixtures";
 
 function noopSubmit() {}

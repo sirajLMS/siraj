@@ -23,13 +23,15 @@ import type {
   CreateRecurringClassStudentSelectSlotProps,
   CreateRecurringClassTimezoneSelectSlot,
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
-import type { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { OnDemandNoCreditsOutcome, SchedulingMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  type DayOfWeek,
+  OnDemandNoCreditsOutcome,
+  SchedulingMode,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
-import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
-import { CLASS_TYPE_OPTIONS } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import { CLASS_TYPE_OPTIONS, type DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
   buildClassTypeLabels,
   buildDayLabels,

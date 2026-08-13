@@ -2,8 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { parentOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-portal.documents";
-import type { ParentSocialLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { type ParentSocialLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 interface ParentSocialProfileShape {
   readonly phone?: string | null;

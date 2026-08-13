@@ -2,8 +2,7 @@
 
 import { ArrowBackOutlined, PaymentsOutlined, SchoolOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
-import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { MetricItem } from "@/frontend/common/types/shared.types";

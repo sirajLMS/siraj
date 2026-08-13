@@ -3,8 +3,7 @@ import {
   SupportedOnlineAccountRepository,
   SupportedPaymentLinkRepository,
 } from "@/backend/db/repo/billing";
-import type { CountryCode } from "@/backend/enum";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, type CountryCode } from "@/backend/enum";
 import type { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";

@@ -5,8 +5,7 @@ import { alpha, Box, Button, CircularProgress, IconButton, Typography } from "@m
 import type { Theme } from "@mui/material/styles";
 import Image from "next/image";
 import { useCallback, useRef } from "react";
-import type { Control, FieldPath, FieldValues } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import {
   AvatarConicRing,
   AvatarFrostedContainer,

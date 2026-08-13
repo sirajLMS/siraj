@@ -2,8 +2,11 @@
 
 import { AppDataGrid } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  type ClassExecutionState,
+  type ClassOutcome,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useScheduleColumns } from "@/frontend/common/views/dashboard/admin/home/components/useScheduleColumns";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";

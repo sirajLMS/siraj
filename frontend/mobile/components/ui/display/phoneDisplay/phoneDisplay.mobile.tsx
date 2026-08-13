@@ -1,8 +1,7 @@
 "use client";
 
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { TypographyProps } from "@mui/material/Typography";
-import Typography from "@mui/material/Typography";
+import Typography, { type TypographyProps } from "@mui/material/Typography";
 import type * as React from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";

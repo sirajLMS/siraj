@@ -11,8 +11,7 @@ import {
   parentInvoiceHistoryQueryDocument,
   submitPaymentProofMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import type { ParentBillingState } from "@/frontend/common/stores/parentBillingStore";
-import { useParentBillingStore } from "@/frontend/common/stores/parentBillingStore";
+import { type ParentBillingState, useParentBillingStore } from "@/frontend/common/stores/parentBillingStore";
 import { logger } from "@/frontend/common/utils/logger";
 import {
   buildInvoiceRow,

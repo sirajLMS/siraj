@@ -14,8 +14,7 @@ import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dash
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { buildAdminDashboardMetrics } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import { buildClassInstanceStatusLabels } from "@/frontend/common/views/dashboard/utils/classInstanceStatusLabels";
-import type { AdminDashboardLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { type AdminDashboardLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 const METRIC_LABEL_KEYS: ReadonlySet<string> = new Set<string>([
   "total",

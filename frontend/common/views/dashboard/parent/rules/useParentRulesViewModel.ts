@@ -3,8 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useState } from "react";
 import { parentHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-portal.documents";
-import type { ParentRulesLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { type ParentRulesLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface ParentRulesViewModel {
   readonly labels: ParentRulesLabels;

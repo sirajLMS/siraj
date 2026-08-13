@@ -2,8 +2,10 @@
 
 import { Grid, Stack } from "@mui/material";
 import type React from "react";
-import type { StaffProfileSharedSlots } from "@/frontend/common/views/dashboard/profile/__shared__/staffProfileShared";
-import { StaffProfileSharedView } from "@/frontend/common/views/dashboard/profile/__shared__/staffProfileShared";
+import {
+  type StaffProfileSharedSlots,
+  StaffProfileSharedView,
+} from "@/frontend/common/views/dashboard/profile/__shared__/staffProfileShared";
 import type { StaffProfileViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileViewModel";
 
 const DesktopViewContentWrapper: React.ComponentType<{ readonly children: React.ReactNode }> = ({ children }) => (

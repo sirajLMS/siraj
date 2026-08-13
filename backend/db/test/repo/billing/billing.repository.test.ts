@@ -6,11 +6,9 @@ import { currencyExchangeAuditLogs, currencyExchangeRates, invoices } from "@/ba
 import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { InvoiceStatus, InvoiceType } from "@/backend/enum";
-import type { DBTransaction } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
+import { type DBTransaction, PaginationArgs } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
 beforeAll(() => {

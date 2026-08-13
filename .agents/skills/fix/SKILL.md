@@ -31,6 +31,9 @@ For thorough per-file verification (tsgo → oxlint → biome → lint → dupli
 # Full verification (all checks):
 bun run scripts/health/sub-loop.ts <file> --lifecycle codescene
 
+# Through duplicates only (tsgo + oxlint + biome + lint + duplicates):
+bun run scripts/health/sub-loop.ts <file> --lifecycle duplicates
+
 # Just lint checks (tsgo + oxlint + biome + lint):
 bun run scripts/health/sub-loop.ts <file> --lifecycle lint
 

@@ -12,8 +12,7 @@
  * `resetQueueAdapterFactory()` can produce a fresh, independent adapter instance.
  */
 
-import type { Job, SendOptions } from "pg-boss";
-import { PgBoss } from "pg-boss";
+import { type Job, PgBoss, type SendOptions } from "pg-boss";
 import { createPool } from "@/backend/db/factory";
 import { DomainError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";

@@ -4,8 +4,11 @@ import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { invalidateTeacherWrite } from "@/backend/services/cache";
-import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types";
-import { PROFILE_FIELD_GROUPS } from "@/backend/types";
+import {
+  PROFILE_FIELD_GROUPS,
+  type TeacherProfileReturnType,
+  type TeacherProfileUpdateInputType,
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 function maskNationalId(value: string | null): string | null {

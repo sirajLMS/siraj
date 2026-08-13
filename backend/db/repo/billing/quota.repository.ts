@@ -16,16 +16,16 @@ import {
   ValidationError,
 } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
-import type {
-  DBTransaction,
-  PaginationArgs,
-  QuotaPaginatedFilter,
-  QuotaReturnType,
-  QuotaSelectType,
-  QuotaSubmitInput,
-  QuotaUpdateInput,
+import {
+  type DBTransaction,
+  mapQuotaToReturnType,
+  type PaginationArgs,
+  type QuotaPaginatedFilter,
+  type QuotaReturnType,
+  type QuotaSelectType,
+  type QuotaSubmitInput,
+  type QuotaUpdateInput,
 } from "@/backend/types";
-import { mapQuotaToReturnType } from "@/backend/types";
 
 type ReadExecutor = DBTransaction | typeof db;
 

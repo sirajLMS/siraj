@@ -1,4 +1,3 @@
-import type { SvgIconComponent } from "@mui/icons-material";
 import {
   AccessTimeOutlined,
   CalendarToday,
@@ -11,6 +10,7 @@ import {
   PersonRemoveOutlined,
   PlayCircleOutlineOutlined,
   PowerSettingsNewOutlined,
+  type SvgIconComponent,
   ThumbDownOutlined,
 } from "@mui/icons-material";
 import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics } from "@/frontend/common/graphql/generated/gql/operations";

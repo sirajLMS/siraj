@@ -4,8 +4,13 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { OrderSortDirection, StudentStatus } from "@/backend/enum";
-import type { DBTransaction, StudentFilterArgs, StudentsOrderByClause } from "@/backend/types";
-import { PaginationArgs, StudentsOrderByColumn } from "@/backend/types";
+import {
+  type DBTransaction,
+  PaginationArgs,
+  type StudentFilterArgs,
+  type StudentsOrderByClause,
+  StudentsOrderByColumn,
+} from "@/backend/types";
 
 function dirTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {

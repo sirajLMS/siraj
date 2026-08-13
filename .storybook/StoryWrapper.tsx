@@ -8,9 +8,9 @@ import { type ReactNode, useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
-import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   AccountStatus,
+  type AppPermission,
   AppPermission as AppPermissionEnum,
   CurrencyCode as CurrencyCodeEnum,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";

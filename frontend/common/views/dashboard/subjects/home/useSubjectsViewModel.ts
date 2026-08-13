@@ -30,8 +30,7 @@ import type {
 } from "@/frontend/common/views/dashboard/subjects/home/types";
 import { useSubjectMutations } from "@/frontend/common/views/dashboard/subjects/home/useSubjectMutations";
 import { useRouter } from "@/shared/i18n/navigation";
-import type { SubjectsLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { type SubjectsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface SubjectsViewModel extends SubjectsViewProps {
   readonly selectedSubject: SubjectItem | null;

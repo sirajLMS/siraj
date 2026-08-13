@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
-import type { FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
-import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import { buildFxDisplayMessages, type FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { buildBillingLabels } from "@/frontend/common/views/dashboard/billing/utils/buildBillingLabels";
 import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";

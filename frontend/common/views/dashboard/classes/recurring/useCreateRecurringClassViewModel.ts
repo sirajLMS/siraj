@@ -30,12 +30,13 @@ import {
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
 import { useRouter } from "@/shared/i18n/navigation";
-import type {
-  CreateRecurringClassLabels,
-  MeetingConfigClassScopeLabels,
-  MeetingConfigManagerLabels,
+import {
+  type CreateRecurringClassLabels,
+  type MeetingConfigClassScopeLabels,
+  type MeetingConfigManagerLabels,
+  Translation,
+  useAppTranslation,
 } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
 
 // Form-instance bag returned by `react-hook-form`. Decoupling the type keeps the
 // ViewModel interface stable while letting both tiers reference the same shared

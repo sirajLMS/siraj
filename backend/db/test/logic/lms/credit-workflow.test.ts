@@ -14,8 +14,7 @@ import {
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CreditReason } from "@/backend/enum";
 import type { ClassInstanceSelectType, DBTransaction } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
 beforeAll(() => {

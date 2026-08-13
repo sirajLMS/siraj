@@ -1,8 +1,7 @@
 "use client";
 
 import { CheckCircleOutlined, Save, ScheduleOutlined, SyncOutlined } from "@mui/icons-material";
-import type { Theme } from "@mui/material";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress, type Theme, Typography } from "@mui/material";
 import type { ComponentType, ReactElement, ReactNode } from "react";
 import { FormProvider } from "react-hook-form";
 import type { StudentQuotaTierConfig } from "@/frontend/common/views/dashboard/students/quota/components/__shared__/studentQuotaShared.types";

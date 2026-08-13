@@ -2,8 +2,7 @@
 
 import { CheckCircleOutlined } from "@mui/icons-material";
 import { Alert, Box, Button, Typography } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
-import { styled } from "@mui/material/styles";
+import { styled, type Theme } from "@mui/material/styles";
 import type { ComponentType } from "react";
 import type {
   BaseRecurringClassFormProps,

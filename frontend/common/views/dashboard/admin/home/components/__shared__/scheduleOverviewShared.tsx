@@ -3,8 +3,10 @@
 import { InputAdornment, TextField } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
-import type { ScheduleOverviewFilterSectionProps } from "@/frontend/common/views/dashboard/admin/home/components/__shared__/scheduleOverviewShared.options";
-import { SharedSearchIcon } from "@/frontend/common/views/dashboard/admin/home/components/__shared__/scheduleOverviewShared.options";
+import {
+  type ScheduleOverviewFilterSectionProps,
+  SharedSearchIcon,
+} from "@/frontend/common/views/dashboard/admin/home/components/__shared__/scheduleOverviewShared.options";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 

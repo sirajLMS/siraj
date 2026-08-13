@@ -9,8 +9,9 @@ import {
   REQUEST_TIMEOUT_MS,
   withTimeout,
 } from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
-import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/services/meeting/channels/IMeetingChannel";
 import {
+  type GenerateMeetingInput,
+  type GenerateMeetingResult,
   GoogleMeetApiError,
   InvalidServiceAccountJsonError,
   MeetingChannelError,

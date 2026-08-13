@@ -1,7 +1,9 @@
 "use client";
 
-import type { ProfileLoadingSkeletonConfig } from "@/frontend/common/views/dashboard/profile/shared/ProfileLoadingSkeleton";
-import { ProfileLoadingSkeleton } from "@/frontend/common/views/dashboard/profile/shared/ProfileLoadingSkeleton";
+import {
+  ProfileLoadingSkeleton,
+  type ProfileLoadingSkeletonConfig,
+} from "@/frontend/common/views/dashboard/profile/shared/ProfileLoadingSkeleton";
 
 const config: ProfileLoadingSkeletonConfig = {
   spacing: { xs: 2, md: 3 },

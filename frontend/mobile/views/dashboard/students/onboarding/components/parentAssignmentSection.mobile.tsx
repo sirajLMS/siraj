@@ -1,8 +1,10 @@
 "use client";
 
 import type { Control, FieldErrors } from "react-hook-form";
-import type { ParentAssignmentSectionSharedOptions } from "@/frontend/common/views/dashboard/students/onboarding/components/__shared__/parentAssignmentSectionShared";
-import { ParentAssignmentSectionShared } from "@/frontend/common/views/dashboard/students/onboarding/components/__shared__/parentAssignmentSectionShared";
+import {
+  ParentAssignmentSectionShared,
+  type ParentAssignmentSectionSharedOptions,
+} from "@/frontend/common/views/dashboard/students/onboarding/components/__shared__/parentAssignmentSectionShared";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { ParentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";

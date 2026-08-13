@@ -11,8 +11,10 @@ import { useClassDetailsPermissions } from "@/frontend/common/views/dashboard/cl
 import { useClassDetailsData } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsQuery";
 import { useClassMutations } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations";
 import { useEventLogDownload } from "@/frontend/common/views/dashboard/classes/details/hooks/useEventLogDownload";
-import type { ClassDetailsHeaderLabels } from "@/frontend/common/views/dashboard/classes/details/types";
-import { formatClassDetailDate } from "@/frontend/common/views/dashboard/classes/details/types";
+import {
+  type ClassDetailsHeaderLabels,
+  formatClassDetailDate,
+} from "@/frontend/common/views/dashboard/classes/details/types";
 import { useRouter } from "@/shared/i18n/navigation";
 import { type ClassDetailsLabels, Translation, useAppTranslation } from "@/shared/locale";
 

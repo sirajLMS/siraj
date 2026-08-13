@@ -1,7 +1,6 @@
 "use client";
 
-import type { SvgIconComponent } from "@mui/icons-material";
-import { AdminPanelSettingsOutlined } from "@mui/icons-material";
+import { AdminPanelSettingsOutlined, type SvgIconComponent } from "@mui/icons-material";
 import { Box, Paper, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import {

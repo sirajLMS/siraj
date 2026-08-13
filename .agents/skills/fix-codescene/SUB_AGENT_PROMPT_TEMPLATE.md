@@ -1,7 +1,7 @@
 You are fixing CodeScene health warnings in a SINGLE file. You may ONLY read and edit THIS file.
 
 File: <file-path>
-Lifecycle stage: codescene (full progressive verification: tsgo → oxlint → biome → lint → codescene --file)
+Lifecycle stage: codescene (full progressive verification: tsgo → oxlint → biome → lint → duplicates → codescene --file)
 
 CodeScene warnings for this file (from `bun run codescene --scan`):
 <paste warning lines>

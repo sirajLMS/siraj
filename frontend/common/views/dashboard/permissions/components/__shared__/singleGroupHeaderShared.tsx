@@ -2,8 +2,7 @@
 
 import { ArrowBackOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
-import type { SxProps, Theme } from "@mui/material/styles";
-import { styled } from "@mui/material/styles";
+import { type SxProps, styled, type Theme } from "@mui/material/styles";
 import type { ComponentType } from "react";
 import type { StatusBadgeCategory } from "@/frontend/common/components/ui/badge";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";

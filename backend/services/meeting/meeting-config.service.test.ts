@@ -7,8 +7,7 @@ import type {
   UserMeetingConfigSelectType,
   UserMeetingConfigSubmitInput,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 // ---------------------------------------------------------------------------
 // Constants

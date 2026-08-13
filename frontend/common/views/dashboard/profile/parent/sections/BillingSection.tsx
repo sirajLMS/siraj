@@ -1,8 +1,7 @@
 "use client";
 
 import { MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
-import type { Control, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
 import { CurrencyCode, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";

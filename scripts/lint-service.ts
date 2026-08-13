@@ -28,6 +28,12 @@
  *   - Non-empty files → lint specific files (repo-relative paths)
  *   - --fix flag → apply auto-fixes (report-only by default)
  *
+ * Cache policy:
+ *   ESLint caching is ALWAYS enabled (--cache --cache-location). The cache files
+ *   (.eslintcache, .eslintcache-type-aware) are NEVER cleared by this service or any
+ *   quality-gate/quality-loop command. They persist across runs for incremental
+ *   performance. A dedicated cache location is used per mode to avoid stale parse errors.
+ *
  * Environment variables:
  *   - LINT_QUEUE_CONCURRENCY   Override eslint --concurrency (default: 4; "auto" allowed)
  *   - LINT_QUEUE_TIMEOUT_MS     Override per-request timeout in ms (default: 300000 files, 1200000 full-repo)

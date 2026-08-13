@@ -1,8 +1,7 @@
 "use client";
 
 import { Paper } from "@mui/material";
-import type { SxProps, Theme } from "@mui/material/styles";
-import { styled } from "@mui/material/styles";
+import { type SxProps, styled, type Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { ComplaintQueueCardShared } from "@/frontend/common/views/dashboard/complaints/components/complaintQueueCardShared";
 import type { AdminComplaintRow } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";

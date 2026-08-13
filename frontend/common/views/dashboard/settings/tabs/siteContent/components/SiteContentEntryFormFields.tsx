@@ -1,8 +1,7 @@
 "use client";
 
 import { FormControl, FormControlLabel, InputLabel, MenuItem, Select, Stack, Switch, TextField } from "@mui/material";
-import type { Control, FieldErrors } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldErrors } from "react-hook-form";
 import {
   SITE_CONTENT_TYPES,
   type SiteContentFormValues,

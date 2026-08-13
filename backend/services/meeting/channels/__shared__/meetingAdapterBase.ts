@@ -1,12 +1,10 @@
 import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
 import { logger } from "@/backend/lib/logger";
-import type {
-  GenerateMeetingInput,
-  GenerateMeetingResult,
-  IMeetingChannel,
-  MeetingProvider,
-} from "@/backend/services/meeting/channels/IMeetingChannel";
 import {
+  type GenerateMeetingInput,
+  type GenerateMeetingResult,
+  type IMeetingChannel,
+  type MeetingProvider,
   NoOrgCredentialsNoUserTokenError,
   ProviderUnavailableError,
 } from "@/backend/services/meeting/channels/IMeetingChannel";

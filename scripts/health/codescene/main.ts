@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { join, relative } from "node:path";
-import { clearCache } from "@/scripts/health/codescene/cache";
 import { checkSingleFile, runHealthCheck } from "@/scripts/health/codescene/checker";
 import {
   COLORS,
@@ -34,7 +33,7 @@ ${COLORS.YELLOW}Flags:${COLORS.NC}
   --scan        Run code health check on all TypeScript files
   --file <path> Check a single file
   --full        Force full check of all files (ignore incremental cache)
-  --reset       Clear incremental cache
+  --reset       (Deprecated — no-op. Caches are never cleared.)
   --update      Update CodeScene CLI to the latest version
   --help, -h    Display this help message
 
@@ -42,7 +41,7 @@ ${COLORS.YELLOW}Examples:${COLORS.NC}
   bun run codescene --scan
   bun run codescene --scan --full
   bun run codescene --file src/components/MyComponent.tsx
-  bun run codescene --reset
+  bun run codescene --reset       (Deprecated — no-op. Caches are never cleared.)
   bun run codescene --update
 `);
 }
@@ -217,8 +216,7 @@ async function main() {
   }
 
   if (args.includes("--reset")) {
-    clearCache();
-    logSuccess("Incremental cache cleared.");
+    logInfo("--reset is deprecated and is a no-op. Caches are never cleared.");
     if (!args.includes("--scan") && !args.includes("--file")) return;
   }
 

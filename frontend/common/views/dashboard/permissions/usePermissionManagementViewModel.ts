@@ -7,8 +7,10 @@ import type {
   User,
   UserOverride,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { PermissionManagementTab } from "@/frontend/common/stores/permissionManagementStore";
-import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
+import {
+  type PermissionManagementTab,
+  usePermissionManagementStore,
+} from "@/frontend/common/stores/permissionManagementStore";
 import {
   type AssignGroupFormBindings,
   useAssignGroupForm,

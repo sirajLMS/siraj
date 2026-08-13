@@ -4,8 +4,7 @@ import { useQuery } from "@apollo/client/react";
 import { parentAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-portal.documents";
 import type { StudentAccountStatus } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import { mapStudentAccountStatus } from "@/frontend/common/views/dashboard/admin/parents/students/utils";
-import type { ParentStudentsLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { type ParentStudentsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export interface ParentStudentRow {
   readonly id: string;

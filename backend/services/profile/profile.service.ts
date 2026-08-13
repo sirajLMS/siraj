@@ -18,31 +18,32 @@ import { ManagerProfileService } from "@/backend/services/staff/manager-profile.
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
 import { AuditService } from "@/backend/services/system/audit.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
-import type {
-  CoreUserProfileFields,
-  ManagerDirectoryRow,
-  ParentAdminProfileUpdateInput,
-  ParentAssignedStudentsResult,
-  ParentOwnProfileReturnType,
-  ParentOwnProfileUpdateInput,
-  ParentProfileResult,
-  ParentProfileUpdateInput,
-  PaymentMethodDefaults,
-  ProfilePageContext,
-  ProfilePageResolution,
-  StaffPermissionGroupReturnType,
-  StaffPermissionOverrideReturnType,
-  TeacherAssignedStudentsResult,
-  TeacherOwnProfileReturnType,
-  TeacherProfileReturnType,
-  TeacherProfileUpdateInputType,
-  UnifiedProfileReturnType,
-  UpdateOwnProfileInput,
-  UpdateUserProfileInput,
-  UserMeetingConfigReturnType,
-  UserPaymentMethodReturnType,
+import {
+  type CoreUserProfileFields,
+  type ManagerDirectoryRow,
+  type ParentAdminProfileUpdateInput,
+  type ParentAssignedStudentsResult,
+  type ParentOwnProfileReturnType,
+  type ParentOwnProfileUpdateInput,
+  type ParentProfileResult,
+  type ParentProfileUpdateInput,
+  type PaymentMethodDefaults,
+  PROFILE_FIELD_GROUPS,
+  type ProfilePageContext,
+  type ProfilePageResolution,
+  STUDENT_FIELD_GROUPS,
+  type StaffPermissionGroupReturnType,
+  type StaffPermissionOverrideReturnType,
+  type TeacherAssignedStudentsResult,
+  type TeacherOwnProfileReturnType,
+  type TeacherProfileReturnType,
+  type TeacherProfileUpdateInputType,
+  type UnifiedProfileReturnType,
+  type UpdateOwnProfileInput,
+  type UpdateUserProfileInput,
+  type UserMeetingConfigReturnType,
+  type UserPaymentMethodReturnType,
 } from "@/backend/types";
-import { PROFILE_FIELD_GROUPS, STUDENT_FIELD_GROUPS } from "@/backend/types";
 import { parseAccountStatus, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 

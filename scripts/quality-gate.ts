@@ -103,6 +103,7 @@ function saveState(stage: QualityStage, owner: QualityState["owner"], lifecycle:
   writeFileSync(STATE_FILE, JSON.stringify({ stage, owner, lifecycle, lastRun: new Date().toISOString() }, null, 2));
 }
 
+/** Clear the quality-gate state file ONLY. Never clear any cache files. */
 function clearState(): void {
   if (existsSync(STATE_FILE)) unlinkSync(STATE_FILE);
 }
@@ -194,7 +195,7 @@ async function executeStages(startIndex: number, lifecycle: QualityLifecycle): P
 async function runQualityGate(): Promise<void> {
   const isFresh = process.argv.includes("--fresh");
   if (isFresh) {
-    console.log("🧹 Fresh start requested. Clearing state...");
+    console.log("🧹 Fresh start requested. Clearing state (caches are preserved)...");
     clearState();
   }
 

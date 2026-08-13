@@ -1,5 +1,4 @@
-import type { AttendanceReportFilters } from "@/backend/db/repo/books/report.repository";
-import { ReportRepository } from "@/backend/db/repo/books/report.repository";
+import { type AttendanceReportFilters, ReportRepository } from "@/backend/db/repo/books/report.repository";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";

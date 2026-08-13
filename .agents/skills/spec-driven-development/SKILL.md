@@ -616,6 +616,7 @@ bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 | `tsgo` | tsgo only |
 | `biome` | tsgo → oxlint → biome:check |
 | `lint` | tsgo → oxlint → biome:check → lint:type-aware (via lint service) |
+| `duplicates` | tsgo → oxlint → biome:check → lint:type-aware → check:duplicates |
 | `codescene` | tsgo → oxlint → biome:check → lint:type-aware → check:duplicates → codescene --file |
 | `sonar-results` | same as `codescene` (subagents never run sonar-scan — hardcoded exclusion) |
 
@@ -623,7 +624,7 @@ bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 - ✅ Discovers and prints ALL applicable `.github/instructions/*.instructions.md` files for the target file
 - ✅ Discovers and prints ALL applicable layer `AGENTS.md` files for the target file
 - ✅ Enforces the Fix-Or-Report rule (fix within same file; report cross-file dependencies to orchestrator)
-- ✅ Runs `check:duplicates` for single-file duplication detection (codescene lifecycle)
+- ✅ Runs `check:duplicates` for single-file duplication detection (duplicates and codescene lifecycles)
 - ✅ Runs `codescene --file` for code health (codescene lifecycle)
 - ✅ Hardcodes exclusion of `sonar-scan` and `sonar-manager` — subagents NEVER trigger a sonar scan
 

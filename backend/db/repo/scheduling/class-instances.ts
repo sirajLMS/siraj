@@ -22,8 +22,7 @@ import { OnDemandStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { EffectiveMeetingService } from "@/backend/services";
 import type * as Types from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 /**
  * Batch lookup for multiple class instances by ID — eliminates N+1 queries

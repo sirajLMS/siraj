@@ -136,13 +136,16 @@ const eslintConfig = defineConfig([
       "no-console": "error",
 
       // SonarJS rules
-      "sonarjs/no-nested-conditional": "off",
+      "sonarjs/no-nested-conditional": "error",
+      "import-x/no-duplicates": ["error", { "prefer-inline": true }],
 
       ...(process.env.ESLINT_TYPE_AWARE === "true"
         ? {
             "@typescript-eslint/await-thenable": "error",
             "@typescript-eslint/no-unnecessary-type-assertion": "warn",
             "@typescript-eslint/no-base-to-string": "warn",
+            "@typescript-eslint/prefer-optional-chain": "error",
+            "@typescript-eslint/prefer-nullish-coalescing": "error",
             "sonarjs/deprecation": "warn",
           }
         : {}),

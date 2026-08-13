@@ -14,15 +14,15 @@ import {
   buildLessonReportSubmittedPayloads,
 } from "@/backend/services/notification/notification-payloads.builders";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
-import type {
-  DBTransaction,
-  LessonReportReturnType,
-  LessonReportSelectType,
-  LessonReportSubmitInput,
-  LessonReviewInput,
-  PendingReviewCountReturnType,
+import {
+  type DBTransaction,
+  type LessonReportReturnType,
+  type LessonReportSelectType,
+  type LessonReportSubmitInput,
+  type LessonReviewInput,
+  PaginationArgs,
+  type PendingReviewCountReturnType,
 } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 /**

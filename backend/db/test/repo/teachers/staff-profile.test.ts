@@ -8,8 +8,7 @@ import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AccountStatus } from "@/backend/enum";
-import type { DBTransaction } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
+import { type DBTransaction, PaginationArgs } from "@/backend/types";
 
 function loc(en: string, ar?: string) {
   return { ar: ar ?? en, en };

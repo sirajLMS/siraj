@@ -1,8 +1,7 @@
 "use client";
 
 import { FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { useWatch } from "react-hook-form";
+import { type Control, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { CurrencySelectController } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySelectControllerShared";

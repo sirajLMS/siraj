@@ -15,8 +15,7 @@ import depthLimit from "graphql-depth-limit";
 // `ctx.cookies.set("session_id", ...)` calls would otherwise be dropped.
 import { appendMutableCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies as nextCookies } from "next/headers";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { createGraphQLContext } from "@/backend/graphql/gqlContextFactory";
 import { graphQLSchema } from "@/backend/graphql/gqlSchema";
 import { ensureEnvironmentValidated, getEnvironmentConfig } from "@/backend/lib/env";

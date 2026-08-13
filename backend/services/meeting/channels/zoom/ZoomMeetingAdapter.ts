@@ -7,8 +7,9 @@ import {
   isTokenExpired,
   MeetingAdapterBase,
 } from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
-import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/services/meeting/channels/IMeetingChannel";
 import {
+  type GenerateMeetingInput,
+  type GenerateMeetingResult,
   InsufficientScopesError,
   NoOrgCredentialsNoUserTokenError,
   ProviderUnavailableError,

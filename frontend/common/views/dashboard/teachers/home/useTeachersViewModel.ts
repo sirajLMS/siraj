@@ -2,11 +2,11 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useCallback } from "react";
-import type {
-  TeacherDirectoryMetrics,
-  TeacherDirectoryRow,
+import {
+  AppPermission,
+  type TeacherDirectoryMetrics,
+  type TeacherDirectoryRow,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { teacherDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useTeacherDirectoryStore } from "@/frontend/common/stores/teacherDirectoryStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

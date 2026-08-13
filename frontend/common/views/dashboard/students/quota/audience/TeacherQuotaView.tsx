@@ -1,8 +1,10 @@
 "use client";
 
 import { WarningAmberOutlined } from "@mui/icons-material";
-import type { QuotaAudienceSection } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceViewShared";
-import { QuotaAudienceViewShared } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceViewShared";
+import {
+  type QuotaAudienceSection,
+  QuotaAudienceViewShared,
+} from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceViewShared";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 interface TeacherQuotaViewProps {

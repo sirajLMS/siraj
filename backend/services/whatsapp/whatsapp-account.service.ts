@@ -23,29 +23,27 @@ import { resolveEnvConfig } from "@/backend/services/system";
 import { AuditService } from "@/backend/services/system/audit.service";
 // r10-043/r10-044/r10-045: Canonical types imported from the types layer,
 // not from service-layer barrels or request builders.
-import type {
-  AuditAction,
-  CreateAuditLogInput,
-  DBTransaction,
-  GetPhoneNumberResult,
-  GraphApiRequestContext,
-  GraphApiRequestInit,
-  ListMessageTemplatesResponseBody,
-  ListPhoneNumbersResponseBody,
-  NotificationPreferenceUpdateInput,
-  WhatsappAccountCreateSubmitInput,
-  WhatsappAccountReturnType,
-  WhatsappAccountUpdateInput,
-  WhatsappPhoneNumber,
-  WhatsappSyncFromMetaReturnType,
-  WhatsappTemplateSnapshot,
-} from "@/backend/types";
 import {
+  type AuditAction,
   buildReturnType,
+  type CreateAuditLogInput,
   coerceLimitTier,
   coerceQualityRating,
+  type DBTransaction,
+  type GetPhoneNumberResult,
+  type GraphApiRequestContext,
+  type GraphApiRequestInit,
   isValidLimitTier,
   isValidQualityRating,
+  type ListMessageTemplatesResponseBody,
+  type ListPhoneNumbersResponseBody,
+  type NotificationPreferenceUpdateInput,
+  type WhatsappAccountCreateSubmitInput,
+  type WhatsappAccountReturnType,
+  type WhatsappAccountUpdateInput,
+  type WhatsappPhoneNumber,
+  type WhatsappSyncFromMetaReturnType,
+  type WhatsappTemplateSnapshot,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 

@@ -6,8 +6,12 @@ import { lessonReports } from "@/backend/db/schema";
 import { createTestLessonReport, createTestUser, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
-import type { ClassInstanceSelectType, DBTransaction, LessonReportSelectType } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
+import {
+  type ClassInstanceSelectType,
+  type DBTransaction,
+  type LessonReportSelectType,
+  PaginationArgs,
+} from "@/backend/types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;

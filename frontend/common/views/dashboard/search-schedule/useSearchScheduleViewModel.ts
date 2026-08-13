@@ -1,7 +1,6 @@
 "use client";
 
-import type { ErrorLike } from "@apollo/client";
-import { NetworkStatus } from "@apollo/client";
+import { type ErrorLike, NetworkStatus } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useMemo } from "react";
 import {

@@ -1,7 +1,6 @@
 "use client";
 
-import type { SxProps, Theme } from "@mui/material";
-import { Box } from "@mui/material";
+import { Box, type SxProps, type Theme } from "@mui/material";
 import type { ComponentType } from "react";
 import { UserEntityFieldsSection } from "@/frontend/common/components/onboarding/sections";
 import { StudentExtensionSection } from "@/frontend/common/views/dashboard/students/onboarding/components/StudentExtensionSection";

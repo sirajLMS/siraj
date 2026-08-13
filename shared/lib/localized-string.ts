@@ -1,5 +1,9 @@
-import type { LocalizedString } from "@/shared/types/localized-string";
-import { DEFAULT_CONTENT_LOCALE, isAppLocale, normalizeContentLocale } from "@/shared/types/localized-string";
+import {
+  DEFAULT_CONTENT_LOCALE,
+  isAppLocale,
+  type LocalizedString,
+  normalizeContentLocale,
+} from "@/shared/types/localized-string";
 
 /**
  * Canonical localized-string helpers shared by frontend and backend.

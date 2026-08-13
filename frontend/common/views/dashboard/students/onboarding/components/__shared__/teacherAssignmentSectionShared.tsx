@@ -1,7 +1,5 @@
-import type { ComponentType } from "react";
-import { useState } from "react";
-import type { Control } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type ComponentType, useState } from "react";
+import { type Control, Controller } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
 import {
   type PersonOption,

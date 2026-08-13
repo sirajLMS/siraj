@@ -1,11 +1,11 @@
 "use client";
 
 import type * as React from "react";
-import type {
-  PhoneInputSharedProps,
-  PhoneInputSlotProps,
+import {
+  PhoneInputShared,
+  type PhoneInputSharedProps,
+  type PhoneInputSlotProps,
 } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
-import { PhoneInputShared } from "@/frontend/common/components/ui/input/phoneInput/PhoneInputShared";
 
 /**
  * Factory for creating tier-specific `PhoneInput` variants.

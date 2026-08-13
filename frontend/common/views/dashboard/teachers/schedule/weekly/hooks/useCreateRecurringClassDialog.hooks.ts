@@ -12,8 +12,7 @@
 // `useEffect` / `function useX` declarations of their own.
 
 import type { useNotifications } from "@toolpad/core/useNotifications";
-import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useState } from "react";
 import {
   ClassType,
   type OnDemandNoCreditsOutcome,

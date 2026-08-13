@@ -13,8 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Control, FieldErrors } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldErrors } from "react-hook-form";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import { ComplaintCategory } from "@/frontend/common/graphql/generated/gql/graphql-types";

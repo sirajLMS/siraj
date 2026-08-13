@@ -18,8 +18,7 @@ import type { RateSource } from "@/backend/enum";
 import { EffectiveMeetingService, resolveClassRate } from "@/backend/services";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 export interface CreateRecurringScheduleInput {
   studentId: string;

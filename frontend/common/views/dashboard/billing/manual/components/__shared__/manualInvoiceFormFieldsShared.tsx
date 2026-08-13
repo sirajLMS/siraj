@@ -2,8 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
-import type { Control } from "react-hook-form";
-import { Controller, useWatch } from "react-hook-form";
+import { type Control, Controller, useWatch } from "react-hook-form";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";

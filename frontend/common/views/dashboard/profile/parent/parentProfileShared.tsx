@@ -8,8 +8,10 @@ import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/parent/sections/AdminOnlySection";
 import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
 import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
-import type { ParentAdminData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { toParentSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import {
+  type ParentAdminData,
+  toParentSharedBaseLabels,
+} from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
 import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";

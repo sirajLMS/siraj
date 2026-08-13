@@ -1,5 +1,4 @@
-import type { ConstValueNode } from "graphql";
-import { GraphQLScalarType, Kind } from "graphql";
+import { type ConstValueNode, GraphQLScalarType, Kind } from "graphql";
 import type { ConstObjectFieldNode } from "graphql/language";
 
 // Pothos custom scalar for JSON

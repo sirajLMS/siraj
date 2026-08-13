@@ -1,8 +1,7 @@
 import { Box } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { ComponentType, ReactNode } from "react";
-import type { Control, FieldErrors } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldErrors } from "react-hook-form";
 import {
   type ParentAutocompleteProps,
   type PersonOption,

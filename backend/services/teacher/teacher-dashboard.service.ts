@@ -14,8 +14,7 @@ import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertType, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/shared/lib/enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherDashboardService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {

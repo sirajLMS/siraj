@@ -8,8 +8,7 @@ import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService, ScheduleDeletionService } from "@/backend/services";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;

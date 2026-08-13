@@ -204,13 +204,14 @@ This single script replaces running `tsgo`, `biome:check`, `oxlint`, `lint:type-
 | `tsgo` | tsgo only |
 | `biome` | tsgo → oxlint → biome:check |
 | `lint` | tsgo → oxlint → biome:check → lint:type-aware |
+| `duplicates` | tsgo → oxlint → biome:check → lint:type-aware → check:duplicates |
 | `codescene` | tsgo → oxlint → biome:check → lint:type-aware → check:duplicates → codescene --file |
 
 **What the script handles automatically:**
 - Discovers and prints ALL applicable `.agents/instructions/*.instructions.md` files
 - Discovers and prints ALL applicable layer `AGENTS.md` files
 - Enforces the Fix-Or-Report rule (fix within same file; report cross-file dependencies)
-- Runs `check:duplicates` and `codescene --file` (at codescene lifecycle)
+- Runs `check:duplicates` and `codescene --file` (at duplicates and codescene lifecycles)
 - Hardcodes exclusion of `sonar-scan` — subagents NEVER trigger a sonar scan
 
 **Exit codes:** `0` = all checks passed · `1` = stopped at a failing check · `2` = invalid arguments

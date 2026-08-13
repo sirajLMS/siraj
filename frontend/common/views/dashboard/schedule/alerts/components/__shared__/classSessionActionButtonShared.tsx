@@ -1,8 +1,7 @@
 "use client";
 
 import { AcUnitOutlined, LogoutOutlined, SummarizeOutlined } from "@mui/icons-material";
-import type { ButtonProps } from "@mui/material";
-import { alpha, Button, Tooltip } from "@mui/material";
+import { alpha, Button, type ButtonProps, Tooltip } from "@mui/material";
 import type { ClassSessionAction } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 
 export interface ClassSessionActionButtonSharedOptions {

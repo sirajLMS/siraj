@@ -6,8 +6,10 @@ import type { Control, UseFormRegister } from "react-hook-form";
 import { PhoneDisplay, SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
-import type { ParentViewData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { toDisplayValue } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import {
+  type ParentViewData,
+  toDisplayValue,
+} from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import { buildSocialLink } from "@/shared/lib/social/social-links";
 import type { ProfileParentLabels } from "@/shared/locale/types/profile";

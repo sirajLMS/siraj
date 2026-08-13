@@ -187,6 +187,15 @@ After making changes:
 4. Re-run `bun quality-gate` to resume from last failed stage
 5. Use `bun quality-gate:fresh` only for clean-slate verification
 
+**⚠️ NEVER CLEAR CACHES.** Neither `quality-gate` nor `quality-loop` may ever clear cache files.
+This includes:
+- ESLint cache (`.eslintcache`, `.eslintcache-type-aware`) — always preserved by `lint-service.ts`
+- CodeScene incremental cache (`scripts/health/codescene/cache.ts`) — `--reset` is deprecated and is a no-op
+- SonarQube cache (`scripts/health/sonar/ts/cache.ts`) — `--reset` does not clear cache
+The `quality-gate:fresh` / `--fresh` flag only clears the quality-gate **state file**
+(`.quality-gate-state.json`), which tracks stage progress — it does NOT touch any cache.
+Never manually delete cache files either.
+
 ## Lint Service (In-Process Serialized ESLint)
 
 The project uses a unified lint service (`scripts/lint-service.ts`) that provides both a CLI and programmatic API. It runs ESLint with serialized execution to prevent CPU/memory contention when multiple callers (e.g., sub-agents, quality-gate stages) lint concurrently within the same process. No HTTP server, no port binding — everything is in-process TypeScript.

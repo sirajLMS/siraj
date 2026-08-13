@@ -1,7 +1,7 @@
-import type { SvgIconComponent } from "@mui/icons-material";
 import {
   CancelOutlined,
   EventBusyOutlined,
+  type SvgIconComponent,
   TimerOutlined,
   VerifiedUserOutlined,
   WarningAmberOutlined,
@@ -9,14 +9,12 @@ import {
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/gql/operations";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
-import type {
-  StudentAccountStatus,
-  StudentDirectoryRowExtended,
-  StudentEnrollmentStatus,
-} from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import {
   StudentEnrollmentStatus as EnrollmentEnum,
   STUDENT_STATUS_TO_ACCOUNT_STATUS,
+  type StudentAccountStatus,
+  type StudentDirectoryRowExtended,
+  type StudentEnrollmentStatus,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { StudentsLabelsBySection } from "@/frontend/common/views/dashboard/admin/parents/students/types/studentsDirectory.types";
 import type { StudentDirectoryLabels } from "@/shared/locale";

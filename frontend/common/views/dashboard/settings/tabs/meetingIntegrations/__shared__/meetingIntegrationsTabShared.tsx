@@ -1,8 +1,16 @@
 "use client";
 
 import { ExpandMoreOutlined } from "@mui/icons-material";
-import type { SxProps, Theme } from "@mui/material";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Typography } from "@mui/material";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Chip,
+  type SxProps,
+  type Theme,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ConnectedAccountsTable } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectedAccountsTable";

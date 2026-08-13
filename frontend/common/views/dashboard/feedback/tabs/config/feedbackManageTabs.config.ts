@@ -5,8 +5,7 @@ import type {
   FeedbackManageTabId,
   FeedbackManageTabLabelKey,
 } from "@/frontend/common/views/dashboard/feedback/tabs/types";
-import type { TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";
-import { getVisibleTabs } from "@/frontend/common/views/dashboard/lib/tabbedPane";
+import { getVisibleTabs, type TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";
 
 export const FEEDBACK_MANAGE_TABS: readonly TabDefinition<FeedbackManageTabId, FeedbackManageTabLabelKey>[] = [
   {

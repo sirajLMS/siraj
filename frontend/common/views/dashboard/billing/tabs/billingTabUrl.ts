@@ -3,8 +3,12 @@ import {
   type BillingTabId,
   type BillingTabLabelKey,
 } from "@/frontend/common/views/dashboard/billing/tabs/types";
-import type { TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";
-import { buildTabHref, createIsTabId, resolveTab } from "@/frontend/common/views/dashboard/lib/tabbedPane";
+import {
+  buildTabHref,
+  createIsTabId,
+  resolveTab,
+  type TabDefinition,
+} from "@/frontend/common/views/dashboard/lib/tabbedPane";
 
 /** Type guard for `BillingTabId`. */
 export const isBillingTabId = createIsTabId<BillingTabId>(BILLING_TAB_IDS);

@@ -5,8 +5,7 @@ import { SessionRepository } from "@/backend/db/repo/shared";
 import { UserRepository } from "@/backend/db/repo/users";
 import { permissionGroups } from "@/backend/db/schema";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
-import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
-import { generateAccessToken, generateGroupSimulationAccessToken } from "@/backend/lib/auth/jwt";
+import { type CustomJWTPayload, generateAccessToken, generateGroupSimulationAccessToken } from "@/backend/lib/auth/jwt";
 import { logger } from "@/backend/lib/logger";
 import {
   assertSessionOwnership,

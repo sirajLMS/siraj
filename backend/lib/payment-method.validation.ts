@@ -11,8 +11,7 @@ import type {
   PaymentMethodTransactionSnapshot,
   UserPaymentMethodSubmitInput,
 } from "@/backend/types";
-import type { LocalizedString } from "@/shared/types/localized-string";
-import { DEFAULT_CONTENT_LOCALE, isAppLocale } from "@/shared/types/localized-string";
+import { DEFAULT_CONTENT_LOCALE, isAppLocale, type LocalizedString } from "@/shared/types/localized-string";
 
 // ============================================================================
 // Enum schemas (runtime mirrors of `@/backend/enum/billing/payment-method.enum`)

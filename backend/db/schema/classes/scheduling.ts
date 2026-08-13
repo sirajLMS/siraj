@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
-import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
+  type AnyPgColumn,
   boolean,
   check,
   date,

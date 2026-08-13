@@ -1,12 +1,21 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
-import { useForm } from "react-hook-form";
+import {
+  type Control,
+  type FieldErrors,
+  type UseFormHandleSubmit,
+  type UseFormRegister,
+  type UseFormReturn,
+  useForm,
+} from "react-hook-form";
 import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
-import type { ParentOnboardingResult } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { CurrencyCode, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  CurrencyCode,
+  InvoiceType,
+  type ParentOnboardingResult,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useCreateParentOnboarding } from "@/frontend/common/hooks/useCreateParentOnboarding";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
 import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";

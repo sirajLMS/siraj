@@ -1,8 +1,7 @@
 "use client";
 
 import { EditOutlined } from "@mui/icons-material";
-import type { Theme } from "@mui/material";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, type Theme, Typography } from "@mui/material";
 import type { ReactElement } from "react";
 import { StudentQuotaView } from "@/frontend/common/views/dashboard/students/quota/components/__shared__/studentQuotaShared";
 import type { StudentQuotaTierConfig } from "@/frontend/common/views/dashboard/students/quota/components/__shared__/studentQuotaShared.types";

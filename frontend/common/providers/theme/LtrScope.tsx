@@ -3,8 +3,7 @@
 import { CacheProvider } from "@emotion/react";
 import Box from "@mui/material/Box";
 import { createTheme, ThemeProvider, useTheme } from "@mui/material/styles";
-import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import { getLtrEmotionCache } from "@/frontend/common/lib/emotion-ltr-cache";
 
 type LtrScopeProps = {
