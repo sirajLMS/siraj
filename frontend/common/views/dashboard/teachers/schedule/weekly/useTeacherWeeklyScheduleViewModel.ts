@@ -494,7 +494,7 @@ export function useTeacherWeeklyScheduleViewModel(
   const schedule = scheduleData?.teacherWeeklyScheduleGrid;
   const workload = workloadData?.teacherWorkloadMetrics;
   const teacherName =
-    (directoryData?.teacherDirectory?.rows?.find(r => r?.id === teacherId)?.name ?? loggedInUserName) ?? "";
+    directoryData?.teacherDirectory?.rows?.find(r => r?.id === teacherId)?.name ?? loggedInUserName ?? "";
 
   useDocumentTitle(teacherName, Translation.Dashboard.TeacherWeeklySchedule, "pageTitle");
 

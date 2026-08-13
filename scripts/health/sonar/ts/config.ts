@@ -40,7 +40,7 @@ export const CONFIG = {
   ADMIN_DEFAULT_PASSWORD: "admin",
   ADMIN_NEW_PASSWORD: process.env.SONAR_ADMIN_PASSWORD ?? ["Admin", "123", "!@#$"].join(""),
   SCANNER_VERSION: "6.2.1.4610",
-  SCANNER_DIR: join((process.env.HOME ?? process.env.USERPROFILE) ?? "", ".sonar-scanner"),
+  SCANNER_DIR: join(process.env.HOME ?? process.env.USERPROFILE ?? "", ".sonar-scanner"),
 };
 
 export { COLORS, logError, logInfo, logSuccess, logWarning };

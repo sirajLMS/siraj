@@ -22,14 +22,14 @@ export function resolveOverrideRow(
 ): OverrideRowData {
   const baselineGroups = userGroups.filter(
     g =>
-      (permission.id && g.permissionIds?.includes(permission.id)) ||
-      (permission.key && g.permissionIds?.includes(permission.key))
+      Boolean(permission.id && g.permissionIds?.includes(permission.id)) ||
+      Boolean(permission.key && g.permissionIds?.includes(permission.key))
   );
   const isAllowedByGroup = baselineGroups.length > 0;
   const baselineText = isAllowedByGroup
-    ? t.allowedViaGroups(baselineGroups.map(g => resolveLocalizedString(g.name, locale) || g.slug || "").join(", "))
+    ? t.allowedViaGroups(baselineGroups.map(g => (resolveLocalizedString(g.name, locale) || g.slug) ?? "").join(", "))
     : t.notSet;
-  const overrideState: OverrideState = (permission.id && localOverrides[permission.id]) || "INHERIT";
+  const overrideState: OverrideState = localOverrides[permission.id ?? ""] ?? "INHERIT";
 
   let effectiveState: EffectiveState;
   if (overrideState === "GRANTED") {

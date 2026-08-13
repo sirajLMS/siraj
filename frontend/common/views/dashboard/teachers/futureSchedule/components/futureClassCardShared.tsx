@@ -74,7 +74,7 @@ function ClassInfo({ item, labels, slots, style }: Readonly<ClassInfoProps>) {
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
         {slots.ClassProfileLink({
           href: item.id ? classHref(item.id) : undefined,
-          name: (item.courseName?.trim() ?? item.subjectName?.trim()) ?? "—",
+          name: item.courseName?.trim() ?? item.subjectName?.trim() ?? "—",
           avatarUrl: item.avatarUrl,
         })}
         {isRescheduled ? (

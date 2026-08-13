@@ -69,7 +69,7 @@ const usePermissionQueries = () => {
     setLoading(permissionsLoading || groupsLoading || usersLoading);
   }, [permissionsLoading, groupsLoading, usersLoading, setLoading]);
 
-  const queryError = (permissionsError ?? groupsError) ?? usersError;
+  const queryError = permissionsError ?? groupsError ?? usersError;
   useEffect(() => {
     if (queryError) {
       logger.error("[PermissionManagement] Query error:", queryError);

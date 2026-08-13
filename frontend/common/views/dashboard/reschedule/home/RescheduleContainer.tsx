@@ -34,7 +34,7 @@ export function RescheduleContainer() {
   const searchParams = useSearchParams();
   const storeSession = useRescheduleStore(state => state.session);
   const setShowSuccess = useRescheduleStore(state => state.setShowSuccess);
-  const classInstanceId = (searchParams.get("classInstanceId") ?? storeSession.sessionId) ?? "";
+  const classInstanceId = searchParams.get("classInstanceId") ?? storeSession.sessionId ?? "";
 
   const { data, loading, error } = useQuery(classInstanceQueryDocument, {
     variables: { id: classInstanceId },
