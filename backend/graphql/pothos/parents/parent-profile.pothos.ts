@@ -8,9 +8,13 @@ import {
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ParentProfileService, StudentManagementService } from "@/backend/services";
-import type { AssociatedStudentResult, DeactivateParentResult, ReactivateParentResult } from "@/backend/types";
-import type { ParentProfileResult } from "@/backend/types/parents/parent.types";
-import type { EditQuotaResult } from "@/backend/types/students/student.types";
+import type {
+  AssociatedStudentResult,
+  DeactivateParentResult,
+  EditQuotaResult,
+  ParentProfileResult,
+  ReactivateParentResult,
+} from "@/backend/types";
 
 /** Pothos object shape (decoupled from barrel re-exports). */
 type ParentProfileGraphQLShape = ParentProfileResult;

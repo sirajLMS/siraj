@@ -1,5 +1,5 @@
 import type { ParentOnboardingInput } from "@/backend/services/parent/parent-onboarding.service";
-import type { ParentEntityInput } from "@/backend/types/parents/parent.types";
+import type { ParentEntityInput } from "@/backend/types";
 
 /**
  * Builds the insert payload for `ParentRepository.create()` from the

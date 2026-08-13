@@ -5,11 +5,7 @@ import { InvoicePaymentSubmissionStatus } from "@/backend/enum/billing/billing.e
 import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
-import type { DBTransaction } from "@/backend/types";
-import type {
-  PaymentProofSnapshot,
-  PaymentProofTransactionSnapshot,
-} from "@/backend/types/billing/payment-method.types";
+import type { DBTransaction, PaymentProofSnapshot, PaymentProofTransactionSnapshot } from "@/backend/types";
 import { INVOICE_FILE_USAGE } from "@/shared/constants/billing/invoice-file-usage";
 import { isAllowedPaymentProofMimeType } from "@/shared/constants/billing/payment-proof";
 import type { ErrorsLabels } from "@/shared/locale";

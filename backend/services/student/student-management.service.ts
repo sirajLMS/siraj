@@ -5,7 +5,7 @@ import { logger } from "@/backend/lib/logger";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
 import { buildStudentLifecyclePayloads } from "@/backend/services/notification/notification-payloads.builders";
 import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
-import type { EditQuotaResult } from "@/backend/types/students/student.types";
+import type { EditQuotaResult } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace StudentManagementService {

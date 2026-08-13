@@ -11,7 +11,7 @@
  * `backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers.ts`.
  */
 
-import type { WhatsappTemplateComponent } from "@/backend/types/whatsapp/whatsapp-channel.types";
+import type { WhatsappTemplateComponent } from "@/backend/types";
 
 /**
  * Runtime context passed to every request builder.

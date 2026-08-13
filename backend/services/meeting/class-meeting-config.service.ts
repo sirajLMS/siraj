@@ -16,15 +16,15 @@ import {
   buildMaskedClassMeetingConfigs,
 } from "@/backend/services/meeting/class-meeting-config-mask";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
-import type { DBTransaction } from "@/backend/types";
-import type { MeetingConfigDetails } from "@/backend/types/meeting";
 import type {
   ClassMeetingConfigReturnType,
   ClassMeetingConfigSelectType,
   ClassMeetingConfigSubmitInput,
+  DBTransaction,
   EffectiveMeetingReturnType,
+  MeetingConfigDetails,
   UpdateClassMeetingConfigInput,
-} from "@/backend/types/meeting/class-meeting-config.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ClassMeetingConfigService {

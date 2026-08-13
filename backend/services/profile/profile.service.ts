@@ -26,6 +26,7 @@ import type {
   ParentOwnProfileReturnType,
   ParentOwnProfileUpdateInput,
   ParentProfileResult,
+  ParentProfileUpdateInput,
   PaymentMethodDefaults,
   ProfilePageContext,
   ProfilePageResolution,
@@ -34,16 +35,14 @@ import type {
   TeacherAssignedStudentsResult,
   TeacherOwnProfileReturnType,
   TeacherProfileReturnType,
+  TeacherProfileUpdateInputType,
   UnifiedProfileReturnType,
   UpdateOwnProfileInput,
   UpdateUserProfileInput,
+  UserMeetingConfigReturnType,
   UserPaymentMethodReturnType,
 } from "@/backend/types";
-import type { UserMeetingConfigReturnType } from "@/backend/types/meeting/meeting-config.types";
-import type { ParentProfileUpdateInput } from "@/backend/types/parents/parent.types";
-import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
-import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
-import type { TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
+import { PROFILE_FIELD_GROUPS, STUDENT_FIELD_GROUPS } from "@/backend/types";
 import { parseAccountStatus, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 

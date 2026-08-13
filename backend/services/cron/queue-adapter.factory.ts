@@ -14,11 +14,7 @@
 import { CronQueueBackend } from "@/backend/enum/cron/cron.enums";
 import { logger } from "@/backend/lib/logger";
 import { resolveEnvConfig } from "@/backend/services/system";
-import {
-  type CronQueueAdapter,
-  CronQueueBackendNotAvailable,
-  CronQueueBackendUnknown,
-} from "@/backend/types/cron/cron.types";
+import { type CronQueueAdapter, CronQueueBackendNotAvailable, CronQueueBackendUnknown } from "@/backend/types";
 
 const BACKEND_TTL_MS = 5 * 60 * 1000; // 5 minutes
 

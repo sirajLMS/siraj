@@ -1,4 +1,4 @@
-import type { MeetingProviderFieldSchema } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderFieldSchema } from "@/backend/types";
 import type { LocalizedString } from "@/shared/types";
 
 export type MeetingProviderCatalogSeed = {

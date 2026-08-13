@@ -1,6 +1,6 @@
 import type { users } from "@/backend/db/schema/users/users";
 import type { AccountStatus, UserRole } from "@/backend/enum";
-import type { PageInfo } from "@/backend/types/shared/pagination.types";
+import type { PageInfo } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 

@@ -10,7 +10,7 @@ import type {
   SupportedOnlineAccountInsertType,
   SupportedOnlineAccountSelectType,
   UpdateSupportedOnlineAccountInput,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
 
 type AccountRow = typeof supportedOnlineAccounts.$inferSelect;
 

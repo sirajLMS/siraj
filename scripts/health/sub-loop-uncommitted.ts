@@ -39,6 +39,7 @@
  *   tsgo          → only run tsgo
  *   biome         → run tsgo, then oxlint, then biome:check
  *   lint          → run tsgo, oxlint, biome, then lint:type-aware (default)
+ *   duplicates    → run tsgo, oxlint, biome, lint:type-aware, then check:duplicates
  *   codescene     → run tsgo, oxlint, biome, lint:type-aware, check:duplicates, codescene
  *   sonar-results → same as codescene
  *
@@ -470,9 +471,13 @@ async function collectResults(depth: number, files: string[]): Promise<BatchChec
     results.push(await checkLintTypeAwareAll(files));
   }
 
-  // check:duplicates + codescene (depth 3+)
+  // check:duplicates (depth 3+)
   if (depth >= 3) {
     results.push(checkDuplicatesAll(files));
+  }
+
+  // codescene (depth 4+)
+  if (depth >= 4) {
     results.push(checkCodesceneAll(files));
   }
 

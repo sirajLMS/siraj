@@ -3,8 +3,7 @@ import { eq } from "drizzle-orm";
 import { SupportedCurrencyRepository } from "@/backend/db/repo/billing";
 import { supportedCurrencies, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { DBTransaction } from "@/backend/types";
-import type { SupportedCurrencyReturnType } from "@/backend/types/billing/currency.types";
+import type { DBTransaction, SupportedCurrencyReturnType } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 

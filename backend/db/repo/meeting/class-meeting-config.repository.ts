@@ -10,12 +10,12 @@ import {
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { classMeetingConfigs } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
-import type { DBTransaction } from "@/backend/types";
 import type {
   ClassMeetingConfigInsertType,
   ClassMeetingConfigSelectType,
+  DBTransaction,
   UpdateClassMeetingConfigInput,
-} from "@/backend/types/meeting/class-meeting-config.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type ClassScope = { readonly classInstanceId: string };

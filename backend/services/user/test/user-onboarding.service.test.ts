@@ -9,8 +9,7 @@ import {
   type UserOnboardingService,
   UserOnboardingService as UserOnboardingServiceImpl,
 } from "@/backend/services/user/user-onboarding.service";
-import type { GroupWithPermissionIds } from "@/backend/types/permissions/permission-management.types";
-import type { UserReturnType } from "@/backend/types/users/user.types";
+import type { GroupWithPermissionIds, UserReturnType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 

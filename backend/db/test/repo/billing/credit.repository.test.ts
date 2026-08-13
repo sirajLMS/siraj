@@ -13,9 +13,14 @@ import {
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CreditReason, PaymentMethodType } from "@/backend/enum";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
-import type { ClassInstanceSelectType, DBTransaction, InvoiceInsertType, PaymentInsertType } from "@/backend/types";
+import type {
+  ClassInstanceSelectType,
+  DBTransaction,
+  InvoiceInsertType,
+  PaymentInsertType,
+  PaymentMethodTransactionSnapshot,
+} from "@/backend/types";
 import { PaginationArgs } from "@/backend/types";
-import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**

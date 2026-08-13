@@ -1,7 +1,7 @@
 import { ParentRepository } from "@/backend/db/repo/parents";
 import { AppPermission } from "@/backend/enum";
 import { ParentServiceBase } from "@/backend/services/parent/__shared__/parentServiceBase";
-import type { ParentAssignedStudentsResult, ParentOwnProfileReturnType } from "@/backend/types/parents/parent.types";
+import type { ParentAssignedStudentsResult, ParentOwnProfileReturnType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentPortalService {

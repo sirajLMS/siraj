@@ -3,11 +3,7 @@ import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { userPaymentMethods } from "@/backend/db/schema";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import type { DBTransaction } from "@/backend/types";
-import type {
-  UserPaymentMethodInsertType,
-  UserPaymentMethodSelectType,
-} from "@/backend/types/billing/payment-method.types";
+import type { DBTransaction, UserPaymentMethodInsertType, UserPaymentMethodSelectType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type DefaultSlot = "PAYIN" | "PAYOUT";

@@ -19,8 +19,12 @@ import { QuotaService } from "@/backend/services/billing/quota.service";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
-import type { DBTransaction, RecurringScheduleDaySelectType, RecurringScheduleSelectType } from "@/backend/types";
-import type { CreateRecurringClassInput } from "@/backend/types/scheduling/scheduling.types";
+import type {
+  CreateRecurringClassInput,
+  DBTransaction,
+  RecurringScheduleDaySelectType,
+  RecurringScheduleSelectType,
+} from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 

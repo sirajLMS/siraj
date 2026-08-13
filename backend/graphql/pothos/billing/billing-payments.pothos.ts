@@ -1,7 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { paymentFields } from "@/backend/graphql/pothos/billing/__shared__/paymentFieldHelpers";
-import type { PaymentReturnType } from "@/backend/types/billing/billing.types";
-import type { TeacherPaymentReturnType } from "@/backend/types/teachers/teacher.types";
+import type { PaymentReturnType, TeacherPaymentReturnType } from "@/backend/types";
 
 const PaymentRef = gqlSchemaBuilder.objectRef<PaymentReturnType>("Payment");
 

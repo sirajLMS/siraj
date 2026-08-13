@@ -1,8 +1,7 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { ClassSessionService, EffectiveMeetingService } from "@/backend/services";
-import type { ClassInstanceDetailReturnType } from "@/backend/types";
-import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
+import type { ClassInstanceDetailReturnType, ClassInstancePerformanceSelectType } from "@/backend/types";
 import { ClassExecutionState, type ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import {
   parseClassExecutionState,

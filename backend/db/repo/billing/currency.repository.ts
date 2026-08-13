@@ -18,12 +18,12 @@ import {
   users,
 } from "@/backend/db/schema";
 import { CountryCode } from "@/backend/enum";
-import type { DBTransaction } from "@/backend/types";
 import type {
+  DBTransaction,
   SupportedCurrencyReturnType,
   SupportedCurrencySelectType,
   SupportedCurrencyUpsertInput,
-} from "@/backend/types/billing/currency.types";
+} from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 const COUNTRY_CODE_VALUES = new Set(Object.values(CountryCode) as string[]);

@@ -9,12 +9,12 @@ import { whatsappChannel } from "@/backend/services/communication/channels/whats
 import type {
   ChannelDispatchResult,
   CommunicationPayload,
+  NotificationDeliverySelectType,
   NotificationEntityKind,
   NotificationMetadata,
+  WhatsappTemplateComponent,
+  WhatsappTemplateMetadata,
 } from "@/backend/types";
-import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
-import type { WhatsappTemplateMetadata } from "@/backend/types/whatsapp/whatsapp-account.types";
-import type { WhatsappTemplateComponent } from "@/backend/types/whatsapp/whatsapp-channel.types";
 import { getServerTranslations } from "@/shared/locale";
 
 const NOTIFICATION_ENTITY_KINDS: readonly NotificationEntityKind[] = [

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { CronJobKind } from "@/backend/enum/cron/cron.enums";
 import { createCustomSqlAdapter } from "@/backend/services/cron/queue-adapters/custom-sql.adapter";
-import type { CronJobPayload, CronQueueStats } from "@/backend/types/cron/cron.types";
+import type { CronJobPayload, CronQueueStats } from "@/backend/types";
 
 // Mock createPool so the adapter never touches a real database.
 type QueryResult = { rows: unknown[]; rowCount: number };

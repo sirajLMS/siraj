@@ -3,14 +3,14 @@ import { AppPermission, Gender, SystemPermissionGroupSlug } from "@/backend/enum
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { buildTeacherInsertPayload } from "@/backend/services/teacher/__shared__/buildTeacherInsertPayload";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
-import type { DBTransaction } from "@/backend/types";
-import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
-import type { TeacherCreateReturnType } from "@/backend/types/teachers/teacher.types";
 import type {
+  DBTransaction,
+  TeacherCreateReturnType,
   UserCreateCoreInput,
   UserCreateProfileFieldsInput,
+  UserPaymentMethodSubmitInput,
   UserReturnType,
-} from "@/backend/types/users/user.types";
+} from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 

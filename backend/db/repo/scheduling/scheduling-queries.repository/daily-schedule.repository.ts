@@ -3,12 +3,12 @@ import {
   applyViewerTimezoneFormatting,
   fetchDailyScheduleBaseRows,
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository/daily-schedule.utils";
-import type { DBTransaction } from "@/backend/types";
 import type {
   AdminDashboardScheduleRepoInput,
   AdminDashboardScheduleResult,
   DailyScheduleResult,
-} from "@/backend/types/scheduling/scheduling.types";
+  DBTransaction,
+} from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { parseIanaTimezone } from "@/shared/lib/enum";
 import {

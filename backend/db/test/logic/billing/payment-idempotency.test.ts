@@ -5,8 +5,12 @@ import { randomUUID } from "node:crypto";
 import { invoices, parents, payments, students, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import type { DBTransaction, InvoiceInsertType, PaymentInsertType } from "@/backend/types";
-import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
+import type {
+  DBTransaction,
+  InvoiceInsertType,
+  PaymentInsertType,
+  PaymentMethodTransactionSnapshot,
+} from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 

@@ -2,13 +2,13 @@ import { StaffProfileRepository } from "@/backend/db/repo/teachers";
 import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
-import type { DBTransaction } from "@/backend/types";
-import type { StaffProfileCreateResult } from "@/backend/types/staff/staff-profile.types";
 import type {
+  DBTransaction,
+  StaffProfileCreateResult,
   UserCreateCoreInput,
   UserCreateProfileFieldsInput,
   UserReturnType,
-} from "@/backend/types/users/user.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export interface ManagerOnboardingInput {

@@ -11,6 +11,7 @@ import {
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { ScheduleQueryService } from "@/backend/services";
 import type {
+  AdminDashboardScheduleInput,
   AdminDashboardScheduleReturnType,
   ClassSessionMetrics,
   DailyScheduleListReturnType,
@@ -21,7 +22,6 @@ import type {
   RescheduleTrackingRow,
   StatusTrackingScheduleRow,
 } from "@/backend/types";
-import type { AdminDashboardScheduleInput } from "@/backend/types/scheduling/schedule.types";
 
 const DailyScheduleMetricsObjectRef = gqlSchemaBuilder.objectRef<ClassSessionMetrics>("DailyScheduleMetrics");
 

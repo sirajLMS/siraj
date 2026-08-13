@@ -9,8 +9,7 @@ import {
 } from "@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory";
 import { redisService } from "@/backend/services/redis";
 import { invalidateEnvConfigCache } from "@/backend/services/system";
-import type { NotificationDeliverySelectType } from "@/backend/types";
-import type { WhatsappAccountSelectType } from "@/backend/types/whatsapp/whatsapp-account.types";
+import type { NotificationDeliverySelectType, WhatsappAccountSelectType } from "@/backend/types";
 
 const MOCK_USER_ID = "user-uuid-wa-0001";
 const MOCK_DELIVERY_ID = "delivery-uuid-wa-0001";

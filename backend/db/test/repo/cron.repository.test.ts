@@ -11,12 +11,7 @@ import {
   CronScheduleStatus,
   CronTriggerSource,
 } from "@/backend/enum/cron/cron.enums";
-import type { DBTransaction } from "@/backend/types";
-import type {
-  CronRunInsertType,
-  CronScheduleInsertType,
-  CronScheduleSelectType,
-} from "@/backend/types/cron/cron.types";
+import type { CronRunInsertType, CronScheduleInsertType, CronScheduleSelectType, DBTransaction } from "@/backend/types";
 
 const noop = () => {};
 void mock.module("@/backend/lib/logger", () => ({

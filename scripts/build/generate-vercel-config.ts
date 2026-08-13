@@ -9,7 +9,7 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CronExpressionParser } from "cron-parser";
-import type { CronDefinition, CronExecutionMode } from "@/backend/types/cron/cron.types";
+import type { CronDefinition, CronExecutionMode } from "@/backend/types";
 
 interface VercelCron {
   path: string;

@@ -10,6 +10,7 @@ import { resolveTeacherId } from "@/backend/services/schedule/__shared__/resolve
 import { resolveViewerTimezone } from "@/backend/services/schedule/resolve-viewer-timezone";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 import type {
+  DailyScheduleResult,
   FutureClassRow,
   PaginationArgs,
   RescheduleTrackingInput,
@@ -17,7 +18,6 @@ import type {
   TeacherFutureScheduleReturnType,
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
-import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
 import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { parseClassExecutionState, parseClassOutcome, parseClassTypeOrNull } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";

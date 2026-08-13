@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import type { MeetingConfigDetails } from "@/backend/types/meeting";
-import type { MeetingConfigSnapshot, UserMeetingConfigSelectType } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+import type {
+  ClassMeetingConfigSelectType,
+  MeetingConfigDetails,
+  MeetingConfigSnapshot,
+  MeetingProviderSelectType,
+  UserMeetingConfigSelectType,
+} from "@/backend/types";
 import { errorsEn } from "@/shared/locale/en/errors";
 
 // ---------------------------------------------------------------------------
@@ -132,7 +136,6 @@ await mock.module("@/backend/db/repo/meeting/user-meeting-config.repository", ()
 }));
 
 // --- ClassMeetingConfigRepository
-import type { ClassMeetingConfigSelectType } from "@/backend/types/meeting/class-meeting-config.types";
 
 function buildClassConfig(overrides: Partial<ClassMeetingConfigSelectType> = {}) {
   return {

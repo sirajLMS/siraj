@@ -32,23 +32,21 @@ import type {
   GraphApiRequestInit,
   ListMessageTemplatesResponseBody,
   ListPhoneNumbersResponseBody,
-  WhatsappPhoneNumber,
-} from "@/backend/types";
-import type { NotificationPreferenceUpdateInput } from "@/backend/types/notifications/notification-preferences.types";
-import type {
+  NotificationPreferenceUpdateInput,
   WhatsappAccountCreateSubmitInput,
   WhatsappAccountReturnType,
   WhatsappAccountUpdateInput,
+  WhatsappPhoneNumber,
   WhatsappSyncFromMetaReturnType,
   WhatsappTemplateSnapshot,
-} from "@/backend/types/whatsapp/whatsapp-account.types";
+} from "@/backend/types";
 import {
   buildReturnType,
   coerceLimitTier,
   coerceQualityRating,
   isValidLimitTier,
   isValidQualityRating,
-} from "@/backend/types/whatsapp/whatsapp-account.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Placeholder string for credentials not yet set via dedicated mutations. */

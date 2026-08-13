@@ -1,9 +1,9 @@
-import type { ClassInstanceDetailReturnType } from "@/backend/types/classes/class-instance-detail.types";
-import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
 import type {
+  ClassInstanceDetailReturnType,
+  EffectiveMeetingReturnType,
   SupportContactReturnType,
   TeacherImportantNoteReturnType,
-} from "@/backend/types/teachers/teacher-notes.types";
+} from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 

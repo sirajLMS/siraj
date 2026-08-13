@@ -6,7 +6,7 @@ export type {
   UpcomingClassRow,
   WeeklyScheduleGridRow,
   WeeklyWorkloadMetrics,
-} from "@/backend/types/scheduling/scheduling.types";
+} from "@/backend/types";
 export * from "./class-status-events.repository";
 export * from "./daily-schedule.repository";
 export * from "./expired-instances.repository";

@@ -13,7 +13,6 @@ import {
   isCronScheduleStatus,
   isCronTriggerSource,
 } from "@/backend/enum/cron/cron.enums";
-import type { DBTransaction } from "@/backend/types";
 import type {
   CronHeartbeatInsertType,
   CronHeartbeatSelectType,
@@ -30,7 +29,8 @@ import type {
   CronScheduleReturnType,
   CronScheduleSelectType,
   CronScheduleUpdateInput,
-} from "@/backend/types/cron/cron.types";
+  DBTransaction,
+} from "@/backend/types";
 
 const INFLIGHT_STATUSES = [CronRunStatus.PENDING, CronRunStatus.RUNNING, CronRunStatus.RETRYING] as const;
 

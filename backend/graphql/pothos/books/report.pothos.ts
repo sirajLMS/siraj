@@ -9,7 +9,7 @@ import type {
   AttendanceReportPaidAmountReturnType,
   AttendanceReportResult,
   AttendanceReportRowReturnType,
-} from "@/backend/types/books/report.types";
+} from "@/backend/types";
 
 export const ReportGroupingModeEnum = gqlSchemaBuilder.enumType(ReportGroupingMode, {
   name: "ReportGroupingMode",

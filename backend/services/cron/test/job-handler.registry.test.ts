@@ -6,7 +6,7 @@ import {
   registerCoreHandlers,
   registerHandler,
 } from "@/backend/services/cron/job-handler-registry";
-import type { CronJobPayload, CronJobResult } from "@/backend/types/cron/cron.types";
+import type { CronJobPayload, CronJobResult } from "@/backend/types";
 
 /**
  * Build a `CronJobKind` from an arbitrary string for testing.

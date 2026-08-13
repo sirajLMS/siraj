@@ -27,7 +27,6 @@ import { formatError } from "@/backend/services/cron/cron-utils";
 import { getQueueAdapter } from "@/backend/services/cron/queue-adapter.factory";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import { resolveEnvConfig } from "@/backend/services/system";
-import type { DBTransaction } from "@/backend/types";
 import type {
   CronJobPayload,
   CronQueueStats,
@@ -41,10 +40,11 @@ import type {
   CronScheduleSelectType,
   CronScheduleSubmitInput,
   CronScheduleUpdateInput,
+  DBTransaction,
   DispatchByIdResult,
   DispatchDueResult,
-} from "@/backend/types/cron/cron.types";
-import { safeCronJobKind } from "@/backend/types/cron/cron.types";
+} from "@/backend/types";
+import { safeCronJobKind } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace CronService {

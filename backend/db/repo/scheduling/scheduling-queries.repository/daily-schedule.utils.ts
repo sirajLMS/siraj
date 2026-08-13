@@ -1,8 +1,7 @@
 import { and, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import type { DBTransaction } from "@/backend/types";
-import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
+import type { DailyScheduleResult, DBTransaction } from "@/backend/types";
 import { parseClassExecutionState, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 
 export function buildDailyScheduleDayConditions(

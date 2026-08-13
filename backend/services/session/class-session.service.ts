@@ -26,9 +26,9 @@ import type {
   ClassInstanceInsertType,
   ClassInstanceSelectType,
   ClassStatusEventReturnType,
+  ClassStatusEventSelectType,
   DBTransaction,
 } from "@/backend/types";
-import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { type ErrorsLabels, getServerTranslations, type SessionLabels } from "@/shared/locale";
 

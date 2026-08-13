@@ -23,8 +23,13 @@ import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { AuditAction, CreateAuditLogInput, DBTransaction } from "@/backend/types";
-import type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
+import type {
+  AuditAction,
+  CreateAuditLogInput,
+  DBTransaction,
+  SiteContentSelectType,
+  SiteContentUpsertInput,
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** URL-safe slug pattern: lowercase alphanumerics and hyphens, 2-100 chars, no leading/trailing hyphen. */

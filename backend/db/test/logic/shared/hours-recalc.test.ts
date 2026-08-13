@@ -5,8 +5,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
-import type { ParentEntity, StudentSelectType, TeacherSelectType } from "@/backend/types";
-import type { UserReturnType } from "@/backend/types/users/user.types";
+import type { ParentEntity, StudentSelectType, TeacherSelectType, UserReturnType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 

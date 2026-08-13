@@ -3,8 +3,7 @@ import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared/bulk-upsert";
 import { classStatusEvents } from "@/backend/db/schema/classes/scheduling";
-import type { DBTransaction } from "@/backend/types";
-import type { ClassStatusEventSelectType } from "@/backend/types/scheduling/class-status-event.types";
+import type { ClassStatusEventSelectType, DBTransaction } from "@/backend/types";
 
 export type ClassStatusEventSeedInsertInput = {
   classInstanceId: string;

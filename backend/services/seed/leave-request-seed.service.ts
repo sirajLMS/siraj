@@ -21,8 +21,7 @@ import {
 } from "@/backend/db/repo/scheduling/leave-request.repository";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { DBTransaction } from "@/backend/types";
-import type { UpsertStudentLeaveQuotaInput } from "@/backend/types/scheduling/scheduling.types";
+import type { DBTransaction, UpsertStudentLeaveQuotaInput } from "@/backend/types";
 
 export namespace LeaveRequestSeedService {
   /** Idempotently create leave request rows for demo class instances. */

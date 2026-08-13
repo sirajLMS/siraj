@@ -11,8 +11,8 @@ import {
   type StudentFieldFilterContext,
 } from "@/backend/services/profile/profile-field-filter";
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
-import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
-import type { StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types/students/student-profile.types";
+import type { StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types";
+import { STUDENT_FIELD_GROUPS } from "@/backend/types";
 import {
   parseAppLanguage,
   parseCurrencyCodeOrNull,

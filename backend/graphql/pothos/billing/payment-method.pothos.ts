@@ -19,7 +19,7 @@ import type {
   UpdateUserPaymentMethodInput,
   UserPaymentMethodReturnType,
   UserPaymentMethodSubmitInput,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
 import type { LocalizedString } from "@/shared/types/localized-string";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;

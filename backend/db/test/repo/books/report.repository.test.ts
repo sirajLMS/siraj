@@ -3,8 +3,7 @@ import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books";
 import type { AttendanceReportRow } from "@/backend/db/repo/books/report.repository";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { DBTransaction } from "@/backend/types";
-import type { AttendanceReportPaidAmountReturnType } from "@/backend/types/books/report.types";
+import type { AttendanceReportPaidAmountReturnType, DBTransaction } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 function paidAmountForCurrency(row: AttendanceReportRow, currency: CurrencyCode): number {

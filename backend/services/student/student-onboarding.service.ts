@@ -4,12 +4,14 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission, StudentStatus, SystemPermissionGroupSlug } from "@/backend/enum";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
-import type { DBTransaction, StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
 import type {
+  DBTransaction,
+  StudentOnboardingInput,
+  StudentOnboardingResult,
   UserCreateCoreInput,
   UserCreateProfileFieldsInput,
   UserReturnType,
-} from "@/backend/types/users/user.types";
+} from "@/backend/types";
 import { parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 

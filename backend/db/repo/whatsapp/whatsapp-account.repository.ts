@@ -2,24 +2,20 @@ import { asc, desc, eq, inArray } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { whatsappAccounts } from "@/backend/db/schema";
-import type { DBTransaction } from "@/backend/types";
 import type {
+  DBTransaction,
   SetWhatsappAccessTokenInput,
   SetWhatsappTwoStepPinInput,
   WhatsappAccountInsertType,
   WhatsappAccountReturnType,
   WhatsappAccountSelectType,
   WhatsappAccountUpdateInput,
-} from "@/backend/types/whatsapp/whatsapp-account.types";
-import { buildReturnType as _buildReturnType } from "@/backend/types/whatsapp/whatsapp-account.types";
+} from "@/backend/types";
+import { buildReturnType as _buildReturnType } from "@/backend/types";
 
 // Re-export the type-guard helpers and buildReturnType for backward-compatible imports
 // (the webhook handler and other consumers import them from this module).
-export {
-  buildReturnType,
-  isValidLimitTier,
-  isValidQualityRating,
-} from "@/backend/types/whatsapp/whatsapp-account.types";
+export { buildReturnType, isValidLimitTier, isValidQualityRating } from "@/backend/types";
 
 /**
  * Convert a SelectType row (with encrypted fields and raw enum strings)

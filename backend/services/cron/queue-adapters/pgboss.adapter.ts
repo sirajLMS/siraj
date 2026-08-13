@@ -26,7 +26,7 @@ import {
   CronQueueBackendNotAvailable,
   type CronQueueStats,
   safeCronJobKind,
-} from "@/backend/types/cron/cron.types";
+} from "@/backend/types";
 
 const QUEUE_NAME_PREFIX = "cron_";
 

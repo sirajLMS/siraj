@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import { WhatsappLimitTier } from "@/backend/enum/whatsapp/whatsapp.enum";
-import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
-import type { WhatsappAccountReturnType } from "@/backend/types/whatsapp/whatsapp-account.types";
+import type { NotificationDeliverySelectType, WhatsappAccountReturnType } from "@/backend/types";
 
 // ---------------------------------------------------------------------------
 // Mocks — must register before SUT import

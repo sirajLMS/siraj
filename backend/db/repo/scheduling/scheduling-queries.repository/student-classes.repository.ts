@@ -3,8 +3,7 @@ import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import type { DBTransaction } from "@/backend/types";
-import type { UpcomingClassRow } from "@/backend/types/scheduling/scheduling.types";
+import type { DBTransaction, UpcomingClassRow } from "@/backend/types";
 import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 
 const VALID_EXECUTION_STATES = new Set(Object.values(ClassExecutionState) as string[]);

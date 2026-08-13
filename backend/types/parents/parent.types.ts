@@ -1,7 +1,5 @@
 import type { AccountStatus, BookingStatus, ParentStatus, StudentStatus } from "@/backend/enum";
-import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
-import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
-import type { PageInfo } from "@/backend/types/shared/pagination.types";
+import type { DisplayAmountReturnType, EffectiveMeetingReturnType, PageInfo } from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";

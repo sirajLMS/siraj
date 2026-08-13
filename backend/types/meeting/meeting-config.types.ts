@@ -4,7 +4,7 @@ import type {
   MeetingConfigBaseSelectType,
   MeetingConfigBaseSubmitInput,
   MeetingConfigDetails,
-} from "@/backend/types/meeting/meeting-config-base.types";
+} from "@/backend/types";
 import type { LocalizedString } from "@/shared/types";
 
 // ============================================================================

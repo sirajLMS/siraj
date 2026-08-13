@@ -14,13 +14,13 @@ import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type {
+  ClassInstanceSelectType,
   DBTransaction,
   ParentEntity,
   StudentProgressSelectType,
   StudentSelectType,
   TeacherSelectType,
 } from "@/backend/types";
-import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function insertUser(tx: DBTransaction, now: Date, name: string, prefix: string) {

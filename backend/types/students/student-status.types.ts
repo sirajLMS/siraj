@@ -1,5 +1,5 @@
 import type { StudentStatus } from "@/backend/enum";
-import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
+import type { EffectiveMeetingReturnType } from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 
 export interface StudentUpcomingClass {

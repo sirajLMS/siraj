@@ -2,11 +2,11 @@ import { eq, inArray } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { classInstancePerformance } from "@/backend/db/schema/classes/scheduling";
-import type { DBTransaction } from "@/backend/types";
 import type {
   ClassInstancePerformanceInsertType,
   ClassInstancePerformanceSelectType,
-} from "@/backend/types/classes/class-instance-performance.types";
+  DBTransaction,
+} from "@/backend/types";
 
 async function upsertOne(
   t: DBTransaction,

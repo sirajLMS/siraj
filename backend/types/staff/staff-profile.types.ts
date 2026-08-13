@@ -1,6 +1,6 @@
 import type { staffProfiles } from "@/backend/db/schema";
 import type { AccountStatus, OverrideState } from "@/backend/enum";
-import type { PageInfo } from "@/backend/types/shared/pagination.types";
+import type { PageInfo } from "@/backend/types";
 
 export type StaffProfileEntity = typeof staffProfiles.$inferSelect;
 export type StaffProfileEntityInput = typeof staffProfiles.$inferInsert;

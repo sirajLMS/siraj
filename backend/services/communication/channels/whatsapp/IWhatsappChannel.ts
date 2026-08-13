@@ -17,4 +17,4 @@ export type {
   WhatsappSendResult,
   WhatsappTemplateComponent,
   WhatsappTemplateRef,
-} from "@/backend/types/whatsapp/whatsapp-channel.types";
+} from "@/backend/types";

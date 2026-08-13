@@ -1,7 +1,7 @@
 import { SupportedCurrencyRepository } from "@/backend/db/repo/billing/currency.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { SupportedCurrencyReturnType, SupportedCurrencyUpsertInput } from "@/backend/types/billing/currency.types";
+import type { SupportedCurrencyReturnType, SupportedCurrencyUpsertInput } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 

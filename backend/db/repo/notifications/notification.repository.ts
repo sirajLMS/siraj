@@ -3,22 +3,21 @@ import { queryDb } from "@/backend/db";
 import { db } from "@/backend/db/drizzleDb";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";
-import type { DBTransaction } from "@/backend/types";
-import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 import type {
   CreateNotificationDeliveryInput,
+  DBTransaction,
   NotificationDeliveryAnalyticsFilter,
   NotificationDeliveryAnalyticsResult,
   NotificationDeliverySelectType,
   NotificationDeliveryStatusCount,
+  NotificationMetadata,
+  RegisterDeviceTokenInput,
+  SetNotificationPreferenceInput,
   UpdateDeliveryStatusInput,
   UserDeliveryHistoryResult,
-} from "@/backend/types/notifications/notificationDeliveries.types";
-import type { RegisterDeviceTokenInput, UserDeviceTokenSelectType } from "@/backend/types/users/userDeviceTokens.types";
-import type {
-  SetNotificationPreferenceInput,
+  UserDeviceTokenSelectType,
   UserNotificationPreferenceSelectType,
-} from "@/backend/types/users/userNotificationPreferences.types";
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {

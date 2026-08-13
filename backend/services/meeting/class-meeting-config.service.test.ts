@@ -4,8 +4,8 @@ import * as MeetingChannelFactory from "@/backend/services/meeting/channels/Meet
 import type {
   ClassMeetingConfigSelectType,
   ClassMeetingConfigSubmitInput,
-} from "@/backend/types/meeting/class-meeting-config.types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+  MeetingProviderSelectType,
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 

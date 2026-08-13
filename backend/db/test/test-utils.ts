@@ -4,8 +4,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
-import type { DBTransaction } from "@/backend/types";
-import type { UserReturnType } from "@/backend/types/users/user.types";
+import type { DBTransaction, UserReturnType } from "@/backend/types";
 import { parseIanaTimezone } from "@/shared/lib/enum";
 
 /**

@@ -15,7 +15,7 @@ import {
 } from "@/backend/services/auth/__shared__/simulationBase";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type * as Types from "@/backend/types";
-import type { RedisGroupSimulationSessionData } from "@/backend/types/auth/auth.types";
+import type { RedisGroupSimulationSessionData } from "@/backend/types";
 import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types";

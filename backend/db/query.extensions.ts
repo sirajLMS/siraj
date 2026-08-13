@@ -1,6 +1,6 @@
 import { type Column, type SQL, sql } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
-import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
+import type { PaginationArgs } from "@/backend/types";
 
 export function queryWithPagination<T extends PgSelect>(qb: T, args?: PaginationArgs | null) {
   if (!args) return qb;

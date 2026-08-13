@@ -5,15 +5,15 @@ import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { getRedisService, SessionRedisService } from "@/backend/services";
-import type { DBTransaction } from "@/backend/types";
 import type {
+  DBTransaction,
   RedisGroupSimulationSessionData,
   RedisSessionData,
   SessionConfigSelectType,
   SessionInsertType,
   SessionMetadataSelectType,
   SessionSelectType,
-} from "@/backend/types/auth/auth.types";
+} from "@/backend/types";
 
 // Default session configuration
 const DEFAULT_SESSION_TTL = 7 * 24 * 60 * 60; // 7 days in seconds

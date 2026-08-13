@@ -1,23 +1,20 @@
 import type { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
 import type { AccountStatus } from "@/backend/enum/auth/auth.enum";
-import type { PaymentMethodDefaults, UserPaymentMethodReturnType } from "@/backend/types/billing/payment-method.types";
 import type {
+  ManagerDirectoryRow,
   ParentAssignedStudentsResult,
   ParentOwnProfileReturnType,
   ParentProfileResult,
-} from "@/backend/types/parents/parent.types";
-import type {
-  ManagerDirectoryRow,
+  PaymentMethodDefaults,
   StaffPermissionGroupReturnType,
   StaffPermissionOverrideReturnType,
-} from "@/backend/types/staff/staff-profile.types";
-import type {
   TeacherAssignedStudentsResult,
   TeacherOwnProfileReturnType,
   TeacherOwnProfileUpdateInput,
   TeacherProfileReturnType,
   TeacherProfileUpdateInputType,
-} from "@/backend/types/teachers/teacher.types";
+  UserPaymentMethodReturnType,
+} from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 

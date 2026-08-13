@@ -22,7 +22,7 @@ import type {
   MyConnectedMeetingProviderReturnType,
   TestMeetingConnectionReturnType,
   TestMeetingConnectionSubmitInput,
-} from "@/backend/types/meeting/meeting-integrations.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const MEETING_PROVIDERS = new Set<string>(Object.values(MeetingIntegrationProviderSlug));

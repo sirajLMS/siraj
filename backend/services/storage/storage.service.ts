@@ -9,11 +9,11 @@ import type {
   DirectoryPermissionsUpdateInput,
   FileOperationResult,
   FileUsageInfo,
+  SiteContentUpsertInput,
   StorageItemProtectionUpdateInput,
   StorageUploadValidationParams,
+  ValidReferenceTable,
 } from "@/backend/types";
-import type { SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
-import type { ValidReferenceTable } from "@/backend/types/storage/storage.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const VALID_REFERENCE_TABLES: readonly ValidReferenceTable[] = [

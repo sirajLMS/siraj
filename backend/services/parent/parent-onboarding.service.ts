@@ -3,14 +3,14 @@ import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { buildParentInsertPayload } from "@/backend/services/parent/__shared__/buildParentInsertPayload";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
-import type { DBTransaction } from "@/backend/types";
-import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
-import type { ParentCreateResult } from "@/backend/types/parents/parent.types";
 import type {
+  DBTransaction,
+  ParentCreateResult,
   UserCreateCoreInput,
   UserCreateProfileFieldsInput,
+  UserPaymentMethodSubmitInput,
   UserReturnType,
-} from "@/backend/types/users/user.types";
+} from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 

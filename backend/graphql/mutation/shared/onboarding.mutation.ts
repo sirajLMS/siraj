@@ -18,7 +18,7 @@ import {
   StudentOnboardingService,
   TeacherOnboardingService,
 } from "@/backend/services";
-import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
+import type { UserPaymentMethodSubmitInput } from "@/backend/types";
 
 function mapInitialPaymentMethodInput(
   input:

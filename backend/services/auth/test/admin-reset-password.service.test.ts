@@ -7,7 +7,7 @@ import { AuthPasswordService } from "@/backend/services/auth/auth-password.servi
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { AdminResetPasswordInput } from "@/backend/types/auth/auth.types";
+import type { AdminResetPasswordInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 

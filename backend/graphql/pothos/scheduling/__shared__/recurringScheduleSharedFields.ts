@@ -5,7 +5,7 @@ import type {
   RecurringScheduleDayDetailReturnType,
   RecurringScheduleDetailReturnType,
   RecurringScheduleListItem,
-} from "@/backend/types/scheduling/recurring-schedule-detail.types";
+} from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;

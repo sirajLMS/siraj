@@ -24,14 +24,14 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import type { MeetingProvider } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { CreateAuditLogInput } from "@/backend/types";
 import type {
   ConnectMeetingProviderOAuthReturnType,
   ConnectMeetingProviderOAuthSubmitInput,
+  CreateAuditLogInput,
   DisconnectMeetingProviderOAuthReturnType,
   DisconnectMeetingProviderOAuthSubmitInput,
   MyConnectedMeetingProviderReturnType,
-} from "@/backend/types/meeting/meeting-integrations.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**

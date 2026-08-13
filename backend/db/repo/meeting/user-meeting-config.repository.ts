@@ -10,12 +10,12 @@ import {
 import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { userMeetingConfigs } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
-import type { DBTransaction } from "@/backend/types";
 import type {
+  DBTransaction,
   UpdateUserMeetingConfigInput,
   UserMeetingConfigInsertType,
   UserMeetingConfigSelectType,
-} from "@/backend/types/meeting/meeting-config.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace UserMeetingConfigRepository {

@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
 import { MeetingChannelError } from "@/backend/services/meeting/channels/IMeetingChannel";
 import * as MeetingChannelFactory from "@/backend/services/meeting/channels/MeetingChannelFactory";
-import type { ClassMeetingConfigInsertType } from "@/backend/types/meeting/class-meeting-config.types";
 import type {
+  ClassMeetingConfigInsertType,
+  MeetingProviderSelectType,
   UserMeetingConfigSelectType,
   UserMeetingConfigSubmitInput,
-} from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 import { getServerTranslations } from "@/shared/locale";
 

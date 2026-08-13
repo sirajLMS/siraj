@@ -4,8 +4,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
 import { books } from "@/backend/db/schema";
 import { AvailabilityStatus } from "@/backend/enum";
-import type { DBTransaction, PaginationArgs } from "@/backend/types";
-import type { BookReturnType } from "@/backend/types/books/book.types";
+import type { BookReturnType, DBTransaction, PaginationArgs } from "@/backend/types";
 
 const VALID_AVAILABILITY_STATUSES = new Set(Object.values(AvailabilityStatus) as readonly string[]);
 

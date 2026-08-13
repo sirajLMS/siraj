@@ -7,11 +7,11 @@ import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-d
 import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { buildMaskedTransactionSnapshot, PermissionsService } from "@/backend/services";
-import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
 import type {
+  DisplayAmountReturnType,
   PaymentMethodTransactionSnapshot,
   PaymentProofTransactionSnapshot,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 type SnapshotUnion = PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot;

@@ -25,7 +25,7 @@ import type {
   UpdateSupportedMobileWalletInput,
   UpdateSupportedOnlineAccountInput,
   UpdateSupportedPaymentLinkInput,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
 
 type ErrorsTranslations = ReturnType<BaseContext["t"]>["errorsTranslations"];
 

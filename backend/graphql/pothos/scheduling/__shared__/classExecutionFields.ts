@@ -2,7 +2,7 @@ import type { ObjectFieldBuilder } from "@pothos/core";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { EffectiveMeetingPothosObject } from "@/backend/graphql/pothos/meeting/effective-meeting.pothos";
 import { ClassExecutionStatePothosObject, ClassOutcomePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
+import type { EffectiveMeetingReturnType } from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;

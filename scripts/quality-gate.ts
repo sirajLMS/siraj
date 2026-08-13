@@ -13,15 +13,36 @@ import { withProcessLock } from "@/scripts/lib/process-lock";
 
 const STATE_FILE = join(process.cwd(), ".quality-gate-state.json");
 
-type QualityStage = "BASIC_CHECKS" | "CODESCENE";
+type QualityStage = "BASIC_CHECKS" | "DUPLICATES" | "CODESCENE";
 type QualityLifecycle = "FRESH" | "NEED_CONFIRM" | "DONE";
 
 interface QualityState {
   stage: QualityStage;
-  owner: "quality-gate" | "codescene";
+  owner: "quality-gate" | "duplicates" | "codescene";
   lifecycle: QualityLifecycle;
   lastRun: string;
 }
+
+const DUPLICATES_INSTRUCTIONS = `
+/**
+ * DUPLICATES REMEDIATION PROMPT:
+ * jscpd has detected code duplication (cross-file clones).
+ *
+ * Fix options:
+ *   1. Extract a shared scaffold — see docs/frontend/ui-shared-scaffold-pattern.md
+ *   2. Extract a shared utility — see docs/frontend/duplication-elimination-patterns.md
+ *   3. If the duplication is intentional (e.g. Drizzle schema column helpers,
+ *      shared/locale ar/en i18n parallel translations, thin passthrough wrappers),
+ *      remove the clone by restructuring, NOT by adding jscpd:ignore comments.
+ *
+ * Hard rules:
+ *   - NEVER add jscpd:ignore comments — fix the root cause instead.
+ *   - NEVER modify .jscpd.json configuration.
+ *   - Zero jscpd:ignore and zero .jscpd.json changes is enforced across all phases.
+ *
+ * After fixing, rerun: bun quality-gate
+ */
+`;
 
 const CODESCENE_INSTRUCTIONS = `
 /**
@@ -98,6 +119,15 @@ async function performStage(stage: QualityStage): Promise<boolean> {
       const lint = await runCommand("bun", ["lint:type-aware"]);
       return lint.success;
     }
+    case "DUPLICATES": {
+      const check = await runCommand("bun", ["check:duplicates"]);
+      if (!check.success) {
+        console.warn("⚠️ Code duplication (cross-file clones) detected by jscpd.");
+        console.log("\x1b[36m%s\x1b[0m", DUPLICATES_INSTRUCTIONS);
+        return false;
+      }
+      return true;
+    }
     case "CODESCENE": {
       const check = await runCommand("bun", ["codescene"]);
       if (!check.success) {
@@ -111,11 +141,16 @@ async function performStage(stage: QualityStage): Promise<boolean> {
   throw new Error(`Unhandled case in performStage`);
 }
 
-const STAGES: QualityStage[] = ["BASIC_CHECKS", "CODESCENE"];
+const STAGES: QualityStage[] = ["BASIC_CHECKS", "DUPLICATES", "CODESCENE"];
 
 async function recoverOwnership(state: QualityState): Promise<void> {
   console.log(`\n🔍 Checking if "${state.owner}" issues are resolved...`);
   let resolved = false;
+
+  if (state.owner === "duplicates") {
+    const check = await runCommand("bun", ["check:duplicates"]);
+    if (check.success) resolved = true;
+  }
 
   if (state.owner === "codescene") {
     const check = await runCommand("bun", ["codescene"]);
@@ -142,6 +177,7 @@ async function executeStages(startIndex: number, lifecycle: QualityLifecycle): P
     const success = await performStage(currentStage);
     if (!success) {
       let owner: QualityState["owner"] = "quality-gate";
+      if (currentStage === "DUPLICATES") owner = "duplicates";
       if (currentStage === "CODESCENE") owner = "codescene";
 
       saveState(currentStage, owner, "NEED_CONFIRM");

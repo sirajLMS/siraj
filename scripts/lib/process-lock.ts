@@ -66,6 +66,7 @@ function getLockNamespace(description: string): string {
   )
     return "lint";
   if (d.includes("codescene")) return "codescene";
+  if (d.includes("duplicates") || d.includes("jscpd")) return "duplicates";
   if (d.includes("build")) return "build";
   if (d.startsWith("test") || d.includes("test:") || d.includes("test ")) return "test";
   return "default";

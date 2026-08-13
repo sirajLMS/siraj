@@ -13,8 +13,7 @@ import {
 } from "@/backend/db/schema";
 import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
-import type { DBTransaction } from "@/backend/types";
-import type { AuditEntityType } from "@/backend/types/audit/audit.types";
+import type { AuditEntityType, DBTransaction } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 type AllTables =

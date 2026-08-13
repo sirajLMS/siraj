@@ -1,8 +1,7 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
 import { MeetingConfigService, MeetingProviderCatalogService } from "@/backend/services";
-import type { ClassInstanceSelectType } from "@/backend/types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+import type { ClassInstanceSelectType, MeetingProviderSelectType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet(classInstancesList: ClassInstanceSelectType[], config?: SeedConfig) {

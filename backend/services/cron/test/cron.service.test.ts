@@ -14,7 +14,7 @@ import type {
   CronScheduleReturnType,
   CronScheduleSelectType,
   CronScheduleSubmitInput,
-} from "@/backend/types/cron/cron.types";
+} from "@/backend/types";
 
 // ── Mutable mock call recording state ──
 // Unlike jest.fn()/mock(), bun:test's mock.module clones the returned object,

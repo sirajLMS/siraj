@@ -3,10 +3,7 @@ import {
   NotificationChannelPothosObject,
   NotificationEventTypePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type {
-  NotificationPreferenceReturnType,
-  NotificationPreferenceUpdateInput,
-} from "@/backend/types/notifications/notification-preferences.types";
+import type { NotificationPreferenceReturnType, NotificationPreferenceUpdateInput } from "@/backend/types";
 
 const NotificationPreferenceRef =
   gqlSchemaBuilder.objectRef<NotificationPreferenceReturnType>("NotificationPreference");

@@ -4,9 +4,12 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { NotificationEventType } from "@/backend/enum";
 import { ClassReminderService, CommunicationService, EVENT_CHANNEL_ALLOWLIST } from "@/backend/services";
-import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
-import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
-import type { StudentSelectType } from "@/backend/types/students/student.types";
+import type {
+  ChannelDispatchResult,
+  ClassInstanceSelectType,
+  CommunicationPayload,
+  StudentSelectType,
+} from "@/backend/types";
 
 // ─── Test fixtures ─────────────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderSelectType } from "@/backend/types";
 
 function buildProvider(overrides: Partial<MeetingProviderSelectType> = {}): MeetingProviderSelectType {
   return {

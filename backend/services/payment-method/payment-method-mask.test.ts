@@ -1,11 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { buildMaskedPaymentMethod } from "@/backend/services/payment-method/payment-method-mask";
-import type {
-  BankTransferDetails,
-  PaymentMethodDetails,
-  UserPaymentMethodSelectType,
-} from "@/backend/types/billing/payment-method.types";
+import type { BankTransferDetails, PaymentMethodDetails, UserPaymentMethodSelectType } from "@/backend/types";
 
 const baseMethod: UserPaymentMethodSelectType = {
   id: "00000000-0000-0000-0000-000000000001",

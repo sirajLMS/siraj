@@ -5,10 +5,8 @@ import {
   hasStudentGroupEditPermission,
   hasStudentGroupViewPermission,
 } from "@/backend/services/profile/profile-field-filter-bridge";
-import type { ProfileFieldGroupDefinition } from "@/backend/types/profile/profile-field-manifest";
-import { PROFILE_FIELD_GROUPS } from "@/backend/types/profile/profile-field-manifest";
-import type { StudentFieldGroupDefinition } from "@/backend/types/students/student-field-manifest";
-import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
+import type { ProfileFieldGroupDefinition, StudentFieldGroupDefinition } from "@/backend/types";
+import { PROFILE_FIELD_GROUPS, STUDENT_FIELD_GROUPS } from "@/backend/types";
 
 export type FieldFilterContext = {
   readonly actorUserId: string;

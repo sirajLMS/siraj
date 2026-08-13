@@ -12,7 +12,7 @@ import {
   MeetingIntegrationConnectedAccountStatus,
 } from "@/backend/enum/meeting/meeting-integrations.enum";
 import type { MeetingProvider } from "@/backend/services";
-import type { MeetingProviderKind } from "@/backend/types/meeting/meeting-provider.types";
+import type { MeetingProviderKind } from "@/backend/types";
 
 export { MeetingConnectionTestMode, MeetingIntegrationConnectedAccountStatus };
 

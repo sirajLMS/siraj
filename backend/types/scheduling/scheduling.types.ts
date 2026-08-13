@@ -7,12 +7,15 @@ import type {
   SchedulingMode,
   StudentStatus,
 } from "@/backend/enum";
-import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
-import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
-import type { PageInfo, PaginationArgs } from "@/backend/types/shared/pagination.types";
-import type { StudentSelectType } from "@/backend/types/students/student.types";
-import type { TeacherSelectType } from "@/backend/types/teachers/teacher.types";
-import type { UserSelectType } from "@/backend/types/users/user.types";
+import type {
+  ClassInstancePerformanceSelectType,
+  ClassInstanceSelectType,
+  PageInfo,
+  PaginationArgs,
+  StudentSelectType,
+  TeacherSelectType,
+  UserSelectType,
+} from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";

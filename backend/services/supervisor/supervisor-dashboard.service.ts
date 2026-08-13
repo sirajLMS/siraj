@@ -4,7 +4,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { cachedRead } from "@/backend/services/cache";
 import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
-import type { SupervisorDashboardReturnType } from "@/backend/types/supervisor";
+import type { SupervisorDashboardReturnType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 const MONTH_NAMES_EN = [

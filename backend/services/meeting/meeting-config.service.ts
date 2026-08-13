@@ -10,18 +10,16 @@ import {
 } from "@/backend/services/meeting/__shared__/meetingConfigHelpers";
 import { prepareMeetingConfigUpsert } from "@/backend/services/meeting/__shared__/prepareMeetingConfigUpsert";
 import { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/services/meeting/meeting-config-mask";
-import type { DBTransaction } from "@/backend/types";
-import type { MeetingConfigDetails } from "@/backend/types/meeting";
 import type {
   ClassMeetingConfigInsertType,
   ClassMeetingConfigSelectType,
-} from "@/backend/types/meeting/class-meeting-config.types";
-import type {
+  DBTransaction,
+  MeetingConfigDetails,
   UpdateUserMeetingConfigInput,
   UserMeetingConfigReturnType,
   UserMeetingConfigSelectType,
   UserMeetingConfigSubmitInput,
-} from "@/backend/types/meeting/meeting-config.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace MeetingConfigService {

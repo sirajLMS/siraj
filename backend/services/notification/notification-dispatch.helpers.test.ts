@@ -7,8 +7,12 @@ import {
   dispatchWithPreferences,
   EVENT_CHANNEL_ALLOWLIST,
 } from "@/backend/services/notification/notification-dispatch.helpers";
-import type { ChannelDispatchResult, CommunicationPayload, UserSelectType } from "@/backend/types";
-import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
+import type {
+  ChannelDispatchResult,
+  CommunicationPayload,
+  UserNotificationPreferenceSelectType,
+  UserSelectType,
+} from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 const PARENT_USER_ID = "00000000-0000-0000-0000-000000000001";

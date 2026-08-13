@@ -3,7 +3,7 @@ import { userPaymentMethods } from "@/backend/db/schema/billing/user-payment-met
 import { currencyCodeEnum, paymentMethodTypeEnum } from "@/backend/db/schema/enums";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
+import type { PaymentMethodTransactionSnapshot } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**

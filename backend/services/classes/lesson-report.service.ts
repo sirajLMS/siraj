@@ -22,7 +22,7 @@ import type {
   LessonReviewInput,
   PendingReviewCountReturnType,
 } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types/shared/pagination.types";
+import { PaginationArgs } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 /**

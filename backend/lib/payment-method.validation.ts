@@ -10,7 +10,7 @@ import type {
   PaymentMethodDetails,
   PaymentMethodTransactionSnapshot,
   UserPaymentMethodSubmitInput,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
 import type { LocalizedString } from "@/shared/types/localized-string";
 import { DEFAULT_CONTENT_LOCALE, isAppLocale } from "@/shared/types/localized-string";
 

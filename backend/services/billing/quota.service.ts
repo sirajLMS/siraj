@@ -14,10 +14,11 @@ import {
   resolveAssociatedViewer,
   requirePermission as sharedRequirePermission,
 } from "@/backend/services/billing/permission-utils";
-import type { DBTransaction } from "@/backend/types";
 import {
+  type DBTransaction,
   mapQuotaLedgerToReturnType,
   mapQuotaToReturnType,
+  type PaginationArgs,
   type QuotaBalanceReturnType,
   type QuotaExpirationBreakdown,
   type QuotaLedgerPaginatedResult,
@@ -25,8 +26,7 @@ import {
   type QuotaReturnType,
   type QuotaSubmitInput,
   type QuotaUpdateInput,
-} from "@/backend/types/billing/quota.types";
-import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 type ReadExecutor = DBTransaction | typeof db;

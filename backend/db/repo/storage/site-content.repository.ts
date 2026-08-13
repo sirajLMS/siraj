@@ -2,8 +2,7 @@ import type { SQL } from "drizzle-orm";
 import { and, desc, eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
 import { siteContent } from "@/backend/db/schema/storage/site-content";
-import type { DBTransaction } from "@/backend/types";
-import type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
+import type { DBTransaction, SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types";
 
 export namespace SiteContentRepository {
   export async function findBySlug(slug: string, tx?: DBTransaction): Promise<SiteContentSelectType | null> {

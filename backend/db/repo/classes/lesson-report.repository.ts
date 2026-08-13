@@ -13,8 +13,7 @@ import {
 } from "@/backend/db/schema";
 import { LessonReportStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import type { DBTransaction, LessonReportInsertType, LessonReportSelectType } from "@/backend/types";
-import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
+import type { DBTransaction, LessonReportInsertType, LessonReportSelectType, PaginationArgs } from "@/backend/types";
 
 export interface PendingReviewFilters {
   teacherId?: string;
