@@ -13,7 +13,7 @@ type UpcomingClassItem = NonNullable<
 function resolveJoinUrl(meetingJoinUrl?: string | null, effectiveMeeting?: EffectiveMeeting | null): string | null {
   const fromEffective = effectiveMeeting?.joinUrl?.trim();
   const fromLegacy = meetingJoinUrl?.trim();
-  return fromEffective || fromLegacy || null;
+  return (fromEffective ?? fromLegacy) ?? null;
 }
 
 export function mapUpcomingLesson(raw: UpcomingClassItem): UpcomingLessonRow {

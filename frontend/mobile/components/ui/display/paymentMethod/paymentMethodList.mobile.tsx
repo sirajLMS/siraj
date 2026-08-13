@@ -88,7 +88,7 @@ export function MobilePaymentMethodList({
                     <MobileLocalizedStringDisplay value={row.catalogName} typographyVariant="titleLg" />
                   ) : (
                     <Typography sx={{ typography: "titleLg" }}>
-                      {row.label?.trim() || typeLabel || row.catalogSlug}
+                      {(row.label?.trim() ?? typeLabel) ?? row.catalogSlug}
                     </Typography>
                   )}
                   {row.isDefault ? (

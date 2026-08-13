@@ -53,7 +53,7 @@ export function EnvSecretField({
   }
 
   if (readOnly) {
-    const displayValue = revealed ? value || placeholder || HIDDEN_SECRET_PLACEHOLDER : HIDDEN_SECRET_PLACEHOLDER;
+    const displayValue = revealed ? ((value || placeholder) ?? HIDDEN_SECRET_PLACEHOLDER) : HIDDEN_SECRET_PLACEHOLDER;
 
     return (
       <TextField

@@ -3,8 +3,11 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback } from "react";
-import type { CreateRecurringClassInput, DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  type CreateRecurringClassInput,
+  type DayOfWeek,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass,
   TeacherWorkloadMetricsQuery_teacherWorkloadMetrics_WeeklyWorkloadMetrics,
@@ -445,16 +448,16 @@ function buildCreateRecurringClassDialog(args: {
 
 function buildScheduleViewModel(schedule: ScheduleGrid, workload: Workload, teacherName: string) {
   return {
-    teacherId: schedule?.teacherId || "",
+    teacherId: schedule?.teacherId ?? "",
     teacherName,
     weeklyHoursWorked: workload?.weeklyHoursWorked ?? "0:00",
-    classes: (schedule?.classes || []).map(c => ({
-      id: c.id || "",
-      studentName: c.studentName || "",
-      studentId: c.studentId || "",
-      duration: c.duration || 0,
-      startTime: c.startTime || "",
-      day: c.day || "",
+    classes: (schedule?.classes ?? []).map(c => ({
+      id: c.id ?? "",
+      studentName: c.studentName ?? "",
+      studentId: c.studentId ?? "",
+      duration: c.duration ?? 0,
+      startTime: c.startTime ?? "",
+      day: c.day ?? "",
       executionState: c.executionState,
       outcome: c.outcome,
       subjectName: c.subjectName ?? null,
@@ -463,7 +466,7 @@ function buildScheduleViewModel(schedule: ScheduleGrid, workload: Workload, teac
       effectiveMeeting: c.effectiveMeeting,
       isFrozen: c.isFrozen ?? false,
     })),
-    lastUpdated: schedule?.weekEnd || new Date().toLocaleTimeString(),
+    lastUpdated: schedule?.weekEnd ?? new Date().toLocaleTimeString(),
   };
 }
 
@@ -491,7 +494,7 @@ export function useTeacherWeeklyScheduleViewModel(
   const schedule = scheduleData?.teacherWeeklyScheduleGrid;
   const workload = workloadData?.teacherWorkloadMetrics;
   const teacherName =
-    directoryData?.teacherDirectory?.rows?.find(r => r?.id === teacherId)?.name || loggedInUserName || "";
+    (directoryData?.teacherDirectory?.rows?.find(r => r?.id === teacherId)?.name ?? loggedInUserName) ?? "";
 
   useDocumentTitle(teacherName, Translation.Dashboard.TeacherWeeklySchedule, "pageTitle");
 

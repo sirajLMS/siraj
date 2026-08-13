@@ -268,7 +268,7 @@ export function PaymentMethodDisplayShared({
           />
         ) : (
           <Typography sx={{ typography: titleTypography }}>
-            {method.label?.trim() || typeLabel || method.catalogSlug}
+            {method.label?.trim() ?? typeLabel ?? method.catalogSlug}
           </Typography>
         )}
         {method.isDefault ? <Chip size="small" color="primary" label={tDisplay.defaultBadge} /> : null}

@@ -120,7 +120,7 @@ export function PaymentMethodDefaultsEditorShared({
         const shortKey = key.slice("direction.".length);
         return isDirectionLabelKey(shortKey) ? t.direction[shortKey] : "";
       });
-      const base = method.label?.trim() || method.catalogSlug || typeLabel;
+      const base = method.label?.trim() ?? method.catalogSlug ?? typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;
     },
     [t]

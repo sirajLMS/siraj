@@ -33,7 +33,7 @@ function formatOptionLabel(option: MeetingConfigSelectOption, locale: string): s
     : (option.provider?.slug ?? "");
   const label = option.label?.trim();
   if (label && providerName) return `${providerName} — ${label}`;
-  return label || providerName || option.id;
+  return label ?? providerName ?? option.id;
 }
 
 export function MeetingConfigSelectShared({

@@ -3,8 +3,12 @@
 import { useQuery } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  ProfileAudience,
+  ProfileMode,
+  ProfileScope,
+  type User,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
@@ -38,12 +42,12 @@ function buildStudentProfile(
     assignedStudents: null,
     associatedStudents: null,
     audience,
-    avatarUrl: userAvatarUrl || user?.avatarUrl || null,
+    avatarUrl: (userAvatarUrl || user?.avatarUrl) ?? null,
     displayCurrency: null,
     email: userEmail ?? user?.email ?? "",
     id: targetUserId,
     meetingConfigs: null,
-    name: userName || user?.name || "",
+    name: (userName || user?.name) ?? "",
     parentAdminProfile: null,
     parentId: null,
     parentOwnProfile: null,

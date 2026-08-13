@@ -89,9 +89,7 @@ async function provisionDemoUsers(): Promise<void> {
  * Safe to call from every suite's beforeAll — concurrent callers share one in-flight request.
  */
 export async function ensureDemoUsersForTests(): Promise<void> {
-  if (!demoUsersReadyPromise) {
-    demoUsersReadyPromise = provisionDemoUsers();
-  }
+  demoUsersReadyPromise ??= provisionDemoUsers();
   await demoUsersReadyPromise;
 }
 

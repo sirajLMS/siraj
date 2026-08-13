@@ -84,7 +84,7 @@ function mapScheduleRowsToClasses(rows: ScheduleRow[] | null | undefined): Acade
     const status = mapRowToSessionStatus(row?.outcome, row?.executionState, row?.isFrozen, row?.scheduledEndAt);
     return {
       id: row?.id ?? "",
-      className: row?.courseName?.trim() || row?.student?.name || "—",
+      className: (row?.courseName?.trim() ?? row?.student?.name) ?? "—",
       classId: row?.id ?? "",
       classAvatarUrl: row?.avatarUrl ?? null,
       instructor: row?.teacher?.name ?? "",
