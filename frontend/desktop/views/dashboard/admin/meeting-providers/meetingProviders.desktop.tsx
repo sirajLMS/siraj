@@ -2,11 +2,11 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
   DesktopAppDataGrid,
   DesktopFormErrorSnackbar,
-  DesktopFormSuccessSnackbar,
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
@@ -80,7 +80,7 @@ export function MeetingProvidersDesktopView({
         message={notifications.errorMsg}
         onClose={notifications.closeError}
       />
-      <DesktopFormSuccessSnackbar
+      <FormSuccessSnackbar
         open={notifications.successOpen}
         message={notifications.successMsg}
         onClose={notifications.closeSuccess}

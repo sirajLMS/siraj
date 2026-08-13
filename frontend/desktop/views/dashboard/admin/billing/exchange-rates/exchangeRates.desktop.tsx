@@ -1,10 +1,8 @@
 "use client";
 
 import { Alert, Box, Button } from "@mui/material";
-import {
-  ExchangeRatesSnackbarShared,
-  ExchangeRatesSyncPanelShared,
-} from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/__shared__/exchangeRatesSyncShared";
+import { AppSnackbar } from "@/frontend/common/components/ui/state/AppSnackbar";
+import { ExchangeRatesSyncPanelShared } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/__shared__/exchangeRatesSyncShared";
 import type {
   buildExchangeRateColumns,
   ExchangeRateRow,
@@ -184,7 +182,7 @@ export function ExchangeRatesDesktopView({
         onError={onErrorManualOverride}
       />
 
-      <ExchangeRatesSnackbarShared state={snackbarState} onClose={onSnackbarClose} />
+      <AppSnackbar state={snackbarState} onClose={onSnackbarClose} />
     </DesktopPageContainer>
   );
 }

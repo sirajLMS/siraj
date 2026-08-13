@@ -3,12 +3,12 @@
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { UserEntityFieldsSection } from "@/frontend/common/components/onboarding/sections";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/staff/onboarding/SystemAccessSection";
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/staff/onboarding/types";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-import { DesktopFormSuccessSnackbar } from "@/frontend/desktop/components/ui/form/snackbar";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 const StyledFormWrapper = styled(Box)(({ theme }) => ({
@@ -91,7 +91,7 @@ export function ManagerOnboardingDesktopView({
         </StyledFormWrapper>
       </Box>
 
-      <DesktopFormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
+      <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
     </DesktopPageContainer>
   );
 }

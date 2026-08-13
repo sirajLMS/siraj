@@ -2,6 +2,7 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Stack, Typography } from "@mui/material";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import {
   StudentOnboardingFormBodyShared,
   type StudentOnboardingSharedOptions,
@@ -9,7 +10,6 @@ import {
 import type { StudentOnboardingViewModel } from "@/frontend/common/views/dashboard/students/onboarding/useStudentOnboardingViewModel";
 import {
   MobileContentStack,
-  MobileFormSuccessSnackbar,
   MobilePageContainer,
   MobilePageHeader,
   MobilePrimaryPageAction,
@@ -59,7 +59,7 @@ export function StudentOnboardingMobileView({
         <StudentOnboardingFormBodyShared {...formProps} labels={labels} options={MOBILE_OPTIONS} />
       </MobileContentStack>
 
-      <MobileFormSuccessSnackbar open={successOpen} message={successMessage} onClose={onCloseSuccess} />
+      <FormSuccessSnackbar open={successOpen} message={successMessage} onClose={onCloseSuccess} />
     </MobilePageContainer>
   );
 }

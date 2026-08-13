@@ -4,6 +4,7 @@ import { AddOutlined, DeleteOutlined, EditOutlined, VideocamOutlined } from "@mu
 import { Alert, Avatar, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
@@ -12,7 +13,6 @@ import {
   MobileCardListItem,
   MobileFab,
   MobileFormErrorSnackbar,
-  MobileFormSuccessSnackbar,
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
@@ -169,7 +169,7 @@ export function MeetingProvidersMobileView({
         message={notifications.errorMsg}
         onClose={notifications.closeError}
       />
-      <MobileFormSuccessSnackbar
+      <FormSuccessSnackbar
         open={notifications.successOpen}
         message={notifications.successMsg}
         onClose={notifications.closeSuccess}

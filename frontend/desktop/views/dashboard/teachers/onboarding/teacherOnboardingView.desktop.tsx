@@ -1,10 +1,10 @@
 "use client";
 
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { TeacherOnboardingShared } from "@/frontend/common/views/dashboard/teachers/onboarding/__shared__/teacherOnboardingShared";
 import type { TeacherOnboardingViewModel } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingViewModel";
 import {
   DesktopFormErrorSnackbar,
-  DesktopFormSuccessSnackbar,
   DesktopPrimaryPageAction,
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
@@ -21,7 +21,7 @@ export function TeacherOnboardingDesktopView({ ...vm }: Readonly<TeacherOnboardi
         PageHeader: DesktopPageHeader,
         SectionPanel: DesktopSectionPanel,
         PrimaryPageAction: DesktopPrimaryPageAction,
-        FormSuccessSnackbar: DesktopFormSuccessSnackbar,
+        FormSuccessSnackbar: FormSuccessSnackbar,
         FormErrorSnackbar: DesktopFormErrorSnackbar,
         userEntityLabels,
         formActionsFlexWrap: "nowrap",

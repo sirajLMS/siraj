@@ -1,11 +1,11 @@
 "use client";
 
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { TeacherOnboardingShared } from "@/frontend/common/views/dashboard/teachers/onboarding/__shared__/teacherOnboardingShared";
 import type { TeacherOnboardingViewModel } from "@/frontend/common/views/dashboard/teachers/onboarding/useTeacherOnboardingViewModel";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
-import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function TeacherOnboardingMobileView({ ...vm }: Readonly<TeacherOnboardingViewModel>) {
@@ -18,7 +18,7 @@ export function TeacherOnboardingMobileView({ ...vm }: Readonly<TeacherOnboardin
         PageHeader: MobilePageHeader,
         SectionPanel: MobileSectionPanel,
         PrimaryPageAction: MobilePrimaryPageAction,
-        FormSuccessSnackbar: MobileFormSuccessSnackbar,
+        FormSuccessSnackbar: FormSuccessSnackbar,
         userEntityLabels,
         formActionsFlexWrap: "wrap",
       }}
