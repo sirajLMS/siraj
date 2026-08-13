@@ -5,7 +5,6 @@ import { Alert, Avatar, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
   MobileBaseDeleteDialog,
@@ -17,6 +16,7 @@ import {
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 function MeetingProvidersMobileEmptyState({ title, body }: Readonly<{ title: string; body: string }>) {
   return (

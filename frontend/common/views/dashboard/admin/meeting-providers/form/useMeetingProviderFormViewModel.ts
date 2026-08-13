@@ -11,7 +11,6 @@ import {
   meetingProviderQueryDocument,
   updateMeetingProviderMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
-import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   MeetingProviderFormViewProps,
@@ -21,6 +20,7 @@ import {
   type MeetingProviderFormData,
   meetingProviderFormSchema,
 } from "@/frontend/common/views/dashboard/admin/meeting-providers/schemas/meetingProviderFormSchema";
+import { isUrlAllowedByProvider } from "@/shared/lib/meeting-config";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 const defaultFormValues: MeetingProviderFormData = {

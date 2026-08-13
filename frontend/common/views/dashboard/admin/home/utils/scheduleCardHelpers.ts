@@ -1,6 +1,5 @@
 // NEW FOR PLAN v5: schedule card pure-data helpers (getPersonAccentColor, buildScheduleMetaItems) lifted out of the mobile tier view so tier modules contain rendering only.
 import type { Theme } from "@mui/material/styles";
-import { getNameInitials } from "@/frontend/common/views/dashboard/utils/nameInitials";
 
 export type PersonAccentTone = "teacher" | "student" | "default";
 
@@ -15,8 +14,6 @@ export function getPersonAccentColor(tone: PersonAccentTone, theme: Theme): stri
   }
   throw new Error(`Unhandled case in getPersonAccentColor`);
 }
-
-export { getNameInitials };
 
 export interface MetaStatItem {
   readonly label: string;

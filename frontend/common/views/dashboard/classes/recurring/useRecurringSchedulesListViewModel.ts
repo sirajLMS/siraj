@@ -6,7 +6,6 @@ import { useCallback, useMemo, useState } from "react";
 import { recurringSchedulesQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-schedule.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import type {
-  RecurringScheduleListItem,
   RecurringSchedulesListLabelsBySection,
   RecurringSchedulesListViewModel,
   UseRecurringSchedulesListViewModelProps,
@@ -121,10 +120,3 @@ export function useRecurringSchedulesListViewModel(
     onRetry: handleRetry,
   };
 }
-
-export type {
-  RecurringScheduleListItem,
-  RecurringSchedulesListLabelsBySection,
-  RecurringSchedulesListViewModel,
-  UseRecurringSchedulesListViewModelProps,
-};

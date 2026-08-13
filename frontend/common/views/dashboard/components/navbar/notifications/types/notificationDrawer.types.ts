@@ -1,32 +1,6 @@
 import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { NotificationsLabels } from "@/shared/locale/types/notifications";
-import type {
-  ClassMetadata,
-  ComplaintMetadata,
-  InvoiceMetadata,
-  LessonReportMetadata,
-  NotificationEntityKind,
-  NotificationMetadata,
-  NotificationMetadataBase,
-  PaymentMethodMetadata,
-  ScheduleMetadata,
-  StudentMetadata,
-  SuggestionMetadata,
-} from "@/shared/types/notification-alerts.types";
-
-export type {
-  ClassMetadata,
-  ComplaintMetadata,
-  InvoiceMetadata,
-  LessonReportMetadata,
-  NotificationEntityKind,
-  NotificationMetadata,
-  NotificationMetadataBase,
-  PaymentMethodMetadata,
-  ScheduleMetadata,
-  StudentMetadata,
-  SuggestionMetadata,
-};
+import type { NotificationMetadata } from "@/shared/types/notification-alerts.types";
 
 /** Alert row shape for the drawer (mirrors SystemAlert selection). */
 export interface NotificationDrawerAlert {

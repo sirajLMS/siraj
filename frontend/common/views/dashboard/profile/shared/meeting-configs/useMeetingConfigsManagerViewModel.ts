@@ -19,7 +19,6 @@ import {
   userMeetingConfigsQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { teacherWeeklyScheduleGridQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/weekly-schedule.documents";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { logger } from "@/frontend/common/utils/logger";
 import type { ConnectionState } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount";
@@ -29,6 +28,7 @@ import type {
   ReauthProvider,
 } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/reauth-needed-banner.types";
 import { useMeetingConfigProfileLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigProfileLabels";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 /** Error code emitted by the backend when a provider token is expired or revoked. */
 const PROVIDER_REAUTH_REQUIRED_CODE = "PROVIDER_REAUTH_REQUIRED";

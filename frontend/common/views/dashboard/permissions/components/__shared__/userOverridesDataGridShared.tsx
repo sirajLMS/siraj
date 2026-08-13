@@ -4,11 +4,11 @@ import { EditOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import {
   OverridesCell,
   type OverridesCellType,
 } from "@/frontend/common/views/dashboard/permissions/components/OverridesCell";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { PermissionsLabels } from "@/shared/locale";
 
 const StyledUserAvatar = styled(Avatar)(({ theme }) => ({

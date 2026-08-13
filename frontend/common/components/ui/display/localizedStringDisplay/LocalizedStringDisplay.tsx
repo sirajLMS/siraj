@@ -3,9 +3,9 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { LocalizedString } from "@/shared/types";
 
 export type LocalizedStringDisplayProps = {

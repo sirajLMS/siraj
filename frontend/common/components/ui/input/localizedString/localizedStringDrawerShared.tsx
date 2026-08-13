@@ -19,7 +19,9 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui/input/localizedString/types/localizedStringDrawer.types";
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
-import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
+import { hasRequiredLocalizedValue } from "@/frontend/common/lib/localized-string";
+import { ALLOWED_LOCALES } from "@/frontend/common/types/localized-string.types";
+import { setLocalizedString } from "@/shared/lib/localized-string";
 import {
   type AppLocale,
   type LocalizedStringLabels,

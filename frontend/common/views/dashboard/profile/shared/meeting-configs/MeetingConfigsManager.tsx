@@ -12,7 +12,6 @@ import {
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { AutoGenerationSupportCallout } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/AutoGenerationSupportCallout";
 import { ConnectProviderAccount } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount";
@@ -23,6 +22,7 @@ import { MeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profi
 import { ReauthNeededBanner } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/reauth-needed-banner";
 import { useMeetingConfigsManagerViewModel } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigsManagerViewModel";
 import { ViewBookingsLink } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ViewBookingsLink";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 export type MeetingConfigsManagerProps = {
   readonly targetUserId: string;

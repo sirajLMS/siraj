@@ -401,7 +401,7 @@ async function runBillingSeeds(context: SeedContext, step: RunStep, config: Seed
     seedOrGetInvoicePaymentSubmissions(context.invoices ?? [], context.parents ?? [], context.users ?? [], config)
   );
   await step("payments", () => seedOrGetPayments(context.invoices ?? [], config));
-  await step("quotas", () => seedOrGetQuotas());
+  await step("quotas", () => seedOrGetQuotas(context.students ?? [], context.teachers ?? [], context.actorUserId));
 }
 
 async function runCommunicationsSeeds(context: SeedContext, step: RunStep, config: SeedConfig): Promise<void> {

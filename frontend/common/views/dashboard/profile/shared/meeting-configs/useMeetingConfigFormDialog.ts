@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { MeetingConfigDetailsForm } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
+import { isUrlAllowedByProvider } from "@/shared/lib/meeting-config";
 import type { MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
 export type MeetingConfigFormEditInfo = {

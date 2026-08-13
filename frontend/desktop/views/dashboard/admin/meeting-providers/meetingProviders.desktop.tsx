@@ -2,7 +2,6 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
   DesktopAppDataGrid,
@@ -13,6 +12,7 @@ import {
   DesktopPrimaryPageAction,
 } from "@/frontend/desktop/components/ui";
 import { DesktopBaseDeleteDialog } from "@/frontend/desktop/components/ui/dialog/DesktopBaseDeleteDialog";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 function MeetingProvidersDesktopEmptyState({ title, body }: Readonly<{ title: string; body: string }>) {
   return (

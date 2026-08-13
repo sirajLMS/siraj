@@ -7,10 +7,10 @@ import type {
   MeetingConfigDisplayData,
   MeetingConfigDisplayProps,
 } from "@/frontend/common/components/ui/display/meetingConfig/types";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import type { UiTypographyVariant, UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import { type MeetingConfigDisplayLabels, Translation, useAppTranslation } from "@/shared/locale";
 import type { LocalizedString } from "@/shared/types";
 

@@ -1,5 +1,5 @@
 import { logger } from "@/backend/lib/logger";
-import { invalidateEnvConfigCache, resolveEnvConfig, resolveEnvConfigMany } from "@/backend/services/system";
+import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system";
 
 /**
  * Minimal channel interface shared by all communication channels.
@@ -163,9 +163,3 @@ export function createChannelFactory<TChannel extends ChannelLifecycle>(
 
   return { getChannel, resetChannel, channel };
 }
-
-/**
- * Convenience re-export so channel factories don't need a separate import
- * for `resolveEnvConfigMany` when resolving adapter credentials.
- */
-export { resolveEnvConfig, resolveEnvConfigMany };

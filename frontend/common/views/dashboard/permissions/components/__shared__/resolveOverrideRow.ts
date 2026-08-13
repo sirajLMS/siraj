@@ -1,6 +1,6 @@
 import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { PermissionsLabels } from "@/shared/locale";
 
 export type EffectiveState = "allowed" | "denied" | "not_set";

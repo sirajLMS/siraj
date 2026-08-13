@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@mui/material";
-import type { NotificationMetadata } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
+import type { NotificationMetadata } from "@/shared/types/notification-alerts.types";
 
 export interface RowViewEntityActionProps {
   readonly viewLabel: string;

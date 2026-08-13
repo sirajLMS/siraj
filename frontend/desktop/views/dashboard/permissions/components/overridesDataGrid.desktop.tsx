@@ -10,14 +10,11 @@ import {
   StyledPermissionKeyTextShared,
 } from "@/frontend/common/views/dashboard/permissions/components/__shared__/overridesDataGridShared.styles";
 import { resolveOverrideRow } from "@/frontend/common/views/dashboard/permissions/components/__shared__/resolveOverrideRow";
-import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import type { OverridesDataGridProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { OverrideEditControlsDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEditControls.desktop";
 import { OverrideEffectiveDisplayDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/overrideEffectiveDisplay.desktop";
 import { useAppLocale } from "@/shared/locale";
-
-export type { OverrideState };
 
 export function OverridesDataGridDesktop({
   labels,
