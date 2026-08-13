@@ -409,7 +409,7 @@ Report your results to the orchestrator:
 ## PROHIBITIONS
 - `bun run lint` is safe to run directly (it uses the in-process lint service — no HTTP server). However, subagents should prefer the per-file `sub-loop.ts` script for file-scoped verification.
  - NEVER modify files other than <file-path>
-- NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section for fix patterns.
+ - NEVER add `oxlint-disable` comments — fix the root cause instead. See `docs/quality/linting-rules.md` for fix patterns.
 
 ERRORS TO FIX:
 <paste errors from tsgo/oxlint/biome/lint/codescene output for this file>
@@ -417,7 +417,7 @@ ERRORS TO FIX:
 
 ### Oxlint Fix Patterns Reference
 
-When subagents encounter oxlint violations, refer them to the "Oxlint Rules" section in `AGENTS.md`
+When subagents encounter oxlint violations, refer them to `docs/quality/linting-rules.md`
 which documents every rule with fix patterns:
 
 | Rule | Fix Pattern |

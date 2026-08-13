@@ -138,7 +138,7 @@ Follow the project's **code quality rules** after making any code edits:
 4. **No Symptom Masking**:
    NEVER resolve errors by masking symptoms, swallowing exceptions, returning dummy fallbacks, commenting out assertions, or deleting failing tests. Trace and fix the root cause.
 5. **No `oxlint-disable` comments**:
-   NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section.
+   NEVER add `oxlint-disable` comments — fix the root cause instead. See `docs/quality/linting-rules.md`.
 
 ---
 

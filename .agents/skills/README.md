@@ -7,6 +7,7 @@ A collection of Claude Code skills following the [agentskills.io](https://agents
 | Skill | Description | Complexity |
 |-------|-------------|------------|
 | [spec-driven-development](./spec-driven-development/) | Master methodology combining all three phases | Intermediate |
+| [spec-implementation](./spec-implementation/) | Companion implementation skill — executes plans task-by-task with quality gates, semantic review, and parallel review waves | Advanced |
 | [requirements-engineering](./requirements-engineering/) | EARS format requirements and acceptance criteria | Beginner |
 | [design-documentation](./design-documentation/) | Technical architecture and component design | Intermediate |
 | [task-breakdown](./task-breakdown/) | Sequenced implementation task planning | Intermediate |

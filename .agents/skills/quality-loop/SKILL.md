@@ -33,7 +33,7 @@ Fix all oxlint warnings and errors. For file-scoped oxlint (faster when only a f
 bunx oxlint --deny-warnings --ignore-path .gitignore <file>
 ```
 
-**Critical**: NEVER add `oxlint-disable` comments — fix the root cause instead. See the "Oxlint Rules" section in `AGENTS.md` for fix patterns per rule.
+**Critical**: NEVER add `oxlint-disable` comments — fix the root cause instead. See `docs/quality/linting-rules.md` for fix patterns per rule.
 
 ### Step 3: Biome
 
