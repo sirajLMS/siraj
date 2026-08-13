@@ -263,7 +263,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         try {
           // Parse token payload
-          const rawPayload = parseTokenPayload(tokenPayload || "{}");
+          const rawPayload = parseTokenPayload(tokenPayload ?? "{}");
           const parsedSessionId = rawPayload.sessionId;
 
           // Mark session as used

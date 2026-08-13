@@ -8,7 +8,7 @@ export const QuotaFormAccessContext = createContext<QuotaFormAccessContextValue 
 
 export function useQuotaFormAccess(): QuotaFormAccessContextValue {
   const value = useContext(QuotaFormAccessContext);
-  if (value == null || value.labels == null || value.commonLabels == null) {
+  if (value?.labels == null || value.commonLabels == null) {
     throw new Error("useQuotaFormAccess must be used within QuotaFormAccessProvider");
   }
   return value;

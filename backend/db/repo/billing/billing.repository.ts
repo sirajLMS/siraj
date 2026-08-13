@@ -62,7 +62,7 @@ export namespace BillingRepository {
     const rate = await getLatestExchangeRate(currency, CurrencyCode.USD, tErrors, t);
     return {
       snapshot: rate.rate,
-      source: rate.source || "SYSTEM_AUTO",
+      source: rate.source ?? "SYSTEM_AUTO",
     };
   }
 
@@ -233,7 +233,7 @@ export namespace BillingRepository {
       toCurrency: input.toCurrency,
       oldRate: results.length > 0 ? oldRate.rate : null,
       newRate: input.rate,
-      source: input.source || "MANUAL",
+      source: input.source ?? "MANUAL",
       changedByUserId,
       createdAt: new Date(),
     });

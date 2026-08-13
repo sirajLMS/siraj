@@ -43,7 +43,7 @@ interface ErrorsTranslationsHolder {
 }
 
 function resolveActorId(ctx: PermissionCtx): string {
-  return ctx.user?.id || "";
+  return ctx.user?.id ?? "";
 }
 
 function resolveErrorsTranslations(ctx: ErrorsTranslationsHolder): ErrorsLabels {

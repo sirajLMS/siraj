@@ -40,7 +40,7 @@ async function resolveUserFromSession(
   const session = await SessionService.validateSession(sessionId);
   if (!session?.userId) return { session: session ?? null, user: null };
 
-  const user = (await UserRepository.findById(session.userId)) || null;
+  const user = (await UserRepository.findById(session.userId)) ?? null;
   if (!user) {
     logger.warn("[RefreshToken] Session found but user not found", {
       userId: session.userId,
@@ -55,10 +55,10 @@ async function resolveUserFromRefreshToken(
   const payload = await verifyToken(refreshToken);
   if (payload?.type !== "refresh") return { session: null, user: null };
 
-  const user = (await UserRepository.findById(payload.userId)) || null;
+  const user = (await UserRepository.findById(payload.userId)) ?? null;
   if (!user) return { session: null, user: null };
 
-  const session = (await SessionRepository.findByUserId(user.id)) || null;
+  const session = (await SessionRepository.findByUserId(user.id)) ?? null;
   if (!session) {
     logger.warn("[RefreshToken] User found but no session exists", {
       userId: user.id,
@@ -140,7 +140,7 @@ async function rotateTokensAndSession(
   ctx: BaseContext,
   rawSessionId?: string
 ): Promise<{ token: string; user: SafeUser } | null> {
-  const sessionIdForUpdate = rawSessionId || session.hashedId;
+  const sessionIdForUpdate = rawSessionId ?? session.hashedId;
   const newAccessToken =
     (rawSessionId ? await ImpersonationService.issueAccessTokenForSession(user.id, rawSessionId) : null) ??
     (rawSessionId ? await PermissionGroupSimulationService.issueAccessTokenForSession(user.id, rawSessionId) : null) ??
@@ -182,7 +182,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, args, ctx) => {
       const { email, password } = args.input;
-      const ipAddress = ctx.ipAddress || "127.0.0.1";
+      const ipAddress = ctx.ipAddress ?? "127.0.0.1";
       const tErrors = ctx.t().errorsTranslations;
 
       // 0. Enforce auth rate limit before any credential checks

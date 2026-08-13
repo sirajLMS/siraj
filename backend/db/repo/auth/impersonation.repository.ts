@@ -79,13 +79,13 @@ export namespace ImpersonationRepository {
     actorUserId: string,
     tx?: DBTransaction
   ): Promise<Types.ImpersonationSessionReturnType | null> {
-    return findActive(eq(impersonationSessions.actorUserId, actorUserId), tx || db);
+    return findActive(eq(impersonationSessions.actorUserId, actorUserId), tx ?? db);
   }
 
   export async function findActiveBySessionId(
     sessionId: string,
     tx?: DBTransaction
   ): Promise<Types.ImpersonationSessionReturnType | null> {
-    return findActive(eq(impersonationSessions.sessionId, sessionId), tx || db);
+    return findActive(eq(impersonationSessions.sessionId, sessionId), tx ?? db);
   }
 }

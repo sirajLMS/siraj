@@ -30,7 +30,7 @@ async function resolveTeacherDashboard(ctx: BaseContext, args: { date: string; p
       return {
         id: r.id,
         studentId: r.studentId,
-        studentName: r.student?.name || "Student",
+        studentName: r.student?.name ?? "Student",
         scheduledStartAt: r.scheduledStartAt,
         scheduledEndAt: r.scheduledEndAt,
         durationMinutes: r.durationMinutes,

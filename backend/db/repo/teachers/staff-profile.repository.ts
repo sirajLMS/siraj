@@ -395,8 +395,8 @@ export namespace StaffProfileRepository {
       }
 
       const profile = existing[0];
-      const hasUserFieldUpdate = input.phoneIsSet || input.statusIsSet;
-      const hasStaffFieldUpdate = input.hourlyRateIsSet || input.rateCurrencyIsSet;
+      const hasUserFieldUpdate = input.phoneIsSet ?? input.statusIsSet;
+      const hasStaffFieldUpdate = input.hourlyRateIsSet ?? input.rateCurrencyIsSet;
 
       if (input.phoneIsSet) {
         await UserRepository.updateProfileFields(profile.userId, { phone: input.phone ?? null }, locale, t);

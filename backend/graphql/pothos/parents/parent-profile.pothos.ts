@@ -120,7 +120,7 @@ gqlSchemaBuilder.queryField("parentProfile", t =>
       parentId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentProfileService.getProfile(ctx.user?.id || "", args.parentId, ctx.locale);
+      return ParentProfileService.getProfile(ctx.user?.id ?? "", args.parentId, ctx.locale);
     },
   })
 );
@@ -133,7 +133,7 @@ gqlSchemaBuilder.queryField("parentAssociatedStudents", t =>
       parentId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentProfileService.getAssociatedStudents(ctx.user?.id || "", args.parentId, ctx.locale);
+      return ParentProfileService.getAssociatedStudents(ctx.user?.id ?? "", args.parentId, ctx.locale);
     },
   })
 );
@@ -150,7 +150,7 @@ gqlSchemaBuilder.queryField("studentById", t =>
       // Reusing AssociatedStudentRef but fetching a single one.
       // Need a student-specific service method or repository call.
       // AssociatedStudentResult is defined as { id, name, status, teacherName, ... }
-      return ParentProfileService.getStudentById(ctx.user?.id || "", args.studentId, ctx.locale);
+      return ParentProfileService.getStudentById(ctx.user?.id ?? "", args.studentId, ctx.locale);
     },
   })
 );
@@ -165,7 +165,7 @@ gqlSchemaBuilder.mutationField("deactivateParent", t =>
       parentId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentProfileService.deactivateAccount(ctx.user?.id || "", args.parentId, ctx.locale);
+      return ParentProfileService.deactivateAccount(ctx.user?.id ?? "", args.parentId, ctx.locale);
     },
   })
 );
@@ -178,7 +178,7 @@ gqlSchemaBuilder.mutationField("reactivateParent", t =>
       parentId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentProfileService.reactivateAccount(ctx.user?.id || "", args.parentId, ctx.locale);
+      return ParentProfileService.reactivateAccount(ctx.user?.id ?? "", args.parentId, ctx.locale);
     },
   })
 );
@@ -195,7 +195,7 @@ gqlSchemaBuilder.mutationField("updateStudentQuota", t =>
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
       return StudentManagementService.editQuota(
-        ctx.user?.id || "",
+        ctx.user?.id ?? "",
         args.studentId,
         tErrors,
         args.newClassesRemaining,

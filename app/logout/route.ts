@@ -18,7 +18,7 @@ function resolveRequestOrigin(request: NextRequest): string {
 function getIpAddress(request: NextRequest): string {
   const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   const realIp = request.headers.get("x-real-ip");
-  return realIp || forwardedFor || "127.0.0.1";
+  return realIp ?? forwardedFor ?? "127.0.0.1";
 }
 
 function getLocale(request: NextRequest): string {

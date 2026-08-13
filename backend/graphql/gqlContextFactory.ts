@@ -70,7 +70,7 @@ const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
 function getIpAddress(headersList: Headers): string {
   const forwardedFor = headersList.get("x-forwarded-for")?.split(",")[0]?.trim();
   const realIp = headersList.get("x-real-ip");
-  const raw = realIp || forwardedFor || "127.0.0.1";
+  const raw = realIp ?? forwardedFor ?? "127.0.0.1";
   const parts = raw.split(":");
   const ip = parts.length === 2 ? parts[0] : raw;
   return IPV4_REGEX.test(ip) ? ip : "127.0.0.1";
@@ -106,11 +106,11 @@ export async function createGraphQLContext(): Promise<BaseContext> {
   const cookieStore = await cookies();
 
   // Extract refresh token from httpOnly cookie only (never from headers — prevents XSS token theft)
-  const refreshToken = cookieStore.get("refresh_token")?.value || undefined;
+  const refreshToken = cookieStore.get("refresh_token")?.value ?? undefined;
 
   // Extract session ID from cookie
-  const sessionId = cookieStore.get("session_id")?.value || undefined;
-  const accessTokenCookie = cookieStore.get("access_token")?.value || undefined;
+  const sessionId = cookieStore.get("session_id")?.value ?? undefined;
+  const accessTokenCookie = cookieStore.get("access_token")?.value ?? undefined;
 
   if (!refreshToken && !sessionId) {
     logger.debug("[GraphQL Context] No auth cookies found in request");

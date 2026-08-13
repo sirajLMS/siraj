@@ -61,19 +61,19 @@ export async function createTestUser(
   const [user] = await tx
     .insert(users)
     .values({
-      name: overrides.name || "Test User",
-      email: overrides.email || `user-${randomUUID()}@example.com`,
-      password: overrides.password || randomUUID(),
-      rememberTokenHash: overrides.rememberTokenHash || null,
-      avatarFilePath: overrides.avatarFilePath || null,
+      name: overrides.name ?? "Test User",
+      email: overrides.email ?? `user-${randomUUID()}@example.com`,
+      password: overrides.password ?? randomUUID(),
+      rememberTokenHash: overrides.rememberTokenHash ?? null,
+      avatarFilePath: overrides.avatarFilePath ?? null,
       avatarUrl: overrides.avatarUrl ?? null,
       status: overrides.status ?? AccountStatus.ACTIVATED,
-      isSuperAdmin: overrides.isSuperAdmin || false,
-      lastLoginAt: overrides.lastLoginAt || null,
-      emailVerifiedAt: overrides.emailVerifiedAt || null,
-      createdAt: overrides.createdAt || now,
-      updatedAt: overrides.updatedAt || now,
-      deletedAt: overrides.deletedAt || null,
+      isSuperAdmin: overrides.isSuperAdmin ?? false,
+      lastLoginAt: overrides.lastLoginAt ?? null,
+      emailVerifiedAt: overrides.emailVerifiedAt ?? null,
+      createdAt: overrides.createdAt ?? now,
+      updatedAt: overrides.updatedAt ?? now,
+      deletedAt: overrides.deletedAt ?? null,
       ...overrides,
     })
     .returning();

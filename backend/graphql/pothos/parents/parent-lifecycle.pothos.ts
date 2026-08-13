@@ -24,7 +24,7 @@ gqlSchemaBuilder.mutationField("changeParentLifecycleStatus", t =>
     },
     resolve: async (_root, args, ctx) => {
       return ParentLifecycleService.changeLifecycleStatus(
-        ctx.user?.id || "",
+        ctx.user?.id ?? "",
         args.parentId,
         args.newStatus,
         ctx.locale

@@ -51,7 +51,7 @@ async function setupTestSession(
   overrides: Partial<Parameters<typeof SessionRepository.create>[0]> = {}
 ) {
   const user = await createTestUser(tx, `${emailPrefix}-${randomUUID()}@example.com`);
-  const sessionId = overrides.hashedId || `session-${randomUUID()}`;
+  const sessionId = overrides.hashedId ?? `session-${randomUUID()}`;
   const hashedSessionId = hashSessionId(sessionId);
 
   const session = await SessionRepository.create(

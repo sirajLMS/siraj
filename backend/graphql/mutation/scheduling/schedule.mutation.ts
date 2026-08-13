@@ -41,7 +41,7 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
           })),
           classType: args.input.classType,
           generateInstancesForWeeks: args.input.generateInstancesForWeeks ?? undefined,
-          hourlyRate: args.input.hourlyRate || null,
+          hourlyRate: args.input.hourlyRate ?? null,
           rateCurrency: args.input.rateCurrency ?? null,
         },
         tErrors

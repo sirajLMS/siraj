@@ -150,7 +150,7 @@ gqlSchemaBuilder.queryField("availableClassSlots", t =>
         return await AvailabilityService.findAvailableSlots(
           args.studentId,
           args.date,
-          args.teacherId ? args.teacherId : null,
+          args.teacherId ?? null,
           args.durationMinutes ?? 60,
           undefined,
           ctx.locale

@@ -23,7 +23,7 @@ gqlSchemaBuilder.queryField("parentDocuments", t =>
       parentId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentDocumentService.getParentDocuments(ctx.user?.id || "", args.parentId, ctx.locale);
+      return ParentDocumentService.getParentDocuments(ctx.user?.id ?? "", args.parentId, ctx.locale);
     },
   })
 );
@@ -39,7 +39,7 @@ gqlSchemaBuilder.mutationField("linkDocumentToParent", t =>
     },
     resolve: async (_root, args, ctx) => {
       const result = await ParentDocumentService.linkDocumentToParent(
-        ctx.user?.id || "",
+        ctx.user?.id ?? "",
         args.parentId,
         args.fileId,
         args.usageType,

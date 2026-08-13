@@ -11,5 +11,5 @@ export function resolveClassAvatarUrl(
     return recurring;
   }
   const subject = subjectAvatarUrl?.trim();
-  return subject || null;
+  return subject ?? null;
 }

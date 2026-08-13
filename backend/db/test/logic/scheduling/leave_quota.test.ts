@@ -32,7 +32,7 @@ async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
       cause && typeof cause === "object" && "message" in cause
         ? String((cause as Record<string, unknown>).message)
         : undefined;
-    const message = causeMessage || errorCaught.message || "";
+    const message = causeMessage ?? errorCaught.message ?? "";
     expect(message).toContain("Leave quota exceeded");
   }
 }

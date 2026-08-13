@@ -25,7 +25,7 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneSele
   logger.info("Seeding system teachers...");
   const seedConfig = config ?? loadSeedConfig();
 
-  const defaultTimezone = timezones.find(t => t.ianaId === "UTC") || timezones[0];
+  const defaultTimezone = timezones.find(t => t.ianaId === "UTC") ?? timezones[0];
   if (!defaultTimezone) {
     throw new Error("No timezones found in seed data.");
   }

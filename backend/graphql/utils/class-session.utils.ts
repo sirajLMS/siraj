@@ -49,8 +49,8 @@ function resolveInstanceAvatarUrl(instance: ClassInstanceWithRelations): string 
 
 function buildStudentParticipant(instance: ClassInstanceWithRelations, unknownName: string) {
   return {
-    id: instance.student?.id || instance.studentId,
-    name: instance.student?.name || unknownName,
+    id: instance.student?.id ?? instance.studentId,
+    name: instance.student?.name ?? unknownName,
     grade: null,
     level: null,
     avatarUrl: instance.student?.avatarUrl ?? null,
@@ -59,8 +59,8 @@ function buildStudentParticipant(instance: ClassInstanceWithRelations, unknownNa
 
 function buildTeacherParticipant(instance: ClassInstanceWithRelations, unknownName: string) {
   return {
-    id: instance.teacher?.id || instance.teacherId,
-    name: instance.teacher?.user?.name || unknownName,
+    id: instance.teacher?.id ?? instance.teacherId,
+    name: instance.teacher?.user?.name ?? unknownName,
     title: truncateQualifications(instance.teacher?.qualifications),
     avatarUrl: instance.teacher?.user?.avatarUrl ?? null,
   };

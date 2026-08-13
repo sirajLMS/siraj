@@ -32,7 +32,7 @@ function teacherWeeklyResolve<TResult>(
   ): Promise<TResult> => {
     const userId = await requireAuth(ctx);
     const tErrors = ctx.t().errorsTranslations;
-    return getService(userId, args.teacherId || null, args.weekDate, tErrors);
+    return getService(userId, args.teacherId ?? null, args.weekDate, tErrors);
   };
 }
 

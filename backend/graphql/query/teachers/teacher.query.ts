@@ -35,7 +35,7 @@ gqlSchemaBuilder.queryField("teacherDirectory", t =>
       const pagination = parsePaginationArgs(args.paginationArgs);
 
       return await StaffDirectoryService.getDirectory(
-        ctx.user?.id || "",
+        ctx.user?.id ?? "",
         pagination,
         args.search ?? undefined,
         ctx.locale

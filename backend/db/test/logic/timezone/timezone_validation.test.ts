@@ -60,7 +60,7 @@ describe("Timezone Validation Constraints", () => {
           })
           .execute()
       );
-      const message = error.cause?.message || error.message || "";
+      const message = error.cause?.message ?? error.message ?? "";
       expect(message).toMatch(/users_timezone_chk|time zone .* not recognized/);
     });
     testLogger.info("Invalid user timezone test passed.");
@@ -114,7 +114,7 @@ describe("Timezone Validation Constraints", () => {
           })
           .execute()
       );
-      const message = error.cause?.message || error.message || "";
+      const message = error.cause?.message ?? error.message ?? "";
       expect(message).toMatch(/recurring_schedules_timezone_chk|time zone .* not recognized/);
     });
     testLogger.info("Invalid recurring schedule timezone test passed.");

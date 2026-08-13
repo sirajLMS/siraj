@@ -140,7 +140,7 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
       );
 
       return {
-        id: `reschedule-tracking-${args.search || ""}-${args.status || ""}`,
+        id: `reschedule-tracking-${args.search ?? ""}-${args.status ?? ""}`,
         ...result,
       };
     },
