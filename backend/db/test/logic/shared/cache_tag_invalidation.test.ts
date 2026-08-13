@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { cachedRead, invalidateParentWrite, invalidateTag } from "@/backend/services/cache";
+import { cachedRead, invalidateParentWrite, invalidateTag } from "@/backend/services";
 
 interface TestKeys {
   parentDirKey: string;

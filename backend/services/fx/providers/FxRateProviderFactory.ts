@@ -1,4 +1,4 @@
-import { SystemSettingsRepository } from "@/backend/db/repo";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { FxProvider, FxProviderConfigSource } from "@/backend/enum/fx/fx-provider.enum";
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";

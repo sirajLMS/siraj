@@ -23,7 +23,7 @@ import {
 import { parents } from "@/backend/db/schema/parents/parents";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
-import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
+import type { NotificationMetadata } from "@/backend/types";
 
 /**
  * User Notification Preferences table.

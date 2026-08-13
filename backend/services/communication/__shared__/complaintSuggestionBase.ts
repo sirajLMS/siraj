@@ -1,7 +1,7 @@
-import { ParentRepository } from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo/parents";
 import type { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { BaseEntity, DBTx, ResolutionResult } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";

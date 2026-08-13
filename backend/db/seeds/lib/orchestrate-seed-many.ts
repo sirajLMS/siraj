@@ -1,4 +1,4 @@
-import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
+import { isDuplicateError } from "@/backend/services";
 
 export type OrchestrateSeedManyOptions<TSpec, TEntity, TKey> = {
   specs: TSpec[];

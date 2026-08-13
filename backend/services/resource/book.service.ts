@@ -3,7 +3,7 @@ import { AppPermission, type AvailabilityStatus } from "@/backend/enum";
 import { DomainError, UnauthorizedError } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { BookReturnType } from "@/backend/types/books/book.types";
+import type { BookReturnType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace BookService {

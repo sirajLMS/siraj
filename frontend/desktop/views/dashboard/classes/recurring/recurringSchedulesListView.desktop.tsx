@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { AppDataGrid } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { RecurringViewShellShared } from "@/frontend/common/views/dashboard/classes/recurring/__shared__/recurringViewShellShared";
-import type { RecurringSchedulesListViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringSchedulesListViewModel";
+import type { RecurringSchedulesListViewModel } from "@/frontend/common/views/dashboard/classes/recurring/types/recurringSchedulesListViewModel.types";
 
 export function RecurringSchedulesListDesktopView({
   labelsBySection,

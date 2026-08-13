@@ -1,18 +1,11 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import {
-  BillingRepository,
-  InvoicePaymentSubmissionRepository,
-  ParentRepository,
-  StorageDbRepository,
-} from "@/backend/db/repo";
+import { BillingRepository, InvoicePaymentSubmissionRepository } from "@/backend/db/repo/billing";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { InvoicePaymentSubmissionStatus } from "@/backend/enum/billing/billing.enum";
 import { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
-import type {
-  PaymentProofSnapshot,
-  PaymentProofTransactionSnapshot,
-} from "@/backend/types/billing/payment-method.types";
+import type { DBTransaction, PaymentProofSnapshot, PaymentProofTransactionSnapshot } from "@/backend/types";
 import { INVOICE_FILE_USAGE } from "@/shared/constants/billing/invoice-file-usage";
 import { isAllowedPaymentProofMimeType } from "@/shared/constants/billing/payment-proof";
 import type { ErrorsLabels } from "@/shared/locale";

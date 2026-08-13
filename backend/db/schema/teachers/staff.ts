@@ -1,7 +1,7 @@
 import { index, numeric, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
 import { currencyCodeEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
  * Thin staff membership marker (Decision 6A).

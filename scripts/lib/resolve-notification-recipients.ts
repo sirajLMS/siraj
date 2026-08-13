@@ -1,7 +1,7 @@
 import { inArray } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { parents, students } from "@/backend/db/schema";
+import type { DBTransaction } from "@/backend/types";
 
 export interface ResolvedRecipient {
   studentId: string;

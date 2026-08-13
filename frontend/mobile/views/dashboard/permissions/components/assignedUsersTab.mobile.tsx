@@ -195,7 +195,7 @@ function AssignedUsersMobileList({ props, labels }: Readonly<AssignedUsersListSl
     <MobileCardList
       rows={filteredAssignedUsers}
       emptyMessage={labels.noAssignedUsers}
-      getKey={user => (user.id || user.email) ?? ""}
+      getKey={user => user.id ?? user.email ?? ""}
       paginationOptions={{ mode: "client" }}
       layout="edge-to-edge"
       renderItem={user => (

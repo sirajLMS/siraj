@@ -1,5 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { LearningResourceService } from "@/backend/services/resource/learning-resource.service";
+import { LearningResourceService } from "@/backend/services";
 import type { LearningResourceReturnType } from "@/backend/types";
 
 // ─── Input Types ──────────────────────────────────────────────────────────────
@@ -39,8 +39,8 @@ gqlSchemaBuilder.queryField("learningResources", t =>
       searchQuery: t.arg.string({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
-      const locale = ctx.locale || "en";
-      const userId = ctx.user?.id || "";
+      const locale = ctx.locale ?? "en";
+      const userId = ctx.user?.id ?? "";
 
       const result = await LearningResourceService.listResources(userId, args.searchQuery ?? undefined, locale);
 
@@ -58,8 +58,8 @@ gqlSchemaBuilder.mutationField("uploadLearningResource", t =>
       input: t.arg({ type: ResourceUploadInput, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const locale = ctx.locale || "en";
-      const userId = ctx.user?.id || "";
+      const locale = ctx.locale ?? "en";
+      const userId = ctx.user?.id ?? "";
 
       return await LearningResourceService.createResource(userId, args.input, locale);
     },

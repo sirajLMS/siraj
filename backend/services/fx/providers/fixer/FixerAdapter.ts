@@ -1,7 +1,7 @@
 import { FxProvider } from "@/backend/enum/fx/fx-provider.enum";
 import { logger } from "@/backend/lib/logger";
 import { FxAdapterBase } from "@/backend/services/fx/providers/__shared__/fxAdapterBase";
-import { fixerResponseSchema } from "@/backend/services/fx/providers/fixer/fixer.types";
+import { fixerResponseSchema } from "@/backend/services/fx/providers/fixer/fixer.helpers";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCodeOrNull } from "@/shared/lib/enum";
 
@@ -121,7 +121,7 @@ export class FixerAdapter extends FxAdapterBase {
 
     if (!fixerResponse.success) {
       const err = fixerResponse.error;
-      const message = err?.info || err?.type || `Fixer error code ${err?.code ?? "unknown"}`;
+      const message = err?.info ?? err?.type ?? `Fixer error code ${err?.code ?? "unknown"}`;
       throw new Error(`Fixer request unsuccessful: ${message}`);
     }
 

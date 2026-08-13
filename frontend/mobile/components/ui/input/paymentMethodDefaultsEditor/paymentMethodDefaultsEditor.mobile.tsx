@@ -1,6 +1,7 @@
 "use client";
 
 import type * as React from "react";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import {
   PAYMENT_METHOD_DEFAULTS_EDITOR_MOBILE_OPTIONS,
   PaymentMethodDefaultsEditorShared,
@@ -8,13 +9,12 @@ import {
 } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/PaymentMethodDefaultsEditorShared";
 import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge/MobileStatusBadge";
-import { MobileFormSuccessSnackbar } from "@/frontend/mobile/components/ui/form/snackbar/MobileFormSuccessSnackbar";
 import { CurrencySelectMobile } from "@/frontend/mobile/components/ui/input/currencySelect";
 import { LocalizedStringDrawerMobile } from "@/frontend/mobile/components/ui/input/localizedString";
 
 const mobileSlots: PaymentMethodDefaultsEditorSlots = {
   StatusBadge: MobileStatusBadge,
-  FormSuccessSnackbar: MobileFormSuccessSnackbar,
+  FormSuccessSnackbar: FormSuccessSnackbar,
   CurrencySelect: CurrencySelectMobile,
   LocalizedStringDrawer: LocalizedStringDrawerMobile,
 };

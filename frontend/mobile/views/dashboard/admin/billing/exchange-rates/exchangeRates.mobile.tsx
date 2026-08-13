@@ -1,10 +1,8 @@
 "use client";
 
 import { Alert, Box, Button, Typography } from "@mui/material";
-import {
-  ExchangeRatesSnackbarShared,
-  ExchangeRatesSyncPanelShared,
-} from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/__shared__/exchangeRatesSyncShared";
+import { AppSnackbar } from "@/frontend/common/components/ui/state/AppSnackbar";
+import { ExchangeRatesSyncPanelShared } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/__shared__/exchangeRatesSyncShared";
 import { formatExchangeRateTimestamp } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import { ManualOverrideDialog } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ManualOverrideDialog";
 import { ProviderSettingsSection } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/ProviderSettingsSection";
@@ -292,7 +290,7 @@ export function ExchangeRatesMobileView({
           onError={onErrorManualOverride}
         />
 
-        <ExchangeRatesSnackbarShared state={snackbarState} onClose={onSnackbarClose} />
+        <AppSnackbar state={snackbarState} onClose={onSnackbarClose} />
       </MobileContentStack>
     </MobilePageContainer>
   );

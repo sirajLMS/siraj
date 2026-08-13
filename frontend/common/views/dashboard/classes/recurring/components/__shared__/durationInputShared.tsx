@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, FormHelperText, TextField } from "@mui/material";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { DurationInputProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 
 export interface DurationInputSharedOptions {

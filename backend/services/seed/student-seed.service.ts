@@ -10,8 +10,8 @@
  *
  * @see backend/db/seeds/students/
  */
-import type { DBTransaction } from "@/backend/db/db.types";
-import { StudentRepository } from "@/backend/db/repo";
+
+import { StudentRepository } from "@/backend/db/repo/students";
 import {
   StudentProgressRepository,
   type StudentProgressUpsertInput,
@@ -24,7 +24,7 @@ import {
 import type { StudentStatus } from "@/backend/enum";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { StudentProgressSelectType, StudentSelectType } from "@/backend/types";
+import type { DBTransaction, StudentProgressSelectType, StudentSelectType } from "@/backend/types";
 
 export type SeedStudentInput = {
   parentId: string;

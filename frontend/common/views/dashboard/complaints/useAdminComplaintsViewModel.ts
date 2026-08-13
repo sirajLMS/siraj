@@ -18,8 +18,7 @@ import type {
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { mapAdminComplaintRows } from "@/frontend/common/views/dashboard/complaints/utils/mapAdminComplaintRows";
-import type { ComplaintsAdminLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { type ComplaintsAdminLabels, Translation, useAppTranslation } from "@/shared/locale";
 import type { ComplaintsLabels } from "@/shared/locale/types/dashboard/complaints";
 
 export interface AdminComplaintsViewModel {

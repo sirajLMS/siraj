@@ -1,13 +1,11 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { db, queryDb } from "@/backend/db";
 import {
   classInstanceFiles,
   complaintFiles,
-  type DBTransaction,
-  db,
   invoiceFiles,
   learningResourceFiles,
   parentFiles,
-  queryDb,
   recurringScheduleFiles,
   staffProfileFiles,
   storageDirectories,
@@ -15,9 +13,10 @@ import {
   studentFiles,
   teacherFiles,
   userFiles,
-} from "@/backend/db";
+} from "@/backend/db/schema";
 import { logger } from "@/backend/lib";
 import type * as StorageTypes from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -115,7 +114,7 @@ export namespace StorageDbRepository {
   export const ensureDirectoryRecord = async (
     input: StorageTypes.FolderCreateInput
   ): Promise<StorageTypes.DirectoryEntity> => {
-    const permissions = input.permissions || {
+    const permissions = input.permissions ?? {
       allowUploads: true,
       allowDelete: true,
       allowMove: true,
@@ -134,14 +133,14 @@ export namespace StorageDbRepository {
         allowCreateSubDirs: permissions.allowCreateSubDirs,
         allowDeleteFiles: permissions.allowDeleteFiles,
         allowMoveFiles: permissions.allowMoveFiles,
-        isProtected: input.protected || false,
-        protectChildren: input.protectChildren || false,
+        isProtected: input.protected ?? false,
+        protectChildren: input.protectChildren ?? false,
       })
       .onConflictDoUpdate({
         target: storageDirectories.path,
         set: {
-          isProtected: input.protected || false,
-          protectChildren: input.protectChildren || false,
+          isProtected: input.protected ?? false,
+          protectChildren: input.protectChildren ?? false,
         },
       })
       .returning();
@@ -620,7 +619,7 @@ export namespace StorageDbRepository {
         const updated = await updateDirectory({
           ...directory,
           isProtected: input.isProtected,
-          protectChildren: input.protectChildren || false,
+          protectChildren: input.protectChildren ?? false,
         });
         return {
           success: !!updated,

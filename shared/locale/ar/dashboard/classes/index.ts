@@ -1,6 +1,6 @@
-export { dashboardClassAuditAr } from "./audit";
-export { dashboardCreateRecurringClassAr } from "./createRecurringClass";
-export { dashboardClassDetailsAr } from "./details";
-export { dashboardClassesMainAr } from "./main";
-export { dashboardRescheduleFormAr } from "./rescheduleForm";
-export { dashboardRescheduleTrackingAr } from "./rescheduleTracking";
+export * from "./audit";
+export * from "./createRecurringClass";
+export * from "./details";
+export * from "./main";
+export * from "./rescheduleForm";
+export * from "./rescheduleTracking";

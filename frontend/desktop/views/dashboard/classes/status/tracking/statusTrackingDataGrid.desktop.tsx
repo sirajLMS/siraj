@@ -1,6 +1,5 @@
 "use client";
 
-import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useCallback, useMemo } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
@@ -8,12 +7,15 @@ import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGri
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
+import {
+  STATUS_ROW_SX,
+  statusRowClassName,
+} from "@/frontend/common/views/dashboard/classes/status/tracking/components/__shared__/statusTrackingGridShared";
 import { STATUS_LABEL_KEYS } from "@/frontend/common/views/dashboard/classes/status/tracking/constants/statusLabelKeys.constants";
 import { StatusAction } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
   computeSessionStatus,
   formatScheduleRange,
-  SessionStatus,
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
@@ -23,8 +25,10 @@ import {
 } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingGridShared";
 import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
-import type { DesktopPersonProfileLinkCellProps } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
-import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
+import {
+  DesktopPersonProfileLinkCell,
+  type DesktopPersonProfileLinkCellProps,
+} from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
 
 export function StatusTrackingDataGridDesktop({
   rows,
@@ -57,7 +61,7 @@ export function StatusTrackingDataGridDesktop({
         renderCell: ({ row }) => (
           <DesktopClassProfileLinkCell
             href={row.id ? classHref(row.id) : undefined}
-            name={row.courseName?.trim() || "—"}
+            name={row.courseName?.trim() ?? "—"}
             avatarUrl={row.avatarUrl}
             avatarSize={40}
             typographyVariant="bodyMd"
@@ -157,19 +161,8 @@ export function StatusTrackingDataGridDesktop({
       ariaLabel="status-tracking-table"
       emptyMessage={labels.noEntries}
       paginationOptions={{ mode: "client" }}
-      getRowClassName={({ row }) =>
-        computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState) === SessionStatus.SUSPENDED_PENDING
-          ? "status-row-suspended"
-          : ""
-      }
-      sx={{
-        "& .status-row-suspended": {
-          backgroundColor: theme => alpha(theme.palette.status.blocked, 0.08),
-          "&:hover": {
-            backgroundColor: theme => alpha(theme.palette.status.blocked, 0.12),
-          },
-        },
-      }}
+      getRowClassName={({ row }) => statusRowClassName(row)}
+      sx={STATUS_ROW_SX}
     />
   );
 }

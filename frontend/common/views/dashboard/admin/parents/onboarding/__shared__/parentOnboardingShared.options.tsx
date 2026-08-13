@@ -1,13 +1,12 @@
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import type { ParentOnboardingSharedOptions } from "@/frontend/common/views/dashboard/admin/parents/onboarding/__shared__/parentOnboardingShared";
 import {
-  DesktopFormSuccessSnackbar,
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
   DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import {
-  MobileFormSuccessSnackbar,
   MobilePageContainer,
   MobilePageHeader,
   MobilePrimaryPageAction,
@@ -53,7 +52,7 @@ export const DESKTOP_OPTIONS: ParentOnboardingSharedOptions = {
     </DesktopPrimaryPageAction>
   ),
   renderSuccessSnackbar: (open, message, onClose) => (
-    <DesktopFormSuccessSnackbar open={open} message={message} onClose={onClose} />
+    <FormSuccessSnackbar open={open} message={message} onClose={onClose} />
   ),
   renderFormSections: (sections, meetingConfigSection) => (
     <>
@@ -101,7 +100,7 @@ export const MOBILE_OPTIONS: ParentOnboardingSharedOptions = {
     </MobilePrimaryPageAction>
   ),
   renderSuccessSnackbar: (open, message, onClose) => (
-    <MobileFormSuccessSnackbar open={open} message={message} onClose={onClose} />
+    <FormSuccessSnackbar open={open} message={message} onClose={onClose} />
   ),
   renderFormSections: (sections, meetingConfigSection) => (
     <>

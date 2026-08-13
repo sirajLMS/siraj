@@ -4,7 +4,7 @@ import {
   populateBillingFxDisplayCurrencyByUserId,
   resolveDisplayAmountFields,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
-import { BillingAlertsService } from "@/backend/services/billing/billing-alerts.service";
+import { BillingAlertsService } from "@/backend/services";
 
 gqlSchemaBuilder.queryFields(t => ({
   unpaidInvoicesAlert: t.field({

@@ -1,1 +1,1 @@
-export { GenderSelectorDesktop } from "@/frontend/desktop/components/ui/input/genderSelector/genderSelector.desktop";
+export * from "./genderSelector.desktop";

@@ -4,10 +4,7 @@ import {
   IanaTimezonePothosObject,
   ManagerAccountTypePothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type {
-  ManagerOnboardingInput,
-  ManagerOnboardingResult,
-} from "@/backend/services/staff/manager-onboarding.service";
+import type { ManagerOnboardingInput, ManagerOnboardingResult } from "@/backend/services";
 import type { ManagerOnboardingReturnType } from "@/backend/types";
 
 const ManagerOnboardingRef = gqlSchemaBuilder.objectRef<ManagerOnboardingReturnType>("ManagerOnboarding");

@@ -90,10 +90,10 @@ export function MobileCardListItem({
       })
     : () => ({});
 
-  const sxArray = Array.isArray(sx) ? sx : sx ? [sx] : [];
+  const singleSx = sx ? [sx] : [];
 
   return (
-    <Paper elevation={0} sx={[baseSx, interactiveSx, ...sxArray]}>
+    <Paper elevation={0} sx={[baseSx, interactiveSx, ...(Array.isArray(sx) ? sx : singleSx)]}>
       {children}
     </Paper>
   );

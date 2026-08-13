@@ -3,11 +3,12 @@ import { SupportedMobileWalletRepository } from "@/backend/db/repo/billing/suppo
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing/user-payment-method.repository";
 import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications/notification-preferences.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
-import { AccountStatus, CurrencyCode, NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { AccountStatus, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 interface CommunicationPayloadShape {

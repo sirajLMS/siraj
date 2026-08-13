@@ -16,10 +16,7 @@ import type {
   ListPhoneNumbersInput,
   ListPhoneNumbersResponseBody,
   WhatsappPhoneNumber,
-} from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
-
-/** Re-exported from the types layer for backward compatibility. */
-export type { ListPhoneNumbersResponseBody } from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+} from "@/backend/types";
 
 const { buildRequest: factoryBuildRequest, collectAll } = buildPaginatedListRequest<
   WhatsappPhoneNumber,
@@ -36,7 +33,7 @@ const { buildRequest: factoryBuildRequest, collectAll } = buildPaginatedListRequ
  * @param input WABA ID to list phone numbers for.
  * @param afterCursor Optional cursor from a prior page's `paging.cursors.after`.
  */
-export function buildRequest(
+export function buildListPhoneNumbersRequest(
   ctx: GraphApiRequestContext,
   input: ListPhoneNumbersInput,
   afterCursor?: string
@@ -49,7 +46,7 @@ export function buildRequest(
  * Returns the phone numbers and the `after` cursor for the next page.
  * The adapter follows cursors until `paging.next` is absent (P2).
  */
-export function parseResponse(body: ListPhoneNumbersResponseBody): {
+export function parseListPhoneNumbersResponse(body: ListPhoneNumbersResponseBody): {
   phoneNumbers: readonly WhatsappPhoneNumber[];
   nextCursor: string | undefined;
 } {

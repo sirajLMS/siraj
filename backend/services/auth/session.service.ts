@@ -1,4 +1,5 @@
-import { SessionRepository, TeacherRepository } from "@/backend/db/repo";
+import { SessionRepository } from "@/backend/db/repo/shared";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { verifyToken } from "@/backend/lib/auth/jwt";
 import { computeSessionHashes, verifyAndMigrateSessionHash } from "@/backend/lib/auth/session-hash";

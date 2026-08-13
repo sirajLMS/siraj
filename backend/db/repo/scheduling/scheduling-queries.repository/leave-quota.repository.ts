@@ -1,9 +1,8 @@
 import { and, eq, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
+import { db, queryDb } from "@/backend/db";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { leaveQuotaUsage, teachers } from "@/backend/db/schema";
+import type { DBTransaction } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 function collectErrorMessages(error: unknown): string {

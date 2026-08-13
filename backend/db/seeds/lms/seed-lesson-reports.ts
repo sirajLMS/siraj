@@ -1,8 +1,7 @@
-import type { SeedConfig } from "@/backend/db/seeds/lib";
-import { findAdminUserOrFallback, findSupervisorUserOrFallback } from "@/backend/db/seeds/lib";
+import { findAdminUserOrFallback, findSupervisorUserOrFallback, type SeedConfig } from "@/backend/db/seeds/lib";
 import { AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
+import { LessonReportService } from "@/backend/services";
 import type {
   ClassInstanceSelectType,
   LessonReportReturnType,

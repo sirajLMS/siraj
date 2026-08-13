@@ -179,7 +179,7 @@ export function QuotaDetailContainer(props: Readonly<QuotaDetailContainerProps>)
         headerName: t.ledger.note,
         flex: 1.5,
         minWidth: 180,
-        renderCell: params => params.value || "-",
+        renderCell: params => params.value ?? "-",
       },
       {
         field: "createdAt",

@@ -1,1 +1,1 @@
-export { dashboardReportsAr } from "./main";
+export * from "./main";

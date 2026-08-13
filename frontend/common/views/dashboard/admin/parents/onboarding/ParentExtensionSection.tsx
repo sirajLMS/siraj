@@ -7,7 +7,7 @@ import {
   UserPersonalAddressField,
   UserPersonalNationalityField,
 } from "@/frontend/common/components/onboarding/sections/userPersonalFieldComponents";
-import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
+import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
 import type { ParentOnboardingLabels } from "@/shared/locale/types/dashboard/parents/onboarding";
 
 interface ParentExtensionSectionProps {

@@ -7,8 +7,7 @@ import {
   RecurringScheduleDetailPothosObject,
   UpdateRecurringClassRateInputPothos,
 } from "@/backend/graphql/pothos/scheduling/recurring-schedule.pothos";
-import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
-import { RecurringScheduleDetailService } from "@/backend/services/schedule/recurring-schedule-detail.service";
+import { RecurringClassService, RecurringScheduleDetailService } from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("createRecurringClass", t =>
   t.field({
@@ -42,7 +41,7 @@ gqlSchemaBuilder.mutationField("createRecurringClass", t =>
           })),
           classType: args.input.classType,
           generateInstancesForWeeks: args.input.generateInstancesForWeeks ?? undefined,
-          hourlyRate: args.input.hourlyRate || null,
+          hourlyRate: args.input.hourlyRate ?? null,
           rateCurrency: args.input.rateCurrency ?? null,
         },
         tErrors

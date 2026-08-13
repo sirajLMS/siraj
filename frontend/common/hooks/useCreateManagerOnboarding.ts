@@ -22,7 +22,7 @@ export function useCreateManagerOnboarding() {
         name: formData.name,
         email: formData.email,
         avatarUrl: formData.avatarUrl ?? null,
-        phone: formData.phone || null,
+        phone: formData.phone ?? null,
         timezone: toGraphqlIanaTimezone(formData.timezone),
         displayCurrency: formData.displayCurrency ?? null,
         accountType: formData.accountType,

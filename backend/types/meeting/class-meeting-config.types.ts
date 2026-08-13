@@ -3,7 +3,7 @@ import type {
   MeetingConfigBaseReturnType,
   MeetingConfigBaseSelectType,
   MeetingConfigBaseSubmitInput,
-} from "@/backend/types/meeting/meeting-config-base.types";
+} from "@/backend/types";
 import type { LocalizedString } from "@/shared/types";
 
 export type ClassMeetingConfigScope = "class_instance" | "recurring_schedule";

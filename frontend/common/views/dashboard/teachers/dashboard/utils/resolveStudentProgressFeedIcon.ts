@@ -1,4 +1,3 @@
-import type { SvgIconComponent } from "@mui/icons-material";
 import {
   CheckCircleOutlineOutlined,
   DescriptionOutlined,
@@ -7,6 +6,7 @@ import {
   PersonOffOutlined,
   PlayCircleOutlineOutlined,
   SensorsOutlined,
+  type SvgIconComponent,
 } from "@mui/icons-material";
 import { TeacherProgressFeedEventKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
 

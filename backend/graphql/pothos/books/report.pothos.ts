@@ -4,12 +4,12 @@ import {
   resolveDisplayAmountFields,
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { ReportGroupingMode, ReportService } from "@/backend/services/report/report.service";
+import { ReportGroupingMode, ReportService } from "@/backend/services";
 import type {
   AttendanceReportPaidAmountReturnType,
   AttendanceReportResult,
   AttendanceReportRowReturnType,
-} from "@/backend/types/books/report.types";
+} from "@/backend/types";
 
 export const ReportGroupingModeEnum = gqlSchemaBuilder.enumType(ReportGroupingMode, {
   name: "ReportGroupingMode",

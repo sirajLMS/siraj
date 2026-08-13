@@ -1,9 +1,7 @@
 import { eq } from "drizzle-orm";
-import { queryDb as queryDbFn } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { systemSettings } from "@/backend/db/schema/shared/settings";
-import type { SystemSettingSelectType, SystemSettingUpsertInput } from "@/backend/types";
+import { db, queryDb as queryDbFn } from "@/backend/db";
+import { systemSettings } from "@/backend/db/schema";
+import type { DBTransaction, SystemSettingSelectType, SystemSettingUpsertInput } from "@/backend/types";
 import {
   SystemSettingCategory as SettingCategory,
   SystemSettingDataType as SettingDataType,

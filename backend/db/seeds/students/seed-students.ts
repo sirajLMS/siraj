@@ -13,7 +13,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { StudentStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
+import { StudentSeedService } from "@/backend/services";
 import type { ParentEntity, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
 
 const DEMO_STUDENTS = [

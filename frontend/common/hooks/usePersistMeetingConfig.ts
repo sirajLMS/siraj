@@ -40,7 +40,7 @@ export function usePersistMeetingConfig() {
           input: {
             userId,
             providerId: formData.meetingProvider.id,
-            label: formData.meetingLabel?.trim() || null,
+            label: formData.meetingLabel?.trim() ?? null,
             isDefault: true,
             password: null,
             details: {

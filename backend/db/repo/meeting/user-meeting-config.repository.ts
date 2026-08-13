@@ -1,7 +1,5 @@
 import { and, asc, eq } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import {
   buildMeetingConfigInsertValues,
   buildMeetingConfigUpdatePayload,
@@ -12,10 +10,11 @@ import { upsertManyWith } from "@/backend/db/repo/meeting/upsert-utils";
 import { userMeetingConfigs } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type {
+  DBTransaction,
   UpdateUserMeetingConfigInput,
   UserMeetingConfigInsertType,
   UserMeetingConfigSelectType,
-} from "@/backend/types/meeting/meeting-config.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace UserMeetingConfigRepository {

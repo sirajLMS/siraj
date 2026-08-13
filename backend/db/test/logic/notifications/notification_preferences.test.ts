@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { userNotificationPreferences, users } from "@/backend/db/schema";
 import {
-  createTestUser,
+  createTestUserWithDefaults,
   runInRollback,
   setupRlsPolicies,
   setupRlsRole,
@@ -33,7 +33,7 @@ describe("User Notification Preferences", () => {
   test("Can insert and retrieve preferences", async () => {
     testLogger.info("Testing preference insertion...");
     await runInRollback(async tx => {
-      const user = await createTestUser(tx, {
+      const user = await createTestUserWithDefaults(tx, {
         name: "Test User",
         email: `user-${randomUUID()}@example.com`,
       });
@@ -112,8 +112,8 @@ describe("User Notification Preferences", () => {
   test("RLS prevents users from seeing others' preferences", async () => {
     testLogger.info("Testing RLS on notification preferences...");
     await runInRollback(async tx => {
-      const userA = await createTestUser(tx, { name: "UserA" });
-      const userB = await createTestUser(tx, { name: "UserB" });
+      const userA = await createTestUserWithDefaults(tx, { name: "UserA" });
+      const userB = await createTestUserWithDefaults(tx, { name: "UserB" });
 
       await tx.insert(userNotificationPreferences).values({
         userId: userB.id,

@@ -7,10 +7,10 @@ import type {
   MeetingConfigDisplayData,
   MeetingConfigDisplayProps,
 } from "@/frontend/common/components/ui/display/meetingConfig/types";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import type { UiTypographyVariant, UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import { type MeetingConfigDisplayLabels, Translation, useAppTranslation } from "@/shared/locale";
 import type { LocalizedString } from "@/shared/types";
 
@@ -229,23 +229,28 @@ export function MeetingConfigDisplayShared({
     );
   }
 
+  let providerNameElement: React.ReactNode;
+  if (config.providerName && ProviderNameDisplay) {
+    providerNameElement = (
+      <ProviderNameDisplay value={config.providerName} typographyVariant="bodyMd" sx={{ fontWeight: 700 }} />
+    );
+  } else if (config.providerName) {
+    providerNameElement = (
+      <Typography
+        sx={{ typography: opts.providerTypographyVariant, fontWeight: 700 }}
+        dir={locale === "ar" ? "rtl" : "ltr"}
+      >
+        {providerTitle}
+      </Typography>
+    );
+  } else {
+    providerNameElement = <Typography sx={{ typography: opts.titleTypographyVariant }}>{providerTitle}</Typography>;
+  }
+
   return (
     <Stack spacing={compact ? opts.compactSpacing : opts.spacing}>
       <Stack sx={{ flexDirection: "row", flexWrap: "wrap", gap: opts.providerGap, alignItems: "center" }}>
-        {config.providerName ? (
-          ProviderNameDisplay ? (
-            <ProviderNameDisplay value={config.providerName} typographyVariant="bodyMd" sx={{ fontWeight: 700 }} />
-          ) : (
-            <Typography
-              sx={{ typography: opts.providerTypographyVariant, fontWeight: 700 }}
-              dir={locale === "ar" ? "rtl" : "ltr"}
-            >
-              {providerTitle}
-            </Typography>
-          )
-        ) : (
-          <Typography sx={{ typography: opts.titleTypographyVariant }}>{providerTitle}</Typography>
-        )}
+        {providerNameElement}
         {config.isDefault ? <Chip size="small" color="primary" label={tDisplay.defaultBadge} /> : null}
         {config.hasSecret ? <Chip size="small" variant="outlined" label={tDisplay.passwordProtected} /> : null}
       </Stack>

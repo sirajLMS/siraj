@@ -10,8 +10,7 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
-import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
+import { ClassCatalogService, RecurringClassService } from "@/backend/services";
 import type { StudentSelectType, TeacherSelectType } from "@/backend/types";
 
 export async function seedOrGet(

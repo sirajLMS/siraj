@@ -114,6 +114,3 @@ export const resetStorageService = (): void => {
   instance = null;
   initializationPromise = null;
 };
-
-export * from "@/backend/storage/disk/storage.service.interface";
-export * from "@/backend/types/storage/storage.types";

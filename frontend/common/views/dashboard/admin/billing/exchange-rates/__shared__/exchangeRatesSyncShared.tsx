@@ -3,14 +3,11 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import type { ComponentType } from "react";
 import type { StatusBadgeSharedProps } from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
-import { AppSnackbar } from "@/frontend/common/components/ui/state/AppSnackbar";
 import { formatExchangeRateTimestamp } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";
 import type {
   ExchangeRatesSyncRun,
   ExchangeRatesViewModel,
 } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/useExchangeRatesViewModel";
-
-export const ExchangeRatesSnackbarShared = AppSnackbar;
 
 export interface ExchangeRatesSyncConfig {
   readonly StatusBadge: ComponentType<Readonly<StatusBadgeSharedProps>>;

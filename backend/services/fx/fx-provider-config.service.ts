@@ -1,4 +1,5 @@
-import { SystemSettingsRepository, UserRepository } from "@/backend/db/repo";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
+import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, type FxProvider, FxProviderConfigSource } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {

@@ -100,8 +100,8 @@ export namespace StorageUtils {
   };
 
   export const blobToFileInfo = (blob: Types.BlobMetadata, baseUrl: string): Types.BucketFile => {
-    const path = blob.name || "";
-    const size = BigInt(blob.size || 0);
+    const path = blob.name ?? "";
+    const size = BigInt(blob.size ?? 0);
     const contentType = blob.contentType;
     const createdAt = blob.timeCreated ? new Date(blob.timeCreated) : new Date();
     const lastModified = blob.updated ? new Date(blob.updated) : new Date();
@@ -126,7 +126,7 @@ export namespace StorageUtils {
   };
 
   export const blobToDirectoryInfo = (blob: Types.BlobMetadata): Types.BucketDirectory => {
-    const path = (blob.name || "").replace(/\/$/, "");
+    const path = (blob.name ?? "").replace(/\/$/, "");
     const createdAt = blob.timeCreated ? new Date(blob.timeCreated) : new Date();
     const lastModified = blob.updated ? new Date(blob.updated) : new Date();
     const isPublic = path.startsWith("public");
@@ -166,9 +166,9 @@ export namespace StorageUtils {
       dbId: dbEntity?.id,
       path: bucketDir.path,
       name: extractFileName(bucketDir.path),
-      isProtected: dbEntity?.isProtected || false,
+      isProtected: dbEntity?.isProtected ?? false,
       permissions: permissions,
-      protectChildren: dbEntity?.protectChildren || false,
+      protectChildren: dbEntity?.protectChildren ?? false,
       createdAt: bucketDir.createdAt,
       lastModified: bucketDir.lastModified,
       fileCount: fileCount,
@@ -183,7 +183,7 @@ export namespace StorageUtils {
 
   export const combineFileData = (bucketFile: Types.BucketFile, dbEntity?: Types.FileEntity | null): Types.FileInfo => {
     const usages: Types.FileUsageInfo[] = [];
-    const isProtected = dbEntity?.isProtected || false;
+    const isProtected = dbEntity?.isProtected ?? false;
 
     const result: Types.FileInfo = {
       dbId: dbEntity?.id,

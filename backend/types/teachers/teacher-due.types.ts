@@ -1,5 +1,6 @@
 import type { teacherDues } from "@/backend/db/schema";
-import type { CurrencyCode, RateSource, TeacherDueStatus } from "@/backend/enum";
+import type { RateSource, TeacherDueStatus } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export type TeacherDueSelectType = typeof teacherDues.$inferSelect;
 export type TeacherDueInsertType = typeof teacherDues.$inferInsert;

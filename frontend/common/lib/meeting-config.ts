@@ -3,10 +3,6 @@ import type {
   MeetingProviderFieldSchema,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import { extractMeetingId, isUrlAllowedByProvider } from "@/shared/lib/meeting-config";
-
-// Re-export shared utilities so frontend consumers keep a single import path.
-export { extractMeetingId, isUrlAllowedByProvider };
 
 type MeetingProviderFieldVisibility = {
   readonly fieldSchema: MeetingProviderFieldSchema | MeetingProviderFieldsFragment["fieldSchema"];

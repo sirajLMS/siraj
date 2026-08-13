@@ -7,7 +7,7 @@ import { ParentStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pot
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ParentDirectoryService } from "@/backend/services/parent/parent-directory.service";
+import { ParentDirectoryService } from "@/backend/services";
 
 const PARENTS_DIRECTORY_DEFAULT_LIMIT = 20;
 const PARENTS_DIRECTORY_MAX_LIMIT = 100;

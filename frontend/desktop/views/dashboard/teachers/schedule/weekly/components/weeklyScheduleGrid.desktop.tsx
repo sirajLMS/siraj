@@ -51,7 +51,7 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
   const { open, openDialog, closeDialog } = useDeleteConfirmDialog();
   const t = labels;
   const classInstanceId = classItem.id ?? "";
-  const subjectLabel = classItem.subjectName?.trim() || t.grid.unknownSubject;
+  const subjectLabel = classItem.subjectName?.trim() ?? t.grid.unknownSubject;
   const statusLabel = resolveWeeklyScheduleSlotStatus(classItem, t.grid.status);
 
   const handleConfirm = () => {
@@ -116,7 +116,7 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
 
           <DesktopPersonProfileLink
             href={classItem.studentId ? studentHref(classItem.studentId) : undefined}
-            name={classItem.studentName || "—"}
+            name={classItem.studentName ?? "—"}
             showAvatar={false}
             typographyVariant="caption"
             fontWeight={500}

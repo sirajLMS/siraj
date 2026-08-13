@@ -1,11 +1,10 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { users } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { ParentDirectoryService } from "@/backend/services/parent/parent-directory.service";
+import { ParentDirectoryService, PermissionsService } from "@/backend/services";
 import { getErrorMessage } from "@/shared/utils/error";
 
 describe("ParentDirectoryService Permission Gating", () => {

@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import type { GcpContext } from "@/backend/storage/disk/gcp/types";
 import { createFolderHelper } from "@/backend/storage/disk/shared/folder-operations.helper";
 import type * as Types from "@/backend/types";

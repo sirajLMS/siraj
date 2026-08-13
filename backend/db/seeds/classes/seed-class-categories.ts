@@ -1,7 +1,6 @@
-import { CLASS_CATEGORY_SEEDS } from "@/backend/db/seeds/lib/class-catalog-factory";
-import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
+import { CLASS_CATEGORY_SEEDS, orchestrateSeedMany } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
+import { ClassCatalogService } from "@/backend/services";
 
 export async function seedOrGet() {
   logger.info("Seeding class categories...");

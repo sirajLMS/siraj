@@ -1,5 +1,5 @@
-export { profileBaseAr as profileAr } from "./base";
-export { profileNotificationsAr } from "./notifications";
-export { profileParentAr } from "./parent";
-export { profileStaffAr } from "./staff";
-export { profileTeacherAr } from "./teacher";
+export * from "./base";
+export * from "./notifications";
+export * from "./parent";
+export * from "./staff";
+export * from "./teacher";

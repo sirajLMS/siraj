@@ -4,7 +4,7 @@ import { DescriptionOutlined, PersonOutlined } from "@mui/icons-material";
 import { Box, InputAdornment, TextField } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { Controller } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { SuggestionFormFieldsProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
 
 type FormFieldsProps = Readonly<Omit<SuggestionFormFieldsProps, "variant">>;

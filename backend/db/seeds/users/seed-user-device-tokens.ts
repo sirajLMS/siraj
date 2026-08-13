@@ -6,7 +6,7 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { NotificationDeviceSeedService } from "@/backend/services/seed/notification-device-seed.service";
+import { NotificationDeviceSeedService } from "@/backend/services";
 import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {

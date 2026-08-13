@@ -5,7 +5,7 @@ import {
   ClassOutcomePothosObject,
   GroupClassAttendanceStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { GroupClassService } from "@/backend/services/group-class/group-class.service";
+import { GroupClassService } from "@/backend/services";
 import type {
   GroupClassAdminNoteReturnType,
   GroupClassAuditReturnType,

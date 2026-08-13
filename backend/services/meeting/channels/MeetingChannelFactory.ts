@@ -1,11 +1,11 @@
 import { logger } from "@/backend/lib/logger";
-import type {
-  GenerateMeetingInput,
-  GenerateMeetingResult,
-  IMeetingChannel,
-  MeetingProvider,
+import {
+  type GenerateMeetingInput,
+  type GenerateMeetingResult,
+  type IMeetingChannel,
+  type MeetingProvider,
+  UnsupportedProviderKindError,
 } from "@/backend/services/meeting/channels/IMeetingChannel";
-import { UnsupportedProviderKindError } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { invalidateEnvConfigCache, resolveEnvConfigMany } from "@/backend/services/system";
 
 // ============================================================================

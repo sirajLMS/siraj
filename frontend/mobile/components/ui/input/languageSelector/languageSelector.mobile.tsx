@@ -1,9 +1,9 @@
 "use client";
 
 import type * as React from "react";
+import type { LanguageSelectorProps } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { LanguageSelectorShared } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelectorShared";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji";
-import type { LanguageSelectorProps } from "@/frontend/mobile/components/ui/input/languageSelector/LanguageSelector";
 
 const MOBILE_OPTION_BOX_SX = { display: "flex", alignItems: "center", py: 1.25, minHeight: 48, gap: 1.5 } as const;
 

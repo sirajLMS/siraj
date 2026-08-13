@@ -1,16 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { UserRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/users";
 import { users } from "@/backend/db/schema";
-import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
+import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import type { DBTransaction } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { getErrorMessage } from "@/shared/utils/error";
 
 describe("UserRepository", () => {
   test("updateDisplayCurrency persists and returns the updated user", async () => {
     await runInRollback(async (tx: DBTransaction) => {
-      const user = await createTestUser(tx);
+      const user = await createTestUserWithDefaults(tx);
       expect(user.displayCurrency).toBeNull();
 
       const updated = await UserRepository.updateDisplayCurrency(user.id, CurrencyCode.EGP, tx);

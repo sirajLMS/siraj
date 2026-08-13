@@ -4,8 +4,10 @@ import { useForm } from "react-hook-form";
 import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
-import type { SuggestionFormData } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
-import { suggestionFormSchema } from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
+import {
+  type SuggestionFormData,
+  suggestionFormSchema,
+} from "@/frontend/common/views/dashboard/suggestions/schemas/suggestionFormSchema";
 import { buildSuggestionsLabels } from "@/frontend/common/views/dashboard/suggestions/utils/buildSuggestionsLabels";
 import { ParentSuggestionsDesktopView } from "@/frontend/desktop/views/dashboard/suggestions/parentSuggestions.desktop";
 import { Translation, useAppTranslation } from "@/shared/locale";

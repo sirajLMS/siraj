@@ -29,4 +29,4 @@ export type {
   TeacherAssignedClassRow,
   UpcomingClassRow,
   WeeklyScheduleGridRow,
-} from "@/backend/types/scheduling/scheduling.types";
+} from "@/backend/types";

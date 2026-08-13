@@ -1,17 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { queryWithPagination } from "@/backend/db/query.extensions";
+import { db, queryDb, queryWithPagination } from "@/backend/db";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ALLOWED_STATUS_TRANSITIONS, OrderSortDirection, StudentStatus } from "@/backend/enum";
+import type { DBTransaction } from "@/backend/types";
 import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
 import { parseStudentStatus } from "@/shared/lib/enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 function decodeCursor(after: string): { createdAt: string; id: string } | null {
   try {

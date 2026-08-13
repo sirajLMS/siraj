@@ -1,13 +1,8 @@
 import { and, asc, eq, inArray, type SQL } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { userPaymentMethods } from "@/backend/db/schema";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import type {
-  UserPaymentMethodInsertType,
-  UserPaymentMethodSelectType,
-} from "@/backend/types/billing/payment-method.types";
+import type { DBTransaction, UserPaymentMethodInsertType, UserPaymentMethodSelectType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type DefaultSlot = "PAYIN" | "PAYOUT";

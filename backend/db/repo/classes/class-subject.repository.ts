@@ -1,10 +1,14 @@
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { runInClassTransaction } from "@/backend/db/repo/classes/shared/runInClassTransaction";
 import { classSubjects } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
-import type { ClassSubjectSelectType, ClassSubjectSubmitInput, ClassSubjectUpdateInput } from "@/backend/types";
+import type {
+  ClassSubjectSelectType,
+  ClassSubjectSubmitInput,
+  ClassSubjectUpdateInput,
+  DBTransaction,
+} from "@/backend/types";
 
 // ─── Shared helpers (eliminate intra-file duplication) ──────────────────────
 

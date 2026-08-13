@@ -1,5 +1,4 @@
-import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import { timestamp, uuid } from "drizzle-orm/pg-core";
+import { type AnyPgColumn, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /**
  * Shared column helpers that eliminate the structural duplication of the

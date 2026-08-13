@@ -1,10 +1,12 @@
-import { BillingRepository, ParentRepository, UserRepository } from "@/backend/db/repo";
-import type { CurrencyCode } from "@/backend/enum";
+import { BillingRepository } from "@/backend/db/repo/billing";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { UserRepository } from "@/backend/db/repo/users";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
+import { FxDisplayService } from "@/backend/services";
 import type { DisplayAmountReturnType } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCode } from "@/shared/lib/enum";
 
 const DisplayAmountRef = gqlSchemaBuilder.objectRef<DisplayAmountReturnType>("DisplayAmount");
@@ -115,11 +117,11 @@ export async function resolveDisplayAmountFields(
     items.map(async item => {
       const itemId = item.id;
       const record = item as Record<string, unknown>;
-      const subjectUserId = subjectUserIdKey
-        ? typeof record[subjectUserIdKey] === "string"
-          ? record[subjectUserIdKey]
-          : null
-        : null;
+      let subjectUserId: string | null = null;
+      if (subjectUserIdKey) {
+        const rawValue = record[subjectUserIdKey];
+        subjectUserId = typeof rawValue === "string" ? rawValue : null;
+      }
       const displayCurrency = resolveEffectiveDisplayCurrency(ctx, subjectUserId);
       if (!displayCurrency) {
         map.set(itemId, null);

@@ -1,19 +1,28 @@
-import { QuotaKind, QuotaPeriodType, SchedulingMode } from "@/backend/enum";
+import { DayOfWeek, QuotaKind, QuotaPeriodType, SchedulingMode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { QuotaService } from "@/backend/services/billing/quota.service";
-import { ClassCatalogService } from "@/backend/services/classes/class-catalog.service";
-import { RecurringClassService } from "@/backend/services/schedule/recurring-class.service";
-import type { QuotaSubmitInput } from "@/backend/types";
+import { ClassCatalogService, QuotaService, RecurringClassService } from "@/backend/services";
+import type { QuotaReturnType, QuotaSubmitInput, StudentSelectType, TeacherSelectType } from "@/backend/types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+import { getServerTranslations } from "@/shared/locale";
 
-const DEMO_STUDENT_ID = "00000000-0000-0000-0000-000000000001";
-const DEMO_TEACHER_ID = "00000000-0000-0000-0000-000000000002";
 const ON_DEMAND_SUBJECT_SLUG = "tajweed";
 
-export async function seedOrGet() {
+export async function seedOrGet(
+  students: StudentSelectType[],
+  teachers: TeacherSelectType[],
+  actorUserId?: string
+): Promise<QuotaReturnType[]> {
   logger.info("Seeding sample billing quotas...");
 
   if (process.env.NODE_ENV === "production") {
     logger.warn("Quota seeding skipped in production");
+    return [];
+  }
+
+  const demoStudent = students[0];
+  const demoTeacher = teachers[0];
+  if (!demoStudent || !demoTeacher) {
+    logger.info("Quota seeding skipped: demo student/teacher not available.");
     return [];
   }
 
@@ -23,7 +32,7 @@ export async function seedOrGet() {
 
   const quotaInputs: QuotaSubmitInput[] = [
     {
-      studentId: DEMO_STUDENT_ID,
+      studentId: demoStudent.id,
       kind: QuotaKind.PACKAGE,
       name: "Demo Package Quota",
       totalClasses: 10,
@@ -32,7 +41,7 @@ export async function seedOrGet() {
       priority: 10,
     },
     {
-      studentId: DEMO_STUDENT_ID,
+      studentId: demoStudent.id,
       kind: QuotaKind.PERIODIC,
       name: "Demo Monthly Quota",
       totalClasses: 20,
@@ -43,7 +52,7 @@ export async function seedOrGet() {
       priority: 20,
     },
     {
-      studentId: DEMO_STUDENT_ID,
+      studentId: demoStudent.id,
       kind: QuotaKind.PERIODIC,
       name: "Demo Custom 90-Day Quota",
       totalClasses: 50,
@@ -67,12 +76,16 @@ export async function seedOrGet() {
     logger.warn("Could not seed demo quotas (student UUID may not exist):", { err });
   }
 
-  await seedOnDemandSchedule();
+  await seedOnDemandSchedule(demoStudent, demoTeacher, actorUserId);
 
   return [];
 }
 
-async function seedOnDemandSchedule() {
+async function seedOnDemandSchedule(
+  demoStudent: StudentSelectType,
+  demoTeacher: TeacherSelectType,
+  actorUserId: string | undefined
+): Promise<void> {
   try {
     const subjects = await ClassCatalogService.findSubjectsBySlugs([ON_DEMAND_SUBJECT_SLUG]);
     if (!subjects.length) {
@@ -80,17 +93,27 @@ async function seedOnDemandSchedule() {
       return;
     }
 
-    await RecurringClassService.upsertManyRecurringSchedules([
+    if (!actorUserId) {
+      logger.warn("On-demand schedule seed skipped: no actor user available.");
+      return;
+    }
+
+    const tErrors = getServerTranslations("en").errorsTranslations;
+
+    await RecurringClassService.createRecurringClass(
+      actorUserId,
       {
-        teacherId: DEMO_TEACHER_ID,
-        studentId: DEMO_STUDENT_ID,
+        teacherId: demoTeacher.id,
+        studentId: demoStudent.id,
         subjectId: subjects[0].id,
         schedulingMode: SchedulingMode.ON_DEMAND,
         durationMinutes: 60,
         defaultStartTime: "10:00",
-        timezone: "Asia/Dubai",
+        timezone: IanaTimezone.Asia_Dubai,
+        days: [{ dayOfWeek: DayOfWeek.MONDAY, startTime: "10:00", isActive: true }],
       },
-    ]);
+      tErrors
+    );
 
     logger.info("On-demand schedule entry seeded.");
   } catch (err) {

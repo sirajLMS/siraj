@@ -205,7 +205,7 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult }: Reado
     }
   };
 
-  const finalLoginResult = externalLoginResult || loginResult;
+  const finalLoginResult = externalLoginResult ?? loginResult;
 
   return (
     <Box

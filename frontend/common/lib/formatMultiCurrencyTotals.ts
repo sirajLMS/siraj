@@ -1,5 +1,7 @@
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { CurrencyCode as CurrencyCodeEnum } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  type CurrencyCode,
+  CurrencyCode as CurrencyCodeEnum,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { formatLockedAmount } from "@/frontend/common/lib/currency";
 
 export interface CurrencyAmountTotal {

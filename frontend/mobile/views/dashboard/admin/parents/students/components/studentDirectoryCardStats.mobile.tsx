@@ -2,11 +2,11 @@
 
 import { Box, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import type {
-  StudentDirectoryRowExtended,
-  StudentEnrollmentStatus,
+import {
+  StudentEnrollmentStatus as EnrollmentEnum,
+  type StudentDirectoryRowExtended,
+  type StudentEnrollmentStatus,
 } from "@/frontend/common/views/dashboard/admin/parents/students/types";
-import { StudentEnrollmentStatus as EnrollmentEnum } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 
 interface StudentDirectoryCardStatsProps {
   readonly row: StudentDirectoryRowExtended;

@@ -1,7 +1,5 @@
 import { and, asc, eq } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import {
   buildMeetingConfigInsertValues,
   buildMeetingConfigUpdatePayload,
@@ -14,8 +12,9 @@ import { logger } from "@/backend/lib/logger";
 import type {
   ClassMeetingConfigInsertType,
   ClassMeetingConfigSelectType,
+  DBTransaction,
   UpdateClassMeetingConfigInput,
-} from "@/backend/types/meeting/class-meeting-config.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type ClassScope = { readonly classInstanceId: string };

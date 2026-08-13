@@ -17,8 +17,7 @@ import {
   UserPaymentMethodUpdateInputPothos,
 } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
-import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import { PaymentCatalogService, PaymentMethodService } from "@/backend/services";
 import type {
   SupportedMobileWalletSubmitInput,
   SupportedOnlineAccountSubmitInput,
@@ -26,7 +25,7 @@ import type {
   UpdateSupportedMobileWalletInput,
   UpdateSupportedOnlineAccountInput,
   UpdateSupportedPaymentLinkInput,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
 
 type ErrorsTranslations = ReturnType<BaseContext["t"]>["errorsTranslations"];
 

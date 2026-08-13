@@ -1,1 +1,1 @@
-export { buildCreateRecurringClassInput } from "./buildCreateRecurringClassInput";
+export * from "./buildCreateRecurringClassInput";

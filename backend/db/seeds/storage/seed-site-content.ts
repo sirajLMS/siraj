@@ -1,6 +1,6 @@
 import { findAdminUserOrFallback, loadSeedConfig, type SeedConfig, SITE_CONTENT_SPECS } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { StorageService } from "@/backend/services/storage/storage.service";
+import { StorageService } from "@/backend/services";
 import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {

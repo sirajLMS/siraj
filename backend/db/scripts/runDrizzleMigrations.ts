@@ -1,7 +1,6 @@
 import { join } from "node:path";
 import { sql } from "drizzle-orm";
-import type { MigrationMeta } from "drizzle-orm/migrator";
-import { readMigrationFiles } from "drizzle-orm/migrator";
+import { type MigrationMeta, readMigrationFiles } from "drizzle-orm/migrator";
 import { getMigrationsToRun } from "drizzle-orm/migrator.utils";
 import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";

@@ -1,7 +1,6 @@
 "use client";
 
-import type { SelectChangeEvent } from "@mui/material";
-import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
 import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 

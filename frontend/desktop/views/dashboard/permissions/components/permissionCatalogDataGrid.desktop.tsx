@@ -49,7 +49,7 @@ interface UsedInCellProps {
 function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
   const usedGroups = groups.filter(g => {
     const ids = g.permissionIds ?? [];
-    return (permission.id && ids.includes(permission.id)) || (permission.key && ids.includes(permission.key));
+    return (permission.id && ids.includes(permission.id)) ?? (permission.key && ids.includes(permission.key));
   });
 
   if (usedGroups.length === 0) {

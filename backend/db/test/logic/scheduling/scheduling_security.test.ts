@@ -6,11 +6,9 @@ import { classInstances, recurringScheduleDays, recurringSchedules } from "@/bac
 import { ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { ScheduleDeletionService } from "@/backend/services/schedule/schedule-deletion.service";
+import { PermissionsService, ScheduleDeletionService } from "@/backend/services";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;

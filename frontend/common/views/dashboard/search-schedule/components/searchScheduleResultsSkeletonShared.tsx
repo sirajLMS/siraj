@@ -1,7 +1,6 @@
 "use client";
 
-import type { SxProps, Theme } from "@mui/material";
-import { Box, Skeleton } from "@mui/material";
+import { Box, Skeleton, type SxProps, type Theme } from "@mui/material";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import type { SearchScheduleResultsSkeletonProps } from "@/frontend/common/views/dashboard/search-schedule/types";

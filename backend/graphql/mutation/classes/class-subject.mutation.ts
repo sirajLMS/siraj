@@ -11,7 +11,7 @@ import {
   SubjectResourcePothosObject,
 } from "@/backend/graphql/pothos/classes/class-subject.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ClassSubjectService } from "@/backend/services/subject/class-subject.service";
+import { ClassSubjectService } from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("createClassSubject", t =>
   t.field({

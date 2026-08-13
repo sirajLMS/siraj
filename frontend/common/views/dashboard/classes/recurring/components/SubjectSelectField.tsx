@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { classSubjectsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 
 export interface SubjectSelectProps {
@@ -36,7 +36,7 @@ export function SubjectSelect({
   const subjects = (data?.classSubjects ?? []).filter(subject => subject?.isActive !== false && subject?.id);
 
   return (
-    <FormControl fullWidth required error={!!error} disabled={disabled || loading} sx={outlinedInputSx}>
+    <FormControl fullWidth required error={!!error} disabled={disabled ?? loading} sx={outlinedInputSx}>
       <InputLabel id={labelId} shrink>
         {label}
       </InputLabel>

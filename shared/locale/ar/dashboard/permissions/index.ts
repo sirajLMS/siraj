@@ -1,1 +1,1 @@
-export { dashboardPermissionsAr } from "./main";
+export * from "./main";

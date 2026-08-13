@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { boolean, index, jsonb, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { paymentDirectionEnum, paymentMethodTypeEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
-import type { PaymentMethodDetails } from "@/backend/types/billing/payment-method.types";
+import type { PaymentMethodDetails } from "@/backend/types";
 
 /**
  * User Payment Methods table.

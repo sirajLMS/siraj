@@ -2,7 +2,7 @@
 
 import { BadgeOutlined } from "@mui/icons-material";
 import type { ComponentType, ElementType } from "react";
-import { AppDatePicker } from "@/frontend/common/components/ui/form";
+import { AppDatePicker } from "@/frontend/common/components/ui/form/date";
 import { StudentInformationSectionShared } from "@/frontend/common/views/dashboard/students/quota/components/studentInformationSectionShared";
 import type {
   StudentInfoDatePickerProps,

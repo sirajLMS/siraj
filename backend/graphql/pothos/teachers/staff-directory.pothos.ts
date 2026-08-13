@@ -7,7 +7,7 @@ import { AccountStatusPothosObject, CurrencyCodePothosObject } from "@/backend/g
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
+import { ManagerDirectoryService, ManagerProfileService } from "@/backend/services";
 import type {
   DisplayAmountReturnType,
   ManagerDirectoryMetrics,
@@ -223,8 +223,6 @@ export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
       rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
     }),
   });
-
-import { ManagerProfileService } from "@/backend/services/staff/manager-profile.service";
 
 gqlSchemaBuilder.mutationField("updateManagerProfile", t =>
   t.field({

@@ -7,7 +7,7 @@ import {
   StudentPothosObject,
 } from "@/backend/graphql/pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { PermissionsService } from "@/backend/services";
 import type * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
 

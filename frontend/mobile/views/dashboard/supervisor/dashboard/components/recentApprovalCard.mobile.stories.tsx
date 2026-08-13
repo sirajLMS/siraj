@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
-import type { RecentApprovalCardLabels } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/RecentApprovalCardList";
 import {
+  type RecentApprovalCardLabels,
   RecentApprovalCardSkeleton,
   RecentApprovalEmptyState,
 } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/RecentApprovalCardList";

@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
-import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
+import { QuotaLedgerRepository, QuotaRepository } from "@/backend/db/repo/billing";
 import { recurringSchedules } from "@/backend/db/schema";
 import { ensureTestSubjectId, setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";

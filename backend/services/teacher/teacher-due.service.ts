@@ -1,23 +1,24 @@
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { RecurringScheduleRepository } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { TeacherDueRepository } from "@/backend/db/repo/teachers/teacher-due.repository";
 import { classInstances } from "@/backend/db/schema";
-import { AppPermission, type CurrencyCode, RateSource, TeacherDueStatus } from "@/backend/enum";
+import { AppPermission, RateSource, TeacherDueStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { invalidateClassLifecycle } from "@/backend/services/cache";
 import { resolveClassRate } from "@/backend/services/pricing/rate-resolver.service";
 import type {
+  DBTransaction,
   TeacherDueInsertType,
   TeacherDueReturnType,
   TeacherDueSelectType,
   TeacherMonthlyReportReturnType,
   TeacherPendingDuesSummaryReturnType,
 } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherDueService {

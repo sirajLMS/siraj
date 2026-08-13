@@ -1,7 +1,7 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
-import { AppPermission, ClassOutcome } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -10,6 +10,7 @@ import { resolveTeacherId } from "@/backend/services/schedule/__shared__/resolve
 import { resolveViewerTimezone } from "@/backend/services/schedule/resolve-viewer-timezone";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 import type {
+  DailyScheduleResult,
   FutureClassRow,
   PaginationArgs,
   RescheduleTrackingInput,
@@ -17,7 +18,7 @@ import type {
   TeacherFutureScheduleReturnType,
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
-import type { DailyScheduleResult } from "@/backend/types/scheduling/scheduling.types";
+import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { parseClassExecutionState, parseClassOutcome, parseClassTypeOrNull } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -37,7 +38,7 @@ export namespace ScheduleService {
       id: item.id,
       studentTime: item.scheduledStartAt.toISOString(),
       teacherTime: item.scheduledStartAt.toISOString(),
-      yourTime: item.yourTimeFormatted || item.scheduledStartAt.toISOString(),
+      yourTime: item.yourTimeFormatted ?? item.scheduledStartAt.toISOString(),
       duration: item.durationMinutes,
       scheduledStartAt: item.scheduledStartAt,
       scheduledEndAt: item.scheduledEndAt,
@@ -47,12 +48,12 @@ export namespace ScheduleService {
       isFrozen: item.isFrozen,
       student: {
         id: item.studentId,
-        name: item.student?.name || unknownName,
+        name: item.student?.name ?? unknownName,
         avatarUrl: item.student?.avatarUrl ?? null,
       },
       teacher: {
         id: item.teacherId,
-        name: item.teacher?.user?.name || unknownName,
+        name: item.teacher?.user?.name ?? unknownName,
         avatarUrl: item.teacher?.user?.avatarUrl ?? null,
       },
       courseName: item.courseName ?? null,
@@ -119,17 +120,17 @@ export namespace ScheduleService {
       await assertDailyScheduleListAccess(
         userId,
         {
-          search: input.search || undefined,
-          metricFilter: input.metricFilter || undefined,
+          search: input.search ?? undefined,
+          metricFilter: input.metricFilter ?? undefined,
         },
         tErrors
       );
 
       const viewerTimezone = await resolveViewerTimezone(userId);
       const targetDate = new Date(input.date);
-      const teacherId = input.teacherId || undefined;
-      const search = input.search || undefined;
-      const metricFilter = input.metricFilter || undefined;
+      const teacherId = input.teacherId ?? undefined;
+      const search = input.search ?? undefined;
+      const metricFilter = input.metricFilter ?? undefined;
 
       const { metrics, rows, totalCount, pageInfo } = await SchedulingRepository.getAdminDashboardSchedule({
         date: targetDate,
@@ -148,9 +149,9 @@ export namespace ScheduleService {
       const first = input.paginationArgs?.first ?? "default";
       const resultKey = [
         input.date,
-        teacherId || "all",
-        search || "",
-        metricFilter || "all",
+        teacherId ?? "all",
+        search ?? "",
+        metricFilter ?? "all",
         `p${page}`,
         `f${first}`,
       ].join("-");
@@ -158,7 +159,7 @@ export namespace ScheduleService {
       return {
         id: `admin-dashboard-${resultKey}`,
         metrics: {
-          id: `metrics-${targetDate.toISOString()}-${teacherId || "all"}-${search || ""}`,
+          id: `metrics-${targetDate.toISOString()}-${teacherId ?? "all"}-${search ?? ""}`,
           ...metrics,
         },
         rows: mappedRows,
@@ -183,7 +184,7 @@ export namespace ScheduleService {
       const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacherId, undefined, viewerTimezone);
 
       return {
-        id: `metrics-${targetDate.toISOString()}-${teacherId || "all"}`,
+        id: `metrics-${targetDate.toISOString()}-${teacherId ?? "all"}`,
         ...metrics,
       };
     } catch (error) {
@@ -290,7 +291,7 @@ export namespace ScheduleService {
 
     return {
       id: cls.id,
-      courseName: cls.subjectName || cls.studentName,
+      courseName: cls.subjectName ?? cls.studentName,
       scheduledDate: cls.scheduledStartAt.toISOString().split("T")[0],
       startTime: formatTime(cls.scheduledStartAt),
       endTime: formatTime(cls.scheduledEndAt),
@@ -299,7 +300,7 @@ export namespace ScheduleService {
       leaveRequestDisabled,
       leaveRequestDisabledReason,
       studentCount: 1,
-      location: effectiveMeeting.joinUrl || "Virtual",
+      location: effectiveMeeting.joinUrl ?? "Virtual",
       subjectId: cls.subjectId,
       subjectName: cls.subjectName,
       classType: resolvedClassType,

@@ -10,7 +10,7 @@ import {
   UserPersonalNationalityField,
   UserPersonalQualificationsField,
 } from "@/frontend/common/components/onboarding/sections/userPersonalFieldComponents";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 import type { TeacherOnboardingLabels } from "@/shared/locale/types/dashboard/teachers/onboarding";
 

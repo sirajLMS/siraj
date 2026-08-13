@@ -2,7 +2,7 @@
 
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from "@mui/material";
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { CategoryItem } from "@/frontend/common/views/dashboard/subjects/home/types";
 
 interface CategorySelectFieldProps<T extends FieldValues> {

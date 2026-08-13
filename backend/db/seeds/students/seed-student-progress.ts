@@ -1,6 +1,6 @@
 import { getFakerForIndex, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { StudentSeedService } from "@/backend/services/seed/student-seed.service";
+import { StudentSeedService } from "@/backend/services";
 import type { ClassInstanceSelectType } from "@/backend/types";
 
 export async function seedOrGet(classInstancesList: ClassInstanceSelectType[], config?: SeedConfig) {

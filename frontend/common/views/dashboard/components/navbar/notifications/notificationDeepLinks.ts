@@ -1,6 +1,6 @@
 import { AppPermission, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classHref, ownProfileHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
-import type { NotificationMetadata } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
+import type { NotificationMetadata } from "@/shared/types/notification-alerts.types";
 
 function isParentViewer(permissions: readonly AppPermission[]): boolean {
   return (

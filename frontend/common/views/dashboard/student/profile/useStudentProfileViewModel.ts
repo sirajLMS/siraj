@@ -169,7 +169,7 @@ export function useStudentProfileViewModel({
 
   const profile: StudentProfileRow | null = useMemo(() => mapStudentProfileFromQuery(profileData), [profileData]);
 
-  const storageOwnerKey = profile?.id || _targetUserId;
+  const storageOwnerKey = profile?.id ?? _targetUserId;
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey });
 
   const formattedDateOfBirth = useMemo(() => {

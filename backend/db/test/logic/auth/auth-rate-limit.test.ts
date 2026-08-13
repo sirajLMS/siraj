@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { authRateLimits } from "@/backend/db/schema";
 import { IP_ADDRESS_1 } from "@/backend/db/test/const";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { AuthRateLimitInsertType } from "@/backend/types/auth/auth.types";
+import type { AuthRateLimitInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 describe("Authentication Rate Limiting", () => {

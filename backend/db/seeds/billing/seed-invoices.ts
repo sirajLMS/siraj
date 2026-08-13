@@ -5,13 +5,13 @@ import {
   DEFAULT_INVOICE_CURRENCY,
   iterateInvoiceMonths,
   loadSeedConfig,
+  orchestrateSeedMany,
   type SeedConfig,
   seedEntityFile,
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
-import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
 import { logger } from "@/backend/lib/logger";
-import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
+import { BillingManagementService } from "@/backend/services";
 import type { ManualInvoiceInsertInput, ParentEntity, StudentSelectType, UserSelectType } from "@/backend/types";
 
 type InvoiceSeedSpec = ManualInvoiceInsertInput & { readonly idempotencyKey: string };

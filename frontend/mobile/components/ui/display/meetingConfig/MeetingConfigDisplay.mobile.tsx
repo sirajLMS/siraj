@@ -1,8 +1,10 @@
 "use client";
 
 import type * as React from "react";
-import type { MeetingConfigDisplaySharedOptions } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplayShared";
-import { MeetingConfigDisplayShared } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplayShared";
+import {
+  MeetingConfigDisplayShared,
+  type MeetingConfigDisplaySharedOptions,
+} from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplayShared";
 import type { MeetingConfigDisplayProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
 
 const MOBILE_OPTIONS = {

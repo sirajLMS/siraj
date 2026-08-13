@@ -1,8 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Control, FieldErrors, UseFormHandleSubmit, UseFormRegister, UseFormReturn } from "react-hook-form";
-import { useForm } from "react-hook-form";
+import {
+  type Control,
+  type FieldErrors,
+  type UseFormHandleSubmit,
+  type UseFormRegister,
+  type UseFormReturn,
+  useForm,
+} from "react-hook-form";
 import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
 import {
@@ -15,10 +21,11 @@ import {
 import { useCreateTeacherOnboarding } from "@/frontend/common/hooks/useCreateTeacherOnboarding";
 import { useTeacherOnboardingStore } from "@/frontend/common/stores/teacherOnboardingStore";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
-import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
-import { teacherOnboardingSchema } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
-import type { TeacherOnboardingLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import {
+  type TeacherOnboardingFormData,
+  teacherOnboardingSchema,
+} from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
+import { type TeacherOnboardingLabels, Translation, useAppTranslation } from "@/shared/locale";
 import type { MeetingConfigJoinLabels, MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
 /**

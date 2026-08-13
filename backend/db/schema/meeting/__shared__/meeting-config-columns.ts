@@ -1,7 +1,7 @@
 import { boolean, jsonb, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { encryptedText } from "@/backend/db/schema/custom-types";
 import { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers";
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
+import type { MeetingConfigDetails } from "@/backend/types";
 
 /**
  * Shared column definitions common to both `class_meeting_configs` and

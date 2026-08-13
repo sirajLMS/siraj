@@ -4,7 +4,7 @@ import { PaymentsOutlined } from "@mui/icons-material";
 import { InputAdornment, TextField } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Controller } from "react-hook-form";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { BaseManualInvoiceFeeFieldProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceFeeField.types";
 

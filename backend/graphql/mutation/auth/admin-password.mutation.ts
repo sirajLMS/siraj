@@ -4,7 +4,7 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { AdminResetPasswordInputPothosObject, AdminResetPasswordResultPothosObject } from "@/backend/graphql/pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { logger } from "@/backend/lib/logger";
-import { AuthPasswordService } from "@/backend/services/auth/auth-password.service";
+import { AuthPasswordService } from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("adminResetPassword", t =>
   t.field({

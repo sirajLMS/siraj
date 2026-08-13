@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import type { GcpContext } from "@/backend/storage/disk/gcp/types";
 import type * as Types from "@/backend/types";

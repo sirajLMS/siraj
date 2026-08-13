@@ -1,8 +1,11 @@
-import { CurrencyCode, RateSource } from "@/backend/enum";
-import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
-import type { ClassSubjectSelectType } from "@/backend/types/classes/class-subject.types";
-import type { RecurringScheduleSelectType } from "@/backend/types/scheduling/scheduling.types";
-import type { TeacherSelectType } from "@/backend/types/teachers/teacher.types";
+import { RateSource } from "@/backend/enum";
+import type {
+  ClassInstanceSelectType,
+  ClassSubjectSelectType,
+  RecurringScheduleSelectType,
+  TeacherSelectType,
+} from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
  * Input shape for {@link resolveClassRate}. All four tiers are optional; the

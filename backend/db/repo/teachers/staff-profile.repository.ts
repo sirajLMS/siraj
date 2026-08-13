@@ -1,8 +1,6 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBQueryExecutor, DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { UserRepository } from "@/backend/db/repo/users/user.repository";
+import { db, queryDb } from "@/backend/db";
+import { UserRepository } from "@/backend/db/repo/users";
 import {
   permissionGroups,
   permissions,
@@ -14,6 +12,8 @@ import {
 import { AccountStatus, OverrideState } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
+  DBQueryExecutor,
+  DBTransaction,
   ManagerDirectoryFilters,
   ManagerDirectoryMetrics,
   ManagerDirectoryResult,
@@ -394,8 +394,8 @@ export namespace StaffProfileRepository {
       }
 
       const profile = existing[0];
-      const hasUserFieldUpdate = input.phoneIsSet || input.statusIsSet;
-      const hasStaffFieldUpdate = input.hourlyRateIsSet || input.rateCurrencyIsSet;
+      const hasUserFieldUpdate = input.phoneIsSet ?? input.statusIsSet;
+      const hasStaffFieldUpdate = input.hourlyRateIsSet ?? input.rateCurrencyIsSet;
 
       if (input.phoneIsSet) {
         await UserRepository.updateProfileFields(profile.userId, { phone: input.phone ?? null }, locale, t);

@@ -4,7 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { type Control, type UseFormRegister, useForm } from "react-hook-form";
-import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { ParentStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type UseAvatarUploadResult, useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
@@ -22,6 +24,7 @@ import { AccountSection } from "@/frontend/common/views/dashboard/profile/parent
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/parent/sections/AdminOnlySection";
 import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/parent/sections/ContactSection";
+import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
 import {
   type ParentProfileViewLabels,
   toParentSharedBaseLabels,
@@ -32,12 +35,9 @@ import {
   AdminResetPasswordSection,
   type AdminResetPasswordSectionRef,
 } from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
-import { ParentExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/ParentExtensionProfileSection";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
-
-export type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 
 type ParentEditFormSubmit = (values: ParentAdminEditFormData) => Promise<void>;
 type AvatarUploader = Pick<UseAvatarUploadResult, "onUploadAvatar">;
@@ -166,7 +166,7 @@ function ParentEditFormSections({
         <SocialSection mode="edit" labels={pt} register={register} control={control} />
       ) : null}
       {canEdit("parent_identity") ? (
-        <ParentExtensionProfileSection mode="edit" labels={pt} scope={scope} register={register} control={control} />
+        <IdentitySection mode="edit" labels={pt} scope={scope} register={register} control={control} />
       ) : null}
 
       {isAdminScope ? (

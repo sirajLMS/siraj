@@ -96,7 +96,7 @@ function getCloudProviderReasons(): string[] {
     reasons.push('NODE_ENV is "production"');
   }
 
-  const dbProvider = process.env.DB_PROVIDER || "postgres";
+  const dbProvider = process.env.DB_PROVIDER ?? "postgres";
   if (dbProvider === "neon") {
     reasons.push('DB_PROVIDER is "neon" (cloud database)');
   }

@@ -1,18 +1,18 @@
 import type { ObjectFieldBuilder } from "@pothos/core";
-import { AppPermission, type CurrencyCode } from "@/backend/enum";
+import { AppPermission } from "@/backend/enum";
 import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { PermissionsService } from "@/backend/services";
-import { buildMaskedTransactionSnapshot } from "@/backend/services/payment-method/payment-method-mask";
-import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
+import { buildMaskedTransactionSnapshot, PermissionsService } from "@/backend/services";
 import type {
+  DisplayAmountReturnType,
   PaymentMethodTransactionSnapshot,
   PaymentProofTransactionSnapshot,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 type SnapshotUnion = PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot;
 

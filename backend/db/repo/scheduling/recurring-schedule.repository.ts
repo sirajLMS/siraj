@@ -1,11 +1,8 @@
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db, type QueryDbHandle } from "@/backend/db/drizzleDb";
-import { teachers, users } from "@/backend/db/schema";
-import { recurringScheduleDays, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
-import { students } from "@/backend/db/schema/students/students";
+import { db, type QueryDbHandle, queryDb } from "@/backend/db";
+import { recurringScheduleDays, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import type {
+  DBTransaction,
   RecurringScheduleDayInsertType,
   RecurringScheduleDaySelectType,
   RecurringScheduleInsertType,

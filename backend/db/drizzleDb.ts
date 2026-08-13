@@ -1,5 +1,5 @@
 import { getActiveHttpProvider, resolveConnectionStrategy } from "@/backend/db/connection-strategy";
-import { relations } from "@/backend/db/drizzleRelations";
+import type { relations } from "@/backend/db/drizzleRelations";
 import { createDatabase, createPool } from "@/backend/db/factory";
 import { clearHttpClientSingleton, getNeonHttpDb } from "@/backend/db/http-client";
 import { ensureEnvironmentValidated, getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
@@ -104,9 +104,5 @@ export function clearDbConnectionSingleton(): void {
   clearGlobalSingleton(HTTP_DB_KEY);
   clearHttpClientSingleton();
 }
-
-export { getActiveHttpProvider, isNeonHttpEligible } from "@/backend/db/connection-strategy";
-export { clearHttpClientSingleton, getNeonHttpClient, getNeonHttpDb } from "@/backend/db/http-client";
-export { relations };
 
 export type DrizzleRelations = typeof relations;

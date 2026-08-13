@@ -16,6 +16,17 @@ applyTo: "backend/**/*.ts"
 - Server Components call services directly (not GraphQL) - services must not rely on GraphQL-specific contexts
 - Domain-driven services (e.g., `PermissionsService`, `ScheduleService`) - no monolithic services like `DashboardService`
 
+### Barrel Files (`index.ts`) Conventions (CRITICAL)
+
+- **Shortest import path**: Always import from the highest available barrel (e.g. `@/backend/services`, not `@/backend/services/communication/channels/whatsapp/cloud-api`). If a barrel doesn't exist at the needed level, create one.
+- **Nested barrels**: Every nested subdirectory that has exportable modules MUST have its own `index.ts`. Parent barrels re-export from nested barrels (`export * from "./subdir"`), never from nested files directly.
+- **Prefer `export *`**: Use `export * from "./module"` exclusively. Avoid named re-exports unless two source files export the same symbol name (collision) — in that case, rename the function in the source file so `export *` works, rather than aliasing in the barrel.
+- **`./` not `@/` in barrels**: `index.ts` files MUST use relative `./` paths, not `@/` path aliases.
+- **No `../` in barrels**: `index.ts` files MUST NOT use `../` or `./../` — only `./` paths.
+- **Max one `/` per path**: Each `export * from` path in an `index.ts` MUST NOT contain more than one `/`.
+- **No imports in barrels**: `index.ts` files contain ONLY `export *` statements — never `import` statements. The only exception is GraphQL mutation/query layers where imports register types in the GraphQL schema.
+- **Unique export names**: When multiple files in the same directory export functions with the same generic name (e.g. `buildRequest`, `parseResponse`), rename them to unique descriptive names in the source files so the barrel can use `export *` without aliasing.
+
 ### Type Definition Pattern (CRITICAL)
 
 - ALL types from `@/backend/types` - NEVER local definitions in Pothos files
@@ -181,15 +192,7 @@ applyTo: "backend/**/*.ts"
 - Per-user OAuth tokens are encrypted at rest via the `encryptedText` custom Drizzle type (AES-256-GCM) — never store raw tokens in the database
 - Typed error hierarchy: `IMeetingChannel.ts` defines `MeetingChannelError` (base with `code`, `upstreamMessage`, `upstreamStatus`) and subclasses — `UnsupportedProviderKindError`, `InsufficientScopesError`, `NoOrgCredentialsNoUserTokenError`, `ProviderReauthRequiredError`, `RateLimitedError`, `ProviderUnavailableError`, and provider-specific API errors. Throw these instead of generic `Error`
 
+### Linting Rules
 
-### Oxlint Rules (CRITICAL — NO `oxlint-disable` comments)
+- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
 
-- **no-unsafe-type-assertion**: Oxlint is STRICTER than ESLint. `as unknown as T` does NOT bypass it. Use type guards (`value is Type`), `instanceof Error`, `find()` with widening cast `(v as string)`, or `.$type<Enum>()` on Drizzle columns. For `response.json()` use `const data: Type = await response.json()` or type guards.
-- **no-await-in-loop**: Use `Promise.all(items.map(async ...))` for independent iterations. Use recursive helpers or `reduce` chains for sequential iterations (shared transactions). `for await...of` is NOT flagged.
-- **consistent-function-scoping**: Move functions that don't capture parent variables to module scope.
-- **no-object-type-as-default-prop**: Extract `{}` / `[]` defaults to module-level constants.
-- **no-underscore-dangle**: Rename `_field` → `field`, or use bracket notation `obj["_ref"]` for external APIs.
-- **no-unsafe-enum-comparison**: Use `String(a) === String(Enum.VALUE)`, string literals, or `Set`-based lookups.
-- **no-shadow**: Use destructuring rename `{ prop: newName }` or `_` prefix for unused params.
-- **consistent-return**: Use `return undefined` instead of bare `return;`. Config override exists for `useEffect`.
-- Config overrides in `oxlint.config.mts` for test files (`unbound-method: off`) and `useEffect` files (`consistent-return: off`) are legitimate — NOT `oxlint-disable` comments.

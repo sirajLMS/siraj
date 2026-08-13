@@ -2,8 +2,10 @@
 
 import { SettingsTimezonesDataGrid } from "@/frontend/common/views/dashboard/settings/components/timezones/SettingsTimezonesDataGrid";
 import { SettingsTimezonesSearchBar } from "@/frontend/common/views/dashboard/settings/components/timezones/SettingsTimezonesSearchBar";
-import type { SettingsTabSharedOptions } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsTabShared";
-import { SettingsTabShared } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsTabShared";
+import {
+  SettingsTabShared,
+  type SettingsTabSharedOptions,
+} from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsTabShared";
 import type { SettingsTimezonesViewModel } from "@/frontend/common/views/dashboard/settings/types/settingsTimezones.types";
 
 export function SettingsTimezonesTabShared({

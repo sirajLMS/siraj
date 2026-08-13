@@ -1,8 +1,6 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { queryWithPagination } from "@/backend/db/query.extensions";
+import { db, queryWithPagination } from "@/backend/db";
 import {
   buildRescheduleConditions,
   buildRescheduleSelectQuery,
@@ -10,6 +8,7 @@ import {
 } from "@/backend/db/repo/scheduling/scheduling-queries.repository/reschedule-tracking.utils";
 import { classInstances, leaveRequests, students, teachers, users } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 
 export const getRescheduleTrackingRows = async (
   input: Types.RescheduleTrackingInput,

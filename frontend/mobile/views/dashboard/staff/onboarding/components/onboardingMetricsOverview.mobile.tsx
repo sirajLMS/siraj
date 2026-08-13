@@ -4,8 +4,10 @@ import { GroupsOutlined, PendingActionsOutlined, SpeedOutlined } from "@mui/icon
 import { useMemo } from "react";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { OnboardingMetricsOverviewProps } from "@/frontend/common/views/dashboard/staff/onboarding/types";
-import type { OnboardingMetricKey } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
-import { resolveMetricValue } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
+import {
+  type OnboardingMetricKey,
+  resolveMetricValue,
+} from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 
 const METRIC_ITEMS = [

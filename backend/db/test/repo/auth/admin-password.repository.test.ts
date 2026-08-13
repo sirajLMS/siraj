@@ -1,11 +1,12 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { UserRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/users";
+
 import { users } from "@/backend/db/schema";
-import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { comparePassword, hashPassword } from "@/backend/lib/auth/password";
+import type { DBTransaction } from "@/backend/types";
 import { getErrorMessage } from "@/shared/utils/error";
 
 const NONEXISTENT_ID = "00000000-0000-0000-0000-000000000000";
@@ -28,7 +29,7 @@ async function fetchUserPasswordRow(tx: DBTransaction, userId: string) {
 describe("UserRepository.updatePassword", () => {
   test("persists the new hashed password and returns the updated user", async () => {
     await runInRollback(async (tx: DBTransaction) => {
-      const user = await createTestUser(tx);
+      const user = await createTestUserWithDefaults(tx);
       const originalRow = await fetchUserPasswordRow(tx, user.id);
       const originalPassword = originalRow?.password ?? "";
 

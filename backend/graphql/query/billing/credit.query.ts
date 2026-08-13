@@ -7,7 +7,7 @@ import {
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { CreditService } from "@/backend/services/billing/credit.service";
+import { CreditService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("studentCreditBalance", t =>
   t.field({

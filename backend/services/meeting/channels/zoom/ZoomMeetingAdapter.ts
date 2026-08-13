@@ -7,19 +7,16 @@ import {
   isTokenExpired,
   MeetingAdapterBase,
 } from "@/backend/services/meeting/channels/__shared__/meetingAdapterBase";
-import type { GenerateMeetingInput, GenerateMeetingResult } from "@/backend/services/meeting/channels/IMeetingChannel";
 import {
+  type GenerateMeetingInput,
+  type GenerateMeetingResult,
   InsufficientScopesError,
   NoOrgCredentialsNoUserTokenError,
   ProviderUnavailableError,
   RateLimitedError,
   ZoomApiError,
 } from "@/backend/services/meeting/channels/IMeetingChannel";
-import type {
-  ZoomErrorResponse,
-  ZoomMeetingResponse,
-  ZoomTokenResponse,
-} from "@/backend/services/meeting/channels/zoom/zoom.types";
+import type { ZoomErrorResponse, ZoomMeetingResponse, ZoomTokenResponse } from "@/backend/types";
 
 export interface ZoomMeetingAdapterOptions {
   readonly accountId?: string;

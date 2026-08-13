@@ -12,19 +12,19 @@ export function useCreateStudentOnboarding() {
 
   const execute = async (formData: StudentOnboardingFormData) => {
     const input: StudentOnboardingInput = {
-      parentId: formData.parentId || null,
+      parentId: formData.parentId ?? null,
       name: formData.name,
       avatarUrl: formData.avatarUrl ?? null,
-      dateOfBirth: formData.dateOfBirth ? formData.dateOfBirth : null,
+      dateOfBirth: formData.dateOfBirth ?? null,
       gender: formData.gender ?? null,
       language: formData.language ?? null,
       status: formData.status,
-      primaryTeacherId: formData.primaryTeacherId || null,
+      primaryTeacherId: formData.primaryTeacherId ?? null,
       classesTotal: null,
       classesRemaining: null,
       email: formData.email,
       password: formData.password,
-      phone: formData.phone || null,
+      phone: formData.phone ?? null,
       timezone: toGraphqlIanaTimezone(formData.timezone),
       displayCurrency: formData.displayCurrency ?? null,
     };

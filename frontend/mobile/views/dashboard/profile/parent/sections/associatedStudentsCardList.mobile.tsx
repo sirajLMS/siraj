@@ -44,7 +44,7 @@ export function AssociatedStudentsCardListMobile({ rows, labels }: Readonly<Base
             <MobilePersonProfileLink
               href={row.teacherUserId ? profileHrefForUser(row.teacherUserId) : undefined}
               avatarUrl={row.teacherAvatarUrl}
-              name={row.teacherName?.trim() || tProfile.notSet}
+              name={row.teacherName?.trim() ?? tProfile.notSet}
               fallbackInitial="T"
               label={t.students.columns.teacher}
             />

@@ -56,7 +56,7 @@ export function AssociatedStudentsDataGridDesktop({
         flex: 1.5,
         minWidth: 220,
         renderCell: params => {
-          const teacherName = params.row.teacherName?.trim() || t.notSet;
+          const teacherName = params.row.teacherName?.trim() ?? t.notSet;
           const href = params.row.teacherUserId ? profileHrefForUser(params.row.teacherUserId) : undefined;
 
           return (

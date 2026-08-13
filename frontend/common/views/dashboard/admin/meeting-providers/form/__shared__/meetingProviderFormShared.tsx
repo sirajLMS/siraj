@@ -147,7 +147,7 @@ function LogoSection({ t, control, isSaving, styles }: Readonly<LogoSectionProps
         control={control}
         render={({ field }) => (
           <CatalogImageUpload
-            imageUrl={field.value || null}
+            imageUrl={field.value ?? null}
             onImageUrlChangeAction={url => field.onChange(url)}
             allowUrlFallback={false}
             disabled={isSaving}

@@ -74,13 +74,13 @@ export function buildStudentProgressFeedItems(
   formatRelativeTime: (value: Date) => string
 ): StudentProgressFeedItem[] {
   return (feed ?? []).map(item => {
-    const studentName = item.studentName?.trim() || "Student";
+    const studentName = item.studentName?.trim() ?? "Student";
     const eventKind = resolveProgressFeedEventKind(item.eventKind);
     const occurredAt = item.occurredAt ? new Date(item.occurredAt) : new Date();
 
     return {
-      id: item.id || "",
-      studentId: item.studentId || "",
+      id: item.id ?? "",
+      studentId: item.studentId ?? "",
       studentName,
       studentInitials: toStudentInitials(studentName),
       summary: formatFeedSummary(item, labels, durationTemplate),

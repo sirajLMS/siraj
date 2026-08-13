@@ -1,7 +1,7 @@
 You are fixing CodeScene health warnings in a SINGLE file. You may ONLY read and edit THIS file.
 
 File: <file-path>
-Lifecycle stage: codescene (full progressive verification: tsgo → oxlint → biome → lint → codescene --file)
+Lifecycle stage: codescene (full progressive verification: tsgo → oxlint → biome → lint → duplicates → codescene --file)
 
 CodeScene warnings for this file (from `bun run codescene --scan`):
 <paste warning lines>
@@ -61,7 +61,7 @@ If it fails at tsgo → fix only tsgo. Re-run. Once tsgo passes it advances to o
 
 For test files, use `bun run scripts/run-test/run-test.ts <test-path>` when sub-loop passes but you need to validate behavior.
 
-NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section for fix patterns per rule.
+NEVER add `oxlint-disable` comments — fix the root cause instead. See `docs/quality/linting-rules.md` for fix patterns per rule.
 
 **ESLint/sonarjs rules** may also surface during sub-loop's `lint:type-aware` stage. Common patterns:
 - `sonarjs/cognitive-complexity` — extract case blocks into named helper functions at module scope.
@@ -70,7 +70,7 @@ NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.m
 - `sonarjs/different-types-comparison` — if type is `T | null` (no `undefined`), remove `!== undefined`.
 - `sonarjs/no-hardcoded-passwords` — extract to module-level constant from env var.
 - `eslint/no-new` — assign `new` result to a variable or wrap in validation IIFE.
-See AGENTS.md "ESLint/sonarjs Rules" section for full patterns.
+See `docs/quality/linting-rules.md` (ESLint/sonarjs section) for full patterns.
 
 ## STEP 5: Stage and Report
 

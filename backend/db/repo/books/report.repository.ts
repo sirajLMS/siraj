@@ -1,14 +1,13 @@
 import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import type { QueryDbHandle } from "@/backend/db/drizzleDb";
+import { type QueryDbHandle, queryDb } from "@/backend/db";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
-import type { CurrencyCode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
   AttendanceReportPaidAmountReturnType,
   AttendanceReportRowReturnType,
-} from "@/backend/types/books/report.types";
+  DBTransaction,
+} from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCode } from "@/shared/lib/enum";
 
 export enum ReportGroupingMode {

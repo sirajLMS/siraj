@@ -200,14 +200,7 @@ frontend/common/views/dashboard/<domain>/components/
 - Format: `~/.bun/bin/bun biome:check`
 - Quality gate: `~/.bun/bin/bun quality-gate`
 
-### Oxlint Rules (CRITICAL — NO `oxlint-disable` comments)
+### Linting Rules
 
-- **no-unsafe-type-assertion**: Oxlint is STRICTER than ESLint. `as unknown as T` does NOT bypass it. Use type guards (`value is Type`), `instanceof Error`, `find()` with widening cast `(v as string)`, or `.$type<Enum>()` on Drizzle columns. For `response.json()` use `const data: Type = await response.json()` or type guards.
-- **no-await-in-loop**: Use `Promise.all(items.map(async ...))` for independent iterations. Use recursive helpers or `reduce` chains for sequential iterations (shared transactions). `for await...of` is NOT flagged.
-- **consistent-function-scoping**: Move functions that don't capture parent variables to module scope.
-- **no-object-type-as-default-prop**: Extract `{}` / `[]` defaults to module-level constants.
-- **no-underscore-dangle**: Rename `_field` → `field`, or use bracket notation `obj["_ref"]` for external APIs.
-- **no-unsafe-enum-comparison**: Use `String(a) === String(Enum.VALUE)`, string literals, or `Set`-based lookups.
-- **no-shadow**: Use destructuring rename `{ prop: newName }` or `_` prefix for unused params.
-- **consistent-return**: Use `return undefined` instead of bare `return;`. Config override exists for `useEffect`.
-- Config overrides in `oxlint.config.mts` for test files (`unbound-method: off`) and `useEffect` files (`consistent-return: off`) are legitimate — NOT `oxlint-disable` comments.
+- See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
+

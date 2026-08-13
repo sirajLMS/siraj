@@ -1,9 +1,8 @@
 import { and, eq, gte, isNull, lt } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { mapStatusTrackingQueryRow } from "@/backend/db/repo/scheduling/scheduling-queries.repository/status-tracking.utils";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
-import type { StatusTrackingRow } from "@/backend/types/scheduling/scheduling.types";
+import type { DBTransaction, StatusTrackingRow } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export const getStatusTrackingRows = async (

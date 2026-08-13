@@ -1,9 +1,9 @@
 import type {
   MeetingConfigSnapshot,
+  MeetingProviderSelectType,
   UserMeetingConfigReturnType,
   UserMeetingConfigSelectType,
-} from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+} from "@/backend/types";
 
 /** Sensitive keys within providerMetadata that must be masked for non-admin users. */
 export const SENSITIVE_METADATA_KEYS = new Set(["password", "token", "refreshToken", "accessToken"]);

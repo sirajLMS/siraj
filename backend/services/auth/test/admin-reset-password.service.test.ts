@@ -1,15 +1,14 @@
 import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { UserRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/users";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum/notifications/notificationDeliveries.enum";
 import { logger } from "@/backend/lib/logger";
 import { AuthPasswordService } from "@/backend/services/auth/auth-password.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { AdminResetPasswordInput } from "@/backend/types/auth/auth.types";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import type { AdminResetPasswordInput } from "@/backend/types";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 const ACTOR_ID = randomUUID();
 const TARGET_ID = randomUUID();

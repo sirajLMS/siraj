@@ -1,11 +1,10 @@
 import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
-import type { UserReturnType } from "@/backend/types/users/user.types";
+import type { DBTransaction, UserReturnType } from "@/backend/types";
 import { parseIanaTimezone } from "@/shared/lib/enum";
 
 /**
@@ -54,7 +53,7 @@ export function testInRollback(name: string, fn: (tx: DBTransaction) => Promise<
  * @param tx Database transaction
  * @param overrides Optional field overrides
  */
-export async function createTestUser(
+export async function createTestUserWithDefaults(
   tx: DBTransaction,
   overrides: Partial<typeof users.$inferInsert> = {}
 ): Promise<UserReturnType> {
@@ -62,19 +61,19 @@ export async function createTestUser(
   const [user] = await tx
     .insert(users)
     .values({
-      name: overrides.name || "Test User",
-      email: overrides.email || `user-${randomUUID()}@example.com`,
-      password: overrides.password || randomUUID(),
-      rememberTokenHash: overrides.rememberTokenHash || null,
-      avatarFilePath: overrides.avatarFilePath || null,
+      name: overrides.name ?? "Test User",
+      email: overrides.email ?? `user-${randomUUID()}@example.com`,
+      password: overrides.password ?? randomUUID(),
+      rememberTokenHash: overrides.rememberTokenHash ?? null,
+      avatarFilePath: overrides.avatarFilePath ?? null,
       avatarUrl: overrides.avatarUrl ?? null,
       status: overrides.status ?? AccountStatus.ACTIVATED,
-      isSuperAdmin: overrides.isSuperAdmin || false,
-      lastLoginAt: overrides.lastLoginAt || null,
-      emailVerifiedAt: overrides.emailVerifiedAt || null,
-      createdAt: overrides.createdAt || now,
-      updatedAt: overrides.updatedAt || now,
-      deletedAt: overrides.deletedAt || null,
+      isSuperAdmin: overrides.isSuperAdmin ?? false,
+      lastLoginAt: overrides.lastLoginAt ?? null,
+      emailVerifiedAt: overrides.emailVerifiedAt ?? null,
+      createdAt: overrides.createdAt ?? now,
+      updatedAt: overrides.updatedAt ?? now,
+      deletedAt: overrides.deletedAt ?? null,
       ...overrides,
     })
     .returning();

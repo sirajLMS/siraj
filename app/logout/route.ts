@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { extractTokenFromHeader } from "@/backend/lib/auth/jwt";
 import { logger } from "@/backend/lib/logger";
-import { SessionService } from "@/backend/services/auth/session.service";
+import { SessionService } from "@/backend/services";
 
 const LOGIN_PATH = "/login";
 
@@ -18,7 +18,7 @@ function resolveRequestOrigin(request: NextRequest): string {
 function getIpAddress(request: NextRequest): string {
   const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   const realIp = request.headers.get("x-real-ip");
-  return realIp || forwardedFor || "127.0.0.1";
+  return realIp ?? forwardedFor ?? "127.0.0.1";
 }
 
 function getLocale(request: NextRequest): string {

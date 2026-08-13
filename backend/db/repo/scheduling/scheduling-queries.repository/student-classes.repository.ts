@@ -1,11 +1,9 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
-import { ClassExecutionState, ClassOutcome } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import type { UpcomingClassRow } from "@/backend/types/scheduling/scheduling.types";
+import type { DBTransaction, UpcomingClassRow } from "@/backend/types";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 
 const VALID_EXECUTION_STATES = new Set(Object.values(ClassExecutionState) as string[]);
 const VALID_OUTCOMES = new Set(Object.values(ClassOutcome) as string[]);

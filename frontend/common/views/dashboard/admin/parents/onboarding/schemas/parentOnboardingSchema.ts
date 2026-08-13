@@ -1,12 +1,9 @@
 import { z } from "zod";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
-import { InvoiceType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import { validateMeetingProviderFields } from "@/frontend/common/views/dashboard/profile/shared/meetingProviderValidation";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
-
-export type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 
 export const parentOnboardingSchema = z
   .object({

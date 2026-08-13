@@ -7,7 +7,7 @@ import {
   GenderPothosObject,
   IanaTimezonePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types/teachers/teacher.types";
+import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types";
 
 const TeacherProfileResultRef = gqlSchemaBuilder.objectRef<TeacherProfileReturnType>("TeacherProfileResult");
 

@@ -43,7 +43,7 @@ async function clearClassesOnDate(token: string, dateVal: string) {
     },
   });
 
-  const list = result.data?.dailyScheduleList || [];
+  const list = result.data?.dailyScheduleList ?? [];
   const idsToDelete = list.map(item => item?.id).filter((id): id is string => Boolean(id));
   const deleteResults = await Promise.all(
     idsToDelete.map(classInstanceId =>
@@ -106,7 +106,7 @@ describe("GraphQL Class Session Integration Tests", () => {
     });
 
     expect(dashboardResult.data).toBeDefined();
-    const rows = dashboardResult.data?.teacherDashboard?.scheduleRows || [];
+    const rows = dashboardResult.data?.teacherDashboard?.scheduleRows ?? [];
     const activatedRow = rows.find(r => r?.id === classInstanceId);
     expect(activatedRow).toBeDefined();
     if (!activatedRow) throw new Error("No activatedRow found");
@@ -216,7 +216,7 @@ describe("GraphQL Class Session Integration Tests", () => {
       activateOverrideClassMutationDocument,
       adminToken,
       outsideClassInstanceId,
-      outsideDate || testDate,
+      outsideDate ?? testDate,
       ClassExecutionState.Activated
     );
   });
@@ -311,9 +311,9 @@ describe("GraphQL Class Session Integration Tests", () => {
         studentUserId,
         teacherUserId,
         parentUserId,
-        studentId: studentId || "",
-        teacherId: teacherId || "",
-        parentId: parentId || "",
+        studentId: studentId ?? "",
+        teacherId: teacherId ?? "",
+        parentId: parentId ?? "",
       });
     }
   });

@@ -4,7 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Stack } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FormErrorSnackbar, FormSuccessSnackbar, PrimaryPageAction } from "@/frontend/common/components/ui";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
+import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
@@ -20,8 +22,10 @@ import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
 import { CompensationSection } from "@/frontend/common/views/dashboard/profile/staff/sections/CompensationSection";
 import { ContactSection } from "@/frontend/common/views/dashboard/profile/staff/sections/ContactSection";
-import type { StaffProfileData } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
-import { toStaffSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
+import {
+  type StaffProfileData,
+  toStaffSharedBaseLabels,
+} from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import {
   type StaffAdminEditFormData,
   staffAdminEditSchema,
@@ -186,7 +190,7 @@ export function StaffProfileEditForm({
 
   const showAccountSection = canEdit("core_identity") || (isAdminScope && canEdit("staff_role"));
   const showCompensationViewSection =
-    canView("staff_role") && (isAdminScope || Boolean(staffData.hourlyRate || staffData.rateCurrency));
+    canView("staff_role") && (isAdminScope || Boolean(staffData.hourlyRate ?? staffData.rateCurrency));
   const showCompensationEditSection = isAdminScope && canEdit("staff_role");
 
   const canResetPassword = isAdminScope && canAdminResetPassword();

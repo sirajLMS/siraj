@@ -1,6 +1,6 @@
 import type { SeedConfig } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { GroupClassService } from "@/backend/services/group-class/group-class.service";
+import { GroupClassService } from "@/backend/services";
 import type { ClassCommunicationSelectType } from "@/backend/types";
 
 type GroupClassEntity = { id: string; classInstanceId: string; courseName: string };

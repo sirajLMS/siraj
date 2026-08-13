@@ -11,8 +11,10 @@ import { StaffProfileEditForm } from "@/frontend/common/views/dashboard/profile/
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/staff/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/staff/sections/AdminOnlySection";
 import { PermissionsSection } from "@/frontend/common/views/dashboard/profile/staff/sections/PermissionsSection";
-import type { StaffProfileViewLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
-import { toStaffSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
+import {
+  type StaffProfileViewLabels,
+  toStaffSharedBaseLabels,
+} from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffProfileViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileViewModel";
 
 export interface StaffProfileSharedSlots {

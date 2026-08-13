@@ -8,7 +8,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { StudentClassHistoryPothosObject } from "@/backend/graphql/pothos/students/student-history.pothos";
 import { StudentUpcomingClassesResultPothosObject } from "@/backend/graphql/pothos/students/student-status.pothos";
-import type { StudentProfileReturnType } from "@/backend/types/students/student-profile.types";
+import type { StudentProfileReturnType } from "@/backend/types";
 
 const StudentProfileRef = gqlSchemaBuilder.objectRef<StudentProfileReturnType>("StudentProfile");
 

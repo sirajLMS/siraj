@@ -1,14 +1,12 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, like } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { permissionGroups, permissions, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
-import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
-import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { PermissionManagementService, PermissionsService, type UserPermissionContext } from "@/backend/services";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;

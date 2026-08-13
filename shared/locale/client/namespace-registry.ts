@@ -1,5 +1,8 @@
-import type { NamespaceHandle, NamespaceLoaderConfig } from "@/shared/locale/namespaces/define-namespace";
-import { getNamespaceId } from "@/shared/locale/namespaces/define-namespace";
+import {
+  getNamespaceId,
+  type NamespaceHandle,
+  type NamespaceLoaderConfig,
+} from "@/shared/locale/namespaces/define-namespace";
 
 const namespaceRegistry = new Map<string, NamespaceLoaderConfig<unknown>>();
 

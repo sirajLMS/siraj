@@ -7,7 +7,7 @@ import {
 } from "@/backend/graphql/pothos/classes/class-session.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { type ClassActionFn, ClassSessionService } from "@/backend/services/session/class-session.service";
+import { type ClassActionFn, ClassSessionService } from "@/backend/services";
 
 async function handleClassAction<R>(ctx: BaseContext, classInstanceId: string, action: ClassActionFn<R>) {
   const userId = await requireAuth(ctx);

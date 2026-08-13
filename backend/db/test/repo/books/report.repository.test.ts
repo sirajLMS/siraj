@@ -1,11 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo";
-import type { AttendanceReportRow } from "@/backend/db/repo/books/report.repository";
+import { type AttendanceReportRow, ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
-import type { AttendanceReportPaidAmountReturnType } from "@/backend/types/books/report.types";
+import type { AttendanceReportPaidAmountReturnType, DBTransaction } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 function paidAmountForCurrency(row: AttendanceReportRow, currency: CurrencyCode): number {
   const entry = row.paidAmounts.find((amount: AttendanceReportPaidAmountReturnType) => amount.currency === currency);

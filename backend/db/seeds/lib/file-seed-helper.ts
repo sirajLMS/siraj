@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
 import { logger } from "@/backend/lib/logger";
-import { StorageService } from "@/backend/services/storage/storage.service";
+import { StorageService } from "@/backend/services";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { ValidReferenceTable } from "@/backend/types";

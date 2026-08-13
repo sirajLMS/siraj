@@ -1,12 +1,12 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import {
   acquireLocks,
   checkOverlaps,
   type DBTransaction,
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import {
   classInstances,
   classSubjects,
@@ -14,12 +14,11 @@ import {
   recurringSchedules,
   teachers,
 } from "@/backend/db/schema";
-import type { CurrencyCode, RateSource } from "@/backend/enum";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import { resolveClassRate } from "@/backend/services/pricing/rate-resolver.service";
+import type { RateSource } from "@/backend/enum";
+import { EffectiveMeetingService, resolveClassRate } from "@/backend/services";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 export interface CreateRecurringScheduleInput {
   studentId: string;

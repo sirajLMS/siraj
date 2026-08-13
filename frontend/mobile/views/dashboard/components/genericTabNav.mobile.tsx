@@ -3,8 +3,10 @@
 import { Box, Chip, Typography } from "@mui/material";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import type { GenericTabNavVariantProps } from "@/frontend/common/views/dashboard/components/genericTabNav.types";
-import { isDateTabNavProps } from "@/frontend/common/views/dashboard/components/genericTabNav.types";
+import {
+  type GenericTabNavVariantProps,
+  isDateTabNavProps,
+} from "@/frontend/common/views/dashboard/components/genericTabNav.types";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
 
 export type GenericTabNavMobileViewProps = GenericTabNavVariantProps<string>;

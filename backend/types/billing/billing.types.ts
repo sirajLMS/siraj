@@ -9,7 +9,6 @@ import type {
   payments,
 } from "@/backend/db/schema";
 import type {
-  CurrencyCode,
   FxProvider,
   FxProviderConfigSource,
   FxSyncStatus,
@@ -18,7 +17,8 @@ import type {
   InvoiceStatus,
   InvoiceType,
 } from "@/backend/enum";
-import type { PageInfo } from "@/backend/types/shared/pagination.types";
+import type { PageInfo } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
 export type InvoiceInsertType = typeof invoices.$inferInsert;

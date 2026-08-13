@@ -1,8 +1,9 @@
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
-import { getStorageService, type StorageService } from "@/backend/storage/storage.service";
+import type { StorageService } from "@/backend/storage/disk/storage.service.interface";
+import { getStorageService } from "@/backend/storage/storage.service";
 import type { FileOperationResult, FileUploadResult, FolderCreateInput } from "@/backend/types";
 import { extToMime } from "@/shared/utils/storage.utils";
 
@@ -111,7 +112,7 @@ export class FileSeedingService implements IFileSeedingService {
       const fileBuffer = await fs.readFile(resolvedPath);
 
       // 3. Detect mime type if not provided
-      const finalContentType = contentType || this.getContentTypeFromFileName(bucketPath) || "application/octet-stream";
+      const finalContentType = contentType ?? this.getContentTypeFromFileName(bucketPath) ?? "application/octet-stream";
 
       // 4. Upload file using StorageService
       const result = await this.storageService.uploadFile(bucketPath, finalContentType, fileBuffer);

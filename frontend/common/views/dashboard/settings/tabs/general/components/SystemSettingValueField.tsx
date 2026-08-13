@@ -1,8 +1,7 @@
 "use client";
 
 import { Switch, TextField, Typography } from "@mui/material";
-import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import type { SystemSettingRow } from "@/frontend/common/views/dashboard/settings/types/generalSettings.types";
 import { SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 

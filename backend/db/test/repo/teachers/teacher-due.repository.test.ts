@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { TeacherDueRepository } from "@/backend/db/repo/teachers/teacher-due.repository";
+import { TeacherDueRepository } from "@/backend/db/repo/teachers";
 import { teacherDues, teacherPayments } from "@/backend/db/schema";
 import { createTestTeacherDue, setupStudent, setupTeacher, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode, PaymentDirection, PaymentMethodType, TeacherDueStatus } from "@/backend/enum";
-import type { ClassInstanceSelectType } from "@/backend/types";
+import { PaymentDirection, PaymentMethodType, TeacherDueStatus } from "@/backend/enum";
+import type { ClassInstanceSelectType, DBTransaction } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 function requireInstance(instance: ClassInstanceSelectType | null): ClassInstanceSelectType {
   if (!instance) {

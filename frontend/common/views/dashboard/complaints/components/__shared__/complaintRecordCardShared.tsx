@@ -5,8 +5,10 @@ import { Box, Paper, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import type { StatusBadgeCategory } from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
-import type { ParentComplaintRecord } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import { ComplaintStatus } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
+import {
+  ComplaintStatus,
+  type ParentComplaintRecord,
+} from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsParentLabels } from "@/shared/locale";
 
 type StatusBadgeComponentProps = {

@@ -1,6 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { assertTestHelperAllowed, isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
-import { TestHelperService } from "@/backend/services/system/test-helper.service";
+import { TestHelperService } from "@/backend/services";
 
 if (isTestHelperEnabled()) {
   const TestEntitiesType = gqlSchemaBuilder.objectRef<{

@@ -6,9 +6,8 @@
  * Logging is structured via `@/backend/lib/logger`.
  */
 
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { CronRepository, toScheduleReturnType } from "@/backend/db/repo";
+import { CronRepository, toScheduleReturnType } from "@/backend/db/repo/cron";
 import {
   CronConcurrencyPolicy,
   CronRunStatus,
@@ -28,23 +27,24 @@ import { formatError } from "@/backend/services/cron/cron-utils";
 import { getQueueAdapter } from "@/backend/services/cron/queue-adapter.factory";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import { resolveEnvConfig } from "@/backend/services/system";
-import type {
-  CronJobPayload,
-  CronQueueStats,
-  CronRunListInput,
-  CronRunListResult,
-  CronRunReturnType,
-  CronScheduleInsertType,
-  CronScheduleListInput,
-  CronScheduleListResult,
-  CronScheduleReturnType,
-  CronScheduleSelectType,
-  CronScheduleSubmitInput,
-  CronScheduleUpdateInput,
-  DispatchByIdResult,
-  DispatchDueResult,
-} from "@/backend/types/cron/cron.types";
-import { safeCronJobKind } from "@/backend/types/cron/cron.types";
+import {
+  type CronJobPayload,
+  type CronQueueStats,
+  type CronRunListInput,
+  type CronRunListResult,
+  type CronRunReturnType,
+  type CronScheduleInsertType,
+  type CronScheduleListInput,
+  type CronScheduleListResult,
+  type CronScheduleReturnType,
+  type CronScheduleSelectType,
+  type CronScheduleSubmitInput,
+  type CronScheduleUpdateInput,
+  type DBTransaction,
+  type DispatchByIdResult,
+  type DispatchDueResult,
+  safeCronJobKind,
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace CronService {
@@ -130,7 +130,7 @@ export namespace CronService {
 
     const cronChanged = input.cronExpression && input.cronExpression !== existing.cronExpression;
     const tzChanged = input.timezone && input.timezone !== existing.timezone;
-    const shouldRecompute = cronChanged || tzChanged;
+    const shouldRecompute = cronChanged ?? tzChanged;
 
     const updateData: CronScheduleUpdateInput = { ...input };
     if (shouldRecompute && existing.status === (CronScheduleStatus.ACTIVE as typeof existing.status)) {

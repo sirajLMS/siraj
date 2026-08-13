@@ -1,7 +1,5 @@
 import { and, asc, count, desc, eq, gt, ilike, inArray, lte, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { cronHeartbeats, cronRuns, cronSchedules } from "@/backend/db/schema";
 import {
   CronConcurrencyPolicy,
@@ -30,7 +28,8 @@ import type {
   CronScheduleReturnType,
   CronScheduleSelectType,
   CronScheduleUpdateInput,
-} from "@/backend/types/cron/cron.types";
+  DBTransaction,
+} from "@/backend/types";
 
 const INFLIGHT_STATUSES = [CronRunStatus.PENDING, CronRunStatus.RUNNING, CronRunStatus.RETRYING] as const;
 

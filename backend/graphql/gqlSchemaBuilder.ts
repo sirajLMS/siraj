@@ -10,13 +10,14 @@ import TracingPlugin, { isRootField, wrapResolver } from "@pothos/plugin-tracing
 import WithInputPlugin from "@pothos/plugin-with-input";
 import { getTableConfig } from "drizzle-orm/pg-core";
 import { GraphQLError } from "graphql";
-import { type DrizzleRelations, db, relations } from "@/backend/db/drizzleDb";
+import { type DrizzleRelations, db } from "@/backend/db/drizzleDb";
+import { relations } from "@/backend/db/drizzleRelations";
 import type { AppPermission } from "@/backend/enum";
 import type { AuthContexts, BaseContext } from "@/backend/graphql/gqlContext";
 import { enablePothosDevHmr } from "@/backend/graphql/pothos-hmr";
 import type { Email } from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { PermissionsService } from "@/backend/services";
 import type { PhoneNumber } from "@/shared/lib/phone";
 import type { LocalizedString } from "@/shared/types/localized-string";
 

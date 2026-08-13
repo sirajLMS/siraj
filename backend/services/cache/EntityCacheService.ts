@@ -38,12 +38,6 @@ export interface CacheEntry<T> {
   cachedAt: number;
 }
 
-export interface CacheStats {
-  provider: string;
-  size: number;
-  hitsByPrefix: Record<string, { hits: number; misses: number }>;
-}
-
 /**
  * Maximum number of entries allowed in hitMissMap.
  * Normal usage derives a finite set of prefixes via prefixOf(), so this cap

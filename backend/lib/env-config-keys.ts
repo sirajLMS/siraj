@@ -1019,8 +1019,6 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
   },
 ];
 
-export { HIDDEN_ENV_CONFIG_KEYS } from "@/shared/constants/env-config-keys";
-
 export function isEnvConfigKeyExposedInSettings(descriptor: EnvConfigKeyDescriptor): boolean {
   return !descriptor.excludeFromDb;
 }

@@ -4,8 +4,8 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import type {
   NotificationPreferenceReturnType,
   NotificationPreferenceUpdateInput,
-} from "@/backend/types/notifications/notification-preferences.types";
-import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
+  UserNotificationPreferenceSelectType,
+} from "@/backend/types";
 import {
   type NotificationPreferenceRole,
   resolveNotificationEventAllowlist,

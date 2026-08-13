@@ -10,8 +10,7 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { type SeedDemoUserInput, UserSeedService } from "@/backend/services/seed/user-seed.service";
-import { ReferenceDataService } from "@/backend/services/system/reference-data.service";
+import { ReferenceDataService, type SeedDemoUserInput, UserSeedService } from "@/backend/services";
 import type { GroupWithPermissionIds, UserSelectType } from "@/backend/types";
 import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 

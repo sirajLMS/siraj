@@ -1,6 +1,6 @@
 import { logger } from "@/backend/lib/logger";
 import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system";
-import type { IWhatsappChannel, WhatsappProvider } from "@/backend/types/whatsapp/whatsapp-channel.types";
+import type { IWhatsappChannel, WhatsappProvider } from "@/backend/types";
 
 let instance: IWhatsappChannel | null = null;
 let initializationPromise: Promise<IWhatsappChannel> | null = null;

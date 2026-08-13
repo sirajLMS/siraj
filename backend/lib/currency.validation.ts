@@ -5,7 +5,7 @@
  */
 
 import { z } from "zod";
-import { CurrencyCode } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
  * Type guard to check if a value is a valid CurrencyCode.

@@ -24,6 +24,7 @@
  *   tsgo          → only run tsgo (type checking only)
  *   biome         → run tsgo, then oxlint, then biome:check (stop if tsgo or oxlint fails)
  *   lint          → run tsgo, oxlint, biome, then lint:type-aware via lint service (stop if earlier check fails)
+ *   duplicates    → run tsgo, oxlint, biome, lint:type-aware, then check:duplicates (stop if earlier check fails)
  *   codescene     → run tsgo, oxlint, biome, lint:type-aware, check:duplicates, then codescene --file
  *
  * Exit codes:
@@ -32,7 +33,7 @@
  *   2 = invalid arguments
  */
 
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import {
   BOLD,
@@ -165,7 +166,7 @@ function printApplicableRuleFiles(filePath: string): void {
   console.log(`  • If fixing requires modifying ANOTHER file: do NOT modify that file.`);
   console.log(`    Report the cross-file dependency to the orchestrator instead.`);
   console.log("");
-  console.log(`${BOLD}Oxlint Fix Patterns (see AGENTS.md for full details):${NC}`);
+  console.log(`${BOLD}Oxlint Fix Patterns (see \`docs/quality/linting-rules.md\` for full details):${NC}`);
   console.log(
     `  • no-unsafe-type-assertion: Use type guards ("value is Type"), instanceof Error, satisfies Partial<T>`
   );
@@ -312,7 +313,42 @@ function jscpdFoundIntraFileClones(output: string): boolean {
   return /Clone found/.test(output) || /Found [1-9]\d* clones/.test(output);
 }
 
-/** Paths ignored by `.jscpd.json` (keep in sync with that file). */
+/** Type guard for `.jscpd.json` config shape. */
+function isJscpdConfig(value: unknown): value is { ignore?: string[] } {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  if (!("ignore" in value)) return true;
+  const ignore = value.ignore;
+  if (ignore === undefined) return true;
+  return Array.isArray(ignore) && ignore.every((v): v is string => typeof v === "string");
+}
+
+/** Patterns ignored by `.jscpd.json` — read at runtime to avoid drift. */
+let jscpdIgnorePatterns: string[] | null = null;
+
+function getJscpdIgnorePatterns(): string[] {
+  if (jscpdIgnorePatterns !== null) return jscpdIgnorePatterns;
+  try {
+    const configPath = resolve(PROJECT_ROOT, ".jscpd.json");
+    const raw = readFileSync(configPath, "utf-8");
+    const parsed: unknown = JSON.parse(raw);
+    jscpdIgnorePatterns = isJscpdConfig(parsed) ? (parsed.ignore ?? []) : [];
+  } catch {
+    jscpdIgnorePatterns = [];
+  }
+  return jscpdIgnorePatterns;
+}
+
+/** Convert a glob-like pattern from .jscpd.json to a regex. */
+function globToRegex(pattern: string): RegExp {
+  const escaped = pattern
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*\*/g, "::GLOBSTAR::")
+    .replace(/\*/g, "[^/]*")
+    .replace(/::GLOBSTAR::/g, ".*")
+    .replace(/\?/g, "[^/]");
+  return new RegExp(`(^|/)${escaped}(/|$)`);
+}
+
 function shouldSkipJscpd(filePath: string): boolean {
   const relPath = relative(PROJECT_ROOT, resolve(PROJECT_ROOT, filePath)).replace(/\\/g, "/");
 
@@ -322,17 +358,12 @@ function shouldSkipJscpd(filePath: string): boolean {
   if (/\.test\.(ts|tsx)$/.test(relPath)) {
     return true;
   }
-  if (
-    /(^|\/)(node_modules|out|build|dist|logs|storage|scratch|draft|storybook-static|docs|coverage)\//.test(relPath) ||
-    /(^|\/)\.(ai|agents|codescene|cursor|git|github|husky|kiro|next|next-dev|playwright-mcp|scannerwork|stakpak|vercel|vscode)\//.test(
-      relPath
-    ) ||
-    /(^|\/)\.next-test[^/]*\//.test(relPath) ||
-    /(^|\/)messages\//.test(relPath) ||
-    relPath.startsWith("frontend/common/graphql/generated/") ||
-    /(^|\/)(seeds|migration|unRefactored_tests)\//.test(relPath)
-  ) {
-    return true;
+
+  const ignorePatterns = getJscpdIgnorePatterns();
+  for (const pattern of ignorePatterns) {
+    if (globToRegex(pattern).test(relPath)) {
+      return true;
+    }
   }
 
   return false;
@@ -479,6 +510,11 @@ async function runProgressiveChecks(
     return 1;
   logPass("check:duplicates passed");
 
+  if (targetDepth <= LIFECYCLE_ORDER.duplicates) {
+    console.log(`\n${GREEN}✅ All checks for lifecycle "duplicates" passed.${NC}`);
+    return 0;
+  }
+
   // Step 6: codescene --file (file-level)
   const codesceneResult = checkCodescene(filePath);
   if (failOnResult(codesceneResult, "codescene FAILED — stopping here. Fix CodeScene health warnings.")) return 1;
@@ -502,6 +538,7 @@ ${BOLD}Lifecycle stages (controls depth of checks):${NC}
   tsgo          Only run tsgo (type checking)
   biome         Run tsgo, then oxlint, then biome:check
   lint          Run tsgo, oxlint, biome, then lint:type-aware via lint service
+  duplicates    Run tsgo, oxlint, biome, lint:type-aware, then check:duplicates
   codescene     Run tsgo, oxlint, biome, lint:type-aware, check:duplicates, then codescene --file
   sonar-results Same as codescene (no sonar for subagents — EVER)
 

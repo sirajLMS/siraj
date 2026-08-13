@@ -1,4 +1,5 @@
-import { BillingRepository, FxSyncRepository } from "@/backend/db/repo";
+import { BillingRepository } from "@/backend/db/repo/billing";
+import { FxSyncRepository } from "@/backend/db/repo/fx-sync.repository";
 import { AppPermission, FxSyncStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {

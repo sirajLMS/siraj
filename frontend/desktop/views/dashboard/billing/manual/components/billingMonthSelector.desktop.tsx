@@ -1,7 +1,6 @@
 "use client";
 
-import type { SxProps, Theme } from "@mui/material";
-import { Checkbox, FormControlLabel } from "@mui/material";
+import { Checkbox, FormControlLabel, type SxProps, type Theme } from "@mui/material";
 import { BillingMonthSelectorShared } from "@/frontend/common/views/dashboard/billing/manual/components/billingMonthSelectorShared";
 import type { BillingMonthItemSlotProps } from "@/frontend/common/views/dashboard/billing/manual/types";
 import type { BillingMonthSelectorProps } from "@/frontend/common/views/dashboard/billing/manual/types/billingMonthSelector.types";

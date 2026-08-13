@@ -2,11 +2,10 @@ import { and, eq, inArray, isNull, lte } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { classInstances, recurringSchedules, systemSettings, users } from "@/backend/db/schema";
 
-import { ClassExecutionState, OnDemandNoCreditsOutcome, OnDemandStatus } from "@/backend/enum";
-
+import { OnDemandNoCreditsOutcome, OnDemandStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
+import { ClassSessionService, QuotaNotificationService } from "@/backend/services";
+import { ClassExecutionState } from "@/shared/constants/class-instance-detail.enum";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 /** Maximum number of pending instances to process per resolver run (unbounded SELECT guard). */

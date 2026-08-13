@@ -3,9 +3,8 @@ import { db } from "@/backend/db/drizzleDb";
 import { quotas } from "@/backend/db/schema";
 import { QuotaStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { QuotaService } from "@/backend/services/billing/quota.service";
-import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";
-import type { QuotaReturnType, QuotaSelectType } from "@/backend/types/billing/quota.types";
+import { QuotaNotificationService, QuotaService } from "@/backend/services";
+import type { QuotaReturnType, QuotaSelectType } from "@/backend/types";
 import { resolveStudentNotificationRecipients } from "@/scripts/lib/resolve-notification-recipients";
 
 /** Quotas with validUntil within this many days are considered "expiring soon". */

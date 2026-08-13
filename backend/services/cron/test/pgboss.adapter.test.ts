@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { CronJobKind } from "@/backend/enum/cron/cron.enums";
-import type { CronJobPayload } from "@/backend/types/cron/cron.types";
+import type { CronJobPayload } from "@/backend/types";
 
 // ── Mock state (reset per test) ──
 let startCalls = 0;

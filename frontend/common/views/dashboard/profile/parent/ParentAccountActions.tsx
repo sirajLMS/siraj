@@ -2,7 +2,8 @@
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { FormErrorSnackbar, FormSuccessSnackbar } from "@/frontend/common/components/ui";
+import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentAccountActionsLabels } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
 import {

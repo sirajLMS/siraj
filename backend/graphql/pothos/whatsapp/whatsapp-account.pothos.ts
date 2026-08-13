@@ -10,7 +10,7 @@ import type {
   WhatsappAccountReturnType,
   WhatsappSyncFromMetaReturnType,
   WhatsappTemplateSnapshot,
-} from "@/backend/types/whatsapp/whatsapp-account.types";
+} from "@/backend/types";
 
 // ─── Object Types ─────────────────────────────────────────────────────────────
 

@@ -5,8 +5,7 @@ import {
   ParentOwnProfilePothosObject,
 } from "@/backend/graphql/pothos/parents/parent-portal.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
-import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
+import { ParentPortalService, SystemSettingsService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("parentAssignedStudents", t =>
   t.field({

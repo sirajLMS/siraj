@@ -35,7 +35,7 @@ export function installCodeScene(): boolean {
     if (ps.status === 0) {
       logSuccess("CodeScene CLI installed successfully");
       // Add the newly installed CLI to the current process PATH
-      const csPath = String.raw`${process.env.USERPROFILE || process.env.HOME}\AppData\Local\Programs\CodeScene`;
+      const csPath = String.raw`${process.env.USERPROFILE ?? process.env.HOME}\AppData\Local\Programs\CodeScene`;
       process.env.PATH = `${csPath};${process.env.PATH}`;
       return true;
     } else {

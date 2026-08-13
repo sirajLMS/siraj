@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import { loadListEntities, paginateStorageItems } from "@/backend/storage/disk/shared/list-operations.helper";
 import { getBlobs } from "@/backend/storage/disk/vercel/shared";
@@ -22,8 +22,8 @@ export async function listFiles(
         items: [],
         totalCount: 0,
         hasMore: false,
-        offset: input.offset || 0,
-        limit: input.limit || 50,
+        offset: input.offset ?? 0,
+        limit: input.limit ?? 50,
       };
     }
 
@@ -43,8 +43,8 @@ export async function listFiles(
       items: [],
       totalCount: 0,
       hasMore: false,
-      offset: input.offset || 0,
-      limit: input.limit || 50,
+      offset: input.offset ?? 0,
+      limit: input.limit ?? 50,
     };
   }
 }
@@ -102,8 +102,8 @@ function processFiles(
       if (!blob) continue;
 
       const directoryPath = StorageUtils.extractDirectoryPath(filePath);
-      const ext = filePath.split(".").pop()?.toLowerCase() || "";
-      const contentType = extToMime[ext] || "application/octet-stream";
+      const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
+      const contentType = extToMime[ext] ?? "application/octet-stream";
 
       const bucketFile: Types.BucketFile = {
         path: filePath,
@@ -168,7 +168,7 @@ export async function fetchDirectoryChildren(
   searchPath?: string | null
 ): Promise<Types.DirectoryInfo[]> {
   try {
-    const targetPath = searchPath || "";
+    const targetPath = searchPath ?? "";
     const prefix = targetPath ? `${targetPath}/` : "";
 
     const dbDirectories = await StorageDbRepository.directoriesByParentPath(targetPath);

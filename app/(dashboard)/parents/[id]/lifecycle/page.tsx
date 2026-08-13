@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { buildTranslatedMetadata } from "@/app/__shared__/buildEntityPageTitle";
 import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
-import { ParentLifecycleService } from "@/backend/services/parent/parent-lifecycle.service";
+import { ParentLifecycleService } from "@/backend/services";
 import {
   AccountStatus as GraphQLAccountStatus,
   ParentStatus as GraphQLParentStatus,

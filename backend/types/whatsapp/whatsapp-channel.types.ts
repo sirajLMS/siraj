@@ -1,6 +1,5 @@
 import type { NotificationEventType } from "@/backend/enum";
-import type { NotificationMetadata } from "@/backend/types";
-import type { WhatsappTemplateMetadata } from "@/backend/types/whatsapp/whatsapp-account.types";
+import type { NotificationMetadata, WhatsappTemplateMetadata } from "@/backend/types";
 
 /**
  * Reference to a pre-approved WhatsApp template stored in Meta's Template Manager.

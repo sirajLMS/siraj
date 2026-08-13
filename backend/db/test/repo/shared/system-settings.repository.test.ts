@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { SystemSettingsRepository } from "@/backend/db/repo";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { systemSettings } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import type { DBTransaction } from "@/backend/types";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 async function createTestSetting(

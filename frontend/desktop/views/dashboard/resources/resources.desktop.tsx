@@ -2,10 +2,10 @@
 
 import { Grid } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui";
+import { ResourceGovernancePanelShared as ResourceGovernancePanelDesktop } from "@/frontend/common/views/dashboard/resources/components/__shared__/resourceGovernancePanelShared";
 import type { ResourcesViewModel } from "@/frontend/common/views/dashboard/resources/useResourcesViewModel";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { ResourceDeleteDialogDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceDeleteDialog.desktop";
-import { ResourceGovernancePanelDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceGovernancePanel.desktop";
 import { ResourceLibraryGridDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceLibraryGrid.desktop";
 import { ResourceUploadFormDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceUploadForm.desktop";
 import { ResourceUploadGuidelinesDesktop } from "@/frontend/desktop/views/dashboard/resources/components/resourceUploadGuidelines.desktop";

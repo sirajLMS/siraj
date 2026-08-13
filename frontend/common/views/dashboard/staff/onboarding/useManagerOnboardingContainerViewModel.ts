@@ -9,8 +9,10 @@ import { CurrencyCode, IanaTimezone, ManagerAccountType } from "@/frontend/commo
 import { useCreateManagerOnboarding } from "@/frontend/common/hooks/useCreateManagerOnboarding";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { managerOnboardingSchema } from "@/frontend/common/views/dashboard/staff/onboarding/schemas/managerOnboardingSchema";
-import type { OnboardingMetricsViewModel } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
-import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
+import {
+  type OnboardingMetricsViewModel,
+  useOnboardingMetrics,
+} from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
 import { useRouter } from "@/shared/i18n/navigation";
 import { type StaffOnboardingLabels, Translation, useAppTranslation } from "@/shared/locale";
 

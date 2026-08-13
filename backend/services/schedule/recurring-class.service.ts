@@ -1,6 +1,5 @@
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { CreditRepository } from "@/backend/db/repo";
+import { CreditRepository } from "@/backend/db/repo/billing";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { classLifecycleAffectedUserIds, SchedulingRepository } from "@/backend/db/repo/scheduling";
@@ -11,7 +10,7 @@ import {
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
-import { AppPermission, type CurrencyCode, NotificationEventType, SchedulingMode } from "@/backend/enum";
+import { AppPermission, NotificationEventType, SchedulingMode } from "@/backend/enum";
 import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -20,8 +19,13 @@ import { QuotaService } from "@/backend/services/billing/quota.service";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
-import type { RecurringScheduleDaySelectType, RecurringScheduleSelectType } from "@/backend/types";
-import type { CreateRecurringClassInput } from "@/backend/types/scheduling/scheduling.types";
+import type {
+  CreateRecurringClassInput,
+  DBTransaction,
+  RecurringScheduleDaySelectType,
+  RecurringScheduleSelectType,
+} from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace RecurringClassService {

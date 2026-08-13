@@ -1,8 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { GroupClassRepository } from "@/backend/db/repo";
+import { GroupClassRepository } from "@/backend/db/repo/classes";
 import { classCommunications, classInstances, groupClassEnrollments, groupClasses } from "@/backend/db/schema";
 import {
   createMockClassInstance,
@@ -13,6 +12,7 @@ import {
   setupTeacher,
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import type { DBTransaction } from "@/backend/types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;

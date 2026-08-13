@@ -1,7 +1,7 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ParentStatusPothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { ParentLifecycleService } from "@/backend/services/parent/parent-lifecycle.service";
+import { ParentLifecycleService } from "@/backend/services";
 import type { ChangeParentLifecycleResult } from "@/backend/types";
 
 const ChangeParentLifecycleResultRef =
@@ -24,7 +24,7 @@ gqlSchemaBuilder.mutationField("changeParentLifecycleStatus", t =>
     },
     resolve: async (_root, args, ctx) => {
       return ParentLifecycleService.changeLifecycleStatus(
-        ctx.user?.id || "",
+        ctx.user?.id ?? "",
         args.parentId,
         args.newStatus,
         ctx.locale

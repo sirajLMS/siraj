@@ -2,17 +2,17 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
   DesktopAppDataGrid,
   DesktopFormErrorSnackbar,
-  DesktopFormSuccessSnackbar,
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
 } from "@/frontend/desktop/components/ui";
 import { DesktopBaseDeleteDialog } from "@/frontend/desktop/components/ui/dialog/DesktopBaseDeleteDialog";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 function MeetingProvidersDesktopEmptyState({ title, body }: Readonly<{ title: string; body: string }>) {
   return (
@@ -80,7 +80,7 @@ export function MeetingProvidersDesktopView({
         message={notifications.errorMsg}
         onClose={notifications.closeError}
       />
-      <DesktopFormSuccessSnackbar
+      <FormSuccessSnackbar
         open={notifications.successOpen}
         message={notifications.successMsg}
         onClose={notifications.closeSuccess}

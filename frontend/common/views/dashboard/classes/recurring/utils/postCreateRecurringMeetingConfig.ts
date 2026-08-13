@@ -35,7 +35,7 @@ export async function postCreateRecurringMeetingConfig(
   const sourceConfig = state.selectedConfig;
   const providerId = sourceConfig?.providerId ?? state.newProvider?.id;
   const meetingUrl = sourceConfig?.details?.meetingUrl?.trim() ?? state.newMeetingUrl.trim();
-  const label = sourceConfig?.label?.trim() || state.newLabel.trim() || null;
+  const label = sourceConfig?.label?.trim() ?? state.newLabel.trim() ?? null;
 
   if (!providerId || !meetingUrl) {
     return { success: !isNewMode };

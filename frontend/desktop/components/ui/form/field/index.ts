@@ -1,1 +1,1 @@
-export { outlinedInputSx } from "@/frontend/desktop/components/ui/form/field/formFieldStyles.desktop";
+export * from "./formFieldStyles.desktop";

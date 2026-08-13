@@ -1,25 +1,31 @@
-import * as ClassInstances from "@/backend/db/repo/scheduling/class-instances";
-import * as Queries from "@/backend/db/repo/scheduling/queries";
-import * as Recurring from "@/backend/db/repo/scheduling/recurring";
-import { findUpcomingInstances } from "@/backend/db/repo/scheduling/scheduling-queries.repository.findUpcoming";
+import * as ClassInstances from "./class-instances";
+import * as Queries from "./queries";
+import * as Recurring from "./recurring";
+import { findUpcomingInstances } from "./scheduling-queries.repository.findUpcoming";
 import {
   getClassInstanceAffectedUsers,
   getClassInstanceAffectedUsersForTeacher,
-} from "@/backend/db/repo/scheduling/scheduling-queries.repository.helpers";
-import * as StateChanges from "@/backend/db/repo/scheduling/state-changes";
+} from "./scheduling-queries.repository.helpers";
+import { resolveStudentTimezone } from "./shared";
+import * as StateChanges from "./state-changes";
 
-export { ClassStatusEventsRepository } from "@/backend/db/repo/scheduling/class-status-events.repository";
-export { RecurringScheduleRepository } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
+export * from "./class-instance-upsert";
+export * from "./class-status-events.repository";
+export * from "./leave-quota-usage.repository";
+export * from "./leave-request.repository";
+export * from "./queries";
+export * from "./recurring-schedule.repository";
+export * from "./scheduling-queries.repository.findUpcoming";
 export type {
   ClassInstanceAffectedUsers,
   ClassInstanceWithAffectedUsers,
-} from "@/backend/db/repo/scheduling/scheduling-queries.repository.helpers";
+} from "./scheduling-queries.repository.helpers";
 export {
   classLifecycleAffectedUserIds,
   getClassInstanceAffectedUsers,
   getClassInstanceAffectedUsersForTeacher,
-} from "@/backend/db/repo/scheduling/scheduling-queries.repository.helpers";
-export { findUpcomingInstances };
+} from "./scheduling-queries.repository.helpers";
+export * from "./shared";
 
 export const SchedulingRepository = {
   ...ClassInstances,
@@ -29,6 +35,7 @@ export const SchedulingRepository = {
   findUpcomingInstances,
   getClassInstanceAffectedUsers,
   getClassInstanceAffectedUsersForTeacher,
+  resolveStudentTimezone,
   findUpcomingInstancesByScheduleId: ClassInstances.findUpcomingInstancesByScheduleId,
   hasOverlappingInstance: ClassInstances.hasOverlappingInstance,
   findOverlappingInstancesForRange: ClassInstances.findOverlappingInstancesForRange,

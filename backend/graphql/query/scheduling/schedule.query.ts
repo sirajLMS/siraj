@@ -21,9 +21,7 @@ import {
 } from "@/backend/graphql/query/scheduling/__shared__/makeWeeklyScheduleQueryField";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { RecurringScheduleDetailService } from "@/backend/services/schedule/recurring-schedule-detail.service";
-import { ScheduleService } from "@/backend/services/schedule/schedule.service";
-import { WeeklyScheduleService } from "@/backend/services/schedule/weekly-schedule.service";
+import { RecurringScheduleDetailService, ScheduleService, WeeklyScheduleService } from "@/backend/services";
 import type { DailyScheduleArgs } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
@@ -142,7 +140,7 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
       );
 
       return {
-        id: `reschedule-tracking-${args.search || ""}-${args.status || ""}`,
+        id: `reschedule-tracking-${args.search ?? ""}-${args.status ?? ""}`,
         ...result,
       };
     },

@@ -5,7 +5,7 @@ import {
   writeMergedBlankRow,
   writeMergedTitleCell,
 } from "@/frontend/common/utils/excel-export/shared-export-logic";
-import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
+import type { ParentDirectoryRow } from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 
 interface ParentDirectoryExportLabels {
   readonly pageTitle: string;

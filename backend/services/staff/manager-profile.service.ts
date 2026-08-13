@@ -1,7 +1,8 @@
-import { StaffProfileRepository, UserRepository } from "@/backend/db";
+import { StaffProfileRepository } from "@/backend/db/repo/teachers";
+import { UserRepository } from "@/backend/db/repo/users";
 import { type AccountStatus, AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { ManagerDirectoryRow } from "@/backend/types";
 import { parseAccountStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
@@ -10,7 +11,7 @@ export interface UpdateManagerProfileInput {
   readonly phone?: string | null;
   readonly status?: AccountStatus | null;
   readonly hourlyRate?: string | null;
-  readonly rateCurrency?: import("@/backend/enum").CurrencyCode | null;
+  readonly rateCurrency?: import("@/shared/constants/currency.enum").CurrencyCode | null;
 }
 
 export namespace ManagerProfileService {

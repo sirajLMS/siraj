@@ -60,10 +60,10 @@ export function DashboardClientBridge({
   enableUsersDirectory,
   hideSidebarNavigation = false,
 }: Readonly<DashboardClientBridgeProps>) {
-  const notificationCount = useLiveNotificationCount(userProfile.notificationCount || 0);
+  const notificationCount = useLiveNotificationCount(userProfile.notificationCount ?? 0);
   const notificationsDrawerVm = useNotificationsDrawerViewModel();
 
-  const permissions = (userProfile.permissions || []).filter(isValidPermission);
+  const permissions = (userProfile.permissions ?? []).filter(isValidPermission);
   const layoutData = hideSidebarNavigation
     ? { sidebarGroups: [], sidebarItems: [], bottomNavItems: [] }
     : getDashboardLayoutData(permissions, { enableUsersDirectory });
@@ -77,13 +77,13 @@ export function DashboardClientBridge({
         sidebarGroups={sidebarGroups}
         sidebarItems={sidebarItems}
         bottomNavItems={bottomNavItems}
-        userName={userProfile.name || ""}
-        userEmail={userProfile.email || ""}
-        userRole={userProfile.role || ""}
+        userName={userProfile.name ?? ""}
+        userEmail={userProfile.email ?? ""}
+        userRole={userProfile.role ?? ""}
         roleLabel={roleLabel}
         appTitle={appTitle}
         logoAriaLabel={logoAriaLabel}
-        avatarUrl={userProfile.avatarUrl || ""}
+        avatarUrl={userProfile.avatarUrl ?? ""}
         notificationCount={notificationCount}
         initialSidebarOpen={initialSidebarOpen}
         hideSidebarNavigation={hideSidebarNavigation}

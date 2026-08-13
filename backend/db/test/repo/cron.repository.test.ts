@@ -1,7 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { CronRepository } from "@/backend/db/repo";
+import { CronRepository } from "@/backend/db/repo/cron";
 import { cronRuns, cronSchedules } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
@@ -12,11 +11,7 @@ import {
   CronScheduleStatus,
   CronTriggerSource,
 } from "@/backend/enum/cron/cron.enums";
-import type {
-  CronRunInsertType,
-  CronScheduleInsertType,
-  CronScheduleSelectType,
-} from "@/backend/types/cron/cron.types";
+import type { CronRunInsertType, CronScheduleInsertType, CronScheduleSelectType, DBTransaction } from "@/backend/types";
 
 const noop = () => {};
 void mock.module("@/backend/lib/logger", () => ({

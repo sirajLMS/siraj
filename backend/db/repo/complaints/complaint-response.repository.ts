@@ -1,12 +1,8 @@
 import { desc, eq, inArray } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { ComplaintStatus } from "@/backend/enum";
-import type {
-  ComplaintResponseInput,
-  ComplaintResponseReturnType,
-} from "@/backend/types/complaints/complaintResponses.types";
+import type { ComplaintResponseInput, ComplaintResponseReturnType, DBTransaction } from "@/backend/types";
 
 type CreateComplaintResponseInput = ComplaintResponseInput & {
   responderUserId: string | null;

@@ -10,7 +10,7 @@ import type {
   SupportedPaymentLinkInsertType,
   SupportedPaymentLinkSelectType,
   UpdateSupportedPaymentLinkInput,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
 
 type LinkRow = typeof supportedPaymentLinks.$inferSelect;
 

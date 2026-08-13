@@ -1,4 +1,4 @@
-import { ParentRepository } from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo/parents";
 import { AppPermission, ParentStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { cachedRead, stableStringify } from "@/backend/services/cache";
@@ -111,7 +111,7 @@ export namespace ParentDirectoryService {
     await assertDirectoryAccess(actorUserId, locale);
 
     const cappedLimit = Math.min(Math.max(limit, 1), PARENTS_DIRECTORY_MAX_LIMIT);
-    const trimmedSearch = search?.trim() || null;
+    const trimmedSearch = search?.trim() ?? null;
 
     return await ParentRepository.findParentsDirectoryLite({
       search: trimmedSearch,

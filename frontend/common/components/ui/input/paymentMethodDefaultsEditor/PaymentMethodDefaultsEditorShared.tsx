@@ -6,7 +6,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
 import { useCallback, useState } from "react";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
 import { filterMethodsForDirection } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/utils";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
@@ -120,7 +120,7 @@ export function PaymentMethodDefaultsEditorShared({
         const shortKey = key.slice("direction.".length);
         return isDirectionLabelKey(shortKey) ? t.direction[shortKey] : "";
       });
-      const base = method.label?.trim() || method.catalogSlug || typeLabel;
+      const base = method.label?.trim() ?? method.catalogSlug ?? typeLabel;
       return directionLabel ? `${base} (${directionLabel})` : base;
     },
     [t]

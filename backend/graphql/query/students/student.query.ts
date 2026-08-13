@@ -1,4 +1,4 @@
-import { StudentRepository } from "@/backend/db/repo";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { AppLanguage } from "@/backend/enum/auth/auth.enum";
 import { AppPermission } from "@/backend/enum/permissions/permission.enum";
 import { StudentStatus } from "@/backend/enum/students/student-lifecycle.enum";

@@ -1,12 +1,9 @@
-export { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
+export { StatusBadge } from "./StatusBadge";
 export {
   type StatusBadgeScaffoldProps,
   StatusBadgeShared,
-} from "@/frontend/common/components/ui/badge/StatusBadgeShared";
-export {
-  getStatusColors,
-  resolveStatusPaletteKey,
-} from "@/frontend/common/components/ui/badge/statusBadgeShared.utils";
+} from "./StatusBadgeShared";
+export * from "./statusBadgeShared.utils";
 export type {
   GetStatusColorsFn,
   ResolveStatusPaletteKeyFn,
@@ -14,4 +11,4 @@ export type {
   StatusBadgeSharedProps,
   StatusBadgeSlotProps,
   StatusPaletteKey,
-} from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
+} from "./types/statusBadgeShared.types";

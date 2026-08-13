@@ -87,11 +87,12 @@ export function MeetingConfigTypeFieldsShared({
   const fields = getVisibleMeetingConfigFields(provider);
   const supportsAuto = provider.fieldSchema?.supportsAutoGeneration === true;
 
-  const generateButtonText = generating
-    ? t.generating
-    : value.meetingUrl.trim()
-      ? t.regenerate
-      : t.generateAutomatically;
+  let generateButtonText = t.generateAutomatically;
+  if (generating) {
+    generateButtonText = t.generating;
+  } else if (value.meetingUrl.trim()) {
+    generateButtonText = t.regenerate;
+  }
 
   const sizeProp = options.textFieldSize ? { size: options.textFieldSize } : {};
   const urlInputModeProp = options.urlInputMode ? { inputMode: options.urlInputMode } : {};
@@ -101,7 +102,7 @@ export function MeetingConfigTypeFieldsShared({
       <TextField
         label={t.meetingUrl}
         value={value.meetingUrl}
-        disabled={disabled || (supportsAuto && Boolean(value.meetingUrl.trim()))}
+        disabled={disabled ?? (supportsAuto && Boolean(value.meetingUrl.trim()))}
         fullWidth
         placeholder={provider.urlExample ?? undefined}
         {...sizeProp}
@@ -112,7 +113,7 @@ export function MeetingConfigTypeFieldsShared({
       />
       {supportsAuto && onGenerateUrl ? (
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Button variant="outlined" size="small" disabled={disabled || generating} onClick={onGenerateUrl}>
+          <Button variant="outlined" size="small" disabled={disabled ?? generating} onClick={onGenerateUrl}>
             {generateButtonText}
           </Button>
           {generationError ? (

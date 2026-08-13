@@ -3,7 +3,7 @@
  * Run: `bun run test:live-comm` or `bun run test:integration`
  */
 import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import { TwilioSmsAdapter } from "@/backend/services/communication/channels/sms/twilio/TwilioSmsAdapter";
 import type { NotificationDeliverySelectType } from "@/backend/types";

@@ -1,8 +1,7 @@
 "use client";
 
 import { InputAdornment, Stack, TextField } from "@mui/material";
-import type { Control, FieldPath, FieldValues, UseFormRegister } from "react-hook-form";
-import { useWatch } from "react-hook-form";
+import { type Control, type FieldPath, type FieldValues, type UseFormRegister, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";

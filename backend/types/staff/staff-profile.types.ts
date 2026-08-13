@@ -1,6 +1,6 @@
 import type { staffProfiles } from "@/backend/db/schema";
 import type { AccountStatus, OverrideState } from "@/backend/enum";
-import type { PageInfo } from "@/backend/types/shared/pagination.types";
+import type { PageInfo } from "@/backend/types";
 
 export type StaffProfileEntity = typeof staffProfiles.$inferSelect;
 export type StaffProfileEntityInput = typeof staffProfiles.$inferInsert;
@@ -37,7 +37,7 @@ export interface ManagerDirectoryRow {
   readonly roleSlug: string | null;
   readonly roleName: string | null;
   readonly hourlyRate: string | null;
-  readonly rateCurrency: import("@/backend/enum").CurrencyCode | null;
+  readonly rateCurrency: import("@/shared/constants/currency.enum").CurrencyCode | null;
 }
 
 export interface ManagerDirectoryFilters {
@@ -64,7 +64,7 @@ export interface UpdateManagerProfileInput {
   phone?: string | null;
   status?: AccountStatus | null;
   hourlyRate?: string | null;
-  rateCurrency?: import("@/backend/enum").CurrencyCode | null;
+  rateCurrency?: import("@/shared/constants/currency.enum").CurrencyCode | null;
 }
 
 export interface StaffPermissionGroupReturnType {

@@ -1,4 +1,4 @@
-import type { TeacherPendingDuesSummaryReturnType } from "@/backend/types/teachers/teacher-due.types";
+import type { TeacherPendingDuesSummaryReturnType } from "@/backend/types";
 
 export interface SupervisorMonthlySnapshotReturnType {
   year: number;

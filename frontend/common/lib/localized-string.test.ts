@@ -1,13 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import {
   hasRequiredLocalizedValue,
-  omitEmptyLocalizedString,
   pickInitialActiveLocale,
   removeLocalizedString,
-  resolveLocalizedString,
-  setLocalizedString,
   unusedLocales,
 } from "@/frontend/common/lib/localized-string";
+import { omitEmptyLocalizedString, resolveLocalizedString, setLocalizedString } from "@/shared/lib/localized-string";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
 
 describe("resolveLocalizedString", () => {

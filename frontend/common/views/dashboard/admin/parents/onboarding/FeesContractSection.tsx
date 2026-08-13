@@ -1,16 +1,14 @@
 "use client";
 
 import { FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { useWatch } from "react-hook-form";
+import { type Control, type FieldErrors, type UseFormRegister, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { CurrencySelectController } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySelectControllerShared";
 import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCurrencySymbol } from "@/frontend/common/lib/currency";
-import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
-import { InvoiceType } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
+import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ParentOnboardingLabels } from "@/shared/locale/types/dashboard/parents";
 

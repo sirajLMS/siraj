@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { CreditRepository, StudentRepository } from "@/backend/db/repo";
+import { CreditRepository } from "@/backend/db/repo/billing";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { creditTransactions } from "@/backend/db/schema";
 import {
   createTestCreditTransaction,
@@ -13,9 +13,8 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { CreditReason } from "@/backend/enum";
-import type { ClassInstanceSelectType } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import type { ClassInstanceSelectType, DBTransaction } from "@/backend/types";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 let tErrors: ErrorsLabels;
 beforeAll(() => {

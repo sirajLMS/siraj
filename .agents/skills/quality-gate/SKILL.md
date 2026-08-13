@@ -2,7 +2,7 @@
 name: quality-gate
 description: >
   Run the project's `bun quality-gate` command and follow its output instructions to resolve
-  all reported issues across stages (BASIC_CHECKS, CODESCENE).
+  all reported issues across stages (BASIC_CHECKS, DUPLICATES, CODESCENE).
   Dispatches parallel subagents (one per file) within each lifecycle stage — no interleaving
   across stages. Each subagent calls `scripts/health/sub-loop.ts` for progressive per-file
   verification (tsgo → oxlint → biome → lint:type-aware → check:duplicates → codescene, in strict
@@ -127,10 +127,18 @@ across stages — e.g., don't dispatch CODESCENE fix subagents while BASIC_CHECK
 
 Run the quality gate command and capture its output.
 
+> **⚠️ NEVER CLEAR CACHES.** The quality-gate workflow must NEVER clear any cache files
+> (ESLint `.eslintcache` / `.eslintcache-type-aware`, CodeScene incremental cache, SonarQube
+> `.sonar-cache`). The `--fresh` flag only clears the quality-gate **state file**
+> (`.quality-gate-state.json`), which tracks stage progress. All caches must be preserved
+> across runs for incremental performance. The `--reset` flag on `codescene` and `sonar-scan`
+> is deprecated and is a no-op for cache clearing.
+
 **ALWAYS use `bun quality-gate:fresh` on the FIRST invocation of a session.** A fresh run discards
 any stale state in `.quality-gate-state.json` (which may reference issues from a previous session
 that have since been fixed, or vice versa) and starts cleanly from the first stage. This avoids
-acting on outdated state and ensures the gate reflects the current working tree.
+acting on outdated state and ensures the gate reflects the current working tree. **Caches are
+preserved.**
 
 ```bash
 bun quality-gate:fresh   # FIRST run of a session — always fresh
@@ -148,12 +156,13 @@ asks to resume from existing state, or if you are certain the persisted state is
 (e.g., you just ran `:fresh` moments ago and only made targeted fixes since).
 
 Read the output carefully. It will indicate:
-- Which stage failed (`BASIC_CHECKS` or `CODESCENE`)
-- The owner of the failure (`quality-gate` or `codescene`)
+- Which stage failed (`BASIC_CHECKS`, `DUPLICATES`, or `CODESCENE`)
+- The owner of the failure (`quality-gate`, `duplicates`, or `codescene`)
 - Specific remediation instructions (printed in colored text)
 
 State is persisted in `.quality-gate-state.json`. Re-running `bun quality-gate` resumes from the
-last failed stage once its issues are resolved.
+last failed stage once its issues are resolved. **Caches (ESLint, CodeScene, SonarQube) are never
+cleared by any quality-gate command.**
 
 ---
 
@@ -164,6 +173,7 @@ Map the failed stage to the correct remediation workflow:
 | Failed Stage | Owner | What to Do |
 |---|---|---|
 | `BASIC_CHECKS` | `quality-gate` | Fix tsgo (grouped parallel) → oxlint (parallel) → biome (parallel) → lint (parallel) |
+| `DUPLICATES` | `duplicates` | Fix cross-file duplications — dispatch parallel subagents per file. See `docs/frontend/duplication-elimination-patterns.md` and `docs/frontend/ui-shared-scaffold-pattern.md` for remediation patterns. Zero `jscpd:ignore` and zero `.jscpd.json` changes are hard rules. |
 | `CODESCENE` | `codescene` | Fix CodeScene warnings — dispatch parallel subagents per file |
 
 If the owner is NOT `quality-gate`, the recovery check runs automatically on the next `bun quality-gate`
@@ -275,10 +285,48 @@ Dispatched as parallel subagents — one per file.
 
 6. Re-run `bun run scripts/lint-service.ts` to verify clean.
 
-7. Resume: re-run `bun quality-gate` — it advances to CODESCENE stage.
+7. Resume: re-run `bun quality-gate` — it advances to DUPLICATES stage.
 
 **No HTTP server needed.** The former `lint-queue-server.ts` / `lint-queue-client.ts` / `LINT_QUEUE_PORT`
 architecture is gone. All lint is now in-process via `scripts/lint-service.ts`.
+
+---
+
+### Phase 6.5: Fix DUPLICATES (Parallel)
+
+The `DUPLICATES` stage runs `bun check:duplicates` (full-repo jscpd scan) and gates on cross-file
+clones. This is the only scan that catches cross-file duplication patterns (e.g., desktop/mobile
+scaffold pairs, re-export shims, parallel i18n implementations).
+
+1. Run `bun check:duplicates` to get the jscpd report.
+
+2. Get the list of files with duplication issues from the report.
+
+3. **Dispatch one subagent per flagged file** — launch all in a SINGLE response (parallel).
+   Each subagent receives:
+   - `lifecycle: duplicates`
+   - The duplication findings for that file (clone pairs, % similarity, lines)
+
+4. Each subagent: reads instruction file + AGENTS.md, fixes duplications using documented patterns,
+   then runs:
+   ```bash
+   bun run scripts/health/sub-loop.ts <file> --lifecycle duplicates
+   ```
+   (This runs tsgo → oxlint → biome → lint:type-aware → check:duplicates in order, short-circuiting at any failure.)
+
+5. **Wait for all subagents to complete.**
+
+6. Re-run `bun check:duplicates` to verify no new clones.
+
+7. Resume: re-run `bun quality-gate` — it advances to CODESCENE stage.
+
+**Remediation patterns:**
+- Extract shared scaffold: `docs/frontend/ui-shared-scaffold-pattern.md`
+- Duplication elimination patterns A-G: `docs/frontend/duplication-elimination-patterns.md`
+
+**Hard rules:**
+- Zero `jscpd:ignore` comments — fix the root cause instead
+- Zero `.jscpd.json` modifications — never widen ignore patterns to pass the gate
 
 ---
 
@@ -312,7 +360,7 @@ architecture is gone. All lint is now in-process via `scripts/lint-service.ts`.
 Re-run `bun quality-gate` until all stages pass.
 
 The state machine behavior:
-- If the previous owner was `codescene`, the script runs a recovery check first.
+- If the previous owner was `codescene` or `duplicates`, the script runs a recovery check first.
 - If the recovery check passes, ownership returns to `quality-gate` and stages continue.
 - If the recovery check fails, the script exits — fix remaining issues and re-run.
 - When all stages pass: `✨✨ ALL QUALITY GATES PASSED! ✨✨` and lifecycle = DONE.
@@ -409,7 +457,7 @@ Report your results to the orchestrator:
 ## PROHIBITIONS
 - `bun run lint` is safe to run directly (it uses the in-process lint service — no HTTP server). However, subagents should prefer the per-file `sub-loop.ts` script for file-scoped verification.
  - NEVER modify files other than <file-path>
-- NEVER add `oxlint-disable` comments — fix the root cause instead. See AGENTS.md "Oxlint Rules" section for fix patterns.
+ - NEVER add `oxlint-disable` comments — fix the root cause instead. See `docs/quality/linting-rules.md` for fix patterns.
 
 ERRORS TO FIX:
 <paste errors from tsgo/oxlint/biome/lint/codescene output for this file>
@@ -417,7 +465,7 @@ ERRORS TO FIX:
 
 ### Oxlint Fix Patterns Reference
 
-When subagents encounter oxlint violations, refer them to the "Oxlint Rules" section in `AGENTS.md`
+When subagents encounter oxlint violations, refer them to `docs/quality/linting-rules.md`
 which documents every rule with fix patterns:
 
 | Rule | Fix Pattern |

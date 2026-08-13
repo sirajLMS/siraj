@@ -2,8 +2,8 @@
 
 import { Box, Stack } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import type { MeetingJoinEmptyRole } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import type { MeetingJoinEmptyRole } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classDetailsContentPaddingSx,

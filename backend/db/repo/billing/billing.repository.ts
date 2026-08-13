@@ -1,7 +1,5 @@
 import { and, asc, count, desc, eq, inArray, isNull, lte, ne, or, type SQL, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBQueryExecutor, DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import {
   currencyExchangeAuditLogs,
   currencyExchangeRates,
@@ -13,8 +11,10 @@ import {
   systemSettings,
   users,
 } from "@/backend/db/schema";
-import { CurrencyCode, StudentStatus } from "@/backend/enum";
+import { StudentStatus } from "@/backend/enum";
 import type * as Types from "@/backend/types";
+import type { DBQueryExecutor, DBTransaction } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -61,7 +61,7 @@ export namespace BillingRepository {
     const rate = await getLatestExchangeRate(currency, CurrencyCode.USD, tErrors, t);
     return {
       snapshot: rate.rate,
-      source: rate.source || "SYSTEM_AUTO",
+      source: rate.source ?? "SYSTEM_AUTO",
     };
   }
 
@@ -232,7 +232,7 @@ export namespace BillingRepository {
       toCurrency: input.toCurrency,
       oldRate: results.length > 0 ? oldRate.rate : null,
       newRate: input.rate,
-      source: input.source || "MANUAL",
+      source: input.source ?? "MANUAL",
       changedByUserId,
       createdAt: new Date(),
     });

@@ -145,10 +145,10 @@ export function useParentProfileViewModel(
         displayCurrency: formData.displayCurrency,
       };
       const parentOwn = {
-        phone: formData.phone || null,
-        facebook: formData.facebook || null,
-        whatsapp: formData.whatsapp || null,
-        twitter: formData.twitter || null,
+        phone: formData.phone ?? null,
+        facebook: formData.facebook ?? null,
+        whatsapp: formData.whatsapp ?? null,
+        twitter: formData.twitter ?? null,
       };
 
       if (scope === ProfileScope.Own) {
@@ -171,10 +171,10 @@ export function useParentProfileViewModel(
               core,
               parent: {
                 ...parentOwn,
-                nationality: formData.nationality || null,
-                address: formData.address || null,
-                invoiceType: formData.invoiceType || null,
-                feeAmount: formData.feeAmount || null,
+                nationality: formData.nationality ?? null,
+                address: formData.address ?? null,
+                invoiceType: formData.invoiceType ?? null,
+                feeAmount: formData.feeAmount ?? null,
                 currency: formData.currency ?? null,
                 timezone: toIanaTimezoneOrNull(formData.timezone),
               },

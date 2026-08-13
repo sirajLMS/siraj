@@ -7,8 +7,7 @@ import {
 } from "@/backend/graphql/pothos/teachers/teacher-dashboard.pothos";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { UnauthorizedError } from "@/backend/lib/errors";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import { TeacherDashboardService } from "@/backend/services/teacher/teacher-dashboard.service";
+import { EffectiveMeetingService, TeacherDashboardService } from "@/backend/services";
 import type { PaginationInput } from "@/backend/types";
 
 async function resolveTeacherDashboard(ctx: BaseContext, args: { date: string; pagination?: PaginationInput | null }) {
@@ -31,7 +30,7 @@ async function resolveTeacherDashboard(ctx: BaseContext, args: { date: string; p
       return {
         id: r.id,
         studentId: r.studentId,
-        studentName: r.student?.name || "Student",
+        studentName: r.student?.name ?? "Student",
         scheduledStartAt: r.scheduledStartAt,
         scheduledEndAt: r.scheduledEndAt,
         durationMinutes: r.durationMinutes,

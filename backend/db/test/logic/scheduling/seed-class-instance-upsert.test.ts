@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
-import { upsertSeedClassInstance } from "@/backend/db/repo/scheduling/class-instance-upsert";
+import { upsertSeedClassInstance } from "@/backend/db/repo/scheduling";
 import { classInstances } from "@/backend/db/schema";
 import { ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";

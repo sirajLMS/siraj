@@ -2,8 +2,10 @@
 
 import { SettingsAuditDataGrid } from "@/frontend/common/views/dashboard/settings/components/audit/SettingsAuditDataGrid";
 import { SettingsAuditFilterBar } from "@/frontend/common/views/dashboard/settings/components/audit/SettingsAuditFilterBar";
-import type { SettingsTabSharedOptions } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsTabShared";
-import { SettingsTabShared } from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsTabShared";
+import {
+  SettingsTabShared,
+  type SettingsTabSharedOptions,
+} from "@/frontend/common/views/dashboard/settings/tabs/__shared__/settingsTabShared";
 import type { SettingsAuditViewModel } from "@/frontend/common/views/dashboard/settings/types/settingsAuditViewModel.types";
 
 export function SettingsAuditTabShared({

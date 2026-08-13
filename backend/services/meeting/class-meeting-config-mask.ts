@@ -2,8 +2,8 @@ import { maskProviderMetadata } from "@/backend/services/meeting/meeting-config-
 import type {
   ClassMeetingConfigReturnType,
   ClassMeetingConfigSelectType,
-} from "@/backend/types/meeting/class-meeting-config.types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+  MeetingProviderSelectType,
+} from "@/backend/types";
 
 export function buildMaskedClassMeetingConfig(
   config: ClassMeetingConfigSelectType,

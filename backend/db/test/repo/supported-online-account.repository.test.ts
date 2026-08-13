@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { SupportedOnlineAccountRepository } from "@/backend/db/repo";
+import { SupportedOnlineAccountRepository } from "@/backend/db/repo/billing";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { IdentifierKind, PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";

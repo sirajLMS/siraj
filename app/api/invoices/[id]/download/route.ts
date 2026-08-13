@@ -11,7 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] || "ar";
+  const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
   const tErrors = getServerTranslations(locale).errorsTranslations;
 
   try {

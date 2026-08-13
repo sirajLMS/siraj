@@ -1,23 +1,20 @@
 import { cert, deleteApp, getApp, getApps, initializeApp } from "firebase-admin/app";
-import type { BatchResponse, Message, SendResponse } from "firebase-admin/messaging";
-import { getMessaging } from "firebase-admin/messaging";
+import { type BatchResponse, getMessaging, type Message, type SendResponse } from "firebase-admin/messaging";
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { NotificationChannel, NotificationDeliveryStatus } from "@/backend/enum";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import type { FcmPushContext } from "@/backend/services/communication/channels/push/fcm/fcm.types";
 import {
   FCM_INVALID_TOKEN_ERROR,
   FCM_TOKEN_EXPIRED_ERROR,
-} from "@/backend/services/communication/channels/push/fcm/fcm.types";
+} from "@/backend/services/communication/channels/push/fcm/fcm.helpers";
 import type {
   IPushChannel,
   PushPayload,
   PushSendResult,
 } from "@/backend/services/communication/channels/push/IPushChannel";
 import { deliveryFailedMessage } from "@/backend/services/communication/utils";
-import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
-import type { UserDeviceTokenSelectType } from "@/backend/types/users/userDeviceTokens.types";
+import type { FcmPushContext, NotificationDeliverySelectType, UserDeviceTokenSelectType } from "@/backend/types";
 
 export class FcmPushAdapter implements IPushChannel {
   private readonly context: FcmPushContext;

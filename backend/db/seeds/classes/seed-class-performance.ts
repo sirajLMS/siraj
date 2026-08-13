@@ -10,7 +10,7 @@ import {
   startOfDay,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
+import { ClassPerformanceService } from "@/backend/services";
 import type { ClassInstancePerformanceInsertType, ClassInstanceSelectType } from "@/backend/types";
 
 function buildPerformanceRow(

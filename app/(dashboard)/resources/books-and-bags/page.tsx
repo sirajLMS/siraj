@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AppPermission } from "@/backend/enum";
 import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
-import { BookService } from "@/backend/services/resource/book.service";
+import { BookService } from "@/backend/services";
 import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { BooksAndBagsView } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBagsView";
 import { getTranslations } from "@/shared/locale";

@@ -14,7 +14,7 @@ export const CONFIG = {
   RESULTS_FILE: join(SCRIPT_DIR, ".cache", "results.txt"),
   TOKEN_FILE: join(SCRIPT_DIR, "token.txt"),
   CS_TOKEN: "",
-  CODESCENE_BIN: process.env.CODESCENE_BIN || "cs",
+  CODESCENE_BIN: process.env.CODESCENE_BIN ?? "cs",
 };
 
 // Disable automatic version check on every run to prevent console clutter during parallel execution
@@ -35,7 +35,7 @@ if (fs.existsSync(CONFIG.TOKEN_FILE)) {
 
 // 2. Fallback to environment if file was missing or empty
 if (!CONFIG.CS_TOKEN) {
-  CONFIG.CS_TOKEN = process.env.CS_ACCESS_TOKEN || "";
+  CONFIG.CS_TOKEN = process.env.CS_ACCESS_TOKEN ?? "";
 }
 
 // Disable automatic version check to prevent spam during parallel execution

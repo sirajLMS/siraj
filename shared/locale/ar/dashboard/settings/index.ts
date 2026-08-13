@@ -1,2 +1,2 @@
-export { dashboardSettingsEnvironmentAr } from "./environment";
-export { dashboardSettingsAr } from "./main";
+export * from "./environment";
+export * from "./main";

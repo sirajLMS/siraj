@@ -1,18 +1,13 @@
 import type { teacherPayments, teachers } from "@/backend/db/schema";
+import type { AccountStatus, Gender, StudentStatus, TeacherProgressFeedEventKind } from "@/backend/enum";
 import type {
-  AccountStatus,
-  ClassExecutionState,
-  ClassOutcome,
-  ClassType,
-  CurrencyCode,
-  Gender,
-  StudentStatus,
-  TeacherProgressFeedEventKind,
-} from "@/backend/enum";
-import type { DisplayAmountReturnType } from "@/backend/types/billing/billing.types";
-import type { EffectiveMeetingReturnType } from "@/backend/types/meeting/class-meeting-config.types";
-import type { ClassSessionMetrics } from "@/backend/types/scheduling/schedule.types";
-import type { PageInfo } from "@/backend/types/shared/pagination.types";
+  ClassSessionMetrics,
+  DisplayAmountReturnType,
+  EffectiveMeetingReturnType,
+  PageInfo,
+} from "@/backend/types";
+import type { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type TeacherSelectType = typeof teachers.$inferSelect;

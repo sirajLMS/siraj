@@ -12,7 +12,7 @@ import type {
   SupportedMobileWalletInsertType,
   SupportedMobileWalletSelectType,
   UpdateSupportedMobileWalletInput,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
 
 type WalletRow = typeof supportedMobileWallets.$inferSelect;
 

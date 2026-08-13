@@ -1,10 +1,17 @@
 "use client";
 
 import { Checkbox, FormControlLabel, Stack } from "@mui/material";
-import type { ChangeEvent } from "react";
-import { useState } from "react";
-import type { Control, FieldErrors, FieldValues, Path, UseFormSetValue } from "react-hook-form";
-import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { type ChangeEvent, useState } from "react";
+import {
+  type Control,
+  Controller,
+  type FieldErrors,
+  type FieldValues,
+  type Path,
+  type UseFormSetValue,
+  useFormContext,
+  useWatch,
+} from "react-hook-form";
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
 import { resolveFieldName } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/utils";
@@ -34,6 +41,17 @@ function setFieldValue<T extends FieldValues>(setValue: UseFormSetValue<T>, name
   if (isFieldValue<T>(value)) {
     setValue(name, value);
   }
+}
+
+/** Resolves a raw type error value into a display-friendly string (or undefined when absent). */
+function resolveTypeErrorMessage(rawTypeError: unknown): string | undefined {
+  if (rawTypeError == null) {
+    return undefined;
+  }
+  if (typeof rawTypeError === "string") {
+    return rawTypeError;
+  }
+  return JSON.stringify(rawTypeError);
 }
 
 export interface OnboardingPaymentMethodSectionProps<T extends FieldValues> {
@@ -92,8 +110,7 @@ export function OnboardingPaymentMethodSection<T extends FieldValues>({
   };
 
   const rawTypeError = methodErrors?.type?.message;
-  const typeErrorMessage =
-    rawTypeError == null ? undefined : typeof rawTypeError === "string" ? rawTypeError : JSON.stringify(rawTypeError);
+  const typeErrorMessage = resolveTypeErrorMessage(rawTypeError);
 
   return (
     <Stack spacing={3} sx={theme => ({ p: theme.layout.cardPadding })}>

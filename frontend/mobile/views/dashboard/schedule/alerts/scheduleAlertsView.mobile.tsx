@@ -5,16 +5,13 @@ import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+import type { ScheduleAlertsViewCommonProps } from "@/frontend/common/views/dashboard/schedule/alerts/__shared__/scheduleAlertsViewSharedProps";
 import { buildAlertMetricItems } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/buildAlertMetricItems";
 import {
   ScheduleAlertsLoadingIndicator,
   type ScheduleAlertsViewSharedProps,
 } from "@/frontend/common/views/dashboard/schedule/alerts/components/__shared__/scheduleAlertsViewShared";
-import type {
-  AcademicClassRow,
-  AlertsMetric,
-  ScheduleAlertsLabels,
-} from "@/frontend/common/views/dashboard/schedule/alerts/types";
+import type { AlertsMetric, ScheduleAlertsLabels } from "@/frontend/common/views/dashboard/schedule/alerts/types";
 import {
   MobileContentInset,
   MobileContentStack,
@@ -75,21 +72,8 @@ function MobileAlertsBody({
   onLeave,
   onViewClassAudit,
   onPageChange,
-  cardListLabels,
-}: {
-  readonly loading: boolean | undefined;
-  readonly labels: ScheduleAlertsLabels;
-  readonly classes: readonly AcademicClassRow[];
-  readonly totalClasses?: number;
-  readonly currentPage: number;
-  readonly pageSize: number;
-  readonly onFilter: () => void;
-  readonly onExport: () => void;
-  readonly onLeave: (id: string) => void;
-  readonly onViewClassAudit: (id: string) => void;
-  readonly onPageChange: (page: number) => void;
-  readonly cardListLabels: AcademicScheduleCardListMobileLabels;
-}) {
+  contentLabels,
+}: ScheduleAlertsViewCommonProps<AcademicScheduleCardListMobileLabels>) {
   if (loading) {
     return <ScheduleAlertsLoadingIndicator loading={labels.loading} />;
   }
@@ -136,7 +120,7 @@ function MobileAlertsBody({
       />
       <AcademicScheduleCardListMobile
         rows={classes}
-        labels={cardListLabels}
+        labels={contentLabels}
         paginationOptions={buildServerPaginationOptions({
           page: currentPage,
           pageSize,
@@ -206,7 +190,7 @@ export function ScheduleAlertsViewMobile({
           onLeave={onLeave}
           onViewClassAudit={onViewClassAudit}
           onPageChange={onPageChange}
-          cardListLabels={cardListLabels}
+          contentLabels={cardListLabels}
         />
       </MobileContentStack>
     </MobilePageContainer>

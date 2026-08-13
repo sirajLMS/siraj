@@ -162,7 +162,7 @@ export function StatusTrackingMobileCard({
         <StyledScheduleSessionCardHeaderMain>
           <MobileClassProfileLink
             href={row.id ? classHref(row.id) : undefined}
-            name={row.courseName?.trim() || "—"}
+            name={row.courseName?.trim() ?? "—"}
             avatarUrl={row.avatarUrl}
             avatarSize={40}
             typographyVariant="titleLg"

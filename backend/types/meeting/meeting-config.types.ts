@@ -4,11 +4,8 @@ import type {
   MeetingConfigBaseSelectType,
   MeetingConfigBaseSubmitInput,
   MeetingConfigDetails,
-} from "@/backend/types/meeting/meeting-config-base.types";
+} from "@/backend/types";
 import type { LocalizedString } from "@/shared/types";
-
-// Re-export so existing imports from this module continue to work.
-export type { MeetingConfigDetails };
 
 // ============================================================================
 // Session snapshot (frozen on class_instances at booking)

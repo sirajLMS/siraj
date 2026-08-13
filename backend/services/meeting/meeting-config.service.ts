@@ -1,4 +1,3 @@
-import type { DBTransaction } from "@/backend/db/db.types";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
@@ -14,14 +13,13 @@ import { buildMaskedMeetingConfig, buildMaskedMeetingConfigs } from "@/backend/s
 import type {
   ClassMeetingConfigInsertType,
   ClassMeetingConfigSelectType,
-} from "@/backend/types/meeting/class-meeting-config.types";
-import type {
+  DBTransaction,
   MeetingConfigDetails,
   UpdateUserMeetingConfigInput,
   UserMeetingConfigReturnType,
   UserMeetingConfigSelectType,
   UserMeetingConfigSubmitInput,
-} from "@/backend/types/meeting/meeting-config.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace MeetingConfigService {
@@ -168,7 +166,7 @@ export namespace MeetingConfigService {
       // it means "regenerate" for auto providers. For manual providers Zod requires
       // a URL, so parsed.meetingUrl will always be a non-empty string.
       const shouldRegenerate =
-        (input.forceRegenerate && provider.providerKind !== "manual") ||
+        (Boolean(input.forceRegenerate) && provider.providerKind !== "manual") ||
         (!parsed.meetingUrl && provider.providerKind !== "manual" && detailsChanged);
 
       if (shouldRegenerate) {

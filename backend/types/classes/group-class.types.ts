@@ -1,5 +1,6 @@
 import type { classCommunications, groupClassEnrollments, groupClasses } from "@/backend/db/schema";
-import type { ClassExecutionState, ClassOutcome, GroupClassAttendanceStatus } from "@/backend/enum";
+import type { GroupClassAttendanceStatus } from "@/backend/enum";
+import type { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import type { LocalizedString } from "@/shared/types";
 export type GroupClassSelectType = typeof groupClasses.$inferSelect;
 export type GroupClassInsertType = typeof groupClasses.$inferInsert;

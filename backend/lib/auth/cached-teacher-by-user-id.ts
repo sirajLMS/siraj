@@ -1,4 +1,4 @@
-import { cachedRead } from "@/backend/services/cache";
+import { cachedRead } from "@/backend/services";
 
 export async function cachedTeacherByUserId<T>(userId: string, roleId: string, loader: () => Promise<T>): Promise<T> {
   const cacheKey = `ec:teacher:byUserId:${userId}:${roleId}`;

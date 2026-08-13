@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import * as Pothos from "@/backend/graphql/pothos";
 import { getStorageService } from "@/backend/storage/storage.service";
@@ -70,8 +70,8 @@ gqlSchemaBuilder.queryFields(t => ({
     resolve: async (_parent, { searchTerm, fileType, folder, limit }) => {
       const storageService = await getStorageService();
       const input = {
-        path: folder || "",
-        limit: limit || 50,
+        path: folder ?? "",
+        limit: limit ?? 50,
         searchTerm,
         fileType,
       };

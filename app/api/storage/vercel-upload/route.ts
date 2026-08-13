@@ -1,6 +1,6 @@
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { type NextRequest, NextResponse } from "next/server";
-import { SignedUrlRepository } from "@/backend/db";
+import { SignedUrlRepository } from "@/backend/db/repo/shared";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
 import { SessionService, StorageService } from "@/backend/services";
 
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         try {
           // Parse token payload
-          const rawPayload = parseTokenPayload(tokenPayload || "{}");
+          const rawPayload = parseTokenPayload(tokenPayload ?? "{}");
           const parsedSessionId = rawPayload.sessionId;
 
           // Mark session as used

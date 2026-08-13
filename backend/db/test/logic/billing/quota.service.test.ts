@@ -10,8 +10,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { type AppPermission, QuotaKind } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { QuotaService } from "@/backend/services/billing/quota.service";
+import { PermissionsService, QuotaService } from "@/backend/services";
 import type { QuotaReturnType, QuotaSubmitInput } from "@/backend/types";
 
 describe("QuotaService", () => {

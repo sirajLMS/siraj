@@ -1,7 +1,9 @@
 "use client";
 
-import type { TeacherActiveSessionControlsSharedOptions } from "@/frontend/common/views/dashboard/teachers/dashboard/components/__shared__/teacherActiveSessionControlsShared";
-import { TeacherActiveSessionControlsShared } from "@/frontend/common/views/dashboard/teachers/dashboard/components/__shared__/teacherActiveSessionControlsShared";
+import {
+  TeacherActiveSessionControlsShared,
+  type TeacherActiveSessionControlsSharedOptions,
+} from "@/frontend/common/views/dashboard/teachers/dashboard/components/__shared__/teacherActiveSessionControlsShared";
 import type { TeacherActiveSessionControlsProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 
 const DESKTOP_OPTIONS: TeacherActiveSessionControlsSharedOptions = {

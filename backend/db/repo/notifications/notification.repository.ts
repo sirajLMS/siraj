@@ -1,24 +1,22 @@
 import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";
-import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 import type {
   CreateNotificationDeliveryInput,
+  DBTransaction,
   NotificationDeliveryAnalyticsFilter,
   NotificationDeliveryAnalyticsResult,
   NotificationDeliverySelectType,
   NotificationDeliveryStatusCount,
+  NotificationMetadata,
+  RegisterDeviceTokenInput,
+  SetNotificationPreferenceInput,
   UpdateDeliveryStatusInput,
   UserDeliveryHistoryResult,
-} from "@/backend/types/notifications/notificationDeliveries.types";
-import type { RegisterDeviceTokenInput, UserDeviceTokenSelectType } from "@/backend/types/users/userDeviceTokens.types";
-import type {
-  SetNotificationPreferenceInput,
+  UserDeviceTokenSelectType,
   UserNotificationPreferenceSelectType,
-} from "@/backend/types/users/userNotificationPreferences.types";
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {

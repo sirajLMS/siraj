@@ -19,15 +19,15 @@ export function hasParentSocialData(parentData: ParentViewData): boolean {
 }
 
 export function hasParentIdentityData(adminData: ParentAdminData): boolean {
-  return Boolean(adminData?.nationality?.trim() || adminData?.address?.trim());
+  return Boolean(adminData?.nationality?.trim() ?? adminData?.address?.trim());
 }
 
 export function hasParentBillingData(adminData: ParentAdminData): boolean {
   return Boolean(
-    adminData?.invoiceType?.trim() ||
-      adminData?.feeAmount?.trim() ||
-      adminData?.currency ||
-      adminData?.timezone?.trim() ||
+    adminData?.invoiceType?.trim() ??
+      adminData?.feeAmount?.trim() ??
+      adminData?.currency ??
+      adminData?.timezone?.trim() ??
       adminData?.lifecycleStatus
   );
 }

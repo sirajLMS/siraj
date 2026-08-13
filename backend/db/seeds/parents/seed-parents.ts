@@ -9,7 +9,7 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
+import { PersonaSeedService } from "@/backend/services";
 import type { UserSelectType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 

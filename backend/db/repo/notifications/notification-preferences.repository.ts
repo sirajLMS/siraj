@@ -1,10 +1,11 @@
 import { eq, inArray, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { userNotificationPreferences } from "@/backend/db/schema";
-import type { NotificationPreferenceUpdateInput } from "@/backend/types/notifications/notification-preferences.types";
-import type { UserNotificationPreferenceSelectType } from "@/backend/types/users/userNotificationPreferences.types";
+import type {
+  DBTransaction,
+  NotificationPreferenceUpdateInput,
+  UserNotificationPreferenceSelectType,
+} from "@/backend/types";
 
 export namespace NotificationPreferencesRepository {
   export async function getByUserId(

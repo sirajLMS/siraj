@@ -1,5 +1,5 @@
 import type { classSubjects, subjectResources } from "@/backend/db/schema";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export type ClassSubjectSelectType = typeof classSubjects.$inferSelect;
 export type ClassSubjectInsertType = typeof classSubjects.$inferInsert;

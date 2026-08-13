@@ -1,6 +1,9 @@
-import type { DBTransaction } from "@/backend/db/db.types";
 import { ClassPerformanceRepository } from "@/backend/db/repo/classes/class-performance.repository";
-import type { ClassInstancePerformanceInsertType, ClassInstancePerformanceSelectType } from "@/backend/types";
+import type {
+  ClassInstancePerformanceInsertType,
+  ClassInstancePerformanceSelectType,
+  DBTransaction,
+} from "@/backend/types";
 
 export namespace ClassPerformanceService {
   export async function getPerformanceForClass(classInstanceId: string) {

@@ -4,8 +4,10 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { Button, Stack, Typography } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
-import { ErrorState, FormErrorSnackbar, FormSuccessSnackbar, SectionPanel } from "@/frontend/common/components/ui";
+import { ErrorState, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
+import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classMeetingConfigsQueryDocument,
@@ -19,13 +21,13 @@ import type {
   ClassMeetingConfigFieldsFragment,
   EffectiveMeetingFieldsFragment,
 } from "@/frontend/common/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ClassMeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigFormDialog";
 import { ClassMeetingContextBanner } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingContextBanner";
 import { MeetingConfigDeleteDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigDeleteDialog";
 import { useMeetingConfigProfileLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigProfileLabels";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type {
   MeetingConfigClassScopeLabels,
   MeetingConfigDisplayLabels,

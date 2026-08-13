@@ -2,12 +2,11 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { classInstances, quotas, recurringScheduleDays, recurringSchedules } from "@/backend/db/schema";
-import { ClassExecutionState, ClassType, DayOfWeek, OnDemandStatus, QuotaStatus, SchedulingMode } from "@/backend/enum";
-
+import { DayOfWeek, OnDemandStatus, QuotaStatus, SchedulingMode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { QuotaService } from "@/backend/services/billing/quota.service";
-import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
+import { AvailabilityService, QuotaService } from "@/backend/services";
 import type { ClassInstanceInsertType } from "@/backend/types";
+import { ClassExecutionState, ClassType } from "@/shared/constants/class-instance-detail.enum";
 
 /** Maximum number of recurring schedules to process per batch (unbounded SELECT guard — RP2-8). */
 const MAX_SCHEDULES_PER_RUN = 500;

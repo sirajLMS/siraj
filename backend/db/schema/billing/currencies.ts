@@ -1,6 +1,6 @@
 import { boolean, index, integer, pgTable, smallint, timestamp, varchar } from "drizzle-orm/pg-core";
 import { countryCodeEnum, currencyCodeEnum } from "@/backend/db/schema/enums";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export const supportedCurrencies = pgTable(
   "supported_currencies",

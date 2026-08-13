@@ -1,9 +1,7 @@
-import type { DBTransaction } from "@/backend/db/db.types";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { safeMaybeGenerateUrl } from "@/backend/services/meeting/__shared__/meetingConfigHelpers";
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+import type { DBTransaction, MeetingConfigDetails, MeetingProviderSelectType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**

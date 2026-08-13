@@ -169,7 +169,7 @@ function SlotItemContent({ classItem, classInstanceId, subjectLabel, statusLabel
 
       <MobilePersonProfileLink
         href={classItem.studentId ? studentHref(classItem.studentId) : undefined}
-        name={classItem.studentName || "—"}
+        name={classItem.studentName ?? "—"}
         showAvatar={false}
         typographyVariant="bodySm"
         fontWeight={500}
@@ -192,7 +192,7 @@ function MobileSlotItem({
   const { open, openDialog, closeDialog } = useDeleteConfirmDialog();
   const t = labels;
   const classInstanceId = classItem.id ?? "";
-  const subjectLabel = classItem.subjectName?.trim() || t.grid.unknownSubject;
+  const subjectLabel = classItem.subjectName?.trim() ?? t.grid.unknownSubject;
   const statusLabel = resolveWeeklyScheduleSlotStatus(classItem, t.grid.status);
 
   const canJoin = isJoinableClassInstance(classItem.executionState, classItem.outcome, {
@@ -390,7 +390,12 @@ function TimeSlotRow({
     );
   }
 
-  const slotMinHeight = isLunch ? 48 : slotClasses.length > 0 ? 96 : 64;
+  let slotMinHeight = 64;
+  if (isLunch) {
+    slotMinHeight = 48;
+  } else if (slotClasses.length > 0) {
+    slotMinHeight = 96;
+  }
 
   return (
     <Box

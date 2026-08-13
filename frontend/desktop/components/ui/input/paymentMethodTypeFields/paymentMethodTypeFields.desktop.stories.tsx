@@ -2,13 +2,13 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import type {
   PaymentMethodCatalogFormValue,
   PaymentMethodDetailsFormValue,
   PaymentMethodTypeFieldsProps,
-} from "@/frontend/desktop/components/ui/input/paymentMethodTypeFields";
+} from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { PaymentMethodTypeFieldsDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodTypeFields/paymentMethodTypeFields.desktop";
 
 type StoryFormValues = {

@@ -1,14 +1,17 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { LessonReportRepository } from "@/backend/db/repo/classes/lesson-report.repository";
+import { LessonReportRepository } from "@/backend/db/repo/classes";
 import { lessonReports } from "@/backend/db/schema";
 import { createTestLessonReport, createTestUser, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AttendanceEvaluation, LessonReportStatus } from "@/backend/enum";
-import type { ClassInstanceSelectType, LessonReportSelectType } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
+import {
+  type ClassInstanceSelectType,
+  type DBTransaction,
+  type LessonReportSelectType,
+  PaginationArgs,
+} from "@/backend/types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;

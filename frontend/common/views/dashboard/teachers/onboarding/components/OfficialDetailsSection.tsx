@@ -1,8 +1,7 @@
 "use client";
 
 import { Grid } from "@mui/material";
-import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";

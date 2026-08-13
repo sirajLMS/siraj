@@ -1,8 +1,8 @@
-import type {
-  ClassSubjectCreateInput,
-  ClassSubjectUpdateInput,
+import {
+  type ClassSubjectCreateInput,
+  type ClassSubjectUpdateInput,
+  CurrencyCode,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SubjectFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/subject.schema";
 
 const VALID_CURRENCY_CODES = new Set(Object.values(CurrencyCode) as readonly string[]);
@@ -29,11 +29,11 @@ function buildSubjectInputFields(data: SubjectFormValues): SubjectInputFields {
     name: data.name,
     slug: data.slug,
     categoryId: data.categoryId,
-    description: data.description || null,
+    description: data.description ?? null,
     isActive: data.isActive ?? null,
     sortOrder: null,
-    avatarUrl: data.avatarUrl || null,
-    hourlyRate: data.hourlyRate || null,
+    avatarUrl: data.avatarUrl ?? null,
+    hourlyRate: data.hourlyRate ?? null,
     rateCurrency: data.rateCurrency && isCurrencyCode(data.rateCurrency) ? data.rateCurrency : null,
   };
 }

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { TeacherRepository } from "@/backend/db/repo";
+import { db } from "@/backend/db";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { teachers, users } from "@/backend/db/schema";
 import { createTestUser, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { AccountStatus, CurrencyCode } from "@/backend/enum";
-import { PaginationArgs } from "@/backend/types";
+import { AccountStatus } from "@/backend/enum";
+import { type DBTransaction, PaginationArgs } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 /**

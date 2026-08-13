@@ -1,9 +1,8 @@
 "use client";
 
-import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/schemas/parentOnboardingSchema";
+import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
 import type { MeetingConfigFieldsLabels } from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigFields";
 import { MeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigOnboardingSection";
 

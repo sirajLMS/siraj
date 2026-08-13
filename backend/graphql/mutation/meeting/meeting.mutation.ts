@@ -18,13 +18,13 @@ import {
 import { withAuthResult, withAuthVoid } from "@/backend/graphql/utils";
 import { handleMeetingChannelError } from "@/backend/graphql/utils/handle-meeting-channel-error";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   ClassMeetingConfigService,
   MeetingConfigService,
   MeetingProviderCatalogService,
-} from "@/backend/services/meeting";
-import { meetingChannel } from "@/backend/services/meeting/channels/MeetingChannelFactory";
+  meetingChannel,
+  PermissionsService,
+} from "@/backend/services";
 import type {
   GenerateMeetingUrlResult,
   MeetingConfigDetails,

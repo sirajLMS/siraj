@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
-import { OnAppChannel } from "@/backend/services";
 import { emailChannel } from "@/backend/services/communication/channels/email";
+import { OnAppChannel } from "@/backend/services/communication/channels/on-app.channel";
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
 import { CommunicationService } from "@/backend/services/communication/communication.service";

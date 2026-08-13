@@ -1,9 +1,7 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
-import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
-import type { TeacherSelectType } from "@/backend/types";
-import type { MeetingProviderSelectType } from "@/backend/types/meeting/meeting-provider.types";
+import { MeetingConfigService, MeetingProviderCatalogService } from "@/backend/services";
+import type { MeetingProviderSelectType, TeacherSelectType } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet(teachersList: TeacherSelectType[], config?: SeedConfig) {

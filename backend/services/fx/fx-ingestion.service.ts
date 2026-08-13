@@ -1,11 +1,12 @@
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { BillingRepository, FxSyncRepository } from "@/backend/db/repo";
+import { BillingRepository } from "@/backend/db/repo/billing";
+import { FxSyncRepository } from "@/backend/db/repo/fx-sync.repository";
 import { AppPermission, FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getFxRateProvider } from "@/backend/services/fx/providers/FxRateProviderFactory";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { getServerTranslations } from "@/shared/locale";
 

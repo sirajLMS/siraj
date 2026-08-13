@@ -1,11 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, students } from "@/backend/db/schema";
 import { ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
+import type { DBTransaction } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { getErrorMessage } from "@/shared/utils/error";
 
 async function testOutcome(tx: DBTransaction, instanceId: string, outcome: "ABSENT" | "LEAVE") {

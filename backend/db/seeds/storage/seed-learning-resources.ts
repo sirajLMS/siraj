@@ -7,7 +7,7 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { LearningResourceService } from "@/backend/services/resource/learning-resource.service";
+import { LearningResourceService } from "@/backend/services";
 import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {

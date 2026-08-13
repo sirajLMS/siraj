@@ -1,6 +1,6 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { CONFIG, logError, logInfo, logSuccess, logWarning } from "@/scripts/health/sonar/ts/config";
-import { isStepCompleted, markStepCompleted } from "@/scripts/health/sonar/ts/state";
+import { markStepCompleted } from "@/scripts/health/sonar/ts/state";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -39,12 +39,26 @@ export async function waitForSonarQube(): Promise<void> {
   await attempt(0);
 }
 
-export async function changeAdminPassword(): Promise<void> {
-  if (isStepCompleted("password_changed")) {
-    logSuccess("Admin password already configured (skipped)");
-    return;
+export async function validateToken(token: string): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const authHeader = `Basic ${btoa(token + ":")}`;
+    const response = await fetch(`${CONFIG.SONAR_HOST}/api/authentication/validate`, {
+      headers: { Authorization: authHeader },
+    });
+    if (response.ok) {
+      const data: unknown = await response.json();
+      if (isRecord(data) && typeof data.valid === "boolean") {
+        return data.valid;
+      }
+    }
+  } catch {
+    return false;
   }
+  return false;
+}
 
+export async function changeAdminPassword(): Promise<void> {
   logInfo("Checking admin password...");
 
   const authHeaderNew = `Basic ${btoa("admin:" + CONFIG.ADMIN_NEW_PASSWORD)}`;
@@ -61,7 +75,7 @@ export async function changeAdminPassword(): Promise<void> {
       }
     }
   } catch (e) {
-    logInfo(`Password not yet configured: ${e instanceof Error ? e.message : String(e)}`);
+    logInfo(`Password check error: ${e instanceof Error ? e.message : String(e)}`);
   }
 
   logInfo(`Changing admin password from '${CONFIG.ADMIN_DEFAULT_PASSWORD}' to '${CONFIG.ADMIN_NEW_PASSWORD}'...`);
@@ -88,8 +102,17 @@ export async function changeAdminPassword(): Promise<void> {
 
 export async function generateToken(): Promise<string> {
   if (existsSync(CONFIG.SONAR_TOKEN_FILE)) {
-    logSuccess("Using existing SonarQube token");
-    return readFileSync(CONFIG.SONAR_TOKEN_FILE, "utf8").trim();
+    const existingToken = readFileSync(CONFIG.SONAR_TOKEN_FILE, "utf8").trim();
+    if (await validateToken(existingToken)) {
+      logSuccess("Using existing SonarQube token");
+      return existingToken;
+    }
+    logWarning("Existing SonarQube token is invalid or expired. Generating a new token...");
+    try {
+      unlinkSync(CONFIG.SONAR_TOKEN_FILE);
+    } catch {
+      // Ignore deletion error
+    }
   }
 
   logInfo("Generating SonarQube authentication token...");
@@ -122,11 +145,6 @@ export async function generateToken(): Promise<string> {
 }
 
 export async function createProject(token: string): Promise<void> {
-  if (isStepCompleted("project_created")) {
-    logSuccess("Project already configured (skipped)");
-    return;
-  }
-
   logInfo("Checking if project exists...");
   const authHeader = `Basic ${btoa(token + ":")}`;
   const searchResponse = await fetch(`${CONFIG.SONAR_HOST}/api/projects/search?projects=${CONFIG.PROJECT_KEY}`, {

@@ -7,7 +7,7 @@ import {
   StartPermissionGroupSimulationResponsePothosObject,
 } from "@/backend/graphql/pothos/permissions/permission-group-simulation.objects.pothos";
 import { setAuthCookies } from "@/backend/lib/auth/cookies";
-import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
+import { PermissionGroupSimulationService } from "@/backend/services";
 
 gqlSchemaBuilder.queryFields(t => ({
   permissionGroupSimulationStatus: t.field({

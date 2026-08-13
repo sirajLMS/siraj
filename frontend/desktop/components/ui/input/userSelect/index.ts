@@ -1,5 +1,5 @@
-export { ParentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect/parentAutocomplete.desktop";
-export { StaffAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect/staffAutocomplete.desktop";
-export { StudentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect/studentAutocomplete.desktop";
-export { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect/teacherAutocomplete.desktop";
-export { UserAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect/userAutocomplete.desktop";
+export * from "./parentAutocomplete.desktop";
+export * from "./staffAutocomplete.desktop";
+export * from "./studentAutocomplete.desktop";
+export * from "./teacherAutocomplete.desktop";
+export * from "./userAutocomplete.desktop";

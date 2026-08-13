@@ -11,7 +11,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  type SxProps,
   TextField,
+  type Theme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
@@ -38,8 +40,6 @@ export interface LiveSessionToolbarProps {
   // Error state
   readonly error?: string | null;
 }
-
-import type { SxProps, Theme } from "@mui/material";
 
 // Success-tinted contained button used for the start action
 const StyledStartActionButton = styled(Button)(({ theme }) => ({

@@ -1,3 +1,3 @@
-export { DesktopBaseAvatar } from "./DesktopBaseAvatar";
-export { DesktopClassAvatar } from "./DesktopClassAvatar";
-export { DesktopUserAvatar } from "./DesktopUserAvatar";
+export * from "./DesktopBaseAvatar";
+export * from "./DesktopClassAvatar";
+export * from "./DesktopUserAvatar";

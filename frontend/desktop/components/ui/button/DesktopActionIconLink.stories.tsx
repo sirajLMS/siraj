@@ -1,31 +1,31 @@
 import { SettingsOutlined } from "@mui/icons-material";
 import { Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { DesktopActionIconLink } from "@/frontend/desktop/components/ui/button/DesktopActionIconLink";
+import { ActionIconLink } from "@/frontend/common/components/ui/button/ActionIconLink";
 
-const meta: Meta<typeof DesktopActionIconLink> = {
+const meta: Meta<typeof ActionIconLink> = {
   title: "UI/ActionIconLink/Desktop",
-  component: DesktopActionIconLink,
+  component: ActionIconLink,
   tags: ["ai-generated"],
 };
 
 export default meta;
-type Story = StoryObj<typeof DesktopActionIconLink>;
+type Story = StoryObj<typeof ActionIconLink>;
 
 export const Default: Story = {
   render: () => (
-    <DesktopActionIconLink href="/settings" aria-label="Settings">
+    <ActionIconLink href="/settings" aria-label="Settings">
       <SettingsOutlined fontSize="small" />
-    </DesktopActionIconLink>
+    </ActionIconLink>
   ),
 };
 
 export const InRowWithText: Story = {
   render: () => (
     <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-      <DesktopActionIconLink href="/profile" aria-label="Profile">
+      <ActionIconLink href="/profile" aria-label="Profile">
         <SettingsOutlined fontSize="small" />
-      </DesktopActionIconLink>
+      </ActionIconLink>
       <Typography variant="bodyMd">Row with icon link and text</Typography>
     </Stack>
   ),
@@ -34,8 +34,8 @@ export const InRowWithText: Story = {
 export const Arabic: Story = {
   globals: { locale: "ar" },
   render: () => (
-    <DesktopActionIconLink href="/ar/settings" aria-label="الإعدادات">
+    <ActionIconLink href="/ar/settings" aria-label="الإعدادات">
       <SettingsOutlined fontSize="small" />
-    </DesktopActionIconLink>
+    </ActionIconLink>
   ),
 };

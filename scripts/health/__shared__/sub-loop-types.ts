@@ -10,7 +10,7 @@
  *   • Imports use the `@/` path alias, consistent with the rest of
  *     `scripts/health/` (see `scripts/health/__shared__/log.ts`).
  *   • No `as` type assertions and no `oxlint-disable` comments — type guards
- *     and `instanceof` are used instead (see AGENTS.md "Oxlint Rules").
+ *     and `instanceof` are used instead (see `docs/quality/linting-rules.md`).
  *   • `runCommand` preserves the exact `spawnSync` exit-code parsing and
  *     output combining behaviour from the original call sites, including the
  *     50MB `maxBuffer` that `sub-loop-uncommitted.ts` relies on for large
@@ -31,16 +31,17 @@ import { spawnSync } from "node:child_process";
  *   • `tsgo`          — type-checking only
  *   • `biome`         — tsgo → oxlint → biome:check
  *   • `lint`          — tsgo → oxlint → biome:check → lint:type-aware
+ *   • `duplicates`    — tsgo → oxlint → biome → lint:type-aware → check:duplicates
  *   • `codescene`     — full chain including check:duplicates and codescene --file
  *   • `sonar-results` — alias for `codescene` (subagents NEVER run sonar;
  *                       only the quality-gate orchestrator handles sonar).
  *
- * Both `sub-loop.ts` and `sub-loop-uncommitted.ts` accept all five stages;
+ * Both `sub-loop.ts` and `sub-loop-uncommitted.ts` accept all six stages;
  * `sub-loop.ts` previously kept `"sonar-results"` out of its `Lifecycle`
  * union but still validated it via a separate `VALID_LIFECYCLES` array.
  * Centralising the type here makes the union the single source of truth.
  */
-export type Lifecycle = "tsgo" | "biome" | "lint" | "codescene" | "sonar-results";
+export type Lifecycle = "tsgo" | "biome" | "lint" | "duplicates" | "codescene" | "sonar-results";
 
 /**
  * Outcome of a single quality check.
@@ -145,8 +146,9 @@ export const LIFECYCLE_ORDER: Record<Lifecycle, number> = {
   tsgo: 0,
   biome: 1,
   lint: 2,
-  codescene: 3,
-  "sonar-results": 3,
+  duplicates: 3,
+  codescene: 4,
+  "sonar-results": 4,
 };
 
 /** Type guard: checks if a string is a valid Lifecycle stage. */

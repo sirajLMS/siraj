@@ -29,10 +29,8 @@ import {
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  NotificationDrawerAlert,
-  NotificationMetadata,
-} from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
+import type { NotificationDrawerAlert } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
+import type { NotificationMetadata } from "@/shared/types/notification-alerts.types";
 
 export interface EventVariantConfig {
   readonly icon: ReactNode;
