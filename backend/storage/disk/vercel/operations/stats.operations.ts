@@ -12,7 +12,7 @@ import { extToMime } from "@/shared/utils/storage.utils";
 
 export async function storageStatistics(ctx: VercelContext, searchPath?: string | null): Promise<Types.StorageStats> {
   try {
-    const targetPath = searchPath || "";
+    const targetPath = searchPath ?? "";
     const prefix = targetPath ? `${targetPath}/` : "";
 
     const allBlobs = await getBlobs(ctx, prefix);
@@ -49,7 +49,7 @@ export async function storageStatistics(ctx: VercelContext, searchPath?: string 
  * Infer content type from file path extension
  */
 function getContentTypeFromPath(pathname: string): string {
-  const ext = pathname.split(".").pop()?.toLowerCase() || "";
+  const ext = pathname.split(".").pop()?.toLowerCase() ?? "";
   return extToMime[ext] || "application/octet-stream";
 }
 

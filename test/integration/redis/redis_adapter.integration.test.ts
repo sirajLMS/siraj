@@ -6,7 +6,7 @@ import { expect, test } from "bun:test";
 import { RedisCacheAdapter } from "@/backend/services";
 import { describeLiveWhen } from "@/test/integration/helpers/describe-live";
 
-const hasRedis = Boolean(process.env.REDIS_URL || process.env.UPSTASH_REDIS_REST_URL);
+const hasRedis = Boolean(process.env.REDIS_URL ?? process.env.UPSTASH_REDIS_REST_URL);
 const describeLive = describeLiveWhen(hasRedis, "RedisCacheAdapter @live-redis");
 
 describeLive("RedisCacheAdapter @live-redis", () => {

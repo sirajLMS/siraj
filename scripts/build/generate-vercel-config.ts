@@ -81,7 +81,7 @@ function validateCronExpression(expression: string, name: string): void {
 }
 
 function getSchedule(envKey: string, defaultValue: string, name: string): string {
-  const value = process.env[envKey]?.trim() || defaultValue;
+  const value = process.env[envKey]?.trim() ?? defaultValue;
   validateCronExpression(value, name);
   return value;
 }

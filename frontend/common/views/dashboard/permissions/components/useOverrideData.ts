@@ -22,7 +22,7 @@ interface UseOverrideDataParams {
 export function useOverrideData({ userId, users, groups, permissions, open, searchQuery }: UseOverrideDataParams) {
   const [initialOverrides, setInitialOverrides] = useState<Record<string, OverrideState>>({});
 
-  const user = useMemo(() => users.find(u => u.id === userId) || null, [users, userId]);
+  const user = useMemo(() => users.find(u => u.id === userId) ?? null, [users, userId]);
 
   const { data: queryData, loading: queryLoading } = useQuery(userOverridesQueryDocument, {
     variables: { userId: userId ?? "" },

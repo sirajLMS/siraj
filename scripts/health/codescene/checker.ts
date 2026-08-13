@@ -215,7 +215,7 @@ export async function runHealthCheck(forceFull = false): Promise<void> {
     errorFiles: [],
   };
 
-  const envConcurrency = Number.parseInt(process.env.CS_CONCURRENCY || "", 10);
+  const envConcurrency = Number.parseInt(process.env.CS_CONCURRENCY ?? "", 10);
   const maxThreads = Number.isNaN(envConcurrency) ? 4 : envConcurrency;
   const concurrency = Math.max(1, Math.min(maxThreads, os.cpus().length - 1));
   logInfo(`🚀 Using ${concurrency} threads`);

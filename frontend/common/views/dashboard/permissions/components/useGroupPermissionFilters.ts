@@ -46,8 +46,8 @@ export function useGroupPermissionFilters({
 
     return assigned.filter(
       u =>
-        u.name?.toLowerCase().includes(query) ||
-        u.email?.toLowerCase().includes(query) ||
+        u.name?.toLowerCase().includes(query) ??
+        u.email?.toLowerCase().includes(query) ??
         u.id?.toLowerCase().includes(query)
     );
   }, [group.assignedUsers, searchQuery]);

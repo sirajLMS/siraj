@@ -44,7 +44,7 @@ export default function EmotionCacheProvider({ children, nonce }: EmotionCachePr
     return (
       <style
         data-emotion={`${cache.key} ${names.join(" ")}`}
-        nonce={nonce || undefined}
+        nonce={nonce ?? undefined}
         // biome-ignore lint/security/noDangerouslySetInnerHtml: Emotion requires this for SSR style injection
         dangerouslySetInnerHTML={{
           __html: styles,

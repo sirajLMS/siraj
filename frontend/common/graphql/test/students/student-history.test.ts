@@ -95,9 +95,9 @@ describe("GraphQL Student History Integration Tests", () => {
         studentUserId,
         teacherUserId,
         parentUserId,
-        studentId: studentId || "",
-        teacherId: teacherId || "",
-        parentId: parentId || "",
+        studentId: studentId ?? "",
+        teacherId: teacherId ?? "",
+        parentId: parentId ?? "",
       });
     }
   });

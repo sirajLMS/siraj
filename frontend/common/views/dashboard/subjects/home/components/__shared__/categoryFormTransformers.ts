@@ -5,7 +5,7 @@ export function categoryFormValuesToCreateInput(data: CategoryFormValues): Class
   return {
     name: data.name,
     slug: data.slug,
-    description: data.description || null,
+    description: data.description ?? null,
     isActive: data.isActive ?? null,
     sortOrder: null,
   };

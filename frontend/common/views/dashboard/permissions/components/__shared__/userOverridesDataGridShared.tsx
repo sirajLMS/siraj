@@ -5,8 +5,10 @@ import { Avatar, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import type { OverridesCellType } from "@/frontend/common/views/dashboard/permissions/components/OverridesCell";
-import { OverridesCell } from "@/frontend/common/views/dashboard/permissions/components/OverridesCell";
+import {
+  OverridesCell,
+  type OverridesCellType,
+} from "@/frontend/common/views/dashboard/permissions/components/OverridesCell";
 import type { PermissionsLabels } from "@/shared/locale";
 
 const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
@@ -34,7 +36,7 @@ export function UserGroupsChips({ userGroups }: Readonly<{ readonly userGroups: 
         if (!name) return null;
         return (
           <Box
-            key={group.id || group.slug}
+            key={group.id ?? group.slug}
             sx={theme => ({
               typography: "labelMd",
               fontWeight: 500,

@@ -203,7 +203,7 @@ export function CatalogEditDialog({ labels, open, kind, row, onClose, onSaved }:
   };
 
   const onSubmit = handleSubmit(async values => {
-    const hasName = Boolean(values.name.en?.trim() || values.name.ar?.trim());
+    const hasName = Boolean(values.name.en?.trim() ?? values.name.ar?.trim());
     if (!hasName) {
       notifications.show(t.errors.nameRequired, { severity: "error" });
       return;

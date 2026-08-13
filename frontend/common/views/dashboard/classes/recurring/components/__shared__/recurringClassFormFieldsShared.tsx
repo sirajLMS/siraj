@@ -323,7 +323,7 @@ export function RecurringClassFormFieldsShared({
   readonly options: RecurringClassFormFieldsSharedOptions;
 }) {
   const teacherId = watch("teacherId");
-  const classType = watch("classType") || "";
+  const classType = watch("classType") ?? "";
 
   const handleClassTypeChange = (val: string) => {
     if (isClassType(val)) {

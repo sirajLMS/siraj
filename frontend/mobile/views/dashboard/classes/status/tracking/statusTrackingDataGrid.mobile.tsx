@@ -79,7 +79,7 @@ function createCourseColumn(labels: StatusTrackingDataGridProps["labels"]) {
     renderCell: ({ row }: { row: StatusTrackingRow }) =>
       renderProfileLinkCell({
         type: "class",
-        name: row.courseName?.trim() || "—",
+        name: row.courseName?.trim() ?? "—",
         href: row.id ? classHref(row.id) : undefined,
         avatarUrl: row.avatarUrl,
         avatarSize: 40,

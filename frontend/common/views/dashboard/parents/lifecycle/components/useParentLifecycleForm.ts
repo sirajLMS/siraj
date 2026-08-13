@@ -31,5 +31,5 @@ export function useParentLifecycleForm(parent: ParentLifecycleViewProps["parent"
 }
 
 export function useParentLifecycleProfileHref(parent: ParentLifecycleViewProps["parent"]): string | undefined {
-  return profileHrefForParent({ userId: parent.userId, parentId: parent.id }) || undefined;
+  return profileHrefForParent({ userId: parent.userId, parentId: parent.id }) ?? undefined;
 }

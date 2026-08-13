@@ -20,7 +20,7 @@ export function MobileMetricCardGrid({ metrics, onMetricClick, selectedKey, sx }
   return (
     <MobileHorizontalScrollRow sx={sx}>
       {metrics.map((metric, index) => {
-        const label = metric.label || resolveMetricLabel(metric.labelKey, labelSources);
+        const label = metric.label ?? resolveMetricLabel(metric.labelKey, labelSources);
         return (
           <Box
             key={metric.key}

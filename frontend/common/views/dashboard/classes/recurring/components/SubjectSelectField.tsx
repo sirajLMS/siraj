@@ -36,7 +36,7 @@ export function SubjectSelect({
   const subjects = (data?.classSubjects ?? []).filter(subject => subject?.isActive !== false && subject?.id);
 
   return (
-    <FormControl fullWidth required error={!!error} disabled={disabled || loading} sx={outlinedInputSx}>
+    <FormControl fullWidth required error={!!error} disabled={disabled ?? loading} sx={outlinedInputSx}>
       <InputLabel id={labelId} shrink>
         {label}
       </InputLabel>

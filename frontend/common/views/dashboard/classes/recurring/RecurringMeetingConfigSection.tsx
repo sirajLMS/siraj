@@ -229,7 +229,7 @@ export function RecurringMeetingConfigSection({
           value="existing"
           control={<Radio />}
           label={t.selectLabel}
-          disabled={disabled || options.length === 0}
+          disabled={disabled ?? options.length === 0}
         />
         <FormControlLabel value="new" control={<Radio />} label={t.createNewConfig} disabled={disabled} />
       </RadioGroup>

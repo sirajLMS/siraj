@@ -62,7 +62,7 @@ export function MobileSectionPanel({
         sx
       )}
     >
-      {(title || actions) && (
+      {(title ?? actions) && (
         <Box
           sx={mergeSx(mobileContentGutterSx, {
             py: 2,

@@ -25,8 +25,10 @@ import {
 } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingGridShared";
 import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import { DesktopClassProfileLinkCell } from "@/frontend/desktop/components/ui/display/classProfileLink/ClassProfileLinkCell.desktop";
-import type { DesktopPersonProfileLinkCellProps } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
-import { DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
+import {
+  DesktopPersonProfileLinkCell,
+  type DesktopPersonProfileLinkCellProps,
+} from "@/frontend/desktop/components/ui/display/personProfileLink/PersonProfileLinkCell.desktop";
 
 export function StatusTrackingDataGridDesktop({
   rows,
@@ -59,7 +61,7 @@ export function StatusTrackingDataGridDesktop({
         renderCell: ({ row }) => (
           <DesktopClassProfileLinkCell
             href={row.id ? classHref(row.id) : undefined}
-            name={row.courseName?.trim() || "—"}
+            name={row.courseName?.trim() ?? "—"}
             avatarUrl={row.avatarUrl}
             avatarSize={40}
             typographyVariant="bodyMd"

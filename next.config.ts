@@ -4,7 +4,7 @@ import { networkInterfaces } from "node:os";
 import type { NextConfig } from "next";
 
 function getEnv(name: string, defaultValue: string): string {
-  return process.env[name] || defaultValue;
+  return process.env[name] ?? defaultValue;
 }
 
 function resolveBuildId(): string {

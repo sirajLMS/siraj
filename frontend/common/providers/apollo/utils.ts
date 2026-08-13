@@ -26,7 +26,7 @@ export const createAuthLink = (getToken: () => string | null) => {
 
     const headers: Record<string, string> = {
       "apollo-require-preflight": "true",
-      "x-apollo-operation-name": operation.operationName || "",
+      "x-apollo-operation-name": operation.operationName ?? "",
     };
 
     if (token) {

@@ -215,7 +215,7 @@ function usePaymentMethodSubmit({ isEdit, editMethod, userId, form, onSaved, onC
           input: {
             direction: values.direction,
             isDefault: values.isDefault,
-            label: values.label?.trim() || null,
+            label: values.label?.trim() ?? null,
             details,
           },
         },
@@ -228,7 +228,7 @@ function usePaymentMethodSubmit({ isEdit, editMethod, userId, form, onSaved, onC
             type: values.type,
             direction: values.direction,
             isDefault: values.isDefault,
-            label: values.label?.trim() || null,
+            label: values.label?.trim() ?? null,
             details,
           },
         },

@@ -185,7 +185,7 @@ export function useStudentAutocomplete(args?: {
 
   const extractRows = useCallback((data: unknown) => resolveStudentRows(mode, data), [mode]);
 
-  const skip = args?.skip || shouldSkipStudentQuery(mode, scope);
+  const skip = args?.skip ?? shouldSkipStudentQuery(mode, scope);
 
   return useAudienceAutocomplete({
     audience: "student",

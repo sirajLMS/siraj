@@ -103,8 +103,8 @@ export function useDashboardViewModel(_: Readonly<UseDashboardViewModelProps>): 
     }
   }, [data, setUser]);
 
-  const permissions = user?.permissions || [];
-  const userName = user?.name || "";
+  const permissions = user?.permissions ?? [];
+  const userName = user?.name ?? "";
 
   const role: DashboardRole = resolveDashboardRole(permissions);
 

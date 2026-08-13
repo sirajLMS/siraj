@@ -49,8 +49,8 @@ export function usePendingReviewsViewModel(
 
   const { data, loading, refetch } = useQuery(pendingLessonReportsQueryDocument, {
     variables: {
-      teacherId: selectedTeacher?.id || null,
-      studentId: studentFilter?.id || null,
+      teacherId: selectedTeacher?.id ?? null,
+      studentId: studentFilter?.id ?? null,
       paginationArgs: {
         first: pageSize,
         page: page + 1,

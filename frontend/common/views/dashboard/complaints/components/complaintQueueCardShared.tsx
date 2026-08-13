@@ -1,8 +1,7 @@
 "use client";
 
 import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlineOutlined, SendOutlined } from "@mui/icons-material";
-import type { ButtonProps } from "@mui/material";
-import { Avatar, Box, TextField, Typography } from "@mui/material";
+import { Avatar, Box, type ButtonProps, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import type { StatusBadgeCategory } from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
@@ -309,7 +308,7 @@ export function ComplaintQueueCardShared({
             gap: SubmitterGap,
           }}
         >
-          <StyledSubmitterAvatar sx={{ width: AvatarSize, height: AvatarSize }} src={row.avatarUrl || undefined}>
+          <StyledSubmitterAvatar sx={{ width: AvatarSize, height: AvatarSize }} src={row.avatarUrl ?? undefined}>
             {getInitials(row.submitterName)}
           </StyledSubmitterAvatar>
           <Box>

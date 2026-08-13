@@ -50,7 +50,7 @@ export function LoginView({
           <LoginHeader labels={labels} />
           <LoginForm labels={labels} onSubmitAction={onSubmitAction} externalLoginResult={externalLoginResult} />
           {isDemo && onFastLogin && (
-            <DemoFastLogin labels={labels} onFastLogin={onFastLogin} groups={demoGroups || []} />
+            <DemoFastLogin labels={labels} onFastLogin={onFastLogin} groups={demoGroups ?? []} />
           )}
           <LoginFooter />
         </CardContent>

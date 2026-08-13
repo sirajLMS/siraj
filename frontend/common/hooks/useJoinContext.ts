@@ -12,7 +12,7 @@ export function useJoinContext(props: MeetingJoinActionProps): JoinContext {
   const hasUrl = Boolean(resolvedUrl) && !props.disabled;
   const buttonLabel = props.label ?? t.joinMeeting;
   const tooltip = resolveTooltip({ hasUrl, meeting: props.meeting, locale, t, tDisplay, emptyRole: props.emptyRole });
-  const providerLogo = props.meeting?.logoUrl?.trim() || null;
+  const providerLogo = props.meeting?.logoUrl?.trim() ?? null;
   const supportsAutoGeneration = props.meeting?.supportsAutoGeneration === true;
   return {
     t,

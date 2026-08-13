@@ -1,8 +1,7 @@
 "use client";
 
 import { Avatar, Box, Typography } from "@mui/material";
-import type { SxProps, Theme } from "@mui/material/styles";
-import { styled } from "@mui/material/styles";
+import { type SxProps, styled, type Theme } from "@mui/material/styles";
 import type { ComponentType } from "react";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import type { OverridesUserSidebarProps } from "@/frontend/common/views/dashboard/permissions/types";
@@ -105,7 +104,7 @@ export function OverridesUserSidebarShared({
         ) : (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
             {userGroups.map(g => (
-              <StyledGroupChip key={g.id || g.slug}>
+              <StyledGroupChip key={g.id ?? g.slug}>
                 <StyledGroupName variant="bodyMd">
                   <LocalizedStringDisplay value={g.name ?? {}} typographyVariant="bodyMd" />
                 </StyledGroupName>

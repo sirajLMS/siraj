@@ -1,11 +1,9 @@
 "use client";
 
-import type { Breakpoint } from "@mui/material";
-import { Box } from "@mui/material";
+import { Box, type Breakpoint } from "@mui/material";
 import Grid, { type GridSize } from "@mui/material/Grid";
 import { useMetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelSources";
-import type { MetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelUtils";
-import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
+import { type MetricLabelSources, resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import { MetricCard } from "@/frontend/common/components/ui/card/MetricCard";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
@@ -37,7 +35,7 @@ function renderMetricCard({
   onMetricClick?: (key: string) => void;
   labelSources: MetricLabelSources;
 }) {
-  const label = metric.label || resolveMetricLabel(metric.labelKey, labelSources);
+  const label = metric.label ?? resolveMetricLabel(metric.labelKey, labelSources);
   return (
     <MetricCard
       icon={metric.icon}

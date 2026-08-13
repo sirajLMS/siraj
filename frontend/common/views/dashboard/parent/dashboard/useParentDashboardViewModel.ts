@@ -64,7 +64,7 @@ function mapExecutionStateToLiveClassStatus(
 
 function resolveMeetingJoinUrl(effectiveMeeting?: EffectiveMeeting | null): string | null {
   const fromEffective = effectiveMeeting?.joinUrl?.trim();
-  return fromEffective || null;
+  return fromEffective ?? null;
 }
 
 type ScheduleQueryData = Operations.ParentDashboardScheduleQuery;

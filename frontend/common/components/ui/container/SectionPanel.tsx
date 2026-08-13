@@ -35,7 +35,7 @@ export function SectionPanel({ id, title, subTitle, actions, children, edgeToEdg
         sx
       )}
     >
-      {(title || actions) && (
+      {(title ?? actions) && (
         <Box
           sx={{
             px: { xs: 2, md: 3 },

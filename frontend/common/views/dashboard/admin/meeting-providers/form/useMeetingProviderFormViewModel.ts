@@ -72,7 +72,7 @@ const buildProviderInput = (values: MeetingProviderFormData) => {
     instructions: instructionsSanitized,
     urlAllowlist: values.urlAllowlist,
     urlExample: values.urlExample?.trim() || null,
-    logoUrl: values.logoUrl?.trim() || null,
+    logoUrl: values.logoUrl?.trim() ?? null,
     fieldSchema,
     providerKind: values.providerKind,
     isActive: values.isActive,

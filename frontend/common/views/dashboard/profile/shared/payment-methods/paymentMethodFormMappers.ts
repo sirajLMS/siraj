@@ -26,19 +26,19 @@ export function emptyPaymentMethodDetailsInput(): PaymentMethodDetailsInput {
 
 export function formDetailsToInput(details: PaymentMethodFormValues["details"]): PaymentMethodDetailsInput {
   return {
-    accountNumber: details.accountNumber?.trim() || null,
-    bankName: details.bankName?.trim() || null,
-    beneficiaryName: details.beneficiaryName?.trim() || null,
-    iban: details.iban?.trim() || null,
-    identifier: details.identifier?.trim() || null,
-    note: details.note?.trim() || null,
-    onlineAccountId: details.onlineAccountId?.trim() || null,
-    paymentLinkId: details.paymentLinkId?.trim() || null,
-    phone: details.phone?.trim() || null,
-    routingNumber: details.routingNumber?.trim() || null,
-    swiftBic: details.swiftBic?.trim() || null,
-    url: details.url?.trim() || null,
-    walletId: details.walletId?.trim() || null,
+    accountNumber: details.accountNumber?.trim() ?? null,
+    bankName: details.bankName?.trim() ?? null,
+    beneficiaryName: details.beneficiaryName?.trim() ?? null,
+    iban: details.iban?.trim() ?? null,
+    identifier: details.identifier?.trim() ?? null,
+    note: details.note?.trim() ?? null,
+    onlineAccountId: details.onlineAccountId?.trim() ?? null,
+    paymentLinkId: details.paymentLinkId?.trim() ?? null,
+    phone: details.phone?.trim() ?? null,
+    routingNumber: details.routingNumber?.trim() ?? null,
+    swiftBic: details.swiftBic?.trim() ?? null,
+    url: details.url?.trim() ?? null,
+    walletId: details.walletId?.trim() ?? null,
   };
 }
 

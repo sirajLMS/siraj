@@ -61,14 +61,14 @@ export function buildStudentProfileEditVariables(
 ) {
   return {
     input: {
-      studentId: studentId || undefined,
+      studentId: studentId ?? undefined,
       phone: draft.phone.trim() || null,
       timezone: draft.timezone.trim() || null,
       displayCurrency: draft.displayCurrency || null,
       dateOfBirth: draft.dateOfBirth ? new Date(draft.dateOfBirth).toISOString() : null,
       gender: draft.gender || null,
       language: draft.language || null,
-      timezoneOverride: draft.timezoneOverride?.trim() || null,
+      timezoneOverride: draft.timezoneOverride?.trim() ?? null,
       parentPhone: draft.parentPhone.trim() || null,
       avatarUrl: draft.avatarUrl,
     },

@@ -11,7 +11,7 @@ export function resolveProviderDisplayName(
   if (meetingInfo.providerName) {
     return resolveLocalizedString(meetingInfo.providerName, locale);
   }
-  return meetingInfo.platform?.trim() || null;
+  return meetingInfo.platform?.trim() ?? null;
 }
 
 export function toEffectiveMeeting(
