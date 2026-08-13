@@ -1,7 +1,6 @@
 import { eq, inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { studentStatusHistory } from "@/backend/db/schema/students/students";
+import { db, queryDb } from "@/backend/db";
+import { studentStatusHistory } from "@/backend/db/schema";
 import type { StudentStatus } from "@/backend/enum";
 import type { DBTransaction, StudentStatusHistorySelectType } from "@/backend/types";
 

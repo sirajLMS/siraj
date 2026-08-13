@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import { FxSyncRepository } from "@/backend/db/repo/fx-sync.repository";
+import { FxSyncRepository } from "@/backend/db/repo";
 import { fxSyncRuns } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";

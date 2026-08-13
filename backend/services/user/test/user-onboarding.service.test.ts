@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
-import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -144,7 +144,7 @@ describe("UserOnboardingService.createUserOfType", () => {
 
   test("supports dynamic groupSlug based on the extension", async () => {
     await runInRollback(async txContext => {
-      const actor = await createTestUser(txContext);
+      const actor = await createTestUserWithDefaults(txContext);
       const { hasPermissionSpy, existsByEmailSpy } = mockCreateUserSpies();
 
       type MyExtension = { kind: "admin" | "supervisor" };
@@ -176,7 +176,7 @@ describe("UserOnboardingService.createUserOfType", () => {
 
   test("writes optional profile fields (timezone + phone) to the users row", async () => {
     await runInRollback(async txContext => {
-      const actor = await createTestUser(txContext);
+      const actor = await createTestUserWithDefaults(txContext);
       const { hasPermissionSpy, existsByEmailSpy } = mockCreateUserSpies();
 
       const result = await UserOnboardingServiceImpl.createUserOfType<{ id: string; status: string }>(

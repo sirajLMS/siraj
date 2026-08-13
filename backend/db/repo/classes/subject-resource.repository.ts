@@ -1,6 +1,5 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { learningResources, subjectResources } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type { DBTransaction, SubjectResourceAttachInput, SubjectResourceReturnType } from "@/backend/types";

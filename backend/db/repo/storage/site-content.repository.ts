@@ -1,6 +1,6 @@
 import { and, desc, eq, type SQL } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import { siteContent } from "@/backend/db/schema/storage/site-content";
+import { siteContent } from "@/backend/db/schema";
 import type { DBTransaction, SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types";
 
 export namespace SiteContentRepository {

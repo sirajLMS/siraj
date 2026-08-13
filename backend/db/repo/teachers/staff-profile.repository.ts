@@ -1,7 +1,6 @@
 import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { UserRepository } from "@/backend/db/repo/users/user.repository";
+import { db, queryDb } from "@/backend/db";
+import { UserRepository } from "@/backend/db/repo/users";
 import {
   permissionGroups,
   permissions,

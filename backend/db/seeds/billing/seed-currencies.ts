@@ -1,4 +1,4 @@
-import { toSupportedCurrencyUpsertInputs } from "@/backend/db/seeds/lib/currency-catalog-factory";
+import { toSupportedCurrencyUpsertInputs } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
 import { CurrencyCatalogService } from "@/backend/services";
 

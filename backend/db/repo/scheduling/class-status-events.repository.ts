@@ -1,8 +1,7 @@
 import { inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared/bulk-upsert";
-import { classStatusEvents } from "@/backend/db/schema/classes/scheduling";
+import { db, queryDb } from "@/backend/db";
+import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared";
+import { classStatusEvents } from "@/backend/db/schema";
 import type { ClassStatusEventSelectType, DBTransaction } from "@/backend/types";
 
 export type ClassStatusEventSeedInsertInput = {

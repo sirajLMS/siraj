@@ -1,5 +1,5 @@
 import { and, eq, gte, isNull, lt } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { mapStatusTrackingQueryRow } from "@/backend/db/repo/scheduling/scheduling-queries.repository/status-tracking.utils";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import type { DBTransaction, StatusTrackingRow } from "@/backend/types";

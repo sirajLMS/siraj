@@ -1,6 +1,5 @@
 import { and, asc, count, desc, eq, inArray, isNull, lte, ne, or, type SQL, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import {
   currencyExchangeAuditLogs,
   currencyExchangeRates,

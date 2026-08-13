@@ -1,6 +1,5 @@
 import { desc, eq, inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { currencyHedges } from "@/backend/db/schema";
 import type {
   CurrencyHedgeInsertType,

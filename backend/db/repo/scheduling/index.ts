@@ -9,7 +9,11 @@ import {
 import { resolveStudentTimezone } from "./shared";
 import * as StateChanges from "./state-changes";
 
+export * from "./class-instance-upsert";
 export * from "./class-status-events.repository";
+export * from "./leave-quota-usage.repository";
+export * from "./leave-request.repository";
+export * from "./queries";
 export * from "./recurring-schedule.repository";
 export * from "./scheduling-queries.repository.findUpcoming";
 export type {
@@ -21,6 +25,7 @@ export {
   getClassInstanceAffectedUsers,
   getClassInstanceAffectedUsersForTeacher,
 } from "./scheduling-queries.repository.helpers";
+export * from "./shared";
 
 export const SchedulingRepository = {
   ...ClassInstances,

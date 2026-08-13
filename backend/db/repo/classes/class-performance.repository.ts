@@ -1,7 +1,6 @@
 import { eq, inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { classInstancePerformance } from "@/backend/db/schema/classes/scheduling";
+import { db, queryDb } from "@/backend/db";
+import { classInstancePerformance } from "@/backend/db/schema";
 import type {
   ClassInstancePerformanceInsertType,
   ClassInstancePerformanceSelectType,

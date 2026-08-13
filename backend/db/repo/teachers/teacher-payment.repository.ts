@@ -1,7 +1,6 @@
 import { and, eq, inArray, or } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { teacherPayments } from "@/backend/db/schema/teachers/teacher-payments";
+import { db, queryDb } from "@/backend/db";
+import { teacherPayments } from "@/backend/db/schema";
 import type { DBTransaction, TeacherPaymentInsertType, TeacherPaymentSelectType } from "@/backend/types";
 
 function teacherPaymentKeyOf(teacherId: string, paymentDate: Date | string): string {

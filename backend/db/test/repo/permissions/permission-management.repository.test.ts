@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { permissionGroups, permissions } from "@/backend/db/schema";
 import { createTestPermission } from "@/backend/db/test/entity-setup";
-import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, OverrideState } from "@/backend/enum";
 import type { DBTransaction } from "@/backend/types";
 import { getErrorMessage } from "@/shared/utils/error";
@@ -313,8 +313,8 @@ describe("PermissionManagementRepository", () => {
 
   describe("Bulk User Management", () => {
     testRepo("listUsersInGroup, bulkAssignUsersToGroup, and bulkRevokeUsersFromGroup should work", async tx => {
-      const user1 = await createTestUser(tx);
-      const user2 = await createTestUser(tx);
+      const user1 = await createTestUserWithDefaults(tx);
+      const user2 = await createTestUserWithDefaults(tx);
 
       const group = await PermissionManagementRepository.createGroup(
         {
@@ -392,7 +392,7 @@ describe("PermissionManagementRepository", () => {
 
   describe("Overrides Engine", () => {
     testRepo("getUserOverrides and setUserOverrides should work", async tx => {
-      const user = await createTestUser(tx);
+      const user = await createTestUserWithDefaults(tx);
       const perm1 = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ONLY);
       const perm2 = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ALT);
 
@@ -481,7 +481,7 @@ describe("PermissionManagementRepository", () => {
       expect(updated.name).toEqual(loc("Ntx Group Updated"));
 
       // User overrides
-      const tempUser = await createTestUser(tx);
+      const tempUser = await createTestUserWithDefaults(tx);
       await PermissionManagementRepository.setUserOverrides(tempUser.id, [], undefined, tx);
       const overrides = await PermissionManagementRepository.getUserOverrides(tempUser.id, tx);
       expect(overrides).toHaveLength(0);

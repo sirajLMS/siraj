@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { classInstances } from "@/backend/db/schema";
 import type { ClassInstanceInsertType, ClassInstanceSelectType, DBTransaction } from "@/backend/types";
 

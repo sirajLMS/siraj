@@ -1,6 +1,5 @@
 import { eq, inArray, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { userNotificationPreferences } from "@/backend/db/schema";
 import type {
   DBTransaction,

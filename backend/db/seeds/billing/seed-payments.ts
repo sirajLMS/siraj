@@ -1,5 +1,4 @@
-import { DEFAULT_INVOICE_CURRENCY, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
-import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
+import { DEFAULT_INVOICE_CURRENCY, loadSeedConfig, orchestrateSeedMany, type SeedConfig } from "@/backend/db/seeds/lib";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { logger } from "@/backend/lib/logger";
 import { PaymentMethodService } from "@/backend/services";

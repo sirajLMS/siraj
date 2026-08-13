@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { teachers, users } from "@/backend/db/schema";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService, StaffProfileService } from "@/backend/services";

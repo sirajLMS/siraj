@@ -1,65 +1,74 @@
-import { seedOrGet as seedOrGetAdminAuditLogs } from "@/backend/db/seeds/audit/seed-admin-audit-logs";
-import { seedOrGet as seedOrGetAuditLogs } from "@/backend/db/seeds/audit/seed-audit-logs";
-import { seedOrGet as seedOrGetUserPermissionOverrides } from "@/backend/db/seeds/auth/seed-user-permission-overrides";
-import { seedOrGet as seedOrGetSupportedCurrencies } from "@/backend/db/seeds/billing/seed-currencies";
-import { seedOrGet as seedOrGetCurrencyExchangeAuditLogs } from "@/backend/db/seeds/billing/seed-currency-exchange-audit-logs";
-import { seedOrGet as seedOrGetCurrencyExchangeRates } from "@/backend/db/seeds/billing/seed-currency-exchange-rates";
-import { seedOrGet as seedOrGetCurrencyHedges } from "@/backend/db/seeds/billing/seed-currency-hedges";
-import { seedOrGet as seedOrGetInvoiceCoverageMonths } from "@/backend/db/seeds/billing/seed-invoice-coverage-months";
-import { seedOrGet as seedOrGetInvoicePaymentSubmissions } from "@/backend/db/seeds/billing/seed-invoice-payment-submissions";
-import { seedOrGet as seedOrGetInvoices } from "@/backend/db/seeds/billing/seed-invoices";
-import { seedOrGet as seedOrGetPayments } from "@/backend/db/seeds/billing/seed-payments";
-import { seedOrGet as seedOrGetQuotas } from "@/backend/db/seeds/billing/seed-quotas";
-import { seedOrGet as seedOrGetSupportedMobileWallets } from "@/backend/db/seeds/billing/seed-supported-mobile-wallets";
-import { seedOrGet as seedOrGetSupportedOnlineAccounts } from "@/backend/db/seeds/billing/seed-supported-online-accounts";
-import { seedOrGet as seedOrGetSupportedPaymentLinks } from "@/backend/db/seeds/billing/seed-supported-payment-links";
-import { seedOrGet as seedOrGetUserPaymentMethods } from "@/backend/db/seeds/billing/seed-user-payment-methods";
-import { seedOrGet as seedOrGetBooks } from "@/backend/db/seeds/books/seed-books";
-import { seedOrGet as seedOrGetClassCategories } from "@/backend/db/seeds/classes/seed-class-categories";
-import { seedOrGet as seedOrGetClassCommunications } from "@/backend/db/seeds/classes/seed-class-communications";
-import { seedOrGet as seedOrGetClassInstances } from "@/backend/db/seeds/classes/seed-class-instances";
-import { seedOrGet as seedOrGetClassPerformance } from "@/backend/db/seeds/classes/seed-class-performance";
-import { seedOrGet as seedOrGetClassStatusEvents } from "@/backend/db/seeds/classes/seed-class-status-events";
-import { seedOrGet as seedOrGetClassSubjects } from "@/backend/db/seeds/classes/seed-class-subjects";
-import { seedOrGet as seedOrGetClasses } from "@/backend/db/seeds/classes/seed-classes";
-import { seedOrGet as seedOrGetDstMigrationEntries } from "@/backend/db/seeds/classes/seed-dst-migration-entries";
-import { seedOrGet as seedOrGetDstMigrationRuns } from "@/backend/db/seeds/classes/seed-dst-migration-runs";
-import { seedOrGet as seedOrGetGroupClassEnrollments } from "@/backend/db/seeds/classes/seed-group-class-enrollments";
-import { seedOrGet as seedOrGetGroupClasses } from "@/backend/db/seeds/classes/seed-group-classes";
-import { seedOrGet as seedOrGetRecurringScheduleDays } from "@/backend/db/seeds/classes/seed-recurring-schedule-days";
-import { seedOrGet as seedOrGetSubjectResources } from "@/backend/db/seeds/classes/seed-subject-resources";
-import { seedOrGet as seedOrGetComplaintResponses } from "@/backend/db/seeds/complaints/seed-complaint-responses";
-import { seedOrGet as seedOrGetComplaints } from "@/backend/db/seeds/complaints/seed-complaints";
-import { findAdminUserOrFallback, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
-import { logFailedSeedSteps, runSeedStep, type SeedStepResult } from "@/backend/db/seeds/lib/run-seed-step";
-import { seedOrGet as seedOrGetCreditTransactions } from "@/backend/db/seeds/lms/seed-credit-transactions";
-import { seedOrGet as seedOrGetLessonReports } from "@/backend/db/seeds/lms/seed-lesson-reports";
-import { seedOrGet as seedOrGetTeacherDues } from "@/backend/db/seeds/lms/seed-teacher-dues";
-import { seedOrGet as seedOrGetClassMeetingConfigs } from "@/backend/db/seeds/meeting/seed-class-meeting-configs";
-import { seedOrGet as seedOrGetMeetingProviders } from "@/backend/db/seeds/meeting/seed-meeting-providers";
-import { seedOrGet as seedOrGetUserMeetingConfigs } from "@/backend/db/seeds/meeting/seed-user-meeting-configs";
-import { seedOrGet as seedOrGetNotificationDeliveries } from "@/backend/db/seeds/notifications/seed-notification-deliveries";
-import { seedOrGet as seedOrGetUserNotificationPreferences } from "@/backend/db/seeds/notifications/seed-user-notification-preferences";
-import { seedOrGet as seedOrGetParents } from "@/backend/db/seeds/parents/seed-parents";
-import { seedOrGet as seedOrGetSuggestions } from "@/backend/db/seeds/parents/seed-suggestions";
-import { seedOrGet as seedOrGetSystemSettings } from "@/backend/db/seeds/shared/system-settings";
-import { seedOrGet as seedOrGetTimezones } from "@/backend/db/seeds/shared/timezones";
-import { verifySeedCoverage } from "@/backend/db/seeds/shared/verify-coverage";
-import { seedOrGet as seedOrGetLearningResources } from "@/backend/db/seeds/storage/seed-learning-resources";
-import { seedOrGet as seedOrGetSiteContent } from "@/backend/db/seeds/storage/seed-site-content";
-import { seedOrGet as seedOrGetStudentProgress } from "@/backend/db/seeds/students/seed-student-progress";
-import { seedOrGet as seedOrGetStudentStatusHistory } from "@/backend/db/seeds/students/seed-student-status-history";
-import { seedOrGet as seedOrGetStudents } from "@/backend/db/seeds/students/seed-students";
-import { seedOrGet as seedOrGetLeaveQuotaUsage } from "@/backend/db/seeds/teachers/seed-leave-quota-usage";
-import { seedOrGet as seedOrGetLeaveRequests } from "@/backend/db/seeds/teachers/seed-leave-requests";
-import { seedOrGet as seedOrGetTeacherAvailabilityWindows } from "@/backend/db/seeds/teachers/seed-teacher-availability-windows";
-import { seedOrGet as seedOrGetTeacherImportantNotes } from "@/backend/db/seeds/teachers/seed-teacher-important-notes";
-import { seedOrGet as seedOrGetTeacherPayments } from "@/backend/db/seeds/teachers/seed-teacher-payments";
-import { seedOrGet as seedOrGetTeacherRecurringUnavailability } from "@/backend/db/seeds/teachers/seed-teacher-recurring-unavailability";
-import { seedOrGet as seedOrGetTeacherVacationRequests } from "@/backend/db/seeds/teachers/seed-teacher-vacation-requests";
-import { seedOrGet as seedOrGetTeachers } from "@/backend/db/seeds/teachers/seed-teachers";
-import { seedOrGet as seedOrGetUserDeviceTokens } from "@/backend/db/seeds/users/seed-user-device-tokens";
-import { seedOrGet as seedOrGetUsers } from "@/backend/db/seeds/users/seed-users";
+import { seedOrGetAdminAuditLogs, seedOrGetAuditLogs } from "@/backend/db/seeds/audit";
+import { seedOrGetUserPermissionOverrides } from "@/backend/db/seeds/auth";
+import {
+  seedOrGetCurrencyExchangeAuditLogs,
+  seedOrGetCurrencyExchangeRates,
+  seedOrGetCurrencyHedges,
+  seedOrGetInvoiceCoverageMonths,
+  seedOrGetInvoicePaymentSubmissions,
+  seedOrGetInvoices,
+  seedOrGetPayments,
+  seedOrGetQuotas,
+  seedOrGetSupportedCurrencies,
+  seedOrGetSupportedMobileWallets,
+  seedOrGetSupportedOnlineAccounts,
+  seedOrGetSupportedPaymentLinks,
+  seedOrGetUserPaymentMethods,
+} from "@/backend/db/seeds/billing";
+import { seedOrGetBooks } from "@/backend/db/seeds/books";
+import {
+  seedOrGetClassCategories,
+  seedOrGetClassCommunications,
+  seedOrGetClasses,
+  seedOrGetClassInstances,
+  seedOrGetClassPerformance,
+  seedOrGetClassStatusEvents,
+  seedOrGetClassSubjects,
+  seedOrGetDstMigrationEntries,
+  seedOrGetDstMigrationRuns,
+  seedOrGetGroupClassEnrollments,
+  seedOrGetGroupClasses,
+  seedOrGetRecurringScheduleDays,
+  seedOrGetSubjectResources,
+} from "@/backend/db/seeds/classes";
+import { seedOrGetComplaintResponses, seedOrGetComplaints } from "@/backend/db/seeds/complaints";
+import {
+  findAdminUserOrFallback,
+  loadSeedConfig,
+  logFailedSeedSteps,
+  runSeedStep,
+  type SeedConfig,
+  type SeedStepResult,
+} from "@/backend/db/seeds/lib";
+import { seedOrGetCreditTransactions, seedOrGetLessonReports, seedOrGetTeacherDues } from "@/backend/db/seeds/lms";
+import {
+  seedOrGetClassMeetingConfigs,
+  seedOrGetMeetingProviders,
+  seedOrGetUserMeetingConfigs,
+} from "@/backend/db/seeds/meeting";
+import {
+  seedOrGetNotificationDeliveries,
+  seedOrGetUserNotificationPreferences,
+} from "@/backend/db/seeds/notifications";
+import { seedOrGetParents, seedOrGetSuggestions } from "@/backend/db/seeds/parents";
+import { seedOrGetSystemSettings, seedOrGetTimezones, verifySeedCoverage } from "@/backend/db/seeds/shared";
+import { seedOrGetLearningResources, seedOrGetSiteContent } from "@/backend/db/seeds/storage";
+import {
+  seedOrGetStudentProgress,
+  seedOrGetStudentStatusHistory,
+  seedOrGetStudents,
+} from "@/backend/db/seeds/students";
+import {
+  seedOrGetLeaveQuotaUsage,
+  seedOrGetLeaveRequests,
+  seedOrGetTeacherAvailabilityWindows,
+  seedOrGetTeacherImportantNotes,
+  seedOrGetTeacherPayments,
+  seedOrGetTeacherRecurringUnavailability,
+  seedOrGetTeachers,
+  seedOrGetTeacherVacationRequests,
+} from "@/backend/db/seeds/teachers";
+import { seedOrGetUserDeviceTokens, seedOrGetUsers } from "@/backend/db/seeds/users";
 import { logger } from "@/backend/lib/logger";
 import { ReferenceDataService } from "@/backend/services";
 import type {

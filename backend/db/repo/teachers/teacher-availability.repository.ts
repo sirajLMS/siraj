@@ -1,5 +1,5 @@
 import { and, eq, gte, ilike, inArray, isNull, lte, sql } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import {
   classInstances,
   teacherAvailabilityWindows,

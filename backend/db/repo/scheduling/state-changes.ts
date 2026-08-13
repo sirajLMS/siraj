@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import {
   createRescheduledSuccessor,
@@ -7,7 +7,7 @@ import {
   getClassInstanceByIdOrThrow,
   performRescheduleValidations,
 } from "@/backend/db/repo/scheduling/shared";
-import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { classInstances, classStatusEvents, leaveRequests, parents, teachers } from "@/backend/db/schema";
 import { RateSource } from "@/backend/enum";
 import {

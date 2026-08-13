@@ -1,7 +1,6 @@
 import { inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { timezones } from "@/backend/db/schema/shared/timezones";
+import { db, queryDb } from "@/backend/db";
+import { timezones } from "@/backend/db/schema";
 import type { DBTransaction, TimezoneSelectType, TimezoneUpsertInput } from "@/backend/types";
 
 export namespace TimezoneRepository {

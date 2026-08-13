@@ -1,7 +1,6 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { db } from "@/backend/db/drizzleDb";
-import { queryWithPagination } from "@/backend/db/query.extensions";
+import { db, queryWithPagination } from "@/backend/db";
 import {
   buildRescheduleConditions,
   buildRescheduleSelectQuery,

@@ -1,10 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling/scheduling-queries.repository.helpers";
+import { classLifecycleAffectedUserIds, SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances } from "@/backend/db/schema";
-import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { createMockClassInstance, runInRollback, setupTestEntities } from "@/backend/db/test";
 
 /**
  * Coverage for `getClassInstanceAffectedUsers` — the helper used by all

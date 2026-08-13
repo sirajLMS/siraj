@@ -1,6 +1,5 @@
 import { and, asc, eq, inArray, type SQL } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { userPaymentMethods } from "@/backend/db/schema";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { DBTransaction, UserPaymentMethodInsertType, UserPaymentMethodSelectType } from "@/backend/types";

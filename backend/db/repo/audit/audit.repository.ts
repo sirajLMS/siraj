@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared/bulk-upsert";
+import { db } from "@/backend/db";
+import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared";
 import { adminAuditLogs, auditLogs } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";

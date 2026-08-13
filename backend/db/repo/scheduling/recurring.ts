@@ -1,12 +1,12 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import {
   acquireLocks,
   checkOverlaps,
   type DBTransaction,
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import {
   classInstances,
   classSubjects,

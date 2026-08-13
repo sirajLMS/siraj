@@ -1,7 +1,7 @@
 import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { users } from "@/backend/db/schema";
 import { AccountStatus, UserRole } from "@/backend/enum";
 import type { DBTransaction, UserReturnType } from "@/backend/types";
@@ -53,7 +53,7 @@ export function testInRollback(name: string, fn: (tx: DBTransaction) => Promise<
  * @param tx Database transaction
  * @param overrides Optional field overrides
  */
-export async function createTestUser(
+export async function createTestUserWithDefaults(
   tx: DBTransaction,
   overrides: Partial<typeof users.$inferInsert> = {}
 ): Promise<UserReturnType> {

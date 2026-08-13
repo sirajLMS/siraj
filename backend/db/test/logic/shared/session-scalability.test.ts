@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { SessionRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
 import { IP_ADDRESS_1, IP_ADDRESS_2 } from "@/backend/db/test/const";

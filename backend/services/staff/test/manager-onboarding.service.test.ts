@@ -2,7 +2,7 @@ import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
-import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -68,7 +68,7 @@ async function testCreateManagerInRollback(
   extraAssertions?: (result: ManagerOnboardingResult) => void
 ) {
   await runInRollback(async txContext => {
-    const actor = await createTestUser(txContext);
+    const actor = await createTestUserWithDefaults(txContext);
     const { hasPermissionSpy, getUserContextSpy } = mockSuperAdmin();
     const existsByEmailSpy = mockExistsByEmail(false);
 

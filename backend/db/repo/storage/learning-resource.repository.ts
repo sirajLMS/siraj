@@ -1,8 +1,6 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { learningResources } from "@/backend/db/schema";
-import { learningResourceFiles } from "@/backend/db/schema/storage/storage";
+import { db, queryDb } from "@/backend/db";
+import { learningResourceFiles, learningResources } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type { DBTransaction, LearningResourceReturnType, PaginationArgs } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";

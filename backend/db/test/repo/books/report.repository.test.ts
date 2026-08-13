@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books";
-import type { AttendanceReportRow } from "@/backend/db/repo/books/report.repository";
+import { type AttendanceReportRow, ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { AttendanceReportPaidAmountReturnType, DBTransaction } from "@/backend/types";

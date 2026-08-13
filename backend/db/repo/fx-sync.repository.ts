@@ -1,6 +1,5 @@
 import { desc, eq, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { fxSyncRuns } from "@/backend/db/schema";
 import { type FxProvider, FxSyncStatus } from "@/backend/enum/fx/fx-provider.enum";
 import type * as Types from "@/backend/types";

@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
+import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting";
 import {
   createMockClassInstance,
   createTestClassMeetingConfig,

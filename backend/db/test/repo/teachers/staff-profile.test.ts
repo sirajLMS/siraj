@@ -1,9 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { StaffProfileRepository } from "@/backend/db/repo/teachers";
-import type { ManagerProfileUpdateInput } from "@/backend/db/repo/teachers/staff-profile.repository";
+import { db } from "@/backend/db";
+import { type ManagerProfileUpdateInput, StaffProfileRepository } from "@/backend/db/repo/teachers";
 import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";

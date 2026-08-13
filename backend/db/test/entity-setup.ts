@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { db } from "@/backend/db/drizzleDb";
+import type { db } from "@/backend/db";
 import {
   classCategories,
   classInstances,

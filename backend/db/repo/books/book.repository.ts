@@ -1,7 +1,6 @@
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
+import { db, queryDb } from "@/backend/db";
+import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { books } from "@/backend/db/schema";
 import { AvailabilityStatus } from "@/backend/enum";
 import type { BookReturnType, DBTransaction, PaginationArgs } from "@/backend/types";

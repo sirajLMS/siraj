@@ -1,6 +1,5 @@
 import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { QueryDbHandle } from "@/backend/db/drizzleDb";
+import { type QueryDbHandle, queryDb } from "@/backend/db";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type {

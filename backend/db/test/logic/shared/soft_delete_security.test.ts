@@ -2,7 +2,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { AuditRepository } from "@/backend/db/repo/audit";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { auditLogs, users } from "@/backend/db/schema";

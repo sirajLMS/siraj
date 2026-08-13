@@ -1,6 +1,6 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { AuditRepository } from "@/backend/db/repo/audit/audit.repository";
+import { db } from "@/backend/db";
+import { AuditRepository } from "@/backend/db/repo/audit";
 import {
   books,
   classInstances,

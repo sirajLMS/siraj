@@ -1,6 +1,5 @@
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { classInstances, students, teacherDues, teachers, users } from "@/backend/db/schema";
 import { TeacherDueStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";

@@ -1,6 +1,5 @@
 import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { teacherImportantNotes } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type {

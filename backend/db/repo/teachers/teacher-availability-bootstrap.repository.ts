@@ -1,6 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import {
   teacherAvailabilityWindows,
   teacherRecurringUnavailability,

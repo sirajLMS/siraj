@@ -1,8 +1,7 @@
 import { hash } from "bcryptjs";
 import { and, asc, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
+import { db, queryDb } from "@/backend/db";
+import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
 import type { AccountStatus } from "@/backend/enum";
 import { validatePasswordStrength } from "@/backend/lib/auth/password";

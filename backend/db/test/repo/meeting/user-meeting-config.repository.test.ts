@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
+import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting";
 import { createTestMeetingConfig, createTestMeetingProvider, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import type { DBTransaction } from "@/backend/types";

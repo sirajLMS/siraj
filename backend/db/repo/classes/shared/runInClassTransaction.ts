@@ -1,4 +1,4 @@
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { logger } from "@/backend/lib/logger";
 import type { DBTransaction } from "@/backend/types";
 

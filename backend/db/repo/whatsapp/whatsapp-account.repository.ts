@@ -1,6 +1,5 @@
 import { asc, desc, eq, inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { whatsappAccounts } from "@/backend/db/schema";
 import {
   buildReturnType as _buildReturnType,

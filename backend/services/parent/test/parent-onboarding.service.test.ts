@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
-import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
@@ -47,7 +47,7 @@ describe("ParentOnboardingService.createParent", () => {
 
   test("creates parent with billing configuration", async () => {
     await runInRollback(async txContext => {
-      const actor = await createTestUser(txContext);
+      const actor = await createTestUserWithDefaults(txContext);
       const hasPermissionSpy = spyOn(PermissionsService, "hasPermission").mockResolvedValue(true);
       const existsByEmailSpy = spyOn(UserRepository, "existsByEmail").mockResolvedValue(false);
 

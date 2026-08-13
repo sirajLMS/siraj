@@ -1,8 +1,8 @@
-import { seedCatalogLogoUrls } from "@/backend/db/seeds/lib/logo-seed-helper";
 import {
   MEETING_PROVIDER_CATALOG_SEEDS,
   type MeetingProviderCatalogSeed,
-} from "@/backend/db/seeds/lib/meeting-provider-factory";
+  seedCatalogLogoUrls,
+} from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
 import { MeetingProviderCatalogService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";

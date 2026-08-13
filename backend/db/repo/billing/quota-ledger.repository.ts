@@ -1,7 +1,5 @@
 import { desc, eq, inArray, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { db } from "@/backend/db/drizzleDb";
-import { queryWithPagination } from "@/backend/db/query.extensions";
+import { type db, queryDb, queryWithPagination } from "@/backend/db";
 import { quotaLedger } from "@/backend/db/schema";
 import type { QuotaLedgerReason } from "@/backend/enum";
 import { QuotaLedgerError } from "@/backend/lib/errors";

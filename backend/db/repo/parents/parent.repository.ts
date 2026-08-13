@@ -1,8 +1,6 @@
 import { and, count, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { queryWithPagination } from "@/backend/db/query.extensions";
-import { UserRepository } from "@/backend/db/repo/users/user.repository";
+import { db, queryDb, queryWithPagination } from "@/backend/db";
+import { UserRepository } from "@/backend/db/repo/users";
 import {
   classInstancePerformance,
   classInstances,

@@ -1,6 +1,5 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { classInstances, classSubjects, recurringSchedules, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { DBTransaction, UpcomingClassRow } from "@/backend/types";

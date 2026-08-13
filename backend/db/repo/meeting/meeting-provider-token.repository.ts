@@ -1,6 +1,5 @@
 import { and, desc, eq } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { meetingProviderTokens } from "@/backend/db/schema";
 import type { DBTransaction, MeetingProviderTokenSelectType, MeetingProviderTokenUpsertInput } from "@/backend/types";
 

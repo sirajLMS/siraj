@@ -1,9 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { queryWithPagination } from "@/backend/db/query.extensions";
+import { db, queryDb, queryWithPagination } from "@/backend/db";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ALLOWED_STATUS_TRANSITIONS, OrderSortDirection, StudentStatus } from "@/backend/enum";
 import type { DBTransaction } from "@/backend/types";

@@ -1,6 +1,6 @@
 import { and, eq, type SQL } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { impersonationSessions } from "@/backend/db/schema/auth/impersonation";
+import { db } from "@/backend/db";
+import { impersonationSessions } from "@/backend/db/schema";
 import type * as Types from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";
 

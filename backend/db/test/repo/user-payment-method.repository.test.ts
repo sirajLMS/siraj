@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing";
-import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { DBTransaction } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -39,7 +39,7 @@ const badTx = makeBadTx();
 describe("UserPaymentMethodRepository", () => {
   test("creates, lists, updates, and deletes user payment methods", async () => {
     await runInRollback(async tx => {
-      const user = await createTestUser(tx);
+      const user = await createTestUserWithDefaults(tx);
       const created = await UserPaymentMethodRepository.create(
         {
           userId: user.id,
@@ -75,7 +75,7 @@ describe("UserPaymentMethodRepository", () => {
 
   test("clearDefaultsInSlot clears only the matching default slot", async () => {
     await runInRollback(async tx => {
-      const user = await createTestUser(tx);
+      const user = await createTestUserWithDefaults(tx);
 
       const payinDefault = await UserPaymentMethodRepository.create(
         {
@@ -113,8 +113,8 @@ describe("UserPaymentMethodRepository", () => {
 
   test("setVerified records verifier metadata", async () => {
     await runInRollback(async tx => {
-      const user = await createTestUser(tx);
-      const admin = await createTestUser(tx);
+      const user = await createTestUserWithDefaults(tx);
+      const admin = await createTestUserWithDefaults(tx);
 
       const method = await UserPaymentMethodRepository.create(
         {

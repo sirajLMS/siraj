@@ -1,7 +1,5 @@
 import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { queryWithPagination } from "@/backend/db/query.extensions";
+import { db, queryDb, queryWithPagination } from "@/backend/db";
 import { teachers, users } from "@/backend/db/schema";
 import { AccountStatus, type Gender } from "@/backend/enum";
 import type {

@@ -1,7 +1,6 @@
 import { desc, eq, inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
-import { bulkInsertOnConflictDoNothing } from "@/backend/db/repo/shared/bulk-upsert";
+import { db, queryDb } from "@/backend/db";
+import { bulkInsertOnConflictDoNothing } from "@/backend/db/repo/shared";
 import {
   classCommunications,
   classInstances,

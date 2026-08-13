@@ -1,6 +1,5 @@
 import { and, eq, gte, inArray, isNull, notInArray, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import {
   type ClassInstanceUpsertManyOptions,
   runClassInstanceUpsertMany,
@@ -15,8 +14,8 @@ import {
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
 import { updateInstanceState } from "@/backend/db/repo/scheduling/state-changes";
-import { SoftDeleteRepository } from "@/backend/db/repo/shared/soft-delete.repository";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
+import { SoftDeleteRepository } from "@/backend/db/repo/shared";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { OnDemandStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";

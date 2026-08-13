@@ -1,4 +1,4 @@
-import { db, getDrizzleDbPool } from "@/backend/db/drizzleDb";
+import { db, getDrizzleDbPool } from "@/backend/db";
 import { applyCustomMigrations } from "@/backend/db/scripts/applyCustomMigrations";
 import { ensureIdempotentMigrations } from "@/backend/db/scripts/ensureIdempotentMigrations";
 import { runDrizzleMigrations } from "@/backend/db/scripts/runDrizzleMigrations";
