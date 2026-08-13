@@ -9,7 +9,7 @@ import { DesktopBaseAvatar } from "@/frontend/desktop/components/ui/avatar/Deskt
 export type { ClassAvatarProps };
 
 export function DesktopClassAvatar({ variant = "rounded", sx, ...props }: ClassAvatarProps) {
-  const normalizedSx = Array.isArray(sx) ? sx : sx ? [sx] : [];
+  const normalizedSx = Array.isArray(sx) ? sx : [sx].filter(Boolean);
   return (
     <DesktopBaseAvatar
       variant={variant}

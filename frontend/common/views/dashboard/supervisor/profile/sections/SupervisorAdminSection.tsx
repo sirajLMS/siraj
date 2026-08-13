@@ -35,6 +35,21 @@ function getAccountStatusColor(status: string | null): "activated" | "deactivate
   return status === AccountStatus.Deactivated ? "deactivated" : "activated";
 }
 
+function getStatusLabel(
+  status: string | null,
+  activatedLabel: string,
+  deactivatedLabel: string,
+  notSetLabel: string
+): string {
+  if (status === "ACTIVATED") {
+    return activatedLabel;
+  }
+  if (status === "DEACTIVATED") {
+    return deactivatedLabel;
+  }
+  return status ?? notSetLabel;
+}
+
 export function SupervisorAdminSection(props: SupervisorAdminSectionProps) {
   const t = useAppTranslation(Translation.Dashboard.SupervisorPortalProfile);
   const tBase = useAppTranslation(Translation.Profile.Base);
@@ -44,12 +59,12 @@ export function SupervisorAdminSection(props: SupervisorAdminSectionProps) {
 
   const { profile } = props;
 
-  const statusLabel =
-    profile.status === "ACTIVATED"
-      ? t.adminResetPassword.statusActivated
-      : profile.status === "DEACTIVATED"
-        ? t.adminResetPassword.statusDeactivated
-        : (profile.status ?? t.notSet);
+  const statusLabel = getStatusLabel(
+    profile.status,
+    t.adminResetPassword.statusActivated,
+    t.adminResetPassword.statusDeactivated,
+    t.notSet
+  );
 
   return (
     <AdminSectionShared

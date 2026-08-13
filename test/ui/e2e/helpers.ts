@@ -189,7 +189,14 @@ async function handleDemoLoginRetry(
   is429 = false
 ): Promise<boolean> {
   if (attempt >= maxAttempts) return false;
-  const delay = is429 ? 2_000 * attempt : isDevMode ? 10_000 * attempt : 1_000 * attempt;
+  let delay: number;
+  if (is429) {
+    delay = 2_000 * attempt;
+  } else if (isDevMode) {
+    delay = 10_000 * attempt;
+  } else {
+    delay = 1_000 * attempt;
+  }
   await new Promise(resolve => setTimeout(resolve, delay));
   return true;
 }

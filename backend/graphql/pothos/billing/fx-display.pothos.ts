@@ -117,11 +117,11 @@ export async function resolveDisplayAmountFields(
     items.map(async item => {
       const itemId = item.id;
       const record = item as Record<string, unknown>;
-      const subjectUserId = subjectUserIdKey
-        ? typeof record[subjectUserIdKey] === "string"
-          ? record[subjectUserIdKey]
-          : null
-        : null;
+      let subjectUserId: string | null = null;
+      if (subjectUserIdKey) {
+        const rawValue = record[subjectUserIdKey];
+        subjectUserId = typeof rawValue === "string" ? rawValue : null;
+      }
       const displayCurrency = resolveEffectiveDisplayCurrency(ctx, subjectUserId);
       if (!displayCurrency) {
         map.set(itemId, null);

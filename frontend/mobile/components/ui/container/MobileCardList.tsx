@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, CircularProgress, type SxProps, type Theme, Typography } from "@mui/material";
+import type { SystemStyleObject } from "@mui/system";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter/paginationControls.mobile";
@@ -59,6 +60,22 @@ function buildPaginationControls(
   );
 }
 
+type SxArrayElement = boolean | SystemStyleObject<Theme> | ((theme: Theme) => SystemStyleObject<Theme>);
+
+function isSxArray(sx: SxProps<Theme> | undefined): sx is ReadonlyArray<SxArrayElement> {
+  return Array.isArray(sx);
+}
+
+function normalizeSx(sx: SxProps<Theme> | undefined): SxArrayElement[] {
+  if (isSxArray(sx)) {
+    return [...sx];
+  }
+  if (sx) {
+    return [sx];
+  }
+  return [];
+}
+
 export function MobileCardList<T>({
   rows,
   renderItem,
@@ -73,16 +90,14 @@ export function MobileCardList<T>({
   sx,
 }: MobileCardListProps<T>) {
   const isEdgeToEdge = layout === "edge-to-edge";
-  const sxArray = Array.isArray(sx) ? sx : sx ? [sx] : [];
-  const listSx: SxProps<Theme> = [
-    {
-      display: "flex",
-      flexDirection: "column",
-      gap,
-      ...(isEdgeToEdge ? {} : { px: { xs: 2 } }),
-    },
-    ...sxArray,
-  ];
+  const sxArray = normalizeSx(sx);
+  const baseSx: SystemStyleObject<Theme> = {
+    display: "flex",
+    flexDirection: "column",
+    gap,
+    ...(isEdgeToEdge ? {} : { px: { xs: 2 } }),
+  };
+  const listSx: SxProps<Theme> = [baseSx, ...sxArray];
   const clientPageSize =
     paginationOptions !== false && paginationOptions.mode === "client"
       ? (paginationOptions.pageSize ?? DEFAULT_CLIENT_PAGE_SIZE)

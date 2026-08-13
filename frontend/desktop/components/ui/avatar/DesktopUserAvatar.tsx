@@ -8,8 +8,15 @@ import { DesktopBaseAvatar } from "@/frontend/desktop/components/ui/avatar/Deskt
 
 export type { UserAvatarProps };
 
+function normalizeSx(sx: UserAvatarProps["sx"]) {
+  if (Array.isArray(sx)) {
+    return sx;
+  }
+  return sx ? [sx] : [];
+}
+
 export function DesktopUserAvatar({ variant = "circular", sx, ...props }: UserAvatarProps) {
-  const normalizedSx = Array.isArray(sx) ? sx : sx ? [sx] : [];
+  const normalizedSx = normalizeSx(sx);
   return (
     <DesktopBaseAvatar
       variant={variant}

@@ -60,8 +60,8 @@ function RecentLessonReportCardDesktop({
   locale,
   onAddReflection,
 }: Readonly<RecentLessonReportCardDesktopProps>) {
-  const subjectName = report.subjectName?.trim() || "—";
-  const teacherName = report.teacherName?.trim() || "—";
+  const subjectName = report.subjectName?.trim() ?? "—";
+  const teacherName = report.teacherName?.trim() ?? "—";
   const statusLabel = resolveLessonReportStatusLabel(report.status, lessonReportStatusLabels);
   const durationLabel = formatRecentLessonReportDuration(report.durationMinutes);
 
@@ -167,9 +167,52 @@ export function StudentRecentReportsCardListDesktop({
 }: Readonly<StudentRecentReportsCardListDesktopProps>) {
   const pageCount = Math.max(1, Math.ceil(pagination.totalCount / pagination.pageSize));
 
-  // Extract nested ternary into a separate variable for readability (SonarQube S3358)
   const isLoadingAndEmpty = loading && rows.length === 0;
   const isEmpty = rows.length === 0;
+
+  let bodyContent: React.ReactNode;
+  if (isLoadingAndEmpty) {
+    bodyContent = (
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, px: 2 })}>
+        {labels.loadingMessage}
+      </Typography>
+    );
+  } else if (isEmpty) {
+    bodyContent = (
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, px: 2 })}>
+        {labels.noLessonReports}
+      </Typography>
+    );
+  } else {
+    bodyContent = (
+      <Stack sx={{ gap: 2 }}>
+        {rows.map(row => (
+          <Paper
+            key={row.id}
+            elevation={0}
+            sx={theme => ({
+              backgroundColor: theme.palette.surfaceContainer,
+              borderRadius: 0,
+              border: "none",
+              boxShadow: "none",
+              overflow: "hidden",
+              width: "100%",
+              px: 2,
+              py: 2,
+            })}
+          >
+            <RecentLessonReportCardDesktop
+              report={row}
+              labels={labels}
+              lessonReportStatusLabels={lessonReportStatusLabels}
+              locale={locale}
+              onAddReflection={onAddReflection}
+            />
+          </Paper>
+        ))}
+      </Stack>
+    );
+  }
 
   return (
     <Box
@@ -178,42 +221,7 @@ export function StudentRecentReportsCardListDesktop({
         py: 2,
       })}
     >
-      {isLoadingAndEmpty ? (
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, px: 2 })}>
-          {labels.loadingMessage}
-        </Typography>
-      ) : isEmpty ? (
-        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.onSurfaceVariant, px: 2 })}>
-          {labels.noLessonReports}
-        </Typography>
-      ) : (
-        <Stack sx={{ gap: 2 }}>
-          {rows.map(row => (
-            <Paper
-              key={row.id}
-              elevation={0}
-              sx={theme => ({
-                backgroundColor: theme.palette.surfaceContainer,
-                borderRadius: 0,
-                border: "none",
-                boxShadow: "none",
-                overflow: "hidden",
-                width: "100%",
-                px: 2,
-                py: 2,
-              })}
-            >
-              <RecentLessonReportCardDesktop
-                report={row}
-                labels={labels}
-                lessonReportStatusLabels={lessonReportStatusLabels}
-                locale={locale}
-                onAddReflection={onAddReflection}
-              />
-            </Paper>
-          ))}
-        </Stack>
-      )}
+      {bodyContent}
 
       <Box sx={{ display: "flex", justifyContent: "flex-end", pt: rows.length > 0 ? 2 : 0 }}>
         <PaginationControls

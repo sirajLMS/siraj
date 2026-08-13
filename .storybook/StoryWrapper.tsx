@@ -43,6 +43,24 @@ function isPaletteMode(value: unknown): value is PaletteMode {
   return value === "light" || value === "dark";
 }
 
+type ViewportGlobal = "mobile" | "tablet" | "desktop";
+
+const VIEWPORT_MAX_WIDTH: Record<ViewportGlobal, number | "none"> = {
+  mobile: 600,
+  tablet: 900,
+  desktop: "none",
+};
+
+function checkIsUiComponent(context: StoryContext): boolean {
+  if (context.parameters?.fileName?.includes("frontend/components/ui/")) {
+    return true;
+  }
+  if (context.title?.startsWith("UI/")) {
+    return true;
+  }
+  return context.title?.startsWith("Form/") ?? false;
+}
+
 /**
  * Syncs Storybook's `theme` global to MUI's `useColorScheme()` and the DOM
  * attributes that scope CSS variable palettes (`data-theme`, `data-mui-color-scheme`).
@@ -184,15 +202,12 @@ export const StoryWrapper = ({ Story, context }: { Story: StoryFn; context: Stor
     });
   }, []);
 
-  const isUiComponent =
-    context.parameters?.fileName?.includes("frontend/components/ui/") ||
-    context.title?.startsWith("UI/") ||
-    context.title?.startsWith("Form/");
+  const isUiComponent = checkIsUiComponent(context);
 
   const content = <RenderStory Story={Story} context={context} />;
 
   // Calculate maxWidth based on viewport global
-  const maxWidth = viewport === "mobile" ? 600 : viewport === "tablet" ? 900 : "none";
+  const maxWidth = VIEWPORT_MAX_WIDTH[viewport];
 
   return (
     <LocaleProvider locale={locale}>

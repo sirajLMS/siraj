@@ -229,23 +229,28 @@ export function MeetingConfigDisplayShared({
     );
   }
 
+  let providerNameElement: React.ReactNode;
+  if (config.providerName && ProviderNameDisplay) {
+    providerNameElement = (
+      <ProviderNameDisplay value={config.providerName} typographyVariant="bodyMd" sx={{ fontWeight: 700 }} />
+    );
+  } else if (config.providerName) {
+    providerNameElement = (
+      <Typography
+        sx={{ typography: opts.providerTypographyVariant, fontWeight: 700 }}
+        dir={locale === "ar" ? "rtl" : "ltr"}
+      >
+        {providerTitle}
+      </Typography>
+    );
+  } else {
+    providerNameElement = <Typography sx={{ typography: opts.titleTypographyVariant }}>{providerTitle}</Typography>;
+  }
+
   return (
     <Stack spacing={compact ? opts.compactSpacing : opts.spacing}>
       <Stack sx={{ flexDirection: "row", flexWrap: "wrap", gap: opts.providerGap, alignItems: "center" }}>
-        {config.providerName ? (
-          ProviderNameDisplay ? (
-            <ProviderNameDisplay value={config.providerName} typographyVariant="bodyMd" sx={{ fontWeight: 700 }} />
-          ) : (
-            <Typography
-              sx={{ typography: opts.providerTypographyVariant, fontWeight: 700 }}
-              dir={locale === "ar" ? "rtl" : "ltr"}
-            >
-              {providerTitle}
-            </Typography>
-          )
-        ) : (
-          <Typography sx={{ typography: opts.titleTypographyVariant }}>{providerTitle}</Typography>
-        )}
+        {providerNameElement}
         {config.isDefault ? <Chip size="small" color="primary" label={tDisplay.defaultBadge} /> : null}
         {config.hasSecret ? <Chip size="small" variant="outlined" label={tDisplay.passwordProtected} /> : null}
       </Stack>

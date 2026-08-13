@@ -8,8 +8,15 @@ import { MobileBaseAvatar } from "@/frontend/mobile/components/ui/avatar/MobileB
 
 export type { UserAvatarProps };
 
+function normalizeSx(sx: UserAvatarProps["sx"]) {
+  if (Array.isArray(sx)) {
+    return sx;
+  }
+  return sx ? [sx] : [];
+}
+
 export function MobileUserAvatar({ variant = "circular", sx, ...props }: UserAvatarProps) {
-  const normalizedSx = Array.isArray(sx) ? sx : sx ? [sx] : [];
+  const normalizedSx = normalizeSx(sx);
   return (
     <MobileBaseAvatar variant={variant} sx={[theme => getUserAvatarSx(theme, props.src), ...normalizedSx]} {...props} />
   );
