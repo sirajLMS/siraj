@@ -38,7 +38,7 @@ const DEFAULT_API_VERSION = "23.0";
  * buildGraphUrl("/123456789/phone_numbers", "v23.0", "?limit=100&after=abc") // → full URL with query
  */
 export function buildGraphUrl(path: string, apiVersion?: string, queryString?: string): string {
-  const rawVersion = apiVersion?.trim() || DEFAULT_API_VERSION;
+  const rawVersion = apiVersion?.trim() ?? DEFAULT_API_VERSION;
   // Strip leading 'v' or 'V' to avoid double-prefix (e.g. "v23.0" → "23.0")
   const version = rawVersion.replace(/^[vV]/, "");
   // Validate version: digits with optional dot-digits (e.g. "23.0") — no injection (r6-sec-06)

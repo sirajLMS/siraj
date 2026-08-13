@@ -166,7 +166,7 @@ export namespace MeetingConfigService {
       // it means "regenerate" for auto providers. For manual providers Zod requires
       // a URL, so parsed.meetingUrl will always be a non-empty string.
       const shouldRegenerate =
-        (input.forceRegenerate && provider.providerKind !== "manual") ||
+        (Boolean(input.forceRegenerate) && provider.providerKind !== "manual") ||
         (!parsed.meetingUrl && provider.providerKind !== "manual" && detailsChanged);
 
       if (shouldRegenerate) {

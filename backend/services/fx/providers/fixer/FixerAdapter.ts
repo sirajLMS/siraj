@@ -121,7 +121,7 @@ export class FixerAdapter extends FxAdapterBase {
 
     if (!fixerResponse.success) {
       const err = fixerResponse.error;
-      const message = err?.info || err?.type || `Fixer error code ${err?.code ?? "unknown"}`;
+      const message = err?.info ?? err?.type ?? `Fixer error code ${err?.code ?? "unknown"}`;
       throw new Error(`Fixer request unsuccessful: ${message}`);
     }
 

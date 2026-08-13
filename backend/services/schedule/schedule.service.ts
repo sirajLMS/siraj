@@ -38,7 +38,7 @@ export namespace ScheduleService {
       id: item.id,
       studentTime: item.scheduledStartAt.toISOString(),
       teacherTime: item.scheduledStartAt.toISOString(),
-      yourTime: item.yourTimeFormatted || item.scheduledStartAt.toISOString(),
+      yourTime: item.yourTimeFormatted ?? item.scheduledStartAt.toISOString(),
       duration: item.durationMinutes,
       scheduledStartAt: item.scheduledStartAt,
       scheduledEndAt: item.scheduledEndAt,
@@ -48,12 +48,12 @@ export namespace ScheduleService {
       isFrozen: item.isFrozen,
       student: {
         id: item.studentId,
-        name: item.student?.name || unknownName,
+        name: item.student?.name ?? unknownName,
         avatarUrl: item.student?.avatarUrl ?? null,
       },
       teacher: {
         id: item.teacherId,
-        name: item.teacher?.user?.name || unknownName,
+        name: item.teacher?.user?.name ?? unknownName,
         avatarUrl: item.teacher?.user?.avatarUrl ?? null,
       },
       courseName: item.courseName ?? null,
@@ -120,17 +120,17 @@ export namespace ScheduleService {
       await assertDailyScheduleListAccess(
         userId,
         {
-          search: input.search || undefined,
-          metricFilter: input.metricFilter || undefined,
+          search: input.search ?? undefined,
+          metricFilter: input.metricFilter ?? undefined,
         },
         tErrors
       );
 
       const viewerTimezone = await resolveViewerTimezone(userId);
       const targetDate = new Date(input.date);
-      const teacherId = input.teacherId || undefined;
-      const search = input.search || undefined;
-      const metricFilter = input.metricFilter || undefined;
+      const teacherId = input.teacherId ?? undefined;
+      const search = input.search ?? undefined;
+      const metricFilter = input.metricFilter ?? undefined;
 
       const { metrics, rows, totalCount, pageInfo } = await SchedulingRepository.getAdminDashboardSchedule({
         date: targetDate,
@@ -149,9 +149,9 @@ export namespace ScheduleService {
       const first = input.paginationArgs?.first ?? "default";
       const resultKey = [
         input.date,
-        teacherId || "all",
-        search || "",
-        metricFilter || "all",
+        teacherId ?? "all",
+        search ?? "",
+        metricFilter ?? "all",
         `p${page}`,
         `f${first}`,
       ].join("-");
@@ -159,7 +159,7 @@ export namespace ScheduleService {
       return {
         id: `admin-dashboard-${resultKey}`,
         metrics: {
-          id: `metrics-${targetDate.toISOString()}-${teacherId || "all"}-${search || ""}`,
+          id: `metrics-${targetDate.toISOString()}-${teacherId ?? "all"}-${search ?? ""}`,
           ...metrics,
         },
         rows: mappedRows,
@@ -184,7 +184,7 @@ export namespace ScheduleService {
       const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacherId, undefined, viewerTimezone);
 
       return {
-        id: `metrics-${targetDate.toISOString()}-${teacherId || "all"}`,
+        id: `metrics-${targetDate.toISOString()}-${teacherId ?? "all"}`,
         ...metrics,
       };
     } catch (error) {
@@ -291,7 +291,7 @@ export namespace ScheduleService {
 
     return {
       id: cls.id,
-      courseName: cls.subjectName || cls.studentName,
+      courseName: cls.subjectName ?? cls.studentName,
       scheduledDate: cls.scheduledStartAt.toISOString().split("T")[0],
       startTime: formatTime(cls.scheduledStartAt),
       endTime: formatTime(cls.scheduledEndAt),
@@ -300,7 +300,7 @@ export namespace ScheduleService {
       leaveRequestDisabled,
       leaveRequestDisabledReason,
       studentCount: 1,
-      location: effectiveMeeting.joinUrl || "Virtual",
+      location: effectiveMeeting.joinUrl ?? "Virtual",
       subjectId: cls.subjectId,
       subjectName: cls.subjectName,
       classType: resolvedClassType,

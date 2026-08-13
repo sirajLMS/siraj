@@ -25,7 +25,7 @@ export namespace StudentOnboardingService {
   ): Promise<StudentOnboardingResult> {
     // LMS — every student must have a login account (students.userId is NOT NULL).
     // Validate email + password are provided before entering the transaction.
-    const email = input.email?.trim() || null;
+    const email = input.email?.trim() ?? null;
     if (!email) {
       throw new Error(tErrors.studentEmailRequired);
     }
@@ -67,7 +67,7 @@ export namespace StudentOnboardingService {
         createExtension: async (createdUser: UserReturnType, txObj: DBTransaction) => {
           return StudentRepository.create(
             {
-              parentId: input.parentId || null,
+              parentId: input.parentId ?? null,
               userId: createdUser.id,
               name: input.name,
               dateOfBirth: input.dateOfBirth ?? null,

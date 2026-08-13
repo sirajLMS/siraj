@@ -626,8 +626,8 @@ export namespace BillingManagementService {
     }
 
     const hasBillingAccess =
-      context?.isSuperAdmin ||
-      context?.permissions?.includes(AppPermission.INVOICES_LIST) ||
+      context?.isSuperAdmin ??
+      context?.permissions?.includes(AppPermission.INVOICES_LIST) ??
       context?.permissions?.includes(AppPermission.BILLING_VIEW_UNPAID_INVOICES);
 
     if (!hasBillingAccess) {

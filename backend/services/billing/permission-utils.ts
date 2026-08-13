@@ -86,12 +86,12 @@ export async function resolveAssociatedViewer(actorUserId: string, studentId: st
   ]);
 
   // (a) The user is the student's parent
-  if (parent && parent.id === profile.parentId) {
+  if ((parent?.id ?? null) === profile.parentId) {
     viewerCache.set(cacheKey, true);
     return true;
   }
   // The user is the student's primary teacher
-  if (teacher && teacher.id === profile.primaryTeacherId) {
+  if ((teacher?.id ?? null) === profile.primaryTeacherId) {
     viewerCache.set(cacheKey, true);
     return true;
   }

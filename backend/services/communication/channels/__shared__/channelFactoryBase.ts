@@ -88,7 +88,7 @@ export function createChannelFactory<TChannel extends ChannelLifecycle>(
   let initializationPromise: Promise<TChannel> | null = null;
 
   const resolveProvider = async (): Promise<string> => {
-    const rawProvider = (await resolveEnvConfig(config.providerEnvKey)) || config.defaultProvider;
+    const rawProvider = (await resolveEnvConfig(config.providerEnvKey)) ?? config.defaultProvider;
 
     if (config.validateProvider) {
       return config.validateProvider(rawProvider);

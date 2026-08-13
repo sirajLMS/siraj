@@ -19,7 +19,7 @@ export function formatError(err: unknown): string {
 
 /** Extract locale from request Accept-Language header */
 export function extractLocale(request: Request): string {
-  return request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] || "en";
+  return request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "en";
 }
 
 /** Get cron error translations from request */
