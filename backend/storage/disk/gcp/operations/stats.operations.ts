@@ -30,7 +30,7 @@ export async function storageStatistics(ctx: GcpContext, path?: string | null): 
       delimiter: "/",
     });
     const apiResponse = isGcsApiResponse(response[2]) ? response[2] : undefined;
-    const directoryCount = apiResponse?.prefixes?.length || 0;
+    const directoryCount = apiResponse?.prefixes?.length ?? 0;
 
     return {
       totalFiles: files.length,
@@ -57,7 +57,7 @@ function processGcsFiles(files: File[]) {
   const fileTypeMap = new Map<Types.FileTypes, { count: number; size: bigint }>();
 
   for (const file of files) {
-    const size = BigInt(file.metadata.size || 0);
+    const size = BigInt(file.metadata.size ?? 0);
     totalSize += size;
 
     const fileType = StorageUtils.getFileTypeFromContentType(file.metadata.contentType);

@@ -11,8 +11,7 @@ import {
   type StudentFieldFilterContext,
 } from "@/backend/services/profile/profile-field-filter";
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
-import type { StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types";
-import { STUDENT_FIELD_GROUPS } from "@/backend/types";
+import { STUDENT_FIELD_GROUPS, type StudentProfileEditInput, type StudentProfileReturnType } from "@/backend/types";
 import {
   parseAppLanguage,
   parseCurrencyCodeOrNull,
@@ -56,12 +55,12 @@ async function resolveIsAssociatedViewer(actorUserId: string, studentId: string)
   }
 
   const parent = await ParentRepository.findByUserId(actorUserId);
-  if (parent && parent.id === profile.parentId) {
+  if (parent !== null && parent.id === profile.parentId) {
     return true;
   }
 
   const teacher = await TeacherRepository.findByUserId(actorUserId);
-  if (teacher && profile.primaryTeacherId === teacher.id) {
+  if (teacher !== null && profile.primaryTeacherId === teacher.id) {
     return true;
   }
 

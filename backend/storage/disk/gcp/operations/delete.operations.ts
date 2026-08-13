@@ -20,7 +20,7 @@ export async function deleteFile(ctx: GcpContext, path: string): Promise<Types.F
     if (usageCheck.isInUse) {
       return {
         success: false,
-        message: usageCheck.deleteBlockReason || "File is in use",
+        message: usageCheck.deleteBlockReason ?? "File is in use",
       };
     }
 
@@ -72,13 +72,13 @@ export async function deleteItems(
   const failures: Array<{ path: string; error: string }> = [];
   const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
-  const context = await getDeleteContext(input.paths, input.force || false);
+  const context = await getDeleteContext(input.paths, input.force ?? false);
 
   const results = await Promise.all(
     input.paths.map(path =>
       deleteSingleItem(ctx, {
         path,
-        force: input.force || false,
+        force: input.force ?? false,
         dbFile: context.dbFileMap.get(path),
         dbDirectory: context.dbDirectoryMap.get(path),
         parentDir: context.dbParentDirMap.get(path.substring(0, path.lastIndexOf("/"))),
@@ -94,7 +94,7 @@ export async function deleteItems(
       successfulItems.push(result.data);
     } else {
       failureCount++;
-      failures.push({ path, error: result.message || "Unknown error" });
+      failures.push({ path, error: result.message ?? "Unknown error" });
     }
   });
 
@@ -158,7 +158,7 @@ async function deleteSingleItem(
     if (!force && usageCheck?.isInUse) {
       return {
         success: false,
-        message: usageCheck.deleteBlockReason || "File is currently in use",
+        message: usageCheck.deleteBlockReason ?? "File is currently in use",
       };
     }
 

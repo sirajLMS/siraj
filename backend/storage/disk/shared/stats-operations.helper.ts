@@ -8,7 +8,7 @@ export function updateFileTypeMap(
   fileType: Types.FileTypes,
   size: bigint
 ): void {
-  const current = fileTypeMap.get(fileType) || {
+  const current = fileTypeMap.get(fileType) ?? {
     count: 0,
     size: BigInt(0),
   };

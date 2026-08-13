@@ -64,7 +64,7 @@ function createStorageClient(credentials: GcpCredentials, defaultProjectId?: str
   });
 
   return new Storage({
-    projectId: credentials.project_id || defaultProjectId,
+    projectId: credentials.project_id ?? defaultProjectId,
     authClient: auth,
   });
 }

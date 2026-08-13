@@ -61,8 +61,8 @@ export async function fileInfoByPath(ctx: VercelContext, filePath: string): Prom
     }
 
     const directoryPath = StorageUtils.extractDirectoryPath(filePath);
-    const ext = filePath.split(".").pop()?.toLowerCase() || "";
-    const contentType = extToMime[ext] || "application/octet-stream";
+    const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
+    const contentType = extToMime[ext] ?? "application/octet-stream";
 
     const bucketFile: Types.BucketFile = {
       path: filePath,
@@ -102,8 +102,8 @@ export async function fileInfoByDbFileId(ctx: VercelContext, id: string): Promis
     }
 
     const directoryPath = StorageUtils.extractDirectoryPath(dbFile.path);
-    const ext = dbFile.path.split(".").pop()?.toLowerCase() || "";
-    const contentType = extToMime[ext] || "application/octet-stream";
+    const ext = dbFile.path.split(".").pop()?.toLowerCase() ?? "";
+    const contentType = extToMime[ext] ?? "application/octet-stream";
 
     const bucketFile: Types.BucketFile = {
       path: dbFile.path,
@@ -188,8 +188,8 @@ export async function renameFile(ctx: VercelContext, input: Types.FileRenameInpu
 
     const fileEntity = await updateDbFilePath(input.currentPath, newPath);
 
-    const ext = newPath.split(".").pop()?.toLowerCase() || "";
-    const contentType = extToMime[ext] || "application/octet-stream";
+    const ext = newPath.split(".").pop()?.toLowerCase() ?? "";
+    const contentType = extToMime[ext] ?? "application/octet-stream";
     const now = new Date();
 
     const bucketFile: Types.BucketFile = {

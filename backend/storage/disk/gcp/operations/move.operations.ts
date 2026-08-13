@@ -73,7 +73,7 @@ export async function moveItems(
     } else {
       failures.push({
         path: sourcePath,
-        error: result.message || "Unknown error",
+        error: result.message ?? "Unknown error",
       });
     }
   }

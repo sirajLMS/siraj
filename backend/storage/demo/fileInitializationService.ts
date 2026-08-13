@@ -112,7 +112,7 @@ export class FileSeedingService implements IFileSeedingService {
       const fileBuffer = await fs.readFile(resolvedPath);
 
       // 3. Detect mime type if not provided
-      const finalContentType = contentType || this.getContentTypeFromFileName(bucketPath) || "application/octet-stream";
+      const finalContentType = contentType ?? this.getContentTypeFromFileName(bucketPath) ?? "application/octet-stream";
 
       // 4. Upload file using StorageService
       const result = await this.storageService.uploadFile(bucketPath, finalContentType, fileBuffer);

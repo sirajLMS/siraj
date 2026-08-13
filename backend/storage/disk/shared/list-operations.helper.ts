@@ -51,13 +51,13 @@ export function paginateStorageItems(
   // Sort items
   const sortedItems = StorageUtils.sortItems(
     filteredItems,
-    input.sortBy || Types.FileSortField.NAME,
-    input.sortDirection || OrderSortDirection.ASC
+    input.sortBy ?? Types.FileSortField.NAME,
+    input.sortDirection ?? OrderSortDirection.ASC
   );
 
   const totalCount = sortedItems.length;
-  const offset = input.offset || 0;
-  const limit = input.limit || 50;
+  const offset = input.offset ?? 0;
+  const limit = input.limit ?? 50;
   const paginatedItems = sortedItems.slice(offset, offset + limit);
   const hasMore = offset + limit < totalCount;
 

@@ -39,8 +39,8 @@ export async function directoryInfoByPath(ctx: LocalContext, dirPath: string): P
 
     const bucketDir: Types.BucketDirectory = {
       path: dirPath,
-      createdAt: stats?.birthtime || new Date(),
-      lastModified: stats?.mtime || new Date(),
+      createdAt: stats?.birthtime ?? new Date(),
+      lastModified: stats?.mtime ?? new Date(),
       isPublic: dirPath.startsWith("public"),
     };
 
