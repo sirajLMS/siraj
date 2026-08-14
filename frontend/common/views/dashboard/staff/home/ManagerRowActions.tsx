@@ -10,6 +10,7 @@ import {
   DialogTitle,
   IconButton,
   Stack,
+  TextField,
   type Theme,
   Tooltip,
   Typography,
@@ -17,6 +18,7 @@ import {
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { outlinedInputSx } from "@/frontend/common/components/ui/form/field/formFieldStyles";
 import { PhoneInput } from "@/frontend/common/components/ui/input";
 import { AccountStatus, type UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -66,7 +68,10 @@ interface EditProfileDialogProps {
   readonly open: boolean;
   readonly onClose: () => void;
   readonly onSubmit: () => void;
-  readonly manager: Manager;
+  readonly editName: string;
+  readonly onNameChange: (value: string) => void;
+  readonly editEmail: string;
+  readonly onEmailChange: (value: string) => void;
   readonly editPhone: string;
   readonly onPhoneChange: (value: string) => void;
   readonly updateLoading: boolean;
@@ -77,7 +82,10 @@ function EditProfileDialog({
   open,
   onClose,
   onSubmit,
-  manager,
+  editName,
+  onNameChange,
+  editEmail,
+  onEmailChange,
   editPhone,
   onPhoneChange,
   updateLoading,
@@ -86,10 +94,22 @@ function EditProfileDialog({
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle>{t.actions.editProfile}</DialogTitle>
       <DialogContent>
-        <Typography variant="bodyMd" sx={theme => ({ mb: 2, color: theme.palette.text.secondary })}>
-          {manager.name}
-        </Typography>
         <StyledEditField>
+          <TextField
+            label={t.fields.name}
+            value={editName}
+            onChange={e => onNameChange(e.target.value)}
+            fullWidth
+            sx={outlinedInputSx}
+          />
+          <TextField
+            label={t.fields.email}
+            type="email"
+            value={editEmail}
+            onChange={e => onEmailChange(e.target.value)}
+            fullWidth
+            sx={outlinedInputSx}
+          />
           <PhoneInput
             value={editPhone || null}
             onChangeAction={value => onPhoneChange(value ?? "")}
@@ -171,6 +191,8 @@ export function ManagerRowActions({ labels, manager }: Readonly<ManagerRowAction
   const t = labels;
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [editName, setEditName] = useState(manager.name);
+  const [editEmail, setEditEmail] = useState(manager.email);
   const [editPhone, setEditPhone] = useState(manager.phone);
 
   const [updateProfile, { loading: updateLoading }] = useMutation(updateManagerProfileMutationDocument, {
@@ -178,6 +200,8 @@ export function ManagerRowActions({ labels, manager }: Readonly<ManagerRowAction
   });
 
   const handleEditClick = () => {
+    setEditName(manager.name);
+    setEditEmail(manager.email);
     setEditPhone(manager.phone);
     setEditDialogOpen(true);
   };
@@ -190,7 +214,14 @@ export function ManagerRowActions({ labels, manager }: Readonly<ManagerRowAction
     executeManagerUpdate(
       updateProfile,
       manager.staffProfileId,
-      { hourlyRate: null, phone: editPhone || null, rateCurrency: null, status: null },
+      {
+        name: editName || null,
+        email: editEmail || null,
+        hourlyRate: null,
+        phone: editPhone || null,
+        rateCurrency: null,
+        status: null,
+      },
       () => setEditDialogOpen(false),
       "Manager profile updated",
       { staffProfileId: manager.staffProfileId }
@@ -201,7 +232,7 @@ export function ManagerRowActions({ labels, manager }: Readonly<ManagerRowAction
     return executeManagerUpdate(
       updateProfile,
       manager.staffProfileId,
-      { hourlyRate: null, phone: null, rateCurrency: null, status: newStatus },
+      { hourlyRate: null, name: null, email: null, phone: null, rateCurrency: null, status: newStatus },
       () => setDeactivateDialogOpen(false),
       "Manager status updated",
       { staffProfileId: manager.staffProfileId, newStatus }
@@ -246,7 +277,10 @@ export function ManagerRowActions({ labels, manager }: Readonly<ManagerRowAction
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
         onSubmit={handleEditSubmit}
-        manager={manager}
+        editName={editName}
+        onNameChange={setEditName}
+        editEmail={editEmail}
+        onEmailChange={setEditEmail}
         editPhone={editPhone}
         onPhoneChange={setEditPhone}
         updateLoading={updateLoading}

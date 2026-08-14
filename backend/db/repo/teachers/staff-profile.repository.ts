@@ -159,7 +159,7 @@ export namespace StaffProfileRepository {
     if (filters?.roleFilter === "supervisor") {
       return ilike(permissionGroups.slug, "%supervisor%");
     }
-    if (filters?.roleFilter === "staff") {
+    if (filters?.roleFilter === "manager") {
       return or(
         isNull(permissionGroups.slug),
         and(

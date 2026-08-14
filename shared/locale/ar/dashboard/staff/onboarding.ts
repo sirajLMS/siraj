@@ -46,6 +46,7 @@ export const dashboardStaffOnboardingAr: StaffOnboardingLabels = {
     processing: "جاري المعالجة...",
     cancel: "إلغاء",
     successMessage: "تم تقديم طلب الحساب بنجاح. في انتظار التحقق من المسؤول الرئيسي.",
+    errorMessage: "فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.",
   },
   metrics: {
     activeStaff: "الموظفون النشطون",

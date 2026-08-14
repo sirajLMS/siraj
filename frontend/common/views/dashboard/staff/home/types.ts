@@ -4,7 +4,7 @@ import type { StaffDirectoryLabels } from "@/shared/locale";
 
 export type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
 
-export type ManagerRole = "admin" | "staff" | "supervisor";
+export type ManagerRole = "admin" | "manager" | "supervisor";
 
 export type ManagerStatus = "active" | "offline";
 

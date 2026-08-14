@@ -44,6 +44,7 @@ export interface StaffOnboardingLabels {
     readonly processing: string;
     readonly cancel: string;
     readonly successMessage: string;
+    readonly errorMessage: string;
   };
   readonly metrics: {
     readonly activeStaff: string;

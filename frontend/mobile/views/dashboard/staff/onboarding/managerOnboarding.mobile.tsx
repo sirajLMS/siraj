@@ -6,7 +6,7 @@ import { UserEntityFieldsSection } from "@/frontend/common/components/onboarding
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/staff/onboarding/SystemAccessSection";
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/staff/onboarding/types";
-import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
+import { MobileFormErrorSnackbar, MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -23,8 +23,12 @@ const StyledFormActions = styled(Box)(({ theme }) => ({
   justifyContent: "center",
   flexDirection: "column",
   gap: theme.spacing(1.5),
-  paddingTop: theme.spacing(2),
+  padding: theme.spacing(2, 0),
   borderTop: `1px solid ${theme.palette.outlineVariant}`,
+  position: "sticky",
+  bottom: 0,
+  backgroundColor: theme.palette.background.default,
+  zIndex: 1,
 }));
 
 export function ManagerOnboardingMobileView({
@@ -35,9 +39,11 @@ export function ManagerOnboardingMobileView({
   handleSubmit,
   isSubmitting,
   showSuccess,
+  submitError,
   onSubmit,
   onCancel,
   onDismissSuccess,
+  onDismissError,
 }: Readonly<ManagerOnboardingViewProps>) {
   const t = labels;
   const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
@@ -92,6 +98,7 @@ export function ManagerOnboardingMobileView({
       </Box>
 
       <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
+      <MobileFormErrorSnackbar open={Boolean(submitError)} message={submitError ?? ""} onClose={onDismissError} />
     </MobilePageContainer>
   );
 }

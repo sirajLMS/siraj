@@ -8,6 +8,8 @@ import { parseAccountStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export interface UpdateManagerProfileInput {
+  readonly name?: string | null;
+  readonly email?: string | null;
   readonly phone?: string | null;
   readonly status?: AccountStatus | null;
   readonly hourlyRate?: string | null;
@@ -82,6 +84,14 @@ export namespace ManagerProfileService {
       });
     } else if (targetIsSuperAdmin || targetIsAcademyAdmin) {
       throw new Error(t.insufficientPermissions);
+    }
+
+    if (input.name !== undefined) {
+      await UserRepository.updateProfileFields(targetRow.id, { name: input.name ?? undefined }, locale);
+    }
+
+    if (input.email !== undefined && input.email !== null) {
+      await UserRepository.updateProfileFields(targetRow.id, { email: input.email }, locale);
     }
 
     if (input.phone !== undefined) {

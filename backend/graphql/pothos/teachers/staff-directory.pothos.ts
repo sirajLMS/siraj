@@ -217,6 +217,8 @@ export const UpdateManagerProfileInputPothosObject = gqlSchemaBuilder
   .inputRef<UpdateManagerProfileInput>("UpdateManagerProfileInput")
   .implement({
     fields: t => ({
+      name: t.string({ required: false, directives: { constraint: { maxLength: 512 } } }),
+      email: t.string({ required: false }),
       phone: t.string({ required: false }),
       status: t.field({ type: AccountStatusPothosObject, required: false }),
       hourlyRate: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
