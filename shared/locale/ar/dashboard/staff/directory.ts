@@ -35,6 +35,7 @@ export const dashboardStaffDirectoryAr: StaffDirectoryLabels = {
   },
   actions: {
     addManager: "إضافة موظف جديد",
+    createUser: "إنشاء مستخدم",
     options: "خيارات",
     editProfile: "تعديل الملف الشخصي",
     deactivate: "تعطيل",

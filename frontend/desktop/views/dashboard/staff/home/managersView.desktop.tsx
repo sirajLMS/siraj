@@ -10,9 +10,14 @@ import { Link } from "@/shared/i18n";
 
 export function ManagersViewDesktop({ labels, ...props }: Readonly<ManagersViewProps>) {
   const actions = props.canCreateManager ? (
-    <Link href="/staff/create" style={{ textDecoration: "none" }}>
-      <DesktopPrimaryPageAction>{labels.actions.addManager}</DesktopPrimaryPageAction>
-    </Link>
+    <>
+      <Link href="/users/create" style={{ textDecoration: "none" }}>
+        <DesktopPrimaryPageAction>{labels.actions.createUser}</DesktopPrimaryPageAction>
+      </Link>
+      <Link href="/staff/create" style={{ textDecoration: "none" }}>
+        <DesktopPrimaryPageAction>{labels.actions.addManager}</DesktopPrimaryPageAction>
+      </Link>
+    </>
   ) : undefined;
 
   return (
