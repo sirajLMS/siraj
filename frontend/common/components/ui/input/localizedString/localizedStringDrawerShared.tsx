@@ -16,15 +16,20 @@ import {
   Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LocalizedStringDrawerProps } from "@/frontend/common/components/ui/input/localizedString/types/localizedStringDrawer.types";
 import { getLanguageDisplayName, getLanguageEmoji } from "@/frontend/common/lib/locale";
-import { ALLOWED_LOCALES, hasRequiredLocalizedValue, setLocalizedString } from "@/frontend/common/lib/localized-string";
-import type { AppLocale, LocalizedStringLabels } from "@/shared/locale";
-import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
-import type { LocalizedString } from "@/shared/types/localized-string";
-import { DEFAULT_CONTENT_LOCALE } from "@/shared/types/localized-string";
+import { hasRequiredLocalizedValue } from "@/frontend/common/lib/localized-string";
+import { ALLOWED_LOCALES } from "@/frontend/common/types/localized-string.types";
+import { setLocalizedString } from "@/shared/lib/localized-string";
+import {
+  type AppLocale,
+  type LocalizedStringLabels,
+  Translation,
+  useAppLocale,
+  useAppTranslation,
+} from "@/shared/locale";
+import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types/localized-string";
 
 // ---------------------------------------------------------------------------
 // Slot Types

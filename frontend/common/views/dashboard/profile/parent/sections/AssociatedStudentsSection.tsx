@@ -5,8 +5,10 @@ import { AppDataGridLoadingOverlay, SectionPanel } from "@/frontend/common/compo
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { AssociatedStudentsSectionVariantProps } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import type { UseAssociatedStudentsSectionViewModelProps } from "@/frontend/common/views/dashboard/profile/parent/useAssociatedStudentsSectionViewModel";
-import { useAssociatedStudentsSectionViewModel } from "@/frontend/common/views/dashboard/profile/parent/useAssociatedStudentsSectionViewModel";
+import {
+  type UseAssociatedStudentsSectionViewModelProps,
+  useAssociatedStudentsSectionViewModel,
+} from "@/frontend/common/views/dashboard/profile/parent/useAssociatedStudentsSectionViewModel";
 
 type AssociatedStudentsSectionProps = UseAssociatedStudentsSectionViewModelProps;
 

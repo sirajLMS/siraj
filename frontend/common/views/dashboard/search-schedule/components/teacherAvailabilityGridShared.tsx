@@ -1,8 +1,7 @@
 "use client";
 
 import { CalendarMonthOutlined } from "@mui/icons-material";
-import type { SxProps, Theme } from "@mui/material";
-import { Box, Chip, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Chip, IconButton, Paper, type SxProps, type Theme, Tooltip, Typography } from "@mui/material";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";

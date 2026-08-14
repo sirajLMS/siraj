@@ -6,7 +6,7 @@ import {
   type SeedConfig,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { AuditService } from "@/backend/services/system/audit.service";
+import { AuditService } from "@/backend/services";
 import type { CreateAuditLogInput, InvoiceSelectType, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], invoicesList: InvoiceSelectType[], config?: SeedConfig) {

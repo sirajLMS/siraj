@@ -1,8 +1,7 @@
 "use client";
 
 import { ScheduleOutlined } from "@mui/icons-material";
-import type { SxProps, Theme } from "@mui/material";
-import { Box, Typography } from "@mui/material";
+import { Box, type SxProps, type Theme, Typography } from "@mui/material";
 import { formatTime } from "@/frontend/common/components/intl/dateFormat";
 import { classHref } from "@/frontend/common/utils/profileHref";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";

@@ -119,3 +119,6 @@ jscpd-admin
 jscpd-intra
 jscpd-output
 jscpd-all
+
+# locale JS transpiled artifacts
+shared/locale/**/*.js

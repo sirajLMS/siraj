@@ -11,8 +11,6 @@ import type { PaymentMethodTypeSelectorProps } from "@/frontend/common/component
 import { PAYMENT_METHOD_TYPES } from "@/frontend/common/lib/payment-method";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-export type { PaymentMethodTypeSelectorProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
-
 export type PaymentMethodTypeSelectorSharedOptions = {
   readonly buttonSx?: React.CSSProperties;
 };

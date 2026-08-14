@@ -1,7 +1,6 @@
 "use client";
 
-import type { Control, FieldPath, FieldValues } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 

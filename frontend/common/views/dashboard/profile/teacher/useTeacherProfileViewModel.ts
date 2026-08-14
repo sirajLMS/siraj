@@ -20,8 +20,6 @@ import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
 import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import type {
-  TeacherAdminData,
-  TeacherOwnData,
   TeacherProfileViewLabels,
   TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
@@ -225,5 +223,3 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
     onTabChange,
   };
 }
-
-export type { TeacherAdminData, TeacherOwnData, TeacherViewData };

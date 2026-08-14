@@ -128,7 +128,7 @@ export function UpcomingClassesTableDesktop({ classes }: Readonly<UpcomingClasse
       avatarSize: 40,
       Cell: DesktopClassProfileLinkCell,
       href: row => classHref(row.id),
-      name: row => row.subjectName?.trim() || "—",
+      name: row => row.subjectName?.trim() ?? "—",
       avatarUrl: row => row.avatarUrl,
     }),
     profileLinkColumn({

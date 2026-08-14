@@ -1,2 +1,2 @@
-export * from "@/frontend/common/components/ui/form/field/DateOfBirthControllerField";
-export * from "@/frontend/common/components/ui/form/field/formFieldStyles";
+export * from "./DateOfBirthControllerField";
+export * from "./formFieldStyles";

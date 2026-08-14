@@ -94,7 +94,7 @@ function buildTimeColumns(
 
 function renderClassCell(row: DailyScheduleRow) {
   const classId = row.id ?? "";
-  const courseName = row.courseName?.trim() || "—";
+  const courseName = row.courseName?.trim() ?? "—";
 
   return (
     <ClassProfileLinkCell

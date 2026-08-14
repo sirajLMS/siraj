@@ -1,15 +1,14 @@
 import { afterAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { SessionRepository } from "@/backend/db/repo";
+import { db } from "@/backend/db";
+import { SessionRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
 import { IP_ADDRESS_1, IP_ADDRESS_2 } from "@/backend/db/test/const";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { resetEnvironmentCache } from "@/backend/lib/env";
-import { resetCacheService } from "@/backend/services/cache/CacheServiceFactory";
-import { checkRedisHealth, getRedisService, resetRedisService } from "@/backend/services/redis";
+import { checkRedisHealth, getRedisService, resetCacheService, resetRedisService } from "@/backend/services";
+import type { DBTransaction } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 config({ path: ".env.redis", override: true });
@@ -52,7 +51,7 @@ async function setupTestSession(
   overrides: Partial<Parameters<typeof SessionRepository.create>[0]> = {}
 ) {
   const user = await createTestUser(tx, `${emailPrefix}-${randomUUID()}@example.com`);
-  const sessionId = overrides.hashedId || `session-${randomUUID()}`;
+  const sessionId = overrides.hashedId ?? `session-${randomUUID()}`;
   const hashedSessionId = hashSessionId(sessionId);
 
   const session = await SessionRepository.create(

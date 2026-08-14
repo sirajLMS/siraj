@@ -1,7 +1,6 @@
 "use client";
 
 import type { ComponentType } from "react";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import type {
   AssignGroupDialogProps,
   DeleteGroupDialogProps,
@@ -9,6 +8,7 @@ import type {
   PermissionGroupFormProps,
   PermissionManagementDialogsProps,
 } from "@/frontend/common/views/dashboard/permissions/types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 export interface PermissionManagementDialogsSharedSlots {
   readonly PermissionGroupForm: ComponentType<Readonly<PermissionGroupFormProps>>;

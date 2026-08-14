@@ -1,5 +1,5 @@
 import { decryptField, encryptField } from "@/backend/lib/field-encryption";
-import type { BankTransferDetails, PaymentMethodDetails } from "@/backend/types/billing/payment-method.types";
+import type { BankTransferDetails, PaymentMethodDetails } from "@/backend/types";
 
 // Sensitive bank routing fields inside `BankTransferDetails` JSONB that must be
 // encrypted at rest (AES-256-GCM via `field-encryption`). `beneficiaryName` and

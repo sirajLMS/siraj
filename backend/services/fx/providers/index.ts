@@ -1,2 +1,2 @@
-export { fxRateProvider, getFxRateProvider, resetFxRateProvider } from "./FxRateProviderFactory";
-export type { IFxRateProvider } from "./IFxRateProvider";
+export * from "./FxRateProviderFactory";
+export * from "./IFxRateProvider";

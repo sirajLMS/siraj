@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
-import { SessionRepository, TeacherRepository, UserRepository } from "@/backend/db/repo";
+import { SessionRepository } from "@/backend/db/repo/shared";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
+import { UserRepository } from "@/backend/db/repo/users";
 import { AccountStatus, type AppPermission, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { SessionService } from "@/backend/services/auth/session.service";

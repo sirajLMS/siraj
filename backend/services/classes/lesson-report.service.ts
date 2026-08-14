@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { LessonReportRepository, type PendingReviewFilters } from "@/backend/db/repo/classes/lesson-report.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
@@ -15,14 +14,15 @@ import {
   buildLessonReportSubmittedPayloads,
 } from "@/backend/services/notification/notification-payloads.builders";
 import { TeacherDueService } from "@/backend/services/teacher/teacher-due.service";
-import type {
-  LessonReportReturnType,
-  LessonReportSelectType,
-  LessonReportSubmitInput,
-  LessonReviewInput,
-  PendingReviewCountReturnType,
+import {
+  type DBTransaction,
+  type LessonReportReturnType,
+  type LessonReportSelectType,
+  type LessonReportSubmitInput,
+  type LessonReviewInput,
+  PaginationArgs,
+  type PendingReviewCountReturnType,
 } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types/shared/pagination.types";
 import { getServerTranslations } from "@/shared/locale";
 
 /**

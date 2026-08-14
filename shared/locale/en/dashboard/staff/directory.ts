@@ -13,7 +13,7 @@ export const dashboardStaffDirectoryEn: StaffDirectoryLabels = {
   filters: {
     allRoleTypes: "All Role Types",
     admin: "Admin",
-    staff: "Staff",
+    manager: "Manager",
     supervisor: "Supervisor",
     statusAll: "Status: All",
     active: "Active",
@@ -29,6 +29,8 @@ export const dashboardStaffDirectoryEn: StaffDirectoryLabels = {
     options: "Options",
   },
   fields: {
+    name: "Name",
+    email: "Email",
     phone: "Phone",
   },
   actions: {
@@ -49,7 +51,7 @@ export const dashboardStaffDirectoryEn: StaffDirectoryLabels = {
   },
   roles: {
     admin: "Admin",
-    staff: "Staff",
+    manager: "Manager",
     supervisor: "Supervisor",
   },
   showingOf: (count, total) => `Showing ${count} of ${total} results`,

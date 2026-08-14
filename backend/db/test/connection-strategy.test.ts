@@ -5,7 +5,7 @@ import {
   poolMax,
   resolveConnectionStrategy,
   resolvePoolMax,
-} from "@/backend/db/connection-strategy";
+} from "@/backend/db";
 
 const ENV_KEYS = [
   "DB_CONNECTION_MODE",

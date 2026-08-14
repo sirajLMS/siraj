@@ -1,24 +1,7 @@
 import { ALLOWED_LOCALES } from "@/frontend/common/types/localized-string.types";
 import type { AppLocale } from "@/shared/i18n/routing";
-import {
-  localeJsonKey,
-  omitEmptyLocalizedString,
-  resolveLocalizedString,
-  setLocalizedString,
-} from "@/shared/lib/localized-string";
-import type { LocalizedString } from "@/shared/types/localized-string";
-import { DEFAULT_CONTENT_LOCALE, isAppLocale, normalizeContentLocale } from "@/shared/types/localized-string";
-
-export {
-  ALLOWED_LOCALES,
-  DEFAULT_CONTENT_LOCALE,
-  isAppLocale,
-  localeJsonKey,
-  normalizeContentLocale,
-  omitEmptyLocalizedString,
-  resolveLocalizedString,
-  setLocalizedString,
-};
+import { omitEmptyLocalizedString } from "@/shared/lib/localized-string";
+import { DEFAULT_CONTENT_LOCALE, isAppLocale, type LocalizedString } from "@/shared/types/localized-string";
 
 /** Remove a locale entry from the map (returns a new object). */
 export function removeLocalizedString(map: LocalizedString | null | undefined, locale: AppLocale): LocalizedString {

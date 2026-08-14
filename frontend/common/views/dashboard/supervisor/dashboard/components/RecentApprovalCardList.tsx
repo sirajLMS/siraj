@@ -21,7 +21,6 @@ import {
 } from "@/frontend/common/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
 import {
-  getNameInitials,
   getPersonAccentColor,
   type PersonAccentTone,
 } from "@/frontend/common/views/dashboard/admin/home/utils/scheduleCardHelpers";
@@ -31,6 +30,7 @@ import {
   ScheduleSessionEmptyState,
 } from "@/frontend/common/views/dashboard/components/ScheduleSessionCardStates";
 import type { RecentApproval } from "@/frontend/common/views/dashboard/supervisor/dashboard/types/supervisorDashboardTypes";
+import { getNameInitials } from "@/frontend/common/views/dashboard/utils/nameInitials";
 import { Link } from "@/shared/i18n";
 
 export interface RecentApprovalCardLabels {

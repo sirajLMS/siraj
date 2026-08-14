@@ -5,8 +5,7 @@ import {
   UserMeetingConfigPothosObject,
 } from "@/backend/graphql/pothos/meeting/meeting.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ClassMeetingConfigService, MeetingConfigService } from "@/backend/services/meeting";
-import { MeetingProviderCatalogService } from "@/backend/services/meeting/meeting-provider-catalog.service";
+import { ClassMeetingConfigService, MeetingConfigService, MeetingProviderCatalogService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("meetingProviders", t =>
   t.field({

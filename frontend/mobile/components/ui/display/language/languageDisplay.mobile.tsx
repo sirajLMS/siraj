@@ -2,8 +2,7 @@
 
 import Stack from "@mui/material/Stack";
 import type { SxProps, Theme } from "@mui/material/styles";
-import type { TypographyProps } from "@mui/material/Typography";
-import Typography from "@mui/material/Typography";
+import Typography, { type TypographyProps } from "@mui/material/Typography";
 import type * as React from "react";
 import { getLanguageDisplayName, getLanguageEmoji, type LanguageType } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";

@@ -1,6 +1,6 @@
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { AuditService } from "@/backend/services/system/audit.service";
+import { AuditService } from "@/backend/services";
 import type {
   AuditAction,
   AuditEntityType,

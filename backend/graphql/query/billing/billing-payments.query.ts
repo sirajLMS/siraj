@@ -1,4 +1,4 @@
-import { BillingRepository } from "@/backend/db/repo";
+import { BillingRepository } from "@/backend/db/repo/billing";
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaymentPothosObject } from "@/backend/graphql/pothos/billing/billing-payments.pothos";

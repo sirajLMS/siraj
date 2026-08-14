@@ -12,11 +12,13 @@ import {
 } from "@/backend/graphql/pothos";
 import { normalizePaymentMethodDetailsInput } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ParentOnboardingService } from "@/backend/services/parent/parent-onboarding.service";
-import { ManagerOnboardingService } from "@/backend/services/staff/manager-onboarding.service";
-import { StudentOnboardingService } from "@/backend/services/student/student-onboarding.service";
-import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
-import type { UserPaymentMethodSubmitInput } from "@/backend/types/billing/payment-method.types";
+import {
+  ManagerOnboardingService,
+  ParentOnboardingService,
+  StudentOnboardingService,
+  TeacherOnboardingService,
+} from "@/backend/services";
+import type { UserPaymentMethodSubmitInput } from "@/backend/types";
 
 function mapInitialPaymentMethodInput(
   input:

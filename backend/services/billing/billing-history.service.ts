@@ -1,4 +1,5 @@
-import { BillingRepository, ParentRepository } from "@/backend/db/repo";
+import { BillingRepository } from "@/backend/db/repo/billing";
+import { ParentRepository } from "@/backend/db/repo/parents";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
@@ -39,7 +40,7 @@ export namespace BillingHistoryService {
     search: string | null | undefined = null
   ): Promise<InvoiceHistoryPaginatedResult> {
     await assertBillingViewPermission(actorUserId, tErrors);
-    const resolvedParentId = await resolveParentId(parentId, userId || actorUserId, tErrors);
+    const resolvedParentId = await resolveParentId(parentId, userId ?? actorUserId, tErrors);
 
     const result = await BillingRepository.getInvoicesForParent(resolvedParentId, pagination, search);
 
@@ -84,7 +85,7 @@ export namespace BillingHistoryService {
     tErrors: ErrorsLabels
   ): Promise<ParentBillingSummaryResult> {
     await assertBillingViewPermission(actorUserId, tErrors);
-    const resolvedParentId = await resolveParentId(parentId, userId || actorUserId, tErrors);
+    const resolvedParentId = await resolveParentId(parentId, userId ?? actorUserId, tErrors);
     return BillingRepository.getParentBillingSummary(resolvedParentId);
   }
 }

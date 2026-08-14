@@ -1,6 +1,6 @@
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { EffectiveMeetingService } from "@/backend/services";
 import type { EffectiveMeetingReturnType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 

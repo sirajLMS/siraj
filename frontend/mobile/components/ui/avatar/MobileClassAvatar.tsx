@@ -1,5 +1,6 @@
 "use client";
 
+import type { SxProps, Theme } from "@mui/material/styles";
 import {
   type ClassAvatarProps,
   getClassFallbackSx,
@@ -8,8 +9,15 @@ import { MobileBaseAvatar } from "@/frontend/mobile/components/ui/avatar/MobileB
 
 export type { ClassAvatarProps };
 
+function normalizeSx(sx: SxProps<Theme> | undefined) {
+  if (sx) {
+    return Array.isArray(sx) ? sx : [sx];
+  }
+  return [];
+}
+
 export function MobileClassAvatar({ variant = "rounded", sx, ...props }: ClassAvatarProps) {
-  const normalizedSx = Array.isArray(sx) ? sx : sx ? [sx] : [];
+  const normalizedSx = normalizeSx(sx);
   return (
     <MobileBaseAvatar
       variant={variant}

@@ -10,7 +10,7 @@ import type {
 } from "@/backend/db/schema";
 import type { AccountStatus, AppPermission, UserRole } from "@/backend/enum";
 import type { Email } from "@/backend/lib/email";
-import type { SafeUser, UserReturnType } from "@/backend/types/users/user.types";
+import type { SafeUser, UserReturnType } from "@/backend/types";
 
 export type UserUpdateInput = {
   name: string;

@@ -9,7 +9,7 @@ import type {
   PaymentMethodTransactionSnapshot,
   UserPaymentMethodReturnType,
   UserPaymentMethodSelectType,
-} from "@/backend/types/billing/payment-method.types";
+} from "@/backend/types";
 
 function maskNumericField(value: string | null | undefined): string | null {
   if (!value) return null;

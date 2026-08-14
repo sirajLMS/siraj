@@ -29,16 +29,16 @@ import { getMeetingChannel } from "@/backend/services/meeting/channels/MeetingCh
 import { MicrosoftTeamsAdapter } from "@/backend/services/meeting/channels/microsoft-teams/MicrosoftTeamsAdapter";
 import { ZoomMeetingAdapter } from "@/backend/services/meeting/channels/zoom/ZoomMeetingAdapter";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { CreateAuditLogInput } from "@/backend/types";
 import type {
   AdminRevokeTokenReturnType,
   AdminRevokeTokenSubmitInput,
+  CreateAuditLogInput,
   MeetingIntegrationConnectedAccountReturnType,
   MeetingIntegrationProviderReturnType,
+  MeetingProviderKind,
   TestMeetingConnectionReturnType,
   TestMeetingConnectionSubmitInput,
-} from "@/backend/types/meeting/meeting-integrations.types";
-import type { MeetingProviderKind } from "@/backend/types/meeting/meeting-provider.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 // ============================================================================

@@ -1,4 +1,6 @@
-import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { StudentRepository } from "@/backend/db/repo/students";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission } from "@/backend/enum";
 import { ForbiddenError } from "@/backend/lib/errors";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -84,12 +86,12 @@ export async function resolveAssociatedViewer(actorUserId: string, studentId: st
   ]);
 
   // (a) The user is the student's parent
-  if (parent && parent.id === profile.parentId) {
+  if ((parent?.id ?? null) === profile.parentId) {
     viewerCache.set(cacheKey, true);
     return true;
   }
   // The user is the student's primary teacher
-  if (teacher && teacher.id === profile.primaryTeacherId) {
+  if ((teacher?.id ?? null) === profile.primaryTeacherId) {
     viewerCache.set(cacheKey, true);
     return true;
   }

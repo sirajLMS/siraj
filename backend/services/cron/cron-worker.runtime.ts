@@ -22,12 +22,7 @@ import { computeBackoffSeconds } from "@/backend/services/cron/cron-scheduler.en
 import { formatError } from "@/backend/services/cron/cron-utils";
 import { getHandler } from "@/backend/services/cron/job-handler-registry";
 import { getQueueAdapter } from "@/backend/services/cron/queue-adapter.factory";
-import type {
-  CronJobHandler,
-  CronJobPayload,
-  CronQueueAdapter,
-  WorkerDrainResult,
-} from "@/backend/types/cron/cron.types";
+import type { CronJobHandler, CronJobPayload, CronQueueAdapter, WorkerDrainResult } from "@/backend/types";
 
 const DEFAULT_CONCURRENCY = 4;
 const HEARTBEAT_MIN_MS = 1_000;

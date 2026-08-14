@@ -1,9 +1,12 @@
 import { eq, inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBQueryExecutor, DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { sessionConfig } from "@/backend/db/schema";
-import type { SessionConfigSelectType, SessionConfigUpsertInput } from "@/backend/types";
+import type {
+  DBQueryExecutor,
+  DBTransaction,
+  SessionConfigSelectType,
+  SessionConfigUpsertInput,
+} from "@/backend/types";
 
 async function upsertOne(
   input: SessionConfigUpsertInput,

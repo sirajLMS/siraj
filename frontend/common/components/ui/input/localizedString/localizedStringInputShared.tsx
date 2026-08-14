@@ -3,8 +3,7 @@
 import { EditOutlined } from "@mui/icons-material";
 import { Box, Button, FormHelperText, IconButton, TextField } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
-import type { ReactNode } from "react";
-import { useRef } from "react";
+import { type ReactNode, useRef } from "react";
 import type {
   LocaleAdornmentSwitchProps,
   LocalizedStringDrawerProps,
@@ -12,8 +11,7 @@ import type {
 } from "@/frontend/common/components/ui/input/localizedString/types";
 import { useLocalizedStringInputState } from "@/frontend/common/hooks/useLocalizedStringInputState";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
-import type { LocalizedStringLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { type LocalizedStringLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 // ---------------------------------------------------------------------------
 // Slot Types

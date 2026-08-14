@@ -276,6 +276,9 @@ export interface ErrorsLabels
   readonly invalidInput: string;
   readonly invalidNationalId: string;
 
+  // ─── General user creation errors ──────────────────────────────────
+  readonly specializedGroupNotAllowed: string;
+
   // ─── Lesson Report errors ─────────────────────────────────────────
   readonly rejectedReportsRequireReason: string;
   readonly approvedReportsNoRejectionReason: string;

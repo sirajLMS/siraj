@@ -2,8 +2,7 @@
 
 import { Box, Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { ComponentProps, ReactNode } from "react";
-import { useState } from "react";
+import { type ComponentProps, type ReactNode, useState } from "react";
 import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ProfileShell } from "@/frontend/common/views/dashboard/profile/core/ProfileShell";

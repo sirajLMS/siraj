@@ -15,7 +15,7 @@ import {
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { BillingHistoryService } from "@/backend/services/billing/billing-history.service";
+import { BillingHistoryService } from "@/backend/services";
 import type {
   AdminBillingSummaryResult,
   BillingCurrencyTotal,

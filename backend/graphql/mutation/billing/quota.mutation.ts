@@ -14,7 +14,7 @@ import {
   QuotaAlreadyDeletedError,
   QuotaNotFoundError,
 } from "@/backend/lib/errors";
-import { QuotaService } from "@/backend/services/billing/quota.service";
+import { QuotaService } from "@/backend/services";
 import type { QuotaUpdateInput } from "@/backend/types";
 
 export function mapQuotaErrorToGraphQLError(error: unknown): GraphQLError {

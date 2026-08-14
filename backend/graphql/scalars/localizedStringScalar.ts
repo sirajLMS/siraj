@@ -1,7 +1,6 @@
 import { GraphQLError, GraphQLScalarType, Kind, type ValueNode } from "graphql";
 import type { AppLocale } from "@/shared/locale";
-import type { LocalizedString } from "@/shared/types/localized-string";
-import { isAppLocale } from "@/shared/types/localized-string";
+import { isAppLocale, type LocalizedString } from "@/shared/types/localized-string";
 
 const MAX_VALUE_LENGTH = 4096;
 

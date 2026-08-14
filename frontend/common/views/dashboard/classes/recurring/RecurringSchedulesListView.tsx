@@ -2,7 +2,7 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { RecurringSchedulesListViewModel } from "@/frontend/common/views/dashboard/classes/recurring/useRecurringSchedulesListViewModel";
+import type { RecurringSchedulesListViewModel } from "@/frontend/common/views/dashboard/classes/recurring/types/recurringSchedulesListViewModel.types";
 
 const lazyViews = createLazyView<RecurringSchedulesListViewModel>(
   () =>

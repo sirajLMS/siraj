@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn } from "@/backend/db/repo/scheduling/scheduling-queries.repository";
 import {
   createRescheduledSuccessor,
@@ -7,18 +7,18 @@ import {
   getClassInstanceByIdOrThrow,
   performRescheduleValidations,
 } from "@/backend/db/repo/scheduling/shared";
-import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settings.repository";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { classInstances, classStatusEvents, leaveRequests, parents, teachers } from "@/backend/db/schema";
-import { type CurrencyCode, RateSource } from "@/backend/enum";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { RateSource } from "@/backend/enum";
 import {
   checkStateChangeAuth,
+  EffectiveMeetingService,
   validateRescheduleState,
   validateStateTransition,
-} from "@/backend/services/scheduling/state-change-validation.service";
+} from "@/backend/services";
 import type * as Types from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 export async function updateInstanceState(
   t: DBTransaction,

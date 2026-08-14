@@ -2,8 +2,10 @@
 
 import { Box, Grid, Stack } from "@mui/material";
 import type { ReactNode } from "react";
-import type { TeacherProfileSharedSections } from "@/frontend/common/views/dashboard/profile/teacher/sections/__shared__/teacherProfileShared";
-import { TeacherProfileShared } from "@/frontend/common/views/dashboard/profile/teacher/sections/__shared__/teacherProfileShared";
+import {
+  TeacherProfileShared,
+  type TeacherProfileSharedSections,
+} from "@/frontend/common/views/dashboard/profile/teacher/sections/__shared__/teacherProfileShared";
 import type { TeacherProfileViewModel } from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileViewModel";
 
 function renderDesktopView(sections: TeacherProfileSharedSections): ReactNode {

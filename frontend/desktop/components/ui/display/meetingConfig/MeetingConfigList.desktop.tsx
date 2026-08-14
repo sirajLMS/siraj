@@ -1,8 +1,10 @@
 "use client";
 
 import type * as React from "react";
-import type { MeetingConfigListSharedOptions } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigListShared";
-import { MeetingConfigListShared } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigListShared";
+import {
+  MeetingConfigListShared,
+  type MeetingConfigListSharedOptions,
+} from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigListShared";
 import type {
   MeetingConfigListItem,
   MeetingConfigListProps,

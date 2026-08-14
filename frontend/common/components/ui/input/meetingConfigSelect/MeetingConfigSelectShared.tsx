@@ -4,8 +4,8 @@ import { Autocomplete, TextField } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
 import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface MeetingConfigSelectSharedSlots {
@@ -33,7 +33,7 @@ function formatOptionLabel(option: MeetingConfigSelectOption, locale: string): s
     : (option.provider?.slug ?? "");
   const label = option.label?.trim();
   if (label && providerName) return `${providerName} — ${label}`;
-  return label || providerName || option.id;
+  return label ?? providerName ?? option.id;
 }
 
 export function MeetingConfigSelectShared({

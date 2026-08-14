@@ -57,6 +57,7 @@ export const PAGE_PERMISSIONS = {
   usersParents: [AppPermission.ParentViewDirectory, AppPermission.ParentsList] as PagePermissions,
   usersStudents: [AppPermission.StudentsList] as PagePermissions,
   usersStaff: [AppPermission.StaffViewDirectory] as PagePermissions,
+  usersCreate: [AppPermission.StaffCreate] as PagePermissions,
   parents: [AppPermission.ParentViewDirectory] as PagePermissions,
   students: [AppPermission.StudentsList] as PagePermissions,
   staff: [AppPermission.StaffViewDirectory] as PagePermissions,

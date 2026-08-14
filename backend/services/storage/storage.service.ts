@@ -1,22 +1,19 @@
-import {
-  ParentRepository,
-  SignedUrlRepository,
-  SiteContentRepository,
-  StorageDbRepository,
-  TeacherRepository,
-} from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { SignedUrlRepository } from "@/backend/db/repo/shared";
+import { SiteContentRepository, StorageDbRepository } from "@/backend/db/repo/storage";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type {
   DirectoryPermissionsUpdateInput,
   FileOperationResult,
   FileUsageInfo,
+  SiteContentUpsertInput,
   StorageItemProtectionUpdateInput,
   StorageUploadValidationParams,
+  ValidReferenceTable,
 } from "@/backend/types";
-import type { SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
-import type { ValidReferenceTable } from "@/backend/types/storage/storage.types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const VALID_REFERENCE_TABLES: readonly ValidReferenceTable[] = [

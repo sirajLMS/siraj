@@ -1,12 +1,12 @@
 import type { ObjectFieldBuilder, ObjectRef } from "@pothos/core";
-import type { CurrencyCode } from "@/backend/enum";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   RecurringScheduleDayDetailReturnType,
   RecurringScheduleDetailReturnType,
   RecurringScheduleListItem,
-} from "@/backend/types/scheduling/recurring-schedule-detail.types";
+} from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;

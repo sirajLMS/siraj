@@ -1,11 +1,9 @@
 "use client";
 
-import type { Breakpoint } from "@mui/material";
-import { Box } from "@mui/material";
+import { Box, type Breakpoint } from "@mui/material";
 import Grid, { type GridSize } from "@mui/material/Grid";
 import { useMetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelSources";
-import type { MetricLabelSources } from "@/frontend/common/components/reports/metricCardLabelUtils";
-import { resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
+import { type MetricLabelSources, resolveMetricLabel } from "@/frontend/common/components/reports/metricCardLabelUtils";
 import type { MetricCardDensity } from "@/frontend/common/components/ui/card/MetricCard/utils";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import { DesktopMetricCard } from "@/frontend/desktop/components/ui/card/MetricCard/DesktopMetricCard";
@@ -41,7 +39,7 @@ function renderMetricCard({
   labelSources: MetricLabelSources;
   density?: MetricCardDensity;
 }) {
-  const label = metric.label || resolveMetricLabel(metric.labelKey, labelSources);
+  const label = metric.label ?? resolveMetricLabel(metric.labelKey, labelSources);
   return (
     <DesktopMetricCard
       icon={metric.icon}

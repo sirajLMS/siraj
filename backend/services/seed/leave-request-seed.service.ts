@@ -9,7 +9,7 @@
  * @see backend/db/seeds/teachers/seed-leave-requests.ts
  * @see backend/db/seeds/teachers/seed-leave-quota-usage.ts
  */
-import type { DBTransaction } from "@/backend/db/db.types";
+
 import {
   LeaveQuotaUsageRepository,
   type LeaveQuotaUsageRow,
@@ -21,7 +21,7 @@ import {
 } from "@/backend/db/repo/scheduling/leave-request.repository";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { UpsertStudentLeaveQuotaInput } from "@/backend/types/scheduling/scheduling.types";
+import type { DBTransaction, UpsertStudentLeaveQuotaInput } from "@/backend/types";
 
 export namespace LeaveRequestSeedService {
   /** Idempotently create leave request rows for demo class instances. */

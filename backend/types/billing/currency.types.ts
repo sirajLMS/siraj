@@ -1,5 +1,6 @@
 import type { supportedCurrencies } from "@/backend/db/schema";
-import type { CountryCode, CurrencyCode } from "@/backend/enum";
+import type { CountryCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export type SupportedCurrencySelectType = typeof supportedCurrencies.$inferSelect;
 export type SupportedCurrencyInsertType = typeof supportedCurrencies.$inferInsert;

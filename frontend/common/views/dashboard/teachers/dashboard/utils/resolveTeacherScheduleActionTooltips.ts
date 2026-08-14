@@ -27,7 +27,7 @@ export function resolveTeacherScheduleActionTooltips(
     activate = disabled.activateAfterWindow;
   }
 
-  const hasJoinUrl = Boolean(row.meetingJoinUrl?.trim() || row.effectiveMeeting?.joinUrl?.trim());
+  const hasJoinUrl = Boolean(row.meetingJoinUrl?.trim() ?? row.effectiveMeeting?.joinUrl?.trim());
   const joinVideo = hasJoinUrl ? actions.joinVideo : (meetingLabels?.emptyTeacher ?? disabled.joinVideoUnavailable);
 
   const markAbsent = row.markAbsentEnabled === false ? disabled.markAbsentWaitingPeriod : controls.markAbsent;

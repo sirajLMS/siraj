@@ -24,9 +24,13 @@
  */
 
 import { NotificationChannel, NotificationEventType } from "@/backend/enum";
-import type { ClassInstanceSelectType, CommunicationPayload, InvoiceSelectType } from "@/backend/types";
-import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
-import type { WhatsappTemplateMetadata } from "@/backend/types/whatsapp/whatsapp-account.types";
+import type {
+  ClassInstanceSelectType,
+  CommunicationPayload,
+  InvoiceSelectType,
+  NotificationMetadata,
+  WhatsappTemplateMetadata,
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 import type {
   ClassLifecycleBodyParams,

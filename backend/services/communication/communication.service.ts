@@ -1,20 +1,20 @@
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { NotificationChannel } from "@/backend/enum";
 import { logger } from "@/backend/lib";
-import { OnAppChannel } from "@/backend/services";
 import { emailChannel } from "@/backend/services/communication/channels/email";
+import { OnAppChannel } from "@/backend/services/communication/channels/on-app.channel";
 import { pushChannel } from "@/backend/services/communication/channels/push";
 import { smsChannel } from "@/backend/services/communication/channels/sms";
-import { whatsappChannel } from "@/backend/services/communication/channels/whatsapp";
+import { whatsappChannel } from "@/backend/services/communication/channels/whatsapp/WhatsappChannelFactory";
 import type {
   ChannelDispatchResult,
   CommunicationPayload,
+  NotificationDeliverySelectType,
   NotificationEntityKind,
   NotificationMetadata,
+  WhatsappTemplateComponent,
+  WhatsappTemplateMetadata,
 } from "@/backend/types";
-import type { NotificationDeliverySelectType } from "@/backend/types/notifications/notificationDeliveries.types";
-import type { WhatsappTemplateMetadata } from "@/backend/types/whatsapp/whatsapp-account.types";
-import type { WhatsappTemplateComponent } from "@/backend/types/whatsapp/whatsapp-channel.types";
 import { getServerTranslations } from "@/shared/locale";
 
 const NOTIFICATION_ENTITY_KINDS: readonly NotificationEntityKind[] = [

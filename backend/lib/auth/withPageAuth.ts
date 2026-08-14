@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import type { AppPermission } from "@/backend/enum";
 import { requirePermissionForPage } from "@/backend/lib/auth/require-permission";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
-import type { UserPermissionContext } from "@/backend/services/auth/permissions.service";
+import type { UserPermissionContext } from "@/backend/services";
 import { redirectToLogin } from "@/frontend/common/lib/redirectToLogin";
 import { getLocale } from "@/shared/locale/server-cookies";
 

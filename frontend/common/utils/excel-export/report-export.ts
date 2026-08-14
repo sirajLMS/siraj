@@ -6,7 +6,7 @@ import {
   EXPORT_FONT,
   nameAltStyle,
   nameStyle,
-  titleStyle,
+  writeMergedTitleCell,
   writeCell as writeSharedCell,
   writeHeaderRow as writeSharedHeaderRow,
   type XLSXModule,
@@ -132,10 +132,7 @@ function writeTitleAndSubtitle(
   toDate: string,
   totalCols: number
 ): void {
-  ws["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } }];
-
-  const titleCell = XLSX.utils.encode_cell({ r: 0, c: 0 });
-  ws[titleCell] = { v: pageTitle, t: "s", s: titleStyle };
+  writeMergedTitleCell(XLSX, ws, pageTitle, totalCols);
 
   const subtitleCell = XLSX.utils.encode_cell({ r: 1, c: 0 });
   ws[subtitleCell] = {
@@ -143,7 +140,7 @@ function writeTitleAndSubtitle(
     t: "s",
     s: subtitleStyle,
   };
-  ws["!merges"].push({ s: { r: 1, c: 0 }, e: { r: 1, c: totalCols - 1 } });
+  ws["!merges"]?.push({ s: { r: 1, c: 0 }, e: { r: 1, c: totalCols - 1 } });
 }
 
 function writeHeaders(XLSX: XLSXModule, ws: WorkSheet, headers: readonly string[]): void {

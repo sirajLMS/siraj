@@ -1,8 +1,11 @@
 import { ProfileScope } from "@/backend/enum";
 import type { FieldFilterContext, StudentFieldFilterContext } from "@/backend/services/profile/profile-field-filter";
-import type { ProfileFieldGroupDefinition } from "@/backend/types/profile/profile-field-manifest";
-import { getProfileEditPermission, getProfileViewPermission } from "@/backend/types/profile/profile-field-manifest";
-import type { StudentFieldGroupDefinition } from "@/backend/types/students/student-field-manifest";
+import {
+  getProfileEditPermission,
+  getProfileViewPermission,
+  type ProfileFieldGroupDefinition,
+  type StudentFieldGroupDefinition,
+} from "@/backend/types";
 
 export function hasProfileGroupViewPermission(ctx: FieldFilterContext, group: ProfileFieldGroupDefinition): boolean {
   const viewPermission = getProfileViewPermission(group, ctx.scope);

@@ -362,6 +362,7 @@ After any duplication elimination:
 - `.ai/plans/duplications-phase3/` — the plan that established repo factory, adapter base, schema helpers, page auth, and test mock patterns
 - `.ai/plans/duplications-phase6/` — the plan that established P3 scaffold extraction patterns (A-G) for micro clusters
 - `.ai/plans/duplications-phase7/` — the plan that established within-file clone extraction, cross-layer utility alignment, and locale extraction patterns
+- `.ai/plans/duplications-phase8/` — the final residual clone elimination plan (12 → 0, Patterns 20–23: ViewModel helpers, skeleton factory, component slot unification, prop-picker functions)
 - `docs/frontend/ui-shared-scaffold-pattern.md`
 - `docs/backend/shared-types-pattern.md`
 - `docs/backend/meeting-adapter-base.md`
@@ -620,3 +621,96 @@ export type StudentDashboardLabels = Pick<PersonLabels, "name" | "status" | "rol
 - **Verify per-file:** Run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` after each modification (runs tsgo → oxlint → biome → lint:type-aware → check:duplicates → codescene).
 
 **See:** `docs/frontend/ui-shared-scaffold-pattern.md` for the detailed scaffold pattern with slot props, config objects, and the full `*Shared.tsx` + `*Shared.options.ts` convention.
+
+## Phase 8: Final Residual Clone Elimination (12 → 0)
+
+Phase 8 eliminated the **final 12 residual clone pairs (1,192 tokens)** that survived Phases 1–7. These were the hardest structural duplicates — pairs that prior phases deemed "too different to fix." Every pair was resolved by **true code extraction** with zero `jscpd:ignore` directives and zero `.jscpd.json` changes. **Final jscpd count: 0 clones.**
+
+The patterns below represent advanced extraction techniques for cases where scaffold extraction alone is insufficient.
+
+### Pattern 20: ViewModel Helper Functions (Phase 8)
+
+**When to use:** Two ViewModel hooks (`use*ViewModel`) build structurally identical derived objects (invoice rows, billing summaries, quick-pay actions) from different raw data sources with slightly different defaults.
+
+**Process:**
+1. Identify the structurally identical derived objects (same shape, same logic, different default values)
+2. Create a `*Helpers.ts` module in the domain's `__shared__/` directory
+3. Implement shared builder functions that accept configurable defaults via an options parameter
+4. For functions needing generic type parameters (e.g., `TSummary extends SomeShape | undefined`), define an explicit args interface
+5. Both ViewModels import and call the shared builders with their domain-specific defaults
+
+**Example (Phase 8, Tasks 1.2):**
+- Created: `frontend/common/views/dashboard/billing/__shared__/billingViewModelHelpers.ts`
+- `buildInvoiceRow(invoice, opts)` — `opts: { staleDefault: boolean | null, currencyDefault: CurrencyCode | null }`
+- `buildParentBillingSummary(data)` — shared summary builder
+- `resolveQuickPayAction(args)` — generic `ResolveQuickPayActionArgs<TSummary>` interface
+- Consumers: `useParentBillingViewModel.ts` (stale: true, currency: Usd), `useUserBillingProfileViewModel.ts` (stale: null, currency: null)
+- Result: 3 clone pairs (303 tokens) eliminated
+
+**Key rules:**
+- Name with `build*` prefix for pure functions (not `use*` — they're not React hooks)
+- Configurable defaults via options object, not function overloads
+- Generic type constraints documented in dedicated interface
+
+### Pattern 21: Loading Skeleton Factory Function (Phase 8)
+
+**When to use:** Two profile skeleton components have identical card structures with only minor differences in the number/config of extra cards.
+
+**Process:**
+1. Identify the common card structures shared by both skeletons
+2. Create a factory function that accepts an array of extra cards and returns the complete skeleton config
+3. Use a `WithCommonCards` variant that prepends shared `COMMON_GRID_CARDS` before the extra cards
+4. Both skeleton components call the factory with their domain-specific extra cards
+
+**Example (Phase 8, Task 1.3):**
+- Created: `frontend/common/views/dashboard/profile/shared/createProfileLoadingSkeletonConfig.ts`
+- `createProfileLoadingSkeletonConfig(cards)` — base factory
+- `createProfileLoadingSkeletonConfigWithCommonCards(extraCards)` — prepends 2 `COMMON_GRID_CARDS`
+- Consumers: `ParentProfileLoadingSkeleton.tsx`, `StaffProfileLoadingSkeleton.tsx`
+- Result: 1 clone pair (83 tokens) eliminated
+
+### Pattern 22: Unified Scaffold with Component Slot Prop (Phase 8)
+
+**When to use:** A common scaffold component and a mobile-specific fork share 90% of their logic, but the mobile version uses different layout constants (spacing, icon sizes) and a mobile-specific action component.
+
+**Process:**
+1. Extend the common scaffold to accept a `PrimaryActionComponent` slot prop (typed as `ComponentType<{ onClick: () => void }>`)
+2. Add configurable sx/layout props with desktop defaults: `cardSx`, `iconCircleSize`, `stackGap`, `titleSubtitleGap`, `actionSx`
+3. Type sx constants as `SxProps<Theme>` to satisfy oxlint `no-unsafe-type-assertion`
+4. Mobile consumers pass MobilePrimaryPageAction and mobile-specific layout values
+5. Delete the mobile-only fork file — it's now fully replaced by the unified scaffold
+
+**Critical:** Non-component exports (constants like `MOBILE_HERO_CARD_SX`) must be in a separate `.ts` file (no JSX, no `"use client"`) to avoid `react-refresh/only-export-components` ESLint warnings.
+
+**Example (Phase 8, Task 2.1):**
+- Extended: `frontend/common/views/dashboard/supervisor/dashboard/components/__shared__/heroSummaryCardShared.tsx`
+- Created: `frontend/common/views/dashboard/supervisor/dashboard/components/__shared__/heroCardSx.constants.ts`
+- Deleted: `frontend/mobile/views/dashboard/supervisor/dashboard/components/__shared__/supervisorHeroCardShared.tsx`
+- Result: 1 clone pair (89 tokens) eliminated
+
+### Pattern 23: Prop-Picker Function for Forwarded Props (Phase 8)
+
+**When to use:** Desktop and mobile view components forward identical sets of 15–25 props from a ViewModel to a child component. The prop lists are duplicated, and individual prop names may differ (e.g., ViewModel `isInitialLoading` → child `isSearching`).
+
+**Process:**
+1. Create a `pick*Props(source)` pure function in a `.ts` file (NOT `.tsx` — avoids `react-refresh/only-export-components`)
+2. Type the function parameter as `Pick<ViewModel, ...all needed fields...>` — accepts any object containing the needed fields, not just the full ViewModel
+3. The function maps fields (including any renames like `isInitialLoading` → `isSearching`)
+4. Both desktop and mobile spread `{...pick*Props(viewModel)}` — only tier-specific props (container wrappers, mobile-only props) remain explicit
+5. For dialog-heavy components, name the function `build*Props` (not `pick*`) when it also adds static resolvers or derived values beyond simple picking
+
+**Variants:**
+- **Simple picker:** `pickSearchScheduleFormProps(vm)` — maps one field rename, returns `Pick<ViewModel, ...fields...>`
+- **Builder:** `useCreateRecurringClassDialogProps(teacherId, vm)` — destructures 15 fields, maps 3 label renames, adds static resolvers, returns `Readonly<SharedProps>`
+- **Bag picker with type:** `useUserBillingSectionProps(vm)` — returns 22 shared fields; mobile adds 3 extra props explicitly
+
+**Example (Phase 8, Tasks 2.5–2.7):**
+- Created: `searchScheduleFormPropsPicker.ts`, `createRecurringClassDialogProps.ts`, `userBillingProfileSharedProps.ts`
+- Desktop: 44 lines → 15 lines; Mobile: 58 lines → 17 lines
+- Result: 3 clone pairs (379 tokens) eliminated
+
+**Key rules:**
+- Function goes in `.ts` file, not `.tsx` (avoids `react-refresh/only-export-components`)
+- Use `Pick<ViewModel, ...>` for the parameter type — allows calling with destructured subsets
+- Return `Readonly<SharedProps>` for builders that construct new objects
+- Keep tier-specific chrome (containers, headers, mobile-only props) explicit — don't over-extract

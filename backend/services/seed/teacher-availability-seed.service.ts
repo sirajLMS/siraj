@@ -11,7 +11,7 @@
  * @see backend/db/seeds/teachers/seed-teacher-recurring-unavailability.ts
  * @see backend/db/seeds/teachers/seed-teacher-vacation-requests.ts
  */
-import type { DBTransaction } from "@/backend/db/db.types";
+
 import {
   type AvailabilityWindowUpsertInput,
   type RecurringUnavailabilityCreateInput,
@@ -21,6 +21,7 @@ import {
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
+  DBTransaction,
   TeacherAvailabilityWindowSelectType,
   TeacherRecurringUnavailabilitySelectType,
   TeacherVacationRequestSelectType,

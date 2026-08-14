@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
+import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting";
 import {
   createMockClassInstance,
   createTestClassMeetingConfig,
@@ -9,6 +8,7 @@ import {
   setupTeacher,
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import type { DBTransaction } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";

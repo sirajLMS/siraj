@@ -166,11 +166,11 @@ export function TeacherLessonReportsViewShared({
 
         {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{shell.emptyMessage}</Typography> : null}
 
-        {loading || error ? null : rows.length === 0 ? (
+        {!loading && !error && rows.length === 0 ? (
           <Typography sx={{ color: theme => theme.palette.text.secondary }}>{shell.emptyMessage}</Typography>
         ) : null}
 
-        {loading || error ? null : rows.length > 0 ? (
+        {!loading && !error && rows.length > 0 ? (
           <Stack spacing={1}>
             {rows.map((row, index) => (
               <LessonReportCard

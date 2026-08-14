@@ -14,7 +14,7 @@ import type {
   CronScheduleReturnType,
   CronScheduleSelectType,
   CronScheduleSubmitInput,
-} from "@/backend/types/cron/cron.types";
+} from "@/backend/types";
 
 // ── Mutable mock call recording state ──
 // Unlike jest.fn()/mock(), bun:test's mock.module clones the returned object,
@@ -309,6 +309,14 @@ await mock.module("@/backend/db/repo", () => ({
   },
 }));
 
+await mock.module("@/backend/db/repo/cron", () => ({
+  CronRepository: repoImpl,
+  toScheduleReturnType: (row: Record<string, unknown>) => {
+    const { createdByUserId: _cb, updatedByUserId: _ub, ...rest } = row;
+    return rest;
+  },
+}));
+
 // ── Mock env-config service (resolveBatchSize calls resolveEnvConfig) ──
 
 await mock.module("@/backend/services/system", () => ({
@@ -376,6 +384,7 @@ await mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     transaction: async (cb: (tx: unknown) => Promise<unknown>) => cb({}),
   },
+  queryDb: () => ({}),
 }));
 
 // ── Import CronService AFTER all mocks ──

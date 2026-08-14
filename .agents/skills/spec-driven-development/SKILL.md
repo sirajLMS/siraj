@@ -515,10 +515,28 @@ Before modifying any repository file, read:
 After all implementation tasks are complete, the final task in every plan MUST:
 
 1. **Create a canonical reference doc** under `docs/<domain>/` consolidating all outcome learnings from the plan
-2. **Update layer AGENTS.md files** that govern the modified layers — add new rules, patterns, or references to the new doc using the pattern shown above
+2. **Update layer AGENTS.md files** that govern the modified layers — add ONLY layer-specific architectural rules and decisions (1-2 lines, no code). Add a one-line reference to the new doc. NEVER add implementation details, code examples, or fix recipes.
 3. **Update `.agents/skills/<skill>/SKILL.md`** if the plan introduced new patterns relevant to a skill's domain — add a section with key rules and a reference to the new doc
-4. **Update `.agents/instructions/<layer>.instructions.md`** if the plan changed conventions that instruction files should enforce
-5. **Update root `AGENTS.md`** Important References section with the new doc
+4. **Update `.agents/instructions/<layer>.instructions.md`** — add ONLY rules and decisions, never implementation details. Add a one-line reference to the new doc.
+5. **Update root `AGENTS.md`** Important References section with a one-line reference to the new doc only.
+
+### AGENTS.md & Instructions Content Policy (CRITICAL)
+
+AGENTS.md files and `.agents/instructions/*.md` files MUST contain ONLY:
+1. **Layer-specific architectural rules** — constraints unique to that layer (e.g., "shared/ must never import from frontend/backend")
+2. **Decisions** — architectural choices and their rationale (1-2 lines, no code)
+3. **References** — one-line pointers to `docs/` for detailed patterns, code examples, and fix recipes
+
+AGENTS.md and instructions files MUST NOT contain:
+- Implementation details (code examples, fix recipes, step-by-step patterns)
+- Tool usage guides (e.g., SonarQube MCP server docs)
+- Duplicated content from other AGENTS.md files or instructions files
+- Command references (those live in root AGENTS.md "Essential Commands" only)
+- Generic workflow documentation (e.g., quality-gate lifecycle, SonarQube issue management)
+
+When propagating learnings from a plan:
+- Full patterns, code examples, and implementation details → `docs/<domain>/<topic>.md`
+- Layer rules and decisions → AGENTS.md / instructions (1-2 lines + doc reference)
 
 ### Knowledge Propagation Task Template
 
@@ -526,10 +544,10 @@ After all implementation tasks are complete, the final task in every plan MUST:
 - [ ] X. **Knowledge Propagation & Documentation**
   - Read all outcome files in `.ai/plans/<feature-name>/outcome/` to synthesize all learnings
   - Create canonical reference doc under `docs/<domain>/<topic>.md` consolidating patterns, rules, and gotchas
-  - Update layer AGENTS.md files with new rules/patterns and reference to the new doc
+  - Update layer AGENTS.md files with layer-specific rules/decisions (no implementation details) and a one-line doc reference
   - Update `.agents/skills/<skill>/SKILL.md` if new patterns affect the skill's domain
-  - Update `.agents/instructions/<layer>.instructions.md` if new conventions should be enforced
-  - Update root `AGENTS.md` Important References section with the new doc
+  - Update `.agents/instructions/<layer>.instructions.md` with rules/decisions only and a one-line doc reference
+  - Update root `AGENTS.md` Important References section with a one-line reference to the new doc
   - Run global check: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` per modified file (0 errors, 0 warnings)
   - Write outcome file: `.ai/plans/<feature-name>/outcome/X.Y-knowledge-propagation-outcome.md`
   - Update progress: Mark task X.Y as `[x]` in `tasks.md`
@@ -598,6 +616,7 @@ bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 | `tsgo` | tsgo only |
 | `biome` | tsgo → oxlint → biome:check |
 | `lint` | tsgo → oxlint → biome:check → lint:type-aware (via lint service) |
+| `duplicates` | tsgo → oxlint → biome:check → lint:type-aware → check:duplicates |
 | `codescene` | tsgo → oxlint → biome:check → lint:type-aware → check:duplicates → codescene --file |
 | `sonar-results` | same as `codescene` (subagents never run sonar-scan — hardcoded exclusion) |
 
@@ -605,7 +624,7 @@ bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene
 - ✅ Discovers and prints ALL applicable `.github/instructions/*.instructions.md` files for the target file
 - ✅ Discovers and prints ALL applicable layer `AGENTS.md` files for the target file
 - ✅ Enforces the Fix-Or-Report rule (fix within same file; report cross-file dependencies to orchestrator)
-- ✅ Runs `check:duplicates` for single-file duplication detection (codescene lifecycle)
+- ✅ Runs `check:duplicates` for single-file duplication detection (duplicates and codescene lifecycles)
 - ✅ Runs `codescene --file` for code health (codescene lifecycle)
 - ✅ Hardcodes exclusion of `sonar-scan` and `sonar-manager` — subagents NEVER trigger a sonar scan
 

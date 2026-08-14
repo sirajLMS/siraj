@@ -1,5 +1,6 @@
-import { CountryCode, CurrencyCode } from "@/backend/enum";
-import type { SupportedCurrencyUpsertInput } from "@/backend/types/billing/currency.types";
+import { CountryCode } from "@/backend/enum";
+import type { SupportedCurrencyUpsertInput } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 type CurrencyCatalogSeed = {
   readonly code: CurrencyCode;

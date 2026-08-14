@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { DBTransaction } from "@/backend/db/db.types";
-import type { db } from "@/backend/db/drizzleDb";
+import type { db } from "@/backend/db";
 import {
   classCategories,
   classInstances,
@@ -22,10 +21,7 @@ import {
   AccountStatus,
   type AppPermission,
   AttendanceEvaluation,
-  ClassExecutionState,
-  ClassOutcome,
   CreditReason,
-  CurrencyCode,
   LessonReportStatus,
   TeacherDueStatus,
 } from "@/backend/enum";
@@ -33,6 +29,7 @@ import type {
   ClassInstanceSelectType,
   ClassMeetingConfigSelectType,
   CreditTransactionSelectType,
+  DBTransaction,
   LessonReportSelectType,
   MeetingProviderSelectType,
   ParentEntity,
@@ -42,6 +39,8 @@ import type {
   UserMeetingConfigSelectType,
   UserSelectType,
 } from "@/backend/types";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 /** LocalizedString helper for permission/group JSONB columns in tests. */

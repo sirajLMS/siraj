@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { SoftDeleteRepository } from "@/backend/db/repo";
+import { db } from "@/backend/db";
+import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
 import {
   closeRlsClients,

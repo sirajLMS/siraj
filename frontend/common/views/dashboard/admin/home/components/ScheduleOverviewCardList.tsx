@@ -156,7 +156,7 @@ export function ScheduleOverviewCard({
   const teacherName = row.teacher?.name ?? "Unknown Teacher";
   const teacherId = row.teacher?.id;
   const classId = row.id ?? "";
-  const courseName = row.courseName?.trim() || "—";
+  const courseName = row.courseName?.trim() ?? "—";
   const yourTime = formatScheduleYourTime(row.yourTime, row.studentTime ?? row.teacherTime, locale);
   const duration = formatDurationMinutes(row.duration);
 

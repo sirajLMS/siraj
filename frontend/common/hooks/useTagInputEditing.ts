@@ -1,7 +1,6 @@
 "use client";
 
-import type { KeyboardEvent, MouseEvent } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 
 // NEW FOR PLAN v5: migrated hook from
 //   frontend/common/components/ui/input/tagInput/useTagInputEditing.ts

@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "module": "esnext",
     "skipLibCheck": true,
     "moduleDetection": "force",
@@ -24,10 +28,14 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     },
     "allowJs": true,
-    "types": ["bun"]
+    "types": [
+      "bun"
+    ]
   },
   "include": [
     ".storybook/**/*.ts",
@@ -38,7 +46,9 @@
     "**/*.tsx",
     ".next-dev/types/**/*.ts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".next-test-3001/dev/types/**/*.ts",
+    ".next-test-3001/dev/dev/types/**/*.ts"
   ],
   "exclude": [
     // Dot-directories (except `.storybook`, which is explicitly included above).

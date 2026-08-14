@@ -1,4 +1,7 @@
-import { ParentRepository, StudentRepository, TeacherRepository, UserRepository } from "@/backend/db";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { StudentRepository } from "@/backend/db/repo/students";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
+import { UserRepository } from "@/backend/db/repo/users";
 import { type AppLanguage, AppPermission, type Gender, StudentStatus } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { StudentHistoryService } from "@/backend/services/history/student-history.service";
@@ -8,8 +11,7 @@ import {
   type StudentFieldFilterContext,
 } from "@/backend/services/profile/profile-field-filter";
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
-import { STUDENT_FIELD_GROUPS } from "@/backend/types/students/student-field-manifest";
-import type { StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types/students/student-profile.types";
+import { STUDENT_FIELD_GROUPS, type StudentProfileEditInput, type StudentProfileReturnType } from "@/backend/types";
 import {
   parseAppLanguage,
   parseCurrencyCodeOrNull,
@@ -53,12 +55,12 @@ async function resolveIsAssociatedViewer(actorUserId: string, studentId: string)
   }
 
   const parent = await ParentRepository.findByUserId(actorUserId);
-  if (parent && parent.id === profile.parentId) {
+  if (parent !== null && parent.id === profile.parentId) {
     return true;
   }
 
   const teacher = await TeacherRepository.findByUserId(actorUserId);
-  if (teacher && profile.primaryTeacherId === teacher.id) {
+  if (teacher !== null && profile.primaryTeacherId === teacher.id) {
     return true;
   }
 

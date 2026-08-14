@@ -1,4 +1,4 @@
-import { StudentRepository } from "@/backend/db";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   canEditStudentFieldGroup,

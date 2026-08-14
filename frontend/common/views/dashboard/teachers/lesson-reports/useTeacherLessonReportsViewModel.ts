@@ -78,7 +78,7 @@ export function useTeacherLessonReportsViewModel({
     () =>
       STATUS_OPTION_KEYS.map(value => ({
         value,
-        label: value === "ALL" ? t.filterAll : isLessonReportStatus(value) ? resolveStatusLabel(value, t) : t.filterAll,
+        label: resolveStatusOptionLabel(value, t),
       })),
     [t]
   );
@@ -112,6 +112,13 @@ export function useTeacherLessonReportsViewModel({
     onStatusFilterChange: setStatusFilter,
     resolveStatusLabel: status => resolveStatusLabel(status, t),
   };
+}
+
+function resolveStatusOptionLabel(value: StatusFilterValue, labels: LessonReportLabels): string {
+  if (isLessonReportStatus(value)) {
+    return resolveStatusLabel(value, labels);
+  }
+  return labels.filterAll;
 }
 
 function resolveStatusLabel(status: LessonReportStatus, labels: LessonReportLabels): string {

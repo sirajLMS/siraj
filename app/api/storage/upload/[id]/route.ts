@@ -88,7 +88,7 @@ async function finalizeUpload(signedUrl: SignedUrlData, absolutePath: string, to
   try {
     const fileEntity = await StorageService.createFileAndGet(signedUrl.filePath, false);
     const stats = await fs.stat(absolutePath);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 
     logger.info("File uploaded successfully via signed URL", { tokenId, path: signedUrl.filePath });
 

@@ -1,6 +1,4 @@
 import type {
-  ClassType as BackendClassType,
-  CurrencyCode as BackendCurrencyCode,
   DayOfWeek as BackendDayOfWeek,
   OnDemandNoCreditsOutcome as BackendOnDemandNoCreditsOutcome,
   SchedulingMode as BackendSchedulingMode,
@@ -14,6 +12,8 @@ import type {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
+import type { ClassType as BackendClassType } from "@/shared/constants/class-instance-detail.enum";
+import type { CurrencyCode as BackendCurrencyCode } from "@/shared/constants/currency.enum";
 
 const CLASS_TYPE_VALUES: readonly string[] = ["REGULAR", "TRIAL", "ADVANCE"];
 const CURRENCY_CODE_VALUES: readonly string[] = [
@@ -122,8 +122,8 @@ export function mapFormDataToServiceInput(data: RecurringClassFormData) {
     timezone: data.timezone,
     days: activeDays.map(day => Object.assign(day, { dayOfWeek: toBackendDayOfWeek(day.dayOfWeek) })),
     classType: CLASS_TYPE_VALUES.find((v): v is BackendClassType => v === data.classType) ?? undefined,
-    effectiveFrom: data.effectiveFrom || undefined,
-    effectiveUntil: data.effectiveUntil || undefined,
+    effectiveFrom: data.effectiveFrom ?? undefined,
+    effectiveUntil: data.effectiveUntil ?? undefined,
     generateInstancesForWeeks: data.generateInstancesForWeeks,
     hourlyRate: data.hourlyRate ?? null,
     rateCurrency: CURRENCY_CODE_VALUES.find((v): v is BackendCurrencyCode => v === data.rateCurrency) ?? null,

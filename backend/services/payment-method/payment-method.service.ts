@@ -1,4 +1,3 @@
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import {
   BillingRepository,
@@ -6,7 +5,7 @@ import {
   SupportedOnlineAccountRepository,
   SupportedPaymentLinkRepository,
   UserPaymentMethodRepository,
-} from "@/backend/db/repo";
+} from "@/backend/db/repo/billing";
 import { teacherPayments } from "@/backend/db/schema";
 import { AppPermission, ProfileScope } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
@@ -22,19 +21,21 @@ import {
 } from "@/backend/services/payment-method/payment-method-mask";
 import { PaymentMethodSnapshotService } from "@/backend/services/payment-method/payment-method-snapshot";
 import type * as Types from "@/backend/types";
-import type { PaymentRecordInput } from "@/backend/types/billing/billing.types";
 import type {
   BankTransferDetails,
+  CreateTeacherPaymentInput,
+  DBTransaction,
   MobileWalletDetails,
   OnlineAccountDetails,
   PaymentLinkDetails,
   PaymentMethodDefaults,
   PaymentMethodDetails,
+  PaymentRecordInput,
+  TeacherPaymentSelectType,
   UpdateUserPaymentMethodInput,
   UserPaymentMethodReturnType,
   UserPaymentMethodSubmitInput,
-} from "@/backend/types/billing/payment-method.types";
-import type { CreateTeacherPaymentInput, TeacherPaymentSelectType } from "@/backend/types/teachers/teacher.types";
+} from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 type DefaultSlot = "PAYIN" | "PAYOUT";

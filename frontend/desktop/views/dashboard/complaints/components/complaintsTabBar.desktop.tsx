@@ -4,8 +4,7 @@ import {
   ComplaintStatus,
   type ComplaintTab,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
-import type { AdminQueueTab } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
-import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
+import { type AdminQueueTab, AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
 import { formatAdminQueueTabLabel } from "@/frontend/common/views/dashboard/shared/utils";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 

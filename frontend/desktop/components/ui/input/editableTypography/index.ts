@@ -1,1 +1,1 @@
-export { EditableTypographyDesktop } from "@/frontend/desktop/components/ui/input/editableTypography/editableTypography.desktop";
+export * from "./editableTypography.desktop";

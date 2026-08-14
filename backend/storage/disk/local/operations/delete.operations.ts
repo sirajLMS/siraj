@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { fileInfoByPath } from "@/backend/storage/disk/local/operations/file.operations";
 import { directoryInfoByPath } from "@/backend/storage/disk/local/operations/folder.operations";
 import type { LocalContext } from "@/backend/storage/disk/local/types";

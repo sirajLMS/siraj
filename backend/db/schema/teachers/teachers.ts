@@ -2,7 +2,7 @@ import { date, index, numeric, pgTable, text, timestamp, uuid, varchar } from "d
 import { encryptedText } from "@/backend/db/schema/custom-types";
 import { countryCodeEnum, currencyCodeEnum, genderEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
-import type { CurrencyCode } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
  * Teachers table.

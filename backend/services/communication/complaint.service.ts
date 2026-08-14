@@ -1,14 +1,10 @@
-import {
-  ComplaintRepository,
-  ComplaintResponseRepository,
-  ParentRepository,
-  SoftDeleteRepository,
-  StorageDbRepository,
-  SystemSettingsRepository,
-} from "@/backend/db/repo";
+import { ComplaintRepository, ComplaintResponseRepository } from "@/backend/db/repo/complaints";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { SoftDeleteRepository, SystemSettingsRepository } from "@/backend/db/repo/shared";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   assertPermission,
   requireParentByActorUserId,

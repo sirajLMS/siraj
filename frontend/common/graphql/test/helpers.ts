@@ -89,9 +89,7 @@ async function provisionDemoUsers(): Promise<void> {
  * Safe to call from every suite's beforeAll — concurrent callers share one in-flight request.
  */
 export async function ensureDemoUsersForTests(): Promise<void> {
-  if (!demoUsersReadyPromise) {
-    demoUsersReadyPromise = provisionDemoUsers();
-  }
+  demoUsersReadyPromise ??= provisionDemoUsers();
   await demoUsersReadyPromise;
 }
 
@@ -611,7 +609,7 @@ export async function cleanupTestEntities(
 export async function provisionTestSuperAdmin(
   superAdminToken: string,
   prefix: string
-): Promise<{ token: string; userId: string }> {
+): Promise<{ token: string; userId: string; email: string }> {
   const createRes = await authenticatedRequest(superAdminToken, "mutate", createTestSuperAdminMutationDocument, {
     prefix,
   });
@@ -625,10 +623,10 @@ export async function provisionTestSuperAdmin(
   // parallel test suites sharing the same DB connection pool).
   const maxAttempts = 3;
   const delayMs = 500;
-  const attemptLogin = async (attempt: number): Promise<{ token: string; userId: string }> => {
+  const attemptLogin = async (attempt: number): Promise<{ token: string; userId: string; email: string }> => {
     try {
       const token = await loginUser(saEmail, TEST_USER_PASSWORD);
-      return { token, userId: saUserId };
+      return { token, userId: saUserId, email: saEmail };
     } catch (err) {
       const lastError = err instanceof Error ? err : new Error(String(err));
       if (attempt >= maxAttempts) {

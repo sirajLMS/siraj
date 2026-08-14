@@ -5,7 +5,8 @@ import { students } from "@/backend/db/schema/students/students";
 import { teacherPayments } from "@/backend/db/schema/teachers/teacher-payments";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
-import { type CurrencyCode, type RateSource, TeacherDueStatus } from "@/backend/enum";
+import { type RateSource, TeacherDueStatus } from "@/backend/enum";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
  * Teacher Dues table.

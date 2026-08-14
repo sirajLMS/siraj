@@ -9,7 +9,7 @@ import {
 } from "@/backend/db/seeds/lib";
 import { LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { LeaveRequestSeedService } from "@/backend/services/seed/leave-request-seed.service";
+import { LeaveRequestSeedService } from "@/backend/services";
 import type {
   ClassInstanceSelectType,
   ParentEntity,

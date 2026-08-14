@@ -1,10 +1,6 @@
-import { seedCatalogLogoUrls } from "@/backend/db/seeds/lib/logo-seed-helper";
-import {
-  MOBILE_WALLET_CATALOG_SEEDS,
-  type MobileWalletCatalogSeed,
-} from "@/backend/db/seeds/lib/payment-catalog-factory";
+import { MOBILE_WALLET_CATALOG_SEEDS, type MobileWalletCatalogSeed, seedCatalogLogoUrls } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
+import { PaymentCatalogService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet() {

@@ -7,7 +7,7 @@ import {
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { LessonReportService } from "@/backend/services/classes/lesson-report.service";
+import { LessonReportService } from "@/backend/services";
 import { PaginationArgs } from "@/backend/types";
 
 gqlSchemaBuilder.queryField("lessonReport", t =>

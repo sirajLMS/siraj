@@ -3,8 +3,7 @@
 import PhoneOutlined from "@mui/icons-material/PhoneOutlined";
 import ScheduleOutlined from "@mui/icons-material/ScheduleOutlined";
 import { Stack, TextField } from "@mui/material";
-import type { Control, FieldPath, FieldValues, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldPath, type FieldValues, type UseFormRegister } from "react-hook-form";
 import { PhoneFormField, SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDisplay/PhoneDisplay";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";

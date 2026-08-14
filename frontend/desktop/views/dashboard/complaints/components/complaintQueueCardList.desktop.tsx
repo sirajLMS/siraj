@@ -2,8 +2,10 @@
 
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { ComplaintQueueCardListSharedProps } from "@/frontend/common/views/dashboard/complaints/components/__shared__/complaintQueueCardListShared";
-import { buildQueueCardProps } from "@/frontend/common/views/dashboard/complaints/components/__shared__/complaintQueueCardListShared";
+import {
+  buildQueueCardProps,
+  type ComplaintQueueCardListSharedProps,
+} from "@/frontend/common/views/dashboard/complaints/components/__shared__/complaintQueueCardListShared";
 import { DesktopPaginationControls } from "@/frontend/desktop/components/ui/filter";
 import { ComplaintQueueCardDesktop } from "@/frontend/desktop/views/dashboard/complaints/components/complaintQueueCard.desktop";
 

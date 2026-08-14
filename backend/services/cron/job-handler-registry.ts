@@ -10,7 +10,7 @@
  * Future plan implementers rely on this contract.
  */
 import { CronJobKind } from "@/backend/enum/cron/cron.enums";
-import type { CronJobHandler, CronJobPayload, CronJobResult } from "@/backend/types/cron/cron.types";
+import type { CronJobHandler, CronJobPayload, CronJobResult } from "@/backend/types";
 
 const registry = new Map<CronJobKind, CronJobHandler>();
 

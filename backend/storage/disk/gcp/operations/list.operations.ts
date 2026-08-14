@@ -30,14 +30,14 @@ export async function listFiles(ctx: GcpContext, input: Types.FilesListSearchInp
 
   const validFiles = files.filter(file => file.name !== prefix);
   const filePaths = validFiles.map(f => f.name);
-  const dirPaths = (apiResponse?.prefixes || []).map(p => p.replace(/\/$/, ""));
+  const dirPaths = (apiResponse?.prefixes ?? []).map(p => p.replace(/\/$/, ""));
 
   const { dbFileMap, dbDirMap } = await loadListEntities(filePaths, dirPaths);
-  const folderFileCountMap = await getFolderFileCounts(ctx, apiResponse?.prefixes || [], dirPaths);
+  const folderFileCountMap = await getFolderFileCounts(ctx, apiResponse?.prefixes ?? [], dirPaths);
 
   const items: Array<Types.FileInfo | Types.DirectoryInfo> = [
     ...mapGcsFiles(validFiles, dbFileMap, ctx.gcpBaseUrl),
-    ...mapGcsDirectories(apiResponse?.prefixes || [], dbDirMap, folderFileCountMap),
+    ...mapGcsDirectories(apiResponse?.prefixes ?? [], dbDirMap, folderFileCountMap),
   ];
 
   return paginateStorageItems(items, input);
@@ -73,7 +73,7 @@ function mapGcsDirectories(
       isPublic: dirPath.startsWith("public"),
     };
 
-    const fileCount = folderFileCountMap.get(dirPath) || 0;
+    const fileCount = folderFileCountMap.get(dirPath) ?? 0;
     return StorageUtils.combineDirectoryData(bucketDir, dbDir, fileCount);
   });
 }
@@ -83,7 +83,7 @@ export async function fetchDirectoryChildren(ctx: GcpContext, path?: string | nu
 }
 
 // Keeping original fetchDirectoryChildren logic as it uses parentPath lookup
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 
 async function originalFetchDirectoryChildren(ctx: GcpContext, path?: string | null): Promise<Types.DirectoryInfo[]> {
   const searchPath = !path || path.length === 0 ? "public" : cleanGcsPath(path);
@@ -99,5 +99,5 @@ async function originalFetchDirectoryChildren(ctx: GcpContext, path?: string | n
   });
 
   const apiResponse = isGcsApiResponse(responseData[2]) ? responseData[2] : undefined;
-  return mapGcsDirectories(apiResponse?.prefixes || [], dbDirectoriesByPath, new Map());
+  return mapGcsDirectories(apiResponse?.prefixes ?? [], dbDirectoriesByPath, new Map());
 }

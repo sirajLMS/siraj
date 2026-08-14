@@ -1,11 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { teachers, userMeetingConfigs, users } from "@/backend/db/schema";
 import { createTestMeetingConfig, createTestMeetingProvider } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { TeacherInsertType } from "@/backend/types";
+import type { DBTransaction, TeacherInsertType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date) {

@@ -9,8 +9,10 @@ import {
   submitComplaintMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useParentComplaintsStore } from "@/frontend/common/stores/parentComplaintsStore";
-import type { ParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
-import { useParentComplaintsViewModel } from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
+import {
+  type ParentComplaintsViewModel,
+  useParentComplaintsViewModel,
+} from "@/frontend/common/views/dashboard/complaints/useParentComplaintsViewModel";
 import { buildComplaintsLabels } from "@/frontend/common/views/dashboard/complaints/utils/buildComplaintsLabels";
 import { Translation, useAppTranslation } from "@/shared/locale";
 

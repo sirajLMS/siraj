@@ -47,21 +47,25 @@
  * `@/app/**` or `next/*` APIs.
  */
 
-import { SystemSettingsRepository } from "@/backend/db/repo";
-import type { EnvConfigKeyDescriptor } from "@/backend/lib/env-config-keys";
-import { ENV_CONFIG_KEYS, isEnvConfigKeyExposedInSettings } from "@/backend/lib/env-config-keys";
+import { SystemSettingsRepository } from "@/backend/db/repo/shared";
+import {
+  ENV_CONFIG_KEYS,
+  type EnvConfigKeyDescriptor,
+  isEnvConfigKeyExposedInSettings,
+} from "@/backend/lib/env-config-keys";
 import { logger } from "@/backend/lib/logger";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type { CreateAuditLogInput } from "@/backend/types";
-import type { EnvConfigAuditCreateInput, EnvConfigAuditEvent } from "@/backend/types/audit/env-config-audit.types";
-import type {
-  EnvConfigCategory,
-  EnvConfigDeleteReturnType,
-  EnvConfigEntry,
-  EnvConfigUpsertInput,
-  EnvConfigUpsertReturnType,
-} from "@/backend/types/shared/env-config.types";
-import { maskSecretValue } from "@/backend/types/shared/env-config.types";
+import {
+  type CreateAuditLogInput,
+  type EnvConfigAuditCreateInput,
+  type EnvConfigAuditEvent,
+  type EnvConfigCategory,
+  type EnvConfigDeleteReturnType,
+  type EnvConfigEntry,
+  type EnvConfigUpsertInput,
+  type EnvConfigUpsertReturnType,
+  maskSecretValue,
+} from "@/backend/types";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 // ─── Shared constants & helpers ─────────────────────────────────────────────────

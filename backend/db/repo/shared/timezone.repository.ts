@@ -1,10 +1,7 @@
 import { inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { timezones } from "@/backend/db/schema/shared/timezones";
-import type { TimezoneSelectType } from "@/backend/types";
-import type { TimezoneUpsertInput } from "@/backend/types/scheduling/scheduling.types";
+import { db, queryDb } from "@/backend/db";
+import { timezones } from "@/backend/db/schema";
+import type { DBTransaction, TimezoneSelectType, TimezoneUpsertInput } from "@/backend/types";
 
 export namespace TimezoneRepository {
   export async function listAll(tx?: DBTransaction): Promise<TimezoneSelectType[]> {

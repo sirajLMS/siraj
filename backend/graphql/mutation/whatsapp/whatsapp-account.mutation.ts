@@ -8,10 +8,7 @@ import {
 } from "@/backend/graphql/pothos/whatsapp/whatsapp-account.pothos";
 import { withAuthResult } from "@/backend/graphql/utils";
 import { WhatsappAccountService } from "@/backend/services";
-import type {
-  WhatsappAccountCreateSubmitInput,
-  WhatsappAccountUpdateInput,
-} from "@/backend/types/whatsapp/whatsapp-account.types";
+import type { WhatsappAccountCreateSubmitInput, WhatsappAccountUpdateInput } from "@/backend/types";
 
 gqlSchemaBuilder.mutationFields(t => ({
   createWhatsappAccount: t.field({

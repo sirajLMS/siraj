@@ -1,8 +1,7 @@
 import { and, eq, gte, inArray, isNull } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import type { QueryDbHandle } from "@/backend/db/drizzleDb";
+import { type QueryDbHandle, queryDb } from "@/backend/db";
 import { classInstances, parents, students, teachers, users } from "@/backend/db/schema";
+import type { DBTransaction } from "@/backend/types";
 
 /** Select fields for the single-instance parent-user query. */
 const singleInstanceSelect = {

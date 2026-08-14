@@ -1,8 +1,7 @@
 import type { ObjectRef } from "@pothos/core";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import type { StudentMonthlyReportReturnType } from "@/backend/types/report/report.types";
-import type { TeacherMonthlyReportReturnType } from "@/backend/types/teachers/teacher-due.types";
+import type { StudentMonthlyReportReturnType, TeacherMonthlyReportReturnType } from "@/backend/types";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 

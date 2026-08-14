@@ -59,7 +59,7 @@ async function walkDirectory(dirPath: string, relativePath: string, state: Stats
  */
 export async function storageStatistics(ctx: LocalContext, searchPath?: string | null): Promise<Types.StorageStats> {
   try {
-    const targetPath = searchPath || "";
+    const targetPath = searchPath ?? "";
     const absolutePath = getAbsolutePath(ctx.basePath, targetPath);
 
     const state: StatsState = {

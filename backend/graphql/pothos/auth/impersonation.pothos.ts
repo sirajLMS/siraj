@@ -2,7 +2,7 @@ import { GraphQLError } from "graphql";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { UserPothosObject } from "@/backend/graphql/pothos/users";
 import { setAuthCookies } from "@/backend/lib/auth/cookies";
-import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
+import { ImpersonationService } from "@/backend/services";
 import type {
   EndImpersonationReturnType,
   ImpersonationStatusReturnType,

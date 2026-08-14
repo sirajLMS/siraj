@@ -1,6 +1,6 @@
 import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import { processDirectory, processFile } from "@/backend/storage/disk/local/shared";
 import type { LocalContext } from "@/backend/storage/disk/local/types";
@@ -28,8 +28,8 @@ export async function listFiles(
         items: [],
         totalCount: 0,
         hasMore: false,
-        offset: input.offset || 0,
-        limit: input.limit || 50,
+        offset: input.offset ?? 0,
+        limit: input.limit ?? 50,
       };
     }
 
@@ -43,8 +43,8 @@ export async function listFiles(
       items: [],
       totalCount: 0,
       hasMore: false,
-      offset: input.offset || 0,
-      limit: input.limit || 50,
+      offset: input.offset ?? 0,
+      limit: input.limit ?? 50,
     };
   }
 }
@@ -109,7 +109,7 @@ export async function fetchDirectoryChildren(
   searchPath?: string | null
 ): Promise<Types.DirectoryInfo[]> {
   try {
-    const targetPath = searchPath || "";
+    const targetPath = searchPath ?? "";
     const absolutePath = getAbsolutePath(ctx.basePath, targetPath);
 
     const dbDirectories = await StorageDbRepository.directoriesByParentPath(targetPath);

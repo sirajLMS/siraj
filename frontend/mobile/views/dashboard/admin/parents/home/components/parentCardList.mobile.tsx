@@ -8,7 +8,7 @@ import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type {
   ParentCardListLabels,
   ParentDirectoryRow,
-} from "@/frontend/common/views/dashboard/admin/parents/home/directory";
+} from "@/frontend/common/views/dashboard/admin/parents/home/ParentsViewTypes";
 import { MobileCardListItem, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container/MobileCardList";
 

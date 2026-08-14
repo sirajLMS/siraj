@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { SchedulingRepository, TeacherAvailabilityRepository } from "@/backend/db/repo";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
-import type { StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
+import type { DBTransaction, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 async function createTestUser(tx: DBTransaction, name: string, emailPrefix: string): Promise<UserSelectType> {

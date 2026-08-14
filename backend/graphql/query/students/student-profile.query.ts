@@ -1,7 +1,7 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { StudentProfilePothosObject } from "@/backend/graphql/pothos/students/student-profile.pothos";
 import { resolveStudentIdFromArgsOrUser } from "@/backend/graphql/query/students/__shared__/resolveStudentIdFromArgsOrUser";
-import { StudentProfileService } from "@/backend/services/student/student-profile.service";
+import { StudentProfileService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("studentProfile", t =>
   t.field({

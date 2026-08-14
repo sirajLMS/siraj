@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { ImpersonationRepository } from "@/backend/db/repo";
-import { impersonationSessions } from "@/backend/db/schema/auth/impersonation";
+import { ImpersonationRepository } from "@/backend/db/repo/auth";
+import { impersonationSessions } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import type { DBTransaction } from "@/backend/types";
 
 async function expectConstraintViolation(fn: () => Promise<unknown>): Promise<void> {
   let didThrow = false;

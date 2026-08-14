@@ -6,11 +6,7 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { AuditService } from "@/backend/services/system/audit.service";
-import type {
-  AdminResetPasswordInput,
-  AdminResetPasswordResult,
-  ChangePasswordInput,
-} from "@/backend/types/auth/auth.types";
+import type { AdminResetPasswordInput, AdminResetPasswordResult, ChangePasswordInput } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace AuthPasswordService {

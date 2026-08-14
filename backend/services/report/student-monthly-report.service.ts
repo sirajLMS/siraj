@@ -2,10 +2,11 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { ParentRepository } from "@/backend/db/repo/parents/parent.repository";
 import { classInstances, creditTransactions, lessonReports, students } from "@/backend/db/schema";
-import { AppPermission, AttendanceEvaluation, ClassExecutionState, ClassOutcome, CreditReason } from "@/backend/enum";
+import { AppPermission, AttendanceEvaluation, CreditReason } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import type { StudentHeader, StudentMonthlyReportReturnType } from "@/backend/types";
+import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace StudentMonthlyReportService {

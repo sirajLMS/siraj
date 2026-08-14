@@ -222,6 +222,10 @@ export const errorsEn: ErrorsLabels = {
   invalidInput: "Invalid input.",
   invalidNationalId: "The national ID is invalid for the selected nationality.",
 
+  // ─── General user creation errors ──────────────────────────────────
+  specializedGroupNotAllowed:
+    "Cannot assign a specialized group (student, teacher, or parent) to a general user. Use the dedicated onboarding flow for that user type instead.",
+
   // ─── Lesson Report errors ─────────────────────────────────────────
   rejectedReportsRequireReason: "REJECTED reports must include a rejection reason.",
   approvedReportsNoRejectionReason: "APPROVED reports must not include a rejection reason.",

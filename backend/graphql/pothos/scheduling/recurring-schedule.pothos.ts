@@ -10,7 +10,7 @@ import type {
   RecurringScheduleDetailReturnType,
   RecurringScheduleListItem,
   RecurringSchedulesPaginatedResult,
-} from "@/backend/types/scheduling/recurring-schedule-detail.types";
+} from "@/backend/types";
 
 const RecurringScheduleDayDetailRef =
   gqlSchemaBuilder.objectRef<RecurringScheduleDayDetailReturnType>("RecurringScheduleDayDetail");

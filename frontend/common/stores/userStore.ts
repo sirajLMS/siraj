@@ -28,11 +28,11 @@ export const useUserStore = create<UserState>((set, get) => ({
   setUser: user =>
     set({
       user,
-      name: user?.name || "",
-      role: user?.role || "",
-      avatarUrl: user?.avatarUrl || "",
+      name: user?.name ?? "",
+      role: user?.role ?? "",
+      avatarUrl: user?.avatarUrl ?? "",
       permissions: user?.permissions ?? [],
-      notificationCount: user?.notificationCount || 0,
+      notificationCount: user?.notificationCount ?? 0,
       displayCurrency: user?.displayCurrency ?? null,
     }),
   setActorIsSuperAdmin: actorIsSuperAdmin => {
@@ -42,7 +42,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     set({ actorIsSuperAdmin });
   },
   hasPermission: permission => {
-    const permissions = get().user?.permissions || get().permissions || [];
+    const permissions = get().user?.permissions ?? get().permissions ?? [];
     return permissions.includes(permission);
   },
 }));

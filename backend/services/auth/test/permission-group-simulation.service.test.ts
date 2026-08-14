@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, spyOn, test } from "bun:test";
-import { SessionRepository } from "@/backend/db/repo";
+import { SessionRepository } from "@/backend/db/repo/shared";
 import { UserRole } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";

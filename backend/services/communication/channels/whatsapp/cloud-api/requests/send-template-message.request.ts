@@ -10,20 +10,23 @@
 import {
   buildAuthHeaders,
   buildGraphUrl,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types";
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import type {
   GraphApiRequestContext,
   GraphApiRequestInit,
   SendTemplateMessageInput,
   SendTemplateMessageResponseBody,
   SendTemplateMessageResult,
-} from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+} from "@/backend/types";
 
 /**
  * Builds the fetch request for POST /{phone_number_id}/messages (type template).
  * The adapter adds `AbortSignal.timeout(10_000)` before executing the `fetch`.
  */
-export function buildRequest(ctx: GraphApiRequestContext, input: SendTemplateMessageInput): GraphApiRequestInit {
+export function buildSendTemplateMessageRequest(
+  ctx: GraphApiRequestContext,
+  input: SendTemplateMessageInput
+): GraphApiRequestInit {
   // Validate inputs before interpolation
   // These are internal developer-facing validation errors caught by the adapter and wrapped into structured error codes
   if (!input.phoneNumberId || input.phoneNumberId.length > 128) {
@@ -73,7 +76,7 @@ export function buildRequest(ctx: GraphApiRequestContext, input: SendTemplateMes
  * Parses a successful (2xx) response body from the send-template-message endpoint.
  * @throws {Error} if the response shape is unexpected (missing `messages[0].id`).
  */
-export function parseResponse(body: SendTemplateMessageResponseBody): SendTemplateMessageResult {
+export function parseSendTemplateResponse(body: SendTemplateMessageResponseBody): SendTemplateMessageResult {
   const messageId = body.messages?.[0]?.id;
   const waId = body.contacts?.[0]?.wa_id;
 

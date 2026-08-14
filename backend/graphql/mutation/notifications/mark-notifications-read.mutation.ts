@@ -1,6 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { NotificationAlertsService } from "@/backend/services/notification/notification-alerts.service";
+import { NotificationAlertsService } from "@/backend/services";
 
 /**
  * `markNotificationsRead` mutation (specs.md S7 task B2).

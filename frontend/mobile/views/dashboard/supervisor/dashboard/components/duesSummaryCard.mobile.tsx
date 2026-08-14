@@ -2,7 +2,9 @@
 
 import { PaymentsOutlined } from "@mui/icons-material";
 import { Stack, Typography } from "@mui/material";
-import { SupervisorHeroCardShared } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/__shared__/supervisorHeroCardShared";
+import { MOBILE_HERO_CARD_SX } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/__shared__/heroCardSx.constants";
+import { HeroSummaryCardShared } from "@/frontend/common/views/dashboard/supervisor/dashboard/components/__shared__/heroSummaryCardShared";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 interface DuesSummaryCardMobileProps {
@@ -19,17 +21,20 @@ export function DuesSummaryCardMobile({ summary, labels, onGoToDues }: Readonly<
   const formattedAmount = `${summary.currency} ${summary.totalAmount.toLocaleString()}`;
 
   return (
-    <SupervisorHeroCardShared
+    <HeroSummaryCardShared
       icon={<PaymentsOutlined fontSize="small" />}
-      iconSx={theme => ({
-        backgroundColor: theme.palette.secondaryContainer,
-        color: theme.palette.onSecondaryContainer,
-      })}
+      iconBgPaletteKey="secondaryContainer"
       title={labels.teacherDuesSummary}
       subtitle={labels.totalPendingDues}
       actionLabel={labels.goToDues}
       onAction={onGoToDues}
       showAction={summary.totalCount > 0}
+      PrimaryActionComponent={MobilePrimaryPageAction}
+      cardSx={MOBILE_HERO_CARD_SX}
+      iconCircleSize={40}
+      stackGap={1.5}
+      titleSubtitleGap={0.5}
+      actionSx={{ alignSelf: "flex-start" }}
     >
       <Stack sx={{ flexDirection: "row", alignItems: "flex-end", gap: 3 }}>
         <Stack sx={{ gap: 0.5, minWidth: 0 }}>
@@ -44,6 +49,6 @@ export function DuesSummaryCardMobile({ summary, labels, onGoToDues }: Readonly<
           {String(summary.totalCount)}
         </Typography>
       </Stack>
-    </SupervisorHeroCardShared>
+    </HeroSummaryCardShared>
   );
 }

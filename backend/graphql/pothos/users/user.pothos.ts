@@ -1,13 +1,11 @@
-import { UserRepository } from "@/backend/db/repo";
+import { UserRepository } from "@/backend/db/repo/users";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AccountStatusPothosObject,
   AppPermissionPothosEnum,
   CurrencyCodePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { PermissionsService } from "@/backend/services";
-import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
-import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
+import { ParentPortalService, PermissionsService, TeacherPortalService } from "@/backend/services";
 import type { UserReturnType } from "@/backend/types";
 
 const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserReturnType>("User");

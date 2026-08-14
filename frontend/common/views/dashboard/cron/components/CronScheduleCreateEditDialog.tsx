@@ -18,8 +18,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CronConcurrencyPolicy, CronJobKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CronScheduleFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
-import type { CronScheduleFormData } from "@/frontend/common/views/dashboard/cron/types";
-import { EMPTY_FORM } from "@/frontend/common/views/dashboard/cron/types";
+import { type CronScheduleFormData, EMPTY_FORM } from "@/frontend/common/views/dashboard/cron/types";
 import { safeEnum } from "@/frontend/common/views/dashboard/cron/utils";
 import type { CronLabels } from "@/shared/locale/types/dashboard/cron";
 

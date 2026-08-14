@@ -2,7 +2,7 @@ import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { StaffDirectoryAutocompleteRowPothosObject } from "@/backend/graphql/pothos/teachers/staff-directory.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ManagerDirectoryService } from "@/backend/services/staff/manager-directory.service";
+import { ManagerDirectoryService } from "@/backend/services";
 
 const STAFF_DIRECTORY_DEFAULT_LIMIT = 20;
 const STAFF_DIRECTORY_MAX_LIMIT = 100;

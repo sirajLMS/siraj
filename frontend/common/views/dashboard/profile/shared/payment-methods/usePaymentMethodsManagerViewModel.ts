@@ -95,7 +95,7 @@ function buildDeleteLabel(
   if (!deleteId) return "";
   const row = methods.find(m => m.id === deleteId);
   if (!row) return "";
-  return row.label?.trim() || resolveTypeLabel(row.type, tType.type);
+  return row.label?.trim() ?? resolveTypeLabel(row.type, tType.type);
 }
 
 function computeBusy(loading: boolean, deleting: boolean, settingDefault: boolean, verifying: boolean): boolean {

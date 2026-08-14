@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import { formatBulkOperationResult } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import type * as Types from "@/backend/types";
@@ -22,7 +22,7 @@ export function validateDeletePermissions(options: DeletePermissionOptions): voi
   const { force, usageCheck, dbFile, dbDirectory, parentDir } = options;
 
   if (!force && usageCheck?.isInUse) {
-    throw new Error(usageCheck.deleteBlockReason || "File is currently in use");
+    throw new Error(usageCheck.deleteBlockReason ?? "File is currently in use");
   }
 
   if (dbFile?.isProtected === true || dbDirectory?.isProtected === true) {
@@ -66,8 +66,8 @@ export async function prepareDeleteFile(filePath: string): Promise<{
         isInUse: usageCheck.isInUse,
         deleteBlockReason: usageCheck.deleteBlockReason ?? null,
       },
-      dbFile: dbFile || undefined,
-      parentDir: parentDir || undefined,
+      dbFile: dbFile ?? undefined,
+      parentDir: parentDir ?? undefined,
     });
   } catch (error) {
     return {
@@ -170,7 +170,7 @@ export async function executeBulkDelete<
 ): Promise<Types.BulkOperationResult> {
   const { dbFileMap, dbDirectoryMap, dbParentDirMap, usageCheckMap } = await loadDeleteEntities(
     input.paths,
-    input.force || false
+    input.force ?? false
   );
 
   const failures: Array<{ path: string; error: string }> = [];
@@ -180,7 +180,7 @@ export async function executeBulkDelete<
       const parentPath = itemPath.substring(0, itemPath.lastIndexOf("/"));
       return deleteFn(ctx, {
         itemPath,
-        force: input.force || false,
+        force: input.force ?? false,
         dbFile: dbFileMap.get(itemPath),
         dbDirectory: dbDirectoryMap.get(itemPath),
         parentDir: dbParentDirMap.get(parentPath),

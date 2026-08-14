@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { currencies } from "@/frontend/common/lib/currency";
 import {
   CurrencyDisplayPart,
   DEFAULT_CURRENCY_DISPLAY_PARTS,
-  DesktopCurrencyDisplay,
-} from "@/frontend/desktop/components/ui/display/currencyDisplay";
+} from "@/frontend/common/components/ui/display/currencyDisplay/constants";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { currencies } from "@/frontend/common/lib/currency";
+import { DesktopCurrencyDisplay } from "@/frontend/desktop/components/ui/display/currencyDisplay/CurrencyDisplay.desktop";
 
 const currencyCodeOptions = currencies.map(currency => currency.code);
 const currencyDisplayPartOptions = Object.values(CurrencyDisplayPart);

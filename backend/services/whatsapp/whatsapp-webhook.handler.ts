@@ -5,18 +5,17 @@ import { logger } from "@/backend/lib/logger";
 import { sanitizeFailureReason } from "@/backend/lib/whatsapp-sanitize";
 import { AuditService } from "@/backend/services/system/audit.service";
 import { WhatsappAccountService } from "@/backend/services/whatsapp";
-import type { CreateAuditLogInput } from "@/backend/types/audit/audit.types";
-import type {
-  WhatsappAccountReturnType,
-  WhatsappAccountUpdateInput,
-} from "@/backend/types/whatsapp/whatsapp-account.types";
-import { coerceLimitTier, coerceQualityRating } from "@/backend/types/whatsapp/whatsapp-account.types";
-import type {
-  WebhookStatusUpdateType as StatusUpdate,
-  WebhookTemplateEventType as TemplateEvent,
-  WebhookChangeType,
-  WebhookEntryType,
-} from "@/backend/types/whatsapp/whatsapp-webhook.types";
+import {
+  type CreateAuditLogInput,
+  coerceLimitTier,
+  coerceQualityRating,
+  type WebhookStatusUpdateType as StatusUpdate,
+  type WebhookTemplateEventType as TemplateEvent,
+  type WebhookChangeType,
+  type WebhookEntryType,
+  type WhatsappAccountReturnType,
+  type WhatsappAccountUpdateInput,
+} from "@/backend/types";
 
 /**
  * WhatsApp webhook handler — processes inbound webhook events from Meta Cloud API.

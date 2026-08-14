@@ -14,16 +14,12 @@
 import {
   buildAuthHeaders,
   buildGraphUrl,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.types";
+} from "@/backend/services/communication/channels/whatsapp/cloud-api/meta-cloud-api.helpers";
 import {
   collectAllPages,
   type ParsedPage,
 } from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/collect-all-pages";
-import type {
-  GraphApiPaginatedResponse,
-  GraphApiRequestContext,
-  GraphApiRequestInit,
-} from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+import type { GraphApiPaginatedResponse, GraphApiRequestContext, GraphApiRequestInit } from "@/backend/types";
 
 /**
  * Options for {@link buildPaginatedListRequest}.

@@ -88,7 +88,7 @@ export function PaymentMethodListShared({
         minWidth: 180,
         renderCell: params => (
           <Typography sx={{ typography: "bodyMd" }}>
-            {params.row.label?.trim() || params.row.catalogSlug || "—"}
+            {params.row.label?.trim() ?? params.row.catalogSlug ?? "—"}
           </Typography>
         ),
       },

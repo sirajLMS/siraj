@@ -2,8 +2,9 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, inArray, sql } from "drizzle-orm";
-import { db } from "@/backend/db/drizzleDb";
-import { DstMigrationRepository, SchedulingRepository } from "@/backend/db/repo";
+import { db } from "@/backend/db";
+import { DstMigrationRepository } from "@/backend/db/repo/classes";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import {
   classInstances,
   classStatusEvents,
@@ -18,14 +19,17 @@ import {
 } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { AppPermission } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { DstMigrationService } from "@/backend/services/system/dst-migration.service";
-import type { ClassInstanceInsertType, ParentEntity, StudentSelectType, TeacherSelectType } from "@/backend/types";
-import type { UserSelectType } from "@/backend/types/users/user.types";
+import { DstMigrationService, PermissionsService } from "@/backend/services";
+import type {
+  ClassInstanceInsertType,
+  ParentEntity,
+  StudentSelectType,
+  TeacherSelectType,
+  UserSelectType,
+} from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
 let tErrors: ErrorsLabels;

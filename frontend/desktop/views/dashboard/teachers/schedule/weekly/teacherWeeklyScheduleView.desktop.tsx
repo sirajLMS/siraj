@@ -5,7 +5,6 @@ import { Box, IconButton, Stack, Typography } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {
-  ClearScheduleDialogShared,
   ScheduleLastUpdatedShared,
   TeacherWeeklyScheduleViewShared,
   type TeacherWeeklyScheduleViewSharedSlots,
@@ -146,6 +145,3 @@ export function TeacherWeeklyScheduleViewDesktop(props: Readonly<TeacherWeeklySc
 }
 
 export default TeacherWeeklyScheduleViewDesktop;
-
-// Re-export shared component for potential reuse
-export { ClearScheduleDialogShared };

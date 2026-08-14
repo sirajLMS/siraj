@@ -5,7 +5,7 @@
  */
 
 import type { NotificationChannel, NotificationEventType } from "@/backend/enum";
-import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
+import type { NotificationMetadata } from "@/backend/types";
 
 export type NotificationAlertReturnType = {
   id: string;

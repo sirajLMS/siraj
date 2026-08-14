@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { notificationDeliveries, userDeviceTokens } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import {

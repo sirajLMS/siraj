@@ -8,12 +8,17 @@
  *
  * @see backend/db/seeds/teachers/seed-teacher-payments.ts
  */
-import type { DBTransaction } from "@/backend/db/db.types";
+
 import { UserPaymentMethodRepository } from "@/backend/db/repo/billing/user-payment-method.repository";
 import { TeacherPaymentRepository } from "@/backend/db/repo/teachers/teacher-payment.repository";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { TeacherPaymentInsertType, TeacherPaymentSelectType, UserPaymentMethodSelectType } from "@/backend/types";
+import type {
+  DBTransaction,
+  TeacherPaymentInsertType,
+  TeacherPaymentSelectType,
+  UserPaymentMethodSelectType,
+} from "@/backend/types";
 
 export namespace TeacherPaymentSeedService {
   /** Read helper for seed scripts — resolve default payout method for a demo teacher. */

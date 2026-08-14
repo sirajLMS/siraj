@@ -13,6 +13,12 @@ Run these checks in sequence. If any fails, fix the issues and re-run from the f
 
 All commands use Bun (`~/.bun/bin/bun` in some environments). All commands are safe to run concurrently with other processes (tsgo, oxlint, biome, and lint all use internal serialization).
 
+> **⚠️ NEVER CLEAR CACHES.** The quality-loop workflow must NEVER clear any cache files
+> (ESLint `.eslintcache` / `.eslintcache-type-aware`, CodeScene incremental cache, SonarQube
+> `.sonar-cache`). All caches are preserved across runs for incremental performance. Never
+> pass `--reset` to `codescene` or `sonar-scan` — it is deprecated and is a no-op for cache
+> clearing. Never delete cache files manually.
+
 ### Step 1: TypeScript
 
 ```bash
@@ -33,7 +39,7 @@ Fix all oxlint warnings and errors. For file-scoped oxlint (faster when only a f
 bunx oxlint --deny-warnings --ignore-path .gitignore <file>
 ```
 
-**Critical**: NEVER add `oxlint-disable` comments — fix the root cause instead. See the "Oxlint Rules" section in `AGENTS.md` for fix patterns per rule.
+**Critical**: NEVER add `oxlint-disable` comments — fix the root cause instead. See `docs/quality/linting-rules.md` for fix patterns per rule.
 
 ### Step 3: Biome
 
@@ -105,10 +111,11 @@ When you only need to verify specific files (not the whole repo), use the per-fi
 bun run scripts/health/sub-loop.ts <file-path> --lifecycle <stage>
 
 # Lifecycle stages (controls depth):
-#   tsgo      → only tsgo
-#   biome     → tsgo + oxlint + biome
-#   lint      → tsgo + oxlint + biome + lint:type-aware
-#   codescene → tsgo + oxlint + biome + lint:type-aware + check:duplicates + codescene --file
+#   tsgo       → only tsgo
+#   biome      → tsgo + oxlint + biome
+#   lint       → tsgo + oxlint + biome + lint:type-aware
+#   duplicates → tsgo + oxlint + biome + lint:type-aware + check:duplicates
+#   codescene  → tsgo + oxlint + biome + lint:type-aware + check:duplicates + codescene --file
 ```
 
 Note: The `lint` and `codescene` lifecycle stages include `lint:type-aware` (ESLint with TypeScript

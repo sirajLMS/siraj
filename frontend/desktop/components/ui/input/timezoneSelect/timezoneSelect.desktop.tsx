@@ -5,8 +5,6 @@ import { TimezoneSelectShared } from "@/frontend/common/components/ui/input/time
 import type { TimezoneSelectProps } from "@/frontend/common/components/ui/input/timezoneSelect/types/timezoneSelectShared.types";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji";
 
-export type { TimezoneSelectProps } from "@/frontend/common/components/ui/input/timezoneSelect/types/timezoneSelectShared.types";
-
 const DESKTOP_OPTION_ROW_SX = { py: 1 } as const;
 
 export const TimezoneSelectDesktop: React.FC<TimezoneSelectProps> = (

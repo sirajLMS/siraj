@@ -1,6 +1,6 @@
 import { Box, MenuItem, Select } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/views/dashboard/staff/home/types";
+import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
 import type { StaffDirectoryLabels } from "@/shared/locale";
 
 const StyledFilterContainer = styled(Box)(({ theme }) => ({
@@ -51,7 +51,7 @@ export function ManagersFilterBar({
         >
           <MenuItem value="all">{t.allRoleTypes}</MenuItem>
           <MenuItem value="admin">{t.admin}</MenuItem>
-          <MenuItem value="staff">{t.staff}</MenuItem>
+          <MenuItem value="manager">{t.manager}</MenuItem>
           <MenuItem value="supervisor">{t.supervisor}</MenuItem>
         </Select>
 

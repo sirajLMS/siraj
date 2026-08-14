@@ -1,6 +1,6 @@
 import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import { PaymentMethodService } from "@/backend/services";
 import type { UserPaymentMethodReturnType, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(

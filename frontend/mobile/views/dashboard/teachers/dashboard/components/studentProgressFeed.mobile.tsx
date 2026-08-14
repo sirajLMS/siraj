@@ -2,8 +2,10 @@
 
 import type { ReactNode } from "react";
 import type { StudentProgressFeedItem } from "@/frontend/common/types/shared.types";
-import type { StudentProgressFeedSharedSlots } from "@/frontend/common/views/dashboard/teachers/dashboard/components/__shared__/studentProgressFeedShared";
-import { StudentProgressFeedShared } from "@/frontend/common/views/dashboard/teachers/dashboard/components/__shared__/studentProgressFeedShared";
+import {
+  StudentProgressFeedShared,
+  type StudentProgressFeedSharedSlots,
+} from "@/frontend/common/views/dashboard/teachers/dashboard/components/__shared__/studentProgressFeedShared";
 import type { StudentProgressFeedProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display/personProfileLink";

@@ -7,12 +7,14 @@ import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/pr
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/parent/sections/AdminOnlySection";
 import { BillingSection } from "@/frontend/common/views/dashboard/profile/parent/sections/BillingSection";
-import type { ParentAdminData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
-import { toParentSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { IdentitySection } from "@/frontend/common/views/dashboard/profile/parent/sections/IdentitySection";
+import {
+  type ParentAdminData,
+  toParentSharedBaseLabels,
+} from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { SocialSection } from "@/frontend/common/views/dashboard/profile/parent/sections/SocialSection";
 import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
-import { ParentExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/ParentExtensionProfileSection";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -134,7 +136,7 @@ export function ParentProfileShared({
     if (!isAdminScope || !adminData || !canView("parent_identity")) {
       return null;
     }
-    return <ParentExtensionProfileSection mode="view" labels={pt} scope={scope} adminData={adminData} />;
+    return <IdentitySection mode="view" labels={pt} scope={scope} adminData={adminData} />;
   };
 
   const renderBillingSection = () => {

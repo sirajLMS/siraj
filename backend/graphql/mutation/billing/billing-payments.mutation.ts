@@ -10,8 +10,7 @@ import {
 } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PermissionsService } from "@/backend/services";
-import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
+import { PaymentMethodService, PermissionsService } from "@/backend/services";
 
 gqlSchemaBuilder.mutationField("recordPayment", t =>
   t.field({

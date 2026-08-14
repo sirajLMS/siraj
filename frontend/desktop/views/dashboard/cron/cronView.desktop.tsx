@@ -2,12 +2,12 @@
 
 import { AddOutlined } from "@mui/icons-material";
 import { Alert, Box, Stack } from "@mui/material";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CronDialogsAndNotificationsShared } from "@/frontend/common/views/dashboard/cron/components/__shared__/cronDialogsAndNotificationsShared";
 import type { CronViewProps } from "@/frontend/common/views/dashboard/cron/types";
 import {
   DesktopAppDataGrid,
   DesktopFormErrorSnackbar,
-  DesktopFormSuccessSnackbar,
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
@@ -90,7 +90,7 @@ export function CronDesktopView(props: Readonly<CronViewProps>) {
           dialogs: { BaseDeleteDialog: DesktopBaseDeleteDialog },
           notifications: {
             FormErrorSnackbar: DesktopFormErrorSnackbar,
-            FormSuccessSnackbar: DesktopFormSuccessSnackbar,
+            FormSuccessSnackbar: FormSuccessSnackbar,
           },
         }}
       />

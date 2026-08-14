@@ -1,14 +1,17 @@
 import { randomUUID } from "node:crypto";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { ParentRepository, StudentRepository, TeacherRepository } from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { StudentRepository } from "@/backend/db/repo/students";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission, StudentStatus, SystemPermissionGroupSlug } from "@/backend/enum";
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
-import type { StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
 import type {
+  DBTransaction,
+  StudentOnboardingInput,
+  StudentOnboardingResult,
   UserCreateCoreInput,
   UserCreateProfileFieldsInput,
   UserReturnType,
-} from "@/backend/types/users/user.types";
+} from "@/backend/types";
 import { parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -22,7 +25,7 @@ export namespace StudentOnboardingService {
   ): Promise<StudentOnboardingResult> {
     // LMS — every student must have a login account (students.userId is NOT NULL).
     // Validate email + password are provided before entering the transaction.
-    const email = input.email?.trim() || null;
+    const email = input.email?.trim() ?? null;
     if (!email) {
       throw new Error(tErrors.studentEmailRequired);
     }
@@ -64,7 +67,7 @@ export namespace StudentOnboardingService {
         createExtension: async (createdUser: UserReturnType, txObj: DBTransaction) => {
           return StudentRepository.create(
             {
-              parentId: input.parentId || null,
+              parentId: input.parentId ?? null,
               userId: createdUser.id,
               name: input.name,
               dateOfBirth: input.dateOfBirth ?? null,

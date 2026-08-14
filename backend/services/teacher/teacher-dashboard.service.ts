@@ -1,6 +1,6 @@
 import { db } from "@/backend/db/drizzleDb";
-import { CreditRepository } from "@/backend/db/repo";
 import { AuditRepository } from "@/backend/db/repo/audit/audit.repository";
+import { CreditRepository } from "@/backend/db/repo/billing";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
@@ -14,8 +14,7 @@ import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertType, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/shared/lib/enum";
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherDashboardService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {

@@ -1,19 +1,19 @@
 import { and, desc, eq, lte, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { getRedisService, SessionRedisService } from "@/backend/services";
 import type {
+  DBTransaction,
   RedisGroupSimulationSessionData,
   RedisSessionData,
   SessionConfigSelectType,
   SessionInsertType,
   SessionMetadataSelectType,
   SessionSelectType,
-} from "@/backend/types/auth/auth.types";
+} from "@/backend/types";
 
 // Default session configuration
 const DEFAULT_SESSION_TTL = 7 * 24 * 60 * 60; // 7 days in seconds
@@ -58,8 +58,8 @@ export namespace SessionRepository {
     return {
       hashedId: redisSession.hashedId,
       userId: redisSession.userId,
-      ipAddress: redisSession.ipAddress || null,
-      userAgent: redisSession.userAgent || null,
+      ipAddress: redisSession.ipAddress ?? null,
+      userAgent: redisSession.userAgent ?? null,
       payload: redisSession.payload,
       lastActivity: BigInt(Math.floor(new Date(redisSession.lastActivityAt).getTime() / 1000)),
     };
@@ -79,8 +79,8 @@ export namespace SessionRepository {
     return {
       hashedId,
       userId,
-      ipAddress: ipAddress || null,
-      userAgent: userAgent || null,
+      ipAddress: ipAddress ?? null,
+      userAgent: userAgent ?? null,
       payload,
       lastActivity: BigInt(Math.floor(now.getTime() / 1000)),
     };
@@ -93,7 +93,7 @@ export namespace SessionRepository {
     roleName: string = "default",
     tx?: DBTransaction
   ): Promise<SessionConfigSelectType> => {
-    const runner = tx || db;
+    const runner = tx ?? db;
     const configs = await runner.select().from(sessionConfig).where(eq(sessionConfig.roleName, roleName)).limit(1);
 
     if (configs.length > 0) return configs[0];
@@ -200,8 +200,8 @@ export namespace SessionRepository {
     return {
       hashedId: mostRecent.hashedId,
       userId: mostRecent.userId,
-      ipAddress: mostRecent.ipAddress || null,
-      userAgent: mostRecent.userAgent || null,
+      ipAddress: mostRecent.ipAddress ?? null,
+      userAgent: mostRecent.userAgent ?? null,
       payload: mostRecent.payload,
       lastActivity: BigInt(Math.floor(new Date(mostRecent.lastActivityAt).getTime() / 1000)),
     };
@@ -227,7 +227,7 @@ export namespace SessionRepository {
         hashedId: input.hashedId,
         userId: input.userId,
         ipAddress: sanitizeIpAddress(input.ipAddress),
-        userAgent: input.userAgent || null,
+        userAgent: input.userAgent ?? null,
         payload: input.payload,
         lastActivity: now,
       })
@@ -256,7 +256,7 @@ export namespace SessionRepository {
       if (!redisSessionsEnabled()) return await createPostgresSession(t, { ...input, hashedId });
 
       await acquireUserLock(t, input.userId);
-      const config = await getSessionConfig(input.roleName || "default", t);
+      const config = await getSessionConfig(input.roleName ?? "default", t);
 
       const redisService = await getSessionRedisService();
       await redisService.enforceConcurrentLimit(input.userId, config.maxConcurrentSessions);
@@ -271,7 +271,7 @@ export namespace SessionRepository {
           hashedId,
           payload: input.payload,
           ipAddress: sanitizeIpAddress(input.ipAddress) ?? undefined,
-          userAgent: input.userAgent || undefined,
+          userAgent: input.userAgent ?? undefined,
           deviceType: input.deviceType,
           deviceName: input.deviceName,
           createdAt: now.toISOString(),
@@ -283,10 +283,10 @@ export namespace SessionRepository {
       await t.insert(sessionMetadata).values({
         sessionId: hashedId,
         userId: input.userId,
-        deviceType: input.deviceType || null,
-        deviceName: input.deviceName || null,
+        deviceType: input.deviceType ?? null,
+        deviceName: input.deviceName ?? null,
         ipAddress: sanitizeIpAddress(input.ipAddress),
-        userAgent: input.userAgent || null,
+        userAgent: input.userAgent ?? null,
         createdAt: now,
         lastActivityAt: now,
         expiresAt,
@@ -336,7 +336,7 @@ export namespace SessionRepository {
         return returning[0];
       }
 
-      const config = await getSessionConfig(input.roleName || "default", t);
+      const config = await getSessionConfig(input.roleName ?? "default", t);
       const redisService = await getSessionRedisService();
       const success = await redisService.touchSession(hashedId, config.ttlSeconds);
 
@@ -536,7 +536,7 @@ export namespace SessionRepository {
     userId: string,
     tx?: DBTransaction
   ): Promise<SessionMetadataSelectType[]> => {
-    const runner = tx || db;
+    const runner = tx ?? db;
     return await runner
       .select()
       .from(sessionMetadata)

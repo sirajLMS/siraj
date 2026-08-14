@@ -1,9 +1,7 @@
 import { and, inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { studentProgress } from "@/backend/db/schema/students/students";
-import type { StudentProgressInsertType, StudentProgressSelectType } from "@/backend/types";
+import { db, queryDb } from "@/backend/db";
+import { studentProgress } from "@/backend/db/schema";
+import type { DBTransaction, StudentProgressInsertType, StudentProgressSelectType } from "@/backend/types";
 
 export type StudentProgressUpsertInput = Pick<
   StudentProgressInsertType,

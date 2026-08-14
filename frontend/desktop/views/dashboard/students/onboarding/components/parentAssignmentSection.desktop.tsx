@@ -2,8 +2,10 @@
 
 import type { Control, FieldErrors } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import type { ParentAssignmentSectionSharedOptions } from "@/frontend/common/views/dashboard/students/onboarding/components/__shared__/parentAssignmentSectionShared";
-import { ParentAssignmentSectionShared } from "@/frontend/common/views/dashboard/students/onboarding/components/__shared__/parentAssignmentSectionShared";
+import {
+  ParentAssignmentSectionShared,
+  type ParentAssignmentSectionSharedOptions,
+} from "@/frontend/common/views/dashboard/students/onboarding/components/__shared__/parentAssignmentSectionShared";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 import { ParentAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 

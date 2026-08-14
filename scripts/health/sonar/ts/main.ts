@@ -1,4 +1,4 @@
-import { clearSonarCache, isProjectChanged, saveProjectFingerprint } from "@/scripts/health/sonar/ts/cache";
+import { isProjectChanged, saveProjectFingerprint } from "@/scripts/health/sonar/ts/cache";
 import { COLORS, logError, logInfo, logSuccess } from "@/scripts/health/sonar/ts/config";
 import { checkDocker, checkDockerCompose, startSonarQube } from "@/scripts/health/sonar/ts/docker";
 import { fetchAndDisplayResults, waitForAnalysisProcessing } from "@/scripts/health/sonar/ts/results";
@@ -25,7 +25,7 @@ ${COLORS.YELLOW}Flags:${COLORS.NC}
   --fresh       Force full SonarQube analysis (setup, scan, and results)
   --result      Fetch and display current analysis issues (no scan)
   --full        Fetch and display analysis issues with duplication metrics (no scan)
-  --reset       Reset SonarQube setup state and clear cache
+  --reset       Reset SonarQube setup state (cache is preserved, never cleared)
   --help, -h    Display this help message
 
 ${COLORS.YELLOW}Examples:${COLORS.NC}
@@ -33,7 +33,7 @@ ${COLORS.YELLOW}Examples:${COLORS.NC}
   bun run sonar-scan --fresh
   bun run sonar-scan --result
   bun run sonar-scan --full
-  bun run sonar-scan --reset
+  bun run sonar-scan --reset    (Does not clear cache — caches are never cleared)
 `);
 }
 
@@ -47,7 +47,7 @@ async function main() {
 
   if (args.includes("--reset")) {
     resetSetup();
-    clearSonarCache();
+    logInfo("Cache preserved (caches are never cleared).");
     return;
   }
 

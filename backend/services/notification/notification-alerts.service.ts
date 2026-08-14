@@ -1,6 +1,6 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { complaints, notificationDeliveries } from "@/backend/db/schema";
 import {
   AppPermission,
@@ -15,10 +15,10 @@ import type {
   MarkableDeliveryRow,
   NotificationAlertReturnType,
   NotificationAlertsPaginatedReturnType,
+  NotificationMetadata,
   RecentNotificationRow,
   UnansweredComplaintRow,
 } from "@/backend/types";
-import type { NotificationMetadata } from "@/backend/types/notifications/notification-alerts.metadata.types";
 import { getServerTranslations } from "@/shared/locale";
 
 const COMPLAINT_ALERT_BODY_LIMIT = 100;

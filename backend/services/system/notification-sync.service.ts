@@ -1,4 +1,4 @@
-import { BillingRepository } from "@/backend/db";
+import { BillingRepository } from "@/backend/db/repo/billing";
 import { logger } from "@/backend/lib";
 import type * as Types from "@/backend/types";
 

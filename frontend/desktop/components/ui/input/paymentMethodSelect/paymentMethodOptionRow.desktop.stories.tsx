@@ -1,8 +1,8 @@
 import { Box, Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { PaymentMethodOptionRow as PaymentMethodOptionRowDesktop } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodOptionRow";
 import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
-import { PaymentMethodOptionRowDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.desktop";
 
 const MOCK_OPTIONS: readonly PaymentMethodCatalogOption[] = [
   {

@@ -6,8 +6,7 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import NumbersOutlinedIcon from "@mui/icons-material/NumbersOutlined";
 import { Box, Button, Card, CardContent, CardHeader, Grid, Skeleton, Stack, Typography, useTheme } from "@mui/material";
 import Link from "next/link";
-import type { ComponentType, ReactElement, ReactNode } from "react";
-import { useMemo } from "react";
+import { type ComponentType, type ReactElement, type ReactNode, useMemo } from "react";
 import {
   Area,
   AreaChart,

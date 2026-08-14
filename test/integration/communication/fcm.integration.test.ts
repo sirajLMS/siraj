@@ -4,10 +4,10 @@
  */
 import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
 import { deleteApp, getApp, getApps } from "firebase-admin/app";
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { DevicePlatform, NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
+import type { PushPayload } from "@/backend/services";
 import { FcmPushAdapter } from "@/backend/services/communication/channels/push/fcm/FcmPushAdapter";
-import type { PushPayload } from "@/backend/services/communication/channels/push/IPushChannel";
 import type {
   CreateNotificationDeliveryInput,
   NotificationDeliverySelectType,

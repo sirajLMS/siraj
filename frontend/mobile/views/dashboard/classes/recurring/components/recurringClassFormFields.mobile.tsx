@@ -4,11 +4,11 @@ import {
   RecurringClassFormFieldsShared,
   type RecurringClassFormFieldsSharedOptions,
 } from "@/frontend/common/views/dashboard/classes/recurring/components/__shared__/recurringClassFormFieldsShared";
+import { TimeInputShared } from "@/frontend/common/views/dashboard/classes/recurring/components/__shared__/timeInputShared";
 import type { RecurringClassFormFieldsProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { StudentAutocompleteMobile, TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { DaysScheduleSectionMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/daysScheduleSection.mobile";
 import { DurationInputMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/durationInput.mobile";
-import { TimeInputMobile } from "@/frontend/mobile/views/dashboard/classes/recurring/components/timeInput.mobile";
 
 const MOBILE_FORM_FIELDS_OPTIONS: RecurringClassFormFieldsSharedOptions = {
   layoutGap: 3,
@@ -16,7 +16,7 @@ const MOBILE_FORM_FIELDS_OPTIONS: RecurringClassFormFieldsSharedOptions = {
   sectionGap: 2,
   StudentAutocomplete: StudentAutocompleteMobile,
   TeacherAutocomplete: TeacherAutocompleteMobile,
-  TimeInput: TimeInputMobile,
+  TimeInput: TimeInputShared,
   DurationInput: DurationInputMobile,
   DaysScheduleSection: DaysScheduleSectionMobile,
 };

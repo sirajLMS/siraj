@@ -1,8 +1,7 @@
 "use client";
 
 import { CssBaseline } from "@mui/material";
-import type { PaletteMode } from "@mui/material/styles";
-import { ThemeProvider, useColorScheme } from "@mui/material/styles";
+import { type PaletteMode, ThemeProvider, useColorScheme } from "@mui/material/styles";
 import { type ReactNode, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 import { logger } from "@/frontend/common/lib/logger";

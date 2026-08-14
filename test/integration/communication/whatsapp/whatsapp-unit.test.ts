@@ -9,22 +9,16 @@
  */
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import {
-  buildRequest as buildGetPhoneNumberRequest,
-  parseResponse as parseGetPhoneNumberResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/get-phone-number.request";
-import {
-  buildRequest as buildListTemplatesRequest,
-  parseResponse as parseListTemplatesResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-message-templates.request";
-import {
-  buildRequest as buildListPhoneNumbersRequest,
-  parseResponse as parseListPhoneNumbersResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/list-phone-numbers.request";
-import {
-  buildRequest as buildSendTemplateRequest,
-  parseResponse as parseSendTemplateResponse,
-} from "@/backend/services/communication/channels/whatsapp/cloud-api/requests/send-template-message.request";
-import type { GraphApiRequestContext } from "@/backend/types/whatsapp/whatsapp-cloud-api.types";
+  buildGetPhoneNumberRequest,
+  buildListMessageTemplatesRequest,
+  buildListPhoneNumbersRequest,
+  buildSendTemplateMessageRequest,
+  parseGetPhoneNumberResponse,
+  parseListMessageTemplatesResponse,
+  parseListPhoneNumbersResponse,
+  parseSendTemplateResponse,
+} from "@/backend/services";
+import type { GraphApiRequestContext } from "@/backend/types";
 
 const CTX: GraphApiRequestContext = {
   accessToken: "test-token-abc123",
@@ -67,7 +61,7 @@ afterEach(() => {
 
 describe("send-template-message — buildRequest", () => {
   test("builds correct URL, method, headers, and JSON body", () => {
-    const { url, init } = buildSendTemplateRequest(CTX, {
+    const { url, init } = buildSendTemplateMessageRequest(CTX, {
       phoneNumberId: "123456789",
       to: "971501234567",
       templateName: "hello_world",
@@ -94,7 +88,7 @@ describe("send-template-message — buildRequest", () => {
   });
 
   test("includes components when provided", () => {
-    const { init } = buildSendTemplateRequest(CTX, {
+    const { init } = buildSendTemplateMessageRequest(CTX, {
       phoneNumberId: "123456789",
       to: "971501234567",
       templateName: "hello_world",
@@ -127,7 +121,7 @@ describe("send-template-message — buildRequest", () => {
       expectedError: "must contain only alphanumeric",
     },
   ])("throws on $description", ({ params, expectedError }) => {
-    expect(() => buildSendTemplateRequest(CTX, params)).toThrow(expectedError);
+    expect(() => buildSendTemplateMessageRequest(CTX, params)).toThrow(expectedError);
   });
 });
 
@@ -248,7 +242,7 @@ describe("get-phone-number — parseResponse", () => {
 
 describe("list-message-templates — buildRequest", () => {
   test("builds GET URL for message_templates endpoint", () => {
-    const { url, init } = buildListTemplatesRequest(CTX, { wabaId: "987654321" });
+    const { url, init } = buildListMessageTemplatesRequest(CTX, { wabaId: "987654321" });
 
     expect(url).toContain("/987654321/message_templates");
     expect(url).toContain("limit=100");
@@ -256,7 +250,7 @@ describe("list-message-templates — buildRequest", () => {
   });
 
   test("builds URL with after cursor for pagination", () => {
-    const { url } = buildListTemplatesRequest(CTX, { wabaId: "987654321" }, "next-cursor");
+    const { url } = buildListMessageTemplatesRequest(CTX, { wabaId: "987654321" }, "next-cursor");
 
     expect(url).toContain("after=next-cursor");
   });
@@ -264,7 +258,7 @@ describe("list-message-templates — buildRequest", () => {
 
 describe("list-message-templates — parseResponse", () => {
   test("extracts templates with language codes and next cursor", () => {
-    const result = parseListTemplatesResponse({
+    const result = parseListMessageTemplatesResponse({
       data: [
         {
           id: "tmpl-1",
@@ -292,7 +286,7 @@ describe("list-message-templates — parseResponse", () => {
   });
 
   test("returns empty array when no templates", () => {
-    const result = parseListTemplatesResponse({ data: [] });
+    const result = parseListMessageTemplatesResponse({ data: [] });
     expect(result.templates).toHaveLength(0);
     expect(result.nextCursor).toBeUndefined();
   });
@@ -304,7 +298,7 @@ describe("buildRequest + mocked fetch — round-trip", () => {
   });
 
   test("send-template-message: fetch with buildRequest returns parsed result", async () => {
-    const { url, init } = buildSendTemplateRequest(CTX, {
+    const { url, init } = buildSendTemplateMessageRequest(CTX, {
       phoneNumberId: "123456789",
       to: "971501234567",
       templateName: "hello_world",

@@ -1,13 +1,13 @@
-export { uiPaymentMethodDefaultsEditorEn as defaultsEditor } from "./defaultsEditor";
-export { uiPaymentMethodDirectionEn as direction } from "./direction";
-export { uiPaymentMethodDisplayEn as display } from "./display";
-export { uiPaymentMethodIdentifierEn as identifier } from "./identifier";
-export { uiPaymentMethodListEn as list } from "./list";
-export { uiPaymentMethodManagerEn as manager } from "./manager";
-export { uiPaymentMethodSelectEn as select } from "./select";
-export { uiPaymentMethodTypeEn as type } from "./type";
-export { uiPaymentMethodTypeFieldsEn as typeFields } from "./typeFields";
-export { uiPaymentMethodTypeSelectorEn as typeSelector } from "./typeSelector";
+export * from "./defaultsEditor";
+export * from "./direction";
+export * from "./display";
+export * from "./identifier";
+export * from "./list";
+export * from "./manager";
+export * from "./select";
+export * from "./type";
+export * from "./typeFields";
+export * from "./typeSelector";
 
 import { uiPaymentMethodDefaultsEditorEn as defaultsEditor } from "./defaultsEditor";
 import { uiPaymentMethodDirectionEn as direction } from "./direction";

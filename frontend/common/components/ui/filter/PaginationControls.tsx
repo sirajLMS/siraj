@@ -14,7 +14,7 @@ import {
   type PaginationControlsSlotProps,
 } from "@/frontend/common/components/ui/filter/PaginationControlsShared";
 
-export type { PaginationControlsSharedProps as PaginationControlsProps } from "@/frontend/common/components/ui/filter/PaginationControlsShared";
+export type { PaginationControlsSharedProps as PaginationControlsProps } from "./PaginationControlsShared";
 
 const COMMON_SLOT_PROPS: PaginationControlsSlotProps = {
   rootGap: 1.5,

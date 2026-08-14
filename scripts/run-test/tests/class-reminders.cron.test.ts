@@ -1,13 +1,15 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { NotificationPreferencesRepository, SchedulingRepository } from "@/backend/db/repo";
+import { NotificationPreferencesRepository } from "@/backend/db/repo/notifications";
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { NotificationEventType } from "@/backend/enum";
-import { CommunicationService } from "@/backend/services/communication/communication.service";
-import { ClassReminderService } from "@/backend/services/notification/class-reminder.service";
-import { EVENT_CHANNEL_ALLOWLIST } from "@/backend/services/notification/notification-dispatch.helpers";
-import type { ChannelDispatchResult, CommunicationPayload } from "@/backend/types";
-import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
-import type { StudentSelectType } from "@/backend/types/students/student.types";
+import { ClassReminderService, CommunicationService, EVENT_CHANNEL_ALLOWLIST } from "@/backend/services";
+import type {
+  ChannelDispatchResult,
+  ClassInstanceSelectType,
+  CommunicationPayload,
+  StudentSelectType,
+} from "@/backend/types";
 
 // ─── Test fixtures ─────────────────────────────────────────────────────
 

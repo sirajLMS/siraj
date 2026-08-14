@@ -1,14 +1,15 @@
 import { createHash } from "node:crypto";
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import type { db } from "@/backend/db/drizzleDb";
-import { queryWithPagination } from "@/backend/db/query.extensions";
+import { type db, queryDb, queryWithPagination } from "@/backend/db";
 import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
 import { DomainError } from "@/backend/lib/errors";
-import type { CreditInsertInput, CreditTransactionSelectType } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
+import {
+  type CreditInsertInput,
+  type CreditTransactionSelectType,
+  type DBTransaction,
+  PaginationArgs,
+} from "@/backend/types";
 
 // NOTE: Overload-by-type-discrimination — tx parameter is polymorphic: string (studentId) or Transaction instance. Callers must be aware that getBalance(tx, undefined) silently targets the wrong studentId.
 type ReadExecutor = DBTransaction | typeof db;
@@ -51,8 +52,12 @@ export namespace CreditRepository {
     if (typeof actualStudentId !== "string") {
       throw new DomainError("INVALID_ARGS", "studentId must be a string when tx is not a string");
     }
-    const actualPagination =
-      typeof tx === "string" ? (studentId instanceof PaginationArgs ? studentId : null) : paginationArgs;
+    let actualPagination: PaginationArgs | null;
+    if (typeof tx === "string") {
+      actualPagination = studentId instanceof PaginationArgs ? studentId : null;
+    } else {
+      actualPagination = paginationArgs ?? null;
+    }
     const q = queryDb(actualTx);
     const baseQuery = q
       .select()
@@ -206,8 +211,12 @@ export namespace CreditRepository {
     if (typeof actualClassId !== "string") {
       throw new DomainError("INVALID_ARGS", "classInstanceId must be a string when tx is not a string");
     }
-    const actualReason =
-      typeof tx === "string" ? (isCreditReason(classInstanceId) ? classInstanceId : undefined) : reason;
+    let actualReason: CreditReason | undefined;
+    if (typeof tx === "string") {
+      actualReason = isCreditReason(classInstanceId) ? classInstanceId : undefined;
+    } else {
+      actualReason = reason;
+    }
     const q = queryDb(actualTx);
     const whereCondition = actualReason
       ? and(eq(creditTransactions.classInstanceId, actualClassId), eq(creditTransactions.reason, actualReason))

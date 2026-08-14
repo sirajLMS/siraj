@@ -1,13 +1,13 @@
-export { uiMeetingConfigClassScopeAr as classScope } from "./classScope";
-export { uiMeetingConfigDisplayAr as display } from "./display";
-export { uiMeetingConfigFieldsAr as fields } from "./fields";
-export { uiMeetingConfigJoinAr as join } from "./join";
-export { uiMeetingConfigLinkedClassInstancesAr as linkedClassInstances } from "./linkedClassInstances";
-export { uiMeetingConfigManagerAr as manager } from "./manager";
-export { uiMeetingConfigProviderSelectAr as providerSelect } from "./providerSelect";
-export { uiMeetingConfigReauthNeededAr as reauthNeeded } from "./reauthNeeded";
-export { uiMeetingConfigRecurringScheduleAr as recurringSchedule } from "./recurringSchedule";
-export { uiMeetingConfigSummaryAr as summary } from "./summary";
+export * from "./classScope";
+export * from "./display";
+export * from "./fields";
+export * from "./join";
+export * from "./linkedClassInstances";
+export * from "./manager";
+export * from "./providerSelect";
+export * from "./reauthNeeded";
+export * from "./recurringSchedule";
+export * from "./summary";
 
 import { uiMeetingConfigClassScopeAr as classScope } from "./classScope";
 import { uiMeetingConfigDisplayAr as display } from "./display";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { StudentHistoryRepository } from "@/backend/db/repo";
+import { StudentHistoryRepository } from "@/backend/db/repo/students";
 import { classInstancePerformance, classInstances } from "@/backend/db/schema";
 import { ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";

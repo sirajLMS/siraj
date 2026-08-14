@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { LessonReportRepository } from "@/backend/db/repo/classes/lesson-report.repository";
+import { LessonReportRepository } from "@/backend/db/repo/classes";
 import {
   createCompletedClassInstance,
   createTestLessonReport,

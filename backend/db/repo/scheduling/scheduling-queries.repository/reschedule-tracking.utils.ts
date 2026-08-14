@@ -1,9 +1,9 @@
 import { and, eq, isNull, ne, or, type SQL, sql } from "drizzle-orm";
 import type { alias } from "drizzle-orm/pg-core";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/backend/enum";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
 
 export function buildRescheduleConditions(
   input: Types.RescheduleTrackingInput,

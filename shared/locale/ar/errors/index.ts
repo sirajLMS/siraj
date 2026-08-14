@@ -218,6 +218,10 @@ export const errorsAr: ErrorsLabels = {
   invalidInput: "إدخال غير صالح.",
   invalidNationalId: "الرقم القومي غير صالح للجنسية المحددة.",
 
+  // ─── General user creation errors ──────────────────────────────────
+  specializedGroupNotAllowed:
+    "لا يمكن تعيين مجموعة متخصصة (طالب أو معلم أو ولي أمر) لمستخدم عام. استخدم مسار الإلحاق المخصص لنوع المستخدم هذا بدلاً من ذلك.",
+
   // ─── Lesson Report errors ─────────────────────────────────────────
   rejectedReportsRequireReason: "يجب أن تتضمن التقارير المرفوضة سبب الرفض.",
   approvedReportsNoRejectionReason: "لا يجب أن تتضمن التقارير المعتمدة سبب رفض.",

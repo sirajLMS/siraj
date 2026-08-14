@@ -3,8 +3,7 @@
 import EmailOutlined from "@mui/icons-material/EmailOutlined";
 import PersonOutlined from "@mui/icons-material/PersonOutlined";
 import { Stack, TextField } from "@mui/material";
-import type { Control, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";

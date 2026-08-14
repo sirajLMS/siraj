@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { GraphQLError } from "graphql";
 import { cookies, headers } from "next/headers";
-import { RateLimitRepository, SessionRepository } from "@/backend/db/repo";
+import { RateLimitRepository, SessionRepository } from "@/backend/db/repo/shared";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -20,11 +20,13 @@ import { comparePassword } from "@/backend/lib/auth/password";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
-import { AuthPasswordService } from "@/backend/services/auth/auth-password.service";
-import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
-import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
-import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
-import { SessionService } from "@/backend/services/auth/session.service";
+import {
+  AuthPasswordService,
+  DemoAuthService,
+  ImpersonationService,
+  PermissionGroupSimulationService,
+  SessionService,
+} from "@/backend/services";
 import type { SafeUser, SessionSelectType, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 
@@ -38,7 +40,7 @@ async function resolveUserFromSession(
   const session = await SessionService.validateSession(sessionId);
   if (!session?.userId) return { session: session ?? null, user: null };
 
-  const user = (await UserRepository.findById(session.userId)) || null;
+  const user = (await UserRepository.findById(session.userId)) ?? null;
   if (!user) {
     logger.warn("[RefreshToken] Session found but user not found", {
       userId: session.userId,
@@ -53,10 +55,10 @@ async function resolveUserFromRefreshToken(
   const payload = await verifyToken(refreshToken);
   if (payload?.type !== "refresh") return { session: null, user: null };
 
-  const user = (await UserRepository.findById(payload.userId)) || null;
+  const user = (await UserRepository.findById(payload.userId)) ?? null;
   if (!user) return { session: null, user: null };
 
-  const session = (await SessionRepository.findByUserId(user.id)) || null;
+  const session = (await SessionRepository.findByUserId(user.id)) ?? null;
   if (!session) {
     logger.warn("[RefreshToken] User found but no session exists", {
       userId: user.id,
@@ -138,7 +140,7 @@ async function rotateTokensAndSession(
   ctx: BaseContext,
   rawSessionId?: string
 ): Promise<{ token: string; user: SafeUser } | null> {
-  const sessionIdForUpdate = rawSessionId || session.hashedId;
+  const sessionIdForUpdate = rawSessionId ?? session.hashedId;
   const newAccessToken =
     (rawSessionId ? await ImpersonationService.issueAccessTokenForSession(user.id, rawSessionId) : null) ??
     (rawSessionId ? await PermissionGroupSimulationService.issueAccessTokenForSession(user.id, rawSessionId) : null) ??
@@ -180,7 +182,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, args, ctx) => {
       const { email, password } = args.input;
-      const ipAddress = ctx.ipAddress || "127.0.0.1";
+      const ipAddress = ctx.ipAddress ?? "127.0.0.1";
       const tErrors = ctx.t().errorsTranslations;
 
       // 0. Enforce auth rate limit before any credential checks

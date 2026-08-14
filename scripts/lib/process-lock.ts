@@ -11,6 +11,8 @@
  *   - `.quality-gate-lock/oxlint/`      → serializes: oxlint (per-file & full-repo)
  *   - `.quality-gate-lock/lint/`        → serializes: lint-service (type-aware ESLint)
  *   - `.quality-gate-lock/codescene/`   → serializes: CodeScene scans
+ *   - `.quality-gate-lock/sonar/`       → serializes: SonarQube scans
+ *   - `.quality-gate-lock/duplicates/`  → serializes: jscpd duplication checks
  *   - `.quality-gate-lock/build/`       → serializes: next build, build:test
  *   - `.quality-gate-lock/test/`        → serializes: bun test runs
  *   - `.quality-gate-lock/default/`     → fallback for uncategorized tasks
@@ -66,9 +68,27 @@ function getLockNamespace(description: string): string {
   )
     return "lint";
   if (d.includes("codescene")) return "codescene";
+  if (d.includes("sonar")) return "sonar";
+  if (d.includes("duplicates") || d.includes("jscpd")) return "duplicates";
   if (d.includes("build")) return "build";
   if (d.startsWith("test") || d.includes("test:") || d.includes("test ")) return "test";
   return "default";
+}
+
+/**
+ * Check if a task description is exempt from the 5-minute timeout.
+ */
+export function isTimeoutExempt(description: string): boolean {
+  const d = description.toLowerCase();
+  return (
+    d.includes("codescene") ||
+    d.includes("sonar") ||
+    d.includes("duplicates") ||
+    d.includes("jscpd") ||
+    d.startsWith("test") ||
+    d.includes("test:") ||
+    d.includes("test ")
+  );
 }
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -203,6 +223,33 @@ function createQueueTicket(ns: string, description: string): { ticketPath: strin
   return { ticketPath, ticketInfo };
 }
 
+function parseTicketFile(queueDir: string, file: string): QueueTicketInfo | null {
+  if (!file.endsWith(".json")) return null;
+  const ticketPath = join(queueDir, file);
+  try {
+    const content = readFileSync(ticketPath, "utf8");
+    const info: QueueTicketInfo = JSON.parse(content);
+    const alive = isPidAlive(info.pid);
+    const exempt = isTimeoutExempt(info.description);
+    if (!alive || (!exempt && Date.now() - info.timestamp > MAX_LOCK_AGE_MS)) {
+      try {
+        unlinkSync(ticketPath);
+      } catch {
+        /* ignore cleanup error */
+      }
+      return null;
+    }
+    return info;
+  } catch {
+    try {
+      unlinkSync(ticketPath);
+    } catch {
+      /* ignore cleanup error */
+    }
+    return null;
+  }
+}
+
 /**
  * Scan queue directory for a namespace, remove stale tickets,
  * and return valid tickets sorted by timestamp ascending (FIFO).
@@ -215,26 +262,9 @@ function getValidQueueTickets(ns: string): { file: string; info: QueueTicketInfo
     const valid: { file: string; info: QueueTicketInfo }[] = [];
 
     for (const file of files) {
-      if (!file.endsWith(".json")) continue;
-      const ticketPath = join(queueDir, file);
-      try {
-        const content = readFileSync(ticketPath, "utf8");
-        const info: QueueTicketInfo = JSON.parse(content);
-        if (!isPidAlive(info.pid) || Date.now() - info.timestamp > MAX_LOCK_AGE_MS) {
-          try {
-            unlinkSync(ticketPath);
-          } catch {
-            /* ignore cleanup error */
-          }
-        } else {
-          valid.push({ file, info });
-        }
-      } catch {
-        try {
-          unlinkSync(ticketPath);
-        } catch {
-          /* ignore cleanup error */
-        }
+      const info = parseTicketFile(queueDir, file);
+      if (info) {
+        valid.push({ file, info });
       }
     }
 
@@ -260,7 +290,9 @@ function getActiveLock(ns: string): ActiveLockInfo | null {
   try {
     const content = readFileSync(activeLockFile, "utf8");
     const info: ActiveLockInfo = JSON.parse(content);
-    if (!isPidAlive(info.pid) || Date.now() - info.acquiredAt > MAX_LOCK_AGE_MS) {
+    const alive = isPidAlive(info.pid);
+    const exempt = isTimeoutExempt(info.description);
+    if (!alive || (!exempt && Date.now() - info.acquiredAt > MAX_LOCK_AGE_MS)) {
       console.log(`${YELLOW}[process-lock]${NC} Cleaning up stale lock held by PID ${info.pid} (${info.description})`);
       try {
         unlinkSync(activeLockFile);
@@ -501,34 +533,31 @@ export async function acquireProcessLock(description: string): Promise<() => voi
 
 /**
  * Wrap an async function in process lock execution.
- * Enforces a 5-minute timeout for all tasks EXCEPT CodeScene and test runs.
+ * Enforces a 5-minute timeout for all tasks EXCEPT exempt tasks (CodeScene, Sonar, Tests, Duplicates).
  */
 export async function withProcessLock<T>(description: string, fn: () => Promise<T>): Promise<T> {
   const release = await acquireProcessLock(description);
 
-  const desc = description.toLowerCase();
-  const isCodeScene = desc.includes("codescene");
-  const isTestRun = desc.startsWith("test") || desc.includes("test:") || desc.includes("test ");
+  const exempt = isTimeoutExempt(description);
   const MAX_TASK_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
   let timeoutTimer: ReturnType<typeof setTimeout> | null = null;
   let timedOut = false;
 
-  const timeoutPromise =
-    isCodeScene || isTestRun
-      ? null
-      : new Promise<never>((_, reject) => {
-          timeoutTimer = setTimeout(() => {
-            timedOut = true;
-            const msg =
-              `\n\x1b[31m❌ [process-lock] TASK TIMEOUT EXCEEDED (5 minutes / 300,000ms)\x1b[0m\n` +
-              `Task "${description}" took longer than 5 minutes (300000ms) to complete.\n` +
-              `This usually indicates an un-excluded build/dist directory, an infinite loop, or resource contention.\n` +
-              `Fix the underlying issue before running again.\n`;
-            console.error(msg);
-            reject(new Error(msg));
-          }, MAX_TASK_TIMEOUT_MS);
-        });
+  const timeoutPromise = exempt
+    ? null
+    : new Promise<never>((_, reject) => {
+        timeoutTimer = setTimeout(() => {
+          timedOut = true;
+          const msg =
+            `\n\x1b[31m❌ [process-lock] TASK TIMEOUT EXCEEDED (5 minutes / 300,000ms)\x1b[0m\n` +
+            `Task "${description}" took longer than 5 minutes (300000ms) to complete.\n` +
+            `This usually indicates an un-excluded build/dist directory, an infinite loop, or resource contention.\n` +
+            `Fix the underlying issue before running again.\n`;
+          console.error(msg);
+          reject(new Error(msg));
+        }, MAX_TASK_TIMEOUT_MS);
+      });
 
   try {
     if (timeoutPromise) {

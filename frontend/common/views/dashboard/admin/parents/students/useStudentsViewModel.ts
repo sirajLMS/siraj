@@ -97,7 +97,7 @@ function useComputedFilterArgs(searchQuery: string, filterArgs: StudentFilterArg
     return {
       ...EMPTY_FILTER_ARGS,
       ...(filterArgs ? { gender: filterArgs.gender, language: filterArgs.language, status: filterArgs.status } : {}),
-      name: searchQuery || filterArgs?.name || null,
+      name: (searchQuery || filterArgs?.name) ?? null,
     };
   }, [searchQuery, filterArgs]);
 }

@@ -1,9 +1,8 @@
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import { ClassExecutionState, type ClassOutcome } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
-import type { ClassInstanceDetailReturnType } from "@/backend/types";
-import type { ClassInstancePerformanceSelectType } from "@/backend/types/classes/class-instance-performance.types";
+import { ClassSessionService, EffectiveMeetingService } from "@/backend/services";
+import type { ClassInstanceDetailReturnType, ClassInstancePerformanceSelectType } from "@/backend/types";
+import { ClassExecutionState, type ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import {
   parseClassExecutionState,
   parseClassOutcome,
@@ -50,8 +49,8 @@ function resolveInstanceAvatarUrl(instance: ClassInstanceWithRelations): string 
 
 function buildStudentParticipant(instance: ClassInstanceWithRelations, unknownName: string) {
   return {
-    id: instance.student?.id || instance.studentId,
-    name: instance.student?.name || unknownName,
+    id: instance.student?.id ?? instance.studentId,
+    name: instance.student?.name ?? unknownName,
     grade: null,
     level: null,
     avatarUrl: instance.student?.avatarUrl ?? null,
@@ -60,8 +59,8 @@ function buildStudentParticipant(instance: ClassInstanceWithRelations, unknownNa
 
 function buildTeacherParticipant(instance: ClassInstanceWithRelations, unknownName: string) {
   return {
-    id: instance.teacher?.id || instance.teacherId,
-    name: instance.teacher?.user?.name || unknownName,
+    id: instance.teacher?.id ?? instance.teacherId,
+    name: instance.teacher?.user?.name ?? unknownName,
     title: truncateQualifications(instance.teacher?.qualifications),
     avatarUrl: instance.teacher?.user?.avatarUrl ?? null,
   };
@@ -122,8 +121,6 @@ export async function buildClassInstanceDetail(
     performance: buildPerformanceBlock(perf),
   };
 }
-
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
 
 export async function resolveDetail(
   userId: string,

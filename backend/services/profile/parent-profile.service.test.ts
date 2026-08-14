@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { CurrencyCode } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 function buildAdminParentInput(formData: {
@@ -15,16 +15,16 @@ function buildAdminParentInput(formData: {
   timezone?: string;
 }) {
   return {
-    phone: formData.phone || null,
-    facebook: formData.facebook || null,
-    whatsapp: formData.whatsapp || null,
-    twitter: formData.twitter || null,
-    nationality: formData.nationality || null,
-    address: formData.address || null,
-    invoiceType: formData.invoiceType || null,
-    feeAmount: formData.feeAmount || null,
-    currency: formData.currency || null,
-    timezone: formData.timezone || null,
+    phone: formData.phone ?? null,
+    facebook: formData.facebook ?? null,
+    whatsapp: formData.whatsapp ?? null,
+    twitter: formData.twitter ?? null,
+    nationality: formData.nationality ?? null,
+    address: formData.address ?? null,
+    invoiceType: formData.invoiceType ?? null,
+    feeAmount: formData.feeAmount ?? null,
+    currency: formData.currency ?? null,
+    timezone: formData.timezone ?? null,
   };
 }
 

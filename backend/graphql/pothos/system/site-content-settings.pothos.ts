@@ -3,8 +3,8 @@ import { AppPermission } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { SiteContentService, SiteContentValidationError } from "@/backend/services/storage/site-content.service";
-import type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types/storage/site-content.types";
+import { SiteContentService, SiteContentValidationError } from "@/backend/services";
+import type { SiteContentSelectType, SiteContentUpsertInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type SiteContentUpsertGraphQLInput = Omit<SiteContentUpsertInput, "updatedByUserId">;

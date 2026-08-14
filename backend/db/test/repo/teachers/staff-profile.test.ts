@@ -1,15 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { StaffProfileRepository } from "@/backend/db/repo";
-import type { ManagerProfileUpdateInput } from "@/backend/db/repo/teachers/staff-profile.repository";
+import { db } from "@/backend/db";
+import { type ManagerProfileUpdateInput, StaffProfileRepository } from "@/backend/db/repo/teachers";
 import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AccountStatus } from "@/backend/enum";
-import { PaginationArgs } from "@/backend/types";
+import { type DBTransaction, PaginationArgs } from "@/backend/types";
 
 function loc(en: string, ar?: string) {
   return { ar: ar ?? en, en };
@@ -215,12 +213,12 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
     await expectDirectoryRoleFilter(tx, "admin", [adminUser.id], [staffUser.id]);
   });
 
-  staffTest("filters by staff role (non-admin slugs)", async tx => {
+  staffTest("filters by manager role (non-admin slugs)", async tx => {
     const { user: adminUser } = await createStaffAndGroup(tx, "AdminNoMatch", "Admin X", `admin-x-${randomUUID()}`);
     const { user: staffUser } = await createStaffAndGroup(tx, "StaffMatch", "Staff Y", `staff-y-${randomUUID()}`);
     const { user: noGroupUser } = await createStaffUser(tx, "NoGroupMatch");
 
-    await expectDirectoryRoleFilter(tx, "staff", [staffUser.id, noGroupUser.id], [adminUser.id]);
+    await expectDirectoryRoleFilter(tx, "manager", [staffUser.id, noGroupUser.id], [adminUser.id]);
   });
 
   staffTest("filters by supervisor role", async tx => {

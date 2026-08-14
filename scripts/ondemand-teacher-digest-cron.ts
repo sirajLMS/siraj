@@ -10,7 +10,7 @@ import {
 
 import { OnDemandStatus, SchedulingMode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { QuotaNotificationService } from "@/backend/services/billing/quota-notification.service";
+import { QuotaNotificationService } from "@/backend/services";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 /** Maximum number of pending instances to process per digest run (unbounded SELECT guard). */

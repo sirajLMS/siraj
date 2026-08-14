@@ -1,9 +1,8 @@
-import { loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
-import { orchestrateSeedMany } from "@/backend/db/seeds/lib/orchestrate-seed-many";
-import { CurrencyCode } from "@/backend/enum";
+import { loadSeedConfig, orchestrateSeedMany, type SeedConfig } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { CurrencyHedgeService } from "@/backend/services/fx/currency-hedge.service";
+import { CurrencyHedgeService } from "@/backend/services";
 import type { CurrencyHedgeSelectType } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 function createHedgeMap(rows: CurrencyHedgeSelectType[]): Map<CurrencyCode, CurrencyHedgeSelectType> {
   const map = new Map<CurrencyCode, CurrencyHedgeSelectType>();

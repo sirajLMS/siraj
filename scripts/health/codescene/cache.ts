@@ -90,7 +90,7 @@ export function getFileMtime(filePath: string): number {
 
 export function getCachedMtime(filePath: string): number {
   loadCache();
-  return mtimeCache.get(filePath) || 0;
+  return mtimeCache.get(filePath) ?? 0;
 }
 
 export function updateCachedMtime(filePath: string, mtime: number): void {

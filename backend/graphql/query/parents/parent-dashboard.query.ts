@@ -6,7 +6,7 @@ import {
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { ParentDashboardService } from "@/backend/services/parent/parent-dashboard.service";
+import { ParentDashboardService } from "@/backend/services";
 
 gqlSchemaBuilder.queryField("parentDashboardSchedule", t =>
   t.field({

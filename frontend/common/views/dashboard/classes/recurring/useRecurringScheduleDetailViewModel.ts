@@ -116,7 +116,7 @@ async function updateRecurringScheduleRate(
     variables: {
       input: {
         recurringScheduleId,
-        hourlyRate: hourlyRate || null,
+        hourlyRate: hourlyRate ?? null,
         rateCurrency: rateCurrency ?? null,
       },
     },

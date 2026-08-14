@@ -1926,6 +1926,24 @@ export enum Gender {
   Male = 'MALE'
 }
 
+/** Input for creating a general user with permission group assignment */
+export type GeneralUserCreateInput = {
+  email: Scalars['String']['input'];
+  groupSlug: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  phone: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<AccountStatus>;
+};
+
+/** Result of general user creation with assigned permission group */
+export type GeneralUserCreateResult = {
+  __typename?: 'GeneralUserCreateResult';
+  assignedGroupSlug: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  user: Maybe<User>;
+};
+
 export type GenerateMeetingUrlInput = {
   durationMinutes: InputMaybe<Scalars['Int']['input']>;
   providerId: Scalars['String']['input'];
@@ -2837,6 +2855,8 @@ export type Mutation = {
   createClassSubject: Maybe<ClassSubject>;
   createCurrencyHedge: Maybe<CurrencyHedge>;
   createFolder: Maybe<FileOperationResult>;
+  /** Create a new user with a non-specialized permission group */
+  createGeneralUser: Maybe<GeneralUserCreateResult>;
   /** Create a new manager/staff account (System Admin only) */
   createManager: Maybe<ManagerOnboardingResult>;
   createManualInvoice: Maybe<ManualInvoiceResult>;
@@ -3177,6 +3197,11 @@ export type MutationCreateCurrencyHedgeArgs = {
 
 export type MutationCreateFolderArgs = {
   input: FolderCreateInput;
+};
+
+
+export type MutationCreateGeneralUserArgs = {
+  input: GeneralUserCreateInput;
 };
 
 
@@ -4726,7 +4751,7 @@ export type Query = {
   /** Fetches the global student directory with cross-relational data. */
   studentDirectory: Maybe<StudentDirectoryPayload>;
   /** Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity. */
-  studentMonthlyReport: Maybe<StudentMonthlyReport>;
+  studentMonthlyReport: StudentMonthlyReport;
   /** List only active/open quotas (status ACTIVE, remaining > 0) for a student */
   studentOpenQuotas: Maybe<Array<Quota>>;
   studentProfile: Maybe<StudentProfile>;
@@ -4754,7 +4779,7 @@ export type Query = {
   teacherFutureSchedule: Maybe<TeacherFutureSchedule>;
   teacherHandbookUrl: Maybe<TeacherHandbookUrl>;
   /** Aggregated monthly report for a single teacher: lessons taught, dues, and cancellation count. */
-  teacherMonthlyReport: Maybe<TeacherMonthlyReport>;
+  teacherMonthlyReport: TeacherMonthlyReport;
   teacherOwnProfile: Maybe<TeacherOwnProfile>;
   /** Get pending (unpaid) teacher due entries, optionally filtered by teacher */
   teacherPendingDues: Maybe<Array<TeacherDue>>;
@@ -7053,7 +7078,9 @@ export type UnpaidInvoicesSummary = {
 };
 
 export type UpdateManagerProfileInput = {
+  email: InputMaybe<Scalars['String']['input']>;
   hourlyRate: InputMaybe<Scalars['String']['input']>;
+  name: InputMaybe<Scalars['String']['input']>;
   phone: InputMaybe<Scalars['String']['input']>;
   rateCurrency: InputMaybe<CurrencyCode>;
   status: InputMaybe<AccountStatus>;
@@ -7306,6 +7333,7 @@ export type WhatsappAccountCreateInput = {
 
 export type WhatsappAccountUpdateInput = {
   displayName: InputMaybe<Scalars['LocalizedString']['input']>;
+  /** Display phone number (max 32 chars) */
   displayPhoneNumber: InputMaybe<Scalars['String']['input']>;
   isActive: InputMaybe<Scalars['Boolean']['input']>;
   portfolioMessagingLimitTier: InputMaybe<WhatsappLimitTier>;

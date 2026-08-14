@@ -46,6 +46,7 @@ export const dashboardStaffOnboardingEn: StaffOnboardingLabels = {
     processing: "Processing...",
     cancel: "Cancel",
     successMessage: "Account request submitted successfully. Pending approval from the main administrator.",
+    errorMessage: "Failed to create account. Please try again.",
   },
   metrics: {
     activeStaff: "Active Staff",

@@ -1,8 +1,10 @@
 "use client";
 
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import type { ComplaintQueueCardListSharedProps } from "@/frontend/common/views/dashboard/complaints/components/__shared__/complaintQueueCardListShared";
-import { buildQueueCardProps } from "@/frontend/common/views/dashboard/complaints/components/__shared__/complaintQueueCardListShared";
+import {
+  buildQueueCardProps,
+  type ComplaintQueueCardListSharedProps,
+} from "@/frontend/common/views/dashboard/complaints/components/__shared__/complaintQueueCardListShared";
 import { MobileCardList } from "@/frontend/mobile/components/ui";
 import { ComplaintQueueCardMobile } from "@/frontend/mobile/views/dashboard/complaints/components/complaintQueueCard.mobile";
 

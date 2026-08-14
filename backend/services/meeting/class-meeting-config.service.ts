@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
@@ -21,10 +20,11 @@ import type {
   ClassMeetingConfigReturnType,
   ClassMeetingConfigSelectType,
   ClassMeetingConfigSubmitInput,
+  DBTransaction,
   EffectiveMeetingReturnType,
+  MeetingConfigDetails,
   UpdateClassMeetingConfigInput,
-} from "@/backend/types/meeting/class-meeting-config.types";
-import type { MeetingConfigDetails } from "@/backend/types/meeting/meeting-config.types";
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ClassMeetingConfigService {

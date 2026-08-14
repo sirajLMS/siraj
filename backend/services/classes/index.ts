@@ -1,2 +1,2 @@
-export * from "@/backend/services/classes/class-catalog.service";
-export * from "@/backend/services/classes/lesson-report.service";
+export * from "./class-catalog.service";
+export * from "./lesson-report.service";

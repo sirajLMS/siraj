@@ -1,15 +1,15 @@
 import { beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
-import { createTestUser, runInRollback } from "@/backend/db/test/test-utils";
+import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
+import { UserRepository } from "@/backend/db/repo/users";
+import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   type UserOnboardingService,
   UserOnboardingService as UserOnboardingServiceImpl,
 } from "@/backend/services/user/user-onboarding.service";
-import type { GroupWithPermissionIds } from "@/backend/types/permissions/permission-management.types";
-import type { UserReturnType } from "@/backend/types/users/user.types";
+import type { GroupWithPermissionIds, UserReturnType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
@@ -144,7 +144,7 @@ describe("UserOnboardingService.createUserOfType", () => {
 
   test("supports dynamic groupSlug based on the extension", async () => {
     await runInRollback(async txContext => {
-      const actor = await createTestUser(txContext);
+      const actor = await createTestUserWithDefaults(txContext);
       const { hasPermissionSpy, existsByEmailSpy } = mockCreateUserSpies();
 
       type MyExtension = { kind: "admin" | "supervisor" };
@@ -176,7 +176,7 @@ describe("UserOnboardingService.createUserOfType", () => {
 
   test("writes optional profile fields (timezone + phone) to the users row", async () => {
     await runInRollback(async txContext => {
-      const actor = await createTestUser(txContext);
+      const actor = await createTestUserWithDefaults(txContext);
       const { hasPermissionSpy, existsByEmailSpy } = mockCreateUserSpies();
 
       const result = await UserOnboardingServiceImpl.createUserOfType<{ id: string; status: string }>(

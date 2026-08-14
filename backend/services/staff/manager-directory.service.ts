@@ -52,7 +52,7 @@ export namespace ManagerDirectoryService {
     }
 
     const cappedLimit = Math.min(Math.max(limit, 1), STAFF_DIRECTORY_MAX_LIMIT);
-    const trimmedSearch = search?.trim() || null;
+    const trimmedSearch = search?.trim() ?? null;
 
     return await StaffProfileRepository.getStaffDirectoryLite({
       search: trimmedSearch,

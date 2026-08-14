@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { CreditRepository, StudentRepository } from "@/backend/db/repo";
+import { CreditRepository } from "@/backend/db/repo/billing";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { AppPermission, CreditReason } from "@/backend/enum";
 import { ConflictError, DomainError, logger, NotFoundError, ValidationError } from "@/backend/lib";
 import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
@@ -11,6 +11,7 @@ import type {
   CreditTransactionReturnType,
   CreditTransactionSelectType,
   CreditTransactionSubmitInput,
+  DBTransaction,
   PaginationArgs,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";

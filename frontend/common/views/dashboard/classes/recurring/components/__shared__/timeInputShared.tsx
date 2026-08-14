@@ -1,7 +1,8 @@
 "use client";
 
 import { Controller } from "react-hook-form";
-import { AppTimePicker, timeInputOutlinedSx } from "@/frontend/common/components/ui/form";
+import { timeInputOutlinedSx } from "@/frontend/common/components/ui/form/field";
+import { AppTimePicker } from "@/frontend/common/components/ui/form/time";
 import type { TimeInputProps } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import { formatTimeValue, parseTimeValue } from "@/frontend/common/views/dashboard/classes/recurring/utils";
 

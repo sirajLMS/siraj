@@ -1,4 +1,4 @@
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { fileExists, fileInfoByPath } from "@/backend/storage/disk/gcp/operations/file.operations";
 import { directoryInfoByPath } from "@/backend/storage/disk/gcp/operations/folder.operations";
 import type { GcpContext, GenericOperationResult } from "@/backend/storage/disk/gcp/types";
@@ -73,7 +73,7 @@ export async function moveItems(
     } else {
       failures.push({
         path: sourcePath,
-        error: result.message || "Unknown error",
+        error: result.message ?? "Unknown error",
       });
     }
   }

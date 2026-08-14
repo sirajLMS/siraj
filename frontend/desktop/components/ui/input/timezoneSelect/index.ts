@@ -1,1 +1,1 @@
-export { TimezoneSelectDesktop } from "@/frontend/desktop/components/ui/input/timezoneSelect/timezoneSelect.desktop";
+export * from "./timezoneSelect.desktop";

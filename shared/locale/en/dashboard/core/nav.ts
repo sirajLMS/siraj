@@ -47,6 +47,7 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
   paymentCatalogs: "Payment Methods",
   feedbackManage: "Feedback",
   usersDirectory: "Users",
+  createUser: "Create User",
   meetingProviders: "Meeting Providers",
   billingParent: "Billing & Payments",
   billingManual: "Manual Invoice",

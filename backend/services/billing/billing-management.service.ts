@@ -1,18 +1,14 @@
 import { createHash } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import {
-  BillingRepository,
-  InvoicePaymentSubmissionRepository,
-  ParentRepository,
-  PermissionManagementRepository,
-  StudentRepository,
-} from "@/backend/db/repo";
+import { BillingRepository, InvoicePaymentSubmissionRepository } from "@/backend/db/repo/billing";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
+import { StudentRepository } from "@/backend/db/repo/students";
 import { invoices } from "@/backend/db/schema";
-import { AppPermission, type CurrencyCode, InvoicePaymentSubmissionStatus } from "@/backend/enum";
+import { AppPermission, InvoicePaymentSubmissionStatus } from "@/backend/enum";
 import { logger, NotFoundError } from "@/backend/lib";
-import { NotificationSyncService, PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
   assertInvoiceBelongsToParentUser,
   buildProofSnapshot,
@@ -26,7 +22,10 @@ import {
   buildInvoiceGeneratedPayloads,
   buildInvoiceStatusChangedPayloads,
 } from "@/backend/services/notification/notification-payloads.builders";
+import { NotificationSyncService } from "@/backend/services/system/notification-sync.service";
 import type * as Types from "@/backend/types";
+import type { DBTransaction } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseInvoiceStatus, parseInvoiceType } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -627,8 +626,8 @@ export namespace BillingManagementService {
     }
 
     const hasBillingAccess =
-      context?.isSuperAdmin ||
-      context?.permissions?.includes(AppPermission.INVOICES_LIST) ||
+      context?.isSuperAdmin ??
+      context?.permissions?.includes(AppPermission.INVOICES_LIST) ??
       context?.permissions?.includes(AppPermission.BILLING_VIEW_UNPAID_INVOICES);
 
     if (!hasBillingAccess) {

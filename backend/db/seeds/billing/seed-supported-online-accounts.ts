@@ -1,10 +1,10 @@
-import { seedCatalogLogoUrls } from "@/backend/db/seeds/lib/logo-seed-helper";
 import {
   ONLINE_ACCOUNT_CATALOG_SEEDS,
   type OnlineAccountCatalogSeed,
-} from "@/backend/db/seeds/lib/payment-catalog-factory";
+  seedCatalogLogoUrls,
+} from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
+import { PaymentCatalogService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet() {

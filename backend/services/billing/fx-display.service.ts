@@ -1,7 +1,6 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import { BillingRepository } from "@/backend/db/repo";
-import { CurrencyCode } from "@/backend/enum";
-import type { DisplayAmountReturnType } from "@/backend/types";
+import { BillingRepository } from "@/backend/db/repo/billing";
+import type { DBTransaction, DisplayAmountReturnType } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 function multiplyAmountByRate(amount: string, rate: string): string {
   const numericAmount = Number.parseFloat(amount);

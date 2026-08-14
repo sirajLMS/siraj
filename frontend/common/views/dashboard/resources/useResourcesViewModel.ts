@@ -17,8 +17,7 @@ import type {
   LearningResourceRow,
   ResourceUploadFormData,
 } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
-import type { ResourcesLabels } from "@/shared/locale";
-import { Translation, useAppTranslation } from "@/shared/locale";
+import { type ResourcesLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export type {
   LearningResourceRow,

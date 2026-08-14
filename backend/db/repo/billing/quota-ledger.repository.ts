@@ -1,13 +1,9 @@
 import { desc, eq, inArray, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import type { db } from "@/backend/db/drizzleDb";
-import { queryWithPagination } from "@/backend/db/query.extensions";
+import { type db, queryDb, queryWithPagination } from "@/backend/db";
 import { quotaLedger } from "@/backend/db/schema";
 import type { QuotaLedgerReason } from "@/backend/enum";
 import { QuotaLedgerError } from "@/backend/lib/errors";
-import type { QuotaLedgerSelectType } from "@/backend/types/billing/quota.types";
-import type { PaginationArgs } from "@/backend/types/shared/pagination.types";
+import type { DBTransaction, PaginationArgs, QuotaLedgerSelectType } from "@/backend/types";
 
 type ReadExecutor = DBTransaction | typeof db;
 

@@ -15,7 +15,7 @@
  */
 
 export * from "./IRedisService";
-export { LocalRedisAdapter } from "./LocalRedisAdapter";
+export * from "./LocalRedisAdapter";
 export * from "./RedisServiceFactory";
-export { SessionRedisService } from "./SessionRedisService";
-export { UpstashRedisAdapter } from "./UpstashRedisAdapter";
+export * from "./SessionRedisService";
+export * from "./UpstashRedisAdapter";

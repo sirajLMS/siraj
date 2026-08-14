@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
@@ -15,7 +14,7 @@ import {
 } from "@/backend/services/meeting/channels/IMeetingChannel";
 import { getMeetingChannel, providerKindToSlug } from "@/backend/services/meeting/channels/MeetingChannelFactory";
 import { buildMeetingProviderCatalogSnapshot } from "@/backend/services/meeting/meeting-config-mask";
-import type { MeetingConfigDetails, MeetingConfigSnapshot } from "@/backend/types/meeting/meeting-config.types";
+import type { DBTransaction, MeetingConfigDetails, MeetingConfigSnapshot } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 const MAX_RETRY_ATTEMPTS = 3;

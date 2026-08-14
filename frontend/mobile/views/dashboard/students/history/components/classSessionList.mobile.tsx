@@ -1,13 +1,15 @@
 "use client";
 
-import type { Theme } from "@mui/material";
-import { Box, Typography } from "@mui/material";
+import { Box, type Theme, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { formatTime } from "@/frontend/common/components/intl/dateFormat";
 import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import type { ClassSession, ClassSessionListProps } from "@/frontend/common/views/dashboard/students/history/types";
-import { isJoinableClassSession } from "@/frontend/common/views/dashboard/students/history/types";
+import {
+  type ClassSession,
+  type ClassSessionListProps,
+  isJoinableClassSession,
+} from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";

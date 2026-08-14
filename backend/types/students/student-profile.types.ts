@@ -1,6 +1,6 @@
-import type { AppLanguage, CurrencyCode, Gender, StudentStatus } from "@/backend/enum";
-import type { StudentClassHistory } from "@/backend/types/students/student.types";
-import type { StudentUpcomingClassesResult } from "@/backend/types/students/student-status.types";
+import type { AppLanguage, Gender, StudentStatus } from "@/backend/enum";
+import type { StudentClassHistory, StudentUpcomingClassesResult } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type StudentProfileReturnType = {

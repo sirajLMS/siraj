@@ -17,10 +17,10 @@ import type {
 import { type StaffDirectoryLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 function mapManagerRole(roleSlug: string | null | undefined): ManagerRole {
-  if (!roleSlug) return "staff";
+  if (!roleSlug) return "manager";
   if (roleSlug.includes("admin")) return "admin";
   if (roleSlug.includes("supervisor")) return "supervisor";
-  return "staff";
+  return "manager";
 }
 
 function mapManagerStatus(status: string | null | undefined): ManagerStatus {

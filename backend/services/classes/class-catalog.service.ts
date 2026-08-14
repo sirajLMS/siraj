@@ -1,4 +1,3 @@
-import type { DBTransaction } from "@/backend/db/db.types";
 import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { SubjectResourceRepository } from "@/backend/db/repo/classes/subject-resource.repository";
@@ -7,6 +6,7 @@ import type {
   ClassCategorySubmitInput,
   ClassSubjectReturnType,
   ClassSubjectSubmitInput,
+  DBTransaction,
   SubjectResourceAttachInput,
   SubjectResourceReturnType,
 } from "@/backend/types";

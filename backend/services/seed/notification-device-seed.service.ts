@@ -9,11 +9,11 @@
  *
  * @see backend/db/seeds/users/seed-user-device-tokens.ts
  */
-import type { DBTransaction } from "@/backend/db/db.types";
+
 import { NotificationRepository } from "@/backend/db/repo/notifications/notification.repository";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { RegisterDeviceTokenInput, UserDeviceTokenSelectType } from "@/backend/types";
+import type { DBTransaction, RegisterDeviceTokenInput, UserDeviceTokenSelectType } from "@/backend/types";
 
 export namespace NotificationDeviceSeedService {
   /** Idempotently register one demo device token for a user. */

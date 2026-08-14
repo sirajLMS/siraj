@@ -8,9 +8,9 @@ import type {
   MeetingJoinEmptyRole,
 } from "@/frontend/common/components/ui/display/meetingConfig/types/meetingJoinAction.types";
 import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
 import type { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { MeetingConfigDisplayLabels, MeetingConfigJoinLabels } from "@/shared/locale";
 
 // Re-export the canonical props types so common-side importers can resolve them from the lib path.

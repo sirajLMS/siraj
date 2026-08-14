@@ -2,13 +2,16 @@
 
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import type { DBTransaction } from "@/backend/db/db.types";
 import { invoices, parents, payments, students, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import { CurrencyCode } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import type { InvoiceInsertType, PaymentInsertType } from "@/backend/types";
-import type { PaymentMethodTransactionSnapshot } from "@/backend/types/billing/payment-method.types";
+import type {
+  DBTransaction,
+  InvoiceInsertType,
+  PaymentInsertType,
+  PaymentMethodTransactionSnapshot,
+} from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function createTestParent(args: { tx: DBTransaction; suffix: string; now: Date }) {

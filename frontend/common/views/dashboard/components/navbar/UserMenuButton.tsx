@@ -6,8 +6,7 @@ import { Box, ButtonBase, Divider, Menu, MenuItem, Typography } from "@mui/mater
 import type React from "react";
 import { useMemo, useState } from "react";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
-import type { SimulatablePermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type SimulatablePermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { simulatablePermissionGroupsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAuth } from "@/frontend/common/hooks/useAuth";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";

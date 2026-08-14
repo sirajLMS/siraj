@@ -1,4 +1,4 @@
-export { classMeetingConfigs } from "@/backend/db/schema/meeting/class-meeting-configs";
-export { meetingProviderTokens } from "@/backend/db/schema/meeting/meeting-provider-tokens";
-export { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers";
-export { userMeetingConfigs } from "@/backend/db/schema/meeting/user-meeting-configs";
+export * from "./class-meeting-configs";
+export * from "./meeting-provider-tokens";
+export * from "./meeting-providers";
+export * from "./user-meeting-configs";

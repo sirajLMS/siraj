@@ -1,5 +1,5 @@
 import { del, head } from "@vercel/blob";
-import { StorageDbRepository } from "@/backend/db/repo";
+import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import {
   type DeleteFnParams,

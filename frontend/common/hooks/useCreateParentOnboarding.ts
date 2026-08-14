@@ -8,8 +8,8 @@ import { createParentMutationDocument } from "@/frontend/common/graphql/sharedDo
 import { usePersistMeetingConfig } from "@/frontend/common/hooks/usePersistMeetingConfig";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
+import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
-import type { ParentOnboardingFormData } from "@/frontend/common/views/dashboard/admin/parents/onboarding/types";
 import { formDetailsToInput } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
 
 function buildParentInput(formData: ParentOnboardingFormData): ParentOnboardingInput {
@@ -17,20 +17,20 @@ function buildParentInput(formData: ParentOnboardingFormData): ParentOnboardingI
     name: formData.name,
     email: formData.email,
     avatarUrl: formData.avatarUrl ?? null,
-    phone: formData.phone || null,
-    nationality: formData.nationality || null,
-    address: formData.address || null,
-    whatsapp: formData.whatsapp || null,
-    facebook: formData.facebook || null,
-    twitter: formData.twitter || null,
+    phone: formData.phone ?? null,
+    nationality: formData.nationality ?? null,
+    address: formData.address ?? null,
+    whatsapp: formData.whatsapp ?? null,
+    facebook: formData.facebook ?? null,
+    twitter: formData.twitter ?? null,
     invoiceType: formData.invoiceType ?? null,
-    feeAmount: formData.feeAmount || null,
+    feeAmount: formData.feeAmount ?? null,
     initialPayinMethod: formData.payinMethod?.type
       ? {
           type: formData.payinMethod.type,
           direction: PaymentDirection.Payin,
           isDefault: true,
-          label: formData.payinMethod.label?.trim() || null,
+          label: formData.payinMethod.label?.trim() ?? null,
           details: formDetailsToInput(formData.payinMethod.details ?? {}),
         }
       : null,

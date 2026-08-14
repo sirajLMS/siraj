@@ -1,15 +1,17 @@
 "use client";
 
-import { alpha } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { classHref, profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
+import {
+  STATUS_ROW_SX,
+  statusRowClassName,
+} from "@/frontend/common/views/dashboard/classes/status/tracking/components/__shared__/statusTrackingGridShared";
 import { STATUS_LABEL_KEYS } from "@/frontend/common/views/dashboard/classes/status/tracking/constants/statusLabelKeys.constants";
 import { StatusAction } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusBadgeAction";
 import {
   computeSessionStatus,
   formatScheduleRange,
-  SessionStatus,
   type StatusTrackingDataGridProps,
   type StatusTrackingRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
@@ -77,7 +79,7 @@ function createCourseColumn(labels: StatusTrackingDataGridProps["labels"]) {
     renderCell: ({ row }: { row: StatusTrackingRow }) =>
       renderProfileLinkCell({
         type: "class",
-        name: row.courseName?.trim() || "—",
+        name: row.courseName?.trim() ?? "—",
         href: row.id ? classHref(row.id) : undefined,
         avatarUrl: row.avatarUrl,
         avatarSize: 40,
@@ -230,19 +232,8 @@ export function StatusTrackingDataGridMobile({
       rowHeight={100}
       ariaLabel="status-tracking-table"
       emptyMessage={labels.noEntries}
-      getRowClassName={({ row }) =>
-        computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState) === SessionStatus.SUSPENDED_PENDING
-          ? "status-row-suspended"
-          : ""
-      }
-      sx={{
-        "& .status-row-suspended": {
-          backgroundColor: theme => alpha(theme.palette.status.blocked, 0.08),
-          "&:hover": {
-            backgroundColor: theme => alpha(theme.palette.status.blocked, 0.12),
-          },
-        },
-      }}
+      getRowClassName={({ row }) => statusRowClassName(row)}
+      sx={STATUS_ROW_SX}
       paginationOptions={{ mode: "client" }}
     />
   );

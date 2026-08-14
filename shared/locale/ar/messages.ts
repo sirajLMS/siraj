@@ -81,6 +81,7 @@ import { dashboardTeacherProfileAr } from "@/shared/locale/ar/dashboard/teachers
 import { dashboardTeacherReassignmentAr } from "@/shared/locale/ar/dashboard/teachers/reassignment.ts";
 import { dashboardTeacherStudentsAr } from "@/shared/locale/ar/dashboard/teachers/students.ts";
 import { dashboardTeacherWeeklyScheduleAr } from "@/shared/locale/ar/dashboard/teachers/weeklySchedule.ts";
+import { dashboardUsersCreateUserAr } from "@/shared/locale/ar/dashboard/users/createUser.ts";
 import { dashboardUsersDirectoryParentAr } from "@/shared/locale/ar/dashboard/users/directory.ts";
 import { emailsAr } from "@/shared/locale/ar/emails";
 import { errorsAr } from "@/shared/locale/ar/errors";
@@ -191,6 +192,7 @@ export const arMessages: Translations = {
     paymentCatalogs: dashboardPaymentCatalogsAr,
     paymentCatalogsParent: dashboardPaymentCatalogsParentAr,
     usersDirectoryParent: dashboardUsersDirectoryParentAr,
+    usersCreateUser: dashboardUsersCreateUserAr,
     permissions: dashboardPermissionsAr,
     settings: dashboardSettingsAr,
     reports: dashboardReportsAr,

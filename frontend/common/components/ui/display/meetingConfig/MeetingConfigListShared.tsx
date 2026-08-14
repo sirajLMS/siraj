@@ -7,9 +7,9 @@ import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import { Box, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import type * as React from "react";
 import type { MeetingConfigListProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 // ── Slot types ──────────────────────────────────────────────────────────────

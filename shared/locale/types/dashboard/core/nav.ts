@@ -50,6 +50,7 @@ export interface DashboardNavigationLabels {
   readonly paymentCatalogs: string;
   readonly feedbackManage: string;
   readonly usersDirectory: string;
+  readonly createUser: string;
   readonly meetingProviders: string;
   readonly billingParent: string;
   readonly billingManual: string;

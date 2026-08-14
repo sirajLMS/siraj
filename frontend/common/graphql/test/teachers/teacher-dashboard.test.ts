@@ -53,7 +53,7 @@ async function clearClassesOnDate(token: string, dateVal: string) {
     },
   });
 
-  const list = result.data?.dailyScheduleList || [];
+  const list = result.data?.dailyScheduleList ?? [];
   const itemsToDelete = list.map(item => item.id).filter((id): id is NonNullable<typeof id> => id !== null);
   await Promise.all(
     itemsToDelete.map(classInstanceId =>
@@ -272,9 +272,9 @@ describe("GraphQL Teacher Dashboard Integration Tests", () => {
         studentUserId,
         teacherUserId,
         parentUserId,
-        studentId: studentId || "",
-        teacherId: teacherId || "",
-        parentId: parentId || "",
+        studentId: studentId ?? "",
+        teacherId: teacherId ?? "",
+        parentId: parentId ?? "",
       });
     }
   });

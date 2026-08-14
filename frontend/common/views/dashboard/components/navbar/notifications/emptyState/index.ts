@@ -1,1 +1,1 @@
-export { NotificationDrawerEmptyState } from "./NotificationDrawerEmptyState";
+export * from "./NotificationDrawerEmptyState";

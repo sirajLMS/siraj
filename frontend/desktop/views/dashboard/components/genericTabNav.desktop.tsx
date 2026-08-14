@@ -2,8 +2,10 @@
 
 import { Box, Tab, Tabs, Typography } from "@mui/material";
 import Link from "next/link";
-import type { GenericTabNavVariantProps } from "@/frontend/common/views/dashboard/components/genericTabNav.types";
-import { isDateTabNavProps } from "@/frontend/common/views/dashboard/components/genericTabNav.types";
+import {
+  type GenericTabNavVariantProps,
+  isDateTabNavProps,
+} from "@/frontend/common/views/dashboard/components/genericTabNav.types";
 
 export type GenericTabNavDesktopViewProps = GenericTabNavVariantProps<string>;
 

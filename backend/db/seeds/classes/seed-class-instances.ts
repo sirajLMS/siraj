@@ -9,7 +9,7 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { ClassSessionService } from "@/backend/services/session/class-session.service";
+import { ClassSessionService } from "@/backend/services";
 import type {
   ClassInstanceInsertType,
   ClassInstanceSelectType,

@@ -10,13 +10,13 @@ import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/mee
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
-import { isUrlAllowedByProvider } from "@/frontend/common/lib/meeting-config";
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import {
   getRecurringMeetingConfigErrorKey,
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
+import { isUrlAllowedByProvider } from "@/shared/lib/meeting-config";
 import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 
 export type RecurringMeetingConfigSectionProps = {
@@ -229,7 +229,7 @@ export function RecurringMeetingConfigSection({
           value="existing"
           control={<Radio />}
           label={t.selectLabel}
-          disabled={disabled || options.length === 0}
+          disabled={disabled ?? options.length === 0}
         />
         <FormControlLabel value="new" control={<Radio />} label={t.createNewConfig} disabled={disabled} />
       </RadioGroup>

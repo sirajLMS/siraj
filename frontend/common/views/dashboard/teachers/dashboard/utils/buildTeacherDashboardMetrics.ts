@@ -1,5 +1,10 @@
-import type { SvgIconComponent } from "@mui/icons-material";
-import { CalendarTodayOutlined, EventBusyOutlined, SensorsOutlined, VerifiedOutlined } from "@mui/icons-material";
+import {
+  CalendarTodayOutlined,
+  EventBusyOutlined,
+  SensorsOutlined,
+  type SvgIconComponent,
+  VerifiedOutlined,
+} from "@mui/icons-material";
 import type { TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics } from "@/frontend/common/graphql/generated/gql/operations";
 import type { MetricItem, MetricItemVariant } from "@/frontend/common/types/shared.types";
 import type { TeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";

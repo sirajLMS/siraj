@@ -1,8 +1,7 @@
 "use client";
 
 import { useMediaQuery, useTheme } from "@mui/material";
-import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import {
   ViewportContext,
   type ViewportContextType,

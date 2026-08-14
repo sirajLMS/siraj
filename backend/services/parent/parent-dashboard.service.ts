@@ -1,4 +1,4 @@
-import { ParentRepository } from "@/backend/db/repo";
+import { ParentRepository } from "@/backend/db/repo/parents";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { cachedRead } from "@/backend/services/cache";

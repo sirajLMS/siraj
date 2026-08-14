@@ -1,8 +1,7 @@
 "use client";
 
 import type { SvgIconComponent } from "@mui/icons-material";
-import type { SxProps } from "@mui/material";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, type SxProps, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactElement } from "react";
 import { QuotaAudienceCard } from "@/frontend/common/views/dashboard/students/quota/audience/QuotaAudienceCard";

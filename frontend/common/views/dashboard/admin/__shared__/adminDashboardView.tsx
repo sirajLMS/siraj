@@ -4,7 +4,7 @@ import type { AdminMetricKey, MetricItem, TeacherFilterItem } from "@/frontend/c
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { ADMIN_METRIC_DEFINITIONS } from "@/frontend/common/views/dashboard/admin/home/utils/adminDashboardMetrics";
 import { DashboardView } from "@/frontend/common/views/dashboard/dashboard/DashboardView";
-import type { DashboardRole } from "@/frontend/common/views/dashboard/dashboard/useDashboardViewModel";
+import type { DashboardRole } from "@/frontend/common/views/dashboard/dashboard/dashboardRoleHelpers";
 import type { ScheduleOverviewData } from "@/frontend/common/views/dashboard/types/dashboard";
 import type { AdminDashboardLabels } from "@/shared/locale";
 

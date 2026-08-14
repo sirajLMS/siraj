@@ -1,4 +1,4 @@
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { NotificationChannel } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import type { CommunicationPayload, NotificationMetadata } from "@/backend/types";

@@ -1,6 +1,7 @@
-import { ImpersonationRepository, SessionRepository, UserRepository } from "@/backend/db/repo";
-import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
-import { generateAccessToken, generateImpersonationAccessToken } from "@/backend/lib/auth/jwt";
+import { ImpersonationRepository } from "@/backend/db/repo/auth";
+import { SessionRepository } from "@/backend/db/repo/shared";
+import { UserRepository } from "@/backend/db/repo/users";
+import { type CustomJWTPayload, generateAccessToken, generateImpersonationAccessToken } from "@/backend/lib/auth/jwt";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { logger } from "@/backend/lib/logger";
 import {

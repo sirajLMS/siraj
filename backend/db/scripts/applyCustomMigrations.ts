@@ -188,7 +188,7 @@ function computeDelta(current: ManifestEntry[], previous: ManifestEntry[]): Mani
   const prev = indexByFile(previous);
   return current.filter(entry => {
     const old = prev.get(entry.file);
-    return !old || old.sha256 !== entry.sha256;
+    return old?.sha256 !== entry.sha256;
   });
 }
 

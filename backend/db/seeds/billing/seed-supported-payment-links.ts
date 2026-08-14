@@ -1,10 +1,6 @@
-import { seedCatalogLogoUrls } from "@/backend/db/seeds/lib/logo-seed-helper";
-import {
-  PAYMENT_LINK_CATALOG_SEEDS,
-  type PaymentLinkCatalogSeed,
-} from "@/backend/db/seeds/lib/payment-catalog-factory";
+import { PAYMENT_LINK_CATALOG_SEEDS, type PaymentLinkCatalogSeed, seedCatalogLogoUrls } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { PaymentCatalogService } from "@/backend/services/payment-method/payment-catalog.service";
+import { PaymentCatalogService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet() {

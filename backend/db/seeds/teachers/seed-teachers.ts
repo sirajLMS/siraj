@@ -8,10 +8,10 @@ import {
   shouldSeedExtendedFiles,
   TEACHER_AVATAR_FILES,
 } from "@/backend/db/seeds/lib";
-import { CurrencyCode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PersonaSeedService } from "@/backend/services/seed/persona-seed.service";
+import { PersonaSeedService } from "@/backend/services";
 import type { TimezoneSelectType, UserSelectType } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 function resolveTimezone(timezones: TimezoneSelectType[], ianaId: string): TimezoneSelectType {
   const match = timezones.find(t => t.ianaId === ianaId);
@@ -25,7 +25,7 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneSele
   logger.info("Seeding system teachers...");
   const seedConfig = config ?? loadSeedConfig();
 
-  const defaultTimezone = timezones.find(t => t.ianaId === "UTC") || timezones[0];
+  const defaultTimezone = timezones.find(t => t.ianaId === "UTC") ?? timezones[0];
   if (!defaultTimezone) {
     throw new Error("No timezones found in seed data.");
   }

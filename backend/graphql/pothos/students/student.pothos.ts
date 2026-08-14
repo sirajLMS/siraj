@@ -8,15 +8,15 @@ import {
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
-import type {
-  PartialStudentUpdateInput,
-  StudentCreateInput,
-  StudentFilterArgs,
-  StudentReturnType,
-  StudentsOrderByClause,
-  StudentsWithFiltersResponse,
+import {
+  type PartialStudentUpdateInput,
+  type StudentCreateInput,
+  type StudentFilterArgs,
+  type StudentReturnType,
+  type StudentsOrderByClause,
+  StudentsOrderByColumn,
+  type StudentsWithFiltersResponse,
 } from "@/backend/types";
-import { StudentsOrderByColumn } from "@/backend/types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

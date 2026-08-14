@@ -1,13 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
-import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
+import { QuotaLedgerRepository, QuotaRepository } from "@/backend/db/repo/billing";
 import { quotas } from "@/backend/db/schema";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
-import { QuotaService } from "@/backend/services/billing/quota.service";
+import { QuotaService } from "@/backend/services";
 import type { QuotaSelectType, QuotaSubmitInput } from "@/backend/types";
 
 describe("Quota Expiry Sweeper Logic", () => {

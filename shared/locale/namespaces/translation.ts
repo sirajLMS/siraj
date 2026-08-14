@@ -87,6 +87,7 @@ import { DashboardTeacherProfile } from "@/shared/locale/namespaces/dashboard/te
 import { DashboardTeacherReassignment } from "@/shared/locale/namespaces/dashboard/teachers/reassignment.namespace";
 import { DashboardTeacherStudents } from "@/shared/locale/namespaces/dashboard/teachers/students.namespace";
 import { DashboardTeacherWeeklySchedule } from "@/shared/locale/namespaces/dashboard/teachers/weeklySchedule.namespace";
+import { DashboardUsersCreateUser } from "@/shared/locale/namespaces/dashboard/users/createUser.namespace";
 import { DashboardUsersDirectoryParent } from "@/shared/locale/namespaces/dashboard/users/directory.namespace";
 import { Emails } from "@/shared/locale/namespaces/emails/emails.namespace";
 import { Errors } from "@/shared/locale/namespaces/errors/errors.namespace";
@@ -177,6 +178,7 @@ export const Translation = {
     ParentStudents: DashboardParentStudents,
     ParentsDirectory: DashboardParentsDirectory,
     UsersDirectoryParent: DashboardUsersDirectoryParent,
+    UsersCreateUser: DashboardUsersCreateUser,
     PaymentCatalogs: DashboardPaymentCatalogs,
     PaymentCatalogsParent: DashboardPaymentCatalogsParent,
     Permissions: DashboardPermissions,

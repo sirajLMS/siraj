@@ -1,7 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
 import {
   classInstances,
   parents,
@@ -14,8 +13,14 @@ import {
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
-import type { ParentEntity, StudentProgressSelectType, StudentSelectType, TeacherSelectType } from "@/backend/types";
-import type { ClassInstanceSelectType } from "@/backend/types/classes/class-instance-detail.types";
+import type {
+  ClassInstanceSelectType,
+  DBTransaction,
+  ParentEntity,
+  StudentProgressSelectType,
+  StudentSelectType,
+  TeacherSelectType,
+} from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 async function insertUser(tx: DBTransaction, now: Date, name: string, prefix: string) {

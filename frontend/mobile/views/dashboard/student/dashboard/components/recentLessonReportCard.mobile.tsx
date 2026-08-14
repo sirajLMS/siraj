@@ -132,8 +132,8 @@ export function RecentLessonReportCardMobile({
   locale,
   onAddReflection,
 }: Readonly<RecentLessonReportCardMobileProps>) {
-  const subjectName = report.subjectName?.trim() || "—";
-  const teacherName = report.teacherName?.trim() || "—";
+  const subjectName = report.subjectName?.trim() ?? "—";
+  const teacherName = report.teacherName?.trim() ?? "—";
   const statusLabel = resolveLessonReportStatusLabel(report.status, lessonReportStatusLabels);
   const durationLabel = formatRecentLessonReportDuration(report.durationMinutes);
 

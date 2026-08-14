@@ -4,8 +4,19 @@ import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import VideocamOffOutlinedIcon from "@mui/icons-material/VideocamOffOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
-import type { ButtonProps } from "@mui/material";
-import { Alert, Avatar, alpha, Box, Button, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Alert,
+  Avatar,
+  alpha,
+  Box,
+  Button,
+  type ButtonProps,
+  Chip,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import type * as React from "react";
 import type { ReactElement, ReactNode } from "react";
 import type {
@@ -72,7 +83,7 @@ function renderIconVariant(
           component={Link}
           href={setupHref}
           id={ctx.id}
-          size={opts.iconButtonSize === null ? undefined : opts.iconButtonSize}
+          size={opts.iconButtonSize ?? undefined}
           aria-label={ctx.t.setupLink}
           sx={theme => ({
             ...(opts.iconButtonSize === null ? { width: 40, height: 40 } : {}),
@@ -95,7 +106,7 @@ function renderIconVariant(
         <span>
           <IconButton
             id={ctx.id}
-            size={opts.iconButtonSize === null ? undefined : opts.iconButtonSize}
+            size={opts.iconButtonSize ?? undefined}
             disabled={!ctx.hasUrl}
             onClick={handleJoin}
             aria-label={ctx.buttonLabel}

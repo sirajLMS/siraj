@@ -5,8 +5,6 @@ import { CurrencyDisplayShared } from "@/frontend/common/components/ui/display/c
 import type { CurrencyDisplayProps } from "@/frontend/common/components/ui/display/currencyDisplay/types/currencyDisplay.types";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
 
-export type { CurrencyDisplayProps } from "@/frontend/common/components/ui/display/currencyDisplay/types/currencyDisplay.types";
-
 /** Default typography variant for the viewport-agnostic common currency display. */
 const DEFAULT_TYPOGRAPHY_VARIANT = "labelMd" as const;
 

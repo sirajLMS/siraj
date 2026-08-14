@@ -11,8 +11,7 @@
  * source of truth for pagination math.
  */
 
-import type { PageInfo, PaginationInput } from "@/backend/types";
-import { PaginationArgs } from "@/backend/types";
+import { type PageInfo, PaginationArgs, type PaginationInput } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
 
 /**

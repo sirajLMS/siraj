@@ -370,7 +370,7 @@ async function printFileDuplicationDetails(options: {
   authHeader: string;
 }): Promise<DuplicationFileDetails | null> {
   const { file, authHeader } = options;
-  const blockCount = file.measures.find(m => m.metric === "duplicated_blocks")?.value || "0";
+  const blockCount = file.measures.find(m => m.metric === "duplicated_blocks")?.value ?? "0";
   globalThis.console.log(`${COLORS.NC}${file.path} ${COLORS.YELLOW}(${blockCount} duplicated blocks)${COLORS.NC}`);
 
   const dupUrl = `${CONFIG.SONAR_HOST}/api/duplications/show?key=${file.key}`;
@@ -395,7 +395,7 @@ async function printFileDuplicationDetails(options: {
       for (const block of group.blocks) {
         const refKey = "_ref";
         const refFile = block[refKey] ? dupData.files[block[refKey]] : null;
-        const refPath = refFile ? refFile.name || block[refKey] || "unknown" : file.path;
+        const refPath = refFile ? ((refFile.name || block[refKey]) ?? "unknown") : file.path;
         globalThis.console.log(
           `    ${COLORS.CYAN}→${COLORS.NC} ${refPath} (lines ${block.from}-${block.from + block.size - 1})`
         );

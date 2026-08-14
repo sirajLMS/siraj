@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { ComplaintResponseRepository } from "@/backend/db/repo";
+import { db } from "@/backend/db";
+import { ComplaintResponseRepository } from "@/backend/db/repo/complaints";
 import { complaintResponses, complaints } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { ComplaintStatus } from "@/backend/enum";
+import type { DBTransaction } from "@/backend/types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
   let errorCaught: unknown = null;

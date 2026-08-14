@@ -1,1 +1,1 @@
-export * from "@/backend/graphql/pothos/whatsapp/whatsapp-account.pothos";
+export * from "./whatsapp-account.pothos";

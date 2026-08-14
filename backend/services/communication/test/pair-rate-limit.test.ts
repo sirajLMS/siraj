@@ -53,6 +53,13 @@ await mock.module("@/backend/lib/field-encryption", () => ({
   decryptField: (val: string) => val,
 }));
 
+await mock.module("@/backend/lib/whatsapp-constants", () => ({
+  MAX_CONCURRENT_CALLS: 10,
+  FETCH_TIMEOUT_MS: 10_000,
+  readErrorBody: async () => undefined,
+  resolveGraphApiContextFromEnv: async () => ({}),
+}));
+
 // Mock the entire system barrel to avoid pulling in real DB services during test
 await mock.module("@/backend/services/system", () => ({
   resolveEnvConfig: async (key: string) => {
@@ -117,6 +124,17 @@ await mock.module("@/backend/db/repo/notifications/notification.repository", () 
   },
 }));
 
+await mock.module("@/backend/db/repo/whatsapp", () => ({
+  WhatsappAccountRepository: {
+    findFirstActiveForCredentials: async () => ({
+      id: "[CARD_REDACTED]-[CARD_REDACTED]",
+      encryptedAccessToken: "test-token",
+      phoneNumberId: "phone-id-123",
+      isActive: true,
+    }),
+  },
+}));
+
 await mock.module("@/backend/db/schema", () => ({
   whatsappAccounts: {
     id: "wa",
@@ -124,6 +142,8 @@ await mock.module("@/backend/db/schema", () => ({
     encryptedAccessToken: "encryptedAccessToken",
     phoneNumberId: "phoneNumberId",
   },
+  rateLimitCache: {},
+  sessionCache: {},
 }));
 
 const mockLimit = async (): Promise<unknown[]> => [];

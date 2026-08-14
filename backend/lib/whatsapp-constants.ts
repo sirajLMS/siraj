@@ -5,7 +5,7 @@
  * account service's `executeGraphApiFetch` helper.
  */
 
-import { resolveEnvConfig } from "@/backend/services/system";
+import { resolveEnvConfig } from "@/backend/services";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /** Maximum concurrent Graph API calls per batch / fan-out (P1). */

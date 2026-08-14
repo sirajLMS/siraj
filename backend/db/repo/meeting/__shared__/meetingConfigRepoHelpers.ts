@@ -1,6 +1,5 @@
-import type { Column } from "drizzle-orm";
-import { eq, isNull } from "drizzle-orm";
-import type { MeetingConfigDetails } from "@/backend/types/meeting";
+import { type Column, eq, isNull } from "drizzle-orm";
+import type { MeetingConfigDetails } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**

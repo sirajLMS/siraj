@@ -5,8 +5,10 @@ import { FormProvider } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
-import type { ReadOnlyStatusCardSharedOptions } from "@/frontend/common/views/dashboard/students/status/components/__shared__/studentStatusShared";
-import { ReadOnlyStatusCardShared } from "@/frontend/common/views/dashboard/students/status/components/__shared__/studentStatusShared";
+import {
+  ReadOnlyStatusCardShared,
+  type ReadOnlyStatusCardSharedOptions,
+} from "@/frontend/common/views/dashboard/students/status/components/__shared__/studentStatusShared";
 import { StudentStatusLabelsProvider } from "@/frontend/common/views/dashboard/students/status/studentStatusLabelsContext";
 import type { StudentStatusPageData } from "@/frontend/common/views/dashboard/students/status/types";
 import type { StudentStatusViewModel } from "@/frontend/common/views/dashboard/students/status/useStudentStatusViewModel";

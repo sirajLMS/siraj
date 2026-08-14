@@ -1,8 +1,7 @@
 import { loadSeedConfig, resolveAssetPath, type SeedConfig } from "@/backend/db/seeds/lib";
 import { InvoiceStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { BillingManagementService } from "@/backend/services/billing/billing-management.service";
-import { StorageService } from "@/backend/services/storage/storage.service";
+import { BillingManagementService, StorageService } from "@/backend/services";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
 import type { InvoiceSelectType, ParentEntity, UserSelectType } from "@/backend/types";
 

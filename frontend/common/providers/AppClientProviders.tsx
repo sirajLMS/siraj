@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AppApolloProvider } from "@/frontend/common/context";
+import { AppApolloProvider } from "@/frontend/common/providers/apollo/AppApolloProvider";
 import { AuthProvider } from "@/frontend/common/providers/apollo/AuthProvider";
 import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";

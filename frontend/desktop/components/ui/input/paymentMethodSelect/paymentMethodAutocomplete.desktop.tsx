@@ -5,10 +5,8 @@ import {
   PaymentMethodAutocompleteShared,
   type PaymentMethodAutocompleteSlots,
 } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodAutocompleteShared";
+import { PaymentMethodOptionRow as PaymentMethodOptionRowDesktop } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodOptionRow";
 import type { PaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/types";
-import { PaymentMethodOptionRowDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.desktop";
-
-export type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
 const desktopSlots: PaymentMethodAutocompleteSlots = {
   OptionRow: PaymentMethodOptionRowDesktop,

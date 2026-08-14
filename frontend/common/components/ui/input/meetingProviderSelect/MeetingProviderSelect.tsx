@@ -7,10 +7,10 @@ import TextField from "@mui/material/TextField";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { meetingProvidersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { resolveLocalizedString } from "@/frontend/common/lib/localized-string";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link } from "@/shared/i18n";
+import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type MeetingProviderSelectProps = {
@@ -61,7 +61,7 @@ export function MeetingProviderSelect({
       <Autocomplete
         options={options}
         loading={loading}
-        disabled={disabled || showEmptyCatalog}
+        disabled={disabled ?? showEmptyCatalog}
         value={value}
         onChange={(_event, next) => onChangeAction(next)}
         getOptionLabel={option => resolveLocalizedString(option.name, locale)}

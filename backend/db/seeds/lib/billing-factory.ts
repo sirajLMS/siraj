@@ -1,7 +1,8 @@
 import { addMonths, formatDateKey, getDateWindow, startOfDay } from "@/backend/db/seeds/lib/date-window";
 import { getFakerForIndex } from "@/backend/db/seeds/lib/faker-client";
 import type { SeedConfig } from "@/backend/db/seeds/lib/seed-config";
-import { CurrencyCode, InvoiceStatus, InvoiceType } from "@/backend/enum";
+import { InvoiceStatus, InvoiceType } from "@/backend/enum";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export interface InvoiceMonthSpec {
   year: number;

@@ -4,7 +4,7 @@ import {
   buildTransactionSnapshotFromInline,
   buildTransactionSnapshotFromMethod,
 } from "@/backend/services/payment-method/payment-method-snapshot";
-import type { UserPaymentMethodSelectType } from "@/backend/types/billing/payment-method.types";
+import type { UserPaymentMethodSelectType } from "@/backend/types";
 
 describe("PaymentMethodSnapshotService", () => {
   test("builds inline cash snapshot for pay-in", () => {

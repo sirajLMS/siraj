@@ -1,8 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { Control, FieldPath, FieldValues } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field/formFieldStyles";
 

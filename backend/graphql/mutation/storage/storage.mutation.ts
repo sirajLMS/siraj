@@ -4,7 +4,7 @@ import * as StoragePothos from "@/backend/graphql/pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { logger } from "@/backend/lib/logger";
 import { sanitizeStoragePath, validateStoragePath } from "@/backend/lib/path-validator";
-import { StorageAuthService, StorageManageService } from "@/backend/services/storage";
+import { StorageAuthService, StorageManageService } from "@/backend/services";
 import { getStorageService } from "@/backend/storage/storage.service";
 import type { ErrorsLabels } from "@/shared/locale";
 

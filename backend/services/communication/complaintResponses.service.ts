@@ -1,7 +1,10 @@
-import { ComplaintRepository, ComplaintResponseRepository, ParentRepository, UserRepository } from "@/backend/db/repo";
+import { ComplaintRepository, ComplaintResponseRepository } from "@/backend/db/repo/complaints";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { CommunicationService, PermissionsService } from "@/backend/services";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { CommunicationService } from "@/backend/services/communication/communication.service";
 import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 

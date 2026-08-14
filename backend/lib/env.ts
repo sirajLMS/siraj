@@ -204,7 +204,7 @@ function validateRedisConfig(): {
   const provider = getEnumEnv("REDIS_PROVIDER", ["local", "upstash"], "local");
 
   if (provider === "local") {
-    const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+    const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
     const sanitizedUrl = sanitizeUrlCredentials(redisUrl);
     logger.debug(`Redis provider: local (${sanitizedUrl})`);
     return { redisProvider: provider, redisUrl };
@@ -220,7 +220,7 @@ function validateRedisConfig(): {
     logger.warn("⚠️  Upstash Redis credentials missing. Falling back to local Redis.");
     return {
       redisProvider: "local",
-      redisUrl: process.env.REDIS_URL || "redis://localhost:6379",
+      redisUrl: process.env.REDIS_URL ?? "redis://localhost:6379",
     };
   }
 
@@ -249,7 +249,7 @@ function logEnvironmentConfig(config: EnvironmentConfig): void {
     logger.debug(`  UPSTASH_REDIS_REST_URL: ${config.upstashRedisUrl ? "[SET]" : "[NOT SET]"}`);
     logger.debug(`  UPSTASH_REDIS_REST_TOKEN: ${config.upstashRedisToken ? "[SET]" : "[NOT SET]"}`);
   }
-  logger.debug(`  ALLOWED_ORIGIN: ${config.allowedOrigin || "[DEFAULT]"}`);
+  logger.debug(`  ALLOWED_ORIGIN: ${config.allowedOrigin ?? "[DEFAULT]"}`);
 }
 
 /**
@@ -406,7 +406,7 @@ export function validateEnvironment(): EnvironmentConfig {
         ? validateRedisConfig()
         : {
             redisProvider: "local" as const,
-            redisUrl: process.env.REDIS_URL || "redis://localhost:6379",
+            redisUrl: process.env.REDIS_URL ?? "redis://localhost:6379",
           };
 
     validateNoPlaceholderSecrets();
@@ -449,7 +449,7 @@ export function requireEnv(name: string): string {
  * Optional: Get environment variable with default
  */
 export function getEnv(name: string, defaultValue: string): string {
-  return process.env[name] || defaultValue;
+  return process.env[name] ?? defaultValue;
 }
 
 const ENV_KEY = Symbol.for("siraj.env");

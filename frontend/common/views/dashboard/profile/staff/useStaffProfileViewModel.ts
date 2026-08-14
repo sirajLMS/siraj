@@ -122,7 +122,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
               timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
             },
             staff: {
-              phone: formData.phone || null,
+              phone: formData.phone ?? null,
             },
           },
         },
@@ -151,9 +151,9 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
               timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
             },
             staff: {
-              phone: formData.phone || null,
+              phone: formData.phone ?? null,
               status: formData.status ?? null,
-              hourlyRate: formData.hourlyRate || null,
+              hourlyRate: formData.hourlyRate ?? null,
               rateCurrency: formData.rateCurrency ?? null,
             },
           },

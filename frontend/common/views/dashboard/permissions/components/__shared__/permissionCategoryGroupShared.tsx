@@ -3,7 +3,7 @@
 import { Box, Checkbox, FormControlLabel, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ComponentType } from "react";
-import { labelSx } from "@/frontend/common/components/ui/form";
+import { labelSx } from "@/frontend/common/components/ui/form/field";
 import type {
   PermissionCategoryGroupProps,
   PermissionRowProps,

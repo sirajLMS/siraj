@@ -2,8 +2,9 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import type {
   ParentAssignedStudentReturnType,
   ParentAssignedStudentsResult,
+  ParentHandbookUrlReturnType,
   ParentOwnProfileReturnType,
-} from "@/backend/types/parents/parent.types";
+} from "@/backend/types";
 
 const ParentAssignedStudentRef = gqlSchemaBuilder.objectRef<ParentAssignedStudentReturnType>("ParentAssignedStudent");
 
@@ -49,8 +50,6 @@ export const ParentOwnProfilePothosObject = ParentOwnProfileRef.implement({
     twitter: t.exposeString("twitter", { nullable: true }),
   }),
 });
-
-import type { ParentHandbookUrlReturnType } from "@/backend/types";
 
 const ParentHandbookUrlRef = gqlSchemaBuilder.objectRef<ParentHandbookUrlReturnType>("ParentHandbookUrl");
 

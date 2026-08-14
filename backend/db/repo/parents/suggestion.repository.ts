@@ -1,10 +1,13 @@
 import { aliasedTable, and, count, desc, eq, gte, ilike, isNull, ne, sql } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db, queryDb } from "@/backend/db";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { SuggestionStatus } from "@/backend/enum";
-import type { SuggestionContributorStats, SuggestionReturnType, SuggestionSubmitInput } from "@/backend/types";
+import type {
+  DBTransaction,
+  SuggestionContributorStats,
+  SuggestionReturnType,
+  SuggestionSubmitInput,
+} from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 
 function isSuggestionStatus(value: string): value is SuggestionStatus {

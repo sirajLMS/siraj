@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import type { TeacherProfileUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { CountryCode, CurrencyCode, Gender, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  CountryCode,
+  CurrencyCode,
+  Gender,
+  IanaTimezone,
+  type TeacherProfileUpdateInput,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   teacherDirectoryQueryDocument,
   teacherProfileForEditQueryDocument,

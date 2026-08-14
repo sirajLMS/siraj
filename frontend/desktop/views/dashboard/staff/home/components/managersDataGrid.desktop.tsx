@@ -20,13 +20,13 @@ const StyledRoleChip = styled(Chip, {
   const roleBackgroundMap: Record<ManagerRole, string> = {
     admin: theme.palette.primaryContainer,
     supervisor: theme.palette.tertiaryContainer,
-    staff: theme.palette.secondaryContainer,
+    manager: theme.palette.secondaryContainer,
   };
 
   const roleColorMap: Record<ManagerRole, string> = {
     admin: theme.palette.onPrimaryContainer,
     supervisor: theme.palette.onTertiaryContainer,
-    staff: theme.palette.onSecondaryContainer,
+    manager: theme.palette.onSecondaryContainer,
   };
 
   const roleBackgroundColor = roleBackgroundMap[role] ?? theme.palette.secondaryContainer;

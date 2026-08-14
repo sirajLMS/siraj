@@ -2,10 +2,7 @@ import type { ObjectRef, RootFieldBuilder } from "@pothos/core";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import type {
-  WeeklyScheduleGridReturnType,
-  WeeklyWorkloadMetricsReturnType,
-} from "@/backend/types/scheduling/schedule.types";
+import type { WeeklyScheduleGridReturnType, WeeklyWorkloadMetricsReturnType } from "@/backend/types";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 type QueryFieldBuilder = RootFieldBuilder<BuilderTypes, unknown, "Query">;
@@ -35,7 +32,7 @@ function teacherWeeklyResolve<TResult>(
   ): Promise<TResult> => {
     const userId = await requireAuth(ctx);
     const tErrors = ctx.t().errorsTranslations;
-    return getService(userId, args.teacherId || null, args.weekDate, tErrors);
+    return getService(userId, args.teacherId ?? null, args.weekDate, tErrors);
   };
 }
 

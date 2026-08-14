@@ -11,6 +11,7 @@ import {
 } from "@mui/icons-material";
 import { Alert, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { ReactNode } from "react";
+import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CronScheduleStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CronScheduleFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { CronDialogsAndNotificationsShared } from "@/frontend/common/views/dashboard/cron/components/__shared__/cronDialogsAndNotificationsShared";
@@ -22,7 +23,6 @@ import {
   MobileCardListItem,
   MobileFab,
   MobileFormErrorSnackbar,
-  MobileFormSuccessSnackbar,
   MobilePageContainer,
   MobilePageHeader,
 } from "@/frontend/mobile/components/ui";
@@ -209,7 +209,7 @@ export function CronMobileView(props: Readonly<CronViewProps>) {
           dialogs: { BaseDeleteDialog: MobileBaseDeleteDialog },
           notifications: {
             FormErrorSnackbar: MobileFormErrorSnackbar,
-            FormSuccessSnackbar: MobileFormSuccessSnackbar,
+            FormSuccessSnackbar: FormSuccessSnackbar,
           },
         }}
       />

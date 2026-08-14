@@ -1,16 +1,12 @@
-import type { DBTransaction } from "@/backend/db/db.types";
 import { db } from "@/backend/db/drizzleDb";
-import { PermissionManagementRepository, UserRepository } from "@/backend/db/repo";
-import type { AppPermission, SystemPermissionGroupSlug } from "@/backend/enum";
-import { CurrencyCode } from "@/backend/enum";
+import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
+import { UserRepository } from "@/backend/db/repo/users";
+import type { AppPermission } from "@/backend/enum";
 import { validatePasswordStrength } from "@/backend/lib/auth";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type {
-  UserCreateCoreInput,
-  UserCreateProfileFieldsInput,
-  UserReturnType,
-} from "@/backend/types/users/user.types";
+import type { DBTransaction, UserCreateCoreInput, UserCreateProfileFieldsInput, UserReturnType } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -72,7 +68,7 @@ export namespace UserOnboardingService {
      */
     readonly validatePassword?: boolean;
     /** Permission group slug, or a function of the extension to support dynamic slugs (manager). */
-    readonly groupSlug: SystemPermissionGroupSlug | ((extension: TExtension) => SystemPermissionGroupSlug);
+    readonly groupSlug: string | ((extension: TExtension) => string);
     /**
      * If `true`, run `await UserRepository.updateTimezone(user.id, IanaTimezone.UTC, ...)`
      * when `profileFields.timezone` is not provided. Currently only the parent

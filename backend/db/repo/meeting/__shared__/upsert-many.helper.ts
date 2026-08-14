@@ -1,5 +1,5 @@
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
+import { db } from "@/backend/db";
+import type { DBTransaction } from "@/backend/types";
 
 /**
  * Shared upsertMany helper for meeting config repositories.

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getBooleanEnv } from "@/backend/lib/env";
-import { DemoAuthService } from "@/backend/services/auth/demo-auth.service";
+import { DemoAuthService } from "@/backend/services";
 import { LoginContainer } from "@/frontend/views/auth/login";
 import { getTranslations } from "@/shared/locale";
 import { getLocale } from "@/shared/locale/server-cookies";

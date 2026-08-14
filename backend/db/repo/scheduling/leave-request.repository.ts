@@ -1,9 +1,8 @@
 import { eq, inArray } from "drizzle-orm";
-import { queryDb } from "@/backend/db";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { leaveRequests } from "@/backend/db/schema/classes/scheduling";
+import { db, queryDb } from "@/backend/db";
+import { leaveRequests } from "@/backend/db/schema";
 import type { LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
+import type { DBTransaction } from "@/backend/types";
 
 export type LeaveRequestRow = typeof leaveRequests.$inferSelect;
 

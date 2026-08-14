@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
-import { NotificationRepository } from "@/backend/db/repo";
+import { NotificationRepository } from "@/backend/db/repo/notifications";
 import { NotificationChannel, NotificationDeliveryStatus, NotificationEventType } from "@/backend/enum";
 import { resetEnvironmentCache } from "@/backend/lib/env";
 import { resetSmsChannel, smsChannel } from "@/backend/services/communication/channels/sms";

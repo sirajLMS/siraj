@@ -1,6 +1,9 @@
 import { db } from "@/backend/db/drizzleDb";
-import { SchedulingRepository } from "@/backend/db/repo";
-import { type ClassInstanceAffectedUsers, classLifecycleAffectedUserIds } from "@/backend/db/repo/scheduling";
+import {
+  type ClassInstanceAffectedUsers,
+  classLifecycleAffectedUserIds,
+  SchedulingRepository,
+} from "@/backend/db/repo/scheduling";
 import { AppPermission, NotificationEventType } from "@/backend/enum";
 import { ForbiddenError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";

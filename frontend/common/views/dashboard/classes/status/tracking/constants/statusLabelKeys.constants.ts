@@ -1,5 +1,4 @@
-import type { CardListLabels } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
-import { SessionStatus } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import { type CardListLabels, SessionStatus } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 
 // NEW FOR PLAN v5 (newly created for the migration wave)
 // Lifted from statusTrackingDataGrid.{mobile,desktop}.tsx + statusTrackingCardList.mobile.tsx (specs.md §3 N5)

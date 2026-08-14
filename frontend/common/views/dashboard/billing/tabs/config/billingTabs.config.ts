@@ -9,8 +9,7 @@ import {
 import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import type { BillingTabId, BillingTabLabelKey } from "@/frontend/common/views/dashboard/billing/tabs/types";
-import type { TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";
-import { getVisibleTabs } from "@/frontend/common/views/dashboard/lib/tabbedPane";
+import { getVisibleTabs, type TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";
 
 export const BILLING_TABS: readonly TabDefinition<BillingTabId, BillingTabLabelKey>[] = [
   {

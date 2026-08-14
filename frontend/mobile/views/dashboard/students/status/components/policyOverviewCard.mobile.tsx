@@ -1,8 +1,8 @@
 "use client";
 
-import type { PolicyOverviewCardSharedOptions } from "@/frontend/common/views/dashboard/students/status/components/__shared__/policyOverviewCardShared";
 import {
   PolicyOverviewCardShared,
+  type PolicyOverviewCardSharedOptions,
   SuspensionWarningBannerShared,
 } from "@/frontend/common/views/dashboard/students/status/components/__shared__/policyOverviewCardShared";
 

@@ -35,13 +35,11 @@ import { resolveNotificationDeepLink } from "@/frontend/common/views/dashboard/c
 
 import type {
   NotificationDrawerAlert,
-  NotificationMetadata,
   NotificationsDrawerViewModel,
 } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
-
 import { useRouter } from "@/shared/i18n/navigation";
-
 import { Translation, useAppTranslation } from "@/shared/locale";
+import type { NotificationMetadata } from "@/shared/types/notification-alerts.types";
 
 const REFETCH_QUERIES = [{ query: notificationAlertsQueryDocument }, { query: meQueryDocument }] as const;
 

@@ -1,7 +1,7 @@
 import { findAdminUser, loadSeedConfig, type SeedConfig } from "@/backend/db/seeds/lib";
 import { AppPermission, OverrideState } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionManagementService } from "@/backend/services/auth/permission-management.service";
+import { PermissionManagementService } from "@/backend/services";
 import type { UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig) {

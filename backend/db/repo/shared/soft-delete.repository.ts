@@ -1,7 +1,6 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
-import type { DBTransaction } from "@/backend/db/db.types";
-import { db } from "@/backend/db/drizzleDb";
-import { AuditRepository } from "@/backend/db/repo/audit/audit.repository";
+import { db } from "@/backend/db";
+import { AuditRepository } from "@/backend/db/repo/audit";
 import {
   books,
   classInstances,
@@ -14,7 +13,7 @@ import {
 } from "@/backend/db/schema";
 import { NotFoundError } from "@/backend/lib";
 import type * as Types from "@/backend/types";
-import type { AuditEntityType } from "@/backend/types/audit/audit.types";
+import type { AuditEntityType, DBTransaction } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 type AllTables =

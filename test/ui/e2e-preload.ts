@@ -12,14 +12,12 @@ try {
   // Access internal module cache via bracket notation to satisfy no-underscore-dangle
   const cacheKey = "_cache";
   const moduleCache = Module[cacheKey];
-  if (!moduleCache[cjsPath]) {
-    moduleCache[cjsPath] = {
-      id: cjsPath,
-      filename: cjsPath,
-      loaded: true,
-      exports: graphqlCjs,
-    };
-  }
+  moduleCache[cjsPath] ??= {
+    id: cjsPath,
+    filename: cjsPath,
+    loaded: true,
+    exports: graphqlCjs,
+  };
 } catch {
   // Ignore preload resolution errors
 }

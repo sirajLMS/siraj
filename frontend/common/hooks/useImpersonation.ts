@@ -27,7 +27,7 @@ export function useImpersonation() {
     async (targetUserId: string, reason?: string) => {
       try {
         const result = await startMutation({
-          variables: { targetUserId, reason: reason || null },
+          variables: { targetUserId, reason: reason ?? null },
         });
 
         const payload = result.data?.startImpersonation;

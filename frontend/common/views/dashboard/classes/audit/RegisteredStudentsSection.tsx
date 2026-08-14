@@ -7,8 +7,10 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ExportButton, PersonProfileLinkCell, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import type { GroupClassStudent } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { GroupClassAttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  GroupClassAttendanceStatus,
+  type GroupClassStudent,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 
 interface RegisteredStudentsSectionProps {
