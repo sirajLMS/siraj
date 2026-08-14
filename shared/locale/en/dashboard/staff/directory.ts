@@ -35,6 +35,7 @@ export const dashboardStaffDirectoryEn: StaffDirectoryLabels = {
   },
   actions: {
     addManager: "Add New Staff",
+    createUser: "Create User",
     options: "Options",
     editProfile: "Edit Profile",
     deactivate: "Deactivate",

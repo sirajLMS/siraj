@@ -33,6 +33,7 @@ export interface StaffDirectoryLabels {
   };
   readonly actions: {
     readonly addManager: string;
+    readonly createUser: string;
     readonly options: string;
     readonly editProfile: string;
     readonly deactivate: string;

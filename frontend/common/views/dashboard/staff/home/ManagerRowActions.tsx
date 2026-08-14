@@ -10,34 +10,27 @@ import {
   DialogTitle,
   IconButton,
   Stack,
-  TextField,
   type Theme,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import { outlinedInputSx } from "@/frontend/common/components/ui/form/field/formFieldStyles";
-import { PhoneInput } from "@/frontend/common/components/ui/input";
 import { AccountStatus, type UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   managerDirectoryQueryDocument,
   updateManagerProfileMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
 import { logger } from "@/frontend/common/utils/logger";
+import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import type { Manager } from "@/frontend/common/views/dashboard/staff/home/types";
+import { useRouter } from "@/shared/i18n/navigation";
 import type { StaffDirectoryLabels } from "@/shared/locale";
 
 interface ManagerRowActionsProps {
   readonly labels: StaffDirectoryLabels;
   readonly manager: Manager;
 }
-
-const StyledEditField = styled(Stack)(({ theme }) => ({
-  gap: theme.spacing(1.5),
-  padding: theme.spacing(1, 0),
-}));
 
 async function executeManagerUpdate(
   updateProfile: (options: {
@@ -61,71 +54,6 @@ async function executeManagerUpdate(
   } catch (error) {
     logger.error("Failed to update manager profile", { error });
   }
-}
-
-interface EditProfileDialogProps {
-  readonly labels: StaffDirectoryLabels;
-  readonly open: boolean;
-  readonly onClose: () => void;
-  readonly onSubmit: () => void;
-  readonly editName: string;
-  readonly onNameChange: (value: string) => void;
-  readonly editEmail: string;
-  readonly onEmailChange: (value: string) => void;
-  readonly editPhone: string;
-  readonly onPhoneChange: (value: string) => void;
-  readonly updateLoading: boolean;
-}
-
-function EditProfileDialog({
-  labels: t,
-  open,
-  onClose,
-  onSubmit,
-  editName,
-  onNameChange,
-  editEmail,
-  onEmailChange,
-  editPhone,
-  onPhoneChange,
-  updateLoading,
-}: Readonly<EditProfileDialogProps>) {
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{t.actions.editProfile}</DialogTitle>
-      <DialogContent>
-        <StyledEditField>
-          <TextField
-            label={t.fields.name}
-            value={editName}
-            onChange={e => onNameChange(e.target.value)}
-            fullWidth
-            sx={outlinedInputSx}
-          />
-          <TextField
-            label={t.fields.email}
-            type="email"
-            value={editEmail}
-            onChange={e => onEmailChange(e.target.value)}
-            fullWidth
-            sx={outlinedInputSx}
-          />
-          <PhoneInput
-            value={editPhone || null}
-            onChangeAction={value => onPhoneChange(value ?? "")}
-            label={t.fields.phone}
-            fullWidth
-          />
-        </StyledEditField>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t.actions.cancel}</Button>
-        <Button onClick={onSubmit} variant="contained" disabled={updateLoading}>
-          {updateLoading ? t.actions.processing : t.actions.save}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
 }
 
 interface DeactivateDialogProps {
@@ -189,43 +117,20 @@ function DeactivateDialog({
 
 export function ManagerRowActions({ labels, manager }: Readonly<ManagerRowActionsProps>) {
   const t = labels;
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const router = useRouter();
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
-  const [editName, setEditName] = useState(manager.name);
-  const [editEmail, setEditEmail] = useState(manager.email);
-  const [editPhone, setEditPhone] = useState(manager.phone);
 
   const [updateProfile, { loading: updateLoading }] = useMutation(updateManagerProfileMutationDocument, {
     refetchQueries: [managerDirectoryQueryDocument],
   });
 
   const handleEditClick = () => {
-    setEditName(manager.name);
-    setEditEmail(manager.email);
-    setEditPhone(manager.phone);
-    setEditDialogOpen(true);
+    router.push(`${profileHrefForUser(manager.userId)}?tab=profile`);
   };
 
   const handleDeactivateClick = () => {
     setDeactivateDialogOpen(true);
   };
-
-  const handleEditSubmit = () =>
-    executeManagerUpdate(
-      updateProfile,
-      manager.staffProfileId,
-      {
-        name: editName || null,
-        email: editEmail || null,
-        hourlyRate: null,
-        phone: editPhone || null,
-        rateCurrency: null,
-        status: null,
-      },
-      () => setEditDialogOpen(false),
-      "Manager profile updated",
-      { staffProfileId: manager.staffProfileId }
-    );
 
   const handleDeactivateSubmit = () => {
     const newStatus = manager.status === "active" ? AccountStatus.Deactivated : AccountStatus.Activated;
@@ -271,20 +176,6 @@ export function ManagerRowActions({ labels, manager }: Readonly<ManagerRowAction
           </IconButton>
         </Tooltip>
       </Stack>
-
-      <EditProfileDialog
-        labels={labels}
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        onSubmit={handleEditSubmit}
-        editName={editName}
-        onNameChange={setEditName}
-        editEmail={editEmail}
-        onEmailChange={setEditEmail}
-        editPhone={editPhone}
-        onPhoneChange={setEditPhone}
-        updateLoading={updateLoading}
-      />
 
       <DeactivateDialog
         labels={labels}
