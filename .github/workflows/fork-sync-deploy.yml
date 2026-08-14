@@ -121,24 +121,10 @@
 name: Sync Forks & Deploy
 
 on:
-  # Auto-trigger: fires on every commit pushed to prod.
+  # Auto-trigger: fires on every commit pushed to prod ONLY.
+  # No manual trigger (workflow_dispatch) — removed intentionally.
   push:
     branches: [prod]
-
-  # Manual trigger: "Run workflow" button in GitHub Actions UI.
-  # Go to: Actions tab -> Fork Sync Deploy (prod) -> Run workflow
-  # The "sync_from" input is locked to "prod" (only option in the
-  # dropdown). The branch dropdown at the top is cosmetic — the
-  # workflow always checks out origin/prod regardless of selection.
-  workflow_dispatch:
-    inputs:
-      sync_from:
-        description: "Source branch to sync from — always prod (locked)"
-        required: true
-        default: prod
-        type: choice
-        options:
-          - prod
 
 jobs:
   sync-to-fork:
