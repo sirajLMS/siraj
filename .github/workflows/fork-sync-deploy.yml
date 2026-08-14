@@ -118,7 +118,7 @@
 #
 # ============================================================
 
-name: Fork Sync Deploy (prod)
+name: Sync Forks & Deploy
 
 on:
   # Auto-trigger: fires on every commit pushed to prod.
