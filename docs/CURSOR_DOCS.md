@@ -47,9 +47,9 @@ Adding these direct documentation paths into **Cursor Docs** (`Cursor Settings` 
 ### 🗄️ Database & ORM
 | Cursor Doc Name | Direct Documentation URL | Context / Target Area |
 | :--- | :--- | :--- |
-| `drizzle` | `https://orm.drizzle.team/docs` | Drizzle ORM schemas, queries & `drizzle-kit` |
+| `drizzle` | `https://orm.drizzle.team/docs/overview` | Drizzle ORM schemas, queries & `drizzle-kit` |
 | `pg` | `https://node-postgres.com/features/connecting` | `node-postgres` driver connection & queries |
-| `neon` | `https://neon.tech/docs | Neon Serverless PostgreSQL driver |
+| `neon` | `https://neon.tech/docs/serverless/serverless-driver` | Neon Serverless PostgreSQL driver |
 
 ### 📝 Forms & Validation
 | Cursor Doc Name | Direct Documentation URL | Context / Target Area |
