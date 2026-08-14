@@ -122,9 +122,11 @@ name: Sync Forks & Deploy
 
 on:
   # Auto-trigger: fires on every commit pushed to prod ONLY.
-  # No manual trigger (workflow_dispatch) — removed intentionally.
   push:
     branches: [prod]
+
+  # Manual trigger: "Run workflow" button in GitHub Actions UI.
+  workflow_dispatch:
 
 jobs:
   sync-to-fork:
