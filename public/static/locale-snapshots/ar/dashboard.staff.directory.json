@@ -11,7 +11,7 @@
   "filters": {
     "allRoleTypes": "جميع الأدوار",
     "admin": "مدير",
-    "staff": "موظف",
+    "manager": "مدير",
     "supervisor": "مشرف",
     "statusAll": "الحالة: الكل",
     "active": "نشط",
@@ -27,10 +27,13 @@
     "options": "خيارات"
   },
   "fields": {
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
     "phone": "الهاتف"
   },
   "actions": {
     "addManager": "إضافة موظف جديد",
+    "createUser": "إنشاء مستخدم",
     "options": "خيارات",
     "editProfile": "تعديل الملف الشخصي",
     "deactivate": "تعطيل",
@@ -51,7 +54,7 @@
   },
   "roles": {
     "admin": "مدير",
-    "staff": "موظف",
+    "manager": "مدير",
     "supervisor": "مشرف"
   },
   "showingOf": {

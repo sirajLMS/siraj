@@ -297,6 +297,19 @@ WHERE
   )
 ON CONFLICT DO NOTHING;
 
+-- Revoke staff role/permission profile fields from supervisors (staff access is admin-only)
+DELETE FROM group_permissions
+WHERE group_id = (SELECT id FROM permission_groups WHERE slug = 'supervisor_default')
+  AND permission_id IN (
+    SELECT id FROM permissions WHERE key IN (
+      'profile.staff_role.view_own'::app_permission,
+      'profile.staff_role.view_other'::app_permission,
+      'profile.staff_role.edit_other'::app_permission,
+      'profile.staff_permissions.view_other'::app_permission,
+      'profile.staff_permissions.edit_other'::app_permission
+    )
+  );
+
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
@@ -305,7 +318,6 @@ WHERE
   AND p.key IN (
     'profile.core_identity.view_own',
     'profile.core_contact.view_own',
-    'profile.staff_role.view_own',
     'profile.core_identity.edit_own',
     'profile.core_contact.edit_own',
     'profile.core_identity.view_other',
@@ -318,8 +330,6 @@ WHERE
     'profile.parent_account.view_other',
     'profile.parent_students.view_other',
     'profile.teacher_students.view_other',
-    'profile.staff_role.view_other',
-    'profile.staff_permissions.view_other',
     'profile.payment_methods.view_other',
     'profile.meeting_configs.view_other',
     'student.student_identity.view_other',
@@ -339,8 +349,6 @@ WHERE
     'profile.parent_account.edit_other',
     'profile.parent_students.edit_other',
     'profile.teacher_students.edit_other',
-    'profile.staff_role.edit_other',
-    'profile.staff_permissions.edit_other',
     'profile.payment_methods.edit_other',
     'profile.meeting_configs.edit_other',
     'student.student_identity.edit_other',

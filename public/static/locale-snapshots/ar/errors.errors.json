@@ -236,6 +236,7 @@
   "unknownName": "غير معروف",
   "invalidInput": "إدخال غير صالح.",
   "invalidNationalId": "الرقم القومي غير صالح للجنسية المحددة.",
+  "specializedGroupNotAllowed": "لا يمكن تعيين مجموعة متخصصة (طالب أو معلم أو ولي أمر) لمستخدم عام. استخدم مسار الإلحاق المخصص لنوع المستخدم هذا بدلاً من ذلك.",
   "rejectedReportsRequireReason": "يجب أن تتضمن التقارير المرفوضة سبب الرفض.",
   "approvedReportsNoRejectionReason": "لا يجب أن تتضمن التقارير المعتمدة سبب رفض.",
   "displayCurrencyNotSet": {

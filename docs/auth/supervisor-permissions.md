@@ -8,9 +8,9 @@ Supervisors (users assigned the `supervisor_default` system permission group) ha
 
 ### Permissions Granted to Supervisors
 
-The `supervisor_default` group carries 74 total permissions (was 34 before issue #47). The 29 new permissions added fall into two categories:
+The `supervisor_default` group carries 68 total permissions (was 34 before issue #47). The 23 new permissions added fall into two categories:
 
-#### Non-Field-ACL Permissions (8)
+#### Non-Field-ACL Permissions (7)
 
 Granted via `backend/db/migration/6-lms-permissions-and-groups.sql`:
 
@@ -23,9 +23,10 @@ Granted via `backend/db/migration/6-lms-permissions-and-groups.sql`:
 | `students.edit` | Edit student profiles |
 | `student.reassign_teacher` | Reassign a student to a different teacher |
 | `student.manage_status` | Change student status (regular, suspended, on-leave) |
-| `staff.view_directory` | View the staff directory |
 
-#### Field-ACL `edit_other` Permissions (21)
+> **Note**: `staff.view_directory` was initially added in issue #47 but subsequently removed. Supervisors do NOT have staff directory access — staff management is admin-only.
+
+#### Field-ACL `edit_other` Permissions (19)
 
 Granted via `backend/db/migration/6d-profile-fine-grained-only.sql`. These allow supervisors to edit **other users'** profile fields (not just their own). Covers:
 
@@ -33,7 +34,6 @@ Granted via `backend/db/migration/6d-profile-fine-grained-only.sql`. These allow
 - `profile.teacher_professional.edit_other`, `profile.teacher_identity.edit_other`
 - `profile.parent_social.edit_other`, `profile.parent_identity.edit_other`, `profile.parent_billing.edit_other`, `profile.parent_account.edit_other`, `profile.parent_students.edit_other`
 - `profile.teacher_students.edit_other`
-- `profile.staff_role.edit_other`, `profile.staff_permissions.edit_other`
 - `profile.payment_methods.edit_other`
 - `profile.meeting_configs.edit_other`
 - `profile.student_identity.edit_other`, `profile.student_academic.edit_other`, `profile.student_teacher.edit_other`, `profile.student_parent.edit_other`, `profile.student_schedule.edit_other`, `profile.student_history.edit_other`, `profile.student_quota_edit.edit_other`
@@ -139,9 +139,21 @@ These items have no relevant permission for supervisors and are correctly hidden
 
 As of issue #47, the following items were removed from the hardcoded supervisor hide set and now rely on `getNavItemsForPermissions` for visibility:
 
-- `teachers` — visible because supervisor has `StaffViewDirectory` + `TeachersList`
+- `teachers` — visible because supervisor has `TeachersList`
 - `students` — visible because supervisor has `StudentsList`
 - `permissions` — still hidden because supervisor lacks `PermissionGroupsManage`
+
+### Items explicitly hidden for supervisors (admin-only)
+
+The following items are always hidden from supervisor portal users via `applySupervisorNavOverrides`, regardless of permissions:
+
+- `staff` — staff management is admin-only (academy admin / super admin)
+- `users-directory` — the users directory page is admin-only
+- `settings`, `whatsapp-settings`, `dst-migration`, `cron`
+- `home`, `own-profile`, `search-schedule`, `schedule-tracking`
+- `schedule-alerts`, `feedback-manage`
+- `parents`, `managers`, `resources`, `subjects`, `books-and-bags`
+- `reports`, `billing-admin`, `payment-catalogs`
 
 ## Manager (Academy Admin) ACL Customization
 

@@ -1033,6 +1033,8 @@ export function applySupervisorNavOverrides(
     "cron",
     "settings",
     "whatsapp-settings",
+    "staff",
+    "users-directory",
   ]);
   return items.filter(item => !hiddenKeys.has(item.key));
 }

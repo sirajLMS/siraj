@@ -203,6 +203,11 @@ DELETE FROM group_permissions
 WHERE group_id = (SELECT id FROM permission_groups WHERE slug = 'supervisor_default')
   AND permission_id = (SELECT id FROM permissions WHERE key = 'dashboard.view_metrics'::app_permission);
 
+-- Revoke staff.view_directory from supervisors (staff access is admin-only)
+DELETE FROM group_permissions
+WHERE group_id = (SELECT id FROM permission_groups WHERE slug = 'supervisor_default')
+  AND permission_id = (SELECT id FROM permissions WHERE key = 'staff.view_directory'::app_permission);
+
 -- IMPORTANT: Supervisors are granted ALL current and future teacher/student management permissions.
 -- Any new teacher/student management permission MUST be added to this group.
 INSERT INTO group_permissions (group_id, permission_id)
@@ -238,8 +243,7 @@ WHERE
     'students.create',
     'students.edit',
     'student.reassign_teacher',
-    'student.manage_status',
-    'staff.view_directory'
+    'student.manage_status'
   )
 ON CONFLICT DO NOTHING;
 
