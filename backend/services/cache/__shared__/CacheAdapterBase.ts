@@ -1,5 +1,5 @@
 import { logger } from "@/backend/lib/logger";
-import { getEntityCacheStats } from "@/backend/services/cache/EntityCacheService";
+import { getEntityCacheStats } from "@/backend/services/cache/entity-cache-stats";
 import type { ICacheService } from "@/backend/services/cache/ICacheService";
 import type { CacheStats } from "@/backend/services/shared/CacheInterface";
 
