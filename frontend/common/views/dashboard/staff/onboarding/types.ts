@@ -11,9 +11,11 @@ export type ManagerOnboardingViewProps = {
   readonly handleSubmit: UseFormHandleSubmit<ManagerOnboardingFormData>;
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
+  readonly submitError: string | null;
   readonly onSubmit: (data: ManagerOnboardingFormData) => void | Promise<void>;
   readonly onCancel: () => void;
   readonly onDismissSuccess: () => void;
+  readonly onDismissError: () => void;
   readonly metricsModel: OnboardingMetricsViewModel;
   readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
 };

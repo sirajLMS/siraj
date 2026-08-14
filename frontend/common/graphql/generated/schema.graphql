@@ -3811,7 +3811,7 @@ type Query {
   """
   Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity.
   """
-  studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport
+  studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport!
 
   """
   List only active/open quotas (status ACTIVE, remaining > 0) for a student
@@ -3853,7 +3853,7 @@ type Query {
   """
   Aggregated monthly report for a single teacher: lessons taught, dues, and cancellation count.
   """
-  teacherMonthlyReport(month: Int!, teacherId: ID!, year: Int!): TeacherMonthlyReport
+  teacherMonthlyReport(month: Int!, teacherId: ID!, year: Int!): TeacherMonthlyReport!
   teacherOwnProfile: TeacherOwnProfile
 
   """
@@ -5498,7 +5498,9 @@ type UnpaidInvoicesSummary {
 }
 
 input UpdateManagerProfileInput {
+  email: String
   hourlyRate: String
+  name: String
   phone: String
   rateCurrency: CurrencyCode
   status: AccountStatus
@@ -5744,6 +5746,8 @@ input WhatsappAccountCreateInput {
 
 input WhatsappAccountUpdateInput {
   displayName: LocalizedString
+
+  """Display phone number (max 32 chars)"""
   displayPhoneNumber: String
   isActive: Boolean
   portfolioMessagingLimitTier: WhatsappLimitTier

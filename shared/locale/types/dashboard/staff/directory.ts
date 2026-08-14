@@ -11,7 +11,7 @@ export interface StaffDirectoryLabels {
   readonly filters: {
     readonly allRoleTypes: string;
     readonly admin: string;
-    readonly staff: string;
+    readonly manager: string;
     readonly supervisor: string;
     readonly statusAll: string;
     readonly active: string;
@@ -27,6 +27,8 @@ export interface StaffDirectoryLabels {
     readonly options: string;
   };
   readonly fields: {
+    readonly name: string;
+    readonly email: string;
     readonly phone: string;
   };
   readonly actions: {
@@ -47,7 +49,7 @@ export interface StaffDirectoryLabels {
   };
   readonly roles: {
     readonly admin: string;
-    readonly staff: string;
+    readonly manager: string;
     readonly supervisor: string;
   };
   readonly showingOf: (count: number, total: number) => string;

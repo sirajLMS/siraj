@@ -6,6 +6,7 @@ import { UserEntityFieldsSection } from "@/frontend/common/components/onboarding
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { SystemAccessSection } from "@/frontend/common/views/dashboard/staff/onboarding/SystemAccessSection";
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/staff/onboarding/types";
+import { DesktopFormErrorSnackbar } from "@/frontend/desktop/components/ui";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
@@ -23,8 +24,12 @@ const StyledFormActions = styled(Box)(({ theme }) => ({
   justifyContent: "space-between",
   flexDirection: "row",
   gap: theme.spacing(2),
-  paddingTop: theme.spacing(2),
+  padding: theme.spacing(2, 0),
   borderTop: `1px solid ${theme.palette.outlineVariant}`,
+  position: "sticky",
+  bottom: 0,
+  backgroundColor: theme.palette.background.default,
+  zIndex: 1,
 }));
 
 export function ManagerOnboardingDesktopView({
@@ -35,9 +40,11 @@ export function ManagerOnboardingDesktopView({
   handleSubmit,
   isSubmitting,
   showSuccess,
+  submitError,
   onSubmit,
   onCancel,
   onDismissSuccess,
+  onDismissError,
 }: Readonly<ManagerOnboardingViewProps>) {
   const t = labels;
   const userEntityLabels = useAppTranslation(Translation.Onboarding.UserEntity);
@@ -92,6 +99,7 @@ export function ManagerOnboardingDesktopView({
       </Box>
 
       <FormSuccessSnackbar open={showSuccess} message={t.actions.successMessage} onClose={onDismissSuccess} />
+      <DesktopFormErrorSnackbar open={Boolean(submitError)} message={submitError ?? ""} onClose={onDismissError} />
     </DesktopPageContainer>
   );
 }

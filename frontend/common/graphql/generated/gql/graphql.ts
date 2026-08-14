@@ -2138,7 +2138,9 @@ export type TestMeetingConnectionInput = {
 };
 
 export type UpdateManagerProfileInput = {
+  email: string | null | undefined;
   hourlyRate: string | null | undefined;
+  name: string | null | undefined;
   phone: string | null | undefined;
   rateCurrency: CurrencyCode | null | undefined;
   status: AccountStatus | null | undefined;
@@ -2254,6 +2256,7 @@ export type WhatsappAccountCreateInput = {
 
 export type WhatsappAccountUpdateInput = {
   displayName: Partial<Record<'ar' | 'en', string>> | null | undefined;
+  /** Display phone number (max 32 chars) */
   displayPhoneNumber: string | null | undefined;
   isActive: boolean | null | undefined;
   portfolioMessagingLimitTier: WhatsappLimitTier | null | undefined;
@@ -3632,7 +3635,7 @@ export type StudentMonthlyReportQueryVariables = Exact<{
 }>;
 
 
-export type StudentMonthlyReportQuery = { studentMonthlyReport: { id: string | null, studentId: string | null, studentName: string | null, year: number | null, month: number | null, totalLessons: number | null, completedLessons: number | null, cancelledLessons: number | null, presentCount: number | null, absentCount: number | null, lateCount: number | null, totalHours: number | null, creditsPurchased: number | null, creditsDeducted: number | null, creditsRefunded: number | null, creditsBalance: number | null } | null };
+export type StudentMonthlyReportQuery = { studentMonthlyReport: { id: string | null, studentId: string | null, studentName: string | null, year: number | null, month: number | null, totalLessons: number | null, completedLessons: number | null, cancelledLessons: number | null, presentCount: number | null, absentCount: number | null, lateCount: number | null, totalHours: number | null, creditsPurchased: number | null, creditsDeducted: number | null, creditsRefunded: number | null, creditsBalance: number | null } };
 
 export type GenerateAttendanceReportQueryVariables = Exact<{
   filters: AttendanceReportFiltersInput;
@@ -4425,7 +4428,7 @@ export type TeacherMonthlyReportQueryVariables = Exact<{
 }>;
 
 
-export type TeacherMonthlyReportQuery = { teacherMonthlyReport: { teacherId: string | null, teacherName: string | null, year: number | null, month: number | null, lessonsTaught: number | null, approvedCount: number | null, cancelledCount: number | null, totalAccruedHours: number | null, totalDueAmount: number | null, totalPaidAmount: number | null, currency: CurrencyCode | null } | null };
+export type TeacherMonthlyReportQuery = { teacherMonthlyReport: { teacherId: string | null, teacherName: string | null, year: number | null, month: number | null, lessonsTaught: number | null, approvedCount: number | null, cancelledCount: number | null, totalAccruedHours: number | null, totalDueAmount: number | null, totalPaidAmount: number | null, currency: CurrencyCode | null } };
 
 export type MarkTeacherDuesPaidMutationVariables = Exact<{
   dueIds: Array<string | number> | string | number;

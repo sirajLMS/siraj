@@ -95,7 +95,7 @@ export type ResourceFilterType = ResourceFileType | "all";
 
 // --- Managers Directory ---
 
-export type ManagerRoleFilter = "all" | "admin" | "staff" | "supervisor";
+export type ManagerRoleFilter = "all" | "admin" | "manager" | "supervisor";
 
 export type ManagerStatusFilter = "all" | "active" | "offline";
 

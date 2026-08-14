@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
@@ -35,9 +34,11 @@ export interface ManagerOnboardingContainerViewModel {
   readonly handleSubmit: ReturnType<typeof useForm<ManagerOnboardingFormData>>["handleSubmit"];
   readonly isSubmitting: boolean;
   readonly showSuccess: boolean;
+  readonly submitError: string | null;
   readonly onSubmit: (data: ManagerOnboardingFormData) => void | Promise<void>;
   readonly onCancel: () => void;
   readonly onDismissSuccess: () => void;
+  readonly onDismissError: () => void;
   // NEW FOR PLAN v5: metricsModel exposed by the Container VM so the tier views no longer call `useOnboardingMetrics` directly (was a GraphQL-in-tier violation per specs §3 N1 / §6.2).
   readonly metricsModel: OnboardingMetricsViewModel;
   readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
@@ -54,8 +55,6 @@ export function useManagerOnboardingContainerViewModel(
   const metricsModel = useOnboardingMetrics();
   const { onUploadAvatar } = useOnboardingAvatar();
 
-  const [showSuccess, setShowSuccess] = useState(false);
-
   const {
     register,
     control,
@@ -67,21 +66,13 @@ export function useManagerOnboardingContainerViewModel(
     defaultValues,
   });
 
-  useEffect(() => {
-    if (!showSuccess) return undefined;
-    const timer = setTimeout(() => {
-      setShowSuccess(false);
-    }, 3000);
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [showSuccess]);
-
   const {
     isSubmitting,
     showSuccess: showSuccessState,
+    submitError,
     onSubmit,
     onDismissSuccess,
+    onDismissError,
   } = useOnboardingSubmit<ManagerOnboardingFormData, { userId: string }>({
     execute: async data => {
       await execute(data);
@@ -90,6 +81,7 @@ export function useManagerOnboardingContainerViewModel(
     onSuccess: () => "/staff",
     successAutoDismissMs: 3000,
     resetForm,
+    onError: () => labels.actions.errorMessage,
   });
 
   const onCancel = () => {
@@ -104,9 +96,11 @@ export function useManagerOnboardingContainerViewModel(
     handleSubmit,
     isSubmitting: loading || isSubmitting,
     showSuccess: showSuccessState,
+    submitError,
     onSubmit,
     onCancel,
     onDismissSuccess,
+    onDismissError,
     metricsModel,
     onUploadAvatar,
   };

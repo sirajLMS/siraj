@@ -51,7 +51,7 @@ export function ManagersFilterBar({
         >
           <MenuItem value="all">{t.allRoleTypes}</MenuItem>
           <MenuItem value="admin">{t.admin}</MenuItem>
-          <MenuItem value="staff">{t.staff}</MenuItem>
+          <MenuItem value="manager">{t.manager}</MenuItem>
           <MenuItem value="supervisor">{t.supervisor}</MenuItem>
         </Select>
 
