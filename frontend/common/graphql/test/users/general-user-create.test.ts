@@ -12,10 +12,12 @@ import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
   loginDemoUser,
+  loginUser,
   provisionTestSuperAdmin,
+  TEST_USER_PASSWORD,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
 
 function buildGeneralUserInput(
   overrides: Partial<GeneralUserCreateInput> & {
@@ -96,12 +98,28 @@ describe("createGeneralUser GraphQL Mutation", () => {
   let superAdminToken = "";
   let superAdminUserId = "";
   let seedSuperAdminToken = "";
+  let superAdminEmail = "";
+  let targetUserId = "";
 
   test("provision super admin for general-user-create tests", async () => {
+    // Get a target user ID for the impersonation test FIRST — log in as teacher,
+    // query me, then clear cookies so the SA session is clean for provisioning
+    clearCookies();
+    const teacherToken = await loginDemoUser("teacher_default");
+    const meResult = await testClient.query({
+      query: meQueryDocument,
+      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
+    });
+    targetUserId = meResult.data?.me?.id ?? "";
+    if (!targetUserId) throw new Error("Failed to get teacher user ID for impersonation");
+
+    // Now provision the test super admin — loginUser sets SA session cookies
+    clearCookies();
     const existingSaToken = await loginDemoUser("super_admin");
     const sa = await provisionTestSuperAdmin(existingSaToken, "genUserCreate");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
+    superAdminEmail = sa.email;
     seedSuperAdminToken = existingSaToken;
 
     expect(superAdminToken).toBeTruthy();
@@ -136,6 +154,7 @@ describe("createGeneralUser GraphQL Mutation", () => {
   // ─── 2. Unauthorized — no token ──────────────────────────────────────
 
   test("unauthenticated request without token — denied (UNAUTHENTICATED)", async () => {
+    clearCookies();
     const result = await testClient.mutate({
       mutation: createGeneralUserMutationDocument,
       variables: { input: buildMinimalInput("Unauthenticated User") },
@@ -167,18 +186,14 @@ describe("createGeneralUser GraphQL Mutation", () => {
   // ─── 4. Impersonation rejection ──────────────────────────────────────
 
   test("super admin impersonating another user — createGeneralUser rejected (notImpersonating guard)", async () => {
-    if (!superAdminToken) throw new Error("Missing super admin setup data");
+    if (!superAdminToken || !targetUserId || !superAdminEmail) throw new Error("Missing setup data");
 
-    // Get a target user ID for impersonation — log in as teacher and query me
-    const teacherToken = await loginDemoUser("teacher_default");
-    const meResult = await testClient.query({
-      query: meQueryDocument,
-      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
-    });
-    const targetUserId = meResult.data?.me?.id;
-    if (!targetUserId) throw new Error("Failed to get teacher user ID for impersonation");
+    // Restore the SA session cookies that were overwritten by the
+    // loginDemoUser calls in the forbidden tests above (tests 3-4)
+    clearCookies();
+    superAdminToken = await loginUser(superAdminEmail, TEST_USER_PASSWORD);
 
-    // Start impersonation as super admin
+    // Start impersonation as super admin — SA session cookies now match the token
     const impersonationData = await authenticatedRequest(
       superAdminToken,
       "mutate",
