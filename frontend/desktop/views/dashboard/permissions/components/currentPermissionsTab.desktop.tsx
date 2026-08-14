@@ -71,7 +71,7 @@ export function CurrentPermissionsTabDesktop({
   return (
     <DesktopSectionPanel contentPadding={false} title={t.currentPermissions}>
       {permissionsCount === 0 && !loading ? (
-        <CurrentPermissionsEmptyState t={t} group={group} onSwitchToAddTab={onSwitchToAddTab} />
+        <CurrentPermissionsEmptyState t={t} onSwitchToAddTab={onSwitchToAddTab} />
       ) : (
         <DesktopAppDataGrid<Permission>
           rows={groupPermissions}

@@ -328,7 +328,28 @@ WHERE
     'student.student_parent.view_other',
     'student.student_schedule.view_other',
     'student.student_history.view_other',
-    'student.student_quota_edit.view_other'
+    'student.student_quota_edit.view_other',
+    'profile.core_identity.edit_other',
+    'profile.core_contact.edit_other',
+    'profile.teacher_professional.edit_other',
+    'profile.teacher_identity.edit_other',
+    'profile.parent_social.edit_other',
+    'profile.parent_identity.edit_other',
+    'profile.parent_billing.edit_other',
+    'profile.parent_account.edit_other',
+    'profile.parent_students.edit_other',
+    'profile.teacher_students.edit_other',
+    'profile.staff_role.edit_other',
+    'profile.staff_permissions.edit_other',
+    'profile.payment_methods.edit_other',
+    'profile.meeting_configs.edit_other',
+    'student.student_identity.edit_other',
+    'student.student_academic.edit_other',
+    'student.student_teacher.edit_other',
+    'student.student_parent.edit_other',
+    'student.student_schedule.edit_other',
+    'student.student_history.edit_other',
+    'student.student_quota_edit.edit_other'
   )
 ON CONFLICT DO NOTHING;
 

@@ -1020,8 +1020,6 @@ export function applySupervisorNavOverrides(
     "search-schedule",
     "schedule-tracking",
     "schedule",
-    "teachers",
-    "students",
     "parents",
     "managers",
     "resources",
@@ -1033,7 +1031,6 @@ export function applySupervisorNavOverrides(
     "feedback-manage",
     "dst-migration",
     "cron",
-    "permissions",
     "settings",
     "whatsapp-settings",
   ]);

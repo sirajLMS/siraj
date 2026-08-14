@@ -29,6 +29,7 @@ export interface PermissionGroupFormProps extends PermissionGroupFormState {
 export interface PermissionGroupFormContentProps {
   readonly control: PermissionGroupFormProps["control"];
   readonly isLoading: boolean;
+  readonly isSystem: boolean;
   readonly searchTerm: string;
   readonly setSearchTerm: (v: string) => void;
   readonly selectedCategory: string;

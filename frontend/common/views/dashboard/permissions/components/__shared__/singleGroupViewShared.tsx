@@ -79,9 +79,7 @@ export function SingleGroupViewShared({
             label={`${t.currentPermissions} (${permissionsCount})`}
             sx={{ textTransform: "none", fontWeight: 600 }}
           />
-          {!group.isSystem && (
-            <Tab value="add" label={t.addPermissions} sx={{ textTransform: "none", fontWeight: 600 }} />
-          )}
+          <Tab value="add" label={t.addPermissions} sx={{ textTransform: "none", fontWeight: 600 }} />
           <Tab
             value="users"
             label={`${t.assignedUsers} (${assignedUsersCount})`}
@@ -110,7 +108,7 @@ export function SingleGroupViewShared({
             />
           )}
 
-          {activeSubTab === "add" && !group.isSystem && (
+          {activeSubTab === "add" && (
             <AddPermissionsTab
               labels={labels}
               filteredAvailablePermissions={filteredAvailablePermissions}

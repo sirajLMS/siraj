@@ -120,6 +120,10 @@ Completed extractions:
 
 The `createGeneralUser` mutation creates a user without a specialized profile extension. It uses `authScopes: { permission: AppPermission.STAFF_CREATE, notImpersonating: true }` to require staff create permission and block creation while impersonating. The `groupSlug` input field is a plain `String!` (not an enum) to allow any permission group slug — specialized groups are rejected at the service layer via `isSpecializedGroup()`. The result type includes `id` (resolved from `parent.user.id`) for Apollo cache normalization. See `docs/services/general-user-creation.md` for the complete pattern reference.
 
+## authScope Patterns (Permission-Based Access)
+
+Use `authScopes: { permission: AppPermission.X }` — **not** `authScopes: { superAdmin: true }` — for any mutation accessible by non-superadmin users with the correct permission. The `permission:` check (defined in `gqlSchemaBuilder.ts`) passes for `ctx.isSuperAdmin || ctx.permissions.includes(key)`, so superAdmins are automatically allowed. `AppPermission` must be imported as a value import when used in `authScopes`. See `docs/auth/supervisor-permissions.md` for the complete pattern reference.
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.

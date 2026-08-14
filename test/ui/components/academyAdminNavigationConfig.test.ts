@@ -60,6 +60,12 @@ const ACADEMY_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.ComplaintsRespond,
   AppPermission.SuggestionsList,
   AppPermission.SuggestionsReview,
+  // Task 1.3 — new permissions granted to academy_admin (manager) role
+  AppPermission.PermissionGroupsManage,
+  AppPermission.PermissionGroupsAssign,
+  AppPermission.TeachersEdit,
+  AppPermission.TeachersList,
+  AppPermission.StudentsEdit,
 ];
 
 describe("academy admin sidebar navigation", () => {
@@ -69,6 +75,8 @@ describe("academy admin sidebar navigation", () => {
 
     expect(keys).toContain("home");
     expect(keys).toContain("students");
+    expect(keys).toContain("teachers");
+    expect(keys).toContain("permissions");
     expect(keys).toContain("feedback-manage");
     expect(keys).not.toContain("suggestions-manage");
     expect(keys).not.toContain("complaints-manage");

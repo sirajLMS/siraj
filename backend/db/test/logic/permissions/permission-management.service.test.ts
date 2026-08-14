@@ -303,13 +303,64 @@ describe("PermissionManagementService Business Logic", () => {
       expect(updated.description).toEqual(loc("Updated description"));
     });
 
-    testSystemGroupGuard(
-      "updateGroup on system group should throw cannotModifySystemPermissionGroup",
-      manageContext,
-      groupId =>
-        PermissionManagementService.updateGroup(adminUser.id, { groupId, name: loc("New System Name") }, tErrors, "ar"),
-      "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام"
-    );
+    test("updateGroup on system group with permissionIds only should succeed", async () => {
+      mockContext = manageContext();
+      const sysGroup = await getSystemGroup();
+
+      const permId = testPerm1?.id;
+      if (!permId) throw new Error("testPerm1 missing");
+
+      const updated = await PermissionManagementService.updateGroup(
+        adminUser.id,
+        { groupId: sysGroup.id, permissionIds: [permId] },
+        tErrors
+      );
+
+      expect(updated).toBeDefined();
+      expect(updated.id).toBe(sysGroup.id);
+      expect(updated.permissionIds).toContain(permId);
+    });
+
+    test("updateGroup on system group should silently ignore name/description changes", async () => {
+      mockContext = manageContext();
+      const sysGroup = await getSystemGroup();
+
+      const permId = testPerm2?.id;
+      if (!permId) throw new Error("testPerm2 missing");
+
+      const updated = await PermissionManagementService.updateGroup(
+        adminUser.id,
+        {
+          groupId: sysGroup.id,
+          name: loc("Attempted Renamed System Group"),
+          description: loc("Attempted new description"),
+          permissionIds: [permId],
+        },
+        tErrors
+      );
+
+      expect(updated).toBeDefined();
+      expect(updated.id).toBe(sysGroup.id);
+      expect(updated.name).toEqual(sysGroup.name);
+      expect(updated.slug).toBe(sysGroup.slug);
+      expect(updated.description).toEqual(sysGroup.description);
+      expect(updated.permissionIds).toContain(permId);
+    });
+
+    test("updateGroup on system group with empty permissionIds should clear all permissions", async () => {
+      mockContext = manageContext();
+      const sysGroup = await getSystemGroup();
+
+      const updated = await PermissionManagementService.updateGroup(
+        adminUser.id,
+        { groupId: sysGroup.id, permissionIds: [] },
+        tErrors
+      );
+
+      expect(updated).toBeDefined();
+      expect(updated.id).toBe(sysGroup.id);
+      expect(updated.permissionIds).toEqual([]);
+    });
 
     testSystemGroupGuard(
       "deleteGroup on system group should throw cannotDeleteSystemPermissionGroup",
