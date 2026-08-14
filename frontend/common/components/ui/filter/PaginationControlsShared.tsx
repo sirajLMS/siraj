@@ -170,7 +170,7 @@ export function PaginationControlsScaffold({
               inputMode: "numeric",
             },
           }}
-          sx={{ width: inputWidth, "& .MuiInputBase-input": { textAlign: "center", paddingBlock: 6 } }}
+          sx={{ width: inputWidth, "& .MuiInputBase-input": { textAlign: "center", paddingBlock: 1 } }}
         />
 
         <Tooltip title={t.nextPage}>
