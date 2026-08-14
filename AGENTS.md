@@ -438,6 +438,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/testing/mock-navigation-helpers.md` - Test mock navigation helpers pattern reference
 - `docs/i18n/locale-namespace-migration.md` - Locale namespace migration from monolithic to sub-module directories
 - `docs/auth/permission-architecture.md` - Client-side permission architecture (3-tier model, wrapper removal rationale)
+- `docs/auth/supervisor-permissions.md` - Supervisor permission model, system group editability, authScope patterns, navigation overrides
 - `docs/i18n/cross-layer-enum-migration.md` - Cross-layer enum delete/codemod pattern (currency/timezone/class-instance-detail workflow)
 - `docs/backend/service-base-pattern.md` - Service base class, shared resolvers, insert payload builders, auth session helpers
 - `docs/backend/types-consolidation.md` - Types consolidation: moving `.types.ts` from service layer to `backend/types/`, split rules, barrel conventions

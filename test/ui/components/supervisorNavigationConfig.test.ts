@@ -21,7 +21,15 @@ const SUPERVISOR_PERMISSIONS: AppPermission[] = [
   AppPermission.HistoryViewCalendar,
   AppPermission.HistoryViewDetails,
   AppPermission.TeachersList,
+  AppPermission.TeachersCreate,
+  AppPermission.TeachersEdit,
+  AppPermission.TeachersManageSchedule,
   AppPermission.StudentsList,
+  AppPermission.StudentsCreate,
+  AppPermission.StudentsEdit,
+  AppPermission.StudentReassignTeacher,
+  AppPermission.StudentManageStatus,
+  AppPermission.StaffViewDirectory,
   AppPermission.ComplaintsList,
   AppPermission.ComplaintsRespond,
 ];
@@ -44,7 +52,9 @@ describe("supervisor sidebar navigation", () => {
     expect(keys).not.toContain("schedule-tracking");
     expect(keys).not.toContain("status-tracking");
     expect(keys).not.toContain("schedule-alerts");
-    expect(keys).not.toContain("students");
+    expect(keys).toContain("teachers");
+    expect(keys).toContain("students");
+    expect(keys).not.toContain("permissions");
     expect(keys).not.toContain("feedback-manage");
 
     expect(keys).not.toContain("today-classes");

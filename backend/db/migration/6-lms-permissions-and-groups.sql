@@ -12,6 +12,12 @@ ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'teacher_dues.view';
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'teacher_dues.mark_paid';
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'monthly_reports.view';
 
+-- Restore enum value dropped by the `parched_mister_fear` migration (which
+-- recreated `app_permission` without it). The `supervisor_default` block below
+-- references this key in a plain `p.key IN (...)` clause, which requires the
+-- enum literal to exist.
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'teacher.view_profile';
+
 -- Temporarily disable the system permission trigger to allow INSERT with is_system = true
 DO $$
 BEGIN
@@ -197,6 +203,8 @@ DELETE FROM group_permissions
 WHERE group_id = (SELECT id FROM permission_groups WHERE slug = 'supervisor_default')
   AND permission_id = (SELECT id FROM permissions WHERE key = 'dashboard.view_metrics'::app_permission);
 
+-- IMPORTANT: Supervisors are granted ALL current and future teacher/student management permissions.
+-- Any new teacher/student management permission MUST be added to this group.
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
@@ -223,7 +231,15 @@ WHERE
     'complaints.respond',
     'notification.view_alerts',
     'user.view_profile',
-    'teacher.view_profile'
+    'teacher.view_profile',
+    'teachers.create',
+    'teachers.edit',
+    'teachers.manage_schedule',
+    'students.create',
+    'students.edit',
+    'student.reassign_teacher',
+    'student.manage_status',
+    'staff.view_directory'
   )
 ON CONFLICT DO NOTHING;
 
