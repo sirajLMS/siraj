@@ -73,6 +73,32 @@ await mock.module("@/backend/db/repo", () => ({
   },
 }));
 
+await mock.module("@/backend/db/repo/students", () => ({
+  StudentRepository: {
+    findById: findByIdMock,
+    reassignTeacher: reassignTeacherMock,
+    changeStatus: changeStatusMock,
+  },
+}));
+
+await mock.module("@/backend/db/repo/teachers", () => ({
+  TeacherRepository: {
+    findById: teacherFindByIdMock,
+  },
+}));
+
+await mock.module("@/backend/db/repo/parents", () => ({
+  ParentRepository: {
+    findUserIdByParentId: parentFindUserIdByParentIdMock,
+  },
+}));
+
+await mock.module("@/backend/db/repo/users", () => ({
+  UserRepository: {
+    findById: userFindByIdMock,
+  },
+}));
+
 // --- Permissions mock ----------------------------------------------------
 
 const hasPermissionMock = mock(async () => true);
@@ -103,7 +129,19 @@ const buildStudentLifecyclePayloadsMock = mock(
 );
 
 await mock.module("@/backend/services/notification/notification-payloads.builders", () => ({
+  CHANNEL_FROM_ENUM: {},
+  ALL_CHANNELS: [],
+  NOTIFICATION_TEMPLATE_MAP: {},
+  buildPerChannel: () => [],
+  fanOutToUsers: () => [],
+  buildInvoiceGeneratedPayloads: () => [],
+  buildInvoiceStatusChangedPayloads: () => [],
+  buildPaymentMethodChangedPayloads: () => [],
+  buildClassLifecyclePayloads: () => [],
   buildStudentLifecyclePayloads: buildStudentLifecyclePayloadsMock,
+  buildLessonReportSubmittedPayloads: () => [],
+  buildLessonReportReviewedPayloads: () => [],
+  buildNewComplaintPayloads: () => [],
 }));
 
 const dispatchWithPreferencesMock = mock(

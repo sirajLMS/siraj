@@ -65,12 +65,29 @@ await mock.module("@/backend/db/repo", () => ({
   },
 }));
 
+await mock.module("@/backend/db/repo/billing", () => ({
+  BillingRepository: {
+    updateExchangeRateInTx: updateExchangeRateInTxMock,
+  },
+}));
+
+await mock.module("@/backend/db/repo/fx-sync.repository", () => ({
+  FxSyncRepository: {
+    createSyncRun: createSyncRunMock,
+    completeSyncRun: completeSyncRunMock,
+    isRecentSuccess: isRecentSuccessMock,
+    getRunningSyncRun: getRunningSyncRunMock,
+    getLatestSyncRun: mock(async () => null),
+  },
+}));
+
 const transactionMock = mock(async (cb: (tx: unknown) => Promise<unknown>) => cb({}));
 
 await mock.module("@/backend/db/drizzleDb", () => ({
   db: {
     transaction: transactionMock,
   },
+  queryDb: () => ({}),
 }));
 
 const hasPermissionMock = mock(async (): Promise<boolean> => true);
@@ -80,6 +97,12 @@ await mock.module("@/backend/services", () => ({
     hasPermission: hasPermissionMock,
   },
   getRedisService: async () => ({}),
+}));
+
+await mock.module("@/backend/services/auth/permissions.service", () => ({
+  PermissionsService: {
+    hasPermission: hasPermissionMock,
+  },
 }));
 
 await mock.module("@/backend/lib", () => ({

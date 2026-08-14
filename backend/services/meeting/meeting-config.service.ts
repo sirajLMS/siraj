@@ -242,6 +242,7 @@ export namespace MeetingConfigService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<UserMeetingConfigReturnType[]> {
+    if (inputs.length === 0) return [];
     const prepared = await prepareMeetingConfigUpsert(
       inputs,
       { topicDefault: "Personal Meeting", tx, tErrors },
@@ -275,6 +276,7 @@ export namespace MeetingConfigService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<ClassMeetingConfigSelectType[]> {
+    if (inputs.length === 0) return [];
     const prepared = await prepareMeetingConfigUpsert(
       inputs,
       { topicDefault: "Class Meeting", tx, tErrors },

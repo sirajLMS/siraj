@@ -121,6 +121,7 @@ await mock.module("@/backend/db/drizzleDb", () => ({
     select: dbSelectMock,
     transaction: dbTransactionMock,
   },
+  queryDb: () => ({}),
 }));
 
 await mock.module("@/backend/db/schema", () => ({
@@ -128,6 +129,12 @@ await mock.module("@/backend/db/schema", () => ({
   permissions: {},
   userPermissionGroups: {},
   invoices: {},
+  invoiceCoverageMonths: {},
+  parents: {},
+  payments: {},
+  students: {},
+  systemSettings: {},
+  users: {},
 }));
 
 await mock.module("@/backend/db/repo", () => ({
@@ -156,6 +163,52 @@ await mock.module("@/backend/db/repo", () => ({
   ParentRepository: {
     getParentProfile: getParentProfileMock,
   },
+  StudentRepository: {
+    findById: studentFindByIdMock,
+  },
+  PermissionManagementRepository: {
+    listUserIdsWithPermission: async () => [STAFF_USER_ID_A, STAFF_USER_ID_B],
+  },
+}));
+
+await mock.module("@/backend/db/repo/billing", () => ({
+  BillingRepository: {
+    createInvoice: createInvoiceMock,
+    createInvoiceCoverageMonths: createInvoiceCoverageMonthsMock,
+    getInvoiceById: getInvoiceByIdMock,
+    setInvoicePaymentPending: setInvoicePaymentPendingMock,
+    markInvoiceAsPaid: markInvoiceAsPaidMock,
+    updateInvoiceStatus: updateInvoiceStatusMock,
+    getUnpaidInvoicesSummary: async () => ({
+      id: "unpaid-invoices-summary",
+      totalOverdueInvoices: 0,
+      totalOverdueAmount: "0.00",
+      overdueAmountsByCurrency: [],
+      items: [],
+    }),
+  },
+  InvoicePaymentSubmissionRepository: {
+    createSubmission: createSubmissionMock,
+    updateSubmissionStatus: updateSubmissionStatusMock,
+    rejectPendingForInvoice: rejectPendingForInvoiceMock,
+    getPendingByInvoiceId: getPendingByInvoiceIdMock,
+    getLatestByInvoiceId: getLatestByInvoiceIdMock,
+  },
+}));
+
+await mock.module("@/backend/db/repo/parents", () => ({
+  ParentRepository: {
+    getParentProfile: getParentProfileMock,
+  },
+}));
+
+await mock.module("@/backend/db/repo/permissions", () => ({
+  PermissionManagementRepository: {
+    listUserIdsWithPermission: async () => [STAFF_USER_ID_A, STAFF_USER_ID_B],
+  },
+}));
+
+await mock.module("@/backend/db/repo/students", () => ({
   StudentRepository: {
     findById: studentFindByIdMock,
   },

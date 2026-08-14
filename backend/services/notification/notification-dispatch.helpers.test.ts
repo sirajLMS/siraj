@@ -72,7 +72,7 @@ function mockUser(overrides?: ContactOverrides): UserSelectType {
   return {
     id,
     name: "Test User",
-    email: overrides?.email ?? "parent@test.com",
+    email: overrides?.email !== undefined ? overrides.email as string : "parent@test.com",
     emailVerifiedAt: null,
     password: crypto.randomUUID(),
     rememberTokenHash: null,
