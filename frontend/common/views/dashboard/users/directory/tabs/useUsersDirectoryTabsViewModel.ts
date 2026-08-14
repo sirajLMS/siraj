@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useUsersDirectoryTabsStore } from "@/frontend/common/stores/usersDirectoryTabsStore";
 import { buildTabHref, buildTabNavItems, resolveTab } from "@/frontend/common/views/dashboard/lib/tabbedPane";
@@ -21,6 +22,7 @@ export function useUsersDirectoryTabsViewModel(): UsersDirectoryTabsViewModel {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const labels = useAppTranslation(Translation.Dashboard.UsersDirectoryParent);
+  const navLabels = useAppTranslation(Translation.Dashboard.CoreNav);
   const hasPermission = useUserStore(state => state.hasPermission);
   const markTabVisited = useUsersDirectoryTabsStore(state => state.markTabVisited);
 
@@ -38,9 +40,16 @@ export function useUsersDirectoryTabsViewModel(): UsersDirectoryTabsViewModel {
     router.replace(buildTabHref(pathname, searchParams, resolvedActiveTab), { scroll: false });
   }, [resolvedActiveTab, tabParam, pathname, router, searchParams]);
 
+  const canCreateUser = hasPermission(AppPermission.StaffCreate);
+
   const viewLabels: UsersDirectoryViewLabels = useMemo(
-    () => ({ title: labels.pageTitle, subtitle: labels.pageSubtitle, tabs: labels.tabs }),
-    [labels]
+    () => ({
+      title: labels.pageTitle,
+      subtitle: labels.pageSubtitle,
+      tabs: labels.tabs,
+      createUserLabel: navLabels.createUser,
+    }),
+    [labels, navLabels.createUser]
   );
 
   const tabNavItems = useMemo(
@@ -56,5 +65,13 @@ export function useUsersDirectoryTabsViewModel(): UsersDirectoryTabsViewModel {
     [visibleTabs, labels.tabs, viewLabels, resolvedActiveTab, pathname, searchParams]
   );
 
-  return { labels: viewLabels, activeTab: resolvedActiveTab, tabNavItems };
+  const handleCreateUser = useMemo(() => () => router.push("/users/create"), [router]);
+
+  return {
+    labels: viewLabels,
+    activeTab: resolvedActiveTab,
+    tabNavItems,
+    canCreateUser,
+    onCreateUser: handleCreateUser,
+  };
 }

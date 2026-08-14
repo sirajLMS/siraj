@@ -81,6 +81,7 @@ import type { TeacherProfileLabels } from "@/shared/locale/types/dashboard/teach
 import type { TeacherReassignmentLabels } from "@/shared/locale/types/dashboard/teachers/reassignment.ts";
 import type { TeacherStudentsLabels } from "@/shared/locale/types/dashboard/teachers/students.ts";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule.ts";
+import type { CreateUserLabels } from "@/shared/locale/types/dashboard/users/createUser.ts";
 import type { UsersDirectoryParentLabels } from "@/shared/locale/types/dashboard/users/directory.ts";
 import type { EmailsLabels } from "@/shared/locale/types/emails";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
@@ -164,6 +165,7 @@ export interface DashboardTranslations {
   parentSocial: ParentSocialLabels;
   feedbackManageParent: FeedbackManageParentLabels;
   usersDirectoryParent: UsersDirectoryParentLabels;
+  usersCreateUser: CreateUserLabels;
   paymentCatalogs: PaymentCatalogsLabels;
   paymentCatalogsParent: PaymentCatalogsParentLabels;
   scheduleTrackingParent: ScheduleTrackingParentLabels;

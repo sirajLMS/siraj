@@ -1926,6 +1926,24 @@ export enum Gender {
   Male = 'MALE'
 }
 
+/** Input for creating a general user with permission group assignment */
+export type GeneralUserCreateInput = {
+  email: Scalars['String']['input'];
+  groupSlug: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  password: Scalars['String']['input'];
+  phone: InputMaybe<Scalars['String']['input']>;
+  status: InputMaybe<AccountStatus>;
+};
+
+/** Result of general user creation with assigned permission group */
+export type GeneralUserCreateResult = {
+  __typename?: 'GeneralUserCreateResult';
+  assignedGroupSlug: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
+  user: Maybe<User>;
+};
+
 export type GenerateMeetingUrlInput = {
   durationMinutes: InputMaybe<Scalars['Int']['input']>;
   providerId: Scalars['String']['input'];
@@ -2837,6 +2855,8 @@ export type Mutation = {
   createClassSubject: Maybe<ClassSubject>;
   createCurrencyHedge: Maybe<CurrencyHedge>;
   createFolder: Maybe<FileOperationResult>;
+  /** Create a new user with a non-specialized permission group */
+  createGeneralUser: Maybe<GeneralUserCreateResult>;
   /** Create a new manager/staff account (System Admin only) */
   createManager: Maybe<ManagerOnboardingResult>;
   createManualInvoice: Maybe<ManualInvoiceResult>;
@@ -3177,6 +3197,11 @@ export type MutationCreateCurrencyHedgeArgs = {
 
 export type MutationCreateFolderArgs = {
   input: FolderCreateInput;
+};
+
+
+export type MutationCreateGeneralUserArgs = {
+  input: GeneralUserCreateInput;
 };
 
 

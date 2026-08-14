@@ -116,6 +116,10 @@ Completed extractions:
 - `makeTeacherMonthlyReportQueryField` / `makeStudentMonthlyReportQueryField` — `backend/graphql/query/reports/__shared__/makeMonthlyReportQueryField.ts`
 - `resolveStudentIdFromArgsOrUser` — `backend/graphql/query/students/__shared__/resolveStudentIdFromArgsOrUser.ts`
 
+## General User Create Mutation Pattern
+
+The `createGeneralUser` mutation creates a user without a specialized profile extension. It uses `authScopes: { permission: AppPermission.STAFF_CREATE, notImpersonating: true }` to require staff create permission and block creation while impersonating. The `groupSlug` input field is a plain `String!` (not an enum) to allow any permission group slug — specialized groups are rejected at the service layer via `isSpecializedGroup()`. The result type includes `id` (resolved from `parent.user.id`) for Apollo cache normalization. See `docs/services/general-user-creation.md` for the complete pattern reference.
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.

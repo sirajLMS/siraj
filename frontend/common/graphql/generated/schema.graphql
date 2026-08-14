@@ -1844,6 +1844,23 @@ enum Gender {
   MALE
 }
 
+"""Input for creating a general user with permission group assignment"""
+input GeneralUserCreateInput {
+  email: String!
+  groupSlug: String!
+  name: String!
+  password: String!
+  phone: String
+  status: AccountStatus
+}
+
+"""Result of general user creation with assigned permission group"""
+type GeneralUserCreateResult {
+  assignedGroupSlug: String
+  id: String
+  user: User
+}
+
 input GenerateMeetingUrlInput {
   durationMinutes: Int
   providerId: String!
@@ -2743,6 +2760,9 @@ type Mutation {
   createClassSubject(input: ClassSubjectCreateInput!): ClassSubject
   createCurrencyHedge(amount: String!, currency: CurrencyCode!, hedgeType: String!, notes: String): CurrencyHedge
   createFolder(input: FolderCreateInput!): FileOperationResult
+
+  """Create a new user with a non-specialized permission group"""
+  createGeneralUser(input: GeneralUserCreateInput!): GeneralUserCreateResult
 
   """Create a new manager/staff account (System Admin only)"""
   createManager(input: ManagerOnboardingInput!): ManagerOnboardingResult

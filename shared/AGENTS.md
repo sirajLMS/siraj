@@ -54,6 +54,10 @@ When frontend and backend both need the same enum values:
 4. Frontend should use GraphQL codegen enums for API-facing types, or import from `@/shared/constants/` when shared logic requires the same values.
 5. **Never** import `@/backend/enum` from `shared/` — see `backend/enum/AGENTS.md`.
 
+## Specialized Group Constants
+
+`shared/constants/specialized-groups.constants.ts` exports `SPECIALIZED_GROUP_SLUGS` (readonly tuple of student/teacher/parent default group slugs), `SPECIALIZED_GROUP_SLUG_SET` (Set<string> for O(1) lookup), and `isSpecializedGroup(slug)` predicate. Used by backend services to reject specialized groups in general user creation and by frontend to filter the permission group dropdown. See `docs/services/general-user-creation.md` for usage.
+
 ## Extracting Code Into Shared
 
 When moving logic from `frontend/` or `backend/` into `shared/`:

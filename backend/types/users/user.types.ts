@@ -93,3 +93,17 @@ export type PaginatedUsersResponse = {
   data: UserReturnType[];
   pageInfo: PageInfo;
 };
+
+export interface GeneralUserCreateInput {
+  readonly name: string;
+  readonly email: string;
+  readonly password: string;
+  readonly phone?: string | null;
+  readonly groupSlug: string;
+  readonly status?: AccountStatus;
+}
+
+export interface GeneralUserCreateResult {
+  readonly user: UserReturnType;
+  readonly assignedGroupSlug: string;
+}

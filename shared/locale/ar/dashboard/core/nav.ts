@@ -47,6 +47,7 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
   paymentCatalogs: "طرق الدفع",
   feedbackManage: "الملاحظات",
   usersDirectory: "المستخدمون",
+  createUser: "إنشاء مستخدم",
   meetingProviders: "منصات الاجتماعات",
   billingParent: "الفواتير والمدفوعات",
   billingManual: "إنشاء فاتورة يدوية",

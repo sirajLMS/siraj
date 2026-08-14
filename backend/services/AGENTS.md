@@ -132,6 +132,10 @@ Completed consolidations:
 
 Multiple meeting provider adapters (Zoom, Google Meet, Teams) share identical getter/setter/logic structure. Use `MeetingProviderAdapterBase` from `__shared__/meetingProviderAdapterBase.ts` as the abstract base class. See `docs/backend/meeting-adapter-base.md` for the complete pattern reference.
 
+## General User Onboarding (`createUserOfType` Null-Extension Pattern)
+
+When creating a user without a specialized profile extension (teacher, parent, student, manager), use `createUserOfType<void>` with `createExtension: async () => null` and `afterExtension: undefined`. The service rejects specialized group slugs (student, teacher, parent) via `isSpecializedGroup()` from `@/shared/constants/specialized-groups.constants` before calling the pipeline. The `groupSlug` parameter in `CreateUserOfTypeOptions` is typed as `string` (widened from `SystemPermissionGroupSlug`) to support custom non-system group slugs. See `docs/services/general-user-creation.md` for the complete pattern reference.
+
 ## Service Base & Shared Helpers (Duplication Elimination)
 
 When multiple service files share identical helper functions (auth preludes, config upserts, insert payload builders, session creators), extract into `__shared__/` modules. See `docs/backend/service-base-pattern.md` for the complete pattern reference.
