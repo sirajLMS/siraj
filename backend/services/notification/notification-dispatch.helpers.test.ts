@@ -64,7 +64,7 @@ let getByUserIdsSpy: ReturnType<typeof spyOn>;
 let dispatchMultiSpy: ReturnType<typeof spyOn>;
 let findSafeByIdsSpy: ReturnType<typeof spyOn>;
 
-type ContactOverrides = { email?: string | null; phone?: string | null };
+type ContactOverrides = { email?: string; phone?: string | null };
 
 function mockUser(overrides?: ContactOverrides): UserSelectType {
   const id = crypto.randomUUID();
@@ -72,7 +72,7 @@ function mockUser(overrides?: ContactOverrides): UserSelectType {
   const base: UserSelectType = {
     id,
     name: "Test User",
-    email: "parent@test.com",
+    email: overrides?.email ?? "test@example.com",
     emailVerifiedAt: null,
     password: crypto.randomUUID(),
     rememberTokenHash: null,
@@ -286,8 +286,8 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     expect(smsPayload?.metadata?.to).toBe("+[PHONE_REDACTED]");
   });
 
-  test("drops email payload when user.email is null (no email payload reaches dispatchMulti)", async () => {
-    mockFindSafeByIdsWithUser({ email: null });
+  test("drops email payload when user.email is empty (no email payload reaches dispatchMulti)", async () => {
+    mockFindSafeByIdsWithUser({ email: "" });
     const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
 
     expect(dispatched.map(p => p.channel)).not.toContain(NotificationChannel.EMAIL);

@@ -12,6 +12,12 @@ ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'teacher_dues.view';
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'teacher_dues.mark_paid';
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'monthly_reports.view';
 
+-- Restore enum value dropped by the `parched_mister_fear` migration (which
+-- recreated `app_permission` without it). The `supervisor_default` block below
+-- references this key in a plain `p.key IN (...)` clause, which requires the
+-- enum literal to exist.
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'teacher.view_profile';
+
 -- Temporarily disable the system permission trigger to allow INSERT with is_system = true
 DO $$
 BEGIN

@@ -62,6 +62,12 @@ const ACADEMY_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.ComplaintsRespond,
   AppPermission.SuggestionsList,
   AppPermission.SuggestionsReview,
+  // Task 1.3 — new permissions granted to academy_admin (manager) role
+  AppPermission.PermissionGroupsManage,
+  AppPermission.PermissionGroupsAssign,
+  AppPermission.TeachersEdit,
+  AppPermission.TeachersList,
+  AppPermission.StudentsEdit,
 ];
 
 describe("academy admin sidebar navigation", () => {
