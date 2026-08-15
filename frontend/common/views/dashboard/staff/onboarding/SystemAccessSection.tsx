@@ -8,15 +8,10 @@ import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/grap
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import type { StaffOnboardingLabels } from "@/shared/locale";
 
-const ACCOUNT_TYPES: readonly ManagerAccountType[] = [
-  ManagerAccountType.Manager,
-  ManagerAccountType.Admin,
-  ManagerAccountType.Supervisor,
-];
+const ACCOUNT_TYPES: readonly ManagerAccountType[] = [ManagerAccountType.Manager, ManagerAccountType.Supervisor];
 
-const ACCOUNT_TYPE_LABEL_KEYS: Readonly<Record<ManagerAccountType, "manager" | "admin" | "supervisor">> = {
+const ACCOUNT_TYPE_LABEL_KEYS: Readonly<Record<ManagerAccountType, "manager" | "supervisor">> = {
   [ManagerAccountType.Manager]: "manager",
-  [ManagerAccountType.Admin]: "admin",
   [ManagerAccountType.Supervisor]: "supervisor",
 };
 
@@ -91,9 +86,6 @@ export function SystemAccessSection({ labels, control }: Props) {
   const accountType = useWatch({ control, name: "accountType" });
 
   const getDescription = (): string => {
-    if (accountType === ManagerAccountType.Admin) {
-      return t.options.accountTypeDescriptions.admin;
-    }
     if (accountType === ManagerAccountType.Supervisor) {
       return t.options.accountTypeDescriptions.supervisor;
     }

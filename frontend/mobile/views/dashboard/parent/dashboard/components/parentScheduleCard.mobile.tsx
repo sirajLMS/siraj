@@ -8,7 +8,6 @@ import {
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { MobileCardListItem, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
-import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingJoinAction.mobile";
 
 export interface ParentScheduleMobileCardItemProps {
   readonly row: ParentScheduleRow;
@@ -46,24 +45,6 @@ const MOBILE_OPTIONS: ParentScheduleCardSharedOptions = {
       />
     </>
   ),
-  renderJoinAction: ({ row, labels, canJoin, frozenFallback }): ReactNode => {
-    let result: ReactNode = null;
-    if (canJoin) {
-      result = (
-        <MobileMeetingJoinAction
-          variant="icon"
-          joinUrl={row.meetingJoinUrl}
-          meeting={row.effectiveMeeting}
-          disabled={!row.videoEnabled}
-          label={labels.schedule.joinVideo}
-          emptyRole="parent"
-        />
-      );
-    } else if (row.isFrozen) {
-      result = frozenFallback;
-    }
-    return result;
-  },
 };
 
 /**

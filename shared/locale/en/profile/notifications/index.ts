@@ -8,10 +8,20 @@ export const profileNotificationsEn: ProfileNotificationsLabels = {
   errorSaving: "Failed to save notification preferences.",
   autoGeneration: {
     title: "Auto-generation modes",
+    summary: "Connect a provider, create a meeting config, and let Siraj generate a meeting URL for every booking.",
     onSave: "On save — a meeting URL is generated automatically when you enable auto-generation",
     preview: "Preview — generate a test URL to see what your meeting will look like",
     booking: "Booking — a fresh URL is generated when a meeting is booked",
     learnMore: "Learn more",
+    learnLess: "Show less",
+    createConfig: "Create config",
+    step1Title: "Connect a provider",
+    step1Description:
+      "Ask your admin to connect Zoom, Google Meet, or Microsoft Teams in Settings → Meeting Integrations.",
+    step2Title: "Create a meeting config",
+    step2Description: "Choose the connected provider, pick a default meeting template, and save it to your profile.",
+    step3Title: "Auto-generate at booking",
+    step3Description: "When a meeting is booked, Siraj creates a fresh meeting URL using your config automatically.",
   },
   categories: {
     info: "Informational",
@@ -67,5 +77,9 @@ export const profileNotificationsEn: ProfileNotificationsLabels = {
     cancel: "Cancel",
     reconnectButton: "Reconnect",
     reconnectCallout: "Reconnect your account",
+    statusConnected: "Connected",
+    statusExpiring: "Expiring",
+    statusExpired: "Expired",
+    statusDisconnected: "Not connected",
   },
 };

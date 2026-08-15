@@ -6,4 +6,6 @@ export const uiMeetingConfigReauthNeededEn = {
   reauthExpiringSoon: "expiring soon",
   reauthExpired: "expired",
   reconnectRequiredBadge: "Reconnect required",
+  remindLater: "Remind me later",
+  reconnectAllButton: "Reconnect All",
 };

@@ -227,6 +227,48 @@ export const classMeetingConfigsQueryDocument: TypedDocumentNode<
   }
 `;
 
+export const classMeetingConfigsWithStatusQueryDocument: TypedDocumentNode<
+  Operations.ClassMeetingConfigsWithStatusQuery,
+  Types.QueryClassMeetingConfigsArgs
+> = gql`
+  query classMeetingConfigsWithStatus($classInstanceId: ID!) {
+    classMeetingConfigs(classInstanceId: $classInstanceId) {
+      id
+      classInstanceId
+      recurringScheduleId
+      providerId
+      label
+      isDefault
+      hasSecret
+      details {
+        meetingUrl
+        username
+        tenantId
+      }
+      providerMetadata
+      meetingUrlStatus
+      meetingUrlExpiresAt
+      meetingUrlError
+      provider {
+        id
+        slug
+        name
+        providerKind
+        isActive
+        fieldSchema {
+          requiresMeetingUrl
+          supportsAutoGeneration
+          supportsUsername
+          supportsPassword
+          supportsTenantId
+        }
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
 export const recurringMeetingConfigsQueryDocument: TypedDocumentNode<
   ClassOps.RecurringMeetingConfigsQuery,
   ClassOps.RecurringMeetingConfigsQueryVariables

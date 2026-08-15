@@ -51,7 +51,7 @@ export const dashboardStaffDirectoryAr: StaffDirectoryLabels = {
     offline: "غير متصل",
   },
   roles: {
-    admin: "مدير",
+    admin: "مدير الأكاديمية",
     manager: "مدير",
     supervisor: "مشرف",
   },

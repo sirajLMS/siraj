@@ -1,7 +1,7 @@
 "use client";
 
 import { WarningAmberOutlined } from "@mui/icons-material";
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { Box, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import type {
   BaseDeleteDialogSharedProps,
   DeleteDialogSlotProps,
@@ -19,11 +19,12 @@ export function BaseDeleteDialogScaffold({
   cancelLabel,
   confirmLabel,
   confirmSx,
+  fullScreen,
   CancelActionButton,
   ConfirmActionButton,
 }: Readonly<BaseDeleteDialogScaffoldProps>) {
   return (
-    <Dialog open={open} onClose={isLoading ? undefined : onClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={isLoading ? undefined : onClose} maxWidth="xs" fullWidth fullScreen={fullScreen}>
       <DialogTitle component="div" sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Box
           sx={theme => ({
@@ -55,6 +56,7 @@ export function BaseDeleteDialogScaffold({
           fullWidth
           onClick={onConfirm}
           disabled={isLoading}
+          aria-busy={isLoading}
           sx={
             confirmSx ??
             (theme => ({
@@ -65,7 +67,7 @@ export function BaseDeleteDialogScaffold({
             }))
           }
         >
-          {isLoading ? "..." : confirmLabel}
+          {isLoading ? <CircularProgress size={20} sx={theme => ({ color: theme.palette.onError })} /> : confirmLabel}
         </ConfirmActionButton>
       </DialogActions>
     </Dialog>

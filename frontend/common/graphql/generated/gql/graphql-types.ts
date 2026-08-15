@@ -701,6 +701,9 @@ export type ClassMeetingConfig = {
   id: Maybe<Scalars['String']['output']>;
   isDefault: Maybe<Scalars['Boolean']['output']>;
   label: Maybe<Scalars['String']['output']>;
+  meetingUrlError: Maybe<Scalars['String']['output']>;
+  meetingUrlExpiresAt: Maybe<Scalars['DateTime']['output']>;
+  meetingUrlStatus: Maybe<Scalars['String']['output']>;
   provider: Maybe<MeetingProvider>;
   providerId: Maybe<Scalars['String']['output']>;
   providerMetadata: Maybe<Scalars['JSON']['output']>;
@@ -2612,7 +2615,6 @@ export type LoginResponse = {
 };
 
 export enum ManagerAccountType {
-  Admin = 'admin',
   Manager = 'manager',
   Supervisor = 'supervisor'
 }
@@ -7186,6 +7188,9 @@ export type UserMeetingConfig = {
   id: Maybe<Scalars['String']['output']>;
   isDefault: Maybe<Scalars['Boolean']['output']>;
   label: Maybe<Scalars['String']['output']>;
+  meetingUrlError: Maybe<Scalars['String']['output']>;
+  meetingUrlExpiresAt: Maybe<Scalars['DateTime']['output']>;
+  meetingUrlStatus: Maybe<Scalars['String']['output']>;
   oauthTokenExpiresAt: Maybe<Scalars['DateTime']['output']>;
   provider: Maybe<MeetingProvider>;
   providerId: Maybe<Scalars['String']['output']>;

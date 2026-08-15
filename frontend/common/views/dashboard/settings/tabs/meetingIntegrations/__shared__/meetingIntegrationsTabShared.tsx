@@ -14,9 +14,11 @@ import {
 import { useState } from "react";
 import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ConnectedAccountsTable } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectedAccountsTable";
+import { ConnectProviderAction } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction";
 import { EndpointList } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/EndpointList";
 import { MeetingIntegrationsHealthHeaders } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/MeetingIntegrationsHealthHeaders";
 import { MeetingProviderCredentialForm } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/MeetingProviderCredentialForm";
+import { ProfileLinkCallout } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ProfileLinkCallout";
 import { RevokeTokenDialog } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/RevokeTokenDialog";
 import { TestConnectionResultPanel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TestConnectionResultPanel";
 import { TokenMetadataDialog } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TokenMetadataDialog";
@@ -76,6 +78,8 @@ export function MeetingIntegrationsTabShared(props: MeetingIntegrationsTabShared
     >
       <MeetingIntegrationsHealthHeaders viewModel={viewModel} />
 
+      <ProfileLinkCallout labels={labels} onNavigate={viewModel.navigateToProfile} />
+
       {providers.map(provider => (
         <Accordion
           key={provider.slug}
@@ -104,7 +108,16 @@ export function MeetingIntegrationsTabShared(props: MeetingIntegrationsTabShared
           </AccordionSummary>
           <AccordionDetails sx={detailsSx}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <EndpointList endpoints={provider.endpoints} label={labels.endpoints} />
+              <ConnectProviderAction
+                labels={labels}
+                providerSlug={provider.slug}
+                providerName={getProviderLabel(provider.slug, labels)}
+                connecting={viewModel.connectingFor === provider.slug}
+                connectError={viewModel.connectErrorFor[provider.slug] ?? null}
+                onConnect={viewModel.connectProvider}
+              />
+
+              <EndpointList endpoints={provider.endpoints} labels={labels} />
 
               <MeetingProviderCredentialForm provider={provider} labels={labels} />
 
@@ -121,8 +134,10 @@ export function MeetingIntegrationsTabShared(props: MeetingIntegrationsTabShared
                 accounts={viewModel.connectedAccountsByProvider[provider.slug] ?? []}
                 loading={viewModel.loadingAccountsFor === provider.slug}
                 providerSlug={provider.slug}
-                viewModel={viewModel}
+                canEdit={viewModel.canEdit}
+                revokingFor={viewModel.revokingFor}
                 onRevokeRequest={(account, slug) => setRevokeTarget({ account, providerSlug: slug })}
+                onMetadataDialogOpen={viewModel.onMetadataDialogOpen}
               />
             </Box>
           </AccordionDetails>

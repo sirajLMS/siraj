@@ -47,6 +47,7 @@
 
 **Read [COMPONENT_PATTERNS.md](COMPONENT_PATTERNS.md) before building or refactoring dashboard pages.**
 **Use [.github/CODE_REVIEW_CHECKLIST.md](.github/CODE_REVIEW_CHECKLIST.md) when reviewing code.**
+**See `docs/frontend/meeting-integrations-ui.md` for the canonical reference on meeting integration UI patterns (MetricCardGrid, AppDataGrid, OAuth callback, reconnect-all, status badges, clipboard, i18n, mobile-desktop, Zod factory, animations, permissions).**
 
 - **Layout (desktop):** Use `PageContainer` inside views — never add outer `p: 2/3` (double-padding with `DashboardLayout.pageMargin`).
 - **Layout (mobile):** `DashboardLayoutMobile` is edge-to-edge (`px: 0`). Do **not** put horizontal padding on `MobilePageContainer` / `MobileContentStack`. Content owns inset via `mobileContentGutterSx`, `MobileContentInset`, `MobilePageHeader`, scroll rows, and section panels — see `frontend/mobile/AGENTS.md`.

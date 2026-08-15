@@ -24,12 +24,10 @@ export interface StaffOnboardingLabels {
   readonly options: {
     readonly accountType: {
       readonly manager: string;
-      readonly admin: string;
       readonly supervisor: string;
     };
     readonly accountTypeDescriptions: {
       readonly manager: string;
-      readonly admin: string;
       readonly supervisor: string;
     };
     readonly department: {

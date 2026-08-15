@@ -177,22 +177,18 @@ export function MeetingConfigListShared({
               </Stack>
               <Stack sx={{ flexDirection: "row", gap: opts.actionGap }}>
                 {onEditAction ? (
-                  <IconButton aria-label={tManager.edit} size="small" onClick={() => onEditAction(config)}>
-                    <EditOutlinedIcon fontSize="small" />
+                  <IconButton aria-label={tManager.edit} onClick={() => onEditAction(config)}>
+                    <EditOutlinedIcon />
                   </IconButton>
                 ) : null}
                 {!config.isDefault && onSetDefaultAction ? (
-                  <IconButton
-                    aria-label={tManager.setDefault}
-                    size="small"
-                    onClick={() => onSetDefaultAction(configId)}
-                  >
-                    <StarOutlinedIcon fontSize="small" />
+                  <IconButton aria-label={tManager.setDefault} onClick={() => onSetDefaultAction(configId)}>
+                    <StarOutlinedIcon />
                   </IconButton>
                 ) : null}
                 {onDeleteAction ? (
-                  <IconButton aria-label={tManager.delete} size="small" onClick={() => onDeleteAction(configId)}>
-                    <DeleteOutlinedIcon fontSize="small" />
+                  <IconButton aria-label={tManager.delete} onClick={() => onDeleteAction(configId)}>
+                    <DeleteOutlinedIcon />
                   </IconButton>
                 ) : null}
               </Stack>

@@ -8,12 +8,10 @@ import { CurrencyCode, IanaTimezone, ManagerAccountType } from "@/frontend/commo
 import { useCreateManagerOnboarding } from "@/frontend/common/hooks/useCreateManagerOnboarding";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { managerOnboardingSchema } from "@/frontend/common/views/dashboard/staff/onboarding/schemas/managerOnboardingSchema";
-import {
-  type OnboardingMetricsViewModel,
-  useOnboardingMetrics,
-} from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
+import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/staff/onboarding/types";
+import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
 import { useRouter } from "@/shared/i18n/navigation";
-import { type StaffOnboardingLabels, Translation, useAppTranslation } from "@/shared/locale";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const defaultValues: ManagerOnboardingFormData = {
   name: "",
@@ -26,23 +24,7 @@ const defaultValues: ManagerOnboardingFormData = {
   password: "",
 };
 
-export interface ManagerOnboardingContainerViewModel {
-  readonly labels: StaffOnboardingLabels;
-  readonly register: ReturnType<typeof useForm<ManagerOnboardingFormData>>["register"];
-  readonly control: ReturnType<typeof useForm<ManagerOnboardingFormData>>["control"];
-  readonly errors: ReturnType<typeof useForm<ManagerOnboardingFormData>>["formState"]["errors"];
-  readonly handleSubmit: ReturnType<typeof useForm<ManagerOnboardingFormData>>["handleSubmit"];
-  readonly isSubmitting: boolean;
-  readonly showSuccess: boolean;
-  readonly submitError: string | null;
-  readonly onSubmit: (data: ManagerOnboardingFormData) => void | Promise<void>;
-  readonly onCancel: () => void;
-  readonly onDismissSuccess: () => void;
-  readonly onDismissError: () => void;
-  // NEW FOR PLAN v5: metricsModel exposed by the Container VM so the tier views no longer call `useOnboardingMetrics` directly (was a GraphQL-in-tier violation per specs §3 N1 / §6.2).
-  readonly metricsModel: OnboardingMetricsViewModel;
-  readonly onUploadAvatar: (file: File) => Promise<{ url: string }>;
-}
+export type ManagerOnboardingContainerViewModel = ManagerOnboardingViewProps;
 
 export type UseManagerOnboardingContainerViewModelProps = Record<string, never>;
 

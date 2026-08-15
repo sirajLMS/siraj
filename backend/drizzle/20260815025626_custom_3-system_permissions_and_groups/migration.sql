@@ -1056,8 +1056,8 @@ VALUES (
     ),
     (
         gen_random_uuid (),
-        '{"ar": "المسؤول", "en": "Admin"}'::jsonb,
-        '{"ar": "إشراف تشغيلي كامل", "en": "Full operational oversight for the sprint"}'::jsonb,
+        '{"ar": "مدير الأكاديمية", "en": "Manager"}'::jsonb,
+        '{"ar": "وصول إداري كامل للنظام لإدارة المعلمين والطلاب والجداول والمالية عدا إدارة الصلاحيات", "en": "Full system access for managing teachers, students, schedules, and billing — except permission control"}'::jsonb,
         true,
         'academy_admin',
         NOW(),

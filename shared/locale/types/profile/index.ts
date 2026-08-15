@@ -312,10 +312,19 @@ export interface ProfileNotificationsLabels {
   readonly errorSaving: string;
   readonly autoGeneration: {
     readonly title: string;
+    readonly summary: string;
     readonly onSave: string;
     readonly preview: string;
     readonly booking: string;
     readonly learnMore: string;
+    readonly learnLess: string;
+    readonly createConfig: string;
+    readonly step1Title: string;
+    readonly step1Description: string;
+    readonly step2Title: string;
+    readonly step2Description: string;
+    readonly step3Title: string;
+    readonly step3Description: string;
   };
   readonly categories: {
     readonly info: string;
@@ -373,6 +382,10 @@ export interface ProfileNotificationsLabels {
     readonly cancel: string;
     readonly reconnectButton: string;
     readonly reconnectCallout: string;
+    readonly statusConnected: string;
+    readonly statusExpiring: string;
+    readonly statusExpired: string;
+    readonly statusDisconnected: string;
   };
 }
 

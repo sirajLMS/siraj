@@ -44,6 +44,7 @@ export const dashboardTeacherDashboardEn: TeacherDashboardLabels = {
     durationValue: minutes => `${minutes} min`,
     current: "Current",
     viewAll: "View All",
+    meetingUrl: "Meeting URL",
   },
   status: {
     missed: "Missed",

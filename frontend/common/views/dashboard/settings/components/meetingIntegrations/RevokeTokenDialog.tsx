@@ -1,35 +1,27 @@
 "use client";
 
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
-export function RevokeTokenDialog({
-  labels,
-  open,
-  revoking,
-  onConfirm,
-  onCancel,
-}: {
+export interface RevokeTokenDialogProps {
   readonly labels: SettingsMeetingIntegrationsLabels;
   readonly open: boolean;
   readonly revoking: boolean;
   readonly onConfirm: () => void;
   readonly onCancel: () => void;
-}) {
+}
+
+export function RevokeTokenDialog({ labels, open, revoking, onConfirm, onCancel }: Readonly<RevokeTokenDialogProps>) {
   return (
-    <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth>
-      <DialogTitle>{labels.actions.revokeConfirmTitle}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{labels.actions.revokeConfirm}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onCancel} disabled={revoking}>
-          {labels.actions.cancel}
-        </Button>
-        <Button onClick={onConfirm} color="error" disabled={revoking}>
-          {labels.actions.confirmRevoke}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      onClose={onCancel}
+      onConfirm={onConfirm}
+      isLoading={revoking}
+      title={labels.actions.revokeConfirmTitle}
+      body={labels.actions.revokeConfirm}
+      cancelLabel={labels.actions.cancel}
+      confirmLabel={labels.actions.confirmRevoke}
+    />
   );
 }

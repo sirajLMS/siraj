@@ -4,6 +4,7 @@ import { AcUnitOutlined, HistoryOutlined } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
@@ -13,7 +14,6 @@ import type {
 import type { ParentScheduleDataGridDesktopProps } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentScheduleComponents.types";
 import type { SchedulePagination } from "@/frontend/common/views/dashboard/parent/dashboard/useParentDashboardViewModel";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
-import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig";
 import { ParentClassStatusIndicatorDesktop } from "@/frontend/desktop/views/dashboard/parent/dashboard/components/parentClassStatusIndicator.desktop";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
@@ -51,6 +51,13 @@ function resolvePaginationOptions(
     result = { mode: "client" };
   }
   return result;
+}
+
+function resolveMeetingUrlStatus(row: ParentScheduleRow): string | null {
+  if (row.isFrozen) return "failed";
+  if (!row.videoEnabled && !row.meetingJoinUrl) return null;
+  if (row.meetingJoinUrl !== null && row.meetingJoinUrl !== undefined) return "generated";
+  return "pending";
 }
 
 export function ParentScheduleDataGridDesktop({
@@ -163,39 +170,34 @@ export function ParentScheduleDataGridDesktop({
       {
         field: "contact",
         headerName: labels.schedule.contact,
-        width: 100,
+        width: 140,
         sortable: false,
         align: "center",
         headerAlign: "center",
         renderCell: ({ row }) => {
           const isJoinable = isJoinableClassInstance(row.executionState, row.outcome, { isFrozen: row.isFrozen });
-          const isFrozen = row.isFrozen;
-
-          let contactContent: React.ReactNode = null;
-          if (isJoinable) {
-            contactContent = (
-              <DesktopMeetingJoinAction
-                variant="icon"
-                joinUrl={row.meetingJoinUrl}
-                meeting={row.effectiveMeeting}
-                disabled={!row.videoEnabled}
-                label={labels.schedule.joinVideo}
-                emptyRole="parent"
-              />
-            );
-          } else if (isFrozen) {
-            contactContent = (
-              <Tooltip title={labels.schedule.contactAdmin}>
-                <AcUnitOutlined sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })} />
-              </Tooltip>
+          if (row.isFrozen) {
+            return (
+              <Box
+                sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
+              >
+                <Tooltip title={labels.schedule.contactAdmin}>
+                  <AcUnitOutlined sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })} />
+                </Tooltip>
+              </Box>
             );
           }
-
           return (
             <Box
               sx={{ display: "flex", justifyContent: "center", width: "100%", height: "100%", alignItems: "center" }}
             >
-              {contactContent}
+              <MeetingUrlCell
+                meetingUrl={row.meetingJoinUrl}
+                meetingUrlStatus={resolveMeetingUrlStatus(row)}
+                joinLabel={labels.schedule.joinVideo}
+                compact
+                onJoin={isJoinable ? () => window.open(row.meetingJoinUrl ?? "", "_blank") : undefined}
+              />
             </Box>
           );
         },

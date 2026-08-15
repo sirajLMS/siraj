@@ -65,12 +65,12 @@ describe("Manager Onboarding GraphQL API", () => {
     expect(superAdminUserId).toBeTruthy();
   });
 
-  test("Super Admin can create manager with admin type (all optional fields provided)", async () => {
+  test("Super Admin can create manager with manager type (all optional fields provided)", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", createManagerMutationDocument, {
       input: buildManagerInput({
-        name: "GraphQL Test Admin",
-        email: `graphql_admin_${Date.now()}@test.com`,
-        accountType: ManagerAccountType.Admin,
+        name: "GraphQL Test Manager",
+        email: `graphql_manager_${Date.now()}@test.com`,
+        accountType: ManagerAccountType.Manager,
         avatarUrl: "https://example.com/avatar.png",
         displayCurrency: CurrencyCode.Usd,
         phone: "+201000000000",
@@ -84,12 +84,12 @@ describe("Manager Onboarding GraphQL API", () => {
     expect(result.createManager.assignedGroupSlug).toBe("academy_admin");
   });
 
-  test("Super Admin can create manager with manager type (optional fields as null)", async () => {
+  test("Super Admin can create manager with supervisor type (optional fields as null)", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", createManagerMutationDocument, {
       input: buildManagerInput({
-        name: "GraphQL Test Manager",
-        email: `graphql_manager_${Date.now()}@test.com`,
-        accountType: ManagerAccountType.Manager,
+        name: "GraphQL Test Supervisor",
+        email: `graphql_supervisor_${Date.now()}@test.com`,
+        accountType: ManagerAccountType.Supervisor,
         avatarUrl: null,
         displayCurrency: null,
         phone: null,
@@ -98,7 +98,7 @@ describe("Manager Onboarding GraphQL API", () => {
     });
 
     if (!result.createManager) throw new Error("createManager is null");
-    expect(result.createManager.assignedGroupSlug).toBe("staff_default");
+    expect(result.createManager.assignedGroupSlug).toBe("supervisor_default");
   });
 
   test("Admin denied creating manager", async () => {

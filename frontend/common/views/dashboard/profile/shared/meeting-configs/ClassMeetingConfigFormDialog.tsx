@@ -3,6 +3,7 @@
 import type { TypedDocumentNode } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { Dialog } from "@mui/material";
+import { useId } from "react";
 import type {
   ClassMeetingConfigFieldsFragment,
   CreateClassMeetingConfigMutation,
@@ -56,6 +57,7 @@ export function ClassMeetingConfigFormDialog({
   const [createConfig, { loading: creating }] = useMutation(createMutation);
   const [updateConfig, { loading: updating }] = useMutation(updateMutation);
   const saving = creating || updating;
+  const formId = useId();
 
   const handleSave = async () => {
     if (!validateUrl()) return;
@@ -112,6 +114,7 @@ export function ClassMeetingConfigFormDialog({
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <MeetingConfigFormDialogContent
+        formId={formId}
         state={state}
         saving={saving}
         hasSecretOnEdit={!!(isEdit && editConfig?.hasSecret)}
@@ -119,6 +122,8 @@ export function ClassMeetingConfigFormDialog({
         onSave={() => {
           void handleSave();
         }}
+        cancelLabel={t.cancel}
+        saveLabel={t.save}
       />
     </Dialog>
   );

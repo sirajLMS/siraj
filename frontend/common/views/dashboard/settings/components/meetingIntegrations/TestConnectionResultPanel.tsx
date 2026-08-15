@@ -1,12 +1,14 @@
 "use client";
 
 import { ContentCopyOutlined, OpenInNewOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, CircularProgress, Link, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, CircularProgress, Link, Stack, Typography } from "@mui/material";
+import type * as React from "react";
 import { useState } from "react";
 import {
   MeetingConnectionTestMode,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TestConnectionState } from "@/frontend/common/views/dashboard/settings/types/meeting-ui.types";
 import type { TestMeetingConnectionResult } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
@@ -18,6 +20,12 @@ const marketplaceUrls: Partial<Record<MeetingIntegrationProviderSlug, string>> =
 
 function getMarketplaceUrl(slug: MeetingIntegrationProviderSlug): string | null {
   return marketplaceUrls[slug] ?? null;
+}
+
+function deriveState(testing: boolean, result: TestMeetingConnectionResult | null): TestConnectionState {
+  if (testing) return "testing";
+  if (result === null) return "idle";
+  return result.ok ? "success" : "failure";
 }
 
 type TestButtonRowProps = {
@@ -51,74 +59,6 @@ function TestButtonRow({ labels, testing, providerSlug, onRunTest }: TestButtonR
   );
 }
 
-type TestResultDetailsProps = {
-  readonly labels: SettingsMeetingIntegrationsLabels;
-  readonly result: TestMeetingConnectionResult;
-  readonly marketplaceUrl: string | null;
-};
-
-function TestResultDetails({ labels, result, marketplaceUrl }: TestResultDetailsProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyUrl = async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      globalThis.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard not available — silently ignore
-    }
-  };
-
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-      <TestResultHeaderRow labels={labels} ok={result.ok} />
-      <Typography sx={{ typography: "bodySm" }}>
-        {labels.latency}: {result.latencyMs}ms
-      </Typography>
-      {result.testJoinUrl && (
-        <TestJoinUrlRow labels={labels} url={result.testJoinUrl} copied={copied} onCopy={handleCopyUrl} />
-      )}
-      {result.deleted !== null && (
-        <Typography sx={{ typography: "bodySm" }}>
-          {labels.deleted}: {result.deleted ? labels.testSuccess : labels.notDeleted}
-        </Typography>
-      )}
-      {result.errorCode && (
-        <Typography sx={{ typography: "bodySm", color: "error.main" }}>
-          {labels.errorCode}: {result.errorCode}
-        </Typography>
-      )}
-      {result.errorMessage && (
-        <Typography sx={{ typography: "bodySm", color: "error.main" }}>
-          {labels.errorMessage}: {result.errorMessage}
-        </Typography>
-      )}
-      {result.rawUpstreamPayload && <RawPayloadSection labels={labels} payload={result.rawUpstreamPayload} />}
-      <MarketplaceLink labels={labels} marketplaceUrl={marketplaceUrl} />
-    </Box>
-  );
-}
-
-type TestResultHeaderRowProps = {
-  readonly labels: SettingsMeetingIntegrationsLabels;
-  readonly ok: boolean;
-};
-
-function TestResultHeaderRow({ labels, ok }: TestResultHeaderRowProps) {
-  return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{labels.testResult}</Typography>
-      <Chip
-        size="small"
-        label={ok ? labels.testSuccess : labels.testFailure}
-        color={ok ? "success" : "error"}
-        variant="outlined"
-      />
-    </Box>
-  );
-}
-
 type TestJoinUrlRowProps = {
   readonly labels: SettingsMeetingIntegrationsLabels;
   readonly url: string;
@@ -128,7 +68,7 @@ type TestJoinUrlRowProps = {
 
 function TestJoinUrlRow({ labels, url, copied, onCopy }: TestJoinUrlRowProps) {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}>
       <Typography sx={{ typography: "bodySm" }}>
         {labels.joinUrl}: {url}
       </Typography>
@@ -198,6 +138,129 @@ function MarketplaceLink({ labels, marketplaceUrl }: MarketplaceLinkProps) {
   );
 }
 
+type SuccessContentProps = {
+  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly result: TestMeetingConnectionResult;
+  readonly marketplaceUrl: string | null;
+};
+
+type ConnectionSummaryMetricsProps = {
+  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly result: TestMeetingConnectionResult;
+  readonly authStatusLabel: string;
+};
+
+function ConnectionSummaryMetrics({ labels, result, authStatusLabel }: ConnectionSummaryMetricsProps) {
+  return (
+    <>
+      <Typography sx={{ typography: "bodySm" }}>
+        {labels.latency}: {result.latencyMs}ms
+      </Typography>
+      <Typography sx={{ typography: "bodySm" }}>
+        {labels.testPanel.endpointReached}: {result.upstreamResponseSummary}
+      </Typography>
+      <Typography sx={{ typography: "bodySm" }}>
+        {labels.testPanel.authStatus}: {authStatusLabel}
+      </Typography>
+    </>
+  );
+}
+
+function SuccessContent({ labels, result, marketplaceUrl }: SuccessContentProps) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      globalThis.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard not available — silently ignore
+    }
+  };
+
+  return (
+    <Alert severity="success" icon={false}>
+      <Stack sx={{ gap: 0.5 }}>
+        <Typography sx={{ fontWeight: 600 }}>{labels.testPanel.successMessage}</Typography>
+        <ConnectionSummaryMetrics labels={labels} result={result} authStatusLabel={labels.testPanel.authSuccess} />
+        {result.testJoinUrl && (
+          <TestJoinUrlRow labels={labels} url={result.testJoinUrl} copied={copied} onCopy={handleCopyUrl} />
+        )}
+        {result.deleted !== null && (
+          <Typography sx={{ typography: "bodySm" }}>
+            {labels.deleted}: {result.deleted ? labels.testSuccess : labels.notDeleted}
+          </Typography>
+        )}
+        {result.rawUpstreamPayload && <RawPayloadSection labels={labels} payload={result.rawUpstreamPayload} />}
+        <MarketplaceLink labels={labels} marketplaceUrl={marketplaceUrl} />
+      </Stack>
+    </Alert>
+  );
+}
+
+type FailureContentProps = {
+  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly result: TestMeetingConnectionResult;
+  readonly providerSlug: MeetingIntegrationProviderSlug;
+  readonly onRunTest: (providerSlug: MeetingIntegrationProviderSlug, mode: MeetingConnectionTestMode) => Promise<void>;
+};
+
+function FailureContent({ labels, result, providerSlug, onRunTest }: FailureContentProps) {
+  return (
+    <Alert
+      severity="error"
+      icon={false}
+      action={
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => onRunTest(providerSlug, MeetingConnectionTestMode.ValidateConfig)}
+        >
+          {labels.retryTest}
+        </Button>
+      }
+    >
+      <Stack sx={{ gap: 0.5 }}>
+        <Typography sx={{ fontWeight: 600 }}>{labels.testConnectionFailure}</Typography>
+        <ConnectionSummaryMetrics labels={labels} result={result} authStatusLabel={labels.testPanel.authFailure} />
+        {result.errorCode && (
+          <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>
+            {labels.errorCode}: {result.errorCode}
+          </Typography>
+        )}
+        {result.errorMessage && (
+          <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>
+            {labels.errorMessage}: {result.errorMessage}
+          </Typography>
+        )}
+        {result.rawUpstreamPayload && <RawPayloadSection labels={labels} payload={result.rawUpstreamPayload} />}
+      </Stack>
+    </Alert>
+  );
+}
+
+type IdleContentProps = {
+  readonly labels: SettingsMeetingIntegrationsLabels;
+};
+
+function IdleContent({ labels }: IdleContentProps) {
+  return <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.testPanel.idleHint}</Typography>;
+}
+
+type TestingContentProps = {
+  readonly labels: SettingsMeetingIntegrationsLabels;
+};
+
+function TestingContent({ labels }: TestingContentProps) {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <CircularProgress size={20} />
+      <Typography sx={{ typography: "bodySm" }}>{labels.testConnectionTesting}</Typography>
+    </Box>
+  );
+}
+
 type TestConnectionResultPanelProps = {
   readonly labels: SettingsMeetingIntegrationsLabels;
   readonly result: TestMeetingConnectionResult | null;
@@ -214,11 +277,27 @@ export function TestConnectionResultPanel({
   onRunTest,
 }: TestConnectionResultPanelProps) {
   const marketplaceUrl = getMarketplaceUrl(providerSlug);
+  const state = deriveState(testing, result);
+
+  let statusContent: React.ReactNode;
+  if (state === "idle") {
+    statusContent = <IdleContent labels={labels} />;
+  } else if (state === "testing") {
+    statusContent = <TestingContent labels={labels} />;
+  } else if (state === "success" && result) {
+    statusContent = <SuccessContent labels={labels} result={result} marketplaceUrl={marketplaceUrl} />;
+  } else if (state === "failure" && result) {
+    statusContent = (
+      <FailureContent labels={labels} result={result} providerSlug={providerSlug} onRunTest={onRunTest} />
+    );
+  } else {
+    statusContent = null;
+  }
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
       <TestButtonRow labels={labels} testing={testing} providerSlug={providerSlug} onRunTest={onRunTest} />
-      {result && <TestResultDetails labels={labels} result={result} marketplaceUrl={marketplaceUrl} />}
+      <Box aria-live="polite">{statusContent}</Box>
     </Box>
   );
 }

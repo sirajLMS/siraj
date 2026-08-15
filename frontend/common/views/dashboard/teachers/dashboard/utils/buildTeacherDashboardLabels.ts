@@ -45,6 +45,7 @@ function buildScheduleLabels(t: TeacherDashboardTranslator): TeacherDashboardLab
     durationValue: t.schedule.durationValue,
     current: t.schedule.current,
     viewAll: t.schedule.viewAll,
+    meetingUrl: t.schedule.meetingUrl,
   };
 }
 

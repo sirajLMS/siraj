@@ -42,6 +42,7 @@ export interface TeacherDashboardLabels {
     readonly durationValue: (minutes: number) => string;
     readonly current: string;
     readonly viewAll: string;
+    readonly meetingUrl: string;
   };
   readonly status: {
     readonly missed: string;

@@ -8,11 +8,7 @@ import {
 } from "@/frontend/common/views/dashboard/parent/dashboard/components/__shared__/parentScheduleCardShared";
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-import {
-  DesktopMeetingJoinAction,
-  DesktopPersonProfileLinkCell,
-  DesktopStatusBadge,
-} from "@/frontend/desktop/components/ui";
+import { DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 
 export interface ParentScheduleDesktopListItemProps {
   readonly row: ParentScheduleRow;
@@ -24,11 +20,20 @@ const DESKTOP_OPTIONS: ParentScheduleCardSharedOptions = {
   renderContainer: (children, row) => (
     <Box
       sx={theme => ({
-        p: 2,
+        p: 2.5,
         borderRadius: 2,
-        border: `1px solid ${row.isFrozen ? theme.palette.info.main : theme.palette.outlineVariant}`,
-        backgroundColor: theme.palette.surfaceContainerLowest,
-        opacity: row.isFrozen ? 0.85 : 1,
+        backgroundColor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.outlineVariant}`,
+        ...(row.isFrozen
+          ? {
+              borderInlineStartWidth: 4,
+              borderInlineStartColor: theme.palette.info.main,
+              opacity: 0.85,
+            }
+          : {}),
+        "&:hover": {
+          boxShadow: theme.palette.shadow.card,
+        },
       })}
     >
       {children}
@@ -63,24 +68,6 @@ const DESKTOP_OPTIONS: ParentScheduleCardSharedOptions = {
       />
     </>
   ),
-  renderJoinAction: ({ row, labels, canJoin, frozenFallback }): ReactNode => {
-    let result: ReactNode = null;
-    if (canJoin) {
-      result = (
-        <DesktopMeetingJoinAction
-          variant="icon"
-          joinUrl={row.meetingJoinUrl}
-          meeting={row.effectiveMeeting}
-          disabled={!row.videoEnabled}
-          label={labels.schedule.joinVideo}
-          emptyRole="parent"
-        />
-      );
-    } else if (row.isFrozen) {
-      result = frozenFallback;
-    }
-    return result;
-  },
 };
 
 /**

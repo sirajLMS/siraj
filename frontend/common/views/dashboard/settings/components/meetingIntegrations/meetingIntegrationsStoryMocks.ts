@@ -10,143 +10,15 @@ import type {
   MeetingIntegrationsViewModel,
   TestMeetingConnectionResult,
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
+import { dashboardSettingsMeetingIntegrationsEn } from "@/shared/locale/en/dashboard/settings/meeting-integrations";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
 const ZOOM = MeetingIntegrationProviderSlugEnum.Zoom;
 const GOOGLE_MEET = MeetingIntegrationProviderSlugEnum.GoogleMeet;
 const MICROSOFT_TEAMS = MeetingIntegrationProviderSlugEnum.MicrosoftTeams;
 
-function createProviderLabels() {
-  return {
-    zoom: "Zoom",
-    googleMeet: "Google Meet",
-    microsoftTeams: "Microsoft Teams",
-  };
-}
-
-function createCredentialFormLabels() {
-  return {
-    title: "Credentials",
-    noFields: "No credential fields for this provider.",
-    save: "Save",
-    saving: "Saving…",
-    revert: "Revert",
-    showValue: "Show value",
-    hideValue: "Hide value",
-    emptyValue: "Not set",
-  };
-}
-
-function createColumnLabels() {
-  return {
-    name: "Name",
-    email: "Email",
-    connectedAt: "Connected At",
-    expiresAt: "Expires At",
-    status: "Status",
-    actions: "Actions",
-  };
-}
-
-function createStatusLabels() {
-  return {
-    connected: "Connected",
-    expiringSoon: "Expiring Soon",
-    reauthNeeded: "Re-auth Needed",
-    revoked: "Revoked",
-  };
-}
-
-function createActionLabels() {
-  return {
-    viewMetadata: "View Details",
-    revoke: "Revoke",
-    revokeConfirm: "Are you sure you want to revoke access for this account?",
-    revokeConfirmTitle: "Revoke Access",
-    cancel: "Cancel",
-    confirmRevoke: "Revoke",
-  };
-}
-
-function createMetadataLabels() {
-  return {
-    title: "Account Details",
-    scopes: "Scopes",
-    expiry: "Expiry",
-    connectedAt: "Connected At",
-    lastRefreshed: "Last Refreshed",
-    requiredScopes: "Required Scopes",
-    grantedScopes: "Granted Scopes",
-    noScopes: "No scopes available",
-    provider: "Provider",
-    email: "Connected Email",
-  };
-}
-
-function createTestPanelLabels() {
-  return {
-    rawResponse: "Raw Response",
-    copyUrl: "Copy URL",
-    copied: "Copied!",
-    marketplaceHint: "Configure in provider marketplace",
-  };
-}
-
-function createNotificationLabels() {
-  return {
-    testSuccess: "Connection test completed successfully.",
-    testError: "Connection test failed.",
-    revokeSuccess: "Access revoked successfully.",
-    revokeError: "Failed to revoke access.",
-    saveSuccess: "Settings saved successfully.",
-    saveError: "Failed to save settings.",
-  };
-}
-
-function createTopLevelLabels() {
-  return {
-    description: "Manage meeting integrations for zoom, Google Meet, and Microsoft Teams.",
-    loading: "Loading...",
-    loadError: "Failed to load meeting integrations.",
-    providersConfigured: "Providers Configured",
-    credentialsHealthy: "Credentials Healthy",
-    teachersConnected: "Teachers Connected",
-    reauthNeeded: "Re-auth Needed",
-    lastTested: "Last Tested",
-    neverTested: "Never tested",
-    endpoints: "Endpoints",
-    testConnection: "Test Connection",
-    validateConfig: "Validate Config",
-    generateAndDelete: "Generate & Delete",
-    runTest: "Run Test",
-    testing: "Testing...",
-    testResult: "Result",
-    testSuccess: "Success",
-    testFailure: "Failed",
-    joinUrl: "Join URL",
-    deleted: "Deleted",
-    notDeleted: "Not Deleted",
-    latency: "Latency",
-    errorCode: "Error Code",
-    errorMessage: "Error Message",
-    rawPayload: "Raw Payload",
-    connectedAccounts: "Connected Accounts",
-    noConnectedAccounts: "No connected accounts found.",
-  };
-}
-
 export function createMeetingIntegrationLabelsMock(): SettingsMeetingIntegrationsLabels {
-  return {
-    ...createTopLevelLabels(),
-    provider: createProviderLabels(),
-    credentialForm: createCredentialFormLabels(),
-    columns: createColumnLabels(),
-    status: createStatusLabels(),
-    actions: createActionLabels(),
-    metadata: createMetadataLabels(),
-    testPanel: createTestPanelLabels(),
-    notifications: createNotificationLabels(),
-  };
+  return dashboardSettingsMeetingIntegrationsEn;
 }
 
 export function createProvidersMock(): readonly MeetingIntegrationProviderSummary[] {
@@ -244,6 +116,7 @@ export function createViewModelMock(
     loadingAccountsFor: overrides.loadingAccountsFor ?? null,
     testingFor: overrides.testingFor ?? null,
     lastTestResultByProvider: overrides.lastTestResultByProvider ?? emptyTestResults,
+    canEdit: overrides.canEdit ?? true,
     revokingFor: overrides.revokingFor ?? null,
     metadataDialogAccount: overrides.metadataDialogAccount ?? null,
     metadataDialogProviderSlug: overrides.metadataDialogProviderSlug ?? null,
@@ -251,6 +124,11 @@ export function createViewModelMock(
     revokeAccount: overrides.revokeAccount ?? (async () => {}),
     onMetadataDialogOpen: overrides.onMetadataDialogOpen ?? (() => {}),
     onMetadataDialogClose: overrides.onMetadataDialogClose ?? (() => {}),
+    connectingFor: overrides.connectingFor ?? null,
+    connectErrorFor: overrides.connectErrorFor ?? {},
+    connectProvider: overrides.connectProvider ?? (() => {}),
+    navigateToProfile: overrides.navigateToProfile ?? (() => {}),
+    canViewProfile: overrides.canViewProfile ?? true,
     refresh: overrides.refresh ?? (async () => {}),
   };
 }

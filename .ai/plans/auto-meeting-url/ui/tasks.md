@@ -48,7 +48,7 @@
 
 ## Phase 1: i18n Foundation & Shared Types
 
-- [ ] 1. **Create i18n translation namespaces**
+- [x] 1. **Create i18n translation namespaces**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read `/home/ahmed/Projects/siraj-meetings/shared/AGENTS.md`
   - Read `/home/ahmed/Projects/siraj-meetings/shared/locale/namespaces/dashboard/settings/meetingIntegrations.namespace.ts` (existing namespace)
@@ -101,7 +101,7 @@
   - Update progress: Mark task 1 as `[x]`
   - _Requirements: AC-8.1, AC-8.2 (i18n completeness)_
 
-- [ ] 2. **Create shared meeting UI types (gap-only extensions over codegen types)**
+- [x] 2. **Create shared meeting UI types (gap-only extensions over codegen types)**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read `/home/ahmed/Projects/siraj-meetings/frontend/common/graphql/sharedDocuments/settings/meeting-integrations.documents.ts` and `meeting/meeting.documents.ts` (existing GraphQL documents for reference types)
   - **Prerequisite task note (CRITICAL):** Before authoring any local UI type here, update the GraphQL schema (Pothos) to expose the fields the UI needs — `meetingUrlStatus`, `meetingUrlExpiresAt`, `meetingUrlError` on the relevant meeting/class-meeting-config objects (and any other new fields downstream tasks query) — then run `bun run generate:gqlSchema && bun codegen` so the canonical types come from codegen (`@/frontend/common/graphql/generated/gql/graphql-types`). Do NOT redefine here types that already exist or can be codegen-derived.
@@ -128,7 +128,7 @@
 
 ## Phase 2: Settings Tab Component Redesign
 
-- [ ] 3. **Redesign `MeetingIntegrationsHealthHeaders` with MetricCardGrid**
+- [x] 3. **Redesign `MeetingIntegrationsHealthHeaders` with MetricCardGrid**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read `/home/ahmed/Projects/siraj-meetings/frontend/AGENTS.md`
   - Read `/home/ahmed/Projects/siraj-meetings/frontend/common/views/dashboard/settings/components/meetingIntegrations/` (existing components)
@@ -152,7 +152,7 @@
   - Update progress: Mark task 3 as `[x]`
   - _Requirements: AC-1.1 (MetricCardGrid for health cards)_
 
-- [ ] 4. **Redesign `ConnectedAccountsTable` with DesktopAppDataGrid/MobileCardList**
+- [x] 4. **Redesign `ConnectedAccountsTable` with DesktopAppDataGrid/MobileCardList**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read `/home/ahmed/Projects/siraj-meetings/frontend/AGENTS.md`
   - Read existing `frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectedAccountsTable.tsx` component
@@ -176,7 +176,7 @@
   - Update progress: Mark task 4 as `[x]`
   - _Requirements: AC-1.2 (DesktopAppDataGrid for connected accounts)_
 
-- [ ] 5. **Redesign `MeetingProviderCredentialForm` with zod validation**
+- [x] 5. **Redesign `MeetingProviderCredentialForm` with zod validation**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/settings/components/meetingIntegrations/MeetingProviderCredentialForm.tsx` component
   - Read existing form patterns (Session Config form dialog as reference)
@@ -195,7 +195,7 @@
   - Update progress: Mark task 5 as `[x]`
   - _Requirements: AC-1.3 (zod validation for credential forms)_
 
-- [ ] 6. **Redesign `RevokeTokenDialog` with BaseDeleteDialog**
+- [x] 6. **Redesign `RevokeTokenDialog` with BaseDeleteDialog**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/settings/components/meetingIntegrations/RevokeTokenDialog.tsx` component
   - Read existing `BaseDeleteDialog` component API at `frontend/common/components/ui/dialog/BaseDeleteDialog.tsx` (check existing usage in Session Config tab)
@@ -213,7 +213,7 @@
   - Update progress: Mark task 6 as `[x]`
   - _Requirements: AC-1.4 (BaseDeleteDialog for revoke)_
 
-- [ ] 7. **Redesign `TestConnectionResultPanel` with proper states**
+- [x] 7. **Redesign `TestConnectionResultPanel` with proper states**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/settings/components/meetingIntegrations/TestConnectionResultPanel.tsx` component
   - Add states: idle (empty Typography `text.secondary`), testing (`CircularProgress`), success (`Alert severity="success"`), failure (`Alert severity="error"` + retry button)
@@ -227,7 +227,7 @@
   - Update progress: Mark task 7 as `[x]`
   - _Requirements: AC-1.1 (test connection states)_
 
-- [ ] 8. **Redesign `EndpointList` and Enhance `TokenMetadataDialog`**
+- [x] 8. **Redesign `EndpointList` and Enhance `TokenMetadataDialog`**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/settings/components/meetingIntegrations/TokenMetadataDialog.tsx` and `.../EndpointList.tsx`
   - `TokenMetadataDialog`: Add copy token ID button, show scopes as chips, loading state
@@ -240,7 +240,7 @@
   - Update progress: Mark task 8 as `[x]`
   - _Requirements: AC-1.1 (admin diagnostic improvements)_
 
-- [ ] 9. **Create `ConnectProviderAction` component (settings tab)**
+- [x] 9. **Create `ConnectProviderAction` component (settings tab)**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction.tsx`
   - "Connect" button for unconnected providers in connected accounts table
@@ -256,7 +256,7 @@
   - Update progress: Mark task 9 as `[x]`
   - _Requirements: AC-1.5 (Connect Provider button in settings)_
 
-- [ ] 10. **Create `ProfileLinkCallout` cross-navigation component**
+- [x] 10. **Create `ProfileLinkCallout` cross-navigation component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/views/dashboard/settings/components/meetingIntegrations/ProfileLinkCallout.tsx`
   - "View Teacher Meeting Configs" button → `/profile?tab=meeting`
@@ -274,7 +274,7 @@
   - Update progress: Mark task 10 as `[x]`
   - _Requirements: AC-1.6, AC-4.1 (cross-navigation settings → profile)_
 
-- [ ] 2b. **Redesign `MeetingIntegrationsTab` container**
+- [x] 2b. **Redesign `MeetingIntegrationsTab` container**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read design.md §3.1 (`MeetingIntegrationsTab` container spec)
   - Read existing `frontend/common/views/dashboard/settings/tabs/meetingIntegrations/MeetingIntegrationsTab.tsx` and `useMeetingIntegrationsViewModel.ts`
@@ -296,7 +296,7 @@
 
 ## Phase 3: Profile Meeting Configs Enhancement
 
-- [ ] 11. **Create `OAuthCallbackHandler` component**
+- [x] 11. **Create `OAuthCallbackHandler` component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/views/dashboard/profile/shared/meeting-configs/OAuthCallbackHandler.tsx`
   - Check URL params on mount: `?oauth_status=success&provider=zoom`
@@ -315,7 +315,7 @@
   - Update progress: Mark task 11 as `[x]`
   - _Requirements: AC-2.1, AC-5.2 (OAuth callback auto-detection)_
 
-- [ ] 12. **Enhance `ConnectProviderAccount` with loading and status badge**
+- [x] 12. **Enhance `ConnectProviderAccount` with loading and status badge**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount.tsx` component
   - Add states: disconnected (Connect button), connected (badge + Disconnect), expiring (amber badge + Reconnect), expired (red badge + Reconnect), connecting (disabled + CircularProgressIndicator)
@@ -331,7 +331,7 @@
   - Update progress: Mark task 12 as `[x]`
   - _Requirements: AC-5.1, AC-5.3, AC-5.4 (OAuth connection UX)_
 
-- [ ] 13. **Create `ReconnectAllAction` batch reconnect component**
+- [x] 13. **Create `ReconnectAllAction` batch reconnect component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/views/dashboard/profile/shared/meeting-configs/ReconnectAllAction.tsx`
   - Show "Reconnect All ({count})" button when ≥2 providers need reauth
@@ -348,7 +348,7 @@
   - Update progress: Mark task 13 as `[x]`
   - _Requirements: AC-2.2 (Reconnect All batch action)_
 
-- [ ] 14. **Enhance `ReauthNeededBanner` with per-provider reconnect**
+- [x] 14. **Enhance `ReauthNeededBanner` with per-provider reconnect**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/profile/shared/meeting-configs/ReauthNeededBanner.tsx` component
   - Add per-provider "Reconnect" button inline
@@ -365,7 +365,7 @@
   - Update progress: Mark task 14 as `[x]`
   - _Requirements: AC-2.5, AC-5.3 (proactive reauth banner)_
 
-- [ ] 14b. **Create `DisconnectConfirmDialog` component**
+- [x] 14b. **Create `DisconnectConfirmDialog` component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read design.md §3.13 (DisconnectConfirmDialog design spec)
   - Read existing `BaseDeleteDialog` at `@/frontend/common/components/ui/dialog/BaseDeleteDialog.tsx` (singular `dialog/`) — verify its actual props (`open`, `onClose`, `title`, `body`, `cancelLabel`, `confirmLabel`, `isLoading`, `onConfirm`)
@@ -386,7 +386,7 @@
   - Update progress: Mark task 14b as `[x]`
   - _Requirements: AC-5.1, AC-5.4 (OAuth disconnect UX)_
 
-- [ ] 15. **Enhance `MeetingConfigFormDialog` with zod and test config**
+- [x] 15. **Enhance `MeetingConfigFormDialog` with zod and test config**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog.tsx` and `MeetingConfigFormDialogContent.tsx`
   - Ensure `EntityFormDialogActions` for footer — props are `formId`, `cancelLabel`, `saveLabel` (NOT `confirmLabel`), `onClose`, `isLoading` (NOT `loading`). Pass already-translated `saveLabel`/`cancelLabel` from labels.
@@ -402,7 +402,7 @@
   - Update progress: Mark task 15 as `[x]`
   - _Requirements: AC-2.6, AC-6.3 (config form with zod + test preview)_
 
-- [ ] 16. **Enhance `ClassMeetingConfigsSection` with generation status**
+- [x] 16. **Enhance `ClassMeetingConfigsSection` with generation status**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection.tsx` component
   - Add generation status badge per class instance: `MeetingGenerationStatusIndicator` (pending/success/failed)
@@ -419,7 +419,7 @@
   - Update progress: Mark task 16 as `[x]`
   - _Requirements: AC-2.7, AC-6.1, AC-6.2 (class meeting config generation status)_
 
-- [ ] 17. **Create `TokenExpiryWarning` component**
+- [x] 17. **Create `TokenExpiryWarning` component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/views/dashboard/profile/shared/meeting-configs/TokenExpiryWarning.tsx`
   - States: safe (>14d, not rendered), warning (<7d, amber), critical (<24h, red), expired (red)
@@ -434,7 +434,7 @@
   - Update progress: Mark task 17 as `[x]`
   - _Requirements: AC-2.3, AC-5.3 (token expiry display)_
 
-- [ ] 18. **Enhance `AutoGenerationSupportCallout` as interactive guide**
+- [x] 18. **Enhance `AutoGenerationSupportCallout` as interactive guide**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/profile/shared/meeting-configs/AutoGenerationSupportCallout.tsx` component
   - Add "Learn More" expandable section with step-by-step guide
@@ -451,7 +451,7 @@
   - Update progress: Mark task 18 as `[x]`
   - _Requirements: AC-6.3 (generation preview callout)_
 
-- [ ] 18b. **Enhance `MeetingConfigsManager` container**
+- [x] 18b. **Enhance `MeetingConfigsManager` container**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read design.md §3.11 (`MeetingConfigsManager` enhanced container spec)
   - Read existing `frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigsManager.tsx` and `useMeetingConfigsManagerViewModel.ts`
@@ -474,7 +474,7 @@
 
 ## Phase 4: Shared/New Components
 
-- [ ] 19. **Create `MeetingUrlStatusBadge` component**
+- [x] 19. **Create `MeetingUrlStatusBadge` component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/components/ui/display/meetingConfig/MeetingUrlStatusBadge.tsx`
   - States: pending (CircularProgress + "Pending"), generated (CheckCircleOutlined + "Ready"), failed (ErrorOutlined + "Failed"), expired (ScheduleOutlined + "Expired")
@@ -490,7 +490,7 @@
   - Update progress: Mark task 19 as `[x]`
   - _Requirements: AC-3.1, AC-3.5, AC-3.6 (URL status badges)_
 
-- [ ] 20. **Create `CopyMeetingUrlButton` component**
+- [x] 20. **Create `CopyMeetingUrlButton` component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/components/ui/display/meetingConfig/CopyMeetingUrlButton.tsx`
   - Copy URL to clipboard via `navigator.clipboard.writeText()`
@@ -507,7 +507,7 @@
   - Update progress: Mark task 20 as `[x]`
   - _Requirements: AC-2.4, AC-3.2, AC-3.3 (copy URL for teachers/students/parents)_
 
-- [ ] 21. **Create `OAuthConnectionStatusBadge` component**
+- [x] 21. **Create `OAuthConnectionStatusBadge` component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/components/ui/display/meetingConfig/OAuthConnectionStatusBadge.tsx`
   - States: connected (green dot + "Connected"), expiring (amber dot + "Expires in X days"), expired (red dot + "Expired"), disconnected (grey dot + "Not connected")
@@ -522,7 +522,7 @@
   - Update progress: Mark task 21 as `[x]`
   - _Requirements: AC-5.7 (connection status badge)_
 
-- [ ] 22. **Create `MeetingUrlCell` for data tables**
+- [x] 22. **Create `MeetingUrlCell` for data tables**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/components/ui/display/meetingConfig/MeetingUrlCell.tsx`
   - Compact layout for data table columns
@@ -539,7 +539,7 @@
   - Update progress: Mark task 22 as `[x]`
   - _Requirements: AC-3.1, AC-3.2, AC-3.5 (URL display in data tables)_
 
-- [ ] 23. **Create `MeetingGenerationStatusIndicator` component**
+- [x] 23. **Create `MeetingGenerationStatusIndicator` component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/components/ui/display/meetingConfig/MeetingGenerationStatusIndicator.tsx`
   - States: pending (CircularProgress + pulsing animation), success (green check + URL + copy + expiresAt), failed (red error + expandable details + retry)
@@ -552,7 +552,7 @@
   - Update progress: Mark task 23 as `[x]`
   - _Requirements: AC-6.1, AC-6.4 (generation status with URL display)_
 
-- [ ] 24. **Create `MeetingProviderLogo` component**
+- [x] 24. **Create `MeetingProviderLogo` component**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create new component: `frontend/common/components/ui/display/meetingConfig/MeetingProviderLogo.tsx`
   - Provider-specific logos for: Zoom, Google Meet, MS Teams, custom
@@ -568,7 +568,7 @@
   - Update progress: Mark task 24 as `[x]`
   - _Requirements: UX (provider visual identification)_
 
-- [ ] 24b. **Create `MeetingIntegrationsBreadcrumb` and `MeetingConfigsBreadcrumb` components**
+- [x] 24b. **Create `MeetingIntegrationsBreadcrumb` and `MeetingConfigsBreadcrumb` components**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read design.md §3.28 (MeetingBreadcrumb spec)
   - Read existing `Breadcrumbs` from `@mui/material/Breadcrumbs`
@@ -586,7 +586,7 @@
   - Update progress: Mark task 24b as `[x]`
   - _Requirements: AC-4.5 (breadcrumb shows current location)_
 
-- [ ] 24c. **Implement animation specification (prefers-reduced-motion)**
+- [x] 24c. **Implement animation specification (prefers-reduced-motion)**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read design.md §3.A (Animation Specification)
   - Add `prefers-reduced-motion` check to components with custom animations:
@@ -611,7 +611,7 @@
 
 ## Phase 5: MeetingJoinAction Enhancement & Integration
 
-- [ ] 25. **Enhance `MeetingJoinAction` with copy, status, retry**
+- [x] 25. **Enhance `MeetingJoinAction` with copy, status, retry**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/components/ui/display/meetingConfig/MeetingJoinAction.tsx` component (plus `.desktop.tsx` / `.mobile.tsx` variants)
   - Add `showCopyButton` prop for non-admin users
@@ -627,7 +627,7 @@
   - Update progress: Mark task 25 as `[x]`
   - _Requirements: AC-3.1-3.6 (MeetingJoinAction enhancement)_
 
-- [ ] 26. **Integrate meeting URL status into teacher schedule grid**
+- [x] 26. **Integrate meeting URL status into teacher schedule grid**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing teacher schedule grid (DesktopAppDataGrid columns + MobileCardList cards) — both require `paginationOptions: ListPaginationOptions` (required prop, non-optional). Verify how the existing grid passes `paginationOptions` and reuse the pattern. Columns are standard `GridColDef[]`.
   - Add `MeetingUrlCell` as a new column in DesktopAppDataGrid (standard `GridColDef[]`)
@@ -644,7 +644,7 @@
   - Update progress: Mark task 26 as `[x]`
   - _Requirements: AC-3.1, AC-3.2 (URL status in teacher schedule)_
 
-- [ ] 27. **Integrate meeting URL display into student and parent dashboards**
+- [x] 27. **Integrate meeting URL display into student and parent dashboards**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing student next class card component
   - Read existing parent dashboard component
@@ -665,7 +665,7 @@
 
 ## Phase 6: ViewModel Updates & Store Enhancement
 
-- [ ] 28. **Update `meetingIntegrationsSettingsStore` with new state fields**
+- [x] 28. **Update `meetingIntegrationsSettingsStore` with new state fields**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `meetingIntegrationsSettingsStore.ts` (locate under `frontend/common/stores/` or `frontend/common/views/dashboard/settings/` — confirm exact path before editing)
   - Add new fields: `testingProviderSlug`, `revokingAccountId`, `connectingProviderSlug`, `testConnectionResult`, `metadataDialogAccountId`, `credentialFormProvider`, `credentialFormMode`
@@ -678,7 +678,7 @@
   - Update progress: Mark task 28 as `[x]`
   - _Requirements: AC-1.8, AC-1.6 (settings store enhancement)_
 
-- [ ] 29. **Update `useMeetingIntegrationsViewModel` with new actions**
+- [x] 29. **Update `useMeetingIntegrationsViewModel` with new actions**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `useMeetingIntegrationsViewModel.ts` (locate under `frontend/common/views/dashboard/settings/tabs/meetingIntegrations/`)
   - Add: `connectProvider(slug)` action (calls `connectMeetingProviderOAuth`, redirects)
@@ -694,7 +694,7 @@
   - Update progress: Mark task 29 as `[x]`
   - _Requirements: AC-1.5, AC-1.6, AC-1.8 (settings ViewModel)_
 
-- [ ] 30. **Update `useMeetingConfigsManagerViewModel` with OAuth callback and reconnect all**
+- [x] 30. **Update `useMeetingConfigsManagerViewModel` with OAuth callback and reconnect all**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigsManagerViewModel.ts`
   - Add: `handleOAuthCallback(status, provider, error?)` action (triggers refetch + toast)
@@ -715,7 +715,7 @@
   - Update progress: Mark task 30 as `[x]`
   - _Requirements: AC-2.1, AC-2.2, AC-2.4, AC-4.2 (profile ViewModel)_
 
-- [ ] 31. **Update profile meeting configs header with settings cross-link**
+- [x] 31. **Update profile meeting configs header with settings cross-link**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigsManager.tsx` header section
   - Add "Admin Provider Settings" button linking to `/dashboard/settings?tab=meetingIntegrations`
@@ -735,7 +735,7 @@
 
 ## Phase 7: Mobile-Desktop Parity & Responsive
 
-- [ ] 32. **Ensure all settings tab variants have mobile equivalents**
+- [x] 32. **Ensure all settings tab variants have mobile equivalents**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing `meetingIntegrationsTab.mobile.tsx`
   - Verify: `MobileMetricCardGrid` for health headers
@@ -753,7 +753,7 @@
   - Update progress: Mark task 32 as `[x]`
   - _Requirements: AC-7.1, AC-7.5, AC-7.6 (settings mobile parity)_
 
-- [ ] 33. **Ensure all profile meeting configs variants have mobile equivalents**
+- [x] 33. **Ensure all profile meeting configs variants have mobile equivalents**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Read existing profile meeting configs mobile variants
   - Verify: ALL dialogs work on mobile (full-screen)
@@ -773,7 +773,7 @@
   - Update progress: Mark task 33 as `[x]`
   - _Requirements: AC-7.2, AC-7.4, AC-7.5 (profile mobile parity)_
 
-- [ ] 34. **Verify schedule grid and dashboards have mobile variants**
+- [x] 34. **Verify schedule grid and dashboards have mobile variants**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Verify: Teacher schedule `MobileCardList` shows meeting URL status with `MeetingUrlCell`
   - Verify: Student next class card is vertical/stacked on mobile
@@ -827,7 +827,7 @@
   - Update progress: Mark task 35 as `[x]`
   - _Requirements: NFR-20 (test coverage ≥80%)_
 
-- [ ] 35b. **Create Storybook stories for all new and enhanced components**
+- [x] 35b. **Create Storybook stories for all new and enhanced components**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create `.stories.tsx` files for every component created or enhanced in this plan (tasks 3-18, 19-27, 14b)
   - Each story file sits next to its component (`.tsx` → `.stories.tsx` in the same directory)
@@ -879,7 +879,7 @@
 
 ## Phase 9: Accessibility & i18n Verification
 
-- [ ] 37. **Accessibility audit and Arabic RTL verification**
+- [x] 37. **Accessibility audit and Arabic RTL verification**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Verify keyboard navigation: All dialogs (Tab, Enter, Escape), tables, forms
   - Verify focus management: Dialogs trap focus, restore on close
@@ -906,7 +906,7 @@
 
 ## Phase 10: Knowledge Propagation & Documentation
 
-- [ ] 38. **Create canonical reference doc and update AGENTS.md**
+- [x] 38. **Create canonical reference doc and update AGENTS.md**
   - Read ALL outcome files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create `docs/frontend/meeting-integrations-ui.md` consolidating:
     - Component patterns used (MetricCardGrid, AppDataGrid, BaseDeleteDialog, EntityFormDialogActions)

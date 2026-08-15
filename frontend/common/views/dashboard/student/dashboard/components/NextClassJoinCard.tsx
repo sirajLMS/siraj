@@ -4,6 +4,7 @@ import { PlayCircleOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, LinearProgress, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { formatDateTime } from "@/frontend/common/components/intl/dateFormat";
+import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
 import type { UpcomingLessonRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import type { AppLocale, StudentPortalDashboardLabels as StudentDashboardLabels } from "@/shared/locale";
@@ -30,6 +31,99 @@ function formatCountdown(dateString: string | null): string | null {
   return `${minutes}m`;
 }
 
+type NextClassChipProps = {
+  readonly isFrozen: boolean | null | undefined;
+  readonly countdown: string | null;
+};
+
+function NextClassChip({ isFrozen, countdown }: NextClassChipProps): ReactNode {
+  if (isFrozen) {
+    return (
+      <Chip
+        size="small"
+        label="Frozen"
+        sx={theme => ({
+          backgroundColor: theme.palette.errorContainer,
+          color: theme.palette.onErrorContainer,
+        })}
+      />
+    );
+  }
+  if (countdown) {
+    return (
+      <Chip
+        size="small"
+        label={countdown}
+        sx={theme => ({
+          backgroundColor: theme.palette.tertiaryContainer,
+          color: theme.palette.onTertiaryContainer,
+          fontWeight: 700,
+        })}
+      />
+    );
+  }
+  return null;
+}
+
+type NextClassActionProps = {
+  readonly joinable: boolean;
+  readonly countdown: string | null;
+  readonly lessonId: string;
+  readonly meetingUrl: string | null | undefined;
+  readonly joinNowLabel: string;
+  readonly onJoin: (id: string) => void;
+};
+
+function NextClassAction({
+  joinable,
+  countdown,
+  lessonId,
+  meetingUrl,
+  joinNowLabel,
+  onJoin,
+}: NextClassActionProps): ReactNode {
+  if (joinable) {
+    return (
+      <Stack direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<PlayCircleOutlined />}
+          onClick={() => onJoin(lessonId)}
+          sx={theme => ({
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.onPrimary,
+            fontWeight: 700,
+            borderRadius: 2,
+            py: 1.25,
+            "&:hover": {
+              backgroundColor: theme.palette.primary.dark ?? theme.palette.primary.main,
+            },
+          })}
+        >
+          {joinNowLabel}
+        </Button>
+        {meetingUrl ? <CopyMeetingUrlButton meetingUrl={meetingUrl} variant="icon" size="large" /> : null}
+      </Stack>
+    );
+  }
+  if (countdown) {
+    return (
+      <Box>
+        <LinearProgress
+          sx={theme => ({
+            backgroundColor: theme.palette.onPrimaryContainer,
+            "& .MuiLinearProgress-bar": {
+              backgroundColor: theme.palette.primary.main,
+            },
+          })}
+        />
+      </Box>
+    );
+  }
+  return null;
+}
+
 export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<NextClassJoinCardProps>): ReactNode {
   if (!lesson) {
     return (
@@ -54,71 +148,6 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
   const countdown = formatCountdown(lesson.scheduledStartAt);
   const scheduledLabel = lesson.scheduledStartAt ? formatDateTime(lesson.scheduledStartAt, locale) : "";
 
-  // Extract nested ternary for chip content
-  let chipContent: ReactNode = null;
-  if (lesson.isFrozen) {
-    chipContent = (
-      <Chip
-        size="small"
-        label="Frozen"
-        sx={theme => ({
-          backgroundColor: theme.palette.errorContainer,
-          color: theme.palette.onErrorContainer,
-        })}
-      />
-    );
-  } else if (countdown) {
-    chipContent = (
-      <Chip
-        size="small"
-        label={countdown}
-        sx={theme => ({
-          backgroundColor: theme.palette.tertiaryContainer,
-          color: theme.palette.onTertiaryContainer,
-          fontWeight: 700,
-        })}
-      />
-    );
-  }
-
-  // Extract nested ternary for action button/content
-  let actionContent: ReactNode = null;
-  if (joinable) {
-    actionContent = (
-      <Button
-        variant="contained"
-        size="large"
-        startIcon={<PlayCircleOutlined />}
-        onClick={() => onJoin(lesson.id)}
-        sx={theme => ({
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          fontWeight: 700,
-          borderRadius: 2,
-          py: 1.25,
-          "&:hover": {
-            backgroundColor: theme.palette.primary.dark ?? theme.palette.primary.main,
-          },
-        })}
-      >
-        {labels.joinNow}
-      </Button>
-    );
-  } else if (countdown) {
-    actionContent = (
-      <Box>
-        <LinearProgress
-          sx={theme => ({
-            backgroundColor: theme.palette.onPrimaryContainer,
-            "& .MuiLinearProgress-bar": {
-              backgroundColor: theme.palette.primary.main,
-            },
-          })}
-        />
-      </Box>
-    );
-  }
-
   return (
     <Box
       sx={theme => ({
@@ -135,7 +164,7 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
         <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onPrimaryContainer, opacity: 0.8 })}>
           {labels.nextClass}
         </Typography>
-        {chipContent}
+        <NextClassChip isFrozen={lesson.isFrozen} countdown={countdown} />
       </Stack>
 
       <Box>
@@ -150,7 +179,14 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
         </Typography>
       </Box>
 
-      {actionContent}
+      <NextClassAction
+        joinable={joinable}
+        countdown={countdown}
+        lessonId={lesson.id}
+        meetingUrl={lesson.meetingJoinUrl}
+        joinNowLabel={labels.joinNow}
+        onJoin={onJoin}
+      />
     </Box>
   );
 }

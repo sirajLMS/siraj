@@ -51,7 +51,7 @@ export const dashboardStaffDirectoryEn: StaffDirectoryLabels = {
     offline: "Offline",
   },
   roles: {
-    admin: "Admin",
+    admin: "Manager",
     manager: "Manager",
     supervisor: "Supervisor",
   },

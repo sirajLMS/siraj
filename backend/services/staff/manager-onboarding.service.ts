@@ -33,13 +33,10 @@ export interface ManagerOnboardingResult {
 }
 
 function resolveTargetGroupSlug(accountType: ManagerAccountType): SystemPermissionGroupSlug {
-  if (accountType === ManagerAccountType.admin) {
-    return SystemPermissionGroupSlug.ACADEMY_ADMIN;
-  }
   if (accountType === ManagerAccountType.supervisor) {
     return SystemPermissionGroupSlug.SUPERVISOR_DEFAULT;
   }
-  return SystemPermissionGroupSlug.STAFF_DEFAULT;
+  return SystemPermissionGroupSlug.ACADEMY_ADMIN;
 }
 
 export namespace ManagerOnboardingService {

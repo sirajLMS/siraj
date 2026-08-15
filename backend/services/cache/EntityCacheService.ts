@@ -134,37 +134,6 @@ async function readFromCache<T>(key: string, tags: string[], callerName: string)
   return { hit: false };
 }
 
-export async function cachedRead<T>(
-  key: string,
-  ttlSeconds: number,
-  loader: () => Promise<T>,
-  tags: string[] = []
-): Promise<T> {
-  if (ttlSeconds > CACHE_TAG_INDEX_TTL) {
-    throw new Error("cache TTL exceeds tag index TTL");
-  }
-
-  const cached = await readFromCache<T>(key, tags, "cachedRead");
-  if (cached.hit) {
-    return cached.data;
-  }
-
-  const data = await loader();
-  const entry: CacheEntry<T> = { version: CACHE_VERSION, data, cachedAt: Date.now() };
-
-  try {
-    await cacheService.set(key, cacheSerialize(entry), { ex: ttlSeconds });
-    if (tags.length > 0) {
-      await safeIndexTags(key, tags);
-    }
-    recordMissForKey(key);
-  } catch (err) {
-    logger.error(`cachedRead cache set failed for key ${key}:`, err);
-  }
-
-  return data;
-}
-
 async function setSingleFlight(key: string, value: string, ttlSeconds: number): Promise<boolean> {
   try {
     const res = await cacheService.pipeline([{ command: "set", args: [key, value, "EX", ttlSeconds, "NX"] }]);
@@ -175,17 +144,24 @@ async function setSingleFlight(key: string, value: string, ttlSeconds: number): 
   }
 }
 
-export async function cachedReadSingleFlight<T>(
+async function setStandard(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+  await cacheService.set(key, value, { ex: ttlSeconds });
+  return true;
+}
+
+async function performCachedRead<T>(
   key: string,
   ttlSeconds: number,
   loader: () => Promise<T>,
-  tags: string[] = []
+  tags: string[],
+  callerName: string,
+  writer: (key: string, serialized: string, ttl: number) => Promise<boolean>
 ): Promise<T> {
   if (ttlSeconds > CACHE_TAG_INDEX_TTL) {
     throw new Error("cache TTL exceeds tag index TTL");
   }
 
-  const cached = await readFromCache<T>(key, tags, "cachedReadSingleFlight");
+  const cached = await readFromCache<T>(key, tags, callerName);
   if (cached.hit) {
     return cached.data;
   }
@@ -194,16 +170,34 @@ export async function cachedReadSingleFlight<T>(
   const entry: CacheEntry<T> = { version: CACHE_VERSION, data, cachedAt: Date.now() };
 
   try {
-    const inserted = await setSingleFlight(key, cacheSerialize(entry), ttlSeconds);
-    if (inserted && tags.length > 0) {
+    const written = await writer(key, cacheSerialize(entry), ttlSeconds);
+    if (written && tags.length > 0) {
       await safeIndexTags(key, tags);
     }
     recordMissForKey(key);
   } catch (err) {
-    logger.error(`cachedReadSingleFlight cache set failed for key ${key}:`, err);
+    logger.error(`${callerName} cache set failed for key ${key}:`, err);
   }
 
   return data;
+}
+
+export function cachedRead<T>(
+  key: string,
+  ttlSeconds: number,
+  loader: () => Promise<T>,
+  tags: string[] = []
+): Promise<T> {
+  return performCachedRead(key, ttlSeconds, loader, tags, "cachedRead", setStandard);
+}
+
+export function cachedReadSingleFlight<T>(
+  key: string,
+  ttlSeconds: number,
+  loader: () => Promise<T>,
+  tags: string[] = []
+): Promise<T> {
+  return performCachedRead(key, ttlSeconds, loader, tags, "cachedReadSingleFlight", setSingleFlight);
 }
 
 export async function invalidateTag(tag: string): Promise<void> {

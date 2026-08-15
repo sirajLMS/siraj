@@ -429,6 +429,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/services/cron-service.md` - Cron service pattern reference
 - `docs/frontend/ui-shared-scaffold-pattern.md` - UI Shared Scaffold (*Shared.tsx) pattern for common/desktop/mobile triplication
 - `docs/frontend/duplication-elimination-patterns.md` - Duplication elimination patterns A-G (scaffold extraction, shared utility, dead code deletion, store consolidation, scaffold extension, shared view scaffold, locale type consolidation) — Phase 6 eliminated 96% of duplications (475→18 pairs) with zero jscpd:ignore
+- `docs/frontend/meeting-integrations-ui.md` - Meeting Integrations UI canonical reference (MetricCardGrid, AppDataGrid, OAuth callback, reconnect-all, status badges, clipboard, i18n namespaces, mobile-desktop responsive, Zod schema factory, animations, permission-gated cross-links, lint workarounds, accessibility)
 - `docs/testing/shared-test-runner.md` - Shared parallel test runner pattern
 - `docs/backend/shared-types-pattern.md` - Cross-layer shared types in shared/types/
 - `docs/backend/meeting-adapter-base.md` - Meeting provider adapter base class pattern reference
@@ -436,6 +437,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/backend/schema-helpers.md` - Schema column and junction table helpers pattern reference
 - `docs/app/with-page-auth.md` - App router page auth wrapper pattern reference
 - `docs/testing/mock-navigation-helpers.md` - Test mock navigation helpers pattern reference
+- `docs/auth/manager-role-mapping.md` - Manager role mapping architecture & permission group slug convention
 - `docs/i18n/locale-namespace-migration.md` - Locale namespace migration from monolithic to sub-module directories
 - `docs/auth/permission-architecture.md` - Client-side permission architecture (3-tier model, wrapper removal rationale)
 - `docs/auth/supervisor-permissions.md` - Supervisor permission model (teacher/student/parent management, staff exclusion, system group editing, authScope pattern)

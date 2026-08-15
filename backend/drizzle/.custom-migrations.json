@@ -1,5 +1,5 @@
 {
-  "manifestHash": "909b99d7269e39262d524e0e22fe7fefba18bc79cf6d5c9824a7950b0b78a65f",
+  "manifestHash": "298ccabfa85f1ce79b8e12b511037e21330048bf891fda474ead9b7cd69a7063",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -7,7 +7,7 @@
     },
     {
       "file": "3-system_permissions_and_groups.sql",
-      "sha256": "f744366028a1bd1d74a4f424a1abb2e2a8befe2958da8d809cb0208ce74ccd12"
+      "sha256": "84c6ee8dbeee135f9b185f8330dec8e8d611b2630a9930c07ff8957ac894a033"
     },
     {
       "file": "30-a-class_instances_rls_policies.sql",
@@ -249,6 +249,7 @@
     "20260809053907_custom_32-user-admin-reset-password-data",
     "20260815025626_custom_3-system_permissions_and_groups",
     "20260815025627_custom_6-lms-permissions-and-groups",
-    "20260815025628_custom_6d-profile-fine-grained-only"
+    "20260815025628_custom_6d-profile-fine-grained-only",
+    "20260815185128_custom_3-system_permissions_and_groups"
   ]
 }

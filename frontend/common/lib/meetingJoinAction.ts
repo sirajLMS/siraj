@@ -76,6 +76,11 @@ export type JoinContext = {
   readonly id?: string;
   readonly providerLogo: string | null;
   readonly onJoinAction?: () => void;
+  readonly showCopyButton: boolean;
+  readonly meetingUrlStatus: string | null;
+  readonly meetingUrlError: string | null;
+  readonly onRetry?: () => void;
+  readonly expiresAt: string | null;
 };
 
 export function makeHandleJoin(resolvedUrl: string | null, onJoinAction?: () => void): () => void {

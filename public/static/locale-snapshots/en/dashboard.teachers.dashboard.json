@@ -53,7 +53,8 @@
       "__fn": "(minutes) => `${minutes} min`"
     },
     "current": "Current",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "meetingUrl": "Meeting URL"
   },
   "status": {
     "missed": "Missed",
