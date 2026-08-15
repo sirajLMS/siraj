@@ -330,6 +330,47 @@ export namespace PermissionManagementRepository {
   }
 
   /**
+   * Replaces the permission bundle for a group and returns the group with updated permission IDs.
+   * If `permissionIds` is `undefined`, the existing bundle is left untouched.
+   */
+  async function replaceGroupPermissionsAndReturn(
+    t: DBTransaction,
+    groupId: string,
+    group: {
+      id: string;
+      name: LocalizedString;
+      slug: string;
+      description: LocalizedString | null;
+      isSystem: boolean;
+      createdByUserId: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+    },
+    permissionIds: string[] | undefined,
+    locale?: string
+  ): Promise<GroupWithPermissionIds> {
+    if (permissionIds !== undefined) {
+      await t.delete(groupPermissions).where(eq(groupPermissions.groupId, groupId));
+
+      if (permissionIds.length > 0) {
+        await t.insert(groupPermissions).values(
+          permissionIds.map(pid => ({
+            groupId,
+            permissionId: pid,
+          }))
+        );
+      }
+    }
+
+    const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, groupId));
+    return toGroupReturn(
+      group,
+      gpList.map(gp => gp.permissionId),
+      locale
+    );
+  }
+
+  /**
    * Atomic transaction. Clears and replaces groupPermissions. Throws if isSystem.
    * Replaces the name/description JSONB maps with the incoming `LocalizedString`
    * maps (empty entries stripped); pass `undefined` to leave a column untouched
@@ -351,35 +392,8 @@ export namespace PermissionManagementRepository {
 
       if (existing.isSystem) {
         // System groups: only the permission bundle (permissionIds) is editable.
-        // Name, slug, and description are immutable. If no permissionIds provided,
-        // return the existing group as-is (no-op).
-        if (input.permissionIds === undefined) {
-          const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, input.id));
-          return toGroupReturn(
-            existing,
-            gpList.map(gp => gp.permissionId),
-            locale
-          );
-        }
-
-        // Replace permission bundle only — skip name/slug/description update.
-        await t.delete(groupPermissions).where(eq(groupPermissions.groupId, input.id));
-
-        if (input.permissionIds.length > 0) {
-          await t.insert(groupPermissions).values(
-            input.permissionIds.map(permissionId => ({
-              groupId: input.id,
-              permissionId,
-            }))
-          );
-        }
-
-        const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, input.id));
-        return toGroupReturn(
-          existing,
-          gpList.map(gp => gp.permissionId),
-          locale
-        );
+        // Name, slug, and description are immutable.
+        return replaceGroupPermissionsAndReturn(t, input.id, existing, input.permissionIds, locale);
       }
 
       const now = new Date();
@@ -405,26 +419,7 @@ export namespace PermissionManagementRepository {
         .where(eq(permissionGroups.id, input.id))
         .returning();
 
-      if (input.permissionIds !== undefined) {
-        await t.delete(groupPermissions).where(eq(groupPermissions.groupId, input.id));
-
-        if (input.permissionIds.length > 0) {
-          await t.insert(groupPermissions).values(
-            input.permissionIds.map(permissionId => ({
-              groupId: input.id,
-              permissionId,
-            }))
-          );
-        }
-      }
-
-      const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, input.id));
-
-      return toGroupReturn(
-        updatedGroup,
-        gpList.map(gp => gp.permissionId),
-        locale
-      );
+      return replaceGroupPermissionsAndReturn(t, input.id, updatedGroup, input.permissionIds, locale);
     };
 
     try {

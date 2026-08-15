@@ -59,13 +59,13 @@ function enforceHitMissCap(): void {
   }
 }
 
-export function recordHit(prefix: string): void {
+function recordHit(prefix: string): void {
   const current = hitMissMap.get(prefix) ?? { hits: 0, misses: 0 };
   hitMissMap.set(prefix, { hits: current.hits + 1, misses: current.misses });
   enforceHitMissCap();
 }
 
-export function recordMiss(prefix: string): void {
+function recordMiss(prefix: string): void {
   const current = hitMissMap.get(prefix) ?? { hits: 0, misses: 0 };
   hitMissMap.set(prefix, { hits: current.hits, misses: current.misses + 1 });
   enforceHitMissCap();
@@ -81,9 +81,4 @@ export function recordMissForKey(key: string): void {
 
 export function getEntityCacheStats(): Record<string, { hits: number; misses: number }> {
   return Object.fromEntries(hitMissMap);
-}
-
-/** Reset all hit/miss counters (test-only helper). */
-export function resetEntityCacheStats(): void {
-  hitMissMap.clear();
 }
