@@ -1,3 +1,4 @@
+import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { StudentStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { StudentLifecycleService } from "@/backend/services";
@@ -33,7 +34,7 @@ export const ChangeStudentStatusResultPothosObject = ChangeStudentStatusResultRe
 gqlSchemaBuilder.mutationField("reassignStudentTeacher", t =>
   t.field({
     type: ReassignStudentTeacherResultRef,
-    authScopes: { superAdmin: true },
+    authScopes: { permission: AppPermission.STUDENT_REASSIGN_TEACHER },
     args: {
       studentId: t.arg.string({ required: true }),
       newTeacherId: t.arg.string({ required: true }),
@@ -55,7 +56,7 @@ gqlSchemaBuilder.mutationField("reassignStudentTeacher", t =>
 gqlSchemaBuilder.mutationField("changeStudentStatus", t =>
   t.field({
     type: ChangeStudentStatusResultRef,
-    authScopes: { superAdmin: true },
+    authScopes: { permission: AppPermission.STUDENT_MANAGE_STATUS },
     args: {
       studentId: t.arg.string({ required: true }),
       newStatus: t.arg({ type: StudentStatusPothosObject, required: true }),

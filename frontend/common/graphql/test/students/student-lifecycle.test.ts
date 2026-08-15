@@ -84,13 +84,14 @@ describe("GraphQL: reassignStudentTeacher mutation", () => {
     expect(denied).toBe(true);
   });
 
-  test("academy admin (non-superAdmin) is denied", async () => {
+  test("academy admin (non-superAdmin) with permission is allowed", async () => {
     const academyAdminToken = await loginDemoUser("academy_admin");
-    await expectMutationError(academyAdminToken, reassignStudentTeacherMutationDocument, {
+    const data = await authenticatedRequest(academyAdminToken, "mutate", reassignStudentTeacherMutationDocument, {
       studentId: studentId || NIL_UUID,
       newTeacherId: newTeacherId || NIL_UUID,
       expectedVersion: null,
     });
+    expect(data.reassignStudentTeacher?.id).toBe(studentId || NIL_UUID);
   });
 
   test("Threat 4 — non-existent teacher returns teacherNotFound", async () => {
@@ -171,13 +172,14 @@ describe("GraphQL: changeStudentStatus mutation", () => {
     expect(denied).toBe(true);
   });
 
-  test("academy admin (non-superAdmin) is denied", async () => {
+  test("academy admin (non-superAdmin) with permission is allowed", async () => {
     const academyAdminToken = await loginDemoUser("academy_admin");
-    await expectMutationError(academyAdminToken, changeStudentStatusMutationDocument, {
+    const data = await authenticatedRequest(academyAdminToken, "mutate", changeStudentStatusMutationDocument, {
       studentId: studentId || NIL_UUID,
-      newStatus: StudentStatus.Suspended,
+      newStatus: StudentStatus.Regular,
       expectedVersion: null,
     });
+    expect(data.changeStudentStatus?.id).toBe(studentId || NIL_UUID);
     expect(academyAdminToken).toBeTruthy();
   });
 

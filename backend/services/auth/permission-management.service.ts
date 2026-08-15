@@ -299,6 +299,27 @@ export namespace PermissionManagementService {
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, tErrors);
 
+    // Fetch the group first to check if it's a system group.
+    // System groups: only permissionIds is editable; name/slug/description are immutable.
+    const existing = await PermissionManagementRepository.getGroupById(input.groupId, locale);
+
+    if (!existing) {
+      throw new Error(tErrors.permissionManagement.permissionGroupNotFound(input.groupId));
+    }
+
+    if (existing.isSystem) {
+      return PermissionManagementRepository.updateGroup(
+        {
+          id: input.groupId,
+          name: undefined,
+          slug: undefined,
+          description: undefined,
+          permissionIds: input.permissionIds,
+        },
+        locale
+      );
+    }
+
     let slug: string | undefined;
 
     if (input.name !== undefined) {

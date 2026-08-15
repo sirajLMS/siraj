@@ -58,7 +58,7 @@ export function CurrentPermissionsTabMobile({
                 {permission.description}
               </Typography>
             ) : null}
-            {!group.isSystem && permission.id ? (
+            {permission.id ? (
               <StyledRevokeButtonShared
                 size="small"
                 startIcon={<RemoveCircleOutlined fontSize="small" />}

@@ -90,6 +90,7 @@ function PermissionGroupFormActionsShared({
 export function PermissionGroupFormContentShared({
   control,
   isLoading,
+  isSystem,
   searchTerm,
   setSearchTerm,
   selectedCategory,
@@ -126,7 +127,7 @@ export function PermissionGroupFormContentShared({
               control={control}
               label={t.groupNameLabel}
               required
-              disabled={isLoading}
+              disabled={isLoading || isSystem}
               fullWidth
             />
           </Grid>
@@ -137,7 +138,7 @@ export function PermissionGroupFormContentShared({
               label={t.descriptionLabel}
               multiline
               minRows={2}
-              disabled={isLoading}
+              disabled={isLoading || isSystem}
               fullWidth
             />
           </Grid>
@@ -221,6 +222,7 @@ export function PermissionGroupFormShared({
       <PermissionGroupFormContentShared
         control={control}
         isLoading={isLoading}
+        isSystem={group?.isSystem ?? false}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         selectedCategory={selectedCategory}

@@ -83,7 +83,7 @@ const meta: Meta<typeof StudentsContainer> = {
     Story => {
       const perms = [
         AppPermission.StudentsList,
-        AppPermission.StaffViewDirectory,
+        AppPermission.TeachersList,
         AppPermission.ResourcesList,
         AppPermission.ResourcesUpload,
         AppPermission.ProfileStaffRoleEditOther,

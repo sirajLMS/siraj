@@ -5,7 +5,10 @@ import { getMigrationsToRun } from "drizzle-orm/migrator.utils";
 import type { NeonDatabase } from "drizzle-orm/neon-serverless";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { upgradeIfNeeded } from "drizzle-orm/up-migrations/pg";
-import { preCommitEnumStatementsForMigrationFile } from "@/backend/db/scripts/ensureIdempotentMigrations";
+import {
+  ensureEnumValuesCommitted,
+  preCommitEnumStatementsForMigrationFile,
+} from "@/backend/db/scripts/ensureIdempotentMigrations";
 import { logger } from "@/backend/lib/logger";
 
 const DEFAULT_MIGRATIONS_FOLDER = "./backend/drizzle";
@@ -92,6 +95,12 @@ export async function runDrizzleMigrations(db: PgMigratorDatabase, config: Drizz
   }
 
   logger.log(`Applying ${migrationsToRun.length} pending Drizzle migration folder(s)...`);
+
+  // Pre-commit ALL enum additions from ALL migration folders before running any
+  // migration. This ensures enum values referenced by earlier migrations (e.g.
+  // INSERT statements casting to app_permission) are available even when the
+  // ALTER TYPE ... ADD VALUE migration folder runs later in the sequence.
+  await ensureEnumValuesCommitted();
 
   const applyMigration = async (migration: MigrationMeta): Promise<void> => {
     const migrationName = migration.name;

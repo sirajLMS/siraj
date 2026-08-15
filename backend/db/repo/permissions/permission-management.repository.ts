@@ -350,7 +350,36 @@ export namespace PermissionManagementRepository {
       }
 
       if (existing.isSystem) {
-        throw new Error(errorsTranslations.permissionManagement.cannotModifySystemPermissionGroup);
+        // System groups: only the permission bundle (permissionIds) is editable.
+        // Name, slug, and description are immutable. If no permissionIds provided,
+        // return the existing group as-is (no-op).
+        if (input.permissionIds === undefined) {
+          const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, input.id));
+          return toGroupReturn(
+            existing,
+            gpList.map(gp => gp.permissionId),
+            locale
+          );
+        }
+
+        // Replace permission bundle only — skip name/slug/description update.
+        await t.delete(groupPermissions).where(eq(groupPermissions.groupId, input.id));
+
+        if (input.permissionIds.length > 0) {
+          await t.insert(groupPermissions).values(
+            input.permissionIds.map(permissionId => ({
+              groupId: input.id,
+              permissionId,
+            }))
+          );
+        }
+
+        const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, input.id));
+        return toGroupReturn(
+          existing,
+          gpList.map(gp => gp.permissionId),
+          locale
+        );
       }
 
       const now = new Date();

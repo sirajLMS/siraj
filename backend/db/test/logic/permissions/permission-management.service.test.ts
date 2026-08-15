@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test
 import { randomUUID } from "node:crypto";
 import { eq, like } from "drizzle-orm";
 import { db } from "@/backend/db";
-import { permissionGroups, permissions, users } from "@/backend/db/schema";
+import { groupPermissions, permissionGroups, permissions, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
 import { PermissionManagementService, PermissionsService, type UserPermissionContext } from "@/backend/services";
@@ -30,6 +30,18 @@ async function getSystemGroup() {
   const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
   expect(sysGroup).toBeDefined();
   return sysGroup;
+}
+
+async function restoreSystemGroupPermissions(
+  groupId: string,
+  originalPerms: ReadonlyArray<{ groupId: string; permissionId: string }>
+): Promise<void> {
+  await db.delete(groupPermissions).where(eq(groupPermissions.groupId, groupId));
+  if (originalPerms.length > 0) {
+    await db
+      .insert(groupPermissions)
+      .values(originalPerms.map(p => ({ groupId: p.groupId, permissionId: p.permissionId })));
+  }
 }
 
 const manageContext = (): UserPermissionContext => ({
@@ -303,13 +315,67 @@ describe("PermissionManagementService Business Logic", () => {
       expect(updated.description).toEqual(loc("Updated description"));
     });
 
-    testSystemGroupGuard(
-      "updateGroup on system group should throw cannotModifySystemPermissionGroup",
-      manageContext,
-      groupId =>
-        PermissionManagementService.updateGroup(adminUser.id, { groupId, name: loc("New System Name") }, tErrors, "ar"),
-      "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام"
-    );
+    test("updateGroup on system group with permissionIds should succeed and update permissions", async () => {
+      mockContext = manageContext();
+      const sysGroup = await getSystemGroup();
+
+      const originalPerms = await db.select().from(groupPermissions).where(eq(groupPermissions.groupId, sysGroup.id));
+
+      const testPermId = testPerm1?.id ?? "";
+      const updated = await PermissionManagementService.updateGroup(
+        adminUser.id,
+        { groupId: sysGroup.id, permissionIds: [testPermId] },
+        tErrors,
+        "en"
+      );
+
+      expect(updated.isSystem).toBe(true);
+      expect(updated.permissionIds).toEqual([testPermId]);
+
+      const afterPerms = await db.select().from(groupPermissions).where(eq(groupPermissions.groupId, sysGroup.id));
+      expect(afterPerms).toHaveLength(1);
+      expect(afterPerms[0].permissionId).toBe(testPermId);
+
+      await restoreSystemGroupPermissions(sysGroup.id, originalPerms);
+    });
+
+    test("updateGroup on system group with name change should succeed but name NOT changed", async () => {
+      mockContext = manageContext();
+      const sysGroup = await getSystemGroup();
+      const originalName = sysGroup.name;
+
+      const updated = await PermissionManagementService.updateGroup(
+        adminUser.id,
+        { groupId: sysGroup.id, name: loc("New System Name") },
+        tErrors,
+        "en"
+      );
+
+      expect(updated.isSystem).toBe(true);
+      expect(updated.name).toEqual(originalName);
+    });
+
+    test("updateGroup on system group with permissionIds: [] should succeed and clear all permissions", async () => {
+      mockContext = manageContext();
+      const sysGroup = await getSystemGroup();
+
+      const originalPerms = await db.select().from(groupPermissions).where(eq(groupPermissions.groupId, sysGroup.id));
+
+      const updated = await PermissionManagementService.updateGroup(
+        adminUser.id,
+        { groupId: sysGroup.id, permissionIds: [] },
+        tErrors,
+        "en"
+      );
+
+      expect(updated.isSystem).toBe(true);
+      expect(updated.permissionIds).toEqual([]);
+
+      const afterPerms = await db.select().from(groupPermissions).where(eq(groupPermissions.groupId, sysGroup.id));
+      expect(afterPerms).toHaveLength(0);
+
+      await restoreSystemGroupPermissions(sysGroup.id, originalPerms);
+    });
 
     testSystemGroupGuard(
       "deleteGroup on system group should throw cannotDeleteSystemPermissionGroup",

@@ -197,6 +197,9 @@ DELETE FROM group_permissions
 WHERE group_id = (SELECT id FROM permission_groups WHERE slug = 'supervisor_default')
   AND permission_id = (SELECT id FROM permissions WHERE key = 'dashboard.view_metrics'::app_permission);
 
+-- IMPORTANT: Supervisors are granted ALL current and future teacher/student/parent management permissions.
+-- Any new teacher/student/parent management permission MUST be added to this group.
+-- Staff permissions are NEVER granted to supervisors.
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p
@@ -223,7 +226,24 @@ WHERE
     'complaints.respond',
     'notification.view_alerts',
     'user.view_profile',
-    'teacher.view_profile'
+    'teacher.view_profile',
+    'teachers.create',
+    'teachers.edit',
+    'teachers.manage_schedule',
+    'schedule.view_weekly',
+    'schedule.view_workload',
+    'schedule.create_class',
+    'schedule.delete_class',
+    'schedule.clear_weekly',
+    'students.create',
+    'students.edit',
+    'student.reassign_teacher',
+    'student.manage_status',
+    'parents.list',
+    'parents.create',
+    'parents.edit',
+    'parent.view_directory',
+    'parent.manage_status'
   )
 ON CONFLICT DO NOTHING;
 

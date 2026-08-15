@@ -65,7 +65,7 @@ type CreateRecurringClassResult = {
 };
 
 type SchedulePermissions = {
-  readonly isAdmin: boolean;
+  readonly hasScheduleManageTeacher: boolean;
   readonly hasScheduleCreateClass: boolean;
   readonly hasScheduleClearWeekly: boolean;
   readonly hasScheduleViewWorkload: boolean;
@@ -128,7 +128,7 @@ function useSchedulePermissions(hasPermission: (perm: AppPermission) => boolean)
   // ScheduleCreateClass / ScheduleClearWeekly / ScheduleViewWorkload /
   // ScheduleDeleteClass — they now gate on these booleans instead.
   return {
-    isAdmin: hasPermission(AppPermission.StaffViewDirectory),
+    hasScheduleManageTeacher: hasPermission(AppPermission.TeachersManageSchedule),
     hasScheduleCreateClass: hasPermission(AppPermission.ScheduleCreateClass),
     hasScheduleClearWeekly: hasPermission(AppPermission.ScheduleClearWeekly),
     hasScheduleViewWorkload: hasPermission(AppPermission.ScheduleViewWorkload),
@@ -136,7 +136,7 @@ function useSchedulePermissions(hasPermission: (perm: AppPermission) => boolean)
   };
 }
 
-function useScheduleQueries(teacherId: string, weekDate: string, isAdmin: boolean) {
+function useScheduleQueries(teacherId: string, weekDate: string, hasScheduleManageTeacher: boolean) {
   const {
     data: scheduleData,
     loading: scheduleLoading,
@@ -151,7 +151,7 @@ function useScheduleQueries(teacherId: string, weekDate: string, isAdmin: boolea
 
   const { data: directoryData } = useQuery(teacherDirectoryQueryDocument, {
     variables: { search: null, paginationArgs: null },
-    skip: !isAdmin,
+    skip: !hasScheduleManageTeacher,
   });
 
   return { scheduleData, scheduleLoading, refetchSchedule, workloadData, refetchWorkload, directoryData };
@@ -488,7 +488,7 @@ export function useTeacherWeeklyScheduleViewModel(
 
   const permissions = useSchedulePermissions(hasPermission);
   const { scheduleData, scheduleLoading, refetchSchedule, workloadData, refetchWorkload, directoryData } =
-    useScheduleQueries(teacherId, selectedWeekDate, permissions.isAdmin);
+    useScheduleQueries(teacherId, selectedWeekDate, permissions.hasScheduleManageTeacher);
   const { deleteRecurringClass, clearWeeklySchedule, createClassMutation, mutationLoading } = useScheduleMutations();
 
   const schedule = scheduleData?.teacherWeeklyScheduleGrid;

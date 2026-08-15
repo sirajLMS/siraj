@@ -236,6 +236,7 @@
   "unknownName": "Unknown",
   "invalidInput": "Invalid input.",
   "invalidNationalId": "The national ID is invalid for the selected nationality.",
+  "specializedGroupNotAllowed": "Cannot assign a specialized group (student, teacher, or parent) to a general user. Use the dedicated onboarding flow for that user type instead.",
   "rejectedReportsRequireReason": "REJECTED reports must include a rejection reason.",
   "approvedReportsNoRejectionReason": "APPROVED reports must not include a rejection reason.",
   "displayCurrencyNotSet": {

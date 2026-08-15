@@ -208,9 +208,8 @@ describe("PermissionManagementRepository", () => {
       expect(dbGroup.name).toEqual(loc("Updated Group Name"));
     });
 
-    testRepo("updateGroup should throw on non-existent group or system group", async tx => {
+    testRepo("updateGroup should throw on non-existent group", async tx => {
       const tFunc = getErrorMessage;
-      // Non-existent group
       let errorThrown: unknown = null;
       try {
         await PermissionManagementRepository.updateGroup(
@@ -226,27 +225,59 @@ describe("PermissionManagementRepository", () => {
       }
       expect(errorThrown).not.toBeNull();
       expect(tFunc(errorThrown)).toContain("مجموعة الأذونات غير موجودة");
+    });
 
-      // System group
+    testRepo("updateGroup on system group should ignore name change and return existing group", async tx => {
       // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
       const [sysGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
       expect(sysGroup).toBeDefined();
 
-      errorThrown = null;
-      try {
-        await PermissionManagementRepository.updateGroup(
-          {
-            id: sysGroup.id,
-            name: loc("Try Modifying System Group"),
-          },
-          "ar",
-          tx
-        );
-      } catch (err) {
-        errorThrown = err;
-      }
-      expect(errorThrown).not.toBeNull();
-      expect(tFunc(errorThrown)).toContain("لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام");
+      const result = await PermissionManagementRepository.updateGroup(
+        {
+          id: sysGroup.id,
+          name: loc("Try Modifying System Group"),
+        },
+        "ar",
+        tx
+      );
+
+      // Name should NOT be changed — system group name is immutable
+      expect(result.name).toEqual(sysGroup.name);
+
+      // Verify db — name unchanged
+      const [dbGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.id, sysGroup.id)).limit(1);
+      expect(dbGroup.name).toEqual(sysGroup.name);
+    });
+
+    testRepo("updateGroup on system group should update permissionIds bundle", async tx => {
+      const [sysGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
+      expect(sysGroup).toBeDefined();
+
+      // Use an existing permission from the DB (seed permissions are already present)
+      const [existingPerm] = await tx.select().from(permissions).limit(1);
+      expect(existingPerm).toBeDefined();
+
+      const result = await PermissionManagementRepository.updateGroup(
+        {
+          id: sysGroup.id,
+          permissionIds: [existingPerm.id],
+        },
+        "ar",
+        tx
+      );
+
+      expect(result.permissionIds).toContain(existingPerm.id);
+
+      // Clear permissions
+      const cleared = await PermissionManagementRepository.updateGroup(
+        {
+          id: sysGroup.id,
+          permissionIds: [],
+        },
+        "ar",
+        tx
+      );
+      expect(cleared.permissionIds).toHaveLength(0);
     });
 
     testRepoError("updateGroup should throw on database error", () =>

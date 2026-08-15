@@ -1354,7 +1354,12 @@ WHERE
         'suggestions.list',
         'suggestions.review',
         'billing.view_exchange_rates',
-        'billing.refresh_exchange_rates'
+        'billing.refresh_exchange_rates',
+        'teachers.edit',
+        'teachers.list',
+        'students.edit',
+        'students.change_teacher',
+        'students.change_status'
     ) ON CONFLICT DO NOTHING;
 
 INSERT INTO

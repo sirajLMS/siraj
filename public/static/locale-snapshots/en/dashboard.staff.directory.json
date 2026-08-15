@@ -11,7 +11,7 @@
   "filters": {
     "allRoleTypes": "All Role Types",
     "admin": "Admin",
-    "staff": "Staff",
+    "manager": "Manager",
     "supervisor": "Supervisor",
     "statusAll": "Status: All",
     "active": "Active",
@@ -27,10 +27,13 @@
     "options": "Options"
   },
   "fields": {
+    "name": "Name",
+    "email": "Email",
     "phone": "Phone"
   },
   "actions": {
     "addManager": "Add New Staff",
+    "createUser": "Create User",
     "options": "Options",
     "editProfile": "Edit Profile",
     "deactivate": "Deactivate",
@@ -51,7 +54,7 @@
   },
   "roles": {
     "admin": "Admin",
-    "staff": "Staff",
+    "manager": "Manager",
     "supervisor": "Supervisor"
   },
   "showingOf": {

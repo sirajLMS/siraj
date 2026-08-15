@@ -151,16 +151,14 @@ export function SingleGroupHeaderShared({
           <StyledBackToGroupsButton variant="outlined" onClick={onBack} sx={options.actionButtonSx}>
             Back to All Groups
           </StyledBackToGroupsButton>
-          {!group.isSystem && (
-            <StyledEditButton
-              variant="contained"
-              startIcon={<EditOutlined fontSize="small" />}
-              onClick={() => group.id && onEditGroup(group.id)}
-              sx={options.actionButtonSx}
-            >
-              Edit Group Details
-            </StyledEditButton>
-          )}
+          <StyledEditButton
+            variant="contained"
+            startIcon={<EditOutlined fontSize="small" />}
+            onClick={() => group.id && onEditGroup(group.id)}
+            sx={options.actionButtonSx}
+          >
+            Edit Group Details
+          </StyledEditButton>
         </Box>
       </Box>
     </>
