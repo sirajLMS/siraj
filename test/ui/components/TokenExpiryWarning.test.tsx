@@ -4,8 +4,10 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { TokenExpiryWarning } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/TokenExpiryWarning";
-import type { MeetingConfigEnhancementLabels } from "@/shared/locale/types/ui";
+import {
+  TokenExpiryWarning,
+  type TokenExpiryWarningProps,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/TokenExpiryWarning";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -21,12 +23,12 @@ afterEach(() => {
   Date.now = REAL_NOW;
 });
 
-const labels = {
+const labels: TokenExpiryWarningProps["labels"] = {
   expiresInDays: (days: number) => `تنتهي خلال ${days} يوم`,
   expiresInHours: (hours: number) => `تنتهي خلال ${hours} ساعة`,
   expired: "منتهي",
   reconnect: "إعادة الربط",
-} as unknown as Pick<MeetingConfigEnhancementLabels, "expiresInDays" | "expiresInHours" | "expired" | "reconnect">;
+};
 
 describe("TokenExpiryWarning", () => {
   test("returns null when expiresAt is null", () => {
@@ -48,39 +50,35 @@ describe("TokenExpiryWarning", () => {
 
   test("warning level shows days countdown", () => {
     const future = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000); // 10 days
-    render(
-      <TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={mock(() => {})} />,
-      { wrapper: TestWrapper }
-    );
+    render(<TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={mock(() => {})} />, {
+      wrapper: TestWrapper,
+    });
     expect(screen.getByText(/Zoom · تنتهي خلال 10 يوم/)).toBeInTheDocument();
     expect(screen.getByText("إعادة الربط")).toBeInTheDocument();
   });
 
   test("critical level shows hours countdown", () => {
     const future = new Date(Date.now() + 5 * 60 * 60 * 1000); // 5 hours
-    render(
-      <TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={mock(() => {})} />,
-      { wrapper: TestWrapper }
-    );
+    render(<TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={mock(() => {})} />, {
+      wrapper: TestWrapper,
+    });
     expect(screen.getByText(/Zoom · تنتهي خلال 5 ساعة/)).toBeInTheDocument();
   });
 
   test("expired level shows expired label", () => {
     const past = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
-    render(
-      <TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={past} onReconnect={mock(() => {})} />,
-      { wrapper: TestWrapper }
-    );
+    render(<TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={past} onReconnect={mock(() => {})} />, {
+      wrapper: TestWrapper,
+    });
     expect(screen.getByText(/Zoom · منتهي/)).toBeInTheDocument();
   });
 
   test("calls onReconnect when reconnect button clicked", () => {
     const future = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
     const onReconnect = mock(() => {});
-    render(
-      <TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={onReconnect} />,
-      { wrapper: TestWrapper }
-    );
+    render(<TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={onReconnect} />, {
+      wrapper: TestWrapper,
+    });
     fireEvent.click(screen.getByText("إعادة الربط"));
     expect(onReconnect).toHaveBeenCalledTimes(1);
   });
@@ -88,7 +86,13 @@ describe("TokenExpiryWarning", () => {
   test("reconnecting=true disables reconnect button and shows spinner", () => {
     const future = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
     render(
-      <TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={mock(() => {})} reconnecting />,
+      <TokenExpiryWarning
+        labels={labels}
+        providerName="Zoom"
+        expiresAt={future}
+        onReconnect={mock(() => {})}
+        reconnecting
+      />,
       { wrapper: TestWrapper }
     );
     expect(screen.getByText("إعادة الربط").closest("button")).toBeDisabled();

@@ -43,6 +43,7 @@ Each sub-directory contains its own `index.ts` barrel that re-exports every `*.e
 ### File Organization
 - One file per logical domain, grouped under the matching sub-directory.
 - Related enums in the same domain go in the same file (e.g., `InvoiceStatus`, `InvoiceType`, `PaymentMethod` in `billing/billing.enum.ts`).
+- `ManagerAccountType` (`backend/enum/users/account-type.enum.ts`) defines only `manager` and `supervisor` (`admin` removed; managers map to `academy_admin`).
 - Const objects like `ALLOWED_STATUS_TRANSITIONS` live alongside their related enum in the domain file.
 - File naming follows the convention `backend/enum/<subdir>/<entity>.enum.ts` (e.g. `backend/enum/users/user.enum.ts`).
 

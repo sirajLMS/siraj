@@ -1,77 +1,18 @@
 "use client";
 
-import { Box, Button, Chip, MenuItem, Select, TextField } from "@mui/material";
+import { Box, Button, Chip, TextField } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
-  MeetingIntegrationConnectedAccountStatus,
-  MeetingIntegrationProviderSlug,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  ConnectedAccountsTableProps,
-  MeetingIntegrationConnectedAccount,
-  MeetingIntegrationProviderSlug as ProviderSlugType,
-} from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
+  getStatusColor,
+  getStatusLabel,
+  isMeetingIntegrationConnectedAccount,
+  isRevokeDisabled,
+  useConnectedAccountsFilter,
+} from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/connectedAccounts.helpers";
+import { StatusFilterSelect } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/StatusFilterSelect";
+import type { ConnectedAccountsTableProps } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
-import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
-
-function isMeetingIntegrationConnectedAccount(value: unknown): value is MeetingIntegrationConnectedAccount {
-  return typeof value === "object" && value !== null && "userId" in value;
-}
-
-function getProviderLabel(slug: MeetingIntegrationProviderSlug, labels: SettingsMeetingIntegrationsLabels): string {
-  switch (slug) {
-    case MeetingIntegrationProviderSlug.Zoom:
-      return labels.provider.zoom;
-    case MeetingIntegrationProviderSlug.GoogleMeet:
-      return labels.provider.googleMeet;
-    case MeetingIntegrationProviderSlug.MicrosoftTeams:
-      return labels.provider.microsoftTeams;
-    default:
-      return String(slug);
-  }
-}
-
-function getStatusLabel(
-  status: MeetingIntegrationConnectedAccountStatus,
-  labels: SettingsMeetingIntegrationsLabels
-): string {
-  switch (status) {
-    case MeetingIntegrationConnectedAccountStatus.Connected:
-      return labels.status.connected;
-    case MeetingIntegrationConnectedAccountStatus.ExpiringSoon:
-      return labels.status.expiringSoon;
-    case MeetingIntegrationConnectedAccountStatus.ReauthNeeded:
-      return labels.status.reauthNeeded;
-    case MeetingIntegrationConnectedAccountStatus.Revoked:
-      return labels.status.revoked;
-    default:
-      return String(status);
-  }
-}
-
-function getStatusColor(status: MeetingIntegrationConnectedAccountStatus): "success" | "warning" | "error" | "default" {
-  switch (status) {
-    case MeetingIntegrationConnectedAccountStatus.Connected:
-      return "success";
-    case MeetingIntegrationConnectedAccountStatus.ExpiringSoon:
-      return "warning";
-    case MeetingIntegrationConnectedAccountStatus.ReauthNeeded:
-      return "error";
-    case MeetingIntegrationConnectedAccountStatus.Revoked:
-      return "default";
-    default:
-      return "default";
-  }
-}
-
-function isRevokeDisabled(
-  account: MeetingIntegrationConnectedAccount,
-  revokingFor: ConnectedAccountsTableProps["revokingFor"],
-  providerSlug: ProviderSlugType
-): boolean {
-  return revokingFor?.userId === account.userId && revokingFor?.providerSlug === providerSlug;
-}
 
 export function ConnectedAccountsTableDesktop({
   labels,
@@ -83,25 +24,11 @@ export function ConnectedAccountsTableDesktop({
   onRevokeRequest,
   onMetadataDialogOpen,
 }: Readonly<ConnectedAccountsTableProps>) {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<MeetingIntegrationConnectedAccountStatus | "all">("all");
-
-  const providerName = useMemo(() => getProviderLabel(providerSlug, labels), [providerSlug, labels]);
-
-  const filteredRows = useMemo(() => {
-    const lowerSearch = search.trim().toLowerCase();
-    return accounts.filter(account => {
-      if (statusFilter !== "all" && account.status !== statusFilter) {
-        return false;
-      }
-      if (lowerSearch.length === 0) {
-        return true;
-      }
-      const nameMatch = (account.name ?? "").toLowerCase().includes(lowerSearch);
-      const emailMatch = (account.email ?? "").toLowerCase().includes(lowerSearch);
-      return nameMatch || emailMatch;
-    });
-  }, [accounts, search, statusFilter]);
+  const { search, setSearch, statusFilter, setStatusFilter, providerName, filteredRows } = useConnectedAccountsFilter(
+    accounts,
+    providerSlug,
+    labels
+  );
 
   const columns: GridColDef[] = useMemo(() => {
     const cols: GridColDef[] = [
@@ -202,25 +129,7 @@ export function ConnectedAccountsTableDesktop({
       </Box>
       <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 1 }}>
         <TextField size="small" value={search} onChange={e => setSearch(e.target.value)} sx={{ minWidth: 200 }} />
-        <Select
-          size="small"
-          value={statusFilter}
-          onChange={e => {
-            const val = e.target.value;
-            setStatusFilter(val === "all" ? "all" : val);
-          }}
-          sx={{ minWidth: 140 }}
-        >
-          <MenuItem value="all">{labels.columns.status}</MenuItem>
-          <MenuItem value={MeetingIntegrationConnectedAccountStatus.Connected}>{labels.status.connected}</MenuItem>
-          <MenuItem value={MeetingIntegrationConnectedAccountStatus.ExpiringSoon}>
-            {labels.status.expiringSoon}
-          </MenuItem>
-          <MenuItem value={MeetingIntegrationConnectedAccountStatus.ReauthNeeded}>
-            {labels.status.reauthNeeded}
-          </MenuItem>
-          <MenuItem value={MeetingIntegrationConnectedAccountStatus.Revoked}>{labels.status.revoked}</MenuItem>
-        </Select>
+        <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} labels={labels} minWidth={140} />
       </Box>
       <Box sx={{ height: 300 }}>
         <DesktopAppDataGrid

@@ -66,8 +66,8 @@ describe("GraphQL: reassignStudentTeacher mutation", () => {
     expect(data.reassignStudentTeacher?.primaryTeacherId).toBe(newTeacherId);
   });
 
-  test("teacher role is denied", async () => {
-    const denied = await assertOperationDenied("teacher_default", "mutate", reassignStudentTeacherMutationDocument, {
+  test.each(["teacher_default", "parent_default"] as const)("%s role is denied", async role => {
+    const denied = await assertOperationDenied(role, "mutate", reassignStudentTeacherMutationDocument, {
       studentId: studentId || NIL_UUID,
       newTeacherId: newTeacherId || NIL_UUID,
       expectedVersion: null,
@@ -75,23 +75,16 @@ describe("GraphQL: reassignStudentTeacher mutation", () => {
     expect(denied).toBe(true);
   });
 
-  test("parent role is denied", async () => {
-    const denied = await assertOperationDenied("parent_default", "mutate", reassignStudentTeacherMutationDocument, {
+  test("academy admin with permission is allowed to reassign teacher", async () => {
+    const adminToken = await loginDemoUser("academy_admin");
+    const payload = {
       studentId: studentId || NIL_UUID,
       newTeacherId: newTeacherId || NIL_UUID,
       expectedVersion: null,
-    });
-    expect(denied).toBe(true);
-  });
-
-  test("academy admin (non-superAdmin) with permission is allowed", async () => {
-    const academyAdminToken = await loginDemoUser("academy_admin");
-    const data = await authenticatedRequest(academyAdminToken, "mutate", reassignStudentTeacherMutationDocument, {
-      studentId: studentId || NIL_UUID,
-      newTeacherId: newTeacherId || NIL_UUID,
-      expectedVersion: null,
-    });
-    expect(data.reassignStudentTeacher?.id).toBe(studentId || NIL_UUID);
+    };
+    const response = await authenticatedRequest(adminToken, "mutate", reassignStudentTeacherMutationDocument, payload);
+    expect(response.reassignStudentTeacher?.id).toEqual(studentId || NIL_UUID);
+    expect(response.reassignStudentTeacher?.primaryTeacherId).toEqual(newTeacherId || NIL_UUID);
   });
 
   test("Threat 4 — non-existent teacher returns teacherNotFound", async () => {
@@ -154,8 +147,8 @@ describe("GraphQL: changeStudentStatus mutation", () => {
     expect(data.changeStudentStatus?.status).toBe(StudentStatus.OnLeave);
   });
 
-  test("teacher role is denied", async () => {
-    const denied = await assertOperationDenied("teacher_default", "mutate", changeStudentStatusMutationDocument, {
+  test.each(["teacher_default", "parent_default"] as const)("%s role is denied", async role => {
+    const denied = await assertOperationDenied(role, "mutate", changeStudentStatusMutationDocument, {
       studentId: studentId || NIL_UUID,
       newStatus: StudentStatus.Suspended,
       expectedVersion: null,
@@ -163,24 +156,14 @@ describe("GraphQL: changeStudentStatus mutation", () => {
     expect(denied).toBe(true);
   });
 
-  test("parent role is denied", async () => {
-    const denied = await assertOperationDenied("parent_default", "mutate", changeStudentStatusMutationDocument, {
-      studentId: studentId || NIL_UUID,
+  test("academy admin with permission is allowed to change status", async () => {
+    const adminToken = await loginDemoUser("academy_admin");
+    const res = await authenticatedRequest(adminToken, "mutate", changeStudentStatusMutationDocument, {
+      studentId,
       newStatus: StudentStatus.Suspended,
       expectedVersion: null,
     });
-    expect(denied).toBe(true);
-  });
-
-  test("academy admin (non-superAdmin) with permission is allowed", async () => {
-    const academyAdminToken = await loginDemoUser("academy_admin");
-    const data = await authenticatedRequest(academyAdminToken, "mutate", changeStudentStatusMutationDocument, {
-      studentId: studentId || NIL_UUID,
-      newStatus: StudentStatus.Regular,
-      expectedVersion: null,
-    });
-    expect(data.changeStudentStatus?.id).toBe(studentId || NIL_UUID);
-    expect(academyAdminToken).toBeTruthy();
+    expect(res.changeStudentStatus?.status).toBe(StudentStatus.Suspended);
   });
 
   test("non-existent student returns studentNotFound", async () => {

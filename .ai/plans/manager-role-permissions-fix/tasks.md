@@ -132,7 +132,7 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
 
 ### Phase A: Backend Foundation — Enum & Service Mapping
 
-- [ ] 1. Update `ManagerAccountType` enum — remove `admin` value
+- [x] 1. Update `ManagerAccountType` enum — remove `admin` value
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `backend/enum/users/account-type.enum.ts`
   - **Changes:**
@@ -145,21 +145,21 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - Cross-file dependency: GraphQL codegen regeneration needed (Task 10) — logged as D1 in deferred-items.md
   - _Requirements: REQ-1 (Manager maps to ACADEMY_ADMIN)_
 
-  - [ ] 1.QL **Quality Loop**: Per-file verification on `backend/enum/users/account-type.enum.ts`
+  - [x] 1.QL **Quality Loop**: Per-file verification on `backend/enum/users/account-type.enum.ts`
     - Run: `bun run scripts/health/sub-loop.ts backend/enum/users/account-type.enum.ts --lifecycle codescene`
     - Fix all errors and re-run until exit code 0
     - Note: `tsgo` may fail due to removed enum value breaking other files — this is expected; fix only errors within THIS file, report cross-file breakages to orchestrator
 
-  - [ ] 1.SR **Semantic Review**: Agent self-review
-    - [ ] No dead branches (all enum paths reachable — `manager` and `supervisor` both handled)
-    - [ ] Enums imported as values (not `import type`) when used at runtime
-    - [ ] All deferred items logged in `deferred-items.md` (D1, D2, D3 logged)
+  - [x] 1.SR **Semantic Review**: Agent self-review
+    - [x] No dead branches (all enum paths reachable — `manager` and `supervisor` both handled)
+    - [x] Enums imported as values (not `import type`) when used at runtime
+    - [x] All deferred items logged in `deferred-items.md` (D1, D2, D3 logged)
 
-  - [ ] 1.IV **Instruction Verification**: Read & validate against rule files
+  - [x] 1.IV **Instruction Verification**: Read & validate against rule files
     - Read printed AGENTS.md + .agents/instructions files
     - Validate enum file against backend.rules and backend/enum/AGENTS.md
 
-- [ ] 2. Update `resolveTargetGroupSlug` in manager onboarding service
+- [x] 2. Update `resolveTargetGroupSlug` in manager onboarding service
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `backend/services/staff/manager-onboarding.service.ts`
   - **Line range:** 35-43
@@ -172,20 +172,20 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - **Applicable instructions:** `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-1 (Manager maps to ACADEMY_ADMIN)_
 
-  - [ ] 2.QL **Quality Loop**: Per-file verification on `backend/services/staff/manager-onboarding.service.ts`
+  - [x] 2.QL **Quality Loop**: Per-file verification on `backend/services/staff/manager-onboarding.service.ts`
     - Run: `bun run scripts/health/sub-loop.ts backend/services/staff/manager-onboarding.service.ts --lifecycle codescene`
     - Fix all errors and re-run until exit code 0
 
-  - [ ] 2.SR **Semantic Review**: Agent self-review
-    - [ ] No dead branches (both `manager` and `supervisor` paths reachable, fallback covers only `manager` now)
-    - [ ] No cross-layer imports
-    - [ ] Enums imported as values at runtime
+  - [x] 2.SR **Semantic Review**: Agent self-review
+    - [x] No dead branches (both `manager` and `supervisor` paths reachable, fallback covers only `manager` now)
+    - [x] No cross-layer imports
+    - [x] Enums imported as values at runtime
 
-  - [ ] 2.IV **Instruction Verification**: Read & validate against rule files
+  - [x] 2.IV **Instruction Verification**: Read & validate against rule files
 
 ### Phase B: Backend — Repository Role Filter
 
-- [ ] 3. Update `resolveRoleCondition` for manager role filter
+- [x] 3. Update `resolveRoleCondition` for manager role filter
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `backend/db/repo/teachers/staff-profile.repository.ts`
   - **Line range:** 155-173
@@ -211,21 +211,21 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - **Applicable instructions:** `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
   - _Requirements: REQ-3 (Staff directory Manager filter shows academy_admin users)_
 
-  - [ ] 3.QL **Quality Loop**: Per-file verification on `backend/db/repo/teachers/staff-profile.repository.ts`
+  - [x] 3.QL **Quality Loop**: Per-file verification on `backend/db/repo/teachers/staff-profile.repository.ts`
     - Run: `bun run scripts/health/sub-loop.ts backend/db/repo/teachers/staff-profile.repository.ts --lifecycle codescene`
     - Fix all errors and re-run until exit code 0
 
-  - [ ] 3.SR **Semantic Review**: Agent self-review
-    - [ ] No read-then-write without atomicity (this is a read-only filter — N/A)
-    - [ ] No dead branches (both `"admin"` and `"manager"` branches reachable, `"supervisor"` branch reachable)
-    - [ ] Enums imported as values at runtime
-    - [ ] Schema migrations match Drizzle schema (no schema change here)
+  - [x] 3.SR **Semantic Review**: Agent self-review
+    - [x] No read-then-write without atomicity (this is a read-only filter — N/A)
+    - [x] No dead branches (both `"admin"` and `"manager"` branches reachable, `"supervisor"` branch reachable)
+    - [x] Enums imported as values at runtime
+    - [x] Schema migrations match Drizzle schema (no schema change here)
 
-  - [ ] 3.IV **Instruction Verification**: Read & validate against rule files
+  - [x] 3.IV **Instruction Verification**: Read & validate against rule files
 
 ### Phase C: Database Migration — Group Name Update
 
-- [ ] 4. Create Drizzle custom migration updating `academy_admin` group name
+- [x] 4. Create Drizzle custom migration updating `academy_admin` group name
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **Create new migration folder:** `backend/drizzle/<timestamp>_custom_update_academy_admin_group_name/migration.sql`
     - Use `drizzle-generate` skill to generate a blank custom migration: `bun drizzle-kit generate --custom --name update-academy-admin-group-name`
@@ -242,7 +242,7 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - Write outcome file documenting the migration filename and SQL content
   - _Requirements: REQ-2 (academy_admin group name updated)_
 
-- [ ] 5. Update seed SQL mirrors for consistency
+- [x] 5. Update seed SQL mirrors for consistency
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File 1:** `backend/db/migration/3-system_permissions_and_groups.sql`
     - **Lines 1023-1031:** Update `academy_admin` INSERT name from `{"ar": "المسؤول", "en": "Admin"}` to `{"ar": "مدير الأكاديمية", "en": "Manager"}`
@@ -257,7 +257,7 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
 
 ### Phase D: i18n Updates
 
-- [ ] 6. Update onboarding locale type schema — remove `admin` keys
+- [x] 6. Update onboarding locale type schema — remove `admin` keys
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `shared/locale/types/dashboard/staff/onboarding.ts`
   - **Line range:** 24-34
@@ -270,18 +270,18 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - Cross-file dependency: TS compilation breaks if AR/EN locale files (Tasks 7-8) still have `admin` keys — must edit all 3 files before running `tsgo`
   - _Requirements: REQ-4 (i18n type schema updated)_
 
-  - [ ] 6.QL **Quality Loop**: Per-file verification on `shared/locale/types/dashboard/staff/onboarding.ts`
+  - [x] 6.QL **Quality Loop**: Per-file verification on `shared/locale/types/dashboard/staff/onboarding.ts`
     - Run: `bun run scripts/health/sub-loop.ts shared/locale/types/dashboard/staff/onboarding.ts --lifecycle codescene`
     - Note: `tsgo` may fail until AR/EN files are also updated — fix only errors in THIS file
 
-  - [ ] 6.SR **Semantic Review**: Agent self-review
-    - [ ] No dead branches (type schema — N/A)
-    - [ ] No cross-layer imports (shared must not import from frontend/backend)
-    - [ ] All deferred items logged (D3 resolved by this task)
+  - [x] 6.SR **Semantic Review**: Agent self-review
+    - [x] No dead branches (type schema — N/A)
+    - [x] No cross-layer imports (shared must not import from frontend/backend)
+    - [x] All deferred items logged (D3 resolved by this task)
 
-  - [ ] 6.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
+  - [x] 6.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
 
-- [ ] 7. Update Arabic onboarding translations — remove `admin`, update `manager`
+- [x] 7. Update Arabic onboarding translations — remove `admin`, update `manager`
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `shared/locale/ar/dashboard/staff/onboarding.ts`
   - **Line range:** 27-36
@@ -294,16 +294,16 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - **Applicable AGENTS.md:** `/home/ahmed/Projects/siraj/shared/AGENTS.md`
   - _Requirements: REQ-4 (AR onboarding translations updated)_
 
-  - [ ] 7.QL **Quality Loop**: Per-file verification on `shared/locale/ar/dashboard/staff/onboarding.ts`
+  - [x] 7.QL **Quality Loop**: Per-file verification on `shared/locale/ar/dashboard/staff/onboarding.ts`
     - Run: `bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/staff/onboarding.ts --lifecycle codescene`
 
-  - [ ] 7.SR **Semantic Review**: Agent self-review
-    - [ ] No cross-layer imports (shared must not import from frontend/backend)
-    - [ ] No hardcoded error strings (these are locale labels, not error messages — OK)
+  - [x] 7.SR **Semantic Review**: Agent self-review
+    - [x] No cross-layer imports (shared must not import from frontend/backend)
+    - [x] No hardcoded error strings (these are locale labels, not error messages — OK)
 
-  - [ ] 7.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
+  - [x] 7.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
 
-- [ ] 8. Update English onboarding translations — remove `admin`, update `manager`
+- [x] 8. Update English onboarding translations — remove `admin`, update `manager`
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `shared/locale/en/dashboard/staff/onboarding.ts`
   - **Line range:** 27-36
@@ -316,15 +316,15 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - **Applicable AGENTS.md:** `/home/ahmed/Projects/siraj/shared/AGENTS.md`
   - _Requirements: REQ-4 (EN onboarding translations updated)_
 
-  - [ ] 8.QL **Quality Loop**: Per-file verification on `shared/locale/en/dashboard/staff/onboarding.ts`
+  - [x] 8.QL **Quality Loop**: Per-file verification on `shared/locale/en/dashboard/staff/onboarding.ts`
     - Run: `bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/staff/onboarding.ts --lifecycle codescene`
 
-  - [ ] 8.SR **Semantic Review**: Agent self-review
-    - [ ] No cross-layer imports (shared must not import from frontend/backend)
+  - [x] 8.SR **Semantic Review**: Agent self-review
+    - [x] No cross-layer imports (shared must not import from frontend/backend)
 
-  - [ ] 8.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
+  - [x] 8.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
 
-- [ ] 9. Update Arabic staff directory i18n role labels
+- [x] 9. Update Arabic staff directory i18n role labels
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `shared/locale/ar/dashboard/staff/directory.ts`
   - **Line range:** 53-57
@@ -336,15 +336,15 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - **Applicable AGENTS.md:** `/home/ahmed/Projects/siraj/shared/AGENTS.md`
   - _Requirements: REQ-4 (AR directory role labels updated)_
 
-  - [ ] 9.QL **Quality Loop**: Per-file verification on `shared/locale/ar/dashboard/staff/directory.ts`
+  - [x] 9.QL **Quality Loop**: Per-file verification on `shared/locale/ar/dashboard/staff/directory.ts`
     - Run: `bun run scripts/health/sub-loop.ts shared/locale/ar/dashboard/staff/directory.ts --lifecycle codescene`
 
-  - [ ] 9.SR **Semantic Review**: Agent self-review
-    - [ ] No cross-layer imports (shared must not import from frontend/backend)
+  - [x] 9.SR **Semantic Review**: Agent self-review
+    - [x] No cross-layer imports (shared must not import from frontend/backend)
 
-  - [ ] 9.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
+  - [x] 9.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
 
-- [ ] 10. Update English staff directory i18n role labels
+- [x] 10. Update English staff directory i18n role labels
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `shared/locale/en/dashboard/staff/directory.ts`
   - **Line range:** 53-57
@@ -355,17 +355,17 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - **Applicable AGENTS.md:** `/home/ahmed/Projects/siraj/shared/AGENTS.md`
   - _Requirements: REQ-4 (EN directory role labels updated)_
 
-  - [ ] 10.QL **Quality Loop**: Per-file verification on `shared/locale/en/dashboard/staff/directory.ts`
+  - [x] 10.QL **Quality Loop**: Per-file verification on `shared/locale/en/dashboard/staff/directory.ts`
     - Run: `bun run scripts/health/sub-loop.ts shared/locale/en/dashboard/staff/directory.ts --lifecycle codescene`
 
-  - [ ] 10.SR **Semantic Review**: Agent self-review
-    - [ ] No cross-layer imports (shared must not import from frontend/backend)
+  - [x] 10.SR **Semantic Review**: Agent self-review
+    - [x] No cross-layer imports (shared must not import from frontend/backend)
 
-  - [ ] 10.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
+  - [x] 10.IV **Instruction Verification**: Read & validate against `shared/AGENTS.md`
 
 ### Phase E: Frontend Updates
 
-- [ ] 11. Update `SystemAccessSection.tsx` — remove `Admin` option
+- [x] 11. Update `SystemAccessSection.tsx` — remove `Admin` option
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `frontend/common/views/dashboard/staff/onboarding/SystemAccessSection.tsx`
   - **Changes:**
@@ -378,21 +378,21 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - Cross-file dependency: Must be done AFTER Task 1 (enum edit) or TypeScript compilation will fail on `ManagerAccountType.Admin` reference
   - _Requirements: REQ-5 (Onboarding form shows only Manager + Supervisor)_
 
-  - [ ] 11.QL **Quality Loop**: Per-file verification on `frontend/common/views/dashboard/staff/onboarding/SystemAccessSection.tsx`
+  - [x] 11.QL **Quality Loop**: Per-file verification on `frontend/common/views/dashboard/staff/onboarding/SystemAccessSection.tsx`
     - Run: `bun run scripts/health/sub-loop.ts frontend/common/views/dashboard/staff/onboarding/SystemAccessSection.tsx --lifecycle codescene`
 
-  - [ ] 11.SR **Semantic Review**: Agent self-review
-    - [ ] No dead branches (only 2 options, both reachable)
-    - [ ] No cross-layer imports (frontend must not import from backend directly — uses `@/backend/enum/...` path alias which is allowed)
-    - [ ] Enums imported as values (not `import type`) — `ManagerAccountType` is used at runtime in conditionals
+  - [x] 11.SR **Semantic Review**: Agent self-review
+    - [x] No dead branches (only 2 options, both reachable)
+    - [x] No cross-layer imports (frontend must not import from backend directly — uses `@/backend/enum/...` path alias which is allowed)
+    - [x] Enums imported as values (not `import type`) — `ManagerAccountType` is used at runtime in conditionals
 
-  - [ ] 11.IV **Instruction Verification**: Read & validate against rule files
+  - [x] 11.IV **Instruction Verification**: Read & validate against rule files
     - Verify MUI v9 compliance (no style props as direct props)
     - Verify React 19 patterns (no `FormEvent`)
 
 ### Phase F: GraphQL Code Generation
 
-- [ ] 12. Regenerate GraphQL schema and types
+- [x] 12. Regenerate GraphQL schema and types
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **Generated files (auto):**
     - `frontend/common/graphql/generated/schema.graphql` — `enum ManagerAccountType` will drop `admin`
@@ -412,7 +412,7 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
 
 ### Phase G: Tests
 
-- [ ] 13. Update manager onboarding service test
+- [x] 13. Update manager onboarding service test
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `backend/services/staff/test/manager-onboarding.service.test.ts`
   - **Changes:**
@@ -424,17 +424,17 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - **Applicable instructions:** `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-6 (Tests updated)_
 
-  - [ ] 13.QL **Quality Loop**: Per-file verification on `backend/services/staff/test/manager-onboarding.service.test.ts`
+  - [x] 13.QL **Quality Loop**: Per-file verification on `backend/services/staff/test/manager-onboarding.service.test.ts`
     - Run: `bun run scripts/health/sub-loop.ts backend/services/staff/test/manager-onboarding.service.test.ts --lifecycle codescene`
 
-  - [ ] 13.SR **Semantic Review**: Agent self-review
-    - [ ] No dead branches in test logic
-    - [ ] Enums imported as values at runtime (test uses `ManagerAccountType.manager`)
-    - [ ] All test paths reachable
+  - [x] 13.SR **Semantic Review**: Agent self-review
+    - [x] No dead branches in test logic
+    - [x] Enums imported as values at runtime (test uses `ManagerAccountType.manager`)
+    - [x] All test paths reachable
 
-  - [ ] 13.IV **Instruction Verification**: Read & validate against rule files
+  - [x] 13.IV **Instruction Verification**: Read & validate against rule files
 
-- [ ] 14. Update staff profile repository test
+- [x] 14. Update staff profile repository test
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `backend/db/test/repo/teachers/staff-profile.test.ts`
   - **Changes:**
@@ -449,39 +449,40 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - **Applicable instructions:** `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-6 (Repository tests updated)_
 
-  - [ ] 14.QL **Quality Loop**: Per-file verification on `backend/db/test/repo/teachers/staff-profile.test.ts`
+  - [x] 14.QL **Quality Loop**: Per-file verification on `backend/db/test/repo/teachers/staff-profile.test.ts`
     - Run: `bun run scripts/health/sub-loop.ts backend/db/test/repo/teachers/staff-profile.test.ts --lifecycle codescene`
 
-  - [ ] 14.SR **Semantic Review**: Agent self-review
-    - [ ] No read-then-write without atomicity (DB tests use `runInRollback` — OK)
-    - [ ] All `tx` passed to ALL repository methods inside transactions
-    - [ ] No `expect(...).rejects.toThrow()` inside `runInRollback`
-    - [ ] No seed data queries — uses `entity-setup.ts` helpers
+  - [x] 14.SR **Semantic Review**: Agent self-review
+    - [x] No read-then-write without atomicity (DB tests use `runInRollback` — OK)
+    - [x] All `tx` passed to ALL repository methods inside transactions
+    - [x] No `expect(...).rejects.toThrow()` inside `runInRollback`
+    - [x] No seed data queries — uses `entity-setup.ts` helpers
 
-  - [ ] 14.IV **Instruction Verification**: Read & validate against rule files
+  - [x] 14.IV **Instruction Verification**: Read & validate against rule files
 
-- [ ] 15. Update GraphQL onboarding test
+- [x] 15. Update GraphQL onboarding test
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `frontend/common/graphql/test/teachers/manager-onboarding.test.ts`
   - **Changes:**
-    - Delete or rewrite "Super Admin can create manager with admin type" test (lines 68-85) — `ManagerAccountType.Admin` no longer exists
-    - Update "creates manager with manager account type" test (lines 87-102): change expected `assignedGroupSlug` from `"staff_default"` to `"academy_admin"`
-    - Verify `provisionTestManager` helper in `frontend/common/graphql/test/helpers.ts` needs no code change (parameterized on `accountType`)
+    - "Super Admin can create manager with admin type" test (lines 68-85): change `ManagerAccountType.Admin` → `ManagerAccountType.Manager`, verify `assignedGroupSlug` is still `"academy_admin"`
+    - "Super Admin can create manager with manager type" test (lines 87-102): update to use `ManagerAccountType.Supervisor` (or remove if redundant with the supervisor test), verify `assignedGroupSlug`
+    - Update input builders to not pass `accountType: ManagerAccountType.Admin`
   - **Run test:** Requires dev server — `bun run test:graphql` (or `bun run scripts/run-test/run-test.ts`)
-  - **Applicable AGENTS.md:** `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md`
+  - **Applicable AGENTS.md:** `/home/ahmed/Projects/siraj/frontend/common/graphql/test/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`, `/home/ahmed/Projects/siraj/frontend/AGENTS.md`
   - **Applicable instructions:** `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-6 (GraphQL onboarding tests updated)_
 
-  - [ ] 15.QL **Quality Loop**: Per-file verification on `frontend/common/graphql/test/teachers/manager-onboarding.test.ts`
+  - [x] 15.QL **Quality Loop**: Per-file verification on `frontend/common/graphql/test/teachers/manager-onboarding.test.ts`
     - Run: `bun run scripts/health/sub-loop.ts frontend/common/graphql/test/teachers/manager-onboarding.test.ts --lifecycle codescene`
 
-  - [ ] 15.SR **Semantic Review**: Agent self-review
-    - [ ] Enums imported as values at runtime (test uses `ManagerAccountType.Manager`)
-    - [ ] No dead branches in test logic
+  - [x] 15.SR **Semantic Review**: Agent self-review
+    - [x] No dead branches
+    - [x] Enums imported as values at runtime (test uses `ManagerAccountType.Manager`, `ManagerAccountType.Supervisor`)
+    - [x] All mutation arguments covered (Rule 11: both meaningful non-null and null optionals tested)
 
-  - [ ] 15.IV **Instruction Verification**: Read & validate against rule files
+  - [x] 15.IV **Instruction Verification**: Read & validate against rule files
 
-- [ ] 16. Update GraphQL manager directory test
+- [x] 16. Update GraphQL manager directory test
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **File:** `frontend/common/graphql/test/teachers/manager-directory-graphql.test.ts`
   - **Changes:**
@@ -493,18 +494,18 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - **Applicable instructions:** `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`, `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
   - _Requirements: REQ-6 (GraphQL directory tests updated)_
 
-  - [ ] 16.QL **Quality Loop**: Per-file verification on `frontend/common/graphql/test/teachers/manager-directory-graphql.test.ts`
+  - [x] 16.QL **Quality Loop**: Per-file verification on `frontend/common/graphql/test/teachers/manager-directory-graphql.test.ts`
     - Run: `bun run scripts/health/sub-loop.ts frontend/common/graphql/test/teachers/manager-directory-graphql.test.ts --lifecycle codescene`
 
-  - [ ] 16.SR **Semantic Review**: Agent self-review
-    - [ ] Enums imported as values at runtime
-    - [ ] No dead branches in test logic
+  - [x] 16.SR **Semantic Review**: Agent self-review
+    - [x] Enums imported as values at runtime
+    - [x] No dead branches in test logic
 
-  - [ ] 16.IV **Instruction Verification**: Read & validate against rule files
+  - [x] 16.IV **Instruction Verification**: Read & validate against rule files
 
 ### Phase H: Validation & Knowledge Propagation
 
-- [ ] 17. Run full quality gate and baseline comparison
+- [x] 17. Run full quality gate and baseline comparison
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **Commands:**
     ```bash
@@ -526,7 +527,7 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - Write outcome file: `.ai/plans/manager-role-permissions-fix/outcome/17-quality-gate-outcome.md`
   - _Requirements: REQ-0 (Execution Protocol)_
 
-- [ ] 18. Permission seed audit
+- [x] 18. Permission seed audit
   - Read all existing files in `.ai/plans/manager-role-permissions-fix/outcome/`
   - **Verification (no code changes expected — investigation confirmed exclusions are already in place):**
     - Verify `academy_admin` group in seed SQL files contains all operational permissions from the todo's "Included" list:
@@ -544,7 +545,7 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
   - Write outcome file: `.ai/plans/manager-role-permissions-fix/outcome/18-seed-audit-outcome.md`
   - _Requirements: REQ-2 (Permission audit confirms all-ops-except-permission-control)_
 
-- [ ] 19. Knowledge Propagation & Documentation
+- [x] 19. Knowledge Propagation & Documentation
   - Read all outcome files in `.ai/plans/manager-role-permissions-fix/outcome/` to synthesize all learnings
   - **Domain:** Auth / permissions → `docs/auth/` subdirectory
   - **Create canonical reference doc:** `docs/auth/manager-role-mapping.md`
@@ -588,21 +589,21 @@ This plan fixes the Manager role mapping so that creating a user as "Manager" (�
 ## Task Execution Checklist
 
 ### Before Starting
-- [ ] Requirements and design documents are reviewed
-- [ ] Dependencies are identified and available
-- [ ] Task scope and acceptance criteria are clear
+- [x] Requirements and design documents are reviewed
+- [x] Dependencies are identified and available
+- [x] Task scope and acceptance criteria are clear
 
 ### Before Completion
-- [ ] All acceptance criteria are met
-- [ ] Tests pass and coverage is adequate
-- [ ] **Quality Loop passed** (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` exit code 0)
-- [ ] **Instruction Verification passed**
-- [ ] **Semantic Review passed**
-- [ ] No regressions in existing functionality
-- [ ] Outcome file written to `.ai/plans/manager-role-permissions-fix/outcome/`
-- [ ] Task marked as `[x]` in this file
+- [x] All acceptance criteria are met
+- [x] Tests pass and coverage is adequate
+- [x] **Quality Loop passed** (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` exit code 0)
+- [x] **Instruction Verification passed**
+- [x] **Semantic Review passed**
+- [x] No regressions in existing functionality
+- [x] Outcome file written to `.ai/plans/manager-role-permissions-fix/outcome/`
+- [x] Task marked as `[x]` in this file
 
 ### Plan Completion
-- [ ] All deferred items resolved (0 ❌ or ⚠️ in `deferred-items.md`)
-- [ ] Baseline comparison shows no new errors introduced
-- [ ] Knowledge propagation task (19) completed
+- [x] All deferred items resolved (0 ❌ or ⚠️ in `deferred-items.md`)
+- [x] Baseline comparison shows no new errors introduced
+- [x] Knowledge propagation task (19) completed

@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { DisconnectConfirmDialogLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/DisconnectConfirmDialog";
-import { DisconnectConfirmDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/DisconnectConfirmDialog";
+import {
+  DisconnectConfirmDialog,
+  type DisconnectConfirmDialogLabels,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/DisconnectConfirmDialog";
 
 const meta = {
   title: "Views/dashboard/profile/shared/meeting-configs/DisconnectConfirmDialog",

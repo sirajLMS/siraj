@@ -1,8 +1,10 @@
 import { Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ConnectProviderActionLabels } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction";
-import { ConnectProviderAction } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction";
+import {
+  ConnectProviderAction,
+  type ConnectProviderActionLabels,
+} from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction";
 
 const meta = {
   title: "Views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction",
@@ -78,6 +80,14 @@ export const MicrosoftTeams: Story = {
 };
 
 export const AllStates: Story = {
+  args: {
+    labels,
+    providerSlug: MeetingIntegrationProviderSlug.Zoom,
+    providerName: "Zoom",
+    connecting: false,
+    connectError: null,
+    onConnect: noop,
+  },
   render: () => (
     <Stack spacing={2} sx={{ width: 520 }}>
       <Typography variant="caption">Idle</Typography>

@@ -1,18 +1,20 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { ConnectProviderAccount } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount";
-import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
+import {
+  ConnectProviderAccount,
+  type ConnectProviderAccountLabels,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();
 });
 
-const labels = {
+const labels: ConnectProviderAccountLabels = {
   connectButton: "ربط",
   connectingLabel: "جارٍ الربط…",
   connectedAs: (email: string) => `مرتبط باسم ${email}`,
@@ -23,7 +25,7 @@ const labels = {
   statusExpiring: "على وشك الانتهاء",
   statusExpired: "منتهي",
   statusDisconnected: "غير مرتبط",
-} as unknown as ProfileNotificationsLabels["connectAccount"];
+};
 
 function renderAccount(props: Record<string, unknown>) {
   return render(

@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
+import { createMeetingIntegrationLabelsMock } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks";
 import { RevokeTokenDialog } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/RevokeTokenDialog";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
@@ -12,14 +13,17 @@ afterEach(() => {
   cleanup();
 });
 
-const labels = {
+const baseLabels = createMeetingIntegrationLabelsMock();
+const labels: SettingsMeetingIntegrationsLabels = {
+  ...baseLabels,
   actions: {
+    ...baseLabels.actions,
     revokeConfirm: "هل أنت متأكد من إلغاء هذا الرمز؟ سيتعين على المعلم إعادة الاتصال.",
     revokeConfirmTitle: "إلغاء رمز مزود الاجتماعات",
     cancel: "إلغاء",
     confirmRevoke: "إلغاء",
   },
-} as unknown as SettingsMeetingIntegrationsLabels;
+};
 
 function renderDialog(props: Record<string, unknown>) {
   return render(

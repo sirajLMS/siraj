@@ -2,7 +2,6 @@
 
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
-import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig";
 import {
   ParentScheduleCardShared,
   type ParentScheduleCardSharedOptions,
@@ -16,23 +15,25 @@ export interface ParentScheduleDesktopListItemProps {
   readonly labels: ParentDashboardLabels;
 }
 
-function resolveMeetingUrlStatus(row: ParentScheduleRow): string | null {
-  if (row.isFrozen) return "failed";
-  if (!row.videoEnabled && !row.meetingJoinUrl) return null;
-  if (row.meetingJoinUrl !== null && row.meetingJoinUrl !== undefined) return "generated";
-  return "pending";
-}
-
 const DESKTOP_OPTIONS: ParentScheduleCardSharedOptions = {
   profileSectionSx: { minWidth: 0, spacing: 0.5 },
   renderContainer: (children, row) => (
     <Box
       sx={theme => ({
-        p: 2,
+        p: 2.5,
         borderRadius: 2,
-        border: `1px solid ${row.isFrozen ? theme.palette.info.main : theme.palette.outlineVariant}`,
-        backgroundColor: theme.palette.surfaceContainerLowest,
-        opacity: row.isFrozen ? 0.85 : 1,
+        backgroundColor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.outlineVariant}`,
+        ...(row.isFrozen
+          ? {
+              borderInlineStartWidth: 4,
+              borderInlineStartColor: theme.palette.info.main,
+              opacity: 0.85,
+            }
+          : {}),
+        "&:hover": {
+          boxShadow: theme.palette.shadow.card,
+        },
       })}
     >
       {children}
@@ -67,22 +68,6 @@ const DESKTOP_OPTIONS: ParentScheduleCardSharedOptions = {
       />
     </>
   ),
-  renderJoinAction: ({ row, labels, canJoin, frozenFallback }): ReactNode => {
-    let result: ReactNode = null;
-    if (row.isFrozen) {
-      result = frozenFallback;
-    } else if (canJoin) {
-      result = (
-        <MeetingUrlCell
-          meetingUrl={row.meetingJoinUrl}
-          meetingUrlStatus={resolveMeetingUrlStatus(row)}
-          joinLabel={labels.schedule.joinVideo}
-          compact
-        />
-      );
-    }
-    return result;
-  },
 };
 
 /**

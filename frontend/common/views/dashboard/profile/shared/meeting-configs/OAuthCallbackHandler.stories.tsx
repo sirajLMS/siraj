@@ -1,7 +1,9 @@
 import { Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { OAuthCallbackHandlerLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/OAuthCallbackHandler";
-import { OAuthCallbackHandler } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/OAuthCallbackHandler";
+import {
+  OAuthCallbackHandler,
+  type OAuthCallbackHandlerLabels,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/OAuthCallbackHandler";
 
 const meta = {
   title: "Views/dashboard/profile/shared/meeting-configs/OAuthCallbackHandler",
@@ -35,7 +37,7 @@ export const Success: Story = {
   ),
 };
 
-export const Error: Story = {
+export const ErrorState: Story = {
   args: {
     labels,
     onCallbackDetected: logCallback,

@@ -2532,7 +2532,6 @@ type LoginResponse {
 }
 
 enum ManagerAccountType {
-  admin
   manager
   supervisor
 }

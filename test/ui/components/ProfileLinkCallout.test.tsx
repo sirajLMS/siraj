@@ -4,8 +4,9 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { ProfileLinkCallout } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ProfileLinkCallout";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { createMeetingIntegrationLabelsMock } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks";
+import { ProfileLinkCallout } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ProfileLinkCallout";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -13,15 +14,16 @@ afterEach(() => {
   cleanup();
 });
 
-const labels = {
+const baseLabels = createMeetingIntegrationLabelsMock();
+const labels: SettingsMeetingIntegrationsLabels = {
+  ...baseLabels,
   viewProfileMeetingConfigs: "عرض إعدادات الاجتماع",
-} as unknown as SettingsMeetingIntegrationsLabels;
+};
 
 function renderCallout(props: Record<string, unknown>) {
-  return render(
-    <ProfileLinkCallout labels={labels} onNavigate={mock(() => {})} {...props} />,
-    { wrapper: TestWrapper },
-  );
+  return render(<ProfileLinkCallout labels={labels} onNavigate={mock(() => {})} {...props} />, {
+    wrapper: TestWrapper,
+  });
 }
 
 describe("ProfileLinkCallout", () => {

@@ -14,26 +14,14 @@ import {
   Typography,
 } from "@mui/material";
 import { useId } from "react";
-import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { getProviderLabel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/connectedAccounts.helpers";
 import {
   srOnlySx,
   useCopyFeedback,
 } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/useCopyFeedback";
 import type { MeetingIntegrationConnectedAccount } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
-
-function getProviderLabel(slug: MeetingIntegrationProviderSlug, labels: SettingsMeetingIntegrationsLabels): string {
-  switch (slug) {
-    case MeetingIntegrationProviderSlug.Zoom:
-      return labels.provider.zoom;
-    case MeetingIntegrationProviderSlug.GoogleMeet:
-      return labels.provider.googleMeet;
-    case MeetingIntegrationProviderSlug.MicrosoftTeams:
-      return labels.provider.microsoftTeams;
-    default:
-      return String(slug);
-  }
-}
 
 function formatDate(date: Date | null | undefined, locale: "en" | "ar"): string {
   if (!date) {

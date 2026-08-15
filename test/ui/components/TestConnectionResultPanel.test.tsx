@@ -8,7 +8,9 @@ import {
   MeetingConnectionTestMode,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { createMeetingIntegrationLabelsMock } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks";
 import { TestConnectionResultPanel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TestConnectionResultPanel";
+import type { TestMeetingConnectionResult } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -16,7 +18,9 @@ afterEach(() => {
   cleanup();
 });
 
-const labels = {
+const baseLabels = createMeetingIntegrationLabelsMock();
+const labels: SettingsMeetingIntegrationsLabels = {
+  ...baseLabels,
   validateConfig: "التحقق من الإعداد",
   generateAndDelete: "إنشاء وحذف",
   testConnectionTesting: "جارٍ اختبار الاتصال…",
@@ -30,6 +34,7 @@ const labels = {
   errorCode: "رمز الخطأ",
   errorMessage: "رسالة الخطأ",
   testPanel: {
+    ...baseLabels.testPanel,
     rawResponse: "الاستجابة الخام",
     copyUrl: "نسخ الرابط",
     copied: "تم النسخ!",
@@ -41,15 +46,21 @@ const labels = {
     successMessage: "نجح اختبار الاتصال.",
     idleHint: "قم بتشغيل اختبار للتحقق من اتصال المزود.",
   },
-} as unknown as SettingsMeetingIntegrationsLabels;
+};
 
-function renderPanel(props: Record<string, unknown>) {
+function renderPanel(props: {
+  result?: TestMeetingConnectionResult | null;
+  testing?: boolean;
+  onRunTest?: (providerSlug: MeetingIntegrationProviderSlug, mode: MeetingConnectionTestMode) => Promise<void>;
+  providerSlug?: MeetingIntegrationProviderSlug;
+}) {
   return render(
     <TestConnectionResultPanel
       labels={labels}
-      providerSlug={MeetingIntegrationProviderSlug.Zoom}
-      onRunTest={mock(() => Promise.resolve())}
-      {...props}
+      providerSlug={props.providerSlug ?? MeetingIntegrationProviderSlug.Zoom}
+      onRunTest={props.onRunTest ?? mock(() => Promise.resolve())}
+      result={props.result ?? null}
+      testing={props.testing ?? false}
     />,
     { wrapper: TestWrapper }
   );

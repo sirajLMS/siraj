@@ -25,18 +25,14 @@ await mock.module("next/navigation", () => ({
 }));
 
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { gql } from "@apollo/client";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import {
-  deleteEnvConfigEntryMutationDocument,
-  envConfigEntriesQueryDocument,
-  upsertEnvConfigEntryMutationDocument,
-} from "@/frontend/common/graphql/sharedDocuments/settings/environment-config.documents";
 import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { envConfigEntriesQueryDocument } from "@/frontend/common/graphql/sharedDocuments/settings/environment-config.documents";
 import { MeetingProviderCredentialForm } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/MeetingProviderCredentialForm";
+import type { MeetingIntegrationProviderSummary } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -45,7 +41,11 @@ afterEach(() => {
   showNotification.mockClear();
 });
 
-const labels = {
+import { createMeetingIntegrationLabelsMock } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks";
+
+const baseLabels = createMeetingIntegrationLabelsMock();
+const labels: SettingsMeetingIntegrationsLabels = {
+  ...baseLabels,
   loading: "جارٍ التحميل…",
   loadError: "تعذّر التحميل",
   credentialFormCreateTitle: "إضافة بيانات",
@@ -55,6 +55,7 @@ const labels = {
   scopesRequired: "النطاقات مطلوبة",
   credentialsSaved: "تم الحفظ",
   credentialForm: {
+    ...baseLabels.credentialForm,
     clientId: "معرّف العميل",
     clientSecret: "السر",
     tenantId: "معرّف المستأجر",
@@ -68,17 +69,16 @@ const labels = {
     saving: "جارٍ الحفظ…",
     noFields: "لا توجد حقول",
     removeScope: "حذف النطاق",
-    notifications: {
-      saveError: "تعذّر الحفظ",
-      saveSuccess: "تم الحفظ",
-    },
   },
   actions: {
+    ...baseLabels.actions,
     cancel: "إلغاء",
   },
-} as unknown as SettingsMeetingIntegrationsLabels;
+};
 
-function makeProvider(slug: MeetingIntegrationProviderSlug = MeetingIntegrationProviderSlug.Zoom) {
+function makeProvider(
+  slug: MeetingIntegrationProviderSlug = MeetingIntegrationProviderSlug.Zoom
+): MeetingIntegrationProviderSummary {
   return {
     id: "prov-1",
     slug,
@@ -87,7 +87,7 @@ function makeProvider(slug: MeetingIntegrationProviderSlug = MeetingIntegrationP
     lastTestedAt: null,
     connectedTeacherCount: 0,
     reauthNeededCount: 0,
-    endpoints: {},
+    endpoints: ["https://zoom.us/oauth"],
   };
 }
 
@@ -126,20 +126,18 @@ const ENV_QUERY_MOCK = {
   },
 };
 
-const UPSERT_MOCK = {
-  request: {
-    query: upsertEnvConfigEntryMutationDocument,
-    variables: { input: { key: "ZOOM_CLIENT_ID", value: "client123" } },
-  },
-  result: { data: { upsertEnvConfigEntry: { key: "ZOOM_CLIENT_ID" } } },
-};
+function renderForm(
+  mocks: NonNullable<Parameters<typeof renderWithWrapper>[1]>["mocks"] = [ENV_QUERY_MOCK],
+  provider = makeProvider()
+) {
+  return renderWithWrapper(<MeetingProviderCredentialForm provider={provider} labels={labels} />, {
+    mocks,
+  });
+}
 
 describe("MeetingProviderCredentialForm", () => {
   test("renders form fields when entries loaded", async () => {
-    renderWithWrapper(
-      <MeetingProviderCredentialForm provider={makeProvider()} labels={labels} />,
-      { mocks: [ENV_QUERY_MOCK] }
-    );
+    renderForm();
 
     await waitFor(() => {
       expect(screen.getByLabelText("معرّف العميل")).toBeInTheDocument();
@@ -151,10 +149,7 @@ describe("MeetingProviderCredentialForm", () => {
   });
 
   test("shows edit title when credentials exist (hasDbOverride)", async () => {
-    renderWithWrapper(
-      <MeetingProviderCredentialForm provider={makeProvider()} labels={labels} />,
-      { mocks: [ENV_QUERY_MOCK] }
-    );
+    renderForm();
 
     await waitFor(() => {
       expect(screen.getByText("تعديل البيانات")).toBeInTheDocument();
@@ -162,10 +157,7 @@ describe("MeetingProviderCredentialForm", () => {
   });
 
   test("shows save button", async () => {
-    renderWithWrapper(
-      <MeetingProviderCredentialForm provider={makeProvider()} labels={labels} />,
-      { mocks: [ENV_QUERY_MOCK] }
-    );
+    renderForm();
 
     await waitFor(() => {
       expect(screen.getByText("حفظ")).toBeInTheDocument();
@@ -173,10 +165,7 @@ describe("MeetingProviderCredentialForm", () => {
   });
 
   test("renders scopes chips from existing entries", async () => {
-    renderWithWrapper(
-      <MeetingProviderCredentialForm provider={makeProvider()} labels={labels} />,
-      { mocks: [ENV_QUERY_MOCK] }
-    );
+    renderForm();
 
     await waitFor(() => {
       expect(screen.getByText("meeting:write")).toBeInTheDocument();
@@ -185,14 +174,14 @@ describe("MeetingProviderCredentialForm", () => {
   });
 
   test("renders Microsoft Teams tenant ID field for Teams provider", async () => {
-    renderWithWrapper(
-      <MeetingProviderCredentialForm provider={makeProvider(MeetingIntegrationProviderSlug.MicrosoftTeams)} labels={labels} />,
-      { mocks: [
+    renderForm(
+      [
         {
           request: { query: envConfigEntriesQueryDocument },
           result: { data: { envConfigEntries: [] } },
         },
-      ] }
+      ],
+      makeProvider(MeetingIntegrationProviderSlug.MicrosoftTeams)
     );
 
     await waitFor(() => {
@@ -201,50 +190,29 @@ describe("MeetingProviderCredentialForm", () => {
   });
 
   test("shows loading state while entries are loading", async () => {
-    renderWithWrapper(
-      <MeetingProviderCredentialForm provider={makeProvider()} labels={labels} />,
-      { mocks: [
-        {
-          request: { query: envConfigEntriesQueryDocument },
-          delay: 1000,
-          result: { data: { envConfigEntries: ZOOM_ENTRIES } },
-        },
-      ] }
-    );
+    renderForm([
+      {
+        request: { query: envConfigEntriesQueryDocument },
+        delay: 1000,
+        result: { data: { envConfigEntries: ZOOM_ENTRIES } },
+      },
+    ]);
 
     expect(screen.getByText("إضافة بيانات")).toBeInTheDocument();
     expect(screen.getByText("جارٍ التحميل…")).toBeInTheDocument();
   });
 
-  test("shows error state when query fails", async () => {
-    renderWithWrapper(
-      <MeetingProviderCredentialForm provider={makeProvider()} labels={labels} />,
-      { mocks: [
-        {
-          request: { query: envConfigEntriesQueryDocument },
-          error: [new Error("network error")],
-        },
-      ] }
-    );
-
+  test.each([
+    ["shows error state when query fails", { error: new Error("network error") }, "تعذّر التحميل"],
+    [
+      "shows noFields when entries empty and not loading",
+      { result: { data: { envConfigEntries: [] } } },
+      "لا توجد حقول",
+    ],
+  ])("%s", async (_name, mockConfig, expectedText) => {
+    renderForm([{ request: { query: envConfigEntriesQueryDocument }, ...mockConfig }]);
     await waitFor(() => {
-      expect(screen.getByText("تعذّر التحميل")).toBeInTheDocument();
-    });
-  });
-
-  test("shows noFields when entries empty and not loading", async () => {
-    renderWithWrapper(
-      <MeetingProviderCredentialForm provider={makeProvider()} labels={labels} />,
-      { mocks: [
-        {
-          request: { query: envConfigEntriesQueryDocument },
-          result: { data: { envConfigEntries: [] } },
-        },
-      ] }
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText("لا توجد حقول")).toBeInTheDocument();
+      expect(screen.getByText(expectedText)).toBeInTheDocument();
     });
   });
 });

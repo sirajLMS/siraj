@@ -1,40 +1,6 @@
-export interface MeetingConfigEnhancementLabels {
-  readonly oauthCallbackSuccess: string;
-  readonly oauthCallbackError: string;
-  readonly reconnectAll: string;
-  readonly reconnecting: string;
-  readonly reconnectAllSuccess: string;
-  readonly reconnectAllError: string;
-  readonly reconnectAllWithCount: (count: number) => string;
-  readonly reconnectingProgress: (current: number, total: number) => string;
-  readonly reconnectedProviders: (count: number) => string;
-  readonly reconnectFailedProviders: (count: number) => string;
-  readonly reconnectAllAriaLabel: string;
-  readonly expiresInDays: (days: number) => string;
-  readonly expiresInHours: (hours: number) => string;
-  readonly expired: string;
-  readonly reconnect: string;
-  readonly copyMeetingUrl: string;
-  readonly urlCopied: string;
-  readonly urlCopyFailed: string;
-  readonly generationPending: string;
-  readonly generationSuccess: string;
-  readonly generationFailed: string;
-  readonly retryGeneration: string;
-  readonly generationPreviewCallout: string;
-  readonly testConfig: string;
-  readonly previewUrlGenerated: string;
-  readonly connectFirstProvider: string;
-  readonly connectFirstProviderDescription: string;
-  readonly disconnectWarningTitle: string;
-  readonly disconnectWarningMessage: string;
-  readonly disconnectWarningImpact: string;
-  readonly disconnect: string;
-  readonly cancel: string;
-  readonly disconnectError: string;
-  readonly navigateToAdminSettings: string;
-  readonly navigateToAdminSettingsAriaLabel: string;
-}
+import type { MeetingConfigEnhancementLabels } from "./meetingConfigEnhancements";
+
+export * from "./meetingConfigEnhancements";
 
 export interface CatalogImageUploadLabels {
   readonly upload: string;

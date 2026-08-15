@@ -4,8 +4,10 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 
 expect.extend(matchers);
 
-import { OAuthCallbackHandler } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/OAuthCallbackHandler";
-import type { MeetingConfigEnhancementLabels } from "@/shared/locale/types/ui";
+import {
+  OAuthCallbackHandler,
+  type OAuthCallbackHandlerLabels,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/OAuthCallbackHandler";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -13,10 +15,10 @@ afterEach(() => {
   window.history.replaceState({}, "", "/");
 });
 
-const labels = {
+const labels: OAuthCallbackHandlerLabels = {
   oauthCallbackSuccess: "تم الربط بنجاح",
   oauthCallbackError: "تعذّر الربط",
-} as unknown as Pick<MeetingConfigEnhancementLabels, "oauthCallbackSuccess" | "oauthCallbackError">;
+};
 
 describe("OAuthCallbackHandler", () => {
   test("renders output live region", () => {
@@ -24,36 +26,28 @@ describe("OAuthCallbackHandler", () => {
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
-  test("detects success params and cleans URL", async () => {
-    window.history.replaceState({}, "", "/?oauth_status=success&provider=zoom");
+  test.each([
+    ["success", "/?oauth_status=success&provider=zoom", ["success", "zoom", undefined] as const, "تم الربط بنجاح"],
+    [
+      "error",
+      "/?oauth_status=error&provider=zoom&error=invalid_scope",
+      ["error", "zoom", "invalid_scope"] as const,
+      "تعذّر الربط",
+    ],
+  ])("detects %s params and cleans URL", async (_status, url, expectedArgs, expectedText) => {
+    window.history.replaceState({}, "", url);
     const onCallbackDetected = mock(() => {});
     render(<OAuthCallbackHandler labels={labels} onCallbackDetected={onCallbackDetected} />, { wrapper: TestWrapper });
 
     await waitFor(() => {
-      expect(onCallbackDetected).toHaveBeenCalledWith("success", "zoom", undefined);
+      expect(onCallbackDetected).toHaveBeenCalledWith(...expectedArgs);
     });
 
     await waitFor(() => {
       expect(window.location.search).toBe("");
     });
 
-    expect(screen.getByText("تم الربط بنجاح")).toBeInTheDocument();
-  });
-
-  test("detects error params and cleans URL", async () => {
-    window.history.replaceState({}, "", "/?oauth_status=error&provider=zoom&error=invalid_scope");
-    const onCallbackDetected = mock(() => {});
-    render(<OAuthCallbackHandler labels={labels} onCallbackDetected={onCallbackDetected} />, { wrapper: TestWrapper });
-
-    await waitFor(() => {
-      expect(onCallbackDetected).toHaveBeenCalledWith("error", "zoom", "invalid_scope");
-    });
-
-    await waitFor(() => {
-      expect(window.location.search).toBe("");
-    });
-
-    expect(screen.getByText("تعذّر الربط")).toBeInTheDocument();
+    expect(screen.getByText(expectedText)).toBeInTheDocument();
   });
 
   test("preserves other URL params when cleaning OAuth params", async () => {
@@ -69,7 +63,7 @@ describe("OAuthCallbackHandler", () => {
     const onCallbackDetected = mock(() => {});
     render(<OAuthCallbackHandler labels={labels} onCallbackDetected={onCallbackDetected} />, { wrapper: TestWrapper });
 
-    await act(() => {
+    act(() => {
       fireEvent.focus(window);
     });
 

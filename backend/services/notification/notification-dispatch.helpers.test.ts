@@ -69,16 +69,16 @@ type ContactOverrides = { email?: string | null; phone?: string | null };
 function mockUser(overrides?: ContactOverrides): UserSelectType {
   const id = crypto.randomUUID();
   const now = new Date();
-  return {
+  const base: UserSelectType = {
     id,
     name: "Test User",
-    email: overrides?.email !== undefined ? (overrides.email as string) : "parent@test.com",
+    email: "parent@test.com",
     emailVerifiedAt: null,
     password: crypto.randomUUID(),
     rememberTokenHash: null,
     avatarFilePath: null,
     avatarUrl: null,
-    phone: overrides?.phone !== undefined ? overrides.phone : "+15555550100",
+    phone: "+15555550100",
     status: AccountStatus.ACTIVATED,
     isSuperAdmin: false,
     timezone: IanaTimezone.UTC,
@@ -88,6 +88,7 @@ function mockUser(overrides?: ContactOverrides): UserSelectType {
     updatedAt: now,
     deletedAt: null,
   };
+  return Object.assign(base, overrides);
 }
 
 function mockFindSafeByIdsWithUser(userOverrides?: ContactOverrides) {

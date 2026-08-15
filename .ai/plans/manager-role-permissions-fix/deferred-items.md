@@ -16,9 +16,9 @@ This ledger tracks all work deferred from one task to another to ensure no defer
 
 | ID | Deferred Item | Source Task | Target Task | Status | Verified By | Notes |
 |---|---|---|---|---|---|---|
-| D1 | GraphQL codegen regeneration after enum edit | 1 | 10 | 🔄 Planned | — | `bun run generate:gqlSchema` + `bun codegen` must run after Task 1 removes `admin` from enum |
-| D2 | Frontend `SystemAccessSection.tsx` compile-safe removal of `Admin` label key | 1 | 9 | 🔄 Planned | — | `ACCOUNT_TYPE_LABEL_KEYS` Record type must drop `"admin"` key at the same time as Task 1 removes enum value or TypeScript compilation breaks |
-| D3 | Locale type schema `admin` key removal | 5 | 5 | 🔄 Planned | — | `shared/locale/types/dashboard/staff/onboarding.ts` must be edited before TS compilation can pass after Task 1 |
+| D1 | GraphQL codegen regeneration after enum edit | 1 | 12 | ✅ Done | `outcome/12-graphql-codegen-outcome.md` | `bun run generate:gqlSchema` + `bun codegen` executed, schema.graphql and graphql-types.ts updated |
+| D2 | Frontend `SystemAccessSection.tsx` compile-safe removal of `Admin` label key | 1 | 11 | ✅ Done | `outcome/11-system-access-section-outcome.md` | `ACCOUNT_TYPE_LABEL_KEYS` Record type and ACCOUNT_TYPES updated, sub-loop exit 0 |
+| D3 | Locale type schema `admin` key removal | 1 | 6 | ✅ Done | `outcome/6-onboarding-locale-type-outcome.md` | `shared/locale/types/dashboard/staff/onboarding.ts` and AR/EN translations updated, sub-loop exit 0 |
 
 ---
 

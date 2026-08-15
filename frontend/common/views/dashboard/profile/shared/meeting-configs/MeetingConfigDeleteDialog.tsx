@@ -22,7 +22,7 @@ export function MeetingConfigDeleteDialog({
   onConfirm,
 }: MeetingConfigDeleteDialogProps) {
   const t = labels;
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down("sm"), { noSsr: true });
+  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"), { noSsr: true });
 
   return (
     <BaseDeleteDialog

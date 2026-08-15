@@ -2,10 +2,18 @@ import { AcUnitOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
+import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
+
+function resolveMeetingUrlStatus(row: ParentScheduleRow): "failed" | "generated" | "pending" | null {
+  if (row.isFrozen) return "failed";
+  if (!row.videoEnabled && !row.meetingJoinUrl) return null;
+  if (row.meetingJoinUrl !== null && row.meetingJoinUrl !== undefined) return "generated";
+  return "pending";
+}
 
 export interface ScheduleCardJoinActionRenderProps {
   readonly row: ParentScheduleRow;
@@ -25,7 +33,7 @@ export interface ParentScheduleCardSharedOptions {
     teacherProfileHref: string | undefined,
     teacherLabel: string
   ) => ReactNode;
-  readonly renderJoinAction: (props: Readonly<ScheduleCardJoinActionRenderProps>) => ReactNode;
+  readonly renderJoinAction?: (props: Readonly<ScheduleCardJoinActionRenderProps>) => ReactNode;
 }
 
 export interface ParentScheduleCardSharedProps {
@@ -44,6 +52,28 @@ function renderFrozenFallback(labels: ParentDashboardLabels): ReactNode {
       <AcUnitOutlined sx={theme => ({ fontSize: 22, color: theme.palette.info.main, opacity: 0.7 })} />
     </Tooltip>
   );
+}
+
+function renderScheduleCardJoinAction({
+  row,
+  labels,
+  canJoin,
+  frozenFallback,
+}: ScheduleCardJoinActionRenderProps): ReactNode {
+  let result: ReactNode = null;
+  if (row.isFrozen) {
+    result = frozenFallback;
+  } else if (canJoin) {
+    result = (
+      <MeetingUrlCell
+        meetingUrl={row.meetingJoinUrl}
+        meetingUrlStatus={resolveMeetingUrlStatus(row)}
+        joinLabel={labels.schedule.joinVideo}
+        compact
+      />
+    );
+  }
+  return result;
 }
 
 export function ParentScheduleCardShared({ row, labels, options }: Readonly<ParentScheduleCardSharedProps>): ReactNode {
@@ -102,7 +132,12 @@ export function ParentScheduleCardShared({ row, labels, options }: Readonly<Pare
         <Stack spacing={0.25} sx={options.profileSectionSx}>
           {options.renderProfileLinks(row, labels, studentProfileHref, teacherProfileHref, teacherLabel)}
         </Stack>
-        {options.renderJoinAction({ row, labels, canJoin, frozenFallback: renderFrozenFallback(labels) })}
+        {(options.renderJoinAction ?? renderScheduleCardJoinAction)({
+          row,
+          labels,
+          canJoin,
+          frozenFallback: renderFrozenFallback(labels),
+        })}
       </Box>
     </>
   );

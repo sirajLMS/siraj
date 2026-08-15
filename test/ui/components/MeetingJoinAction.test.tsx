@@ -34,15 +34,17 @@ describe("MeetingJoinAction", () => {
     expect(screen.getByText("الرابط قيد التوليد")).toBeInTheDocument();
   });
 
-  test("renders button variant failed status with retry", () => {
+  test.each(["button", "action"] as const)("renders retry button in %s variant when failed", variant => {
     const onRetry = mock(() => {});
     renderJoin({
       joinUrl: "https://meet.example.com/abc",
       meetingUrlStatus: "failed",
-      variant: "button",
+      variant,
       onRetry,
     });
-    expect(screen.getByText("فشل توليد الرابط")).toBeInTheDocument();
+    if (variant === "button") {
+      expect(screen.getByText("فشل توليد الرابط")).toBeInTheDocument();
+    }
     fireEvent.click(screen.getByText("إعادة توليد الرابط"));
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
@@ -90,7 +92,6 @@ describe("MeetingJoinAction", () => {
       joinUrl: null,
       emptyRole: "teacher",
       setupHref: "/settings",
-      variants: "button" as unknown as undefined,
       variant: "button",
     });
     // Should render an Alert with a setup link
@@ -122,17 +123,5 @@ describe("MeetingJoinAction", () => {
     renderJoin({ joinUrl: null, variant: "button" });
     // Renders pending badge since no URL
     expect(screen.getByText("الرابط قيد التوليد")).toBeInTheDocument();
-  });
-
-  test("renders retry button in action variant when failed", () => {
-    const onRetry = mock(() => {});
-    renderJoin({
-      joinUrl: "https://meet.example.com/abc",
-      meetingUrlStatus: "failed",
-      variant: "action",
-      onRetry,
-    });
-    fireEvent.click(screen.getByText("إعادة توليد الرابط"));
-    expect(onRetry).toHaveBeenCalledTimes(1);
   });
 });

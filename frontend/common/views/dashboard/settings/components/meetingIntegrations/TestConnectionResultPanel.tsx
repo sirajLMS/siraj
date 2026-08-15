@@ -144,6 +144,28 @@ type SuccessContentProps = {
   readonly marketplaceUrl: string | null;
 };
 
+type ConnectionSummaryMetricsProps = {
+  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly result: TestMeetingConnectionResult;
+  readonly authStatusLabel: string;
+};
+
+function ConnectionSummaryMetrics({ labels, result, authStatusLabel }: ConnectionSummaryMetricsProps) {
+  return (
+    <>
+      <Typography sx={{ typography: "bodySm" }}>
+        {labels.latency}: {result.latencyMs}ms
+      </Typography>
+      <Typography sx={{ typography: "bodySm" }}>
+        {labels.testPanel.endpointReached}: {result.upstreamResponseSummary}
+      </Typography>
+      <Typography sx={{ typography: "bodySm" }}>
+        {labels.testPanel.authStatus}: {authStatusLabel}
+      </Typography>
+    </>
+  );
+}
+
 function SuccessContent({ labels, result, marketplaceUrl }: SuccessContentProps) {
   const [copied, setCopied] = useState(false);
 
@@ -161,15 +183,7 @@ function SuccessContent({ labels, result, marketplaceUrl }: SuccessContentProps)
     <Alert severity="success" icon={false}>
       <Stack sx={{ gap: 0.5 }}>
         <Typography sx={{ fontWeight: 600 }}>{labels.testPanel.successMessage}</Typography>
-        <Typography sx={{ typography: "bodySm" }}>
-          {labels.latency}: {result.latencyMs}ms
-        </Typography>
-        <Typography sx={{ typography: "bodySm" }}>
-          {labels.testPanel.endpointReached}: {result.upstreamResponseSummary}
-        </Typography>
-        <Typography sx={{ typography: "bodySm" }}>
-          {labels.testPanel.authStatus}: {labels.testPanel.authSuccess}
-        </Typography>
+        <ConnectionSummaryMetrics labels={labels} result={result} authStatusLabel={labels.testPanel.authSuccess} />
         {result.testJoinUrl && (
           <TestJoinUrlRow labels={labels} url={result.testJoinUrl} copied={copied} onCopy={handleCopyUrl} />
         )}
@@ -209,15 +223,7 @@ function FailureContent({ labels, result, providerSlug, onRunTest }: FailureCont
     >
       <Stack sx={{ gap: 0.5 }}>
         <Typography sx={{ fontWeight: 600 }}>{labels.testConnectionFailure}</Typography>
-        <Typography sx={{ typography: "bodySm" }}>
-          {labels.latency}: {result.latencyMs}ms
-        </Typography>
-        <Typography sx={{ typography: "bodySm" }}>
-          {labels.testPanel.endpointReached}: {result.upstreamResponseSummary}
-        </Typography>
-        <Typography sx={{ typography: "bodySm" }}>
-          {labels.testPanel.authStatus}: {labels.testPanel.authFailure}
-        </Typography>
+        <ConnectionSummaryMetrics labels={labels} result={result} authStatusLabel={labels.testPanel.authFailure} />
         {result.errorCode && (
           <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>
             {labels.errorCode}: {result.errorCode}

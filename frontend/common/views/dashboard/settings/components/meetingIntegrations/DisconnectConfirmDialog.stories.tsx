@@ -1,7 +1,9 @@
 import { Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { DisconnectConfirmDialogLabels } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/DisconnectConfirmDialog";
-import { DisconnectConfirmDialog } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/DisconnectConfirmDialog";
+import {
+  DisconnectConfirmDialog,
+  type DisconnectConfirmDialogLabels,
+} from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/DisconnectConfirmDialog";
 
 const meta = {
   title: "Views/dashboard/settings/components/meetingIntegrations/DisconnectConfirmDialog",

@@ -2615,7 +2615,6 @@ export type LoginResponse = {
 };
 
 export enum ManagerAccountType {
-  Admin = 'admin',
   Manager = 'manager',
   Supervisor = 'supervisor'
 }

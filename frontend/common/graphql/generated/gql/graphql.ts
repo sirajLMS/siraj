@@ -1459,7 +1459,6 @@ export type LoginInput = {
 };
 
 export type ManagerAccountType =
-  | 'admin'
   | 'manager'
   | 'supervisor';
 

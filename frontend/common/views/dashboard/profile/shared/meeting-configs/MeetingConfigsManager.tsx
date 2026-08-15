@@ -234,7 +234,7 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
   const { t, configs, loading, error, refetch } = state;
   const [disconnectTarget, setDisconnectTarget] = useState<string | null>(null);
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true });
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down("sm"), { noSsr: true });
+  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"), { noSsr: true });
   const crossLinkFadeTimeout = reducedMotion ? 0 : 200;
 
   if (error && configs.length === 0) {

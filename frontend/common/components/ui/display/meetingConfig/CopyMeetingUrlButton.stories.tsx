@@ -43,6 +43,7 @@ export const WithCustomTooltip: Story = {
 };
 
 export const AllVariants: Story = {
+  args: { meetingUrl: SAMPLE_URL },
   render: () => (
     <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
       <Typography variant="caption">Icon</Typography>

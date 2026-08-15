@@ -1,9 +1,8 @@
 /**
- * Discriminates the three staff-side user-of-type buckets when creating a new
+ * Discriminates the two staff-side user-of-type buckets when creating a new
  * manager/staff account.
  *
- * - admin      → academy administrator (assigned the `ACADEMY_ADMIN` group)
- * - manager    → regular staff member (assigned the `STAFF_DEFAULT` group)
+ * - manager    → academy administrator (assigned the `ACADEMY_ADMIN` group)
  * - supervisor → supervisor (assigned the `SUPERVISOR_DEFAULT` group)
  *
  * The enum maps to permission group assignment via `resolveTargetGroupSlug`
@@ -11,13 +10,12 @@
  *
  * The enum keys are intentionally lowercase because Pothos derives the public
  * GraphQL enum value names from these keys, and the existing client/server
- * contract exposes them as `admin`/`manager`/`supervisor`. Callers in the
- * backend MUST access enum members via dot access (`ManagerAccountType.admin`)
+ * contract exposes them as `manager`/`supervisor`. Callers in the
+ * backend MUST access enum members via dot access (`ManagerAccountType.manager`)
  * — never via the raw string literals — so that renaming a value only needs a
  * single edit here.
  */
 export enum ManagerAccountType {
-  admin = "admin",
   manager = "manager",
   supervisor = "supervisor",
 }
@@ -28,7 +26,6 @@ export enum ManagerAccountType {
  * union the type system already enforces on `accountType` usages.
  */
 export const MANAGER_ACCOUNT_TYPES: readonly ManagerAccountType[] = [
-  ManagerAccountType.admin,
   ManagerAccountType.manager,
   ManagerAccountType.supervisor,
 ] as const;

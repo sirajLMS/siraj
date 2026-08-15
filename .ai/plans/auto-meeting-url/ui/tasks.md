@@ -827,7 +827,7 @@
   - Update progress: Mark task 35 as `[x]`
   - _Requirements: NFR-20 (test coverage ≥80%)_
 
-- [ ] 35b. **Create Storybook stories for all new and enhanced components**
+- [x] 35b. **Create Storybook stories for all new and enhanced components**
   - Read all files in `.ai/plans/auto-meeting-url/ui/outcome/`
   - Create `.stories.tsx` files for every component created or enhanced in this plan (tasks 3-18, 19-27, 14b)
   - Each story file sits next to its component (`.tsx` → `.stories.tsx` in the same directory)

@@ -149,21 +149,6 @@ describe("ManagerOnboardingService.createManager", () => {
     });
   });
 
-  test("creates manager with admin account type", async () => {
-    await testCreateManagerInRollback(
-      {
-        name: "New Admin",
-        email: "newadmin@test.com",
-        password: randomUUID(),
-        accountType: ManagerAccountType.admin,
-      },
-      SystemPermissionGroupSlug.ACADEMY_ADMIN,
-      result => {
-        expect(result.staffProfileId).toBeDefined();
-      }
-    );
-  });
-
   test("creates manager with manager account type", async () => {
     await testCreateManagerInRollback(
       {
@@ -172,7 +157,10 @@ describe("ManagerOnboardingService.createManager", () => {
         password: randomUUID(),
         accountType: ManagerAccountType.manager,
       },
-      SystemPermissionGroupSlug.STAFF_DEFAULT
+      SystemPermissionGroupSlug.ACADEMY_ADMIN,
+      result => {
+        expect(result.staffProfileId).toBeDefined();
+      }
     );
   });
 

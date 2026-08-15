@@ -35,6 +35,10 @@ export const WithLogoUrl: Story = {
 };
 
 export const AllProviders: Story = {
+  args: {
+    providerSlug: "zoom",
+    providerName: "Zoom",
+  },
   render: () => (
     <Stack spacing={2} sx={{ alignItems: "flex-start" }}>
       <Stack sx={{ flexDirection: "row", gap: 2, alignItems: "center" }}>

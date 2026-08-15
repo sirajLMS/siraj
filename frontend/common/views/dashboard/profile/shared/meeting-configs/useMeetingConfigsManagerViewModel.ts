@@ -601,50 +601,59 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
     setExpandedBookingsId(meetingConfigId);
   };
 
-  const handleReconnect = async (providerSlug: string) => {
-    if (!isMeetingIntegrationProviderSlug(providerSlug)) return;
-    setConnectingSlugs(prev => new Set(prev).add(providerSlug));
-    setReconnectingFor(providerSlug);
-    try {
-      const result = await connectMeetingProviderOAuth({
-        variables: {
-          input: {
-            providerSlug,
-            returnPath: globalThis.window?.location?.pathname ?? "/",
+  const requestOAuthAuthorizeUrl = useCallback(
+    async (providerSlug: string): Promise<string | null> => {
+      if (!isMeetingIntegrationProviderSlug(providerSlug)) return null;
+      setConnectingSlugs(prev => new Set(prev).add(providerSlug));
+      setReconnectingFor(providerSlug);
+      try {
+        const result = await connectMeetingProviderOAuth({
+          variables: {
+            input: {
+              providerSlug,
+              returnPath: globalThis.window?.location?.pathname ?? "/",
+            },
           },
-        },
-      });
-      const authorizeUrl = result.data?.connectMeetingProviderOAuth?.authorizeUrl;
-      if (authorizeUrl) {
-        // Clear local state before redirecting away.
-        setReauthProviderSlugs(prev => {
+        });
+        const authorizeUrl = result.data?.connectMeetingProviderOAuth?.authorizeUrl ?? null;
+        if (authorizeUrl) {
+          setReauthProviderSlugs(prev => {
+            const next = new Set(prev);
+            next.delete(providerSlug);
+            return next;
+          });
+          return authorizeUrl;
+        }
+        setConnectingSlugs(prev => {
           const next = new Set(prev);
           next.delete(providerSlug);
           return next;
         });
-        if (globalThis.window) {
-          globalThis.window.location.href = authorizeUrl;
-        }
-        return;
+        return null;
+      } catch (caughtError) {
+        setConnectingSlugs(prev => {
+          const next = new Set(prev);
+          next.delete(providerSlug);
+          return next;
+        });
+        logger.error(`OAuth connect failed for provider ${providerSlug}:`, caughtError);
+        return null;
+      } finally {
+        setReconnectingFor(null);
       }
-      // No authorizeUrl returned — clear local state as fallback.
-      setConnectingSlugs(prev => {
-        const next = new Set(prev);
-        next.delete(providerSlug);
-        return next;
-      });
-      setErrorMessage(t.saveError);
-    } catch (caughtError) {
-      setConnectingSlugs(prev => {
-        const next = new Set(prev);
-        next.delete(providerSlug);
-        return next;
-      });
-      logger.error("handleReconnect OAuth failed", caughtError);
-      setErrorMessage(t.saveError);
-    } finally {
-      setReconnectingFor(null);
+    },
+    [connectMeetingProviderOAuth]
+  );
+
+  const handleReconnect = async (providerSlug: string) => {
+    const authorizeUrl = await requestOAuthAuthorizeUrl(providerSlug);
+    if (authorizeUrl) {
+      if (globalThis.window) {
+        globalThis.window.location.href = authorizeUrl;
+      }
+      return;
     }
+    setErrorMessage(t.saveError);
     // Clear cached instances for configs using this provider.
     setBookingsInstances(prev => clearProviderBookingsInstances(configs, providerSlug, prev));
     // Collapse any expanded view for configs using this provider.
@@ -713,49 +722,14 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
 
   const reconnectAllProvider = useCallback(
     async (providerSlug: string): Promise<boolean> => {
-      if (!isMeetingIntegrationProviderSlug(providerSlug)) return false;
-      setConnectingSlugs(prev => new Set(prev).add(providerSlug));
-      setReconnectingFor(providerSlug);
-      try {
-        const result = await connectMeetingProviderOAuth({
-          variables: {
-            input: {
-              providerSlug,
-              returnPath: globalThis.window?.location?.pathname ?? "/",
-            },
-          },
-        });
-        const authorizeUrl = result.data?.connectMeetingProviderOAuth?.authorizeUrl;
-        if (authorizeUrl) {
-          setReauthProviderSlugs(prev => {
-            const next = new Set(prev);
-            next.delete(providerSlug);
-            return next;
-          });
-          // Collect authorizeUrl in the ref Map; the batch completion handler
-          // opens these URLs after all mutations finish.
-          reconnectUrlsRef.current.set(providerSlug, authorizeUrl);
-          return true;
-        }
-        setConnectingSlugs(prev => {
-          const next = new Set(prev);
-          next.delete(providerSlug);
-          return next;
-        });
-        return false;
-      } catch (caughtError) {
-        setConnectingSlugs(prev => {
-          const next = new Set(prev);
-          next.delete(providerSlug);
-          return next;
-        });
-        logger.error("reconnectAllProvider OAuth failed", caughtError);
-        return false;
-      } finally {
-        setReconnectingFor(null);
+      const authorizeUrl = await requestOAuthAuthorizeUrl(providerSlug);
+      if (authorizeUrl) {
+        reconnectUrlsRef.current.set(providerSlug, authorizeUrl);
+        return true;
       }
+      return false;
     },
-    [connectMeetingProviderOAuth]
+    [requestOAuthAuthorizeUrl]
   );
 
   /** Completion handler for {@link ReconnectAllAction}. Shows a toast with the

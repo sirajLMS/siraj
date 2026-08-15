@@ -1,67 +1,20 @@
 "use client";
 
-import { Box, Button, Chip, MenuItem, Select, Stack, Typography } from "@mui/material";
-import { type ReactNode, useMemo, useState } from "react";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import type { ReactNode } from "react";
 import {
-  MeetingIntegrationConnectedAccountStatus,
-  MeetingIntegrationProviderSlug,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  formatConnectedAccountDate,
+  getStatusColor,
+  getStatusLabel,
+  useConnectedAccountsFilter,
+} from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/connectedAccounts.helpers";
+import { StatusFilterSelect } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/StatusFilterSelect";
 import type {
   ConnectedAccountsTableProps,
   MeetingIntegrationConnectedAccount,
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
-
-function getProviderLabel(slug: MeetingIntegrationProviderSlug, labels: SettingsMeetingIntegrationsLabels): string {
-  switch (slug) {
-    case MeetingIntegrationProviderSlug.Zoom:
-      return labels.provider.zoom;
-    case MeetingIntegrationProviderSlug.GoogleMeet:
-      return labels.provider.googleMeet;
-    case MeetingIntegrationProviderSlug.MicrosoftTeams:
-      return labels.provider.microsoftTeams;
-    default:
-      return String(slug);
-  }
-}
-
-function getStatusLabel(
-  status: MeetingIntegrationConnectedAccountStatus,
-  labels: SettingsMeetingIntegrationsLabels
-): string {
-  switch (status) {
-    case MeetingIntegrationConnectedAccountStatus.Connected:
-      return labels.status.connected;
-    case MeetingIntegrationConnectedAccountStatus.ExpiringSoon:
-      return labels.status.expiringSoon;
-    case MeetingIntegrationConnectedAccountStatus.ReauthNeeded:
-      return labels.status.reauthNeeded;
-    case MeetingIntegrationConnectedAccountStatus.Revoked:
-      return labels.status.revoked;
-    default:
-      return String(status);
-  }
-}
-
-function getStatusColor(status: MeetingIntegrationConnectedAccountStatus): "success" | "warning" | "error" | "default" {
-  switch (status) {
-    case MeetingIntegrationConnectedAccountStatus.Connected:
-      return "success";
-    case MeetingIntegrationConnectedAccountStatus.ExpiringSoon:
-      return "warning";
-    case MeetingIntegrationConnectedAccountStatus.ReauthNeeded:
-      return "error";
-    case MeetingIntegrationConnectedAccountStatus.Revoked:
-      return "default";
-    default:
-      return "default";
-  }
-}
-
-function formatDate(date: Date | null): string {
-  return date ? date.toLocaleDateString() : "—";
-}
 
 interface AccountCardProps {
   readonly account: MeetingIntegrationConnectedAccount;
@@ -92,10 +45,10 @@ function AccountCard({ account, labels, canEdit, isRevoking, onRevoke, onMetadat
             {labels.columns.email}: {account.email ?? "—"}
           </Typography>
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-            {labels.columns.connectedAt}: {formatDate(account.connectedAt)}
+            {labels.columns.connectedAt}: {formatConnectedAccountDate(account.connectedAt)}
           </Typography>
           <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
-            {labels.columns.expiresAt}: {formatDate(account.expiresAt)}
+            {labels.columns.expiresAt}: {formatConnectedAccountDate(account.expiresAt)}
           </Typography>
         </Stack>
 
@@ -131,25 +84,11 @@ export function ConnectedAccountsTableMobile({
   onRevokeRequest,
   onMetadataDialogOpen,
 }: Readonly<ConnectedAccountsTableProps>) {
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<MeetingIntegrationConnectedAccountStatus | "all">("all");
-
-  const providerName = useMemo(() => getProviderLabel(providerSlug, labels), [providerSlug, labels]);
-
-  const filteredRows = useMemo(() => {
-    const lowerSearch = search.trim().toLowerCase();
-    return accounts.filter(account => {
-      if (statusFilter !== "all" && account.status !== statusFilter) {
-        return false;
-      }
-      if (lowerSearch.length === 0) {
-        return true;
-      }
-      const nameMatch = (account.name ?? "").toLowerCase().includes(lowerSearch);
-      const emailMatch = (account.email ?? "").toLowerCase().includes(lowerSearch);
-      return nameMatch || emailMatch;
-    });
-  }, [accounts, search, statusFilter]);
+  const { search, setSearch, statusFilter, setStatusFilter, providerName, filteredRows } = useConnectedAccountsFilter(
+    accounts,
+    providerSlug,
+    labels
+  );
 
   const renderItem = (account: MeetingIntegrationConnectedAccount): ReactNode => (
     <AccountCard
@@ -186,25 +125,7 @@ export function ConnectedAccountsTableMobile({
             outline: "none",
           }}
         />
-        <Select
-          size="small"
-          value={statusFilter}
-          onChange={e => {
-            const val = e.target.value;
-            setStatusFilter(val === "all" ? "all" : val);
-          }}
-          sx={{ minWidth: 120 }}
-        >
-          <MenuItem value="all">{labels.columns.status}</MenuItem>
-          <MenuItem value={MeetingIntegrationConnectedAccountStatus.Connected}>{labels.status.connected}</MenuItem>
-          <MenuItem value={MeetingIntegrationConnectedAccountStatus.ExpiringSoon}>
-            {labels.status.expiringSoon}
-          </MenuItem>
-          <MenuItem value={MeetingIntegrationConnectedAccountStatus.ReauthNeeded}>
-            {labels.status.reauthNeeded}
-          </MenuItem>
-          <MenuItem value={MeetingIntegrationConnectedAccountStatus.Revoked}>{labels.status.revoked}</MenuItem>
-        </Select>
+        <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} labels={labels} minWidth={120} />
       </Stack>
 
       <MobileCardList

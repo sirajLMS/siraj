@@ -124,6 +124,40 @@ function renderSetupAlert(ctx: JoinContext, setupHref: string, emptyRole: Meetin
   );
 }
 
+function renderStatusFallback(
+  status: MeetingUrlStatus,
+  ctx: JoinContext,
+  urlStatusT: UrlStatusTranslations,
+  isIcon = false
+): ReactElement | null {
+  if (status === "pending" || status === "expired") {
+    return <MeetingUrlStatusBadge status={status} size="small" tooltip={ctx.meetingUrlError ?? null} />;
+  }
+  if (status === "failed") {
+    return (
+      <Stack sx={isIcon ? { alignItems: "center", gap: 0.25 } : { gap: 0.5 }}>
+        <MeetingUrlStatusBadge status="failed" size="small" tooltip={ctx.meetingUrlError ?? null} />
+        {ctx.onRetry ? renderRetryButton(ctx.onRetry, urlStatusT.retryUrlGeneration) : null}
+      </Stack>
+    );
+  }
+  return null;
+}
+
+function renderInteractiveActionLayout(
+  ctx: JoinContext,
+  opts: Required<MeetingJoinActionSharedOptions>,
+  buttonNode: ReactElement
+): ReactElement {
+  return (
+    <Stack sx={{ gap: 0.5 }}>
+      <Tooltip title={ctx.tooltip}>{wrapSpan(buttonNode, opts.fullWidth)}</Tooltip>
+      {ctx.showCopyButton && ctx.resolvedUrl ? renderCopyButton(ctx.resolvedUrl) : null}
+      {renderExpiresAt(ctx.expiresAt)}
+    </Stack>
+  );
+}
+
 function renderIconVariant(
   ctx: JoinContext,
   setupHref: string | undefined,
@@ -156,22 +190,8 @@ function renderIconVariant(
     );
   }
 
-  if (status === "pending") {
-    return <MeetingUrlStatusBadge status="pending" size="small" tooltip={ctx.meetingUrlError ?? null} />;
-  }
-
-  if (status === "failed") {
-    return (
-      <Stack sx={{ alignItems: "center", gap: 0.25 }}>
-        <MeetingUrlStatusBadge status="failed" size="small" tooltip={ctx.meetingUrlError ?? null} />
-        {ctx.onRetry ? renderRetryButton(ctx.onRetry, urlStatusT.retryUrlGeneration) : null}
-      </Stack>
-    );
-  }
-
-  if (status === "expired") {
-    return <MeetingUrlStatusBadge status="expired" size="small" tooltip={ctx.meetingUrlError ?? null} />;
-  }
+  const fallback = renderStatusFallback(status, ctx, urlStatusT, true);
+  if (fallback) return fallback;
 
   const VideoIcon = ctx.hasUrl ? VideocamOutlinedIcon : VideocamOffOutlinedIcon;
   return (
@@ -212,56 +232,31 @@ function renderButtonVariant(
   status: MeetingUrlStatus,
   urlStatusT: UrlStatusTranslations
 ): ReactElement {
-  if (status === "pending") {
-    return <MeetingUrlStatusBadge status="pending" size="small" tooltip={ctx.meetingUrlError ?? null} />;
-  }
-
-  if (status === "failed") {
-    return (
-      <Stack sx={{ gap: 0.5 }}>
-        <MeetingUrlStatusBadge status="failed" size="small" tooltip={ctx.meetingUrlError ?? null} />
-        {ctx.onRetry ? renderRetryButton(ctx.onRetry, urlStatusT.retryUrlGeneration) : null}
-      </Stack>
-    );
-  }
-
-  if (status === "expired") {
-    return <MeetingUrlStatusBadge status="expired" size="small" tooltip={ctx.meetingUrlError ?? null} />;
-  }
+  const fallback = renderStatusFallback(status, ctx, urlStatusT, false);
+  if (fallback) return fallback;
 
   const handleJoin = makeHandleJoin(ctx.resolvedUrl, ctx.onJoinAction);
-  return (
-    <Stack sx={{ gap: 0.5 }}>
-      <Tooltip title={ctx.tooltip}>
-        {wrapSpan(
-          <Button
-            id={ctx.id}
-            variant="contained"
-            fullWidth={opts.fullWidth || undefined}
-            startIcon={
-              ctx.hasUrl && ctx.providerLogo ? (
-                <Box
-                  component="img"
-                  src={ctx.providerLogo}
-                  alt=""
-                  sx={{ width: 18, height: 18, borderRadius: "50%" }}
-                />
-              ) : (
-                <OpenInNewOutlinedIcon />
-              )
-            }
-            disabled={!ctx.hasUrl}
-            onClick={handleJoin}
-          >
-            {ctx.buttonLabel}
-          </Button>,
-          opts.fullWidth
-        )}
-      </Tooltip>
-      {ctx.showCopyButton && ctx.resolvedUrl ? renderCopyButton(ctx.resolvedUrl) : null}
-      {renderExpiresAt(ctx.expiresAt)}
-    </Stack>
+  const startIcon =
+    ctx.hasUrl && ctx.providerLogo ? (
+      <Box component="img" src={ctx.providerLogo} alt="" sx={{ width: 18, height: 18, borderRadius: "50%" }} />
+    ) : (
+      <OpenInNewOutlinedIcon />
+    );
+
+  const button = (
+    <Button
+      id={ctx.id}
+      variant="contained"
+      fullWidth={opts.fullWidth || undefined}
+      startIcon={startIcon}
+      disabled={!ctx.hasUrl}
+      onClick={handleJoin}
+    >
+      {ctx.buttonLabel}
+    </Button>
   );
+
+  return renderInteractiveActionLayout(ctx, opts, button);
 }
 
 function renderActionVariant(
@@ -271,39 +266,18 @@ function renderActionVariant(
   status: MeetingUrlStatus,
   urlStatusT: UrlStatusTranslations
 ): ReactElement {
-  if (status === "pending") {
-    return <MeetingUrlStatusBadge status="pending" size="small" tooltip={ctx.meetingUrlError ?? null} />;
-  }
-
-  if (status === "failed") {
-    return (
-      <Stack sx={{ gap: 0.5 }}>
-        <MeetingUrlStatusBadge status="failed" size="small" tooltip={ctx.meetingUrlError ?? null} />
-        {ctx.onRetry ? renderRetryButton(ctx.onRetry, urlStatusT.retryUrlGeneration) : null}
-      </Stack>
-    );
-  }
-
-  if (status === "expired") {
-    return <MeetingUrlStatusBadge status="expired" size="small" tooltip={ctx.meetingUrlError ?? null} />;
-  }
+  const fallback = renderStatusFallback(status, ctx, urlStatusT, false);
+  if (fallback) return fallback;
 
   const handleJoin = makeHandleJoin(ctx.resolvedUrl, ctx.onJoinAction);
   const ActionComp = ActionComponent;
-  return (
-    <Stack sx={{ gap: 0.5 }}>
-      <Tooltip title={ctx.tooltip}>
-        {wrapSpan(
-          <ActionComp id={ctx.id} startIcon={<VideocamOutlinedIcon />} disabled={!ctx.hasUrl} onClick={handleJoin}>
-            {ctx.buttonLabel}
-          </ActionComp>,
-          opts.fullWidth
-        )}
-      </Tooltip>
-      {ctx.showCopyButton && ctx.resolvedUrl ? renderCopyButton(ctx.resolvedUrl) : null}
-      {renderExpiresAt(ctx.expiresAt)}
-    </Stack>
+  const button = (
+    <ActionComp id={ctx.id} startIcon={<VideocamOutlinedIcon />} disabled={!ctx.hasUrl} onClick={handleJoin}>
+      {ctx.buttonLabel}
+    </ActionComp>
   );
+
+  return renderInteractiveActionLayout(ctx, opts, button);
 }
 
 // ── Scaffold component ──────────────────────────────────────────────────────

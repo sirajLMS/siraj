@@ -1,7 +1,9 @@
 import { Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { TokenExpiryWarningProps } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/TokenExpiryWarning";
-import { TokenExpiryWarning } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/TokenExpiryWarning";
+import {
+  TokenExpiryWarning,
+  type TokenExpiryWarningProps,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/TokenExpiryWarning";
 
 const meta = {
   title: "Views/dashboard/profile/shared/meeting-configs/TokenExpiryWarning",
@@ -92,6 +94,12 @@ export const NullExpiresAt: Story = {
 };
 
 export const AllStates: Story = {
+  args: {
+    labels,
+    providerName: "Zoom",
+    expiresAt: daysFromNow(7),
+    onReconnect: noop,
+  },
   render: () => (
     <Stack spacing={2} sx={{ width: 520 }}>
       <Typography variant="caption">Warning (7 days)</Typography>

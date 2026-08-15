@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render } from "@testing-library/react";
 
 expect.extend(matchers);
 
@@ -33,14 +33,14 @@ describe("MeetingProviderLogo", () => {
   });
 
   test("renders fallback Avatar for unknown provider", () => {
-    render(<MeetingProviderLogo providerSlug="unknown_provider" />, { wrapper: TestWrapper });
+    const { container } = render(<MeetingProviderLogo providerSlug="unknown_provider" />, { wrapper: TestWrapper });
     // Avatar fallback uses a VideocamOutlined icon
-    expect(screen.getByText(/meeting provider logo/i)).toBeInTheDocument();
+    expect(container.querySelector(".MuiAvatar-root")).toBeInTheDocument();
   });
 
   test("renders fallback Avatar for null providerSlug", () => {
-    render(<MeetingProviderLogo providerSlug={null} />, { wrapper: TestWrapper });
-    expect(screen.getByText(/meeting provider logo/i)).toBeInTheDocument();
+    const { container } = render(<MeetingProviderLogo providerSlug={null} />, { wrapper: TestWrapper });
+    expect(container.querySelector(".MuiAvatar-root")).toBeInTheDocument();
   });
 
   test("renders small size", () => {

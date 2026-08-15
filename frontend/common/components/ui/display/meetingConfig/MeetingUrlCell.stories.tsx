@@ -74,6 +74,7 @@ export const CompactWithoutUrl: Story = {
 };
 
 export const AllStates: Story = {
+  args: { meetingUrl: URL },
   render: () => (
     <Stack spacing={2} sx={{ width: 480 }}>
       <Typography variant="caption">Generated</Typography>

@@ -136,7 +136,7 @@ export function MeetingConfigFormDialog({
   });
   const { isEdit, label, isDefault, details, provider, providerChanged, validateUrl, setSaveError, t } = state;
   const formId = useId();
-  const isMobile = useMediaQuery<Theme>(theme => theme.breakpoints.down("sm"), { noSsr: true });
+  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"), { noSsr: true });
 
   const schema = createMeetingConfigFormSchema(labels);
 

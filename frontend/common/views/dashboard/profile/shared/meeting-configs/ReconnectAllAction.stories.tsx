@@ -1,7 +1,9 @@
 import { Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { ReconnectAllActionLabels } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ReconnectAllAction";
-import { ReconnectAllAction } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ReconnectAllAction";
+import {
+  ReconnectAllAction,
+  type ReconnectAllActionLabels,
+} from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ReconnectAllAction";
 import type { ReauthProvider } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/reauth-needed-banner.types";
 
 const meta = {
@@ -80,6 +82,12 @@ export const MixedResults: Story = {
 };
 
 export const AllVariants: Story = {
+  args: {
+    providers: PROVIDERS,
+    labels,
+    onReconnectProvider: alwaysSucceeds,
+    onComplete: noop,
+  },
   render: () => (
     <Stack spacing={2} sx={{ width: 480 }}>
       <Typography variant="caption">Three providers — all succeed</Typography>

@@ -31,7 +31,7 @@ import type { MeetingGenerationLabels } from "@/shared/locale/types/dashboard/me
 export type GenerationIndicatorStatus = "pending" | "success" | "failed";
 
 export interface MeetingGenerationStatusIndicatorProps {
-  readonly status: GenerationIndicatorStatus;
+  readonly status: GenerationIndicatorStatus | (string & {});
   readonly url?: string | null;
   readonly error?: string | null;
   readonly expiresAt?: string | null;

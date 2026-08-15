@@ -5,19 +5,21 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 expect.extend(matchers);
 
 import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { ConnectProviderAction } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction";
-import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
+import {
+  ConnectProviderAction,
+  type ConnectProviderActionLabels,
+} from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();
 });
 
-const labels = {
+const labels: ConnectProviderActionLabels = {
   connectProvider: "ربط المزود",
   connecting: "جارٍ الربط…",
   connectProviderError: "تعذّر ربط المزود.",
-} as unknown as SettingsMeetingIntegrationsLabels;
+};
 
 function renderAction(props: Record<string, unknown>) {
   return render(

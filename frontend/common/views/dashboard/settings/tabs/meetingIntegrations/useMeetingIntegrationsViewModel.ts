@@ -345,31 +345,21 @@ function useConnectedAccountsSync(
   }, [connectedAccountsData?.meetingIntegrationConnectedAccounts, connectedAccountsLoading, expandedSlug, store]);
 }
 
-export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel {
-  const router = useRouter();
-  const labels = useAppTranslation(Translation.Dashboard.SettingsMeetingIntegrations);
-  const locale = useAppLocale();
-  const notifications = useNotifications();
-  const hasPermission = useUserStore(state => state.hasPermission);
-  const canEdit = hasPermission(AppPermission.SettingsEditMeetingIntegrations);
+interface UseMeetingIntegrationsActionsParams {
+  readonly store: ReturnType<typeof useMeetingIntegrationsStoreValues>;
+  readonly notifications: ReturnType<typeof useNotifications>;
+  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly refetch: () => Promise<unknown>;
+  readonly router: ReturnType<typeof useRouter>;
+}
 
-  const store = useMeetingIntegrationsStoreValues();
-
-  const { data, loading, error, refetch } = useMeetingIntegrationProvidersQuery();
-
-  const providers = useMemo(() => (data?.meetingIntegrationProviders ?? []).map(mapProviderSummary), [data]);
-
-  useConnectedAccountsSync(store.expandedSlug, store);
-
-  // Sync canViewProfile into the store so the ProfileLinkCallout visibility
-  // survives tier switches (Zustand persists state across viewport remounts).
-  useEffect(() => {
-    const permitted = hasPermission(MEETING_INTEGRATIONS_PROFILE_LINK_PERMISSION);
-    if (store.canViewProfile !== permitted) {
-      store.setCanViewProfile(permitted);
-    }
-  }, [hasPermission, store]);
-
+function useMeetingIntegrationsActions({
+  store,
+  notifications,
+  labels,
+  refetch,
+  router,
+}: UseMeetingIntegrationsActionsParams) {
   const [testConnection] = useMutation(testMeetingProviderConnectionMutationDocument);
   const [revokeToken] = useMutation(adminRevokeMeetingProviderTokenMutationDocument);
   const [connectOAuth] = useMutation(connectMeetingProviderOAuthMutationDocument);
@@ -403,18 +393,49 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
     await refetch();
   }, [refetch]);
 
-  // Connect-provider OAuth flow: calls connectMeetingProviderOAuth mutation,
-  // redirects to the returned authorizeUrl, and handles errors via toast + logger.
   const connectProvider = useCallback(
     (providerSlug: ViewModelProviderSlug) =>
       buildConnectProvider({ connectOAuth, notifications, labels }, store)(providerSlug),
     [connectOAuth, notifications, labels, store]
   );
 
-  // Cross-navigation to the teacher profile meeting-configs tab.
   const navigateToProfile = useCallback(() => {
     router.push("/profile?tab=meeting");
   }, [router]);
+
+  return {
+    runTest,
+    revokeAccount,
+    onMetadataDialogOpen,
+    onMetadataDialogClose,
+    refresh,
+    connectProvider,
+    navigateToProfile,
+  };
+}
+
+export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel {
+  const router = useRouter();
+  const labels = useAppTranslation(Translation.Dashboard.SettingsMeetingIntegrations);
+  const locale = useAppLocale();
+  const notifications = useNotifications();
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canEdit = hasPermission(AppPermission.SettingsEditMeetingIntegrations);
+
+  const store = useMeetingIntegrationsStoreValues();
+  const { data, loading, error, refetch } = useMeetingIntegrationProvidersQuery();
+  const providers = useMemo(() => (data?.meetingIntegrationProviders ?? []).map(mapProviderSummary), [data]);
+
+  useConnectedAccountsSync(store.expandedSlug, store);
+
+  useEffect(() => {
+    const permitted = hasPermission(MEETING_INTEGRATIONS_PROFILE_LINK_PERMISSION);
+    if (store.canViewProfile !== permitted) {
+      store.setCanViewProfile(permitted);
+    }
+  }, [hasPermission, store]);
+
+  const actions = useMeetingIntegrationsActions({ store, notifications, labels, refetch, router });
 
   return {
     labels,
@@ -432,15 +453,15 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
     revokingFor: store.revokingFor,
     metadataDialogAccount: store.metadataDialogAccount,
     metadataDialogProviderSlug: store.metadataDialogProviderSlug,
-    runTest,
-    revokeAccount,
-    onMetadataDialogOpen,
-    onMetadataDialogClose,
+    runTest: actions.runTest,
+    revokeAccount: actions.revokeAccount,
+    onMetadataDialogOpen: actions.onMetadataDialogOpen,
+    onMetadataDialogClose: actions.onMetadataDialogClose,
     connectingFor: store.connectingProviderSlug,
     connectErrorFor: store.connectErrorFor,
-    connectProvider,
-    navigateToProfile,
+    connectProvider: actions.connectProvider,
+    navigateToProfile: actions.navigateToProfile,
     canViewProfile: store.canViewProfile,
-    refresh,
+    refresh: actions.refresh,
   };
 }

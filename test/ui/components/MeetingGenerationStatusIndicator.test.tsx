@@ -4,14 +4,17 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { MeetingGenerationStatusIndicator } from "@/frontend/common/components/ui/display/meetingConfig/MeetingGenerationStatusIndicator";
+import {
+  MeetingGenerationStatusIndicator,
+  type MeetingGenerationStatusIndicatorProps,
+} from "@/frontend/common/components/ui/display/meetingConfig/MeetingGenerationStatusIndicator";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();
 });
 
-function renderIndicator(props: Record<string, unknown>) {
+function renderIndicator(props: MeetingGenerationStatusIndicatorProps) {
   return render(<MeetingGenerationStatusIndicator {...props} />, { wrapper: TestWrapper });
 }
 
@@ -52,7 +55,7 @@ describe("MeetingGenerationStatusIndicator", () => {
     expect(screen.getByText("فشل التوليد")).toBeInTheDocument();
     // There are two elements with "فشل التوليد" - the label and the expand toggle
     const outputs = screen.getAllByText("فشل التوليد");
-    expect(outputs.length).toBe(2);
+    expect(outputs).toHaveLength(2);
   });
 
   test("calls onCopyUrl when copy button clicked in success state", () => {
@@ -74,7 +77,7 @@ describe("MeetingGenerationStatusIndicator", () => {
   });
 
   test("returns null for unknown status", () => {
-    const { container } = renderIndicator({ status: "unknown" as never });
+    const { container } = renderIndicator({ status: "unknown" });
     expect(container.firstChild).toBeNull();
   });
 
@@ -82,6 +85,6 @@ describe("MeetingGenerationStatusIndicator", () => {
     renderIndicator({ status: "failed", error: null });
     const outputs = screen.getAllByText("فشل التوليد");
     // Only one occurrence (the label), no expand toggle
-    expect(outputs.length).toBe(1);
+    expect(outputs).toHaveLength(1);
   });
 });

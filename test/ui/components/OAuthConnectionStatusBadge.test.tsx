@@ -4,7 +4,10 @@ import { cleanup, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { OAuthConnectionStatusBadge } from "@/frontend/common/components/ui/display/meetingConfig/OAuthConnectionStatusBadge";
+import {
+  OAuthConnectionStatusBadge,
+  type OAuthConnectionStatusBadgeProps,
+} from "@/frontend/common/components/ui/display/meetingConfig/OAuthConnectionStatusBadge";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 const fixedNow = new Date("2025-06-15T12:00:00Z").getTime();
@@ -20,7 +23,7 @@ afterEach(() => {
   cleanup();
 });
 
-function renderBadge(props: Record<string, unknown>) {
+function renderBadge(props: OAuthConnectionStatusBadgeProps) {
   return render(<OAuthConnectionStatusBadge {...props} />, { wrapper: TestWrapper });
 }
 

@@ -55,10 +55,10 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
 
-    const adminMgr = await provisionTestManager(superAdminToken, "MgrDirTest-Admin", ManagerAccountType.Admin);
+    const adminMgr = await provisionTestManager(superAdminToken, "MgrDirTest-Admin", ManagerAccountType.Manager);
     adminManagerUserId = adminMgr.userId;
 
-    const staffMgr = await provisionTestManager(superAdminToken, "MgrDirTest-Staff", ManagerAccountType.Manager);
+    const staffMgr = await provisionTestManager(superAdminToken, "MgrDirTest-Staff", ManagerAccountType.Supervisor);
     staffManagerUserId = staffMgr.userId;
 
     expect(adminToken).toBeTruthy();
@@ -135,7 +135,7 @@ describe("managerDirectory and updateManagerProfile GraphQL Integration Tests", 
     if (!managerResult.rows) throw new Error("No rows returned");
 
     const staffMgr = managerResult.rows.find(
-      m => m.roleSlug === "staff_default" || m.name?.includes("MgrDirTest-Staff")
+      m => m.roleSlug === "supervisor_default" || m.name?.includes("MgrDirTest-Staff")
     );
     if (!staffMgr?.staffProfileId) throw new Error("No manager found to update");
 

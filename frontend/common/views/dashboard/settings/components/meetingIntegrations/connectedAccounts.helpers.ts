@@ -1,0 +1,122 @@
+import { useMemo, useState } from "react";
+import {
+  MeetingIntegrationConnectedAccountStatus,
+  MeetingIntegrationProviderSlug,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  ConnectedAccountsTableProps,
+  MeetingIntegrationConnectedAccount,
+  MeetingIntegrationProviderSlug as ProviderSlugType,
+} from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
+import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
+
+export function getProviderLabel(
+  slug: MeetingIntegrationProviderSlug,
+  labels: SettingsMeetingIntegrationsLabels
+): string {
+  switch (slug) {
+    case MeetingIntegrationProviderSlug.Zoom:
+      return labels.provider.zoom;
+    case MeetingIntegrationProviderSlug.GoogleMeet:
+      return labels.provider.googleMeet;
+    case MeetingIntegrationProviderSlug.MicrosoftTeams:
+      return labels.provider.microsoftTeams;
+    default:
+      return String(slug);
+  }
+}
+
+export function getStatusLabel(
+  status: MeetingIntegrationConnectedAccountStatus,
+  labels: SettingsMeetingIntegrationsLabels
+): string {
+  switch (status) {
+    case MeetingIntegrationConnectedAccountStatus.Connected:
+      return labels.status.connected;
+    case MeetingIntegrationConnectedAccountStatus.ExpiringSoon:
+      return labels.status.expiringSoon;
+    case MeetingIntegrationConnectedAccountStatus.ReauthNeeded:
+      return labels.status.reauthNeeded;
+    case MeetingIntegrationConnectedAccountStatus.Revoked:
+      return labels.status.revoked;
+    default:
+      return String(status);
+  }
+}
+
+export function getStatusColor(
+  status: MeetingIntegrationConnectedAccountStatus
+): "success" | "warning" | "error" | "default" {
+  switch (status) {
+    case MeetingIntegrationConnectedAccountStatus.Connected:
+      return "success";
+    case MeetingIntegrationConnectedAccountStatus.ExpiringSoon:
+      return "warning";
+    case MeetingIntegrationConnectedAccountStatus.ReauthNeeded:
+      return "error";
+    case MeetingIntegrationConnectedAccountStatus.Revoked:
+      return "default";
+    default:
+      return "default";
+  }
+}
+
+export function formatConnectedAccountDate(date: Date | null | undefined): string {
+  return date ? date.toLocaleDateString() : "—";
+}
+
+export function isMeetingIntegrationConnectedAccount(value: unknown): value is MeetingIntegrationConnectedAccount {
+  return typeof value === "object" && value !== null && "userId" in value;
+}
+
+export function isRevokeDisabled(
+  account: MeetingIntegrationConnectedAccount,
+  revokingFor: ConnectedAccountsTableProps["revokingFor"],
+  providerSlug: ProviderSlugType
+): boolean {
+  return revokingFor?.userId === account.userId && revokingFor?.providerSlug === providerSlug;
+}
+
+export function filterConnectedAccounts(
+  accounts: readonly MeetingIntegrationConnectedAccount[],
+  search: string,
+  statusFilter: MeetingIntegrationConnectedAccountStatus | "all"
+): readonly MeetingIntegrationConnectedAccount[] {
+  const lowerSearch = search.trim().toLowerCase();
+  return accounts.filter(account => {
+    if (statusFilter !== "all" && account.status !== statusFilter) {
+      return false;
+    }
+    if (lowerSearch.length === 0) {
+      return true;
+    }
+    const nameMatch = (account.name ?? "").toLowerCase().includes(lowerSearch);
+    const emailMatch = (account.email ?? "").toLowerCase().includes(lowerSearch);
+    return nameMatch || emailMatch;
+  });
+}
+
+export function useConnectedAccountsFilter(
+  accounts: readonly MeetingIntegrationConnectedAccount[],
+  providerSlug: MeetingIntegrationProviderSlug,
+  labels: SettingsMeetingIntegrationsLabels
+) {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<MeetingIntegrationConnectedAccountStatus | "all">("all");
+
+  const providerName = useMemo(() => getProviderLabel(providerSlug, labels), [providerSlug, labels]);
+
+  const filteredRows = useMemo(
+    () => filterConnectedAccounts(accounts, search, statusFilter),
+    [accounts, search, statusFilter]
+  );
+
+  return {
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    providerName,
+    filteredRows,
+  };
+}

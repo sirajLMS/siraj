@@ -213,12 +213,12 @@ describe("StaffProfileRepository — getManagerDirectory", () => {
     await expectDirectoryRoleFilter(tx, "admin", [adminUser.id], [staffUser.id]);
   });
 
-  staffTest("filters by manager role (non-admin slugs)", async tx => {
-    const { user: adminUser } = await createStaffAndGroup(tx, "AdminNoMatch", "Admin X", `admin-x-${randomUUID()}`);
-    const { user: staffUser } = await createStaffAndGroup(tx, "StaffMatch", "Staff Y", `staff-y-${randomUUID()}`);
-    const { user: noGroupUser } = await createStaffUser(tx, "NoGroupMatch");
+  staffTest("filters by manager role (admin slugs)", async tx => {
+    const { user: adminUser } = await createStaffAndGroup(tx, "AdminMatch", "Admin X", `admin-x-${randomUUID()}`);
+    const { user: staffUser } = await createStaffAndGroup(tx, "StaffNoMatch", "Staff Y", `staff-y-${randomUUID()}`);
+    const { user: noGroupUser } = await createStaffUser(tx, "NoGroupNoMatch");
 
-    await expectDirectoryRoleFilter(tx, "manager", [staffUser.id, noGroupUser.id], [adminUser.id]);
+    await expectDirectoryRoleFilter(tx, "manager", [adminUser.id], [staffUser.id, noGroupUser.id]);
   });
 
   staffTest("filters by supervisor role", async tx => {

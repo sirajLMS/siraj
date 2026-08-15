@@ -47,6 +47,7 @@ export const GeneratedWithoutUrl: Story = {
 };
 
 export const AllStates: Story = {
+  args: { status: "pending" },
   render: () => (
     <Stack spacing={3} sx={{ width: 520 }}>
       <Stack spacing={1}>

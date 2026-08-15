@@ -1,4 +1,4 @@
-import { and, count, eq, ilike, isNull, notIlike, or, sql } from "drizzle-orm";
+import { and, count, eq, ilike, or, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { UserRepository } from "@/backend/db/repo/users";
 import {
@@ -160,14 +160,7 @@ export namespace StaffProfileRepository {
       return ilike(permissionGroups.slug, "%supervisor%");
     }
     if (filters?.roleFilter === "manager") {
-      return or(
-        isNull(permissionGroups.slug),
-        and(
-          notIlike(permissionGroups.slug, "%admin%"),
-          notIlike(permissionGroups.slug, "%supervisor%"),
-          ilike(permissionGroups.slug, "%staff%")
-        )
-      );
+      return ilike(permissionGroups.slug, "%admin%");
     }
     return undefined;
   }

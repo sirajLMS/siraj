@@ -4,14 +4,17 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig/MeetingUrlCell";
+import {
+  MeetingUrlCell,
+  type MeetingUrlCellProps,
+} from "@/frontend/common/components/ui/display/meetingConfig/MeetingUrlCell";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();
 });
 
-function renderCell(props: Record<string, unknown>) {
+function renderCell(props: MeetingUrlCellProps) {
   return render(<MeetingUrlCell {...props} />, { wrapper: TestWrapper });
 }
 
