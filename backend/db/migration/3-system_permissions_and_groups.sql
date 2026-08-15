@@ -12,6 +12,17 @@ END $$;
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'billing.view_exchange_rates';
 ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'billing.refresh_exchange_rates';
 
+-- Restore enum values dropped by the `parched_mister_fear` migration, which
+-- recreated `app_permission` without these entries. The INSERT statements below
+-- cast to these enum values, so they must exist by the time the INSERT runs.
+-- Declared as `ADD VALUE IF NOT EXISTS` so they are idempotent.
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'auth.view_own_profile';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'teacher.view_own_profile';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'parent.view_own_profile';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'parent.view_profile';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'staff.edit_profile';
+ALTER TYPE app_permission ADD VALUE IF NOT EXISTS 'user.view_profile';
+
 -- Story 15: Add ON_APP notification channel
 ALTER TYPE notification_channel ADD VALUE IF NOT EXISTS 'ON_APP';
 
@@ -1354,7 +1365,14 @@ WHERE
         'suggestions.list',
         'suggestions.review',
         'billing.view_exchange_rates',
-        'billing.refresh_exchange_rates'
+        'billing.refresh_exchange_rates',
+        'permission_groups.manage',
+        'permission_groups.assign',
+        'teachers.edit',
+        'teachers.list',
+        'students.edit',
+        'students.change_teacher',
+        'students.change_status'
     ) ON CONFLICT DO NOTHING;
 
 INSERT INTO

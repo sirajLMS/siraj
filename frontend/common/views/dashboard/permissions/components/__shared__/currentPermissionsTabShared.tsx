@@ -10,11 +10,7 @@ import {
 } from "@/frontend/common/views/dashboard/permissions/components/__shared__/currentPermissionsTabShared.styles";
 import type { CurrentPermissionsEmptyStateProps } from "@/frontend/common/views/dashboard/permissions/types/currentPermissionsTabShared.types";
 
-export function CurrentPermissionsEmptyState({
-  t,
-  group,
-  onSwitchToAddTab,
-}: Readonly<CurrentPermissionsEmptyStateProps>) {
+export function CurrentPermissionsEmptyState({ t, onSwitchToAddTab }: Readonly<CurrentPermissionsEmptyStateProps>) {
   return (
     <StyledEmptyStateContainerShared>
       <StyledEmptyStateIconCircleShared>
@@ -24,11 +20,9 @@ export function CurrentPermissionsEmptyState({
       <StyledEmptyStateDescriptionShared variant="bodyMd">
         {t.noPermissionsDescription}
       </StyledEmptyStateDescriptionShared>
-      {!group.isSystem && (
-        <StyledAssignFirstButtonShared variant="contained" onClick={onSwitchToAddTab}>
-          {t.assignFirstPermission}
-        </StyledAssignFirstButtonShared>
-      )}
+      <StyledAssignFirstButtonShared variant="contained" onClick={onSwitchToAddTab}>
+        {t.assignFirstPermission}
+      </StyledAssignFirstButtonShared>
     </StyledEmptyStateContainerShared>
   );
 }

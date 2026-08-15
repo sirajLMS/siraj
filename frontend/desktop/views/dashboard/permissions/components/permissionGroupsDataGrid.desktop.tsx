@@ -61,11 +61,7 @@ function RowActionsDesktop({
           <PersonAddOutlined fontSize="small" sx={{ mr: 1 }} />
           {t.actionAssign}
         </MenuItem>
-        <MenuItem
-          onClick={() => handleAction(onEditGroup)}
-          disabled={group.isSystem ?? false}
-          id={`group-action-edit-${group.id}`}
-        >
+        <MenuItem onClick={() => handleAction(onEditGroup)} id={`group-action-edit-${group.id}`}>
           <EditOutlined fontSize="small" sx={{ mr: 1 }} />
           {t.actionEdit}
         </MenuItem>

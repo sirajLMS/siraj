@@ -47,7 +47,7 @@ export const PAGE_PERMISSIONS = {
   scheduleTrackingAlerts: [AppPermission.ScheduleViewList] as PagePermissions,
   statusTracking: [AppPermission.ScheduleViewAll] as PagePermissions,
   scheduleAlerts: [AppPermission.ScheduleViewList] as PagePermissions,
-  teachers: [AppPermission.StaffViewDirectory] as PagePermissions,
+  teachers: [AppPermission.StaffViewDirectory, AppPermission.TeachersList] as PagePermissions,
   usersDirectoryParent: [
     AppPermission.StaffViewDirectory,
     AppPermission.ParentViewDirectory,

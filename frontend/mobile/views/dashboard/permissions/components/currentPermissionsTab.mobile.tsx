@@ -12,7 +12,6 @@ import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components
 
 export function CurrentPermissionsTabMobile({
   labels,
-  group,
   groupPermissions,
   permissionsCount,
   onRevokePermission,
@@ -22,7 +21,7 @@ export function CurrentPermissionsTabMobile({
   const t = labels;
 
   if (permissionsCount === 0 && !loading) {
-    return <CurrentPermissionsEmptyState t={t} group={group} onSwitchToAddTab={onSwitchToAddTab} />;
+    return <CurrentPermissionsEmptyState t={t} onSwitchToAddTab={onSwitchToAddTab} />;
   }
 
   if (groupPermissions.length === 0 && !loading) {
@@ -58,7 +57,7 @@ export function CurrentPermissionsTabMobile({
                 {permission.description}
               </Typography>
             ) : null}
-            {!group.isSystem && permission.id ? (
+            {permission.id ? (
               <StyledRevokeButtonShared
                 size="small"
                 startIcon={<RemoveCircleOutlined fontSize="small" />}

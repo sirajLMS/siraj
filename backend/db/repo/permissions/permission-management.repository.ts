@@ -350,7 +350,28 @@ export namespace PermissionManagementRepository {
       }
 
       if (existing.isSystem) {
-        throw new Error(errorsTranslations.permissionManagement.cannotModifySystemPermissionGroup);
+        // System groups: only permissionIds can be updated; name/slug/description are immutable
+        if (input.permissionIds === undefined) {
+          const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, input.id));
+          return toGroupReturn(
+            existing,
+            gpList.map(gp => gp.permissionId),
+            locale
+          );
+        }
+        // Skip name/slug/description update; only replace permissionIds
+        await t.delete(groupPermissions).where(eq(groupPermissions.groupId, input.id));
+        if (input.permissionIds.length > 0) {
+          await t
+            .insert(groupPermissions)
+            .values(input.permissionIds.map(permissionId => ({ groupId: input.id, permissionId })));
+        }
+        const gpList = await t.select().from(groupPermissions).where(eq(groupPermissions.groupId, input.id));
+        return toGroupReturn(
+          existing,
+          gpList.map(gp => gp.permissionId),
+          locale
+        );
       }
 
       const now = new Date();

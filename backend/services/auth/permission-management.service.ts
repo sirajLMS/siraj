@@ -299,9 +299,11 @@ export namespace PermissionManagementService {
   ): Promise<GroupWithPermissionIds> {
     await requireManageAccess(actorUserId, tErrors);
 
+    const group = await requireGroupExists(input.groupId, tErrors);
+
     let slug: string | undefined;
 
-    if (input.name !== undefined) {
+    if (input.name !== undefined && !group.isSystem) {
       const validated = await validateGroupName(input.name, tErrors);
       slug = validated.slug;
     }
@@ -309,9 +311,9 @@ export namespace PermissionManagementService {
     return PermissionManagementRepository.updateGroup(
       {
         id: input.groupId,
-        name: input.name,
+        name: group.isSystem ? undefined : input.name,
         slug,
-        description: trimLocalizedString(input.description),
+        description: group.isSystem ? undefined : trimLocalizedString(input.description),
         permissionIds: input.permissionIds,
       },
       locale

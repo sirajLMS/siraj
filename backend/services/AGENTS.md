@@ -148,6 +148,10 @@ Completed extractions:
 - `buildTeacherInsertPayload` — `backend/services/teachers/__shared__/buildTeacherInsertPayload.ts`
 - `createAuthSession` — `backend/services/auth/__shared__/createAuthSession.ts`
 
+## System Permission Groups
+
+System permission groups (those with `isSystem = true`) can have their **permission bundles edited** via `updateGroup` (add/remove permissions), but their **name, slug, and description are immutable**, and **delete is blocked**. The service layer skips `validateGroupName` for system groups and passes `undefined` for `name`/`description` to the repository, which only replaces `group_permissions` entries. See `docs/auth/supervisor-permissions.md` for the complete model reference.
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
