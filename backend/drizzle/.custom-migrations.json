@@ -1,5 +1,5 @@
 {
-  "manifestHash": "2fad8f0aebf3584859a1ada6855f7b339fcd86a4838d64d979fdfb3f0560c959",
+  "manifestHash": "909b99d7269e39262d524e0e22fe7fefba18bc79cf6d5c9824a7950b0b78a65f",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -7,7 +7,7 @@
     },
     {
       "file": "3-system_permissions_and_groups.sql",
-      "sha256": "f562509f21bbcdfae7e261d6f2a537655c5cbcf60a3741b3a662e089f139b33a"
+      "sha256": "f744366028a1bd1d74a4f424a1abb2e2a8befe2958da8d809cb0208ce74ccd12"
     },
     {
       "file": "30-a-class_instances_rls_policies.sql",
@@ -67,7 +67,7 @@
     },
     {
       "file": "6-lms-permissions-and-groups.sql",
-      "sha256": "27e6afb7e743af4a6dd6cfbae8c3ce323cad67666a5ef18bb20c1f839da447f9"
+      "sha256": "ba8d3b18e5f331cf0b8abe3daf27632905a866b0def2885e0d83b446c194e8d0"
     },
     {
       "file": "6a-profile-field-permissions.sql",
@@ -83,7 +83,7 @@
     },
     {
       "file": "6d-profile-fine-grained-only.sql",
-      "sha256": "dcbd7a429b68db8216b00f9b64002669418ece6a6071d647101b3b2bdef1b3d7"
+      "sha256": "07e795b514cea1c4469a83c4a10e2b43a5607c7c3f2861d9619d3a79dbe1a7e6"
     },
     {
       "file": "7a-settings-permissions-enum.sql",
@@ -247,12 +247,8 @@
     "20260808165215_custom_31-user-admin-reset-password",
     "20260809053906_custom_31-user-admin-reset-password",
     "20260809053907_custom_32-user-admin-reset-password-data",
-    "20260814164249_custom_3-system_permissions_and_groups",
-    "20260814164250_custom_6-lms-permissions-and-groups",
-    "20260814164251_custom_6d-profile-fine-grained-only",
-    "20260814165452_custom_3-system_permissions_and_groups",
-    "20260814165945_custom_6-lms-permissions-and-groups",
-    "20260814165946_custom_6d-profile-fine-grained-only",
-    "20260814170626_custom_6-lms-permissions-and-groups"
+    "20260815025626_custom_3-system_permissions_and_groups",
+    "20260815025627_custom_6-lms-permissions-and-groups",
+    "20260815025628_custom_6d-profile-fine-grained-only"
   ]
 }

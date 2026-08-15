@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default withPageAuth(
-  [AppPermission.STAFF_VIEW_DIRECTORY, AppPermission.PARENT_VIEW_DIRECTORY, AppPermission.STUDENTS_LIST],
+  [AppPermission.TEACHERS_LIST, AppPermission.PARENT_VIEW_DIRECTORY, AppPermission.STUDENTS_LIST],
   async () => {
     if (!(await isUsersDirectoryEnabled())) {
       notFound();

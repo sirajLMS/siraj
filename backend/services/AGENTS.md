@@ -150,7 +150,8 @@ Completed extractions:
 
 ## System Permission Groups
 
-System permission groups (those with `isSystem = true`) can have their **permission bundles edited** via `updateGroup` (add/remove permissions), but their **name, slug, and description are immutable**, and **delete is blocked**. The service layer skips `validateGroupName` for system groups and passes `undefined` for `name`/`description` to the repository, which only replaces `group_permissions` entries. See `docs/auth/supervisor-permissions.md` for the complete model reference.
+- System permission groups (`supervisor_default`, `academy_admin`, etc.) can have their **permission bundle** (`permissionIds`) edited via `updateGroup` (superadmin-only via `requireManageAccess`). Name, slug, and description are immutable for system groups. System groups cannot be deleted (`deleteGroup` throws `cannotDeleteSystemPermissionGroup`).
+- `resolveTeacherId` accepts `TEACHERS_MANAGE_SCHEDULE` as an admin-level permission (in addition to `STAFF_VIEW_DIRECTORY` and `SCHEDULE_VIEW_ALL`), allowing supervisors to view any teacher's schedule.
 
 ## Linting Rules
 

@@ -1,0 +1,29 @@
+{
+  "pageTitle": "إنشاء مستخدم",
+  "formTitle": "إنشاء مستخدم جديد",
+  "name": "الاسم",
+  "email": "البريد الإلكتروني",
+  "phone": "الهاتف",
+  "password": "كلمة المرور",
+  "permissionGroup": "مجموعة الصلاحيات",
+  "accountStatus": "حالة الحساب",
+  "statusActivated": "مفعّل",
+  "statusDeactivated": "غير مفعّل",
+  "createButton": "إنشاء مستخدم",
+  "cancelButton": "إلغاء",
+  "createSuccess": "تم إنشاء المستخدم بنجاح",
+  "createError": "فشل في إنشاء المستخدم",
+  "nameRequired": "الاسم مطلوب",
+  "emailRequired": "البريد الإلكتروني مطلوب",
+  "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح",
+  "emailExists": "يوجد حساب بهذا البريد الإلكتروني بالفعل",
+  "passwordRequired": "كلمة المرور مطلوبة",
+  "passwordWeak": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+  "permissionGroupRequired": "مجموعة الصلاحيات مطلوبة",
+  "specializedGroupNotAllowed": "هذه المجموعة تتطلب تدفقاً متخصصاً. يرجى استخدام النموذج المخصص.",
+  "permissionGroupNotFound": "مجموعة الصلاحيات المحددة غير موجودة",
+  "sections": {
+    "userDetails": "بيانات المستخدم",
+    "permissions": "الصلاحيات"
+  }
+}

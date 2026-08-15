@@ -1,5 +1,7 @@
 export enum AppPermission {
   AUTH_LOGIN = "auth.login",
+  AUTH_VIEW_OWN_PROFILE = "auth.view_own_profile",
+  AUTH_EDIT_OWN_PROFILE = "auth.edit_own_profile",
   DASHBOARD_VIEW = "dashboard.view",
   DASHBOARD_VIEW_METRICS = "dashboard.view_metrics",
   DASHBOARD_FILTER_METRICS = "dashboard.filter_metrics",
@@ -27,6 +29,9 @@ export enum AppPermission {
   HISTORY_VIEW_DETAILS = "history.view_details",
   TEACHER_VIEW_DASHBOARD = "teacher.view_dashboard",
   TEACHER_VIEW_STUDENTS = "teacher.view_students",
+  TEACHER_VIEW_PROFILE = "teacher.view_profile",
+  TEACHER_VIEW_OWN_PROFILE = "teacher.view_own_profile",
+  TEACHER_EDIT_OWN_PROFILE = "teacher.edit_own_profile",
   SYSTEM_ENFORCE_TIME_WINDOW = "system.enforce_time_window",
   SYSTEM_ENFORCE_LEAVE_LIMIT = "system.enforce_leave_limit",
   TEACHERS_LIST = "teachers.list",
@@ -70,6 +75,7 @@ export enum AppPermission {
   // Staff/Manager Management
   STAFF_CREATE = "staff.create",
   STAFF_EDIT = "staff.edit",
+  STAFF_EDIT_PROFILE = "staff.edit_profile",
   PERMISSION_GROUPS_MANAGE = "permission_groups.manage",
   PERMISSION_GROUPS_ASSIGN = "permission_groups.assign",
   NOTIFICATION_VIEW_ALERTS = "notification.view_alerts",
@@ -79,6 +85,9 @@ export enum AppPermission {
   SYSTEM_BULK_UPDATE_DST = "system.bulk_update_dst",
   PARENT_VIEW_DIRECTORY = "parent.view_directory",
   // Parent Profile & Account Lifecycle Management
+  PARENT_VIEW_PROFILE = "parent.view_profile",
+  PARENT_VIEW_OWN_PROFILE = "parent.view_own_profile",
+  PARENT_EDIT_OWN_PROFILE = "parent.edit_own_profile",
   PARENT_VIEW_STUDENTS = "parent.view_students",
   PARENT_MANAGE_STATUS = "parent.manage_status",
   STUDENT_VIEW_ASSOCIATED = "student.view_associated",
@@ -262,6 +271,8 @@ export enum AppPermission {
   CRON_MANAGE = "cron.manage",
   // User Admin Management
   USER_ADMIN_RESET_PASSWORD = "user.admin_reset_password",
+  USER_VIEW_PROFILE = "user.view_profile",
+  USER_EDIT_PROFILE = "user.edit_profile",
 }
 
 const appPermissionValues = Object.values(AppPermission) as readonly AppPermission[];

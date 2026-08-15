@@ -54,6 +54,8 @@ const ACADEMY_ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.ReportGenerateCustom,
   AppPermission.ReportViewFinancials,
   AppPermission.TeachersCreate,
+  AppPermission.TeachersEdit,
+  AppPermission.TeachersList,
   AppPermission.ParentsCreate,
   AppPermission.ComplaintsList,
   AppPermission.ComplaintsDelete,
@@ -76,7 +78,6 @@ describe("academy admin sidebar navigation", () => {
     expect(keys).toContain("home");
     expect(keys).toContain("students");
     expect(keys).toContain("teachers");
-    expect(keys).toContain("permissions");
     expect(keys).toContain("feedback-manage");
     expect(keys).not.toContain("suggestions-manage");
     expect(keys).not.toContain("complaints-manage");

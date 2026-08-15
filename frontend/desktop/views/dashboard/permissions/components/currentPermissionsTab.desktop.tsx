@@ -14,7 +14,6 @@ import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/comp
 
 export function CurrentPermissionsTabDesktop({
   labels,
-  group,
   groupPermissions,
   permissionsCount,
   onRevokePermission,
@@ -44,10 +43,7 @@ export function CurrentPermissionsTabDesktop({
         flex: 1.5,
         minWidth: 250,
       },
-    ];
-
-    if (!group.isSystem) {
-      cols.push({
+      {
         field: "actions",
         headerName: "",
         width: 100,
@@ -62,11 +58,11 @@ export function CurrentPermissionsTabDesktop({
             {t.revoke}
           </StyledRevokeButtonShared>
         ),
-      });
-    }
+      },
+    ];
 
     return cols;
-  }, [t, group.isSystem, onRevokePermission]);
+  }, [t, onRevokePermission]);
 
   return (
     <DesktopSectionPanel contentPadding={false} title={t.currentPermissions}>

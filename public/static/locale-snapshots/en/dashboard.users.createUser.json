@@ -1,0 +1,29 @@
+{
+  "pageTitle": "Create User",
+  "formTitle": "Create New User",
+  "name": "Name",
+  "email": "Email",
+  "phone": "Phone",
+  "password": "Password",
+  "permissionGroup": "Permission Group",
+  "accountStatus": "Account Status",
+  "statusActivated": "Activated",
+  "statusDeactivated": "Deactivated",
+  "createButton": "Create User",
+  "cancelButton": "Cancel",
+  "createSuccess": "User created successfully",
+  "createError": "Failed to create user",
+  "nameRequired": "Name is required",
+  "emailRequired": "Email is required",
+  "emailInvalid": "Please enter a valid email address",
+  "emailExists": "An account with this email already exists",
+  "passwordRequired": "Password is required",
+  "passwordWeak": "Password must be at least 8 characters",
+  "permissionGroupRequired": "Permission group is required",
+  "specializedGroupNotAllowed": "This group requires a specialized onboarding flow. Please use the dedicated form.",
+  "permissionGroupNotFound": "The selected permission group was not found",
+  "sections": {
+    "userDetails": "User Details",
+    "permissions": "Permissions"
+  }
+}

@@ -161,7 +161,7 @@ export const SIDEBAR_NAV_GROUPS: readonly NavGroup[] = [
     iconKey: "group",
     section: "main",
     permission: [
-      AppPermission.StaffViewDirectory,
+      AppPermission.TeachersList,
       AppPermission.ParentsList,
       AppPermission.TeacherViewStudents,
       AppPermission.StudentsList,
@@ -1020,7 +1020,6 @@ export function applySupervisorNavOverrides(
     "search-schedule",
     "schedule-tracking",
     "schedule",
-    "parents",
     "managers",
     "resources",
     "subjects",
@@ -1031,6 +1030,7 @@ export function applySupervisorNavOverrides(
     "feedback-manage",
     "dst-migration",
     "cron",
+    "permissions",
     "settings",
     "whatsapp-settings",
   ]);

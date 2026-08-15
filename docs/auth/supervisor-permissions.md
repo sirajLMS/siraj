@@ -1,160 +1,81 @@
-# Supervisor Permissions & System Group Management
+# Supervisor Permissions Model
 
-This document covers the supervisor permission model, system permission group editability rules, the GraphQL authScope pattern, and navigation override behavior. Implemented as part of [GitHub issue #47](https://github.com/sirajLMS/siraj/issues/47).
+## Overview
 
-## Supervisor Permission Model
+The `supervisor_default` permission group grants full operational management over **Teachers, Students, and Parents** — list, create, edit, view/edit profiles, manage schedules/status/lifecycle. **Staff is explicitly excluded** — supervisors have NO staff management or view permissions.
 
-Supervisors (users assigned the `supervisor_default` system permission group) have **full teacher and student management permissions** — they can create, edit, manage schedules, reassign teachers, and change student status exactly like a superAdmin, with one exception: they **cannot manage permission groups** (they lack `PermissionGroupsManage`).
+## Staff Exclusion (Absolute)
 
-### Permissions Granted to Supervisors
+Supervisors do NOT receive:
+- `staff.view_directory` — no staff directory access
+- `permission_groups.manage` / `permission_groups.assign` — no permission management (superadmin-only)
+- `profile.core_identity.edit_other` — `core_identity` has `audiences: ALL_AUDIENCES` (includes STAFF), so `edit_other` is excluded
+- `profile.core_contact.edit_other` — same reason as `core_identity`
+- `profile.staff_role.edit_other` — `staff_role` has `audiences: [STAFF]`
+- `profile.staff_permissions.edit_other` — `staff_permissions` has `audiences: [STAFF]`
 
-The `supervisor_default` group carries 74 total permissions (was 34 before issue #47). The 29 new permissions added fall into two categories:
+Supervisors DO have `view_other` for `core_identity`, `core_contact`, `staff_role`, `staff_permissions` (existing behavior, backward-compatible). This is a deliberate asymmetry: supervisors can VIEW staff profile fields but cannot EDIT them.
 
-#### Non-Field-ACL Permissions (8)
+## Field-ACL Audience Model
 
-Granted via `backend/db/migration/6-lms-permissions-and-groups.sql`:
+The field-ACL model uses `audiences` to determine which user types a field group applies to. When granting `edit_other` to a role, only field groups whose `audiences` do NOT include `STAFF` are safe:
 
-| Permission Key | Description |
-|---|---|
-| `teachers.create` | Create new teacher accounts |
-| `teachers.edit` | Edit teacher profiles |
-| `teachers.manage_schedule` | Manage teacher schedules |
-| `students.create` | Create new student accounts |
-| `students.edit` | Edit student profiles |
-| `student.reassign_teacher` | Reassign a student to a different teacher |
-| `student.manage_status` | Change student status (regular, suspended, on-leave) |
-| `staff.view_directory` | View the staff directory |
+| Field Group | Audiences | `edit_other` for supervisor? |
+|-------------|-----------|------------------------------|
+| `core_identity` | `[TEACHER, PARENT, STAFF]` | NO — includes STAFF |
+| `core_contact` | `[TEACHER, PARENT, STAFF]` | NO — includes STAFF |
+| `teacher_professional` | `[TEACHER]` | YES |
+| `teacher_identity` | `[TEACHER]` | YES |
+| `parent_social` | `[PARENT]` | YES |
+| `parent_identity` | `[PARENT]` | YES |
+| `parent_billing` | `[PARENT]` | YES |
+| `parent_account` | `[PARENT]` | YES |
+| `parent_students` | `[PARENT]` | YES |
+| `teacher_students` | `[TEACHER]` | YES |
+| `staff_role` | `[STAFF]` | NO — staff-only |
+| `staff_permissions` | `[STAFF]` | NO — staff-only |
+| `payment_methods` | `[TEACHER, PARENT]` | YES |
+| `meeting_configs` | `[TEACHER, PARENT]` | YES |
 
-#### Field-ACL `edit_other` Permissions (21)
+## Teacher Page/Nav Gating
 
-Granted via `backend/db/migration/6d-profile-fine-grained-only.sql`. These allow supervisors to edit **other users'** profile fields (not just their own). Covers:
+Teacher pages and nav items are gated on `TeachersList` (a teacher-specific permission), NOT `StaffViewDirectory` (a staff permission). This decouples teacher access from staff access:
 
-- `profile.core_identity.edit_other`, `profile.core_contact.edit_other`
-- `profile.teacher_professional.edit_other`, `profile.teacher_identity.edit_other`
-- `profile.parent_social.edit_other`, `profile.parent_identity.edit_other`, `profile.parent_billing.edit_other`, `profile.parent_account.edit_other`, `profile.parent_students.edit_other`
-- `profile.teacher_students.edit_other`
-- `profile.staff_role.edit_other`, `profile.staff_permissions.edit_other`
-- `profile.payment_methods.edit_other`
-- `profile.meeting_configs.edit_other`
-- `profile.student_identity.edit_other`, `profile.student_academic.edit_other`, `profile.student_teacher.edit_other`, `profile.student_parent.edit_other`, `profile.student_schedule.edit_other`, `profile.student_history.edit_other`, `profile.student_quota_edit.edit_other`
+- `/teachers` page → `withPageAuth([AppPermission.TEACHERS_LIST])`
+- `/users` page → `withPageAuth([AppPermission.TEACHERS_LIST, AppPermission.PARENT_VIEW_DIRECTORY, AppPermission.STUDENTS_LIST])`
+- `teachers` nav item → `PAGE_PERMISSIONS.teachers = [AppPermission.TeachersList]`
+- `usersTeachers` tab → `PAGE_PERMISSIONS.usersTeachers = [AppPermission.TeachersList]`
+- `usersDirectoryParent` → `PAGE_PERMISSIONS.usersDirectoryParent = [AppPermission.TeachersList, AppPermission.ParentViewDirectory, AppPermission.StudentsList]`
+- `grp_users` nav group → `permission: [AppPermission.TeachersList, ...]`
+- Weekly schedule ViewModel → `hasScheduleManageTeacher: hasPermission(AppPermission.TeachersManageSchedule)` (replaces `isAdmin: hasPermission(AppPermission.StaffViewDirectory)`)
+- `resolveTeacherId` backend helper → accepts `TEACHERS_MANAGE_SCHEDULE` as admin-level permission
 
-**Deliberately excluded**: `profile.core_status.edit_other` — supervisors lack the `view_other` permission for `core_status`, so the `edit_other` grant would be ineffective.
+## Permission Management (Superadmin-Only)
 
-### What Supervisors Cannot Do
+Only superadmin can manage permissions. `academy_admin` does NOT get `permission_groups.manage` or `permission_groups.assign`. The `requireManageAccess` guard checks `isSuperAdmin || hasPermission(PERMISSION_GROUPS_MANAGE)` — since no non-superadmin group has `PERMISSION_GROUPS_MANAGE`, only superadmin passes.
 
-- **Manage permission groups** — supervisors lack `PermissionGroupsManage`. The `permissions` nav item is hidden for them.
-- **Access admin-only settings** — settings, whatsapp-settings, dst-migration, cron, etc. remain hidden via `applySupervisorNavOverrides`.
+### System Group Editing
 
-## Migration Maintenance Rule
-
-> **Any new teacher/student management permission MUST be added to the `supervisor_default` group in `backend/db/migration/6-lms-permissions-and-groups.sql`.**
-
-There is a comment block above the `supervisor_default` INSERT statement documenting this requirement:
-
-```sql
--- IMPORTANT: Supervisors are granted ALL current and future teacher/student management permissions.
--- Any new teacher/student management permission MUST be added to this group.
-```
-
-When adding a new permission enum value that relates to teacher or student management, append it to the `p.key IN (...)` clause for the `supervisor_default` group. The INSERT uses `ON CONFLICT DO NOTHING`, making it idempotent and safe to re-run.
-
-## System Permission Group Editability
-
-System permission groups (those with `isSystem = true`, such as `super_admin`, `supervisor_default`, `academy_admin`, `teacher_default`, `parent_default`) have special editability rules:
-
-| Operation | Allowed? | Notes |
-|---|---|---|
-| **Edit permission bundle** (add/revoke permissions via `updateGroup`) | ✅ Yes | The `permissionIds` array can be freely replaced |
-| **Rename group** (change `name`/`slug`) | ❌ No | Name/slug/description are immutable |
-| **Delete group** | ❌ No | Delete is blocked at both service and repository layers |
-
-### Frontend Behavior
-
-The frontend shows **Edit** and **Revoke** buttons for system groups, but:
-- The **Edit dialog** makes `name` and `description` fields read-only (via `disabled={isLoading || isSystem}`) when editing a system group — only the permission bundle section remains editable.
-- The **Delete** menu item remains disabled (`disabled={group.isSystem ?? false}`) for system groups.
-
-### Backend Behavior
-
-The service layer (`permission-management.service.ts`) and repository layer (`permission-management.repository.ts`) enforce these rules:
-
-1. **Service `updateGroup`**: For system groups, skips `validateGroupName` and passes `undefined` for `name` and `description` to the repository (silently ignored).
-2. **Repository `updateGroup`**: For system groups, only replaces the `group_permissions` join table entries (delete old + insert new). Name/slug/description columns are never touched.
-3. **Repository `deleteGroup`**: Throws `cannotDeleteSystemPermissionGroup` for system groups — unchanged.
+System permission groups (`supervisor_default`, `academy_admin`, etc.) can have their **permission bundle** (`permissionIds`) edited by superadmin via `updateGroup`. However:
+- Name, slug, and description are **immutable** for system groups
+- System groups **cannot be deleted** (`deleteGroup` throws `cannotDeleteSystemPermissionGroup`)
+- The frontend shows the Edit button and Add Permissions tab for all groups, but name/description fields are disabled when `isSystem` is true
 
 ## GraphQL authScope Pattern
 
-### When to use `permission:` vs `superAdmin:`
+Use `authScopes: { permission: AppPermission.X }` (not `authScopes: { superAdmin: true }`) for mutations accessible by non-superadmin users with the correct permission. The `superAdmin: true` authScope blocks ALL non-superadmin users.
 
-Use `authScopes: { permission: AppPermission.X }` (not `authScopes: { superAdmin: true }`) for any mutation accessible by non-superadmin users with the correct permission.
+Mutations fixed to use permission-based authScopes:
+- `reassignStudentTeacher` → `permission: AppPermission.STUDENT_REASSIGN_TEACHER`
+- `changeStudentStatus` → `permission: AppPermission.STUDENT_MANAGE_STATUS`
+- `updateStudentQuota` → `permission: AppPermission.STUDENT_QUOTA_EDIT_EDIT_OTHER`
 
-| authScope | Passes for |
-|---|---|
-| `{ superAdmin: true }` | Only `ctx.isSuperAdmin === true` (superAdmins only) |
-| `{ permission: AppPermission.X }` | `ctx.isSuperAdmin \|\| ctx.permissions.includes(key)` (superAdmins **and** users with the permission) |
+## Supervisor Nav Overrides
 
-The `permission:` check is defined in `gqlSchemaBuilder.ts` and automatically passes for superAdmins (via `ctx.isSuperAdmin` bypass), so existing superAdmin tests remain valid without changes.
+`applySupervisorNavOverrides` hides admin-only items from supervisors. Teachers, students, and parents are NO LONGER hidden — supervisors have the permissions to see them. Staff remains hidden (filtered by `StaffViewDirectory` which supervisors lack).
 
-### Example
+Items still hidden from supervisors: `home`, `own-profile`, `search-schedule`, `schedule-tracking`, `schedule`, `managers`, `resources`, `subjects`, `books-and-bags`, `reports`, `billing-admin`, `payment-catalogs`, `feedback-manage`, `dst-migration`, `cron`, `permissions`, `settings`, `whatsapp-settings`.
 
-```typescript
-// ✅ Correct — allows supervisors and academy admins with the permission
-authScopes: { permission: AppPermission.STUDENT_REASSIGN_TEACHER },
+## Migration Constraint
 
-// ❌ Wrong — blocks non-superAdmin users even if they have the permission
-authScopes: { superAdmin: true },
-```
-
-`AppPermission` must be imported as a **value import** (not type-only) when used in runtime expressions like `authScopes`:
-
-```typescript
-import { AppPermission } from "@/backend/enum";
-```
-
-## `applySupervisorNavOverrides` Function
-
-The `applySupervisorNavOverrides` function in `frontend/common/views/dashboard/config/navigationConfig.ts` runs **AFTER** `getNavItemsForPermissions` permission-based filtering. It applies additional hiding rules specific to the supervisor role.
-
-### Critical Rule
-
-`applySupervisorNavOverrides` must **NOT** override permission-based filtering for items the supervisor has permissions for. Only genuinely admin-only items should remain hidden.
-
-### Items still hidden by `applySupervisorNavOverrides`
-
-These items have no relevant permission for supervisors and are correctly hidden:
-
-- `settings`
-- `whatsapp-settings`
-- `dst-migration`
-- `cron`
-- `home`
-- `own-profile`
-- `search-schedule`
-- `schedule-tracking`
-- `status-tracking`
-- `schedule-alerts`
-- `feedback-manage`
-
-### Items removed from the override hide set (now permission-based)
-
-As of issue #47, the following items were removed from the hardcoded supervisor hide set and now rely on `getNavItemsForPermissions` for visibility:
-
-- `teachers` — visible because supervisor has `StaffViewDirectory` + `TeachersList`
-- `students` — visible because supervisor has `StudentsList`
-- `permissions` — still hidden because supervisor lacks `PermissionGroupsManage`
-
-## Manager (Academy Admin) ACL Customization
-
-The `academy_admin` (manager) role now has the following permissions, allowing them to customize permission groups for their academy staff:
-
-| Permission Key | Description |
-|---|---|
-| `permission_groups.manage` | Create, edit, and delete custom permission groups |
-| `permission_groups.assign` | Assign/revoke permission groups to users |
-| `teachers.edit` | Edit teacher profiles |
-| `teachers.list` | List/view teachers |
-| `students.edit` | Edit student profiles |
-| `students.change_teacher` | Reassign students to different teachers |
-| `students.change_status` | Change student status |
-
-These permissions were added via `backend/db/migration/3-system_permissions_and_groups.sql` and allow academy admins to access the Permissions management page, create custom permission groups for their staff, and manage teacher/student profiles.
+Any new teacher/student/parent management permission MUST be added to the `supervisor_default` block in `backend/db/migration/6-lms-permissions-and-groups.sql`. Staff permissions must NEVER be added to `supervisor_default`.

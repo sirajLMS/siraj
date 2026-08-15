@@ -186,7 +186,7 @@ gqlSchemaBuilder.mutationField("reactivateParent", t =>
 gqlSchemaBuilder.mutationField("updateStudentQuota", t =>
   t.field({
     type: EditQuotaResultRef,
-    authScopes: { superAdmin: true },
+    authScopes: { permission: AppPermission.STUDENT_QUOTA_EDIT_EDIT_OTHER },
     args: {
       studentId: t.arg.string({ required: true }),
       newClassesRemaining: t.arg.int({ required: true }),

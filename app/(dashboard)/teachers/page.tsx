@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.pageTitle };
 }
 
-export default withPageAuth([AppPermission.STAFF_VIEW_DIRECTORY, AppPermission.TEACHERS_LIST], async () => {
+export default withPageAuth([AppPermission.TEACHERS_LIST], async () => {
   if (await isUsersDirectoryEnabled()) {
     redirect("/users?tab=teachers");
   }

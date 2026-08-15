@@ -1366,8 +1366,6 @@ WHERE
         'suggestions.review',
         'billing.view_exchange_rates',
         'billing.refresh_exchange_rates',
-        'permission_groups.manage',
-        'permission_groups.assign',
         'teachers.edit',
         'teachers.list',
         'students.edit',

@@ -24,6 +24,7 @@ export async function resolveTeacherId(
   const isAdmin = await PermissionsService.hasAnyPermission(userId, [
     AppPermission.STAFF_VIEW_DIRECTORY,
     AppPermission.SCHEDULE_VIEW_ALL,
+    AppPermission.TEACHERS_MANAGE_SCHEDULE,
   ]);
 
   if (isAdmin && requestedTeacherId) {

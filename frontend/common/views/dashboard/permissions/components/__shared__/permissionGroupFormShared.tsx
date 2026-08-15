@@ -222,7 +222,7 @@ export function PermissionGroupFormShared({
       <PermissionGroupFormContentShared
         control={control}
         isLoading={isLoading}
-        isSystem={!!group?.isSystem}
+        isSystem={group?.isSystem ?? false}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
         selectedCategory={selectedCategory}
