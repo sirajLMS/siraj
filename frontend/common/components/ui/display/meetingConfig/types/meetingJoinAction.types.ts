@@ -13,4 +13,14 @@ export type MeetingJoinActionProps = {
   readonly onJoinAction?: () => void;
   readonly emptyRole?: MeetingJoinEmptyRole;
   readonly setupHref?: string;
+  /** Show copy-to-clipboard button alongside the join action (non-admin users). */
+  readonly showCopyButton?: boolean;
+  /** URL generation status from backend (pending / generated / failed / expired). */
+  readonly meetingUrlStatus?: string | null;
+  /** Error message from failed generation, shown as badge tooltip / retry context. */
+  readonly meetingUrlError?: string | null;
+  /** Optional retry callback for failed URL generations. */
+  readonly onRetry?: () => void;
+  /** ISO timestamp when the generated URL expires (null-safe: omitted renders nothing). */
+  readonly expiresAt?: string | null;
 };

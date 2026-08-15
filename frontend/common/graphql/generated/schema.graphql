@@ -655,6 +655,9 @@ type ClassMeetingConfig {
   id: String
   isDefault: Boolean
   label: String
+  meetingUrlError: String
+  meetingUrlExpiresAt: DateTime
+  meetingUrlStatus: String
   provider: MeetingProvider
   providerId: String
   providerMetadata: JSON
@@ -5622,6 +5625,9 @@ type UserMeetingConfig {
   id: String
   isDefault: Boolean
   label: String
+  meetingUrlError: String
+  meetingUrlExpiresAt: DateTime
+  meetingUrlStatus: String
   oauthTokenExpiresAt: DateTime
   provider: MeetingProvider
   providerId: String

@@ -4,8 +4,14 @@ import { AcUnitOutlined } from "@mui/icons-material";
 import { Box, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig/MeetingUrlCell";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  type ClassExecutionState,
+  type ClassOutcome,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import type { TeacherScheduleDataGridProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
@@ -129,6 +135,41 @@ function buildColumns(
       minWidth: 140,
       sortable: false,
       renderCell: ({ row }) => <StatusCell row={row} labels={labels} instanceStatusLabels={instanceStatusLabels} />,
+    },
+    {
+      field: "meetingUrl",
+      headerName: labels.schedule.meetingUrl,
+      flex: 1.2,
+      minWidth: 180,
+      sortable: false,
+      renderCell: ({ row }) => (
+        <RequirePermission
+          permissions={[AppPermission.MeetingConfigsManageOwn, AppPermission.MeetingConfigsManageClass]}
+          fallback={
+            <MeetingUrlCell
+              meetingUrl={row.meetingJoinUrl}
+              meetingUrlStatus={row.meetingUrlStatus}
+              meetingUrlError={row.meetingUrlError}
+              joinLabel={labels.actions.joinVideo}
+              setupHref="/profile?tab=meeting"
+              compact
+              badgeSize="small"
+              canCopyUrl={false}
+            />
+          }
+        >
+          <MeetingUrlCell
+            meetingUrl={row.meetingJoinUrl}
+            meetingUrlStatus={row.meetingUrlStatus}
+            meetingUrlError={row.meetingUrlError}
+            joinLabel={labels.actions.joinVideo}
+            setupHref="/profile?tab=meeting"
+            compact
+            badgeSize="small"
+            canCopyUrl
+          />
+        </RequirePermission>
+      ),
     },
     {
       field: "actions",

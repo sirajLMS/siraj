@@ -15,5 +15,6 @@ export function useMeetingConfigProfileLabels(): MeetingConfigProfileLabels {
     linkedClassInstances: meetingConfig.linkedClassInstances,
     autoGeneration: profileNotifications.autoGeneration,
     connectAccount: profileNotifications.connectAccount,
+    enhancements: meetingConfig.enhancements,
   };
 }

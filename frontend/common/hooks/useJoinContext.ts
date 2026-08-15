@@ -25,5 +25,10 @@ export function useJoinContext(props: MeetingJoinActionProps): JoinContext {
     id: props.id,
     providerLogo,
     onJoinAction: props.onJoinAction,
+    showCopyButton: props.showCopyButton === true,
+    meetingUrlStatus: props.meetingUrlStatus ?? null,
+    meetingUrlError: props.meetingUrlError ?? null,
+    onRetry: props.onRetry,
+    expiresAt: props.expiresAt ?? null,
   };
 }

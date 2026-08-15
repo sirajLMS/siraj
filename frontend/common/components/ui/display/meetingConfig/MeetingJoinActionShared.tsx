@@ -1,6 +1,8 @@
 "use client";
 
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import VideocamOffOutlinedIcon from "@mui/icons-material/VideocamOffOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
@@ -11,7 +13,6 @@ import {
   Box,
   Button,
   type ButtonProps,
-  Chip,
   IconButton,
   Stack,
   Tooltip,
@@ -19,6 +20,11 @@ import {
 } from "@mui/material";
 import type * as React from "react";
 import type { ReactElement, ReactNode } from "react";
+import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig/CopyMeetingUrlButton";
+import {
+  type MeetingUrlStatus,
+  MeetingUrlStatusBadge,
+} from "@/frontend/common/components/ui/display/meetingConfig/MeetingUrlStatusBadge";
 import type {
   MeetingJoinActionProps,
   MeetingJoinEmptyRole,
@@ -26,6 +32,7 @@ import type {
 import { useJoinContext } from "@/frontend/common/hooks/useJoinContext";
 import { type JoinContext, makeHandleJoin, resolveEmptyMessage } from "@/frontend/common/lib/meetingJoinAction";
 import { Link } from "@/shared/i18n";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 // ── Slot types ──────────────────────────────────────────────────────────────
 
@@ -53,6 +60,54 @@ const DEFAULT_OPTIONS: Required<MeetingJoinActionSharedOptions> = {
   iconFontSize: "small",
 };
 
+// ── Status mapping ──────────────────────────────────────────────────────────
+
+function mapUrlStatus(status: string | null, hasUrl: boolean): MeetingUrlStatus {
+  if (status === "failed") return "failed";
+  if (status === "expired") return "expired";
+  if (status === "pending") return "pending";
+  if (hasUrl && (status === "generated" || !status)) return "generated";
+  return "pending";
+}
+
+function formatExpiresAt(isoString: string): string {
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) {
+    return isoString;
+  }
+  return date.toLocaleString();
+}
+
+// ── Status badge + extras render helpers ────────────────────────────────────
+
+/** Translations from the MeetingUrlStatus namespace used by the render helpers. */
+interface UrlStatusTranslations {
+  readonly retryUrlGeneration: string;
+}
+
+function renderCopyButton(url: string): ReactElement {
+  return <CopyMeetingUrlButton meetingUrl={url} variant="icon" size="small" />;
+}
+
+function renderRetryButton(onRetry: (() => void) | undefined, retryLabel: string): ReactElement | null {
+  if (!onRetry) return null;
+  return (
+    <Button size="small" variant="text" startIcon={<RefreshOutlinedIcon />} onClick={onRetry}>
+      {retryLabel}
+    </Button>
+  );
+}
+
+function renderExpiresAt(expiresAt: string | null): ReactElement | null {
+  if (!expiresAt) return null;
+  return (
+    <Stack direction="row" sx={{ alignItems: "center", gap: 0.5 }}>
+      <ScheduleOutlinedIcon sx={{ fontSize: 16 }} />
+      <Typography variant="labelUppercase">{formatExpiresAt(expiresAt)}</Typography>
+    </Stack>
+  );
+}
+
 const wrapSpan = (children: ReactNode, fullWidth: boolean): ReactElement =>
   fullWidth ? <span style={{ display: "block", width: "100%" }}>{children}</span> : <span>{children}</span>;
 
@@ -72,7 +127,9 @@ function renderSetupAlert(ctx: JoinContext, setupHref: string, emptyRole: Meetin
 function renderIconVariant(
   ctx: JoinContext,
   setupHref: string | undefined,
-  opts: Required<MeetingJoinActionSharedOptions>
+  opts: Required<MeetingJoinActionSharedOptions>,
+  status: MeetingUrlStatus,
+  urlStatusT: UrlStatusTranslations
 ): ReactElement {
   const handleJoin = makeHandleJoin(ctx.resolvedUrl, ctx.onJoinAction);
 
@@ -99,9 +156,26 @@ function renderIconVariant(
     );
   }
 
+  if (status === "pending") {
+    return <MeetingUrlStatusBadge status="pending" size="small" tooltip={ctx.meetingUrlError ?? null} />;
+  }
+
+  if (status === "failed") {
+    return (
+      <Stack sx={{ alignItems: "center", gap: 0.25 }}>
+        <MeetingUrlStatusBadge status="failed" size="small" tooltip={ctx.meetingUrlError ?? null} />
+        {ctx.onRetry ? renderRetryButton(ctx.onRetry, urlStatusT.retryUrlGeneration) : null}
+      </Stack>
+    );
+  }
+
+  if (status === "expired") {
+    return <MeetingUrlStatusBadge status="expired" size="small" tooltip={ctx.meetingUrlError ?? null} />;
+  }
+
   const VideoIcon = ctx.hasUrl ? VideocamOutlinedIcon : VideocamOffOutlinedIcon;
   return (
-    <Stack sx={{ alignItems: "center", gap: 0.25 }}>
+    <Stack direction="row" sx={{ alignItems: "center", gap: 0.25 }}>
       <Tooltip title={ctx.tooltip}>
         <span>
           <IconButton
@@ -127,53 +201,108 @@ function renderIconVariant(
           </IconButton>
         </span>
       </Tooltip>
+      {ctx.showCopyButton && ctx.resolvedUrl ? renderCopyButton(ctx.resolvedUrl) : null}
     </Stack>
   );
 }
 
-function renderButtonVariant(ctx: JoinContext, opts: Required<MeetingJoinActionSharedOptions>): ReactElement {
+function renderButtonVariant(
+  ctx: JoinContext,
+  opts: Required<MeetingJoinActionSharedOptions>,
+  status: MeetingUrlStatus,
+  urlStatusT: UrlStatusTranslations
+): ReactElement {
+  if (status === "pending") {
+    return <MeetingUrlStatusBadge status="pending" size="small" tooltip={ctx.meetingUrlError ?? null} />;
+  }
+
+  if (status === "failed") {
+    return (
+      <Stack sx={{ gap: 0.5 }}>
+        <MeetingUrlStatusBadge status="failed" size="small" tooltip={ctx.meetingUrlError ?? null} />
+        {ctx.onRetry ? renderRetryButton(ctx.onRetry, urlStatusT.retryUrlGeneration) : null}
+      </Stack>
+    );
+  }
+
+  if (status === "expired") {
+    return <MeetingUrlStatusBadge status="expired" size="small" tooltip={ctx.meetingUrlError ?? null} />;
+  }
+
   const handleJoin = makeHandleJoin(ctx.resolvedUrl, ctx.onJoinAction);
   return (
-    <Tooltip title={ctx.tooltip}>
-      {wrapSpan(
-        <Button
-          id={ctx.id}
-          variant="contained"
-          fullWidth={opts.fullWidth || undefined}
-          startIcon={
-            ctx.hasUrl && ctx.providerLogo ? (
-              <Box component="img" src={ctx.providerLogo} alt="" sx={{ width: 18, height: 18, borderRadius: "50%" }} />
-            ) : (
-              <OpenInNewOutlinedIcon />
-            )
-          }
-          disabled={!ctx.hasUrl}
-          onClick={handleJoin}
-        >
-          {ctx.buttonLabel}
-        </Button>,
-        opts.fullWidth
-      )}
-    </Tooltip>
+    <Stack sx={{ gap: 0.5 }}>
+      <Tooltip title={ctx.tooltip}>
+        {wrapSpan(
+          <Button
+            id={ctx.id}
+            variant="contained"
+            fullWidth={opts.fullWidth || undefined}
+            startIcon={
+              ctx.hasUrl && ctx.providerLogo ? (
+                <Box
+                  component="img"
+                  src={ctx.providerLogo}
+                  alt=""
+                  sx={{ width: 18, height: 18, borderRadius: "50%" }}
+                />
+              ) : (
+                <OpenInNewOutlinedIcon />
+              )
+            }
+            disabled={!ctx.hasUrl}
+            onClick={handleJoin}
+          >
+            {ctx.buttonLabel}
+          </Button>,
+          opts.fullWidth
+        )}
+      </Tooltip>
+      {ctx.showCopyButton && ctx.resolvedUrl ? renderCopyButton(ctx.resolvedUrl) : null}
+      {renderExpiresAt(ctx.expiresAt)}
+    </Stack>
   );
 }
 
 function renderActionVariant(
   ctx: JoinContext,
   ActionComponent: React.ComponentType<ButtonProps>,
-  opts: Required<MeetingJoinActionSharedOptions>
+  opts: Required<MeetingJoinActionSharedOptions>,
+  status: MeetingUrlStatus,
+  urlStatusT: UrlStatusTranslations
 ): ReactElement {
+  if (status === "pending") {
+    return <MeetingUrlStatusBadge status="pending" size="small" tooltip={ctx.meetingUrlError ?? null} />;
+  }
+
+  if (status === "failed") {
+    return (
+      <Stack sx={{ gap: 0.5 }}>
+        <MeetingUrlStatusBadge status="failed" size="small" tooltip={ctx.meetingUrlError ?? null} />
+        {ctx.onRetry ? renderRetryButton(ctx.onRetry, urlStatusT.retryUrlGeneration) : null}
+      </Stack>
+    );
+  }
+
+  if (status === "expired") {
+    return <MeetingUrlStatusBadge status="expired" size="small" tooltip={ctx.meetingUrlError ?? null} />;
+  }
+
   const handleJoin = makeHandleJoin(ctx.resolvedUrl, ctx.onJoinAction);
   const ActionComp = ActionComponent;
   return (
-    <Tooltip title={ctx.tooltip}>
-      {wrapSpan(
-        <ActionComp id={ctx.id} startIcon={<VideocamOutlinedIcon />} disabled={!ctx.hasUrl} onClick={handleJoin}>
-          {ctx.buttonLabel}
-        </ActionComp>,
-        opts.fullWidth
-      )}
-    </Tooltip>
+    <Stack sx={{ gap: 0.5 }}>
+      <Tooltip title={ctx.tooltip}>
+        {wrapSpan(
+          <ActionComp id={ctx.id} startIcon={<VideocamOutlinedIcon />} disabled={!ctx.hasUrl} onClick={handleJoin}>
+            {ctx.buttonLabel}
+          </ActionComp>,
+          opts.fullWidth
+        )}
+      </Tooltip>
+      {ctx.showCopyButton && ctx.resolvedUrl ? renderCopyButton(ctx.resolvedUrl) : null}
+      {renderExpiresAt(ctx.expiresAt)}
+    </Stack>
   );
 }
 
@@ -185,37 +314,24 @@ export interface MeetingJoinActionSharedProps extends MeetingJoinActionProps, Me
 
 export function MeetingJoinActionShared(props: Readonly<MeetingJoinActionSharedProps>): React.ReactElement {
   const ctx = useJoinContext(props);
+  const urlStatusT = useAppTranslation(Translation.Dashboard.MeetingUrlStatus);
   const { variant = "action", emptyRole, setupHref, ActionComponent, options } = props;
   const opts: Required<MeetingJoinActionSharedOptions> = { ...DEFAULT_OPTIONS, ...options };
 
-  if (!ctx.hasUrl && emptyRole && setupHref && variant !== "icon") {
+  const urlStatus = mapUrlStatus(ctx.meetingUrlStatus, ctx.hasUrl);
+
+  // Non-auto-generation, no URL, and no status → fall back to setup alert (existing behavior)
+  if (!ctx.hasUrl && emptyRole && setupHref && variant !== "icon" && !ctx.meetingUrlStatus) {
     return renderSetupAlert(ctx, setupHref, emptyRole);
   }
 
-  const isUrlPending = !ctx.hasUrl && ctx.supportsAutoGeneration;
-
   if (variant === "icon") {
-    return (
-      <Stack sx={{ alignItems: "center", gap: 0.5 }}>
-        {renderIconVariant(ctx, setupHref, opts)}
-        {isUrlPending ? <Chip size="small" color="info" label={ctx.tDisplay.urlPending} /> : null}
-      </Stack>
-    );
+    return renderIconVariant(ctx, setupHref, opts, urlStatus, urlStatusT);
   }
 
   if (variant === "button") {
-    return (
-      <Stack sx={{ gap: 0.5 }}>
-        {renderButtonVariant(ctx, opts)}
-        {isUrlPending ? <Chip size="small" color="info" label={ctx.tDisplay.urlPending} /> : null}
-      </Stack>
-    );
+    return renderButtonVariant(ctx, opts, urlStatus, urlStatusT);
   }
 
-  return (
-    <Stack sx={{ gap: 0.5 }}>
-      {renderActionVariant(ctx, ActionComponent, opts)}
-      {isUrlPending ? <Chip size="small" color="info" label={ctx.tDisplay.urlPending} /> : null}
-    </Stack>
-  );
+  return renderActionVariant(ctx, ActionComponent, opts, urlStatus, urlStatusT);
 }

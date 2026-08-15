@@ -6,4 +6,6 @@ export const uiMeetingConfigReauthNeededAr = {
   reauthExpiringSoon: "على وشك الانتهاء",
   reauthExpired: "منتهي",
   reconnectRequiredBadge: "إعادة الربط مطلوبة",
+  remindLater: "ذكّرني لاحقاً",
+  reconnectAllButton: "إعادة ربط الكل",
 };

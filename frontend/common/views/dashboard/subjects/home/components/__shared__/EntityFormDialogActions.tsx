@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, DialogActions } from "@mui/material";
+import { Button, CircularProgress, DialogActions } from "@mui/material";
 
 interface EntityFormDialogActionsProps {
   /** HTML id of the <form> the submit button should target. */
@@ -48,6 +48,7 @@ export function EntityFormDialogActions({
         form={formId}
         disabled={isLoading}
         variant="contained"
+        aria-busy={isLoading}
         sx={theme => ({
           backgroundColor: theme.palette.primary.main,
           color: theme.palette.onPrimary,
@@ -56,7 +57,7 @@ export function EntityFormDialogActions({
           "&:hover": { backgroundColor: theme.palette.primary.dark },
         })}
       >
-        {isLoading ? "..." : saveLabel}
+        {isLoading ? <CircularProgress size={20} sx={theme => ({ color: theme.palette.onPrimary })} /> : saveLabel}
       </Button>
     </DialogActions>
   );

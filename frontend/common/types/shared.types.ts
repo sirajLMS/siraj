@@ -145,6 +145,8 @@ export interface TeacherScheduleRow {
   readonly isCurrent?: boolean;
   readonly studentId?: string;
   readonly meetingJoinUrl?: string | null;
+  readonly meetingUrlStatus?: string | null;
+  readonly meetingUrlError?: string | null;
   readonly effectiveMeeting?: EffectiveMeeting | null;
   readonly isFrozen?: boolean | null;
 }

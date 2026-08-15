@@ -1,0 +1,80 @@
+import { afterEach, describe, expect, test } from "bun:test";
+import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup, render, screen } from "@testing-library/react";
+
+expect.extend(matchers);
+
+import { MeetingProviderLogo } from "@/frontend/common/components/ui/display/meetingConfig/MeetingProviderLogo";
+import { TestWrapper } from "@/test/ui/components/TestWrapper";
+
+afterEach(() => {
+  cleanup();
+});
+
+describe("MeetingProviderLogo", () => {
+  test("renders zoom provider logo", () => {
+    const { container } = render(<MeetingProviderLogo providerSlug="zoom" />, { wrapper: TestWrapper });
+    expect(container.querySelector("img")).toBeInTheDocument();
+  });
+
+  test("renders google_meet provider logo", () => {
+    const { container } = render(<MeetingProviderLogo providerSlug="google_meet" />, { wrapper: TestWrapper });
+    expect(container.querySelector("img")).toBeInTheDocument();
+  });
+
+  test("renders microsoft_teams provider logo", () => {
+    const { container } = render(<MeetingProviderLogo providerSlug="microsoft_teams" />, { wrapper: TestWrapper });
+    expect(container.querySelector("img")).toBeInTheDocument();
+  });
+
+  test("renders custom provider logo", () => {
+    const { container } = render(<MeetingProviderLogo providerSlug="custom" />, { wrapper: TestWrapper });
+    expect(container.querySelector("img")).toBeInTheDocument();
+  });
+
+  test("renders fallback Avatar for unknown provider", () => {
+    render(<MeetingProviderLogo providerSlug="unknown_provider" />, { wrapper: TestWrapper });
+    // Avatar fallback uses a VideocamOutlined icon
+    expect(screen.getByText(/meeting provider logo/i)).toBeInTheDocument();
+  });
+
+  test("renders fallback Avatar for null providerSlug", () => {
+    render(<MeetingProviderLogo providerSlug={null} />, { wrapper: TestWrapper });
+    expect(screen.getByText(/meeting provider logo/i)).toBeInTheDocument();
+  });
+
+  test("renders small size", () => {
+    const { container } = render(<MeetingProviderLogo providerSlug="zoom" size="small" />, { wrapper: TestWrapper });
+    expect(container.querySelector("img")).toBeInTheDocument();
+  });
+
+  test("renders large size", () => {
+    const { container } = render(<MeetingProviderLogo providerSlug="zoom" size="large" />, { wrapper: TestWrapper });
+    expect(container.querySelector("img")).toBeInTheDocument();
+  });
+
+  test("uses logoUrl override when provided", () => {
+    const { container } = render(
+      <MeetingProviderLogo providerSlug="zoom" logoUrl="https://example.com/custom-logo.png" />,
+      { wrapper: TestWrapper }
+    );
+    expect(container.querySelector("img")).toHaveAttribute("src", "https://example.com/custom-logo.png");
+  });
+
+  test("uses providerName in alt text", () => {
+    const { container } = render(<MeetingProviderLogo providerSlug="zoom" providerName="Zoom" />, {
+      wrapper: TestWrapper,
+    });
+    expect(container.querySelector("img")).toHaveAttribute("alt", "Zoom logo");
+  });
+
+  test("uses default alt text when no providerName", () => {
+    const { container } = render(<MeetingProviderLogo providerSlug="zoom" />, { wrapper: TestWrapper });
+    expect(container.querySelector("img")).toHaveAttribute("alt", "zoom logo");
+  });
+
+  test("renders with custom sx prop", () => {
+    const { container } = render(<MeetingProviderLogo providerSlug="zoom" sx={{ mt: 1 }} />, { wrapper: TestWrapper });
+    expect(container.querySelector("img")).toBeInTheDocument();
+  });
+});

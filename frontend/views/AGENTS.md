@@ -52,6 +52,7 @@
 - **Auto-generation vs manual override**: When an auto-capable provider's config comes with a user-supplied `meetingUrl` (non-empty), the service treats it as a **manual override** — no generation occurs, and the URL allowlist is enforced against the user-supplied URL. Only when `meetingUrl` is empty does the "Generate" button call the backend to produce a fresh join link via the adapter.
 - **Admin Meeting Integrations tab**: The admin "Meeting Integrations" tab (mirrors `EnvironmentConfigTab`) uses the standard `createLazyView` + `ResponsiveViewSwitch` pattern. See `frontend/common/views/dashboard/settings/tabs/meetingIntegrations/MeetingIntegrationsTab.tsx` (switcher), `useMeetingIntegrationsViewModel.ts` (view model), and `frontend/common/stores/meetingIntegrationsSettingsStore.ts` (Zustand store). Components live in `frontend/common/views/dashboard/settings/components/meetingIntegrations/` (`MeetingProviderCredentialForm`, `TestConnectionResultPanel`, `ConnectedAccountsTable`, `RevokeTokenDialog`, `MeetingIntegrationsHealthHeaders`).
 - See `docs/services/meeting-providers.md` for backend adapter/factory details.
+- See `docs/frontend/meeting-integrations-ui.md` for the canonical reference on meeting integration UI patterns (OAuth callback handling, reconnect-all batch action, status badges, clipboard, i18n namespaces, mobile-desktop responsive, Zod schema factory, animations, permission-gated cross-links, lint rule workarounds, accessibility checklist).
 
 ## Quota Views
 

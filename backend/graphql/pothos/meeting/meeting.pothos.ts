@@ -77,6 +77,21 @@ function meetingConfigSharedFields(t: PothosObjectFieldBuilder<MeetingConfigBase
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),
     provider: t.expose("provider", { type: MeetingProviderPothosObject, nullable: true }),
+    meetingUrlStatus: t.field({
+      type: "String",
+      nullable: true,
+      resolve: () => null,
+    }),
+    meetingUrlExpiresAt: t.field({
+      type: "DateTime",
+      nullable: true,
+      resolve: () => null,
+    }),
+    meetingUrlError: t.field({
+      type: "String",
+      nullable: true,
+      resolve: () => null,
+    }),
   };
 }
 

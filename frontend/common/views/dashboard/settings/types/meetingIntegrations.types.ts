@@ -56,6 +56,7 @@ export type MeetingIntegrationsViewModel = {
   readonly locale: "en" | "ar";
   readonly loading: boolean;
   readonly error: Error | undefined;
+  readonly canEdit: boolean;
   readonly providers: readonly MeetingIntegrationProviderSummary[];
 
   readonly expandedSlug: MeetingIntegrationProviderSlug | null;
@@ -83,5 +84,37 @@ export type MeetingIntegrationsViewModel = {
   ) => void;
   readonly onMetadataDialogClose: () => void;
 
+  // Connect-provider OAuth flow (wired in Task 29)
+  readonly connectingFor: MeetingIntegrationProviderSlug | null;
+  readonly connectErrorFor: Readonly<Partial<Record<MeetingIntegrationProviderSlug, string | null>>>;
+  readonly connectProvider: (providerSlug: MeetingIntegrationProviderSlug) => void;
+
+  // Cross-navigation to teacher profile meeting configs (wired in Task 29)
+  readonly navigateToProfile: () => void;
+  readonly canViewProfile: boolean;
+
   readonly refresh: () => Promise<void>;
+};
+
+/**
+ * Props for the tier-specific ConnectedAccountsTable views (desktop + mobile).
+ * Derived from the parent `MeetingIntegrationsViewModel` — each per-provider
+ * accordion passes a slice that couples the provider slug, its accounts array,
+ * and the label/permission/handler surface the table needs.
+ */
+export type ConnectedAccountsTableProps = {
+  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly accounts: readonly MeetingIntegrationConnectedAccount[];
+  readonly loading: boolean;
+  readonly providerSlug: MeetingIntegrationProviderSlug;
+  readonly canEdit: boolean;
+  readonly revokingFor: { userId: string; providerSlug: MeetingIntegrationProviderSlug } | null;
+  readonly onRevokeRequest: (
+    account: MeetingIntegrationConnectedAccount,
+    providerSlug: MeetingIntegrationProviderSlug
+  ) => void;
+  readonly onMetadataDialogOpen: (
+    account: MeetingIntegrationConnectedAccount,
+    providerSlug: MeetingIntegrationProviderSlug
+  ) => void;
 };

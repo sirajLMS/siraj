@@ -2,15 +2,21 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import { Button, Stack, Typography } from "@mui/material";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import { Button, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorState, SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
+import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
 import {
   classMeetingConfigsQueryDocument,
+  classMeetingConfigsWithStatusQueryDocument,
   createClassMeetingConfigMutationDocument,
   deleteClassMeetingConfigMutationDocument,
   recurringMeetingConfigsQueryDocument,
@@ -31,8 +37,13 @@ import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type {
   MeetingConfigClassScopeLabels,
   MeetingConfigDisplayLabels,
+  MeetingConfigEnhancementLabels,
   MeetingConfigManagerLabels,
 } from "@/shared/locale/types/ui";
+
+type StatusConfigEntry = Operations.ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig;
+
+type StatusMap = ReadonlyMap<string, StatusConfigEntry>;
 
 export type ClassMeetingConfigsSectionProps = {
   readonly classInstanceId?: string;
@@ -52,6 +63,109 @@ function configLabel(config: ClassMeetingConfigFieldsFragment, locale: string): 
   return config.provider?.slug ?? config.id ?? "";
 }
 
+function resolveGenerationStatus(statusValue: string | null | undefined): "pending" | "generated" | "failed" {
+  if (statusValue === "generated") return "generated";
+  if (statusValue === "failed") return "failed";
+  return "pending";
+}
+
+function MeetingGenerationStatusIndicator({
+  status,
+  labels,
+}: {
+  readonly status: "pending" | "generated" | "failed";
+  readonly labels: MeetingConfigEnhancementLabels;
+}): React.ReactNode {
+  let chipLabel: string;
+  let chipColor: "default" | "success" | "error";
+  if (status === "generated") {
+    chipLabel = labels.generationSuccess;
+    chipColor = "success";
+  } else if (status === "failed") {
+    chipLabel = labels.generationFailed;
+    chipColor = "error";
+  } else {
+    chipLabel = labels.generationPending;
+    chipColor = "default";
+  }
+  // Placeholder: MeetingGenerationStatusIndicator will be a dedicated component in Phase 4
+  return <Chip size="small" color={chipColor} variant="outlined" label={chipLabel} />;
+}
+
+function formatExpiry(expiresAt: string | null, labels: MeetingConfigEnhancementLabels): string | null {
+  if (!expiresAt) return null;
+  const expiryDate = new Date(expiresAt);
+  if (Number.isNaN(expiryDate.getTime())) return null;
+  const now = Date.now();
+  const diffMs = expiryDate.getTime() - now;
+  if (diffMs <= 0) return labels.expired;
+  const diffHours = diffMs / (1000 * 60 * 60);
+  if (diffHours < 24) {
+    const roundedHours = Math.max(1, Math.round(diffHours));
+    return labels.expiresInHours(roundedHours);
+  }
+  const diffDays = Math.round(diffHours / 24);
+  return labels.expiresInDays(diffDays);
+}
+
+function StatusExtra({
+  config,
+  statusMap,
+  enhancements,
+  onRetry,
+}: {
+  readonly config: MeetingConfigListItem;
+  readonly statusMap: StatusMap;
+  readonly enhancements: MeetingConfigEnhancementLabels;
+  readonly onRetry: (id: string) => void;
+}): React.ReactNode {
+  const configId = config.id;
+  const statusEntry = configId ? statusMap.get(configId) : undefined;
+
+  const status = statusEntry ? resolveGenerationStatus(statusEntry.meetingUrlStatus) : "pending";
+  const meetingUrl = statusEntry?.details?.meetingUrl ?? null;
+  const hasUrl = meetingUrl != null && meetingUrl.trim() !== "";
+  const expiryText = statusEntry ? formatExpiry(statusEntry.meetingUrlExpiresAt, enhancements) : null;
+  const isFailed = status === "failed";
+
+  const handleCopyUrl = useCallback(() => {
+    if (!meetingUrl) return;
+    navigator.clipboard.writeText(meetingUrl).catch(() => {
+      // Clipboard write failed silently; user may not have permissions
+    });
+  }, [meetingUrl]);
+
+  if (!configId || !statusEntry) return null;
+
+  return (
+    <Stack sx={{ flexDirection: "row", gap: 1, alignItems: "center", flexWrap: "wrap", mt: 1 }}>
+      <MeetingGenerationStatusIndicator status={status} labels={enhancements} />
+
+      {isFailed ? (
+        <Tooltip title={enhancements.retryGeneration}>
+          <IconButton size="small" aria-label={enhancements.retryGeneration} onClick={() => onRetry(configId)}>
+            <RefreshOutlinedIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      ) : null}
+
+      {hasUrl ? (
+        <Tooltip title={enhancements.copyMeetingUrl}>
+          <IconButton size="small" aria-label={enhancements.copyMeetingUrl} onClick={handleCopyUrl}>
+            <ContentCopyOutlinedIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      ) : null}
+
+      {expiryText ? (
+        <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary })}>
+          {expiryText}
+        </Typography>
+      ) : null}
+    </Stack>
+  );
+}
+
 function ConfigsContent({
   t,
   tManager,
@@ -60,10 +174,13 @@ function ConfigsContent({
   configs,
   busy,
   effectiveMeeting,
+  enhancements,
+  statusMap,
   handleAdd,
   handleEdit,
   handleSetDefault,
   onDelete,
+  onRetry,
 }: {
   readonly t: MeetingConfigClassScopeLabels;
   readonly tManager: MeetingConfigManagerLabels;
@@ -72,11 +189,21 @@ function ConfigsContent({
   readonly configs: readonly ClassMeetingConfigFieldsFragment[];
   readonly busy: boolean;
   readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
+  readonly enhancements: MeetingConfigEnhancementLabels;
+  readonly statusMap: StatusMap;
   readonly handleAdd: () => void;
   readonly handleEdit: (config: unknown) => void;
   readonly handleSetDefault: (id: string) => Promise<void>;
   readonly onDelete: (id: string) => void;
+  readonly onRetry: (id: string) => void;
 }) {
+  const renderRowExtra = useCallback(
+    (config: MeetingConfigListItem): React.ReactNode => (
+      <StatusExtra config={config} statusMap={statusMap} enhancements={enhancements} onRetry={onRetry} />
+    ),
+    [statusMap, enhancements, onRetry]
+  );
+
   return (
     <Stack spacing={2}>
       <ClassMeetingContextBanner
@@ -101,6 +228,7 @@ function ConfigsContent({
         onEditAction={resolvedCanManage ? handleEdit : undefined}
         onDeleteAction={resolvedCanManage ? onDelete : undefined}
         onSetDefaultAction={resolvedCanManage ? handleSetDefault : undefined}
+        renderRowExtra={renderRowExtra}
       />
 
       {!resolvedCanManage && configs.length === 0 ? (
@@ -153,7 +281,12 @@ function useScopeQueries(scopeId: string, isClassScope: boolean) {
     skip: isClassScope || !scopeId,
   });
 
-  const loading = classLoading || recurringLoading;
+  const { data: statusData, loading: statusLoading } = useQuery(classMeetingConfigsWithStatusQueryDocument, {
+    variables: { classInstanceId: scopeId },
+    skip: !isClassScope || !scopeId,
+  });
+
+  const loading = classLoading || recurringLoading || statusLoading;
   const error = classError ?? recurringError;
   const refetch = isClassScope ? refetchClass : refetchRecurring;
   const configs = useMemo(
@@ -161,7 +294,18 @@ function useScopeQueries(scopeId: string, isClassScope: boolean) {
     [isClassScope, classData?.classMeetingConfigs, recurringData?.recurringMeetingConfigs]
   );
 
-  return { loading, error, refetch, configs };
+  const statusMap = useMemo<StatusMap>(() => {
+    if (!isClassScope || !statusData?.classMeetingConfigs) return new Map();
+    const map = new Map<string, StatusConfigEntry>();
+    for (const entry of statusData.classMeetingConfigs) {
+      if (entry?.id) {
+        map.set(entry.id, entry);
+      }
+    }
+    return map;
+  }, [isClassScope, statusData?.classMeetingConfigs]);
+
+  return { loading, error, refetch, configs, statusMap };
 }
 
 function useMeetingConfigMutations(
@@ -299,7 +443,7 @@ export function ClassMeetingConfigsSection({
   const isClassScope = Boolean(classInstanceId);
   const scopeId = classInstanceId ?? recurringScheduleId ?? "";
 
-  const { loading, error, refetch, configs } = useScopeQueries(scopeId, isClassScope);
+  const { loading, error, refetch, configs, statusMap } = useScopeQueries(scopeId, isClassScope);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editConfig, setEditConfig] = useState<ClassMeetingConfigFieldsFragment | null>(null);
@@ -333,6 +477,23 @@ export function ClassMeetingConfigsSection({
     setFormOpen(true);
   }, []);
 
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [retryMutation] = useMutation(updateClassMeetingConfigMutationDocument);
+  const handleRetry = useCallback(
+    async (id: string) => {
+      setRetryingId(id);
+      try {
+        await retryMutation({ variables: { id, input: {} } });
+        await refetch();
+      } catch {
+        setErrorMessage(tManager.saveError);
+      } finally {
+        setRetryingId(null);
+      }
+    },
+    [retryMutation, refetch, tManager]
+  );
+
   if (!scopeId) return null;
 
   if (error && configs.length === 0) {
@@ -349,7 +510,7 @@ export function ClassMeetingConfigsSection({
     );
   }
 
-  const busy = loading || deleting || settingDefault;
+  const busy = loading || deleting || settingDefault || retryingId != null;
 
   return (
     <SectionPanel id="meeting-configs" title={t.sectionTitle} subTitle={t.sectionSubtitle}>
@@ -361,10 +522,13 @@ export function ClassMeetingConfigsSection({
         configs={configs}
         busy={busy}
         effectiveMeeting={effectiveMeeting}
+        enhancements={labels.enhancements}
+        statusMap={statusMap}
         handleAdd={handleAdd}
         handleEdit={handleEdit}
         handleSetDefault={handleSetDefault}
         onDelete={id => setDeleteId(id)}
+        onRetry={handleRetry}
       />
 
       <ClassMeetingConfigDialogs

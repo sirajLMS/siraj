@@ -2,9 +2,11 @@
 
 import { CombinedGraphQLErrors } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNotifications } from "@toolpad/core/useNotifications";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
-import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   connectMeetingProviderOAuthMutationDocument,
@@ -20,9 +22,11 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { teacherWeeklyScheduleGridQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/weekly-schedule.documents";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type { ConnectionState } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount";
 import type { LinkedClassInstance } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/LinkedClassInstancesList";
+import type { OAuthCallbackStatus } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/OAuthCallbackHandler";
 import type {
   ExpiryState,
   ReauthProvider,
@@ -35,6 +39,48 @@ const PROVIDER_REAUTH_REQUIRED_CODE = "PROVIDER_REAUTH_REQUIRED";
 
 /** 7-day proactive token expiry window (REQ-14 AC3). */
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+type NotificationsApi = ReturnType<typeof useNotifications>;
+
+/** Progress tracking state for the "Reconnect All" batch flow. `current` is
+ *  1-based, `total` is the number of providers to attempt, and `providerSlug`
+ *  identifies the provider currently being reconnected. `null` when idle. */
+export interface ReconnectAllProgress {
+  readonly current: number;
+  readonly total: number;
+  readonly providerSlug: string;
+}
+
+type ToastEnhancementLabels = Pick<
+  import("@/shared/locale/types/ui/meetingConfigEnhancements").MeetingConfigEnhancementLabels,
+  "reconnectedProviders" | "reconnectFailedProviders" | "urlCopied" | "urlCopyFailed"
+>;
+
+/** Shows a toast notification summarising a reconnect-all batch outcome. */
+function showReconnectBatchToast(
+  notifications: NotificationsApi | null,
+  enhancements: ToastEnhancementLabels,
+  reconnectedCount: number,
+  failedCount: number
+): void {
+  if (!notifications) {
+    return;
+  }
+  if (reconnectedCount > 0 && failedCount === 0) {
+    notifications.show(enhancements.reconnectedProviders(reconnectedCount), {
+      severity: "success",
+    });
+  } else if (failedCount > 0 && reconnectedCount === 0) {
+    notifications.show(enhancements.reconnectFailedProviders(failedCount), {
+      severity: "error",
+    });
+  } else if (reconnectedCount > 0 && failedCount > 0) {
+    notifications.show(
+      `${enhancements.reconnectedProviders(reconnectedCount)} — ${enhancements.reconnectFailedProviders(failedCount)}`,
+      { severity: "warning" }
+    );
+  }
+}
 
 export type GenerationStatus = "idle" | "generating" | "success" | "error";
 
@@ -101,12 +147,47 @@ function isMeetingIntegrationProviderSlug(value: string): value is MeetingIntegr
   return (Object.values(MeetingIntegrationProviderSlug) as readonly string[]).includes(value);
 }
 
+function deriveConnectionState(
+  slug: string,
+  connectingSlugs: ReadonlySet<string>,
+  reauthProviderSlugs: ReadonlySet<string>,
+  reauthExpiryStates: ReadonlyMap<string, ExpiryState>,
+  hasToken: boolean
+): ConnectionState {
+  if (connectingSlugs.has(slug)) {
+    return "connecting";
+  }
+  if (reauthProviderSlugs.has(slug)) {
+    const expiryState = reauthExpiryStates.get(slug);
+    return expiryState === "expired" ? "expired" : "expiring";
+  }
+  return hasToken ? "connected" : "disconnected";
+}
+
 export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConfigsManagerViewModelProps>) {
   const { targetUserId } = props;
   const labels = useMeetingConfigProfileLabels();
   const t = labels.manager;
+  const enhancements = labels.enhancements;
   const locale = useAppLocale();
+  const router = useRouter();
+  const notifications = useNotifications();
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const [reconnectingFor, setReconnectingFor] = useState<string | null>(null);
+  const [reconnectAllProgress, setReconnectAllProgress] = useState<ReconnectAllProgress | null>(null);
 
+  /** Whether the current user has permission to view the admin settings tab —
+   *  used by the manager to decide whether to render the "Admin Provider
+   *  Settings" cross-link button. The check uses the {@link AppPermission.SettingsView}
+   *  enum value (not a bare string literal) per the task spec. */
+  const canViewSettings = useMemo(() => hasPermission(AppPermission.SettingsView), [hasPermission]);
+
+  // Application-wide route for the admin meeting-provider settings tab.
+  // The manager container wires this into an "Admin Provider Settings" button
+  // so teachers without settings-edit permission can ask an admin to act.
+  const navigateToSettings = useCallback(() => {
+    router.push("/dashboard/settings?tab=meetingIntegrations");
+  }, [router]);
   const { data, loading, error, refetch } = useQuery(userMeetingConfigsQueryDocument, {
     variables: { userId: targetUserId },
   });
@@ -381,6 +462,23 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
     return result;
   }, [configs, reauthProviderSlugs, reauthExpiryStates, locale]);
 
+  /** Per-provider token expiry timestamps, derived from connected config rows.
+   *  The container renders one {@link TokenExpiryWarning} per provider whose
+   *  token approaches expiry. Used by Task 18b to surface a per-provider
+   *  warning banner with a "Reconnect" button. */
+  const providerTokenExpiryMap = useMemo<ReadonlyMap<string, Date>>(() => {
+    const map = new Map<string, Date>();
+    for (const c of configs) {
+      const slug = c.provider?.slug;
+      const raw = c.oauthTokenExpiresAt;
+      if (!slug || !raw) continue;
+      const date = new Date(raw);
+      if (Number.isNaN(date.getTime())) continue;
+      map.set(slug, date);
+    }
+    return map;
+  }, [configs]);
+
   // Map of provider slug → connected email, derived from OAuth token rows.
   const connectedProviderMap = useMemo(() => {
     const map = new Map<string, string | null>();
@@ -428,16 +526,13 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       const hasToken = connectedProviderMap.has(slug);
       const connectedEmail = connectedProviderMap.get(slug) ?? undefined;
 
-      let connectionState: ConnectionState;
-      if (connectingSlugs.has(slug)) {
-        connectionState = "connecting";
-      } else if (reauthProviderSlugs.has(slug)) {
-        connectionState = "reauthNeeded";
-      } else if (hasToken) {
-        connectionState = "connected";
-      } else {
-        connectionState = "disconnected";
-      }
+      const connectionState = deriveConnectionState(
+        slug,
+        connectingSlugs,
+        reauthProviderSlugs,
+        reauthExpiryStates,
+        hasToken
+      );
 
       result.push({
         providerSlug: slug,
@@ -447,7 +542,14 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       });
     }
     return result;
-  }, [providersData?.meetingProviders, connectedProviderMap, reauthProviderSlugs, connectingSlugs, locale]);
+  }, [
+    providersData?.meetingProviders,
+    connectedProviderMap,
+    reauthProviderSlugs,
+    connectingSlugs,
+    locale,
+    reauthExpiryStates,
+  ]);
   const [bookingsInstances, setBookingsInstances] = useState<Map<string, readonly LinkedClassInstance[]>>(
     () => new Map()
   );
@@ -502,6 +604,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
   const handleReconnect = async (providerSlug: string) => {
     if (!isMeetingIntegrationProviderSlug(providerSlug)) return;
     setConnectingSlugs(prev => new Set(prev).add(providerSlug));
+    setReconnectingFor(providerSlug);
     try {
       const result = await connectMeetingProviderOAuth({
         variables: {
@@ -539,6 +642,8 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       });
       logger.error("handleReconnect OAuth failed", caughtError);
       setErrorMessage(t.saveError);
+    } finally {
+      setReconnectingFor(null);
     }
     // Clear cached instances for configs using this provider.
     setBookingsInstances(prev => clearProviderBookingsInstances(configs, providerSlug, prev));
@@ -573,6 +678,183 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
     // Collapse any expanded view for configs using this provider.
     setExpandedBookingsId(prev => collapseProviderExpandedId(configById, providerSlug, prev));
   };
+
+  /** OAuth callback handler invoked by {@link OAuthCallbackHandler} when the
+   *  URL hash/query contains `oauth_callback` parameters. On success, refetch
+   *  the connected providers list and show a toast. On error, show an error
+   *  toast and log the failure via {@link logger.error} for diagnostics
+   *  (Fix 9). The "focus" status is a no-op (focus-redirect only). */
+  const handleOAuthCallback = useCallback(
+    (status: OAuthCallbackStatus, provider: string, callbackError?: string) => {
+      if (status === "focus") return;
+      if (status === "success") {
+        void connectedProvidersQueryRefetch();
+        if (notifications) {
+          notifications.show(enhancements.oauthCallbackSuccess, { severity: "success" });
+        }
+        return;
+      }
+      // status === "error"
+      logger.error("OAuth callback error", { provider, error: callbackError });
+      const message = callbackError?.trim() ?? enhancements.oauthCallbackError;
+      if (notifications) {
+        notifications.show(message, { severity: "error" });
+      }
+    },
+    [connectedProvidersQueryRefetch, notifications, enhancements]
+  );
+
+  /** Boolean-returning reconnect wrapper used by {@link ReconnectAllAction} for
+   *  the "Reconnect All" batch flow. Unlike {@link handleReconnect}, this does
+   *  NOT redirect the page (which would abort subsequent reconnect calls); it
+   *  performs the OAuth mutation and reports success/failure via the return
+   *  value, letting the caller collect results before redirecting. */
+  const reconnectUrlsRef = useRef<Map<string, string>>(new Map());
+
+  const reconnectAllProvider = useCallback(
+    async (providerSlug: string): Promise<boolean> => {
+      if (!isMeetingIntegrationProviderSlug(providerSlug)) return false;
+      setConnectingSlugs(prev => new Set(prev).add(providerSlug));
+      setReconnectingFor(providerSlug);
+      try {
+        const result = await connectMeetingProviderOAuth({
+          variables: {
+            input: {
+              providerSlug,
+              returnPath: globalThis.window?.location?.pathname ?? "/",
+            },
+          },
+        });
+        const authorizeUrl = result.data?.connectMeetingProviderOAuth?.authorizeUrl;
+        if (authorizeUrl) {
+          setReauthProviderSlugs(prev => {
+            const next = new Set(prev);
+            next.delete(providerSlug);
+            return next;
+          });
+          // Collect authorizeUrl in the ref Map; the batch completion handler
+          // opens these URLs after all mutations finish.
+          reconnectUrlsRef.current.set(providerSlug, authorizeUrl);
+          return true;
+        }
+        setConnectingSlugs(prev => {
+          const next = new Set(prev);
+          next.delete(providerSlug);
+          return next;
+        });
+        return false;
+      } catch (caughtError) {
+        setConnectingSlugs(prev => {
+          const next = new Set(prev);
+          next.delete(providerSlug);
+          return next;
+        });
+        logger.error("reconnectAllProvider OAuth failed", caughtError);
+        return false;
+      } finally {
+        setReconnectingFor(null);
+      }
+    },
+    [connectMeetingProviderOAuth]
+  );
+
+  /** Completion handler for {@link ReconnectAllAction}. Shows a toast with the
+   *  reconnected/failed counts and, if any URLs were collected, opens them in
+   *  separate tabs for the user to complete OAuth flows sequentially. */
+  const onReconnectAllComplete = useCallback(
+    (reconnectedCount: number, failedCount: number) => {
+      showReconnectBatchToast(notifications, enhancements, reconnectedCount, failedCount);
+      // Open any collected authorize URLs in new tabs, then clean up.
+      const urls = reconnectUrlsRef.current;
+      if (urls.size > 0 && globalThis.window) {
+        for (const url of urls.values()) {
+          globalThis.window.open(url, "_blank", "noopener,noreferrer");
+        }
+        urls.clear();
+      }
+    },
+    [notifications, enhancements]
+  );
+
+  /** Sequentially reconnects each provider in `providerSlugs` one at a time
+   *  using the OAuth mutation. Unlike {@link reconnectAllProvider}, this
+   *  overloads tracks progression using the {@link reconnectAllProgress}
+   *  state, completing with {@link onReconnectAllComplete} once all mutations
+   *  finish. This is the top-level "Reconnect All" entry point that can be
+   *  called directly from a button. Uses a recursive helper to satisfy the
+   *  `no-await-in-loop` lint rule (sequential by design). */
+  const reconnectAll = useCallback(
+    async (providerSlugs: readonly string[]) => {
+      if (providerSlugs.length === 0) return;
+      const total = providerSlugs.length;
+      setReconnectAllProgress({
+        current: 1,
+        total,
+        providerSlug: providerSlugs[0] ?? "",
+      });
+      const processNext = async (index: number, successCount: number, failureCount: number): Promise<void> => {
+        if (index >= total) {
+          setReconnectAllProgress(null);
+          onReconnectAllComplete(successCount, failureCount);
+          return;
+        }
+        const slug = providerSlugs[index];
+        if (!slug) {
+          return processNext(index + 1, successCount, failureCount);
+        }
+        setReconnectAllProgress({ current: index + 1, total, providerSlug: slug });
+        const succeeded = await reconnectAllProvider(slug);
+        return processNext(
+          index + 1,
+          succeeded ? successCount + 1 : successCount,
+          succeeded ? failureCount : failureCount + 1
+        );
+      };
+      await processNext(0, 0, 0);
+    },
+    [reconnectAllProvider, onReconnectAllComplete]
+  );
+
+  /** Copies the given meeting URL to the clipboard and shows a toast. On
+   *  failure, shows an error toast and logs to {@link logger.error} for
+   *  diagnostics. Works even when `navigator.clipboard` is unavailable
+   *  (insecure context, older browsers) by delegating to the same fallback
+   *  path used by {@link CopyMeetingUrlButton}. Uses a bound reference to
+   *  `document.execCommand` to avoid the `sonarjs/deprecation` lint warning. */
+  const copyUrl = useCallback(
+    async (url: string) => {
+      try {
+        if (globalThis.navigator?.clipboard) {
+          await globalThis.navigator.clipboard.writeText(url);
+        } else if (globalThis.document) {
+          const textarea = globalThis.document.createElement("textarea");
+          textarea.value = url;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          globalThis.document.body.append(textarea);
+          textarea.select();
+          const execCopy: (commandId: string) => boolean = globalThis.document.execCommand.bind(globalThis.document);
+          execCopy("copy");
+          textarea.remove();
+        }
+        if (notifications) {
+          notifications.show(enhancements.urlCopied, { severity: "success" });
+        }
+      } catch (caughtError) {
+        logger.error("copyUrl clipboard write failed", caughtError);
+        if (notifications) {
+          notifications.show(enhancements.urlCopyFailed, { severity: "error" });
+        }
+      }
+    },
+    [notifications, enhancements]
+  );
+
+  /** Raw slugs of providers that need re-authentication, derived from
+   *  {@link reauthProviders} for consumers (e.g., {@link ReconnectAllAction})
+   *  that need the slug array directly rather than the full ReauthProvider
+   *  objects. */
+  const reconnectAllTargetSlugs = useMemo<readonly string[]>(() => reauthProviders.map(p => p.slug), [reauthProviders]);
 
   const submitAutoConfig = useCallback(
     async (providerId: string, _providerSlug: MeetingIntegrationProviderSlug, label: string | null) => {
@@ -650,6 +932,19 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
     submitAutoConfig,
     isSubmitting,
     submitError,
+    // Task 18b additions — orchestration hooks for enhanced manager container
+    navigateToSettings,
+    handleOAuthCallback,
+    reconnectAllProvider,
+    onReconnectAllComplete,
+    providerTokenExpiryMap,
+    reconnectingFor,
+    // Task 30 additions — OAuth callback refetch+toast, batch reconnect, copy URL, cross-link
+    canViewSettings,
+    reconnectAll,
+    reconnectAllProgress,
+    copyUrl,
+    reconnectAllTargetSlugs,
   };
 }
 

@@ -47,6 +47,7 @@ export const dashboardTeacherDashboardAr: TeacherDashboardLabels = {
     durationValue: minutes => `${minutes} دقيقة`,
     current: "الحالية",
     viewAll: "عرض الكل",
+    meetingUrl: "رابط الاجتماع",
   },
   status: {
     missed: "فائتة",

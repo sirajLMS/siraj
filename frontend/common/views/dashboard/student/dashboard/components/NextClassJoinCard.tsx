@@ -4,6 +4,7 @@ import { PlayCircleOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, LinearProgress, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { formatDateTime } from "@/frontend/common/components/intl/dateFormat";
+import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
 import type { UpcomingLessonRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 import type { AppLocale, StudentPortalDashboardLabels as StudentDashboardLabels } from "@/shared/locale";
@@ -84,25 +85,29 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
   // Extract nested ternary for action button/content
   let actionContent: ReactNode = null;
   if (joinable) {
+    const meetingUrl = lesson.meetingJoinUrl ?? "";
     actionContent = (
-      <Button
-        variant="contained"
-        size="large"
-        startIcon={<PlayCircleOutlined />}
-        onClick={() => onJoin(lesson.id)}
-        sx={theme => ({
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-          fontWeight: 700,
-          borderRadius: 2,
-          py: 1.25,
-          "&:hover": {
-            backgroundColor: theme.palette.primary.dark ?? theme.palette.primary.main,
-          },
-        })}
-      >
-        {labels.joinNow}
-      </Button>
+      <Stack direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<PlayCircleOutlined />}
+          onClick={() => onJoin(lesson.id)}
+          sx={theme => ({
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.onPrimary,
+            fontWeight: 700,
+            borderRadius: 2,
+            py: 1.25,
+            "&:hover": {
+              backgroundColor: theme.palette.primary.dark ?? theme.palette.primary.main,
+            },
+          })}
+        >
+          {labels.joinNow}
+        </Button>
+        {meetingUrl ? <CopyMeetingUrlButton meetingUrl={meetingUrl} variant="icon" size="large" /> : null}
+      </Stack>
     );
   } else if (countdown) {
     actionContent = (

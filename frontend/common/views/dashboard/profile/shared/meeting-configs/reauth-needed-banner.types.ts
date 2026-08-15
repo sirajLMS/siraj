@@ -12,6 +12,8 @@ export type ReauthNeededBannerProps = {
   readonly reauthProviders: readonly ReauthProvider[];
   readonly labels: MeetingConfigReauthNeededLabels;
   readonly onReconnect: (providerSlug: string) => void;
+  readonly onReconnectAll?: () => void;
+  readonly onDismiss?: () => void;
 };
 
 export function expiryLabel(state: ExpiryState | undefined, labels: MeetingConfigReauthNeededLabels): string {

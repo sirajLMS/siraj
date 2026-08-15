@@ -1,5 +1,6 @@
 export * from "./classScope";
 export * from "./display";
+export * from "./enhancements";
 export * from "./fields";
 export * from "./join";
 export * from "./linkedClassInstances";
@@ -11,6 +12,7 @@ export * from "./summary";
 
 import { uiMeetingConfigClassScopeEn as classScope } from "./classScope";
 import { uiMeetingConfigDisplayEn as display } from "./display";
+import { uiMeetingConfigEnhancementsEn as enhancements } from "./enhancements";
 import { uiMeetingConfigFieldsEn as fields } from "./fields";
 import { uiMeetingConfigJoinEn as join } from "./join";
 import { uiMeetingConfigLinkedClassInstancesEn as linkedClassInstances } from "./linkedClassInstances";
@@ -40,4 +42,5 @@ export const uiMeetingConfigEn = {
   recurringSchedule,
   reauthNeeded,
   linkedClassInstances,
+  enhancements,
 };

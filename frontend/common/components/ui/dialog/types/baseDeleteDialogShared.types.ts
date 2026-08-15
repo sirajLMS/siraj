@@ -12,6 +12,8 @@ export interface BaseDeleteDialogSharedProps {
   confirmLabel: string;
   /** Optional override for the confirm button sx (default uses error palette) */
   confirmSx?: SxProps<Theme>;
+  /** Whether the dialog should be full-screen (mobile pattern). Defaults to false. */
+  fullScreen?: boolean;
 }
 
 export interface DeleteDialogSlotProps {

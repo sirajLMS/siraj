@@ -1,7 +1,24 @@
 "use client";
 
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { CheckOutlined, ContentCopyOutlined } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { useId } from "react";
 import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  srOnlySx,
+  useCopyFeedback,
+} from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/useCopyFeedback";
 import type { MeetingIntegrationConnectedAccount } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
@@ -28,112 +45,142 @@ function formatDate(date: Date | null | undefined, locale: "en" | "ar"): string 
   }).format(date);
 }
 
+const labelUppercaseSx = {
+  typography: "labelUppercase",
+  color: "text.secondary",
+  mb: 0.5,
+} as const;
+
+type MetadataFieldProps = {
+  readonly label: string;
+  readonly children: React.ReactNode;
+};
+
+function MetadataField({ label, children }: MetadataFieldProps) {
+  return (
+    <Box>
+      <Typography sx={labelUppercaseSx}>{label}</Typography>
+      {children}
+    </Box>
+  );
+}
+
+type TokenIdRowProps = {
+  readonly tokenId: string;
+  readonly labels: SettingsMeetingIntegrationsLabels;
+};
+
+function TokenIdRow({ tokenId, labels }: TokenIdRowProps) {
+  const [copied, copy] = useCopyFeedback();
+
+  const handleCopy = () => copy(tokenId);
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Typography sx={{ typography: "bodyMd", fontFamily: "monospace", wordBreak: "break-all" }}>{tokenId}</Typography>
+      <Tooltip title={copied ? labels.metadata.tokenIdCopied : labels.metadata.copyTokenId}>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={copied ? <CheckOutlined /> : <ContentCopyOutlined />}
+          onClick={handleCopy}
+          aria-label={labels.metadata.copyTokenId}
+        >
+          {copied ? labels.metadata.tokenIdCopied : labels.metadata.copyTokenId}
+        </Button>
+      </Tooltip>
+      <Typography component="output" sx={srOnlySx} aria-live="polite">
+        {copied ? labels.metadata.tokenIdCopied : ""}
+      </Typography>
+    </Box>
+  );
+}
+
+type ScopesChipsProps = {
+  readonly scopes: readonly string[] | undefined;
+  readonly labels: SettingsMeetingIntegrationsLabels;
+};
+
+function ScopesChips({ scopes, labels }: ScopesChipsProps) {
+  const visibleScopes = scopes ?? [];
+  if (visibleScopes.length === 0) {
+    return <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.metadata.noScopes}</Typography>;
+  }
+  return (
+    <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+      {visibleScopes.map(scope => (
+        <Chip key={scope} size="small" label={scope} variant="outlined" />
+      ))}
+    </Box>
+  );
+}
+
+type TokenMetadataDialogProps = {
+  readonly labels: SettingsMeetingIntegrationsLabels;
+  readonly locale: "en" | "ar";
+  readonly account: MeetingIntegrationConnectedAccount | null;
+  readonly providerSlug: MeetingIntegrationProviderSlug | null;
+  readonly loading?: boolean;
+  readonly open: boolean;
+  readonly onClose: () => void;
+};
+
 export function TokenMetadataDialog({
   labels,
   locale,
   account,
   providerSlug,
+  loading = false,
   open,
   onClose,
-}: {
-  readonly labels: SettingsMeetingIntegrationsLabels;
-  readonly locale: "en" | "ar";
-  readonly account: MeetingIntegrationConnectedAccount | null;
-  readonly providerSlug: MeetingIntegrationProviderSlug | null;
-  readonly open: boolean;
-  readonly onClose: () => void;
-}) {
+}: TokenMetadataDialogProps) {
+  const titleId = useId();
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{labels.metadata.title}</DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth aria-labelledby={titleId}>
+      <DialogTitle id={titleId}>{labels.metadata.title}</DialogTitle>
       <DialogContent>
         {account && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-            <Box>
-              <Typography
-                sx={{
-                  typography: "labelUppercase",
-                  color: "text.secondary",
-                  mb: 0.5,
-                }}
-              >
-                {labels.metadata.provider}
-              </Typography>
+            <MetadataField label={labels.metadata.provider}>
               <Typography sx={{ typography: "bodyMd" }}>
                 {providerSlug ? getProviderLabel(providerSlug, labels) : "—"}
               </Typography>
-            </Box>
+            </MetadataField>
 
             {account.email && (
-              <Box>
-                <Typography
-                  sx={{
-                    typography: "labelUppercase",
-                    color: "text.secondary",
-                    mb: 0.5,
-                  }}
-                >
-                  {labels.metadata.email}
-                </Typography>
+              <MetadataField label={labels.metadata.email}>
                 <Typography sx={{ typography: "bodyMd" }}>{account.email}</Typography>
-              </Box>
+              </MetadataField>
             )}
 
-            <Box>
-              <Typography
-                sx={{
-                  typography: "labelUppercase",
-                  color: "text.secondary",
-                  mb: 0.5,
-                }}
-              >
-                {labels.metadata.scopes}
-              </Typography>
-              <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-                {(account.scopes ?? []).map(scope => (
-                  <Chip key={scope} size="small" label={scope} variant="outlined" />
-                ))}
-              </Box>
-            </Box>
+            <MetadataField label={labels.metadata.tokenId}>
+              <TokenIdRow tokenId={account.id} labels={labels} />
+            </MetadataField>
 
-            <Box>
-              <Typography
-                sx={{
-                  typography: "labelUppercase",
-                  color: "text.secondary",
-                  mb: 0.5,
-                }}
-              >
-                {labels.metadata.expiry}
-              </Typography>
+            <MetadataField label={labels.metadata.scopes}>
+              <ScopesChips scopes={account.scopes} labels={labels} />
+            </MetadataField>
+
+            <MetadataField label={labels.metadata.expiry}>
               <Typography sx={{ typography: "bodyMd" }}>{formatDate(account.expiresAt, locale)}</Typography>
-            </Box>
+            </MetadataField>
 
-            <Box>
-              <Typography
-                sx={{
-                  typography: "labelUppercase",
-                  color: "text.secondary",
-                  mb: 0.5,
-                }}
-              >
-                {labels.metadata.connectedAt}
-              </Typography>
+            <MetadataField label={labels.metadata.connectedAt}>
               <Typography sx={{ typography: "bodyMd" }}>{formatDate(account.connectedAt, locale)}</Typography>
-            </Box>
+            </MetadataField>
 
-            <Box>
-              <Typography
-                sx={{
-                  typography: "labelUppercase",
-                  color: "text.secondary",
-                  mb: 0.5,
-                }}
-              >
-                {labels.metadata.lastRefreshed}
-              </Typography>
+            <MetadataField label={labels.metadata.lastRefreshed}>
               <Typography sx={{ typography: "bodyMd" }}>{formatDate(account.lastRefreshedAt, locale)}</Typography>
-            </Box>
+            </MetadataField>
+          </Box>
+        )}
+
+        {loading && !account && (
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, py: 3 }}>
+            <CircularProgress size={20} />
+            <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>
+              {labels.metadata.loadingHint}
+            </Typography>
           </Box>
         )}
       </DialogContent>

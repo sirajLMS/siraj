@@ -2,6 +2,7 @@ import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 import type {
   MeetingConfigClassScopeLabels,
   MeetingConfigDisplayLabels,
+  MeetingConfigEnhancementLabels,
   MeetingConfigLinkedClassInstancesLabels,
   MeetingConfigManagerLabels,
   MeetingConfigReauthNeededLabels,
@@ -17,4 +18,5 @@ export type MeetingConfigProfileLabels = {
   readonly linkedClassInstances: MeetingConfigLinkedClassInstancesLabels;
   readonly autoGeneration: ProfileNotificationsLabels["autoGeneration"];
   readonly connectAccount: ProfileNotificationsLabels["connectAccount"];
+  readonly enhancements: MeetingConfigEnhancementLabels;
 };

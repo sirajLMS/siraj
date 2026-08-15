@@ -3,7 +3,13 @@
 import { AccessTimeOutlined, AcUnitOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Button, Paper, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig/MeetingUrlCell";
+import {
+  AppPermission,
+  ClassExecutionState,
+  ClassOutcome,
+} from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import { formatDurationMinutes } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -399,6 +405,32 @@ export function TeacherScheduleMobileCardItem({
       <CardHeader row={row} labels={labels} canActivate={canActivate} isLive={isLive} studentHref={studentHrefValue} />
       <TimeHighlight row={row} labels={labels} />
       <StudentInfoRow row={row} />
+      <Box sx={{ mb: 1.5 }}>
+        <RequirePermission
+          permissions={[AppPermission.MeetingConfigsManageOwn, AppPermission.MeetingConfigsManageClass]}
+          fallback={
+            <MeetingUrlCell
+              meetingUrl={row.meetingJoinUrl}
+              meetingUrlStatus={row.meetingUrlStatus}
+              meetingUrlError={row.meetingUrlError}
+              joinLabel={labels.actions.joinVideo}
+              setupHref="/profile?tab=meeting"
+              badgeSize="medium"
+              canCopyUrl={false}
+            />
+          }
+        >
+          <MeetingUrlCell
+            meetingUrl={row.meetingJoinUrl}
+            meetingUrlStatus={row.meetingUrlStatus}
+            meetingUrlError={row.meetingUrlError}
+            joinLabel={labels.actions.joinVideo}
+            setupHref="/profile?tab=meeting"
+            badgeSize="medium"
+            canCopyUrl
+          />
+        </RequirePermission>
+      </Box>
       <CardFooter
         row={row}
         labels={labels}

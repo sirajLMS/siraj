@@ -4013,6 +4013,24 @@ export type ClassMeetingConfigsQueryVariables = Exact<{
 
 export type ClassMeetingConfigsQuery = ClassMeetingConfigsQuery_Query;
 
+export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig_details_MeetingConfigDetails = { meetingUrl: string | null, username: string | null, tenantId: string | null };
+
+export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig_provider_MeetingProvider_fieldSchema_MeetingProviderFieldSchema = { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null };
+
+export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig_provider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, providerKind: string | null, isActive: boolean | null, fieldSchema: ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig_provider_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
+
+export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, meetingUrlStatus: string | null, meetingUrlExpiresAt: string | null, meetingUrlError: string | null, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig_provider_MeetingProvider | null };
+
+export type ClassMeetingConfigsWithStatusQuery_Query = { classMeetingConfigs: Array<ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig> | null };
+
+
+export type ClassMeetingConfigsWithStatusQueryVariables = Exact<{
+  classInstanceId: string | number;
+}>;
+
+
+export type ClassMeetingConfigsWithStatusQuery = ClassMeetingConfigsWithStatusQuery_Query;
+
 export type RecurringMeetingConfigsQuery_recurringMeetingConfigs_ClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails | null, provider: ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider | null };
 
 export type RecurringMeetingConfigsQuery_Query = { recurringMeetingConfigs: Array<RecurringMeetingConfigsQuery_recurringMeetingConfigs_ClassMeetingConfig> | null };

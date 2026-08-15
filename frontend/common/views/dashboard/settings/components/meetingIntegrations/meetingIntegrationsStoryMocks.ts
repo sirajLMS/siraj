@@ -34,6 +34,15 @@ function createCredentialFormLabels() {
     showValue: "Show value",
     hideValue: "Hide value",
     emptyValue: "Not set",
+    clientId: "Client ID",
+    clientSecret: "Client Secret",
+    tenantId: "Tenant ID",
+    scopes: "Scopes",
+    webhookSecret: "Webhook Secret",
+    accountId: "Account ID",
+    addScope: "Add",
+    removeScope: "Remove",
+    scopesPlaceholder: "Enter scope and press Enter",
   };
 }
 
@@ -80,6 +89,10 @@ function createMetadataLabels() {
     noScopes: "No scopes available",
     provider: "Provider",
     email: "Connected Email",
+    tokenId: "Token ID",
+    copyTokenId: "Copy token ID",
+    tokenIdCopied: "Token ID copied!",
+    loadingHint: "Loading token metadata…",
   };
 }
 
@@ -89,6 +102,12 @@ function createTestPanelLabels() {
     copyUrl: "Copy URL",
     copied: "Copied!",
     marketplaceHint: "Configure in provider marketplace",
+    endpointReached: "Endpoint reached",
+    authStatus: "Authentication",
+    authSuccess: "Authenticated",
+    authFailure: "Not authenticated",
+    successMessage: "Connection test succeeded.",
+    idleHint: "Run a test to verify the provider connection.",
   };
 }
 
@@ -132,6 +151,35 @@ function createTopLevelLabels() {
     rawPayload: "Raw Payload",
     connectedAccounts: "Connected Accounts",
     noConnectedAccounts: "No connected accounts found.",
+    totalProviders: "Total providers",
+    connectedProviders: "Connected providers",
+    providersWithIssues: "Providers with issues",
+    disconnectedProviders: "Disconnected providers",
+    connectProvider: "Connect provider",
+    connecting: "Connecting…",
+    connectProviderSuccess: "Provider connected successfully.",
+    connectProviderError: "Failed to connect provider.",
+    viewProfileMeetingConfigs: "View meeting configs",
+    adminProviderSettings: "Admin provider settings",
+    clientIdRequired: "Client ID is required",
+    clientSecretRequired: "Client secret is required",
+    scopesRequired: "Scopes are required",
+    credentialFormCreateTitle: "Add credentials",
+    credentialFormEditTitle: "Edit credentials",
+    credentialsSaved: "Credentials saved.",
+    testConnectionIdle: "Test connection",
+    testConnectionTesting: "Testing connection…",
+    testConnectionFailure: "Connection test failed.",
+    retryTest: "Retry test",
+    revoke: "Revoke",
+    tokenRevoked: "Token revoked.",
+    tokenMetadata: "Token metadata",
+    tokenIssuedAt: "Issued at",
+    tokenExpiresAt: "Expires at",
+    tokenScopes: "Scopes",
+    tokenType: "Token type",
+    copyEndpointUrl: "Copy endpoint URL",
+    endpointCopied: "Endpoint URL copied!",
   };
 }
 
@@ -244,6 +292,7 @@ export function createViewModelMock(
     loadingAccountsFor: overrides.loadingAccountsFor ?? null,
     testingFor: overrides.testingFor ?? null,
     lastTestResultByProvider: overrides.lastTestResultByProvider ?? emptyTestResults,
+    canEdit: overrides.canEdit ?? true,
     revokingFor: overrides.revokingFor ?? null,
     metadataDialogAccount: overrides.metadataDialogAccount ?? null,
     metadataDialogProviderSlug: overrides.metadataDialogProviderSlug ?? null,

@@ -34,6 +34,9 @@ import { dashboardLmsLessonReportsEn } from "@/shared/locale/en/dashboard/lms/le
 import { dashboardLmsMonthlyReportsEn } from "@/shared/locale/en/dashboard/lms/monthlyReports.ts";
 import { dashboardLmsTeacherDuesEn } from "@/shared/locale/en/dashboard/lms/teacherDues.ts";
 import { dashboardMeetingProvidersEn } from "@/shared/locale/en/dashboard/meeting-providers/main.ts";
+import { dashboardMeetingGenerationEn } from "@/shared/locale/en/dashboard/meetingGeneration/meetingGeneration";
+import { dashboardMeetingUrlStatusEn } from "@/shared/locale/en/dashboard/meetingUrlStatus/meetingUrlStatus";
+import { dashboardOAuthFlowEn } from "@/shared/locale/en/dashboard/oauthFlow/oauthFlow";
 import { dashboardParentsDirectoryEn } from "@/shared/locale/en/dashboard/parents/directory.ts";
 import { dashboardParentLifecycleEn } from "@/shared/locale/en/dashboard/parents/lifecycle.ts";
 import { dashboardParentOnboardingEn } from "@/shared/locale/en/dashboard/parents/onboarding.ts";
@@ -182,6 +185,9 @@ export const enMessages: Translations = {
     staffDirectory: dashboardStaffDirectoryEn,
     staffOnboarding: dashboardStaffOnboardingEn,
     meetingProviders: dashboardMeetingProvidersEn,
+    meetingGeneration: dashboardMeetingGenerationEn,
+    meetingUrlStatus: dashboardMeetingUrlStatusEn,
+    oauthFlow: dashboardOAuthFlowEn,
     parentsDirectory: dashboardParentsDirectoryEn,
     parentOnboarding: dashboardParentOnboardingEn,
     parentStudents: dashboardParentStudentsEn,

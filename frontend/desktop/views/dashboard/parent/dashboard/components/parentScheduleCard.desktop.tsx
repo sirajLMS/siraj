@@ -2,21 +2,25 @@
 
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
+import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig";
 import {
   ParentScheduleCardShared,
   type ParentScheduleCardSharedOptions,
 } from "@/frontend/common/views/dashboard/parent/dashboard/components/__shared__/parentScheduleCardShared";
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
-import {
-  DesktopMeetingJoinAction,
-  DesktopPersonProfileLinkCell,
-  DesktopStatusBadge,
-} from "@/frontend/desktop/components/ui";
+import { DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
 
 export interface ParentScheduleDesktopListItemProps {
   readonly row: ParentScheduleRow;
   readonly labels: ParentDashboardLabels;
+}
+
+function resolveMeetingUrlStatus(row: ParentScheduleRow): string | null {
+  if (row.isFrozen) return "failed";
+  if (!row.videoEnabled && !row.meetingJoinUrl) return null;
+  if (row.meetingJoinUrl !== null && row.meetingJoinUrl !== undefined) return "generated";
+  return "pending";
 }
 
 const DESKTOP_OPTIONS: ParentScheduleCardSharedOptions = {
@@ -65,19 +69,17 @@ const DESKTOP_OPTIONS: ParentScheduleCardSharedOptions = {
   ),
   renderJoinAction: ({ row, labels, canJoin, frozenFallback }): ReactNode => {
     let result: ReactNode = null;
-    if (canJoin) {
+    if (row.isFrozen) {
+      result = frozenFallback;
+    } else if (canJoin) {
       result = (
-        <DesktopMeetingJoinAction
-          variant="icon"
-          joinUrl={row.meetingJoinUrl}
-          meeting={row.effectiveMeeting}
-          disabled={!row.videoEnabled}
-          label={labels.schedule.joinVideo}
-          emptyRole="parent"
+        <MeetingUrlCell
+          meetingUrl={row.meetingJoinUrl}
+          meetingUrlStatus={resolveMeetingUrlStatus(row)}
+          joinLabel={labels.schedule.joinVideo}
+          compact
         />
       );
-    } else if (row.isFrozen) {
-      result = frozenFallback;
     }
     return result;
   },

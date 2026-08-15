@@ -34,6 +34,9 @@ import { DashboardLmsLessonReports } from "@/shared/locale/namespaces/dashboard/
 import { DashboardLmsMonthlyReports } from "@/shared/locale/namespaces/dashboard/lms/monthlyReports.namespace";
 import { DashboardLmsTeacherDues } from "@/shared/locale/namespaces/dashboard/lms/teacherDues.namespace";
 import { DashboardMeetingProviders } from "@/shared/locale/namespaces/dashboard/meeting-providers/main.namespace";
+import { DashboardMeetingGeneration } from "@/shared/locale/namespaces/dashboard/meetingGeneration/meetingGeneration.namespace";
+import { DashboardMeetingUrlStatus } from "@/shared/locale/namespaces/dashboard/meetingUrlStatus/meetingUrlStatus.namespace";
+import { DashboardOAuthFlow } from "@/shared/locale/namespaces/dashboard/oauthFlow/oauthFlow.namespace";
 import { DashboardParentsDirectory } from "@/shared/locale/namespaces/dashboard/parents/directory.namespace";
 import { DashboardParentLifecycle } from "@/shared/locale/namespaces/dashboard/parents/lifecycle.namespace";
 import { DashboardParentOnboarding } from "@/shared/locale/namespaces/dashboard/parents/onboarding.namespace";
@@ -170,6 +173,9 @@ export const Translation = {
     LmsMonthlyReports: DashboardLmsMonthlyReports,
     LmsTeacherDues: DashboardLmsTeacherDues,
     MeetingProviders: DashboardMeetingProviders,
+    MeetingGeneration: DashboardMeetingGeneration,
+    MeetingUrlStatus: DashboardMeetingUrlStatus,
+    OAuthFlow: DashboardOAuthFlow,
     ParentLifecycle: DashboardParentLifecycle,
     ParentOnboarding: DashboardParentOnboarding,
     ParentProfile: DashboardParentProfile,

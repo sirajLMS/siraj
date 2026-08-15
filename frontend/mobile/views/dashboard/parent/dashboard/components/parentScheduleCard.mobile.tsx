@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { MeetingUrlCell } from "@/frontend/common/components/ui/display/meetingConfig";
 import {
   ParentScheduleCardShared,
   type ParentScheduleCardSharedOptions,
@@ -8,11 +9,17 @@ import {
 import type { ParentDashboardLabels } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardLabels";
 import type { ParentScheduleRow } from "@/frontend/common/views/dashboard/parent/dashboard/types/parentDashboardTypes";
 import { MobileCardListItem, MobilePersonProfileLink, MobileStatusBadge } from "@/frontend/mobile/components/ui";
-import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingJoinAction.mobile";
 
 export interface ParentScheduleMobileCardItemProps {
   readonly row: ParentScheduleRow;
   readonly labels: ParentDashboardLabels;
+}
+
+function resolveMeetingUrlStatus(row: ParentScheduleRow): string | null {
+  if (row.isFrozen) return "failed";
+  if (!row.videoEnabled && !row.meetingJoinUrl) return null;
+  if (row.meetingJoinUrl !== null && row.meetingJoinUrl !== undefined) return "generated";
+  return "pending";
 }
 
 const MOBILE_OPTIONS: ParentScheduleCardSharedOptions = {
@@ -48,19 +55,17 @@ const MOBILE_OPTIONS: ParentScheduleCardSharedOptions = {
   ),
   renderJoinAction: ({ row, labels, canJoin, frozenFallback }): ReactNode => {
     let result: ReactNode = null;
-    if (canJoin) {
+    if (row.isFrozen) {
+      result = frozenFallback;
+    } else if (canJoin) {
       result = (
-        <MobileMeetingJoinAction
-          variant="icon"
-          joinUrl={row.meetingJoinUrl}
-          meeting={row.effectiveMeeting}
-          disabled={!row.videoEnabled}
-          label={labels.schedule.joinVideo}
-          emptyRole="parent"
+        <MeetingUrlCell
+          meetingUrl={row.meetingJoinUrl}
+          meetingUrlStatus={resolveMeetingUrlStatus(row)}
+          joinLabel={labels.schedule.joinVideo}
+          compact
         />
       );
-    } else if (row.isFrozen) {
-      result = frozenFallback;
     }
     return result;
   },

@@ -1,35 +1,35 @@
 "use client";
 
-import { Card, CardContent, Grid, Typography } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
+import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
+import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import type { MeetingIntegrationsViewModel } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 
-export function MeetingIntegrationsHealthHeaders({ viewModel }: { readonly viewModel: MeetingIntegrationsViewModel }) {
-  const { labels, providers } = viewModel;
+const lazyViews = createLazyView<MeetingIntegrationsViewModel>(
+  () =>
+    import(
+      "@/frontend/mobile/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsHealthHeaders.mobile"
+    ).then(m => ({
+      default: m.MeetingIntegrationsHealthHeadersMobile,
+    })),
+  () =>
+    import(
+      "@/frontend/desktop/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsHealthHeaders.desktop"
+    ).then(m => ({
+      default: m.MeetingIntegrationsHealthHeadersDesktop,
+    }))
+);
 
-  const totalConfigured = providers.length;
-  const totalHealthy = providers.filter(p => p.credentialsHealthy).length;
-  const totalConnected = providers.reduce((sum, p) => sum + p.connectedTeacherCount, 0);
-  const totalReauth = providers.reduce((sum, p) => sum + p.reauthNeededCount, 0);
+const fallback = (
+  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 120 }}>
+    <CircularProgress size={32} />
+  </Box>
+);
 
-  const metrics = [
-    { label: labels.providersConfigured, value: totalConfigured },
-    { label: labels.credentialsHealthy, value: totalHealthy },
-    { label: labels.teachersConnected, value: totalConnected },
-    { label: labels.reauthNeeded, value: totalReauth },
-  ];
-
+export function MeetingIntegrationsHealthHeaders({
+  viewModel,
+}: Readonly<{ readonly viewModel: MeetingIntegrationsViewModel }>) {
   return (
-    <Grid container spacing={2}>
-      {metrics.map(metric => (
-        <Grid key={metric.label} size={{ xs: 6, md: 3 }}>
-          <Card variant="outlined">
-            <CardContent>
-              <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{metric.label}</Typography>
-              <Typography sx={{ typography: "displayMd", fontWeight: 700 }}>{metric.value}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+    <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} fallback={fallback} />
   );
 }

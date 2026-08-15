@@ -2,20 +2,27 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 import {
+  AppPermission,
   MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import { connectMeetingProviderOAuthMutationDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import {
   adminRevokeMeetingProviderTokenMutationDocument,
   meetingIntegrationConnectedAccountsQueryDocument,
   testMeetingProviderConnectionMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/settings/meeting-integrations.documents";
 import { useMeetingIntegrationProvidersQuery } from "@/frontend/common/hooks/settings";
-import { useMeetingIntegrationsSettingsStore } from "@/frontend/common/stores/meetingIntegrationsSettingsStore";
+import {
+  MEETING_INTEGRATIONS_PROFILE_LINK_PERMISSION,
+  useMeetingIntegrationsSettingsStore,
+} from "@/frontend/common/stores/meetingIntegrationsSettingsStore";
+import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   MeetingIntegrationConnectedAccount,
@@ -102,6 +109,9 @@ interface UseMeetingIntegrationsStoreAccess {
   revokingFor: { userId: string; providerSlug: ViewModelProviderSlug } | null;
   metadataDialogAccount: MeetingIntegrationConnectedAccount | null;
   metadataDialogProviderSlug: ViewModelProviderSlug | null;
+  connectingProviderSlug: ViewModelProviderSlug | null;
+  connectErrorFor: Readonly<Partial<Record<ViewModelProviderSlug, string | null>>>;
+  canViewProfile: boolean;
   setExpandedSlug: (slug: ViewModelProviderSlug | null) => void;
   setLoadingAccountsFor: (slug: ViewModelProviderSlug | null) => void;
   setConnectedAccounts: (slug: ViewModelProviderSlug, accounts: readonly MeetingIntegrationConnectedAccount[]) => void;
@@ -110,6 +120,9 @@ interface UseMeetingIntegrationsStoreAccess {
   setRevokingFor: (value: { userId: string; providerSlug: ViewModelProviderSlug } | null) => void;
   setMetadataDialogAccount: (account: MeetingIntegrationConnectedAccount | null) => void;
   setMetadataDialogProviderSlug: (slug: ViewModelProviderSlug | null) => void;
+  setConnectingProviderSlug: (slug: ViewModelProviderSlug | null) => void;
+  setConnectErrorFor: (slug: ViewModelProviderSlug, error: string | null) => void;
+  setCanViewProfile: (value: boolean) => void;
 }
 
 function useMeetingIntegrationsStoreValues(): UseMeetingIntegrationsStoreAccess {
@@ -121,6 +134,9 @@ function useMeetingIntegrationsStoreValues(): UseMeetingIntegrationsStoreAccess 
   const revokingFor = useMeetingIntegrationsSettingsStore(state => state.revokingFor);
   const metadataDialogAccount = useMeetingIntegrationsSettingsStore(state => state.metadataDialogAccount);
   const metadataDialogProviderSlug = useMeetingIntegrationsSettingsStore(state => state.metadataDialogProviderSlug);
+  const connectingProviderSlug = useMeetingIntegrationsSettingsStore(state => state.connectingProviderSlug);
+  const connectErrorFor = useMeetingIntegrationsSettingsStore(state => state.connectErrorFor);
+  const canViewProfile = useMeetingIntegrationsSettingsStore(state => state.canViewProfile);
   const setExpandedSlug = useMeetingIntegrationsSettingsStore(state => state.setExpandedSlug);
   const setLoadingAccountsFor = useMeetingIntegrationsSettingsStore(state => state.setLoadingAccountsFor);
   const setConnectedAccounts = useMeetingIntegrationsSettingsStore(state => state.setConnectedAccounts);
@@ -131,6 +147,9 @@ function useMeetingIntegrationsStoreValues(): UseMeetingIntegrationsStoreAccess 
   const setMetadataDialogProviderSlug = useMeetingIntegrationsSettingsStore(
     state => state.setMetadataDialogProviderSlug
   );
+  const setConnectingProviderSlug = useMeetingIntegrationsSettingsStore(state => state.setConnectingProviderSlug);
+  const setConnectErrorFor = useMeetingIntegrationsSettingsStore(state => state.setConnectErrorFor);
+  const setCanViewProfile = useMeetingIntegrationsSettingsStore(state => state.setCanViewProfile);
 
   return {
     expandedSlug,
@@ -141,6 +160,9 @@ function useMeetingIntegrationsStoreValues(): UseMeetingIntegrationsStoreAccess 
     revokingFor,
     metadataDialogAccount,
     metadataDialogProviderSlug,
+    connectingProviderSlug,
+    connectErrorFor,
+    canViewProfile,
     setExpandedSlug,
     setLoadingAccountsFor,
     setConnectedAccounts,
@@ -149,6 +171,57 @@ function useMeetingIntegrationsStoreValues(): UseMeetingIntegrationsStoreAccess 
     setRevokingFor,
     setMetadataDialogAccount,
     setMetadataDialogProviderSlug,
+    setConnectingProviderSlug,
+    setConnectErrorFor,
+    setCanViewProfile,
+  };
+}
+
+interface ConnectProviderDeps {
+  connectOAuth: ReturnType<typeof useMutation>[0];
+  notifications: ReturnType<typeof useNotifications>;
+  labels: SettingsMeetingIntegrationsLabels;
+}
+
+function buildConnectProvider(
+  deps: ConnectProviderDeps,
+  store: Pick<UseMeetingIntegrationsStoreAccess, "setConnectingProviderSlug" | "setConnectErrorFor">
+) {
+  const { connectOAuth, notifications, labels } = deps;
+
+  return async (providerSlug: ViewModelProviderSlug) => {
+    store.setConnectingProviderSlug(providerSlug);
+    store.setConnectErrorFor(providerSlug, null);
+
+    try {
+      const returnPath = globalThis.window?.location?.pathname ?? "/";
+      const { data } = await connectOAuth({
+        variables: {
+          input: {
+            providerSlug,
+            returnPath,
+          },
+        },
+      });
+
+      const authorizeUrl = data?.connectMeetingProviderOAuth?.authorizeUrl;
+      if (authorizeUrl && globalThis.window) {
+        globalThis.window.location.href = authorizeUrl;
+        return;
+      }
+
+      // No authorizeUrl returned — treat as an error.
+      const errorMsg = labels.connectProviderError;
+      store.setConnectErrorFor(providerSlug, errorMsg);
+      notifications.show(errorMsg, { severity: "error" });
+    } catch (connectError) {
+      logger.error("Failed to connect meeting provider OAuth", { providerSlug, error: connectError });
+      const errorMsg = labels.connectProviderError;
+      store.setConnectErrorFor(providerSlug, errorMsg);
+      notifications.show(errorMsg, { severity: "error" });
+    } finally {
+      store.setConnectingProviderSlug(null);
+    }
   };
 }
 
@@ -273,9 +346,12 @@ function useConnectedAccountsSync(
 }
 
 export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel {
+  const router = useRouter();
   const labels = useAppTranslation(Translation.Dashboard.SettingsMeetingIntegrations);
   const locale = useAppLocale();
   const notifications = useNotifications();
+  const hasPermission = useUserStore(state => state.hasPermission);
+  const canEdit = hasPermission(AppPermission.SettingsEditMeetingIntegrations);
 
   const store = useMeetingIntegrationsStoreValues();
 
@@ -285,8 +361,18 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
 
   useConnectedAccountsSync(store.expandedSlug, store);
 
+  // Sync canViewProfile into the store so the ProfileLinkCallout visibility
+  // survives tier switches (Zustand persists state across viewport remounts).
+  useEffect(() => {
+    const permitted = hasPermission(MEETING_INTEGRATIONS_PROFILE_LINK_PERMISSION);
+    if (store.canViewProfile !== permitted) {
+      store.setCanViewProfile(permitted);
+    }
+  }, [hasPermission, store]);
+
   const [testConnection] = useMutation(testMeetingProviderConnectionMutationDocument);
   const [revokeToken] = useMutation(adminRevokeMeetingProviderTokenMutationDocument);
+  const [connectOAuth] = useMutation(connectMeetingProviderOAuthMutationDocument);
 
   const runTest = useCallback(
     (providerSlug: ViewModelProviderSlug, mode: MeetingConnectionTestMode) =>
@@ -317,11 +403,25 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
     await refetch();
   }, [refetch]);
 
+  // Connect-provider OAuth flow: calls connectMeetingProviderOAuth mutation,
+  // redirects to the returned authorizeUrl, and handles errors via toast + logger.
+  const connectProvider = useCallback(
+    (providerSlug: ViewModelProviderSlug) =>
+      buildConnectProvider({ connectOAuth, notifications, labels }, store)(providerSlug),
+    [connectOAuth, notifications, labels, store]
+  );
+
+  // Cross-navigation to the teacher profile meeting-configs tab.
+  const navigateToProfile = useCallback(() => {
+    router.push("/profile?tab=meeting");
+  }, [router]);
+
   return {
     labels,
     locale,
     loading,
     error: error ?? undefined,
+    canEdit,
     providers,
     expandedSlug: store.expandedSlug,
     onExpandedSlugChange: store.setExpandedSlug,
@@ -336,6 +436,11 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
     revokeAccount,
     onMetadataDialogOpen,
     onMetadataDialogClose,
+    connectingFor: store.connectingProviderSlug,
+    connectErrorFor: store.connectErrorFor,
+    connectProvider,
+    navigateToProfile,
+    canViewProfile: store.canViewProfile,
     refresh,
   };
 }

@@ -34,7 +34,10 @@ import type { CreditLabels } from "@/shared/locale/types/dashboard/lms/credit.ts
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports.ts";
 import type { MonthlyReportLabels } from "@/shared/locale/types/dashboard/lms/monthlyReports.ts";
 import type { TeacherDueLabels } from "@/shared/locale/types/dashboard/lms/teacherDues.ts";
+import type { MeetingGenerationLabels } from "@/shared/locale/types/dashboard/meeting-generation.ts";
 import type { MeetingProvidersLabels } from "@/shared/locale/types/dashboard/meeting-providers/main.ts";
+import type { MeetingUrlStatusLabels } from "@/shared/locale/types/dashboard/meeting-url-status.ts";
+import type { OAuthFlowLabels } from "@/shared/locale/types/dashboard/oauth-flow.ts";
 import type { ParentsDirectoryLabels } from "@/shared/locale/types/dashboard/parents/directory.ts";
 import type { ParentLifecycleLabels } from "@/shared/locale/types/dashboard/parents/lifecycle.ts";
 import type { ParentOnboardingLabels } from "@/shared/locale/types/dashboard/parents/onboarding.ts";
@@ -156,6 +159,9 @@ export interface DashboardTranslations {
   staffDirectory: StaffDirectoryLabels;
   staffOnboarding: StaffOnboardingLabels;
   meetingProviders: MeetingProvidersLabels;
+  meetingGeneration: MeetingGenerationLabels;
+  meetingUrlStatus: MeetingUrlStatusLabels;
+  oauthFlow: OAuthFlowLabels;
   parentsDirectory: ParentsDirectoryLabels;
   parentOnboarding: ParentOnboardingLabels;
   parentStudents: ParentStudentsLabels;
