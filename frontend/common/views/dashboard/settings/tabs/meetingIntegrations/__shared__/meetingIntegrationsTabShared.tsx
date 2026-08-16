@@ -82,7 +82,7 @@ export function MeetingIntegrationsTabShared(props: MeetingIntegrationsTabShared
 
       {providers.map(provider => (
         <Accordion
-          key={provider.slug}
+          key={provider.id}
           expanded={viewModel.expandedSlug === provider.slug}
           onChange={(_, expanded) => {
             viewModel.onExpandedSlugChange(expanded ? provider.slug : null);
