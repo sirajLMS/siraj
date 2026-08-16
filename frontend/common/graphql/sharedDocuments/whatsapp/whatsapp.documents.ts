@@ -141,3 +141,45 @@ export const isWhatsappConfiguredQueryDocument: TypedDocumentNode<Operations.IsW
     isWhatsappConfigured
   }
 `;
+
+// ─── Pending Backend Resolver Queries ────────────────────────────────
+// The following documents target queries that do NOT yet exist in the
+// backend Pothos schema (no `whatsappTemplates` or `whatsappOptInAudit`
+// query root field). They are stub definitions ready to be un-commented
+// once the backend resolvers are created.
+//
+// CROSS-FILE DEPENDENCY (Task 9):
+//   Required backend resolvers:
+//   - `whatsappTemplates` query returning `[WhatsappTemplateSnapshot!]`
+//     (or a new persisted templates type with body/buttonStructure fields)
+//   - `whatsappOptInAudit` query returning a new `WhatsappOptInAuditEntry` type
+//   Resolvers must be added in:
+//     backend/graphql/query/whatsapp/whatsapp-account.query.ts
+//   Pothos object types in:
+//     backend/graphql/pothos/whatsapp/whatsapp-account.pothos.ts
+//   Run `bun run generate:gqlSchema && bun codegen` after backend resolvers
+//   are added, then replace the comments below with typed exports:
+//
+// export const whatsappTemplatesQueryDocument: TypedDocumentNode<Operations.WhatsappTemplatesQuery> = gql`
+//   query WhatsappTemplatesQuery {
+//     whatsappTemplates {
+//       id
+//       name
+//       language
+//       category
+//       status
+//     }
+//   }
+// `;
+//
+// export const whatsappOptInAuditQueryDocument: TypedDocumentNode<Operations.WhatsappOptInAuditQuery> = gql`
+//   query WhatsappOptInAuditQuery {
+//     whatsappOptInAudit {
+//       id
+//       optedIn
+//       optedInAt
+//       changedBy
+//       createdAt
+//     }
+//   }
+// `;

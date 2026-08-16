@@ -1,82 +1,30 @@
 "use client";
 
-import { WhatsappConfigLayout } from "@/frontend/common/views/dashboard/settings/whatsapp/WhatsappConfigLayout";
-import type {
-  WhatsappConfigTab,
-  WhatsappConfigViewSharedProps,
-} from "@/frontend/common/views/dashboard/settings/whatsapp/WhatsappConfigView";
+import type { ReactNode } from "react";
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
-import { NumbersTabMobile } from "@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/NumbersTab.mobile";
-import { OptInTabMobile } from "@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/OptInTab.mobile";
-import { TemplatesTabMobile } from "@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/TemplatesTab.mobile";
 
-export function WhatsappConfigMobileView(props: Readonly<WhatsappConfigViewSharedProps>) {
-  const {
-    labels,
-    accounts,
-    templates,
-    loading,
-    syncing,
-    optInLoading,
-    isOptedIn,
-    isConfigured,
-    snackbar,
-    onDeleteAccount,
-    onSyncFromMeta,
-    onToggleOptIn,
-    onDismissSnackbar,
-  } = props;
+type WhatsappConfigMobileShellProps = {
+  readonly title: string;
+  readonly children: ReactNode;
+};
 
+/**
+ * Mobile page shell for the WhatsApp settings page.
+ *
+ * Provides the mobile page container + header and renders `children` (the
+ * URL-synced tab nav and tab panels). Tab content rendering is handled by
+ * the common-layer `WhatsappTabPanels` component which lazy-loads
+ * `NumbersTab.mobile`, `TemplatesTab.mobile`, and `OptInTab.mobile`
+ * via `ResponsiveViewSwitch`.
+ */
+export function WhatsappConfigMobileShell({ title, children }: Readonly<WhatsappConfigMobileShellProps>) {
   return (
-    <WhatsappConfigLayout
-      {...props}
-      pageContainer={
-        <MobilePageContainer>
-          <MobilePageHeader title={labels.page.pageTitle} />
-        </MobilePageContainer>
-      }
-    >
-      {(tab: WhatsappConfigTab) => {
-        if (tab === "numbers") {
-          return (
-            <NumbersTabMobile
-              labels={labels}
-              accounts={accounts}
-              loading={loading}
-              syncing={syncing}
-              snackbar={snackbar}
-              onDeleteAccount={onDeleteAccount}
-              onSetAccessToken={props.onSetAccessToken}
-              onSetTwoStepPin={props.onSetTwoStepPin}
-              onSyncFromMeta={onSyncFromMeta}
-              onDismissSnackbar={onDismissSnackbar}
-              isConfigured={isConfigured}
-            />
-          );
-        }
-
-        if (tab === "templates") {
-          return (
-            <TemplatesTabMobile
-              labels={labels}
-              templates={templates}
-              loading={loading}
-              syncing={syncing}
-              onSyncFromMeta={onSyncFromMeta}
-              isConfigured={isConfigured}
-            />
-          );
-        }
-
-        return (
-          <OptInTabMobile
-            labels={labels}
-            isOptedIn={isOptedIn}
-            optInLoading={optInLoading}
-            onToggleOptIn={onToggleOptIn}
-          />
-        );
-      }}
-    </WhatsappConfigLayout>
+    <MobilePageContainer>
+      <MobilePageHeader title={title} />
+      {children}
+    </MobilePageContainer>
   );
 }
+
+/** @deprecated Use `WhatsappConfigMobileShell` — the old per-tab view is replaced by URL-synced tab architecture. */
+export const WhatsappConfigMobileView = WhatsappConfigMobileShell;

@@ -99,6 +99,32 @@ When eliminating desktop↔mobile code duplication, use the `*Shared.tsx` / `__s
 - See `docs/frontend/duplication-elimination-patterns.md` for all Patterns A-G
 - NEVER use `jscpd:ignore` — fix the root cause instead
 
+## WhatsApp UI Patterns
+
+- **Canonical reference**: See `docs/frontend/whatsapp-ui-patterns.md` for the full pattern catalog (ViewModel hooks, URL-synced tabs, dialog state, per-row loading, i18n label helpers, animations, accessibility, testing, gotchas).
+
+### New MUI v9 Patterns
+
+- **`@keyframes` in sx**: Embed `@keyframes` directly in sx prop objects — not via `@mui/material/styles` `keyframes`.
+- **`component="output"` for aria-live**: Use `<Box component="output" aria-busy>` instead of `role="status"` (oxlint `prefer-tag-over-role`). Use `<Box component="alert">` instead of `role="alert"` on non-Alert elements.
+- **Stack `alignItems`/`justifyContent`**: NOT valid direct props — always use `sx`.
+
+### New React 19 Patterns
+
+- **RefObject**: React 19 deprecates `MutableRefObject`. Use `RefObject<T>` — `current` is mutable.
+- **`renderHook` unavailable in `bun:test`**: Use consumer-component pattern (render a component calling the hook, capture state via `useEffect`).
+
+### New Accessibility Patterns
+
+- **`aria-invalid`**: `aria-invalid={!!error}` on form `TextField`s with validation errors.
+- **`PermissionDeniedFallback`**: `LockOutlined` icon + title + description + `role="alert"` — not bare `null`.
+- **Reduced motion**: `useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true })` → set MUI `Fade`/`Grow` `timeout={0}` when true.
+
+### Enum Safety
+
+- **`no-unsafe-enum-comparison` (oxlint)**: Use `Record<string, string>` lookup tables, not switch statements on enum values.
+- **`no-unsafe-type-assertion` (oxlint)**: Use type guards (`value is Type`) instead of `as` casts.
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.

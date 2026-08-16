@@ -100,7 +100,7 @@ const ESLINT_PATCH = "-r ./scripts/ts6-eslint-patch.cjs";
 const DEFAULT_TIMEOUT_FILES_MS = Number(process.env.LINT_QUEUE_TIMEOUT_MS ?? 300000);
 
 /** Default per-request timeout for full-repo lint runs (5 minutes) */
-const DEFAULT_TIMEOUT_FULL_REPO_MS = Number(process.env.LINT_QUEUE_TIMEOUT_MS ?? 300000);
+const DEFAULT_TIMEOUT_FULL_REPO_MS = Number(process.env.LINT_QUEUE_TIMEOUT_MS ?? 1200000);
 
 /** ESLint concurrency value (default 4; override via LINT_QUEUE_CONCURRENCY env var) */
 const CONCURRENCY = process.env.LINT_QUEUE_CONCURRENCY ?? "4";

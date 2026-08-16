@@ -1,16 +1,23 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, waitFor } from "@testing-library/react";
-import { useEffect } from "react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { type RefObject, useEffect } from "react";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 expect.extend(matchers);
 
 import {
+  createWhatsappAccountMutationDocument,
+  deleteWhatsappAccountMutationDocument,
   isUserWhatsappOptInQueryDocument,
+  isWhatsappConfiguredQueryDocument,
+  setUserWhatsappOptInMutationDocument,
+  syncWhatsappAccountsFromMetaMutationDocument,
+  updateWhatsappAccountMutationDocument,
   whatsappAccountsQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import type { WhatsappSettingsViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import { useWhatsappSettingsViewModel } from "@/frontend/common/views/dashboard/settings/whatsapp/useWhatsappSettingsViewModel";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -36,14 +43,16 @@ interface ViewModelSnapshot {
   readonly isOptedIn: boolean;
   readonly syncing: boolean;
   readonly optInLoading: boolean;
-  readonly snackbar: { open: boolean; message: string; severity: string };
+  readonly snackbar: { readonly message: string; readonly severity: "success" | "error" } | null;
 }
 
 let captures: ViewModelSnapshot[] = [];
+let vmRef: RefObject<WhatsappSettingsViewModel | null>;
 
 function WhatsappSettingsConsumer() {
   const vm = useWhatsappSettingsViewModel();
   useEffect(() => {
+    vmRef.current = vm;
     captures.push({
       accounts: vm.accounts,
       loading: vm.loading,
@@ -54,6 +63,42 @@ function WhatsappSettingsConsumer() {
     });
   });
   return <div data-testid="consumer" />;
+}
+
+// Interactive consumer with action buttons for triggering handlers in act()
+function InteractiveConsumer() {
+  const vm = useWhatsappSettingsViewModel();
+  useEffect(() => {
+    vmRef.current = vm;
+    captures.push({
+      accounts: vm.accounts,
+      loading: vm.loading,
+      isOptedIn: vm.isOptedIn,
+      syncing: vm.syncing,
+      optInLoading: vm.optInLoading,
+      snackbar: vm.snackbar,
+    });
+  });
+  return (
+    <div>
+      <button type="button" data-testid="open-create" onClick={() => vm.openCreateDialog()}>
+        open-create
+      </button>
+      <button
+        type="button"
+        data-testid="open-delete"
+        onClick={() => vm.openDeleteConfirmDialog("acc-1", "Account acc-1")}
+      >
+        open-delete
+      </button>
+      <button type="button" data-testid="close-dialog" onClick={() => vm.closeDialog()}>
+        close-dialog
+      </button>
+      <button type="button" data-testid="close-snackbar" onClick={() => vm.closeSnackbar()}>
+        close-snackbar
+      </button>
+    </div>
+  );
 }
 
 function latestCapture(): ViewModelSnapshot | undefined {
@@ -94,15 +139,92 @@ function optInMock(optedIn: boolean): MockLink.MockedResponse {
   };
 }
 
+function configuredMock(configured: boolean): MockLink.MockedResponse {
+  return {
+    request: { query: isWhatsappConfiguredQueryDocument, variables: {} },
+    result: { data: { isWhatsappConfigured: configured } },
+  };
+}
+
+function createAccountMock(account: ReturnType<typeof makeAccountRow>): MockLink.MockedResponse {
+  return {
+    request: {
+      query: createWhatsappAccountMutationDocument,
+      variables: {
+        input: {
+          displayName: { en: `Account ${account.id}` },
+          phoneNumberId: account.phoneNumberId,
+          wabaId: account.wabaId,
+          displayPhoneNumber: null,
+          isActive: null,
+          portfolioMessagingLimitTier: null,
+          qualityRating: null,
+          throughputLevel: null,
+        },
+      },
+    },
+    result: { data: { createWhatsappAccount: account } },
+  };
+}
+
+function updateAccountMock(accountId: string, displayName: string): MockLink.MockedResponse {
+  return {
+    request: {
+      query: updateWhatsappAccountMutationDocument,
+      variables: {
+        id: accountId,
+        input: {
+          displayName: { en: displayName },
+          displayPhoneNumber: null,
+          isActive: null,
+          portfolioMessagingLimitTier: null,
+          qualityRating: null,
+          throughputLevel: null,
+        },
+      },
+    },
+    result: { data: { updateWhatsappAccount: { id: accountId, __typename: "WhatsappAccount" } } },
+  };
+}
+
+function deleteAccountMock(accountId: string): MockLink.MockedResponse {
+  return {
+    request: {
+      query: deleteWhatsappAccountMutationDocument,
+      variables: { id: accountId },
+    },
+    result: { data: { deleteWhatsappAccount: true } },
+  };
+}
+
+function syncMock(result: { added: number; updated: number }): MockLink.MockedResponse {
+  return {
+    request: { query: syncWhatsappAccountsFromMetaMutationDocument, variables: {} },
+    result: { data: { syncWhatsappAccountsFromMeta: result } },
+  };
+}
+
+function setOptInMock(enabled: boolean): MockLink.MockedResponse {
+  return {
+    request: {
+      query: setUserWhatsappOptInMutationDocument,
+      variables: { userId: "me", enabled, source: "graphql" },
+    },
+    result: { data: { setUserWhatsappOptIn: true } },
+  };
+}
+
 await mockNextNavigation("/dashboard", { includeRouter: false, routingIncludeReplaceAndPrefetch: false });
 
 beforeEach(() => {
   captures = [];
+  vmRef = { current: null };
 });
 
 afterEach(() => {
   cleanup();
   captures = [];
+  vmRef = { current: null };
   mock.restore();
 });
 
@@ -113,7 +235,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
 
     renderWithWrapper(<WhatsappSettingsConsumer />, {
       locale: "en",
-      mocks: [accountsMock([account1, account2]), optInMock(true)],
+      mocks: [accountsMock([account1, account2]), optInMock(true), configuredMock(true)],
     });
 
     // Wait for the hook to render and capture state
@@ -170,6 +292,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
           request: { query: isUserWhatsappOptInQueryDocument, variables: { userId: "me" } },
           result: { data: { isUserWhatsappOptIn: null } },
         },
+        configuredMock(true),
       ],
     });
 
@@ -184,7 +307,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
   test("Q3.3 — isOptedIn=true when query returns true", async () => {
     renderWithWrapper(<WhatsappSettingsConsumer />, {
       locale: "en",
-      mocks: [accountsMock([]), optInMock(true)],
+      mocks: [accountsMock([]), optInMock(true), configuredMock(true)],
     });
 
     await waitFor(() => {
@@ -201,6 +324,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
           error: new Error("Network error"),
         },
         optInMock(false),
+        configuredMock(true),
       ],
     });
 
@@ -215,21 +339,21 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
   test("Q3.5 — snackbar starts closed with default state", async () => {
     renderWithWrapper(<WhatsappSettingsConsumer />, {
       locale: "en",
-      mocks: [accountsMock([]), optInMock(false)],
+      mocks: [accountsMock([]), optInMock(false), configuredMock(true)],
     });
 
     await waitFor(() => {
       expect(latestCapture()).toBeDefined();
     });
 
-    // Before any interaction, snackbar should be in its default closed state
-    expect(latestCapture()?.snackbar).toEqual({ open: false, message: "", severity: "success" });
+    // Before any interaction, snackbar should be null (closed — new pattern from Task 2)
+    expect(latestCapture()?.snackbar).toBeNull();
   });
 
   test("Q3.6 — sync and optIn loading flags start false", async () => {
     renderWithWrapper(<WhatsappSettingsConsumer />, {
       locale: "en",
-      mocks: [accountsMock([]), optInMock(false)],
+      mocks: [accountsMock([]), optInMock(false), configuredMock(true)],
     });
 
     await waitFor(() => {
@@ -238,5 +362,273 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
 
     expect(latestCapture()?.syncing).toBe(false);
     expect(latestCapture()?.optInLoading).toBe(false);
+  });
+});
+
+// ─── Task 18: Mutation & Handler Tests ────────────────────────────────
+// Uses InteractiveConsumer which renders action buttons to trigger handlers
+// inside act() via fireEvent. The vmRef captures the full ViewModel for
+// direct property assertions (creating, deletingId, syncingId, dialogState,
+// mutationError, snackbar, etc.).
+
+function baseMocks(accounts: ReturnType<typeof makeAccountRow>[] = [], optedIn = false): MockLink.MockedResponse[] {
+  return [accountsMock(accounts), optInMock(optedIn), configuredMock(true)];
+}
+
+async function waitForLoaded() {
+  await waitFor(() => {
+    expect(latestCapture()?.loading).toBe(false);
+  });
+}
+
+describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", () => {
+  test("Q3.7 — create account mutation flow shows success snackbar", async () => {
+    const newAccount = makeAccountRow("acc-new", "+[PHONE_REDACTED]");
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: [...baseMocks(), createAccountMock(newAccount), accountsMock([newAccount])],
+    });
+
+    await waitForLoaded();
+
+    await act(async () => {
+      await vmRef.current?.handleCreate({
+        displayName: "Account acc-new",
+        phoneNumberId: "phone-1",
+        wabaId: "waba-1",
+      });
+    });
+
+    await waitFor(() => {
+      expect(latestCapture()?.snackbar?.severity).toBe("success");
+    });
+    expect(latestCapture()?.snackbar?.message).toBe("WhatsApp number saved successfully.");
+    // Dialog should close after successful create
+    expect(vmRef.current?.dialogState.type).toBeNull();
+  });
+
+  test("Q3.8 — create with invalid input blocks mutation and sets mutationError", async () => {
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: baseMocks(),
+    });
+
+    await waitForLoaded();
+
+    await act(async () => {
+      await vmRef.current?.handleCreate({
+        displayName: "",
+        phoneNumberId: "phone-1",
+        wabaId: "waba-1",
+      });
+    });
+
+    // Validation error should be set as mutationError
+    expect(vmRef.current?.mutationError).not.toBeNull();
+    // No success snackbar should appear
+    expect(latestCapture()?.snackbar).toBeNull();
+  });
+
+  test("Q3.9 — update account name mutation flow shows success snackbar", async () => {
+    const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: [
+        ...baseMocks([account]),
+        updateAccountMock("acc-1", "Updated Name"),
+        accountsMock([{ ...account, displayName: { en: "Updated Name" } }]),
+      ],
+    });
+
+    await waitForLoaded();
+
+    await act(async () => {
+      await vmRef.current?.handleEditName("acc-1", "Updated Name");
+    });
+
+    await waitFor(() => {
+      expect(latestCapture()?.snackbar?.severity).toBe("success");
+    });
+    expect(latestCapture()?.snackbar?.message).toBe("WhatsApp number saved successfully.");
+  });
+
+  test("Q3.10 — edit name with invalid input blocks mutation", async () => {
+    const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: baseMocks([account]),
+    });
+
+    await waitForLoaded();
+
+    await act(async () => {
+      await vmRef.current?.handleEditName("acc-1", "");
+    });
+
+    expect(vmRef.current?.mutationError).not.toBeNull();
+    expect(latestCapture()?.snackbar).toBeNull();
+  });
+
+  test("Q3.11 — delete dialog cancel does not trigger mutation", async () => {
+    const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: baseMocks([account]),
+    });
+
+    await waitForLoaded();
+
+    // Open delete dialog
+    await act(async () => {
+      vmRef.current?.openDeleteConfirmDialog("acc-1", "Account acc-1");
+    });
+    expect(vmRef.current?.dialogState.type).toBe("deleteConfirm");
+
+    // Cancel by closing dialog
+    await act(async () => {
+      vmRef.current?.closeDialog();
+    });
+
+    expect(vmRef.current?.dialogState.type).toBeNull();
+    // No delete loading state
+    expect(vmRef.current?.deletingId).toBeNull();
+    // No snackbar (mutation not called)
+    expect(latestCapture()?.snackbar).toBeNull();
+  });
+
+  test("Q3.12 — sync sets syncingId to 'all' during mutation, clears after", async () => {
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: [...baseMocks(), syncMock({ added: 0, updated: 0 }), accountsMock([])],
+    });
+
+    await waitForLoaded();
+
+    expect(vmRef.current?.syncingId).toBeNull();
+
+    await act(async () => {
+      await vmRef.current?.handleSync();
+    });
+
+    // After sync completes, syncingId should be null again
+    await waitFor(() => {
+      expect(vmRef.current?.syncingId).toBeNull();
+    });
+    // Sync produces a snackbar (noChange → success)
+    await waitFor(() => {
+      expect(latestCapture()?.snackbar?.severity).toBe("success");
+    });
+  });
+
+  test("Q3.13 — validateAccessToken returns error for short token", async () => {
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: baseMocks(),
+    });
+
+    await waitForLoaded();
+
+    // Short token should fail validation
+    const shortTokenError = vmRef.current?.validateAccessToken("short");
+    expect(shortTokenError).not.toBeNull();
+
+    // Valid token (50+ chars) should pass
+    const validToken = "a".repeat(50);
+    expect(vmRef.current?.validateAccessToken(validToken)).toBeNull();
+  });
+
+  test("Q3.14 — validateTwoStepPin returns error for wrong format", async () => {
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: baseMocks(),
+    });
+
+    await waitForLoaded();
+
+    // Non-6-digit PIN should fail
+    const wrongPinError = vmRef.current?.validateTwoStepPin("12345");
+    expect(wrongPinError).not.toBeNull();
+
+    // Letters should fail
+    const lettersPinError = vmRef.current?.validateTwoStepPin("abcdef");
+    expect(lettersPinError).not.toBeNull();
+
+    // 6-digit PIN should pass
+    expect(vmRef.current?.validateTwoStepPin("123456")).toBeNull();
+  });
+
+  test("Q3.15 — per-row loading states: deletingId set during delete", async () => {
+    const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
+
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: [...baseMocks([account]), deleteAccountMock("acc-1"), accountsMock([])],
+    });
+
+    await waitForLoaded();
+
+    // Delete account — should produce success snackbar and clear deletingId
+    await act(async () => {
+      await vmRef.current?.handleDelete("acc-1");
+    });
+
+    // After mutation completes, deletingId is cleared
+    await waitFor(() => {
+      expect(vmRef.current?.deletingId).toBeNull();
+    });
+    // And a success snackbar is shown
+    await waitFor(() => {
+      expect(latestCapture()?.snackbar?.severity).toBe("success");
+    });
+  });
+
+  test("Q3.16 — snackbar close clears message", async () => {
+    const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: [...baseMocks([account]), deleteAccountMock("acc-1"), accountsMock([])],
+    });
+
+    await waitForLoaded();
+
+    // Trigger delete to produce a snackbar
+    await act(async () => {
+      await vmRef.current?.handleDelete("acc-1");
+    });
+
+    await waitFor(() => {
+      expect(latestCapture()?.snackbar).not.toBeNull();
+    });
+
+    // Close snackbar via button
+    fireEvent.click(screen.getByTestId("close-snackbar"));
+
+    await waitFor(() => {
+      expect(latestCapture()?.snackbar).toBeNull();
+    });
+  });
+
+  test("Q3.17 — opt-in toggle sets optInLoading during mutation", async () => {
+    renderWithWrapper(<InteractiveConsumer />, {
+      locale: "en",
+      mocks: [...baseMocks([], false), setOptInMock(true), optInMock(true)],
+    });
+
+    await waitForLoaded();
+
+    expect(vmRef.current?.optInLoading).toBe(false);
+
+    await act(async () => {
+      await vmRef.current?.handleToggleOptIn(true);
+    });
+
+    // After mutation completes, optInLoading should be false again
+    await waitFor(() => {
+      expect(vmRef.current?.optInLoading).toBe(false);
+    });
+    // Opt-in toggle shows success snackbar
+    await waitFor(() => {
+      expect(latestCapture()?.snackbar?.severity).toBe("success");
+    });
   });
 });

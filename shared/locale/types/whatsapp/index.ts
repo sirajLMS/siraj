@@ -67,6 +67,8 @@ export interface WhatsappLabels {
   readonly templateStatusPending: string;
   readonly templateStatusRejected: string;
   readonly templateStatusPaused: string;
+  readonly templateStatusPendingDeletion: string;
+  readonly templateStatusDisabled: string;
 
   // ─── Quality rating labels (Q5) ────────────────────────────────────
   readonly qualityGreen: string;
@@ -81,6 +83,7 @@ export interface WhatsappLabels {
   readonly tier1K: string;
   readonly tier5K: string;
   readonly tier10K: string;
+  readonly tier100K: string;
   readonly tierUnlimited: string;
   readonly tierUnknown: string;
 
@@ -97,6 +100,13 @@ export interface WhatsappLabels {
   // ─── Unverified 2-slot warning (R7) ────────────────────────────────
   readonly unverifiedWarningTitle: string;
   readonly unverifiedWarningBody: string;
+
+  // ─── Tier exceeded & coexistence inline warnings (Task 11) ─────────
+  readonly warningTierExceeded: string;
+  readonly warningCoexistence: string;
+
+  // ─── Throughput metric label (Task 11) ──────────────────────────────
+  readonly throughput24h: string;
 
   // ─── Opt-in toggle + consent copy (REQ-10) ──────────────────────────
   readonly optInTitle: string;
@@ -117,4 +127,105 @@ export interface WhatsappLabels {
   // ─── Delivery-failure keys (14.5 — notifications namespace extension) ──
   readonly deliveryFailed: string;
   readonly deliveryFailedWithReason: (reason: string) => string;
+
+  // ─── Create/Edit form labels (Task 1) ──────────────────────────────
+  readonly createAccountTitle: string;
+  readonly editNameTitle: string;
+  readonly displayNameLabel: string;
+  readonly phoneNumberIdLabel: string;
+  readonly wabaIdLabel: string;
+  readonly displayNameHelper: string;
+  readonly phoneNumberIdHelper: string;
+  readonly wabaIdHelper: string;
+
+  // ─── Validation messages (Task 1) ──────────────────────────────────
+  readonly validationDisplayNameRequired: string;
+  readonly validationDisplayNameTooLong: string;
+  readonly validationPhoneNumberIdRequired: string;
+  readonly validationPhoneNumberIdNumeric: string;
+  readonly validationWabaIdRequired: string;
+  readonly validationWabaIdNumeric: string;
+  readonly validationAccessTokenTooShort: string;
+  readonly validationPinFormat: string;
+
+  // ─── Delete confirm with interpolation (Task 1) ───────────────────
+  readonly deleteConfirmTitle: string;
+  readonly deleteConfirmMessage: (displayName: string) => string;
+
+  // ─── State labels (Task 1) ─────────────────────────────────────────
+  readonly loadingTitle: string;
+  readonly retry: string;
+  readonly refresh: string;
+  readonly permissionDenied: string;
+
+  // ─── Account action labels (Task 1) ────────────────────────────────
+  readonly editName: string;
+  readonly addFirstNumber: string;
+
+  // ─── Template preview labels (Task 1) ─────────────────────────────
+  readonly templateBody: string;
+  readonly templateButtons: string;
+  readonly templateLastUpdated: string;
+
+  // ─── Error boundary (Task 1) ───────────────────────────────────────
+  readonly errorGenericTitle: string;
+  readonly errorGeneric: string;
+
+  // ─── Opt-in history table (Task 12) ─────────────────────────────────
+  /** Section title for the opt-in audit history table. */
+  readonly optInHistoryTitle: string;
+  /** Section subtitle for the opt-in audit history table. */
+  readonly optInHistorySubtitle: string;
+  /** Column header: date of the audit entry. */
+  readonly optInHistoryDate: string;
+  /** Column header: action (opted in / opted out). */
+  readonly optInHistoryAction: string;
+  /** Column header: user who changed the opt-in state. */
+  readonly optInHistoryChangedBy: string;
+  /** Label shown when action is "opted in". */
+  readonly optInActionOptedIn: string;
+  /** Label shown when action is "opted out". */
+  readonly optInActionOptedOut: string;
+  /** Empty state message when no audit entries exist. */
+  readonly optInHistoryEmpty: string;
+  /** Filter button label for date range. */
+  readonly optInHistoryFilter: string;
+  /** Start date label for the date range filter. */
+  readonly optInHistoryFilterFrom: string;
+  /** End date label for the date range filter. */
+  readonly optInHistoryFilterTo: string;
+  /** Apply button in the date range filter popover. */
+  readonly optInHistoryFilterApply: string;
+  /** Clear button in the date range filter popover. */
+  readonly optInHistoryFilterClear: string;
+  /** Export button label. */
+  readonly optInHistoryExport: string;
+
+  // ─── Admin consolidated opt-in view (Task 13) ──────────────────────
+  /** Title for the admin consolidated opt-in view section. */
+  readonly optInAdminTitle: string;
+  /** Subtitle for the admin consolidated opt-in view section. */
+  readonly optInAdminSubtitle: string;
+  /** Column header: user name. */
+  readonly optInAdminUserName: string;
+  /** Column header: opted-in status (Yes/No). */
+  readonly optInAdminOptedIn: string;
+  /** Column header: opt-in timestamp. */
+  readonly optInAdminOptedInAt: string;
+  /** Column header: actions column. */
+  readonly optInAdminActions: string;
+  /** Search field placeholder for filtering by user name. */
+  readonly optInAdminSearchPlaceholder: string;
+  /** Label for opted-in status (Yes). */
+  readonly optInAdminYes: string;
+  /** Label for opted-out status (No). */
+  readonly optInAdminNo: string;
+  /** Empty state message when no users match the search filter. */
+  readonly optInAdminEmpty: string;
+
+  // ─── Accessibility & Permission Denied (Task 17) ───────────────────
+  /** Permission denied UI title. */
+  readonly permissionDeniedTitle: string;
+  /** Permission denied UI description. */
+  readonly permissionDeniedDescription: string;
 }

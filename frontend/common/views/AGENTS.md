@@ -153,6 +153,16 @@ Runs progressive checks: tsgo → biome → lint (queue) → codescene. Fix unti
 - `frontend/common/components/ui/AGENTS.md` — viewport-agnostic primitives layer
 - `frontend/views/AGENTS.md` — ViewModel conventions (legacy location, will point here after Block 2)
 
+## WhatsApp Settings Patterns
+
+- **Canonical reference**: See `docs/frontend/whatsapp-ui-patterns.md` for the full pattern catalog (ViewModel hooks, URL-synced tabs, dialog state, per-row loading, i18n label helpers, animations, accessibility, testing, gotchas).
+- **ViewModel composable hooks**: The WhatsApp ViewModel decomposes into 10+ sub-hooks (`useWhatsappQueries`, `useWhatsappMutations`, `useWhatsappDialogs`, etc.) assembled by `buildWhatsappViewModel`. When a ViewModel grows past ~120 lines, extract sub-hooks early to avoid CodeScene Large Method.
+- **URL-synced tabs**: `useWhatsappTab()` reads `?tab=` from URL via `useSearchParams`, validates against `TAB_IDS` allowlist. Tab changes use `<Link>` hrefs — no `setActiveTab` needed.
+- **Dialog state**: Single `dialogState: { type, accountId?, displayName? }` — no local `useState` for dialog open/close. `mutationError` tracks inline validation errors.
+- **Per-row loading**: `creating`, `deletingId`, `updatingId`, `syncingId` (sentinel `"all"` for bulk sync).
+- **i18n label helpers**: Record-based lookups (`getTemplateStatusLabelKey`, `getQualityLabelKey`, etc.) avoid `no-unsafe-enum-comparison`.
+- **Missing backend resolvers**: `whatsappTemplates` and `whatsappOptInAudit` queries don't exist — documents are commented-out stubs with placeholder data.
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
