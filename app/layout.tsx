@@ -96,6 +96,16 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       dir={direction}
       data-mui-color-scheme={initialTheme}
       data-theme={initialTheme}
+      // Mirror the initial mode as a boolean `data-light`/`data-dark` attribute
+      // so MUI's emotion CSS `[data-light]`/`[data-dark]` palette rules match the
+      // server-rendered mode on the very first paint — before
+      // `<InitColorSchemeScript />` runs and before React hydration. Without
+      // this, `:root,[data-light]` always matches (light vars active) while
+      // `[data-dark]` never matches during SSR, causing a brief light-mode
+      // flash in dark sessions. `InitColorSchemeScript` will reconcile this
+      // attribute with `localStorage.theme` immediately after parse.
+      {...{ [`data-${initialTheme}`]: "" }}
+      style={{ colorScheme: initialTheme }}
       suppressHydrationWarning
       className={`${inter.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable}`}
     >
