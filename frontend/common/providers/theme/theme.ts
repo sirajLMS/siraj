@@ -19,22 +19,6 @@ const locales = (locale: string = "en") => {
   }
 };
 
-// Autofill tokens are mode-specific; only the dark variants are baked into the
-// single shared component overrides tree because cssVars renders one stylesheet
-// for both modes (component overrides reference `theme.palette.*` CSS vars, which
-// resolve per active mode at runtime; the mode-fixed autofill strings below match
-// the project's default dark scheme — see the migration report for details).
-const autofillTokens = {
-  light: {
-    autofillBackground: "#ffffff",
-    autofillText: "#191c1e",
-  },
-  dark: {
-    autofillBackground: "#161d1d",
-    autofillText: "#dde4e3",
-  },
-};
-
 const sharedFoundation = (direction: "rtl" | "ltr") => ({
   direction,
   layout: layoutSettings,
@@ -70,7 +54,6 @@ export function createAppCssVarsTheme(
   defaultColorScheme: PaletteMode = "dark"
 ) {
   const isLight = defaultColorScheme === "light";
-  const autofillTokensForDefault = isLight ? autofillTokens.light : autofillTokens.dark;
 
   const themeWithLocale = createTheme(
     {
@@ -97,11 +80,7 @@ export function createAppCssVarsTheme(
 
       ...sharedFoundation(direction),
 
-      components: components({
-        isLight,
-        autofillBackground: autofillTokensForDefault.autofillBackground,
-        autofillText: autofillTokensForDefault.autofillText,
-      }),
+      components: components(),
     },
     ...locales(locale)
   );
@@ -119,8 +98,6 @@ export function createAppCssVarsTheme(
 export function createAppTheme(mode: PaletteMode, direction: "rtl" | "ltr" = "ltr", locale: string = "en") {
   const isLight = mode === "light";
   const palette = isLight ? lightPalette : darkPalette;
-  const autofillBackground = isLight ? autofillTokens.light.autofillBackground : autofillTokens.dark.autofillBackground;
-  const autofillText = isLight ? autofillTokens.light.autofillText : autofillTokens.dark.autofillText;
 
   const themeWithLocale = createTheme(
     {
@@ -131,11 +108,7 @@ export function createAppTheme(mode: PaletteMode, direction: "rtl" | "ltr" = "lt
         ...palette,
       },
 
-      components: components({
-        isLight,
-        autofillBackground,
-        autofillText,
-      }),
+      components: components(),
     },
     ...locales(locale)
   );

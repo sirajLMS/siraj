@@ -1,10 +1,22 @@
 import type { Components, Theme } from "@mui/material/styles";
 
-interface ComponentProps {
-  isLight: boolean;
-  autofillBackground: string;
-  autofillText: string;
-}
+/**
+ * CSS-variable-based autofill color tokens.
+ *
+ * With `cssVariables: true`, MUI bakes a single stylesheet that serves both
+ * light and dark modes. Literal hex strings baked at theme creation time (the
+ * previous approach) locked autofill colors to the *default* color scheme,
+ * so switching to a non-default mode mismatched the palette and browser
+ * autofill themes reappeared. Using CSS variable references lets the browser
+ * resolve autofill colors at runtime per the active color scheme.
+ *
+ * Background: matches the surface behind the input (transparent inputs sit on
+ * either background.default or background.paper); we use surface because it is
+ * the elevated card surface where form inputs live.
+ * Text: matches the primary text color.
+ */
+const AUTOFILL_BACKGROUND_VAR = "var(--mui-palette-surface, var(--mui-palette-background-default))";
+const AUTOFILL_TEXT_VAR = "var(--mui-palette-text-primary)";
 
 /**
  * MD3 switch geometry (material-web md-comp-switch), scaled ~0.7 for dense UI.
@@ -65,57 +77,60 @@ const getSwitchMainColor = (theme: Theme, color: string | undefined): string => 
   return theme.palette.primary.main;
 };
 
-const getMuiCssBaseline = ({
-  autofillBackground,
-  autofillText,
-}: ComponentProps): Components<Omit<Theme, "components">>["MuiCssBaseline"] => ({
+const getMuiCssBaseline = (): Components<Omit<Theme, "components">>["MuiCssBaseline"] => ({
   styleOverrides: {
     body: {
       backgroundColor: "var(--mui-palette-background-default)",
       color: "var(--mui-palette-onBackground)",
     },
+    /**
+     * Autofill rules use CSS variable references so the browser resolves the
+     * correct colors at runtime for the active color scheme. Hardcoded literals
+     * baked at theme creation time only matched the default scheme, causing
+     * mismatched autofill styling when the user switched modes.
+     */
     "input:-webkit-autofill": {
-      WebkitBoxShadow: `0 0 0 1000px ${autofillBackground} inset !important`,
-      WebkitTextFillColor: `${autofillText} !important`,
-      caretColor: `${autofillText} !important`,
+      WebkitBoxShadow: `0 0 0 1000px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+      WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
+      caretColor: `${AUTOFILL_TEXT_VAR} !important`,
       borderRadius: "inherit",
       transition: "background-color 5000s ease-in-out 0s",
     },
     "input:-webkit-autofill:hover": {
-      WebkitBoxShadow: `0 0 0 1000px ${autofillBackground} inset !important`,
-      WebkitTextFillColor: `${autofillText} !important`,
+      WebkitBoxShadow: `0 0 0 1000px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+      WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
     },
     "input:-webkit-autofill:focus": {
-      WebkitBoxShadow: `0 0 0 1000px ${autofillBackground} inset !important`,
-      WebkitTextFillColor: `${autofillText} !important`,
+      WebkitBoxShadow: `0 0 0 1000px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+      WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
     },
     "input:-webkit-autofill:active": {
-      WebkitBoxShadow: `0 0 0 1000px ${autofillBackground} inset !important`,
-      WebkitTextFillColor: `${autofillText} !important`,
+      WebkitBoxShadow: `0 0 0 1000px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+      WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
     },
     "textarea:-webkit-autofill, select:-webkit-autofill": {
-      WebkitBoxShadow: `0 0 0 1000px ${autofillBackground} inset !important`,
-      WebkitTextFillColor: `${autofillText} !important`,
-      caretColor: `${autofillText} !important`,
+      WebkitBoxShadow: `0 0 0 1000px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+      WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
+      caretColor: `${AUTOFILL_TEXT_VAR} !important`,
       borderRadius: "inherit",
       transition: "background-color 5000s ease-in-out 0s",
     },
     "input:autofill, textarea:autofill, select:autofill": {
-      boxShadow: `0 0 0 1000px ${autofillBackground} inset !important`,
-      color: `${autofillText} !important`,
+      boxShadow: `0 0 0 1000px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+      color: `${AUTOFILL_TEXT_VAR} !important`,
     },
     "input:-internal-autofill-selected": {
-      backgroundColor: `${autofillBackground} !important`,
+      backgroundColor: `${AUTOFILL_BACKGROUND_VAR} !important`,
       backgroundImage: "none !important",
-      color: `${autofillText} !important`,
+      color: `${AUTOFILL_TEXT_VAR} !important`,
     },
     "input[data-com-onepassword-filled], textarea[data-com-onepassword-filled], input[data-com-onepassword-filled='dark'], textarea[data-com-onepassword-filled='dark']":
       {
-        backgroundColor: `${autofillBackground} !important`,
-        WebkitBoxShadow: `0 0 0 1000px ${autofillBackground} inset !important`,
-        WebkitTextFillColor: `${autofillText} !important`,
-        color: `${autofillText} !important`,
-        caretColor: `${autofillText} !important`,
+        backgroundColor: `${AUTOFILL_BACKGROUND_VAR} !important`,
+        WebkitBoxShadow: `0 0 0 1000px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+        WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
+        color: `${AUTOFILL_TEXT_VAR} !important`,
+        caretColor: `${AUTOFILL_TEXT_VAR} !important`,
       },
     "*::-webkit-scrollbar": {
       width: "6px",
@@ -185,48 +200,45 @@ const getMuiCard = (): Components<Omit<Theme, "components">>["MuiCard"] => ({
   },
 });
 
-const getMuiInputOverrides = ({
-  autofillBackground,
-  autofillText,
-}: Pick<ComponentProps, "autofillBackground" | "autofillText">) => ({
+const getMuiInputOverrides = () => ({
   MuiOutlinedInput: {
     styleOverrides: {
       root: {
         "& input:-webkit-autofill": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
-          WebkitTextFillColor: `${autofillText} !important`,
-          caretColor: `${autofillText} !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+          WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
+          caretColor: `${AUTOFILL_TEXT_VAR} !important`,
           borderRadius: "inherit",
           transition: "background-color 5000s ease-in-out 0s",
         },
         "& input:-webkit-autofill:hover": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
-          WebkitTextFillColor: `${autofillText} !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+          WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
         },
         "& input:-webkit-autofill:focus": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
-          WebkitTextFillColor: `${autofillText} !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+          WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
         },
         "& input:-webkit-autofill:active": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
-          WebkitTextFillColor: `${autofillText} !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+          WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
         },
       },
       input: {
         "&:-webkit-autofill": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
-          WebkitTextFillColor: `${autofillText} !important`,
-          caretColor: `${autofillText} !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+          WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
+          caretColor: `${AUTOFILL_TEXT_VAR} !important`,
           borderRadius: "inherit",
         },
         "&:-webkit-autofill:hover": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
         },
         "&:-webkit-autofill:focus": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
         },
         "&:-webkit-autofill:active": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
         },
       },
     },
@@ -235,13 +247,13 @@ const getMuiInputOverrides = ({
     styleOverrides: {
       input: {
         "&:-webkit-autofill": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
-          WebkitTextFillColor: `${autofillText} !important`,
-          caretColor: `${autofillText} !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+          WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
+          caretColor: `${AUTOFILL_TEXT_VAR} !important`,
         },
         "&:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active": {
-          WebkitBoxShadow: `0 0 0 100px ${autofillBackground} inset !important`,
-          WebkitTextFillColor: `${autofillText} !important`,
+          WebkitBoxShadow: `0 0 0 100px ${AUTOFILL_BACKGROUND_VAR} inset !important`,
+          WebkitTextFillColor: `${AUTOFILL_TEXT_VAR} !important`,
         },
       },
     },
@@ -444,19 +456,15 @@ const getMuiTypography = (): Components<Omit<Theme, "components">>["MuiTypograph
   },
 });
 
-export const components = ({
-  isLight,
-  autofillBackground,
-  autofillText,
-}: ComponentProps): Components<Omit<Theme, "components">> => {
+export const components = (): Components<Omit<Theme, "components">> => {
   return {
-    MuiCssBaseline: getMuiCssBaseline({ isLight, autofillBackground, autofillText }),
+    MuiCssBaseline: getMuiCssBaseline(),
     MuiButton: getMuiButton(),
     MuiPaper: getMuiPaper(),
     MuiCard: getMuiCard(),
     MuiSwitch: getMuiSwitch(),
     MuiTypography: getMuiTypography(),
-    ...getMuiInputOverrides({ autofillBackground, autofillText }),
+    ...getMuiInputOverrides(),
     MuiDataGrid: getMuiDataGrid(),
   };
 };
