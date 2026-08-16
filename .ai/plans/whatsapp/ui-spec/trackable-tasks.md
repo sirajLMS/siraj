@@ -73,7 +73,7 @@
 
 ### Phase 1: Foundation (No Visual Changes)
 
-- [ ] 1. **i18n Key Additions & Label Helpers**
+- [x] 1. **i18n Key Additions & Label Helpers**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Add new i18n keys to `shared/locale/types/whatsapp/index.ts`: form labels, validation messages, delete confirm interpolation, permission denied, retry, error boundary, template preview labels
   - Implement new keys in `shared/locale/en/whatsapp/index.ts`
@@ -90,7 +90,7 @@
   - Update progress: Mark task 1 as `[x]`
   - _Requirements: UI-REQ-3_
 
-- [ ] 2. **Form Validation Functions & Types Activation**
+- [x] 2. **Form Validation Functions & Types Activation**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Create `frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation.ts` — validates displayName, phoneNumberId, wabaId, accessToken, twoStepPin
   - Activate dead types in `types/whatsappSettingsTypes.ts` — wire `WhatsappAccountFormValues`, `ApiFormValues`, `CredentialFormValues` to actual form usage
@@ -102,7 +102,7 @@
   - Update progress: Mark task 2 as `[x]`
   - _Requirements: UI-REQ-5_
 
-- [ ] 3. **GraphQL Document Additions & URL Tab Helper**
+- [x] 3. **GraphQL Document Additions & URL Tab Helper**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Add `whatsappTemplatesQueryDocument` to `frontend/common/graphql/sharedDocuments/whatsapp/whatsapp.documents.ts` (query persisted templates). Note: The exported constant is camelCase (`whatsappTemplatesQueryDocument`); the PascalCase `WhatsappTemplatesQueryDocument` refers to the generated Operations **type**, not the exported constant (matching existing convention in `whatsapp.documents.ts`).
   - Add `whatsappOptInAuditQueryDocument` to `whatsapp.documents.ts` (query opt-in audit trail). Note: The exported constant is camelCase (`whatsappOptInAuditQueryDocument`); the PascalCase `WhatsappOptInAuditQueryDocument` refers to the generated Operations **type**, not the exported constant (matching existing convention in `whatsapp.documents.ts`).
@@ -119,7 +119,7 @@
 
 ### Phase 2: Core UI Infrastructure
 
-- [ ] 4. **Route Boundaries (loading.tsx & error.tsx)**
+- [x] 4. **Route Boundaries (loading.tsx & error.tsx)**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Create `app/(dashboard)/settings/whatsapp/loading.tsx` — skeleton loader using PageContainer + tab skeleton
   - Create `app/(dashboard)/settings/whatsapp/error.tsx` — "use client" error boundary with retry button, theme palette, i18n labels
@@ -130,7 +130,7 @@
   - Update progress: Mark task 4 as `[x]`
   - _Requirements: UI-REQ-7_
 
-- [ ] 5. **URL-Synced Tab Navigation Migration**
+- [x] 5. **URL-Synced Tab Navigation Migration**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Modify `WhatsappConfigView.tsx`: Replace `useState<TabId>` with `useWhatsappTab()` hook, drop `ssr: false` from lazy loading
   - Create `WhatsappTabNav.tsx` — generic tab navigation using `GenericTabNav` via `ResponsiveViewSwitch`, reads activeTab from URL
@@ -144,7 +144,7 @@
   - Update progress: Mark task 5 as `[x]`
   - _Requirements: UI-REQ-4_
 
-- [ ] 6. **ViewModel Enhancement (Create/Update/Validation/Loading States)**
+- [x] 6. **ViewModel Enhancement (Create/Update/Validation/Loading States)**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Wire `createWhatsappAccount` mutation → `handleCreate` with form validation
   - Wire `updateWhatsappAccount` mutation → `handleEditName` with validation
@@ -162,7 +162,7 @@
   - Update progress: Mark task 6 as `[x]`
   - _Requirements: UI-REQ-1, UI-REQ-2, UI-REQ-5, UI-REQ-7_
 
-- [ ] 7. **Shared Component Adoption (Snackbars & StatusBadges)**
+- [x] 7. **Shared Component Adoption (Snackbars & StatusBadges)**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Create `whatsappStatusBadge.tsx` — WhatsApp status badge config mapping template statuses and account statuses to StatusBadge categories
   - Replace `tabs/components/NumbersSnackbar.tsx` with `FormSuccessSnackbar` + `FormErrorSnackbar` in `WhatsappSettingsContainer.tsx` (or `WhatsappConfigView.tsx`)
@@ -179,7 +179,7 @@
 
 ### Phase 3: Component Features
 
-- [ ] 8. **Create/Edit Account Dialogs**
+- [x] 8. **Create/Edit Account Dialogs**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Create `CreateAccountDialog.tsx` (shared common component): displayName, phoneNumberId, wabaId fields with inline validation, submit/cancel buttons, loading state
   - Create `EditNameDialog.tsx` (shared common component): displayName field pre-filled, validation, submit/cancel buttons, loading state
@@ -194,7 +194,7 @@
   - Update progress: Mark task 8 as `[x]`
   - _Requirements: UI-REQ-1_
 
-- [ ] 9. **Template Persistence & Body Preview**
+- [x] 9. **Template Persistence & Body Preview**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Wire `whatsappTemplates` query to `tabs/shared/TemplatesTabContent.tsx` — show persisted templates on mount ⚠️ NOTE: Backend resolver for a standalone templates query does not exist yet — either create it first (backend task) or use template snapshots from the `syncWhatsappAccountsFromMeta` mutation result
   - Add template body preview: expand row (desktop AppDataGrid) / expand card (mobile MobileCardList) to show body content, language, category, buttons
@@ -208,7 +208,7 @@
   - Update progress: Mark task 9 as `[x]`
   - _Requirements: UI-REQ-2, UI-REQ-3_
 
-- [ ] 10. **Delete Confirm with Account Name & Per-Row Loading**
+- [x] 10. **Delete Confirm with Account Name & Per-Row Loading**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Repair existing `DeleteConfirmDialog` in `tabs/NumbersTab.desktop.tsx:48-85` — fix it to render account name (`accountLabel`). Currently buggy: component ignores the `state` prop and shows generic text without the account name. Use `deleteConfirmMessage` interpolation key for "Delete '{displayName}'?".
   - Wire per-row `LinearProgress` (desktop) or skeleton overlay (mobile) using `deletingId` from ViewModel
@@ -221,7 +221,7 @@
   - Update progress: Mark task 10 as `[x]`
   - _Requirements: UI-REQ-7, UI-REQ-8_
 
-- [ ] 11. **i18n Enum Localization (Wire All 31 Orphaned Keys)**
+- [x] 11. **i18n Enum Localization (Wire All 31 Orphaned Keys)**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Modify `tabs/shared/NumberCard.tsx`: Replace raw enum interpolation of `quality` with `t.qualityGreen` helper (current code renders `{account.qualityRating}` directly — no toUpperCase, just raw enum value)
   - Modify `tabs/shared/NumberCard.tsx`: Replace raw enum interpolation of `tier` with `t.tier1K` helper (current code renders `{account.portfolioMessagingLimitTier}` directly)
@@ -241,7 +241,7 @@
 
 ### Phase 4: Opt-in Features (Deferred from Parent Plan)
 
-- [ ] 12. **Non-Admin Opt-in History Table**
+- [x] 12. **Non-Admin Opt-in History Table**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Wire `whatsappOptInAuditQuery` to `tabs/shared/OptInTabContent.tsx` for non-admin users
   - Add history table (desktop: AppDataGrid; mobile: MobileCardList) showing: date, action (opted in/out), changedBy
@@ -255,7 +255,7 @@
   - Update progress: Mark task 12 as `[x]`
   - _Requirements: UI-REQ-6_
 
-- [ ] 13. **Admin Opt-in Consolidated View**
+- [x] 13. **Admin Opt-in Consolidated View**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Add admin consolidated view to `tabs/shared/OptInTabContent.tsx`: table of all users' opt-in states with search/filter
   - Desktop: AppDataGrid with columns (userName, optedIn, optedInAt, actions)
@@ -271,7 +271,7 @@
 
 ### Phase 5: Mobile/Desktop Parity
 
-- [ ] 14. **Mobile Numbers Tab Full CRUD**
+- [x] 14. **Mobile Numbers Tab Full CRUD**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Modify `tabs/NumbersTab.mobile.tsx` to support full CRUD (reverses Q10 read-only decision)
   - Add action menu (Bottom Sheet or Speed Dial) per account card
@@ -288,7 +288,7 @@
   - Update progress: Mark task 14 as `[x]`
   - _Requirements: UI-REQ-12_
 
-- [ ] 15. **Mobile Templates Preview & Opt-in History**
+- [x] 15. **Mobile Templates Preview & Opt-in History**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Modify `tabs/TemplatesTab.mobile.tsx`: use MobileCardList with expandable cards for template body preview
   - Replace raw status with localized labels (via `whatsappTemplateStatusLabels`)
@@ -303,7 +303,7 @@
 
 ### Phase 6: Polish (Animations, RTL, Accessibility)
 
-- [ ] 16. **Animations & Transitions**
+- [x] 16. **Animations & Transitions**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Add tab fade-in transition: `@keyframes whatsappTabFadeIn` in WhatsappTabPanels (200ms ease-in-out, opacity + translateY)
   - Add row enter animation: MUI Fade + Grow on new account row (300ms)
@@ -320,7 +320,7 @@
   - Update progress: Mark task 16 as `[x]`
   - _Requirements: UI-REQ-11_
 
-- [ ] 17. **Accessibility & Permission Denial UI**
+- [x] 17. **Accessibility & Permission Denial UI**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Add `aria-invalid` to all form fields with validation errors
   - Add `aria-busy` to all loading containers (skeletons, per-row loaders)
@@ -337,7 +337,7 @@
 
 ### Phase 7: Testing
 
-- [ ] 18. **ViewModel Tests (Create/Update/Validation/Loading)**
+- [x] 18. **ViewModel Tests (Create/Update/Validation/Loading)**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Add tests to `test/ui/components/useWhatsappSettingsViewModel.test.tsx`:
     - Create account mutation flow (valid input → success snackbar)
@@ -358,7 +358,7 @@
   - Update progress: Mark task 18 as `[x]`
   - _Requirements: UI-REQ-1, UI-REQ-5, UI-REQ-7_
 
-- [ ] 19. **Component Tests (Dialogs, Tabs, Parity)**
+- [x] 19. **Component Tests (Dialogs, Tabs, Parity)**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
   - Create `test/ui/components/whatsappCreateAccountDialog.test.tsx`: fields render, validation errors, submit disabled, onSubmit called with valid data
   - Create `test/ui/components/whatsappEditNameDialog.test.tsx`: pre-filled name, validation, submit
@@ -379,7 +379,7 @@
 
 ### Phase 8: Knowledge Propagation
 
-- [ ] 20. **Knowledge Propagation & Documentation**
+- [x] 20. **Knowledge Propagation & Documentation**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/` to synthesize all learnings
   - Create canonical reference doc under `docs/frontend/whatsapp-ui-patterns.md` consolidating patterns, rules, and gotchas discovered during implementation
   - Update `frontend/common/views/AGENTS.md` with new rules/patterns and reference to the new doc

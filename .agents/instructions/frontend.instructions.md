@@ -237,6 +237,24 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - **Typed `execCopy` binding for clipboard fallback**: `sonarjs/deprecation` flags `document.execCommand`. Use `const execCopy: (commandId: string) => boolean = globalThis.document.execCommand.bind(globalThis.document)` — the explicit type annotation sheds the deprecation marker
 - **`prefers-reduced-motion` with MUI**: Detect with `useMediaQuery("(prefers-reduced-motion: reduce)")`. Pass `timeout={0}` to MUI `Fade`/`Slide` when reduced. Skip `@keyframes` animation classes when reduced
 
+### WhatsApp UI Patterns
+
+- **Canonical reference**: See `docs/frontend/whatsapp-ui-patterns.md` for the complete WhatsApp UI pattern catalog (ViewModel hooks, URL-synced tabs, dialog state, per-row loading, i18n label helpers, animations, accessibility, testing, gotchas)
+- **ViewModel composable hooks**: Decompose large ViewModels into sub-hooks assembled by a builder function. Extract when approaching ~120 lines (CodeScene Large Method threshold)
+- **URL-synced tabs**: `useWhatsappTab()` reads `?tab=` from URL via `useSearchParams`, validates against `TAB_IDS` allowlist. Tab changes use `<Link>` hrefs
+- **Dialog state**: Single `dialogState: { type, accountId?, displayName? }` — no local `useState` for dialog open/close. `mutationError` tracks inline validation errors
+- **Per-row loading**: `creating`, `deletingId`, `updatingId`, `syncingId` (sentinel `"all"` for bulk sync)
+- **i18n label helpers**: Record-based lookups (`getTemplateStatusLabelKey`, `getQualityLabelKey`, etc.) avoid `no-unsafe-enum-comparison`
+- **`@keyframes` in sx**: Embed `@keyframes` directly in sx prop objects — not via `@mui/material/styles` `keyframes`
+- **`component="output"` for aria-live**: Use `<Box component="output" aria-busy>` instead of `role="status"` (oxlint `prefer-tag-over-role`)
+- **`aria-invalid`**: `aria-invalid={!!error}` on form `TextField`s with validation errors
+- **Reduced motion**: `useMediaQuery("(prefers-reduced-motion: reduce)", { noSsr: true })` → set MUI `Fade`/`Grow` `timeout={0}` when true
+- **`RefObject<T>`**: React 19 deprecates `MutableRefObject`. Use `RefObject<T>` — `current` is mutable
+- **`renderHook` unavailable in `bun:test`**: Use consumer-component pattern (render a component calling the hook, capture state via `useEffect`)
+- **Missing backend resolvers**: `whatsappTemplates` and `whatsappOptInAudit` queries don't exist — documents are commented-out stubs with placeholder data
+- **Missing enum values**: `TIER_250K`, `TIER_1M`, `qualityOrange` DON'T EXIST — use actual values from `whatsapp-templates.enum.ts`
+- **Permission enum names**: `WhatsappConfigManage` (not `WHATSAPP_MANAGE`), `WhatsappTemplatesManage`, `WhatsappView` — from `graphql-types.ts`
+
 ### Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.

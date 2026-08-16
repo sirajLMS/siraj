@@ -1,21 +1,78 @@
 "use client";
 
-import { Box, Card, CardContent, CardHeader, Chip } from "@mui/material";
+import { WarningOutlined } from "@mui/icons-material";
+import { Alert, Box, Card, CardContent, CardHeader, Chip } from "@mui/material";
 import type { ReactNode } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import { getQualityLabelKey } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappQualityLabel";
+import { getWhatsappAccountStatusBadgeConfig } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappStatusBadge";
+import { getThroughputLabelKey } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappThroughputLabel";
+import { getTierLabelKey } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappTierLabel";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
-/** Common labels needed for account card chips. */
+/** Reducible enum-label i18n keys (quality, tier, throughput, template status). */
+const LABEL_KEYS = [
+  "qualityGreen",
+  "qualityYellow",
+  "qualityRed",
+  "qualityUnknown",
+  "tier50",
+  "tier250",
+  "tier1K",
+  "tier10K",
+  "tier100K",
+  "tierUnlimited",
+  "tierUnknown",
+  "throughputStandard",
+  "throughputCoexistence",
+  "throughputHigh",
+  "throughputUnknown",
+] as const satisfies readonly string[];
+
+type LabelKey = (typeof LABEL_KEYS)[number];
+
+function isLabelKey(key: string): key is LabelKey {
+  return (LABEL_KEYS as readonly string[]).includes(key);
+}
+
+function resolveLabel(key: string, t: NumberCardLabels): string {
+  return isLabelKey(key) ? t[key] : key;
+}
+
+/** Common labels needed for account card chips and warnings. */
 type NumberCardLabels = Pick<
   WhatsappLabels,
   | "qualityRating"
   | "messagingTier"
   | "throughputLevel"
+  | "throughput24h"
   | "lastWebhookAt"
   | "isActive"
   | "isInactive"
   | "wabaId"
   | "phoneNumberId"
+  | "coexistenceWarningTitle"
+  | "coexistenceWarningBody"
+  | "unverifiedWarningTitle"
+  | "unverifiedWarningBody"
+  | "warningTierExceeded"
+  | "warningCoexistence"
+  | "qualityGreen"
+  | "qualityYellow"
+  | "qualityRed"
+  | "qualityUnknown"
+  | "tier50"
+  | "tier250"
+  | "tier1K"
+  | "tier10K"
+  | "tier100K"
+  | "tierUnlimited"
+  | "tierUnknown"
+  | "throughputStandard"
+  | "throughputCoexistence"
+  | "throughputHigh"
+  | "throughputUnknown"
 >;
 
 /** Props for the shared NumberCard component. */
@@ -37,6 +94,13 @@ export interface NumberCardProps {
  * The isActive chip is common to both tiers.
  */
 export function NumberCard({ account, labels: t, action, extraChips, chipGap = 1 }: Readonly<NumberCardProps>) {
+  const qualityLabel = resolveLabel(getQualityLabelKey(account.qualityRating ?? ""), t);
+  const tierLabel = resolveLabel(getTierLabelKey(account.portfolioMessagingLimitTier ?? ""), t);
+  const throughputLabel = resolveLabel(getThroughputLabelKey(account.throughputLevel ?? ""), t);
+
+  const isCoexistence = account.throughputLevel?.toUpperCase() === "COEXISTENCE";
+  const isUnverified = account.portfolioMessagingLimitTier?.toUpperCase() === "UNTIERED";
+
   return (
     <Card variant="outlined">
       <CardHeader
@@ -46,19 +110,28 @@ export function NumberCard({ account, labels: t, action, extraChips, chipGap = 1
       />
       <CardContent>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: chipGap }}>
-          <Chip
-            size="small"
+          <StatusBadge
+            {...getWhatsappAccountStatusBadgeConfig(account.isActive)}
             label={account.isActive ? t.isActive : t.isInactive}
-            color={account.isActive ? "success" : "default"}
           />
           {extraChips}
-          <Chip size="small" label={`${t.qualityRating}: ${account.qualityRating}`} />
-          <Chip size="small" label={`${t.messagingTier}: ${account.portfolioMessagingLimitTier}`} />
-          <Chip size="small" label={`${t.throughputLevel}: ${account.throughputLevel}`} />
+          <Chip size="small" label={`${t.qualityRating}: ${qualityLabel}`} />
+          <Chip size="small" label={`${t.messagingTier}: ${tierLabel}`} />
+          <Chip size="small" label={`${t.throughput24h}: ${throughputLabel}`} />
           {account.lastWebhookAt ? (
             <Chip size="small" label={`${t.lastWebhookAt}: ${new Date(account.lastWebhookAt).toLocaleString()}`} />
           ) : null}
         </Box>
+        {isCoexistence ? (
+          <Alert severity="warning" icon={<WarningOutlined />} sx={{ mt: 1.5 }} role="alert">
+            <strong>{t.coexistenceWarningTitle}</strong> — {t.coexistenceWarningBody}
+          </Alert>
+        ) : null}
+        {isUnverified ? (
+          <Alert severity="info" sx={{ mt: 1.5 }} role="alert">
+            <strong>{t.unverifiedWarningTitle}</strong> — {t.unverifiedWarningBody}
+          </Alert>
+        ) : null}
       </CardContent>
     </Card>
   );

@@ -43,6 +43,18 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["app/**/error.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noShadowRestrictedNames": "off"
+          }
+        }
+      }
+    }
+  ],
   "javascript": {
     "parser": {
       "unsafeParameterDecoratorsEnabled": true

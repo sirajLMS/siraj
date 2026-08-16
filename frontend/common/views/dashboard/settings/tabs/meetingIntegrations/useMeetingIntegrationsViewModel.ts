@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   AppPermission,
   MeetingConnectionTestMode,
@@ -315,7 +315,10 @@ function buildRevokeAccount(deps: RevokeAccountDeps, store: Pick<UseMeetingInteg
 
 function useConnectedAccountsSync(
   expandedSlug: ViewModelProviderSlug | null,
-  store: Pick<UseMeetingIntegrationsStoreAccess, "setLoadingAccountsFor" | "setConnectedAccounts">
+  store: Pick<
+    UseMeetingIntegrationsStoreAccess,
+    "connectedAccountsByProvider" | "setLoadingAccountsFor" | "setConnectedAccounts"
+  >
 ): void {
   const { data: connectedAccountsData, loading: connectedAccountsLoading } = useQuery(
     meetingIntegrationConnectedAccountsQueryDocument,
@@ -325,6 +328,22 @@ function useConnectedAccountsSync(
       variables: { providerSlug: expandedSlug ?? "zoom" },
     }
   );
+
+  // Memoize the mapped accounts so the reference is stable across Apollo cache
+  // ticks (cache-and-network returns new object refs even when content is
+  // unchanged). Without this, the sync effect loops: data tick → set → re-render
+  // → new data ref → set again → "Maximum update depth exceeded".
+  const accounts = useMemo(
+    () =>
+      (connectedAccountsData?.meetingIntegrationConnectedAccounts ?? [])
+        .filter((account): account is Operations.MeetingIntegrationConnectedAccountFieldsFragment => account != null)
+        .map(mapConnectedAccount),
+    [connectedAccountsData?.meetingIntegrationConnectedAccounts]
+  );
+
+  // Track the last accounts we wrote to the store so we only push when the
+  // content actually changes — prevents the set → re-render → set loop.
+  const lastSyncedRef = useRef<{ slug: ViewModelProviderSlug; signature: string } | null>(null);
 
   useEffect(() => {
     if (expandedSlug === null) {
@@ -336,13 +355,19 @@ function useConnectedAccountsSync(
       return;
     }
 
-    const accounts = (connectedAccountsData?.meetingIntegrationConnectedAccounts ?? [])
-      .filter((account): account is Operations.MeetingIntegrationConnectedAccountFieldsFragment => account != null)
-      .map(mapConnectedAccount);
+    // Build a stable content signature so we don't re-set identity-equal data.
+    const signature = accounts
+      .map(a => `${a.id}|${a.status}|${a.expiresAt?.getTime() ?? ""}|${a.lastRefreshedAt?.getTime() ?? ""}`)
+      .join("\n");
 
+    if (lastSyncedRef.current?.slug === expandedSlug && lastSyncedRef.current.signature === signature) {
+      return;
+    }
+
+    lastSyncedRef.current = { slug: expandedSlug, signature };
     store.setConnectedAccounts(expandedSlug, accounts);
     store.setLoadingAccountsFor(null);
-  }, [connectedAccountsData?.meetingIntegrationConnectedAccounts, connectedAccountsLoading, expandedSlug, store]);
+  }, [accounts, connectedAccountsLoading, expandedSlug, store]);
 }
 
 interface UseMeetingIntegrationsActionsParams {
@@ -424,7 +449,18 @@ export function useMeetingIntegrationsViewModel(): MeetingIntegrationsViewModel 
 
   const store = useMeetingIntegrationsStoreValues();
   const { data, loading, error, refetch } = useMeetingIntegrationProvidersQuery();
-  const providers = useMemo(() => (data?.meetingIntegrationProviders ?? []).map(mapProviderSummary), [data]);
+  const providers = useMemo(() => {
+    const seen = new Set<string>();
+    return (data?.meetingIntegrationProviders ?? [])
+      .filter(provider => {
+        if (provider.slug == null || seen.has(provider.slug)) {
+          return false;
+        }
+        seen.add(provider.slug);
+        return true;
+      })
+      .map(mapProviderSummary);
+  }, [data]);
 
   useConnectedAccountsSync(store.expandedSlug, store);
 

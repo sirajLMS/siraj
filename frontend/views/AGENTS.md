@@ -111,6 +111,14 @@ frontend/common/views/dashboard/<domain>/components/
 
 The general user creation form uses the ViewModel + Shared scaffold pattern with `react-hook-form` + `zodResolver`. The permission group autocomplete filters out specialized groups (student, teacher, parent) using `SPECIALIZED_GROUP_SLUG_SET.has(slug)` from `@/shared/constants/specialized-groups.constants`. Zod v4 patterns: `z.enum(AccountStatus)` (not `z.nativeEnum()`), `z.email()` via pipe (`z.string().min(1).pipe(z.email(...))`). The `AccountStatus` enum is imported from `@/frontend/common/graphql/generated/gql/graphql-types` (not `@/backend/enum`) for frontend schemas. See `docs/services/general-user-creation.md` for the complete pattern reference.
 
+## WhatsApp Settings UI
+
+- **Canonical reference**: See `docs/frontend/whatsapp-ui-patterns.md` for the complete WhatsApp UI pattern catalog.
+- **Mobile/desktop parity**: Shared content components (`OptInTabContent`, `TemplatesTabContent`) live in `tabs/shared/`. Platform wrappers pass platform-specific sections via render-prop slots (`historySection`, `adminSection`).
+- **Mobile templates**: Use `MobileCardList` + `MobileCardListItem` with expandable `Collapse`. Desktop uses shared `Card` + `CardActionArea` + `Collapse`.
+- **Mobile CRUD**: Full CRUD parity — per-card action menu (`MoreVertOutlined`), credential editing, delete confirm with `fullScreen` dialogs.
+- **SharedScaffold pattern**: Desktop and mobile share content via `*Shared.tsx` in `tabs/shared/` with slot props for tier-specific sections.
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.

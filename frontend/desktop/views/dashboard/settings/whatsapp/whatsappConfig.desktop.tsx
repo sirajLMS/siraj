@@ -1,84 +1,30 @@
 "use client";
 
-import { WhatsappConfigLayout } from "@/frontend/common/views/dashboard/settings/whatsapp/WhatsappConfigLayout";
-import type {
-  WhatsappConfigTab,
-  WhatsappConfigViewSharedProps,
-} from "@/frontend/common/views/dashboard/settings/whatsapp/WhatsappConfigView";
+import type { ReactNode } from "react";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
-import { NumbersTabDesktop } from "@/frontend/desktop/views/dashboard/settings/whatsapp/tabs/NumbersTab.desktop";
-import { OptInTabDesktop } from "@/frontend/desktop/views/dashboard/settings/whatsapp/tabs/OptInTab.desktop";
-import { TemplatesTabDesktop } from "@/frontend/desktop/views/dashboard/settings/whatsapp/tabs/TemplatesTab.desktop";
 
-export function WhatsappConfigDesktopView(props: Readonly<WhatsappConfigViewSharedProps>) {
-  const {
-    labels,
-    accounts,
-    templates,
-    loading,
-    syncing,
-    optInLoading,
-    isOptedIn,
-    isConfigured,
-    snackbar,
-    onDeleteAccount,
-    onSetAccessToken,
-    onSetTwoStepPin,
-    onSyncFromMeta,
-    onToggleOptIn,
-    onDismissSnackbar,
-  } = props;
+type WhatsappConfigDesktopShellProps = {
+  readonly title: string;
+  readonly children: ReactNode;
+};
 
+/**
+ * Desktop page shell for the WhatsApp settings page.
+ *
+ * Provides the desktop page container + header and renders `children` (the
+ * URL-synced tab nav and tab panels). Tab content rendering is handled by
+ * the common-layer `WhatsappTabPanels` component which lazy-loads
+ * `NumbersTab.desktop`, `TemplatesTab.desktop`, and `OptInTab.desktop`
+ * via `ResponsiveViewSwitch`.
+ */
+export function WhatsappConfigDesktopShell({ title, children }: Readonly<WhatsappConfigDesktopShellProps>) {
   return (
-    <WhatsappConfigLayout
-      {...props}
-      pageContainer={
-        <DesktopPageContainer>
-          <DesktopPageHeader title={labels.page.pageTitle} />
-        </DesktopPageContainer>
-      }
-    >
-      {(tab: WhatsappConfigTab) => {
-        if (tab === "numbers") {
-          return (
-            <NumbersTabDesktop
-              labels={labels}
-              accounts={accounts}
-              loading={loading}
-              syncing={syncing}
-              snackbar={snackbar}
-              onDeleteAccount={onDeleteAccount}
-              onSetAccessToken={onSetAccessToken}
-              onSetTwoStepPin={onSetTwoStepPin}
-              onSyncFromMeta={onSyncFromMeta}
-              onDismissSnackbar={onDismissSnackbar}
-              isConfigured={isConfigured}
-            />
-          );
-        }
-
-        if (tab === "templates") {
-          return (
-            <TemplatesTabDesktop
-              labels={labels}
-              templates={templates}
-              loading={loading}
-              syncing={syncing}
-              onSyncFromMeta={onSyncFromMeta}
-              isConfigured={isConfigured}
-            />
-          );
-        }
-
-        return (
-          <OptInTabDesktop
-            labels={labels}
-            isOptedIn={isOptedIn}
-            optInLoading={optInLoading}
-            onToggleOptIn={onToggleOptIn}
-          />
-        );
-      }}
-    </WhatsappConfigLayout>
+    <DesktopPageContainer>
+      <DesktopPageHeader title={title} />
+      {children}
+    </DesktopPageContainer>
   );
 }
+
+/** @deprecated Use `WhatsappConfigDesktopShell` — the old per-tab view is replaced by URL-synced tab architecture. */
+export const WhatsappConfigDesktopView = WhatsappConfigDesktopShell;

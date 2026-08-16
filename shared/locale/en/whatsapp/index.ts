@@ -52,6 +52,8 @@ export const whatsappEn: WhatsappLabels = {
   templateStatusPending: "Pending",
   templateStatusRejected: "Rejected",
   templateStatusPaused: "Paused",
+  templateStatusPendingDeletion: "Pending Deletion",
+  templateStatusDisabled: "Disabled",
 
   // ─── Quality rating labels (Q5) ────────────────────────────────────
   qualityGreen: "High Quality",
@@ -66,6 +68,7 @@ export const whatsappEn: WhatsappLabels = {
   tier1K: "1,000 conversations / 24h",
   tier5K: "5,000 conversations / 24h",
   tier10K: "10,000 conversations / 24h",
+  tier100K: "100,000 conversations / 24h",
   tierUnlimited: "Unlimited conversations / 24h",
   tierUnknown: "Unknown tier",
 
@@ -84,6 +87,13 @@ export const whatsappEn: WhatsappLabels = {
   unverifiedWarningTitle: "Unverified Number",
   unverifiedWarningBody:
     "This number is unverified and limited to 2 message template slots. Complete Meta verification to unlock full template capacity.",
+
+  // ─── Tier exceeded & coexistence inline warnings (Task 11) ─────────
+  warningTierExceeded: "Tier limit exceeded — messaging may be throttled",
+  warningCoexistence: "Coexistence mode active — 20 messages/second max",
+
+  // ─── Throughput metric label (Task 11) ──────────────────────────────
+  throughput24h: "Throughput (24h)",
 
   // ─── Opt-in toggle + consent copy (REQ-10) ──────────────────────────
   optInTitle: "WhatsApp Notifications Opt-in",
@@ -105,4 +115,81 @@ export const whatsappEn: WhatsappLabels = {
   // ─── Delivery-failure keys (14.5) ──────────────────────────────────
   deliveryFailed: "WhatsApp message delivery failed",
   deliveryFailedWithReason: (reason: string) => `WhatsApp message delivery failed: ${reason}`,
+
+  // ─── Create/Edit form labels (Task 1) ──────────────────────────────
+  createAccountTitle: "Add WhatsApp Number",
+  editNameTitle: "Edit Display Name",
+  displayNameLabel: "Display Name",
+  phoneNumberIdLabel: "Phone Number ID",
+  wabaIdLabel: "WABA ID",
+  displayNameHelper: "The name shown to recipients in WhatsApp.",
+  phoneNumberIdHelper: "The Meta-assigned phone number ID.",
+  wabaIdHelper: "The WhatsApp Business Account ID from Meta.",
+
+  // ─── Validation messages (Task 1) ──────────────────────────────────
+  validationDisplayNameRequired: "Display name is required.",
+  validationDisplayNameTooLong: "Display name must be 100 characters or fewer.",
+  validationPhoneNumberIdRequired: "Phone number ID is required.",
+  validationPhoneNumberIdNumeric: "Phone number ID must be numeric.",
+  validationWabaIdRequired: "WABA ID is required.",
+  validationWabaIdNumeric: "WABA ID must be numeric.",
+  validationAccessTokenTooShort: "Access token must be at least 50 characters.",
+  validationPinFormat: "PIN must be exactly 6 digits.",
+
+  // ─── Delete confirm with interpolation (Task 1) ───────────────────
+  deleteConfirmTitle: "Delete WhatsApp Number",
+  deleteConfirmMessage: (displayName: string) =>
+    `Are you sure you want to delete "${displayName}"? This action cannot be undone.`,
+
+  // ─── State labels (Task 1) ─────────────────────────────────────────
+  loadingTitle: "Loading…",
+  retry: "Retry",
+  refresh: "Refresh",
+  permissionDenied: "Permission Denied",
+
+  // ─── Account action labels (Task 1) ────────────────────────────────
+  editName: "Edit Name",
+  addFirstNumber: "Add Your First Number",
+
+  // ─── Template preview labels (Task 1) ─────────────────────────────
+  templateBody: "Message Body",
+  templateButtons: "Buttons",
+  templateLastUpdated: "Last Updated",
+
+  // ─── Error boundary (Task 1) ───────────────────────────────────────
+  errorGenericTitle: "Something went wrong",
+  errorGeneric: "An unexpected error occurred while loading WhatsApp settings. Please try again.",
+
+  // ─── Opt-in history table (Task 12) ─────────────────────────────────
+  optInHistoryTitle: "Opt-in History",
+  optInHistorySubtitle: "Recent changes to your WhatsApp notification opt-in status.",
+  optInHistoryDate: "Date",
+  optInHistoryAction: "Action",
+  optInHistoryChangedBy: "Changed By",
+  optInActionOptedIn: "Opted In",
+  optInActionOptedOut: "Opted Out",
+  optInHistoryEmpty: "No opt-in history entries yet.",
+  optInHistoryFilter: "Filter",
+  optInHistoryFilterFrom: "From",
+  optInHistoryFilterTo: "To",
+  optInHistoryFilterApply: "Apply",
+  optInHistoryFilterClear: "Clear",
+  optInHistoryExport: "Export CSV",
+
+  // ─── Admin consolidated opt-in view (Task 13) ──────────────────────
+  optInAdminTitle: "All Users Opt-in Status",
+  optInAdminSubtitle: "View and manage opt-in states for all WhatsApp users.",
+  optInAdminUserName: "User",
+  optInAdminOptedIn: "Opted In",
+  optInAdminOptedInAt: "Opted-in At",
+  optInAdminActions: "Actions",
+  optInAdminSearchPlaceholder: "Search by user name…",
+  optInAdminYes: "Yes",
+  optInAdminNo: "No",
+  optInAdminEmpty: "No users match the search filter.",
+
+  // ─── Accessibility & Permission Denied (Task 17) ───────────────────
+  permissionDeniedTitle: "Access Restricted",
+  permissionDeniedDescription:
+    "You don't have permission to access this section. Contact an administrator if you believe this is an error.",
 };

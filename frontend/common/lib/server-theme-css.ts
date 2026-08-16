@@ -18,9 +18,11 @@ interface ServerThemeTokens {
   readonly onSurfaceVariant: string;
   readonly outlineVariant: string;
   readonly surfaceContainerLow: string;
+  readonly surface: string;
   readonly primaryContainer: string;
   readonly primaryMain: string;
   readonly borderLight: string;
+  readonly textPrimary: string;
   readonly textPrimaryChannel: string;
   readonly skeletonBg: string;
 }
@@ -37,9 +39,11 @@ const DARK_FALLBACKS: ServerThemeTokens = {
   onSurfaceVariant: "#A1A1AA",
   outlineVariant: "#404040",
   surfaceContainerLow: "#141414",
+  surface: "#1E1E1E",
   primaryContainer: "#115E59",
   primaryMain: "#2DD4BF",
   borderLight: "#333333",
+  textPrimary: "#FAFAFA",
   textPrimaryChannel: "255 255 255",
   skeletonBg: "rgba(255 255 255 / 0.13)",
 };
@@ -56,9 +60,11 @@ const LIGHT_FALLBACKS: ServerThemeTokens = {
   onSurfaceVariant: "#52525B",
   outlineVariant: "#E4E4E7",
   surfaceContainerLow: "#FAFAFA",
+  surface: "#FFFFFF",
   primaryContainer: "#CCFBF1",
   primaryMain: "#0D9488",
   borderLight: "#E4E4E7",
+  textPrimary: "#0F172A",
   textPrimaryChannel: "0 0 0",
   skeletonBg: "rgba(0 0 0 / 0.11)",
 };
@@ -84,9 +90,11 @@ function extractTokens(mode: PaletteMode): ServerThemeTokens {
     onSurfaceVariant: palette.onSurfaceVariant ?? fallbacks.onSurfaceVariant,
     outlineVariant: palette.outlineVariant ?? fallbacks.outlineVariant,
     surfaceContainerLow: palette.surfaceContainerLow ?? fallbacks.surfaceContainerLow,
+    surface: palette.surface ?? fallbacks.surface,
     primaryContainer: palette.primaryContainer ?? fallbacks.primaryContainer,
     primaryMain: hasMain(primary) ? primary.main : fallbacks.primaryMain,
     borderLight: border?.light ?? fallbacks.borderLight,
+    textPrimary: palette.text?.primary ?? fallbacks.textPrimary,
     textPrimaryChannel: fallbacks.textPrimaryChannel,
     skeletonBg: fallbacks.skeletonBg,
   };
@@ -125,6 +133,8 @@ function buildModeRule(mode: PaletteMode): string {
       --mui-palette-border-light: ${tokens.borderLight};
       --mui-palette-outlineVariant: ${tokens.outlineVariant};
       --mui-palette-surfaceContainerLow: ${tokens.surfaceContainerLow};
+      --mui-palette-surface: ${tokens.surface};
+      --mui-palette-text-primary: ${tokens.textPrimary};
       --mui-palette-text-primaryChannel: ${tokens.textPrimaryChannel};
       --mui-palette-Skeleton-bg: ${tokens.skeletonBg};
       color-scheme: ${mode};
