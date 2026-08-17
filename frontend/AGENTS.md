@@ -103,6 +103,10 @@ When eliminating desktop↔mobile code duplication, use the `*Shared.tsx` / `__s
 
 - **Canonical reference**: See `docs/frontend/whatsapp-ui-patterns.md` for the full pattern catalog (ViewModel hooks, URL-synced tabs, dialog state, per-row loading, i18n label helpers, animations, accessibility, testing, gotchas).
 
+## Quota UI Patterns
+
+- **Canonical reference**: See `docs/frontend/quota-ui-patterns.md` for the full pattern catalog (tier isolation with container switchers, RHF 3-generic `useForm` pattern, `cache.updateQuery` for paginated lists, StatusBadge quota categories, MetricCard animated prop, reduced-motion CSS in sx, Storybook `ErrorState` naming, component test tier-view mocking, i18n CLDR plurals, CodeScene 150-line limit, `QuotaFormAccessProvider` field-level RBAC).
+
 ### New MUI v9 Patterns
 
 - **`@keyframes` in sx**: Embed `@keyframes` directly in sx prop objects — not via `@mui/material/styles` `keyframes`.

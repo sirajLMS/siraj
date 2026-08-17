@@ -13,6 +13,7 @@ export function MobileFormErrorSnackbar({ open, message, onClose }: Readonly<Mob
   return (
     <Snackbar open={open} anchorOrigin={{ vertical: "bottom", horizontal: "center" }} onClose={onClose}>
       <Box
+        {...{ component: "alert" }}
         sx={theme => ({
           display: "flex",
           alignItems: "center",

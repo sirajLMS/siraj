@@ -14,11 +14,19 @@
     "remaining": "الحصص المتبقية",
     "reservedClasses": "الحصص المحجوزة",
     "validUntil": "صالحة حتى",
+    "validFrom": "صالحة من",
     "status": "الحالة",
     "periodType": "نوع الفترة",
     "priority": "الأولوية",
     "all": "الكل",
-    "studentIdPlaceholder": "معرف الطالب"
+    "studentIdPlaceholder": "معرف الطالب",
+    "periodDays": "أيام الفترة",
+    "periodDaysHelperText": "عدد أيام الفترة المخصصة",
+    "periodDaysRequired": "أيام الفترة مطلوبة عندما يكون نوع الفترة مخصص",
+    "validUntilAfterValidFrom": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء",
+    "studentPickerPlaceholder": "اختر طالباً",
+    "studentPickerNoOptions": "لم يتم العثور على طلاب",
+    "studentPickerLoading": "جاري تحميل الطلاب..."
   },
   "kinds": {
     "PACKAGE": "باقة",
@@ -27,7 +35,8 @@
   "statuses": {
     "ACTIVE": "نشطة",
     "EXPIRED": "منتهية",
-    "ARCHIVED": "مؤرشفة"
+    "ARCHIVED": "مؤرشفة",
+    "PENDING": "قيد الانتظار"
   },
   "periodTypes": {
     "WEEKLY": "أسبوعية",
@@ -40,11 +49,23 @@
     "edit": "تعديل الحصة",
     "delete": "حذف الحصة",
     "cancel": "إلغاء",
-    "viewLedger": "عرض سجل التدقيق"
+    "viewLedger": "عرض سجل التدقيق",
+    "view": "عرض",
+    "filter": "تصفية",
+    "addQuota": "إضافة حصة"
+  },
+  "deleteConfirm": {
+    "title": "حذف الحصة",
+    "body": {
+      "__fn": "(studentName) => `\\u0647\\u0644 \\u0623\\u0646\\u062A \\u0645\\u062A\\u0623\\u0643\\u062F \\u0645\\u0646 \\u062D\\u0630\\u0641 \\u062D\\u0635\\u0629 ${studentName}\\u061F`"
+    },
+    "cancel": "إلغاء",
+    "confirm": "حذف"
   },
   "errors": {
     "createFailed": "فشل في إنشاء الحصة. يرجى المحاولة مرة أخرى.",
-    "updateFailed": "فشل في تحديث الحصة. يرجى المحاولة مرة أخرى."
+    "updateFailed": "فشل في تحديث الحصة. يرجى المحاولة مرة أخرى.",
+    "deleteFailed": "فشل في حذف الحصة"
   },
   "ledger": {
     "title": "سجل تدقيق الحصة",
@@ -55,25 +76,46 @@
   },
   "insightsTitle": "نظرة عامة على نظام الحصص",
   "activeQuotasCount": {
-    "__fn": "(count) => count === 1 ? \"\\u062D\\u0635\\u0629 \\u0646\\u0634\\u0637\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\" : `${count} \\u062D\\u0635\\u0635 \\u0646\\u0634\\u0637\\u0629`"
+    "__fn": "(count) => {\n    if (count === 0)\n      return \"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u062D\\u0635\\u0635 \\u0646\\u0634\\u0637\\u0629\";\n    if (count === 1)\n      return \"\\u062D\\u0635\\u0629 \\u0646\\u0634\\u0637\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\";\n    if (count === 2)\n      return \"\\u062D\\u0635\\u062A\\u0627\\u0646 \\u0646\\u0634\\u0637\\u062A\\u0627\\u0646\";\n    if (count >= 3 && count <= 10)\n      return `${count} \\u062D\\u0635\\u0635 \\u0646\\u0634\\u0637\\u0629`;\n    return `${count} \\u062D\\u0635\\u0629 \\u0646\\u0634\\u0637\\u0629`;\n  }"
   },
   "totalClassesRemaining": {
-    "__fn": "(count) => count === 1 ? \"\\u062D\\u0635\\u0629 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\" : `${count} \\u062D\\u0635\\u0635 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629`"
+    "__fn": "(count) => {\n    if (count === 0)\n      return \"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u062D\\u0635\\u0635 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629\";\n    if (count === 1)\n      return \"\\u062D\\u0635\\u0629 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\";\n    if (count === 2)\n      return \"\\u062D\\u0635\\u062A\\u0627\\u0646 \\u0645\\u062A\\u0628\\u0642\\u064A\\u062A\\u0627\\u0646\";\n    if (count >= 3 && count <= 10)\n      return `${count} \\u062D\\u0635\\u0635 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629`;\n    return `${count} \\u062D\\u0635\\u0629 \\u0645\\u062A\\u0628\\u0642\\u064A\\u0629`;\n  }"
   },
   "expiringThisWeekCount": {
-    "__fn": "(count) => count === 1 ? \"\\u062D\\u0635\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629 \\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\" : `${count} \\u062D\\u0635\\u0635 \\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639`"
+    "__fn": "(count) => {\n    if (count === 0)\n      return \"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u062D\\u0635\\u0635 \\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\";\n    if (count === 1)\n      return \"\\u062D\\u0635\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629 \\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\";\n    if (count === 2)\n      return \"\\u062D\\u0635\\u062A\\u0627\\u0646 \\u062A\\u0646\\u062A\\u0647\\u064A\\u0627\\u0646 \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639\";\n    if (count >= 3 && count <= 10)\n      return `${count} \\u062D\\u0635\\u0635 \\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639`;\n    return `${count} \\u062D\\u0635\\u0629 \\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0627 \\u0627\\u0644\\u0623\\u0633\\u0628\\u0648\\u0639`;\n  }"
   },
+  "quotaCount": {
+    "__fn": "(count) => {\n    if (count === 0)\n      return \"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u062D\\u0635\\u0635\";\n    if (count === 1)\n      return \"\\u062D\\u0635\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\";\n    if (count === 2)\n      return \"\\u062D\\u0635\\u062A\\u0627\\u0646\";\n    if (count >= 3 && count <= 10)\n      return `${count} \\u062D\\u0635\\u0635`;\n    return `${count} \\u062D\\u0635\\u0629`;\n  }"
+  },
+  "ledgerCount": {
+    "__fn": "(count) => {\n    if (count === 0)\n      return \"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u0625\\u062F\\u062E\\u0627\\u0644\\u0627\\u062A \\u0633\\u062C\\u0644\";\n    if (count === 1)\n      return \"\\u0625\\u062F\\u062E\\u0627\\u0644 \\u0633\\u062C\\u0644 \\u0648\\u0627\\u062D\\u062F\";\n    if (count === 2)\n      return \"\\u0625\\u062F\\u062E\\u0627\\u0644\\u0627 \\u0633\\u062C\\u0644\";\n    if (count >= 3 && count <= 10)\n      return `${count} \\u0625\\u062F\\u062E\\u0627\\u0644\\u0627\\u062A \\u0633\\u062C\\u0644`;\n    return `${count} \\u0625\\u062F\\u062E\\u0627\\u0644 \\u0633\\u062C\\u0644`;\n  }"
+  },
+  "deleteSuccess": "تم حذف الحصة بنجاح",
+  "notFoundTitle": "لم يتم العثور على الحصة",
+  "notFoundMessage": "الحصة التي تبحث عنها غير موجودة.",
+  "notFoundBackButton": "العودة إلى الحصص",
+  "errorGenericTitle": "حدث خطأ ما",
+  "errorGeneric": "حدث خطأ غير متوقع أثناء تحميل صفحة الحصة. يرجى المحاولة مرة أخرى.",
+  "retry": "إعادة المحاولة",
+  "restrictedAccessHelperText": "تحتاج إلى صلاحيات إدارة الحصص لتعديل هذا الحقل.",
+  "emptyListMessage": "لم يتم العثور على حصص. أنشئ واحدة للبدء.",
+  "emptyListCta": "إنشاء حصة",
+  "insightsDateRangeLabel": "النطاق الزمني",
+  "insightsKindLabel": "النوع",
+  "insightsStatusLabel": "الحالة",
+  "insightsStudentLabel": "الطالب",
+  "exportSuccess": "اكتمل التصدير",
+  "emptyInsightsMessage": "لا توجد بيانات تحليلات للفلاتر المحددة.",
   "charts": {
     "quotaPurchasesOverTime": "مشتريات الحصص عبر الزمن",
     "redemptionRateByType": "معدل الاسترداد حسب النوع",
-    "onDemandDeliveryRate": "معدل تسليم الحصص الفورية",
+    "packageDeliveryRate": "معدل تسليم حصص الباقات",
     "pendingCreditBacklogGauge": "تراكم الرصيد المعلق",
     "expiredSlippage": "انزلاق الحصص المنتهية",
     "months": "الأشهر",
     "classes": "حصص",
     "packageType": "باقة",
     "periodicType": "دورية",
-    "onDemandType": "فورية",
     "committed": "ملتزم بها",
     "cancelled": "ملغاة",
     "deliveryRate": "معدل التسليم",

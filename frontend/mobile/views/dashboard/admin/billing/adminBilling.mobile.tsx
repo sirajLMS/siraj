@@ -1,6 +1,6 @@
 "use client";
 
-import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
+import { AccountBalanceWalletOutlined, AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
@@ -25,7 +25,7 @@ import { Link } from "@/shared/i18n";
 
 function ExchangeRatesLink({ labels }: { readonly labels: AdminBillingViewModel["labels"] }) {
   return (
-    <Box sx={{ mb: 2, px: { xs: 2, md: 0 } }}>
+    <Box sx={{ mb: 2, px: { xs: 2, md: 0 }, display: "flex", gap: 1.5, flexWrap: "wrap" }}>
       <Button
         component={Link}
         href="/billing/exchange-rates"
@@ -34,6 +34,15 @@ function ExchangeRatesLink({ labels }: { readonly labels: AdminBillingViewModel[
         startIcon={<TimelineOutlined />}
       >
         {labels.exchangeRatesLink}
+      </Button>
+      <Button
+        component={Link}
+        href="/quotas"
+        variant="outlined"
+        size="small"
+        startIcon={<AccountBalanceWalletOutlined />}
+      >
+        {labels.quotasLink}
       </Button>
     </Box>
   );

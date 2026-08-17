@@ -1,4 +1,4 @@
-import type { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
 export function formatQuotaStatus(
@@ -25,6 +25,19 @@ export function formatQuotaKind(kind: QuotaKind | string, t: QuotaLabels): strin
       return t.kinds.PERIODIC;
     default:
       return kind;
+  }
+}
+
+export function formatQuotaPeriodType(periodType: QuotaPeriodType | string, t: QuotaLabels): string {
+  switch (periodType) {
+    case "WEEKLY":
+      return t.periodTypes.WEEKLY;
+    case "MONTHLY":
+      return t.periodTypes.MONTHLY;
+    case "CUSTOM":
+      return t.periodTypes.CUSTOM;
+    default:
+      return periodType;
   }
 }
 

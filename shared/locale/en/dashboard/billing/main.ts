@@ -13,6 +13,7 @@ export const dashboardBillingEn: BillingLabels = {
   parentPageSubtitle: "Track and download institutional billing records.",
   manualInvoice: "Manual Invoice",
   exchangeRatesLink: "Exchange Rates",
+  quotasLink: "Quotas & Allocations",
   quickPay: "Quick Pay",
   viewAllNegativeBalance: "View All Students with Negative Balance",
   requiresAttention: "Requires Attention",

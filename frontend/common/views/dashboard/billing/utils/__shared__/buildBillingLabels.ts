@@ -11,6 +11,7 @@ export function buildPageLabels(t: BillingLabels) {
     parentPageSubtitle: t.parentPageSubtitle,
     manualInvoice: t.manualInvoice,
     exchangeRatesLink: t.exchangeRatesLink,
+    quotasLink: t.quotasLink,
     quickPay: t.quickPay,
     viewAllNegativeBalance: t.viewAllNegativeBalance,
     requiresAttention: t.requiresAttention,

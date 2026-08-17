@@ -57,6 +57,32 @@ export type CreateRecurringClassTimezoneSelectSlot = React.ComponentType<
 >;
 
 /**
+ * Option for the quota autocomplete — represents an open quota returned by the
+ * `studentOpenQuotas` GraphQL query.
+ */
+export interface QuotaAutocompleteOption {
+  readonly id: string;
+  readonly name: string;
+  readonly remaining: number;
+  readonly validUntil: string;
+}
+
+/** Slot props for the quota-select autocomplete field. */
+export interface QuotaAutocompleteSlotProps {
+  readonly studentId: string;
+  readonly value: string | null;
+  readonly onChange: (value: string | null) => void;
+  readonly disabled: boolean;
+  readonly label: string;
+  readonly placeholder: string;
+  readonly noOptionsText: string;
+  readonly noOptionsCta: string;
+  readonly optionLabel: (option: QuotaAutocompleteOption) => string;
+}
+
+export type QuotaAutocompleteSlot = React.ComponentType<Readonly<QuotaAutocompleteSlotProps>>;
+
+/**
  * Slot props for the outer dialog chrome.
  *
  * Desktop: `DialogTitle` inside `maxWidth="sm"` dialog.
@@ -78,6 +104,7 @@ export interface CreateRecurringClassDialogSlotProps {
   readonly DialogShell: CreateRecurringClassDialogShellSlot;
   readonly StudentSelect: CreateRecurringClassStudentSelectSlot;
   readonly TimezoneSelect: CreateRecurringClassTimezoneSelectSlot;
+  readonly QuotaAutocomplete: QuotaAutocompleteSlot;
   readonly layout: CreateRecurringClassDialogLayoutProps;
 }
 

@@ -84,6 +84,13 @@ Student quota tab views live under `frontend/common/views/dashboard/students/quo
 - Student quota tab is registered in `studentProfileTabs.ts` with `QUOTA_TAB_GROUPS`
 - Tab shows per-audience rendering: student/parent see PENDING_CREDIT prominently; teacher sees CONFLICT_HELD
 
+### Tier Isolation
+
+- Quota views follow the standard `createLazyView` + `ResponsiveViewSwitch` pattern with lazy-loaded `.mobile.tsx` and `.desktop.tsx` tier views
+- **Containers act as tier switchers**: `QuotaInsightsContainer.tsx` and `StudentQuotaContainer.tsx` call the ViewModel hook and render the switcher (`XxView.tsx`), passing the view model down
+- **CodeScene 150-line limit**: Keep `.mobile.tsx` and `.desktop.tsx` tier files under 150 lines by extracting reusable UI into `components/` subdirectories under each tier
+- **Full canonical reference**: See `docs/frontend/quota-ui-patterns.md` for the complete quota UI pattern catalog (RHF 3-generic pattern, cache.updateQuery, StatusBadge quota categories, MetricCard animations, reduced-motion CSS, Storybook ErrorState naming, component test tier-view mocking, i18n CLDR plurals, QuotaFormAccessProvider RBAC)
+
 ## __shared__/ Directory Convention for View Component Scaffolds
 
 When a desktop view component (`.desktop.tsx`) and its mobile counterpart (`.mobile.tsx`) share significant presentation logic, extract the shared logic into a `*Shared.tsx` scaffold placed in a `__shared__/` directory at the parent level:

@@ -77,5 +77,60 @@ export const dashboardStudentQuotaAr: StudentQuotaLabels = {
     conflictHeld: "تعارضات معلقة",
     analyticsOverview: "نظرة عامة تحليلية",
     noData: "لا توجد بيانات",
+    noQuotaAssigned: "لا توجد حصة مخصصة — تواصل مع مدير الأكاديمية",
+    quotaExhausted: "تم استنفاد هذه الحصة",
+    eligibleForNextClass: "مؤهل للحصة القادمة",
+    notEligibleForNextClass: "غير مؤهل للحصة القادمة",
+    expiryWarning: days => {
+      if (days === 0) return "تنتهي هذه الحصة اليوم";
+      if (days === 1) return "تنتهي هذه الحصة خلال يوم واحد";
+      if (days === 2) return "تنتهي هذه الحصة خلال يومين";
+      if (days >= 3 && days <= 10) return `تنتهي هذه الحصة خلال ${days} أيام`;
+      return `تنتهي هذه الحصة خلال ${days} يوماً`;
+    },
+    remainingOfTotal: (remaining, total) => `${remaining} / ${total}`,
+    validPeriod: "فترة الصلاحية",
+    recentLedgerEntries: "آخر عمليات السجل",
+    noLedgerEntries: "لا توجد عمليات حديثة في السجل",
+    loadingData: "جارٍ التحميل…",
+    selectChildPrompt: "اختر ابناً لعرض تفاصيل الحصة",
+    name: "الاسم",
+    kind: "النوع",
+    remaining: "المتبقي",
+    totalClasses: "الإجمالي",
+    status: "الحالة",
+    validFrom: "صالح من",
+    validUntil: "صالح حتى",
+    delta: "التغيير",
+    reason: "السبب",
+    ledgerDate: "التاريخ",
+    createdAt: "تاريخ الإنشاء",
+    newQuota: "حصة جديدة",
+    editQuota: "تعديل",
+    deleteQuota: "حذف",
+    statuses: {
+      ACTIVE: "نشط",
+      EXPIRED: "منتهي",
+      ARCHIVED: "مؤرشف",
+    },
+    kinds: {
+      PACKAGE: "باقة",
+      PERIODIC: "دوري",
+    },
+    ledgerReasons: {
+      ADJUST: "تعديل",
+      EXPIRE: "انتهاء",
+      GRANT: "منح",
+      REDEEM: "استرداد",
+      RELEASE: "إطلاق",
+      RESERVE: "حجز",
+    },
+  },
+  quotaCount: count => {
+    if (count === 0) return "لا توجد حصص";
+    if (count === 1) return "حصة واحدة";
+    if (count === 2) return "حصتان";
+    if (count >= 3 && count <= 10) return `${count} حصص`;
+    return `${count} حصة`;
   },
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { AddOutlined, TimelineOutlined } from "@mui/icons-material";
+import { AccountBalanceWalletOutlined, AddOutlined, TimelineOutlined } from "@mui/icons-material";
 import { Box, Button, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { StudentCreditFooterShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/studentCreditFooterShared";
@@ -40,6 +40,9 @@ function AdminBillingHeaderActions({
           {labels.exchangeRatesLink}
         </Button>
       ) : null}
+      <Button component={Link} href="/quotas" variant="outlined" startIcon={<AccountBalanceWalletOutlined />}>
+        {labels.quotasLink}
+      </Button>
       {canCreate ? (
         <DesktopPrimaryPageAction startIcon={<AddOutlined />} onClick={onManualInvoice}>
           {labels.manualInvoice}

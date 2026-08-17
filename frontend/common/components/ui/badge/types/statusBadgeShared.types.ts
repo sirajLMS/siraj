@@ -13,7 +13,8 @@ export type StatusBadgeCategory =
   | "trackingStatus"
   | "invoice"
   | "paymentMethod"
-  | "syncStatus";
+  | "syncStatus"
+  | "quotaStatus";
 
 export type StatusPaletteKey = "active" | "pending" | "blocked" | "confirmed" | "completed" | "cancelled";
 
@@ -23,6 +24,7 @@ export interface StatusBadgeSharedProps {
   readonly label: string;
   readonly size?: "small" | "medium";
   readonly icon?: ReactNode;
+  readonly component?: "output";
 }
 
 /**

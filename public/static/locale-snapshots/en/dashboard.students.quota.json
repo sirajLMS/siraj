@@ -75,6 +75,55 @@
     "lowBalanceAlerts": "Low-Balance Alerts",
     "conflictHeld": "Conflicts Held",
     "analyticsOverview": "Analytics Overview",
-    "noData": "No data available"
+    "noData": "No data available",
+    "noQuotaAssigned": "No quota assigned — contact academy admin",
+    "quotaExhausted": "This quota is exhausted",
+    "eligibleForNextClass": "Eligible for next class",
+    "notEligibleForNextClass": "Not eligible for next class",
+    "expiryWarning": {
+      "__fn": "(days) => {\n      if (days === 0)\n        return \"This quota expires today\";\n      if (days === 1)\n        return \"This quota expires in 1 day\";\n      return `This quota expires in ${days} days`;\n    }"
+    },
+    "remainingOfTotal": {
+      "__fn": "(remaining, total) => `${remaining} / ${total}`"
+    },
+    "validPeriod": "Valid Period",
+    "recentLedgerEntries": "Recent Ledger Entries",
+    "noLedgerEntries": "No recent ledger entries",
+    "loadingData": "Loading…",
+    "selectChildPrompt": "Select a child to view quota details",
+    "name": "Name",
+    "kind": "Kind",
+    "remaining": "Remaining",
+    "totalClasses": "Total",
+    "status": "Status",
+    "validFrom": "Valid From",
+    "validUntil": "Valid Until",
+    "delta": "Change",
+    "reason": "Reason",
+    "ledgerDate": "Date",
+    "createdAt": "Created At",
+    "newQuota": "New Quota",
+    "editQuota": "Edit",
+    "deleteQuota": "Delete",
+    "statuses": {
+      "ACTIVE": "Active",
+      "EXPIRED": "Expired",
+      "ARCHIVED": "Archived"
+    },
+    "kinds": {
+      "PACKAGE": "Package",
+      "PERIODIC": "Periodic"
+    },
+    "ledgerReasons": {
+      "ADJUST": "Adjust",
+      "EXPIRE": "Expire",
+      "GRANT": "Grant",
+      "REDEEM": "Redeem",
+      "RELEASE": "Release",
+      "RESERVE": "Reserve"
+    }
+  },
+  "quotaCount": {
+    "__fn": "(count) => count === 1 ? \"1 quota\" : `${count} quotas`"
   }
 }

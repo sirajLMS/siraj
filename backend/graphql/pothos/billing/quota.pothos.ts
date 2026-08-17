@@ -31,8 +31,16 @@ export const QuotaPothosObject = QuotaRef.implement({
     totalClasses: t.exposeInt("totalClasses"),
     remaining: t.exposeInt("remaining"),
     reservedClasses: t.exposeInt("reservedClasses"),
-    validFrom: t.expose("validFrom", { type: "DateTime", nullable: true }),
-    validUntil: t.expose("validUntil", { type: "DateTime", nullable: true }),
+    validFrom: t.field({
+      type: "DateTime",
+      nullable: true,
+      resolve: parent => (parent.validFrom ? new Date(parent.validFrom) : null),
+    }),
+    validUntil: t.field({
+      type: "DateTime",
+      nullable: true,
+      resolve: parent => (parent.validUntil ? new Date(parent.validUntil) : null),
+    }),
     status: t.expose("status", { type: QuotaStatusPothosEnum }),
     periodType: t.expose("periodType", { type: QuotaPeriodTypePothosEnum, nullable: true }),
     periodDays: t.exposeInt("periodDays", { nullable: true }),

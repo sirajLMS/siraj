@@ -47,7 +47,7 @@ function resolveSaveText(labels: StudentQuotaLabels, isSaving: boolean, isSaved:
 }
 
 const loadingContent: ReactElement = (
-  <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+  <Box component="output" aria-busy="true" sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
     <CircularProgress />
   </Box>
 );
@@ -128,7 +128,7 @@ function FormActionsShared({
                   }
                 : {
                     color: theme.palette.onSurfaceVariant,
-                    "&:hover": { color: theme.palette.error.main, backgroundColor: "transparent" },
+                    "&:hover": { color: theme.palette.error.main, backgroundColor: theme.palette.action.hover },
                   }),
             })}
           >

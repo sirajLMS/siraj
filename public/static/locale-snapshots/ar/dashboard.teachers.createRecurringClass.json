@@ -40,6 +40,13 @@
   "scheduling": {
     "mode": "وضع الجدولة",
     "quotaId": "معرف الحصة",
+    "quotaSelect": "اختر الحصة",
+    "quotaPlaceholder": "اختر حصة متاحة...",
+    "noOpenQuotas": "لا توجد حصص متاحة — أنشئ حصة أولاً",
+    "noOpenQuotasCta": "إنشاء حصة",
+    "quotaOptionLabel": {
+      "__fn": "(name, remaining, validUntil) => `${name} \\u2014 \\u0645\\u062A\\u0628\\u0642\\u064A ${remaining} \\u2014 \\u0635\\u0627\\u0644\\u062D \\u062D\\u062A\\u0649 ${validUntil}`"
+    },
     "earmarkedClasses": "الحصص المحجوزة",
     "generationHorizon": "أفق التوليد (أسابيع)",
     "ondemandNoCreditsOutcome": "نتيجة عدم توفر الرصيد عند الطلب",

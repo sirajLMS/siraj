@@ -17,6 +17,7 @@ export interface MobileStatusBadgeProps {
   readonly size?: "small" | "medium";
   readonly typographyVariant?: "labelUppercase" | "labelSm";
   readonly icon?: ReactNode;
+  readonly component?: "output";
 }
 
 /**
@@ -36,6 +37,7 @@ export function MobileStatusBadge({
   size = "small",
   typographyVariant = "labelUppercase",
   icon,
+  component,
 }: Readonly<MobileStatusBadgeProps>) {
   const chipHeight = size === "small" ? 20 : 24;
   const chipMinWidth = size === "small" ? 72 : 84;
@@ -47,6 +49,7 @@ export function MobileStatusBadge({
     label,
     size,
     icon,
+    component,
   };
 
   const slotProps: StatusBadgeSlotProps = {

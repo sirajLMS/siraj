@@ -12,6 +12,7 @@ export interface BillingLabels extends PaymentComponentLabels {
   readonly parentPageSubtitle: string;
   readonly manualInvoice: string;
   readonly exchangeRatesLink: string;
+  readonly quotasLink: string;
   readonly quickPay: string;
   readonly viewAllNegativeBalance: string;
   readonly requiresAttention: string;

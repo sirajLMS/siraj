@@ -39,6 +39,7 @@ export function StatusBadgeShared({
   chipDimensions,
   chipPaddingInline,
   boxPadding,
+  component,
 }: Readonly<StatusBadgeScaffoldProps>) {
   const dimensions = chipDimensions?.[size] ?? { height: size === "small" ? 24 : 28, minWidth: 72 };
 
@@ -48,6 +49,7 @@ export function StatusBadgeShared({
         icon={icon}
         label={label}
         size={size}
+        {...(component ? { component } : {})}
         sx={theme => {
           const { backgroundColor, color } = getStatusColors(theme, category, status);
           const typography =
@@ -64,6 +66,10 @@ export function StatusBadgeShared({
             borderRadius: theme.layout.radius.badge,
             height: dimensions.height,
             paddingInline: chipPaddingInline ? chipPaddingInline(theme) : theme.spacing(0.5),
+            transition: "background-color 200ms ease, color 200ms ease",
+            "@media (prefers-reduced-motion: reduce)": {
+              transition: "none",
+            },
             "& .MuiChip-icon": { color },
           };
           if (dimensions.minWidth !== undefined) {
@@ -82,7 +88,7 @@ export function StatusBadgeShared({
 
   return (
     <Box
-      component="span"
+      component={component ?? "span"}
       sx={theme => {
         const { backgroundColor, color } = getStatusColors(theme, category, status);
         const base: Record<string, unknown> = {
@@ -91,6 +97,10 @@ export function StatusBadgeShared({
           borderRadius: theme.layout.radius.badge,
           backgroundColor,
           color,
+          transition: "background-color 200ms ease, color 200ms ease",
+          "@media (prefers-reduced-motion: reduce)": {
+            transition: "none",
+          },
         };
         if (dimensions.minWidth !== undefined) {
           base.minWidth = dimensions.minWidth;

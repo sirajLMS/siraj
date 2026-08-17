@@ -38,6 +38,11 @@ export const dashboardTeacherCreateRecurringClassAr: TeacherCreateRecurringClass
   scheduling: {
     mode: "وضع الجدولة",
     quotaId: "معرف الحصة",
+    quotaSelect: "اختر الحصة",
+    quotaPlaceholder: "اختر حصة متاحة...",
+    noOpenQuotas: "لا توجد حصص متاحة — أنشئ حصة أولاً",
+    noOpenQuotasCta: "إنشاء حصة",
+    quotaOptionLabel: (name, remaining, validUntil) => `${name} — متبقي ${remaining} — صالح حتى ${validUntil}`,
     earmarkedClasses: "الحصص المحجوزة",
     generationHorizon: "أفق التوليد (أسابيع)",
     ondemandNoCreditsOutcome: "نتيجة عدم توفر الرصيد عند الطلب",
