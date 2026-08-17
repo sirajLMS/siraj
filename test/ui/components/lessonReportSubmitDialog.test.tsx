@@ -19,26 +19,31 @@ expect.extend(matchers);
 import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { LessonReportSubmitDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog";
 import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
+const locale: AppLocale = "ar";
+const lessonReportLabels = readTranslation(Translation.Dashboard.LmsLessonReports, locale);
 const MOCK_LABELS: LessonReportFormLabels = {
-  attendanceEvaluation: "Attendance",
-  durationMinutes: "Duration (min)",
-  completionPercentage: "Completion",
-  teacherNotes: "Teacher Notes",
-  present: "Present",
-  absent: "Absent",
-  late: "Late",
-  submit: "Submit",
-  dialogTitle: "Submit Lesson Report",
-  cancel: "Cancel",
-  submitting: "Submitting...",
-  submitFailed: "Submission failed",
-  attendanceRequired: "Attendance is required",
-  durationMin: "Duration must be at least 1",
-  durationMax: "Duration must be at most 600",
-  completionMin: "Completion must be at least 0",
-  completionMax: "Completion must be at most 100",
+  attendanceEvaluation: lessonReportLabels.attendanceEvaluation,
+  durationMinutes: lessonReportLabels.durationMinutes,
+  completionPercentage: lessonReportLabels.completionPercentage,
+  teacherNotes: lessonReportLabels.teacherNotes,
+  present: lessonReportLabels.present,
+  absent: lessonReportLabels.absent,
+  late: lessonReportLabels.late,
+  submit: lessonReportLabels.submit,
+  dialogTitle: lessonReportLabels.dialogTitle,
+  cancel: lessonReportLabels.cancel,
+  submitting: lessonReportLabels.submitting,
+  submitFailed: lessonReportLabels.submitFailed,
+  attendanceRequired: lessonReportLabels.attendanceRequired,
+  durationMin: lessonReportLabels.durationMin,
+  durationMax: lessonReportLabels.durationMax,
+  completionMin: lessonReportLabels.completionMin,
+  completionMax: lessonReportLabels.completionMax,
 };
 
 afterEach(() => {
@@ -55,15 +60,16 @@ describe("LessonReportSubmitDialog", () => {
         classInstanceId="cls-1"
         labels={MOCK_LABELS}
         onSubmit={() => Promise.resolve()}
-      />
+      />,
+      { locale }
     );
 
-    expect(screen.getByText("Submit Lesson Report")).toBeVisible();
-    expect(screen.getByText("Attendance")).toBeVisible();
-    expect(screen.getByText("Duration (min)")).toBeVisible();
-    expect(screen.getByLabelText("Teacher Notes")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Submit" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeVisible();
+    expect(screen.getByText(MOCK_LABELS.dialogTitle)).toBeVisible();
+    expect(screen.getByText(MOCK_LABELS.attendanceEvaluation)).toBeVisible();
+    expect(screen.getByText(MOCK_LABELS.durationMinutes)).toBeVisible();
+    expect(screen.getByLabelText(MOCK_LABELS.teacherNotes)).toBeVisible();
+    expect(screen.getByRole("button", { name: MOCK_LABELS.submit })).toBeVisible();
+    expect(screen.getByRole("button", { name: MOCK_LABELS.cancel })).toBeVisible();
   });
 
   test("calls onSubmit with form data when submitted", async () => {
@@ -78,10 +84,11 @@ describe("LessonReportSubmitDialog", () => {
         defaultDurationMinutes={60}
         labels={MOCK_LABELS}
         onSubmit={onSubmit}
-      />
+      />,
+      { locale }
     );
 
-    const submitButton = screen.getByText("Submit");
+    const submitButton = screen.getByText(MOCK_LABELS.submit);
     fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -112,13 +119,14 @@ describe("LessonReportSubmitDialog", () => {
         classInstanceId="cls-1"
         labels={MOCK_LABELS}
         onSubmit={onSubmit}
-      />
+      />,
+      { locale }
     );
 
-    fireEvent.click(screen.getByText("Submit"));
+    fireEvent.click(screen.getByText(MOCK_LABELS.submit));
 
     await waitFor(() => {
-      expect(screen.getByText("Submission failed")).toBeVisible();
+      expect(screen.getByText(MOCK_LABELS.submitFailed)).toBeVisible();
     });
 
     expect(loggerError).toHaveBeenCalledTimes(1);

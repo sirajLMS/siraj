@@ -6,8 +6,14 @@ expect.extend(matchers);
 
 import { EditNameDialog } from "@/frontend/common/views/dashboard/settings/whatsapp/editNameDialog/EditNameDialog";
 import { validateDisplayName } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
-import { firstCallArgStringAt, testLabels } from "@/test/ui/components/helpers/whatsappTestHelpers";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+import { firstCallArgStringAt } from "@/test/ui/components/helpers/whatsappTestHelpers";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Whatsapp, locale);
 
 const noopPromise = (): Promise<void> => Promise.resolve();
 
@@ -19,7 +25,7 @@ function renderDialog(overrides: Record<string, unknown> = {}) {
       open
       accountId="acc-1"
       initialDisplayName="Old Name"
-      labels={testLabels}
+      labels={labels}
       loading={false}
       mutationError={null}
       onClose={onClose}
@@ -27,7 +33,7 @@ function renderDialog(overrides: Record<string, unknown> = {}) {
       validateDisplayName={validateDisplayName}
       {...overrides}
     />,
-    { locale: "en" }
+    { locale }
   );
   return { onSubmit, onClose };
 }
@@ -43,34 +49,34 @@ describe("EditNameDialog", () => {
 
   test("pre-fills the display name field when editing", () => {
     renderDialog();
-    const input = screen.getByLabelText(testLabels.displayNameLabel);
+    const input = screen.getByLabelText(labels.displayNameLabel);
     expect(input.getAttribute("value")).toBe("Old Name");
   });
 
   test("shows validation error when name is cleared and Save clicked", async () => {
     renderDialog();
     await act(async () => {
-      fireEvent.change(screen.getByLabelText(testLabels.displayNameLabel), {
+      fireEvent.change(screen.getByLabelText(labels.displayNameLabel), {
         target: { value: "" },
       });
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: testLabels.save }));
+      fireEvent.click(screen.getByRole("button", { name: labels.save }));
     });
     await waitFor(() => {
-      expect(screen.getByText(testLabels.validationDisplayNameRequired)).toBeTruthy();
+      expect(screen.getByText(labels.validationDisplayNameRequired)).toBeTruthy();
     });
   });
 
   test("onSubmit called with valid name when Save clicked", async () => {
     const { onSubmit } = renderDialog();
     await act(async () => {
-      fireEvent.change(screen.getByLabelText(testLabels.displayNameLabel), {
+      fireEvent.change(screen.getByLabelText(labels.displayNameLabel), {
         target: { value: "New Name" },
       });
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: testLabels.save }));
+      fireEvent.click(screen.getByRole("button", { name: labels.save }));
     });
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledTimes(1);
@@ -82,14 +88,14 @@ describe("EditNameDialog", () => {
   test("Cancel button calls onClose", async () => {
     const { onClose } = renderDialog();
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: testLabels.cancel }));
+      fireEvent.click(screen.getByRole("button", { name: labels.cancel }));
     });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   test("Save button disabled when loading", () => {
     renderDialog({ loading: true });
-    expect(screen.getByRole("button", { name: testLabels.save }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: labels.save }).hasAttribute("disabled")).toBe(true);
   });
 
   test("displays mutation error when provided", () => {
@@ -100,7 +106,7 @@ describe("EditNameDialog", () => {
   test("does not submit when accountId is null", async () => {
     const { onSubmit } = renderDialog({ accountId: null });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: testLabels.save }));
+      fireEvent.click(screen.getByRole("button", { name: labels.save }));
     });
     expect(onSubmit).not.toHaveBeenCalled();
   });

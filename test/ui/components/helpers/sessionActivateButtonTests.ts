@@ -3,12 +3,17 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type ComponentType, createElement } from "react";
 import type { SessionActivateButtonProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
+const locale: AppLocale = "ar";
+const teacherDashboardLabels = readTranslation(Translation.Dashboard.TeacherDashboard, locale);
 const mockLabels = {
-  activateLabel: "Activate Session",
-  connectingLabel: "Connecting...",
-  tooltip: "Activate Session",
+  activateLabel: teacherDashboardLabels.actions.activateSession,
+  connectingLabel: teacherDashboardLabels.actions.connecting,
+  tooltip: teacherDashboardLabels.actions.activateSession,
 };
 
 export interface SessionActivateButtonTestCase {
@@ -34,7 +39,7 @@ export function makeSessionActivateButtonTests(
         onActivate,
         ...mockLabels,
       }),
-      { permissions: [] }
+      { permissions: [], locale }
     );
     return { onActivate };
   }
@@ -44,7 +49,7 @@ export function makeSessionActivateButtonTests(
       name: "renders activate button in ready state",
       run: () => {
         renderButton({ disabled: false, isConnecting: false });
-        const button = screen.getByRole("button", { name: /activate session/i });
+        const button = screen.getByRole("button", { name: new RegExp(mockLabels.activateLabel) });
         expect(button).toBeVisible();
         expect(button).not.toBeDisabled();
       },
@@ -53,7 +58,7 @@ export function makeSessionActivateButtonTests(
       name: "renders connecting state with spinner",
       run: () => {
         renderButton({ disabled: false, isConnecting: true });
-        const button = screen.getByRole("button", { name: /connecting/i });
+        const button = screen.getByRole("button", { name: new RegExp(mockLabels.connectingLabel) });
         expect(button).toBeVisible();
         expect(button).toBeDisabled();
       },
@@ -62,7 +67,7 @@ export function makeSessionActivateButtonTests(
       name: "button is disabled when disabled prop is true",
       run: () => {
         renderButton({ disabled: true, isConnecting: false });
-        const button = screen.getByRole("button", { name: /activate session/i });
+        const button = screen.getByRole("button", { name: new RegExp(mockLabels.activateLabel) });
         expect(button).toBeDisabled();
       },
     },
@@ -72,7 +77,7 @@ export function makeSessionActivateButtonTests(
         const onActivate = mock(() => {});
         renderButton({ disabled: false, isConnecting: false, onActivate });
         const user = userEvent.setup();
-        const button = screen.getByRole("button", { name: /activate session/i });
+        const button = screen.getByRole("button", { name: new RegExp(mockLabels.activateLabel) });
         await user.click(button);
         expect(onActivate).toHaveBeenCalledTimes(1);
       },
@@ -82,7 +87,7 @@ export function makeSessionActivateButtonTests(
       run: () => {
         const onActivate = mock(() => {});
         renderButton({ disabled: true, isConnecting: false, onActivate });
-        const button = screen.getByRole("button", { name: /activate session/i });
+        const button = screen.getByRole("button", { name: new RegExp(mockLabels.activateLabel) });
         expect(button).toBeDisabled();
         expect(onActivate).not.toHaveBeenCalled();
       },

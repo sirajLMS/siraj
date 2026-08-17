@@ -23,8 +23,14 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { useStudentPortalProfileStore } from "@/frontend/common/stores/studentPortalProfileStore";
 import { useStudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
 import { StudentProfileDesktopView } from "@/frontend/desktop/views/dashboard/student/profile/studentProfile.desktop";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { createProfileMockData } from "@/test/ui/components/fixtures/studentHistoryFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "en";
+const labels = readTranslation(Translation.Dashboard.StudentPortalProfile, locale);
 
 const studentId = "student-profile-1";
 
@@ -93,10 +99,10 @@ describe("StudentProfileContainer", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Personal Information")).toBeInTheDocument();
+      expect(screen.getByText(labels.personalInfo)).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Parent Information")).toBeInTheDocument();
+    expect(screen.getByText(labels.parentInfo)).toBeInTheDocument();
     expect(screen.getByText("Parent One")).toBeInTheDocument();
   });
 });

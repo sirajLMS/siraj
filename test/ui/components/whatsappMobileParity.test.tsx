@@ -5,6 +5,7 @@ import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react
 expect.extend(matchers);
 
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { WhatsappSettingsLabels } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import {
   validateAccessToken,
   validateDisplayName,
@@ -15,19 +16,39 @@ import {
 import { NumbersTabMobile } from "@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/NumbersTab.mobile";
 import { OptInTabMobile } from "@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/OptInTab.mobile";
 import { TemplatesTabMobile } from "@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/TemplatesTab.mobile";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import {
   makeAccountRow,
   makeAdminUser,
   makeAuditEntry,
   makeTemplateRow,
-  testSettingsLabels,
 } from "@/test/ui/components/helpers/whatsappTestHelpers";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Whatsapp, locale);
+
+const settingsLabels: WhatsappSettingsLabels = {
+  page: labels,
+  notifications: {
+    syncSuccess: labels.syncSuccess,
+    syncNoChange: labels.syncNoChange,
+    syncError: labels.syncError,
+    deleteSuccess: labels.deleteSuccess,
+    deleteError: labels.deleteError,
+    saveSuccess: labels.saveSuccess,
+    saveError: labels.saveError,
+    optInSuccess: "Opt-in updated successfully.",
+    optInError: labels.optInError,
+  },
+};
 
 const noopPromise = (): Promise<void> => Promise.resolve();
 
 const mobileNumbersProps = {
-  labels: testSettingsLabels,
+  labels: settingsLabels,
   loading: false,
   syncing: false,
   snackbar: null,
@@ -73,12 +94,12 @@ describe("Mobile parity — NumbersTab CRUD", () => {
         accounts={[makeAccountRow("acc-1", "+555", "Business Account")]}
         dialogState={{ type: null }}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
     // Account name should render
     expect(screen.getByText("Business Account")).toBeTruthy();
     // Action menu button (aria-label=editAccount)
-    expect(screen.getByLabelText(testSettingsLabels.page.editAccount)).toBeTruthy();
+    expect(screen.getByLabelText(labels.editAccount)).toBeTruthy();
   });
 
   test("action menu opens when button clicked and shows menu items", async () => {
@@ -88,34 +109,34 @@ describe("Mobile parity — NumbersTab CRUD", () => {
         accounts={[makeAccountRow("acc-1", "+555", "Business Account")]}
         dialogState={{ type: null }}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
     await act(async () => {
-      fireEvent.click(screen.getByLabelText(testSettingsLabels.page.editAccount));
+      fireEvent.click(screen.getByLabelText(labels.editAccount));
     });
     await waitFor(() => {
-      expect(screen.getByText(testSettingsLabels.page.editName)).toBeTruthy();
-      expect(screen.getByText(testSettingsLabels.page.editToken)).toBeTruthy();
-      expect(screen.getByText(testSettingsLabels.page.editPin)).toBeTruthy();
-      expect(screen.getByText(testSettingsLabels.page.deleteAccount)).toBeTruthy();
+      expect(screen.getByText(labels.editName)).toBeTruthy();
+      expect(screen.getByText(labels.editToken)).toBeTruthy();
+      expect(screen.getByText(labels.editPin)).toBeTruthy();
+      expect(screen.getByText(labels.deleteAccount)).toBeTruthy();
     });
   });
 
   test("create dialog renders when dialogState.type is 'create'", () => {
     renderWithWrapper(<NumbersTabMobile {...mobileNumbersProps} accounts={[]} dialogState={{ type: "create" }} />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.WhatsappConfigManage],
     });
-    expect(screen.getByText(testSettingsLabels.page.createAccountTitle)).toBeTruthy();
+    expect(screen.getByText(labels.createAccountTitle)).toBeTruthy();
   });
 
   test("empty accounts state shows add-first-number button", () => {
     renderWithWrapper(<NumbersTabMobile {...mobileNumbersProps} accounts={[]} dialogState={{ type: null }} />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.WhatsappConfigManage],
     });
-    expect(screen.getByText(testSettingsLabels.page.noAccounts)).toBeTruthy();
-    expect(screen.getByText(testSettingsLabels.page.addFirstNumber)).toBeTruthy();
+    expect(screen.getByText(labels.noAccounts)).toBeTruthy();
+    expect(screen.getByText(labels.addFirstNumber)).toBeTruthy();
   });
 
   test("delete confirm dialog shows on mobile when dialogState.type is 'deleteConfirm'", () => {
@@ -125,10 +146,10 @@ describe("Mobile parity — NumbersTab CRUD", () => {
         accounts={[makeAccountRow("acc-1")]}
         dialogState={{ type: "deleteConfirm", accountId: "acc-1", displayName: "Delete Me" }}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
-    expect(screen.getByText(testSettingsLabels.page.deleteConfirmTitle)).toBeTruthy();
-    expect(screen.getByText(testSettingsLabels.page.deleteConfirmMessage("Delete Me"))).toBeTruthy();
+    expect(screen.getByText(labels.deleteConfirmTitle)).toBeTruthy();
+    expect(screen.getByText(labels.deleteConfirmMessage("Delete Me"))).toBeTruthy();
   });
 });
 
@@ -145,7 +166,7 @@ describe("Mobile parity — TemplatesTab expandable cards", () => {
     const t1 = makeTemplateRow("tpl-1", "Welcome Message");
     renderWithWrapper(
       <TemplatesTabMobile
-        labels={testSettingsLabels}
+        labels={settingsLabels}
         templates={[t1]}
         loading={false}
         syncing={false}
@@ -154,7 +175,7 @@ describe("Mobile parity — TemplatesTab expandable cards", () => {
         queryError={false}
         onRetry={mock(() => {})}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappTemplatesManage] }
+      { locale, permissions: [AppPermission.WhatsappTemplatesManage] }
     );
     // MobileCardList may suspend on first render; use findByText to wait
     const nameEl = await screen.findByText("Welcome Message");
@@ -165,7 +186,7 @@ describe("Mobile parity — TemplatesTab expandable cards", () => {
     const t1 = makeTemplateRow("tpl-1", "Welcome Message");
     renderWithWrapper(
       <TemplatesTabMobile
-        labels={testSettingsLabels}
+        labels={settingsLabels}
         templates={[t1]}
         loading={false}
         syncing={false}
@@ -174,23 +195,23 @@ describe("Mobile parity — TemplatesTab expandable cards", () => {
         queryError={false}
         onRetry={mock(() => {})}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappTemplatesManage] }
+      { locale, permissions: [AppPermission.WhatsappTemplatesManage] }
     );
     // Click the card's expand area
-    const expandArea = screen.getByLabelText(`Welcome Message — ${testSettingsLabels.page.templateBody}`);
+    const expandArea = screen.getByLabelText(`Welcome Message — ${labels.templateBody}`);
     await act(async () => {
       fireEvent.click(expandArea);
     });
     // After expansion, detail fields should be visible
     await waitFor(() => {
-      expect(screen.getAllByText(testSettingsLabels.page.templateCategory).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(labels.templateCategory).length).toBeGreaterThan(0);
     });
   });
 
   test("mobile templates error state shows retry button", () => {
     renderWithWrapper(
       <TemplatesTabMobile
-        labels={testSettingsLabels}
+        labels={settingsLabels}
         templates={[]}
         loading={false}
         syncing={false}
@@ -199,9 +220,9 @@ describe("Mobile parity — TemplatesTab expandable cards", () => {
         queryError
         onRetry={mock(() => {})}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappTemplatesManage] }
+      { locale, permissions: [AppPermission.WhatsappTemplatesManage] }
     );
-    expect(screen.getByText(testSettingsLabels.page.retry)).toBeTruthy();
+    expect(screen.getByText(labels.retry)).toBeTruthy();
   });
 });
 
@@ -221,7 +242,7 @@ describe("Mobile parity — OptInTab history cards", () => {
     ];
     renderWithWrapper(
       <OptInTabMobile
-        labels={testSettingsLabels}
+        labels={settingsLabels}
         isOptedIn={false}
         optInLoading={false}
         onToggleOptIn={mock(noopPromise)}
@@ -231,7 +252,7 @@ describe("Mobile parity — OptInTab history cards", () => {
         onExportCsv={mock(() => {})}
         adminUsers={[]}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
     // Toggle rendered
     expect(screen.getByRole("switch")).toBeTruthy();
@@ -246,7 +267,7 @@ describe("Mobile parity — OptInTab history cards", () => {
     const users = [makeAdminUser("u-1", "Alice", true), makeAdminUser("u-2", "Bob", false)];
     renderWithWrapper(
       <OptInTabMobile
-        labels={testSettingsLabels}
+        labels={settingsLabels}
         isOptedIn={false}
         optInLoading={false}
         onToggleOptIn={mock(noopPromise)}
@@ -256,7 +277,7 @@ describe("Mobile parity — OptInTab history cards", () => {
         onExportCsv={mock(() => {})}
         adminUsers={users}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
     expect(screen.getByText("Alice")).toBeTruthy();
     expect(screen.getByText("Bob")).toBeTruthy();

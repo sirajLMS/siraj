@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 
+// Mock the role-specific dashboard containers as simple divs with data-testid.
+// DashboardContainerView uses next/dynamic to lazy-load these. The next/dynamic
+// mock resolves the importer asynchronously, so tests use findByTestId.
 await mock.module("@/frontend/common/views/dashboard/admin/home/AdminDashboardContainer", () => ({
   AdminDashboardContainer: () => <div data-testid="admin-dashboard">Admin Dashboard</div>,
 }));
@@ -52,120 +55,120 @@ afterEach(() => {
 });
 
 describe("DashboardContainer permission routing", () => {
-  test("renders ParentDashboardContainer when parent permission present and metrics absent", () => {
+  test("renders ParentDashboardContainer when parent permission present and metrics absent", async () => {
     const permissions = [AppPermission.ScheduleViewFamily];
     useUserStore.getState().setUser(createUser(permissions, "PARENT"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("parent-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("parent-dashboard")).toBeVisible();
   });
 
-  test("renders TeacherDashboardContainer when teacher permission present and metrics absent", () => {
+  test("renders TeacherDashboardContainer when teacher permission present and metrics absent", async () => {
     const permissions = [AppPermission.TeacherViewDashboard];
     useUserStore.getState().setUser(createUser(permissions, "TEACHER"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("teacher-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("teacher-dashboard")).toBeVisible();
   });
 
-  test("renders StudentDashboardContainer when student permission present and metrics absent", () => {
+  test("renders StudentDashboardContainer when student permission present and metrics absent", async () => {
     const permissions = [AppPermission.StudentViewOwnDashboard];
     useUserStore.getState().setUser(createUser(permissions, "STUDENT"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("student-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("student-dashboard")).toBeVisible();
   });
 
-  test("renders SupervisorDashboardContainer when supervisor permission present and metrics absent", () => {
+  test("renders SupervisorDashboardContainer when supervisor permission present and metrics absent", async () => {
     const permissions = [AppPermission.SupervisorViewDashboard];
     useUserStore.getState().setUser(createUser(permissions, "SUPERVISOR"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("supervisor-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("supervisor-dashboard")).toBeVisible();
   });
 
-  test("renders AdminDashboardContainer when no special permission matches (default)", () => {
+  test("renders AdminDashboardContainer when no special permission matches (default)", async () => {
     const permissions: AppPermission[] = [];
     useUserStore.getState().setUser(createUser(permissions, "ADMIN"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("admin-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("admin-dashboard")).toBeVisible();
   });
 
-  test("renders AdminDashboardContainer when DashboardViewMetrics present (beats parent)", () => {
+  test("renders AdminDashboardContainer when DashboardViewMetrics present (beats parent)", async () => {
     const permissions = [AppPermission.ScheduleViewFamily, AppPermission.DashboardViewMetrics];
     useUserStore.getState().setUser(createUser(permissions, "ADMIN"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("admin-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("admin-dashboard")).toBeVisible();
   });
 
-  test("renders AdminDashboardContainer when DashboardViewMetrics present (beats teacher)", () => {
+  test("renders AdminDashboardContainer when DashboardViewMetrics present (beats teacher)", async () => {
     const permissions = [AppPermission.TeacherViewDashboard, AppPermission.DashboardViewMetrics];
     useUserStore.getState().setUser(createUser(permissions, "ADMIN"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("admin-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("admin-dashboard")).toBeVisible();
   });
 
-  test("renders AdminDashboardContainer when DashboardViewMetrics present (beats student)", () => {
+  test("renders AdminDashboardContainer when DashboardViewMetrics present (beats student)", async () => {
     const permissions = [AppPermission.StudentViewOwnDashboard, AppPermission.DashboardViewMetrics];
     useUserStore.getState().setUser(createUser(permissions, "ADMIN"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("admin-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("admin-dashboard")).toBeVisible();
   });
 
-  test("renders AdminDashboardContainer when DashboardViewMetrics present (beats supervisor)", () => {
+  test("renders AdminDashboardContainer when DashboardViewMetrics present (beats supervisor)", async () => {
     const permissions = [AppPermission.SupervisorViewDashboard, AppPermission.DashboardViewMetrics];
     useUserStore.getState().setUser(createUser(permissions, "ADMIN"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("admin-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("admin-dashboard")).toBeVisible();
   });
 
-  test("parent beats teacher when parent permission present (priority order)", () => {
+  test("parent beats teacher when parent permission present (priority order)", async () => {
     const permissions = [AppPermission.ScheduleViewFamily, AppPermission.TeacherViewDashboard];
     useUserStore.getState().setUser(createUser(permissions, "PARENT"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("parent-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("parent-dashboard")).toBeVisible();
   });
 
-  test("teacher beats student when teacher and student permissions present", () => {
+  test("teacher beats student when teacher and student permissions present", async () => {
     const permissions = [AppPermission.TeacherViewDashboard, AppPermission.StudentViewOwnDashboard];
     useUserStore.getState().setUser(createUser(permissions, "TEACHER"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("teacher-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("teacher-dashboard")).toBeVisible();
   });
 
-  test("student beats supervisor when student and supervisor permissions present", () => {
+  test("student beats supervisor when student and supervisor permissions present", async () => {
     const permissions = [AppPermission.StudentViewOwnDashboard, AppPermission.SupervisorViewDashboard];
     useUserStore.getState().setUser(createUser(permissions, "STUDENT"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("student-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("student-dashboard")).toBeVisible();
   });
 
-  test("supervisor beats admin default when supervisor permission present", () => {
+  test("supervisor beats admin default when supervisor permission present", async () => {
     const permissions = [AppPermission.SupervisorViewDashboard];
     useUserStore.getState().setUser(createUser(permissions, "SUPERVISOR"));
 
     renderWithWrapper(<DashboardContainer />, { permissions });
 
-    expect(screen.getByTestId("supervisor-dashboard")).toBeVisible();
+    expect(await screen.findByTestId("supervisor-dashboard")).toBeVisible();
   });
 });

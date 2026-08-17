@@ -8,21 +8,33 @@ expect.extend(matchers);
 await mockNextNavigation("/dashboard", { locale: "ar" });
 
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const urlStatusT = readTranslation(Translation.Dashboard.MeetingUrlStatus, locale);
+const meetingConfigT = readTranslation(Translation.Ui.MeetingConfig, locale);
+const joinLabel = meetingConfigT.join.joinMeeting;
+const copyLabel = meetingConfigT.enhancements.copyMeetingUrl;
+const setupLink = meetingConfigT.join.setupLink;
+const emptyTeacherMessage = meetingConfigT.join.emptyTeacher;
 
 afterEach(() => {
   cleanup();
 });
 
 function renderJoin(props: Record<string, unknown>) {
-  return render(<MeetingJoinAction {...props} />, { wrapper: TestWrapper });
+  return render(<MeetingJoinAction {...props} />, {
+    wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
+  });
 }
 
 describe("MeetingJoinAction", () => {
   test("renders button variant with generated URL and join label", () => {
     renderJoin({ joinUrl: "https://meet.example.com/abc", variant: "button", showCopyButton: true });
-    // Button variant renders the join button (label comes from translations)
-    expect(screen.getByText(/انضمام|join|الانضمام/i)).toBeInTheDocument();
+    expect(screen.getByText(joinLabel)).toBeInTheDocument();
   });
 
   test("renders button variant pending status badge", () => {
@@ -31,7 +43,7 @@ describe("MeetingJoinAction", () => {
       meetingUrlStatus: "pending",
       variant: "button",
     });
-    expect(screen.getByText("الرابط قيد التوليد")).toBeInTheDocument();
+    expect(screen.getByText(urlStatusT.urlPending)).toBeInTheDocument();
   });
 
   test.each(["button", "action"] as const)("renders retry button in %s variant when failed", variant => {
@@ -43,9 +55,9 @@ describe("MeetingJoinAction", () => {
       onRetry,
     });
     if (variant === "button") {
-      expect(screen.getByText("فشل توليد الرابط")).toBeInTheDocument();
+      expect(screen.getByText(urlStatusT.urlFailed)).toBeInTheDocument();
     }
-    fireEvent.click(screen.getByText("إعادة توليد الرابط"));
+    fireEvent.click(screen.getByText(urlStatusT.retryUrlGeneration));
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
@@ -55,13 +67,12 @@ describe("MeetingJoinAction", () => {
       meetingUrlStatus: "expired",
       variant: "button",
     });
-    expect(screen.getByText("الرابط منتهي الصلاحية")).toBeInTheDocument();
+    expect(screen.getByText(urlStatusT.urlExpired)).toBeInTheDocument();
   });
 
   test("renders icon variant with generated URL", () => {
     renderJoin({ joinUrl: "https://meet.example.com/abc", variant: "icon", showCopyButton: true });
-    // Icon variant shows a copy button
-    expect(screen.getByLabelText("نسخ رابط الاجتماع")).toBeInTheDocument();
+    expect(screen.getByLabelText(copyLabel)).toBeInTheDocument();
   });
 
   test("renders icon variant pending status badge", () => {
@@ -70,12 +81,12 @@ describe("MeetingJoinAction", () => {
       meetingUrlStatus: "pending",
       variant: "icon",
     });
-    expect(screen.getByText("الرابط قيد التوليد")).toBeInTheDocument();
+    expect(screen.getByText(urlStatusT.urlPending)).toBeInTheDocument();
   });
 
   test("renders action variant with generated URL", () => {
     renderJoin({ joinUrl: "https://meet.example.com/abc", variant: "action", showCopyButton: true });
-    expect(screen.getByText(/انضمام|join|الانضمام/i)).toBeInTheDocument();
+    expect(screen.getByText(joinLabel)).toBeInTheDocument();
   });
 
   test("renders action variant pending status badge", () => {
@@ -84,7 +95,7 @@ describe("MeetingJoinAction", () => {
       meetingUrlStatus: "pending",
       variant: "action",
     });
-    expect(screen.getByText("الرابط قيد التوليد")).toBeInTheDocument();
+    expect(screen.getByText(urlStatusT.urlPending)).toBeInTheDocument();
   });
 
   test("renders setup alert when no URL, emptyRole and setupHref provided (non-icon variant)", () => {
@@ -94,8 +105,8 @@ describe("MeetingJoinAction", () => {
       setupHref: "/settings",
       variant: "button",
     });
-    // Should render an Alert with a setup link
-    expect(screen.getByText("إعداد إعدادات الاجتماع")).toBeInTheDocument();
+    expect(screen.getByText(emptyTeacherMessage)).toBeInTheDocument();
+    expect(screen.getByText(setupLink)).toBeInTheDocument();
   });
 
   test("renders null state without URL in icon variant without setupHref", () => {
@@ -104,7 +115,7 @@ describe("MeetingJoinAction", () => {
       variant: "icon",
       meetingUrlStatus: "pending",
     });
-    expect(screen.getByText("الرابط قيد التوليد")).toBeInTheDocument();
+    expect(screen.getByText(urlStatusT.urlPending)).toBeInTheDocument();
   });
 
   test("calls onJoinAction when join button clicked", () => {
@@ -114,14 +125,13 @@ describe("MeetingJoinAction", () => {
       variant: "button",
       onJoinAction,
     });
-    const button = screen.getByRole("button", { name: /انضمام|join|الانضمام/i });
+    const button = screen.getByRole("button", { name: joinLabel });
     fireEvent.click(button);
     expect(onJoinAction).toHaveBeenCalledTimes(1);
   });
 
   test("disabled state when no URL and no setup", () => {
     renderJoin({ joinUrl: null, variant: "button" });
-    // Renders pending badge since no URL
-    expect(screen.getByText("الرابط قيد التوليد")).toBeInTheDocument();
+    expect(screen.getByText(urlStatusT.urlPending)).toBeInTheDocument();
   });
 });

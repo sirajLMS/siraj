@@ -69,6 +69,7 @@ export function TestWrapper({
         defaultOptions: {
           watchQuery: {
             errorPolicy: "all",
+            fetchPolicy: "no-cache",
           },
           query: {
             errorPolicy: "all",

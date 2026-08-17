@@ -8,12 +8,14 @@ import {
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { createMeetingIntegrationLabelsMock } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks";
 import type {
   ConnectedAccountsTableProps,
   MeetingIntegrationConnectedAccount,
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import { ConnectedAccountsTableDesktop } from "@/frontend/desktop/views/dashboard/settings/components/meetingIntegrations/ConnectedAccountsTable.desktop";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -21,39 +23,11 @@ afterEach(() => {
   cleanup();
 });
 
-const baseLabels = createMeetingIntegrationLabelsMock();
-const labels: SettingsMeetingIntegrationsLabels = {
-  ...baseLabels,
-  connectedAccounts: "الحسابات المرتبطة",
-  noConnectedAccounts: "لا توجد حسابات",
-  provider: {
-    zoom: "Zoom",
-    googleMeet: "Google Meet",
-    microsoftTeams: "Microsoft Teams",
-  },
-  status: {
-    ...baseLabels.status,
-    connected: "مرتبط",
-    expiringSoon: "على وشك الانتهاء",
-    reauthNeeded: "مطلوب إعادة ربط",
-    revoked: "مُلغى",
-  },
-  columns: {
-    ...baseLabels.columns,
-    name: "الاسم",
-    email: "البريد",
-    connectedAt: "تاريخ الربط",
-    expiresAt: "تاريخ الانتهاء",
-    status: "الحالة",
-    actions: "إجراءات",
-  },
-  actions: {
-    ...baseLabels.actions,
-    viewMetadata: "عرض التفاصيل",
-    revoke: "إلغاء",
-    cancel: "إلغاء",
-  },
-};
+const locale: AppLocale = "ar";
+const labels: SettingsMeetingIntegrationsLabels = readTranslation(
+  Translation.Dashboard.SettingsMeetingIntegrations,
+  locale
+);
 
 function makeAccount(overrides: Partial<MeetingIntegrationConnectedAccount> = {}): MeetingIntegrationConnectedAccount {
   return {
@@ -80,7 +54,9 @@ function renderTable(props: Partial<ConnectedAccountsTableProps> = {}) {
     onRevokeRequest: mock(() => {}),
     onMetadataDialogOpen: mock(() => {}),
   };
-  return render(<ConnectedAccountsTableDesktop {...defaultProps} {...props} />, { wrapper: TestWrapper });
+  return render(<ConnectedAccountsTableDesktop {...defaultProps} {...props} />, {
+    wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
+  });
 }
 
 describe("ConnectedAccountsTableDesktop", () => {
@@ -88,9 +64,11 @@ describe("ConnectedAccountsTableDesktop", () => {
     // Reset any pending timers
   });
 
-  test("renders connected accounts title with provider name", () => {
+  test("renders connected accounts title with provider name", async () => {
     renderTable();
-    expect(screen.getByText(`الحسابات المرتبطة — Zoom`)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(`${labels.connectedAccounts} — ${labels.provider.zoom}`)).toBeInTheDocument();
+    });
   });
 
   test("renders account rows with name and email", async () => {
@@ -104,23 +82,23 @@ describe("ConnectedAccountsTableDesktop", () => {
   test("renders status chip with correct label", async () => {
     renderTable({ accounts: [makeAccount({ status: MeetingIntegrationConnectedAccountStatus.Connected })] });
     await waitFor(() => {
-      expect(screen.getByText("مرتبط")).toBeInTheDocument();
+      expect(screen.getByText(labels.status.connected)).toBeInTheDocument();
     });
   });
 
   test("renders revoke and viewMetadata action buttons when canEdit=true", async () => {
     renderTable();
     await waitFor(() => {
-      expect(screen.getByText("إلغاء")).toBeInTheDocument();
-      expect(screen.getByText("عرض التفاصيل")).toBeInTheDocument();
+      expect(screen.getByText(labels.actions.revoke)).toBeInTheDocument();
+      expect(screen.getByText(labels.actions.viewMetadata)).toBeInTheDocument();
     });
   });
 
   test("hides actions column when canEdit=false", async () => {
     renderTable({ canEdit: false });
     await waitFor(() => {
-      expect(screen.queryByText("إلغاء")).not.toBeInTheDocument();
-      expect(screen.queryByText("عرض التفاصيل")).not.toBeInTheDocument();
+      expect(screen.queryByText(labels.actions.revoke)).not.toBeInTheDocument();
+      expect(screen.queryByText(labels.actions.viewMetadata)).not.toBeInTheDocument();
     });
   });
 
@@ -129,7 +107,7 @@ describe("ConnectedAccountsTableDesktop", () => {
     const account = makeAccount();
     renderTable({ accounts: [account], onRevokeRequest });
     await waitFor(() => {
-      const revokeBtn = screen.getByText("إلغاء");
+      const revokeBtn = screen.getByText(labels.actions.revoke);
       fireEvent.click(revokeBtn);
     });
     expect(onRevokeRequest).toHaveBeenCalledTimes(1);
@@ -142,7 +120,7 @@ describe("ConnectedAccountsTableDesktop", () => {
       revokingFor: { userId: "user-1", providerSlug: MeetingIntegrationProviderSlug.Zoom },
     });
     await waitFor(() => {
-      const revokeBtn = screen.getByText("إلغاء").closest("button");
+      const revokeBtn = screen.getByText(labels.actions.revoke).closest("button");
       expect(revokeBtn).toBeDisabled();
     });
   });
@@ -150,7 +128,7 @@ describe("ConnectedAccountsTableDesktop", () => {
   test("shows empty message when no accounts", async () => {
     renderTable({ accounts: [] });
     await waitFor(() => {
-      expect(screen.getByText("لا توجد حسابات")).toBeInTheDocument();
+      expect(screen.getByText(labels.noConnectedAccounts)).toBeInTheDocument();
     });
   });
 

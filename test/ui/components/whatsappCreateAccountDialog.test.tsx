@@ -10,8 +10,14 @@ import {
   validatePhoneNumberId,
   validateWabaId,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
-import { firstCallArgRecord, testLabels } from "@/test/ui/components/helpers/whatsappTestHelpers";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+import { firstCallArgRecord } from "@/test/ui/components/helpers/whatsappTestHelpers";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Whatsapp, locale);
 
 const noopPromise = (): Promise<void> => Promise.resolve();
 
@@ -23,7 +29,7 @@ async function fillField(label: string, value: string) {
 
 async function clickSave() {
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: testLabels.save }));
+    fireEvent.click(screen.getByRole("button", { name: labels.save }));
   });
 }
 
@@ -39,7 +45,7 @@ function renderDialog(overrides: Record<string, unknown> = {}) {
   renderWithWrapper(
     <CreateAccountDialog
       open
-      labels={testLabels}
+      labels={labels}
       loading={false}
       mutationError={null}
       onClose={onClose}
@@ -49,7 +55,7 @@ function renderDialog(overrides: Record<string, unknown> = {}) {
       validateWabaId={validateWabaId}
       {...overrides}
     />,
-    { locale: "en" }
+    { locale }
   );
   return { onSubmit, onClose };
 }
@@ -65,46 +71,46 @@ describe("CreateAccountDialog", () => {
 
   test("renders all three form fields when open", () => {
     renderDialog();
-    expect(screen.getByLabelText(testLabels.displayNameLabel)).toBeTruthy();
-    expect(screen.getByLabelText(testLabels.phoneNumberIdLabel)).toBeTruthy();
-    expect(screen.getByLabelText(testLabels.wabaIdLabel)).toBeTruthy();
+    expect(screen.getByLabelText(labels.displayNameLabel)).toBeTruthy();
+    expect(screen.getByLabelText(labels.phoneNumberIdLabel)).toBeTruthy();
+    expect(screen.getByLabelText(labels.wabaIdLabel)).toBeTruthy();
   });
 
   test("shows title and action buttons", () => {
     renderDialog();
-    expect(screen.getByText(testLabels.createAccountTitle)).toBeTruthy();
-    expect(screen.getByRole("button", { name: testLabels.save })).toBeTruthy();
-    expect(screen.getByRole("button", { name: testLabels.cancel })).toBeTruthy();
+    expect(screen.getByText(labels.createAccountTitle)).toBeTruthy();
+    expect(screen.getByRole("button", { name: labels.save })).toBeTruthy();
+    expect(screen.getByRole("button", { name: labels.cancel })).toBeTruthy();
   });
 
   test("shows validation error when display name is empty and Save clicked", async () => {
     renderDialog();
     await clickSave();
-    await expectValidationError(testLabels.validationDisplayNameRequired);
+    await expectValidationError(labels.validationDisplayNameRequired);
   });
 
   test("shows validation error for non-numeric phone number ID", async () => {
     renderDialog();
-    await fillField(testLabels.displayNameLabel, "Test Account");
-    await fillField(testLabels.phoneNumberIdLabel, "abc");
+    await fillField(labels.displayNameLabel, "Test Account");
+    await fillField(labels.phoneNumberIdLabel, "abc");
     await clickSave();
-    await expectValidationError(testLabels.validationPhoneNumberIdNumeric);
+    await expectValidationError(labels.validationPhoneNumberIdNumeric);
   });
 
   test("shows validation error for non-numeric waba ID", async () => {
     renderDialog();
-    await fillField(testLabels.displayNameLabel, "Test Account");
-    await fillField(testLabels.phoneNumberIdLabel, "123456");
-    await fillField(testLabels.wabaIdLabel, "xyz");
+    await fillField(labels.displayNameLabel, "Test Account");
+    await fillField(labels.phoneNumberIdLabel, "123456");
+    await fillField(labels.wabaIdLabel, "xyz");
     await clickSave();
-    await expectValidationError(testLabels.validationWabaIdNumeric);
+    await expectValidationError(labels.validationWabaIdNumeric);
   });
 
   test("onSubmit called with valid data when all fields pass validation", async () => {
     const { onSubmit } = renderDialog();
-    await fillField(testLabels.displayNameLabel, "My Account");
-    await fillField(testLabels.phoneNumberIdLabel, "123456789");
-    await fillField(testLabels.wabaIdLabel, "987654321");
+    await fillField(labels.displayNameLabel, "My Account");
+    await fillField(labels.phoneNumberIdLabel, "123456789");
+    await fillField(labels.wabaIdLabel, "987654321");
     await clickSave();
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledTimes(1);
@@ -119,14 +125,14 @@ describe("CreateAccountDialog", () => {
   test("onClose called when Cancel button clicked", async () => {
     const { onClose } = renderDialog();
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: testLabels.cancel }));
+      fireEvent.click(screen.getByRole("button", { name: labels.cancel }));
     });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   test("Save button disabled when loading", () => {
     renderDialog({ loading: true });
-    expect(screen.getByRole("button", { name: testLabels.save }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: labels.save }).hasAttribute("disabled")).toBe(true);
   });
 
   test("displays mutation error alert when provided", () => {

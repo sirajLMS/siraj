@@ -15,6 +15,7 @@ const ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.DashboardViewMetrics,
   AppPermission.StaffViewDirectory,
   AppPermission.StudentsList,
+  AppPermission.TeachersList,
   AppPermission.BillingViewHistory,
   AppPermission.BillingViewExchangeRates,
   AppPermission.BillingManageCurrencyHedges,

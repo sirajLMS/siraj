@@ -1,9 +1,22 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Locator, Page } from "playwright";
+import { getDefaultTranslations } from "@/shared/locale/server";
 import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
+
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+const tr = (s: string): RegExp => new RegExp(escapeRegExp(s));
+
+const T = getDefaultTranslations();
+const notifs = T.dashboardTranslations.coreNotifications;
+const common = T.commonTranslations;
+
+const NOTIFICATIONS = tr(common.notifications);
+const POSTPAID_INVOICES_TITLE = tr(notifs.unpaidInvoicesTitle);
 
 let context: BrowserContext;
 let page: Page;
@@ -28,7 +41,7 @@ function getBellButton(p: Page): Locator {
   // The NotificationButton wraps NotificationsOutlined icon in NavbarIcon
   // (IconButton with aria-label="Notifications" / "الإشعارات").
   // In dev mode MUI icons get data-testid="${displayName}Icon".
-  return p.locator('button[aria-label="Notifications"], button[aria-label="الإشعارات"]').first();
+  return p.locator(`button[aria-label="${escapeRegExp(common.notifications)}"]`).first();
 }
 
 describe("Notifications & Billing E2E", () => {
@@ -41,7 +54,7 @@ describe("Notifications & Billing E2E", () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
     // Drawer title: "Notifications" (en) / "الإشعارات" (ar)
-    const drawerTitle = p.getByText(/Notifications|الإشعارات/).first();
+    const drawerTitle = p.getByText(NOTIFICATIONS).first();
     await drawerTitle.waitFor({ state: "visible" });
     expect(await drawerTitle.isVisible()).toBe(true);
   });
@@ -52,7 +65,7 @@ describe("Notifications & Billing E2E", () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
     // Section title: "Unpaid Invoices" (en) / "الفواتير غير المدفوعة" (ar)
-    const billingTitle = p.getByText(/Unpaid Invoices|الفواتير غير المدفوعة/).first();
+    const billingTitle = p.getByText(POSTPAID_INVOICES_TITLE).first();
     await billingTitle.waitFor({ state: "visible" });
     expect(await billingTitle.isVisible()).toBe(true);
   });
@@ -62,7 +75,7 @@ describe("Notifications & Billing E2E", () => {
     // re-enable once the billing section is reachable from the popover.
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
-    const billingTitle = p.getByText(/Unpaid Invoices|الفواتير غير المدفوعة/).first();
+    const billingTitle = p.getByText(POSTPAID_INVOICES_TITLE).first();
     await billingTitle.waitFor({ state: "visible" });
 
     const userRow = p.locator('[role="button"]').filter({ hasText: /\w+/ }).last();
@@ -75,7 +88,7 @@ describe("Notifications & Billing E2E", () => {
 
   test("Teacher does NOT see notification bell icon", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.teacher.groupSlug);
-    const bellIcon = p.locator('button[aria-label="Notifications"], button[aria-label="الإشعارات"]');
+    const bellIcon = p.locator(`button[aria-label="${escapeRegExp(common.notifications)}"]`);
     expect(await bellIcon.count()).toBe(0);
   });
 
@@ -83,7 +96,7 @@ describe("Notifications & Billing E2E", () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug, createMobileContext);
     expect(await getBellButton(p).isVisible()).toBe(true);
     await getBellButton(p).click();
-    const drawerTitle = p.getByText(/Notifications|الإشعارات/).first();
+    const drawerTitle = p.getByText(NOTIFICATIONS).first();
     await drawerTitle.waitFor({ state: "visible" });
     expect(await drawerTitle.isVisible()).toBe(true);
   });

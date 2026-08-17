@@ -10,8 +10,14 @@ import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/genera
 import { MeetingIntegrationsHealthHeadersShared } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/__shared__/meetingIntegrationsHealthHeadersShared";
 import { createMeetingIntegrationLabelsMock } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks";
 import type { MeetingIntegrationsViewModel } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const t = readTranslation(Translation.Dashboard.SettingsMeetingIntegrations, locale);
 
 afterEach(() => {
   cleanup();
@@ -20,14 +26,14 @@ afterEach(() => {
 const baseLabels = createMeetingIntegrationLabelsMock();
 const labels: SettingsMeetingIntegrationsLabels = {
   ...baseLabels,
-  totalProviders: "إجمالي المزودين",
-  connectedProviders: "مرتبط",
-  providersWithIssues: "بمشاكل",
-  disconnectedProviders: "غير مرتبط",
+  totalProviders: t.totalProviders,
+  connectedProviders: t.connectedProviders,
+  providersWithIssues: t.providersWithIssues,
+  disconnectedProviders: t.disconnectedProviders,
   provider: {
-    zoom: "Zoom",
-    googleMeet: "Google Meet",
-    microsoftTeams: "Microsoft Teams",
+    zoom: t.provider.zoom,
+    googleMeet: t.provider.googleMeet,
+    microsoftTeams: t.provider.microsoftTeams,
   },
 };
 
@@ -53,7 +59,7 @@ function makeProvider(
 function makeViewModel(overrides: Partial<MeetingIntegrationsViewModel> = {}): MeetingIntegrationsViewModel {
   return {
     labels,
-    locale: "ar",
+    locale,
     loading: false,
     error: undefined,
     canEdit: true,
@@ -109,7 +115,7 @@ function renderShared(viewModel: MeetingIntegrationsViewModel) {
       renderSkeleton={() => (<SkeletonComponent />) as ReactNode}
       renderMetrics={metrics => MetricsRenderer({ metrics }) as ReactNode}
     />,
-    { wrapper: TestWrapper }
+    { wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper> }
   );
 }
 

@@ -13,7 +13,12 @@ await mock.module("next/link", () => ({
     createElement("a", { href, ...rest }, children),
 }));
 
-const mockLabels = (await import("@/test/ui/components/quota/mockQuotaLabels")).createMockQuotaLabels();
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+
+const locale: AppLocale = "en";
+const mockLabels = readTranslation(Translation.Dashboard.BillingQuota, locale);
 
 let mockViewModel = {
   t: mockLabels,
@@ -78,17 +83,17 @@ describe("QuotaContainer — desktop", () => {
   });
 
   test("renders desktop view header", async () => {
-    renderWithWrapper(<QuotaListDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaListDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
-      expect(screen.getAllByText("Quotas").length).toBeGreaterThan(0);
+      expect(screen.getAllByText(mockLabels.listTitle).length).toBeGreaterThan(0);
     });
   });
 
   test("renders DataGrid when quotas exist", async () => {
     mockViewModel = { ...mockViewModel, quotas: [mockQuota], totalCount: 1 };
 
-    renderWithWrapper(<QuotaListDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaListDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
       expect(document.querySelector(".MuiDataGrid-root")).not.toBeNull();
@@ -98,7 +103,7 @@ describe("QuotaContainer — desktop", () => {
   test("renders quota name in DataGrid", async () => {
     mockViewModel = { ...mockViewModel, quotas: [mockQuota], totalCount: 1 };
 
-    renderWithWrapper(<QuotaListDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaListDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
       expect(screen.getByText("Summer Package")).toBeVisible();
@@ -108,7 +113,7 @@ describe("QuotaContainer — desktop", () => {
   test("renders loading state when loading=true", async () => {
     mockViewModel = { ...mockViewModel, loading: true, quotas: [] };
 
-    renderWithWrapper(<QuotaListDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaListDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
       expect(document.querySelector(".MuiDataGrid-root")).not.toBeNull();
@@ -118,7 +123,7 @@ describe("QuotaContainer — desktop", () => {
   test("renders empty state when no quotas", async () => {
     mockViewModel = { ...mockViewModel, quotas: [], totalCount: 0, loading: false };
 
-    renderWithWrapper(<QuotaListDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaListDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
       expect(document.querySelector(".MuiDataGrid-root")).not.toBeNull();

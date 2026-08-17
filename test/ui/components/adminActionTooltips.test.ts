@@ -3,18 +3,14 @@ import {
   getForceActivateDisabledTooltip,
   getStopDisabledTooltip,
 } from "@/frontend/common/views/dashboard/classes/details/admin/adminActionTooltips";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 
-const forceActivateTooltips = {
-  activated: "You cannot force activate because this class is already activated.",
-  running: "You cannot force activate because the session is running.",
-  completed: "You cannot force activate because this class is completed.",
-};
-
-const stopTooltips = {
-  notActivated: "You cannot stop because this class has not been activated yet.",
-  activated: "You cannot stop because the session has not started. Start the session first.",
-  completed: "You cannot stop because this class is completed.",
-};
+const locale: AppLocale = "ar";
+const adminActions = readTranslation(Translation.Dashboard.AdminView, locale).adminActions;
+const forceActivateTooltips = adminActions.disabledTooltips.forceActivate;
+const stopTooltips = adminActions.disabledTooltips.stop;
 
 describe("adminActionTooltips", () => {
   test("getForceActivateDisabledTooltip returns null for NOT_ACTIVATED", () => {

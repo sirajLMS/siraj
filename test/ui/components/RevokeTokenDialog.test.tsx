@@ -4,8 +4,10 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { createMeetingIntegrationLabelsMock } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks";
 import { RevokeTokenDialog } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/RevokeTokenDialog";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -13,17 +15,11 @@ afterEach(() => {
   cleanup();
 });
 
-const baseLabels = createMeetingIntegrationLabelsMock();
-const labels: SettingsMeetingIntegrationsLabels = {
-  ...baseLabels,
-  actions: {
-    ...baseLabels.actions,
-    revokeConfirm: "هل أنت متأكد من إلغاء هذا الرمز؟ سيتعين على المعلم إعادة الاتصال.",
-    revokeConfirmTitle: "إلغاء رمز مزود الاجتماعات",
-    cancel: "إلغاء",
-    confirmRevoke: "إلغاء",
-  },
-};
+const locale: AppLocale = "ar";
+const labels: SettingsMeetingIntegrationsLabels = readTranslation(
+  Translation.Dashboard.SettingsMeetingIntegrations,
+  locale
+);
 
 function renderDialog(props: Record<string, unknown>) {
   return render(
@@ -35,23 +31,22 @@ function renderDialog(props: Record<string, unknown>) {
       onCancel={mock(() => {})}
       {...props}
     />,
-    { wrapper: TestWrapper }
+    { wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper> }
   );
 }
 
 describe("RevokeTokenDialog", () => {
   test("renders dialog with title and body when open", () => {
     renderDialog({});
-    expect(screen.getByText("إلغاء رمز مزود الاجتماعات")).toBeInTheDocument();
-    expect(screen.getByText(/هل أنت متأكد من إلغاء هذا الرمز؟/)).toBeInTheDocument();
+    expect(screen.getByText(labels.actions.revokeConfirmTitle)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(labels.actions.revokeConfirm))).toBeInTheDocument();
   });
 
   test("calls onConfirm when confirm button clicked", () => {
     const onConfirm = mock(() => {});
     renderDialog({ onConfirm });
-    // Both cancel and confirm have same label "إلغاء" so we need to find the dialog buttons
-    const buttons = screen.getAllByText("إلغاء");
-    // Find the confirm button (second one, inside the dialog actions)
+    // Cancel and confirm may share the same label; find all matching and click the last (confirm)
+    const buttons = screen.getAllByText(labels.actions.confirmRevoke);
     fireEvent.click(buttons[buttons.length - 1]);
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
@@ -59,20 +54,19 @@ describe("RevokeTokenDialog", () => {
   test("calls onCancel when cancel button clicked", () => {
     const onCancel = mock(() => {});
     renderDialog({ onCancel });
-    const buttons = screen.getAllByText("إلغاء");
-    // The first "إلغاء" is the cancel button
+    const buttons = screen.getAllByText(labels.actions.cancel);
     fireEvent.click(buttons[0]);
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   test("shows loading state when revoking is true", () => {
     renderDialog({ revoking: true });
-    // When revoking, confirm button should show loading (disabled or progress indicator)
-    expect(screen.getByText("إلغاء رمز مزود الاجتماعات")).toBeInTheDocument();
+    // When revoking, confirm button shows loading indicator; title still visible
+    expect(screen.getByText(labels.actions.revokeConfirmTitle)).toBeInTheDocument();
   });
 
   test("does not render dialog when open is false", () => {
     renderDialog({ open: false });
-    expect(screen.queryByText("إلغاء رمز مزود الاجتماعات")).not.toBeInTheDocument();
+    expect(screen.queryByText(labels.actions.revokeConfirmTitle)).not.toBeInTheDocument();
   });
 });

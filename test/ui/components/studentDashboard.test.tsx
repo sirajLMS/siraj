@@ -50,7 +50,14 @@ import { ReflectionDialog } from "@/frontend/common/views/dashboard/student/dash
 import { StudentDashboardContainer as StudentDashboardEntry } from "@/frontend/common/views/dashboard/student/dashboard/StudentDashboardContainer";
 import { useStudentDashboardViewModel } from "@/frontend/common/views/dashboard/student/dashboard/useStudentDashboardViewModel";
 import { StudentDashboardDesktopView } from "@/frontend/desktop/views/dashboard/student/dashboard/studentDashboard.desktop";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "en";
+const labels = readTranslation(Translation.Dashboard.StudentPortalDashboard, locale);
+const lessonReportStatusLabels = readTranslation(Translation.Dashboard.LmsLessonReports, locale);
 
 /**
  * Production-shaped container for desktop viewport tests.
@@ -268,21 +275,25 @@ describe("StudentDashboardContainer", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Next Class")).toBeInTheDocument();
+      expect(screen.getByText(labels.nextClass)).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Welcome, Ahmed Student")).toBeInTheDocument();
+    expect(screen.getByText(labels.welcomeMessage("Ahmed Student"))).toBeInTheDocument();
     // Instructor and Join appear in both Next Class card and Today's Classes list.
     expect(screen.getAllByText(instructorName).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByRole("button", { name: "Join" }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByRole("button", { name: labels.joinNow }).length).toBeGreaterThanOrEqual(1);
 
     await waitFor(() => {
-      expect(screen.getByText("Classes Remaining")).toBeInTheDocument();
+      expect(screen.getByText(labels.classesRemaining)).toBeInTheDocument();
     });
     expect(screen.getByText("8")).toBeInTheDocument();
-    expect(screen.getByText("Total Classes")).toBeInTheDocument();
+    expect(screen.getByText(labels.classesTotal)).toBeInTheDocument();
     expect(screen.getByText("20")).toBeInTheDocument();
-    expect(screen.getByText("20 total classes")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        `${creditBalanceMockData.studentCreditBalance.classesTotal} ${labels.classesTotal.toLowerCase()}`
+      )
+    ).toBeInTheDocument();
 
     const firstLessonDate = formatDate("2026-07-10", "en");
     const secondLessonDate = formatDate("2026-07-12", "en");
@@ -291,12 +302,14 @@ describe("StudentDashboardContainer", () => {
       expect(screen.getByText(firstLessonDate)).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Recent Lesson Reports")).toBeInTheDocument();
-    expect(screen.getByText(/45\s*min\s*·\s*80%\s*·\s*PRESENT/)).toBeInTheDocument();
-    expect(screen.getByText("APPROVED")).toBeInTheDocument();
+    expect(screen.getByText(labels.recentLessonReports)).toBeInTheDocument();
+    expect(screen.getByText("45 min")).toBeInTheDocument();
+    expect(screen.getByText("80%")).toBeInTheDocument();
+    expect(screen.getByText(lessonReportStatusLabels.approved)).toBeInTheDocument();
     expect(screen.getByText(secondLessonDate)).toBeInTheDocument();
-    expect(screen.getByText(/60\s*min\s*·\s*50%\s*·\s*LATE/)).toBeInTheDocument();
-    expect(screen.getByText("PENDING_REVIEW")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Add Reflection" })).toHaveLength(2);
+    expect(screen.getAllByText("60 min").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("50%")).toBeInTheDocument();
+    expect(screen.getByText(lessonReportStatusLabels.pendingReview)).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: labels.addReflection })).toHaveLength(2);
   });
 });

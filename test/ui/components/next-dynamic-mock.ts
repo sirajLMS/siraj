@@ -4,7 +4,7 @@
  */
 import { mock } from "bun:test";
 import type React from "react";
-import { createElement } from "react";
+import { createElement, useState } from "react";
 
 // Type guard: narrows `unknown` to a React component type so we can pass it to
 // createElement without an unsafe `as` assertion (oxlint no-unsafe-type-assertion).
@@ -93,18 +93,29 @@ void mock.module("next/dynamic", () => {
       cacheKey = importerStr;
     }
 
-    // Create synchronous component
-    const DynamicComponent = ({ ...props }: T) => {
-      const cached = moduleCache.get(cacheKey);
-      let content: React.ReactNode;
+    // Create component that resolves the importer for uncached dynamic imports.
+    // Uses a state + promise pattern that works with findByTestId (async polling).
+    const cached = moduleCache.get(cacheKey);
+    let resolvedComp: React.ComponentType<unknown> | null = cached && isComponentType(cached) ? cached : null;
+    let _importPromise: Promise<React.ComponentType<unknown>> | null = null;
 
-      if (cached && isComponentType(cached)) {
-        // The type guard narrows `unknown` to ComponentType<unknown>; createElement
-        // accepts props of type T since T extends Record<string, unknown> is
-        // assignable to `unknown`. No `as` assertion needed.
-        content = createElement(cached, props);
+    const DynamicComponent = (props: T): React.ReactNode => {
+      const [, forceRender] = useState({});
+
+      let content: React.ReactNode;
+      if (resolvedComp) {
+        content = createElement(resolvedComp, props);
       } else {
-        // Show loading or null if not loaded yet
+        _importPromise ??= importer().then(mod => {
+          const comp: unknown = mod.default;
+          if (isComponentType(comp)) {
+            moduleCache.set(cacheKey, comp);
+            resolvedComp = comp;
+            forceRender({});
+            return comp;
+          }
+          throw new Error(`Dynamic import for ${cacheKey} did not resolve to a component`);
+        });
         content = options?.loading?.() ?? null;
       }
 

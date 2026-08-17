@@ -93,45 +93,64 @@ function makeProvider(
 
 const ZOOM_ENTRIES = [
   {
+    __typename: "EnvConfigEntry",
     id: "e1",
     key: "ZOOM_CLIENT_ID",
     value: "client123",
     category: "meeting",
+    displayStrategy: "text",
+    description: null,
+    isSecret: false,
+    excludeFromDb: false,
+    source: "db",
     hasDbOverride: true,
+    editable: true,
   },
   {
+    __typename: "EnvConfigEntry",
     id: "e2",
     key: "ZOOM_CLIENT_SECRET",
     value: "secret456",
     category: "meeting",
+    displayStrategy: "text",
+    description: null,
+    isSecret: true,
+    excludeFromDb: false,
+    source: "db",
     hasDbOverride: true,
+    editable: true,
   },
   {
+    __typename: "EnvConfigEntry",
     id: "e3",
     key: "ZOOM_SCOPES",
     value: "meeting:write,meeting:read",
     category: "meeting",
+    displayStrategy: "text",
+    description: null,
+    isSecret: false,
+    excludeFromDb: false,
+    source: "db",
     hasDbOverride: true,
+    editable: true,
   },
 ];
 
-const ENV_QUERY_MOCK = {
+const ENV_QUERY_MOCK = () => ({
   request: {
     query: envConfigEntriesQueryDocument,
   },
   result: {
     data: {
+      __typename: "Query",
       envConfigEntries: ZOOM_ENTRIES,
     },
   },
-};
+});
 
-function renderForm(
-  mocks: NonNullable<Parameters<typeof renderWithWrapper>[1]>["mocks"] = [ENV_QUERY_MOCK],
-  provider = makeProvider()
-) {
+function renderForm(mocks?: NonNullable<Parameters<typeof renderWithWrapper>[1]>["mocks"], provider = makeProvider()) {
   return renderWithWrapper(<MeetingProviderCredentialForm provider={provider} labels={labels} />, {
-    mocks,
+    mocks: mocks ?? [ENV_QUERY_MOCK()],
   });
 }
 
@@ -174,11 +193,69 @@ describe("MeetingProviderCredentialForm", () => {
   });
 
   test("renders Microsoft Teams tenant ID field for Teams provider", async () => {
+    const TEAMS_ENTRIES = [
+      {
+        __typename: "EnvConfigEntry",
+        id: "t1",
+        key: "MICROSOFT_TEAMS_CLIENT_ID",
+        value: "teams-client-id",
+        category: "meeting",
+        displayStrategy: "text",
+        description: null,
+        isSecret: false,
+        excludeFromDb: false,
+        source: "db",
+        hasDbOverride: true,
+        editable: true,
+      },
+      {
+        __typename: "EnvConfigEntry",
+        id: "t2",
+        key: "MICROSOFT_TEAMS_CLIENT_SECRET",
+        value: "teams-secret",
+        category: "meeting",
+        displayStrategy: "text",
+        description: null,
+        isSecret: true,
+        excludeFromDb: false,
+        source: "db",
+        hasDbOverride: true,
+        editable: true,
+      },
+      {
+        __typename: "EnvConfigEntry",
+        id: "t3",
+        key: "MICROSOFT_TEAMS_TENANT_ID",
+        value: "teams-tenant-123",
+        category: "meeting",
+        displayStrategy: "text",
+        description: null,
+        isSecret: false,
+        excludeFromDb: false,
+        source: "db",
+        hasDbOverride: true,
+        editable: true,
+      },
+      {
+        __typename: "EnvConfigEntry",
+        id: "t4",
+        key: "MICROSOFT_TEAMS_SCOPES",
+        value: "https://graph.microsoft.com/.default",
+        category: "meeting",
+        displayStrategy: "text",
+        description: null,
+        isSecret: false,
+        excludeFromDb: false,
+        source: "db",
+        hasDbOverride: true,
+        editable: true,
+      },
+    ];
     renderForm(
       [
         {
           request: { query: envConfigEntriesQueryDocument },
-          result: { data: { envConfigEntries: [] } },
+          result: { data: { __typename: "Query", envConfigEntries: TEAMS_ENTRIES } },
         },
       ],
       makeProvider(MeetingIntegrationProviderSlug.MicrosoftTeams)
@@ -194,7 +271,7 @@ describe("MeetingProviderCredentialForm", () => {
       {
         request: { query: envConfigEntriesQueryDocument },
         delay: 1000,
-        result: { data: { envConfigEntries: ZOOM_ENTRIES } },
+        result: { data: { __typename: "Query", envConfigEntries: ZOOM_ENTRIES } },
       },
     ]);
 
@@ -206,7 +283,7 @@ describe("MeetingProviderCredentialForm", () => {
     ["shows error state when query fails", { error: new Error("network error") }, "تعذّر التحميل"],
     [
       "shows noFields when entries empty and not loading",
-      { result: { data: { envConfigEntries: [] } } },
+      { result: { data: { __typename: "Query", envConfigEntries: [] } } },
       "لا توجد حقول",
     ],
   ])("%s", async (_name, mockConfig, expectedText) => {

@@ -13,7 +13,12 @@ await mock.module("next/link", () => ({
     createElement("a", { href, ...rest }, children),
 }));
 
-const mockLabels = (await import("@/test/ui/components/quota/mockQuotaLabels")).createMockQuotaLabels();
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+
+const locale: AppLocale = "en";
+const mockLabels = readTranslation(Translation.Dashboard.BillingQuota, locale);
 
 await mock.module("@/frontend/common/views/dashboard/billing/quota/useQuotaDetailViewModel", () => ({
   useQuotaDetailViewModel: () => mockViewModel,
@@ -82,7 +87,7 @@ describe("QuotaDetailContainer", () => {
   test("renders loading skeleton while quota query is loading", async () => {
     mockViewModel = { ...mockViewModel, loadingQuota: true, quota: null };
 
-    const { container } = renderWithWrapper(<QuotaDetailDesktopTestView />, { locale: "en", viewport: "desktop" });
+    const { container } = renderWithWrapper(<QuotaDetailDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
       expect(container.firstChild).not.toBeNull();
@@ -92,7 +97,7 @@ describe("QuotaDetailContainer", () => {
   test("renders quota name as page title when quota is found", async () => {
     mockViewModel = { ...mockViewModel, quota: mockQuota, loadingQuota: false };
 
-    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
       expect(screen.getAllByText("Summer Package").length).toBeGreaterThan(0);
@@ -102,30 +107,30 @@ describe("QuotaDetailContainer", () => {
   test("renders ledger section title", async () => {
     mockViewModel = { ...mockViewModel, quota: mockQuota, loadingQuota: false };
 
-    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
-      expect(screen.getAllByText("Ledger").length).toBeGreaterThan(0);
+      expect(screen.getAllByText(mockLabels.ledger.title).length).toBeGreaterThan(0);
     });
   });
 
   test("renders delete button in actions", async () => {
     mockViewModel = { ...mockViewModel, quota: mockQuota, loadingQuota: false };
 
-    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
-      expect(screen.getByText("Delete")).toBeVisible();
+      expect(screen.getByText(mockLabels.actions.delete)).toBeVisible();
     });
   });
 
   test("renders edit button in actions", async () => {
     mockViewModel = { ...mockViewModel, quota: mockQuota, loadingQuota: false };
 
-    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
-      expect(screen.getByText("Edit")).toBeVisible();
+      expect(screen.getByText(mockLabels.actions.edit)).toBeVisible();
     });
   });
 
@@ -133,19 +138,19 @@ describe("QuotaDetailContainer", () => {
     const onDeleteDialogOpen = mock(() => {});
     mockViewModel = { ...mockViewModel, quota: mockQuota, loadingQuota: false, onDeleteDialogOpen };
 
-    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<QuotaDetailDesktopTestView />, { locale, viewport: "desktop" });
 
     await waitFor(() => {
-      expect(screen.getByText("Delete")).toBeVisible();
+      expect(screen.getByText(mockLabels.actions.delete)).toBeVisible();
     });
-    fireEvent.click(screen.getByText("Delete"));
+    fireEvent.click(screen.getByText(mockLabels.actions.delete));
     expect(onDeleteDialogOpen).toHaveBeenCalledTimes(1);
   });
 
   test("renders null when quota is null and not loading", () => {
     mockViewModel = { ...mockViewModel, quota: null, loadingQuota: false };
 
-    const { container } = renderWithWrapper(<QuotaDetailDesktopTestView />, { locale: "en", viewport: "desktop" });
+    const { container } = renderWithWrapper(<QuotaDetailDesktopTestView />, { locale, viewport: "desktop" });
 
     expect(container.firstChild).toBeNull();
   });

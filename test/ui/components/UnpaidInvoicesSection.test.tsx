@@ -31,7 +31,13 @@ import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-t
 import { unpaidInvoicesAlertQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { UnpaidInvoicesSection } from "@/frontend/common/views/dashboard/components/navbar/UnpaidInvoicesSection";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "en";
+const labels = readTranslation(Translation.Dashboard.CoreNotifications, locale);
 
 afterEach(() => {
   cleanup();
@@ -98,28 +104,28 @@ describe("UnpaidInvoicesSection", () => {
     ];
 
     renderWithWrapper(<UnpaidInvoicesSection />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.ProfileCoreIdentityViewOther],
       mocks,
     });
 
-    expect(screen.getByText("Loading billing data...")).toBeVisible();
+    expect(screen.getByText(labels.loadingBilling)).toBeVisible();
   });
 
   test("shows no unpaid invoices message when totalOverdueInvoices is 0", async () => {
     renderWithWrapper(<UnpaidInvoicesSection />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewUnpaidInvoices],
       mocks: createBillingMock(mockBillingEmpty),
     });
 
-    const message = await screen.findByText("No invoices requiring payment.");
+    const message = await screen.findByText(labels.noUnpaidInvoices);
     expect(message).toBeVisible();
   });
 
   test("renders invoice items with user names and amounts", async () => {
     renderWithWrapper(<UnpaidInvoicesSection />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.ProfileCoreIdentityViewOther],
       mocks: createBillingMock(),
     });
@@ -136,12 +142,12 @@ describe("UnpaidInvoicesSection", () => {
 
   test("shows overdue count badge", async () => {
     renderWithWrapper(<UnpaidInvoicesSection />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.ProfileCoreIdentityViewOther],
       mocks: createBillingMock(),
     });
 
-    const header = await screen.findByText("Unpaid Invoices");
+    const header = await screen.findByText(labels.unpaidInvoicesTitle);
     expect(header).toBeVisible();
 
     const badge = await screen.findByText("2");
@@ -152,7 +158,7 @@ describe("UnpaidInvoicesSection", () => {
     const { default: userEvent } = await import("@testing-library/user-event");
 
     renderWithWrapper(<UnpaidInvoicesSection />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewUnpaidInvoices, AppPermission.ProfileCoreIdentityViewOther],
       mocks: createBillingMock(),
     });
@@ -169,7 +175,7 @@ describe("UnpaidInvoicesSection", () => {
 
   test("user rows are not clickable without profile core identity view_other permission", async () => {
     renderWithWrapper(<UnpaidInvoicesSection />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewUnpaidInvoices],
       mocks: createBillingMock(),
     });

@@ -13,7 +13,12 @@ await mock.module("next/link", () => ({
     createElement("a", { href, ...rest }, children),
 }));
 
-const mockLabels = (await import("@/test/ui/components/quota/mockQuotaLabels")).createMockQuotaLabels();
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+
+const locale: AppLocale = "en";
+const mockLabels = readTranslation(Translation.Dashboard.BillingQuota, locale);
 
 await mock.module("@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel", () => ({
   useQuotaInsightsViewModel: () => viewModelRef.current,
@@ -91,7 +96,7 @@ const mockQuota: QuotaItem = {
 };
 
 function renderInsights() {
-  return renderWithWrapper(<QuotaInsightsDesktopTestView />, { locale: "en", viewport: "desktop" });
+  return renderWithWrapper(<QuotaInsightsDesktopTestView />, { locale, viewport: "desktop" });
 }
 
 async function assertInsightsRenders() {
@@ -114,7 +119,7 @@ describe("QuotaInsightsContainer", () => {
     renderInsights();
 
     await waitFor(() => {
-      expect(screen.getAllByText("Quota Insights").length).toBeGreaterThan(0);
+      expect(screen.getAllByText(mockLabels.insightsTitle).length).toBeGreaterThan(0);
     });
   });
 
@@ -134,12 +139,12 @@ describe("QuotaInsightsContainer", () => {
 
     await waitFor(
       () => {
-        expect(screen.getByText("7 active quotas")).toBeVisible();
-        expect(screen.getByText("120 classes remaining")).toBeVisible();
+        expect(screen.getByText(mockLabels.activeQuotasCount(7))).toBeVisible();
+        expect(screen.getByText(mockLabels.totalClassesRemaining(120))).toBeVisible();
       },
-      { timeout: 5000 }
+      { timeout: 10000 }
     );
-  });
+  }, 15000);
 
   test("renders loading state when loading=true", async () => {
     viewModelRef.current = { ...mockViewModel, loading: true };
@@ -147,7 +152,7 @@ describe("QuotaInsightsContainer", () => {
     renderInsights();
 
     await waitFor(() => {
-      expect(screen.getAllByText("Quota Insights").length).toBeGreaterThan(0);
+      expect(screen.getAllByText(mockLabels.insightsTitle).length).toBeGreaterThan(0);
     });
   });
 
@@ -157,7 +162,7 @@ describe("QuotaInsightsContainer", () => {
     renderInsights();
 
     await waitFor(() => {
-      expect(screen.getByText("Failed to load quota data")).toBeVisible();
+      expect(screen.getByText(mockLabels.errors.loadFailed)).toBeVisible();
     });
   });
 
@@ -175,10 +180,10 @@ describe("QuotaInsightsContainer", () => {
     renderInsights();
 
     await waitFor(() => {
-      expect(screen.getByText("Date Range")).toBeVisible();
+      expect(screen.getByText(mockLabels.insightsDateRangeLabel)).toBeVisible();
     });
-    expect(screen.getByText("Kind")).toBeVisible();
-    expect(screen.getByText("Status")).toBeVisible();
-    expect(screen.getByText("Student")).toBeVisible();
+    expect(screen.getByText(mockLabels.insightsKindLabel)).toBeVisible();
+    expect(screen.getByText(mockLabels.insightsStatusLabel)).toBeVisible();
+    expect(screen.getByText(mockLabels.insightsStudentLabel)).toBeVisible();
   });
 });

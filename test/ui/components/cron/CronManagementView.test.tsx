@@ -1,120 +1,16 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { CronRunStatus, CronScheduleStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
-const mockLabels: CronLabels = {
-  pageTitle: "Cron Schedules",
-  pageSubtitle: "Manage cron schedules",
-  colName: "Name",
-  colExpression: "Expression",
-  colJobKind: "Job Kind",
-  colStatus: "Status",
-  colNextRun: "Next Run",
-  colLastRun: "Last Run",
-  colStartedAt: "Started At",
-  colActions: "Actions",
-  statusActive: "Active",
-  statusPaused: "Paused",
-  statusDisabled: "Disabled",
-  actionCreate: "Create",
-  actionEdit: "Edit",
-  actionPause: "Pause",
-  actionResume: "Resume",
-  actionDelete: "Delete",
-  actionTrigger: "Trigger",
-  actionConfirm: "Confirm",
-  actionCancel: "Cancel",
-  dialogCreateTitle: "Create Schedule",
-  dialogEditTitle: "Edit Schedule",
-  dialogRunsTitle: (name: string) => `Runs for ${name}`,
-  fieldName: "Name",
-  fieldDescription: "Description",
-  fieldCronExpression: "Cron Expression",
-  fieldJobKind: "Job Kind",
-  fieldPayload: "Payload",
-  fieldTimezone: "Timezone",
-  fieldConcurrencyPolicy: "Concurrency Policy",
-  fieldMaxRetries: "Max Retries",
-  fieldRetryBackoffSeconds: "Retry Backoff (s)",
-  fieldTimeoutSeconds: "Timeout (s)",
-  jobKindNoop: "Noop",
-  concurrencyAllow: "Allow",
-  concurrencySkip: "Skip",
-  concurrencyReplace: "Replace",
-  previewNextRuns: "Next runs",
-  queueStatsTitle: "Queue Stats",
-  queueStatsPending: "Pending",
-  queueStatsInFlight: "In Flight",
-  queueStatsFailed: "Failed",
-  runsTitle: "Run History",
-  runsCount: (count: number) => `${count} runs`,
-  statusPending: "Pending",
-  statusRunning: "Running",
-  statusCompleted: "Completed",
-  statusFailed: "Failed",
-  statusRetrying: "Retrying",
-  statusTimeout: "Timeout",
-  statusCancelled: "Cancelled",
-  manualTriggerConfirmTitle: "Trigger Schedule",
-  manualTriggerConfirmMessage: (name: string) => `Are you sure you want to manually trigger "${name}"?`,
-  manualTriggerConfirmButton: "Trigger Now",
-  scheduleCreated: "Schedule created successfully",
-  scheduleUpdated: "Schedule updated successfully",
-  scheduleDeleted: "Schedule deleted successfully",
-  schedulePaused: "Schedule paused successfully",
-  scheduleResumed: "Schedule resumed successfully",
-  scheduleTriggered: "Schedule triggered successfully",
-  emptyMessage: "No cron schedules found",
-  errors: {
-    invalidCronExpression: (expr: string) => `Invalid cron expression: ${expr}`,
-    scheduleNameTaken: (name: string) => `Schedule name exists: ${name}`,
-    scheduleNotFound: (id: string) => `Schedule not found: ${id}`,
-    scheduleInactive: "Schedule is inactive",
-    scheduleNotActive: "Schedule is not active",
-    scheduleNotPaused: "Schedule is not paused",
-    concurrencyConflict: "Concurrency conflict",
-    queueBackendNotAvailable: "Queue backend not available",
-    permissionDenied: "Permission denied",
-    genericError: "An unexpected error occurred",
-    invalidTimezone: (tz: string) => `Invalid timezone: ${tz}`,
-    runNotFound: (id: string) => `Run not found: ${id}`,
-    manualTriggerConflict: "Manual trigger conflict",
-    dispatchSendFailed: (id: string) => `Dispatch send failed: ${id}`,
-    enqueueRetryFailed: (id: string) => `Enqueue retry failed: ${id}`,
-    queueBackendUnknown: (backend: string) => `Unknown queue backend: ${backend}`,
-    missingScheduleId: "Missing schedule ID",
-    invalidScheduleIdFormat: "Invalid schedule ID format",
-    tickerFailed: "Ticker failed",
-    classRemindersFailed: "Class reminders failed",
-    userContextRequired: "User context required",
-    unauthorized: "Unauthorized",
-    methodNotAllowed: "Method not allowed",
-    serverMisconfigured: "Server misconfigured",
-  },
-  colConcurrencyPolicy: "Concurrency Policy",
-  colTriggerSource: "Trigger Source",
-  colAttempt: "Attempt",
-  colDuration: "Duration",
-  colErrorMessage: "Error Message",
-  triggerSourceVercelTicker: "Vercel Ticker",
-  triggerSourceVercelExplicit: "Vercel Explicit",
-  triggerSourceExternal: "External",
-  triggerSourceWorkerRetry: "Worker Retry",
-  triggerSourceManual: "Manual",
-  pgBoss: "PG Boss",
-  bullmqPostgres: "BullMQ Postgres",
-  customSql: "Custom SQL",
-  queueBackendStub: "Queue Backend Stub",
-  bullmqRedis: "BullMQ Redis",
-  statusSkipped: "Skipped",
-  manualTriggerCancel: "Cancel",
-  loading: "Loading...",
-  triggerSkipped: "Trigger skipped",
-} as const;
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Dashboard.Cron, locale);
 
 const mockViewModel: Record<string, unknown> = {
-  labels: mockLabels,
-  locale: "en",
+  labels,
+  locale,
   rows: [],
   columns: [],
   loading: false,
@@ -208,7 +104,6 @@ import {
 } from "@/frontend/common/views/dashboard/cron/utils/cron-status-utils";
 import { CronDesktopView } from "@/frontend/desktop/views/dashboard/cron/cronView.desktop";
 import { CronMobileView } from "@/frontend/mobile/views/dashboard/cron/cronView.mobile";
-import type { CronLabels } from "@/shared/locale/types/dashboard/cron";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 function CronDesktopTestView() {
@@ -265,18 +160,18 @@ describe("CronDesktopView behavioral tests", () => {
       },
     ];
     mockViewModel.columns = [
-      { key: "name", label: "Name" },
-      { key: "cronExpression", label: "Cron Expression" },
-      { key: "status", label: "Status" },
+      { key: "name", label: labels.colName },
+      { key: "cronExpression", label: labels.fieldCronExpression },
+      { key: "status", label: labels.colStatus },
     ];
 
-    const { container } = renderWithWrapper(<CronDesktopTestView />, { locale: "en", viewport: "desktop" });
+    const { container } = renderWithWrapper(<CronDesktopTestView />, { locale, viewport: "desktop" });
 
     // With non-empty rows the empty-state Alert should NOT render.
     // The component may still be in Suspense (lazy loaded), so we verify
     // no alert with the empty-state description appears in the rendered output.
     const alerts = container.querySelectorAll('[role="alert"]');
-    const emptyStateAlert = Array.from(alerts).find(el => el.textContent === "Manage cron schedules");
+    const emptyStateAlert = Array.from(alerts).find(el => el.textContent === labels.pageSubtitle);
     expect(emptyStateAlert).toBeUndefined();
   });
 
@@ -284,12 +179,11 @@ describe("CronDesktopView behavioral tests", () => {
     mockViewModel.createOpen = true;
     mockViewModel.editingSchedule = null;
 
-    renderWithWrapper(<CronDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<CronDesktopTestView />, { locale, viewport: "desktop" });
 
-    // The create dialog title uses dialogCreateTitle = "Create Schedule"
+    // The create dialog title uses dialogCreateTitle
     // MUI Dialog renders via Portal; query document body for the title text
-    const dialogTitle = document.body.textContent?.includes("Create Schedule");
-    expect(dialogTitle).toBe(true);
+    expect(document.body.textContent?.includes(labels.dialogCreateTitle)).toBe(true);
   });
 
   test("trigger dialog renders when triggering is true", () => {
@@ -297,10 +191,10 @@ describe("CronDesktopView behavioral tests", () => {
     mockViewModel.triggeringSchedule = { id: "sched-1", name: "Daily Report" };
     mockViewModel.onTriggerConfirm = mock(() => {});
 
-    renderWithWrapper(<CronDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<CronDesktopTestView />, { locale, viewport: "desktop" });
 
     // The trigger dialog renders via Portal; check document body for content
-    expect(document.body.textContent?.includes("Concurrency conflict")).toBe(true);
+    expect(document.body.textContent?.includes(labels.errors.concurrencyConflict)).toBe(true);
     expect(document.body.textContent?.includes("Daily Report")).toBe(true);
   });
 
@@ -313,10 +207,10 @@ describe("CronDesktopView behavioral tests", () => {
     ];
     mockViewModel.runsLoading = false;
 
-    renderWithWrapper(<CronDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<CronDesktopTestView />, { locale, viewport: "desktop" });
 
-    // The runs dialog title uses dialogRunsTitle(name) = "Runs for Daily Report"
-    expect(document.body.textContent?.includes("Runs for Daily Report")).toBe(true);
+    // The runs dialog title uses dialogRunsTitle(name)
+    expect(document.body.textContent?.includes(labels.dialogRunsTitle("Daily Report"))).toBe(true);
   });
 
   test("runs dialog shows empty state when runs list is empty", () => {
@@ -325,12 +219,12 @@ describe("CronDesktopView behavioral tests", () => {
     mockViewModel.runs = [];
     mockViewModel.runsLoading = false;
 
-    renderWithWrapper(<CronDesktopTestView />, { locale: "en", viewport: "desktop" });
+    renderWithWrapper(<CronDesktopTestView />, { locale, viewport: "desktop" });
 
-    expect(document.body.textContent?.includes("Runs for Daily Report")).toBe(true);
+    expect(document.body.textContent?.includes(labels.dialogRunsTitle("Daily Report"))).toBe(true);
     // When runs list is empty, the dialog renders labels.emptyMessage in a Chip
     // The mock labels don't include emptyMessage, so just verify the dialog title is present
-    expect(document.body.textContent?.includes("Runs for Daily Report")).toBe(true);
+    expect(document.body.textContent?.includes(labels.dialogRunsTitle("Daily Report"))).toBe(true);
   });
 });
 
@@ -338,14 +232,14 @@ describe("CronDesktopView", () => {
   test("renders without crashing on desktop", async () => {
     await act(async () => {
       renderWithWrapper(<CronDesktopTestView />, {
-        locale: "en",
+        locale,
         viewport: "desktop",
       });
     });
 
     await waitFor(
       () => {
-        expect(screen.getByText("Cron Schedules")).toBeInTheDocument();
+        expect(screen.getByText(labels.pageTitle)).toBeInTheDocument();
       },
       { timeout: 5000 }
     );
@@ -356,14 +250,14 @@ describe("CronMobileView", () => {
   test("renders without crashing on mobile", async () => {
     await act(async () => {
       renderWithWrapper(<CronMobileTestView />, {
-        locale: "en",
+        locale,
         viewport: "mobile",
       });
     });
 
     await waitFor(
       () => {
-        expect(screen.getByText("Cron Schedules")).toBeInTheDocument();
+        expect(screen.getByText(labels.pageTitle)).toBeInTheDocument();
       },
       { timeout: 5000 }
     );
@@ -386,15 +280,15 @@ describe("getCronStatusColor", () => {
 
 describe("getCronStatusLabel", () => {
   test("returns statusActive label for ACTIVE", () => {
-    expect(getCronStatusLabel(CronScheduleStatus.Active, mockLabels)).toBe("Active");
+    expect(getCronStatusLabel(CronScheduleStatus.Active, labels)).toBe(labels.statusActive);
   });
 
   test("returns statusPaused label for PAUSED", () => {
-    expect(getCronStatusLabel(CronScheduleStatus.Paused, mockLabels)).toBe("Paused");
+    expect(getCronStatusLabel(CronScheduleStatus.Paused, labels)).toBe(labels.statusPaused);
   });
 
   test("returns statusDisabled label for DISABLED", () => {
-    expect(getCronStatusLabel(CronScheduleStatus.Disabled, mockLabels)).toBe("Disabled");
+    expect(getCronStatusLabel(CronScheduleStatus.Disabled, labels)).toBe(labels.statusDisabled);
   });
 });
 
@@ -430,30 +324,30 @@ describe("getCronRunStatusColor", () => {
 
 describe("getCronRunStatusLabel", () => {
   test("returns statusPending label for PENDING", () => {
-    expect(getCronRunStatusLabel(CronRunStatus.Pending, mockLabels)).toBe("Pending");
+    expect(getCronRunStatusLabel(CronRunStatus.Pending, labels)).toBe(labels.statusPending);
   });
 
   test("returns statusRunning label for RUNNING", () => {
-    expect(getCronRunStatusLabel(CronRunStatus.Running, mockLabels)).toBe("Running");
+    expect(getCronRunStatusLabel(CronRunStatus.Running, labels)).toBe(labels.statusRunning);
   });
 
   test("returns statusCompleted label for COMPLETED", () => {
-    expect(getCronRunStatusLabel(CronRunStatus.Completed, mockLabels)).toBe("Completed");
+    expect(getCronRunStatusLabel(CronRunStatus.Completed, labels)).toBe(labels.statusCompleted);
   });
 
   test("returns statusFailed label for FAILED", () => {
-    expect(getCronRunStatusLabel(CronRunStatus.Failed, mockLabels)).toBe("Failed");
+    expect(getCronRunStatusLabel(CronRunStatus.Failed, labels)).toBe(labels.statusFailed);
   });
 
   test("returns statusRetrying label for RETRYING", () => {
-    expect(getCronRunStatusLabel(CronRunStatus.Retrying, mockLabels)).toBe("Retrying");
+    expect(getCronRunStatusLabel(CronRunStatus.Retrying, labels)).toBe(labels.statusRetrying);
   });
 
   test("returns statusTimeout label for TIMEOUT", () => {
-    expect(getCronRunStatusLabel(CronRunStatus.Timeout, mockLabels)).toBe("Timeout");
+    expect(getCronRunStatusLabel(CronRunStatus.Timeout, labels)).toBe(labels.statusTimeout);
   });
 
   test("returns statusCancelled label for CANCELLED", () => {
-    expect(getCronRunStatusLabel(CronRunStatus.Cancelled, mockLabels)).toBe("Cancelled");
+    expect(getCronRunStatusLabel(CronRunStatus.Cancelled, labels)).toBe(labels.statusCancelled);
   });
 });

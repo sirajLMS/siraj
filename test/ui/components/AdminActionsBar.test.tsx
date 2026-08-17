@@ -8,6 +8,9 @@ expect.extend(matchers);
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { AdminActionsBar } from "@/frontend/common/views/dashboard/classes/details/admin/AdminActionsBar";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -15,27 +18,8 @@ afterEach(() => {
   useUserStore.setState({ permissions: [] }, false);
 });
 
-const mockLabels = {
-  administrativeActions: "Administrative Actions",
-  generateLog: "Generate Log",
-  reschedule: "Reschedule",
-  forceActivate: "Force Activate",
-  stopPause: "Stop/Pause",
-  deleteInstance: "Delete Instance",
-  overrideRateButton: "Override Rate",
-  disabledTooltips: {
-    forceActivate: {
-      activated: "You cannot force activate because this class is already activated.",
-      running: "You cannot force activate because the session is running.",
-      completed: "You cannot force activate because this class is completed.",
-    },
-    stop: {
-      notActivated: "You cannot stop because this class has not been activated yet.",
-      activated: "You cannot stop because the session has not started. Start the session first.",
-      completed: "You cannot stop because this class is completed.",
-    },
-  },
-};
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Dashboard.AdminView, locale).adminActions;
 
 const createMockHandlers = () => ({
   onForceActivate: mock(() => {}),
@@ -50,8 +34,9 @@ type ExecutionState = "NOT_ACTIVATED" | "ACTIVATED" | "RUNNING" | "COMPLETED";
 
 function setupAdminActionsBar(executionState: ExecutionState, permissions: AppPermission[] = []) {
   const handlers = createMockHandlers();
-  renderWithWrapper(<AdminActionsBar {...handlers} executionState={executionState} labels={mockLabels} />, {
+  renderWithWrapper(<AdminActionsBar {...handlers} executionState={executionState} labels={labels} />, {
     permissions,
+    locale,
   });
   return handlers;
 }
@@ -78,7 +63,7 @@ describe("AdminActionsBar", () => {
     const user = userEvent.setup();
     await user.hover(screen.getByTestId("tooltip-target-force-activate"));
 
-    expect(await screen.findByRole("tooltip")).toHaveTextContent(mockLabels.disabledTooltips.forceActivate.activated);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(labels.disabledTooltips.forceActivate.activated);
   });
 
   test("shows disabled tooltip for stop when ACTIVATED", async () => {
@@ -87,7 +72,7 @@ describe("AdminActionsBar", () => {
     const user = userEvent.setup();
     await user.hover(screen.getByTestId("tooltip-target-stop-pause"));
 
-    expect(await screen.findByRole("tooltip")).toHaveTextContent(mockLabels.disabledTooltips.stop.activated);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(labels.disabledTooltips.stop.activated);
   });
 
   test("renders stop button disabled when not RUNNING", () => {
@@ -110,20 +95,20 @@ describe("AdminActionsBar", () => {
 
     const deleteButton = screen.getByRole("button", { name: /delete-instance/i });
     expect(deleteButton).toBeVisible();
-    expect(deleteButton).toHaveAttribute("title", "Delete Instance");
+    expect(deleteButton).toHaveAttribute("title", labels.deleteInstance);
   });
 
   test("reschedule button visible with SessionReschedule permission", () => {
     setupAdminActionsBar("NOT_ACTIVATED", [AppPermission.SessionReschedule]);
 
-    const rescheduleButton = screen.getByRole("button", { name: /reschedule/i });
+    const rescheduleButton = screen.getByRole("button", { name: labels.reschedule });
     expect(rescheduleButton).toBeVisible();
   });
 
   test("reschedule button hidden without SessionReschedule permission", () => {
     setupAdminActionsBar("NOT_ACTIVATED");
 
-    const rescheduleButton = screen.queryByRole("button", { name: /reschedule/i });
+    const rescheduleButton = screen.queryByRole("button", { name: labels.reschedule });
     expect(rescheduleButton).toBeNull();
   });
 

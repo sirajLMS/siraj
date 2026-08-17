@@ -26,7 +26,12 @@ await mock.module("@/frontend/desktop/views/dashboard/billing/quota/components/Q
   QuotaFormSectionDesktop: () => createElement("div", { "data-testid": "form-section" }),
 }));
 
-const mockLabels = (await import("@/test/ui/components/quota/mockQuotaLabels")).createMockQuotaLabels();
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+
+const locale: AppLocale = "en";
+const mockLabels = readTranslation(Translation.Dashboard.BillingQuota, locale);
 
 const noop = () => {};
 const noopHandler = () => noop;
@@ -88,7 +93,7 @@ function renderForm(overrides: Record<string, unknown> = {}) {
   for (const [key, value] of Object.entries(overrides)) {
     mockViewModel[key] = value;
   }
-  return renderWithWrapper(createElement(QuotaFormTestView), { locale: "en", viewport: "desktop" });
+  return renderWithWrapper(createElement(QuotaFormTestView), { locale, viewport: "desktop" });
 }
 
 describe("QuotaFormContainer", () => {
@@ -136,7 +141,7 @@ describe("QuotaFormContainer", () => {
 
   test("renders without crashing when submitError is set", async () => {
     mockViewModel.isEditing = false;
-    mockViewModel.submitError = "Failed to create quota";
+    mockViewModel.submitError = mockLabels.errors.createFailed;
     const { container } = renderForm();
     await waitFor(() => expect(getAllByText(container, mockLabels.newQuota).length).toBeGreaterThan(0));
     mockViewModel.submitError = null;

@@ -1,31 +1,37 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
+import { getDefaultTranslations } from "@/shared/locale/server";
 import { DEMO_USERS, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
 
-// Bilingual regex patterns for quota UI labels.
-// The demo user defaults to Arabic locale, so all patterns match Arabic.
-const QUOTA_TITLE = /Student Quotas|حصص الطلاب/i;
-const QUOTA_LIST_TITLE = /Quotas List|قائمة الحصص/i;
-const NEW_QUOTA_BUTTON = /New Quota|حصة جديدة/i;
-const CREATE_QUOTA_BUTTON = /Create Quota|إنشاء حصة/i;
-const SAVE_BUTTON = /Save Changes|حفظ التغييرات/i;
-const QUOTA_INSIGHTS_TITLE = /Quota System Overview|نظرة عامة على نظام الحصص/i;
-const QUOTA_INSIGHTS_LINK = /Quota Insights|تحليلات الحصص/i;
-const DELETE_QUOTA_BUTTON = /Delete Quota|حذف الحصة/i;
-const STUDENT_LABEL = /Student|الطالب/i;
-const KIND_LABEL = /Quota Type|نوع الحصة/i;
-const VALID_FROM_LABEL = /Valid From|صالحة من/i;
-const NO_QUOTAS = /No quotas found|لم يتم العثور على حصص/i;
-const EMPTY_LIST_MSG = /No quotas found\. Create one|لم يتم العثور على حصص\. أنشئ/i;
-const STATUS_LABEL = /^Status$|^الحالة$/i;
-const DATE_RANGE_LABEL = /Date Range|النطاق الزمني/i;
-const KIND_FILTER_LABEL = /^Kind$|^النوع$/i;
-const STUDENT_FILTER_LABEL = /^Student$|^الطالب$/i;
-const DELETE_CONFIRM = /^Delete$|^حذف$/i;
-const DELETE_CANCEL = /^Cancel$|^إلغاء$/i;
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Translation-based patterns for quota UI labels.
+const t = getDefaultTranslations().dashboardTranslations.billingQuota;
+
+const QUOTA_TITLE = new RegExp(escapeRegExp(t.title));
+const QUOTA_LIST_TITLE = new RegExp(escapeRegExp(t.listTitle));
+const NEW_QUOTA_BUTTON = new RegExp(escapeRegExp(t.newQuota));
+const CREATE_QUOTA_BUTTON = new RegExp(escapeRegExp(t.actions.create));
+const SAVE_BUTTON = new RegExp(escapeRegExp(t.actions.save));
+const QUOTA_INSIGHTS_TITLE = new RegExp(escapeRegExp(t.insightsTitle));
+const QUOTA_INSIGHTS_LINK = new RegExp(escapeRegExp(t.insights));
+const DELETE_QUOTA_BUTTON = new RegExp(escapeRegExp(t.deleteConfirm.title));
+const STUDENT_LABEL = new RegExp(escapeRegExp(t.fields.student));
+const KIND_LABEL = new RegExp(escapeRegExp(t.fields.kind));
+const VALID_FROM_LABEL = new RegExp(escapeRegExp(t.fields.validFrom));
+const NO_QUOTAS = new RegExp(escapeRegExp(t.noQuotas.replace(/\.$/, "")));
+const EMPTY_LIST_MSG = new RegExp(escapeRegExp(t.emptyListMessage));
+const STATUS_LABEL = new RegExp(escapeRegExp(t.fields.status));
+const DATE_RANGE_LABEL = new RegExp(escapeRegExp(t.insightsDateRangeLabel));
+const KIND_FILTER_LABEL = new RegExp(escapeRegExp(t.insightsKindLabel));
+const STUDENT_FILTER_LABEL = new RegExp(escapeRegExp(t.insightsStudentLabel));
+const DELETE_CONFIRM = new RegExp(escapeRegExp(t.deleteConfirm.confirm));
+const DELETE_CANCEL = new RegExp(escapeRegExp(t.deleteConfirm.cancel));
 
 let context: BrowserContext | undefined;
 let page: Page | undefined;
@@ -292,7 +298,8 @@ describe.serial("Quota E2E", () => {
     ({ page, context } = await setupDesktopRouteTest("/quotas/new"));
 
     await page.getByText(NEW_QUOTA_BUTTON).first().waitFor({ state: "attached" });
-    const nameField = page.getByLabel(/Quota Name|اسم الحصة/i).first();
+    const quotaName = new RegExp(escapeRegExp(t.fields.name));
+    const nameField = page.getByLabel(quotaName).first();
     await nameField.waitFor({ state: "attached" });
     await nameField.fill("E2E Test Quota");
 
@@ -300,7 +307,8 @@ describe.serial("Quota E2E", () => {
     await studentField.click();
     await page.getByRole("option").first().click();
 
-    const totalClassesField = page.getByLabel(/Total Classes|إجمالي الحصص/i).first();
+    const totalClasses = new RegExp(escapeRegExp(t.fields.totalClasses));
+    const totalClassesField = page.getByLabel(totalClasses).first();
     await totalClassesField.fill("10");
 
     const submitButton = page.getByRole("button", { name: CREATE_QUOTA_BUTTON }).first();
@@ -330,7 +338,14 @@ describe.serial("Quota E2E", () => {
 
     // Filter buttons — DesktopFilterButton renders as <button> with bilingual text
     const anyFilter = page
-      .getByRole("button", { name: /Date Range|Kind|Status|Student|النطاق الزمني|النوع|الحالة|الطالب/i })
+      .getByRole("button", {
+        name: new RegExp(
+          [t.insightsDateRangeLabel, t.insightsKindLabel, t.fields.status, t.fields.student]
+            .map(escapeRegExp)
+            .join("|"),
+          "i"
+        ),
+      })
       .first();
     await anyFilter.waitFor({ state: "attached", timeout: 30_000 });
     expect(await anyFilter.count()).toBeGreaterThan(0);
@@ -351,7 +366,7 @@ describe.serial("Quota E2E", () => {
     const dataGrid = page.locator(".MuiDataGrid-root").first();
     await dataGrid.waitFor({ state: "attached" });
 
-    const deleteButton = page.locator('button[aria-label*="Delete"], button[aria-label*="حذف"]').first();
+    const deleteButton = page.locator(`button[aria-label*="${escapeRegExp(t.actions.delete)}"]`).first();
     await deleteButton.waitFor({ state: "attached" });
     await deleteButton.click();
 
@@ -370,7 +385,7 @@ describe.serial("Quota E2E", () => {
     ({ page, context } = await setupDesktopQuotaListTest());
     await waitForDesktopContent(page);
 
-    const deleteButton = page.locator('button[aria-label*="Delete"], button[aria-label*="حذف"]').first();
+    const deleteButton = page.locator(`button[aria-label*="${escapeRegExp(t.actions.delete)}"]`).first();
     const hasDelete = (await deleteButton.count()) > 0;
 
     if (hasDelete) {
@@ -395,7 +410,7 @@ describe.serial("Quota E2E", () => {
     }
   });
 
-  test("Bilingual: page renders labels in either English or Arabic", async () => {
+  test("Page renders labels in default locale", async () => {
     ({ page, context } = await setupDesktopQuotaListTest());
 
     expect(await page.getByText(QUOTA_TITLE).count()).toBeGreaterThan(0);
@@ -403,9 +418,7 @@ describe.serial("Quota E2E", () => {
     const bodyText = await page.locator("body").textContent();
     expect(bodyText).not.toBeNull();
     const pageContent = bodyText ?? "";
-    const hasEnglish = /Quota/i.test(pageContent);
-    const hasArabic = /حصص/i.test(pageContent);
-    expect(hasEnglish || hasArabic).toBe(true);
+    expect(QUOTA_TITLE.test(pageContent)).toBe(true);
   });
 
   test("Mobile insights: page loads with title and metric cards", async () => {

@@ -22,6 +22,9 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { useStudentPortalHistoryStore } from "@/frontend/common/stores/studentPortalHistoryStore";
 import { useStudentSessionsViewModel } from "@/frontend/common/views/dashboard/student/sessions/useStudentSessionsViewModel";
 import { StudentSessionsDesktopView } from "@/frontend/desktop/views/dashboard/student/sessions/studentSessions.desktop";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import {
   createProfileMockData,
   createTwoSessionHistoryMockData,
@@ -29,6 +32,9 @@ import {
   HISTORY_YEAR,
 } from "@/test/ui/components/fixtures/studentHistoryFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "en";
+const labels = readTranslation(Translation.Dashboard.StudentPortalSessions, locale);
 
 const studentId = "student-sessions-1";
 
@@ -103,13 +109,13 @@ describe("StudentSessionsContainer", () => {
       expect(screen.getByText(expectedMonthLabel)).toBeInTheDocument();
     });
 
-    expect(screen.getAllByLabelText("Previous month").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByLabelText("Next month").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByLabelText(labels.previousMonth).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByLabelText(labels.nextMonth).length).toBeGreaterThanOrEqual(1);
 
-    expect(screen.getByLabelText("Filter by Subject")).toBeInTheDocument();
-    expect(screen.getByLabelText("Filter by Status")).toBeInTheDocument();
+    expect(screen.getByLabelText(labels.filterBySubject)).toBeInTheDocument();
+    expect(screen.getByLabelText(labels.filterByStatus)).toBeInTheDocument();
 
-    expect(screen.getAllByText("Sessions").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(labels.pageTitle).length).toBeGreaterThanOrEqual(1);
 
     await waitFor(() => {
       expect(screen.getAllByText("Quran Recitation").length).toBeGreaterThanOrEqual(1);
@@ -125,7 +131,7 @@ describe("StudentSessionsContainer", () => {
     const tajweedLinks = screen.getAllByRole("link", { name: /Tajweed/ });
     expect(tajweedLinks.some(link => link.getAttribute("href") === "/classes/session-2")).toBe(true);
 
-    expect(screen.getAllByText("Ended").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(labels.statusLabels.ended).length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText("COMPLETED")).not.toBeInTheDocument();
   });
 });

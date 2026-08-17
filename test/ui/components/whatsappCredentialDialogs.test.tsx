@@ -5,6 +5,7 @@ import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react
 expect.extend(matchers);
 
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { WhatsappSettingsLabels } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import {
   validateAccessToken,
   validateDisplayName,
@@ -13,17 +14,34 @@ import {
   validateWabaId,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
 import { NumbersTabDesktop } from "@/frontend/desktop/views/dashboard/settings/whatsapp/tabs/NumbersTab.desktop";
-import {
-  firstCallArgString,
-  makeAccountRow,
-  testSettingsLabels,
-} from "@/test/ui/components/helpers/whatsappTestHelpers";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+import { firstCallArgString, makeAccountRow } from "@/test/ui/components/helpers/whatsappTestHelpers";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const noopPromise = (): Promise<void> => Promise.resolve();
 
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Whatsapp, locale);
+
+const settingsLabels: WhatsappSettingsLabels = {
+  page: labels,
+  notifications: {
+    syncSuccess: labels.syncSuccess,
+    syncNoChange: labels.syncNoChange,
+    syncError: labels.syncError,
+    deleteSuccess: labels.deleteSuccess,
+    deleteError: labels.deleteError,
+    saveSuccess: labels.saveSuccess,
+    saveError: labels.saveError,
+    optInSuccess: "Opt-in updated successfully.",
+    optInError: labels.optInError,
+  },
+};
+
 const baseProps = {
-  labels: testSettingsLabels,
+  labels: settingsLabels,
   accounts: [],
   loading: false,
   syncing: false,
@@ -67,13 +85,13 @@ function renderDesktopWithAccount(overrides: Record<string, unknown> = {}) {
       onSetTwoStepPin={onSetTwoStepPin}
       {...overrides}
     />,
-    { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+    { locale, permissions: [AppPermission.WhatsappConfigManage] }
   );
   return { onSetAccessToken, onSetTwoStepPin, account };
 }
 
 async function openActionMenu() {
-  const menuBtn = screen.getByLabelText(testSettingsLabels.page.editAccount);
+  const menuBtn = screen.getByLabelText(labels.editAccount);
   await act(async () => {
     fireEvent.click(menuBtn);
   });
@@ -91,12 +109,12 @@ async function fillAndSave(placeholder: string, value: string) {
     fireEvent.change(input, { target: { value } });
   });
   await act(async () => {
-    fireEvent.click(screen.getByRole("button", { name: testSettingsLabels.page.save }));
+    fireEvent.click(screen.getByRole("button", { name: labels.save }));
   });
 }
 
 function expectSaveDisabled() {
-  const saveBtn = screen.getByRole("button", { name: testSettingsLabels.page.save });
+  const saveBtn = screen.getByRole("button", { name: labels.save });
   expect(saveBtn.hasAttribute("disabled")).toBe(true);
 }
 
@@ -135,42 +153,32 @@ describe("CredentialEditDialog (via NumbersTabDesktop action menu)", () => {
 
   test("edit token dialog: click menu Edit Token opens dialog with title and disabled Save", async () => {
     renderDesktopWithAccount();
-    await openDialogAndExpect(testSettingsLabels.page.editToken);
+    await openDialogAndExpect(labels.editToken);
   });
 
   test("edit token dialog: typing a value enables Save and clicking Save calls onSetAccessToken", async () => {
     const { onSetAccessToken } = renderDesktopWithAccount();
-    await submitCredentialDialog(
-      testSettingsLabels.page.editToken,
-      testSettingsLabels.page.accessTokenPlaceholder,
-      "a".repeat(50),
-      onSetAccessToken
-    );
+    await submitCredentialDialog(labels.editToken, labels.accessTokenPlaceholder, "a".repeat(50), onSetAccessToken);
   });
 
   test("edit pin dialog: click menu Edit Pin opens dialog with title and disabled Save", async () => {
     renderDesktopWithAccount();
-    await openDialogAndExpect(testSettingsLabels.page.editPin);
+    await openDialogAndExpect(labels.editPin);
   });
 
   test("edit pin dialog: typing a value and clicking Save calls onSetTwoStepPin", async () => {
     const { onSetTwoStepPin } = renderDesktopWithAccount();
-    await submitCredentialDialog(
-      testSettingsLabels.page.editPin,
-      testSettingsLabels.page.twoStepPinPlaceholder,
-      "123456",
-      onSetTwoStepPin
-    );
+    await submitCredentialDialog(labels.editPin, labels.twoStepPinPlaceholder, "123456", onSetTwoStepPin);
   });
 
   test("credential dialog Cancel button closes dialog without calling set handler", async () => {
     const { onSetAccessToken } = renderDesktopWithAccount();
     await openActionMenu();
     await act(async () => {
-      fireEvent.click(screen.getByText(testSettingsLabels.page.editToken));
+      fireEvent.click(screen.getByText(labels.editToken));
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: testSettingsLabels.page.cancel }));
+      fireEvent.click(screen.getByRole("button", { name: labels.cancel }));
     });
     expect(onSetAccessToken).toHaveBeenCalledTimes(0);
   });

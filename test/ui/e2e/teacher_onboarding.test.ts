@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
+import { getDefaultTranslations } from "@/shared/locale/server";
 import { closeE2eSession, DEMO_USERS, loginAsDemoUserAtRoute } from "@/test/ui/e2e/helpers";
 import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
@@ -8,14 +9,20 @@ setupBrowserLifecycle();
 const isDevMode = process.env.TEST_SERVER_MODE === "dev";
 const headingTimeout = isDevMode ? 180_000 : 30_000;
 
-const PAGE_TITLE = /انضمام المعلم|teacher onboarding/i;
-const FULL_NAME_LABEL = /الاسم الكامل|full name/i;
-const EMAIL_LABEL = /البريد الإلكتروني|email/i;
-const PASSWORD_LABEL = /كلمة المرور|password/i;
-const PHONE_LABEL = /الهاتف|phone/i;
-const PHONE_MAX_LENGTH_ERROR =
-  /يجب ألا يزيد رقم الهاتف عن 50 حرف|phone number must be at most 50 characters|رقم الهاتف غير صالح|invalid phone number/i;
-const PHONE_INVALID_ERROR = /رقم الهاتف غير صالح|invalid phone number/i;
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const onboarding = getDefaultTranslations().dashboardTranslations.teacherOnboarding;
+const phoneInput = getDefaultTranslations().uiTranslations.phoneInput;
+
+const PAGE_TITLE = new RegExp(escapeRegExp(onboarding.pageTitle));
+const FULL_NAME_LABEL = new RegExp(escapeRegExp(onboarding.fields.fullName));
+const EMAIL_LABEL = new RegExp(escapeRegExp(onboarding.fields.email));
+const PASSWORD_LABEL = new RegExp(escapeRegExp(onboarding.fields.password));
+const PHONE_LABEL = new RegExp(escapeRegExp(onboarding.fields.phone));
+const PHONE_MAX_LENGTH_ERROR = new RegExp(escapeRegExp(onboarding.validation.phoneMaxLength));
+const PHONE_INVALID_ERROR = new RegExp(escapeRegExp(phoneInput.invalidPhone));
 
 let context: BrowserContext;
 let page: Page;

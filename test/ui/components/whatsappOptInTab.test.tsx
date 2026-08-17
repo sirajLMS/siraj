@@ -6,14 +6,31 @@ expect.extend(matchers);
 
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { OptInTabContent } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/OptInTabContent";
+import type { WhatsappSettingsLabels } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import { OptInTabMobile } from "@/frontend/mobile/views/dashboard/settings/whatsapp/tabs/OptInTab.mobile";
-import {
-  firstCallArgBoolean,
-  makeAdminUser,
-  makeAuditEntry,
-  testSettingsLabels,
-} from "@/test/ui/components/helpers/whatsappTestHelpers";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+import { firstCallArgBoolean, makeAdminUser, makeAuditEntry } from "@/test/ui/components/helpers/whatsappTestHelpers";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Whatsapp, locale);
+
+const settingsLabels: WhatsappSettingsLabels = {
+  page: labels,
+  notifications: {
+    syncSuccess: labels.syncSuccess,
+    syncNoChange: labels.syncNoChange,
+    syncError: labels.syncError,
+    deleteSuccess: labels.deleteSuccess,
+    deleteError: labels.deleteError,
+    saveSuccess: labels.saveSuccess,
+    saveError: labels.saveError,
+    optInSuccess: "Opt-in updated successfully.",
+    optInError: labels.optInError,
+  },
+};
 
 const noopPromise = (): Promise<void> => Promise.resolve();
 
@@ -21,7 +38,7 @@ function renderOptInTabContent(overrides: Record<string, unknown> = {}) {
   const onToggleOptIn = mock(noopPromise);
   renderWithWrapper(
     <OptInTabContent
-      labels={testSettingsLabels}
+      labels={settingsLabels}
       isOptedIn={false}
       optInLoading={false}
       onToggleOptIn={onToggleOptIn}
@@ -32,7 +49,7 @@ function renderOptInTabContent(overrides: Record<string, unknown> = {}) {
       adminUsers={[]}
       {...overrides}
     />,
-    { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+    { locale, permissions: [AppPermission.WhatsappConfigManage] }
   );
   return { onToggleOptIn };
 }
@@ -61,12 +78,12 @@ describe("OptInTabContent — toggle (non-admin)", () => {
 
   test("opt-in status label shows 'disabled' when not opted in", () => {
     renderOptInTabContent({ isOptedIn: false });
-    expect(screen.getByText(testSettingsLabels.page.optInDisabled)).toBeTruthy();
+    expect(screen.getByText(labels.optInDisabled)).toBeTruthy();
   });
 
   test("opt-in status label shows 'enabled' when opted in", () => {
     renderOptInTabContent({ isOptedIn: true });
-    expect(screen.getByText(testSettingsLabels.page.optInEnabled)).toBeTruthy();
+    expect(screen.getByText(labels.optInEnabled)).toBeTruthy();
   });
 
   test("optInLoading shows CircularProgress instead of switch", () => {
@@ -95,8 +112,8 @@ describe("OptInTabContent — history entries", () => {
 
   test("opt-in history title and subtitle are rendered", () => {
     renderOptInTabContent();
-    expect(screen.getByText(testSettingsLabels.page.optInHistoryTitle)).toBeTruthy();
-    expect(screen.getByText(testSettingsLabels.page.optInHistorySubtitle)).toBeTruthy();
+    expect(screen.getByText(labels.optInHistoryTitle)).toBeTruthy();
+    expect(screen.getByText(labels.optInHistorySubtitle)).toBeTruthy();
   });
 });
 
@@ -119,7 +136,7 @@ describe("OptInTabContent — admin consolidated view", () => {
   test("admin section shows permission denied when user lacks permission", () => {
     renderWithWrapper(
       <OptInTabContent
-        labels={testSettingsLabels}
+        labels={settingsLabels}
         isOptedIn={false}
         optInLoading={false}
         onToggleOptIn={mock(noopPromise)}
@@ -130,9 +147,9 @@ describe("OptInTabContent — admin consolidated view", () => {
         adminUsers={[]}
         adminSection={<div data-testid="custom-admin">Admin Panel</div>}
       />,
-      { locale: "en", permissions: [] }
+      { locale, permissions: [] }
     );
-    expect(screen.getByText(testSettingsLabels.page.permissionDeniedTitle)).toBeTruthy();
+    expect(screen.getByText(labels.permissionDeniedTitle)).toBeTruthy();
     expect(screen.queryByTestId("custom-admin")).toBeNull();
   });
 });
@@ -150,7 +167,7 @@ describe("OptInTabMobile — integration with shared content", () => {
     const adminUser = makeAdminUser("u-1", "Alice", true);
     renderWithWrapper(
       <OptInTabMobile
-        labels={testSettingsLabels}
+        labels={settingsLabels}
         isOptedIn={false}
         optInLoading={false}
         onToggleOptIn={mock(noopPromise)}
@@ -160,7 +177,7 @@ describe("OptInTabMobile — integration with shared content", () => {
         onExportCsv={mock(() => {})}
         adminUsers={[adminUser]}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
     // Wait for Suspense to resolve: both the toggle and the admin user row
     // render asynchronously when MobileCardList lazy-loads its internals.
@@ -175,7 +192,7 @@ describe("OptInTabMobile — integration with shared content", () => {
     const auditEntry = makeAuditEntry("a-1", "optIn");
     renderWithWrapper(
       <OptInTabMobile
-        labels={testSettingsLabels}
+        labels={settingsLabels}
         isOptedIn={false}
         optInLoading={false}
         onToggleOptIn={mock(noopPromise)}
@@ -185,7 +202,7 @@ describe("OptInTabMobile — integration with shared content", () => {
         onExportCsv={mock(() => {})}
         adminUsers={[]}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
     // The audit entry date should be rendered in the card
     const dateEl = await screen.findByText(auditEntry.date);

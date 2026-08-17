@@ -11,25 +11,32 @@ import type {
   WhatsappSettingsLabels,
   WhatsappTemplateRow,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
-import { whatsappEn } from "@/shared/locale/en/whatsapp";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
-/** Full English labels object for use in tests. */
-export const testLabels: WhatsappLabels = whatsappEn;
+/**
+ * Full labels object for use in tests, sourced from the translation system.
+ *
+ * Tests should prefer calling `readTranslation(Translation.Whatsapp, locale)` directly
+ * so the same `locale` flows into both assertions and `TestWrapper`. This export is
+ * kept for legacy helpers that need the raw en labels object without a locale.
+ */
+export const testLabels: WhatsappLabels = readTranslation(Translation.Whatsapp, "en");
 
 /** Grouped labels (page + notifications) used by NumbersTabSharedProps etc. */
 export const testSettingsLabels: WhatsappSettingsLabels = {
-  page: whatsappEn,
+  page: testLabels,
   notifications: {
-    syncSuccess: whatsappEn.syncSuccess,
-    syncNoChange: whatsappEn.syncNoChange,
-    syncError: whatsappEn.syncError,
-    deleteSuccess: whatsappEn.deleteSuccess,
-    deleteError: whatsappEn.deleteError,
-    saveSuccess: whatsappEn.saveSuccess,
-    saveError: whatsappEn.saveError,
+    syncSuccess: testLabels.syncSuccess,
+    syncNoChange: testLabels.syncNoChange,
+    syncError: testLabels.syncError,
+    deleteSuccess: testLabels.deleteSuccess,
+    deleteError: testLabels.deleteError,
+    saveSuccess: testLabels.saveSuccess,
+    saveError: testLabels.saveError,
     optInSuccess: "Opt-in updated successfully.",
-    optInError: whatsappEn.optInError,
+    optInError: testLabels.optInError,
   },
 };
 

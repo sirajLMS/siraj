@@ -38,6 +38,9 @@ import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ScheduleOverviewDataGrid } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import { createDailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/scheduleFixture";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -45,34 +48,37 @@ afterEach(() => {
   useUserStore.setState({ permissions: [] }, false);
 });
 
-const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
-  [ClassOutcome.Pending]: "Pending",
-  [ClassOutcome.Taken]: "Taken",
-  [ClassOutcome.Absent]: "Absent",
-  [ClassOutcome.Leave]: "Leave",
-  [ClassExecutionState.NotActivated]: "Not Activated",
-  [ClassExecutionState.Activated]: "Activated",
-  [ClassExecutionState.Running]: "Running",
-  [ClassExecutionState.Completed]: "Completed",
-  [ClassExecutionState.OnDemandConflictHeld]: "Conflict Held",
-  [ClassExecutionState.OnDemandNoCreditsAbsent]: "No Credits (Absent)",
-  [ClassExecutionState.OnDemandNoCreditsCancelled]: "No Credits (Cancelled)",
-  [ClassExecutionState.OnDemandPendingCredits]: "Pending Credit",
-};
+const locale: AppLocale = "ar";
+const adminLabels = readTranslation(Translation.Dashboard.Admin, locale);
 
 const headers = {
-  className: "Class",
-  student: "Student",
-  teacher: "Teacher",
-  time: "Time",
-  yourTime: "Your Time",
-  teacherTime: "Teacher Time",
-  studentTime: "Student Time",
-  duration: "Duration",
-  status: "Status",
-  actions: "Actions",
-  history: "History",
-  joinVideo: "Join Video",
+  className: adminLabels.className,
+  student: adminLabels.student,
+  teacher: adminLabels.teacher,
+  time: adminLabels.time,
+  yourTime: adminLabels.yourTime,
+  teacherTime: adminLabels.teacherTime,
+  studentTime: adminLabels.studentTime,
+  duration: adminLabels.duration,
+  status: adminLabels.status,
+  actions: adminLabels.actions,
+  history: adminLabels.history,
+  joinVideo: adminLabels.joinVideo,
+};
+
+const statusLabels: Record<ClassOutcome | ClassExecutionState, string> = {
+  [ClassOutcome.Pending]: adminLabels.statusLabels.PENDING,
+  [ClassOutcome.Taken]: adminLabels.statusLabels.TAKEN,
+  [ClassOutcome.Absent]: adminLabels.statusLabels.ABSENT,
+  [ClassOutcome.Leave]: adminLabels.statusLabels.LEAVE,
+  [ClassExecutionState.NotActivated]: adminLabels.statusLabels.NOT_ACTIVATED,
+  [ClassExecutionState.Activated]: adminLabels.statusLabels.ACTIVATED,
+  [ClassExecutionState.Running]: adminLabels.statusLabels.RUNNING,
+  [ClassExecutionState.Completed]: adminLabels.statusLabels.COMPLETED,
+  [ClassExecutionState.OnDemandConflictHeld]: adminLabels.statusLabels.ON_DEMAND_CONFLICT_HELD,
+  [ClassExecutionState.OnDemandNoCreditsAbsent]: adminLabels.statusLabels.ON_DEMAND_NO_CREDITS_ABSENT,
+  [ClassExecutionState.OnDemandNoCreditsCancelled]: adminLabels.statusLabels.ON_DEMAND_NO_CREDITS_CANCELLED,
+  [ClassExecutionState.OnDemandPendingCredits]: adminLabels.statusLabels.ON_DEMAND_PENDING_CREDITS,
 };
 
 const mockRows: readonly DailyScheduleRow[] = [
@@ -118,10 +124,10 @@ function renderScheduleDataGrid(permissions: AppPermission[] = []) {
       {...defaultPaginationProps}
       headers={headers}
       statusLabels={statusLabels}
-      detailsLabel="View Details"
-      emptyMessage="No classes scheduled"
+      detailsLabel={adminLabels.details}
+      emptyMessage={adminLabels.noClasses}
     />,
-    { permissions }
+    { permissions, locale }
   );
 }
 
@@ -129,16 +135,16 @@ describe("ScheduleOverviewDataGrid", () => {
   test("shows timezone columns with ScheduleViewTimezones permission", () => {
     renderScheduleDataGrid([AppPermission.ScheduleViewTimezones]);
 
-    expect(screen.getByText("Your Time")).toBeVisible();
-    expect(screen.getByText("Teacher Time")).toBeVisible();
-    expect(screen.getByText("Student Time")).toBeVisible();
+    expect(screen.getByText(adminLabels.yourTime)).toBeVisible();
+    expect(screen.getByText(adminLabels.teacherTime)).toBeVisible();
+    expect(screen.getByText(adminLabels.studentTime)).toBeVisible();
   });
 
   test("shows single time column without ScheduleViewTimezones permission", () => {
     renderScheduleDataGrid([]);
 
-    expect(screen.getByText("Your Time")).toBeVisible();
-    expect(screen.queryByText("Time")).toBeNull();
+    expect(screen.getByText(adminLabels.yourTime)).toBeVisible();
+    expect(screen.queryByText(adminLabels.time)).toBeNull();
   });
 
   test("renders student and teacher names as profile links", () => {
@@ -154,11 +160,11 @@ describe("ScheduleOverviewDataGrid", () => {
   test("renders history and details action links", () => {
     renderScheduleDataGrid([]);
 
-    expect(screen.getAllByRole("link", { name: "History" })[0]).toHaveAttribute(
+    expect(screen.getAllByRole("link", { name: adminLabels.history })[0]).toHaveAttribute(
       "href",
       "/students/student-1/profile?tab=history"
     );
-    expect(screen.getAllByRole("link", { name: "View Details" })[0]).toHaveAttribute("href", "/classes/row-1");
+    expect(screen.getAllByRole("link", { name: adminLabels.details })[0]).toHaveAttribute("href", "/classes/row-1");
   });
 
   test("renders empty message when no rows", () => {
@@ -171,12 +177,12 @@ describe("ScheduleOverviewDataGrid", () => {
         onPageChange={mock(() => {})}
         headers={headers}
         statusLabels={statusLabels}
-        detailsLabel="View Details"
-        emptyMessage="No classes scheduled"
+        detailsLabel={adminLabels.details}
+        emptyMessage={adminLabels.noClasses}
       />,
-      { permissions: [] }
+      { permissions: [], locale }
     );
 
-    expect(screen.getByText("No classes scheduled")).toBeVisible();
+    expect(screen.getByText(adminLabels.noClasses)).toBeVisible();
   });
 });

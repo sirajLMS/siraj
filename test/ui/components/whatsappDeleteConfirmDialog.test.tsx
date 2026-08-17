@@ -5,6 +5,7 @@ import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react
 expect.extend(matchers);
 
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { WhatsappSettingsLabels } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import {
   validateAccessToken,
   validateDisplayName,
@@ -13,17 +14,34 @@ import {
   validateWabaId,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappFormValidation";
 import { NumbersTabDesktop } from "@/frontend/desktop/views/dashboard/settings/whatsapp/tabs/NumbersTab.desktop";
-import {
-  firstCallArgString,
-  makeAccountRow,
-  testSettingsLabels,
-} from "@/test/ui/components/helpers/whatsappTestHelpers";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+import { firstCallArgString, makeAccountRow } from "@/test/ui/components/helpers/whatsappTestHelpers";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Whatsapp, locale);
+
+const settingsLabels: WhatsappSettingsLabels = {
+  page: labels,
+  notifications: {
+    syncSuccess: labels.syncSuccess,
+    syncNoChange: labels.syncNoChange,
+    syncError: labels.syncError,
+    deleteSuccess: labels.deleteSuccess,
+    deleteError: labels.deleteError,
+    saveSuccess: labels.saveSuccess,
+    saveError: labels.saveError,
+    optInSuccess: "Opt-in updated successfully.",
+    optInError: labels.optInError,
+  },
+};
 
 const noopPromise = (): Promise<void> => Promise.resolve();
 
 const baseProps = {
-  labels: testSettingsLabels,
+  labels: settingsLabels,
   accounts: [],
   loading: false,
   syncing: false,
@@ -71,9 +89,9 @@ describe("DeleteConfirmDialog (via NumbersTabDesktop)", () => {
         dialogState={{ type: "deleteConfirm", accountId: "acc-99", displayName: "My Test Account" }}
         onDeleteAccount={mockOnDelete}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
-    expect(screen.getByText(testSettingsLabels.page.deleteConfirmMessage("My Test Account"))).toBeTruthy();
+    expect(screen.getByText(labels.deleteConfirmMessage("My Test Account"))).toBeTruthy();
   });
 
   test("Cancel button does NOT call onDeleteAccount", async () => {
@@ -86,10 +104,10 @@ describe("DeleteConfirmDialog (via NumbersTabDesktop)", () => {
         onDeleteAccount={onDelete}
         onCloseDialog={onClose}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: testSettingsLabels.page.cancel }));
+      fireEvent.click(screen.getByRole("button", { name: labels.cancel }));
     });
     expect(onDelete).toHaveBeenCalledTimes(0);
   });
@@ -102,10 +120,10 @@ describe("DeleteConfirmDialog (via NumbersTabDesktop)", () => {
         dialogState={{ type: "deleteConfirm", accountId: "acc-42", displayName: "Account 42" }}
         onDeleteAccount={onDelete}
       />,
-      { locale: "en", permissions: [AppPermission.WhatsappConfigManage] }
+      { locale, permissions: [AppPermission.WhatsappConfigManage] }
     );
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: testSettingsLabels.page.deleteAccount }));
+      fireEvent.click(screen.getByRole("button", { name: labels.deleteAccount }));
     });
     await waitFor(() => {
       expect(onDelete).toHaveBeenCalledTimes(1);

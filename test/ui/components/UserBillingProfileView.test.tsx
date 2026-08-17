@@ -144,8 +144,11 @@ import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billin
 import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type { UserBillingProfileViewProps } from "@/frontend/common/views/dashboard/users/billing-profile/types/userBillingProfile.types";
 import { UserBillingProfileDesktopView as UserBillingProfileView } from "@/frontend/desktop/views/dashboard/users/billing-profile/userBillingProfile.desktop";
+import type { AppLocale } from "@/shared/locale/AppLocale";
 import type { BillingLabels } from "@/shared/locale/types/dashboard/billing/main";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "en";
 
 afterEach(() => {
   cleanup();
@@ -593,34 +596,34 @@ const MockIcon: SvgIconComponent = Object.assign((_props: unknown) => null, { mu
 describe("UserBillingProfileView", () => {
   test("renders nothing when unauthorized", () => {
     renderWithWrapper(<UserBillingProfileView {...baseProps} />, {
-      locale: "en",
+      locale,
       permissions: [],
     });
 
-    expect(screen.queryByText("User Billing Profile")).toBeNull();
+    expect(screen.queryByText(mockLabels.billingProfileTitle)).toBeNull();
   });
 
   test("renders loading state", () => {
     mockMediaQuery(false);
 
     renderWithWrapper(<UserBillingProfileView {...baseProps} loading={true} />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewHistory],
     });
 
-    expect(screen.getByText("User Billing Profile")).toBeVisible();
+    expect(screen.getByText(mockLabels.billingProfileTitle)).toBeVisible();
   });
 
   test("renders empty invoices on mobile view", () => {
     mockMediaQuery(true);
 
     renderWithWrapper(<UserBillingProfileView {...baseProps} invoices={[]} totalCount={0} />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewHistory],
     });
 
-    expect(screen.getByText("You don't have invoices.")).toBeVisible();
-    expect(screen.getByText("Any upcoming billing cycles will appear here automatically.")).toBeVisible();
+    expect(screen.getByText(mockLabels.parentTable.emptyTitle)).toBeVisible();
+    expect(screen.getByText(mockLabels.parentTable.emptySubtitle)).toBeVisible();
   });
 
   test("renders metrics from summary data", () => {
@@ -643,7 +646,7 @@ describe("UserBillingProfileView", () => {
     };
 
     renderWithWrapper(<UserBillingProfileView {...propsWithSummary} />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewHistory],
     });
 
@@ -688,7 +691,7 @@ describe("UserBillingProfileView", () => {
     };
 
     renderWithWrapper(<UserBillingProfileView {...propsWithInvoices} />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewHistory],
     });
 
@@ -702,11 +705,11 @@ describe("UserBillingProfileView", () => {
     const onSearchChange = mock(() => {});
 
     renderWithWrapper(<UserBillingProfileView {...baseProps} onSearchChange={onSearchChange} />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewHistory],
     });
 
-    const searchInput = screen.getByPlaceholderText("Search by ID...");
+    const searchInput = screen.getByPlaceholderText(mockLabels.search.parentPlaceholder);
     fireEvent.change(searchInput, { target: { value: "INV-001" } });
 
     expect(onSearchChange).toHaveBeenCalledWith("INV-001");
@@ -735,7 +738,7 @@ describe("UserBillingProfileView", () => {
     };
 
     renderWithWrapper(<UserBillingProfileView {...propsWithInvoices} />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.BillingViewHistory],
     });
   }
@@ -743,14 +746,14 @@ describe("UserBillingProfileView", () => {
   test("renders desktop view on large screens", () => {
     renderInvoiceView(false);
 
-    expect(screen.getByText("Invoice History")).toBeVisible();
+    expect(screen.getByText(mockLabels.sections.invoiceHistory)).toBeVisible();
     expect(screen.getByRole("grid")).toBeVisible();
   });
 
   test("renders mobile view on small screens", () => {
     renderInvoiceView(true);
 
-    expect(screen.getByText("Invoice History")).toBeVisible();
+    expect(screen.getByText(mockLabels.sections.invoiceHistory)).toBeVisible();
     expect(screen.getByText("INV-100")).toBeVisible();
     expect(screen.queryByRole("grid")).toBeNull();
   });

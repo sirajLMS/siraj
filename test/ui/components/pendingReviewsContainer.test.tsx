@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
-await mockNextNavigation("/dashboard", { includeRouter: false, routingIncludeReplaceAndPrefetch: false });
+await mockNextNavigation("/dashboard", { includeRouter: true, routingIncludeReplaceAndPrefetch: false, locale: "en" });
 
 // Bypass ResponsiveViewSwitch / next/dynamic preload races (same pattern as studentDashboard).
 await mock.module("@/frontend/common/views/dashboard/supervisor/lesson-reviews/PendingReviewsContainer", () => ({
@@ -29,7 +29,15 @@ import { useUserAutocompleteStore } from "@/frontend/common/stores/userAutocompl
 import { PendingReviewsContainer as PendingReviewsEntry } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/PendingReviewsContainer";
 import { usePendingReviewsViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-reviews/usePendingReviewsViewModel";
 import { PendingReviewsDesktopView } from "@/frontend/desktop/views/dashboard/supervisor/lesson-reviews/pendingReviews.desktop";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "en";
+const t = readTranslation(Translation.Dashboard.SupervisorPortalPendingReviews, locale);
+const dashboardT = readTranslation(Translation.Dashboard.Admin, locale);
+const expectedPaginationText = dashboardT.paginationRange(1, 2, 2);
 
 function PendingReviewsContainerImpl() {
   const viewModel = usePendingReviewsViewModel({});
@@ -232,13 +240,13 @@ afterEach(() => {
 describe("PendingReviewsContainer", () => {
   test("renders pending review rows with teacher/student names, filters, and totalCount", async () => {
     renderWithWrapper(<PendingReviewsEntry />, {
-      locale: "en",
+      locale,
       permissions: [],
       viewport: "desktop",
       mocks: createMocks(),
     });
 
-    await screen.findByText("Pending Lesson Reviews");
+    await screen.findByText(t.pageTitle);
 
     // Name columns (not raw UUIDs)
     expect(await screen.findByText("Student One")).toBeVisible();
@@ -249,18 +257,18 @@ describe("PendingReviewsContainer", () => {
     expect(screen.queryByText("teacher-1")).not.toBeInTheDocument();
 
     // Filter Autocomplete fields
-    expect(screen.getByLabelText("Filter by Teacher")).toBeVisible();
-    expect(screen.getByLabelText("Filter by Student")).toBeVisible();
+    expect(screen.getByLabelText(t.filterByTeacher)).toBeVisible();
+    expect(screen.getByLabelText(t.filterByStudent)).toBeVisible();
 
     // Server pagination driven by totalCount (2 rows)
     await waitFor(() => {
-      expect(screen.getByText(/1[–-]2 of 2/i)).toBeVisible();
+      expect(screen.getByText(expectedPaginationText)).toBeVisible();
     });
   });
 
   async function renderAndFindReviewButtons(buttonName: string): Promise<HTMLElement[]> {
     renderWithWrapper(<PendingReviewsEntry />, {
-      locale: "en",
+      locale,
       permissions: [],
       viewport: "desktop",
       mocks: createMocks(),
@@ -274,10 +282,10 @@ describe("PendingReviewsContainer", () => {
   }
 
   test("renders an approve button for each pending review row", async () => {
-    await renderAndFindReviewButtons("Approve");
+    await renderAndFindReviewButtons(t.approveButton);
   });
 
   test("renders a reject button for each pending review row", async () => {
-    await renderAndFindReviewButtons("Reject");
+    await renderAndFindReviewButtons(t.rejectButton);
   });
 });

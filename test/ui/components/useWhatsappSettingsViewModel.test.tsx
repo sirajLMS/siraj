@@ -3,9 +3,15 @@ import type { MockLink } from "@apollo/client/testing";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { type RefObject, useEffect } from "react";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 expect.extend(matchers);
+
+const locale: AppLocale = "en";
+const whatsappLabels = readTranslation(Translation.Whatsapp, locale);
 
 import {
   createWhatsappAccountMutationDocument,
@@ -234,7 +240,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
     const account2 = makeAccountRow("acc-2", "+9876543210");
 
     renderWithWrapper(<WhatsappSettingsConsumer />, {
-      locale: "en",
+      locale,
       mocks: [accountsMock([account1, account2]), optInMock(true), configuredMock(true)],
     });
 
@@ -282,7 +288,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
 
   test("Q3.2 — isOptedIn defaults to false when query returns null", async () => {
     renderWithWrapper(<WhatsappSettingsConsumer />, {
-      locale: "en",
+      locale,
       mocks: [
         {
           request: { query: whatsappAccountsQueryDocument, variables: {} },
@@ -306,7 +312,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
 
   test("Q3.3 — isOptedIn=true when query returns true", async () => {
     renderWithWrapper(<WhatsappSettingsConsumer />, {
-      locale: "en",
+      locale,
       mocks: [accountsMock([]), optInMock(true), configuredMock(true)],
     });
 
@@ -317,7 +323,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
 
   test("Q3.4 — accounts default to empty array on query error", async () => {
     renderWithWrapper(<WhatsappSettingsConsumer />, {
-      locale: "en",
+      locale,
       mocks: [
         {
           request: { query: whatsappAccountsQueryDocument, variables: {} },
@@ -338,7 +344,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
 
   test("Q3.5 — snackbar starts closed with default state", async () => {
     renderWithWrapper(<WhatsappSettingsConsumer />, {
-      locale: "en",
+      locale,
       mocks: [accountsMock([]), optInMock(false), configuredMock(true)],
     });
 
@@ -352,7 +358,7 @@ describe("useWhatsappSettingsViewModel() — Q3 ViewModel tests", () => {
 
   test("Q3.6 — sync and optIn loading flags start false", async () => {
     renderWithWrapper(<WhatsappSettingsConsumer />, {
-      locale: "en",
+      locale,
       mocks: [accountsMock([]), optInMock(false), configuredMock(true)],
     });
 
@@ -385,7 +391,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
   test("Q3.7 — create account mutation flow shows success snackbar", async () => {
     const newAccount = makeAccountRow("acc-new", "+[PHONE_REDACTED]");
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: [...baseMocks(), createAccountMock(newAccount), accountsMock([newAccount])],
     });
 
@@ -402,14 +408,14 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
     await waitFor(() => {
       expect(latestCapture()?.snackbar?.severity).toBe("success");
     });
-    expect(latestCapture()?.snackbar?.message).toBe("WhatsApp number saved successfully.");
+    expect(latestCapture()?.snackbar?.message).toBe(whatsappLabels.saveSuccess);
     // Dialog should close after successful create
     expect(vmRef.current?.dialogState.type).toBeNull();
   });
 
   test("Q3.8 — create with invalid input blocks mutation and sets mutationError", async () => {
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: baseMocks(),
     });
 
@@ -432,7 +438,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
   test("Q3.9 — update account name mutation flow shows success snackbar", async () => {
     const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: [
         ...baseMocks([account]),
         updateAccountMock("acc-1", "Updated Name"),
@@ -449,13 +455,13 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
     await waitFor(() => {
       expect(latestCapture()?.snackbar?.severity).toBe("success");
     });
-    expect(latestCapture()?.snackbar?.message).toBe("WhatsApp number saved successfully.");
+    expect(latestCapture()?.snackbar?.message).toBe(whatsappLabels.saveSuccess);
   });
 
   test("Q3.10 — edit name with invalid input blocks mutation", async () => {
     const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: baseMocks([account]),
     });
 
@@ -472,7 +478,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
   test("Q3.11 — delete dialog cancel does not trigger mutation", async () => {
     const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: baseMocks([account]),
     });
 
@@ -498,7 +504,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
 
   test("Q3.12 — sync sets syncingId to 'all' during mutation, clears after", async () => {
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: [...baseMocks(), syncMock({ added: 0, updated: 0 }), accountsMock([])],
     });
 
@@ -522,7 +528,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
 
   test("Q3.13 — validateAccessToken returns error for short token", async () => {
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: baseMocks(),
     });
 
@@ -539,7 +545,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
 
   test("Q3.14 — validateTwoStepPin returns error for wrong format", async () => {
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: baseMocks(),
     });
 
@@ -561,7 +567,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
     const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
 
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: [...baseMocks([account]), deleteAccountMock("acc-1"), accountsMock([])],
     });
 
@@ -585,7 +591,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
   test("Q3.16 — snackbar close clears message", async () => {
     const account = makeAccountRow("acc-1", "+[PHONE_REDACTED]");
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: [...baseMocks([account]), deleteAccountMock("acc-1"), accountsMock([])],
     });
 
@@ -610,7 +616,7 @@ describe("useWhatsappSettingsViewModel() — Task 18 mutation & handler tests", 
 
   test("Q3.17 — opt-in toggle sets optInLoading during mutation", async () => {
     renderWithWrapper(<InteractiveConsumer />, {
-      locale: "en",
+      locale,
       mocks: [...baseMocks([], false), setOptInMock(true), optInMock(true)],
     });
 

@@ -1,9 +1,34 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Locator, Page } from "playwright";
+import { getDefaultTranslations } from "@/shared/locale/server";
 import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
+
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+const tr = (s: string): RegExp => new RegExp(escapeRegExp(s), "i");
+
+const T = getDefaultTranslations().dashboardTranslations;
+const lr = T.lmsLessonReports;
+const nav = T.coreNav;
+const reviews = T.supervisorPortalPendingReviews;
+
+const DIALOG_TITLE = tr(lr.dialogTitle);
+const ATTENDANCE_EVALUATION = tr(lr.attendanceEvaluation);
+const DURATION_MINUTES = tr(lr.durationMinutes);
+const COMPLETION_PERCENTAGE = tr(lr.completionPercentage);
+const TEACHER_NOTES = tr(lr.teacherNotes);
+const SUBMIT_BUTTON = tr(lr.submit);
+const MARK_COMPLETED_BUTTON = tr(lr.markCompletedButton);
+const APPROVED_STATUS = tr(lr.approved);
+const PENDING_REVIEWS_TITLE = tr(reviews.pageTitle);
+const LESSON_REPORTS_TITLE = tr(lr.title);
+const APPROVE_BUTTON = tr(reviews.approveButton);
+const APPROVE_SUCCESS = tr(reviews.approveSuccess);
+const LOGOUT_BUTTON = tr(nav.logout);
 
 let context: BrowserContext;
 let page: Page;
@@ -36,7 +61,7 @@ async function waitForSuccessOrHidden(dialog: Locator, snackbar: Locator): Promi
 }
 
 async function logout(appContext: BrowserContext, pageNumber: Page): Promise<void> {
-  const logoutButton = pageNumber.getByRole("button", { name: /logout|sign\s+out|تسجيل\s+الخروج/i }).first();
+  const logoutButton = pageNumber.getByRole("button", { name: LOGOUT_BUTTON }).first();
   if (await isVisible(logoutButton)) {
     await logoutButton.click();
     await pageNumber.waitForURL("**/login**");
@@ -54,18 +79,18 @@ async function loginDemo(role: "teacher" | "supervisor"): Promise<void> {
 }
 
 async function fillLessonReportDialog(pageNumber: Page): Promise<void> {
-  const dialog = pageNumber.getByRole("dialog", { name: /lesson\s+report|تقرير\s+الدرس/i });
+  const dialog = pageNumber.getByRole("dialog", { name: DIALOG_TITLE });
   await dialog.waitFor({ state: "visible" });
 
-  const attendanceSelect = dialog.getByLabel(/attendance\s+evaluation|تقييم\s+الحضور/i);
+  const attendanceSelect = dialog.getByLabel(ATTENDANCE_EVALUATION);
   await attendanceSelect.waitFor({ state: "visible" });
-  await attendanceSelect.selectOption({ label: "Present" });
+  await attendanceSelect.selectOption({ label: lr.present });
 
-  const durationInput = dialog.getByLabel(/duration\s*\(minutes\)|مدة\s*\(دقائق\)|duration\s+minutes/i);
+  const durationInput = dialog.getByLabel(DURATION_MINUTES);
   await durationInput.waitFor({ state: "visible" });
   await durationInput.fill("60");
 
-  const completionSlider = dialog.getByRole("slider", { name: /completion\s+percentage|نسبة\s+الإكمال/i });
+  const completionSlider = dialog.getByRole("slider", { name: COMPLETION_PERCENTAGE });
   await completionSlider.waitFor({ state: "visible" });
   await completionSlider.evaluate((el: HTMLInputElement) => {
     el.value = "100";
@@ -73,24 +98,19 @@ async function fillLessonReportDialog(pageNumber: Page): Promise<void> {
     el.dispatchEvent(new Event("change", { bubbles: true }));
   });
 
-  const notesInput = dialog.getByLabel(/teacher\s+notes|ملاحظات\s+المعلم/i);
+  const notesInput = dialog.getByLabel(TEACHER_NOTES);
   await notesInput.waitFor({ state: "visible" });
   await notesInput.fill("Test lesson report");
 
-  const submitButton = dialog.getByRole("button", { name: /submit|إرسال/i }).first();
+  const submitButton = dialog.getByRole("button", { name: SUBMIT_BUTTON }).first();
   await submitButton.waitFor({ state: "visible" });
   await submitButton.click();
 
   await dialog.waitFor({ state: "hidden" });
-
-  const successSnackbar = pageNumber.getByRole("status", { name: /success|successfully|تم\s+بنجاح/i });
-  await waitForSuccessOrHidden(dialog, successSnackbar);
 }
 
 async function submitTeacherLessonReportIfAvailable(pageNumber: Page): Promise<void> {
-  const markCompletedButton = pageNumber
-    .getByRole("button", { name: /mark\s+completed|mark\s+complete|إكمال/i })
-    .first();
+  const markCompletedButton = pageNumber.getByRole("button", { name: MARK_COMPLETED_BUTTON }).first();
   const hasMarkCompletedButton = await isVisible(markCompletedButton);
 
   if (!hasMarkCompletedButton) {
@@ -105,14 +125,11 @@ async function submitTeacherLessonReportIfAvailable(pageNumber: Page): Promise<v
 
 async function approvePendingReportIfAvailable(pageNumber: Page): Promise<void> {
   const reviewsTitle = pageNumber.getByRole("heading", {
-    name: /pending\s+reviews|مراجعات\s+معلقة|lesson\s+reports|تقارير\s+الدرس/i,
+    name: new RegExp(`${PENDING_REVIEWS_TITLE.source}|${LESSON_REPORTS_TITLE.source}`, "i"),
   });
   await reviewsTitle.first().waitFor({ state: "visible" });
 
-  const reportRow = pageNumber
-    .locator('[role="row"]')
-    .filter({ hasText: /Test lesson report|تقرير\s+درس\s+اختباري/i })
-    .first();
+  const reportRow = pageNumber.locator('[role="row"]').filter({ hasText: "Test lesson report" }).first();
   const hasReport = await isVisible(reportRow);
 
   if (!hasReport) {
@@ -120,20 +137,18 @@ async function approvePendingReportIfAvailable(pageNumber: Page): Promise<void> 
     return;
   }
 
-  const approveButton = reportRow.getByRole("button", { name: /approve|موافقة/i }).first();
+  const approveButton = reportRow.getByRole("button", { name: APPROVE_BUTTON }).first();
   await approveButton.waitFor({ state: "visible" });
   await approveButton.click();
 
-  const successSnackbar = pageNumber.getByRole("status", { name: /approved|تم\s+الموافقة|success|نجاح/i });
+  const successSnackbar = pageNumber.getByRole("status", { name: APPROVE_SUCCESS });
+  await waitForSuccessOrHidden(reviewsTitle.first(), successSnackbar);
+
+  const approvedStatus = reportRow.getByText(APPROVED_STATUS);
   try {
-    await successSnackbar.waitFor({ state: "visible" });
+    await approvedStatus.waitFor({ state: "visible" });
   } catch {
-    const approvedStatus = reportRow.getByText(/approved|موافق\s+عليه/i);
-    try {
-      await approvedStatus.waitFor({ state: "visible" });
-    } catch {
-      expect(await approveButton.isVisible()).toBe(false);
-    }
+    expect(await approveButton.isVisible()).toBe(false);
   }
 }
 
@@ -179,7 +194,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
     expect(await dashboardTitle.first().isVisible()).toBe(true);
 
     // Check for Mark Completed button (either enabled or disabled)
-    const markCompletedButtons = page.getByRole("button", { name: /mark\s+completed|mark\s+complete|إكمال/i });
+    const markCompletedButtons = page.getByRole("button", { name: MARK_COMPLETED_BUTTON });
     const buttonCount = await markCompletedButtons.count();
     expect(buttonCount).toBeGreaterThanOrEqual(0); // At least no error
 
@@ -205,7 +220,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
 
     // Verify page loads with pending reviews container
     const pageTitle = page.getByRole("heading", {
-      name: /pending\s+reviews|مراجعات\s+معلقة|lesson\s+reports|تقارير\s+الدرس/i,
+      name: new RegExp(`${PENDING_REVIEWS_TITLE.source}|${LESSON_REPORTS_TITLE.source}`, "i"),
     });
     await pageTitle.first().waitFor({ state: "visible" });
   });

@@ -1,5 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
+import { getDefaultTranslations } from "@/shared/locale/server";
 import {
   authenticateDemoUser,
   closeE2eSession,
@@ -11,14 +12,25 @@ import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
 
-const SCHEDULE_SEARCH_NAV = /schedule search|بحث الجدول/i;
-const SCHEDULE_SEARCH_TITLE = /search schedule availability|البحث عن توفر الجدول/i;
-const DATE_RANGE_LABEL = /date range|نطاق التاريخ/i;
-const TIME_RANGE_LABEL = /time range|نطاق الوقت/i;
-const FILTERS_BUTTON = /filters|الفلاتر/i;
-const SEARCH_BUTTON = /^search$|^بحث$/i;
-const SEARCH_OUTCOME =
-  /teachers with \d+ available slots|معلمين مع \d+ فترات متاحة|no available time slots found|لم يتم العثور على فترات زمنية متاحة/i;
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+const tr = (s: string): RegExp => new RegExp(escapeRegExp(s), "i");
+const trExact = (s: string): RegExp => new RegExp(`^${escapeRegExp(s)}$`, "i");
+
+const T = getDefaultTranslations().dashboardTranslations;
+const sched = T.coreSearchSchedule;
+const nav = T.coreNav;
+
+const SCHEDULE_SEARCH_NAV = tr(nav.scheduleSearch);
+const SCHEDULE_SEARCH_TITLE = tr(sched.pageTitle);
+const DATE_RANGE_LABEL = tr(sched.dateRange);
+const TIME_RANGE_LABEL = tr(sched.timeRange);
+const FILTERS_BUTTON = tr(sched.filters);
+const SEARCH_BUTTON = trExact(sched.searchBtn);
+
+const resultsCountPattern = escapeRegExp(sched.resultsCount(999, 999)).replace(/999/g, "\\d+");
+const SEARCH_OUTCOME = new RegExp(`${resultsCountPattern}|${escapeRegExp(sched.noResults)}`, "i");
 
 let adminContext: BrowserContext | undefined;
 let adminPage: Page | undefined;
@@ -130,10 +142,7 @@ describe.serial("Availability Search E2E", () => {
     isolatedPage = await isolatedContext.newPage();
     await authenticateDemoUser(isolatedContext, DEMO_USERS.teacher.groupSlug);
     await gotoAppRoute(isolatedPage, "/dashboard");
-    await isolatedPage
-      .getByText(/today's classes|حصص اليوم/i)
-      .first()
-      .waitFor({ state: "visible", timeout: 45_000 });
+    await isolatedPage.getByText(tr(nav.todayClasses)).first().waitFor({ state: "visible", timeout: 45_000 });
 
     expect(await isolatedPage.getByRole("link", { name: SCHEDULE_SEARCH_NAV }).count()).toBe(0);
   });

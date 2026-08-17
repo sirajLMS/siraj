@@ -8,7 +8,14 @@ import {
   TokenExpiryWarning,
   type TokenExpiryWarningProps,
 } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/TokenExpiryWarning";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const meetingConfigLabels = readTranslation(Translation.Ui.MeetingConfig, locale);
+const labels: TokenExpiryWarningProps["labels"] = meetingConfigLabels.enhancements;
 
 afterEach(() => {
   cleanup();
@@ -23,18 +30,11 @@ afterEach(() => {
   Date.now = REAL_NOW;
 });
 
-const labels: TokenExpiryWarningProps["labels"] = {
-  expiresInDays: (days: number) => `تنتهي خلال ${days} يوم`,
-  expiresInHours: (hours: number) => `تنتهي خلال ${hours} ساعة`,
-  expired: "منتهي",
-  reconnect: "إعادة الربط",
-};
-
 describe("TokenExpiryWarning", () => {
   test("returns null when expiresAt is null", () => {
     const { container } = render(
       <TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={null} onReconnect={mock(() => {})} />,
-      { wrapper: TestWrapper }
+      { wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper> }
     );
     expect(container.firstChild).toBeNull();
   });
@@ -43,7 +43,7 @@ describe("TokenExpiryWarning", () => {
     const future = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
     const { container } = render(
       <TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={mock(() => {})} />,
-      { wrapper: TestWrapper }
+      { wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper> }
     );
     expect(container.firstChild).toBeNull();
   });
@@ -51,35 +51,35 @@ describe("TokenExpiryWarning", () => {
   test("warning level shows days countdown", () => {
     const future = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000); // 10 days
     render(<TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={mock(() => {})} />, {
-      wrapper: TestWrapper,
+      wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
     });
-    expect(screen.getByText(/Zoom · تنتهي خلال 10 يوم/)).toBeInTheDocument();
-    expect(screen.getByText("إعادة الربط")).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`Zoom · ${labels.expiresInDays(10)}`))).toBeInTheDocument();
+    expect(screen.getByText(labels.reconnect)).toBeInTheDocument();
   });
 
   test("critical level shows hours countdown", () => {
     const future = new Date(Date.now() + 5 * 60 * 60 * 1000); // 5 hours
     render(<TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={mock(() => {})} />, {
-      wrapper: TestWrapper,
+      wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
     });
-    expect(screen.getByText(/Zoom · تنتهي خلال 5 ساعة/)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`Zoom · ${labels.expiresInHours(5)}`))).toBeInTheDocument();
   });
 
   test("expired level shows expired label", () => {
     const past = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
     render(<TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={past} onReconnect={mock(() => {})} />, {
-      wrapper: TestWrapper,
+      wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
     });
-    expect(screen.getByText(/Zoom · منتهي/)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`Zoom · ${labels.expired}`))).toBeInTheDocument();
   });
 
   test("calls onReconnect when reconnect button clicked", () => {
     const future = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
     const onReconnect = mock(() => {});
     render(<TokenExpiryWarning labels={labels} providerName="Zoom" expiresAt={future} onReconnect={onReconnect} />, {
-      wrapper: TestWrapper,
+      wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
     });
-    fireEvent.click(screen.getByText("إعادة الربط"));
+    fireEvent.click(screen.getByText(labels.reconnect));
     expect(onReconnect).toHaveBeenCalledTimes(1);
   });
 
@@ -93,8 +93,8 @@ describe("TokenExpiryWarning", () => {
         onReconnect={mock(() => {})}
         reconnecting
       />,
-      { wrapper: TestWrapper }
+      { wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper> }
     );
-    expect(screen.getByText("إعادة الربط").closest("button")).toBeDisabled();
+    expect(screen.getByText(labels.reconnect).closest("button")).toBeDisabled();
   });
 });

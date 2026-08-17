@@ -4,9 +4,15 @@ import { cleanup } from "@testing-library/react";
 import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 expect.extend(matchers);
+
+const locale: AppLocale = "en";
+const profileBaseLabels = readTranslation(Translation.Profile.Base, locale);
 
 afterEach(() => {
   cleanup();
@@ -26,7 +32,7 @@ describe("UserDetailsProfileSection", () => {
         displayCurrency={null}
       />,
       {
-        locale: "en",
+        locale,
         permissions: [AppPermission.ProfileCoreContactViewOwn, AppPermission.ProfileCoreIdentityViewOwn],
       }
     );
@@ -34,7 +40,7 @@ describe("UserDetailsProfileSection", () => {
     expect(await findByText("Phone")).toBeInTheDocument();
     expect(await findByText("Timezone")).toBeInTheDocument();
     expect(await findByText("Currency")).toBeInTheDocument();
-    const notSetLabels = await findAllByText("Not set");
+    const notSetLabels = await findAllByText(profileBaseLabels.notSet);
     expect(notSetLabels.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -50,7 +56,7 @@ describe("UserDetailsProfileSection", () => {
         timezone="Asia/Riyadh"
         displayCurrency={CurrencyCode.Usd}
       />,
-      { permissions: [] }
+      { locale, permissions: [] }
     );
 
     expect(container).toBeEmptyDOMElement();

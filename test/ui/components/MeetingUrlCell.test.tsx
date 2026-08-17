@@ -8,46 +8,54 @@ import {
   MeetingUrlCell,
   type MeetingUrlCellProps,
 } from "@/frontend/common/components/ui/display/meetingConfig/MeetingUrlCell";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const t = readTranslation(Translation.Dashboard.MeetingUrlStatus, locale);
 
 afterEach(() => {
   cleanup();
 });
 
 function renderCell(props: MeetingUrlCellProps) {
-  return render(<MeetingUrlCell {...props} />, { wrapper: TestWrapper });
+  return render(<MeetingUrlCell {...props} />, {
+    wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
+  });
 }
 
 describe("MeetingUrlCell", () => {
   test("renders generated URL with join and copy buttons (non-compact)", () => {
     renderCell({ meetingUrl: "https://meet.example.com/abc" });
-    expect(screen.getByText("الرابط جاهز")).toBeInTheDocument();
-    expect(screen.getByLabelText("الانضمام إلى الاجتماع")).toBeInTheDocument();
-    expect(screen.getByLabelText("نسخ الرابط")).toBeInTheDocument();
+    expect(screen.getByText(t.urlReady)).toBeInTheDocument();
+    expect(screen.getByLabelText(t.joinMeeting)).toBeInTheDocument();
+    expect(screen.getByLabelText(t.copyUrl)).toBeInTheDocument();
   });
 
   test("renders generated URL compact layout", () => {
     renderCell({ meetingUrl: "https://meet.example.com/abc", compact: true });
-    expect(screen.getByText("الرابط جاهز")).toBeInTheDocument();
-    expect(screen.getByLabelText("الانضمام إلى الاجتماع")).toBeInTheDocument();
+    expect(screen.getByText(t.urlReady)).toBeInTheDocument();
+    expect(screen.getByLabelText(t.joinMeeting)).toBeInTheDocument();
   });
 
   test("renders null URL with not-generated message and setup link", () => {
     renderCell({ meetingUrl: null, setupHref: "/settings" });
-    expect(screen.getByText("لم يتم توليد رابط اجتماع بعد.")).toBeInTheDocument();
-    expect(screen.getByText("إعداد إعدادات الاجتماع")).toBeInTheDocument();
+    expect(screen.getByText(t.urlNotGenerated)).toBeInTheDocument();
+    expect(screen.getByText(t.setupMeetingConfig)).toBeInTheDocument();
   });
 
   test("renders null URL without setup link when setupHref not provided", () => {
     renderCell({ meetingUrl: null });
-    expect(screen.getByText("لم يتم توليد رابط اجتماع بعد.")).toBeInTheDocument();
-    expect(screen.queryByText("إعداد إعدادات الاجتماع")).not.toBeInTheDocument();
+    expect(screen.getByText(t.urlNotGenerated)).toBeInTheDocument();
+    expect(screen.queryByText(t.setupMeetingConfig)).not.toBeInTheDocument();
   });
 
   test("renders pending status with badge", () => {
     renderCell({ meetingUrl: "https://meet.example.com/abc", meetingUrlStatus: "pending" });
-    expect(screen.getByText("الرابط قيد التوليد")).toBeInTheDocument();
-    expect(screen.queryByLabelText("الانضمام إلى الاجتماع")).not.toBeInTheDocument();
+    expect(screen.getByText(t.urlPending)).toBeInTheDocument();
+    expect(screen.queryByLabelText(t.joinMeeting)).not.toBeInTheDocument();
   });
 
   test("renders failed status with retry button", () => {
@@ -58,33 +66,33 @@ describe("MeetingUrlCell", () => {
       meetingUrlError: "Network error",
       onRetry,
     });
-    expect(screen.getByText("فشل توليد الرابط")).toBeInTheDocument();
-    const retryButton = screen.getByText("إعادة توليد الرابط");
+    expect(screen.getByText(t.urlFailed)).toBeInTheDocument();
+    const retryButton = screen.getByText(t.retryUrlGeneration);
     fireEvent.click(retryButton);
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
   test("renders failed status without retry button when onRetry not provided", () => {
     renderCell({ meetingUrl: "https://meet.example.com/abc", meetingUrlStatus: "failed" });
-    expect(screen.getByText("فشل توليد الرابط")).toBeInTheDocument();
-    expect(screen.queryByText("إعادة توليد الرابط")).not.toBeInTheDocument();
+    expect(screen.getByText(t.urlFailed)).toBeInTheDocument();
+    expect(screen.queryByText(t.retryUrlGeneration)).not.toBeInTheDocument();
   });
 
   test("renders expired status with badge", () => {
     renderCell({ meetingUrl: "https://meet.example.com/abc", meetingUrlStatus: "expired" });
-    expect(screen.getByText("الرابط منتهي الصلاحية")).toBeInTheDocument();
-    expect(screen.queryByLabelText("الانضمام إلى الاجتماع")).not.toBeInTheDocument();
+    expect(screen.getByText(t.urlExpired)).toBeInTheDocument();
+    expect(screen.queryByLabelText(t.joinMeeting)).not.toBeInTheDocument();
   });
 
   test("hides copy button when canCopyUrl = false", () => {
     renderCell({ meetingUrl: "https://meet.example.com/abc", canCopyUrl: false });
-    expect(screen.queryByLabelText("نسخ الرابط")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(t.copyUrl)).not.toBeInTheDocument();
   });
 
   test("calls onJoin when join button clicked", () => {
     const onJoin = mock(() => {});
     renderCell({ meetingUrl: "https://meet.example.com/abc", onJoin });
-    fireEvent.click(screen.getByLabelText("الانضمام إلى الاجتماع"));
+    fireEvent.click(screen.getByLabelText(t.joinMeeting));
     expect(onJoin).toHaveBeenCalledTimes(1);
   });
 
@@ -99,12 +107,12 @@ describe("MeetingUrlCell", () => {
       meetingUrlStatus: "failed",
       meetingUrlError: "Timeout error",
     });
-    const badge = screen.getByLabelText("فشل توليد الرابط");
+    const badge = screen.getByLabelText(t.urlFailed);
     expect(badge).toHaveAttribute("title", "Timeout error");
   });
 
   test("renders with badgeSize medium", () => {
     renderCell({ meetingUrl: "https://meet.example.com/abc", badgeSize: "medium" });
-    expect(screen.getByText("الرابط جاهز")).toBeInTheDocument();
+    expect(screen.getByText(t.urlReady)).toBeInTheDocument();
   });
 });

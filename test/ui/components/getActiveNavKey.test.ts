@@ -31,6 +31,7 @@ const ADMIN_PERMISSIONS: AppPermission[] = [
   AppPermission.DashboardViewMetrics,
   AppPermission.StaffViewDirectory,
   AppPermission.StudentsList,
+  AppPermission.TeachersList,
 ];
 
 describe("getActiveNavKey", () => {

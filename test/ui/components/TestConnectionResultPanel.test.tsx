@@ -8,9 +8,11 @@ import {
   MeetingConnectionTestMode,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { createMeetingIntegrationLabelsMock } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks";
 import { TestConnectionResultPanel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TestConnectionResultPanel";
 import type { TestMeetingConnectionResult } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -18,35 +20,11 @@ afterEach(() => {
   cleanup();
 });
 
-const baseLabels = createMeetingIntegrationLabelsMock();
-const labels: SettingsMeetingIntegrationsLabels = {
-  ...baseLabels,
-  validateConfig: "التحقق من الإعداد",
-  generateAndDelete: "إنشاء وحذف",
-  testConnectionTesting: "جارٍ اختبار الاتصال…",
-  testConnectionFailure: "فشل اختبار الاتصال.",
-  retryTest: "إعادة الاختبار",
-  testSuccess: "نجاح",
-  notDeleted: "لم يُحذف",
-  deleted: "تم حذف الاجتماع",
-  joinUrl: "رابط الانضمام",
-  latency: "زمن الاستجابة",
-  errorCode: "رمز الخطأ",
-  errorMessage: "رسالة الخطأ",
-  testPanel: {
-    ...baseLabels.testPanel,
-    rawResponse: "الاستجابة الخام",
-    copyUrl: "نسخ الرابط",
-    copied: "تم النسخ!",
-    marketplaceHint: "تكوين في سوق المزود",
-    endpointReached: "نقطة النهاية المتاحة",
-    authStatus: "المصادقة",
-    authSuccess: "تمت المصادقة",
-    authFailure: "غير مصدّق",
-    successMessage: "نجح اختبار الاتصال.",
-    idleHint: "قم بتشغيل اختبار للتحقق من اتصال المزود.",
-  },
-};
+const locale: AppLocale = "ar";
+const labels: SettingsMeetingIntegrationsLabels = readTranslation(
+  Translation.Dashboard.SettingsMeetingIntegrations,
+  locale
+);
 
 function renderPanel(props: {
   result?: TestMeetingConnectionResult | null;
@@ -62,23 +40,23 @@ function renderPanel(props: {
       result={props.result ?? null}
       testing={props.testing ?? false}
     />,
-    { wrapper: TestWrapper }
+    { wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper> }
   );
 }
 
 describe("TestConnectionResultPanel", () => {
   test("renders idle state with test buttons", () => {
     renderPanel({ result: null, testing: false });
-    expect(screen.getByText("قم بتشغيل اختبار للتحقق من اتصال المزود.")).toBeInTheDocument();
-    expect(screen.getByText("التحقق من الإعداد")).toBeInTheDocument();
-    expect(screen.getByText("إنشاء وحذف")).toBeInTheDocument();
+    expect(screen.getByText(labels.testPanel.idleHint)).toBeInTheDocument();
+    expect(screen.getByText(labels.validateConfig)).toBeInTheDocument();
+    expect(screen.getByText(labels.generateAndDelete)).toBeInTheDocument();
   });
 
   test("renders testing state with progress indicator", () => {
     renderPanel({ result: null, testing: true });
-    expect(screen.getByText("جارٍ اختبار الاتصال…")).toBeInTheDocument();
+    expect(screen.getByText(labels.testConnectionTesting)).toBeInTheDocument();
     // Test buttons should be disabled
-    const validateButton = screen.getByText("التحقق من الإعداد");
+    const validateButton = screen.getByText(labels.validateConfig);
     expect(validateButton.closest("button")).toBeDisabled();
   });
 
@@ -99,10 +77,12 @@ describe("TestConnectionResultPanel", () => {
       },
       testing: false,
     });
-    expect(screen.getByText("نجح اختبار الاتصال.")).toBeInTheDocument();
+    expect(screen.getByText(labels.testPanel.successMessage)).toBeInTheDocument();
     expect(screen.getByText(/150ms/)).toBeInTheDocument();
     expect(screen.getByText(/200 OK/)).toBeInTheDocument();
-    expect(screen.getByText("تمت المصادقة")).toBeInTheDocument();
+    // authSuccess is rendered as "{authStatus}: {authSuccess}" in a combined paragraph
+    const authParagraph = screen.getByText(new RegExp(labels.testPanel.authSuccess));
+    expect(authParagraph).toBeInTheDocument();
   });
 
   test("renders failure state with retry button", () => {
@@ -124,8 +104,8 @@ describe("TestConnectionResultPanel", () => {
       testing: false,
       onRunTest,
     });
-    expect(screen.getByText("فشل اختبار الاتصال.")).toBeInTheDocument();
-    const retryButton = screen.getByText("إعادة الاختبار");
+    expect(screen.getByText(labels.testConnectionFailure)).toBeInTheDocument();
+    const retryButton = screen.getByText(labels.retryTest);
     fireEvent.click(retryButton);
     expect(onRunTest).toHaveBeenCalledTimes(1);
   });
@@ -147,6 +127,6 @@ describe("TestConnectionResultPanel", () => {
       },
       testing: false,
     });
-    expect(screen.getByText("تكوين في سوق المزود")).toBeInTheDocument();
+    expect(screen.getByText(labels.testPanel.marketplaceHint)).toBeInTheDocument();
   });
 });

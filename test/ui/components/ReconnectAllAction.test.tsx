@@ -9,19 +9,17 @@ import {
   type ReconnectAllActionLabels,
 } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ReconnectAllAction";
 import type { ReauthProvider } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/reauth-needed-banner.types";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
   cleanup();
 });
 
-const labels: ReconnectAllActionLabels = {
-  reconnectAllWithCount: (count: number) => `إعادة ربط الكل (${count})`,
-  reconnectingProgress: (current: number, total: number) => `جارٍ ${current}/${total}`,
-  reconnectedProviders: (count: number) => `نجح ${count}`,
-  reconnectFailedProviders: (count: number) => `فشل ${count}`,
-  reconnectAllAriaLabel: "إعادة ربط جميع المزودين",
-};
+const locale: AppLocale = "ar";
+const labels: ReconnectAllActionLabels = readTranslation(Translation.Ui.MeetingConfig, locale).enhancements;
 
 const twoProviders: readonly ReauthProvider[] = [
   { slug: "zoom", name: "Zoom", expiryState: "expired" },
@@ -42,15 +40,15 @@ function renderAction(
       onComplete={mock(() => {})}
       {...overrides}
     />,
-    { wrapper: TestWrapper }
+    { wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper> }
   );
 }
 
 describe("ReconnectAllAction", () => {
   test("renders button with count when >= 2 providers", () => {
     renderAction();
-    expect(screen.getByLabelText("إعادة ربط جميع المزودين")).toBeInTheDocument();
-    expect(screen.getByText("إعادة ربط الكل (2)")).toBeInTheDocument();
+    expect(screen.getByLabelText(labels.reconnectAllAriaLabel)).toBeInTheDocument();
+    expect(screen.getByText(labels.reconnectAllWithCount(2))).toBeInTheDocument();
   });
 
   test.each([
@@ -66,7 +64,7 @@ describe("ReconnectAllAction", () => {
     const onComplete = mock(() => {});
     renderAction(twoProviders, { onReconnectProvider, onComplete });
 
-    fireEvent.click(screen.getByLabelText("إعادة ربط جميع المزودين"));
+    fireEvent.click(screen.getByLabelText(labels.reconnectAllAriaLabel));
 
     await waitFor(() => {
       expect(onReconnectProvider).toHaveBeenCalledTimes(2);
@@ -83,9 +81,9 @@ describe("ReconnectAllAction", () => {
     const onReconnectProvider = mock((_slug: string) => Promise.resolve(true));
     renderAction(twoProviders, { onReconnectProvider });
 
-    fireEvent.click(screen.getByLabelText("إعادة ربط جميع المزودين"));
+    fireEvent.click(screen.getByLabelText(labels.reconnectAllAriaLabel));
 
-    expect(screen.getByText(/جارٍ/)).toBeInTheDocument();
+    expect(screen.getByText(content => content === labels.reconnectingProgress(1, 2))).toBeInTheDocument();
   });
 
   test("counts failures in onComplete", async () => {
@@ -93,7 +91,7 @@ describe("ReconnectAllAction", () => {
     const onComplete = mock(() => {});
     renderAction(twoProviders, { onReconnectProvider, onComplete });
 
-    fireEvent.click(screen.getByLabelText("إعادة ربط جميع المزودين"));
+    fireEvent.click(screen.getByLabelText(labels.reconnectAllAriaLabel));
 
     await waitFor(() => {
       expect(onComplete).toHaveBeenCalledWith(0, 2);

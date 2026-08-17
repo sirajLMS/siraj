@@ -6,8 +6,30 @@ expect.extend(matchers);
 
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { TemplatesTabContent } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/TemplatesTabContent";
-import { makeTemplateRow, testSettingsLabels } from "@/test/ui/components/helpers/whatsappTestHelpers";
+import type { WhatsappSettingsLabels } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+import { makeTemplateRow } from "@/test/ui/components/helpers/whatsappTestHelpers";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Whatsapp, locale);
+
+const settingsLabels: WhatsappSettingsLabels = {
+  page: labels,
+  notifications: {
+    syncSuccess: labels.syncSuccess,
+    syncNoChange: labels.syncNoChange,
+    syncError: labels.syncError,
+    deleteSuccess: labels.deleteSuccess,
+    deleteError: labels.deleteError,
+    saveSuccess: labels.saveSuccess,
+    saveError: labels.saveError,
+    optInSuccess: "Opt-in updated successfully.",
+    optInError: labels.optInError,
+  },
+};
 
 const noopPromise = (): Promise<void> => Promise.resolve();
 
@@ -16,7 +38,7 @@ function renderTemplatesTab(overrides: Record<string, unknown> = {}) {
   const onRetry = mock(() => {});
   renderWithWrapper(
     <TemplatesTabContent
-      labels={testSettingsLabels}
+      labels={settingsLabels}
       templates={[]}
       loading={false}
       syncing={false}
@@ -26,7 +48,7 @@ function renderTemplatesTab(overrides: Record<string, unknown> = {}) {
       onRetry={onRetry}
       {...overrides}
     />,
-    { locale: "en", permissions: [AppPermission.WhatsappTemplatesManage] }
+    { locale, permissions: [AppPermission.WhatsappTemplatesManage] }
   );
   return { onSyncFromMeta, onRetry };
 }
@@ -51,16 +73,16 @@ describe("TemplatesTabContent", () => {
   test("shows template language chip and status badge", () => {
     const t1 = makeTemplateRow("tpl-1", "Welcome Message");
     renderTemplatesTab({ templates: [t1] });
-    expect(screen.getByText(`Language: ${t1.language}`)).toBeTruthy();
+    expect(screen.getByText(`${labels.templateLanguage}: ${t1.language}`)).toBeTruthy();
     // Template name should be visible in collapsed state
     expect(screen.getByText("Welcome Message")).toBeTruthy();
   });
 
   test("shows empty state with sync CTA when no templates", () => {
     renderTemplatesTab({ templates: [] });
-    expect(screen.getByText(testSettingsLabels.page.noTemplates)).toBeTruthy();
+    expect(screen.getByText(labels.noTemplates)).toBeTruthy();
     // syncTemplates text appears in both the header Sync button and the empty-state CTA button
-    const syncButtons = screen.getAllByText(testSettingsLabels.page.syncTemplates);
+    const syncButtons = screen.getAllByText(labels.syncTemplates);
     expect(syncButtons.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -68,26 +90,26 @@ describe("TemplatesTabContent", () => {
     const t1 = makeTemplateRow("tpl-1", "Welcome Message");
     renderTemplatesTab({ templates: [t1] });
     // The card action area — click it
-    const cardActionArea = screen.getByLabelText(`Welcome Message — ${testSettingsLabels.page.templateBody}`);
+    const cardActionArea = screen.getByLabelText(`Welcome Message — ${labels.templateBody}`);
     await act(async () => {
       fireEvent.click(cardActionArea);
     });
     // After expansion, the "Last Updated" label should be visible (it's in the Collapse section)
     await waitFor(() => {
-      expect(screen.getAllByText(testSettingsLabels.page.templateLastUpdated).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(labels.templateLastUpdated).length).toBeGreaterThan(0);
     });
   });
 
   test("error state shows retry button", () => {
     renderTemplatesTab({ queryError: true });
-    expect(screen.getByText(testSettingsLabels.page.errorGenericTitle)).toBeTruthy();
-    expect(screen.getByText(testSettingsLabels.page.retry)).toBeTruthy();
+    expect(screen.getByText(labels.errorGenericTitle)).toBeTruthy();
+    expect(screen.getByText(labels.retry)).toBeTruthy();
   });
 
   test("retry button calls onRetry", async () => {
     const { onRetry } = renderTemplatesTab({ queryError: true });
     await act(async () => {
-      fireEvent.click(screen.getByText(testSettingsLabels.page.retry));
+      fireEvent.click(screen.getByText(labels.retry));
     });
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
@@ -96,7 +118,7 @@ describe("TemplatesTabContent", () => {
     const { onSyncFromMeta } = renderTemplatesTab({ templates: [] });
     await act(async () => {
       // There are two sync buttons in empty state: header + CTA. Click the first one.
-      fireEvent.click(screen.getAllByText(testSettingsLabels.page.syncTemplates)[0]);
+      fireEvent.click(screen.getAllByText(labels.syncTemplates)[0]);
     });
     expect(onSyncFromMeta).toHaveBeenCalledTimes(1);
   });
@@ -110,7 +132,7 @@ describe("TemplatesTabContent", () => {
     // Render with no permissions for the empty state CTA
     renderWithWrapper(
       <TemplatesTabContent
-        labels={testSettingsLabels}
+        labels={settingsLabels}
         templates={[]}
         loading={false}
         syncing={false}
@@ -119,9 +141,9 @@ describe("TemplatesTabContent", () => {
         queryError={false}
         onRetry={mock(() => {})}
       />,
-      { locale: "en", permissions: [] }
+      { locale, permissions: [] }
     );
     // Should show permission denied text since no WhatsappTemplatesManage
-    expect(screen.getByText(testSettingsLabels.page.permissionDenied)).toBeTruthy();
+    expect(screen.getByText(labels.permissionDenied)).toBeTruthy();
   });
 });

@@ -20,7 +20,13 @@ expect.extend(matchers);
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/profile/profile.documents";
 import { useSupervisorProfileViewModel } from "@/frontend/common/views/dashboard/supervisor/profile/useSupervisorProfileViewModel";
 import { SupervisorProfileDesktopView } from "@/frontend/desktop/views/dashboard/supervisor/profile/supervisorProfile.desktop";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "en";
+const labels = readTranslation(Translation.Dashboard.SupervisorPortalProfile, locale);
 
 const targetUserId = "supervisor-user-1";
 
@@ -94,7 +100,7 @@ afterEach(() => {
 describe("SupervisorProfileContainer", () => {
   test("renders supervisor profile fields from mocked GraphQL data", async () => {
     renderWithWrapper(<SupervisorProfileContainerImpl userId={targetUserId} />, {
-      locale: "en",
+      locale,
       themeMode: "dark",
       mocks: createMocks(),
       viewport: "desktop",
@@ -104,19 +110,20 @@ describe("SupervisorProfileContainer", () => {
       expect(screen.getByText("Sara Supervisor")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("My Profile")).toBeInTheDocument();
+    expect(screen.getByText(labels.pageTitle)).toBeInTheDocument();
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
 
-    expect(screen.getByText("Account Information")).toBeInTheDocument();
-    expect(screen.getByText("Contact Information")).toBeInTheDocument();
-    expect(screen.getByText("Role Information")).toBeInTheDocument();
+    expect(screen.getByText(labels.sections.account)).toBeInTheDocument();
+    expect(screen.getByText(labels.sections.contact)).toBeInTheDocument();
+    expect(screen.getByText(labels.sections.role)).toBeInTheDocument();
 
-    expect(screen.getByText("Full Name")).toBeInTheDocument();
-    expect(screen.getByText("Account Status")).toBeInTheDocument();
+    expect(screen.getByText(labels.fields.fullName)).toBeInTheDocument();
+    const statusLabels = screen.getAllByText(labels.fields.status);
+    expect(statusLabels.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("ACTIVE")).toBeInTheDocument();
-    expect(screen.getByText("Email")).toBeInTheDocument();
+    expect(screen.getByText(labels.fields.email)).toBeInTheDocument();
     expect(screen.getByText("sara@example.com")).toBeInTheDocument();
-    expect(screen.getByText("Role")).toBeInTheDocument();
+    expect(screen.getByText(labels.fields.roleName)).toBeInTheDocument();
     expect(screen.getByText("Supervisor")).toBeInTheDocument();
   });
 });

@@ -13,7 +13,12 @@ await mock.module("next/link", () => ({
     createElement("a", { href, ...rest }, children),
 }));
 
-const mockLabels = (await import("@/test/ui/components/quota/mockQuotaLabels")).createMockQuotaLabels();
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
+
+const locale: AppLocale = "en";
+const mockLabels = readTranslation(Translation.Dashboard.BillingQuota, locale);
 
 await mock.module("@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel", () => ({
   useQuotaViewModel: () => mockViewModel,
@@ -78,17 +83,17 @@ describe("QuotaContainer — mobile", () => {
   });
 
   test("renders mobile view header", async () => {
-    renderWithWrapper(<QuotaListMobileTestView />, { locale: "en", viewport: "mobile" });
+    renderWithWrapper(<QuotaListMobileTestView />, { locale, viewport: "mobile" });
 
     await waitFor(() => {
-      expect(screen.getAllByText("Quotas").length).toBeGreaterThan(0);
+      expect(screen.getAllByText(mockLabels.title).length).toBeGreaterThan(0);
     });
   });
 
   test("no MuiDataGrid-root on mobile view", async () => {
     mockViewModel = { ...mockViewModel, quotas: [mockQuota], totalCount: 1 };
 
-    renderWithWrapper(<QuotaListMobileTestView />, { locale: "en", viewport: "mobile" });
+    renderWithWrapper(<QuotaListMobileTestView />, { locale, viewport: "mobile" });
 
     await waitFor(() => {
       expect(screen.getByText("Summer Package")).toBeVisible();
@@ -99,7 +104,7 @@ describe("QuotaContainer — mobile", () => {
   test("renders quota name in card list on mobile", async () => {
     mockViewModel = { ...mockViewModel, quotas: [mockQuota], totalCount: 1 };
 
-    renderWithWrapper(<QuotaListMobileTestView />, { locale: "en", viewport: "mobile" });
+    renderWithWrapper(<QuotaListMobileTestView />, { locale, viewport: "mobile" });
 
     await waitFor(() => {
       expect(screen.getByText("Summer Package")).toBeVisible();
@@ -109,20 +114,20 @@ describe("QuotaContainer — mobile", () => {
   test("renders loading state when loading=true on mobile", async () => {
     mockViewModel = { ...mockViewModel, loading: true, quotas: [] };
 
-    renderWithWrapper(<QuotaListMobileTestView />, { locale: "en", viewport: "mobile" });
+    renderWithWrapper(<QuotaListMobileTestView />, { locale, viewport: "mobile" });
 
     await waitFor(() => {
-      expect(screen.getAllByText("Quotas").length).toBeGreaterThan(0);
+      expect(screen.getAllByText(mockLabels.title).length).toBeGreaterThan(0);
     });
   });
 
   test("renders empty state when no quotas on mobile", async () => {
     mockViewModel = { ...mockViewModel, quotas: [], totalCount: 0, loading: false };
 
-    renderWithWrapper(<QuotaListMobileTestView />, { locale: "en", viewport: "mobile" });
+    renderWithWrapper(<QuotaListMobileTestView />, { locale, viewport: "mobile" });
 
     await waitFor(() => {
-      expect(screen.getAllByText("Quotas").length).toBeGreaterThan(0);
+      expect(screen.getAllByText(mockLabels.title).length).toBeGreaterThan(0);
     });
   });
 });

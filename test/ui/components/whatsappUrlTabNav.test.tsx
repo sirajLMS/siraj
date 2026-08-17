@@ -26,7 +26,7 @@ await mock.module("next/navigation", () => ({
     prefetch: mock(() => {}),
   }),
   usePathname: () => "/settings/whatsapp",
-  useParams: () => ({ locale: "en" }),
+  useParams: () => ({ locale }),
   redirect: mock(() => {}),
 }));
 
@@ -90,8 +90,13 @@ await mock.module("@/frontend/common/views/dashboard/components/GenericTabNav", 
 import { WhatsappTabNav } from "@/frontend/common/views/dashboard/settings/whatsapp/WhatsappTabNav";
 // ─── Imports (after mocks are registered) ──────────────────────────────
 import { useWhatsappTab } from "@/frontend/common/views/dashboard/settings/whatsapp/whatsappTabUrl";
-import { whatsappEn } from "@/shared/locale/en/whatsapp";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Whatsapp, locale);
 
 // ─── Consumer pattern for testing the hook ────────────────────────────
 
@@ -179,9 +184,9 @@ describe("WhatsappTabNav — tab rendering", () => {
   });
 
   test("renders all three tab links with labels", () => {
-    renderWithWrapper(<WhatsappTabNav activeTab="templates" pageLabels={whatsappEn} />, { locale: "en" });
-    expect(screen.getByText(whatsappEn.tabNumbers)).toBeTruthy();
-    expect(screen.getByText(whatsappEn.tabTemplates)).toBeTruthy();
-    expect(screen.getByText(whatsappEn.tabOptIn)).toBeTruthy();
+    renderWithWrapper(<WhatsappTabNav activeTab="templates" pageLabels={labels} />, { locale });
+    expect(screen.getByText(labels.tabNumbers)).toBeTruthy();
+    expect(screen.getByText(labels.tabTemplates)).toBeTruthy();
+    expect(screen.getByText(labels.tabOptIn)).toBeTruthy();
   });
 });

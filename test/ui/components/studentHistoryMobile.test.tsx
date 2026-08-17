@@ -21,6 +21,9 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { useStudentPortalHistoryStore } from "@/frontend/common/stores/studentPortalHistoryStore";
 import { useStudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import { StudentHistoryMobileView } from "@/frontend/mobile/views/dashboard/student/history/studentHistory.mobile";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import {
   createProfileMockData,
   createSingleSessionHistoryMockData,
@@ -28,6 +31,9 @@ import {
   HISTORY_YEAR,
 } from "@/test/ui/components/fixtures/studentHistoryFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "en";
+const labels = readTranslation(Translation.Dashboard.StudentPortalHistory, locale);
 
 const studentId = "student-history-mobile-1";
 
@@ -100,12 +106,12 @@ describe("StudentHistoryMobileView", () => {
       expect(screen.getByRole("tablist")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Schedule for Fri, July 10")).toBeInTheDocument();
+    expect(screen.getByText(labels.scheduleFor("Fri", "July", 10))).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getAllByText("Quran Recitation").length).toBeGreaterThanOrEqual(1);
     });
     expect(screen.getAllByText("Ustadh Yusuf").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Ended").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(labels.statusLabels.ended).length).toBeGreaterThanOrEqual(1);
   });
 });

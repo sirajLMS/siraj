@@ -4,12 +4,18 @@ import {
   AvailabilitySearchSortBy,
   IanaTimezone,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
+
+const locale: AppLocale = "ar";
+const labels = readTranslation(Translation.Dashboard.CoreSearchSchedule, locale);
 
 await mockNextNavigation("/search-schedule");
 
 await mock.module("@/frontend/common/hooks/useLanguageSwitch", () => ({
-  useLanguageSwitch: () => ({ currentLocale: "en", switchLanguage: () => {}, isPending: false }),
+  useLanguageSwitch: () => ({ currentLocale: locale, switchLanguage: () => {}, isPending: false }),
 }));
 
 import type { MockLink } from "@apollo/client/testing";
@@ -151,27 +157,27 @@ function createSearchMock(
 describe("SearchScheduleContainer", () => {
   test("hides entire page when user lacks ScheduleSearchAvailability", () => {
     renderWithWrapper(<SearchScheduleContainer />, {
-      locale: "en",
+      locale,
       permissions: [],
     });
 
-    expect(screen.queryByText("Search Schedule Availability")).toBeNull();
+    expect(screen.queryByText(labels.pageTitle)).toBeNull();
   });
 
   test("renders page title and search form when permission granted", async () => {
     renderWithWrapper(<SearchScheduleContainer />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.ScheduleSearchAvailability],
       mocks: createSearchMock(),
     });
 
-    expect(await screen.findByText("Search Schedule Availability")).toBeVisible();
-    expect(screen.getByRole("button", { name: /search/i })).toBeVisible();
+    expect(await screen.findByText(labels.pageTitle)).toBeVisible();
+    expect(screen.getByRole("button", { name: new RegExp(labels.searchBtn, "i") })).toBeVisible();
   });
 
   test("shows skeleton while initial query is loading", async () => {
     renderWithWrapper(<SearchScheduleContainer />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.ScheduleSearchAvailability],
       mocks: createSearchMock(),
     });
@@ -183,7 +189,7 @@ describe("SearchScheduleContainer", () => {
 
   test("shows results after initial load with matching data", async () => {
     renderWithWrapper(<SearchScheduleContainer />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.ScheduleSearchAvailability],
       mocks: createSearchMock(),
     });
@@ -197,12 +203,12 @@ describe("SearchScheduleContainer", () => {
 
   test("shows no results message when query returns empty", async () => {
     renderWithWrapper(<SearchScheduleContainer />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.ScheduleSearchAvailability],
       mocks: createSearchMock(mockEmptyResult),
     });
 
-    const noResults = await screen.findByText("No available time slots found for the given criteria.");
+    const noResults = await screen.findByText(labels.noResults);
     expect(noResults).toBeVisible();
   });
 
@@ -220,35 +226,35 @@ describe("SearchScheduleContainer", () => {
     ];
 
     renderWithWrapper(<SearchScheduleContainer />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.ScheduleSearchAvailability],
       mocks,
     });
 
-    const errorMsg = await screen.findByText("Failed to load availability data.");
+    const errorMsg = await screen.findByText(labels.errorLoading);
     expect(errorMsg).toBeVisible();
   });
 
   test("form renders filter inputs", () => {
     renderWithWrapper(<SearchScheduleContainer />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.ScheduleSearchAvailability],
       mocks: createSearchMock(),
     });
 
-    expect(screen.getByLabelText("Date range")).toBeVisible();
-    expect(screen.getByLabelText("Time range")).toBeVisible();
-    expect(screen.getByLabelText("Teacher name")).toBeVisible();
-    expect(screen.getByRole("button", { name: /search/i })).toBeVisible();
+    expect(screen.getByLabelText(labels.dateRange)).toBeVisible();
+    expect(screen.getByLabelText(labels.timeRange)).toBeVisible();
+    expect(screen.getByLabelText(labels.teacherName)).toBeVisible();
+    expect(screen.getByRole("button", { name: new RegExp(labels.searchBtn, "i") })).toBeVisible();
   });
 
   test("form renders filter drawer button", () => {
     renderWithWrapper(<SearchScheduleContainer />, {
-      locale: "en",
+      locale,
       permissions: [AppPermission.ScheduleSearchAvailability],
       mocks: createSearchMock(),
     });
 
-    expect(screen.getByLabelText("Filters")).toBeVisible();
+    expect(screen.getByLabelText(labels.filters)).toBeVisible();
   });
 });

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import type { AppLocale } from "@/shared/locale/AppLocale";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";
 
 await mockNextNavigation("/students/history", {
@@ -18,6 +19,8 @@ expect.extend(matchers);
 import { GenericTabNavMobileView } from "@/frontend/mobile/views/dashboard/components/genericTabNav.mobile";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
+const locale: AppLocale = "en";
+
 const dateTabs = [
   { id: "1", weekdayLabel: "Wed", dayNumber: 1, hasSession: true },
   { id: "2", weekdayLabel: "Thu", dayNumber: 2, hasSession: false },
@@ -31,7 +34,7 @@ afterEach(() => {
 describe("GenericTabNav date variant", () => {
   test("renders weekday and day number for each tab", () => {
     render(
-      <TestWrapper locale="en" themeMode="dark">
+      <TestWrapper locale={locale} themeMode="dark">
         <GenericTabNavMobileView
           variant="date"
           mode="button"
@@ -54,7 +57,7 @@ describe("GenericTabNav date variant", () => {
     const onTabChange = mock((id: string) => id);
 
     render(
-      <TestWrapper locale="en" themeMode="dark">
+      <TestWrapper locale={locale} themeMode="dark">
         <GenericTabNavMobileView variant="date" mode="button" activeTab="1" tabs={dateTabs} onTabChange={onTabChange} />
       </TestWrapper>
     );

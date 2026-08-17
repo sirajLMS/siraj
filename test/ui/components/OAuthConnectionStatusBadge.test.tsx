@@ -8,7 +8,13 @@ import {
   OAuthConnectionStatusBadge,
   type OAuthConnectionStatusBadgeProps,
 } from "@/frontend/common/components/ui/display/meetingConfig/OAuthConnectionStatusBadge";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "ar";
+const t = readTranslation(Translation.Dashboard.OAuthFlow, locale);
 
 const fixedNow = new Date("2025-06-15T12:00:00Z").getTime();
 let originalDateNow: typeof Date.now;
@@ -24,7 +30,9 @@ afterEach(() => {
 });
 
 function renderBadge(props: OAuthConnectionStatusBadgeProps) {
-  return render(<OAuthConnectionStatusBadge {...props} />, { wrapper: TestWrapper });
+  return render(<OAuthConnectionStatusBadge {...props} />, {
+    wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
+  });
 }
 
 function daysInMs(days: number) {
@@ -34,7 +42,7 @@ function daysInMs(days: number) {
 describe("OAuthConnectionStatusBadge", () => {
   test("renders connected status", () => {
     renderBadge({ status: "connected" });
-    expect(screen.getByText("متصل")).toBeInTheDocument();
+    expect(screen.getByText(t.statusConnected)).toBeInTheDocument();
   });
 
   test("renders expiring status with countdown days", () => {
@@ -42,8 +50,7 @@ describe("OAuthConnectionStatusBadge", () => {
       status: "expiring",
       expiresAt: new Date(fixedNow + daysInMs(5)).toISOString(),
     });
-    // expiresInDays(5) → "ينتهي خلال 5 أيام"
-    expect(screen.getByText("ينتهي خلال 5 أيام")).toBeInTheDocument();
+    expect(screen.getByText(t.expiresInDays(5))).toBeInTheDocument();
   });
 
   test("renders expiring status with 1 day countdown", () => {
@@ -51,7 +58,7 @@ describe("OAuthConnectionStatusBadge", () => {
       status: "expiring",
       expiresAt: new Date(fixedNow + daysInMs(1)).toISOString(),
     });
-    expect(screen.getByText("ينتهي خلال يوم واحد")).toBeInTheDocument();
+    expect(screen.getByText(t.expiresInDays(1))).toBeInTheDocument();
   });
 
   test("renders expiring status with 2 days countdown", () => {
@@ -59,7 +66,7 @@ describe("OAuthConnectionStatusBadge", () => {
       status: "expiring",
       expiresAt: new Date(fixedNow + daysInMs(2)).toISOString(),
     });
-    expect(screen.getByText("ينتهي خلال يومين")).toBeInTheDocument();
+    expect(screen.getByText(t.expiresInDays(2))).toBeInTheDocument();
   });
 
   test("renders expired status when expiring but days <= 0", () => {
@@ -67,32 +74,31 @@ describe("OAuthConnectionStatusBadge", () => {
       status: "expiring",
       expiresAt: new Date(fixedNow - 1000).toISOString(),
     });
-    // When days <= 0, shows t.statusExpired
-    expect(screen.getByText("منتهي")).toBeInTheDocument();
+    expect(screen.getByText(t.statusExpired)).toBeInTheDocument();
   });
 
   test("renders standalone expired status", () => {
     renderBadge({ status: "expired" });
-    expect(screen.getByText("منتهي")).toBeInTheDocument();
+    expect(screen.getByText(t.statusExpired)).toBeInTheDocument();
   });
 
   test("renders disconnected status", () => {
     renderBadge({ status: "disconnected" });
-    expect(screen.getByText("غير متصل")).toBeInTheDocument();
+    expect(screen.getByText(t.statusNotConnected)).toBeInTheDocument();
   });
 
   test("expiring with null expiresAt renders statusExpiring label", () => {
     renderBadge({ status: "expiring", expiresAt: null });
-    expect(screen.getByText("قارب الانتهاء")).toBeInTheDocument();
+    expect(screen.getByText(t.statusExpiring)).toBeInTheDocument();
   });
 
   test("has status aria-label", () => {
     renderBadge({ status: "connected" });
-    expect(screen.getByLabelText("حالة اتصال OAuth")).toBeInTheDocument();
+    expect(screen.getByLabelText(t.statusAriaLabel)).toBeInTheDocument();
   });
 
   test("renders with custom sx prop", () => {
     renderBadge({ status: "connected" });
-    expect(screen.getByText("متصل")).toBeInTheDocument();
+    expect(screen.getByText(t.statusConnected)).toBeInTheDocument();
   });
 });

@@ -22,6 +22,9 @@ import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDoc
 import { useStudentPortalHistoryStore } from "@/frontend/common/stores/studentPortalHistoryStore";
 import { useStudentHistoryViewModel } from "@/frontend/common/views/dashboard/student/history/useStudentHistoryViewModel";
 import { StudentHistoryDesktopView } from "@/frontend/desktop/views/dashboard/student/history/studentHistory.desktop";
+import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import {
   createProfileMockData,
   createTwoSessionHistoryMockData,
@@ -29,6 +32,9 @@ import {
   HISTORY_YEAR,
 } from "@/test/ui/components/fixtures/studentHistoryFixtures";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
+
+const locale: AppLocale = "en";
+const labels = readTranslation(Translation.Dashboard.StudentPortalHistory, locale);
 
 const studentId = "student-history-1";
 
@@ -103,22 +109,22 @@ describe("StudentHistoryContainer", () => {
       expect(screen.getByText(expectedMonthLabel)).toBeInTheDocument();
     });
 
-    expect(screen.getAllByLabelText("Previous month").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByLabelText("Next month").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByLabelText(labels.previousMonth).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByLabelText(labels.nextMonth).length).toBeGreaterThanOrEqual(1);
 
-    expect(screen.getByText("Total Classes")).toBeInTheDocument();
+    expect(screen.getByText(labels.totalClasses)).toBeInTheDocument();
     expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Attendance Rate")).toBeInTheDocument();
+    expect(screen.getByText(labels.attendanceRate)).toBeInTheDocument();
     expect(screen.getByText("90%")).toBeInTheDocument();
-    expect(screen.getByText("Hours Studied")).toBeInTheDocument();
+    expect(screen.getByText(labels.hoursStudied)).toBeInTheDocument();
     expect(screen.getByText("4.5h")).toBeInTheDocument();
-    expect(screen.getByText("Performance")).toBeInTheDocument();
+    expect(screen.getByText(labels.performance)).toBeInTheDocument();
     expect(screen.getByText("85%")).toBeInTheDocument();
 
-    expect(screen.getAllByText("Lesson History").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(labels.lessonHistory).length).toBeGreaterThanOrEqual(1);
 
-    expect(screen.queryByLabelText("Filter by Subject")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Filter by Status")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(labels.filterBySubject)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(labels.filterByStatus)).not.toBeInTheDocument();
     expect(screen.queryByRole("grid")).not.toBeInTheDocument();
   });
 });
