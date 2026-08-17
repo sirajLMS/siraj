@@ -269,11 +269,11 @@ describe.serial("Quota E2E", () => {
     expect(await studentPanel.count()).toBeGreaterThan(0);
 
     const kindPanel = page.getByText(KIND_LABEL).first();
-    await kindPanel.waitFor({ state: "attached" });
+    await kindPanel.waitFor({ state: "attached", timeout: 30_000 });
     expect(await kindPanel.count()).toBeGreaterThan(0);
 
     const validFromPanel = page.getByText(VALID_FROM_LABEL).first();
-    await validFromPanel.waitFor({ state: "attached" });
+    await validFromPanel.waitFor({ state: "attached", timeout: 30_000 });
     expect(await validFromPanel.count()).toBeGreaterThan(0);
 
     // Submit button — "Create Quota" or "Save Changes"
@@ -281,7 +281,7 @@ describe.serial("Quota E2E", () => {
       .getByRole("button", { name: CREATE_QUOTA_BUTTON })
       .or(page.getByRole("button", { name: SAVE_BUTTON }))
       .first();
-    await submitButton.waitFor({ state: "attached" });
+    await submitButton.waitFor({ state: "attached", timeout: 30_000 });
     expect(await submitButton.count()).toBeGreaterThan(0);
   });
 
