@@ -38,6 +38,11 @@ export const dashboardTeacherCreateRecurringClassEn: TeacherCreateRecurringClass
   scheduling: {
     mode: "Scheduling Mode",
     quotaId: "Quota ID",
+    quotaSelect: "Select Quota",
+    quotaPlaceholder: "Choose an open quota...",
+    noOpenQuotas: "No open quotas — create a quota first",
+    noOpenQuotasCta: "Create Quota",
+    quotaOptionLabel: (name, remaining, validUntil) => `${name} — ${remaining} remaining — valid until ${validUntil}`,
     earmarkedClasses: "Earmarked Classes",
     generationHorizon: "Generation Horizon (weeks)",
     ondemandNoCreditsOutcome: "On-Demand No Credits Outcome",

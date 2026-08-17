@@ -14,6 +14,7 @@ import type { StudentQuotaViewModel } from "@/frontend/common/views/dashboard/st
 import { MobileUserAvatar } from "@/frontend/mobile/components/ui/avatar";
 import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui/button";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/page/MobilePageContainer";
+import { MobilePageHeader } from "@/frontend/mobile/components/ui/container/page/MobilePageHeader";
 import { ContextualHelperCardsMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/contextualHelperCards.mobile";
 import { CourseDetailsSectionMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/courseDetailsSection.mobile";
 import { StudentInformationSectionMobile } from "@/frontend/mobile/views/dashboard/students/quota/components/studentInformationSection.mobile";
@@ -57,12 +58,24 @@ function MobileProfileHeader({ studentData, onEditAvatar, showAvatarEdit }: Read
 }
 
 function renderMobileHeader({
+  t,
   studentData,
 }: Readonly<{
   t: { readonly breadcrumbs: { readonly students: string; readonly adjustQuota: string } };
   readonly studentData: StudentProfileData;
 }>): ReactElement {
-  return <MobileProfileHeader studentData={studentData} showAvatarEdit={false} onEditAvatar={undefined} />;
+  return (
+    <>
+      <MobilePageHeader
+        title={t.breadcrumbs.adjustQuota}
+        breadcrumbs={[
+          { label: t.breadcrumbs.students, href: "/students" },
+          { label: t.breadcrumbs.adjustQuota, current: true },
+        ]}
+      />
+      <MobileProfileHeader studentData={studentData} showAvatarEdit={false} onEditAvatar={undefined} />
+    </>
+  );
 }
 
 const MOBILE_TIER: StudentQuotaTierConfig = {

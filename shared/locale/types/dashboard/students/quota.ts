@@ -74,5 +74,48 @@ export interface StudentQuotaLabels {
     readonly conflictHeld: string;
     readonly analyticsOverview: string;
     readonly noData: string;
+    readonly noQuotaAssigned: string;
+    readonly quotaExhausted: string;
+    readonly eligibleForNextClass: string;
+    readonly notEligibleForNextClass: string;
+    readonly expiryWarning: (days: number) => string;
+    readonly remainingOfTotal: (remaining: number, total: number) => string;
+    readonly validPeriod: string;
+    readonly recentLedgerEntries: string;
+    readonly noLedgerEntries: string;
+    readonly loadingData: string;
+    readonly selectChildPrompt: string;
+    readonly name: string;
+    readonly kind: string;
+    readonly remaining: string;
+    readonly totalClasses: string;
+    readonly status: string;
+    readonly validFrom: string;
+    readonly validUntil: string;
+    readonly delta: string;
+    readonly reason: string;
+    readonly ledgerDate: string;
+    readonly createdAt: string;
+    readonly newQuota: string;
+    readonly editQuota: string;
+    readonly deleteQuota: string;
+    readonly statuses: {
+      readonly ACTIVE: string;
+      readonly EXPIRED: string;
+      readonly ARCHIVED: string;
+    };
+    readonly kinds: {
+      readonly PACKAGE: string;
+      readonly PERIODIC: string;
+    };
+    readonly ledgerReasons: {
+      readonly ADJUST: string;
+      readonly EXPIRE: string;
+      readonly GRANT: string;
+      readonly REDEEM: string;
+      readonly RELEASE: string;
+      readonly RESERVE: string;
+    };
   };
+  readonly quotaCount: (count: number) => string;
 }

@@ -29,7 +29,7 @@ export function StudentQuotaView(props: Readonly<UseStudentQuotaViewModelProps>)
   if (!props.studentId) {
     if (viewModel.loadingState === "loading") {
       return (
-        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <Box component="output" aria-busy="true" sx={{ display: "flex", justifyContent: "center", p: 4 }}>
           <CircularProgress />
         </Box>
       );
@@ -39,7 +39,7 @@ export function StudentQuotaView(props: Readonly<UseStudentQuotaViewModelProps>)
 
   if (viewModel.loadingState === "loading") {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+      <Box component="output" aria-busy="true" sx={{ display: "flex", justifyContent: "center", p: 4 }}>
         <CircularProgress />
       </Box>
     );
@@ -50,7 +50,7 @@ export function StudentQuotaView(props: Readonly<UseStudentQuotaViewModelProps>)
   }
 
   if (viewModel.loadingState === "error") {
-    return <Typography sx={{ color: "error.main", p: 2 }}>{viewModel.errorMessage}</Typography>;
+    return <Typography sx={theme => ({ color: theme.palette.error.main, p: 2 })}>{viewModel.errorMessage}</Typography>;
   }
 
   return <ResponsiveViewSwitch mobile={lazyViews.mobile} desktop={lazyViews.desktop} props={viewModel} />;

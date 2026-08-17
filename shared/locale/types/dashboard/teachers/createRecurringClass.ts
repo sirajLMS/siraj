@@ -36,6 +36,11 @@ export interface TeacherCreateRecurringClassLabels {
   readonly scheduling: {
     readonly mode: string;
     readonly quotaId: string;
+    readonly quotaSelect: string;
+    readonly quotaPlaceholder: string;
+    readonly noOpenQuotas: string;
+    readonly noOpenQuotasCta: string;
+    readonly quotaOptionLabel: (name: string, remaining: number, validUntil: string) => string;
     readonly earmarkedClasses: string;
     readonly generationHorizon: string;
     readonly ondemandNoCreditsOutcome: string;

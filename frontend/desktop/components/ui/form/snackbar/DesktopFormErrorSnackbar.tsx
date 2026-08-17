@@ -13,6 +13,7 @@ export function DesktopFormErrorSnackbar({ open, message, onClose }: Readonly<De
   return (
     <Snackbar open={open} anchorOrigin={{ vertical: "top", horizontal: "right" }} onClose={onClose}>
       <Box
+        {...{ component: "alert" }}
         sx={theme => ({
           display: "flex",
           alignItems: "center",

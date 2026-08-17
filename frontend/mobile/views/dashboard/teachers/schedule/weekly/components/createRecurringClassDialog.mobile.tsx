@@ -9,6 +9,7 @@ import type {
   CreateRecurringClassStudentSelectSlotProps,
   CreateRecurringClassTimezoneSelectSlotProps,
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
+import { QuotaAutocomplete } from "@/frontend/common/components/ui/input/quotaSelect";
 import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useCreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/useCreateRecurringClassDialogProps";
@@ -111,6 +112,7 @@ function CreateRecurringClassDialogMobileBody({
         DialogShell: MobileDialogShell,
         StudentSelect: MobileStudentSelect,
         TimezoneSelect: MobileTimezoneSelect,
+        QuotaAutocomplete,
         layout: {
           fieldRowDirection: "column",
           dayItemDirection: "column",

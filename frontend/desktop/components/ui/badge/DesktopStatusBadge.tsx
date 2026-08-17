@@ -12,6 +12,7 @@ export interface DesktopStatusBadgeProps {
   readonly label: string;
   readonly size?: "small" | "medium";
   readonly icon?: ReactNode;
+  readonly component?: "output";
 }
 
 /**
@@ -25,6 +26,7 @@ export function DesktopStatusBadge({
   label,
   size = "small",
   icon,
+  component,
 }: Readonly<DesktopStatusBadgeProps>) {
   return (
     <StatusBadgeShared
@@ -33,6 +35,7 @@ export function DesktopStatusBadge({
       label={label}
       size={size}
       icon={icon}
+      component={component}
       chipDimensions={{
         small: { height: 24 },
         medium: { height: 28 },

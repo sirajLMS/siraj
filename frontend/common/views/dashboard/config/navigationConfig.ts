@@ -678,6 +678,22 @@ export const BOTTOM_NAV_ITEMS: readonly NavItem[] = [
     section: "main",
     permission: PAGE_PERMISSIONS.quotas,
   },
+  {
+    key: "quotas-create",
+    labelKey: "quotasCreate",
+    iconKey: "noteAdd",
+    href: "/quotas/new",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotasCreate,
+  },
+  {
+    key: "quotas-insights",
+    labelKey: "quotasInsights",
+    iconKey: "analytics",
+    href: "/quotas/insights",
+    section: "main",
+    permission: PAGE_PERMISSIONS.quotasInsights,
+  },
 
   {
     key: "payment-catalogs",

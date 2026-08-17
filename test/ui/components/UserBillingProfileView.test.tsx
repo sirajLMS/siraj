@@ -159,6 +159,7 @@ const mockLabels: BillingLabels = {
   parentPageTitle: "Invoices & Billing",
   parentPageSubtitle: "Track and download your institutional billing records.",
   manualInvoice: "Manual Invoice",
+  quotasLink: "Quotas",
   exchangeRatesLink: "Exchange Rates",
   quickPay: "Quick Pay",
   viewAllNegativeBalance: "View All Students with Negative Balance",

@@ -29,7 +29,7 @@ export function QuotaAudienceView({ t }: Readonly<QuotaAudienceViewProps>) {
     default:
       return (
         <Box sx={{ p: 4, textAlign: "center" }}>
-          <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {t.audience.noData}
           </Typography>
         </Box>

@@ -133,7 +133,7 @@ export function MobileCardList<T>({
 
   if (loading && rows.length === 0) {
     return (
-      <Box sx={listSx}>
+      <Box component="output" aria-busy="true" sx={listSx}>
         {renderSkeleton ? (
           renderSkeleton()
         ) : (

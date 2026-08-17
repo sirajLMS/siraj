@@ -13,6 +13,7 @@ export const dashboardBillingAr: BillingLabels = {
   parentPageSubtitle: "تتبع وتحميل سجلات الفوترة المؤسسية.",
   manualInvoice: "فاتورة يدوية",
   exchangeRatesLink: "أسعار الصرف",
+  quotasLink: "الحصص والمحفظات",
   quickPay: "دفع سريع",
   viewAllNegativeBalance: "عرض جميع الطلاب برصيد سالب",
   requiresAttention: "يتطلب اهتماماً",

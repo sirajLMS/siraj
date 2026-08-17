@@ -27,11 +27,15 @@ interface QuotaStore {
   filterStatus: QuotaStatus | null;
   filterKind: QuotaKind | null;
   searchQuery: string;
+  page: number;
+  pageSize: number;
   setFormData: (data: Partial<QuotaFormState>) => void;
   resetFormData: () => void;
   setFilterStatus: (status: QuotaStatus | null) => void;
   setFilterKind: (kind: QuotaKind | null) => void;
   setSearchQuery: (query: string) => void;
+  setPage: (page: number) => void;
+  setPageSize: (pageSize: number) => void;
 }
 
 export const useQuotaStore = create<QuotaStore>(set => ({
@@ -39,6 +43,8 @@ export const useQuotaStore = create<QuotaStore>(set => ({
   filterStatus: null,
   filterKind: null,
   searchQuery: "",
+  page: 0,
+  pageSize: 10,
   setFormData: data =>
     set(state => ({
       formData: { ...state.formData, ...data },
@@ -47,4 +53,6 @@ export const useQuotaStore = create<QuotaStore>(set => ({
   setFilterStatus: status => set({ filterStatus: status }),
   setFilterKind: kind => set({ filterKind: kind }),
   setSearchQuery: query => set({ searchQuery: query }),
+  setPage: page => set({ page }),
+  setPageSize: pageSize => set({ pageSize }),
 }));

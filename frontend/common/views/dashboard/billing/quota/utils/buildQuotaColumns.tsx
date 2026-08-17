@@ -1,5 +1,6 @@
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
+import { StatusBadge } from "@/frontend/common/components/ui/badge";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import {
   formatQuotaDate,
@@ -26,7 +27,18 @@ export function buildQuotaColumns(t: QuotaLabels): GridColDef<QuotaItem>[] {
       headerName: t.fields.kind,
       flex: 1,
       minWidth: 120,
-      renderCell: params => <Chip label={formatQuotaKind(params.value ?? "", t)} size="small" variant="outlined" />,
+      renderCell: params => {
+        const label = formatQuotaKind(params.value ?? "", t);
+        return (
+          <StatusBadge
+            category="quotaStatus"
+            status={params.value ?? ""}
+            label={label}
+            size="small"
+            component="output"
+          />
+        );
+      },
     },
     {
       field: "status",
@@ -34,8 +46,16 @@ export function buildQuotaColumns(t: QuotaLabels): GridColDef<QuotaItem>[] {
       flex: 1,
       minWidth: 120,
       renderCell: params => {
-        const { label, color } = formatQuotaStatus(params.value ?? "", t);
-        return <Chip label={label} size="small" color={color} />;
+        const { label } = formatQuotaStatus(params.value ?? "", t);
+        return (
+          <StatusBadge
+            category="quotaStatus"
+            status={params.value ?? ""}
+            label={label}
+            size="small"
+            component="output"
+          />
+        );
       },
     },
     {

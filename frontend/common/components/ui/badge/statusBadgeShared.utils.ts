@@ -107,6 +107,15 @@ export const resolveStatusPaletteKey: ResolveStatusPaletteKeyFn = (
       };
       return map[status] ?? "pending";
     }
+    case "quotaStatus": {
+      const map: Record<string, "active" | "completed" | "blocked" | "pending"> = {
+        ACTIVE: "active",
+        EXPIRED: "completed",
+        ARCHIVED: "blocked",
+        PENDING: "pending",
+      };
+      return map[status] ?? "pending";
+    }
     default:
       return null;
   }

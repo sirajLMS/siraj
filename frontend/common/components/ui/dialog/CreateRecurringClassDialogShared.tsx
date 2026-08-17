@@ -11,6 +11,8 @@ import {
   FormControlLabel,
   InputLabel,
   MenuItem,
+  Radio,
+  RadioGroup,
   Select,
   Stack,
   TextField,
@@ -22,6 +24,7 @@ import type {
   CreateRecurringClassDialogSharedComponentProps,
   CreateRecurringClassStudentSelectSlotProps,
   CreateRecurringClassTimezoneSelectSlot,
+  QuotaAutocompleteSlot,
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
 import {
   type DayOfWeek,
@@ -195,89 +198,104 @@ function SchedulingFields({
   t,
   onSchedulingModeChange,
   onOndemandNoCreditsOutcomeChange,
+  QuotaAutocomplete,
 }: {
   readonly state: CreateRecurringClassDialogFormState;
   readonly mutationLoading: boolean;
   readonly t: TeacherCreateRecurringClassLabels;
   readonly onSchedulingModeChange: (value: string) => void;
   readonly onOndemandNoCreditsOutcomeChange: (value: string) => void;
+  readonly QuotaAutocomplete: QuotaAutocompleteSlot;
 }) {
+  const isQuotaMode = state.schedulingMode === SchedulingMode.Quota;
+  const isOnDemandMode = state.schedulingMode === SchedulingMode.OnDemand;
+  const showCommonFields = isQuotaMode || isOnDemandMode;
+
   return (
     <Stack sx={{ gap: 2 }}>
-      <FormControl fullWidth>
-        <InputLabel id="scheduling-mode-label" shrink>
+      <FormControl fullWidth disabled={mutationLoading}>
+        <Typography component="label" variant="body2" sx={{ mb: 1 }}>
           {t.scheduling.mode}
-        </InputLabel>
-        <Select
-          labelId="scheduling-mode-label"
-          id="scheduling-mode-select"
-          value={state.schedulingMode ?? ""}
-          label={t.scheduling.mode}
-          onChange={e => onSchedulingModeChange(e.target.value)}
-          disabled={mutationLoading}
-          displayEmpty
-        >
-          <MenuItem value="">
-            <em>{t.scheduling.noMode}</em>
-          </MenuItem>
-          <MenuItem value={SchedulingMode.NumberOfClasses}>{t.scheduling.modes.NumberOfClasses}</MenuItem>
-          <MenuItem value={SchedulingMode.OnDemand}>{t.scheduling.modes.OnDemand}</MenuItem>
-          <MenuItem value={SchedulingMode.Quota}>{t.scheduling.modes.Quota}</MenuItem>
-        </Select>
+        </Typography>
+        <RadioGroup row value={state.schedulingMode ?? ""} onChange={e => onSchedulingModeChange(e.target.value)}>
+          <FormControlLabel
+            value={SchedulingMode.NumberOfClasses}
+            control={<Radio />}
+            label={t.scheduling.modes.NumberOfClasses}
+          />
+          <FormControlLabel value={SchedulingMode.OnDemand} control={<Radio />} label={t.scheduling.modes.OnDemand} />
+          <FormControlLabel value={SchedulingMode.Quota} control={<Radio />} label={t.scheduling.modes.Quota} />
+        </RadioGroup>
       </FormControl>
-      <TextField
-        fullWidth
-        label={t.scheduling.quotaId}
-        value={state.quotaId ?? ""}
-        onChange={e => state.setQuotaId(e.target.value || null)}
-        disabled={mutationLoading}
-      />
-      <TextField
-        fullWidth
-        label={t.scheduling.earmarkedClasses}
-        type="number"
-        value={state.earmarkedClasses ?? ""}
-        onChange={e => {
-          const val = e.target.value;
-          state.setEarmarkedClasses(val === "" ? null : Number(val));
-        }}
-        disabled={mutationLoading}
-      />
-      <TextField
-        fullWidth
-        label={t.scheduling.generationHorizon}
-        type="number"
-        slotProps={{ htmlInput: { min: 1, max: 52 } }}
-        value={state.generationHorizonWeeks ?? ""}
-        onChange={e => {
-          const val = e.target.value;
-          state.setGenerationHorizonWeeks(val === "" ? null : Number(val));
-        }}
-        disabled={mutationLoading}
-      />
-      <FormControl fullWidth>
-        <InputLabel id="ondemand-no-credits-outcome-label" shrink>
-          {t.scheduling.ondemandNoCreditsOutcome}
-        </InputLabel>
-        <Select
-          labelId="ondemand-no-credits-outcome-label"
-          id="ondemand-no-credits-outcome-select"
-          value={state.ondemandNoCreditsOutcome ?? ""}
-          label={t.scheduling.ondemandNoCreditsOutcome}
-          onChange={e => onOndemandNoCreditsOutcomeChange(e.target.value)}
+
+      {isQuotaMode && (
+        <QuotaAutocomplete
+          studentId={state.studentId}
+          value={state.quotaId}
+          onChange={state.setQuotaId}
           disabled={mutationLoading}
-          displayEmpty
-        >
-          <MenuItem value="">
-            <em>{t.scheduling.noMode}</em>
-          </MenuItem>
-          <MenuItem value={OnDemandNoCreditsOutcome.AutoCancel}>{t.scheduling.ondemandNoCredits.AutoCancel}</MenuItem>
-          <MenuItem value={OnDemandNoCreditsOutcome.AutoAbsentNoCredits}>
-            {t.scheduling.ondemandNoCredits.AutoAbsentNoCredits}
-          </MenuItem>
-          <MenuItem value={OnDemandNoCreditsOutcome.RemindOnly}>{t.scheduling.ondemandNoCredits.RemindOnly}</MenuItem>
-        </Select>
-      </FormControl>
+          label={t.scheduling.quotaSelect}
+          placeholder={t.scheduling.quotaPlaceholder}
+          noOptionsText={t.scheduling.noOpenQuotas}
+          noOptionsCta={t.scheduling.noOpenQuotasCta}
+          optionLabel={option => t.scheduling.quotaOptionLabel(option.name, option.remaining, option.validUntil)}
+        />
+      )}
+
+      {showCommonFields && (
+        <TextField
+          fullWidth
+          label={t.scheduling.earmarkedClasses}
+          type="number"
+          value={state.earmarkedClasses ?? ""}
+          onChange={e => {
+            const val = e.target.value;
+            state.setEarmarkedClasses(val === "" ? null : Number(val));
+          }}
+          disabled={mutationLoading}
+        />
+      )}
+
+      {showCommonFields && (
+        <TextField
+          fullWidth
+          label={t.scheduling.generationHorizon}
+          type="number"
+          slotProps={{ htmlInput: { min: 1, max: 52 } }}
+          value={state.generationHorizonWeeks ?? ""}
+          onChange={e => {
+            const val = e.target.value;
+            state.setGenerationHorizonWeeks(val === "" ? null : Number(val));
+          }}
+          disabled={mutationLoading}
+        />
+      )}
+
+      {isOnDemandMode && (
+        <FormControl fullWidth>
+          <InputLabel id="ondemand-no-credits-outcome-label" shrink>
+            {t.scheduling.ondemandNoCreditsOutcome}
+          </InputLabel>
+          <Select
+            labelId="ondemand-no-credits-outcome-label"
+            id="ondemand-no-credits-outcome-select"
+            value={state.ondemandNoCreditsOutcome ?? ""}
+            label={t.scheduling.ondemandNoCreditsOutcome}
+            onChange={e => onOndemandNoCreditsOutcomeChange(e.target.value)}
+            disabled={mutationLoading}
+            displayEmpty
+          >
+            <MenuItem value="">
+              <em>{t.scheduling.noMode}</em>
+            </MenuItem>
+            <MenuItem value={OnDemandNoCreditsOutcome.AutoCancel}>{t.scheduling.ondemandNoCredits.AutoCancel}</MenuItem>
+            <MenuItem value={OnDemandNoCreditsOutcome.AutoAbsentNoCredits}>
+              {t.scheduling.ondemandNoCredits.AutoAbsentNoCredits}
+            </MenuItem>
+            <MenuItem value={OnDemandNoCreditsOutcome.RemindOnly}>{t.scheduling.ondemandNoCredits.RemindOnly}</MenuItem>
+          </Select>
+        </FormControl>
+      )}
     </Stack>
   );
 }
@@ -445,6 +463,7 @@ function DialogFormContent({
   onGoToCreatedClass,
   StudentSelect,
   TimezoneSelect,
+  QuotaAutocomplete,
   layout,
   onClassTypeChange,
   onSchedulingModeChange,
@@ -466,6 +485,7 @@ function DialogFormContent({
   readonly onGoToCreatedClass: () => void;
   readonly StudentSelect: React.ComponentType<Readonly<CreateRecurringClassStudentSelectSlotProps>>;
   readonly TimezoneSelect: CreateRecurringClassTimezoneSelectSlot;
+  readonly QuotaAutocomplete: QuotaAutocompleteSlot;
   readonly layout: CreateRecurringClassDialogLayoutProps;
   readonly onClassTypeChange: (value: string) => void;
   readonly onSchedulingModeChange: (value: string) => void;
@@ -517,6 +537,7 @@ function DialogFormContent({
           t={t}
           onSchedulingModeChange={onSchedulingModeChange}
           onOndemandNoCreditsOutcomeChange={onOndemandNoCreditsOutcomeChange}
+          QuotaAutocomplete={QuotaAutocomplete}
         />
         <DayScheduleList
           days={days}
@@ -586,7 +607,7 @@ export function CreateRecurringClassDialogShared({
   onOndemandNoCreditsOutcomeChange,
   slots,
 }: Readonly<CreateRecurringClassDialogSharedComponentProps>) {
-  const { DialogShell, StudentSelect, TimezoneSelect, layout } = slots;
+  const { DialogShell, StudentSelect, TimezoneSelect, QuotaAutocomplete, layout } = slots;
 
   const handleClassTypeChange = (value: string) => {
     onClassTypeChange(value, state.setClassType);
@@ -622,6 +643,7 @@ export function CreateRecurringClassDialogShared({
           onGoToCreatedClass={onGoToCreatedClass}
           StudentSelect={StudentSelect}
           TimezoneSelect={TimezoneSelect}
+          QuotaAutocomplete={QuotaAutocomplete}
           layout={layout}
           onClassTypeChange={handleClassTypeChange}
           onSchedulingModeChange={handleSchedulingModeChange}

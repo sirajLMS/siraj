@@ -14,6 +14,7 @@ interface StatusBadgeProps {
   readonly label: string;
   readonly size?: "small" | "medium";
   readonly icon?: ReactNode;
+  readonly component?: "output";
 }
 
 /**
@@ -23,7 +24,7 @@ interface StatusBadgeProps {
  * - Box paddingInline `theme.spacing(1.5)`, py 0.5
  * - Typography variant `labelUppercase`, lineHeight 1
  */
-export function StatusBadge({ category, status, label, size = "small", icon }: Readonly<StatusBadgeProps>) {
+export function StatusBadge({ category, status, label, size = "small", icon, component }: Readonly<StatusBadgeProps>) {
   return (
     <StatusBadgeShared
       category={category}
@@ -31,6 +32,7 @@ export function StatusBadge({ category, status, label, size = "small", icon }: R
       label={label}
       size={size}
       icon={icon}
+      component={component}
       boxPadding={(theme: Theme) => ({
         paddingInline: theme.spacing(1.5),
         py: 0.5,

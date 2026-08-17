@@ -138,7 +138,5 @@ export const PAGE_PERMISSIONS = {
   ] as PagePermissions,
   quotas: [AppPermission.QuotasView] as PagePermissions,
   quotasCreate: [AppPermission.QuotasManage] as PagePermissions,
-  quotasView: [AppPermission.QuotasView] as PagePermissions,
-  quotasEdit: [AppPermission.QuotasManage] as PagePermissions,
   quotasInsights: [AppPermission.QuotasView] as PagePermissions,
 } as const;
