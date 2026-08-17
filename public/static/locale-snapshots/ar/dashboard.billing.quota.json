@@ -52,7 +52,8 @@
     "viewLedger": "عرض سجل التدقيق",
     "view": "عرض",
     "filter": "تصفية",
-    "addQuota": "إضافة حصة"
+    "addQuota": "إضافة حصة",
+    "exportCsv": "تصدير CSV"
   },
   "deleteConfirm": {
     "title": "حذف الحصة",
@@ -65,7 +66,8 @@
   "errors": {
     "createFailed": "فشل في إنشاء الحصة. يرجى المحاولة مرة أخرى.",
     "updateFailed": "فشل في تحديث الحصة. يرجى المحاولة مرة أخرى.",
-    "deleteFailed": "فشل في حذف الحصة"
+    "deleteFailed": "فشل في حذف الحصة",
+    "loadFailed": "فشل في تحميل بيانات الحصة. يرجى المحاولة مرة أخرى."
   },
   "ledger": {
     "title": "سجل تدقيق الحصة",

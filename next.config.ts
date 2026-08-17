@@ -62,6 +62,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions"],
   turbopack: {},
   experimental: {
+    useTypeScriptCli: false,
     optimizePackageImports: [
       "@mui/x-data-grid",
       "@mui/x-date-pickers",

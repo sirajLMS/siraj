@@ -52,7 +52,8 @@
     "viewLedger": "View Audit Ledger",
     "view": "View",
     "filter": "Filter",
-    "addQuota": "Add Quota"
+    "addQuota": "Add Quota",
+    "exportCsv": "Export CSV"
   },
   "deleteConfirm": {
     "title": "Delete Quota",
@@ -65,7 +66,8 @@
   "errors": {
     "createFailed": "Failed to create quota. Please try again.",
     "updateFailed": "Failed to update quota. Please try again.",
-    "deleteFailed": "Failed to delete quota"
+    "deleteFailed": "Failed to delete quota",
+    "loadFailed": "Failed to load quota data. Please try again."
   },
   "ledger": {
     "title": "Quota Audit Ledger",

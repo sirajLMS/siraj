@@ -6,6 +6,8 @@
   "generationStatusSuccess": "Generation succeeded",
   "generationStatusFailed": "Generation failed",
   "generationRetry": "Retry generation",
+  "generationShowDetails": "Show details",
+  "generationHideDetails": "Hide details",
   "generationSuccessRate": {
     "__fn": "(rate) => `Success rate: ${rate}`"
   },
