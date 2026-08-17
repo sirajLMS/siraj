@@ -8,4 +8,5 @@ export const dashboardBooksAndBagsAr: BooksAndBagsLabels = {
   statusOutOfStock: "غير متوفر",
   deleteSuccess: "تم حذف الكتاب بنجاح.",
   deleteFailed: "فشل حذف الكتاب.",
+  ariaDeleteBook: "حذف الكتاب",
 };

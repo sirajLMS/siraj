@@ -1,4 +1,4 @@
-import type { CommonLabels } from "@/shared/locale/types/common";
+import type { CommonLabels } from "../../types/common";
 
 export const commonAr: CommonLabels = {
   title: "سراج",
@@ -31,4 +31,12 @@ export const commonAr: CommonLabels = {
   notSet: "غير محدد",
   cancel: "إلغاء",
   save: "حفظ",
+  ariaClose: "إغلاق",
+  ariaDelete: "حذف",
+  ariaDeleteResource: "حذف المورد",
+  ariaDeleteBook: "حذف الكتاب",
+  ariaDismiss: "إغفاء",
+  ariaMenu: "القائمة",
+  ariaUserProfileMenu: "قائمة ملف المستخدم",
+  ariaProfileSections: "أقسام الملف الشخصي",
 };

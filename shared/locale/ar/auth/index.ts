@@ -1,6 +1,6 @@
-import { authImpersonationAr } from "@/shared/locale/ar/auth/impersonation";
-import { authLoginAr } from "@/shared/locale/ar/auth/login";
-import type { AuthLabels } from "@/shared/locale/types/auth";
+import type { AuthLabels } from "../../types/auth";
+import { authImpersonationAr } from "./impersonation";
+import { authLoginAr } from "./login";
 
 export const authAr: AuthLabels = {
   login: authLoginAr,

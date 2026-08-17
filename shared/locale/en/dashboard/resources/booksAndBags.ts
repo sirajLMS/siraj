@@ -8,4 +8,5 @@ export const dashboardBooksAndBagsEn: BooksAndBagsLabels = {
   statusOutOfStock: "Out of Stock",
   deleteSuccess: "Book deleted successfully.",
   deleteFailed: "Failed to delete book.",
+  ariaDeleteBook: "Delete book",
 };

@@ -1,4 +1,4 @@
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "../../types/errors";
 
 const student = {
   studentNotFound: (id: string) => `الطالب غير موجود: ${id}`,
@@ -32,6 +32,7 @@ const user = {
   userEmailExists: "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
   cannotModifyBankingFields: "لا يمكن تعديل الحقول المصرفية.",
   parentNotFound: "ولي الأمر غير موجود.",
+  userCreateFailed: (email: string) => `فشل إنشاء مستخدم بالبريد الإلكتروني: ${email}`,
 } as const;
 
 const scheduling = {
@@ -158,6 +159,22 @@ export const errorsAr: ErrorsLabels = {
       `${tableName} غير موجود: ${entityId}`,
     invalidFileType: "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و HEIC.",
     invoicePaymentProofPending: "لدى هذه الفاتورة إثبات دفع قيد المراجعة بالفعل.",
+    fileUsageRegistered: "تم تسجيل استخدام الملف بنجاح",
+    fileUsageRegisterFailed: (error: string) => `فشل تسجيل استخدام الملف: ${error}`,
+    fileCurrentlyInUse: "الملف قيد الاستخدام حاليًا",
+    unableToCheckFileUsage: "تعذر التحقق من استخدام الملف",
+    directoryNotFound: "الدليل غير موجود",
+    directoryPermissionsUpdated: "تم تحديث أذونات الدليل بنجاح",
+    directoryPermissionsUpdateFailed: "فشل تحديث أذونات الدليل",
+    permissionsUpdateFailed: (error: string) => `فشل تحديث الأذونات: ${error}`,
+    fileProtectionUpdated: "تم تحديث حماية الملف بنجاح",
+    fileProtectionUpdateFailed: "فشل تحديث حماية الملف",
+    directoryProtectionUpdated: "تم تحديث حماية الدليل بنجاح",
+    directoryProtectionUpdateFailed: "فشل تحديث حماية الدليل",
+    fileOrDirectoryNotFound: "الملف أو الدليل غير موجود",
+    protectionUpdateFailed: (error: string) => `فشل تعيين الحماية: ${error}`,
+    sha256HashMismatch: "عدم تطابق في بصمة SHA-256",
+    invalidUploadRequestBody: "نص طلب الرفع غير صالح",
   },
   meetingProvider: {
     meetingProviderInactive: "موفر الاجتماعات غير نشط.",
@@ -171,6 +188,12 @@ export const errorsAr: ErrorsLabels = {
     invalidReturnPath: "مسار الإرجاع غير صالح. يجب أن يكون مسار الإرجاع ارتباطاً نسبياً.",
     missingSubject: "مطلوب موضوع الانتحال لتفويض النطاق الكامل",
     dwdNotEnabled: "تفويض النطاق الكامل غير مفعّل لحساب الخدمة هذا. اتصل بمسؤول Google Workspace لديك.",
+    slugIsRequired: "المعرّف الفريد (slug) مطلوب",
+    urlAllowlistIsRequired: "قائمة عناوين URL المسموح بها مطلوبة",
+    fieldSchemaIsRequired: "مخطط الحقل (fieldSchema) مطلوب",
+    providerIdIsRequired: "معرّف المزوّد (providerId) مطلوب",
+    isDefaultIsRequired: "القيمة الافتراضية (isDefault) مطلوبة",
+    detailsIsRequired: "التفاصيل (details) مطلوبة",
   },
   parent: {
     alreadyExists: "ملف ولي الأمر لهذا المستخدم موجود بالفعل.",
@@ -302,4 +325,15 @@ export const errorsAr: ErrorsLabels = {
 
   // ─── Offline resolver / notification fallbacks ──────────────────────
   studentNameFallback: "طالب",
+
+  // ─── Data-integrity guards (developer-facing) ────────────────────
+  invalidIdentifierKind: (value: string) => `صفحة حساب غير صالحة: identifierKind غير مدعوم '${value}'`,
+  invalidSupportedDirections: (value: string) => `صفحة حساب غير صالحة: supportedDirections غير مدعوم '${value}'`,
+
+  // ─── Permission override validation errors ──────────────────────
+  invalidOverrideState: "قيمة حالة تجاوز الصلاحية غير صالحة.",
+
+  // ─── Storage bulk operation errors ──────────────────────────────
+  bulkOperationLimitExceeded: (operation: string, limit: number) =>
+    `عملية ${operation} المجموعة محدودة بـ ${limit} عنصر كحد أقصى`,
 };

@@ -1,4 +1,4 @@
-import type { ErrorsLabels } from "@/shared/locale/types/errors";
+import type { ErrorsLabels } from "../../types/errors";
 
 const student = {
   studentNotFound: (id: string) => `Student not found: ${id}`,
@@ -32,6 +32,7 @@ const user = {
   userEmailExists: "User with this email already exists.",
   cannotModifyBankingFields: "Cannot modify banking fields.",
   parentNotFound: "Parent not found.",
+  userCreateFailed: (email: string) => `Failed to create user with email: ${email}`,
 } as const;
 
 const scheduling = {
@@ -158,6 +159,22 @@ export const errorsEn: ErrorsLabels = {
       `${tableName} not found: ${entityId}`,
     invalidFileType: "Invalid file type. Only PDF, JPG, PNG, and HEIC files are allowed.",
     invoicePaymentProofPending: "A payment proof is already pending review for this invoice.",
+    fileUsageRegistered: "File usage registered successfully",
+    fileUsageRegisterFailed: (error: string) => `Failed to register file usage: ${error}`,
+    fileCurrentlyInUse: "File is currently being used",
+    unableToCheckFileUsage: "Unable to check file usage",
+    directoryNotFound: "Directory not found",
+    directoryPermissionsUpdated: "Directory permissions updated successfully",
+    directoryPermissionsUpdateFailed: "Failed to update directory permissions",
+    permissionsUpdateFailed: (error: string) => `Failed to update permissions: ${error}`,
+    fileProtectionUpdated: "File protection updated successfully",
+    fileProtectionUpdateFailed: "Failed to update file protection",
+    directoryProtectionUpdated: "Directory protection updated successfully",
+    directoryProtectionUpdateFailed: "Failed to update directory protection",
+    fileOrDirectoryNotFound: "File or directory not found",
+    protectionUpdateFailed: (error: string) => `Failed to set protection: ${error}`,
+    sha256HashMismatch: "SHA-256 hash mismatch",
+    invalidUploadRequestBody: "Invalid upload request body",
   },
   meetingProvider: {
     meetingProviderInactive: "Meeting provider is inactive.",
@@ -172,6 +189,12 @@ export const errorsEn: ErrorsLabels = {
     missingSubject: "Impersonation subject is required for domain-wide delegation",
     dwdNotEnabled:
       "Domain-Wide Delegation is not enabled for this service account. Contact your Google Workspace admin.",
+    slugIsRequired: "slug is required",
+    urlAllowlistIsRequired: "urlAllowlist is required",
+    fieldSchemaIsRequired: "fieldSchema is required",
+    providerIdIsRequired: "providerId is required",
+    isDefaultIsRequired: "isDefault is required",
+    detailsIsRequired: "details is required",
   },
   parent: {
     alreadyExists: "Parent profile for this user already exists.",
@@ -304,4 +327,15 @@ export const errorsEn: ErrorsLabels = {
 
   // ─── Offline resolver / notification fallbacks ──────────────────────
   studentNameFallback: "Student",
+
+  // ─── Data-integrity guards (developer-facing) ────────────────────
+  invalidIdentifierKind: (value: string) => `Invalid account row: unsupported identifierKind '${value}'`,
+  invalidSupportedDirections: (value: string) => `Invalid account row: unsupported supportedDirections '${value}'`,
+
+  // ─── Permission override validation errors ──────────────────────
+  invalidOverrideState: "Invalid permission override state value.",
+
+  // ─── Storage bulk operation errors ──────────────────────────────
+  bulkOperationLimitExceeded: (operation: string, limit: number) =>
+    `Bulk ${operation} operation limited to ${limit} items maximum`,
 };

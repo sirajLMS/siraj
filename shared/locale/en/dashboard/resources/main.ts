@@ -52,5 +52,6 @@ export const dashboardResourcesEn: ResourcesLabels = {
     uploadRetryFailed: "Failed to upload resource. Please try again.",
     deleteSuccess: "Resource deleted successfully.",
     deleteFailed: "Failed to delete resource.",
+    ariaDeleteResource: "Delete resource",
   },
 };

@@ -6,6 +6,7 @@ export const dashboardStudentPortalDashboardAr: StudentPortalDashboardLabels = {
   nextClass: "الحصة القادمة",
   joinNow: "انضم",
   noUpcomingClasses: "لا توجد حصص قادمة مجدولة",
+  frozen: "مجمّد",
   creditBalance: "الرصيد المتبقي",
   classesRemaining: "الحصص المتبقية",
   classesTotal: "إجمالي الحصص",

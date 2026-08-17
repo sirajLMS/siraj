@@ -52,5 +52,6 @@ export const dashboardResourcesAr: ResourcesLabels = {
     uploadRetryFailed: "فشل رفع المورد. يرجى المحاولة مرة أخرى.",
     deleteSuccess: "تم حذف المورد بنجاح.",
     deleteFailed: "فشل حذف المورد.",
+    ariaDeleteResource: "حذف المورد",
   },
 };

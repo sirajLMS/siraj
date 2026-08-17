@@ -1,4 +1,4 @@
-import type { ProfileParentLabels } from "@/shared/locale/types/profile";
+import type { ProfileParentLabels } from "../../../types/profile";
 
 export const profileParentEn: ProfileParentLabels = {
   ownSubtitle: "View and update your contact and communication details.",

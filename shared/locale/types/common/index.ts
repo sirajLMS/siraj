@@ -38,4 +38,12 @@ export interface CommonLabels {
   readonly errors: string;
   readonly cancel: string;
   readonly save: string;
+  readonly ariaClose: string;
+  readonly ariaDelete: string;
+  readonly ariaDeleteResource: string;
+  readonly ariaDeleteBook: string;
+  readonly ariaDismiss: string;
+  readonly ariaMenu: string;
+  readonly ariaUserProfileMenu: string;
+  readonly ariaProfileSections: string;
 }

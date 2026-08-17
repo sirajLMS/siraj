@@ -1,4 +1,4 @@
-import type { SessionLabels } from "@/shared/locale/types/session";
+import type { SessionLabels } from "../../types/session";
 
 export const sessionEn: SessionLabels = {
   leaveProcessedDescription: successorId => `Leave request processed, rescheduled to session ${successorId}.`,

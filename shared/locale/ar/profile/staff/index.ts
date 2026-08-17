@@ -1,4 +1,4 @@
-import type { ProfileStaffLabels } from "@/shared/locale/types/profile";
+import type { ProfileStaffLabels } from "../../../types/profile";
 
 export const profileStaffAr: ProfileStaffLabels = {
   ownSubtitle: "عرض وتحديث بيانات حسابك ومعلومات الاتصال.",

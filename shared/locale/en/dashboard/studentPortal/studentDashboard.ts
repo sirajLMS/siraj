@@ -6,6 +6,7 @@ export const dashboardStudentPortalDashboardEn: StudentPortalDashboardLabels = {
   nextClass: "Next Class",
   joinNow: "Join",
   noUpcomingClasses: "No upcoming classes scheduled",
+  frozen: "Frozen",
   creditBalance: "Credit Balance",
   classesRemaining: "Classes Remaining",
   classesTotal: "Total Classes",

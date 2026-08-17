@@ -11,6 +11,7 @@ export interface BooksAndBagsLabels {
   readonly statusOutOfStock: string;
   readonly deleteSuccess: string;
   readonly deleteFailed: string;
+  readonly ariaDeleteBook: string;
 }
 
 export interface ResourcesLabels {
@@ -58,5 +59,6 @@ export interface ResourcesLabels {
     readonly uploadRetryFailed: string;
     readonly deleteSuccess: string;
     readonly deleteFailed: string;
+    readonly ariaDeleteResource: string;
   };
 }

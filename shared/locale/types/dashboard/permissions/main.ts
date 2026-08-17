@@ -68,6 +68,7 @@ export interface PermissionsLabels {
   readonly labelExplicitGrant: string;
   readonly labelExplicitDeny: string;
   readonly labelInherited: string;
+  readonly columnStatus: string;
   readonly currentGroups: string;
   readonly noAssignedGroups: string;
   readonly filterPermissions: string;

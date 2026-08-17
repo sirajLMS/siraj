@@ -1,4 +1,4 @@
-import type { SessionLabels } from "@/shared/locale/types/session";
+import type { SessionLabels } from "../../types/session";
 
 export const sessionAr: SessionLabels = {
   leaveProcessedDescription: successorId => `تمت معالجة طلب الإجازة، تمت إعادة الجدولة إلى الجلسة ${successorId}.`,

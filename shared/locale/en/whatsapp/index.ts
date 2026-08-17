@@ -1,4 +1,4 @@
-import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
+import type { WhatsappLabels } from "../../types/whatsapp";
 
 export const whatsappEn: WhatsappLabels = {
   // ─── Page / Tab labels ──────────────────────────────────────────────

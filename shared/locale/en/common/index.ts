@@ -1,4 +1,4 @@
-import type { CommonLabels } from "@/shared/locale/types/common";
+import type { CommonLabels } from "../../types/common";
 
 export const commonEn: CommonLabels = {
   title: "Siraj",
@@ -31,4 +31,12 @@ export const commonEn: CommonLabels = {
   errors: "Errors",
   cancel: "Cancel",
   save: "Save",
+  ariaClose: "Close",
+  ariaDelete: "Delete",
+  ariaDeleteResource: "Delete resource",
+  ariaDeleteBook: "Delete book",
+  ariaDismiss: "Dismiss",
+  ariaMenu: "Menu",
+  ariaUserProfileMenu: "User profile menu",
+  ariaProfileSections: "Profile sections",
 };

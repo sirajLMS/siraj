@@ -72,6 +72,7 @@ export const dashboardPermissionsAr: PermissionsLabels = {
   labelExplicitGrant: "(منح صريح)",
   labelExplicitDeny: "(حظر صريح)",
   labelInherited: "(موروث)",
+  columnStatus: "الحالة",
   currentGroups: "المجموعات الحالية",
   noAssignedGroups: "لا توجد مجموعات معينة",
   filterPermissions: "تصفية الصلاحيات...",

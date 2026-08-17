@@ -1,4 +1,4 @@
-import type { SmsLabels } from "@/shared/locale/types/sms";
+import type { SmsLabels } from "../../types/sms";
 
 export const smsAr: SmsLabels = {
   complaintResponse: {

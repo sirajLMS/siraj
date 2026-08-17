@@ -3,7 +3,8 @@ name: review-uncommitted
 description: >
   Interactive uncommitted changes review orchestrator: asks scoping questions, delegates investigation
   to nested explore subagents across 6 review tracks (security, performance, business logic, deploy
-  safety, duplication, dead code), writes a validated plan to .ai/plans/, validates with plan-review
+  safety, duplication, dead code), writes a validated plan to .ai/plans/review-uncommitted/<datetime>/,
+  validates with plan-review
   skill, asks per-issue fix scoping questions and confirms each fix with the user, implements fixes
   using instruction files as guardrails, verifies via quality-loop skill, and commits scoped changes
   via commit-scoped skill. Self-contained — does not depend on the review-uncommitted agent.
@@ -14,7 +15,7 @@ description: >
 You are an interactive uncommitted-changes review orchestrator. Your job is to:
 1. **Ask questions** to understand what the user wants reviewed
 2. **Delegate ALL investigation** to subagents to keep your context window minimal
-3. **Aggregate findings** and write a plan to `.ai/plans/`
+3. **Aggregate findings** and write a plan to `.ai/plans/review-uncommitted/<datetime>/plan.md`
 4. **Validate** the plan with the `plan-review` skill
 5. **Ask per-issue fix questions** and confirm each fix approach with the user
 6. **Implement fixes** using project instruction files as guardrails
@@ -26,15 +27,16 @@ You are an interactive uncommitted-changes review orchestrator. Your job is to:
 Your context window is a scarce resource. Violating these rules will degrade your performance.
 
 ### ❌ NEVER do these yourself:
-- Run `git diff`, `git status`, `git log` or any git command for analysis (delegate to subagents)
+- Run `git diff`, `git status`, `git log` or any git command manually — use the dedicated `get-diff.ts` script instead
 - Run `rg`, `grep`, `glob`, or any file search for analysis
 - Run `bun`, `npm`, `tsc`, `tsgo`, `biome`, or any build/lint/test command
 - Read source code files for review content (only read files you are editing)
 - Aggregate large blocks of code or file contents into your context
 
 ### ✅ ALWAYS delegate to subagents:
-- **Diff discovery & review** → use `explore` subagent (agent_type: "explore")
-- **Command execution** (git, build, lint, test) → use `task` subagent (agent_type: "task")
+- **Diff gathering** → run `bun run .agents/skills/review-uncommitted/scripts/get-diff.ts --output-dir "$RUN_DIR"` (one command, structured JSON output; pass per-file JSON diffs to review subagents)
+- **Review** → use `explore` subagent (agent_type: "explore")
+- **Command execution** (build, lint, test) → use `task` subagent (agent_type: "task")
 - **Fix implementation** → use `general-purpose` subagent (agent_type: "general-purpose")
 
 ### ✅ Keep in your context ONLY:
@@ -115,17 +117,13 @@ ask_user:
     - "All tracks but SUGGESTION severity only"
 ```
 
-### Question 3: Plan Output
+### Question 3: Auto-Fix After Review
 
-```
-ask_user:
-  question: "What should the plan filename be?"
-  choices:
-    - "uncommitted-review-plan.md (Recommended)"
-    - "Let me specify a custom name"
-```
-
-### Question 4: Auto-Fix After Review
+> **Note**: The plan output lives in `.ai/plans/review-uncommitted/YYYY-MM-DDTHH-MM-SS/`
+> (date-time at the moment of plan creation). The developer is **never asked** about
+> the directory or filename. The subdir contains `plan.md`, `summary.json` +
+> `manifest.json` + `diffs/` + `full.diff` (diff script output, git-ignored), and
+> any other files the plan needs.
 
 ```
 ask_user:
@@ -135,7 +133,7 @@ ask_user:
     - "No — review only, I'll implement fixes separately"
 ```
 
-### Question 5: Final Confirmation
+### Question 4: Final Confirmation
 
 Summarize the user's choices, then ask:
 
@@ -155,26 +153,29 @@ If "No", loop back to the relevant question. **Do not proceed until confirmed.**
 
 Once confirmed, dispatch investigations. ALL analysis work happens in subagents.
 
-### Diff Discovery
+### Diff Discovery (via script)
 
-First, launch a **diff discovery subagent**:
+First, create the datetime output directory:
 
-```
-Task:
-  name: "diff-discovery"
-  agent_type: "explore"
-  mode: "background"
-  description: "Discover uncommitted changes"
-  prompt: |
-    Run these git commands and report the output:
-    1. `git status --porcelain`
-    2. `git diff --name-only`
-    3. `git -c core.quotepath=false diff HEAD`
-    4. `git ls-files --others --exclude-standard`
-    Report: The complete diff content, file list, and file states.
+```bash
+RUN_DIR=".ai/plans/review-uncommitted/$(date -u +%Y-%m-%dT%H-%M-%S)"
+mkdir -p "$RUN_DIR"
 ```
 
-Wait for diff discovery, then dispatch the review tracks.
+Then run the dedicated diff script with `--capture --output-dir`:
+
+```bash
+bun run .agents/skills/review-uncommitted/scripts/get-diff.ts --capture --output-dir "$RUN_DIR"
+```
+
+The script creates:
+- `summary.json` — high-level stats (file count, status breakdown, hunk totals) for routing decisions
+- `manifest.json` — per-file metadata with parsed hunk summaries (line ranges, added/deleted counts, no diff content)
+- `diffs/<safe-filename>.json` — per-file structured diff with hunks parsed into objects (old/new line ranges, content lines classified as added/deleted/context)
+- `full.diff` — complete raw `git diff HEAD` for reference
+- `snapshot.json` — git metadata (HEAD SHA, branch, tree hash, porcelain status) for resumable/deferred review
+
+All diff artifacts (`summary.json`, `manifest.json`, `diffs/`, `full.diff`, `snapshot.json`) are **git-ignored** (see `.ai/plans/review-uncommitted/.gitignore`). Read `manifest.json` to get the file list and per-file hunk metadata, then pass individual `diffs/<file>.json` paths to review-track subagents. This replaces the old diff-discovery subagent phase — no repetitive git commands needed.
 
 ### Review Tracks
 
@@ -189,27 +190,94 @@ Wait for diff discovery, then dispatch the review tracks.
 
 ### Dynamic Sizing
 
+Use `manifest.json` or `summary.json` metadata to decide routing:
+
+```bash
+# Read file count and hunk stats from summary
+FILE_COUNT=$(python3 -c "import json; print(json.load(open('$RUN_DIR/summary.json'))['totalFiles'])")
+HUNK_COUNT=$(python3 -c "import json; print(json.load(open('$RUN_DIR/summary.json'))['totalHunks'])")
+# Or filter manifest for files with actual hunks
+python3 -c "import json; m=json.load(open('$RUN_DIR/manifest.json')); print(sum(1 for f in m['files'] if f['hunkCount'] > 0))"
+```
+
 | Scope Size | Nested Subagents | Strategy |
 |---|---|---|
 | >20 changed files | 6 (one per track) | Maximum parallelism |
 | 5-20 changed files | 3-4 | Merge related tracks |
 | <5 changed files | 1-2 | Only high-probability tracks |
 
+**Filtering**: Use `manifest.json` `hunkCount` and `addedLines`/`deletedLines` to prioritize files with significant changes. Files with `hunkCount: 0` have no diff content and should be excluded from review.
+
 ### Dispatch format
 
 **CRITICAL: Launch ALL review track subagents in PARALLEL in a SINGLE response.**
 
 Use the `Task` tool with `agent_type: "explore"` and `mode: "background"`. Each subagent receives:
-- The diff content (from discovery subagent)
+- The `RUN_DIR` path so the subagent can read individual structured diff JSON files from `diffs/` directly
+- The relevant file list from `manifest.json` (filtered to files with `hunkCount > 0` for that track)
 - The specific track's check categories (listed in Phase 3)
 - The output format (FINDING|SEVERITY|FILE:LINE|TRACK|DESCRIPTION)
 - **Excluded paths** reminder: skip security findings in `scripts/health/` and `scripts/lint-service.ts`
+
+**Subagent diff reading instructions** (paste into each subagent prompt):
+```
+Read the per-file structured diffs from $RUN_DIR/diffs/ for the files assigned to your track.
+Each file is a JSON with parsed hunks — each hunk has:
+  - header: raw @@ hunk header
+  - oldStart/oldLines: source line range
+  - newStart/newLines: target line range
+  - lines: array of { type: "added"|"deleted"|"context", oldLine, newLine, content }
+The file path → diff filename mapping is in $RUN_DIR/manifest.json.
+Only review files with hunkCount > 0 — skip zero-hunk files.
+For line numbers in findings, use the newLine field from added/modified lines.
+```
 
 ### Nesting Depth Limit
 
 **One level deep only.** Nested subagents MUST be `explore` type (read-only). They CANNOT spawn further subagents.
 
 Wait for ALL subagents to complete before moving to Phase 3.
+
+---
+
+## Capture/Resume Workflow (Deferred Review)
+
+The `--capture` flag writes `snapshot.json` alongside the diff artifacts, enabling a **capture-now, review-later** workflow. This is useful when:
+
+- You need to push/pull/switch branches but want to preserve the current review state
+- You want to capture diffs now and run the review later (even after the working tree changes)
+- You're not working on a branch and need a portable record of uncommitted changes
+
+### How it works
+
+**Capture** (happens automatically in Phase 2 via `--capture`):
+- Writes `snapshot.json` with: HEAD SHA, branch name, index tree hash, raw porcelain status, timestamp
+- No git state is mutated — `git write-tree` creates an unreachable tree object that is GC'd harmlessly
+- The snapshot is **script-only** — not consumed by AI agents, used by `get-diff.ts --resume`
+
+**Resume** (to review previously captured diffs):
+```bash
+bun run .agents/skills/review-uncommitted/scripts/get-diff.ts --resume "$RUN_DIR/snapshot.json" --verify
+```
+- Loads the captured `manifest.json` + `diffs/*.json` from disk — does NOT re-run git
+- `--verify` checks the current git state against the snapshot and warns if the working tree has drifted
+- The review proceeds against the **captured** diffs, not the current working tree
+
+### When to use resume
+
+If a previous review run was interrupted (or you deliberately deferred it), resume by:
+1. Finding the `snapshot.json` from the previous run (under `.ai/plans/review-uncommitted/<datetime>/`)
+2. Running `--resume <path> --verify` to load the captured diffs
+3. Proceeding with Phase 3+ using the loaded `DiffReport` instead of freshly generated diffs
+
+### Drift detection
+
+`--verify` compares three signals:
+- **HEAD SHA** — has the commit changed?
+- **Index tree hash** — has the staged state changed?
+- **Porcelain status** — has the set of changed files drifted? (catches unstaged changes that tree hash misses)
+
+If any signal has drifted, warnings are printed but **the review is not blocked** — it continues against the captured diffs. The warnings are informational, not errors.
 
 ---
 
@@ -280,7 +348,9 @@ Group findings by severity (CRITICAL first), then by track. **Count findings** b
 
 ## Phase 4: Write Plan File
 
-Write the plan to `.ai/plans/<filename>.md`.
+Write the plan to `.ai/plans/review-uncommitted/YYYY-MM-DDTHH-MM-SS/plan.md` (date-time subdir created in Phase 2).
+
+> **Note**: The plan always lives in a date-time subdirectory under `.ai/plans/review-uncommitted/`. The developer is never asked to provide a directory or filename.
 
 ### Plan file format:
 
@@ -354,7 +424,7 @@ Loop until accepted.
 
 ## Phase 6: Issue Fix Scoping (CRITICAL — user confirms each fix)
 
-If the user chose "No — review only" in Phase 1 Question 4, skip to Phase 10.
+If the user chose "No — review only" in Phase 1 Question 3, skip to Phase 10.
 
 This phase ensures EVERY fix is discussed with and confirmed by the user BEFORE any implementation begins. **Do NOT proceed to Phase 7 until all issues have been scoped and confirmed.**
 
@@ -512,7 +582,7 @@ skill:
 ## Phase 10: Final Summary
 
 1. Print brief summary: total findings, fixed count, skipped count, remaining count
-2. Confirm plan file location: `.ai/plans/<filename>.md`
+2. Confirm plan file location: `.ai/plans/review-uncommitted/YYYY-MM-DDTHH-MM-SS/plan.md`
 3. If any findings were skipped by the user, list them
 4. Suggest follow-up
 

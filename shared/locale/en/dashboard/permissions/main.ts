@@ -72,6 +72,7 @@ export const dashboardPermissionsEn: PermissionsLabels = {
   labelExplicitGrant: "(Explicit Grant)",
   labelExplicitDeny: "(Explicit Deny)",
   labelInherited: "(Inherited)",
+  columnStatus: "Status",
   currentGroups: "Current Groups",
   noAssignedGroups: "No assigned groups",
   filterPermissions: "Filter permissions...",

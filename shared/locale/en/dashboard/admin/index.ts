@@ -1,4 +1,4 @@
-import type { AdminDashboardLabels } from "@/shared/locale/types/dashboard/admin";
+import type { AdminDashboardLabels } from "../../../types/dashboard/admin";
 
 export const dashboardAdminEn: AdminDashboardLabels = {
   // ─── Static strings ────────────────────────────────────────────────

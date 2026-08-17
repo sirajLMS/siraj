@@ -1,4 +1,4 @@
-import type { ProfileTeacherLabels } from "@/shared/locale/types/profile";
+import type { ProfileTeacherLabels } from "../../../types/profile";
 
 export const profileTeacherAr: ProfileTeacherLabels = {
   ownSubtitle: "عرض وتحديث ملفك التدريسي وبيانات الاتصال.",

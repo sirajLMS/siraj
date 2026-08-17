@@ -4,6 +4,7 @@ export interface StudentPortalDashboardLabels {
   readonly nextClass: string;
   readonly joinNow: string;
   readonly noUpcomingClasses: string;
+  readonly frozen: string;
   readonly creditBalance: string;
   readonly classesRemaining: string;
   readonly classesTotal: string;

@@ -93,6 +93,22 @@ export interface FileErrors {
   readonly recordNotFound: (params: { tableName: string; entityId: string }) => string;
   readonly invalidFileType: string;
   readonly invoicePaymentProofPending: string;
+  readonly fileUsageRegistered: string;
+  readonly fileUsageRegisterFailed: (error: string) => string;
+  readonly fileCurrentlyInUse: string;
+  readonly unableToCheckFileUsage: string;
+  readonly directoryNotFound: string;
+  readonly directoryPermissionsUpdated: string;
+  readonly directoryPermissionsUpdateFailed: string;
+  readonly permissionsUpdateFailed: (error: string) => string;
+  readonly fileProtectionUpdated: string;
+  readonly fileProtectionUpdateFailed: string;
+  readonly directoryProtectionUpdated: string;
+  readonly directoryProtectionUpdateFailed: string;
+  readonly fileOrDirectoryNotFound: string;
+  readonly protectionUpdateFailed: (error: string) => string;
+  readonly sha256HashMismatch: string;
+  readonly invalidUploadRequestBody: string;
 }
 
 /**
@@ -110,6 +126,12 @@ export interface MeetingProviderErrors {
   readonly invalidReturnPath: string;
   readonly missingSubject: string;
   readonly dwdNotEnabled: string;
+  readonly slugIsRequired: string;
+  readonly urlAllowlistIsRequired: string;
+  readonly fieldSchemaIsRequired: string;
+  readonly providerIdIsRequired: string;
+  readonly isDefaultIsRequired: string;
+  readonly detailsIsRequired: string;
 }
 
 /**
@@ -174,6 +196,7 @@ export interface UserErrors {
   readonly userEmailExists: string;
   readonly cannotModifyBankingFields: string;
   readonly parentNotFound: string;
+  readonly userCreateFailed: (email: string) => string;
 }
 
 /**
@@ -355,4 +378,14 @@ export interface ErrorsLabels
 
   // ─── Offline resolver / notification fallbacks ──────────────────────
   readonly studentNameFallback: string;
+
+  // ─── Data-integrity guards (developer-facing) ────────────────────
+  readonly invalidIdentifierKind: (value: string) => string;
+  readonly invalidSupportedDirections: (value: string) => string;
+
+  // ─── Permission override validation errors ──────────────────────
+  readonly invalidOverrideState: string;
+
+  // ─── Storage bulk operation errors ──────────────────────────────
+  readonly bulkOperationLimitExceeded: (operation: string, limit: number) => string;
 }
