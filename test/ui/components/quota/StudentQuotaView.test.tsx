@@ -209,66 +209,39 @@ const emptyLedgerMock = {
   },
 };
 
+type MockEntry = typeof meQueryMock | typeof studentQuotasMock | typeof ledgerMock;
+
+async function renderAndAssertVisible(mocks: MockEntry[], expectedText: string): Promise<void> {
+  renderWithWrapper(<StudentQuotaAudienceView t={t} />, {
+    locale: "en",
+    viewport: "desktop",
+    mocks: [meQueryMock, ...mocks],
+  });
+  await waitFor(() => {
+    expect(screen.getByText(expectedText)).toBeVisible();
+  });
+}
+
 describe("StudentQuotaView", () => {
   afterEach(() => cleanup());
 
   test("renders quota balance cards for student's quotas", async () => {
-    renderWithWrapper(<StudentQuotaAudienceView t={t} />, {
-      locale: "en",
-      viewport: "desktop",
-      mocks: [meQueryMock, studentQuotasMock, ledgerMock],
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText("Summer Package")).toBeVisible();
-    });
+    await renderAndAssertVisible([studentQuotasMock, ledgerMock], "Summer Package");
   });
 
   test("renders ledger entries section", async () => {
-    renderWithWrapper(<StudentQuotaAudienceView t={t} />, {
-      locale: "en",
-      viewport: "desktop",
-      mocks: [meQueryMock, studentQuotasMock, ledgerMock],
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(t.audience.recentLedgerEntries)).toBeVisible();
-    });
+    await renderAndAssertVisible([studentQuotasMock, ledgerMock], t.audience.recentLedgerEntries);
   });
 
   test("renders empty state when no quotas assigned", async () => {
-    renderWithWrapper(<StudentQuotaAudienceView t={t} />, {
-      locale: "en",
-      viewport: "desktop",
-      mocks: [meQueryMock, emptyStudentQuotasMock, emptyLedgerMock],
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(t.audience.noQuotaAssigned)).toBeVisible();
-    });
+    await renderAndAssertVisible([emptyStudentQuotasMock, emptyLedgerMock], t.audience.noQuotaAssigned);
   });
 
   test("renders no ledger entries message when ledger is empty", async () => {
-    renderWithWrapper(<StudentQuotaAudienceView t={t} />, {
-      locale: "en",
-      viewport: "desktop",
-      mocks: [meQueryMock, studentQuotasMock, emptyLedgerMock],
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(t.audience.noLedgerEntries)).toBeVisible();
-    });
+    await renderAndAssertVisible([studentQuotasMock, emptyLedgerMock], t.audience.noLedgerEntries);
   });
 
   test("renders studentTitle as page heading", async () => {
-    renderWithWrapper(<StudentQuotaAudienceView t={t} />, {
-      locale: "en",
-      viewport: "desktop",
-      mocks: [meQueryMock, studentQuotasMock, ledgerMock],
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(t.audience.studentTitle)).toBeVisible();
-    });
+    await renderAndAssertVisible([studentQuotasMock, ledgerMock], t.audience.studentTitle);
   });
 });
