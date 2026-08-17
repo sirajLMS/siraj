@@ -84,6 +84,7 @@ The backend follows a consistent pattern for defining and using types across all
 ## Important References
 
 - `docs/services/meeting-providers.md` - Meeting provider adapter/factory pattern reference (auto URL generation for Zoom, Google Meet, Microsoft Teams)
+- `docs/services/zoom-token-types.md` - Zoom token kinds (SDK JWT, OBF, ZAK, S2S OAuth, per-user OAuth) semantics and constraints
 
 ## WhatsApp Cloud API Integration
 

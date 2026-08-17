@@ -422,6 +422,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/graphql/dataloader-batching.md` - Pothos DataLoader batching pattern reference
 - `docs/services/entity-cache-service.md` - Entity Cache Service pattern reference
 - `docs/services/meeting-providers.md` - Meeting provider adapter/factory pattern reference (auto URL generation)
+- `docs/services/zoom-token-types.md` - Zoom token kinds (SDK JWT, OBF, ZAK, S2S OAuth, per-user OAuth) semantics and constraints
 - `docs/services/whatsapp-cloud-api.md` - WhatsApp Cloud API integration reference (adapter, factory, webhook, dispatch, schema, opt-in, frontend)
 - `docs/services/general-user-creation.md` - General user creation pattern (createUserOfType null extension, specialized group filtering, cache eviction)
 - `docs/billing/quota-system.md` - Quota System: append-only ledger, FIFO selection, periodic rollover, on-demand scheduling integration
@@ -449,6 +450,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/graphql/pothos-field-factories.md` - Pothos field helpers, input field helpers, and query field factory idioms
 - `docs/architecture/import-export-conventions.md` - Import/export barrel conventions, `export *` rules, collision registry, re-export elimination summary
 - `docs/quality/linting-rules.md` - Oxlint & ESLint/sonarjs lint rule fix recipes and config overrides
+- `docs/workflows/plan-doc-reconciliation.md` - Plan-vs-canonical-doc reconciliation workflow (docs-only plan pattern, anchor-on-text, outcome-pointer rule, known-open-issues propagation, phantom-spec-code handling, markdown link-integrity loop)
 
 
 ## Linting Rules

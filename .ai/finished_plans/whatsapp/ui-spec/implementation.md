@@ -24,7 +24,7 @@ The design covers: component architecture, data flow, state management, ViewMode
 - **User experience**: Smooth transitions, clear feedback, accessible, responsive
 - **Maintainability**: Use shared components, no dead code, clean architecture
 - **Testability**: High ViewModel + component test coverage
-- **Mobile parity**: Full admin CRUD on mobile (reverses Q10 read-only decision)
+- **Mobile parity**: Full admin CRUD on mobile (reverses v1 read-only decision)
 
 ### Key Design Decisions
 
@@ -36,8 +36,8 @@ The design covers: component architecture, data flow, state management, ViewMode
 **Decision:** Adopt client-side tab URL sync (Pattern B client-side useSearchParams)
 **Rationale:** Deep-linking is a user requirement (UI-REQ-4). Per-tab Suspense enables independent loading. Per-tab RequirePermission enables fine-grained access control. Server reads of `searchParams` are NOT used — the URL is read purely client-side, so this stays compatible with the existing component tree.
 
-### Decision: Reversal of Mobile Read-Only (Q10)
-**Context:** The parent plan (Q10) intentionally made mobile Numbers tab read-only. Research shows admin users need full CRUD on mobile.
+### Decision: Reversal of Mobile Read-Only
+**Context:** The parent plan intentionally made mobile Numbers tab read-only in v1. Research and follow-up review show admin users need full CRUD on mobile. (Note: earlier drafts of this plan cited a "Q10" spec code from the parent plan — that citation was incorrect, as no such code exists in the parent plan or canonical docs; see `.ai/analysis/whatsapp/discrepancies.md` D4.)
 **Options Considered:**
 1. Keep mobile read-only — Pros: minimal effort / Cons: mobile admins cannot manage accounts
 2. Full mobile CRUD with dialogs — Pros: parity, production-ready / Cons: more components
@@ -95,7 +95,7 @@ app/(dashboard)/settings/whatsapp/
           ├─ WhatsappTabNav                     [NEW: GenericTabNav via ResponsiveViewSwitch]
           └─ WhatsappTabPanels                   [NEW: Per-tab Suspense + RequirePermission]
               ├─ <Suspense fallback={NumbersSkeleton}>
-              │     <RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>
+              │     <RequirePermission permissions={AppPermission.WHATSAPP_VIEW}>
               │       <NumbersTabContent />
               │     </RequirePermission>
               │   </Suspense>
@@ -128,6 +128,7 @@ app/(dashboard)/settings/whatsapp/
 | `frontend/common/views/dashboard/settings/whatsapp/whatsappQualityLabel.ts` | Helper: map quality enum → i18n key |
 | `frontend/common/views/dashboard/settings/whatsapp/whatsappTierLabel.ts` | Helper: map tier enum → i18n key |
 | `frontend/common/views/dashboard/settings/whatsapp/whatsappTemplateStatusLabels.ts` | Helper: map template status enum → i18n key |
+| `frontend/common/views/dashboard/settings/whatsapp/whatsappThroughputLabel.ts` | Helper: map `WhatsappThroughputLevel` enum → i18n key (per `docs/frontend/whatsapp-ui-patterns.md:107-115`; 4th of four label helpers) |
 | `frontend/common/graphql/sharedDocuments/whatsapp/whatsapp.documents.ts` | MODIFY — add `whatsappTemplatesQueryDocument` (persisted templates) ⚠️ Backend resolver does not exist yet — must be created first or use sync mutation snapshot |
 | `test/ui/components/whatsappCreateAccountDialog.test.tsx` | Create account dialog tests |
 | `test/ui/components/whatsappEditNameDialog.test.tsx` | Edit name dialog tests |
@@ -140,7 +141,7 @@ app/(dashboard)/settings/whatsapp/
 
 #### Files to Modify
 
-> **Admin-only features wrapper:** All admin-only affordances — the create account dialog (CreateAccountDialog), the delete account action, the edit-credentials token/PIN dialogs, and the consolidated admin opt-in history view — MUST be wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>`. These sections are gated independently from the page-level `WHATSAPP_VIEW` gate so that staff with only `WHATSAPP_VIEW` (or non-admin roles that still reach the Settings page) cannot invoke mutating admin actions even if the tab content itself renders.
+> **Admin-only features wrapper:** All admin-only affordances — the create account dialog (CreateAccountDialog), the delete account action, the edit-credentials token/PIN dialogs, and the consolidated admin opt-in history view — MUST be wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_CONFIG_MANAGE}>`. These sections are gated independently from the page-level `WHATSAPP_VIEW` gate so that staff with only `WHATSAPP_VIEW` (or non-admin roles that still reach the Settings page) cannot invoke mutating admin actions even if the tab content itself renders.
 
 | File | Changes |
 |---|---|
@@ -152,18 +153,18 @@ app/(dashboard)/settings/whatsapp/
 | `whatsappConfig.desktop.tsx` | Remove (replaced by WhatsappTabPanels + per-tab lazy loading) |
 | `whatsappConfig.mobile.tsx` | Remove (replaced by WhatsappTabPanels + per-tab lazy loading) |
 | `tabs/shared/NumberCard.tsx` | Replace raw enum values with localized labels (qualityLabel, tierLabel helpers), add coexistence/unverified warnings, use StatusBadge |
-| `tabs/shared/OptInTabContent.tsx` | Add non-admin history table, filters, bulk actions; wrap the admin consolidated view in `<RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>` |
+| `tabs/shared/OptInTabContent.tsx` | Add non-admin history table, filters, bulk actions; wrap the admin consolidated view in `<RequirePermission permissions={AppPermission.WHATSAPP_CONFIG_MANAGE}>` |
 | `tabs/shared/TemplatesTabContent.tsx` | Use persisted templates query (⚠️ backend resolver does not exist — create first or use sync mutation snapshot), add body preview, use template status labels, add error/retry state |
 | `tabs/shared/statusChipColor.ts` | Add PAUSED, PENDING_DELETION, DISABLED cases; or deprecate in favor of whatsappStatusBadge config |
 | `tabs/components/NumbersSnackbar.tsx` | Deprecate/replace with FormSuccessSnackbar + FormErrorSnackbar in container |
 | `tabs/whatsappTabSharedProps.ts` | Update with new ViewModel properties (creating, deletingId, updatingId, validation functions) |
 | `types/whatsappSettingsTypes.ts` | Activate dead types (WhatsappAccountFormValues, ApiFormValues, CredentialFormValues) with validation |
-| `frontend/desktop/.../NumbersTab.desktop.tsx` | Add "Add Account" button + CreateAccountDialog (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>`), wire EditNameDialog, pass account name to DeleteConfirmDialog, add per-row loading |
+| `frontend/desktop/.../NumbersTab.desktop.tsx` | Add "Add Account" button + CreateAccountDialog (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_CONFIG_MANAGE}>`), wire EditNameDialog, pass account name to DeleteConfirmDialog, add per-row loading |
 | `frontend/desktop/.../TemplatesTab.desktop.tsx` | Use AppDataGrid with expandable rows for template body preview |
-| `frontend/desktop/.../OptInTab.desktop.tsx` | Add admin consolidated table view (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>`), add non-admin history table |
-| `frontend/mobile/.../NumbersTab.mobile.tsx` | Add full CRUD: action menu (Bottom Sheet), credential dialogs (edit token/PIN wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>`), delete confirmation (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>`), create account (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>`), per-row loading |
+| `frontend/desktop/.../OptInTab.desktop.tsx` | Add admin consolidated table view (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_CONFIG_MANAGE}>`), add non-admin history table |
+| `frontend/mobile/.../NumbersTab.mobile.tsx` | Add full CRUD: action menu (Bottom Sheet), credential dialogs (edit token/PIN wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_CONFIG_MANAGE}>`), delete confirmation (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_CONFIG_MANAGE}>`), create account (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_CONFIG_MANAGE}>`), per-row loading |
 | `frontend/mobile/.../TemplatesTab.mobile.tsx` | Use MobileCardList with expandable cards for template body preview |
-| `frontend/mobile/.../OptInTab.mobile.tsx` | Add non-admin history table (mobile card format), admin consolidated list (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>`) |
+| `frontend/mobile/.../OptInTab.mobile.tsx` | Add non-admin history table (mobile card format), admin consolidated list (wrapped in `<RequirePermission permissions={AppPermission.WHATSAPP_CONFIG_MANAGE}>`) |
 | `shared/locale/types/whatsapp/index.ts` | Add new keys for create/edit form labels, validation messages, delete confirm with interpolation, permission denied, retry, error boundary |
 | `shared/locale/en/whatsapp/index.ts` | Implement new keys in English |
 | `shared/locale/ar/whatsapp/index.ts` | Implement new keys in Arabic |
@@ -177,7 +178,7 @@ app/(dashboard)/settings/whatsapp/
 | Route | Type | Purpose | Permission | Suspense | Error Boundary |
 |---|---|---|---|---|---|
 | `/settings/whatsapp` | Server | WhatsApp settings page (default tab) | `WHATSAPP_VIEW` (page gate) | loading.tsx | error.tsx |
-| `/settings/whatsapp?tab=numbers` | Client-synced | Numbers tab | `AppPermission.WHATSAPP_MANAGE` (per-tab guard) | NumbersSkeleton | per-tab error |
+| `/settings/whatsapp?tab=numbers` | Client-synced | Numbers tab | `AppPermission.WHATSAPP_VIEW` (per-tab guard — view is the least-privileged entry; CRUD gating is component-level) | NumbersSkeleton | per-tab error |
 | `/settings/whatsapp?tab=templates` | Client-synced | Templates tab | `AppPermission.WHATSAPP_TEMPLATES_MANAGE` (per-tab guard) | TemplatesSkeleton | per-tab error |
 | `/settings/whatsapp?tab=optin` | Client-synced | Opt-in tab | `AppPermission.WHATSAPP_VIEW` (per-tab guard — least-privileged, user-facing) | OptInSkeleton | per-tab error |
 
@@ -188,16 +189,16 @@ WhatsApp Settings remains in the **Integrations** group under the **Settings** p
 
 | Tab / Feature | SUPER_ADMIN | ACADEMY_ADMIN | STAFF | TEACHER | PARENT | SUPERVISOR | STUDENT | GUEST |
 |---|---|---|---|---|---|---|---|---|
-| Numbers tab (view) | ✅ | ✅ | ✅ (if WHATSAPP_MANAGE — per-tab guard) | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Numbers tab (CRUD) | ✅ | ✅ | ✅ (if WHATSAPP_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Numbers tab (view) | ✅ | ✅ | ✅ (if WHATSAPP_CONFIG_MANAGE — per-tab guard) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Numbers tab (CRUD) | ✅ | ✅ | ✅ (if WHATSAPP_CONFIG_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Templates tab (view) | ✅ | ✅ | ✅ (if WHATSAPP_TEMPLATES_MANAGE — per-tab guard) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Templates tab (sync) | ✅ | ✅ | ✅ (if WHATSAPP_TEMPLATES_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Opt-in tab (admin view) | ✅ | ✅ | ✅ (if WHATSAPP_VIEW — per-tab guard, least-privileged) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Opt-in tab (personal) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Create account | ✅ | ✅ | ✅ (if WHATSAPP_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Edit name | ✅ | ✅ | ✅ (if WHATSAPP_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Delete account | ✅ | ✅ | ✅ (if WHATSAPP_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Edit credentials | ✅ | ✅ | ✅ (if WHATSAPP_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Create account | ✅ | ✅ | ✅ (if WHATSAPP_CONFIG_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Edit name | ✅ | ✅ | ✅ (if WHATSAPP_CONFIG_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Delete account | ✅ | ✅ | ✅ (if WHATSAPP_CONFIG_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Edit credentials | ✅ | ✅ | ✅ (if WHATSAPP_CONFIG_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Sync from Meta | ✅ | ✅ | ✅ (if WHATSAPP_TEMPLATES_MANAGE) | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ### Per-Audience Rendering
@@ -206,7 +207,7 @@ WhatsApp Settings remains in the **Integrations** group under the **Settings** p
 |---|---|---|---|---|
 | SUPER_ADMIN | All 3 tabs | Full CRUD, all accounts | Sync + preview | Admin: all users' opt-in |
 | ACADEMY_ADMIN | All 3 tabs | Full CRUD, all accounts | Sync + preview | Admin: all users' opt-in |
-| STAFF (with WHATSAPP_VIEW page-gate) | Numbers tab visible only if `WHATSAPP_MANAGE`; Templates tab visible only if `WHATSAPP_TEMPLATES_MANAGE`; Opt-in always visible | Full CRUD (gated by `WHATSAPP_MANAGE` per-tab guard) | Sync + preview (gated by `WHATSAPP_TEMPLATES_MANAGE` per-tab guard) | Admin: all users' opt-in (per-tab guard `WHATSAPP_VIEW`) |
+| STAFF (with WHATSAPP_VIEW page-gate) | Numbers tab visible only if `WHATSAPP_CONFIG_MANAGE`; Templates tab visible only if `WHATSAPP_TEMPLATES_MANAGE`; Opt-in always visible | Full CRUD (gated by `WHATSAPP_CONFIG_MANAGE` per-tab guard) | Sync + preview (gated by `WHATSAPP_TEMPLATES_MANAGE` per-tab guard) | Admin: all users' opt-in (per-tab guard `WHATSAPP_VIEW`) |
 | TEACHER | Opt-in only | Hidden | Hidden | Personal opt-in toggle + history |
 | PARENT | Opt-in only | Hidden | Hidden | Personal opt-in toggle + history |
 | SUPERVISOR | Opt-in only | Hidden | Hidden | Personal opt-in toggle + history |
@@ -236,16 +237,16 @@ WhatsApp Settings remains in the **Integrations** group under the **Settings** p
 | Route / Component | Permission | Failure Behavior |
 |---|---|---|
 | `/settings/whatsapp` (page) | `WHATSAPP_VIEW` (page gate — kept as the entry requirement) | Redirect to settings home with toast |
-| Numbers tab (per-tab guard) | `AppPermission.WHATSAPP_MANAGE` | Tab hidden from nav; direct URL → "Permission Denied" |
+| Numbers tab (per-tab guard) | `AppPermission.WHATSAPP_VIEW` (view) + `WHATSAPP_CONFIG_MANAGE` (CRUD gating via nested RequirePermission) | Tab hidden from nav; direct URL → "Permission Denied" |
 | Templates tab (per-tab guard) | `AppPermission.WHATSAPP_TEMPLATES_MANAGE` | Tab hidden from nav |
 | Opt-in tab (per-tab guard) | `AppPermission.WHATSAPP_VIEW` (least-privileged — user-facing toggle stays reachable) | Tab hidden |
-| Create account button | `AppPermission.WHATSAPP_MANAGE` (RequirePermission wrapper) | Button hidden |
-| Edit name menu item | `AppPermission.WHATSAPP_MANAGE` (RequirePermission wrapper) | Menu item hidden |
-| Delete account menu item | `AppPermission.WHATSAPP_MANAGE` (RequirePermission wrapper) | Menu item hidden |
-| Edit token dialog | `AppPermission.WHATSAPP_MANAGE` (RequirePermission wrapper) | Dialog not accessible |
-| Edit PIN dialog | `AppPermission.WHATSAPP_MANAGE` (RequirePermission wrapper) | Dialog not accessible |
+| Create account button | `AppPermission.WHATSAPP_CONFIG_MANAGE` (RequirePermission wrapper) | Button hidden |
+| Edit name menu item | `AppPermission.WHATSAPP_CONFIG_MANAGE` (RequirePermission wrapper) | Menu item hidden |
+| Delete account menu item | `AppPermission.WHATSAPP_CONFIG_MANAGE` (RequirePermission wrapper) | Menu item hidden |
+| Edit token dialog | `AppPermission.WHATSAPP_CONFIG_MANAGE` (RequirePermission wrapper) | Dialog not accessible |
+| Edit PIN dialog | `AppPermission.WHATSAPP_CONFIG_MANAGE` (RequirePermission wrapper) | Dialog not accessible |
 | Sync from Meta button | `AppPermission.WHATSAPP_TEMPLATES_MANAGE` | Button hidden |
-| Admin consolidated opt-in view | `AppPermission.WHATSAPP_MANAGE` (RequirePermission wrapper) | Admin section hidden; falls back to personal toggle |
+| Admin consolidated opt-in view | `AppPermission.WHATSAPP_CONFIG_MANAGE` (RequirePermission wrapper) | Admin section hidden; falls back to personal toggle |
 | Opt-in toggle (personal) | `WHATSAPP_OPT_IN_MANAGE` | Switch disabled with tooltip |
 
 ## Data Flow
@@ -389,6 +390,17 @@ export function useWhatsappTab(): [TabId, (tab: TabId) => void] {
 //   export const whatsappTemplatesQueryDocument = graphql(...)   — not PascalCase
 //   export const whatsappOptInAuditQueryDocument = graphql(...)
 // The PascalCase form `WhatsappTemplatesQuery` refers to the GraphQL Operations type name, not the exported const.
+//
+// ⚠️ BACKEND RESOLVER FOR `whatsappTemplates` DOES NOT EXIST IN v1 (see `Assumptions / Non-Assumptions`
+//    block in specs.md). `whatsappTemplatesQueryDocument` is a stub placeholder whose resolver was never
+//    built. Templates render from `syncWhatsappAccountsFromMeta` mutation snapshots only until a future
+//    backend plan ships the resolver. Document MUST still be declared so the queries slot exists.
+//
+// ⚠️ `body` and `buttonStructure` are NOT fields on `WhatsappTemplateSnapshot` in v1 — the snapshot
+//    fragment only exposes `id`, `name`, `language`, `category`, `status` (see
+//    `docs/frontend/whatsapp-ui-patterns.md:173-178`). They are left here as forward-looking placeholders
+//    for when a future backend plan extends the snapshot type; the UI MUST degrade gracefully when they
+//    are absent.
 query WhatsappTemplatesQuery {
   whatsappTemplates {
     id
@@ -396,8 +408,7 @@ query WhatsappTemplatesQuery {
     language
     category
     status
-    body
-    buttonStructure
+    # body / buttonStructure — omitted (not on snapshot type in v1)
     createdAt
     updatedAt
   }
@@ -532,7 +543,7 @@ function WhatsappTabPanels({ activeTab }: { activeTab: TabId }) {
     <>
       {activeTab === "numbers" && (
         <Suspense fallback={<NumbersSkeleton />}>
-          <RequirePermission permissions={AppPermission.WHATSAPP_MANAGE}>
+          <RequirePermission permissions={AppPermission.WHATSAPP_VIEW}>
             <NumbersTabContent />
           </RequirePermission>
         </Suspense>
@@ -570,12 +581,13 @@ export const whatsappTemplateStatusConfig: Record<string, StatusBadgeCategory> =
   DISABLED: { color: "neutral", labelKey: "templateStatusDisabled" },
 };
 
-export const whatsappAccountStatusConfig: Record<string, StatusBadgeCategory> = {
-  CONNECTED: { color: "success", labelKey: "statusConnected" },
-  PENDING: { color: "warning", labelKey: "statusPending" },
-  DISCONNECTED: { color: "error", labelKey: "statusDisconnected" },
-  ERROR: { color: "error", labelKey: "statusError" },
-};
+// ⚠️ Account status derives from the BOOLEAN `isActive` field via `getWhatsappAccountStatusBadgeConfig(isActive)`
+//    (per `docs/frontend/whatsapp-ui-patterns.md:87-89`). Do NOT invent CONNECTED/PENDING/DISCONNECTED/ERROR
+//    strings — those are NOT in the canonical UI doc; the only states are active / inactive.
+export const getWhatsappAccountStatusBadgeConfig = (isActive: boolean) =>
+  isActive
+    ? { color: "success" as const, labelKey: "statusActive" }
+    : { color: "neutral" as const, labelKey: "statusInactive" };
 ```
 
 ### WhatsappQualityLabel Helper
@@ -589,8 +601,9 @@ export function getQualityLabelKey(quality: string): string {
     case WhatsappQualityRating.GREEN: return "qualityGreen";
     case WhatsappQualityRating.YELLOW: return "qualityYellow";
     case WhatsappQualityRating.RED: return "qualityRed";
-    // NOTE: qualityOrange key does NOT exist yet — must be added to type schema + EN + AR locale files
-    case WhatsappQualityRating.ORANGE: return "qualityOrange";
+    // Do NOT add `qualityOrange` — `ORANGE` is not in WhatsappQualityRating
+    // (per `shared/constants/whatsapp-templates.enum.ts`: only GREEN/YELLOW/RED/UNKNOWN).
+    // Map anything else to the UNKNOWN band per canonical UI doc `whatsapp-ui-patterns.md:180-182`.
     default: return "qualityUnknown";
   }
 }
@@ -606,12 +619,12 @@ export function getTierLabelKey(tier: string): string {
   switch (tier?.toUpperCase()) {
     case WhatsappLimitTier.TIER_1K: return "tier1K";
     case WhatsappLimitTier.TIER_10K: return "tier10K";
-    // NOTE: tier100K key does NOT exist yet — must be added to type schema + EN + AR locale files
     case WhatsappLimitTier.TIER_100K: return "tier100K";
-    // NOTE: tier250K key does NOT exist yet — must be added to type schema + EN + AR locale files
-    case WhatsappLimitTier.TIER_250K: return "tier250K";
-    // NOTE: tier1M key does NOT exist yet — must be added to type schema + EN + AR locale files
-    case WhatsappLimitTier.TIER_1M: return "tier1M";
+    // Do NOT add `tier250K` / `tier1M` — `TIER_250K` and `TIER_1M` are NOT in
+    // `WhatsappLimitTier` (per `shared/constants/whatsapp-templates.enum.ts`:
+    // the real values are UNTIERED, TIER_50, TIER_250, TIER_1K, TIER_10K,
+    // TIER_100K, TIER_UNLIMITED, TIER_NOT_SET). Map anything else to
+    // `tierTierUnknown` per canonical UI doc `whatsapp-ui-patterns.md:180-182`.
     default: return "tierTierUnknown";
   }
 }

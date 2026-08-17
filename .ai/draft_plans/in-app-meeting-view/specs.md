@@ -105,9 +105,9 @@ Add an in-app meeting view embedded via the Zoom Meeting SDK (Client/Component V
 
 #### Acceptance Criteria
 
-1. WHEN `meetingSurfaceContext(classInstanceId)` is invoked for a Zoom `class_instance` THEN the `ZoomSdkSignatureService.sign({ meetingNumber, role, actorUserId })` SHALL mint a JWT with payload `{ appKey: ZOOM_MSDK_CLIENT_ID, sdkKey: ZOOM_MSDK_CLIENT_ID, mn: meetingNumber, role: 0|1, iat: now-30s, exp: iat+1800, tokenExp: exp }` signed with `ZOOM_MSDK_CLIENT_SECRET` via `jose` using `HS256`. (`appKey` is the canonical Zoom docs field; include both `appKey` and `sdkKey` with the same value for cross-platform compatibility per [Zoom signature troubleshooting](https://developers.zoom.us/blog/troubleshooting-meeting-sdk-signature-validation/).)
-2. WHEN the JWT is minted THEN `exp - iat` SHALL be in `[1800, 172800]` seconds (Zoom's documented bounds — 30 min minimum, 48 h maximum).
-3. WHEN the signature request for the same `(actorUserId, meetingNumber, role)` repeats within a 30-minute window THEN the service SHALL return a cached signature instead of re-minting (per-meetingNumber+role+userId memoisation, TTL = `exp - 60s`).
+1. WHEN `meetingSurfaceContext(classInstanceId)` is invoked for a Zoom `class_instance` THEN the `ZoomSdkSignatureService.sign({ meetingNumber, role, actorUserId })` SHALL mint a JWT with payload `{ appKey: ZOOM_MSDK_CLIENT_ID, sdkKey: ZOOM_MSDK_CLIENT_ID, mn: meetingNumber, role: 0|1, iat: now-30s, exp: iat+3600, tokenExp: exp }` signed with `ZOOM_MSDK_CLIENT_SECRET` via `jose` using `HS256`. (`appKey` is the canonical Zoom docs field; include both `appKey` and `sdkKey` with the same value for cross-platform compatibility per [Zoom signature troubleshooting](https://developers.zoom.us/blog/troubleshooting-meeting-sdk-signature-validation/).) Effective lifetime ~3570 s after the 30 s `iat` backdate. Server clock drift of up to ~30 s remains safe.
+2. WHEN the JWT is minted THEN `exp - iat` SHALL be in `[1800, 172800]` seconds (Zoom's documented bounds — 30 min minimum, 48 h maximum); the plan default is `iat + 3600` (60 min), 2× the documented minimum, chosen for clock-drift margin without replay risk.
+3. WHEN the signature request for the same `(actorUserId, meetingNumber, role)` repeats within a 60-minute window THEN the service SHALL return a cached signature instead of re-minting (per-meetingNumber+role+userId memoisation, TTL = `exp - 30s`).
 4. WHEN a cache miss occurs THEN the service SHALL mint under a race-safe promise (only one mint in flight per cache key; concurrent callers await the same promise).
 5. WHEN `resetZoomSdkSignatureCache(meetingNumber?)` is invoked THEN the service SHALL clear the in-memory cache (used by `resetMeetingChannel` invalidation flows).
 6. WHERE the actor is determined to be the meeting host/owner (linked class teacher or schedule owner) THEN `role` SHALL be `1`; otherwise `role` SHALL be `0` (attendee).
@@ -120,7 +120,15 @@ Add an in-app meeting view embedded via the Zoom Meeting SDK (Client/Component V
 
 ### Requirement 3: ZoomObfTokenService (External Meeting Token)
 
-**User Story:** As an external participant (outside the host's Zoom tenant) joining an in-app-embedded Zoom meeting, I want an OBF token resolved server-side so I can join cross-tenant meetings after Zoom's March 2026 enforcement date.
+**User Story:** As an engineer implementing the in-app meeting surface, I want the spec to clearly distinguish OBF (On-Behalf-Of) and ZAK (Zoom Access Key) tokens — and document the host-presence dependency of OBF — so that I implement the correct participant-identity model for each meeting configuration.
+
+> **OBF (On-Behalf-Of)** — the SDK app joins on behalf of an external user; OBF tokens allow the SDK app to join only **after an authorized user (host/co-host) is already in the meeting**. For external-only meetings where the host has not joined, the OBF join will sit in the waiting room or fail.
+
+> **ZAK (Zoom Access Key)** — a host-equivalent token that lets a specific person act as host; no host-presence dependency.
+
+> OBF vs ZAK is a per-meeting configuration driven by whether external participants need host-like authority — NOT a generic "external vs internal" switch.
+
+As an external participant (outside the host's Zoom tenant) joining an in-app-embedded Zoom meeting, I also want an OBF token resolved server-side so I can join cross-tenant meetings after Zoom's March 2026 enforcement date.
 
 #### Acceptance Criteria
 
@@ -130,6 +138,7 @@ Add an in-app meeting view embedded via the Zoom Meeting SDK (Client/Component V
 4. WHEN `ZOOM_MSDK_OBF_ENABLED` is `false` (default) THEN the service SHALL short-circuit and return `null` (legacy same-tenant behaviour preserved).
 5. WHEN the OBF token is fetched THEN the service SHALL cache it in-memory for the shorter of (token TTL − 120 s) or 30 minutes, keyed by `(meetingNumber, actorUserId)`.
 6. WHERE the meeting is internal (same-tenant join) THEN the service SHALL return `null` and the front-end SHOULD join with `zak: undefined` (Zoom SDK tolerates this for internal meetings as of Aug 2026).
+7. WHEN an OBF token is used to join THEN the surface SHALL treat the join as dependent on an authorized host (host/co-host) already being present in the meeting; the OBF join will sit in the waiting room or fail if the host has not yet joined (see REQ-5 for the "Waiting for the host" UX). This constraint does NOT apply to ZAK-issued joins, where the ZAK holder is the host-equivalent.
 
 #### Additional Details
 
@@ -167,6 +176,14 @@ Add an in-app meeting view embedded via the Zoom Meeting SDK (Client/Component V
 6. WHEN the embedded surface unmounts (route change, tab close) THEN the surface SHALL call `client.leaveMeeting()` and dispose the WASM instance to prevent memory leaks.
 7. WHEN `meetingSurfaceContext.obfToken` is non-null AND the SDK `client.join` requires it (Zoom external meetings after Feb 2026) THEN the surface SHALL pass `obfToken` to the join call.
 8. WHEN the SDK reports a `WebRTCNotSupported` error (Firefox has no WebRTC video per [Zoom browser support](https://developers.zoom.us/docs/meeting-sdk/web/browser-support/) — it falls back to WebAssembly video, which may still fail on some configurations) THEN the surface SHALL render the fallback "Open in Zoom client" deep link preserved from the predecessor plan's `joinWebUrl`, with an explanatory translated note.
+9. WHEN an OBF-joined external participant's join would be blocked by the absence of a host THEN the surface SHALL enter a "Waiting for the host" state with a translated message and poll the participant list (via the Zoom `GET /metrics/meetings/{meetingId}/participants` API) every 5 s until the host joins or a 10-min timeout is reached.
+10. WHEN the "Waiting for the host" state is rendered THEN the translated string SHALL be a typed translation key from the canonical i18n system in `shared/locale/types/dashboard/meeting-providers/` (type schema) + `shared/locale/{en,ar}/dashboard/meeting-providers/` (implementations), not hardcoded (per REQ-0.5). Two keys SHALL be defined:
+    - `waitingForHost` — "Waiting for the host to start the meeting"
+    - `hostJoinTimeout` — "The host hasn't joined yet. You can keep waiting or try again later."
+
+    Both keys are static strings (no params), so they SHALL be typed as `string`, not `() => string`, per the `shared/AGENTS.md` Pluralization/Interpolation Pattern.
+11. WHEN the 10-min timeout is reached in the "Waiting for the host" state THEN the surface SHALL show the `hostJoinTimeout` translation and offer "Keep waiting" / "Leave" actions.
+12. The "Waiting for the host" state applies only to external participants joining via OBF (e.g., parents). Teachers/hosts follow their normal host-join flow and SHALL NOT see this state.
 
 #### Additional Details
 
@@ -483,8 +500,8 @@ The predecessor plan established the `meetingIntegrations` tab at `?tab=meetingI
 | `IMeetingSurface` | New adapter interface declaring either `mode: "embed"` (Zoom) or `mode: "redirect"` (Meet/Teams/manual). |
 | Zoom Meeting SDK | Zoom's WebAssembly web client (`@zoom/meetingsdk`) embedding a Zoom meeting inside a third-party page either as Client View (full-page) or Component View (modular widgets). |
 | Meeting SDK JWT signature | Server-minted JWT signed with Meeting SDK Client ID + Secret authorizing the front-end SDK join — distinct from the auto-meeting-url plan's S2S OAuth token. |
-| OBF token | "On Behalf Of" token required by Zoom for external (cross-tenant) meeting joins. Enforcement begins **March 2, 2026**; readiness deadline Feb 23, 2026. Mutually exclusive with ZAK in `client.join()`. |
-| ZAK token | Zoom Access Token — alternative per-user host identity token, used when OBF is unavailable. |
+| OBF token | "On Behalf Of" token required by Zoom for external (cross-tenant) meeting joins. OBF tokens allow the SDK app to join only **after an authorized user (host/co-host) is already in the meeting**. Enforcement begins **March 2, 2026**; readiness deadline Feb 23, 2026. Mutually exclusive with ZAK in `client.join()`. |
+| ZAK token | Zoom Access Key — host-equivalent token for a specific person. No host-presence dependency; the ZAK holder acts as host. |
 | Component View | Zoom SDK mode providing modular widgets (video tile, chat, controls) for custom layouts — desktop only. |
 | Client View | Zoom SDK mode providing a full-page Zoom web client experience — mobile + desktop. |
 | `meetingSurfaceContext` | GraphQL query returning the full context needed by the front-end to render the appropriate meeting surface. |

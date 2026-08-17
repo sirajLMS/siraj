@@ -52,7 +52,7 @@
   - [x] 1.5 **Edit `backend/services/communication/utils.ts`** — add `whatsapp: "WhatsApp"` to `CHANNEL_LABELS` (C1; without this the enum change breaks `Record<DeliveryChannel, string>` totality)
   - [x] 1.6 Run `bun run generate:gqlSchema && bun codegen`
   - [x] 1.7 Verify forced errors exist pre-Phase-6: `communication.service.ts` missing `case "whatsapp"`; then resolve them (task 6)
-  - [x] 1.8 **Quality loop per file**: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 1.8 **Quality loop per file**: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 1.9 **AGENTS.md/instruction compliance**: read and fix violations against:
       - `backend/types/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (types/enum files)
       - `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (schema enum)
@@ -62,7 +62,7 @@
 - [x] **2. Env-config registry (REQ-3)**
   - [x] 2.1 Edit `backend/lib/env-config-keys.ts` — `whatsapp` category with 6 keys
   - [x] 2.2 Edit `backend/types/shared/env-config.types.ts` — `whatsapp` in `EnvConfigCategory`
-  - [x] 2.3 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 2.3 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 2.4 **AGENTS.md/instruction compliance**: read and fix violations against:
       - `backend/lib/AGENTS.md` (or `backend/AGENTS.md`) + `.agents/instructions/backend.instructions.md` (env-config files)
       - `backend/types/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (env-config types)
@@ -71,7 +71,7 @@
   - [x] 3.1 Create `backend/services/communication/channels/whatsapp/IWhatsappChannel.ts` — template-only `WhatsappPayload` with `template: WhatsappTemplateRef` + `components` (B1; no free-text `body` field in v1)
   - [x] 3.2 Create `backend/services/communication/channels/whatsapp/WhatsappChannelFactory.ts` — includes exported `resetWhatsappChannel()` (S4: drops singleton + initialization promise so token rotation takes effect without restart)
   - [x] 3.3 Create `backend/services/communication/channels/whatsapp/index.ts`
-  - [x] 3.4 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 3.4 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 3.5 **AGENTS.md/instruction compliance**: read and fix violations against:
       - `backend/services/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (channel interface, factory, index)
 
@@ -82,7 +82,7 @@
   - [x] 4.4 Create `get-phone-number.request.ts` — GET `/{phone_number_id}` returning raw tier enum verbatim (Q5)
   - [x] 4.5 Create `list-message-templates.request.ts` — GET `/{waba_id}/message_templates` with pagination; response must carry exact `language.code` for later send-time resolution (B6)
   - [x] 4.6 **Do NOT create**: register / deregister / request_code / verify_code / create / delete template builders — admins use WhatsApp Manager in v1 (Q1)
-  - [x] 4.7 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 4.7 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 4.8 **AGENTS.md/instruction compliance**: read and fix violations against:
       - `backend/services/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (all request builder files)
 
@@ -96,7 +96,7 @@
     - Track send-attempted count for tier-budget accounting: failed sends still consume Meta budget; expose for `dispatchMulti` logging (Q4) — `WhatsappSendResult.sendAttempted` flag set on all paths where a Graph API call was actually made
     - Terminal failure → `updateDeliveryStatus(FAILED)` + `deliveryFailedMessage("whatsapp")`
   - [x] 5.2 Create `cloud-api/index.ts`
-  - [x] 5.3 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 5.3 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 5.4 **AGENTS.md/instruction compliance**: read and fix violations against:
       - `backend/services/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (adapter, index)
 
@@ -104,7 +104,7 @@
   - [x] 6.1 Edit `notification-dispatch.helpers.ts` — `EVENT_CHANNEL_ALLOWLIST` adds `WHATSAPP` for `CLASS_REMINDER`, `CLASS_ACTIVATED`, `LESSON_REPORT_SUBMITTED`, `LESSON_REPORT_REVIEWED`, `INVOICE_GENERATED`; `recipientAddressForChannel` returns `user.phone` for whatsapp
   - [x] 6.2 Edit `notification-payloads.builders.ts` — `ALL_CHANNELS` + `CHANNEL_FROM_ENUM` get whatsapp; **add `NOTIFICATION_TEMPLATE_MAP` per-event `{ templateName, paramsOrder }`** filling `metadata.whatsappTemplate` (B1); consult per-user opt-in gate so opted-out users get no WhatsApp payload (REQ-10/BL1)
   - [x] 6.3 Edit `communication.service.ts` — **dedicated `dispatchWhatsapp` branch** reading `metadata.whatsappTemplate` → `IWhatsappChannel.send` (C2; never route through the email/sms-shaped `dispatchRecipientChannel`); fails fast with clear error if `whatsappTemplate` missing
-  - [x] 6.4 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 6.4 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 6.5 **AGENTS.md/instruction compliance**: read and fix violations against:
       - `backend/services/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md` (dispatch helpers, payload builders, communication service)
 
@@ -121,7 +121,7 @@
       - `8a-whatsapp-permissions-enum.sql` — enum only (3 perms, BL2)
       - `8b-whatsapp-permissions-data.sql` — seeds + super_admin grants
   - [x] 7.6 Run `bun db migrate` then `bun db push` and verify
-  - [x] 7.7 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 7.7 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 7.8 **AGENTS.md/instruction compliance**: read and fix violations against:
       - Schema files: `backend/db/schema/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
       - Migration SQL: `backend/db/test/AGENTS.md` (seeding conventions)
@@ -132,7 +132,7 @@
   - [x] 8.2 Create `backend/types/whatsapp/index.ts`
   - [x] 8.3 Create `backend/db/repo/whatsapp/whatsapp-account.repository.ts` — CRUD, `findByPhoneNumberId`, `listActive`, all methods accept optional `tx`
   - [x] 8.4 Create `backend/db/repo/whatsapp/index.ts`
-  - [x] 8.5 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 8.5 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 8.6 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
       - Types files: `backend/types/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
       - Repository files: `backend/db/repo/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
@@ -147,7 +147,7 @@
   - [x] 9.2 Create `backend/services/whatsapp/index.ts`
   - [x] 9.3 Edit `backend/types/audit/audit.types.ts` — `WHATSAPP_ACCOUNT`
   - [x] 9.4 Per-user opt-in storage: extend existing notification-preference storage with `whatsappEnabled` flag defaulting to **false** (REQ-10)
-  - [x] 9.5 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 9.5 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 9.6 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
       - Service files: `backend/services/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
       - Types file: `backend/types/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
@@ -158,7 +158,7 @@
   - [x] 10.3 Create `backend/db/migration/8b-whatsapp-permissions-data.sql` — seed rows + `super_admin` grants; mirror `7a/7b` with `trg_protect_system_permissions` wrap
   - [x] 10.4 Wire into `backend/drizzle/.custom-migrations.json`
   - [x] 10.5 Run `bun db migrate` then `bun db push` and verify
-  - [x] 10.6 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 10.6 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 10.7 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
       - Enum file: `backend/enum/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
       - Migration SQL: `backend/db/test/AGENTS.md` (seeding conventions)
@@ -171,7 +171,7 @@
   - [x] 11.4 Create `backend/graphql/query/whatsapp/whatsapp.query.ts`
   - [x] 11.5 Edit GraphQL index barrels (pothos, query, mutation)
   - [x] 11.6 Run `bun run generate:gqlSchema && bun codegen`
-  - [x] 11.7 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 11.7 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 11.8 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
       - Pothos files: `backend/graphql/pothos/AGENTS.md`, `backend/graphql/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
       - Mutation/Query files: `backend/graphql/mutation/AGENTS.md`, `backend/graphql/query/AGENTS.md`, `backend/graphql/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
@@ -183,11 +183,11 @@
 - [x] **12. Webhook route (REQ-5, C3, S1, S2, S3, S5)**
   - [x] 12.1 Create `app/api/webhooks/whatsapp/route.ts`:
     - GET: per-IP rate-limit on mismatches (S1); `hub.verify_token` compared via `crypto.timingSafeEqual` over equal-length buffers (S5); 403 on mismatch
-    - POST: `await req.text()` first; **body-size cap ~1 MB → 413**; HMAC-SHA256 verify with `timingSafeEqual`; **on mismatch log only `(ip, userAgent, contentLength, signaturePrefix)` — never the body (S2)**; 401 on mismatch
+    - POST: `await req.text()` first; **body-size cap ~1 MB → 413** — apply IFF both **`Content-Length` header AND actual `rawBody.length > 1_000_000`** are oversized (conjunction — see `docs/services/whatsapp-cloud-api.md:159` and D7; checking one alone misses forged headers or truncated streams); HMAC-SHA256 verify with `timingSafeEqual`; **on mismatch log only `(ip, userAgent, contentLength, signaturePrefix)` — never the body (S2)**; 401 on mismatch
     - Reject `body.object !== "whatsapp_business_account"` with 404
     - **Strip `value.messages[]` from every change entry before anything else touches the event (S3)**
     - Return 200 immediately, defer handler via **`after(async () => …)` from `next/server` (C3)** — verified exported from `node_modules/next/server.d.ts`; `queueMicrotask` forbidden
-  - [x] 12.2 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 12.2 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 12.3 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
       - App Router route: `app/AGENTS.md` + `.agents/instructions/frontend.instructions.md` (Next.js App Router conventions)
       - Backend handler service: `backend/services/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
@@ -201,7 +201,7 @@
   - [x] 13.6 `business_capability_update` → account fields + audit
   - [x] 13.7 Inbound `messages[]` already stripped at route (S3); handler defensively drops if encountered
   - [x] 13.8 Update `whatsapp_accounts.lastWebhookAt` on account-scoped events (`$onUpdate` handles `updatedAt`, B4)
-  - [x] 13.9 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 13.9 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 13.10 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
       - Handler service: `backend/services/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/backend.instructions.md`
 
@@ -255,7 +255,7 @@ Tasks 14-17 below are kept for i18n and GraphQL documents which are still needed
   - [x] 18.5 `pair-rate-limit.integration.test.ts` — two template sends to same recipient < 6 s apart; assert **second is deferred (not failed)** and Meta receives both ≥ 6 s apart (B2)
   - [x] 18.6 `whatsapp-api-call-coverage.test.ts` — fails if any file under `cloud-api/requests/` lacks a paired integration test (4 builders are required to have pairs; nothing else may exist in the folder, Q1)
   - [x] 18.7 Verify skip behavior when env creds missing (`WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_TEST_TO_PHONE`, `WHATSAPP_WABA_ID`)
-  - [x] 18.8 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 18.8 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 18.9 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
       - Integration tests: `scripts/run-test/AGENTS.md`, `backend/db/test/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/tests.instructions.md`
 
@@ -276,7 +276,7 @@ Tasks 14-17 below are kept for i18n and GraphQL documents which are still needed
   - [x] 19.4 Create `pair-rate-limit.test.ts` (pure unit) — defer math, Redis key shape, TTL; no Meta call on guard hit (B2)
   - [x] 19.5 Create `test/ui/components/useWhatsappSettingsViewModel.test.tsx` (Q3) — mocked Apollo; fetchPolicy, mapping, error path
   - [x] 19.6 Run DB-backed tests via `bun run scripts/run-test/run-test.ts` where applicable
-  - [x] 19.7 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on each modified file
+  - [x] 19.7 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on each modified file
   - [x] 19.8 **AGENTS.md/instruction compliance**: read applicable files for each modified file, fix violations:
       - Unit tests: `scripts/run-test/AGENTS.md`, `backend/db/test/AGENTS.md`, `backend/AGENTS.md` + `.agents/instructions/tests.instructions.md`
       - Frontend test: `test/ui/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/tests.instructions.md`, `.agents/instructions/frontend.instructions.md`
@@ -289,7 +289,7 @@ Tasks 14-17 below are kept for i18n and GraphQL documents which are still needed
   - [x] 21.1 Edit `frontend/common/views/dashboard/config/navigationConfig.ts` — add `Integrations` NavGroup after `Admin` with `WHATSAPP_VIEW` permission gate
   - [x] 21.2 Add WhatsApp NavItem: `href: "/settings/whatsapp"`, icon, permission: `WHATSAPP_VIEW`
   - [x] 21.3 Ensure `applyTeacherNavOverrides` / `applyParentNavOverrides` / `applyStudentNavOverrides` hide Integrations group for portal users
-  - [x] 21.4 Quality loop per file: run `bun tsgo && bun biome:check && lint-queue-client` on modified file
+  - [x] 21.4 Quality loop per file: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` on modified file
   - [x] 21.5 **AGENTS.md/instruction compliance**: `frontend/common/views/AGENTS.md`, `frontend/AGENTS.md` + `.agents/instructions/frontend.instructions.md`, `.agents/instructions/mobile-desktop.instructions.md`
 
 - [x] **22. Settings route for WhatsApp (REQ-11)**
@@ -355,10 +355,10 @@ Tasks 14-17 below are kept for i18n and GraphQL documents which are still needed
 - [x] **20. Final verification**
   - [x] 20.1 All REQ acceptance criteria checked against [specs.md](./specs.md) — including REQ-10 opt-in and REQ-9 core-set alignment (Q1)
   - [x] 20.2 Confirm no Plan-review regressions: grep for `queueMicrotask` in webhook route (C3 ✅ clean), `dispatchRecipientChannel` handling whatsapp (C2 ✅ whatsapp channel handled in dispatch helpers), missing `CHANNEL_LABELS.whatsapp` (C1 ✅ N/A — no CHANNEL_LABELS constant in codebase), in-memory rate-limit maps (B2 ✅ clean — uses Drizzle queries not in-memory maps), `whatsapp.dispatch` permission (BL2 ✅ no send-mutation in v1, confirmed in permission enum), Zustand whatsapp store (Q2 ✅ no store needed — tab state via useState)
-  - [x] 20.3 Run **quality loop** on all modified files: `bun tsgo && bun biome:check && lint-queue-client` (no codescene/sonar)
+  - [x] 20.3 Run **quality loop** on all modified files: `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene` (no codescene/sonar)
   - [x] 20.4 Fix tsgo / biome / lint failures
   - [x] 20.5 Re-run quality loop until all stages pass
-  - [x] 20.6 Quality loop on any remaining modified files: run `bun tsgo && bun biome:check && lint-queue-client`
+  - [x] 20.6 Quality loop on any remaining modified files: run `bun tsgo && bun biome:check && bun run scripts/health/sub-loop.ts <the-file> --lifecycle codescene`
   - [x] 20.7 **AGENTS.md/instruction compliance**: read all applicable AGENTS.md + `.agents/instructions/*.md` for any final modified files, fix violations
   - [x] 20.8 Update Progress Summary below
 
@@ -377,6 +377,10 @@ Tasks 14-17 below are kept for i18n and GraphQL documents which are still needed
   - [x] 30.8 Run global check: `bun tsgo`, `bun biome:check`, `bun run lint` (0 errors, 0 warnings)
   - [x] 30.9 Write outcome file: `.ai/plans/whatsapp/outcome/30.1-knowledge-propagation-outcome.md`
   - [x] 30.10 Update progress: Mark task 30 as `[x]` in `trackable-tasks.md`
+  - [ ] 30.11 **Surface r3 HIGH findings** ( TECHNICAL DEBT — POSTPONED via `.ai/plans/whatsapp-plan-fixes/` Task 16; reference `r3-comprehensive-review.md:14-16`): Two HIGH issues from the r3 comprehensive review remain unfixed as of 2026-08-17 — see `.ai/finished_plans/whatsapp/r3-comprehensive-review.md` Fixed: 0 / 23:
+      - **[HIGH] business-logic** — `backend/db/repo/notifications/notification.repository.ts:346-394`: TOCTOU race in UPDATE branch; no `SELECT FOR UPDATE` / advisory lock; two concurrent webhooks can double-apply status.
+      - **[HIGH] business-logic** — `backend/services/whatsapp/whatsapp-webhook.handler.ts:161-166`: `handleMessagesStatus` never passes `userId`/`channel`/`eventType` to `handleDeliveryWebhook`, making the INSERT upsert path dead code; status webhooks that arrive before the adapter creates the delivery row are silently lost.
+      - **Action:** These are out of scope for the `whatsapp-plan-fixes` documentation-only plan (which corrects plan/doc drift, not source code — see AC-27). They are tracked in `docs/services/whatsapp-cloud-api.md` "Known Open Issues" (added by `whatsapp-plan-fixes` Task 19) and require a future backend engineering plan to fix.
   - _Requirements: Knowledge propagation protocol_
 
 ---

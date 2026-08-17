@@ -366,12 +366,12 @@ Read `node_modules/next/dist/docs/` for Next.js 16 App Router before writing. `a
   - On mismatch: log `(ip, userAgent, contentLength)` only (S2); return 403
 - **POST**:
   - `const rawBody = await req.text()` first
-  - If `rawBody.length > 1_000_000` bytes → 413 without parsing
+  - If **both** `Content-Length` header **and** actual `rawBody.length > 1_000_000` bytes → 413 without parsing (conjunction semantics — see `docs/services/whatsapp-cloud-api.md:159` and D7; checks against header alone, or body alone, miss oversized bodies with forged headers or under-sized bodies with truncated stream)
   - HMAC-SHA256 with resolved `WHATSAPP_APP_SECRET`; `timingSafeEqual` against `x-hub-signature-256` (strip `sha256=`)
   - On mismatch: log `(ip, userAgent, contentLength, signaturePrefix)` only (S2); return 401
   - Parse JSON
   - If `body.object !== "whatsapp_business_account"` → return 404
-  - **Strip inbound messages now** (S3):
+  - **Strip inbound messages now** (S3; route-level, primary defense):
     ```typescript
     for (const entry of body.entry ?? []) {
       for (const change of entry.changes ?? []) {
@@ -381,6 +381,7 @@ Read `node_modules/next/dist/docs/` for Next.js 16 App Router before writing. `a
       }
     }
     ```
+    **Belt-and-suspenders note (D11 — see `whatsapp-cloud-api.md` §9 "`messages[]` Stripped Defensively"):** The route-level strip (S3) above is the primary defense; the handler (`whatsapp-webhook.handler.ts`) **MUST** also defensively re-check / delete `value.messages[]` on each entry it touches, in case a future refactor moves the handler call site ahead of the strip. The canonical doc records this pattern as defense-in-depth — both layers SHOULD exist, in this order.
   - Acknowledge immediately and defer heavy work (C3):
     ```typescript
     after(async () => {

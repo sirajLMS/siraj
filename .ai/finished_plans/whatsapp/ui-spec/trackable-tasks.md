@@ -11,7 +11,7 @@
 - **Related Documents**:
   - Requirements: `.ai/plans/whatsapp/ui-spec/specs.md`
   - Design: `.ai/plans/whatsapp/ui-spec/implementation.md`
-  - Parent plan: `.ai/plans/whatsapp/` (do NOT modify)
+  - Parent plan: `.ai/finished_plans/whatsapp/` (frozen / archived — see `.ai/analysis/whatsapp/` for known issues)
 
 ## Non-Negotiable Execution Protocol for All Tasks
 
@@ -67,9 +67,22 @@
 ### Development Approach
 - **Testing Strategy**: TDD for validation functions. Component tests after implementation. ViewModel tests for new mutation flows.
 - **Integration Strategy**: Phase-by-phase — each phase produces independently testable code.
-- **Deployment Strategy**: No backend changes. All changes are frontend-only. Deploy with existing CI pipeline.
+- **Deployment Strategy**: Frontend-only deployment. **No backend changes** — but two backend resolvers are NOT yet present and are deferred to a future backend plan (see `Assumptions / Non-Assumptions` in specs.md): `whatsappTemplates` (templates render from `syncWhatsappAccountsFromMeta` mutation snapshots instead) and `whatsappOptInAudit` (opt-in audit history deferred per parent plan `trackable-tasks.md:325-328`). Deploy with existing CI pipeline.
 
 ## Implementation Plan
+
+### Parent-Plan Deferred Items (backend, 26.3–26.6)
+
+These items were marked `[~]` (deferred) in the parent plan and are **out of scope** for this ui-spec. They require a future backend plan before any UI data becomes real. The ui-spec renders placeholder empty arrays with TODO comments for these.
+
+| Item | Status | Reference |
+|------|--------|-----------|
+| 26.3 Numbers opt-in table (per-account opt-in counts) | Deferred — backend | `.ai/finished_plans/whatsapp/trackable-tasks.md:325-328` |
+| 26.4 Bulk opt-in actions (select-all-and-toggle) | Deferred — backend | `.ai/finished_plans/whatsapp/trackable-tasks.md:326` |
+| 26.5 Opt-in audit trail (user-visible) | Deferred — backend | `.ai/finished_plans/whatsapp/trackable-tasks.md:327` |
+| 26.6 Backend `whatsappOptInAudit` GraphQL resolver | Deferred — backend | `.ai/finished_plans/whatsapp/trackable-tasks.md:328` |
+
+See `docs/frontend/whatsapp-ui-patterns.md` "Plan Debt" section and this spec's `Assumptions / Non-Assumptions` block for the "do NOT build front-end against resolvers that don't exist" rule.
 
 ### Phase 1: Foundation (No Visual Changes)
 
@@ -78,11 +91,12 @@
   - Add new i18n keys to `shared/locale/types/whatsapp/index.ts`: form labels, validation messages, delete confirm interpolation, permission denied, retry, error boundary, template preview labels
   - Implement new keys in `shared/locale/en/whatsapp/index.ts`
   - Implement new keys in `shared/locale/ar/whatsapp/index.ts`
-  - Add missing i18n keys: `tier100K`, `tier250K`, `tier1M`, and `qualityOrange` (no keys exist for these enum values — add to type schema + EN + AR locale files; per `implementation.md:577-599`)
+  - Add the new i18n key `tier100K` (no key currently exists for the real `TIER_100K` enum value — add to type schema + EN + AR locale files). **Do NOT** add `tier250K`, `tier1M`, or `qualityOrange` — those enum values (`TIER_250K`, `TIER_1M`, `ORANGE`) do NOT exist in `shared/constants/whatsapp-templates.enum.ts`; the real values are `UNTIERED, TIER_50, TIER_250, TIER_1K, TIER_10K, TIER_100K, TIER_UNLIMITED, TIER_NOT_SET` (tier) and `GREEN, YELLOW, RED, UNKNOWN` (quality). Unknown values map to the existing `qualityUnknown` / `tierTierUnknown` keys.
   - Create `frontend/common/views/dashboard/settings/whatsapp/whatsappQualityLabel.ts` — maps quality enum → i18n key
   - Create `frontend/common/views/dashboard/settings/whatsapp/whatsappTierLabel.ts` — maps tier enum → i18n key
   - Create `frontend/common/views/dashboard/settings/whatsapp/whatsappTemplateStatusLabels.ts` — maps template status → i18n key
-  - Verify: `grep -E "tier100K|tier250K|tier1M|qualityOrange" shared/locale/en/whatsapp/index.ts shared/locale/ar/whatsapp/index.ts shared/locale/types/whatsapp/index.ts` returns matches for all 4 keys in each file
+  - Create `frontend/common/views/dashboard/settings/whatsapp/whatsappThroughputLabel.ts` — maps `WhatsappThroughputLevel` enum values to i18n keys (per canonical UI doc `docs/frontend/whatsapp-ui-patterns.md:107-115` and outcome `11-i18n-localization-outcome.md:22-27`). This is the **4th label helper**; without it, the Throughput column shows raw enum values.
+  - Verify: `grep -E "tier100K" shared/locale/en/whatsapp/index.ts shared/locale/ar/whatsapp/index.ts shared/locale/types/whatsapp/index.ts` returns matches for `tier100K` in each file. Also assert the phantom keys do NOT appear: `grep -E "tier250K|tier1M|qualityOrange" shared/locale/{en,ar,types}/whatsapp/index.ts` must return **zero** matches (those enum values do not exist — see `shared/constants/whatsapp-templates.enum.ts`).
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each modified file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/shared/AGENTS.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`
@@ -273,7 +287,7 @@
 
 - [x] 14. **Mobile Numbers Tab Full CRUD**
   - Read all existing files in `.ai/plans/whatsapp/ui-spec/outcome/`
-  - Modify `tabs/NumbersTab.mobile.tsx` to support full CRUD (reverses Q10 read-only decision)
+  - Modify `tabs/NumbersTab.mobile.tsx` to support full CRUD (reverses v1 mobile read-only decision)
   - Add action menu (Bottom Sheet or Speed Dial) per account card
   - Wire DeleteConfirmDialog to mobile (same shared component as desktop)
   - Wire credential dialogs (Edit Token, Edit Pin) to mobile (Dialog fullScreen on small viewports)
@@ -370,6 +384,8 @@
   - Create `test/ui/components/whatsappUrlTabNav.test.tsx`: tab deep-linking, invalid tab fallback
   - **Note**: Use `renderWithWrapper` from `test/ui/components/TestWrapper.tsx` with mocked Apollo `MockLink` responses for all component tests (per `test/ui/AGENTS.md`).
   - **Note**: All tests use `bun:test` imports and Happy DOM environment (NOT Vitest). Run via `bun run test:ui:components`.
+  - **⚠️ MobileCardList Suspense gotcha**: `MobileCardList` uses `next/dynamic` for its rows, so tests need `findByText` / `waitFor` (NOT synchronous `getByText`) for elements rendered inside its cards. Mock `next/navigation` via `mockNextNavigation` at module scope. See `docs/frontend/whatsapp-ui-patterns.md:165-167`.
+  - **⚠️ `toggleOptInAction` mock gotcha**: When mocking the opt-in toggle in `whatsappOptInTab.test.tsx`, the action MUST use `source: "graphql"` (NOT `"settings"` or `"manual"`) — see `docs/frontend/whatsapp-ui-patterns.md:210`. Wrong values silently break cache invalidation.
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene` for each test file (handles tsgo → biome → oxlint → lint:type-aware → check:duplicates → codescene in one progressive command)
   - **Instruction Verification**: Validate against `/home/ahmed/Projects/siraj-whatsapp/test/ui/AGENTS.md`, `/home/ahmed/Projects/siraj-whatsapp/.agents/instructions/tests.instructions.md`
   - Run global check: `bun tsgo`, `bun biome:check`, `bun run lint`, `bun run test:ui:components`
@@ -422,8 +438,8 @@
 
 ## Progress Summary
 
-- **Total Tasks**: 20
-- **Completed**: 0
-- **Remaining**: 20
-- **Estimated Effort**: ~60-80 hours (frontend-only changes)
-- **No backend changes needed**: All backend resolvers already exist
+- **Total Tasks**: 20 (main tasks; subtasks X.Y.QL / X.Y.IV per task per the standard template)
+- **Completed**: 20 (all 20 main tasks marked `[x]` — execution completed, see outcome `20-knowledge-propagation-outcome.md`)
+- **Remaining**: 0 (this plan is archived; the `whatsapp-plan-fixes` plan corrected stale content in 2026-08-17 — see `.ai/plans/whatsapp-plan-fixes/`)
+- **Estimated Effort**: ~60-80 hours (frontend-only changes; backend resolvers `whatsappTemplates` and `whatsappOptInAudit` are NOT in v1 — deferred to a future backend plan)
+- **Frontend-only**: Create/update/delete account mutations + the existing i18n keys ARE already wired through the backend; the only deferred backend resolvers are `whatsappTemplates` and `whatsappOptInAudit` (see `Assumptions / Non-Assumptions` in `specs.md`)

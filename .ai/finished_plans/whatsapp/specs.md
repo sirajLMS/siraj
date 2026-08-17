@@ -55,10 +55,9 @@ Add WhatsApp outbound notifications via **pre-approved utility templates** (arbi
 9. **Audience**: `SUPER_ADMIN`, `ACADEMY_ADMIN`, `STAFF_DEFAULT`, `SUPERVISOR_DEFAULT` with `WHATSAPP_VIEW` permission. Portal users (teachers, parents, students) never see it — they only receive notifications.
 10. **Tab-level permissions**: Numbers tab (view: `WHATSAPP_VIEW`, config: `WHATSAPP_CONFIG_MANAGE`), Templates tab (read-only sync, `WHATSAPP_TEMPLATES_MANAGE`), Opt-in tab (view: `WHATSAPP_VIEW`, bulk mutate: `SUPER_ADMIN` only).
 11. **Secret rotation**: `setAccessToken` / `setTwoStepPin` / Opt-in bulk / Sync → `SUPER_ADMIN` only. `WHATSAPP_CONFIG_MANAGE` = view + sync only.
-11. **Audience**: `SUPER_ADMIN`, `ACADEMY_ADMIN`, `STAFF_DEFAULT`, `SUPERVISOR_DEFAULT` with `WHATSAPP_VIEW` permission. Portal users (teachers, parents, students) never see it — they only receive notifications.
-12. **Tab-level permissions**: Numbers tab (view: `WHATSAPP_VIEW`, config: `WHATSAPP_CONFIG_MANAGE`), Templates tab (read-only sync, `WHATSAPP_TEMPLATES_MANAGE`), Opt-in tab (view: `WHATSAPP_VIEW`, bulk mutate: `SUPER_ADMIN` only).
-13. **Secret rotation**: `setAccessToken` / `setTwoStepPin` / Opt-in bulk / Sync → `SUPER_ADMIN` only. `WHATSAPP_CONFIG_MANAGE` = view + sync only.
-14. **Opt-in default OFF**: All users (parents, students) start with `whatsappEnabled: false`. Admins can toggle individually or bulk in Opt-in tab. Users can opt-in via profile settings.
+12. **Opt-in default OFF**: All users (parents, students) start with `whatsappEnabled: false`. Admins can toggle individually or bulk in Opt-in tab. Users can opt-in via profile settings.
+
+> **Numbering fix (2026-08-17):** Earlier drafts of this plan duplicated items 11-13 (a "Tab-level permissions" / "Audience" / "Secret rotation" triplet was inserted twice — see `.ai/analysis/whatsapp/internal-consistency.md` IC3). The duplicate triplet has been removed; the canonical sequence is now items 1-12 above, each listed once.
 
 ### Official integration path
 Meta discontinued `WhatsApp/WhatsApp-Nodejs-SDK` (archived June 2023, alpha v0.0.5). Meta docs state community SDKs are not endorsed. **Official path**: HTTPS to `https://graph.facebook.com/v23.0/...`.
@@ -149,7 +148,7 @@ References:
 #### Acceptance criteria
 
 1. WHEN Meta sends GET with `hub.verify_token` matching `WHATSAPP_VERIFY_TOKEN` THEN Siraj SHALL return `hub.challenge` as plain text with HTTP 200. Compare SHALL use `crypto.timingSafeEqual` over constant-length buffers (S5). Repeated failures from the same IP SHALL be logged with `(ip, userAgent, contentLength)` only and rate-limited (S1).
-2. WHEN Meta sends POST THEN Siraj SHALL read raw body via `await req.text()` BEFORE JSON parse, verify `X-Hub-Signature-256` with HMAC-SHA256 keyed by `WHATSAPP_APP_SECRET`, using `crypto.timingSafeEqual`.
+2. WHEN Meta sends POST THEN Siraj SHALL read raw body via `await req.text()` BEFORE JSON parse, verify `X-Hub-Signature-256` with HMAC-SHA256 keyed by `WHATSAPP_APP_SECRET`, using `crypto.timingSafeEqual`. **Front-of-direction note (REQ-5.4 body-size gate):** the 413 reach MUST apply IFF both **the `Content-Length` header AND the actual `rawBody.length > 1_000_000`** are oversized — a conjunction, not a single-condition check (canonical `docs/services/whatsapp-cloud-api.md:159` + D7). Checking only the header misses oversized bodies wearing forged small headers; checking only the body misses truncated streams reported as large by the header.
 3. IF signature verification fails THEN Siraj SHALL return HTTP 401 and SHALL not parse the body; logs SHALL contain only `(ip, userAgent, contentLength, signaturePrefix)` — never the raw body (S2).
 4. WHEN webhook contains `value.statuses[]` THEN Siraj SHALL upsert `notification_deliveries` keyed by `providerMessageId === wamid` (`INSERT … ON CONFLICT DO UPDATE`, P3) with forward-only transitions. Status rank map: `accepted: 0 → sent: 1 → delivered: 2 → read: 3`; `failed: -1`. Transition takes effect iff `newRank > currentRank` OR (`currentRank = -1` AND `newRank > 0` — a delayed `delivered` after a transient `failed` resurrects the row). `deliveredAt` may remain null when `read` arrives without `delivered`; dashboards tolerate that (B3).
 5. WHEN webhook field is one of `message_template_status_update`, `template_category_update`, `message_template_quality_update`, `message_template_components_update` THEN Siraj SHALL emit audit log entries (`entityType: WHATSAPP_ACCOUNT`) without persisting templates locally in v1.
@@ -403,4 +402,4 @@ References:
 - [x] Non-functional requirements addressed
 - [x] Out of scope documented
 - [x] Traceability to implementation.md and trackable-tasks.md
-- [x] Post-review findings applied (C1–C3, B1–B6, S1–S5, P1–P3, BL1–BL4, Q1–Q5)
+- [x] Post-review findings applied (C1–C3, B1–B6, S1–S5, P1–P3, BL1–BL4, Q1–Q5) — `(Q6 was reserved in the canonical doc prefix table — `docs/services/whatsapp-cloud-api.md:28` — but never populated; see `.ai/analysis/whatsapp/doc-gaps.md` DG1)`

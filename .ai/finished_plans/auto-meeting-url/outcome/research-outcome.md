@@ -27,7 +27,7 @@ Use `/me` path with user-level (General app `authorization_code` grant) tokens. 
   "timezone": "America/New_York",
   "settings": {
     "host_video": true,
-    "participant_video": false,
+    "participant_video": true,
     "join_before_host": false,
     "waiting_room": true,
     "mute_upon_entry": true,
@@ -39,7 +39,7 @@ Use `/me` path with user-level (General app `authorization_code` grant) tokens. 
 - `type: 2` = scheduled (instant meeting = `type: 1`).
 - `start_time` ISO 8601 UTC, optional when `type: 2` (default: now).
 - `duration` minutes.
-- `settings.waiting_room` (true), `settings.host_video` (true), `settings.participant_video` (false), `settings.join_before_host` (false) — sane defaults for educational meetings.
+- `settings.waiting_room` (true), `settings.host_video` (true), `settings.participant_video` (true), `settings.join_before_host` (false) — sane defaults for educational meetings. Updated post-analysis: the executed adapter (`backend/services/meeting/channels/zoom/ZoomMeetingAdapter.ts:116`) uses `participant_video: true`. The `trackable-tasks.md` value was correct; this research-outcome was stale.
 
 ### Response body (verified)
 ```json
@@ -56,7 +56,7 @@ Use `/me` path with user-level (General app `authorization_code` grant) tokens. 
   "join_url": "https://zoom.us/j/93123456789",
   "start_url": "https://zoom.us/s/93123456789?zak=...",
   "password": "auto-generated if account requires it",
-  "settings": { "host_video": true, "participant_video": false, "waiting_room": true, "auto_recording": "cloud" }
+  "settings": { "host_video": true, "participant_video": true, "waiting_room": true, "auto_recording": "cloud" }
 }
 ```
 
@@ -116,7 +116,7 @@ Body: grant_type=refresh_token&refresh_token=<TOKEN>
 ```
 
 - **Refresh tokens rotate** — Zoom returns a new `refresh_token` on every refresh; the old one is invalidated. **The adapter MUST persist the new refresh token after every refresh exchange** (REQ-9 criteria 3 — already captured).
-- Refresh tokens expire in **90 days** (per docs). When `invalid_grant` surfaces, throw `ProviderReauthRequiredError` and show the "Reconnect your Zoom account" UI state.
+- Zoom does not document a fixed refresh-token lifetime. Treat `invalid_grant` as the sole re-auth trigger (verified from Zoom's Token & Authorization Code Flow docs fetched during analysis). When `invalid_grant` surfaces, throw `ProviderReauthRequiredError` and show the "Reconnect your Zoom account" UI state.
 - Scopes: `meeting:write` (user-level, requires user OAuth app). Scope names are identical for S2S and user OAuth except for the `:admin` suffix.
 - Use the `/me` path with user tokens — never user-id paths with user-level OAuth tokens.
 

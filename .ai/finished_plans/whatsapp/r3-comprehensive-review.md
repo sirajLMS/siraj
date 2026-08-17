@@ -1,6 +1,7 @@
 # Round 3 Comprehensive Review Plan
 
 **Date**: 2025-01-17
+  > **Date-context note (added 2026-08-17):** This date field is retained from the original r3 draft and reflects when the uncommitted-review ran. The parent plan was subsequently re-versioned to `2026-07-30` (see parent `specs.md:5`); the r3 findings themselves remain as written — no re-execution of the review has occurred. The 2 HIGH findings listed below remain unfixed (Fixed: 0 / 23) and are surfaced in `docs/services/whatsapp-cloud-api.md` "Known Open Issues" by the `whatsapp-plan-fixes` plan.
 **Scope**: Uncommitted WhatsApp integration changes (99 files)
 **Skills**: repo-review, review-uncommitted, review-types
 **Tracks**: All 6 tracks (security, performance, business-logic, deploy-safety, duplication, dead-code) + types (naming, duplication, consistency, imports, canonical-object, foundation) + frontend conventions + config/env

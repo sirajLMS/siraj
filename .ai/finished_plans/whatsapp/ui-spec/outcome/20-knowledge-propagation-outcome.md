@@ -1,5 +1,7 @@
 # Task 20: Knowledge Propagation & Documentation — Outcome
 
+> **Plan-Correction Note (2026-08-17):** The plan source this outcome executed has since been corrected in `.ai/plans/whatsapp-plan-fixes/`. Contradictions recorded below are historical; do not re-apply them.
+
 ## Summary
 
 Synthesized learnings from all 19 prior task outcome files and propagated knowledge to permanent project artifacts. Created a canonical reference doc covering all WhatsApp UI patterns, rules, and gotchas. Updated 6 existing project files (AGENTS.md files, instruction files, root AGENTS.md) with references to the new doc and relevant new patterns.

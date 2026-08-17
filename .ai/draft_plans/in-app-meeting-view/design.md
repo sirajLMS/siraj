@@ -47,16 +47,16 @@ The existing admin "Meeting Integrations" Settings 7th tab is extended with thre
 **Decision:** Option 2.
 **Rationale:** The "how do users join this meeting" question is orthogonal to the "how is this meeting URL generated" question. Some future provider (e.g. Jitsi) might generate URLs via `IMeetingChannel` (or not), but its surface adapter returns `mode: "embed"` regardless. Loose coupling keeps each layer swappable.
 
-#### Decision: SDK JWT signature cached per `(actorUserId, meetingNumber, role)` for 30 minutes
+#### Decision: SDK JWT signature cached per `(actorUserId, meetingNumber, role)` with 60-minute TTL
 
 **Context:** Zoom SDK signatures are valid up to 48h but join flows are short-lived. Re-minting on every `meetingSurfaceContext` query is wasteful.
 
 **Options Considered:**
 1. Stateless — re-mint on every call. Cons: extra `jose` signing overhead per query. ~5ms CPU per mint.
-2. Cache per `(actorUserId, meetingNumber, role)` with TTL `exp - 60s`.
+2. Cache per `(actorUserId, meetingNumber, role)` with TTL `exp - 30s`.
 
-**Decision:** Option 2 with 30-minute TTL (`exp = iat + 1800`, the Zoom minimum).
-**Rationale:** A 30-minute cache covers the typical "user opens join card then clicks join" delta (seconds) and even a "user refreshes the page after a network drop" retry (minutes). With TTL `exp - 60s` we never serve a near-expiry signature. Race-safe via a `Promise<signature>` memo (concurrent callers await the same mint).
+**Decision:** Option 2 with 60-minute TTL (`exp = iat + 3600`, 2× the Zoom documented minimum of 1800 s).
+**Rationale:** A 60-minute cache covers the typical "user opens join card then clicks join" delta (seconds) and even a "user refreshes the page after a network drop" retry (minutes). Effective lifetime ~3570 s after the 30 s `iat` backdate. JWTs are cached until `exp - 30 s`. Server clock drift of up to ~30 s remains safe. Race-safe via a `Promise<signature>` memo (concurrent callers await the same mint).
 
 #### Decision: OBF token resolution happens server-side, surfaced via `obfToken` in surface context
 
@@ -68,6 +68,25 @@ The existing admin "Meeting Integrations" Settings 7th tab is extended with thre
 
 **Decision:** Option 2.
 **Rationale:** Server-side resolution keeps the host's OAuth tokens in Siraj's backend. The `obfToken` returned to the front-end is meeting-actor-bound and valid only for that join (Zoom OBF tokens are scoped to the meeting+actor pair).
+
+> **Host-presence constraint (Issue #1):** OBF tokens allow the SDK app to join only **after an authorized user (host/co-host) is already in the meeting**. For external-only meetings where the host has not joined, the OBF join will sit in the waiting room or fail. The `ZoomEmbeddedSurface` must handle this explicitly:
+
+```
+join() → ZoomObfTokenService.resolveOBFToken()
+  → if no host in meeting:
+      → enter "WaitingForHost" state
+      → poll GET /metrics/meetings/{meetingId}/participants every 5 s
+      → timeout after 10 min
+  → on host detection → resume SDK join
+  → on timeout → show hostJoinTimeout translation + "Keep waiting" / "Leave" buttons
+```
+
+- OBF vs ZAK is a per-meeting configuration driven by whether external participants need host-like authority — NOT a generic "external vs internal" switch.
+- The "WaitingForHost" state applies only to external participants joining via OBF (e.g., parents). Teachers/hosts follow their normal host-join flow.
+
+#### Future Consideration: Backend Pre-Join Hook (v2)
+
+A backend pre-join hook that joins the host first (as a bot via the host's S2S token), allowing external OBF joins without waiting, is a **v2 consideration**. v1 surfaces the waiting state and polls the participant API (`GET /metrics/meetings/{meetingId}/participants`) instead. This is explicitly marked out of scope for v1.
 
 #### Decision: Hybrid Credential Resolution for recordings / attendance reuses `MeetingChannelFactory`
 
@@ -417,8 +436,8 @@ Factory mirrors `MeetingChannelFactory` from the predecessor plan.
 
 **Responsibilities:**
 - Persist `ZOOM_MSDK_CLIENT_ID` + `ZOOM_MSDK_CLIENT_SECRET` resolution via `resolveEnvConfigMany` from predecessor plan pattern.
-- Mint JWT with payload `{ appKey: ZOOM_MSDK_CLIENT_ID, sdkKey: ZOOM_MSDK_CLIENT_ID, mn: meetingNumber, role: 0|1, iat: now-30s, exp: iat+1800, tokenExp: exp }` signed via `jose.SignJWT` using `HS256` + `ZOOM_MSDK_CLIENT_SECRET`. (`appKey` is canonical per Zoom docs; include both keys with same value.)
-- Cache per `(actorUserId, meetingNumber, role)` for TTL `exp - 60s`.
+- Mint JWT with payload `{ appKey: ZOOM_MSDK_CLIENT_ID, sdkKey: ZOOM_MSDK_CLIENT_ID, mn: meetingNumber, role: 0|1, iat: now-30s, exp: iat+3600, tokenExp: exp }` signed via `jose.SignJWT` using `HS256` + `ZOOM_MSDK_CLIENT_SECRET`. (`appKey` is canonical per Zoom docs; include both keys with same value.)
+- Cache per `(actorUserId, meetingNumber, role)` for TTL `exp - 30s`.
 - Race-safe concurrent mint memoised as `Promise<signature>`.
 - `resetZoomSdkSignatureCache(meetingNumber?)` for invalidation.
 
@@ -454,12 +473,19 @@ export class ZoomSdkSignatureService {
 
 **Purpose**: Resolve OBF tokens (or ZAK fallback) for external-meeting Zoom SDK joins.
 
+> **OBF (On-Behalf-Of)** — the SDK app joins on behalf of an external user; OBF tokens allow the SDK app to join only **after an authorized user (host/co-host) is already in the meeting**. For external-only meetings where the host has not joined, the OBF join will sit in the waiting room or fail.
+>
+> **ZAK (Zoom Access Key)** — a host-equivalent token that lets a specific person act as host; no host-presence dependency.
+>
+> OBF vs ZAK is a per-meeting configuration driven by whether external participants need host-like authority — NOT a generic "external vs internal" switch.
+
 **Responsibilities:**
 - Resolve `ZOOM_MSDK_OBF_ENABLED`; short-circuit return `null` when disabled.
 - Resolve host S2S access token (via `MeetingChannelFactory.getAccessToken("zoom", hostUserId)`) OR per-actor token (when `meeting_provider_tokens` row exists).
 - POST to Zoom OBF endpoint with that access token, get OBF token bound to the actor identity.
 - Cache OBF token in-memory for `(meetingNumber, actorUserId)` with TTL `min(tokenTTL - 120, 1800)s`.
 - Throw `ZoomObfTokenError` mapped to `errors.zoomSdk.obfFailed` on 4xx; graceful `null` return on 5xx (let the SDK itself surface the upstream error to the user).
+- Surface a `hostPresenceRequired: true` flag when an OBF token is returned (external meeting) so the front-end `ZoomEmbeddedSurface` can enter the "WaitingForHost" polling state per REQ-5 AC #9–#12. ZAK-issued joins set `hostPresenceRequired: false`.
 
 **Interfaces** (`backend/services/meeting/surfaces/zoom/ZoomObfTokenService.ts`):
 
@@ -996,6 +1022,7 @@ sequenceDiagram
 | Missing Meeting SDK credentials | `MissingMeetingSdkCredentialsError` → `errors.meetingSdk.missingCredentials` | "Admin: configure ZOOM_MSDK_CLIENT_ID + SECRET in Settings" |
 | Url still pending generation | `MeetingUrlPendingError` → `errors.meeting.urlPending` | "Class URL is being generated — try again in a few seconds" (auto-retry) |
 | OBF token fetch failed | `ZoomObfTokenError` → `errors.zoomSdk.obfFailed` | "External meeting auth failed — opening in Zoom client instead" |
+| OBF join blocked — host not present | `WaitingForHost` state in `ZoomEmbeddedSurface` | Show translated `waitingForHost` message; poll `GET /metrics/meetings/{meetingId}/participants` every 5 s; on 10-min timeout show `hostJoinTimeout` + "Keep waiting" / "Leave" |
 | SDK signature invalid (Zoom 3712) | `ZoomSdkSignatureInvalidError` → `errors.zoomSdk.signatureInvalid` | "Refresh meeting context and retry" |
 | WebRTC unsupported (Firefox) | `WebRtcUnsupportedError` → `errors.zoomSdk.webRtcUnsupported` | "Use Chrome/Edge/Safari or open in Zoom desktop client" |
 | Webhook verification failed | (logged, not surfaced) `meeting.webhook.verificationFailed` | (none — admin audit only) |
@@ -1113,6 +1140,27 @@ sequenceDiagram
 - Frontend codegen handles new mutated schema automatically (`bun codegen`).
 - Admin UI's existing env-config table auto-discovers new `category: "meeting"` keys — no UI change beyond the new sub-panels.
 - Storybook mock stores need a new "embed"/"redirect" meeting-surface-context story variant per the task breakdown.
+
+---
+
+## Translation Keys (REQ-0.5 / Issue #1 — "Waiting for the host")
+
+The `ZoomEmbeddedSurface` "WaitingForHost" state and timeout require two typed translation keys in the canonical i18n system.
+
+| Translation key | Namespace (type schema) | Namespace (implementations) | Type | English |
+|---|---|---|---|---|
+| `waitingForHost` | `shared/locale/types/dashboard/meeting-providers/` | `shared/locale/{en,ar}/dashboard/meeting-providers/` | `string` | "Waiting for the host to start the meeting" |
+| `hostJoinTimeout` | same | same | `string` | "The host hasn't joined yet. You can keep waiting or try again later." |
+
+**Convention:** Static strings with no parameters are typed as `string` (not `() => string`), implemented verbatim in each locale file per the `shared/AGENTS.md` Pluralization/Interpolation Pattern.
+
+**Implementation ownership:** Adding these keys to the locale files belongs to this in-app plan (the executing team), NOT the zoom-meeting-fixes plan-correction plan. This plan-correction plan defines the keys as requirements only. The executing team MUST complete Namespace Registration per `shared/AGENTS.md`:
+
+1. Add the keys to `MessageSchema` in `shared/locale/types/message.ts`.
+2. Add a path mapping in `shared/locale/serverLegacy.ts` `namespacePaths`.
+3. Wire into `LocaleProvider` translations in `app/[locale]/layout.tsx` if rendered at layout time (or lazy-load on the meeting page if rendered only on demand).
+
+The keys live in the existing `meeting-providers` namespace (`shared/locale/types/dashboard/meeting-providers/` + `shared/locale/{en,ar}/dashboard/meeting-providers/`).
 
 ---
 

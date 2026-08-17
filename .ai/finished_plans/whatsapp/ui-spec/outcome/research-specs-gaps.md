@@ -1,5 +1,7 @@
 # Research: WhatsApp Spec Gaps Analysis
 
+> **Plan-Correction Note (2026-08-17):** The plan source this outcome executed has since been corrected in `.ai/plans/whatsapp-plan-fixes/`. Contradictions recorded below are historical; do not re-apply them.
+
 ## Source
 Subagent: research-specs-gaps
 Elapsed: 512s, 28 tool calls

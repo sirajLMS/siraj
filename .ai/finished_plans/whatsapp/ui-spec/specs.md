@@ -41,6 +41,57 @@ A production-ready WhatsApp settings page where admins can manage accounts, cred
 - Webhook handler logic
 - Notification dispatch logic
 - The parent plan (`.ai/plans/whatsapp/specs.md`, `implementation.md`, `trackable-tasks.md`)
+  (the parent plan is *frozen / archived* — see `.ai/finished_plans/whatsapp/`)
+
+### Assumptions / Non-Assumptions
+
+> Added 2026-08-17 by the `whatsapp-plan-fixes` plan (AC-3, AC-4 part 1) to correct
+> three phantom-resolver / phantom-enum / phantom-persistence claims that the
+> original draft of this spec made. See `.ai/analysis/whatsapp/discrepancies.md`
+> (D3) and `.ai/analysis/whatsapp/plan-gaps.md` (PG1) for the underlying findings.
+
+**Non-Assumptions (things this plan does NOT assume):**
+
+1. **`whatsappTemplates` GraphQL query does NOT exist in v1.** The query
+   document `whatsappTemplatesQueryDocument` is a stub placeholder in
+   `frontend/common/graphql/sharedDocuments/whatsapp/whatsapp.documents.ts`
+   registered against a backend resolver that was never built. Templates
+   render from `syncWhatsappAccountsFromMeta` mutation result snapshots
+   only (parent plan business-logic label BL3 — see
+   `.ai/analysis/whatsapp/discrepancies.md:88-134`).
+2. **`whatsappOptInAudit` GraphQL query does NOT exist in v1.** Same stub
+   pattern — the document is declared but the resolver is not implemented.
+   Opt-in audit history is **deferred** to a future backend plan (parent
+   plan `trackable-tasks.md:325-328`, items 26.3-26.6).
+3. **Templates are NOT persisted in the database from sync operations in
+   v1.** The parent plan's `syncWhatsappAccountsFromMeta` resolver returns
+   a transient snapshot; there is no `whatsapp_templates` table and no
+   query to fetch templates after a sync. UI-REQ-2 "persisted templates
+   query" is therefore **deferred** to a future backend plan.
+4. **`body` and `buttonStructure` fields do NOT exist on
+   `WhatsappTemplateSnapshot`.** The current GraphQL fragment types only
+   `name`, `language`, `category`, `status`, `id`; any preview UI must
+   degrade gracefully when these fields are absent. (See
+   `whatsapp-ui-patterns.md:173-178`.)
+5. **`WhatsappLimitTier.TIER_250K` / `TIER_1M` and
+   `WhatsappQualityRating.ORANGE` are NOT valid enum values.** The real
+   values are defined in `shared/constants/whatsapp-templates.enum.ts` —
+   see the Glossary at the end of this file.
+6. **There is no `AppPermission.WHATSAPP_MANAGE` permission.** The three
+   canonical permissions are `WHATSAPP_VIEW`, `WHATSAPP_CONFIG_MANAGE`,
+   and `WHATSAPP_TEMPLATES_MANAGE` (see
+   `backend/enum/permissions/permission.enum.ts:264-266`).
+
+**Assumptions (things this plan DOES assume):**
+
+- The parent plan's *Cloud API integration itself* is stable and correct —
+  this plan does not revisit webhook, sync, or dispatch logic.
+- All ~76 existing i18n keys are correct; a subset needs to be wired to
+  UI components (audit required for exact count — see task 1).
+- The parent plan's `CreateWhatsappAccountMutationDocument` and
+  `UpdateWhatsappAccountMutationDocument` operations (resolvers + DB
+  persistence) DO exist and ARE permission-gated. Only `whatsappTemplates`
+  and `whatsappOptInAudit` queries are missing.
 
 ## Requirements
 
@@ -73,7 +124,7 @@ A production-ready WhatsApp settings page where admins can manage accounts, cred
 - **Priority**: High
 - **Complexity**: Medium
 - **Dependencies**: Existing `CreateWhatsappAccountMutationDocument`, `UpdateWhatsappAccountMutationDocument` in `whatsapp.documents.ts` (already defined, never wired; exported as camelCase `createWhatsappAccountMutationDocument` / `updateWhatsappAccountMutationDocument` — the PascalCase names refer to the Operations types). Existing form types in `whatsappSettingsTypes.ts` (declared but unused — wire them).
-- **Assumptions**: Backend resolvers for create/update already exist and are permission-gated with `WHATSAPP_MANAGE`.
+- **Assumptions**: Backend resolvers for create/update already exist and are permission-gated with `WHATSAPP_CONFIG_MANAGE`.
 
 ### Requirement 2: Template Persistence & Preview (UI-REQ-2)
 
@@ -90,7 +141,7 @@ A production-ready WhatsApp settings page where admins can manage accounts, cred
 #### Additional Details
 - **Priority**: High
 - **Complexity**: Medium
-- **Dependencies**: New `WhatsappTemplatesQueryDocument` GraphQL document (not yet defined; the exported constant should be camelCase `whatsappTemplatesQueryDocument` to match the existing convention in `whatsapp.documents.ts` — the PascalCase name refers to the Operations type, not the exported constant). Backend resolver may already exist or needs a thin query wrapper. The new query document MUST include `id` field on each object type selection for Apollo cache normalization.
+- **Dependencies**: New `WhatsappTemplatesQueryDocument` GraphQL document (not yet defined; the exported constant should be camelCase `whatsappTemplatesQueryDocument` to match the existing convention in `whatsapp.documents.ts` — the PascalCase name refers to the Operations type, not the exported constant). **⚠️ Backend resolver for `whatsappTemplates` does NOT exist in v1** — `whatsappTemplatesQueryDocument` is a stub placeholder whose resolver was never built (see this spec's "Assumptions / Non-Assumptions" section above and `.ai/analysis/whatsapp/discrepancies.md:88-134`). Templates render from `syncWhatsappAccountsFromMeta` mutation snapshots only until a future backend plan ships the resolver. The new query document MUST include `id` field on each object type selection for Apollo cache normalization.
 - **Assumptions**: Templates are stored in the database from the sync operation (backend already persists them).
 
 ### Requirement 3: Full i18n Coverage (UI-REQ-3)
@@ -99,8 +150,8 @@ A production-ready WhatsApp settings page where admins can manage accounts, cred
 
 #### Acceptance Criteria
 2. WHEN a phone number's quality rating is GREEN THEN system SHALL display the localized "High Quality" label from `t.qualityGreen`.
-2. WHEN a phone number's quality rating is YELLOW/RED/ORANGE/unknown THEN system SHALL display the corresponding localized label.
-3. WHEN a phone number's tier is TIER_1K/TIER_10K/TIER_100K/TIER_250K/TIER_1M/unknown THEN system SHALL display the corresponding localized label.
+2. WHEN a phone number's quality rating is YELLOW/RED/unknown THEN system SHALL display the corresponding localized label.
+3. WHEN a phone number's tier is TIER_50/TIER_250/TIER_1K/TIER_10K/TIER_100K/unknown THEN system SHALL display the corresponding localized label.
 4. WHEN a template's status is APPROVED/PENDING/REJECTED/PAUSED/PENDING_DELETION/DISABLED THEN system SHALL display the corresponding localized label.
 5. WHEN an account is unverified or in coexistence mode THEN system SHALL show the appropriate warning label.
 6. WHEN a delivery failure occurs THEN system SHALL show the localized delivery failure title/body/retry labels.
@@ -168,7 +219,7 @@ A production-ready WhatsApp settings page where admins can manage accounts, cred
 - **Priority**: Medium
 - **Complexity**: High
 - **Dependencies**: Tasks 26.3-26.6 from the parent plan (defined but never implemented). May need a new `WhatsappOptInAuditQueryDocument` GraphQL document (the exported constant should be camelCase `whatsappOptInAuditQueryDocument` to match the existing convention in `whatsapp.documents.ts` — the PascalCase name refers to the Operations type, not the exported constant). The new query document MUST include `id` field on each object type selection for Apollo cache normalization. Admin view needs a different layout from non-admin view.
-- **Assumptions**: Backend audit trail queries may already exist or need thin query wrappers. The parent plan's Q11 explicitly called for these features.
+- **Assumptions**: Backend audit trail queries DO NOT exist in v1 — `whatsappOptInAudit` is deferred to a future backend plan (parent plan `trackable-tasks.md:325-328`, items 26.3-26.6). See this spec's "Assumptions / Non-Assumptions" section above. The parent plan (tasks 26.3-26.6) explicitly deferred these opt-in audit features; the inline reference to "Q11" that previously appeared here was a phantom spec code (see `.ai/analysis/whatsapp/discrepancies.md` D4).
 
 ### Requirement 7: Loading, Error & Empty States (UI-REQ-7)
 
@@ -282,7 +333,7 @@ A production-ready WhatsApp settings page where admins can manage accounts, cred
 #### Additional Details
 - **Priority**: High
 - **Complexity**: Medium
-- **Dependencies**: Current mobile `NumbersTab.mobile.tsx` is read-only by design (per Q10 in parent plan). This plan reverses that decision — mobile admins should have full CRUD capability. Mobile needs action menu (Bottom Sheet or Speed Dial), credential dialogs, and delete confirmation.
+- **Dependencies**: Current mobile `NumbersTab.mobile.tsx` is read-only by design in v1. This plan reverses that decision — mobile admins should have full CRUD capability. Mobile needs action menu (Bottom Sheet or Speed Dial), credential dialogs, and delete confirmation. (Earlier drafts referenced a "Q10" spec code from the parent plan — that citation was incorrect, as no such code exists in the parent plan or canonical docs; see `.ai/analysis/whatsapp/discrepancies.md` D4.)
 - **Assumptions**: Mobile dialogs use MUI `Dialog` with `fullScreen` on small viewports or `useMediaQuery` for responsive dialog sizing.
 
 ## UX/Navigation Requirements (MANDATORY)
@@ -329,13 +380,13 @@ WhatsApp settings appear under the **Integrations** (`grp_integrations`) group i
 | Component / Tab | Permission Required |
 |---|---|
 | WhatsApp settings page | `WHATSAPP_VIEW` |
-| Numbers tab | `WHATSAPP_VIEW` (view), `WHATSAPP_MANAGE` (create/edit/delete/credential) |
+| Numbers tab | `WHATSAPP_VIEW` (view), `WHATSAPP_CONFIG_MANAGE` (create/edit/delete/credential) |
 | Templates tab | `WHATSAPP_VIEW` (view), `WHATSAPP_TEMPLATES_MANAGE` (sync) |
 | Opt-in tab (admin view) | `WHATSAPP_VIEW` |
 | Opt-in tab (non-admin) | `WHATSAPP_OPT_IN_MANAGE` (toggle) |
-| Create/Edit account form | `WHATSAPP_MANAGE` |
-| Delete account | `WHATSAPP_MANAGE` |
-| Edit access token / PIN | `WHATSAPP_MANAGE` |
+| Create/Edit account form | `WHATSAPP_CONFIG_MANAGE` |
+| Delete account | `WHATSAPP_CONFIG_MANAGE` |
+| Edit access token / PIN | `WHATSAPP_CONFIG_MANAGE` |
 | Sync from Meta | `WHATSAPP_TEMPLATES_MANAGE` |
 
 ## Non-Functional Requirements
@@ -348,7 +399,7 @@ WhatsApp settings appear under the **Integrations** (`grp_integrations`) group i
 
 ### Security Requirements
 - WHEN user lacks `WHATSAPP_VIEW` permission THEN system SHALL deny access and show "Permission Denied" UI.
-- WHEN user lacks `WHATSAPP_MANAGE` permission THEN system SHALL hide create/edit/delete actions.
+- WHEN user lacks `WHATSAPP_CONFIG_MANAGE` permission THEN system SHALL hide create/edit/delete actions.
 - WHEN credential dialogs are open THEN system SHALL mask the access token field (type="password") by default with a show/hide toggle.
 - WHEN form fields contain sensitive data THEN system SHALL NOT log them to console (use `logger` with redaction).
 
@@ -378,14 +429,14 @@ WhatsApp settings appear under the **Integrations** (`grp_integrations`) group i
 - **i18n**: compile-time TypeScript system in `shared/locale/` (not next-intl)
 
 ### Business Constraints
-- Backend resolvers already exist for create/update account mutations (just not wired in UI)
-- Templates are already persisted in the database from sync operations (just no query to fetch them)
-- Mobile was intentionally read-only (Q10) — this plan reverses that decision for admin users
-- No new database migrations needed
+- Backend resolvers already exist for create/update account mutations (just not wired in UI).
+- **Templates are NOT persisted in the database from sync operations in v1** — there is no `whatsapp_templates` table and no `whatsappTemplates` query. Templates render from `syncWhatsappAccountsFromMeta` mutation result snapshots only (parent plan BL3). UI-REQ-2 "persisted templates query" is **deferred** to a future backend plan.
+- Mobile was intentionally read-only in v1; this plan reverses that decision for admin users (the inline reference to "Q10" that previously appeared here was a phantom spec code — see `.ai/analysis/whatsapp/discrepancies.md` D4).
+- No new database migrations needed.
 
 ### Assumptions
-- The `WhatsappTemplatesQueryDocument` (exported as `whatsappTemplatesQueryDocument` — camelCase convention) backend resolver already exists or can be trivially added (backend stores templates)
-- The `WhatsappOptInAuditQueryDocument` (exported as `whatsappOptInAuditQueryDocument` — camelCase convention) backend resolver may need to be added for audit trail
+- **The `whatsappTemplates` backend resolver does NOT exist in v1** — `whatsappTemplatesQueryDocument` is a stub placeholder in `whatsapp.documents.ts` whose resolver was never built. Templates render only from `syncWhatsappAccountsFromMeta` mutation snapshots until a future backend plan ships the resolver.
+- **The `whatsappOptInAudit` backend resolver does NOT exist in v1** — same stub pattern. Opt-in audit history is deferred to a future backend plan (parent plan `trackable-tasks.md:325-328`, items 26.3-26.6).
 - All ~76 existing i18n keys are correct; a subset needs to be wired to UI components (audit required for exact count)
 - The parent plan's implementation is stable and will not be modified
 
@@ -423,8 +474,8 @@ WhatsApp settings appear under the **Integrations** (`grp_integrations`) group i
 |------|------------|
 | Pattern A | URL-synced tab navigation via `useSearchParams` + `router.replace`, used by main Settings page |
 | Pattern B | State-only tab navigation via `useState`, currently used by WhatsApp (to be migrated to Pattern A) |
-| Tier | Meta's messaging limit tier (TIER_1K, TIER_10K, TIER_100K, TIER_250K, TIER_1M) |
-| Quality Rating | Meta's quality assessment (GREEN, YELLOW, RED, ORANGE) |
+| Tier | Meta's messaging limit tier (`UNTIERED`, `TIER_50`, `TIER_250`, `TIER_1K`, `TIER_10K`, `TIER_100K`, `TIER_UNLIMITED`, `TIER_NOT_SET` — see `shared/constants/whatsapp-templates.enum.ts`; `TIER_250K`/`TIER_1M` do NOT exist) |
+| Quality Rating | Meta's quality assessment (`GREEN`, `YELLOW`, `RED`, `UNKNOWN` — see `shared/constants/whatsapp-templates.enum.ts`; `ORANGE` does NOT exist) |
 | WABA ID | WhatsApp Business Account ID |
 | Credential Dialog | Dialog for editing access token or two-step PIN |
 | ViewModel | `useWhatsappSettingsViewModel` hook managing all WhatsApp settings state |

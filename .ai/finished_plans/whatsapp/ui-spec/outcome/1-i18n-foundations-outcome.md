@@ -1,5 +1,7 @@
 # Task 1 Outcome: i18n Key Additions & Label Helpers
 
+> **Plan-Correction Note (2026-08-17):** The plan source this outcome executed has since been corrected in `.ai/plans/whatsapp-plan-fixes/`. Contradictions recorded below are historical; do not re-apply them.
+
 ## Summary
 
 Added missing i18n keys for WhatsApp configuration UI (form labels, validation messages, delete confirm with interpolation, state labels, template preview labels, error boundary) and created three label helper functions that map Meta enum values to localized i18n keys. Fixed the `no-unsafe-enum-comparison` oxlint rule by using record-based lookups instead of switch statements comparing enum values with string parameters.
