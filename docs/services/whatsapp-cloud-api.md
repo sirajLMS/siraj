@@ -1,6 +1,6 @@
 # WhatsApp Cloud API Integration Reference
 
-This document consolidates patterns, rules, and gotchas from the WhatsApp Cloud API integration (Tasks 1–29). It serves as the canonical reference for all WhatsApp-related backend and frontend code.
+This document consolidates patterns, rules, and gotchas from the WhatsApp Cloud API integration (Tasks 1–29, with knowledge propagation captured by Task 30 per `.ai/plans/whatsapp-plan-fixes/`). It serves as the canonical reference for all WhatsApp-related backend and frontend code.
 
 ---
 
@@ -25,9 +25,10 @@ Admin UI → Settings > WhatsApp (3 tabs: Numbers, Templates, Opt-in)
 | P1–P3 | Performance |
 | S1–S5 | Security |
 | C1–C3 | Code conventions |
-| Q1–Q6 | Quality |
-| R1–R8 | Runtime |
+| Q1–Q5 | Quality (`Q6` was reserved but never populated — see this doc's footnote)| R1–R8 | Runtime |
 | BL1–BL4 | Backlog (deferred) |
+
+**Q6 footnote:** `Q6` was reserved in earlier drafts for a possible "quality" reviewer comment block but was never populated. All post-review findings map to `Q1–Q5` only — see `.ai/analysis/whatsapp/doc-gaps.md` DG1 and parent `specs.md:406`.
 
 ---
 
@@ -161,8 +162,27 @@ Admin UI → Settings > WhatsApp (3 tabs: Numbers, Templates, Opt-in)
 - On HMAC mismatch, logs **only** `(ip, userAgent, contentLength, signaturePrefix)` — never body (S2). 401 on HMAC mismatch, 400 on invalid JSON, 404 on `body.object !== "whatsapp_business_account"`.
 - `stripInboundMessages()` removes `value.messages[]` before anything else (S3).
 - Returns **200 immediately**, defers handler via `after()` from `next/server` (C3, not `queueMicrotask`).
-- Handler processes by `field`: `message_template_status_update` (R6, audit-only), `phone_number_quality_update` (Q5), `business_capability_update`.
-- Uses `NotificationRepository.handleDeliveryWebhook()` for status transitions.
+
+### Webhook HTTP Status Code Table
+
+| Method | Code | Meaning | When |
+|--------|------|---------|------|
+| GET | 200 | Returns `hub.challenge` as plain text | `hub.mode=subscribe`, `hub.verify_token` matches (S5) |
+| GET | 403 | Verification failed | `hub.verify_token` mismatch, or rate-limit triggered (S1) |
+| GET | 429 | Rate-limited | Per-IP rate limit exceeded (S1) |
+| POST | 200 | Event accepted, handler deferred | Successful HMAC, valid `body.object`, schema dispatch |
+| POST | 401 | HMAC mismatch | `X-Hub-Signature-256` verification fails — logs `(ip, userAgent, contentLength, signaturePrefix)` only (S2) |
+| POST | 400 | Invalid JSON | `req.text()` parses to non-JSON body |
+| POST | 404 | Not a WABA event | `body.object !== "whatsapp_business_account"` |
+| POST | 413 | Body too large | **Both** `Content-Length` header **and** actual `rawBody.length > 1_000_000` bytes (conjunction — D7) |
+- Handler processes by `field`. The complete lifecycle-event set (audit-only, R6) and their effects:
+  - **`message_template_status_update`** — audit log entry (`entityType: WHATSAPP_ACCOUNT`); no local template persistence in v1.
+  - **`template_category_update`** — audit log entry only.
+  - **`message_template_quality_update`** — audit log entry only; read `max_daily_conversations_per_business` (Q5).
+  - **`message_template_components_update`** — audit log entry only.
+  - **`phone_number_quality_update`** — read `max_daily_conversations_per_business` (NOT deprecated `old_limit` / `current_limit`) and update `portfolioMessagingLimitTier` on matching accounts (Q5). Value MUST be the raw Meta enum string verbatim (`UNTIERED / TIER_50 / TIER_250 / TIER_1K / TIER_10K / TIER_100K / TIER_UNLIMITED / TIER_NOT_SET`) — no transformation.
+  - **`business_capability_update`** — process `max_phone_numbers_per_business` and messaging limit updates (R6).
+  - **Status field** (`value.statuses[]`) — handled via `NotificationRepository.handleDeliveryWebhook()` (see B3 below).
 
 ### B3 Forward-Only Status Rank — With Resurrection Edge Case
 - `STATUS_RANK = { accepted: 0, sent: 1, delivered: 2, read: 3, failed: -1 }`.
@@ -220,3 +240,17 @@ Admin UI → Settings > WhatsApp (3 tabs: Numbers, Templates, Opt-in)
 
 ### Exact Language Code (B6)
 - Template `language.code` returned **exactly from Meta** (e.g. `ar`, `en_US`, `ar_AR`) — no hardcoded locale mapping. Adapter resolves send-time language code from the synced template list.
+
+---
+
+## Known Open Issues (from r3 Comprehensive Review)
+
+Tracked in `.ai/finished_plans/whatsapp/r3-comprehensive-review.md`. **Fixed: 0 / 23 as of 2026-08-17.** The 2 HIGH findings below require a backend engineering effort and are out of scope for any documentation-only plan correction.
+
+| Severity | Track | File | Issue |
+|----------|-------|------|-------|
+| HIGH | business-logic | `backend/db/repo/notifications/notification.repository.ts:346-394` | TOCTOU race in UPDATE branch — no `SELECT FOR UPDATE` / advisory lock; two concurrent webhooks can double-apply a status transition. |
+| HIGH | business-logic | `backend/services/whatsapp/whatsapp-webhook.handler.ts:161-166` | `handleMessagesStatus` never passes `userId`/`channel`/`eventType` to `handleDeliveryWebhook`, making the INSERT upsert path dead code; status webhooks that arrive before the adapter creates the delivery row are silently lost. |
+
+The remaining 21 MEDIUM / LOW findings (schema drift, env-config gaps, dead code, duplication, types) are listed in full in `r3-comprehensive-review.md`.
+

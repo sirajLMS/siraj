@@ -78,8 +78,8 @@ Every adapter follows the same hybrid auth order inside `generateMeeting`:
 File: `backend/services/meeting/channels/zoom/ZoomMeetingAdapter.ts`
 
 - **Org path**: Server-to-Server OAuth (`grant_type=account_credentials`) at `https://zoom.us/oauth/token` → JWT access token, cached until `exp - 60s`. No refresh token; re-call when expired.
-- **Per-user path**: OAuth `authorization_code` → `refresh_token` grant. Zoom **rotates refresh tokens** on every refresh — the adapter MUST persist the new `refresh_token` back to `MeetingProviderTokenRepository` after each refresh exchange.
-- **Create meeting**: `POST https://api.zoom.us/v2/users/me/meetings` with `type: 2` (scheduled) + sensible defaults (`waiting_room: true`, `join_before_host: false`, `host_video: true`). Returns `join_url` → stored as `details.meetingUrl`, `start_url` → `providerMetadata.startUrl`.
+- **Per-user path**: OAuth `authorization_code` → `refresh_token` grant. Zoom **rotates refresh tokens** on every refresh — the adapter MUST persist the new `refresh_token` back to `MeetingProviderTokenRepository` after each refresh exchange. There is **no documented absolute 90-day expiry** — the `invalid_grant` error is the *sole authoritative signal* that re-auth is required. Do **NOT** build proactive renewal on a hardcoded 90-day clock.
+- **Create meeting**: `POST https://api.zoom.us/v2/users/me/meetings` with `type: 2` (scheduled) + sensible defaults (`host_video: true`, `participant_video: true`, `waiting_room: true`, `join_before_host: false`, `mute_upon_entry: true`). Returns `join_url` → stored as `details.meetingUrl`, `start_url` → `providerMetadata.startUrl`.
 - **Delete**: `DELETE https://api.zoom.us/v2/meetings/{meetingId}` → `204 No Content`. Supported for cancel-cleanup.
 - **Security**: Zoom overwrites disabled security settings if password + waiting_room + meeting_authentication are all disabled. Always read back the response.
 - **Scopes**: `meeting:write` (user), `meeting:write:admin` (S2S).

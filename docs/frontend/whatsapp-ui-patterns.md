@@ -214,3 +214,19 @@ Label helpers map enum values → i18n key strings via `Record<string, string>` 
 ### CodeScene Duplication in Tests
 
 - CodeScene flags structural duplication in test bodies. Extract action sequences into named helpers: `fillField`, `clickSave`, `expectValidationError`, `openDialogAndExpect`.
+
+---
+
+## Plan Debt — Deferred parent-plan items (26.3–26.6)
+
+These items were marked `[~]` (deferred) in the parent WhatsApp plan (`.ai/finished_plans/whatsapp/trackable-tasks.md:325-328`) and remain backend-engineering work — they need a GraphQL resolver before any UI data becomes real. The v1 UI renders placeholder empty arrays with a `// NOTE: deferred — parent plan 26.x` comment, so the view degrades gracefully and ships today.
+
+| Item | What's missing (backend) | UI placeholder behavior |
+|------|---------------------------|--------------------------|
+| 26.3 Numbers opt-in table (per-account opt-in counts) | No GraphQL query for per-account opt-in counts | Numbers tab renders "—" or hides the chip until backend ships |
+| 26.4 Bulk opt-in actions (select-all-and-toggle) | Mutation scope over multiple user IDs | Toolbar renders but bulk action is disabled with tooltip "Backend pending" |
+| 26.5 Opt-in audit trail (user-visible) | No `whatsappOptInAudit` resolver; emitted audit log entries live only in backend audit table | Opt-in tab history section renders empty-state message (`optInHistoryEmpty`) — `OptInTabPanel` passes `auditEntries: []` with a NOTE comment |
+| 26.6 `whatsappOptInAudit` GraphQL resolver | Backend resolver never built | N/A until backend ships |
+
+**Source of grains:** the active backend resolvers in v1 are `whatsappAccounts{}`, `syncWhatsappAccountsFromMeta`, `createWhatsappAccount`, `updateWhatsappAccount{}`, `updateWhatsappAccountName`, `setAccessToken`, `setTwoStepPin`, `deleteWhatsappAccount`, `updateWhatsappLocalTemplateOptIn`. Anything else — including `whatsappTemplates{}` (templates render from the sync mutation's per-account snapshot) and `whatsappOptInAudit{}` — does NOT exist in v1 and is deferred. See this spec's `Assumptions / Non-Assumptions` block in `ui-spec/specs.md`.
+
