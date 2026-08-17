@@ -50,6 +50,7 @@ const actionLabels = {
     view: "View",
     filter: "Filter",
     addQuota: "Add Quota",
+    exportCsv: "Export CSV",
   },
   deleteConfirm: {
     title: "Confirm Delete",
@@ -61,6 +62,7 @@ const actionLabels = {
     createFailed: "Failed to create quota",
     updateFailed: "Failed to update quota",
     deleteFailed: "Failed to delete quota",
+    loadFailed: "Failed to load quota data",
   },
   ledger: {
     title: "Ledger",

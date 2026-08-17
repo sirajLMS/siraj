@@ -53,7 +53,7 @@ export function QuotaInsightsMobileView(vm: Readonly<QuotaInsightsViewModel>): R
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   if (error) {
-    return <MobileErrorState message={labels.errors.createFailed} />;
+    return <MobileErrorState message={labels.errors.loadFailed} />;
   }
 
   if (loading && vm.quotas.length === 0) {
@@ -76,7 +76,7 @@ export function QuotaInsightsMobileView(vm: Readonly<QuotaInsightsViewModel>): R
             breadcrumbs={quotaInsightsBreadcrumbs(labels)}
             actions={
               <MobileExportButton startIcon={<DownloadOutlined />} onClick={exportCsv}>
-                {labels.actions.create}
+                {labels.actions.exportCsv}
               </MobileExportButton>
             }
           />

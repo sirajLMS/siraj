@@ -45,7 +45,7 @@ export function QuotaInsightsDesktopView(vm: Readonly<QuotaInsightsViewModel>): 
   const { labels, loading, error, metrics, chartData, exportCsv } = vm;
 
   if (error) {
-    return <DesktopErrorState message={labels.errors.createFailed} />;
+    return <DesktopErrorState message={labels.errors.loadFailed} />;
   }
 
   if (loading && vm.quotas.length === 0) {
@@ -68,7 +68,7 @@ export function QuotaInsightsDesktopView(vm: Readonly<QuotaInsightsViewModel>): 
             breadcrumbs={quotaInsightsBreadcrumbs(labels)}
             actions={
               <DesktopExportButton startIcon={<DownloadOutlined />} onClick={exportCsv}>
-                {labels.actions.create}
+                {labels.actions.exportCsv}
               </DesktopExportButton>
             }
           />

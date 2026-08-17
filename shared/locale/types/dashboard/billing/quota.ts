@@ -53,6 +53,7 @@ export interface QuotaLabels {
     readonly view: string;
     readonly filter: string;
     readonly addQuota: string;
+    readonly exportCsv: string;
   };
   readonly deleteConfirm: {
     readonly title: string;
@@ -64,6 +65,7 @@ export interface QuotaLabels {
     readonly createFailed: string;
     readonly updateFailed: string;
     readonly deleteFailed: string;
+    readonly loadFailed: string;
   };
   readonly ledger: {
     readonly title: string;

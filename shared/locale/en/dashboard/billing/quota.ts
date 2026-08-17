@@ -55,6 +55,7 @@ export const quotaEn: QuotaLabels = {
     view: "View",
     filter: "Filter",
     addQuota: "Add Quota",
+    exportCsv: "Export CSV",
   },
   deleteConfirm: {
     title: "Delete Quota",
@@ -66,6 +67,7 @@ export const quotaEn: QuotaLabels = {
     createFailed: "Failed to create quota. Please try again.",
     updateFailed: "Failed to update quota. Please try again.",
     deleteFailed: "Failed to delete quota",
+    loadFailed: "Failed to load quota data. Please try again.",
   },
   ledger: {
     title: "Quota Audit Ledger",

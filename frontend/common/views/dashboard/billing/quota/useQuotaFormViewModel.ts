@@ -218,14 +218,19 @@ function buildEditDefaults(quota: QuotaQuery["quota"]): QuotaFormInput {
   };
 }
 
+function toDateValue(value: string | null | undefined): string | null {
+  if (!value) return null;
+  return new Date(value).toISOString();
+}
+
 function buildCreateInput(data: QuotaFormData): QuotaSubmitInput {
   return {
     studentId: data.studentId,
     kind: data.kind,
     name: data.name,
     totalClasses: data.totalClasses,
-    validFrom: data.validFrom ?? null,
-    validUntil: data.validUntil ?? null,
+    validFrom: toDateValue(data.validFrom),
+    validUntil: toDateValue(data.validUntil),
     periodType: data.periodType ?? null,
     periodDays: data.periodDays ?? null,
     priority: data.priority,
@@ -237,7 +242,7 @@ function buildCreateInput(data: QuotaFormData): QuotaSubmitInput {
 function buildUpdateInput(data: QuotaFormData, status: QuotaStatus | null): QuotaUpdateInput {
   return {
     name: data.name,
-    validUntil: data.validUntil ?? null,
+    validUntil: toDateValue(data.validUntil),
     status,
     priority: data.priority,
   };

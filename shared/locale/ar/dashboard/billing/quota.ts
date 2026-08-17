@@ -55,6 +55,7 @@ export const quotaAr: QuotaLabels = {
     view: "عرض",
     filter: "تصفية",
     addQuota: "إضافة حصة",
+    exportCsv: "تصدير CSV",
   },
   deleteConfirm: {
     title: "حذف الحصة",
@@ -66,6 +67,7 @@ export const quotaAr: QuotaLabels = {
     createFailed: "فشل في إنشاء الحصة. يرجى المحاولة مرة أخرى.",
     updateFailed: "فشل في تحديث الحصة. يرجى المحاولة مرة أخرى.",
     deleteFailed: "فشل في حذف الحصة",
+    loadFailed: "فشل في تحميل بيانات الحصة. يرجى المحاولة مرة أخرى.",
   },
   ledger: {
     title: "سجل تدقيق الحصة",
