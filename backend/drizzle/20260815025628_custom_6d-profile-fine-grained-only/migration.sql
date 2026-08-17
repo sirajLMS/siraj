@@ -201,12 +201,14 @@ WHERE
     'profile.core_identity.view_own',
     'profile.core_contact.view_own',
     'profile.teacher_professional.view_own',
+    'profile.teacher_identity.view_own',
     'profile.teacher_students.view_own',
     'profile.payment_methods.view_own',
     'profile.meeting_configs.view_own',
     'profile.core_identity.edit_own',
     'profile.core_contact.edit_own',
     'profile.teacher_professional.edit_own',
+    'profile.teacher_identity.edit_own',
     'profile.payment_methods.edit_own',
     'profile.meeting_configs.edit_own',
     'profile.core_identity.view_other',
@@ -220,7 +222,7 @@ WHERE
     'student.student_schedule.view_own',
     'student.student_history.view_own'
   )
-ON CONFLICT DO NOTHING;--> statement-breakpoint
+ON CONFLICT DO NOTHING;-->statement-breakpoint
 INSERT INTO group_permissions (group_id, permission_id)
 SELECT g.id, p.id
 FROM permission_groups g, permissions p

@@ -13,6 +13,12 @@ interface TeacherProfileEditForceCompleteGuardProps {
 /**
  * Client-side guard for teacher own-profile edit force-complete query param.
  * Complements the server redirect in `app/(dashboard)/profile/edit/page.tsx` on SPA navigations.
+ *
+ * Behavior:
+ *  - Missing national ID without forceComplete: push the force-complete URL back.
+ *  - National ID completed while forceComplete is set: the teacher has just
+ *    finished the required profile completion flow, so redirect to /dashboard
+ *    (their original destination) rather than back to the regular edit page.
  */
 export function TeacherProfileEditForceCompleteGuard({
   active,
@@ -34,7 +40,7 @@ export function TeacherProfileEditForceCompleteGuard({
     }
 
     if (nationalIdComplete && forceComplete) {
-      router.replace(buildTeacherProfileEditHref(false, searchParams.toString()));
+      router.replace("/dashboard");
     }
   }, [active, nationalIdComplete, router, searchParams]);
 

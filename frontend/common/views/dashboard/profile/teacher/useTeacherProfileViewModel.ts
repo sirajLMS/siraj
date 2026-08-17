@@ -18,7 +18,6 @@ import {
 import { isTeacherNationalIdComplete } from "@/frontend/common/lib/profileCompletion";
 import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
-import { ownProfileHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherProfileViewLabels,
   TeacherViewData,
@@ -149,7 +148,9 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
       });
 
       if (forceComplete && isTeacherNationalIdComplete(formData.nationalId)) {
-        router.replace(ownProfileHref());
+        // After completing the required national ID, send the teacher to the dashboard
+        // (the original destination they were blocked from) rather than the profile view.
+        router.replace("/dashboard");
         router.refresh();
         return;
       }

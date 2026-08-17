@@ -1,11 +1,12 @@
-# CI workflow for build, type-check, format/lint (via Biome), and tests.
+# CI workflow for build, type-check, format/lint (via Biome), and unit/integration tests.
 # NOTE: ESLint (`bun run lint`) is intentionally NOT run in CI. Per AGENTS.md,
 # `bun run lint` is heavyweight and must go through the lint queue server
 # (a local-only dev process). Lint runs in pre-commit hooks and the local
 # `bun quality-gate` orchestration. Biome (which is concurrency-safe) IS
 # run here as the CI-safe format/lint gate.
 #
-# Tests run sequentially in order: `bun run test:db`, `bun run test:services`, then `bun run test:graphql`.
+# Tests run sequentially in order: `bun run test:db` then `bun run test:services`.
+# GraphQL tests run in a dedicated workflow (.github/workflows/graphql.yml).
 # If any test step fails, CI execution halts immediately. Never run raw `bun test` or UI test scripts.
 # UI tests run locally via `bun run test:ui`.
 #
@@ -13,18 +14,6 @@
 # all required vars. Set TEST_CI=true so test runners keep workflow DATABASE_URL
 # (Postgres service) instead of clearing it before spawning workers. Locally,
 # developers create `.env.test` from the "Test environment" section in .env.example.
-#
-# GraphQL tests in CI use `TEST_SERVER_MODE=production` (pre-built `next start`
-# against `.next-test-prod`, same as UI E2E). Local `bun run test:graphql`
-# keeps the default dev server unless TEST_SERVER_MODE is set explicitly.
-#
-# Test-helper GraphQL mutations (ensureDemoUsers, createTestEntities, etc.) are
-# gated by `backend/lib/test-helper-gate.ts`. They register only when TEST_SERVER=1
-# (set by the test harness on the spawned `next start` process), TEST_CI=true
-# (job env below), or NODE_ENV is not production. They are hard-disabled when
-# VERCEL_ENV=production — real production deploys must never set TEST_SERVER or TEST_CI.
-# TODO(team): pin Bun version for reproducibility (currently unpinned).
-
 #
 # DATABASE_URL policy: never use secrets.DATABASE_URL in this workflow (or any
 # test/build CI). Always use the job Postgres service below (siraj_test).
@@ -82,10 +71,10 @@ jobs:
       - name: Biome lint + format
         run: bun run biome:check
 
-  build-and-test:
-    name: Build & test
+  tests:
+    name: Database & Services Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -120,14 +109,13 @@ jobs:
       NEXT_PUBLIC_BASE_URL: http://localhost:3000
       ALLOWED_ORIGIN: http://localhost:3000
       LOCAL_STORAGE_PATH: ./storage/
-      # Demo / test-server flags (GraphQL + production test server harness)
+      # Demo / test-server flags
       IS_DEMO: "true"
       NEXT_PUBLIC_IS_DEMO: "true"
       AUTH_COOKIE_SECURE: "false"
       # Test runner (migrate-only DB — no seeds; tests provision their own data)
       NODE_ENV: test
       # Test harness: keep job DATABASE_URL when spawning bun test workers (see backend/lib/test-ci-env.ts).
-      # Also enables test-helper GraphQL mutations as a secondary gate signal (see test-helper-gate.ts).
       TEST_CI: "true"
 
     steps:
@@ -147,23 +135,8 @@ jobs:
           restore-keys: |
             bun-pkgs-${{ runner.os }}-
 
-      - name: Cache Next.js build
-        uses: actions/cache@v4
-        with:
-          path: |
-            .next/cache
-            .next-test-prod/cache
-          key: nextjs-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          restore-keys: |
-            nextjs-${{ runner.os }}-${{ hashFiles('bun.lock') }}-
-
       - name: Install dependencies
         run: bun install --frozen-lockfile
-
-      - name: Next.js test production build
-        env:
-          NEXT_DEBUG_PRERENDER: "1"
-        run: bun run build:test
 
       # Migrate-only: do NOT run drizzleSeed.ts or any seed step here.
       - name: Prepare database
@@ -174,10 +147,3 @@ jobs:
 
       - name: Backend services tests
         run: bun run test:services
-
-      - name: GraphQL integration tests
-        env:
-          TEST_SERVER_MODE: production
-          # Harness sets TEST_SERVER=1 on the spawned `next start` process; explicit here documents CI intent.
-          TEST_SERVER: "1"
-        run: bun run test:graphql

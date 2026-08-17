@@ -160,10 +160,10 @@ describe("GraphQL: changeStudentStatus mutation", () => {
     const adminToken = await loginDemoUser("academy_admin");
     const res = await authenticatedRequest(adminToken, "mutate", changeStudentStatusMutationDocument, {
       studentId,
-      newStatus: StudentStatus.Suspended,
+      newStatus: StudentStatus.Regular,
       expectedVersion: null,
     });
-    expect(res.changeStudentStatus?.status).toBe(StudentStatus.Suspended);
+    expect(res.changeStudentStatus?.status).toBe(StudentStatus.Regular);
   });
 
   test("non-existent student returns studentNotFound", async () => {

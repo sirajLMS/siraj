@@ -156,23 +156,64 @@ function getErrorCode(err: unknown): string | undefined {
   return typeof code === "string" ? code : undefined;
 }
 
-const waitBuffer = new Int32Array(new SharedArrayBuffer(4));
-function syncSleep(ms: number): void {
-  Atomics.wait(waitBuffer, 0, 0, ms);
+function asyncSleep(ms: number): Promise<void> {
+  return new Promise(done => setTimeout(done, ms));
 }
 
 /**
- * Check if a process PID is alive.
- * Returns true if process exists, false otherwise.
+ * Check if a process PID is alive and actively running (not dead, zombie, or stopped).
+ * Returns true if process exists and is in an active state, false otherwise.
  */
-export function isPidAlive(pid: number): boolean {
+export function isPidRunning(pid: number): boolean {
+  if (!Number.isInteger(pid) || pid <= 0) {
+    return false;
+  }
+
+  // 1. Basic OS signal check (works across all platforms)
   try {
     process.kill(pid, 0);
-    return true;
   } catch (err: unknown) {
-    return getErrorCode(err) === "EPERM";
+    // If error is not EPERM (e.g. ESRCH = no such process), process does not exist
+    if (getErrorCode(err) !== "EPERM") {
+      return false;
+    }
   }
+
+  // 2. Linux /proc inspection for process state & zombie/stopped detection
+  try {
+    const statPath = `/proc/${pid}/stat`;
+    if (existsSync(statPath)) {
+      const statContent = readFileSync(statPath, "utf8");
+      const lastParen = statContent.lastIndexOf(")");
+      if (lastParen !== -1 && lastParen + 2 < statContent.length) {
+        const stateChar = statContent.charAt(lastParen + 2);
+        // States:
+        // 'R' (running), 'S' (sleeping), 'D' (disk sleep), 'I' (idle) -> Running / active
+        // 'Z' (zombie), 'T' (stopped by job control/Ctrl+Z), 't' (tracing stop), 'X'/'x' (dead), 'K' (wakekill), 'W' (paging) -> NOT running
+        if (stateChar === "Z" || stateChar === "T" || stateChar === "t" || stateChar === "X" || stateChar === "x") {
+          return false;
+        }
+      }
+    }
+
+    const cmdlinePath = `/proc/${pid}/cmdline`;
+    if (existsSync(cmdlinePath)) {
+      const cmdline = readFileSync(cmdlinePath, "utf8");
+      if (cmdline.length === 0) {
+        return false;
+      }
+    }
+  } catch {
+    // If reading /proc fails or on non-Linux, the basic kill(pid, 0) check above stands
+  }
+
+  return true;
 }
+
+/**
+ * Backward compatibility alias for isPidRunning
+ */
+export const isPidAlive = isPidRunning;
 
 /**
  * Ensure lock directories exist for a given namespace.
@@ -231,7 +272,7 @@ function parseTicketFile(queueDir: string, file: string): QueueTicketInfo | null
   try {
     const content = readFileSync(ticketPath, "utf8");
     const info: QueueTicketInfo = JSON.parse(content);
-    const alive = isPidAlive(info.pid);
+    const alive = isPidRunning(info.pid);
     const exempt = isTimeoutExempt(info.description);
     if (!alive || (!exempt && Date.now() - info.timestamp > MAX_LOCK_AGE_MS)) {
       try {
@@ -292,7 +333,7 @@ function getActiveLock(ns: string): ActiveLockInfo | null {
   try {
     const content = readFileSync(activeLockFile, "utf8");
     const info: ActiveLockInfo = JSON.parse(content);
-    const alive = isPidAlive(info.pid);
+    const alive = isPidRunning(info.pid);
     const exempt = isTimeoutExempt(info.description);
     if (!alive || (!exempt && Date.now() - info.acquiredAt > MAX_LOCK_AGE_MS)) {
       console.log(`${YELLOW}[process-lock]${NC} Cleaning up stale lock held by PID ${info.pid} (${info.description})`);
@@ -311,6 +352,26 @@ function getActiveLock(ns: string): ActiveLockInfo | null {
       /* ignore stale lock cleanup error */
     }
     return null;
+  }
+}
+
+/**
+ * Clean up all stale active locks and queue tickets across all lock namespaces.
+ */
+export function cleanAllStaleLocks(): void {
+  if (!existsSync(LOCK_BASE_DIR)) return;
+  try {
+    const entries = readdirSync(LOCK_BASE_DIR, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const ns = entry.name;
+      // 1. Check active lock in namespace
+      getActiveLock(ns);
+      // 2. Check queue tickets in namespace
+      getValidQueueTickets(ns);
+    }
+  } catch {
+    /* ignore scan errors */
   }
 }
 
@@ -369,7 +430,7 @@ function createReleaseCallback(ns: string, description: string): () => void {
 const activeTickets = new Set<string>();
 
 /**
- * Attach process exit handlers to clean up all active locks on crash/exit.
+ * Attach process exit handlers to clean up all active locks and tickets on crash/exit/signals.
  */
 function attachExitHandlers(): void {
   if (exitHandlersAttached) return;
@@ -404,7 +465,22 @@ function attachExitHandlers(): void {
     cleanupAll();
     process.exit(143);
   });
+  process.on("SIGHUP", () => {
+    cleanupAll();
+    process.exit(129);
+  });
+  process.on("SIGQUIT", () => {
+    cleanupAll();
+    process.exit(131);
+  });
+  process.on("SIGBREAK", () => {
+    cleanupAll();
+    process.exit(130);
+  });
 }
+
+// Attach handlers eagerly on module import
+attachExitHandlers();
 
 function getQueuePosition(ns: string, ticketInfo: QueueTicketInfo): { pos: number; total: number } {
   const validTickets = getValidQueueTickets(ns);
@@ -481,6 +557,9 @@ export async function acquireProcessLock(description: string): Promise<() => voi
   ensureLockDirs(ns);
   attachExitHandlers();
 
+  // Sweep and clean up any stale locks/tickets from dead or stopped processes
+  cleanAllStaleLocks();
+
   // 1. Re-entrancy check (same process or descendant process spawned by lock owner)
   const currentActive = getActiveLock(ns);
   if (currentActive && isProcessDescendantOf(currentActive.pid)) {
@@ -493,7 +572,6 @@ export async function acquireProcessLock(description: string): Promise<() => voi
   activeTickets.add(ticketPath);
   console.log(`${CYAN}[process-lock]${NC} Enqueued request for "${description}" (PID: ${process.pid})`);
 
-  let lastLoggedState = "";
   const cleanupTicket = () => {
     activeTickets.delete(ticketPath);
     try {
@@ -503,9 +581,9 @@ export async function acquireProcessLock(description: string): Promise<() => voi
     }
   };
 
-  // 3. Wait loop
-  while (true) {
+  const poll = async (lastState: string): Promise<() => void> => {
     const active = getActiveLock(ns);
+    let state = lastState;
 
     if (active) {
       if (active.pid === process.pid) {
@@ -513,7 +591,7 @@ export async function acquireProcessLock(description: string): Promise<() => voi
         setReentryCount(ns, 1);
         return createReleaseCallback(ns, description);
       }
-      lastLoggedState = checkQueuePosition(ns, ticketInfo, active.pid, active.description, lastLoggedState);
+      state = checkQueuePosition(ns, ticketInfo, active.pid, active.description, state);
     } else {
       const validTickets = getValidQueueTickets(ns);
       const isFirst = validTickets.length === 0 || validTickets[0].info.ticketId === ticketInfo.ticketId;
@@ -526,10 +604,19 @@ export async function acquireProcessLock(description: string): Promise<() => voi
         );
         return createReleaseCallback(ns, description);
       }
-      lastLoggedState = checkWaitingPosition(ns, ticketInfo, lastLoggedState);
+      state = checkWaitingPosition(ns, ticketInfo, state);
     }
 
-    syncSleep(POLL_INTERVAL_MS);
+    await asyncSleep(POLL_INTERVAL_MS);
+    return poll(state);
+  };
+
+  // 3. Wait loop via recursive async polling
+  try {
+    return await poll("");
+  } finally {
+    // If we exit unexpectedly without returning, ensure ticket is cleaned up
+    cleanupTicket();
   }
 }
 

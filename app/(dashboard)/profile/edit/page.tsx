@@ -5,7 +5,6 @@ import { resolveProfilePageContext } from "@/backend/lib/auth/cached-profile";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { getServerUserContext } from "@/backend/lib/auth/server-auth";
 import {
-  buildTeacherProfileEditHref,
   hasForceCompleteSearchParam,
   TEACHER_PROFILE_COMPLETION_EDIT_HREF,
 } from "@/frontend/common/lib/profileCompletion";
@@ -56,7 +55,7 @@ export default async function ProfileEditPage({ searchParams }: ProfileEditPageP
     }
 
     if (nationalIdComplete && forceComplete) {
-      redirect({ href: buildTeacherProfileEditHref(false) });
+      redirect({ href: "/dashboard" });
       return undefined;
     }
   }

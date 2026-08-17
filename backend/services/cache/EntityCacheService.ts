@@ -262,6 +262,7 @@ export async function invalidateTeacherWrite(teacherId: string, userId: string):
   await invalidateTags([
     `teacher:${teacherId}`,
     `teacher:byUserId:${userId}`,
+    `user:${userId}`,
     "teacherDirectory",
     "dashboard:supervisor",
   ]);

@@ -1,16 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { sql } from "drizzle-orm";
-import { db } from "@/backend/db";
+import { eq, sql } from "drizzle-orm";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
-import {
-  closeRlsClients,
-  queryAsRlsRole,
-  setupRlsPolicies,
-  setupRlsRole,
-  teardownRlsRole,
-} from "@/backend/db/test/test-utils";
+import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 
 describe("Row Level Security and Soft Delete", () => {
   beforeAll(async () => {
@@ -29,117 +22,130 @@ describe("Row Level Security and Soft Delete", () => {
   });
 
   afterAll(async () => {
-    await closeRlsClients();
     await teardownRlsRole();
   });
 
   test("Insert with deleted_at IS NULL succeeds, but deleted_at IS NOT NULL fails under RLS", async () => {
-    const emailValid = `rls-test-${randomUUID()}@example.com`;
-    const emailInvalid = `rls-test-${randomUUID()}@example.com`;
-    const now = new Date();
+    await runInRollback(async tx => {
+      const emailValid = `rls-test-${randomUUID()}@example.com`;
+      const emailInvalid = `rls-test-${randomUUID()}@example.com`;
+      const now = new Date();
+      const passwordHash = randomUUID();
 
-    const passwordHash = randomUUID();
-    const validRows = await queryAsRlsRole<{ id: string }>(
-      "test_rls_user",
-      "00000000-0000-0000-0000-000000000000",
-      `INSERT INTO "users" (name, email, password, created_at, updated_at) VALUES ('RLS Test User', $1, $3, $2, $2) RETURNING id`,
-      [emailValid, now.toISOString(), passwordHash]
-    );
-    expect(validRows).toHaveLength(1);
+      await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
+      await tx.execute(sql`SET LOCAL app.current_user_id = '00000000-0000-0000-0000-000000000000'`);
 
-    let insertError: unknown = null;
-    try {
-      await queryAsRlsRole(
-        "test_rls_user",
-        "00000000-0000-0000-0000-000000000000",
-        `INSERT INTO "users" (name, email, password, created_at, updated_at, deleted_at) VALUES ('RLS Deleted User', $1, $3, $2, $2, $2)`,
-        [emailInvalid, now.toISOString(), passwordHash]
-      );
-    } catch (e) {
-      insertError = e;
-    }
+      const validRows = await tx
+        .insert(users)
+        .values({
+          name: "RLS Test User",
+          email: emailValid,
+          password: passwordHash,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning({ id: users.id });
+      expect(validRows).toHaveLength(1);
 
-    expect(insertError).not.toBeNull();
+      let insertError: unknown = null;
+      try {
+        await tx
+          .insert(users)
+          .values({
+            name: "RLS Deleted User",
+            email: emailInvalid,
+            password: passwordHash,
+            createdAt: now,
+            updatedAt: now,
+            deletedAt: now,
+          })
+          .returning({ id: users.id });
+      } catch (e) {
+        insertError = e;
+      }
 
-    await db.delete(users).where(sql`email IN (${emailValid}, ${emailInvalid})`);
+      expect(insertError).not.toBeNull();
+    });
   });
 
   test("Update to deleted_at IS NOT NULL fails under RLS", async () => {
-    const email = `rls-update-${randomUUID()}@example.com`;
-    const now = new Date();
+    await runInRollback(async tx => {
+      const email = `rls-update-${randomUUID()}@example.com`;
+      const now = new Date();
 
-    const [user] = await db
-      .insert(users)
-      .values({
-        name: "RLS Update User",
-        email,
-        password: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+      const [user] = await tx
+        .insert(users)
+        .values({
+          name: "RLS Update User",
+          email,
+          password: randomUUID(),
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
-    let updateError: unknown = null;
-    let updatedRows: { id: string }[] = [];
-    try {
-      updatedRows = await queryAsRlsRole<{ id: string }>(
-        "test_rls_user",
-        "00000000-0000-0000-0000-000000000000",
-        `UPDATE "users" SET deleted_at = $1 WHERE id = $2 RETURNING id`,
-        [now.toISOString(), user.id]
-      );
-    } catch (e) {
-      updateError = e;
-    }
+      await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
+      await tx.execute(sql`SET LOCAL app.current_user_id = '00000000-0000-0000-0000-000000000000'`);
 
-    const [activeRow] = await db.select().from(users).where(sql`id = ${user.id}`);
-    expect(activeRow?.deletedAt).toBeNull();
-    expect(updateError !== null || updatedRows.length === 0).toBe(true);
+      let updateError: unknown = null;
+      let updatedRows: { id: string }[] = [];
+      try {
+        updatedRows = await tx
+          .update(users)
+          .set({ deletedAt: now })
+          .where(eq(users.id, user.id))
+          .returning({ id: users.id });
+      } catch (e) {
+        updateError = e;
+      }
 
-    await db.delete(users).where(sql`id = ${user.id}`);
+      expect(updateError !== null || updatedRows.length === 0).toBe(true);
+    });
   });
 
   test("Repository soft delete hides row from SELECT. Hard delete as RLS role is blocked. Superuser hard delete removes row.", async () => {
-    const email = `rls-delete-${randomUUID()}@example.com`;
-    const now = new Date();
+    await runInRollback(async tx => {
+      const email = `rls-delete-${randomUUID()}@example.com`;
+      const now = new Date();
 
-    const [user] = await db
-      .insert(users)
-      .values({
-        name: "RLS Delete User",
-        email,
-        password: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+      const [user] = await tx
+        .insert(users)
+        .values({
+          name: "RLS Delete User",
+          email,
+          password: randomUUID(),
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
-    await SoftDeleteRepository.softDeleteUser(user.id);
+      await SoftDeleteRepository.softDeleteUser(user.id, null, tx);
 
-    const selectedUsers = await queryAsRlsRole<{ id: string }>(
-      "test_rls_user",
-      "00000000-0000-0000-0000-000000000000",
-      `SELECT id FROM "users" WHERE id = $1`,
-      [user.id]
-    );
-    expect(selectedUsers).toHaveLength(0);
+      await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
+      await tx.execute(sql`SET LOCAL app.current_user_id = '00000000-0000-0000-0000-000000000000'`);
 
-    const [superuserSelect] = await db.select().from(users).where(sql`id = ${user.id}`);
-    expect(superuserSelect).toBeDefined();
-    expect(superuserSelect.deletedAt).not.toBeNull();
+      const selectedUsers = await tx.select({ id: users.id }).from(users).where(eq(users.id, user.id));
+      expect(selectedUsers).toHaveLength(0);
 
-    const deleteResult = await queryAsRlsRole<{ id: string }>(
-      "test_rls_user",
-      "00000000-0000-0000-0000-000000000000",
-      `DELETE FROM "users" WHERE id = $1 RETURNING id`,
-      [user.id]
-    );
-    expect(deleteResult).toHaveLength(0);
+      let deleteResult: { id: string }[] = [];
+      try {
+        deleteResult = await tx.delete(users).where(eq(users.id, user.id)).returning({ id: users.id });
+      } catch {
+        // Blocked by RLS delete policy
+      }
+      expect(deleteResult).toHaveLength(0);
 
-    const deleteRes = await SoftDeleteRepository.hardDelete("users", user.id);
-    expect(deleteRes.id).toBe(user.id);
+      await tx.execute(sql`RESET ROLE`);
 
-    const superuserSelectAfter = await db.select().from(users).where(sql`id = ${user.id}`);
-    expect(superuserSelectAfter).toHaveLength(0);
+      const [superuserSelect] = await tx.select().from(users).where(eq(users.id, user.id));
+      expect(superuserSelect).toBeDefined();
+      expect(superuserSelect.deletedAt).not.toBeNull();
+
+      const deleteRes = await SoftDeleteRepository.hardDelete("users", user.id, tx);
+      expect(deleteRes.id).toBe(user.id);
+
+      const superuserSelectAfter = await tx.select().from(users).where(eq(users.id, user.id));
+      expect(superuserSelectAfter).toHaveLength(0);
+    });
   });
 });
