@@ -1,12 +1,13 @@
 "use client";
 
 import { ArrowBackOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, Button, Fade, Skeleton, type Theme, Typography } from "@mui/material";
+import { Box, Button, Fade, type Theme, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useMemo } from "react";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
+import { QuotaDetailLoadingSkeleton } from "@/frontend/common/views/dashboard/billing/quota/components/__shared__/QuotaDetailLoadingSkeleton";
 import type { QuotaLedgerItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaDetailViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaDetailViewModel";
 import { formatQuotaDate } from "@/frontend/common/views/dashboard/billing/quota/utils/quotaFormatters";
@@ -66,16 +67,6 @@ function getDeltaColor(value: number, theme: Theme) {
   return { color: theme.palette.text.primary };
 }
 
-function DesktopQuotaDetailSkeleton() {
-  return (
-    <Box component="output" aria-busy="true" sx={{ display: "flex", flexDirection: "column", gap: 3, py: 3 }}>
-      <Skeleton variant="rectangular" sx={{ height: 80 }} />
-      <Skeleton variant="rectangular" sx={{ height: 200 }} />
-      <Skeleton variant="rectangular" sx={{ height: 400 }} />
-    </Box>
-  );
-}
-
 export function QuotaDetailDesktop(props: Readonly<QuotaDetailViewModel>) {
   const {
     t,
@@ -101,7 +92,7 @@ export function QuotaDetailDesktop(props: Readonly<QuotaDetailViewModel>) {
   if (loadingQuota) {
     return (
       <DesktopPageContainer>
-        <DesktopQuotaDetailSkeleton />
+        <QuotaDetailLoadingSkeleton />
       </DesktopPageContainer>
     );
   }

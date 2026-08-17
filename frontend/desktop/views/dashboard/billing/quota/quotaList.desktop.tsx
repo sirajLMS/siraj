@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  CheckCircleOutlined,
-  ConfirmationNumberOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  ScheduleOutlined,
-  SearchOutlined,
-  VisibilityOutlined,
-} from "@mui/icons-material";
+import { DeleteOutlined, EditOutlined, SearchOutlined, VisibilityOutlined } from "@mui/icons-material";
 import {
   Box,
   Fade,
@@ -29,9 +21,9 @@ import { useMemo } from "react";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { ErrorState } from "@/frontend/common/components/ui/state/ErrorState";
 import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaListViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
+import { buildQuotaListMetrics } from "@/frontend/common/views/dashboard/billing/quota/utils";
 import { buildQuotaColumns } from "@/frontend/common/views/dashboard/billing/quota/utils/buildQuotaColumns";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container/DesktopSectionPanel";
@@ -157,34 +149,6 @@ function QuotaDesktopGrid({
   );
 }
 
-function buildMetrics(t: QuotaLabels, totalCount: number, quotas: readonly QuotaItem[]): MetricItem[] {
-  const activeCount = quotas.filter(q => q.status === QuotaStatus.Active).length;
-  const expiredCount = quotas.filter(q => q.status === QuotaStatus.Expired).length;
-  return [
-    {
-      key: "total-quotas",
-      count: totalCount,
-      label: t.listTitle,
-      labelKey: "billing.quota.totalQuotas",
-      icon: ConfirmationNumberOutlined,
-    },
-    {
-      key: "active-quotas",
-      count: activeCount,
-      label: t.statuses.ACTIVE,
-      labelKey: "billing.quota.activeQuotas",
-      icon: CheckCircleOutlined,
-    },
-    {
-      key: "expired-quotas",
-      count: expiredCount,
-      label: t.statuses.EXPIRED,
-      labelKey: "billing.quota.expiredQuotas",
-      icon: ScheduleOutlined,
-    },
-  ];
-}
-
 export function QuotaListDesktop(props: Readonly<QuotaListViewModel>) {
   const {
     t,
@@ -244,7 +208,7 @@ export function QuotaListDesktop(props: Readonly<QuotaListViewModel>) {
     return baseCols;
   }, [t, handleDelete]);
 
-  const metrics = useMemo(() => buildMetrics(t, totalCount, quotas), [t, totalCount, quotas]);
+  const metrics = useMemo(() => buildQuotaListMetrics(t, totalCount, quotas), [t, totalCount, quotas]);
 
   const hasError =
     !loading &&

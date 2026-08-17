@@ -1,5 +1,8 @@
+import { EventBusyOutlined, Inventory2Outlined, NumbersOutlined } from "@mui/icons-material";
 import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
+import type { QuotaInsightsViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
 export interface PurchasesOverTimeData {
@@ -191,4 +194,49 @@ export function buildQuotaInsightsCsv(quotas: QuotaItem[], labels: QuotaLabels):
   ]);
   const csvLines = [headers, ...rows].map(row => row.map(escapeCsvCell).join(","));
   return csvLines.join("\n");
+}
+
+export function buildQuotaInsightsMetrics(vm: Readonly<QuotaInsightsViewModel>): readonly MetricItem[] {
+  const { metrics, labels } = vm;
+  return [
+    {
+      key: "activeQuotas",
+      count: metrics.activeQuotasCount,
+      labelKey: "quota.activeQuotas",
+      label: labels.activeQuotasCount(metrics.activeQuotasCount),
+      icon: Inventory2Outlined,
+      variant: "default",
+    },
+    {
+      key: "totalRemaining",
+      count: metrics.totalClassesRemaining,
+      labelKey: "quota.remaining",
+      label: labels.totalClassesRemaining(metrics.totalClassesRemaining),
+      icon: NumbersOutlined,
+      variant: "highlight",
+    },
+    {
+      key: "totalReserved",
+      count: metrics.totalReserved,
+      labelKey: "quota.reserved",
+      label: labels.fields.reservedClasses,
+      icon: Inventory2Outlined,
+      variant: "default",
+    },
+    {
+      key: "pendingBacklog",
+      count: metrics.pendingBacklogCount,
+      labelKey: "quota.pendingBacklog",
+      label: labels.charts.pendingCredits,
+      icon: EventBusyOutlined,
+      variant: metrics.pendingBacklogCount > 0 ? "danger" : "default",
+    },
+  ];
+}
+
+export function quotaInsightsBreadcrumbs(t: { readonly insights: string }) {
+  return [
+    { label: "Quotas", href: "/quotas" },
+    { label: t.insights, current: true },
+  ];
 }

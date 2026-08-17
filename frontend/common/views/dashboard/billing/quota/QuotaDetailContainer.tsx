@@ -1,10 +1,11 @@
 "use client";
 
 import { ArrowBackOutlined } from "@mui/icons-material";
-import { Box, Button, Skeleton, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import Link from "next/link";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
+import { QuotaDetailLoadingSkeleton } from "@/frontend/common/views/dashboard/billing/quota/components/__shared__/QuotaDetailLoadingSkeleton";
 import {
   type QuotaDetailViewModel,
   useQuotaDetailViewModel,
@@ -23,16 +24,6 @@ const lazyViews = createLazyView<QuotaDetailViewModel>(
 
 interface QuotaDetailContainerProps {
   readonly quotaId: string;
-}
-
-function QuotaDetailLoading() {
-  return (
-    <Box component="output" aria-busy="true" sx={{ display: "flex", flexDirection: "column", gap: 3, py: 3 }}>
-      <Skeleton variant="rectangular" sx={{ height: 80 }} />
-      <Skeleton variant="rectangular" sx={{ height: 200 }} />
-      <Skeleton variant="rectangular" sx={{ height: 400 }} />
-    </Box>
-  );
 }
 
 function QuotaDetailNotFound({
@@ -61,7 +52,7 @@ export function QuotaDetailContainer(props: Readonly<QuotaDetailContainerProps>)
   const viewModel = useQuotaDetailViewModel(quotaId);
 
   if (viewModel.loadingQuota) {
-    return <QuotaDetailLoading />;
+    return <QuotaDetailLoadingSkeleton />;
   }
 
   if (viewModel.notFound || !viewModel.quota) {

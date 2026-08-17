@@ -1,16 +1,13 @@
 "use client";
 
-import {
-  DownloadOutlined,
-  EventBusyOutlined,
-  FilterListOutlined,
-  Inventory2Outlined,
-  NumbersOutlined,
-} from "@mui/icons-material";
+import { DownloadOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Collapse, Fade, IconButton, Skeleton } from "@mui/material";
 import { type ReactElement, useState } from "react";
-import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { QuotaInsightsViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel";
+import {
+  buildQuotaInsightsMetrics,
+  quotaInsightsBreadcrumbs,
+} from "@/frontend/common/views/dashboard/billing/quota/utils";
 import { MobileExportButton, MobileFilterButton } from "@/frontend/mobile/components/ui/button";
 import { MobileMetricCardGrid } from "@/frontend/mobile/components/ui/card/MobileMetricCardGrid";
 import { MobileContentStack } from "@/frontend/mobile/components/ui/container/MobileContentStack";
@@ -18,51 +15,6 @@ import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container/Mo
 import { MobilePageContainer, MobilePageHeader } from "@/frontend/mobile/components/ui/container/page";
 import { MobileErrorState, MobileLoadingState } from "@/frontend/mobile/components/ui/state";
 import { QuotaInsightsChartsMobile } from "@/frontend/mobile/views/dashboard/billing/quota/components/QuotaInsightsChartsMobile";
-
-function buildMobileMetrics(vm: QuotaInsightsViewModel): readonly MetricItem[] {
-  const { metrics, labels } = vm;
-  return [
-    {
-      key: "activeQuotas",
-      count: metrics.activeQuotasCount,
-      labelKey: "quota.activeQuotas",
-      label: labels.activeQuotasCount(metrics.activeQuotasCount),
-      icon: Inventory2Outlined,
-      variant: "default",
-    },
-    {
-      key: "totalRemaining",
-      count: metrics.totalClassesRemaining,
-      labelKey: "quota.remaining",
-      label: labels.totalClassesRemaining(metrics.totalClassesRemaining),
-      icon: NumbersOutlined,
-      variant: "highlight",
-    },
-    {
-      key: "totalReserved",
-      count: metrics.totalReserved,
-      labelKey: "quota.reserved",
-      label: labels.fields.reservedClasses,
-      icon: Inventory2Outlined,
-      variant: "default",
-    },
-    {
-      key: "pendingBacklog",
-      count: metrics.pendingBacklogCount,
-      labelKey: "quota.pendingBacklog",
-      label: labels.charts.pendingCredits,
-      icon: EventBusyOutlined,
-      variant: metrics.pendingBacklogCount > 0 ? "danger" : "default",
-    },
-  ];
-}
-
-function mobileBreadcrumbs(t: { readonly insights: string }) {
-  return [
-    { label: "Quotas", href: "/quotas" },
-    { label: t.insights, current: true },
-  ];
-}
 
 function renderMobileChartContent(
   loading: boolean,
@@ -107,7 +59,7 @@ export function QuotaInsightsMobileView(vm: Readonly<QuotaInsightsViewModel>): R
   if (loading && vm.quotas.length === 0) {
     return (
       <MobilePageContainer>
-        <MobilePageHeader title={labels.insightsTitle} breadcrumbs={mobileBreadcrumbs(labels)} />
+        <MobilePageHeader title={labels.insightsTitle} breadcrumbs={quotaInsightsBreadcrumbs(labels)} />
         <Box aria-busy="true">
           <MobileLoadingState />
         </Box>
@@ -121,7 +73,7 @@ export function QuotaInsightsMobileView(vm: Readonly<QuotaInsightsViewModel>): R
         <MobilePageContainer>
           <MobilePageHeader
             title={labels.insightsTitle}
-            breadcrumbs={mobileBreadcrumbs(labels)}
+            breadcrumbs={quotaInsightsBreadcrumbs(labels)}
             actions={
               <MobileExportButton startIcon={<DownloadOutlined />} onClick={exportCsv}>
                 {labels.actions.create}
@@ -130,7 +82,7 @@ export function QuotaInsightsMobileView(vm: Readonly<QuotaInsightsViewModel>): R
           />
 
           <Box aria-busy={loading}>
-            <MobileMetricCardGrid metrics={buildMobileMetrics(vm)} />
+            <MobileMetricCardGrid metrics={buildQuotaInsightsMetrics(vm)} />
 
             {/* Collapsible Filters */}
             <MobileSectionPanel

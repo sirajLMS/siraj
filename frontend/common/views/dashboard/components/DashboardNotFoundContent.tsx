@@ -3,16 +3,20 @@
 import SearchOffOutlined from "@mui/icons-material/SearchOffOutlined";
 import { Box, Button, Typography } from "@mui/material";
 import Link from "next/link";
-import type { DashboardCoreLayoutLabels } from "@/shared/locale/types/dashboard/core";
 
-interface DashboardNotFoundContentProps {
-  readonly labels: Pick<
-    DashboardCoreLayoutLabels,
-    "pageNotFoundTitle" | "pageNotFoundDescription" | "pageNotFoundBackToDashboard"
-  >;
+export interface DashboardNotFoundContentProps {
+  readonly title: string;
+  readonly description: string;
+  readonly backLabel: string;
+  readonly backHref?: string;
 }
 
-export function DashboardNotFoundContent({ labels }: DashboardNotFoundContentProps) {
+export function DashboardNotFoundContent({
+  title,
+  description,
+  backLabel,
+  backHref = "/dashboard",
+}: Readonly<DashboardNotFoundContentProps>) {
   return (
     <Box
       sx={{
@@ -42,7 +46,7 @@ export function DashboardNotFoundContent({ labels }: DashboardNotFoundContentPro
         <SearchOffOutlined sx={{ fontSize: 36 }} />
       </Box>
       <Typography variant="headlineMd" sx={{ color: theme => theme.palette.text.primary }}>
-        {labels.pageNotFoundTitle}
+        {title}
       </Typography>
       <Typography
         variant="bodyMd"
@@ -51,10 +55,10 @@ export function DashboardNotFoundContent({ labels }: DashboardNotFoundContentPro
           maxWidth: 420,
         }}
       >
-        {labels.pageNotFoundDescription}
+        {description}
       </Typography>
-      <Button component={Link} href="/dashboard" variant="contained" sx={{ mt: 1 }}>
-        {labels.pageNotFoundBackToDashboard}
+      <Button component={Link} href={backHref} variant="contained" sx={{ mt: 1 }}>
+        {backLabel}
       </Button>
     </Box>
   );

@@ -1,67 +1,19 @@
 "use client";
 
-import {
-  DownloadOutlined,
-  EventBusyOutlined,
-  FilterListOutlined,
-  Inventory2Outlined,
-  NumbersOutlined,
-} from "@mui/icons-material";
+import { DownloadOutlined, FilterListOutlined } from "@mui/icons-material";
 import { Box, Fade, Skeleton, Stack } from "@mui/material";
 import type { ReactElement } from "react";
-import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { QuotaInsightsViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel";
+import {
+  buildQuotaInsightsMetrics,
+  quotaInsightsBreadcrumbs,
+} from "@/frontend/common/views/dashboard/billing/quota/utils";
 import { DesktopExportButton, DesktopFilterButton } from "@/frontend/desktop/components/ui/button";
 import { DesktopMetricCardGrid } from "@/frontend/desktop/components/ui/card/MetricCardGrid/DesktopMetricCardGrid";
 import { DesktopSectionPanel } from "@/frontend/desktop/components/ui/container";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { DesktopErrorState, DesktopLoadingState } from "@/frontend/desktop/components/ui/state";
 import { QuotaInsightsChartsDesktop } from "@/frontend/desktop/views/dashboard/billing/quota/components/QuotaInsightsChartsDesktop";
-
-function buildDesktopMetrics(vm: QuotaInsightsViewModel): readonly MetricItem[] {
-  const { metrics, labels } = vm;
-  return [
-    {
-      key: "activeQuotas",
-      count: metrics.activeQuotasCount,
-      labelKey: "quota.activeQuotas",
-      label: labels.activeQuotasCount(metrics.activeQuotasCount),
-      icon: Inventory2Outlined,
-      variant: "default",
-    },
-    {
-      key: "totalRemaining",
-      count: metrics.totalClassesRemaining,
-      labelKey: "quota.remaining",
-      label: labels.totalClassesRemaining(metrics.totalClassesRemaining),
-      icon: NumbersOutlined,
-      variant: "highlight",
-    },
-    {
-      key: "totalReserved",
-      count: metrics.totalReserved,
-      labelKey: "quota.reserved",
-      label: labels.fields.reservedClasses,
-      icon: Inventory2Outlined,
-      variant: "default",
-    },
-    {
-      key: "pendingBacklog",
-      count: metrics.pendingBacklogCount,
-      labelKey: "quota.pendingBacklog",
-      label: labels.charts.pendingCredits,
-      icon: EventBusyOutlined,
-      variant: metrics.pendingBacklogCount > 0 ? "danger" : "default",
-    },
-  ];
-}
-
-function desktopBreadcrumbs(t: { readonly insights: string }) {
-  return [
-    { label: "Quotas", href: "/quotas" },
-    { label: t.insights, current: true },
-  ];
-}
 
 function renderChartContent(
   loading: boolean,
@@ -99,7 +51,7 @@ export function QuotaInsightsDesktopView(vm: Readonly<QuotaInsightsViewModel>): 
   if (loading && vm.quotas.length === 0) {
     return (
       <DesktopPageContainer>
-        <DesktopPageHeader title={labels.insightsTitle} breadcrumbs={desktopBreadcrumbs(labels)} />
+        <DesktopPageHeader title={labels.insightsTitle} breadcrumbs={quotaInsightsBreadcrumbs(labels)} />
         <Box aria-busy="true">
           <DesktopLoadingState />
         </Box>
@@ -113,7 +65,7 @@ export function QuotaInsightsDesktopView(vm: Readonly<QuotaInsightsViewModel>): 
         <DesktopPageContainer>
           <DesktopPageHeader
             title={labels.insightsTitle}
-            breadcrumbs={desktopBreadcrumbs(labels)}
+            breadcrumbs={quotaInsightsBreadcrumbs(labels)}
             actions={
               <DesktopExportButton startIcon={<DownloadOutlined />} onClick={exportCsv}>
                 {labels.actions.create}
@@ -123,7 +75,7 @@ export function QuotaInsightsDesktopView(vm: Readonly<QuotaInsightsViewModel>): 
 
           <Box aria-busy={loading}>
             {/* Metric Cards */}
-            <DesktopMetricCardGrid metrics={buildDesktopMetrics(vm)} />
+            <DesktopMetricCardGrid metrics={buildQuotaInsightsMetrics(vm)} />
 
             {/* Filter Bar */}
             <Stack direction="row" spacing={2} sx={{ mt: 2, flexWrap: "wrap", gap: 1 }}>

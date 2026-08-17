@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  AddOutlined,
-  CheckCircleOutlined,
-  ConfirmationNumberOutlined,
-  InsightsOutlined,
-  ScheduleOutlined,
-  SearchOutlined,
-} from "@mui/icons-material";
+import { AddOutlined, InsightsOutlined, SearchOutlined } from "@mui/icons-material";
 import {
   Button,
   Fade,
@@ -26,9 +19,9 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaListViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
+import { buildQuotaListMetrics } from "@/frontend/common/views/dashboard/billing/quota/utils";
 import {
   MobileCardList,
   MobileCardListItem,
@@ -131,34 +124,6 @@ function MobileFilterControls({
   );
 }
 
-function buildMetrics(t: QuotaLabels, totalCount: number, quotas: readonly QuotaItem[]): MetricItem[] {
-  const activeCount = quotas.filter(q => q.status === QuotaStatus.Active).length;
-  const expiredCount = quotas.filter(q => q.status === QuotaStatus.Expired).length;
-  return [
-    {
-      key: "total-quotas",
-      count: totalCount,
-      label: t.listTitle,
-      labelKey: "billing.quota.totalQuotas",
-      icon: ConfirmationNumberOutlined,
-    },
-    {
-      key: "active-quotas",
-      count: activeCount,
-      label: t.statuses.ACTIVE,
-      labelKey: "billing.quota.activeQuotas",
-      icon: CheckCircleOutlined,
-    },
-    {
-      key: "expired-quotas",
-      count: expiredCount,
-      label: t.statuses.EXPIRED,
-      labelKey: "billing.quota.expiredQuotas",
-      icon: ScheduleOutlined,
-    },
-  ];
-}
-
 export function QuotaListMobile(props: Readonly<QuotaListViewModel>) {
   const {
     t,
@@ -177,7 +142,7 @@ export function QuotaListMobile(props: Readonly<QuotaListViewModel>) {
   } = props;
 
   const router = useRouter();
-  const metrics = buildMetrics(t, totalCount, quotas);
+  const metrics = buildQuotaListMetrics(t, totalCount, quotas);
 
   const renderItem = (quota: QuotaItem, index: number): ReactNode => (
     <MobileCardListItem

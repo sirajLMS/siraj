@@ -4,7 +4,7 @@ import { SyncOutlined } from "@mui/icons-material";
 import { Box, Fade, Stack } from "@mui/material";
 import { FormProvider } from "react-hook-form";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
-import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/billing/quota/quotaFormAccessContext";
+import { useQuotaFormShell } from "@/frontend/common/views/dashboard/billing/quota/useQuotaFormShell";
 import type { UseQuotaFormViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaFormViewModel";
 import { DesktopFormErrorSnackbar } from "@/frontend/desktop/components/ui";
 import { DesktopPrimaryPageAction } from "@/frontend/desktop/components/ui/button";
@@ -27,16 +27,7 @@ export function QuotaFormDesktopView(props: Readonly<UseQuotaFormViewModel>) {
     errors,
   } = props;
 
-  const pageTitle = isEditing ? labels.editQuota : labels.newQuota;
-
-  const breadcrumbs = [
-    { label: labels.title, href: "/quotas" },
-    { label: pageTitle, current: true },
-  ];
-
-  const periodType = form.watch("periodType");
-  const kind = form.watch("kind");
-  const { canManage } = useQuotaFormAccess();
+  const { pageTitle, breadcrumbs, periodType, kind, canManage } = useQuotaFormShell(props);
 
   return (
     <Fade in timeout={300}>

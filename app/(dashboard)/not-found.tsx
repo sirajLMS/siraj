@@ -15,11 +15,9 @@ export default async function DashboardNotFound() {
 
   return (
     <DashboardNotFoundContent
-      labels={{
-        pageNotFoundTitle: t.pageNotFoundTitle,
-        pageNotFoundDescription: t.pageNotFoundDescription,
-        pageNotFoundBackToDashboard: t.pageNotFoundBackToDashboard,
-      }}
+      title={t.pageNotFoundTitle}
+      description={t.pageNotFoundDescription}
+      backLabel={t.pageNotFoundBackToDashboard}
     />
   );
 }
