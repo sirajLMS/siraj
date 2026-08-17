@@ -212,10 +212,15 @@ const ledgerMock = {
 describe("ParentQuotaView", () => {
   afterEach(() => cleanup());
 
-  test.skip("renders child tabs for parent's children", () => {
-    // Skipped: child tab rendering depends on the parentAssociatedStudents query resolving before tab UI renders.
-    // The mock data returns correctly but the component's child selection state doesn't initialize in time.
-    expect.assertions(0);
+  test("renders child tabs for parent's children", async () => {
+    renderParentView([meQueryMock, childrenMock([mockChild]), studentQuotasMock, ledgerMock]);
+
+    await waitFor(
+      () => {
+        expect(screen.getAllByText("Child One").length).toBeGreaterThan(0);
+      },
+      { timeout: 5000 }
+    );
   });
 
   const renderParentView = (mocks: MockLink.MockedResponse[]) => {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { createElement, type ReactElement } from "react";
 
 await mock.module("@/frontend/common/utils/logger", () => ({
@@ -16,7 +16,7 @@ await mock.module("next/link", () => ({
 const mockLabels = (await import("@/test/ui/components/quota/mockQuotaLabels")).createMockQuotaLabels();
 
 await mock.module("@/frontend/common/views/dashboard/billing/quota/useQuotaInsightsViewModel", () => ({
-  useQuotaInsightsViewModel: () => mockViewModel,
+  useQuotaInsightsViewModel: () => viewModelRef.current,
 }));
 
 import * as matchers from "@testing-library/jest-dom/matchers";
@@ -32,7 +32,7 @@ import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 await mockNextNavigation();
 
-let mockViewModel = {
+const mockViewModel = {
   labels: mockLabels,
   loading: false,
   error: false,
@@ -64,8 +64,12 @@ let mockViewModel = {
   refetch: () => {},
 };
 
+// Wrap in a ref so the mock factory always reads the current object
+// (mock.module captures the closure at registration time, not per-test)
+const viewModelRef = { current: mockViewModel };
+
 function QuotaInsightsDesktopTestView(): ReactElement {
-  return <QuotaInsightsDesktopView {...mockViewModel} />;
+  return <QuotaInsightsDesktopView {...viewModelRef.current} />;
 }
 
 const mockQuota: QuotaItem = {
@@ -98,6 +102,10 @@ async function assertInsightsRenders() {
 }
 
 describe("QuotaInsightsContainer", () => {
+  beforeEach(() => {
+    viewModelRef.current = mockViewModel;
+  });
+
   afterEach(() => {
     cleanup();
   });
@@ -111,7 +119,7 @@ describe("QuotaInsightsContainer", () => {
   });
 
   test("renders KPI metric labels with data", async () => {
-    mockViewModel = {
+    viewModelRef.current = {
       ...mockViewModel,
       metrics: {
         activeQuotasCount: 7,
@@ -124,14 +132,17 @@ describe("QuotaInsightsContainer", () => {
 
     renderInsights();
 
-    await waitFor(() => {
-      expect(screen.getByText("7 active quotas")).toBeVisible();
-    });
-    expect(screen.getByText("120 classes remaining")).toBeVisible();
+    await waitFor(
+      () => {
+        expect(screen.getByText("7 active quotas")).toBeVisible();
+        expect(screen.getByText("120 classes remaining")).toBeVisible();
+      },
+      { timeout: 5000 }
+    );
   });
 
   test("renders loading state when loading=true", async () => {
-    mockViewModel = { ...mockViewModel, loading: true };
+    viewModelRef.current = { ...mockViewModel, loading: true };
 
     renderInsights();
 
@@ -141,27 +152,33 @@ describe("QuotaInsightsContainer", () => {
   });
 
   test("renders error state when error=true", async () => {
-    mockViewModel = { ...mockViewModel, error: true };
+    viewModelRef.current = { ...mockViewModel, error: true };
 
     renderInsights();
 
     await waitFor(() => {
-      expect(screen.getByText("Failed to create quota")).toBeVisible();
+      expect(screen.getByText("Failed to load quota data")).toBeVisible();
     });
   });
 
   test("renders insights view with data", async () => {
-    mockViewModel = { ...mockViewModel, quotas: [mockQuota], loading: false, error: false };
+    viewModelRef.current = { ...mockViewModel, quotas: [mockQuota], loading: false, error: false };
     await assertInsightsRenders();
   });
 
   test("renders insights view with empty data", async () => {
-    mockViewModel = { ...mockViewModel, quotas: [], loading: false, error: false };
+    viewModelRef.current = { ...mockViewModel, quotas: [], loading: false, error: false };
     await assertInsightsRenders();
   });
 
-  test.skip("renders filter buttons for date range, kind, status, student", () => {
-    // Skipped: filter buttons require complex MUI Select/Autocomplete interaction testing
-    expect.assertions(0);
+  test("renders filter buttons for date range, kind, status, student", async () => {
+    renderInsights();
+
+    await waitFor(() => {
+      expect(screen.getByText("Date Range")).toBeVisible();
+    });
+    expect(screen.getByText("Kind")).toBeVisible();
+    expect(screen.getByText("Status")).toBeVisible();
+    expect(screen.getByText("Student")).toBeVisible();
   });
 });

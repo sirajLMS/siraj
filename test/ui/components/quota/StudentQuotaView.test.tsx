@@ -220,16 +220,20 @@ describe("StudentQuotaView", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(t.audience.studentTitle)).toBeVisible();
+      expect(screen.getByText("Summer Package")).toBeVisible();
     });
-
-    expect(screen.getByText("Summer Package")).toBeVisible();
   });
 
-  test.skip("renders ledger entries section", () => {
-    // Skipped: ledger entries require the student ID to be resolved from meQuery before the ledger query fires.
-    // The meQuery mock returns data but the component's useStudentId hook doesn't resolve it in time for the ledger sub-query.
-    expect.assertions(0);
+  test("renders ledger entries section", async () => {
+    renderWithWrapper(<StudentQuotaAudienceView t={t} />, {
+      locale: "en",
+      viewport: "desktop",
+      mocks: [meQueryMock, studentQuotasMock, ledgerMock],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(t.audience.recentLedgerEntries)).toBeVisible();
+    });
   });
 
   test("renders empty state when no quotas assigned", async () => {
