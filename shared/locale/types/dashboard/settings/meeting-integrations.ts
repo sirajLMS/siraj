@@ -17,6 +17,7 @@ export interface SettingsMeetingIntegrationsLabels {
   readonly connectProviderSuccess: string;
   readonly connectProviderError: string;
   readonly viewProfileMeetingConfigs: string;
+  readonly viewProfileMeetingConfigsAriaLabel: string;
   readonly adminProviderSettings: string;
   readonly clientIdRequired: string;
   readonly clientSecretRequired: string;

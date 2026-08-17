@@ -26,7 +26,7 @@ export function ProfileLinkCallout({ labels, onNavigate }: ProfileLinkCalloutPro
             size="small"
             startIcon={<OpenInNewOutlined />}
             onClick={onNavigate}
-            aria-label="Navigate to teacher meeting configs"
+            aria-label={labels.viewProfileMeetingConfigsAriaLabel}
           >
             {labels.viewProfileMeetingConfigs}
           </Button>

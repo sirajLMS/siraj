@@ -6,7 +6,7 @@ import { CloseOutlined, VisibilityOffOutlined, VisibilityOutlined } from "@mui/i
 import { Box, Chip, CircularProgress, IconButton, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
@@ -414,6 +414,7 @@ export function MeetingProviderCredentialForm({
     handleSubmit,
     control,
     setValue,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<CredentialFormValues>({
     resolver: zodResolver(schema),
@@ -421,6 +422,12 @@ export function MeetingProviderCredentialForm({
   });
 
   const scopes = useWatch({ control, name: "scopes" });
+
+  useEffect(() => {
+    if (!loading && providerEntries.length > 0) {
+      reset(defaultValues);
+    }
+  }, [loading, providerEntries.length, defaultValues, reset]);
 
   const { onAddScope, onRemoveScope } = useScopeHandlers(scopes, setValue);
 

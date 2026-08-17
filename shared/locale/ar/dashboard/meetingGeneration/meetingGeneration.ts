@@ -8,6 +8,8 @@ export const dashboardMeetingGenerationAr: MeetingGenerationLabels = {
   generationStatusSuccess: "تم توليد الرابط بنجاح",
   generationStatusFailed: "فشل التوليد",
   generationRetry: "إعادة التوليد",
+  generationShowDetails: "عرض التفاصيل",
+  generationHideDetails: "إخفاء التفاصيل",
   generationSuccessRate: (rate: string) => `معدل النجاح: ${rate}`,
   generationAvgTime: (time: string) => `متوسط زمن التوليد: ${time}`,
 };

@@ -20,6 +20,10 @@ export function getTranslations(locale: string): Translations {
   return messagesByLocale[resolveLocale(locale)];
 }
 
+export function getDefaultTranslations(): Translations {
+  return messagesByLocale[defaultLocale];
+}
+
 export function loadAllTranslations(locale: string): Translations {
   return getTranslations(locale);
 }

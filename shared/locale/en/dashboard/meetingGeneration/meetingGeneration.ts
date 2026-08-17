@@ -8,6 +8,8 @@ export const dashboardMeetingGenerationEn: MeetingGenerationLabels = {
   generationStatusSuccess: "Generation succeeded",
   generationStatusFailed: "Generation failed",
   generationRetry: "Retry generation",
+  generationShowDetails: "Show details",
+  generationHideDetails: "Hide details",
   generationSuccessRate: (rate: string) => `Success rate: ${rate}`,
   generationAvgTime: (time: string) => `Average generation time: ${time}`,
 };

@@ -19,6 +19,7 @@ export const dashboardSettingsMeetingIntegrationsEn: SettingsMeetingIntegrations
   connectProviderSuccess: "Provider connected successfully.",
   connectProviderError: "Failed to connect provider.",
   viewProfileMeetingConfigs: "View meeting configs",
+  viewProfileMeetingConfigsAriaLabel: "Navigate to teacher meeting configs",
   adminProviderSettings: "Admin provider settings",
   clientIdRequired: "Client ID is required",
   clientSecretRequired: "Client secret is required",

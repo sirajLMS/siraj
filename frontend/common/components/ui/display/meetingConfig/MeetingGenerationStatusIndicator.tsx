@@ -176,6 +176,8 @@ interface FailedRenderProps {
   readonly fadeTimeout: number;
   readonly error: string | null | undefined;
   readonly failedLabel: string;
+  readonly showDetailsLabel: string;
+  readonly hideDetailsLabel: string;
   readonly retryLabel: string;
   readonly onRetry?: () => void;
   readonly expanded: boolean;
@@ -188,6 +190,8 @@ function renderFailed({
   fadeTimeout,
   error,
   failedLabel,
+  showDetailsLabel,
+  hideDetailsLabel,
   retryLabel,
   onRetry,
   expanded,
@@ -223,7 +227,7 @@ function renderFailed({
               aria-expanded={expanded}
               aria-controls={detailsId}
             >
-              {failedLabel}
+              {expanded ? hideDetailsLabel : showDetailsLabel}
             </Button>
             <Collapse in={expanded} timeout={fadeTimeout} id={detailsId}>
               <Alert
@@ -283,6 +287,8 @@ export function MeetingGenerationStatusIndicator({
       fadeTimeout,
       error,
       failedLabel: t.generationStatusFailed,
+      showDetailsLabel: t.generationShowDetails,
+      hideDetailsLabel: t.generationHideDetails,
       retryLabel: t.generationRetry,
       onRetry,
       expanded,

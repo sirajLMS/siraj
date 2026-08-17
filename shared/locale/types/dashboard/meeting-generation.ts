@@ -6,6 +6,8 @@ export interface MeetingGenerationLabels {
   readonly generationStatusSuccess: string;
   readonly generationStatusFailed: string;
   readonly generationRetry: string;
+  readonly generationShowDetails: string;
+  readonly generationHideDetails: string;
   readonly generationSuccessRate: (rate: string) => string;
   readonly generationAvgTime: (time: string) => string;
 }

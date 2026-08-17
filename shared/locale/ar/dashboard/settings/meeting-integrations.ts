@@ -19,6 +19,7 @@ export const dashboardSettingsMeetingIntegrationsAr: SettingsMeetingIntegrations
   connectProviderSuccess: "تم ربط المزود بنجاح.",
   connectProviderError: "تعذّر ربط المزود.",
   viewProfileMeetingConfigs: "عرض إعدادات الاجتماع",
+  viewProfileMeetingConfigsAriaLabel: "الانتقال إلى إعدادات اجتماعات المعلم",
   adminProviderSettings: "إعدادات مزود المشرف",
   clientIdRequired: "معرّف العميل مطلوب",
   clientSecretRequired: "سر العميل مطلوب",
