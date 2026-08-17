@@ -97,7 +97,7 @@ void mock.module("next/dynamic", () => {
     // Uses a state + promise pattern that works with findByTestId (async polling).
     const cached = moduleCache.get(cacheKey);
     let resolvedComp: React.ComponentType<unknown> | null = cached && isComponentType(cached) ? cached : null;
-    let _importPromise: Promise<React.ComponentType<unknown>> | null = null;
+    let pendingImport: Promise<React.ComponentType<unknown>> | null = null;
 
     const DynamicComponent = (props: T): React.ReactNode => {
       const [, forceRender] = useState({});
@@ -106,7 +106,7 @@ void mock.module("next/dynamic", () => {
       if (resolvedComp) {
         content = createElement(resolvedComp, props);
       } else {
-        _importPromise ??= importer().then(mod => {
+        pendingImport ??= importer().then(mod => {
           const comp: unknown = mod.default;
           if (isComponentType(comp)) {
             moduleCache.set(cacheKey, comp);
@@ -116,6 +116,7 @@ void mock.module("next/dynamic", () => {
           }
           throw new Error(`Dynamic import for ${cacheKey} did not resolve to a component`);
         });
+        pendingImport.catch(() => {});
         content = options?.loading?.() ?? null;
       }
 

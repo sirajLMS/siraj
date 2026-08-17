@@ -21,7 +21,7 @@ export function useLanguageSwitch() {
       locale: newLocale,
       redirect,
     });
-    globalThis.location.assign(`/api/set-locale?${params.toString()}`);
+    window.location.replace(`/api/set-locale?${params.toString()}`);
   };
 
   return {

@@ -82,7 +82,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
     // Hard navigate to the server logout route — clears httpOnly cookies +
     // DB sessions, then redirects to /login (in-memory auth drops on unload).
-    globalThis.location.href = "/logout";
+    window.location.replace("/logout");
   }, []);
 
   const login = useCallback(

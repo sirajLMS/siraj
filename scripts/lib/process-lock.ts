@@ -81,10 +81,12 @@ function getLockNamespace(description: string): string {
 export function isTimeoutExempt(description: string): boolean {
   const d = description.toLowerCase();
   return (
+    d.includes("quality-gate") ||
     d.includes("codescene") ||
     d.includes("sonar") ||
     d.includes("duplicates") ||
     d.includes("jscpd") ||
+    d.includes("lint-service") ||
     d.startsWith("test") ||
     d.includes("test:") ||
     d.includes("test ")

@@ -463,7 +463,7 @@ function SidebarAccountFooter({
     <IconButton
       aria-label={logoutLabel}
       onClick={() => {
-        globalThis.location.href = "/logout";
+        window.location.replace("/logout");
       }}
       sx={{
         color: "var(--mui-palette-onSurfaceVariant)",
