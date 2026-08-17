@@ -75,6 +75,55 @@
     "lowBalanceAlerts": "تنبيهات الرصيد المنخفض",
     "conflictHeld": "تعارضات معلقة",
     "analyticsOverview": "نظرة عامة تحليلية",
-    "noData": "لا توجد بيانات"
+    "noData": "لا توجد بيانات",
+    "noQuotaAssigned": "لا توجد حصة مخصصة — تواصل مع مدير الأكاديمية",
+    "quotaExhausted": "تم استنفاد هذه الحصة",
+    "eligibleForNextClass": "مؤهل للحصة القادمة",
+    "notEligibleForNextClass": "غير مؤهل للحصة القادمة",
+    "expiryWarning": {
+      "__fn": "(days) => {\n      if (days === 0)\n        return \"\\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0647 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u0627\\u0644\\u064A\\u0648\\u0645\";\n      if (days === 1)\n        return \"\\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0647 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u062E\\u0644\\u0627\\u0644 \\u064A\\u0648\\u0645 \\u0648\\u0627\\u062D\\u062F\";\n      if (days === 2)\n        return \"\\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0647 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u062E\\u0644\\u0627\\u0644 \\u064A\\u0648\\u0645\\u064A\\u0646\";\n      if (days >= 3 && days <= 10)\n        return `\\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0647 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u062E\\u0644\\u0627\\u0644 ${days} \\u0623\\u064A\\u0627\\u0645`;\n      return `\\u062A\\u0646\\u062A\\u0647\\u064A \\u0647\\u0630\\u0647 \\u0627\\u0644\\u062D\\u0635\\u0629 \\u062E\\u0644\\u0627\\u0644 ${days} \\u064A\\u0648\\u0645\\u0627\\u064B`;\n    }"
+    },
+    "remainingOfTotal": {
+      "__fn": "(remaining, total) => `${remaining} / ${total}`"
+    },
+    "validPeriod": "فترة الصلاحية",
+    "recentLedgerEntries": "آخر عمليات السجل",
+    "noLedgerEntries": "لا توجد عمليات حديثة في السجل",
+    "loadingData": "جارٍ التحميل…",
+    "selectChildPrompt": "اختر ابناً لعرض تفاصيل الحصة",
+    "name": "الاسم",
+    "kind": "النوع",
+    "remaining": "المتبقي",
+    "totalClasses": "الإجمالي",
+    "status": "الحالة",
+    "validFrom": "صالح من",
+    "validUntil": "صالح حتى",
+    "delta": "التغيير",
+    "reason": "السبب",
+    "ledgerDate": "التاريخ",
+    "createdAt": "تاريخ الإنشاء",
+    "newQuota": "حصة جديدة",
+    "editQuota": "تعديل",
+    "deleteQuota": "حذف",
+    "statuses": {
+      "ACTIVE": "نشط",
+      "EXPIRED": "منتهي",
+      "ARCHIVED": "مؤرشف"
+    },
+    "kinds": {
+      "PACKAGE": "باقة",
+      "PERIODIC": "دوري"
+    },
+    "ledgerReasons": {
+      "ADJUST": "تعديل",
+      "EXPIRE": "انتهاء",
+      "GRANT": "منح",
+      "REDEEM": "استرداد",
+      "RELEASE": "إطلاق",
+      "RESERVE": "حجز"
+    }
+  },
+  "quotaCount": {
+    "__fn": "(count) => {\n    if (count === 0)\n      return \"\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u062D\\u0635\\u0635\";\n    if (count === 1)\n      return \"\\u062D\\u0635\\u0629 \\u0648\\u0627\\u062D\\u062F\\u0629\";\n    if (count === 2)\n      return \"\\u062D\\u0635\\u062A\\u0627\\u0646\";\n    if (count >= 3 && count <= 10)\n      return `${count} \\u062D\\u0635\\u0635`;\n    return `${count} \\u062D\\u0635\\u0629`;\n  }"
   }
 }

@@ -40,6 +40,13 @@
   "scheduling": {
     "mode": "Scheduling Mode",
     "quotaId": "Quota ID",
+    "quotaSelect": "Select Quota",
+    "quotaPlaceholder": "Choose an open quota...",
+    "noOpenQuotas": "No open quotas — create a quota first",
+    "noOpenQuotasCta": "Create Quota",
+    "quotaOptionLabel": {
+      "__fn": "(name, remaining, validUntil) => `${name} \\u2014 ${remaining} remaining \\u2014 valid until ${validUntil}`"
+    },
     "earmarkedClasses": "Earmarked Classes",
     "generationHorizon": "Generation Horizon (weeks)",
     "ondemandNoCreditsOutcome": "On-Demand No Credits Outcome",
