@@ -52,7 +52,7 @@ function DateTabNavDesktop({
   activeTab,
   tabs,
   onTabChange,
-  ariaLabel = "Days",
+  ariaLabel,
 }: Readonly<Extract<GenericTabNavDesktopViewProps, { variant: "date" }>>) {
   return (
     <Box

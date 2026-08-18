@@ -1,12 +1,12 @@
 "use client";
 
 import { ArrowForwardOutlined } from "@mui/icons-material";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { DesktopAppDataGrid, DesktopPersonProfileLinkCell, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import { DesktopAppDataGrid, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui";
 import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
 interface Props {
@@ -48,7 +48,7 @@ export function UpdatedSessionsDataGridDesktop({ labels, sessions, loading = fal
         width: 130,
         align: "center",
         headerAlign: "center",
-        renderCell: params => <DesktopStatusBadge category="session" status="pending" label={params.row.fromTime} />,
+        renderCell: params => <Typography variant="bodyMd">{params.row.fromTime}</Typography>,
       },
       {
         field: "arrow",
@@ -68,7 +68,7 @@ export function UpdatedSessionsDataGridDesktop({ labels, sessions, loading = fal
         width: 130,
         align: "center",
         headerAlign: "center",
-        renderCell: params => <DesktopStatusBadge category="session" status="completed" label={params.row.toTime} />,
+        renderCell: params => <Typography variant="bodyMd">{params.row.toTime}</Typography>,
       },
     ],
     [labels]

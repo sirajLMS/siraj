@@ -75,7 +75,9 @@ export function SystemSettingValueField({
         size="small"
         multiline
         minRows={2}
-        slotProps={{ input: { sx: { fontFamily: "monospace", fontSize: "0.85rem" } } }}
+        slotProps={{
+          input: { sx: theme => ({ fontFamily: "monospace", fontSize: theme.typography.bodyMd.fontSize }) },
+        }}
         onChange={event => setDraftValue(event.target.value)}
         onBlur={() => commitValue(draftValue)}
       />

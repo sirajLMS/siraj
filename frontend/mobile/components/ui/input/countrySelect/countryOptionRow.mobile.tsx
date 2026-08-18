@@ -21,7 +21,11 @@ export function CountryOptionRowMobile({
         <Box
           component="span"
           dir="ltr"
-          sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, fontSize: "0.95rem" })}
+          sx={theme => ({
+            color: theme.palette.text.secondary,
+            flexShrink: 0,
+            fontSize: theme.typography.bodyMd.fontSize,
+          })}
         >
           +{country.phone}
         </Box>

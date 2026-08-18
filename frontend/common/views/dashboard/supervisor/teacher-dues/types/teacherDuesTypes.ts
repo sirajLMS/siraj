@@ -61,6 +61,8 @@ export type TeacherDuesColumnLabels = Pick<
   | "rateSourceRecurring"
   | "rateSourceSubject"
   | "rateSourceTeacher"
+  | "statusPending"
+  | "statusPaid"
 >;
 
 export interface TeacherDuesColumnParams {

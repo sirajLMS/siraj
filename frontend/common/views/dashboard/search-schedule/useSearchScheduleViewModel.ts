@@ -388,7 +388,7 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
 
   const store = useSearchScheduleStoreSlice();
 
-  const { commitSearch, hasHydrated, hasSearched } = store;
+  const { commitSearch, ensureDraftDates, hasHydrated, hasSearched } = store;
 
   useEffect(() => {
     if (!hasHydrated || hasSearched) {
@@ -399,8 +399,8 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
   }, [commitSearch, hasHydrated, hasSearched]);
 
   useEffect(() => {
-    store.ensureDraftDates();
-  }, [store.ensureDraftDates]);
+    ensureDraftDates();
+  }, [ensureDraftDates]);
 
   const handlers = useSearchScheduleHandlers(
     store.setDraft,

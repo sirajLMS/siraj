@@ -30,6 +30,7 @@ export const PAYMENT_METHOD_TRANSACTION_SNAPSHOT_FIELDS = gql`
       ...PaymentMethodDetailsFields
     }
     catalog {
+      id
       catalogId
       catalogSlug
       catalogName

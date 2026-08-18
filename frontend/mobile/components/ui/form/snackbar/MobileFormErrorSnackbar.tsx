@@ -20,14 +20,16 @@ export function MobileFormErrorSnackbar({ open, message, onClose }: Readonly<Mob
           gap: 1.5,
           px: 2.5,
           py: 1.5,
-          borderRadius: 12,
+          borderRadius: theme.shape.borderRadius,
           backgroundColor: theme.palette.error.main,
           color: theme.palette.onError,
           boxShadow: theme.palette.shadow.card,
         })}
       >
         <ErrorOutlined />
-        <Typography sx={{ fontWeight: 700, fontSize: "0.875rem" }}>{message}</Typography>
+        <Typography sx={theme => ({ fontWeight: 700, fontSize: theme.typography.bodyMd.fontSize })}>
+          {message}
+        </Typography>
       </Box>
     </Snackbar>
   );

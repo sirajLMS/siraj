@@ -50,8 +50,33 @@ async function waitForServerRecovery(): Promise<void> {
 }
 
 async function attemptEnsureDemoUsers(attempt: number, maxAttempts: number): Promise<boolean> {
+  const loginResult = await testClient.mutate({
+    mutation: demoLoginMutationDocument,
+    variables: {
+      input: {
+        groupSlug: "super_admin",
+      },
+    },
+  });
+
+  const token = loginResult.data?.demoLogin?.token;
+  if (!token) {
+    const loginError = `demoLogin for super_admin failed: ${loginResult.error?.message ?? "unknown GraphQL error"}`;
+    if (attempt >= maxAttempts) {
+      throw new Error(loginError);
+    }
+    await waitForServerRecovery();
+    await new Promise(resolve => setTimeout(resolve, 5_000 * attempt));
+    return false;
+  }
+
   const result = await testClient.mutate({
     mutation: ensureDemoUsersMutationDocument,
+    context: {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
   });
 
   if (!result.error) {
@@ -194,7 +219,7 @@ export async function assertOperationDenied<TData = unknown, TVars extends Opera
 /**
  * Logs in a standard user using email and password, returning their auth token.
  */
-export async function loginUser(email: string, password = "password"): Promise<string> {
+export async function loginUser(email: string, password: string): Promise<string> {
   return executeLogin(loginMutationDocument, { input: { email, password } }, data => data?.login?.token, email);
 }
 

@@ -37,7 +37,18 @@ export function ScheduleSessionCardMetaBar({ items }: { readonly items: readonly
           <StyledScheduleSessionMetaLabel variant="labelMd" title={item.label}>
             {item.label}
           </StyledScheduleSessionMetaLabel>
-          <StyledScheduleSessionMetaValue variant="bodyMd" tone={item.tone}>
+          {/* Use `component="span"` when the value is a React element (e.g. a
+              ScheduleTimezoneOffsetCell that renders a <div>/<Tooltip>) so the
+              Typography doesn't render a <p> containing a block-level <div>,
+              which triggers a React hydration error. Plain string values keep
+              the default <p>. */}
+          <StyledScheduleSessionMetaValue
+            variant="bodyMd"
+            tone={item.tone}
+            {...(typeof item.value !== "string" && typeof item.value !== "number" && typeof item.value !== "boolean"
+              ? { component: "span" }
+              : {})}
+          >
             {item.value}
           </StyledScheduleSessionMetaValue>
         </StyledScheduleSessionMetaTile>

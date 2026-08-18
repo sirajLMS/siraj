@@ -86,7 +86,7 @@ function LocaleList({
             sx={optionSx}
           >
             <LocaleEmoji emoji={language.emoji} />
-            <Box component="span" sx={{ flex: 1, fontSize: "0.875rem" }}>
+            <Box component="span" sx={theme => ({ flex: 1, fontSize: theme.typography.bodyMd.fontSize })}>
               {getLanguageDisplayName(language.code, uiLocale)}
             </Box>
             {isSelected ? (
@@ -188,7 +188,7 @@ export function LocaleAdornmentSwitchShared({
       >
         <LocaleEmoji emoji={emoji} />
         {compact ? null : (
-          <Box component="span" sx={{ whiteSpace: "nowrap", fontSize: "0.875rem" }}>
+          <Box component="span" sx={theme => ({ whiteSpace: "nowrap", fontSize: theme.typography.bodyMd.fontSize })}>
             {label}
           </Box>
         )}

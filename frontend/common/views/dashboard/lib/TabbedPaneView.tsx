@@ -41,8 +41,8 @@ interface TabbedPaneViewProps<TabId extends string, Labels> {
   readonly chrome?: ReactNode;
   /** Panels rendered BELOW the tab nav. Required. */
   readonly panels: ReactNode;
-  /** Optional ariaLabel passed to `<GenericTabNav>` (mobile tablist hint). */
-  readonly ariaLabel?: string;
+  /** Translated aria-label passed to `<GenericTabNav>` (tablist hint). */
+  readonly ariaLabel: string;
 }
 
 const noopShell = createLazyView<TabbedPaneViewShellProps>(

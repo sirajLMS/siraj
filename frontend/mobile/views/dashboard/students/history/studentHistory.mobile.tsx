@@ -124,19 +124,19 @@ function HistoryMobileMetricsGrid({
       <MobileMetric
         title={t.metrics.attendanceRate(metrics.attendanceRate)}
         icon={<VerifiedUser sx={theme => ({ color: theme.palette.onSecondaryContainer, fontSize: 18 })} />}
-        value={`${metrics.attendanceRate}%`}
+        value={t.percentValue(metrics.attendanceRate)}
         bg={theme => theme.palette.secondaryContainer}
       />
       <MobileMetric
         title={t.metrics.hoursStudied(metrics.hoursStudied)}
         icon={<Timer sx={theme => ({ color: theme.palette.onTertiaryContainer, fontSize: 18 })} />}
-        value={`${metrics.hoursStudied}h`}
+        value={t.hoursShort(metrics.hoursStudied)}
         bg={theme => theme.palette.tertiaryContainer}
       />
       <MobileMetric
         title={t.metrics.performance(metrics.performance)}
         icon={<TrendingUp sx={theme => ({ color: theme.palette.onErrorContainer, fontSize: 18 })} />}
-        value={`${metrics.performance}%`}
+        value={t.percentValue(metrics.performance)}
         bg={theme => theme.palette.errorContainer}
       />
     </Box>
@@ -221,8 +221,7 @@ function HistoryMobileActions({
           <ChevronRight sx={{ fontSize: 18 }} />
         </IconButton>
       </Box>
-      <Box
-        component="button"
+      <IconButton
         type="button"
         aria-label={t.exportPdf}
         onClick={onPrint}
@@ -238,10 +237,13 @@ function HistoryMobileActions({
           boxShadow: theme.palette.shadow.button,
           border: "none",
           cursor: "pointer",
+          "&:hover": {
+            backgroundColor: theme.palette.surfaceContainerHigh,
+          },
         })}
       >
         <PictureAsPdf />
-      </Box>
+      </IconButton>
     </Box>
   );
 }

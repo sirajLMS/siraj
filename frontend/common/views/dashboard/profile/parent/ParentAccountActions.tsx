@@ -1,61 +1,23 @@
 "use client";
 
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
+import { Button, Stack, type Theme } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ParentAccountActionsLabels } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
 import {
   type ParentAccountActionsProps,
   useParentAccountActionsViewModel,
 } from "@/frontend/common/views/dashboard/profile/parent/useParentAccountActionsViewModel";
 
-type AccountActionDialogProps = {
-  readonly open: boolean;
-  readonly onClose: () => void;
-  readonly onConfirm: () => void;
-  readonly loading: boolean;
-  readonly error: string | null;
-  readonly mode: "deactivate" | "reactivate";
-  readonly labels: ParentAccountActionsLabels;
-};
-
-function AccountActionDialog({ open, onClose, onConfirm, loading, error, mode, labels: t }: AccountActionDialogProps) {
-  const isDeactivate = mode === "deactivate";
-
-  const dialogTitle = isDeactivate ? t.deactivateDialogTitle : t.reactivateDialogTitle;
-  const confirmText = isDeactivate ? t.deactivateConfirmText : t.reactivateConfirmText;
-  const buttonColor = isDeactivate ? "error" : "success";
-  let buttonText: string;
-  if (loading) {
-    buttonText = isDeactivate ? t.deactivating : t.reactivating;
-  } else {
-    buttonText = isDeactivate ? t.deactivateAccount : t.reactivateAccount;
-  }
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{dialogTitle}</DialogTitle>
-      <DialogContent>
-        <Typography variant="bodyMd">{confirmText}</Typography>
-        {error ? (
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main, mt: 2 })}>
-            {error}
-          </Typography>
-        ) : null}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={loading}>
-          {t.cancel}
-        </Button>
-        <Button onClick={onConfirm} variant="contained" color={buttonColor} disabled={loading}>
-          {buttonText}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-}
+const reactivateConfirmSx = (theme: Theme) =>
+  ({
+    py: 1.5,
+    backgroundColor: theme.palette.success.main,
+    color: theme.palette.onSuccess,
+    "&:hover": { backgroundColor: theme.palette.success.dark },
+  }) as const;
 
 export function ParentAccountActions(props: Readonly<ParentAccountActionsProps>) {
   const {
@@ -74,6 +36,16 @@ export function ParentAccountActions(props: Readonly<ParentAccountActionsProps>)
   } = useParentAccountActionsViewModel(props);
   const t = labels;
 
+  const isDeactivate = dialogMode === "deactivate";
+  const dialogTitle = isDeactivate ? t.deactivateDialogTitle : t.reactivateDialogTitle;
+  const confirmText = isDeactivate ? t.deactivateConfirmText : t.reactivateConfirmText;
+  const confirmLabel = (() => {
+    if (isLoading) {
+      return isDeactivate ? t.deactivating : t.reactivating;
+    }
+    return isDeactivate ? t.deactivateAccount : t.reactivateAccount;
+  })();
+
   return (
     <RequirePermission permissions={[AppPermission.ParentManageStatus]}>
       <Stack direction="row" spacing={1}>
@@ -89,14 +61,16 @@ export function ParentAccountActions(props: Readonly<ParentAccountActionsProps>)
       </Stack>
 
       {dialogMode ? (
-        <AccountActionDialog
+        <BaseDeleteDialog
           open
           onClose={closeDialog}
           onConfirm={handleConfirm}
-          loading={isLoading}
-          error={mutationError}
-          mode={dialogMode}
-          labels={labels}
+          isLoading={isLoading}
+          title={dialogTitle}
+          body={confirmText}
+          cancelLabel={t.cancel}
+          confirmLabel={confirmLabel}
+          confirmSx={isDeactivate ? undefined : reactivateConfirmSx}
         />
       ) : null}
 
@@ -105,11 +79,7 @@ export function ParentAccountActions(props: Readonly<ParentAccountActionsProps>)
         message={successMessage ?? ""}
         onClose={clearSuccessMessage}
       />
-      <FormErrorSnackbar
-        open={Boolean(mutationError) && !dialogMode}
-        message={mutationError ?? ""}
-        onClose={clearMutationError}
-      />
+      <FormErrorSnackbar open={Boolean(mutationError)} message={mutationError ?? ""} onClose={clearMutationError} />
     </RequirePermission>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Button, Chip, Typography } from "@mui/material";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import {
@@ -14,7 +14,7 @@ export type GenericTabNavMobileViewProps = GenericTabNavVariantProps<string>;
 function DefaultTabNavMobile({
   activeTab,
   tabs,
-  ariaLabel = "Sections",
+  ariaLabel,
 }: Readonly<Extract<GenericTabNavMobileViewProps, { variant?: "default" }>>) {
   return (
     <Box
@@ -70,7 +70,7 @@ function DateTabNavMobile({
   activeTab,
   tabs,
   onTabChange,
-  ariaLabel = "Days",
+  ariaLabel,
 }: Readonly<Extract<GenericTabNavMobileViewProps, { variant: "date" }>>) {
   const activeTabRef = useRef<HTMLButtonElement | null>(null);
 
@@ -93,10 +93,9 @@ function DateTabNavMobile({
           const isActive = activeTab === tab.id;
 
           return (
-            <Box
+            <Button
               key={tab.id}
               ref={isActive ? activeTabRef : undefined}
-              component="button"
               type="button"
               role="tab"
               aria-selected={isActive}
@@ -166,7 +165,7 @@ function DateTabNavMobile({
               ) : (
                 <Box sx={{ width: 5, height: 5 }} />
               )}
-            </Box>
+            </Button>
           );
         })}
       </MobileHorizontalScrollRow>

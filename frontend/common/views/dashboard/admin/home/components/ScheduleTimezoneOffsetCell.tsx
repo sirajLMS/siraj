@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Tooltip } from "@mui/material";
+import { Box, IconButton, Tooltip } from "@mui/material";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { StyledMonospaceLabel } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
 import { buildScheduleTimezoneOffsetDetail } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -33,21 +33,21 @@ function ScheduleTimezoneOffsetTooltipBody({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, py: 0.25 }}>
       {time ? (
-        <Box component="span" sx={{ typography: "bodyMd" }}>
+        <Box sx={{ typography: "bodyMd" }}>
           {labels.time}: {time}
         </Box>
       ) : null}
       {timezoneName ? (
-        <Box component="span" sx={{ typography: "bodyMd" }}>
+        <Box sx={{ typography: "bodyMd" }}>
           {labels.timezone}: {timezoneName}
         </Box>
       ) : null}
       {timezoneUtcOffset ? (
-        <Box component="span" sx={{ typography: "bodyMd" }}>
+        <Box sx={{ typography: "bodyMd" }}>
           {labels.utcOffset}: {timezoneUtcOffset}
         </Box>
       ) : null}
-      <Box component="span" sx={{ typography: "bodyMd" }}>
+      <Box sx={{ typography: "bodyMd" }}>
         {labels.yourOffset}: {yourUtcOffset}
       </Box>
     </Box>
@@ -85,29 +85,30 @@ export function ScheduleTimezoneOffsetCell({ timeValue, timezone, at }: Schedule
       leaveTouchDelay={3000}
       describeChild
     >
-      <Box
-        component="button"
-        type="button"
-        tabIndex={0}
-        aria-label={`${detail.time}. ${labels.timezone}: ${detail.timezoneName}. ${labels.utcOffset}: ${detail.timezoneUtcOffset}. ${labels.yourOffset}: ${detail.yourUtcOffset}`}
-        sx={theme => ({
-          cursor: "help",
-          border: "none",
-          background: "transparent",
-          padding: 0,
-          margin: 0,
-          display: "inline-flex",
-          alignItems: "center",
-          color: "inherit",
-          font: "inherit",
-          "&:focus-visible": {
-            outline: `2px solid ${theme.palette.primary.main}`,
-            outlineOffset: 2,
-            borderRadius: 1,
-          },
-        })}
-      >
-        <StyledMonospaceLabel variant="labelMd">{detail.time}</StyledMonospaceLabel>
+      <Box sx={{ display: "inline-flex", alignItems: "center" }}>
+        <IconButton
+          type="button"
+          tabIndex={0}
+          aria-label={`${detail.time}. ${labels.timezone}: ${detail.timezoneName}. ${labels.utcOffset}: ${detail.timezoneUtcOffset}. ${labels.yourOffset}: ${detail.yourUtcOffset}`}
+          sx={theme => ({
+            cursor: "help",
+            border: "none",
+            background: "transparent",
+            padding: 0,
+            margin: 0,
+            display: "inline-flex",
+            alignItems: "center",
+            color: "inherit",
+            font: "inherit",
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.primary.main}`,
+              outlineOffset: 2,
+              borderRadius: 1,
+            },
+          })}
+        >
+          <StyledMonospaceLabel variant="labelMd">{detail.time}</StyledMonospaceLabel>
+        </IconButton>
       </Box>
     </Tooltip>
   );

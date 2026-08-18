@@ -70,7 +70,7 @@ function MixedContentItem({ index, type }: Readonly<{ index: number; type: "card
     case "text":
       return (
         <Box sx={{ p: 2 }}>
-          <Typography variant="bodyMd" color="text.secondary">
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             Plain text content item {index}
           </Typography>
         </Box>

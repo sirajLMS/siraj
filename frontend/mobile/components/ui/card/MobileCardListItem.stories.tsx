@@ -33,7 +33,7 @@ const SampleContent = () => (
     <Typography variant="h6" sx={{ fontWeight: 600 }}>
       Card Title
     </Typography>
-    <Typography variant="body1" color="text.secondary">
+    <Typography variant="body1" sx={theme => ({ color: theme.palette.text.secondary })}>
       This is the card description with some additional context about the item.
     </Typography>
     <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
@@ -53,7 +53,7 @@ const InteractiveContent = () => (
         <EditIcon fontSize="small" />
       </IconButton>
     </Stack>
-    <Typography variant="body1" color="text.secondary">
+    <Typography variant="body1" sx={theme => ({ color: theme.palette.text.secondary })}>
       Click or tap this card to interact with it. It has hover and active states.
     </Typography>
     <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
@@ -80,7 +80,7 @@ const AccentContent = ({ icon, color }: AccentContentProps) => (
         {color.charAt(0).toUpperCase() + color.slice(1)} Alert
       </Typography>
     </Stack>
-    <Typography variant="body1" color="text.secondary">
+    <Typography variant="body1" sx={theme => ({ color: theme.palette.text.secondary })}>
       This card has an accent border on the {color} side indicating status.
     </Typography>
   </Stack>

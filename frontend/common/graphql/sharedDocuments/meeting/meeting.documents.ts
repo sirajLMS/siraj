@@ -36,6 +36,7 @@ const USER_MEETING_CONFIG_FIELDS = gql`
     hasSecret
     oauthTokenExpiresAt
     details {
+      id
       meetingUrl
       username
       tenantId
@@ -186,6 +187,7 @@ const CLASS_MEETING_CONFIG_FIELDS = gql`
     isDefault
     hasSecret
     details {
+      id
       meetingUrl
       username
       tenantId
@@ -241,6 +243,7 @@ export const classMeetingConfigsWithStatusQueryDocument: TypedDocumentNode<
       isDefault
       hasSecret
       details {
+        id
         meetingUrl
         username
         tenantId

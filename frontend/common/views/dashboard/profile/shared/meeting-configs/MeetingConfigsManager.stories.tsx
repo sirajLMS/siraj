@@ -113,6 +113,7 @@ function makeConfig(overrides: {
     createdAt: "2026-01-15T10:00:00Z",
     updatedAt: "2026-01-20T12:00:00Z",
     details: {
+      id: "meeting-config-details",
       meetingUrl: overrides.meetingUrl ?? null,
       username: null,
       tenantId: null,

@@ -2,6 +2,7 @@
 
 import { ContentCopyOutlined, OpenInNewOutlined } from "@mui/icons-material";
 import { Alert, Box, Chip, CircularProgress, Link, Stack, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import type * as React from "react";
 import { FilterButton } from "@/frontend/common/components/ui/button";
 import {
@@ -83,6 +84,17 @@ function TestJoinUrlRow({ labels, url, copied, onCopy }: TestJoinUrlRowProps) {
   );
 }
 
+const StyledPre = styled("pre")(({ theme }) => ({
+  typography: "bodyMd",
+  fontFamily: "monospace",
+  p: 1,
+  m: 0,
+  mt: 0.5,
+  overflow: "auto",
+  maxHeight: 240,
+  bgcolor: theme.palette.action.hover,
+}));
+
 type RawPayloadSectionProps = {
   readonly labels: SettingsMeetingIntegrationsLabels;
   readonly payload: unknown;
@@ -92,28 +104,11 @@ function RawPayloadSection({ labels, payload }: RawPayloadSectionProps) {
   return (
     <details>
       <summary>
-        <Box
-          component="span"
-          sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary, cursor: "pointer" })}
-        >
+        <Box sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary, cursor: "pointer" })}>
           {labels.testPanel.rawResponse}
         </Box>
       </summary>
-      <Box
-        component="pre"
-        sx={theme => ({
-          typography: "bodyMd",
-          fontFamily: "monospace",
-          p: 1,
-          m: 0,
-          mt: 0.5,
-          overflow: "auto",
-          maxHeight: 240,
-          bgcolor: theme.palette.action.hover,
-        })}
-      >
-        {JSON.stringify(payload, null, 2)}
-      </Box>
+      <StyledPre>{JSON.stringify(payload, null, 2)}</StyledPre>
     </details>
   );
 }

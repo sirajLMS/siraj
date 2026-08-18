@@ -14,8 +14,8 @@ export function useNavLabels(): (labelKey: keyof DashboardNavigationLabels) => s
   const labels = useAppTranslation(Translation.Dashboard.CoreNav);
 
   return (labelKey: keyof DashboardNavigationLabels): string => {
-    if (labelKey === "nav") {
-      throw new Error("nav is a nested object, use specific sub-keys like labels.nav.logout");
+    if (labelKey === "nav" || labelKey === "toggleGroupAriaLabel") {
+      throw new Error(`${labelKey} is not a string label, access it directly via labels.${labelKey}`);
     }
     return labels[labelKey];
   };

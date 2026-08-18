@@ -159,7 +159,7 @@ export function ResetPasswordDialog({
               <Box
                 component="label"
                 htmlFor="send-email-checkbox"
-                sx={{ cursor: "pointer", fontSize: "0.875rem", fontWeight: 500 }}
+                sx={theme => ({ cursor: "pointer", fontSize: theme.typography.bodyMd.fontSize, fontWeight: 500 })}
               >
                 {t.adminResetPassword.sendEmailLabel}
               </Box>

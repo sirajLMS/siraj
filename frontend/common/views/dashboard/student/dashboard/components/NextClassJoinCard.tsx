@@ -17,7 +17,7 @@ export interface NextClassJoinCardProps {
   readonly onJoin: (id: string) => void;
 }
 
-function formatCountdown(dateString: string | null): string | null {
+function formatCountdown(dateString: string | null, labels: StudentDashboardLabels): string | null {
   if (!dateString) return null;
   const start = new Date(dateString).getTime();
   if (Number.isNaN(start)) return null;
@@ -28,8 +28,8 @@ function formatCountdown(dateString: string | null): string | null {
   if (totalMinutes <= 0) return null;
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
+  if (hours > 0) return `${labels.hoursShort(hours)} ${labels.minutesShort(minutes)}`;
+  return labels.minutesShort(minutes);
 }
 
 type NextClassChipProps = {
@@ -43,7 +43,11 @@ function NextClassChip({ isFrozen, countdown, frozenLabel }: NextClassChipProps)
     return <StatusBadge category="classSession" status="hold" label={frozenLabel} />;
   }
   if (countdown) {
-    return <StatusBadge category="session" status="confirmed" label={countdown} />;
+    return (
+      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onPrimaryContainer, opacity: 0.9 })}>
+        {countdown}
+      </Typography>
+    );
   }
   return null;
 }
@@ -128,7 +132,7 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
   const joinable =
     isJoinableClassInstance(lesson.executionState, lesson.outcome, { isFrozen: lesson.isFrozen }) &&
     Boolean(lesson.meetingJoinUrl);
-  const countdown = formatCountdown(lesson.scheduledStartAt);
+  const countdown = formatCountdown(lesson.scheduledStartAt, labels);
   const scheduledLabel = lesson.scheduledStartAt ? formatDateTime(lesson.scheduledStartAt, locale) : "";
 
   return (
@@ -158,7 +162,7 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
           {lesson.instructor}
         </Typography>
         <Typography variant="labelMd" sx={theme => ({ color: theme.palette.onPrimaryContainer, opacity: 0.75 })}>
-          {lesson.durationMinutes} min
+          {labels.durationMinutesShort(lesson.durationMinutes)}
         </Typography>
       </Box>
 

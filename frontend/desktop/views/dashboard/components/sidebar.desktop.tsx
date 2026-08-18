@@ -50,6 +50,7 @@ export function SidebarDesktop({
       userName={userName}
       avatarUrl={avatarUrl}
       logoutLabel={navLabels.nav.logout}
+      toggleGroupAriaLabel={navLabels.toggleGroupAriaLabel}
     />
   );
 }

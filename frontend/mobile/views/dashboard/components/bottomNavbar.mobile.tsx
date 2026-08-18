@@ -1,12 +1,23 @@
 "use client";
 
-import { Box, Paper } from "@mui/material";
+import { Paper } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { useNavLabels } from "@/frontend/common/views/dashboard/components/useNavLabels";
 import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 import {
   BOTTOM_NAV_SCROLL_THRESHOLD,
   BottomNavItemViewMobile,
 } from "@/frontend/mobile/views/dashboard/components/bottomNavItemView.mobile";
+
+const StyledNav = styled("nav")(({ theme }) => ({
+  display: "flex",
+  height: theme.layout.bottomNavHeight,
+  backgroundColor: theme.palette.background.paper,
+  scrollbarWidth: "none",
+  "&::-webkit-scrollbar": {
+    display: "none",
+  },
+}));
 
 interface BottomNavbarMobileProps {
   readonly items: readonly NavItem[];
@@ -30,18 +41,10 @@ export function BottomNavbarMobile({ items, activeKey }: Readonly<BottomNavbarMo
       }}
       elevation={3}
     >
-      <Box
-        component="nav"
-        sx={theme => ({
-          display: "flex",
-          height: theme.layout.bottomNavHeight,
-          backgroundColor: theme.palette.background.paper,
+      <StyledNav
+        sx={{
           overflowX: isScrollable ? "auto" : "hidden",
-          scrollbarWidth: "none",
-          "&::-webkit-scrollbar": {
-            display: "none",
-          },
-        })}
+        }}
       >
         {items.map(item => (
           <BottomNavItemViewMobile
@@ -54,7 +57,7 @@ export function BottomNavbarMobile({ items, activeKey }: Readonly<BottomNavbarMo
             isScrollable={isScrollable}
           />
         ))}
-      </Box>
+      </StyledNav>
     </Paper>
   );
 }

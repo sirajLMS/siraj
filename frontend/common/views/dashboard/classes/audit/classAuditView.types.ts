@@ -37,6 +37,7 @@ export interface RegisteredStudentsLabels {
   readonly present: string;
   readonly absent: string;
   readonly noEntries: string;
+  readonly viewStudentAriaLabel: (name: string) => string;
 }
 
 export interface ClassAuditLabels {

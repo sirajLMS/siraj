@@ -155,7 +155,12 @@ const populatedMocks: MockLink.MockedResponse[] = [
           providerMetadata: null,
           createdAt: "2026-08-15T10:00:00Z",
           updatedAt: "2026-08-15T10:00:00Z",
-          details: { meetingUrl: "https://zoom.us/j/456", username: null, tenantId: null },
+          details: {
+            id: "meeting-config-details",
+            meetingUrl: "https://zoom.us/j/456",
+            username: null,
+            tenantId: null,
+          },
           provider: zoomProvider,
         },
       },
@@ -181,7 +186,7 @@ const editConfig: UserMeetingConfigFieldsFragment = {
   providerMetadata: null,
   createdAt: "2026-08-01T00:00:00Z",
   updatedAt: "2026-08-10T00:00:00Z",
-  details: { meetingUrl: "https://zoom.us/j/456", username: null, tenantId: null },
+  details: { id: "meeting-config-details", meetingUrl: "https://zoom.us/j/456", username: null, tenantId: null },
   provider: zoomProvider,
 };
 

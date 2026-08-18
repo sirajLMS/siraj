@@ -2,20 +2,10 @@
 
 import { useMutation } from "@apollo/client/react";
 import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Stack,
-  type Theme,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { IconButton, Stack, type Theme, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { AccountStatus, type UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   managerDirectoryQueryDocument,
@@ -66,15 +56,13 @@ interface DeactivateDialogProps {
   readonly updateLoading: boolean;
 }
 
-function resolveSubmitLabel(
-  state: { readonly updateLoading: boolean; readonly isDeactivate: boolean },
-  t: StaffDirectoryLabels["actions"]
-): string {
-  if (state.updateLoading) {
-    return t.processing;
-  }
-  return state.isDeactivate ? t.deactivate : t.activate;
-}
+const activateConfirmSx = (theme: Theme) =>
+  ({
+    py: 1.5,
+    backgroundColor: theme.palette.success.main,
+    color: theme.palette.onSuccess,
+    "&:hover": { backgroundColor: theme.palette.success.dark },
+  }) as const;
 
 function DeactivateDialog({
   labels: t,
@@ -91,27 +79,19 @@ function DeactivateDialog({
   const confirmationLabel = isDeactivate
     ? actions.deactivateConfirmation(manager.name)
     : actions.activateConfirmation(manager.name);
-  const submitButtonSx = (theme: Theme) => {
-    const baseColor = isDeactivate ? theme.palette.error : theme.palette.success;
-    return {
-      backgroundColor: baseColor.main,
-      "&:hover": { backgroundColor: baseColor.dark },
-    };
-  };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{dialogTitle}</DialogTitle>
-      <DialogContent>
-        <Typography variant="bodyMd">{confirmationLabel}</Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t.actions.cancel}</Button>
-        <Button onClick={onSubmit} variant="contained" disabled={updateLoading} sx={submitButtonSx}>
-          {resolveSubmitLabel({ updateLoading, isDeactivate }, t.actions)}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      onClose={onClose}
+      onConfirm={onSubmit}
+      isLoading={updateLoading}
+      title={dialogTitle}
+      body={confirmationLabel}
+      cancelLabel={actions.cancel}
+      confirmLabel={isDeactivate ? actions.deactivate : actions.activate}
+      confirmSx={isDeactivate ? undefined : activateConfirmSx}
+    />
   );
 }
 

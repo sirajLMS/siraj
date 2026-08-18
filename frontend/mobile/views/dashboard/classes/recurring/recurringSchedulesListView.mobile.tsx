@@ -71,7 +71,7 @@ export function RecurringSchedulesListMobileView({
                   {columns.schedule}: {row.defaultStartTime ?? ""}
                 </Typography>
                 <Typography sx={{ typography: "bodyMd" }}>
-                  {columns.duration}: {row.durationMinutes ?? 0} min
+                  {columns.duration}: {columns.durationMinutesShort(row.durationMinutes ?? 0)}
                 </Typography>
                 {row.hourlyRate ? (
                   <Typography sx={{ typography: "bodyMd" }}>

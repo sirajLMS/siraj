@@ -7,12 +7,12 @@ import {
   cleanupTestSuperAdmin,
   createManualClassEntry,
   ensureTestSubjectId,
+  loginAndProvision,
   loginDemoUser,
-  provisionTestEntities,
   provisionTestSuperAdmin,
 } from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
 
 /**
  * Helper to fetch status tracking schedule with a given token.
@@ -45,6 +45,7 @@ async function expectRoleDenied(role: string, date: string) {
 
   expect(result.error).toBeDefined();
   expect(result.data?.statusTrackingSchedule).toBeFalsy();
+  clearCookies();
 }
 
 /**
@@ -71,22 +72,19 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   let sharedSubjectId = "";
   const testDate = new Date().toISOString().split("T")[0];
 
-  test("login as academy_admin and provision test entities", async () => {
-    adminToken = await loginDemoUser("academy_admin");
-    expect(adminToken).not.toBeNull();
+  beforeAll(async () => {
+    const prov = await loginAndProvision("s10status");
+    adminToken = prov.adminToken;
+    superAdminToken = prov.superAdminToken;
+    studentId = prov.studentId;
+    teacherId = prov.teacherId;
+    teacherToken = prov.teacherToken;
 
-    const entities = await provisionTestEntities(adminToken, "s10status");
-    if (!entities.studentId) throw new Error("No studentId provisioned");
-    if (!entities.teacherId) throw new Error("No teacherId provisioned");
-    studentId = entities.studentId;
-    teacherId = entities.teacherId;
-    teacherToken = entities.teacherToken;
-
-    const sa = await provisionTestSuperAdmin(adminToken, "s10statusSa");
+    const sa = await provisionTestSuperAdmin(superAdminToken, "s10statusSa");
     superAdminToken = sa.token;
     superAdminUserId = sa.userId;
 
-    sharedSubjectId = await ensureTestSubjectId(adminToken);
+    sharedSubjectId = await ensureTestSubjectId(superAdminToken);
     expect(sharedSubjectId).toBeTruthy();
   });
 
@@ -221,73 +219,36 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   });
 
   describe("security: T10-004 — SUSPENDED→REGULAR restores isFrozen = false", () => {
-    let localAdminToken = "";
-    let localSuperAdminToken = "";
-    let localStudentId = "";
-
-    beforeAll(async () => {
-      // Self-contained provisioning so this describe does not depend on the
-      // outer describe's mutable state being initialized. Bun test may run
-      // inner describes concurrently with the file's top-level tests on
-      // resource-constrained CI runners — reading the outer
-      // `superAdminToken` / `studentId` as empty in that race causes
-      // `changeStudentStatus` to run unauthenticated and fail with
-      // `Not authorized to resolve Mutation.changeStudentStatus`. The
-      // outer lifecycle reuses an already-provisioned super admin / student
-      // when available; otherwise it provisions isolated fixtures scoped
-      // to this describe and cleans them up afterwards.
-      localAdminToken = adminToken || (await loginDemoUser("academy_admin"));
-
-      if (superAdminToken && superAdminUserId) {
-        localSuperAdminToken = superAdminToken;
-      } else {
-        const sa = await provisionTestSuperAdmin(localAdminToken, "s10statusSa");
-        localSuperAdminToken = sa.token;
-        superAdminToken = sa.token;
-        superAdminUserId = sa.userId;
-      }
-
-      if (studentId) {
-        localStudentId = studentId;
-      } else {
-        const entities = await provisionTestEntities(localAdminToken, "s10status");
-        localStudentId = entities.studentId;
-        studentId = entities.studentId;
-        teacherId = entities.teacherId;
-        teacherToken = entities.teacherToken;
-      }
-    });
-
     test("after admin changes student from SUSPENDED back to REGULAR, isFrozen reflects unfrozen state", async () => {
       // Step 1: Change student to SUSPENDED (triggers bulkFreezeStudentClasses)
-      await authenticatedRequest(localSuperAdminToken, "mutate", changeStudentStatusMutationDocument, {
-        studentId: localStudentId,
+      await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
+        studentId,
         newStatus: StudentStatus.Suspended,
         expectedVersion: null,
       });
 
       // Step 2: Verify via statusTrackingSchedule that classes have isFrozen = true
-      const suspendedData = await fetchStatusTracking(localAdminToken, testDate);
+      const suspendedData = await fetchStatusTracking(adminToken, testDate);
 
       const suspendedRows = suspendedData.statusTrackingSchedule;
-      const frozenRow = suspendedRows?.find(r => r?.studentId === localStudentId);
+      const frozenRow = suspendedRows?.find(r => r?.studentId === studentId);
       if (frozenRow) {
         expect(frozenRow.isFrozen).toBe(true);
         expect(frozenRow.studentStatus).toBe(StudentStatus.Suspended);
       }
 
       // Step 3: Change student back to REGULAR (triggers bulkUnfreezeStudentClasses)
-      await authenticatedRequest(localSuperAdminToken, "mutate", changeStudentStatusMutationDocument, {
-        studentId: localStudentId,
+      await authenticatedRequest(superAdminToken, "mutate", changeStudentStatusMutationDocument, {
+        studentId,
         newStatus: StudentStatus.Regular,
         expectedVersion: null,
       });
 
       // Step 4: Verify via statusTrackingSchedule that classes have isFrozen = false
-      const restoredData = await fetchStatusTracking(localAdminToken, testDate);
+      const restoredData = await fetchStatusTracking(adminToken, testDate);
 
       const restoredRows = restoredData.statusTrackingSchedule;
-      const restoredRow = restoredRows?.find(r => r?.studentId === localStudentId);
+      const restoredRow = restoredRows?.find(r => r?.studentId === studentId);
       if (restoredRow) {
         expect(restoredRow.isFrozen).toBe(false);
         expect(restoredRow.studentStatus).toBe(StudentStatus.Regular);

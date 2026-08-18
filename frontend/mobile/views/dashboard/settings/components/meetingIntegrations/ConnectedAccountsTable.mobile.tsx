@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, OutlinedInput, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -113,8 +113,7 @@ export function ConnectedAccountsTableMobile({
       </Typography>
 
       <Stack direction="row" spacing={1} sx={{ px: 2, mb: 1 }}>
-        <Box
-          component="input"
+        <OutlinedInput
           value={search}
           onChange={e => setSearch(e.target.value)}
           sx={{

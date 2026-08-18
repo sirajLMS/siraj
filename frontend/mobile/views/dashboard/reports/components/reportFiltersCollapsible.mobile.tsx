@@ -1,7 +1,7 @@
 "use client";
 
 import { ExpandMoreOutlined, FilterListOutlined } from "@mui/icons-material";
-import { Box, Collapse, IconButton, Typography } from "@mui/material";
+import { Box, Button, Collapse, IconButton, Typography } from "@mui/material";
 import type { ReportFiltersFormLabels } from "@/frontend/common/views/dashboard/reports/types/reportsLabelTypes";
 import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 import type { ReportFiltersCollapsibleProps } from "@/frontend/common/views/dashboard/reports/types/reportsViewProps";
@@ -43,8 +43,7 @@ export function ReportFiltersCollapsibleMobile({
         overflow: "hidden",
       })}
     >
-      <Box
-        component="button"
+      <Button
         type="button"
         onClick={onToggleExpanded}
         sx={{
@@ -56,6 +55,8 @@ export function ReportFiltersCollapsibleMobile({
           border: "none",
           backgroundColor: "transparent",
           cursor: "pointer",
+          textTransform: "none",
+          "&:hover": { backgroundColor: "transparent" },
         }}
       >
         <Typography
@@ -80,7 +81,7 @@ export function ReportFiltersCollapsibleMobile({
         >
           <ExpandMoreOutlined />
         </IconButton>
-      </Box>
+      </Button>
 
       <Collapse in={expanded}>
         <Box sx={{ px: 2, pb: 3 }}>

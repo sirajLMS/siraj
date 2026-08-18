@@ -1,7 +1,7 @@
 "use client";
 
 import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
-import { Avatar, Box, Button, Typography } from "@mui/material";
+import { Avatar, Box, Button, OutlinedInput, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
@@ -59,8 +59,7 @@ function AssignedUsersToolbar({
 }>) {
   return (
     <StyledUserToolbar>
-      <Box
-        component="input"
+      <OutlinedInput
         type="text"
         value={searchQuery}
         onChange={e => onSearchChange(e.target.value)}

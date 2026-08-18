@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Box, Tab, Tabs } from "@mui/material";
+import { Box, Button, Tab, Tabs } from "@mui/material";
 import type { PaymentCatalogAdminViewModel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/usePaymentCatalogAdminViewModel";
 import {
   MobileCardList,
@@ -59,8 +59,7 @@ export function PaymentCatalogAdminMobileView({
 
 function MobileAddButton({ label, onClick }: Readonly<{ readonly label: string; readonly onClick: () => void }>) {
   return (
-    <Box
-      component="button"
+    <Button
       onClick={onClick}
       sx={theme => ({
         display: "inline-flex",
@@ -75,10 +74,11 @@ function MobileAddButton({ label, onClick }: Readonly<{ readonly label: string; 
         cursor: "pointer",
         font: "inherit",
         fontWeight: 700,
+        textTransform: "none",
       })}
     >
       <AddOutlined fontSize="small" />
       {label}
-    </Box>
+    </Button>
   );
 }

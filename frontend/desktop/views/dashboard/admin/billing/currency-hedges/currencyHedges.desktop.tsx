@@ -1,6 +1,5 @@
 "use client";
 
-import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type {
@@ -13,6 +12,7 @@ import {
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
+  DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import { useAppLocale } from "@/shared/locale";
 
@@ -45,7 +45,7 @@ export function CurrencyHedgesDesktopView({
         subtitle={shell.pageSubtitle}
         actions={<DesktopPrimaryPageAction onClick={onAdd}>{actions.addHedge}</DesktopPrimaryPageAction>}
       />
-      <Box sx={{ height: 560 }}>
+      <DesktopSectionPanel contentPadding={false}>
         <DesktopAppDataGrid
           rows={rows}
           columns={gridColumns}
@@ -54,7 +54,7 @@ export function CurrencyHedgesDesktopView({
           getRowId={row => row.id}
           paginationOptions={{ mode: "client" }}
         />
-      </Box>
+      </DesktopSectionPanel>
     </DesktopPageContainer>
   );
 }

@@ -48,6 +48,7 @@ export const teacherMonthlyReportQueryDocument: TypedDocumentNode<
 > = gql`
   query TeacherMonthlyReport($teacherId: ID!, $year: Int!, $month: Int!) {
     teacherMonthlyReport(teacherId: $teacherId, year: $year, month: $month) {
+      id
       teacherId
       teacherName
       year

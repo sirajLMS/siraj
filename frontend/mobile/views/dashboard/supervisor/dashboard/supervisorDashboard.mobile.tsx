@@ -15,6 +15,7 @@ import {
   MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
+  MobilePrimaryPageAction,
   MobileSectionPanel,
 } from "@/frontend/mobile/components/ui";
 import { DuesSummaryCardMobile } from "@/frontend/mobile/views/dashboard/supervisor/dashboard/components/duesSummaryCard.mobile";
@@ -60,23 +61,13 @@ export function SupervisorDashboardMobileView({
                 {monthlySnapshot.label}
               </Typography>
             </Box>
-            <Box
-              component="button"
-              type="button"
+            <MobilePrimaryPageAction
+              variant="text"
               onClick={onGoToMonthlyReports}
-              sx={theme => ({
-                background: "none",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                color: theme.palette.primary.main,
-                fontFamily: "inherit",
-                fontSize: "inherit",
-                textAlign: "start",
-              })}
+              sx={{ minWidth: "auto", px: 0, textAlign: "start" }}
             >
               {labels.goToMonthlyReports}
-            </Box>
+            </MobilePrimaryPageAction>
           </Stack>
         </MobileSectionPanel>
 

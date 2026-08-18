@@ -42,6 +42,7 @@ export interface ClassAuditGridProps {
     readonly present: string;
     readonly absent: string;
     readonly noEntries: string;
+    readonly viewStudentAriaLabel: (name: string) => string;
   };
   readonly onExportStudents: () => void;
   readonly onViewStudent: (id: string) => void;

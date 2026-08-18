@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CountryDetectionResult } from "@/frontend/common/lib/locale/country/types";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const MAX_REQUESTS_PER_DAY = 5;
 
@@ -33,12 +34,13 @@ const detectCountry = async (
   setCountryCode: (code: string) => void,
   setError: (error: string | null) => void,
   setLoading: (loading: boolean) => void,
-  defaultCountryCode: string
+  defaultCountryCode: string,
+  errorMessages: { requestLimitReached: string; detectionFailed: string }
 ) => {
   try {
     const response = await fetch("https://ipapi.co/json/");
     if (response.status === 429) {
-      setError("Request limit reached for today");
+      setError(errorMessages.requestLimitReached);
       setLoading(false);
       return;
     }
@@ -47,7 +49,7 @@ const detectCountry = async (
     setLocalStorageItem(STORAGE_KEYS.fetchDate, new Date().toISOString());
     setCountryCode(data.country_code);
   } catch {
-    setError("Failed to detect country");
+    setError(errorMessages.detectionFailed);
     setLocalStorageItem(STORAGE_KEYS.requestCount, MAX_REQUESTS_PER_DAY.toString());
     setLocalStorageItem(STORAGE_KEYS.countryCode, defaultCountryCode);
     setCountryCode(defaultCountryCode);
@@ -63,10 +65,11 @@ const fetchCountryCode = (
   setCountryCode: (code: string) => void,
   setError: (error: string | null) => void,
   setLoading: (loading: boolean) => void,
-  defaultCountryCode: string
+  defaultCountryCode: string,
+  errorMessages: { requestLimitReached: string; detectionFailed: string }
 ) => {
   if (!hasClientWindow()) {
-    void detectCountry(setCountryCode, setError, setLoading, defaultCountryCode);
+    void detectCountry(setCountryCode, setError, setLoading, defaultCountryCode, errorMessages);
     return;
   }
 
@@ -84,7 +87,7 @@ const fetchCountryCode = (
       setLoading(false);
       return;
     }
-    setError("Request limit reached for today");
+    setError(errorMessages.requestLimitReached);
     setLocalStorageItem(STORAGE_KEYS.requestCount, MAX_REQUESTS_PER_DAY.toString());
     setLoading(false);
     return;
@@ -98,13 +101,19 @@ const fetchCountryCode = (
     return;
   }
 
-  void detectCountry(setCountryCode, setError, setLoading, defaultCountryCode);
+  void detectCountry(setCountryCode, setError, setLoading, defaultCountryCode, errorMessages);
 };
 
 export function useCountryDetection(timeout: number = 2000, defaultCountryCode: string = "SA"): CountryDetectionResult {
+  const t = useAppTranslation(Translation.Ui.CountrySelect);
   const [countryCode, setCountryCode] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const errorMessages = useMemo(
+    () => ({ requestLimitReached: t.requestLimitReached, detectionFailed: t.detectionFailed }),
+    [t.requestLimitReached, t.detectionFailed]
+  );
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -124,14 +133,14 @@ export function useCountryDetection(timeout: number = 2000, defaultCountryCode: 
         setCountryCode(storedCountryCode);
         setLoading(false);
       } else {
-        fetchCountryCode(setCountryCode, setError, setLoading, defaultCountryCode);
+        fetchCountryCode(setCountryCode, setError, setLoading, defaultCountryCode, errorMessages);
       }
     } else {
-      fetchCountryCode(setCountryCode, setError, setLoading, defaultCountryCode);
+      fetchCountryCode(setCountryCode, setError, setLoading, defaultCountryCode, errorMessages);
     }
 
     return () => clearTimeout(timeoutId);
-  }, [loading, timeout, defaultCountryCode]);
+  }, [loading, timeout, defaultCountryCode, errorMessages]);
 
   return {
     countryCode: countryCode ?? defaultCountryCode,

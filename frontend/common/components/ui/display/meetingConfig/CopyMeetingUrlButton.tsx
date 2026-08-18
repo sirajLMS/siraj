@@ -196,27 +196,35 @@ export function CopyMeetingUrlButton({
     return (
       <Tooltip title={tooltipText}>
         <Box
-          component="button"
-          onClick={handleCopy}
-          disabled={disabled}
-          aria-label={resolvedAriaLabel}
-          aria-pressed={isCopied}
           sx={theme => ({
             display: "inline-flex",
             alignItems: "center",
             gap: 0.5,
-            background: "none",
-            border: "none",
-            cursor: disabled ? "default" : "pointer",
-            padding: 0,
             color: iconColor(theme),
             "&:hover": disabled ? {} : { color: theme.palette.primary.main },
           })}
         >
-          {iconNode}
-          <Box component="span" sx={{ typography: "bodyMd" }}>
-            {labels.copyMeetingUrl}
-          </Box>
+          <button
+            type="button"
+            onClick={handleCopy}
+            disabled={disabled}
+            aria-label={resolvedAriaLabel}
+            aria-pressed={isCopied}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              background: "none",
+              border: "none",
+              cursor: disabled ? "default" : "pointer",
+              padding: 0,
+              color: "inherit",
+              font: "inherit",
+            }}
+          >
+            {iconNode}
+            <Box sx={{ typography: "bodyMd" }}>{labels.copyMeetingUrl}</Box>
+          </button>
         </Box>
       </Tooltip>
     );

@@ -48,6 +48,7 @@ interface SidebarShellProps {
   readonly userName: string;
   readonly avatarUrl: string;
   readonly logoutLabel: string;
+  readonly toggleGroupAriaLabel: (label: string) => string;
 }
 
 interface SidebarNavItemProps {
@@ -168,6 +169,7 @@ interface SidebarGroupHeaderProps {
   readonly isCollapsed: boolean;
   readonly collapsed: boolean;
   readonly onToggle: () => void;
+  readonly toggleGroupAriaLabel: (label: string) => string;
 }
 
 function SidebarGroupStaticTitle({
@@ -188,7 +190,13 @@ function SidebarGroupStaticTitle({
   );
 }
 
-function SidebarGroupHeader({ group, isCollapsed, collapsed, onToggle }: SidebarGroupHeaderProps) {
+function SidebarGroupHeader({
+  group,
+  isCollapsed,
+  collapsed,
+  onToggle,
+  toggleGroupAriaLabel,
+}: SidebarGroupHeaderProps) {
   const Chevron = collapsed ? KeyboardArrowDownOutlined : KeyboardArrowUpOutlined;
 
   if (isCollapsed) {
@@ -201,7 +209,7 @@ function SidebarGroupHeader({ group, isCollapsed, collapsed, onToggle }: Sidebar
     <ListItemButton
       onClick={onToggle}
       aria-expanded={!collapsed}
-      aria-label={`Toggle ${group.label} group`}
+      aria-label={toggleGroupAriaLabel(group.label)}
       sx={{
         borderRadius: 2,
         px: 2,
@@ -300,12 +308,14 @@ function GroupedNavList({
   activeKey,
   isCollapsed,
   navListRef,
+  toggleGroupAriaLabel,
 }: {
   readonly groups: readonly TranslatedNavGroup[];
   readonly items: readonly TranslatedNavItem[];
   readonly activeKey: string | null;
   readonly isCollapsed: boolean;
   readonly navListRef?: RefObject<HTMLElement | null>;
+  readonly toggleGroupAriaLabel: (label: string) => string;
 }) {
   const { grouped, noGroup, endItems } = bucketItemsByGroup(groups, items);
   useCollapsedGroupState(groups);
@@ -330,7 +340,7 @@ function GroupedNavList({
         "&::-webkit-scrollbar": { width: 4 },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor: "var(--mui-palette-outlineVariant)",
-          borderRadius: 12,
+          borderRadius: theme => theme.shape.borderRadius,
         },
       }}
     >
@@ -369,6 +379,7 @@ function GroupedNavList({
                     isCollapsed={isCollapsed}
                     collapsed={collapsed}
                     onToggle={() => toggleGroupCollapsed(group.id)}
+                    toggleGroupAriaLabel={toggleGroupAriaLabel}
                   />
                   <Collapse in={!collapsed} timeout="auto" unmountOnExit>
                     <List
@@ -515,6 +526,7 @@ function SidebarContent({
   userName,
   avatarUrl,
   logoutLabel,
+  toggleGroupAriaLabel,
 }: {
   readonly navGroups: readonly TranslatedNavGroup[];
   readonly navItems: readonly TranslatedNavItem[];
@@ -524,6 +536,7 @@ function SidebarContent({
   readonly userName: string;
   readonly avatarUrl: string;
   readonly logoutLabel: string;
+  readonly toggleGroupAriaLabel: (label: string) => string;
 }) {
   const mainItems = navItems.filter(item => item.section === "main");
   const mainGroups = navGroups.filter(group => group.section === "main");
@@ -545,6 +558,7 @@ function SidebarContent({
         activeKey={activeKey}
         isCollapsed={isCollapsed}
         navListRef={navListRef}
+        toggleGroupAriaLabel={toggleGroupAriaLabel}
       />
 
       <SidebarAccountFooter
@@ -566,6 +580,7 @@ function SidebarMobileDrawer({
   userName,
   avatarUrl,
   logoutLabel,
+  toggleGroupAriaLabel,
 }: {
   readonly sidebarWidth: string;
   readonly navGroups: readonly TranslatedNavGroup[];
@@ -574,6 +589,7 @@ function SidebarMobileDrawer({
   readonly userName: string;
   readonly avatarUrl: string;
   readonly logoutLabel: string;
+  readonly toggleGroupAriaLabel: (label: string) => string;
 }) {
   const mobileDrawerOpen = useLayoutStore(state => state.mobileDrawerOpen);
   const closeMobileDrawer = useLayoutStore(state => state.closeMobileDrawer);
@@ -623,6 +639,7 @@ function SidebarMobileDrawer({
         userName={userName}
         avatarUrl={avatarUrl}
         logoutLabel={logoutLabel}
+        toggleGroupAriaLabel={toggleGroupAriaLabel}
       />
     </Drawer>
   );
@@ -637,6 +654,7 @@ function SidebarDesktop({
   userName,
   avatarUrl,
   logoutLabel,
+  toggleGroupAriaLabel,
 }: {
   readonly sidebarWidth: string;
   readonly navGroups: readonly TranslatedNavGroup[];
@@ -646,6 +664,7 @@ function SidebarDesktop({
   readonly userName: string;
   readonly avatarUrl: string;
   readonly logoutLabel: string;
+  readonly toggleGroupAriaLabel: (label: string) => string;
 }) {
   const collapsedWidth = "80px";
   const storeSidebarOpen = useLayoutStore(state => state.sidebarOpen);
@@ -684,6 +703,7 @@ function SidebarDesktop({
         userName={userName}
         avatarUrl={avatarUrl}
         logoutLabel={logoutLabel}
+        toggleGroupAriaLabel={toggleGroupAriaLabel}
       />
 
       <Box
@@ -756,6 +776,7 @@ export function SidebarShell({
   userName,
   avatarUrl,
   logoutLabel,
+  toggleGroupAriaLabel,
 }: SidebarShellProps) {
   return (
     <>
@@ -767,6 +788,7 @@ export function SidebarShell({
         userName={userName}
         avatarUrl={avatarUrl}
         logoutLabel={logoutLabel}
+        toggleGroupAriaLabel={toggleGroupAriaLabel}
       />
       <SidebarDesktop
         sidebarWidth={sidebarWidth}
@@ -777,6 +799,7 @@ export function SidebarShell({
         userName={userName}
         avatarUrl={avatarUrl}
         logoutLabel={logoutLabel}
+        toggleGroupAriaLabel={toggleGroupAriaLabel}
       />
     </>
   );

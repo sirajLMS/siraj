@@ -8,6 +8,7 @@ export const studentCreditBalanceQueryDocument: TypedDocumentNode<
 > = gql`
   query StudentCreditBalance($studentId: ID!) {
     studentCreditBalance(studentId: $studentId) {
+      id
       studentId
       classesRemaining
       classesTotal

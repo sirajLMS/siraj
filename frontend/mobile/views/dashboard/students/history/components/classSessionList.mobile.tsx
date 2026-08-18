@@ -14,6 +14,7 @@ import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/stude
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { Link } from "@/shared/i18n";
+import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/students/history";
 
 const STATUS_LABEL_KEYS: Readonly<Record<AttendanceStatus, string>> = {
   [AttendanceStatus.Absent]: "absent",
@@ -26,10 +27,10 @@ function getStatusLabel(status: AttendanceStatus, labels: Readonly<Record<string
   return labels[key] ?? labels[status] ?? status;
 }
 
-function formatDuration(mins: number): string {
-  if (mins < 60) return `${mins}m`;
+function formatDuration(mins: number, t: StudentHistoryLabels): string {
+  if (mins < 60) return t.minutesShort(mins);
   const hrs = mins / 60;
-  return `${hrs % 1 === 0 ? hrs : hrs.toFixed(1)}h`;
+  return t.hoursShort(hrs % 1 === 0 ? hrs : Number(hrs.toFixed(1)));
 }
 
 function SessionListHeader({ title, dateStr }: Readonly<{ title: string; dateStr: string }>) {
@@ -196,7 +197,8 @@ function ClassSessionCard({
 }
 
 export function ClassSessionListMobile({ dateStr, sessions }: Readonly<ClassSessionListProps>) {
-  const t = useStudentHistoryLabels().classDetails;
+  const labels = useStudentHistoryLabels();
+  const t = labels.classDetails;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -212,7 +214,7 @@ export function ClassSessionListMobile({ dateStr, sessions }: Readonly<ClassSess
           <ClassSessionCard
             session={session}
             statusLabel={getStatusLabel(session.status, t.status)}
-            durationLabel={formatDuration(session.duration)}
+            durationLabel={formatDuration(session.duration, labels)}
           />
         )}
       />

@@ -70,7 +70,7 @@ const StyledSubmitButton = styled(Button, {
 })<{ extraSx: (theme: Theme) => Record<string, unknown> }>(({ theme, extraSx }) => ({
   backgroundColor: theme.palette.primary.main,
   color: theme.palette.onPrimary,
-  borderRadius: 12,
+  borderRadius: theme.shape.borderRadius,
   typography: "labelUppercase",
   boxShadow: theme.palette.shadow.button,
   "&:hover": {

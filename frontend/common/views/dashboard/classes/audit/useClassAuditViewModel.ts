@@ -198,6 +198,7 @@ function buildRegisteredStudentsLabels(t: ClassAuditT, registeredStudentCount: n
     present: t.students.present,
     absent: t.students.absent,
     noEntries: t.students.noEntries,
+    viewStudentAriaLabel: t.students.viewStudentAriaLabel,
   };
 }
 

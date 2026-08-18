@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Typography,
-} from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
 import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import {
@@ -123,7 +115,7 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
           />
 
           <Typography variant="caption" sx={{ color: "inherit", opacity: 0.85, lineHeight: 1.2 }}>
-            {classItem.duration}m · {statusLabel}
+            {t.grid.minutesShort(classItem.duration ?? 0)} · {statusLabel}
           </Typography>
         </Box>
 
@@ -144,7 +136,7 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
                 component="span"
                 className="material-symbols-outlined"
                 sx={theme => ({
-                  fontSize: 16,
+                  fontSize: theme.typography.bodyLg.fontSize,
                   cursor: "pointer",
                   opacity: 0.7,
                   "&:hover": { color: theme.palette.error.main, opacity: 1 },
@@ -158,18 +150,16 @@ function SlotItem({ classItem, onRemove, hasScheduleDeleteClass, labels, meeting
         ) : null}
       </Box>
 
-      <Dialog open={open} onClose={closeDialog}>
-        <DialogTitle>{t.dialogs.deleteClassTitle}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{t.dialogs.deleteClassMessage}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeDialog}>{t.dialogs.cancel}</Button>
-          <Button onClick={handleConfirm} color="error" variant="contained">
-            {t.dialogs.confirmYes}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <BaseDeleteDialog
+        open={open}
+        onClose={closeDialog}
+        onConfirm={handleConfirm}
+        isLoading={false}
+        title={t.dialogs.deleteClassTitle}
+        body={t.dialogs.deleteClassMessage}
+        cancelLabel={t.dialogs.cancel}
+        confirmLabel={t.dialogs.confirmYes}
+      />
     </>
   );
 }

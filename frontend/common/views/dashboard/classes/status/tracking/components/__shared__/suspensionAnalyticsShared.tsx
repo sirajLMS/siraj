@@ -169,7 +169,7 @@ function CtaUrgentBadge({ label, mb }: { readonly label: string; readonly mb: nu
         paddingInline: theme.spacing(1.5),
         paddingBlock: theme.spacing(0.5),
         backgroundColor: alpha(theme.palette.primaryContainer, 0.3),
-        borderRadius: 12,
+        borderRadius: theme.shape.borderRadius,
         mb,
       })}
     >

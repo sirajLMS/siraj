@@ -6,7 +6,7 @@ import EditNoteIcon from "@mui/icons-material/EditNote";
 import HelpOutlinedIcon from "@mui/icons-material/HelpOutlined";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
-import { alpha, Box, Grid, Stack, Typography } from "@mui/material";
+import { alpha, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { styled, type Theme } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { BaseCard } from "@/frontend/common/components/ui";
@@ -124,8 +124,7 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
             const Icon = config.icon;
             const { statusKey } = config;
             const buttonElement = (
-              <Box
-                component="button"
+              <Button
                 id={`action-btn-${config.key}`}
                 onClick={handlers[config.key]}
                 sx={theme => {
@@ -168,7 +167,7 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
                 <Typography variant="labelUppercase" sx={{ color: "inherit" }}>
                   {actionLabels[config.key]}
                 </Typography>
-              </Box>
+              </Button>
             );
 
             return (

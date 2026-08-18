@@ -15,7 +15,7 @@ export const StyledViewProfileButton = styled(Link)(({ theme }) => ({
   display: "block",
   width: "100%",
   textAlign: "center",
-  borderRadius: 8,
+  borderRadius: theme.shape.borderRadius,
   fontWeight: 700,
   letterSpacing: "0.08em",
   paddingBlock: 1.25,

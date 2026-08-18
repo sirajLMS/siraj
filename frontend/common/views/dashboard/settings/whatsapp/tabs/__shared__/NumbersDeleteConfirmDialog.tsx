@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@mui/material";
 import { useCallback, useState } from "react";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 export function NumbersDeleteConfirmDialog({
@@ -29,27 +21,22 @@ export function NumbersDeleteConfirmDialog({
 }>) {
   const [submitting, setSubmitting] = useState(false);
 
-  const handleConfirm = useCallback(async () => {
+  const handleConfirm = useCallback(() => {
     setSubmitting(true);
-    try {
-      await onConfirm();
-    } finally {
-      setSubmitting(false);
-    }
+    void onConfirm().finally(() => setSubmitting(false));
   }, [onConfirm]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullScreen={fullScreen}>
-      <DialogTitle>{labels.deleteConfirmTitle}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{labels.deleteConfirmMessage(displayName)}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{labels.cancel}</Button>
-        <Button variant="contained" color="error" disabled={submitting} onClick={handleConfirm}>
-          {submitting ? <CircularProgress size={20} /> : labels.deleteAccount}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      onClose={onClose}
+      onConfirm={handleConfirm}
+      isLoading={submitting}
+      title={labels.deleteConfirmTitle}
+      body={labels.deleteConfirmMessage(displayName)}
+      cancelLabel={labels.cancel}
+      confirmLabel={labels.deleteAccount}
+      fullScreen={fullScreen}
+    />
   );
 }

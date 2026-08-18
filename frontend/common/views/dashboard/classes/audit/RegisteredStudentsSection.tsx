@@ -27,6 +27,7 @@ interface RegisteredStudentsSectionProps {
     readonly present: string;
     readonly absent: string;
     readonly noEntries: string;
+    readonly viewStudentAriaLabel: (name: string) => string;
   };
   readonly onExport: () => void;
   readonly onViewStudent: (id: string) => void;
@@ -126,7 +127,7 @@ export function RegisteredStudentsSection({
                 onViewStudent(row.id);
               }
             }}
-            aria-label={`View ${row.name ?? ""}`}
+            aria-label={labels.viewStudentAriaLabel(row.name ?? "")}
           >
             <VisibilityOutlined fontSize="small" />
           </StyledViewActionButton>

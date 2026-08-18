@@ -1,9 +1,9 @@
 "use client";
 
-import { LinearProgress } from "@mui/material";
+import { LinearProgress, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { RateSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { RateSource, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherDueRow,
@@ -36,9 +36,10 @@ function StudentNameCell({ row }: Readonly<{ row: TeacherDueRow }>) {
   );
 }
 
-function StatusCell({ row }: Readonly<{ row: TeacherDueRow }>) {
-  const status = row.status ?? "PENDING";
-  return <DesktopStatusBadge category="invoice" status={status} label={status} />;
+function StatusCell({ row, labels }: Readonly<{ row: TeacherDueRow; labels: TeacherDuesColumnLabels }>) {
+  const status = row.status ?? TeacherDueStatus.Pending;
+  const statusLabel = status === TeacherDueStatus.Paid ? labels.statusPaid : labels.statusPending;
+  return <DesktopStatusBadge category="invoice" status={status} label={statusLabel} />;
 }
 
 function rateSourceLabel(source: RateSource | null, labels: TeacherDuesColumnLabels): string {
@@ -57,7 +58,7 @@ function rateSourceLabel(source: RateSource | null, labels: TeacherDuesColumnLab
 }
 
 function RateSourceCell({ row, labels }: Readonly<{ row: TeacherDueRow; labels: TeacherDuesColumnLabels }>) {
-  return <DesktopStatusBadge category="invoice" status="PENDING" label={rateSourceLabel(row.rateSource, labels)} />;
+  return <Typography variant="bodyMd">{rateSourceLabel(row.rateSource, labels)}</Typography>;
 }
 
 function MarkAsPaidCell({
@@ -130,7 +131,7 @@ function buildColumns({
       field: "status",
       headerName: labels.statusColumn,
       width: 130,
-      renderCell: params => <StatusCell row={params.row} />,
+      renderCell: params => <StatusCell row={params.row} labels={labels} />,
     },
     {
       field: "rateSource",

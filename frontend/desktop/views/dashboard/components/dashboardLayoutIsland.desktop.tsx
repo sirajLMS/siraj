@@ -1,6 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { type ReactNode, useEffect, useRef } from "react";
 import { useFxLiveRefresh } from "@/frontend/common/hooks/useFxLiveRefresh";
 import { FxStaleBanner } from "@/frontend/common/views/dashboard/components/FxStaleBanner";
@@ -20,6 +21,16 @@ interface DashboardLayoutIslandProps {
   readonly hideSidebarNavigation?: boolean;
 }
 
+const StyledMain = styled("main")({
+  flexGrow: 1,
+  minWidth: 0,
+  minHeight: 0,
+  overflowY: "auto",
+  overscrollBehavior: "contain",
+  backgroundColor: "var(--mui-palette-background-default)",
+  paddingBottom: 0,
+});
+
 function DesktopMainScrollArea({ children }: { readonly children: ReactNode }) {
   const mainRef = useRef<HTMLElement>(null);
   useFxLiveRefresh();
@@ -29,19 +40,7 @@ function DesktopMainScrollArea({ children }: { readonly children: ReactNode }) {
   }, []);
 
   return (
-    <Box
-      component="main"
-      ref={mainRef}
-      sx={{
-        flexGrow: 1,
-        minWidth: 0,
-        minHeight: 0,
-        overflowY: "auto",
-        overscrollBehavior: "contain",
-        backgroundColor: "var(--mui-palette-background-default)",
-        pb: 0,
-      }}
-    >
+    <StyledMain ref={mainRef}>
       <Box
         sx={theme => ({
           px: theme.layout.pageMargin,
@@ -51,7 +50,7 @@ function DesktopMainScrollArea({ children }: { readonly children: ReactNode }) {
         <FxStaleBanner />
         {children}
       </Box>
-    </Box>
+    </StyledMain>
   );
 }
 

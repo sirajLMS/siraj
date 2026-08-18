@@ -6,7 +6,7 @@ import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import type { ReactElement } from "react";
-import { PrimaryPageAction, StatusBadge } from "@/frontend/common/components/ui";
+import { PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota } from "@/frontend/common/graphql/generated/gql/operations";
@@ -182,60 +182,61 @@ export function SupervisorQuotaView({ t }: Readonly<SupervisorQuotaViewProps>): 
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <Stack
-        sx={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}
+      <SectionPanel
+        title={t.audience.supervisorTitle}
+        actions={
+          canManage ? (
+            <Link href="/quotas/new" style={{ textDecoration: "none" }}>
+              <PrimaryPageAction color="primary" startIcon={<AddOutlined />}>
+                {t.audience.newQuota}
+              </PrimaryPageAction>
+            </Link>
+          ) : null
+        }
       >
-        <Typography variant="titleLg">{t.audience.supervisorTitle}</Typography>
-        {canManage && (
-          <Link href="/quotas/new" style={{ textDecoration: "none" }}>
-            <PrimaryPageAction color="primary" startIcon={<AddOutlined />}>
-              {t.audience.newQuota}
-            </PrimaryPageAction>
-          </Link>
-        )}
-      </Stack>
-      <Stack sx={{ flexDirection: "row", gap: 2, flexWrap: "wrap" }}>
-        <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
-          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.audience.totalClasses}
-          </Typography>
-          <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
-            {totalCount}
-          </Typography>
-        </Paper>
-        <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
-          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.audience.statuses.ACTIVE}
-          </Typography>
-          <Typography variant="headlineMd" sx={theme => ({ fontWeight: 700, color: theme.palette.success.main })}>
-            {activeCount}
-          </Typography>
-        </Paper>
-        <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
-          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.audience.statuses.EXPIRED}
-          </Typography>
-          <Typography variant="headlineMd" sx={theme => ({ fontWeight: 700, color: theme.palette.error.main })}>
-            {expiredCount}
-          </Typography>
-        </Paper>
-        <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
-          <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.audience.statuses.ARCHIVED}
-          </Typography>
-          <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
-            {archivedCount}
-          </Typography>
-        </Paper>
-      </Stack>
-      <AppDataGrid
-        rows={quotas}
-        columns={columns}
-        loading={loading}
-        emptyMessage={t.audience.noData}
-        ariaLabel={t.audience.supervisorTitle}
-        paginationOptions={{ mode: "client", pageSize: 10 }}
-      />
+        <Stack sx={{ flexDirection: "row", gap: 2, flexWrap: "wrap" }}>
+          <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
+            <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {t.audience.totalClasses}
+            </Typography>
+            <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
+              {totalCount}
+            </Typography>
+          </Paper>
+          <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
+            <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {t.audience.statuses.ACTIVE}
+            </Typography>
+            <Typography variant="headlineMd" sx={theme => ({ fontWeight: 700, color: theme.palette.success.main })}>
+              {activeCount}
+            </Typography>
+          </Paper>
+          <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
+            <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {t.audience.statuses.EXPIRED}
+            </Typography>
+            <Typography variant="headlineMd" sx={theme => ({ fontWeight: 700, color: theme.palette.error.main })}>
+              {expiredCount}
+            </Typography>
+          </Paper>
+          <Paper variant="outlined" sx={{ p: 2, flex: 1, minWidth: 120 }}>
+            <Typography variant="labelSm" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {t.audience.statuses.ARCHIVED}
+            </Typography>
+            <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
+              {archivedCount}
+            </Typography>
+          </Paper>
+        </Stack>
+        <AppDataGrid
+          rows={quotas}
+          columns={columns}
+          loading={loading}
+          emptyMessage={t.audience.noData}
+          ariaLabel={t.audience.supervisorTitle}
+          paginationOptions={{ mode: "client", pageSize: 10 }}
+        />
+      </SectionPanel>
     </Box>
   );
 }

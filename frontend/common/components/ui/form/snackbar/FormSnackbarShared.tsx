@@ -30,7 +30,7 @@ export function FormSnackbarShared({
           gap: 1.5,
           px: 3,
           py: 1.5,
-          borderRadius: 12,
+          borderRadius: theme.shape.borderRadius,
           backgroundColor: theme.palette[severityColor].main,
           color: severityColor === "error" ? theme.palette.onError : theme.palette.onPrimary,
           boxShadow: theme.palette.shadow.card,

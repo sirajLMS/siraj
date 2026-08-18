@@ -1,7 +1,8 @@
 "use client";
 
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
-import { Box, Chip, CircularProgress, Link as MuiLink, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Link as MuiLink, Stack, Typography } from "@mui/material";
+import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
 import type { MeetingConfigLinkedClassInstancesLabels } from "@/shared/locale/types/ui";
 
 // Design decision: instances are passed as props rather than fetched internally.
@@ -102,7 +103,7 @@ export function LinkedClassInstancesList({
               <OpenInNewOutlinedIcon sx={{ fontSize: 14 }} />
             </MuiLink>
           ) : (
-            <Chip size="small" color="info" variant="outlined" label={labels.urlPendingBadge} />
+            <StatusBadge category="syncStatus" status="pending" label={labels.urlPendingBadge} />
           )}
         </Stack>
       ))}

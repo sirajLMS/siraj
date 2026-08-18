@@ -34,7 +34,7 @@ function MobileSearchSlot({
         placeholder={t.searchPermissionsPlaceholder}
         value={searchQuery}
         onChange={e => onSearchChange(e.target.value)}
-        style={{ paddingLeft: 36 }}
+        sx={{ paddingLeft: 36 }}
         autoComplete="off"
       />
     </Box>

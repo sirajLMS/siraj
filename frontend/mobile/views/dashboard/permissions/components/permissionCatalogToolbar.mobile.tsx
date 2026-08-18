@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, TextField } from "@mui/material";
+import { Box, Button, InputAdornment, TextField } from "@mui/material";
 import type { PermissionCatalogToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileContentInset, MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
 
@@ -13,8 +13,7 @@ interface CategoryChipProps {
 
 function CategoryChip({ label, active, onClick }: Readonly<CategoryChipProps>) {
   return (
-    <Box
-      component="button"
+    <Button
       onClick={onClick}
       sx={theme => ({
         flexShrink: 0,
@@ -28,10 +27,14 @@ function CategoryChip({ label, active, onClick }: Readonly<CategoryChipProps>) {
         color: active ? theme.palette.onPrimaryContainer : theme.palette.onSurfaceVariant,
         border: `1px solid ${active ? theme.palette.primaryContainer : theme.palette.outlineVariant}`,
         transition: theme.transitions.create("all", { duration: 200 }),
+        textTransform: "none",
+        "&:hover": {
+          backgroundColor: active ? theme.palette.primaryContainer : theme.palette.surfaceContainer,
+        },
       })}
     >
       {label}
-    </Box>
+    </Button>
   );
 }
 

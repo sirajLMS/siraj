@@ -10,12 +10,24 @@ import {
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 
+type StudentStatusKey = "regular" | "suspended" | "on_leave" | "on_trial" | "deactivated";
+
+function isStudentStatusKey(value: string): value is StudentStatusKey {
+  return (
+    value === "regular" ||
+    value === "suspended" ||
+    value === "on_leave" ||
+    value === "on_trial" ||
+    value === "deactivated"
+  );
+}
+
 function studentStatusLabel(
   status: string,
   labels: { regular: string; suspended: string; on_leave: string; on_trial: string; deactivated: string }
 ): string {
-  const key = status.toLowerCase() as keyof typeof labels;
-  return labels[key] ?? labels.regular;
+  const key = status.toLowerCase();
+  return isStudentStatusKey(key) ? labels[key] : labels.regular;
 }
 
 export function AssociatedStudentsCardListMobile({ rows, labels }: Readonly<BaseAssociatedStudentsListProps>) {

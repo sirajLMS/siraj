@@ -14,6 +14,16 @@ const StyledDesktopFooter = styled(Box)(({ theme }) => ({
   justifyContent: "space-between",
 }));
 
+const UpdateButton = styled("button")(({ theme }) => ({
+  color: theme.palette.primary.main,
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  padding: 0,
+  font: "inherit",
+  "&:hover": { textDecoration: "underline" },
+}));
+
 function NoteHeaderDesktop({ title }: Readonly<{ title: string }>) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
@@ -33,21 +43,11 @@ function NoteFooterDesktop({
       <Typography variant="labelUppercase" sx={{ opacity: 0.6 }}>
         {lastUpdatedText}
       </Typography>
-      <Typography
-        component="button"
-        variant="labelUppercase"
-        onClick={onUpdate}
-        sx={theme => ({
-          color: theme.palette.primary.main,
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          p: 0,
-          "&:hover": { textDecoration: "underline" },
-        })}
-      >
-        {updateLabel}
-      </Typography>
+      <UpdateButton type="button" onClick={onUpdate}>
+        <Typography variant="labelUppercase" sx={{ color: "inherit" }}>
+          {updateLabel}
+        </Typography>
+      </UpdateButton>
     </StyledDesktopFooter>
   );
 }

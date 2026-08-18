@@ -31,14 +31,11 @@ export function ResourceUploadGuidelinesShared({
           </Typography>
           <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
             {labels.guidelines.items.map(item => (
-              <Typography
-                key={item}
-                component="li"
-                variant="bodyMd"
-                sx={theme => ({ color: theme.palette.text.secondary, mb: 0.5 })}
-              >
-                {item}
-              </Typography>
+              <li key={item}>
+                <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, mb: 0.5 })}>
+                  {item}
+                </Typography>
+              </li>
             ))}
           </Box>
         </Box>

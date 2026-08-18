@@ -40,6 +40,7 @@ const sampleConfigs: DesktopMeetingConfigListItem[] = [
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     details: {
+      id: "meeting-config-details",
       meetingUrl: "https://zoom.us/j/123456789",
       username: "teacher@example.com",
       tenantId: null,
@@ -58,6 +59,7 @@ const sampleConfigs: DesktopMeetingConfigListItem[] = [
     createdAt: "2026-01-02T00:00:00.000Z",
     updatedAt: "2026-01-02T00:00:00.000Z",
     details: {
+      id: "meeting-config-details",
       meetingUrl: "https://meet.google.com/abc-defg-hij",
       username: null,
       tenantId: null,

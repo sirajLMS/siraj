@@ -1,86 +1,32 @@
-import { afterAll, beforeAll } from "bun:test";
+import { beforeAll } from "bun:test";
 import { ensureDemoUsersForTests } from "@/frontend/common/graphql/test/helpers";
-import {
-  anyPeerHeartbeatsAlive,
-  registerWorkerHeartbeat,
-  releaseHeartbeatSync,
-} from "@/frontend/common/graphql/test/shared-workers";
 import { getTestPort, getTestServerMode } from "@/frontend/common/graphql/test/testPort";
-import { isTestServerRunning, startTestServer, stopTestServer } from "@/frontend/common/graphql/test/testServer";
+import { isTestServerRunning, startTestServer } from "@/frontend/common/graphql/test/testServer";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
-let startedSuitesCount = 0;
-let stopTimeout: Timer | null = null;
 let serverStartPromise: Promise<void> | null = null;
-
-const STOP_POLL_INTERVAL_MS = 500;
-const MAX_STOP_POLL_ROUNDS = 60;
 
 /**
  * Setup the shared Next.js test server for this describe block.
  *
- * - First worker to call this spawns the server on a shared port.
- * - Peer workers (parallel `bun test` workers) detect the running server and
- *   reuse it, registering a heartbeat so the owner does not kill the server
- *   while peers are still running tests.
- * - On suite completion (`afterAll`), each worker releases its heartbeat. The
- *   owner polls {@link anyPeerHeartbeatsAlive} before tearing the server down,
- *   so peers with in-flight tests are never cut off.
+ * - In dev mode: if a dev server is already running on port 3000, it is reused
+ *   (no separate test server is spawned). This avoids the Next.js 16 dist-dir
+ *   conflict that prevents a second dev server from starting.
+ * - In dev mode with no dev server running: a separate test dev server is
+ *   spawned on port 3066 using .next-dev.
+ * - In production mode: a `next start` server is spawned on port 3066 using
+ *   .next-test-prod (requires `bun run build:test` beforehand).
+ * - Sequential tests reuse the already-running server instantly.
+ * - The server persists across test files during multi-test runs (e.g. test:graphql,
+ *   test:ui:e2e) to preserve route warmup and compilation state.
  */
 export function setupTestServerLifecycle() {
   beforeAll(async () => {
-    startedSuitesCount++;
-    if (stopTimeout) {
-      testLogger.debug("Cancelling pending test server stop timeout.");
-      clearTimeout(stopTimeout);
-      stopTimeout = null;
-    }
     if (!serverStartPromise || !(await isTestServerRunning())) {
       serverStartPromise = startTestServer();
     }
     await serverStartPromise;
-    await registerWorkerHeartbeat();
     await ensureDemoUsersForTests();
     testLogger.info(`GraphQL test server ready on port ${getTestPort()} (${getTestServerMode()} mode)`);
-  });
-
-  afterAll(() => {
-    startedSuitesCount--;
-    if (startedSuitesCount === 0) {
-      testLogger.debug("All active test suites finished. Scheduling test server stop...");
-      stopTimeout = setTimeout(() => {
-        void stopServerWhenPeersDone();
-      }, 2_000);
-      if (stopTimeout && typeof stopTimeout.unref === "function") {
-        stopTimeout.unref();
-      }
-    }
-  });
-}
-
-async function stopServerWhenPeersDone(): Promise<void> {
-  stopTimeout = null;
-  releaseHeartbeatSync();
-  await pollForPeerCompletion(process.pid, 0);
-}
-
-function stopTestServerAndClearPromise(): void {
-  stopTestServer();
-  serverStartPromise = null;
-}
-
-async function pollForPeerCompletion(ownerPid: number, round: number): Promise<void> {
-  if (round >= MAX_STOP_POLL_ROUNDS) {
-    testLogger.warn("Test server stop poll timed out; forcing stop.");
-    stopTestServerAndClearPromise();
-    return;
-  }
-  const peersAlive = await anyPeerHeartbeatsAlive(ownerPid);
-  if (!peersAlive) {
-    stopTestServerAndClearPromise();
-    return;
-  }
-  testLogger.debug(`Deferring test server stop: ${peersAlive ? "peer worker(s) still active" : "no peers"}.`);
-  await new Promise(resolve => setTimeout(resolve, STOP_POLL_INTERVAL_MS));
-  await pollForPeerCompletion(ownerPid, round + 1);
+  }, 180_000);
 }

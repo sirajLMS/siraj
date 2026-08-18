@@ -9,7 +9,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   type SxProps,
   TextField,
@@ -18,6 +17,7 @@ import {
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -173,20 +173,27 @@ interface ConfirmationDialogProps {
   };
 }
 
+const warningConfirmSx = (theme: Theme) =>
+  ({
+    py: 1.5,
+    backgroundColor: theme.palette.warning.main,
+    color: theme.palette.onWarning,
+    "&:hover": { backgroundColor: theme.palette.warning.dark },
+  }) as const;
+
 function ConfirmationDialog({ open, isProcessing, onClose, onSubmit, submitColor, labels }: ConfirmationDialogProps) {
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{labels.title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{labels.confirmation}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{labels.cancel}</Button>
-        <Button onClick={onSubmit} variant="contained" color={submitColor} disabled={isProcessing}>
-          {labels.submit}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      onClose={onClose}
+      onConfirm={onSubmit}
+      isLoading={isProcessing}
+      title={labels.title}
+      body={labels.confirmation}
+      cancelLabel={labels.cancel}
+      confirmLabel={labels.submit}
+      confirmSx={submitColor === "warning" ? warningConfirmSx : undefined}
+    />
   );
 }
 

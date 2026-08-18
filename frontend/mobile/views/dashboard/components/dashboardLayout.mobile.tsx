@@ -1,6 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { type ReactNode, useEffect, useRef } from "react";
 import { useFxLiveRefresh } from "@/frontend/common/hooks/useFxLiveRefresh";
 import {
@@ -26,6 +27,15 @@ import { usePathname } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { DashboardNavigationLabels } from "@/shared/locale/types/dashboard/core/nav";
 
+const StyledMain = styled("main")(({ theme }) => ({
+  flexGrow: 1,
+  minWidth: 0,
+  minHeight: 0,
+  overflowY: "auto",
+  overscrollBehavior: "contain",
+  backgroundColor: theme.palette.background.default,
+}));
+
 function MobileMainScrollArea({
   children,
   hideBottomNav,
@@ -41,16 +51,9 @@ function MobileMainScrollArea({
   }, []);
 
   return (
-    <Box
-      component="main"
+    <StyledMain
       ref={mainRef}
       sx={theme => ({
-        flexGrow: 1,
-        minWidth: 0,
-        minHeight: 0,
-        overflowY: "auto",
-        overscrollBehavior: "contain",
-        backgroundColor: theme.palette.background.default,
         pb: hideBottomNav
           ? theme.spacing(2)
           : `calc(${theme.layout.bottomNavHeight} + env(safe-area-inset-bottom, 0px) + ${theme.spacing(2)})`,
@@ -65,7 +68,7 @@ function MobileMainScrollArea({
         <FxStaleBanner />
         {children}
       </Box>
-    </Box>
+    </StyledMain>
   );
 }
 
@@ -129,6 +132,7 @@ export function DashboardLayoutMobile({
           userName={userName}
           avatarUrl={avatarUrl}
           logoutLabel={navLabels.nav.logout}
+          toggleGroupAriaLabel={navLabels.toggleGroupAriaLabel}
         />
       )}
 

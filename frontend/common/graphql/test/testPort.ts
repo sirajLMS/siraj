@@ -1,92 +1,57 @@
-import { unlinkSync } from "node:fs";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { createServer, type Server } from "node:net";
-import { join } from "node:path";
+import { spawnSync } from "bun";
 
-const PREFERRED_PORT = 3001;
-const PORT_RANGE_START = 3020;
-const PORT_RANGE_END = 3199;
-const LOCK_DIR = join(process.cwd(), ".graphql-test-ports");
+const FIXED_TEST_PORT = 3066;
 
 /** Ports used by GraphQL/UI test servers — never kill dev (3000) or prod start (4000). */
-export const TEST_SERVER_PREFERRED_PORT = PREFERRED_PORT;
-export const TEST_SERVER_PORT_RANGE = { start: PORT_RANGE_START, end: PORT_RANGE_END } as const;
+export const TEST_SERVER_PREFERRED_PORT = FIXED_TEST_PORT;
+export const TEST_SERVER_PORT = FIXED_TEST_PORT;
 export const PROTECTED_APP_PORTS = [3000, 4000] as const;
 
-export function getTestServerPortCandidates(): number[] {
-  const ports: number[] = [PREFERRED_PORT];
-  for (let port = PORT_RANGE_START; port <= PORT_RANGE_END; port++) {
-    ports.push(port);
+/**
+ * Terminate all listeners on a given port, guarding against killing protected app ports (3000, 4000).
+ */
+export function killListenersOnPort(port: number): number {
+  if ((PROTECTED_APP_PORTS as readonly number[]).includes(port)) {
+    return 0;
   }
-  return ports;
+
+  const lsof = spawnSync(["lsof", "-ti", `tcp:${port}`, "-sTCP:LISTEN"], {
+    stdout: "pipe",
+    stderr: "ignore",
+  });
+  const pids = lsof.stdout?.toString().trim().split("\n").filter(Boolean) ?? [];
+  let killed = 0;
+
+  for (const pidText of pids) {
+    const pid = Number(pidText);
+    if (!Number.isInteger(pid) || pid <= 0 || pid === process.pid) {
+      continue;
+    }
+    try {
+      process.kill(pid, "SIGTERM");
+      killed++;
+    } catch {
+      // already gone
+    }
+  }
+
+  return killed;
+}
+
+/** The standard dev server port. When a dev server is already running here,
+ * E2E tests in dev mode will reuse it instead of spawning a separate test server. */
+export const DEV_SERVER_PORT = 3000;
+
+export function getTestServerPortCandidates(): number[] {
+  return [FIXED_TEST_PORT];
 }
 
 let allocatedPort: number | undefined;
 let portReservationServer: Server | undefined;
-let heldPortLock: number | undefined;
 
 export function clearTestPort(): void {
   allocatedPort = undefined;
-}
-
-function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function readLockPid(lockFile: string): Promise<number | undefined> {
-  try {
-    const raw = (await readFile(lockFile, "utf8")).trim();
-    const pid = Number(raw);
-    return Number.isInteger(pid) ? pid : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-async function releasePortLock(port: number): Promise<void> {
-  if (heldPortLock !== port) return;
-  try {
-    await unlink(join(LOCK_DIR, `${port}.lock`));
-  } catch {
-    // ignore
-  }
-  heldPortLock = undefined;
-}
-
-async function tryAcquirePortLock(port: number): Promise<boolean> {
-  await mkdir(LOCK_DIR, { recursive: true });
-  const lockFile = join(LOCK_DIR, `${port}.lock`);
-
-  const existingPid = await readLockPid(lockFile);
-  if (existingPid !== undefined && isProcessAlive(existingPid) && existingPid !== process.pid) {
-    return false;
-  }
-
-  if (existingPid !== undefined && !isProcessAlive(existingPid)) {
-    try {
-      await unlink(lockFile);
-    } catch {
-      // ignore
-    }
-  }
-
-  try {
-    await writeFile(lockFile, String(process.pid), { flag: "wx" });
-    heldPortLock = port;
-    return true;
-  } catch {
-    const currentPid = await readLockPid(lockFile);
-    if (currentPid === process.pid) {
-      heldPortLock = port;
-      return true;
-    }
-    return false;
-  }
 }
 
 function releasePortReservation(): void {
@@ -112,35 +77,22 @@ function reservePort(port: number): Promise<boolean> {
   });
 }
 
-async function reserveLockedPort(port: number): Promise<boolean> {
-  if (!(await tryAcquirePortLock(port))) {
-    return false;
-  }
-  if (await reservePort(port)) {
-    return true;
-  }
-  await releasePortLock(port);
-  return false;
-}
-
-async function reserveFirstAvailablePort(candidates: number[]): Promise<number | undefined> {
-  async function tryNext(index: number): Promise<number | undefined> {
-    if (index >= candidates.length) return undefined;
-    if (await reserveLockedPort(candidates[index])) return candidates[index];
-    return tryNext(index + 1);
-  }
-  return tryNext(0);
-}
-
 export function setTestPort(port: number): void {
   allocatedPort = port;
 }
 
 export function getTestPort(): number {
-  if (allocatedPort === undefined) {
-    throw new Error("GraphQL test server port is not set. Call setupTestServerLifecycle() before using testClient.");
+  if (allocatedPort !== undefined) {
+    return allocatedPort;
   }
-  return allocatedPort;
+  const envPort = process.env.GRAPHQL_TEST_PORT;
+  if (envPort) {
+    const parsed = Number(envPort);
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+  return FIXED_TEST_PORT;
 }
 
 export function getTestBaseUrl(): string {
@@ -160,11 +112,11 @@ function isUiTestRun(): boolean {
   return process.argv.some(arg => arg.replaceAll("\\", "/").includes("test/ui"));
 }
 
-export function getTestDistDir(port: number): string {
+export function getTestDistDir(): string {
   if (getTestServerMode() === "production") {
     return getProductionBuildDistDir();
   }
-  return `.next-test-${port}`;
+  return ".next-dev";
 }
 
 export function getProductionBuildDistDir(): string {
@@ -183,52 +135,17 @@ export function getTestServerLogPath(port: number): string {
   return `logs/next-${mode}-server-${port}.log`;
 }
 
-function getPidSkewedCandidates(excluded: Set<number>): number[] {
-  const rangeSize = PORT_RANGE_END - PORT_RANGE_START + 1;
-  const start = PORT_RANGE_START + (process.pid % rangeSize);
-  const ordered: number[] = [];
-
-  for (let offset = 0; offset < rangeSize; offset++) {
-    const port = PORT_RANGE_START + ((start - PORT_RANGE_START + offset) % rangeSize);
-    if (!excluded.has(port)) {
-      ordered.push(port);
-    }
-  }
-
-  return ordered;
-}
-
-export async function allocateTestPort(excludePorts: number[] = []): Promise<number> {
-  const excluded = new Set(excludePorts);
-
+export async function allocateTestPort(): Promise<number> {
   const envPort = process.env.GRAPHQL_TEST_PORT;
-  if (envPort) {
-    const port = Number(envPort);
-    if (!Number.isInteger(port) || port < 1 || port > 65535) {
-      throw new Error(`GRAPHQL_TEST_PORT must be a valid port number, got: ${envPort}`);
-    }
-    if (excluded.has(port)) {
-      throw new Error(`GRAPHQL_TEST_PORT=${port} was excluded after a failed start attempt.`);
-    }
-    if (!(await reserveLockedPort(port))) {
-      throw new Error(`GRAPHQL_TEST_PORT=${port} is not bindable. Choose a free port or stop the conflicting process.`);
-    }
-    return port;
+  const targetPort = envPort ? Number(envPort) : FIXED_TEST_PORT;
+
+  if (!Number.isInteger(targetPort) || targetPort < 1 || targetPort > 65535) {
+    throw new Error(`Invalid test port number: ${envPort}`);
   }
 
-  const preferredCandidates = [PREFERRED_PORT].filter(port => !excluded.has(port));
-  const preferred = await reserveFirstAvailablePort(preferredCandidates);
-  if (preferred !== undefined) {
-    return preferred;
-  }
-
-  const pidSkewed = getPidSkewedCandidates(excluded);
-  const fallback = await reserveFirstAvailablePort(pidSkewed);
-  if (fallback !== undefined) {
-    return fallback;
-  }
-
-  throw new Error(`No bindable port found in range ${PREFERRED_PORT} or ${PORT_RANGE_START}-${PORT_RANGE_END}.`);
+  // Check if we can bind or if it's already reserved
+  await reservePort(targetPort);
+  return targetPort;
 }
 
 export async function releaseTcpPortReservation(): Promise<void> {
@@ -237,17 +154,24 @@ export async function releaseTcpPortReservation(): Promise<void> {
 
 export async function releaseAllocatedTestPort(): Promise<void> {
   releasePortReservation();
-  if (heldPortLock !== undefined) {
-    await releasePortLock(heldPortLock);
-  }
 }
 
-process.on("exit", () => {
-  if (heldPortLock !== undefined) {
-    try {
-      unlinkSync(join(LOCK_DIR, `${heldPortLock}.lock`));
-    } catch {
-      // ignore
-    }
+/**
+ * Detect whether a dev server is already responding on the given port.
+ * Used to decide if E2E tests can reuse the existing dev server instead of
+ * spawning a separate test server (which Next.js 16 refuses when the dist
+ * directory is shared).
+ *
+ * Any HTTP response — even a 500 from a compilation error — means the server
+ * is running and we should reuse it rather than spawning a conflicting one.
+ */
+export async function isServerRunningOnPort(port: number): Promise<boolean> {
+  try {
+    const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
+    const res = await fetchFn(`http://localhost:${port}/`, { method: "GET", redirect: "manual" });
+    // Any HTTP response (including errors) means the server is running
+    return res.status > 0;
+  } catch {
+    return false;
   }
-});
+}

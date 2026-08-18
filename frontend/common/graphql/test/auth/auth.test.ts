@@ -2,6 +2,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { CombinedGraphQLErrors } from "@apollo/client";
 import {
   demoLoginMutationDocument,
+  ensureDemoUsersMutationDocument,
   logoutMutationDocument,
   meQueryDocument,
   refreshTokenMutationDocument,
@@ -182,6 +183,22 @@ describe("GraphQL Auth Integration Tests", () => {
       const gqlError = result.error.errors?.[0];
       expect(gqlError?.extensions?.code).toBe("UNAUTHENTICATED");
     }
+  });
+
+  test("ensureDemoUsers mutation requires authentication", async () => {
+    clearCookies();
+
+    const result = await testClient.mutate({
+      mutation: ensureDemoUsersMutationDocument,
+      context: {
+        headers: {
+          // No Authorization header, no cookies
+        },
+      },
+    });
+
+    expect(result.data?.ensureDemoUsers).toBeFalsy();
+    expect(result.error).toBeDefined();
   });
 
   afterAll(() => {

@@ -2639,7 +2639,7 @@ export type InvoicePaymentsQuery_invoicePayments_Payment_displayAmount_DisplayAm
 
 export type InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_details_PaymentMethodDetails = { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null };
 
-export type InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_catalog_PaymentMethodCatalogSnapshot = { catalogId: string | null, catalogSlug: string | null, catalogName: Partial<Record<'ar' | 'en', string>> | null };
+export type InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_catalog_PaymentMethodCatalogSnapshot = { id: string | null, catalogId: string | null, catalogSlug: string | null, catalogName: Partial<Record<'ar' | 'en', string>> | null };
 
 export type InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot = { userPaymentMethodId: string | null, type: Types.PaymentMethodType | null, direction: Types.PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_details_PaymentMethodDetails | null, catalog: InvoicePaymentsQuery_invoicePayments_Payment_paymentMethodSnapshot_PaymentMethodTransactionSnapshot_catalog_PaymentMethodCatalogSnapshot | null };
 
@@ -2694,7 +2694,7 @@ export type CreateTeacherPaymentMutationVariables = Exact<{
 
 export type CreateTeacherPaymentMutation = CreateTeacherPaymentMutation_Mutation;
 
-export type StudentCreditBalanceQuery_studentCreditBalance_CreditBalance = { studentId: string | null, classesRemaining: number | null, classesTotal: number | null };
+export type StudentCreditBalanceQuery_studentCreditBalance_CreditBalance = { id: string | null, studentId: string | null, classesRemaining: number | null, classesTotal: number | null };
 
 export type StudentCreditBalanceQuery_Query = { studentCreditBalance: StudentCreditBalanceQuery_studentCreditBalance_CreditBalance | null };
 
@@ -3856,7 +3856,7 @@ export type MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingPro
 
 export type MeetingProviderFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
-export type UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails = { meetingUrl: string | null, username: string | null, tenantId: string | null };
+export type UserMeetingConfigFieldsFragment_UserMeetingConfig_details_MeetingConfigDetails = { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null };
 
 export type UserMeetingConfigFieldsFragment_UserMeetingConfig_provider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
@@ -3992,7 +3992,7 @@ export type SetDefaultMeetingConfigMutationVariables = Exact<{
 
 export type SetDefaultMeetingConfigMutation = SetDefaultMeetingConfigMutation_Mutation;
 
-export type ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails = { meetingUrl: string | null, username: string | null, tenantId: string | null };
+export type ClassMeetingConfigFieldsFragment_ClassMeetingConfig_details_MeetingConfigDetails = { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null };
 
 export type ClassMeetingConfigFieldsFragment_ClassMeetingConfig_provider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_MeetingProvider_fieldSchema_MeetingProviderFieldSchema | null };
 
@@ -4012,7 +4012,7 @@ export type ClassMeetingConfigsQueryVariables = Exact<{
 
 export type ClassMeetingConfigsQuery = ClassMeetingConfigsQuery_Query;
 
-export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig_details_MeetingConfigDetails = { meetingUrl: string | null, username: string | null, tenantId: string | null };
+export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig_details_MeetingConfigDetails = { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null };
 
 export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig_provider_MeetingProvider_fieldSchema_MeetingProviderFieldSchema = { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null };
 
@@ -4687,7 +4687,7 @@ export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionG
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_staffPermissionOverrides_StaffPermissionOverride = { id: string | null, permissionId: string | null, permissionKey: string | null, resource: string | null, action: string | null, state: Types.OverrideState | null };
 
-export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_meetingConfigs_UserMeetingConfig_details_MeetingConfigDetails = { meetingUrl: string | null, username: string | null, tenantId: string | null };
+export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_meetingConfigs_UserMeetingConfig_details_MeetingConfigDetails = { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null };
 
 export type ProfileByUserIdQuery_profileByUserId_UnifiedProfile_meetingConfigs_UserMeetingConfig_provider_MeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null };
 
@@ -6181,7 +6181,7 @@ export type TeacherPendingDuesSummaryQueryVariables = Exact<{ [key: string]: nev
 
 export type TeacherPendingDuesSummaryQuery = TeacherPendingDuesSummaryQuery_Query;
 
-export type TeacherMonthlyReportQuery_teacherMonthlyReport_TeacherMonthlyReport = { teacherId: string | null, teacherName: string | null, year: number | null, month: number | null, lessonsTaught: number | null, approvedCount: number | null, cancelledCount: number | null, totalAccruedHours: number | null, totalDueAmount: number | null, totalPaidAmount: number | null, currency: Types.CurrencyCode | null };
+export type TeacherMonthlyReportQuery_teacherMonthlyReport_TeacherMonthlyReport = { id: string | null, teacherId: string | null, teacherName: string | null, year: number | null, month: number | null, lessonsTaught: number | null, approvedCount: number | null, cancelledCount: number | null, totalAccruedHours: number | null, totalDueAmount: number | null, totalPaidAmount: number | null, currency: Types.CurrencyCode | null };
 
 export type TeacherMonthlyReportQuery_Query = { teacherMonthlyReport: TeacherMonthlyReportQuery_teacherMonthlyReport_TeacherMonthlyReport };
 

@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button as MuiButton,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { classHref, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   isTerminalClassInstance,
@@ -25,6 +15,7 @@ import type {
   ScheduledClass,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
+import { MobileBaseDeleteDialog } from "@/frontend/mobile/components/ui/dialog";
 import { MobilePersonProfileLink } from "@/frontend/mobile/components/ui/display";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
 import { Link } from "@/shared/i18n";
@@ -48,41 +39,6 @@ interface MobileSlotItemProps {
 }
 
 // --- Sub-components for MobileSlotItem ---
-
-interface DeleteConfirmDialogProps {
-  readonly open: boolean;
-  readonly onClose: () => void;
-  readonly onConfirm: () => void;
-  readonly title: string;
-  readonly message: string;
-  readonly cancelLabel: string;
-  readonly confirmLabel: string;
-}
-
-function DeleteConfirmDialog({
-  open,
-  onClose,
-  onConfirm,
-  title,
-  message,
-  cancelLabel,
-  confirmLabel,
-}: Readonly<DeleteConfirmDialogProps>) {
-  return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{message}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <MuiButton onClick={onClose}>{cancelLabel}</MuiButton>
-        <MuiButton onClick={onConfirm} color="error" variant="contained">
-          {confirmLabel}
-        </MuiButton>
-      </DialogActions>
-    </Dialog>
-  );
-}
 
 interface SlotItemActionsProps {
   readonly canJoin: boolean;
@@ -141,9 +97,16 @@ interface SlotItemContentProps {
   readonly classInstanceId: string;
   readonly subjectLabel: string;
   readonly statusLabel: string;
+  readonly labels: TeacherWeeklyScheduleLabels;
 }
 
-function SlotItemContent({ classItem, classInstanceId, subjectLabel, statusLabel }: Readonly<SlotItemContentProps>) {
+function SlotItemContent({
+  classItem,
+  classInstanceId,
+  subjectLabel,
+  statusLabel,
+  labels,
+}: Readonly<SlotItemContentProps>) {
   return (
     <Box sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 0.25 }}>
       {classInstanceId ? (
@@ -176,7 +139,7 @@ function SlotItemContent({ classItem, classInstanceId, subjectLabel, statusLabel
       />
 
       <Typography variant="caption" sx={{ color: "inherit", opacity: 0.85, lineHeight: 1.2 }}>
-        {classItem.duration}m · {statusLabel}
+        {labels.grid.minutesShort(classItem.duration ?? 0)} · {statusLabel}
       </Typography>
     </Box>
   );
@@ -238,6 +201,7 @@ function MobileSlotItem({
           classInstanceId={classInstanceId}
           subjectLabel={subjectLabel}
           statusLabel={statusLabel}
+          labels={labels}
         />
 
         <SlotItemActions
@@ -250,12 +214,13 @@ function MobileSlotItem({
         />
       </Box>
 
-      <DeleteConfirmDialog
+      <MobileBaseDeleteDialog
         open={open}
         onClose={closeDialog}
         onConfirm={handleConfirm}
+        isLoading={false}
         title={t.dialogs.deleteClassTitle}
-        message={t.dialogs.deleteClassMessage}
+        body={t.dialogs.deleteClassMessage}
         cancelLabel={t.dialogs.cancel}
         confirmLabel={t.dialogs.confirmYes}
       />

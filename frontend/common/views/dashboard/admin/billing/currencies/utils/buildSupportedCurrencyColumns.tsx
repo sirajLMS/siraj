@@ -3,7 +3,7 @@
 // supportedCurrencies.desktop.tsx (specs §3 N11). Mirrors the
 // `exchangeRatesColumns.tsx` precedent.
 import { EditOutlined, ToggleOffOutlined } from "@mui/icons-material";
-import { IconButton, Stack } from "@mui/material";
+import { Box, IconButton, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { getCountryDisplayName } from "@/frontend/common/lib/locale";
@@ -31,9 +31,9 @@ export function buildSupportedCurrencyColumns(
       width: 60,
       sortable: false,
       renderCell: ({ row }) => (
-        <span aria-hidden style={{ fontSize: 24 }}>
+        <Box component="span" aria-hidden sx={theme => ({ fontSize: theme.typography.headlineMd.fontSize })}>
           {row.flagEmoji}
-        </span>
+        </Box>
       ),
     },
     {

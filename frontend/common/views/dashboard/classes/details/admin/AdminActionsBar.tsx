@@ -6,7 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import PauseIcon from "@mui/icons-material/Pause";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
-import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { styled, type Theme } from "@mui/material/styles";
 import type { ReactElement } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
@@ -102,7 +102,7 @@ function ActionIconButtonWithTooltip({
 
   return (
     <Tooltip title={tooltipTitle}>
-      <Box component="span" data-testid={`tooltip-target-${ariaLabel}`} sx={{ display: "inline-flex" }}>
+      <Box data-testid={`tooltip-target-${ariaLabel}`} sx={{ display: "inline-flex" }}>
         <ButtonComponent aria-label={ariaLabel} disabled={disabled} onClick={onClick} sx={sx}>
           {icon}
         </ButtonComponent>
@@ -208,44 +208,35 @@ function SecondaryAdminActions({
     <>
       <RequirePermission permissions={[AppPermission.SessionReschedule]}>
         <Tooltip title={labels.reschedule}>
-          <Box
-            component="button"
+          <Button
             aria-label={labels.reschedule}
             onClick={onReschedule}
-            sx={theme => textActionButtonSx(theme)}
+            sx={theme => ({ ...textActionButtonSx(theme), textTransform: "none" })}
           >
             <CalendarMonthOutlinedIcon sx={{ fontSize: 16 }} />
-            <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-              {labels.reschedule}
-            </Box>
-          </Box>
+            <Box sx={{ display: { xs: "none", sm: "inline" } }}>{labels.reschedule}</Box>
+          </Button>
         </Tooltip>
       </RequirePermission>
       <Tooltip title={labels.generateLog}>
-        <Box
-          component="button"
+        <Button
           aria-label={labels.generateLog}
           onClick={onGenerateLog}
-          sx={theme => textActionButtonSx(theme)}
+          sx={theme => ({ ...textActionButtonSx(theme), textTransform: "none" })}
         >
           <ArticleIcon sx={{ fontSize: 16 }} />
-          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-            {labels.generateLog}
-          </Box>
-        </Box>
+          <Box sx={{ display: { xs: "none", sm: "inline" } }}>{labels.generateLog}</Box>
+        </Button>
       </Tooltip>
       <Tooltip title={labels.overrideRateButton}>
-        <Box
-          component="button"
+        <Button
           aria-label={labels.overrideRateButton}
           onClick={onOverrideRate}
-          sx={theme => textActionButtonSx(theme)}
+          sx={theme => ({ ...textActionButtonSx(theme), textTransform: "none" })}
         >
           <EditIcon sx={{ fontSize: 16 }} />
-          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-            {labels.overrideRateButton}
-          </Box>
-        </Box>
+          <Box sx={{ display: { xs: "none", sm: "inline" } }}>{labels.overrideRateButton}</Box>
+        </Button>
       </Tooltip>
       <StyledDeleteIconButton
         aria-label={labels.deleteInstance}

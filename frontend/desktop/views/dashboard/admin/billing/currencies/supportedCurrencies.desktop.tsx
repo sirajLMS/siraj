@@ -19,6 +19,7 @@ import {
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
+  DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import { useAppLocale } from "@/shared/locale";
 
@@ -78,15 +79,17 @@ export function SupportedCurrenciesDesktopView({
           ) : null
         }
       />
-      <DesktopAppDataGrid
-        rows={rows}
-        columns={columnsWithActions}
-        loading={loading}
-        emptyMessage={shell.empty}
-        getRowId={row => row.id}
-        autoHeight
-        paginationOptions={{ mode: "client" }}
-      />
+      <DesktopSectionPanel contentPadding={false}>
+        <DesktopAppDataGrid
+          rows={rows}
+          columns={columnsWithActions}
+          loading={loading}
+          emptyMessage={shell.empty}
+          getRowId={row => row.id}
+          autoHeight
+          paginationOptions={{ mode: "client" }}
+        />
+      </DesktopSectionPanel>
       <Alert severity="info" sx={{ mt: 2 }}>
         {shell.footerNote}
       </Alert>

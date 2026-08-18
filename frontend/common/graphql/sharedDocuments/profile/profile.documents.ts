@@ -176,6 +176,7 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
         isDefault
         hasSecret
         details {
+          id
           meetingUrl
           username
           tenantId

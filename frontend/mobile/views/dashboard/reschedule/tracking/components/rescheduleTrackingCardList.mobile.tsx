@@ -114,7 +114,7 @@ function TrackingCardFooter({
           gap: 0.5,
           px: 1.5,
           py: 0.5,
-          borderRadius: 8,
+          borderRadius: theme.shape.borderRadius,
           backgroundColor: isLeave ? theme.palette.error.main : theme.palette.primary.main,
         })}
       >

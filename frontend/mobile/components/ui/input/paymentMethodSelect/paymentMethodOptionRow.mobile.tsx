@@ -18,14 +18,18 @@ export function PaymentMethodOptionRowMobile({
       ) : (
         <Avatar sx={{ width: 32, height: 32 }}>{resolvePaymentMethodTypeIcon(type)}</Avatar>
       )}
-      <Box component="span" sx={{ flex: 1, fontSize: "1rem" }}>
+      <Box component="span" sx={theme => ({ flex: 1, fontSize: theme.typography.bodyLg.fontSize })}>
         {option.displayName}
       </Box>
       {showSlug ? (
         <Box
           component="span"
           dir="ltr"
-          sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, fontSize: "0.9rem" })}
+          sx={theme => ({
+            color: theme.palette.text.secondary,
+            flexShrink: 0,
+            fontSize: theme.typography.bodyMd.fontSize,
+          })}
         >
           {option.slug}
         </Box>

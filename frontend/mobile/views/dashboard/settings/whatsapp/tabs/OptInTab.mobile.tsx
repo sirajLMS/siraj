@@ -1,7 +1,7 @@
 "use client";
 
 import { DownloadOutlined } from "@mui/icons-material";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, OutlinedInput, Stack, Typography } from "@mui/material";
 import { useCallback } from "react";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import {
@@ -177,8 +177,7 @@ function MobileAdminSection({ labels, adminUsers }: Readonly<OptInTabSharedProps
   return (
     <Stack spacing={2}>
       {/* Search input */}
-      <Box
-        component="input"
+      <OutlinedInput
         type="search"
         value={search}
         onChange={e => setSearch(e.target.value)}
@@ -191,7 +190,7 @@ function MobileAdminSection({ labels, adminUsers }: Readonly<OptInTabSharedProps
           borderRadius: 1,
           border: theme => `1px solid ${theme.palette.divider}`,
           outline: "none",
-          fontSize: "0.875rem",
+          fontSize: theme => theme.typography.bodyMd.fontSize,
           fontFamily: "inherit",
         }}
       />

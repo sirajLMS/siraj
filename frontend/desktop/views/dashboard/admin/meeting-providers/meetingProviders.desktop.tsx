@@ -10,6 +10,7 @@ import {
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
+  DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import { DesktopBaseDeleteDialog } from "@/frontend/desktop/components/ui/dialog/DesktopBaseDeleteDialog";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
@@ -54,7 +55,7 @@ export function MeetingProvidersDesktopView({
         <MeetingProvidersDesktopEmptyState title={t.emptyCatalogTitle} body={t.emptyCatalogBody} />
       ) : null}
 
-      <Box sx={{ height: 600 }}>
+      <DesktopSectionPanel contentPadding={false}>
         <DesktopAppDataGrid
           rows={rows}
           columns={columns}
@@ -62,7 +63,7 @@ export function MeetingProvidersDesktopView({
           getRowId={row => row.id ?? ""}
           paginationOptions={{ mode: "client" }}
         />
-      </Box>
+      </DesktopSectionPanel>
 
       <DesktopBaseDeleteDialog
         open={Boolean(deleteProvider)}

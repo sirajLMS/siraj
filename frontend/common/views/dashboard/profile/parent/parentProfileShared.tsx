@@ -170,7 +170,7 @@ export function ParentProfileShared({
     }
     return (
       <SectionPanel title={pt.sections.students}>
-        <Typography variant="bodyMd" color="text.secondary">
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {pt.students.empty}
         </Typography>
       </SectionPanel>

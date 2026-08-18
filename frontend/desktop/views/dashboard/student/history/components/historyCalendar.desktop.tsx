@@ -1,7 +1,7 @@
 "use client";
 
 import { ScheduleOutlined } from "@mui/icons-material";
-import { Box, type SxProps, type Theme, Typography } from "@mui/material";
+import { Box, Button, type SxProps, type Theme, Typography } from "@mui/material";
 import { formatTime } from "@/frontend/common/components/intl/dateFormat";
 import { classHref } from "@/frontend/common/utils/profileHref";
 import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/shared/calendarGridShared.utils";
@@ -83,9 +83,8 @@ function renderDayCell(
   const badgeStatus = session ? mapStudentHistoryStatusToBadge(session.status, session.outcome) : "pending";
 
   return (
-    <Box
+    <Button
       key={`day-${day}`}
-      component="button"
       type="button"
       onClick={() => onSelectDay(isSelected ? null : day)}
       onKeyDown={e => {
@@ -102,8 +101,10 @@ function renderDayCell(
         borderBottom: `1px solid ${theme.palette.outlineVariant}`,
         backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLowest,
         transition: theme.transitions.create("background-color", { duration: 150, easing: "ease" }),
+        textTransform: "none",
         "&:hover": {
           boxShadow: `inset 0 0 0 2px ${theme.palette.primary.main}`,
+          backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLowest,
         },
       })}
     >
@@ -144,7 +145,7 @@ function renderDayCell(
           </Box>
         </Box>
       ) : null}
-    </Box>
+    </Button>
   );
 }
 

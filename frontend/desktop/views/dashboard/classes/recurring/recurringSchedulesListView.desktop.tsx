@@ -6,6 +6,7 @@ import { AppDataGrid } from "@/frontend/common/components/ui";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { RecurringViewShellShared } from "@/frontend/common/views/dashboard/classes/recurring/__shared__/recurringViewShellShared";
 import type { RecurringSchedulesListViewModel } from "@/frontend/common/views/dashboard/classes/recurring/types/recurringSchedulesListViewModel.types";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 
 export function RecurringSchedulesListDesktopView({
   labelsBySection,
@@ -47,34 +48,36 @@ export function RecurringSchedulesListDesktopView({
       {rows.length === 0 ? (
         <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{shell.emptyMessage}</Typography>
       ) : (
-        <AppDataGrid
-          rows={rows}
-          columns={[
-            { field: "studentName", headerName: columns.student, flex: 1 },
-            { field: "teacherName", headerName: columns.teacher, flex: 1 },
-            { field: "defaultStartTime", headerName: columns.schedule, flex: 1 },
-            {
-              field: "durationMinutes",
-              headerName: columns.duration,
-              flex: 1,
-              valueGetter: (_value, row) => `${row.durationMinutes ?? 0} min`,
-            },
-            {
-              field: "hourlyRate",
-              headerName: columns.rate,
-              flex: 1,
-              valueGetter: (_value, row) => row.hourlyRate ?? "-",
-            },
-          ]}
-          getRowId={row => row.id ?? ""}
-          onRowClick={row => router.push(`/recurring-schedules/${row.id}`)}
-          paginationOptions={buildServerPaginationOptions({
-            page: currentPage,
-            pageSize,
-            totalCount,
-            onPageChange,
-          })}
-        />
+        <DesktopSectionPanel contentPadding={false}>
+          <AppDataGrid
+            rows={rows}
+            columns={[
+              { field: "studentName", headerName: columns.student, flex: 1 },
+              { field: "teacherName", headerName: columns.teacher, flex: 1 },
+              { field: "defaultStartTime", headerName: columns.schedule, flex: 1 },
+              {
+                field: "durationMinutes",
+                headerName: columns.duration,
+                flex: 1,
+                valueGetter: (_value, row) => columns.durationMinutesShort(row.durationMinutes ?? 0),
+              },
+              {
+                field: "hourlyRate",
+                headerName: columns.rate,
+                flex: 1,
+                valueGetter: (_value, row) => row.hourlyRate ?? "-",
+              },
+            ]}
+            getRowId={row => row.id ?? ""}
+            onRowClick={row => router.push(`/recurring-schedules/${row.id}`)}
+            paginationOptions={buildServerPaginationOptions({
+              page: currentPage,
+              pageSize,
+              totalCount,
+              onPageChange,
+            })}
+          />
+        </DesktopSectionPanel>
       )}
     </RecurringViewShellShared>
   );

@@ -9,14 +9,14 @@ import {
 
 export type TagInputProps = TagInputSharedProps;
 
-const MOBILE_CHIP_SX_EXT: SxProps<Theme> = {
+const MOBILE_CHIP_SX_EXT: SxProps<Theme> = (theme: Theme) => ({
   minHeight: 36,
-  fontSize: 14,
-};
+  fontSize: theme.typography.bodyMd.fontSize,
+});
 
-const MOBILE_LABEL_SX_EXT: SxProps<Theme> = {
-  fontSize: "0.95rem",
-};
+const MOBILE_LABEL_SX_EXT: SxProps<Theme> = (theme: Theme) => ({
+  fontSize: theme.typography.bodyMd.fontSize,
+});
 
 const MOBILE_INPUT_SX_EXT: SxProps<Theme> = {
   margin: 0.5,
@@ -26,7 +26,7 @@ const MOBILE_INPUT_SX_EXT: SxProps<Theme> = {
 };
 
 const MOBILE_CHIP_EDIT_INPUT_SX_EXT: SxProps<Theme> = (theme: Theme) => ({
-  fontSize: 15,
+  fontSize: theme.typography.bodyMd.fontSize,
   padding: theme.spacing(0.5, 0.75),
   minWidth: "80px",
   minHeight: "32px",

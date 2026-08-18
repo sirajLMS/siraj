@@ -1,6 +1,6 @@
 "use client";
 
-import { Box } from "@mui/material";
+import { Button } from "@mui/material";
 import { BillingMonthSelectorShared } from "@/frontend/common/views/dashboard/billing/manual/components/billingMonthSelectorShared";
 import type {
   BillingMonthItemSlotProps,
@@ -9,9 +9,8 @@ import type {
 
 function MobileMonthItem({ monthId, isChecked, onToggle, label }: Readonly<BillingMonthItemSlotProps>) {
   return (
-    <Box
+    <Button
       key={monthId}
-      component="button"
       type="button"
       onClick={() => {
         onToggle();
@@ -28,10 +27,14 @@ function MobileMonthItem({ monthId, isChecked, onToggle, label }: Readonly<Billi
         textTransform: "uppercase",
         transition: theme.transitions.create(["background-color", "border-color"], { duration: 150, easing: "ease" }),
         borderColor: isChecked ? theme.palette.primaryContainer : theme.palette.outlineVariant,
+        "&:hover": {
+          backgroundColor: isChecked ? theme.palette.primaryContainer : theme.palette.background.paper,
+          borderColor: isChecked ? theme.palette.primaryContainer : theme.palette.outlineVariant,
+        },
       })}
     >
       {label}
-    </Box>
+    </Button>
   );
 }
 

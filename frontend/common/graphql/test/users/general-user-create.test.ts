@@ -47,7 +47,7 @@ function buildInputMissingField(field: keyof GeneralUserCreateInput): Record<str
   const input: Record<string, unknown> = {
     name: "Validation Test User",
     email: `genuser_validation_${Date.now()}@test.com`,
-    password: randomUUID(),
+    password: `TestPass-${randomUUID().slice(0, 8)}!`,
     groupSlug: STAFF_DEFAULT_GROUP,
     phone: null,
     status: null,
@@ -68,7 +68,7 @@ function buildMinimalInput(name: string, groupSlug = STAFF_DEFAULT_GROUP): Gener
   return buildGeneralUserInput({
     name,
     email: uniqueEmail("genuser"),
-    password: randomUUID(),
+    password: `TestPass-${randomUUID().slice(0, 8)}!`,
     groupSlug,
     phone: null,
     status: null,
@@ -133,7 +133,7 @@ describe("createGeneralUser GraphQL Mutation", () => {
       input: buildGeneralUserInput({
         name: "GraphQL Test User",
         email: uniqueEmail("genuser_full"),
-        password: randomUUID(),
+        password: `TestPass-${randomUUID().slice(0, 8)}!`,
         groupSlug: STAFF_DEFAULT_GROUP,
         phone: "+201000000000",
         status: AccountStatus.Activated,

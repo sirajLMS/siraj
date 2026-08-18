@@ -11,7 +11,7 @@ export type GenericTabNavMode = "link" | "button";
 
 export type DefaultGenericTabNavVariantProps<TabId extends string> = TabNavVariantProps<TabId> & {
   readonly variant?: "default";
-  readonly ariaLabel?: string;
+  readonly ariaLabel: string;
 };
 
 export type DateGenericTabNavVariantProps<TabId extends string> = {
@@ -20,7 +20,7 @@ export type DateGenericTabNavVariantProps<TabId extends string> = {
   readonly activeTab: TabId;
   readonly tabs: readonly DateTabNavItem<TabId>[];
   readonly onTabChange: (id: TabId) => void;
-  readonly ariaLabel?: string;
+  readonly ariaLabel: string;
 };
 
 export type GenericTabNavVariantProps<TabId extends string> =
