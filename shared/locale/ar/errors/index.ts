@@ -19,6 +19,7 @@ const student = {
     `انتقال حالة غير صالح: ${currentStatus} -> ${newStatus}.`,
   studentEmailRequired: "بريد الطالب الإلكتروني مطلوب.",
   studentPasswordRequired: "كلمة مرور الطالب مطلوبة.",
+  upsertFailed: "فشل عملية إدراج/تحديث الطالب.",
 } as const;
 
 const category = {
@@ -61,6 +62,11 @@ const scheduling = {
   missedClassTime: "لقد فات وقت الحصة.",
   absentTooEarly: ({ waitingMinutes }: { waitingMinutes: string }) =>
     `لا يمكن وضع علامة الغياب بعد. يرجى الانتظار ${waitingMinutes} دقيقة بعد وقت البدء المجدول.`,
+  vacationStartBeforeEnd: "يجب أن يكون تاريخ بداية الإجازة قبل تاريخ النهاية",
+  startTimeBeforeEndTime: "يجب أن يكون وقت البداية قبل وقت النهاية",
+  dateRangeExceedsMax: (maxDays: number) => `لا يمكن أن يتجاوز نطاق التاريخ ${maxDays} يومًا`,
+  vacationRequestNotPending: (id: string) => `طلب الإجازة ${id} ليس في حالة الانتظار`,
+  vacationRequestAlreadyCancelled: (id: string) => `طلب الإجازة ${id} تم إلغاؤه بالفعل`,
 } as const;
 
 const permissionGroup = {
@@ -75,6 +81,34 @@ const teacher = {
   quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
     `الحصة (${requested}) تتجاوز الإجمالي (${total}).`,
   vacationRequestNotFound: (id: string) => `طلب الإجازة غير موجود: ${id}`,
+  createFailed: "فشل إنشاء ملف المعلم.",
+  upsertFailed: "فشل عملية إدراج/تحديث المعلم.",
+  noteCreateFailed: "فشل إنشاء ملاحظة المعلم.",
+  staffProfileCreateFailed: "فشل إنشاء ملف الموظف.",
+  staffProfileUpdateFailed: "فشل تحديث ملف الموظف.",
+  availabilityUpdateFailed: "فشل تحديث نافذة التوفر.",
+  availabilityInsertFailed: "فشل إدراج نافذة التوفر.",
+  recurringUnavailabilityInsertFailed: "فشل إدراج عدم التوفر المتكرر.",
+  vacationInsertFailed: "فشل إدراج طلب الإجازة.",
+} as const;
+
+const teacherDue = {
+  hoursMustBePositive: "يجب أن تكون الساعات أكبر من 0.",
+  amountMustBeNonNegative: "المبلغ يجب أن يكون غير سالب.",
+  insertFailed: "فشل إدراج صف مستحقات المعلم.",
+} as const;
+
+const classSubject = {
+  createFailed: "فشل إنشاء مادة الفصل.",
+} as const;
+
+const leaveQuota = {
+  updateFailed: "فشل تحديث حصة الإجازة.",
+  insertFailed: "فشل إدراج حصة الإجازة.",
+} as const;
+
+const classInstance = {
+  idempotencyKeyRequired: "تتطلب عملية إدراج/تحديث مثيل الفصل مفتاح idempotency.",
 } as const;
 
 export const errorsAr: ErrorsLabels = {
@@ -125,6 +159,7 @@ export const errorsAr: ErrorsLabels = {
     permissionGroupNameTooLong: "اسم المجموعة طويل جداً (255 حرف كحد أقصى).",
     permissionGroupInvalidName: "اسم المجموعة غير صالح.",
     cannotModifySuperAdmin: "لا يمكن تعديل المستخدم المسؤول الأعلى.",
+    cannotModifySelf: "لا يمكن تعديل صلاحياتك الخاصة.",
     cannotModifySystemPermissionGroup: "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام",
     cannotDeleteSystemPermissionGroup: "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام",
   },
@@ -154,6 +189,9 @@ export const errorsAr: ErrorsLabels = {
     quotaReleaseConcurrentModification: "فشل تحرير الحصة: لم تعد الحصة نشطة بعد تعديل متزامن",
     quotaRefreshConcurrentWrite: "فشل تحديث الحصة بسبب تعديل متزامن",
     quotaResetConcurrentModification: "فشل إعادة تعيين فترة الحصة بسبب تعديل متزامن",
+    paymentMethodCreateFailed: "فشل إنشاء طريقة دفع المستخدم.",
+    paymentMethodNotFound: (id: string) => `طريقة الدفع غير موجودة (المعرف: ${id}).`,
+    currencyHedgeCreateFailed: "فشل إنشاء تغطية العملة.",
   },
   credit: {
     duplicatePurchase: "تمت معالجة عملية شراء الرصيد هذه بالفعل.",
@@ -164,11 +202,13 @@ export const errorsAr: ErrorsLabels = {
   file: {
     recordNotFound: ({ tableName, entityId }: { tableName: string; entityId: string }) =>
       `${tableName} غير موجود: ${entityId}`,
-    invalidFileType: "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و HEIC.",
+    invalidFileType:
+      "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و GIF و WebP و BMP و DOC و DOCX و XLS و XLSX و PPT و PPTX.",
     invalidFileId: "معرف الملف غير صالح.",
     invoicePaymentProofPending: "لدى هذه الفاتورة إثبات دفع قيد المراجعة بالفعل.",
     fileUsageRegistered: "تم تسجيل استخدام الملف بنجاح",
     fileUsageRegisterFailed: (error: string) => `فشل تسجيل استخدام الملف: ${error}`,
+    fileUsageRegisterFailedGeneric: "فشل تسجيل استخدام الملف.",
     fileCurrentlyInUse: "الملف قيد الاستخدام حاليًا",
     unableToCheckFileUsage: "تعذر التحقق من استخدام الملف",
     directoryNotFound: "الدليل غير موجود",
@@ -258,6 +298,8 @@ export const errorsAr: ErrorsLabels = {
     alreadyExists: "ملف ولي الأمر لهذا المستخدم موجود بالفعل.",
     invalidTimezone: "المنطقة الزمنية غير صالحة.",
     createFailed: "فشل إنشاء ملف ولي الأمر.",
+    suggestionSubmitFailed: "فشل إرسال الاقتراح.",
+    upsertFailed: "فشل عملية إدراج/تحديث ولي الأمر.",
   },
   staff: {
     alreadyExists: "ملف الموظف لهذا المستخدم موجود بالفعل.",
@@ -273,11 +315,41 @@ export const errorsAr: ErrorsLabels = {
     bookDeleteFailed: "فشل حذف الكتاب.",
     resourceDeleteFailed: "فشل حذف مورد التعلم.",
     permissionDenied: "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
+    seedCreateFailed: "فشل إنشاء مورد التعلم الأولي.",
+    createFailed: "فشل إنشاء مورد التعلم.",
+    handbookUploadFailed: "فشل رفع ملف الدليل. يرجى المحاولة مرة أخرى.",
   },
   notification: {
     deliveryNotFound: (id: string) => `تسليم الإشعار غير موجود: ${id}`,
   },
+  fx: {
+    syncAlreadyRunning: "جاري مزامنة أسعار الصرف. يرجى المحاولة لاحقاً.",
+    syncFailed: "فشلت مزامنة أسعار الصرف. يرجى المحاولة لاحقاً.",
+  },
+  complaint: {
+    responseCreateFailed: "فشل إنشاء رد على الشكوى.",
+    createFailed: "فشل إنشاء الشكوى.",
+  },
+  subjectResource: {
+    attachFailed: "فشل إرفاق المورد بالمادة.",
+    linkNotFound: "رابط المورد غير موجود.",
+    notFound: "مورد المادة غير موجود.",
+  },
+  meetingConfig: {
+    requiresInstanceOrSchedule: "يتطلب تكوين اجتماع الفصل معرف مثيل الفصل أو معرف الجدولة المتكررة.",
+  },
+  meeting: {
+    providerTokenUpdateFailed: "فشل تحديث رمز موفر الاجتماعات.",
+    providerTokenInsertFailed: "فشل إدراج رمز موفر الاجتماعات.",
+  },
+  session: {
+    userIdRequired: "معرف المستخدم (userId) مطلوب.",
+  },
+  classSubject,
+  leaveQuota,
+  classInstance,
   teacher,
+  teacherDue,
   student,
   category,
   user,
@@ -299,6 +371,8 @@ export const errorsAr: ErrorsLabels = {
       `حجز ${requested} يتجاوز الحصة المتبقية (${available})`,
     slotConflict: (startTime: string, endTime: string) => `الفترة الزمنية ${startTime}–${endTime} تتعارض مع حجز قائم`,
     onDemandNoCredits: (studentName: string) => `لا توجد أرصدة كافية للحجز الفوري لـ ${studentName}`,
+    cannotRefreshNonPeriodic: "لا يمكن تحديث حصة غير دورية",
+    noValidPeriodDays: "الحصة لا تحتوي على أيام صالحة للفترة المحددة",
   },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",

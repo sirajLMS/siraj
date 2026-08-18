@@ -12,6 +12,7 @@ export interface RecurringSchedulesListColumnLabels {
   readonly teacher: string;
   readonly schedule: string;
   readonly duration: string;
+  readonly durationMinutesShort: (minutes: number) => string;
   readonly rate: string;
   readonly actions: string;
 }

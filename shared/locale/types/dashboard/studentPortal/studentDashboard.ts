@@ -24,4 +24,7 @@ export interface StudentPortalDashboardLabels {
   readonly columnDuration: string;
   readonly columnStatus: string;
   readonly columnActions: string;
+  readonly minutesShort: (minutes: number) => string;
+  readonly hoursShort: (hours: number) => string;
+  readonly durationMinutesShort: (minutes: number) => string;
 }

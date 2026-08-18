@@ -14,6 +14,7 @@ export const recurringSchedulesList: RecurringSchedulesListLabels = {
     teacher: "Teacher",
     schedule: "Schedule",
     duration: "Duration",
+    durationMinutesShort: minutes => `${minutes} min`,
     rate: "Rate",
     actions: "Actions",
   },

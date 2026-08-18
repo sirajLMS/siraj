@@ -26,4 +26,7 @@ export const dashboardStudentPortalDashboardEn: StudentPortalDashboardLabels = {
   columnDuration: "Duration",
   columnStatus: "Status",
   columnActions: "Actions",
+  minutesShort: minutes => `${minutes}m`,
+  hoursShort: hours => `${hours}h`,
+  durationMinutesShort: minutes => `${minutes} min`,
 };

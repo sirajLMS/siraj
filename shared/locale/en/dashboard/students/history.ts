@@ -61,6 +61,9 @@ export const dashboardStudentHistoryEn: StudentHistoryLabels = {
     title: "Performance Streak",
     description: count => `Student's performance trend over the last ${count} classes.`,
   },
+  hoursShort: hours => `${hours}h`,
+  minutesShort: minutes => `${minutes}m`,
+  percentValue: value => `${value}%`,
   errors: {
     loadFailed: "Failed to load student history.",
   },

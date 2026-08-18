@@ -24,6 +24,7 @@ export const dashboardTeacherWeeklyScheduleEn: TeacherWeeklyScheduleLabels = {
     availableSlot: "Available Slot",
     lastUpdated: date => `Last Updated: ${date}`,
     unknownSubject: "Class",
+    minutesShort: minutes => `${minutes}m`,
     status: {
       ended: "Ended",
       absent: "Absent",

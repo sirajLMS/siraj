@@ -20,6 +20,10 @@ function resolveAdminPassword(): string {
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (adminPassword) return adminPassword;
 
+  if ((process.env.IS_DEMO === "true" || process.env.TEST_SERVER === "1") && !process.env.ADMIN_PASSWORD) {
+    throw new Error("ADMIN_PASSWORD env var is required when IS_DEMO/TEST_SERVER is set");
+  }
+
   const nodeEnv = process.env.NODE_ENV ?? "development";
   if (nodeEnv === "production") {
     throw new Error("Default seed admin password must not be used in production — set ADMIN_PASSWORD env var");
@@ -43,7 +47,7 @@ const internalAcademyAdmins: InternalDemoUser[] = [
   {
     name: "Admin",
     email: "academy@siraj.local",
-    plainPassword: DEFAULT_SEED_ADMIN_PASSWORD,
+    plainPassword: resolveAdminPassword(),
     isSuperAdmin: false,
     groupSlug: SystemPermissionGroupSlug.ACADEMY_ADMIN,
   },
@@ -53,7 +57,7 @@ const internalTeachers: InternalDemoUser[] = [
   {
     name: "Default Teacher",
     email: "teacher@siraj.local",
-    plainPassword: DEFAULT_SEED_ADMIN_PASSWORD,
+    plainPassword: resolveAdminPassword(),
     isSuperAdmin: false,
     groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
   },
@@ -63,7 +67,7 @@ const internalSupervisors: InternalDemoUser[] = [
   {
     name: "Default Supervisor",
     email: "supervisor@siraj.local",
-    plainPassword: DEFAULT_SEED_ADMIN_PASSWORD,
+    plainPassword: resolveAdminPassword(),
     isSuperAdmin: false,
     groupSlug: SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
   },
@@ -73,7 +77,7 @@ const internalStaff: InternalDemoUser[] = [
   {
     name: "Default Staff",
     email: "staff@siraj.local",
-    plainPassword: DEFAULT_SEED_ADMIN_PASSWORD,
+    plainPassword: resolveAdminPassword(),
     isSuperAdmin: false,
     groupSlug: SystemPermissionGroupSlug.STAFF_DEFAULT,
   },
@@ -83,7 +87,7 @@ const internalStudents: InternalDemoUser[] = [
   {
     name: "Default Student",
     email: "student@siraj.local",
-    plainPassword: DEFAULT_SEED_ADMIN_PASSWORD,
+    plainPassword: resolveAdminPassword(),
     isSuperAdmin: false,
     groupSlug: SystemPermissionGroupSlug.STUDENT_DEFAULT,
   },
@@ -93,7 +97,7 @@ const internalParents: InternalDemoUser[] = [
   {
     name: "Default Parent",
     email: "parent@siraj.local",
-    plainPassword: DEFAULT_SEED_ADMIN_PASSWORD,
+    plainPassword: resolveAdminPassword(),
     isSuperAdmin: false,
     groupSlug: SystemPermissionGroupSlug.PARENT_DEFAULT,
   },

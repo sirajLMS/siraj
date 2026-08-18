@@ -59,6 +59,9 @@ export interface StudentHistoryLabels {
     readonly title: string;
     readonly description: (count: number) => string;
   };
+  readonly hoursShort: (hours: number) => string;
+  readonly minutesShort: (minutes: number) => string;
+  readonly percentValue: (value: number) => string;
   readonly errors: {
     readonly loadFailed: string;
   };

@@ -24,6 +24,7 @@ export const dashboardTeacherWeeklyScheduleAr: TeacherWeeklyScheduleLabels = {
     availableSlot: "فترة متاحة",
     lastUpdated: time => `آخر تحديث: ${time}`,
     unknownSubject: "حصة",
+    minutesShort: minutes => `${minutes} د`,
     status: {
       ended: "انتهت",
       absent: "غائب",

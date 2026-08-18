@@ -1,26 +1,5 @@
 import type { ErrorsLabels } from "../../types/errors";
 
-const student = {
-  studentNotFound: (id: string) => `Student not found: ${id}`,
-  studentCreateFailed: "Failed to create student.",
-  studentUpdateFailed: (id: string) => `Failed to update student (id: ${id}).`,
-  studentVersionMismatch: ({
-    id,
-    expectedVersion,
-    gotVersion,
-  }: {
-    id: string;
-    expectedVersion: number;
-    gotVersion: number;
-  }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
-  insufficientClasses: ({ id, remaining, required }: { id: string; remaining: number; required: number }) =>
-    `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`,
-  invalidStatusTransition: ({ currentStatus, newStatus }: { currentStatus: string; newStatus: string }) =>
-    `Invalid status transition: ${currentStatus} -> ${newStatus}.`,
-  studentEmailRequired: "Student email is required.",
-  studentPasswordRequired: "Student password is required.",
-} as const;
-
 const category = {
   categoryNotFound: (id: string) => `Category not found: ${id}`,
   categoryCreateFailed: "Failed to create class category.",
@@ -61,6 +40,11 @@ const scheduling = {
   missedClassTime: "You have missed the class time.",
   absentTooEarly: ({ waitingMinutes }: { waitingMinutes: string }) =>
     `Cannot mark absent yet. Please wait ${waitingMinutes} minutes after scheduled start time.`,
+  vacationStartBeforeEnd: "Vacation start date must be before end date",
+  startTimeBeforeEndTime: "Start time must be before end time",
+  dateRangeExceedsMax: (maxDays: number) => `Date range cannot exceed ${maxDays} days`,
+  vacationRequestNotPending: (id: string) => `Vacation request ${id} is not in pending status`,
+  vacationRequestAlreadyCancelled: (id: string) => `Vacation request ${id} is already cancelled`,
 } as const;
 
 const permissionGroup = {
@@ -75,6 +59,56 @@ const teacher = {
   quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
     `Quota (${requested}) exceeds total (${total}).`,
   vacationRequestNotFound: (id: string) => `Vacation request not found: ${id}`,
+  createFailed: "Failed to create teacher profile.",
+  upsertFailed: "Teacher upsert failed.",
+  noteCreateFailed: "Failed to create teacher note.",
+  staffProfileCreateFailed: "Failed to create staff profile.",
+  staffProfileUpdateFailed: "Failed to update staff profile.",
+  availabilityUpdateFailed: "Failed to update availability window.",
+  availabilityInsertFailed: "Failed to insert availability window.",
+  recurringUnavailabilityInsertFailed: "Failed to insert recurring unavailability.",
+  vacationInsertFailed: "Failed to insert vacation request.",
+} as const;
+
+const teacherDue = {
+  hoursMustBePositive: "Hours must be greater than 0.",
+  amountMustBeNonNegative: "Amount must be non-negative.",
+  insertFailed: "Failed to insert teacher due row.",
+} as const;
+
+const classSubject = {
+  createFailed: "Failed to create class subject.",
+} as const;
+
+const leaveQuota = {
+  updateFailed: "Leave quota update failed.",
+  insertFailed: "Leave quota insert failed.",
+} as const;
+
+const classInstance = {
+  idempotencyKeyRequired: "Seed class instance upsert requires an idempotency key.",
+} as const;
+
+const student = {
+  studentNotFound: (id: string) => `Student not found: ${id}`,
+  studentCreateFailed: "Failed to create student.",
+  studentUpdateFailed: (id: string) => `Failed to update student (id: ${id}).`,
+  studentVersionMismatch: ({
+    id,
+    expectedVersion,
+    gotVersion,
+  }: {
+    id: string;
+    expectedVersion: number;
+    gotVersion: number;
+  }) => `Student ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
+  insufficientClasses: ({ id, remaining, required }: { id: string; remaining: number; required: number }) =>
+    `Insufficient class balance for student ${id}: remaining ${remaining}, required ${required}.`,
+  invalidStatusTransition: ({ currentStatus, newStatus }: { currentStatus: string; newStatus: string }) =>
+    `Invalid status transition: ${currentStatus} -> ${newStatus}.`,
+  studentEmailRequired: "Student email is required.",
+  studentPasswordRequired: "Student password is required.",
+  upsertFailed: "Student upsert failed.",
 } as const;
 
 export const errorsEn: ErrorsLabels = {
@@ -125,6 +159,7 @@ export const errorsEn: ErrorsLabels = {
     permissionGroupNameTooLong: "Permission group name is too long (max 255 characters).",
     permissionGroupInvalidName: "Invalid permission group name.",
     cannotModifySuperAdmin: "Cannot modify super admin user.",
+    cannotModifySelf: "Cannot modify your own permissions.",
     cannotModifySystemPermissionGroup: "Cannot modify core properties of system permission groups",
     cannotDeleteSystemPermissionGroup: "Cannot delete a system permission or group",
   },
@@ -154,6 +189,9 @@ export const errorsEn: ErrorsLabels = {
     quotaReleaseConcurrentModification: "Quota release failed: quota no longer active after concurrent modification",
     quotaRefreshConcurrentWrite: "Failed to refresh quota due to concurrent modification",
     quotaResetConcurrentModification: "Failed to reset quota period due to concurrent modification",
+    paymentMethodCreateFailed: "Failed to create user payment method.",
+    paymentMethodNotFound: (id: string) => `Payment method not found (ID: ${id}).`,
+    currencyHedgeCreateFailed: "Failed to create currency hedge.",
   },
   credit: {
     duplicatePurchase: "This credit purchase has already been processed.",
@@ -164,11 +202,13 @@ export const errorsEn: ErrorsLabels = {
   file: {
     recordNotFound: ({ tableName, entityId }: { tableName: string; entityId: string }) =>
       `${tableName} not found: ${entityId}`,
-    invalidFileType: "Invalid file type. Only PDF, JPG, PNG, and HEIC files are allowed.",
+    invalidFileType:
+      "Invalid file type. Only PDF, JPG, PNG, GIF, WebP, BMP, DOC, DOCX, XLS, XLSX, PPT, and PPTX files are allowed.",
     invalidFileId: "Invalid file ID.",
     invoicePaymentProofPending: "A payment proof is already pending review for this invoice.",
     fileUsageRegistered: "File usage registered successfully",
     fileUsageRegisterFailed: (error: string) => `Failed to register file usage: ${error}`,
+    fileUsageRegisterFailedGeneric: "Failed to register file usage.",
     fileCurrentlyInUse: "File is currently being used",
     unableToCheckFileUsage: "Unable to check file usage",
     directoryNotFound: "Directory not found",
@@ -259,6 +299,8 @@ export const errorsEn: ErrorsLabels = {
     alreadyExists: "Parent profile for this user already exists.",
     invalidTimezone: "Invalid timezone.",
     createFailed: "Failed to create parent profile.",
+    suggestionSubmitFailed: "Failed to submit suggestion.",
+    upsertFailed: "Parent upsert failed.",
   },
   staff: {
     alreadyExists: "Staff profile for this user already exists.",
@@ -274,11 +316,41 @@ export const errorsEn: ErrorsLabels = {
     bookDeleteFailed: "Failed to delete book.",
     resourceDeleteFailed: "Failed to delete learning resource.",
     permissionDenied: "You do not have permission to perform this action.",
+    seedCreateFailed: "Failed to create seed learning resource.",
+    createFailed: "Failed to create learning resource.",
+    handbookUploadFailed: "Failed to upload handbook file. Please try again.",
   },
   notification: {
     deliveryNotFound: (id: string) => `Notification delivery not found: ${id}`,
   },
+  fx: {
+    syncAlreadyRunning: "An FX sync is already running. Please try again later.",
+    syncFailed: "Failed to sync exchange rates. Please try again later.",
+  },
+  complaint: {
+    responseCreateFailed: "Failed to create complaint response.",
+    createFailed: "Failed to create complaint.",
+  },
+  subjectResource: {
+    attachFailed: "Failed to attach resource to subject.",
+    linkNotFound: "Resource link not found.",
+    notFound: "Subject resource not found.",
+  },
+  meetingConfig: {
+    requiresInstanceOrSchedule: "Class meeting config requires classInstanceId or recurringScheduleId.",
+  },
+  meeting: {
+    providerTokenUpdateFailed: "Failed to update meeting provider token.",
+    providerTokenInsertFailed: "Failed to insert meeting provider token.",
+  },
+  session: {
+    userIdRequired: "User ID (userId) is required.",
+  },
+  classSubject,
+  leaveQuota,
+  classInstance,
   teacher,
+  teacherDue,
   student,
   category,
   user,
@@ -303,6 +375,8 @@ export const errorsEn: ErrorsLabels = {
     slotConflict: (startTime: string, endTime: string) =>
       `Time slot ${startTime}–${endTime} conflicts with existing booking`,
     onDemandNoCredits: (studentName: string) => `Not enough credits for on-demand booking for ${studentName}`,
+    cannotRefreshNonPeriodic: "Cannot refresh non-periodic quota",
+    noValidPeriodDays: "Quota has no valid period days configured",
   },
   // ─── Top-level API-facing strings ──────────────────────────────────
   rateLimitExceeded: "Too many requests. Please try again later.",

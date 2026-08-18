@@ -22,6 +22,7 @@ export interface TeacherWeeklyScheduleLabels {
     readonly availableSlot: string;
     readonly lastUpdated: (date: string) => string;
     readonly unknownSubject: string;
+    readonly minutesShort: (minutes: number) => string;
     readonly status: {
       readonly ended: string;
       readonly absent: string;

@@ -26,4 +26,7 @@ export const dashboardStudentPortalDashboardAr: StudentPortalDashboardLabels = {
   columnDuration: "المدة",
   columnStatus: "الحالة",
   columnActions: "الإجراءات",
+  minutesShort: minutes => `${minutes} د`,
+  hoursShort: hours => `${hours} س`,
+  durationMinutesShort: minutes => `${minutes} دقيقة`,
 };

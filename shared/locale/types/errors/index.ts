@@ -56,6 +56,7 @@ export interface PermissionManagementErrors {
   readonly permissionGroupNameTooLong: string;
   readonly permissionGroupInvalidName: string;
   readonly cannotModifySuperAdmin: string;
+  readonly cannotModifySelf: string;
   readonly cannotModifySystemPermissionGroup: string;
   readonly cannotDeleteSystemPermissionGroup: string;
 }
@@ -79,6 +80,9 @@ export interface BillingErrors {
   readonly quotaReleaseConcurrentModification: string;
   readonly quotaRefreshConcurrentWrite: string;
   readonly quotaResetConcurrentModification: string;
+  readonly paymentMethodCreateFailed: string;
+  readonly paymentMethodNotFound: (id: string) => string;
+  readonly currencyHedgeCreateFailed: string;
 }
 
 /**
@@ -100,6 +104,7 @@ export interface FileErrors {
   readonly invoicePaymentProofPending: string;
   readonly fileUsageRegistered: string;
   readonly fileUsageRegisterFailed: (error: string) => string;
+  readonly fileUsageRegisterFailedGeneric: string;
   readonly fileCurrentlyInUse: string;
   readonly unableToCheckFileUsage: string;
   readonly directoryNotFound: string;
@@ -198,6 +203,69 @@ export interface ParentErrors {
   readonly alreadyExists: string;
   readonly invalidTimezone: string;
   readonly createFailed: string;
+  readonly suggestionSubmitFailed: string;
+  readonly upsertFailed: string;
+}
+
+/**
+ * ComplaintErrors — complaint specific errors.
+ */
+export interface ComplaintErrors {
+  readonly responseCreateFailed: string;
+  readonly createFailed: string;
+}
+
+/**
+ * SubjectResourceErrors — subject-resource attachment errors.
+ */
+export interface SubjectResourceErrors {
+  readonly attachFailed: string;
+  readonly linkNotFound: string;
+  readonly notFound: string;
+}
+
+/**
+ * ClassSubjectErrors — class subject repository errors.
+ */
+export interface ClassSubjectErrors {
+  readonly createFailed: string;
+}
+
+/**
+ * LeaveQuotaErrors — leave quota usage repository errors.
+ */
+export interface LeaveQuotaErrors {
+  readonly updateFailed: string;
+  readonly insertFailed: string;
+}
+
+/**
+ * ClassInstanceErrors — class instance upsert errors.
+ */
+export interface ClassInstanceErrors {
+  readonly idempotencyKeyRequired: string;
+}
+
+/**
+ * MeetingConfigErrors — class meeting config validation errors.
+ */
+export interface MeetingConfigErrors {
+  readonly requiresInstanceOrSchedule: string;
+}
+
+/**
+ * MeetingTokenErrors — meeting provider token storage errors.
+ */
+export interface MeetingTokenErrors {
+  readonly providerTokenUpdateFailed: string;
+  readonly providerTokenInsertFailed: string;
+}
+
+/**
+ * SessionRepositoryErrors — session lifecycle validation errors.
+ */
+export interface SessionRepositoryErrors {
+  readonly userIdRequired: string;
 }
 
 /**
@@ -227,6 +295,9 @@ export interface ResourceErrors {
   readonly bookDeleteFailed: string;
   readonly resourceDeleteFailed: string;
   readonly permissionDenied: string;
+  readonly seedCreateFailed: string;
+  readonly createFailed: string;
+  readonly handbookUploadFailed: string;
 }
 
 /**
@@ -239,6 +310,24 @@ export interface TeacherErrors {
   readonly quotaMustBeNonNegative: string;
   readonly quotaExceedsTotal: (params: { requested: number; total: number }) => string;
   readonly vacationRequestNotFound: (id: string) => string;
+  readonly createFailed: string;
+  readonly upsertFailed: string;
+  readonly noteCreateFailed: string;
+  readonly staffProfileCreateFailed: string;
+  readonly staffProfileUpdateFailed: string;
+  readonly availabilityUpdateFailed: string;
+  readonly availabilityInsertFailed: string;
+  readonly recurringUnavailabilityInsertFailed: string;
+  readonly vacationInsertFailed: string;
+}
+
+/**
+ * TeacherDueErrors — teacher due validation errors.
+ */
+export interface TeacherDueErrors {
+  readonly hoursMustBePositive: string;
+  readonly amountMustBeNonNegative: string;
+  readonly insertFailed: string;
 }
 
 /**
@@ -253,6 +342,7 @@ export interface StudentErrors {
   readonly invalidStatusTransition: (params: { currentStatus: string; newStatus: string }) => string;
   readonly studentEmailRequired: string;
   readonly studentPasswordRequired: string;
+  readonly upsertFailed: string;
 }
 
 /**
@@ -302,6 +392,11 @@ export interface SchedulingErrors extends SchedulingSharedErrors {
   readonly cannotRescheduleAlreadyRescheduled: string;
   readonly outOfQuota: string;
   readonly missedClassTime: string;
+  readonly vacationStartBeforeEnd: string;
+  readonly startTimeBeforeEndTime: string;
+  readonly dateRangeExceedsMax: (maxDays: number) => string;
+  readonly vacationRequestNotPending: (id: string) => string;
+  readonly vacationRequestAlreadyCancelled: (id: string) => string;
 }
 
 /**
@@ -332,6 +427,8 @@ export interface QuotaErrors {
   readonly earmarkExceedsRemaining: (requested: number, available: number) => string;
   readonly slotConflict: (startTime: string, endTime: string) => string;
   readonly onDemandNoCredits: (studentName: string) => string;
+  readonly cannotRefreshNonPeriodic: string;
+  readonly noValidPeriodDays: string;
 }
 
 /**
@@ -339,6 +436,14 @@ export interface QuotaErrors {
  */
 export interface NotificationErrors {
   readonly deliveryNotFound: (id: string) => string;
+}
+
+/**
+ * FxErrors — FX (exchange rate) specific errors.
+ */
+export interface FxErrors {
+  readonly syncAlreadyRunning: string;
+  readonly syncFailed: string;
 }
 
 /**
@@ -359,6 +464,7 @@ export interface ErrorsLabels
   readonly file: FileErrors;
   readonly meetingProvider: MeetingProviderErrors;
   readonly teacher: TeacherErrors;
+  readonly teacherDue: TeacherDueErrors;
   readonly student: StudentErrors;
   readonly category: CategoryErrors;
   readonly user: UserErrors;
@@ -371,6 +477,15 @@ export interface ErrorsLabels
   readonly lessonReport: LessonReportErrors;
   readonly resource: ResourceErrors;
   readonly notification: NotificationErrors;
+  readonly fx: FxErrors;
+  readonly complaint: ComplaintErrors;
+  readonly subjectResource: SubjectResourceErrors;
+  readonly meetingConfig: MeetingConfigErrors;
+  readonly meeting: MeetingTokenErrors;
+  readonly session: SessionRepositoryErrors;
+  readonly classSubject: ClassSubjectErrors;
+  readonly leaveQuota: LeaveQuotaErrors;
+  readonly classInstance: ClassInstanceErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;

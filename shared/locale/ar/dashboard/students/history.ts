@@ -61,6 +61,9 @@ export const dashboardStudentHistoryAr: StudentHistoryLabels = {
     title: "سلسلة الأداء",
     description: _count => `لقد حضرت 100% من الحصص هذا الأسبوع. واصل هذا الزخم!`,
   },
+  hoursShort: hours => `${hours} س`,
+  minutesShort: minutes => `${minutes} د`,
+  percentValue: value => `${value}٪`,
   errors: {
     loadFailed: "فشل في تحميل سجل الطالب.",
   },
