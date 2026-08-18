@@ -38,7 +38,7 @@ function ParentSearchField({
       sx={{
         width: 300,
         "& .MuiOutlinedInput-root": {
-          borderRadius: 10,
+          borderRadius: 12,
           backgroundColor: theme => theme.palette.background.paper,
         },
       }}

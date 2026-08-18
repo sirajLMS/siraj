@@ -53,7 +53,11 @@ export function BookItemCardDesktop({ book, labels, onDelete }: Readonly<BookIte
         <Typography variant="bodyLg" sx={theme => ({ fontWeight: 700, color: theme.palette.primary.main })}>
           {book.name}
         </Typography>
-        <IconButton aria-label="Delete book" onClick={handleDelete} sx={theme => ({ color: theme.palette.error.main })}>
+        <IconButton
+          aria-label={labels.ariaDeleteBook}
+          onClick={handleDelete}
+          sx={theme => ({ color: theme.palette.error.main })}
+        >
           <DeleteOutlined />
         </IconButton>
       </Box>

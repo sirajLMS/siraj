@@ -25,6 +25,3 @@ export function WhatsappConfigDesktopShell({ title, children }: Readonly<Whatsap
     </DesktopPageContainer>
   );
 }
-
-/** @deprecated Use `WhatsappConfigDesktopShell` — the old per-tab view is replaced by URL-synced tab architecture. */
-export const WhatsappConfigDesktopView = WhatsappConfigDesktopShell;

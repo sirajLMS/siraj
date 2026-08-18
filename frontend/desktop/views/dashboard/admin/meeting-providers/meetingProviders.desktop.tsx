@@ -18,8 +18,8 @@ function MeetingProvidersDesktopEmptyState({ title, body }: Readonly<{ title: st
   return (
     <Alert severity="info" sx={{ mb: 2 }}>
       <Stack spacing={0.5}>
-        <Box sx={{ typography: "titleSm" }}>{title}</Box>
-        <Box sx={{ typography: "bodySm" }}>{body}</Box>
+        <Box sx={{ typography: "labelSm" }}>{title}</Box>
+        <Box sx={{ typography: "bodyMd" }}>{body}</Box>
       </Stack>
     </Alert>
   );

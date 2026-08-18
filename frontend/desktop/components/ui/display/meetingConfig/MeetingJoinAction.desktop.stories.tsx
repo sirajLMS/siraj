@@ -1,6 +1,7 @@
 import { Box, Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig/MeetingJoinAction.desktop";
 
 const mockMeeting: EffectiveMeetingFieldsFragment = {
@@ -9,7 +10,7 @@ const mockMeeting: EffectiveMeetingFieldsFragment = {
   providerName: { en: "Zoom", ar: "زووم" },
   logoUrl: null,
   meetingId: "123-456-789",
-  source: "class",
+  source: EffectiveMeetingSource.Class,
   configId: "cfg-1",
   providerId: "prov-1",
   supportsAutoGeneration: false,
@@ -75,7 +76,7 @@ const urlPendingMeeting: EffectiveMeetingFieldsFragment = {
   providerName: { en: "Zoom", ar: "زووم" },
   logoUrl: null,
   meetingId: null,
-  source: "class",
+  source: EffectiveMeetingSource.Class,
   configId: "cfg-1",
   providerId: "prov-1",
   supportsAutoGeneration: true,

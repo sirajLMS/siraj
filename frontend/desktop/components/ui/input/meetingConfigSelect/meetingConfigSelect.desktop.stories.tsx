@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import type { MeetingConfigSelectOption } from "@/frontend/common/components/ui/input/meetingConfigSelect/types";
 import {
   MeetingConfigSelectDesktop,
   type MeetingConfigSelectProps,

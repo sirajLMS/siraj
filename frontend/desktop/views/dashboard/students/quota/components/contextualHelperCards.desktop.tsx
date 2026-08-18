@@ -2,7 +2,7 @@
 
 import { InfoOutlined, PublicOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
+import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/useQuotaFormAccess";
 
 export function ContextualHelperCardsDesktop() {
   const { labels } = useQuotaFormAccess();

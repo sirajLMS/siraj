@@ -4,6 +4,7 @@ import { AttachFileOutlined, DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Paper, Typography } from "@mui/material";
 import { ResourceFileTypeIconShared as ResourceFileTypeIconDesktop } from "@/frontend/common/views/dashboard/resources/components/__shared__/resourceFileTypeIconShared";
 import type { ResourceLibraryCardProps } from "@/frontend/common/views/dashboard/resources/types/resourcesTypes";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function ResourceLibraryCardDesktop({
   resource,
@@ -11,6 +12,7 @@ export function ResourceLibraryCardDesktop({
   onDeleteRequest,
   onCardClick,
 }: Readonly<Omit<ResourceLibraryCardProps, "variant" | "labels">>) {
+  const t = useAppTranslation(Translation.Dashboard.Resources);
   // NEW FOR PLAN v5: the inline `<RequirePermission permissions={AppPermission.ResourcesDelete}>`
   // wrapper that previously lived here was lifted to the page-level ViewModel
   // per specs.md §3 N3 + §6.1. The card now consumes `canManage` (threaded from
@@ -50,7 +52,7 @@ export function ResourceLibraryCardDesktop({
         <ResourceFileTypeIconDesktop fileType={resource.fileType} />
         {canManage ? (
           <IconButton
-            aria-label="Delete resource"
+            aria-label={t.notification.ariaDeleteResource}
             onClick={e => {
               e.stopPropagation();
               onDeleteRequest(resource.id);

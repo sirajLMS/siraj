@@ -45,7 +45,7 @@ export function ParentWelcomeHeroDesktop({
             gap: 1,
             py: 0.5,
             px: 1.5,
-            borderRadius: 999,
+            borderRadius: "9999px",
             backgroundColor: alpha(theme.palette.header, 0.4),
           })}
         >
