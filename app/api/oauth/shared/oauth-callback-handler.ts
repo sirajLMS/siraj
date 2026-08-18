@@ -6,139 +6,31 @@
  * identical structure — only the provider slug, token-endpoint URL,
  * client-id/secret fields, and optional extra form params differ. This module
  * owns the common GET flow (code/state extraction, state verification, slug
- * check, open-redirect guard, token exchange, upsert, redirect) and exposes a
- * single {@link handleOAuthCallback} entry point that each route calls with a
- * provider-specific config.
+ * check, open-redirect guard) and delegates the token exchange + persistence
+ * to {@link MeetingOAuthService.exchangeAndPersistTokens}.
+ *
+ * The route handler stays responsible for HTTP request/response only — all
+ * business logic (external HTTP exchange, database upsert) lives in the
+ * service layer per AGENTS.md rules.
  */
 
 import { type NextRequest, NextResponse } from "next/server";
 
-import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
-import { ensureEnvironmentValidated, getEnvironmentConfig } from "@/backend/lib/env";
+import { ensureEnvironmentValidated } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import { type MeetingProvider, verifyOAuthState } from "@/backend/services";
+import {
+  buildCallbackRedirectUri,
+  MeetingOAuthService,
+  type OAuthCallbackConfig,
+  verifyOAuthState,
+} from "@/backend/services";
+import { getServerTranslations } from "@/shared/locale";
+
+// Re-export the config type so the three route files that import it from this
+// module continue to work without changing their import paths.
+export type { OAuthCallbackConfig } from "@/backend/services";
 
 ensureEnvironmentValidated();
-
-/** Minimal token-response shape every provider returns from its token endpoint. */
-export interface OAuthTokenResponse {
-  readonly access_token: string;
-  readonly token_type: string;
-  readonly expires_in: number;
-  readonly refresh_token?: string;
-  readonly scope?: string;
-}
-
-/**
- * Provider-specific callback configuration.
- *
- * Each route file constructs one of these and passes it to
- * {@link handleOAuthCallback}. Only the bits that genuinely vary between
- * providers live here — the shared flow lives in the helper.
- */
-export interface OAuthCallbackConfig {
-  /** Canonical meeting-provider slug. */
-  readonly providerSlug: MeetingProvider;
-  /** Human-readable provider name used in log messages (e.g. "Zoom"). */
-  readonly displayName: string;
-  /**
-   * Builds the absolute token-endpoint URL for the code-for-tokens exchange.
-   * Receives the resolved environment config so MS Teams can read its
-   * tenant id, etc.
-   */
-  readonly buildTokenUrl: (config: ReturnType<typeof getEnvironmentConfig>) => string;
-  /** Returns the OAuth client id for this provider from env config. */
-  readonly resolveClientId: (config: ReturnType<typeof getEnvironmentConfig>) => string;
-  /** Returns the OAuth client secret for this provider from env config. */
-  readonly resolveClientSecret: (config: ReturnType<typeof getEnvironmentConfig>) => string;
-  /**
-   * Optional extra form params to merge into the token-exchange body
-   * (e.g. MS Teams sends `scope`). The base params (`grant_type`, `code`,
-   * `redirect_uri`, `client_id`, `client_secret`) are always included.
-   */
-  readonly extraTokenParams?: Record<string, string>;
-}
-
-/**
- * Builds the redirect URI for this provider's callback. Mirrors the logic in
- * `meeting-oauth.service.ts` — kept local rather than exported from there to
- * keep the callback handler self-contained and side-effect-free.
- */
-function buildRedirectUri(providerSlug: MeetingProvider): string {
-  const config = getEnvironmentConfig();
-  const baseUrlRaw = config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "";
-  const baseUrl = baseUrlRaw.endsWith("/") ? baseUrlRaw.slice(0, -1) : baseUrlRaw;
-  const pathSlug = providerSlug.replaceAll("_", "-");
-  return `${baseUrl}/api/oauth/${pathSlug}/callback`;
-}
-
-/**
- * Exchanges an authorization code for provider tokens at the provider's token
- * endpoint. Throws on non-2xx with the provider's error body for diagnostics.
- */
-async function exchangeCodeForTokens(
-  cfg: OAuthCallbackConfig,
-  code: string,
-  redirectUri: string
-): Promise<OAuthTokenResponse> {
-  const config = getEnvironmentConfig();
-
-  const params = new URLSearchParams({
-    grant_type: "authorization_code",
-    code,
-    redirect_uri: redirectUri,
-    client_id: cfg.resolveClientId(config),
-    client_secret: cfg.resolveClientSecret(config),
-  });
-
-  // Conditionally append provider-specific extra params to avoid creating an
-  // effectively empty object via spread when `extraTokenParams` is undefined.
-  if (cfg.extraTokenParams) {
-    for (const [key, value] of Object.entries(cfg.extraTokenParams)) {
-      // Ensure only string values are appended; the config type enforces this,
-      // but guard defensively in case of unexpected runtime values.
-      if (value != null) params.set(key, value);
-    }
-  }
-
-  const res = await fetch(cfg.buildTokenUrl(config), {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params.toString(),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`${cfg.displayName} token exchange failed (${res.status}): ${body}`);
-  }
-
-  const data: unknown = await res.json();
-  if (!isOAuthTokenResponse(data)) {
-    throw new Error(`${cfg.displayName} token exchange returned unexpected shape: ${JSON.stringify(data)}`);
-  }
-  return data;
-}
-
-/**
- * Type guard that validates a token-endpoint response conforms to the minimal
- * {@link OAuthTokenResponse} shape. Used instead of `as` to satisfy oxlint's
- * `no-unsafe-type-assertion` rule.
- */
-function isOAuthTokenResponse(value: unknown): value is OAuthTokenResponse {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return false;
-  }
-  return (
-    "access_token" in value &&
-    typeof value.access_token === "string" &&
-    "token_type" in value &&
-    typeof value.token_type === "string" &&
-    "expires_in" in value &&
-    typeof value.expires_in === "number" &&
-    (!("refresh_token" in value) || value.refresh_token === undefined || typeof value.refresh_token === "string") &&
-    (!("scope" in value) || value.scope === undefined || typeof value.scope === "string")
-  );
-}
 
 /**
  * Runs the full OAuth callback GET flow for a single provider and returns the
@@ -156,17 +48,20 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
   const { providerSlug, displayName } = cfg;
   const logTag = `${displayName} OAuth callback`;
 
+  const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
+  const tErrors = getServerTranslations(locale).errorsTranslations;
+
   const url = request.nextUrl;
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
 
   if (!code || !state) {
-    return NextResponse.json({ error: "Missing code or state parameter" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.missingCodeOrState }, { status: 400 });
   }
 
   const statePayload = await verifyOAuthState(state);
   if (!statePayload) {
-    return NextResponse.json({ error: "Invalid or expired OAuth state" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.invalidOrExpiredOAuthState }, { status: 400 });
   }
 
   if (statePayload.providerSlug !== providerSlug) {
@@ -174,38 +69,26 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
       expected: providerSlug,
       actual: statePayload.providerSlug,
     });
-    return NextResponse.json({ error: "Provider mismatch in OAuth state" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.providerMismatch }, { status: 400 });
   }
 
   const { userId, returnPath } = statePayload;
-  const redirectUri = buildRedirectUri(providerSlug);
+  const redirectUri = buildCallbackRedirectUri(providerSlug);
 
   // Defense-in-depth: validate returnPath to prevent open redirect
   if (!returnPath.startsWith("/") || returnPath.startsWith("//")) {
     logger.warn(`${logTag}: invalid return path detected`, { returnPath });
-    return NextResponse.json({ error: "Invalid return path" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.meetingProvider.invalidReturnPath }, { status: 400 });
   }
 
   try {
-    const tokenResponse = await exchangeCodeForTokens(cfg, code, redirectUri);
-    const expiresAt = new Date(Date.now() + tokenResponse.expires_in * 1000);
-
-    await MeetingProviderTokenRepository.upsert({
-      userId,
-      providerSlug,
-      accessToken: tokenResponse.access_token,
-      refreshToken: tokenResponse.refresh_token ?? null,
-      expiresAt,
-      scopes: tokenResponse.scope ? tokenResponse.scope.split(" ") : [],
-    });
-
-    logger.info(`${logTag}: tokens persisted`, { userId });
+    await MeetingOAuthService.exchangeAndPersistTokens(cfg, userId, code, redirectUri);
   } catch (error) {
     logger.error(`${logTag}: token exchange or persistence failed`, {
       userId,
       error: error instanceof Error ? error.message : String(error),
     });
-    return NextResponse.json({ error: "Failed to complete OAuth token exchange" }, { status: 502 });
+    return NextResponse.json({ error: tErrors.failedToCompleteOAuthTokenExchange }, { status: 502 });
   }
 
   return NextResponse.redirect(new URL(returnPath, url.origin), 302);

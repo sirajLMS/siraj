@@ -8,6 +8,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logger, resolveLocalStoragePath } from "@/backend/lib";
 import { StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
+import type { ErrorsLabels } from "@/shared/locale/types";
 
 /**
  * Bridge DOM ReadableStream to a Node Readable via async iteration.
@@ -23,32 +24,36 @@ interface SignedUrlData {
   filePath: string;
 }
 
-function validateHeaders(request: NextRequest, signedUrl: SignedUrlData): NextResponse | null {
+function resolveLocaleFromRequest(request: NextRequest): string {
+  return request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
+}
+
+function validateHeaders(request: NextRequest, signedUrl: SignedUrlData, tErrors: ErrorsLabels): NextResponse | null {
   const contentType = request.headers.get("content-type");
   const contentLength = request.headers.get("content-length");
   const contentMd5 = request.headers.get("content-md5");
 
   if (contentType !== signedUrl.contentType) {
-    return NextResponse.json({ error: `Content-Type mismatch. Expected: ${signedUrl.contentType}` }, { status: 400 });
+    return NextResponse.json({ error: tErrors.file.contentTypeMismatch(signedUrl.contentType) }, { status: 400 });
   }
 
   if (!contentLength) {
-    return NextResponse.json({ error: "Content-Length header is required" }, { status: 411 });
+    return NextResponse.json({ error: tErrors.file.contentLengthRequired }, { status: 411 });
   }
 
   if (BigInt(contentLength) > signedUrl.fileSize) {
     return NextResponse.json(
-      { error: `Content-Length exceeds declared size of ${signedUrl.fileSize} bytes` },
+      { error: tErrors.file.contentLengthExceedsSize(signedUrl.fileSize.toString()) },
       { status: 413 }
     );
   }
 
   if (!contentMd5) {
-    return NextResponse.json({ error: "Content-MD5 header is required" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.file.contentMd5Required }, { status: 400 });
   }
 
   if (contentMd5 !== signedUrl.contentHash) {
-    return NextResponse.json({ error: "Content-MD5 mismatch" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.file.contentMd5Mismatch }, { status: 400 });
   }
 
   return null;
@@ -90,7 +95,12 @@ async function streamToFile(
 /**
  * Finalize the upload by creating a database record and returning the response
  */
-async function finalizeUpload(signedUrl: SignedUrlData, absolutePath: string, tokenId: string): Promise<NextResponse> {
+async function finalizeUpload(
+  signedUrl: SignedUrlData,
+  absolutePath: string,
+  tokenId: string,
+  tErrors: ErrorsLabels
+): Promise<NextResponse> {
   try {
     const fileEntity = await StorageService.createFileAndGet(signedUrl.filePath, false);
     const stats = await fs.stat(absolutePath);
@@ -113,7 +123,7 @@ async function finalizeUpload(signedUrl: SignedUrlData, absolutePath: string, to
   } catch (error) {
     await fs.unlink(absolutePath).catch(() => {});
     logger.error("Failed to create file record", { tokenId, error });
-    return NextResponse.json({ error: "Failed to create file record" }, { status: 500 });
+    return NextResponse.json({ error: tErrors.file.failedToCreateFileRecord }, { status: 500 });
   }
 }
 
@@ -128,35 +138,44 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     if (!signedUrl) {
       logger.warn("Invalid or expired signed URL token", { tokenId });
-      return NextResponse.json({ error: "Invalid, expired, or already used token" }, { status: 403 });
+      const locale = resolveLocaleFromRequest(request);
+      const tErrors = getServerTranslations(locale).errorsTranslations;
+      return NextResponse.json({ error: tErrors.file.invalidOrExpiredToken }, { status: 403 });
     }
 
-    const validationResponse = validateHeaders(request, signedUrl);
+    const locale = resolveLocaleFromRequest(request);
+    const tErrors = getServerTranslations(locale).errorsTranslations;
+
+    const validationResponse = validateHeaders(request, signedUrl, tErrors);
     if (validationResponse) return validationResponse;
 
-    return await processUpload(request, signedUrl, tokenId);
+    return await processUpload(request, signedUrl, tokenId, tErrors);
   } catch (error) {
     logger.error("Unexpected error in upload handler", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const locale = resolveLocaleFromRequest(request);
+    const tErrors = getServerTranslations(locale).errorsTranslations;
+    return NextResponse.json({ error: tErrors.internalServerError }, { status: 500 });
   }
 }
 
-async function processUpload(request: NextRequest, signedUrl: SignedUrlData, tokenId: string): Promise<NextResponse> {
-  const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
-  const tErrors = getServerTranslations(locale).errorsTranslations;
-
+async function processUpload(
+  request: NextRequest,
+  signedUrl: SignedUrlData,
+  tokenId: string,
+  tErrors: ErrorsLabels
+): Promise<NextResponse> {
   let absolutePath: string;
   try {
     absolutePath = resolveLocalStoragePath(signedUrl.filePath);
   } catch (error) {
     logger.error("Path traversal attempt detected", { tokenId, path: signedUrl.filePath, error });
-    return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.file.invalidFilePath }, { status: 400 });
   }
 
   await fs.mkdir(path.dirname(absolutePath), { recursive: true, mode: 0o755 });
 
   if (!request.body) {
-    return NextResponse.json({ error: "Request body is required" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.file.requestBodyRequired }, { status: 400 });
   }
 
   try {
@@ -164,10 +183,10 @@ async function processUpload(request: NextRequest, signedUrl: SignedUrlData, tok
   } catch (error) {
     logger.error("Failed to stream file to disk", { tokenId, error });
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to write file" },
+      { error: error instanceof Error ? error.message : tErrors.file.failedToWriteFile },
       { status: 400 }
     );
   }
 
-  return await finalizeUpload(signedUrl, absolutePath, tokenId);
+  return await finalizeUpload(signedUrl, absolutePath, tokenId, tErrors);
 }

@@ -1,9 +1,9 @@
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { type NextRequest, NextResponse } from "next/server";
-import { SignedUrlRepository } from "@/backend/db/repo/shared";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
 import { SessionService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
+import type { ErrorsLabels } from "@/shared/locale/types";
 
 export type VercelUploadUrlClientPlayload = {
   sessionId: string;
@@ -80,17 +80,18 @@ async function getUserIdFromRequest(request: NextRequest): Promise<string | null
 async function validateUploadPayload(
   pathName: string,
   clientPayload: VercelUploadUrlClientPlayload,
-  userId: string
+  userId: string,
+  tErrors: ErrorsLabels
 ): Promise<NextResponse | null> {
   if (!pathName) {
     logger.warn("Missing pathname in upload request", { userId });
-    return NextResponse.json({ error: "Missing pathname in upload request" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.file.missingPathname }, { status: 400 });
   }
 
   const { sessionId, fileSize, contentType } = clientPayload;
   if (!sessionId) {
     logger.warn("Missing upload session ID", { pathname: pathName });
-    return NextResponse.json({ error: "Missing upload session ID" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.file.missingUploadSessionId }, { status: 400 });
   }
 
   if (!fileSize || fileSize <= 0) {
@@ -98,63 +99,24 @@ async function validateUploadPayload(
       pathname: pathName,
       fileSize,
     });
-    return NextResponse.json({ error: "Invalid file size in upload request" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.file.invalidFileSize }, { status: 400 });
   }
 
   if (!contentType) {
     logger.warn("Missing content type in upload request", {
       pathname: pathName,
     });
-    return NextResponse.json({ error: "Missing content type in upload request" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.file.missingContentType }, { status: 400 });
   }
 
   return null;
 }
 
 async function validateSession(sessionId: string, pathName: string): Promise<NextResponse | null> {
-  const session = await SignedUrlRepository.getSignedUrlById(sessionId);
-
-  if (!session) {
-    logger.warn("Invalid upload session", {
-      sessionId,
-      pathname: pathName,
-    });
-    return NextResponse.json({ error: "Invalid upload session" }, { status: 403 });
+  const result = await StorageService.validateSignedUrlSession(sessionId, pathName);
+  if (result) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
-
-  if (session.used) {
-    logger.warn("Upload session already used", {
-      sessionId,
-      pathname: pathName,
-    });
-    return NextResponse.json({ error: "Upload session already used" }, { status: 403 });
-  }
-
-  if (session.expiresAt < new Date()) {
-    logger.warn("Upload session expired", {
-      sessionId,
-      pathname: pathName,
-      expiresAt: session.expiresAt,
-    });
-    return NextResponse.json({ error: "Upload session expired" }, { status: 403 });
-  }
-
-  // Validate metadata matches
-  if (session.filePath !== pathName) {
-    logger.warn("File path mismatch", {
-      sessionId,
-      expectedPath: session.filePath,
-      receivedPath: pathName,
-    });
-    return NextResponse.json({ error: "File path mismatch" }, { status: 400 });
-  }
-
-  logger.info("🔍 [VERCEL UPLOAD] Validated upload session", {
-    sessionId,
-    pathname: pathName,
-    expiresAt: session.expiresAt,
-  });
-
   return null;
 }
 
@@ -163,6 +125,9 @@ async function validateSession(sessionId: string, pathName: string): Promise<Nex
  * POST /api/storage/vercel-upload
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
+  const tErrors = getServerTranslations(locale).errorsTranslations;
+
   try {
     // Step 1: Authenticate the request
     const userId = await getUserIdFromRequest(request);
@@ -170,7 +135,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Require authentication for uploads
     if (!userId) {
       logger.warn("Unauthorized upload attempt");
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      return NextResponse.json({ error: tErrors.file.authenticationRequired }, { status: 401 });
     }
 
     logger.info("🔍 [VERCEL UPLOAD] Request authenticated", {
@@ -182,19 +147,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const rawBody: unknown = await request.json();
     if (!isHandleUploadBody(rawBody)) {
       logger.warn("Invalid upload request body", { userId });
-      const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
-      const tErrors = getServerTranslations(locale).errorsTranslations;
       return NextResponse.json({ error: tErrors.file.invalidUploadRequestBody }, { status: 400 });
     }
     const body: HandleUploadBody = rawBody;
     if (body.type !== "blob.generate-client-token") {
-      throw new Error("InvalidEventType");
+      throw new Error(tErrors.invalidEventType);
     }
 
     const clientPlayload = parseClientPayload(body.payload.clientPayload);
     const pathName = body.payload.pathname;
 
-    const payloadValidationError: NextResponse | null = await validateUploadPayload(pathName, clientPlayload, userId);
+    const payloadValidationError: NextResponse | null = await validateUploadPayload(
+      pathName,
+      clientPlayload,
+      userId,
+      tErrors
+    );
     if (payloadValidationError) return payloadValidationError;
 
     const { sessionId, fileSize, contentType } = clientPlayload;
@@ -206,11 +174,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     // Step 3: Validate upload request
-    const validationError = StorageService.validateUpload({
-      path: pathName,
-      size: fileSize,
-      contentType,
-    });
+    const validationError = StorageService.validateUpload(
+      {
+        path: pathName,
+        size: fileSize,
+        contentType,
+      },
+      locale
+    );
 
     if (validationError) {
       logger.warn("Upload validation failed", {
@@ -222,7 +193,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Step 4: Check directory permissions
     const directoryPath = pathName.substring(0, pathName.lastIndexOf("/"));
-    const directoryError = await StorageService.checkDirectoryUploadPermissions(directoryPath);
+    const directoryError = await StorageService.checkDirectoryUploadPermissions(directoryPath, locale);
 
     if (directoryError) {
       logger.warn("Uploads not allowed in directory", {
@@ -296,6 +267,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       stack: error instanceof Error ? error.stack : undefined,
     });
 
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: tErrors.internalServerError }, { status: 500 });
   }
 }

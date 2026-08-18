@@ -3,6 +3,7 @@ import { FxSyncTrigger } from "@/backend/enum";
 import { logger } from "@/backend/lib";
 import { verifyCronSecretAuth } from "@/backend/lib/cron-auth";
 import { FxIngestionService } from "@/backend/services";
+import { getServerTranslations } from "@/shared/locale";
 
 /**
  * Vercel Cron entry point for FX rate refresh.
@@ -40,6 +41,8 @@ export async function GET(request: NextRequest) {
     logger.error("FX cron refresh failed", {
       error: error instanceof Error ? error.message : String(error),
     });
-    return NextResponse.json({ success: false, error: "FX refresh failed" }, { status: 500 });
+    const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
+    const tErrors = getServerTranslations(locale).errorsTranslations;
+    return NextResponse.json({ success: false, error: tErrors.fxRefreshFailed }, { status: 500 });
   }
 }

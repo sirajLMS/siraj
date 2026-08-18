@@ -2,6 +2,7 @@ import { mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { type NextRequest, NextResponse  } from "next/server";
 import { getBooleanEnv } from "@/backend/lib/env";
+import { getServerTranslations } from "@/shared/locale";
 
 interface LogEntry {
   sessionId: string;
@@ -173,19 +174,22 @@ const CLIENT_LOGS_ENABLED =
   process.env.NODE_ENV === "development" || process.env.ENABLE_LOGGING === "true";
 
 export async function POST(request: NextRequest) {
+  const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
+  const tErrors = getServerTranslations(locale).errorsTranslations;
+
   if (!CLIENT_LOGS_ENABLED) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: tErrors.notFound }, { status: 404 });
   }
 
   try {
     const body = (await request.json()) as BatchLogRequest;
 
     if (!Array.isArray(body.logs)) {
-      return NextResponse.json({ error: "Invalid request format. Expected { logs: LogEntry[] }" }, { status: 400 });
+      return NextResponse.json({ error: tErrors.invalidRequestFormat }, { status: 400 });
     }
 
     if (!body.logs.every(isValidLogEntry)) {
-      return NextResponse.json({ error: "Missing required fields in log entry" }, { status: 400 });
+      return NextResponse.json({ error: tErrors.missingRequiredFields }, { status: 400 });
     }
 
     // Sanitize all session IDs to prevent path traversal
@@ -193,7 +197,7 @@ export async function POST(request: NextRequest) {
       try {
         sanitizeSessionId(log.sessionId);
       } catch {
-        return NextResponse.json({ error: "Invalid sessionId in log entry" }, { status: 400 });
+        return NextResponse.json({ error: tErrors.invalidSessionId }, { status: 400 });
       }
     }
 
@@ -204,6 +208,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, count: body.logs.length });
   } catch {
-    return NextResponse.json({ error: "Failed to write logs" }, { status: 500 });
+    return NextResponse.json({ error: tErrors.failedToWriteLogs }, { status: 500 });
   }
 }

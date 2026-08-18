@@ -10,6 +10,8 @@ import {
   verifyToken,
 } from "@/backend/lib";
 import { SessionService, StorageService } from "@/backend/services";
+import { getServerTranslations } from "@/shared/locale";
+import type { ErrorsLabels } from "@/shared/locale/types";
 import { extToMime } from "@/shared/utils";
 
 /**
@@ -112,7 +114,10 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
   });
 }
 
-async function authenticateRequest(request: NextRequest): Promise<{ userId: string } | NextResponse> {
+async function authenticateRequest(
+  request: NextRequest,
+  tErrors: ErrorsLabels
+): Promise<{ userId: string } | NextResponse> {
   const authHeader = request.headers.get("authorization");
   const accessToken = extractTokenFromHeader(authHeader) ?? request.cookies.get("access_token")?.value ?? null;
   const payload = accessToken ? await verifyToken(accessToken) : null;
@@ -129,11 +134,11 @@ async function authenticateRequest(request: NextRequest): Promise<{ userId: stri
     }
   }
 
-  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  return NextResponse.json({ error: tErrors.file.authenticationRequired }, { status: 401 });
 }
 
-async function checkFileAccess(userId: string, relativePath: string): Promise<NextResponse | null> {
-  const accessResult = await StorageService.checkFileAccess(userId, relativePath);
+async function checkFileAccess(userId: string, relativePath: string, locale?: string): Promise<NextResponse | null> {
+  const accessResult = await StorageService.checkFileAccess(userId, relativePath, locale);
   if (accessResult) {
     return NextResponse.json({ error: accessResult.error }, { status: accessResult.status });
   }
@@ -170,11 +175,14 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
  * GET /api/storage/files/[[...path]]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path?: string[] }> }) {
+  const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
+  const tErrors = getServerTranslations(locale).errorsTranslations;
+
   try {
     const relativePath = await getRelativePath(params);
 
     if (!relativePath) {
-      return NextResponse.json({ error: "File path is required" }, { status: 400 });
+      return NextResponse.json({ error: tErrors.file.filePathRequired }, { status: 400 });
     }
 
     // Allow unauthenticated access to public files (public/ or avatars/ directories)
@@ -186,7 +194,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           : resolveLocalStoragePath(relativePath);
       } catch (error) {
         logger.warn("Path traversal attempt detected in public file request", { path: relativePath, error });
-        return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
+        return NextResponse.json({ error: tErrors.file.invalidFilePath }, { status: 400 });
       }
 
       try {
@@ -194,15 +202,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         return buildFileResponse(absolutePath, relativePath, request.headers.get("range"));
       } catch {
         logger.warn("Public file not found", { path: relativePath, absolutePath });
-        return NextResponse.json({ error: "File not found" }, { status: 404 });
+        return NextResponse.json({ error: tErrors.file.fileNotFound }, { status: 404 });
       }
     }
 
     // Require authentication for non-public files
-    const authResult = await authenticateRequest(request);
+    const authResult = await authenticateRequest(request, tErrors);
     if (authResult instanceof NextResponse) return authResult;
 
-    const accessDenied = await checkFileAccess(authResult.userId, relativePath);
+    const accessDenied = await checkFileAccess(authResult.userId, relativePath, locale);
     if (accessDenied) return accessDenied;
 
     let absolutePath: string;
@@ -210,19 +218,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       absolutePath = resolveLocalStoragePath(relativePath);
     } catch (error) {
       logger.warn("Path traversal attempt detected", { path: relativePath, error });
-      return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
+      return NextResponse.json({ error: tErrors.file.invalidFilePath }, { status: 400 });
     }
 
     try {
       await fs.access(absolutePath);
     } catch {
       logger.warn("File not found", { path: relativePath });
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
+      return NextResponse.json({ error: tErrors.file.fileNotFound }, { status: 404 });
     }
 
     return buildFileResponse(absolutePath, relativePath, request.headers.get("range"));
   } catch (error) {
     logger.error("Unexpected error in file serving handler", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: tErrors.internalServerError }, { status: 500 });
   }
 }

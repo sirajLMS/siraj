@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getEnv, getEnvironmentConfig } from "@/backend/lib/env";
+import { getServerTranslations } from "@/shared/locale";
 import { locales } from "@/shared/locale/AppLocale";
 
 const envConfig = getEnvironmentConfig();
@@ -53,10 +54,17 @@ function isAllowedOrigin(request: NextRequest): boolean {
  * Prefer this over fetch + location.reload() so the cookie is applied on the
  * same response that loads the next document.
  */
+function resolveLocaleFromRequest(request: NextRequest): string {
+  return request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
+}
+
 export async function GET(request: NextRequest) {
+  const locale = resolveLocaleFromRequest(request);
+  const tErrors = getServerTranslations(locale).errorsTranslations;
+
   const localeParam = request.nextUrl.searchParams.get("locale");
   if (!localeParam || !isAppLocale(localeParam)) {
-    return NextResponse.json({ error: "Invalid locale" }, { status: 400 });
+    return NextResponse.json({ error: tErrors.invalidLocale }, { status: 400 });
   }
 
   const redirectPath = safeRedirectPath(request.nextUrl.searchParams.get("redirect"));
@@ -72,9 +80,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const locale = resolveLocaleFromRequest(request);
+  const tErrors = getServerTranslations(locale).errorsTranslations;
+
   try {
     if (!isAllowedOrigin(request)) {
-      return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+      return NextResponse.json({ error: tErrors.invalidOrigin }, { status: 403 });
     }
 
     // Security Note: This endpoint is intentionally public.
@@ -90,13 +101,13 @@ export async function POST(request: NextRequest) {
       typeof body.locale !== "string" ||
       !isAppLocale(body.locale)
     ) {
-      return NextResponse.json({ error: "Invalid locale" }, { status: 400 });
+      return NextResponse.json({ error: tErrors.invalidLocale }, { status: 400 });
     }
 
     const response = NextResponse.json({ success: true, locale: body.locale });
     applyLocaleCookie(response, body.locale);
     return response;
   } catch {
-    return NextResponse.json({ error: "Failed to set locale" }, { status: 500 });
+    return NextResponse.json({ error: tErrors.failedToSetLocale }, { status: 500 });
   }
 }
