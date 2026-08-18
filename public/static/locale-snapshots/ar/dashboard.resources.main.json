@@ -53,6 +53,7 @@
     "createRecordFailed": "فشل إنشاء سجل المورد.",
     "uploadRetryFailed": "فشل رفع المورد. يرجى المحاولة مرة أخرى.",
     "deleteSuccess": "تم حذف المورد بنجاح.",
-    "deleteFailed": "فشل حذف المورد."
+    "deleteFailed": "فشل حذف المورد.",
+    "ariaDeleteResource": "حذف المورد"
   }
 }

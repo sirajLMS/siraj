@@ -37,9 +37,10 @@
  *
  *   summary.json     — High-level stats (file count, status breakdown, hunk totals)
  *   manifest.json    — Per-file metadata + parsed hunk summaries (no diff content)
- *   diffs/<safe>.json — Per-file structured diff: hunks parsed into objects with
- *                       old/new line ranges, content lines classified as added/
- *                       deleted/context, and per-line metadata
+ *   diffs/<hex>.json — Per-file structured diff (filename = hex-encoded file path):
+ *                       hunks parsed into objects with old/new line ranges, content
+ *                       lines classified as added/deleted/context, per-line metadata
+ *                       (hex encoding guarantees no filename collisions)
  *   full.diff        — Raw `git diff HEAD` for reference (not structured)
  *   snapshot.json    — (only with --capture) Git metadata header for resumability
  *
@@ -73,12 +74,8 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { parseArgs } from "node:util";
 
+import { runCommand } from "@/scripts/health/__shared__/sub-loop-types";
 import {
-  type CommandRunResult,
-  runCommand,
-} from "@/scripts/health/__shared__/sub-loop-types";
-import {
-  COLORS,
   logError,
   logInfo,
   logSuccess,
@@ -283,10 +280,11 @@ function getPorcelainStatus(): Map<string, string> {
     }
 
     const xy = entry.substring(0, 2);
-    const isRename = xy[0] === "R" || xy[1] === "R";
+    const isRenameOrCopy = xy[0] === "R" || xy[1] === "R" || xy[0] === "C" || xy[1] === "C";
 
-    if (isRename) {
-      // For renames: entry i is "R  old/path", entry i+1 is new/path
+    if (isRenameOrCopy) {
+      // For renames/copies: entry i is "R  old/path", entry i+1 is new/path
+      // Both use two NUL-delimited fields with -z format
       const newPath = entries[i + 1];
       if (newPath) {
         statusMap.set(newPath, xy);
@@ -309,7 +307,7 @@ function getPorcelainStatus(): Map<string, string> {
  * Get the full list of changed files (unstaged + staged + untracked), deduped and sorted.
  */
 function getChangedFiles(statusMap: Map<string, string>): string[] {
-  return [...statusMap.keys()].sort((a, b) => a.localeCompare(b));
+  return [...statusMap.keys()].toSorted((a, b) => a.localeCompare(b));
 }
 
 /**
@@ -496,12 +494,15 @@ function summarizeHunk(hunk: ParsedHunk, index: number): HunkSummary {
 
 /**
  * Convert a file path to a filesystem-safe filename for the diffs/ directory.
- * Uses `__` for path separators, `_` for other unsafe characters.
+ * Uses a hex-encoded path to guarantee uniqueness — no collision is possible
+ * because the full original path is encoded, not translated through a lossy
+ * character replacement.
  */
 function safeFilename(filePath: string): string {
-  return filePath
-    .replace(/\//g, "__")
-    .replace(/[^A-Za-z0-9._-]/g, "_");
+  // Hex-encode the full path to guarantee uniqueness — no collision possible.
+  // This avoids the `foo/bar.ts` vs `foo__bar.ts` collision that a naive
+  // `/`→`__` replacement would cause.
+  return Buffer.from(filePath, "utf8").toString("hex");
 }
 
 // ─── Report Generation ──────────────────────────────────────────────────────
@@ -666,6 +667,82 @@ export function writeDiffReport(
 // `git write-tree` creates a tree object but it's unreachable and GC'd cleanly.
 
 /**
+ * Safely narrow `unknown` to `Record<string, unknown>` after confirming it's a
+ * non-null object. This avoids unsafe `as` assertions in type guards.
+ */
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (typeof value !== "object" || value === null) return null;
+  // After the typeof check, `value` is `object`. Build a record from its
+  // entries to avoid unsafe `as` narrowing.
+  return Object.fromEntries(Object.entries(value));
+}
+
+/**
+ * Type guard: validate that a parsed JSON object is a valid `Snapshot`.
+ * Checks required fields and their types.
+ */
+function isSnapshot(value: unknown): value is Snapshot {
+  const v = asRecord(value);
+  if (v === null) return false;
+  return (
+    typeof v.schemaVersion === "number" &&
+    typeof v.timestamp === "string" &&
+    typeof v.headSha === "string" &&
+    typeof v.branch === "string" &&
+    typeof v.treeHash === "string" &&
+    typeof v.porcelainStatus === "string" &&
+    typeof v.artifacts === "object" &&
+    v.artifacts !== null
+  );
+}
+
+/**
+ * Type guard: validate that a parsed JSON object is a valid `DiffManifest`.
+ */
+function isDiffManifest(value: unknown): value is DiffManifest {
+  const v = asRecord(value);
+  if (v === null) return false;
+  return (
+    typeof v.timestamp === "string" &&
+    typeof v.fileCount === "number" &&
+    typeof v.summary === "object" &&
+    v.summary !== null &&
+    Array.isArray(v.files)
+  );
+}
+
+/**
+ * Type guard: validate that a parsed JSON object is a valid `FileDiff`.
+ */
+function isFileDiff(value: unknown): value is FileDiff {
+  const v = asRecord(value);
+  if (v === null) return false;
+  return (
+    typeof v.path === "string" &&
+    typeof v.status === "string" &&
+    Array.isArray(v.hunks)
+  );
+}
+
+/** Parse JSON with a type guard — throws on parse failure or invalid shape. */
+function parseJsonAs<T>(
+  raw: string,
+  guard: (value: unknown) => value is T,
+  label: string,
+): T {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`Corrupt ${label}: failed to parse JSON`);
+  }
+  if (!guard(parsed)) {
+    throw new Error(`Invalid ${label}: schema mismatch`);
+  }
+  return parsed;
+}
+
+/**
  * Capture a snapshot: generate the diff report, write all artifacts, and write
  * a `snapshot.json` with git metadata for later resumability.
  *
@@ -757,13 +834,7 @@ export function loadSnapshot(
 
   const snapshotDir = dirname(absSnapshotPath);
   const rawSnapshot = readFileSync(absSnapshotPath, "utf-8");
-
-  let snapshot: Snapshot;
-  try {
-    snapshot = JSON.parse(rawSnapshot) as Snapshot;
-  } catch {
-    throw new Error(`Corrupt snapshot.json: failed to parse JSON`);
-  }
+  const snapshot = parseJsonAs(rawSnapshot, isSnapshot, "snapshot.json");
 
   if (snapshot.schemaVersion !== 1) {
     throw new Error(
@@ -776,12 +847,13 @@ export function loadSnapshot(
   if (!existsSync(manifestPath)) {
     throw new Error(`Manifest not found: ${manifestPath}`);
   }
-  const manifest = JSON.parse(
+  const manifest = parseJsonAs(
     readFileSync(manifestPath, "utf-8"),
-  ) as DiffManifest;
+    isDiffManifest,
+    "manifest.json",
+  );
 
   // Load each per-file diff
-  const diffsDir = join(snapshotDir, snapshot.artifacts.diffsDir);
   const fileDiffs = new Map<string, FileDiff>();
 
   for (const fileEntry of manifest.files) {
@@ -790,9 +862,11 @@ export function loadSnapshot(
       logWarning(`Missing diff artifact: ${diffFilePath} — skipping`);
       continue;
     }
-    const fileDiff = JSON.parse(
+    const fileDiff = parseJsonAs(
       readFileSync(diffFilePath, "utf-8"),
-    ) as FileDiff;
+      isFileDiff,
+      `diff artifact ${fileEntry.diffFile}`,
+    );
     fileDiffs.set(fileDiff.path, fileDiff);
   }
 
@@ -910,7 +984,7 @@ function printHelp(): void {
     "Creates (under <output-dir>/):",
     "  summary.json       — High-level stats (file count, status breakdown, hunk totals)",
     "  manifest.json      — Per-file metadata + parsed hunk summaries",
-    "  diffs/<safe>.json  — Per-file structured diff with parsed hunks",
+    "  diffs/<hex>.json   — Per-file structured diff with parsed hunks (hex-encoded filename)",
     "  full.diff          — Raw `git diff HEAD` for reference",
     "  snapshot.json      — (capture mode only) Git metadata for resumability",
     "",
@@ -926,7 +1000,7 @@ function printHelp(): void {
     "  1 — not inside a git repository / runtime error",
     "  2 — invalid arguments or snapshot not found / corrupt",
   ];
-  console.log(lines.join("\n"));
+  logInfo(lines.join("\n"));
 }
 
 function main(): void {
@@ -997,7 +1071,7 @@ function main(): void {
   const outputDir = values["output-dir"];
   if (!outputDir) {
     logError("Must specify --output-dir <path> (or --resume <snapshot.json>)");
-    console.log("Run with --help for usage.");
+    logInfo("Run with --help for usage.");
     process.exit(2);
   }
 
@@ -1008,9 +1082,11 @@ function main(): void {
 
       // The report was already written by captureSnapshot() — log from the snapshot's manifest
       const manifestPath = join(resolve(outputDir), "manifest.json");
-      const manifest = JSON.parse(
+      const manifest = parseJsonAs(
         readFileSync(manifestPath, "utf-8"),
-      ) as DiffManifest;
+        isDiffManifest,
+        "manifest.json",
+      );
       const s = manifest.summary;
       logInfo(
         `Summary: ${s.totalFiles} files (${s.modified} modified, ${s.added} added, ${s.deleted} deleted, ${s.untracked} untracked)`,

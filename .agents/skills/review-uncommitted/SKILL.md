@@ -171,7 +171,7 @@ bun run .agents/skills/review-uncommitted/scripts/get-diff.ts --capture --output
 The script creates:
 - `summary.json` — high-level stats (file count, status breakdown, hunk totals) for routing decisions
 - `manifest.json` — per-file metadata with parsed hunk summaries (line ranges, added/deleted counts, no diff content)
-- `diffs/<safe-filename>.json` — per-file structured diff with hunks parsed into objects (old/new line ranges, content lines classified as added/deleted/context)
+- `diffs/<hex>.json` — per-file structured diff with hunks parsed into objects (old/new line ranges, content lines classified as added/deleted/context; filename is hex-encoded file path to guarantee uniqueness)
 - `full.diff` — complete raw `git diff HEAD` for reference
 - `snapshot.json` — git metadata (HEAD SHA, branch, tree hash, porcelain status) for resumable/deferred review
 
@@ -193,11 +193,11 @@ All diff artifacts (`summary.json`, `manifest.json`, `diffs/`, `full.diff`, `sna
 Use `manifest.json` or `summary.json` metadata to decide routing:
 
 ```bash
-# Read file count and hunk stats from summary
-FILE_COUNT=$(python3 -c "import json; print(json.load(open('$RUN_DIR/summary.json'))['totalFiles'])")
-HUNK_COUNT=$(python3 -c "import json; print(json.load(open('$RUN_DIR/summary.json'))['totalHunks'])")
+# Read file count and hunk stats from summary (using Bun for JSON parsing)
+FILE_COUNT=$(bun -e "console.log(JSON.parse(require('fs').readFileSync('$RUN_DIR/summary.json','utf8')).totalFiles)")
+HUNK_COUNT=$(bun -e "console.log(JSON.parse(require('fs').readFileSync('$RUN_DIR/summary.json','utf8')).totalHunks)")
 # Or filter manifest for files with actual hunks
-python3 -c "import json; m=json.load(open('$RUN_DIR/manifest.json')); print(sum(1 for f in m['files'] if f['hunkCount'] > 0))"
+bun -e "const m=JSON.parse(require('fs').readFileSync('$RUN_DIR/manifest.json','utf8')); console.log(m.files.filter(f=>f.hunkCount>0).length)"
 ```
 
 | Scope Size | Nested Subagents | Strategy |
@@ -227,7 +227,7 @@ Each file is a JSON with parsed hunks — each hunk has:
   - oldStart/oldLines: source line range
   - newStart/newLines: target line range
   - lines: array of { type: "added"|"deleted"|"context", oldLine, newLine, content }
-The file path → diff filename mapping is in $RUN_DIR/manifest.json.
+The file path → diff filename mapping is in $RUN_DIR/manifest.json — look up each file's "diffFile" field (e.g. "diffs/<hex>.json") to find its structured diff.
 Only review files with hunkCount > 0 — skip zero-hunk files.
 For line numbers in findings, use the newLine field from added/modified lines.
 ```

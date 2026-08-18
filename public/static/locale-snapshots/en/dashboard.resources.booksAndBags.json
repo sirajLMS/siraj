@@ -5,5 +5,6 @@
   "statusAvailable": "Available",
   "statusOutOfStock": "Out of Stock",
   "deleteSuccess": "Book deleted successfully.",
-  "deleteFailed": "Failed to delete book."
+  "deleteFailed": "Failed to delete book.",
+  "ariaDeleteBook": "Delete book"
 }

@@ -29,5 +29,13 @@
   "notSet": "Not set",
   "errors": "Errors",
   "cancel": "Cancel",
-  "save": "Save"
+  "save": "Save",
+  "ariaClose": "Close",
+  "ariaDelete": "Delete",
+  "ariaDeleteResource": "Delete resource",
+  "ariaDeleteBook": "Delete book",
+  "ariaDismiss": "Dismiss",
+  "ariaMenu": "Menu",
+  "ariaUserProfileMenu": "User profile menu",
+  "ariaProfileSections": "Profile sections"
 }

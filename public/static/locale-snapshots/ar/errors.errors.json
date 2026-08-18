@@ -94,7 +94,29 @@
       "__fn": "({ tableName, entityId }) => `${tableName} \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${entityId}`"
     },
     "invalidFileType": "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و HEIC.",
-    "invoicePaymentProofPending": "لدى هذه الفاتورة إثبات دفع قيد المراجعة بالفعل."
+    "invoicePaymentProofPending": "لدى هذه الفاتورة إثبات دفع قيد المراجعة بالفعل.",
+    "fileUsageRegistered": "تم تسجيل استخدام الملف بنجاح",
+    "fileUsageRegisterFailed": {
+      "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u062A\\u0633\\u062C\\u064A\\u0644 \\u0627\\u0633\\u062A\\u062E\\u062F\\u0627\\u0645 \\u0627\\u0644\\u0645\\u0644\\u0641: ${error}`"
+    },
+    "fileCurrentlyInUse": "الملف قيد الاستخدام حاليًا",
+    "unableToCheckFileUsage": "تعذر التحقق من استخدام الملف",
+    "directoryNotFound": "الدليل غير موجود",
+    "directoryPermissionsUpdated": "تم تحديث أذونات الدليل بنجاح",
+    "directoryPermissionsUpdateFailed": "فشل تحديث أذونات الدليل",
+    "permissionsUpdateFailed": {
+      "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0627\\u0644\\u0623\\u0630\\u0648\\u0646\\u0627\\u062A: ${error}`"
+    },
+    "fileProtectionUpdated": "تم تحديث حماية الملف بنجاح",
+    "fileProtectionUpdateFailed": "فشل تحديث حماية الملف",
+    "directoryProtectionUpdated": "تم تحديث حماية الدليل بنجاح",
+    "directoryProtectionUpdateFailed": "فشل تحديث حماية الدليل",
+    "fileOrDirectoryNotFound": "الملف أو الدليل غير موجود",
+    "protectionUpdateFailed": {
+      "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u062A\\u0639\\u064A\\u064A\\u0646 \\u0627\\u0644\\u062D\\u0645\\u0627\\u064A\\u0629: ${error}`"
+    },
+    "sha256HashMismatch": "عدم تطابق في بصمة SHA-256",
+    "invalidUploadRequestBody": "نص طلب الرفع غير صالح"
   },
   "meetingProvider": {
     "meetingProviderInactive": "موفر الاجتماعات غير نشط.",
@@ -111,7 +133,13 @@
     "meetingProviderInUse": "موفر الاجتماعات قيد الاستخدام ولا يمكن حذفه.",
     "invalidReturnPath": "مسار الإرجاع غير صالح. يجب أن يكون مسار الإرجاع ارتباطاً نسبياً.",
     "missingSubject": "مطلوب موضوع الانتحال لتفويض النطاق الكامل",
-    "dwdNotEnabled": "تفويض النطاق الكامل غير مفعّل لحساب الخدمة هذا. اتصل بمسؤول Google Workspace لديك."
+    "dwdNotEnabled": "تفويض النطاق الكامل غير مفعّل لحساب الخدمة هذا. اتصل بمسؤول Google Workspace لديك.",
+    "slugIsRequired": "المعرّف الفريد (slug) مطلوب",
+    "urlAllowlistIsRequired": "قائمة عناوين URL المسموح بها مطلوبة",
+    "fieldSchemaIsRequired": "مخطط الحقل (fieldSchema) مطلوب",
+    "providerIdIsRequired": "معرّف المزوّد (providerId) مطلوب",
+    "isDefaultIsRequired": "القيمة الافتراضية (isDefault) مطلوبة",
+    "detailsIsRequired": "التفاصيل (details) مطلوبة"
   },
   "parent": {
     "alreadyExists": "ملف ولي الأمر لهذا المستخدم موجود بالفعل.",
@@ -165,7 +193,10 @@
     },
     "userEmailExists": "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
     "cannotModifyBankingFields": "لا يمكن تعديل الحقول المصرفية.",
-    "parentNotFound": "ولي الأمر غير موجود."
+    "parentNotFound": "ولي الأمر غير موجود.",
+    "userCreateFailed": {
+      "__fn": "(email) => `\\u0641\\u0634\\u0644 \\u0625\\u0646\\u0634\\u0627\\u0621 \\u0645\\u0633\\u062A\\u062E\\u062F\\u0645 \\u0628\\u0627\\u0644\\u0628\\u0631\\u064A\\u062F \\u0627\\u0644\\u0625\\u0644\\u0643\\u062A\\u0631\\u0648\\u0646\\u064A: ${email}`"
+    }
   },
   "scheduling": {
     "cannotRescheduleToSelf": "لا يمكن إعادة الجدولة للذات.",
@@ -277,6 +308,9 @@
   "userEmailExists": "مستخدم بهذا البريد الإلكتروني موجود بالفعل.",
   "cannotModifyBankingFields": "لا يمكن تعديل الحقول المصرفية.",
   "parentNotFound": "ولي الأمر غير موجود.",
+  "userCreateFailed": {
+    "__fn": "(email) => `\\u0641\\u0634\\u0644 \\u0625\\u0646\\u0634\\u0627\\u0621 \\u0645\\u0633\\u062A\\u062E\\u062F\\u0645 \\u0628\\u0627\\u0644\\u0628\\u0631\\u064A\\u062F \\u0627\\u0644\\u0625\\u0644\\u0643\\u062A\\u0631\\u0648\\u0646\\u064A: ${email}`"
+  },
   "cannotRescheduleToSelf": "لا يمكن إعادة الجدولة للذات.",
   "cannotRescheduleCompleted": "لا يمكن إعادة جدولة جلسة مكتملة.",
   "cannotRescheduleAlreadyRescheduled": "لا يمكن إعادة جدولة جلسة تم إعادة جدولتها بالفعل.",
@@ -365,5 +399,15 @@
   "deliveryFailed": {
     "__fn": "(channelLabel) => `\\u0641\\u0634\\u0644 \\u062A\\u0633\\u0644\\u064A\\u0645 ${channelLabel}. \\u064A\\u0631\\u062C\\u0649 \\u0627\\u0644\\u0645\\u062D\\u0627\\u0648\\u0644\\u0629 \\u0645\\u0631\\u0629 \\u0623\\u062E\\u0631\\u0649 \\u0644\\u0627\\u062D\\u0642\\u0627\\u064B.`"
   },
-  "studentNameFallback": "طالب"
+  "studentNameFallback": "طالب",
+  "invalidIdentifierKind": {
+    "__fn": "(value) => `\\u0635\\u0641\\u062D\\u0629 \\u062D\\u0633\\u0627\\u0628 \\u063A\\u064A\\u0631 \\u0635\\u0627\\u0644\\u062D\\u0629: identifierKind \\u063A\\u064A\\u0631 \\u0645\\u062F\\u0639\\u0648\\u0645 '${value}'`"
+  },
+  "invalidSupportedDirections": {
+    "__fn": "(value) => `\\u0635\\u0641\\u062D\\u0629 \\u062D\\u0633\\u0627\\u0628 \\u063A\\u064A\\u0631 \\u0635\\u0627\\u0644\\u062D\\u0629: supportedDirections \\u063A\\u064A\\u0631 \\u0645\\u062F\\u0639\\u0648\\u0645 '${value}'`"
+  },
+  "invalidOverrideState": "قيمة حالة تجاوز الصلاحية غير صالحة.",
+  "bulkOperationLimitExceeded": {
+    "__fn": "(operation, limit) => `\\u0639\\u0645\\u0644\\u064A\\u0629 ${operation} \\u0627\\u0644\\u0645\\u062C\\u0645\\u0648\\u0639\\u0629 \\u0645\\u062D\\u062F\\u0648\\u062F\\u0629 \\u0628\\u0640 ${limit} \\u0639\\u0646\\u0635\\u0631 \\u0643\\u062D\\u062F \\u0623\\u0642\\u0635\\u0649`"
+  }
 }

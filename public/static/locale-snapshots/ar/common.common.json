@@ -29,5 +29,13 @@
   "errors": "أخطاء",
   "notSet": "غير محدد",
   "cancel": "إلغاء",
-  "save": "حفظ"
+  "save": "حفظ",
+  "ariaClose": "إغلاق",
+  "ariaDelete": "حذف",
+  "ariaDeleteResource": "حذف المورد",
+  "ariaDeleteBook": "حذف الكتاب",
+  "ariaDismiss": "إغفاء",
+  "ariaMenu": "القائمة",
+  "ariaUserProfileMenu": "قائمة ملف المستخدم",
+  "ariaProfileSections": "أقسام الملف الشخصي"
 }
