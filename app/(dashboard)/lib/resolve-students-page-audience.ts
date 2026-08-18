@@ -1,5 +1,5 @@
 import { AppPermission } from "@/backend/enum";
-import type { UserPermissionContext } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 
 export type StudentsPageAudience = "admin" | "teacher" | "parent";
 

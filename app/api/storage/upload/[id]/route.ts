@@ -7,6 +7,7 @@ import { pipeline } from "node:stream/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import { logger, resolveLocalStoragePath } from "@/backend/lib";
 import { StorageService } from "@/backend/services";
+import { getServerTranslations } from "@/shared/locale";
 
 /**
  * Bridge DOM ReadableStream to a Node Readable via async iteration.
@@ -56,7 +57,12 @@ function validateHeaders(request: NextRequest, signedUrl: SignedUrlData): NextRe
 /**
  * Stream request body to file while calculating SHA-256
  */
-async function streamToFile(stream: ReadableStream, filePath: string, expectedMd5: string): Promise<void> {
+async function streamToFile(
+  stream: ReadableStream,
+  filePath: string,
+  expectedMd5: string,
+  hashMismatchMessage: string
+): Promise<void> {
   const hash = crypto.createHash("sha256");
   const writeStream = createWriteStream(filePath);
 
@@ -73,7 +79,7 @@ async function streamToFile(stream: ReadableStream, filePath: string, expectedMd
     const actualHash = hash.digest("base64");
     if (actualHash !== expectedMd5) {
       await fs.unlink(filePath).catch(() => {});
-      throw new Error("SHA-256 hash mismatch");
+      throw new Error(hashMismatchMessage);
     }
   } catch (error) {
     await fs.unlink(filePath).catch(() => {});
@@ -128,14 +134,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const validationResponse = validateHeaders(request, signedUrl);
     if (validationResponse) return validationResponse;
 
-    return await processUpload(request.body, signedUrl, tokenId);
+    return await processUpload(request, signedUrl, tokenId);
   } catch (error) {
     logger.error("Unexpected error in upload handler", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-async function processUpload(body: ReadableStream<Uint8Array> | null, signedUrl: SignedUrlData, tokenId: string) {
+async function processUpload(request: NextRequest, signedUrl: SignedUrlData, tokenId: string): Promise<NextResponse> {
+  const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
+  const tErrors = getServerTranslations(locale).errorsTranslations;
+
   let absolutePath: string;
   try {
     absolutePath = resolveLocalStoragePath(signedUrl.filePath);
@@ -146,12 +155,12 @@ async function processUpload(body: ReadableStream<Uint8Array> | null, signedUrl:
 
   await fs.mkdir(path.dirname(absolutePath), { recursive: true, mode: 0o755 });
 
-  if (!body) {
+  if (!request.body) {
     return NextResponse.json({ error: "Request body is required" }, { status: 400 });
   }
 
   try {
-    await streamToFile(body, absolutePath, signedUrl.contentHash);
+    await streamToFile(request.body, absolutePath, signedUrl.contentHash, tErrors.file.sha256HashMismatch);
   } catch (error) {
     logger.error("Failed to stream file to disk", { tokenId, error });
     return NextResponse.json(

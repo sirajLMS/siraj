@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { SignedUrlRepository } from "@/backend/db/repo/shared";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
 import { SessionService, StorageService } from "@/backend/services";
+import { getServerTranslations } from "@/shared/locale";
 
 export type VercelUploadUrlClientPlayload = {
   sessionId: string;
@@ -181,7 +182,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const rawBody: unknown = await request.json();
     if (!isHandleUploadBody(rawBody)) {
       logger.warn("Invalid upload request body", { userId });
-      return NextResponse.json({ error: "Invalid upload request body" }, { status: 400 });
+      const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";
+      const tErrors = getServerTranslations(locale).errorsTranslations;
+      return NextResponse.json({ error: tErrors.file.invalidUploadRequestBody }, { status: 400 });
     }
     const body: HandleUploadBody = rawBody;
     if (body.type !== "blob.generate-client-token") {
