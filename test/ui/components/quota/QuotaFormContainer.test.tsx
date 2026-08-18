@@ -67,9 +67,17 @@ await mock.module("@/frontend/common/views/dashboard/billing/quota/useQuotaFormV
   useQuotaFormViewModel: () => mockViewModel,
 }));
 
-await mock.module("@/frontend/common/views/dashboard/billing/quota/quotaFormAccessContext", () => ({
-  QuotaFormAccessContext: { Provider: ({ children }: { children: ReactElement }) => children },
-  useQuotaFormAccess: () => ({ canManage: true, canView: true, readOnly: false, fieldAccess: {}, labels: mockLabels }),
+await mock.module("@/frontend/common/views/dashboard/billing/quota/useQuotaFormShell", () => ({
+  useQuotaFormShell: () => ({
+    pageTitle: mockViewModel.isEditing ? mockLabels.editQuota : mockLabels.newQuota,
+    breadcrumbs: [
+      { label: mockLabels.title, href: "/quotas" },
+      { label: mockViewModel.isEditing ? mockLabels.editQuota : mockLabels.newQuota, current: true },
+    ],
+    periodType: "PACKAGE",
+    kind: "PURCHASE",
+    canManage: true,
+  }),
 }));
 
 import * as matchers from "@testing-library/jest-dom/matchers";

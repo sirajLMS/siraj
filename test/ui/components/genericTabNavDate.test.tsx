@@ -58,7 +58,14 @@ describe("GenericTabNav date variant", () => {
 
     render(
       <TestWrapper locale={locale} themeMode="dark">
-        <GenericTabNavMobileView variant="date" mode="button" activeTab="1" tabs={dateTabs} onTabChange={onTabChange} />
+        <GenericTabNavMobileView
+          variant="date"
+          mode="button"
+          activeTab="1"
+          tabs={dateTabs}
+          onTabChange={onTabChange}
+          ariaLabel="Month days"
+        />
       </TestWrapper>
     );
 

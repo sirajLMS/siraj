@@ -63,7 +63,12 @@ function makeConfig(overrides: Partial<ClassMeetingConfigFieldsFragment> = {}): 
     label: "TestClassConfig",
     isDefault: false,
     hasSecret: false,
-    details: { meetingUrl: "https://zoom.us/j/123456789", username: null, tenantId: null },
+    details: {
+      id: "meeting-config-details",
+      meetingUrl: "https://zoom.us/j/123456789",
+      username: null,
+      tenantId: null,
+    },
     providerMetadata: {},
     provider: makeProvider("zoom"),
     createdAt: "2025-01-01T00:00:00Z",

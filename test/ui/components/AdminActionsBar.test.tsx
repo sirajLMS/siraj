@@ -93,7 +93,7 @@ describe("AdminActionsBar", () => {
   test("renders delete button", () => {
     setupAdminActionsBar("NOT_ACTIVATED");
 
-    const deleteButton = screen.getByRole("button", { name: /delete-instance/i });
+    const deleteButton = screen.getByRole("button", { name: labels.deleteInstance });
     expect(deleteButton).toBeVisible();
     expect(deleteButton).toHaveAttribute("title", labels.deleteInstance);
   });

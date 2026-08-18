@@ -6,9 +6,12 @@ expect.extend(matchers);
 
 import { MeetingProviderLogo } from "@/frontend/common/components/ui/display/meetingConfig/MeetingProviderLogo";
 import type { AppLocale } from "@/shared/locale/AppLocale";
+import { readTranslation } from "@/shared/locale/client/translation-cache-store";
+import { Translation } from "@/shared/locale/namespaces/translation";
 import { TestWrapper } from "@/test/ui/components/TestWrapper";
 
 const locale: AppLocale = "ar";
+const meetingConfigLabels = readTranslation(Translation.Ui.MeetingConfig, locale);
 
 afterEach(() => {
   cleanup();
@@ -83,14 +86,14 @@ describe("MeetingProviderLogo", () => {
     const { container } = render(<MeetingProviderLogo providerSlug="zoom" providerName="Zoom" />, {
       wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
     });
-    expect(container.querySelector("img")).toHaveAttribute("alt", "Zoom logo");
+    expect(container.querySelector("img")).toHaveAttribute("alt", meetingConfigLabels.providerLogoAlt("Zoom"));
   });
 
   test("uses default alt text when no providerName", () => {
     const { container } = render(<MeetingProviderLogo providerSlug="zoom" />, {
       wrapper: ({ children }) => <TestWrapper locale={locale}>{children}</TestWrapper>,
     });
-    expect(container.querySelector("img")).toHaveAttribute("alt", "zoom logo");
+    expect(container.querySelector("img")).toHaveAttribute("alt", meetingConfigLabels.providerLogoAlt("zoom"));
   });
 
   test("renders with custom sx prop", () => {

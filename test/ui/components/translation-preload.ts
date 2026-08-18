@@ -44,8 +44,16 @@ const meetingNamespaceHandles: readonly NamespaceHandle<unknown>[] = [
   Translation.Ui.MeetingConfig,
   Translation.Ui.MeetingConfigRecurringSchedule,
   Translation.Dashboard.CoreNotifications,
+  Translation.Dashboard.CoreNav,
+  Translation.Dashboard.CoreStatusTracking,
+  Translation.Dashboard.RescheduleTracking,
+  Translation.Dashboard.ParentsDirectory,
+  Translation.Dashboard.StudentStatus,
   Translation.Dashboard.SupervisorPortalProfile,
   Translation.Errors,
+  Translation.Profile.Parent,
+  Translation.Profile.Teacher,
+  Translation.Ui.UserSelect,
 ];
 
 const pendingPromises: Promise<unknown>[] = [];

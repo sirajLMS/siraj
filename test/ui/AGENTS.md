@@ -1,10 +1,18 @@
 # UI Test Rules (`test/ui/`)
 
-All tests under `test/ui/` run with `TEST_SERVER_MODE=production`. Any test that starts the shared Next.js test harness uses **`next start`** against a pre-built production bundle — not `next dev`.
+E2E tests under `test/ui/` default to **dev mode** (`TEST_SERVER_MODE=dev`). When a dev server is already running on port 3000, E2E tests reuse it instead of spawning a separate test server — this avoids the Next.js 16 dist-dir conflict that prevents a second dev server from starting. If no dev server is running, a separate test dev server is spawned on port 3066. To run E2E against a production build instead, set `TEST_SERVER_MODE=production` and run `bun run build:test` first.
 
 ## Prerequisites
 
-**Before E2E tests (or any UI test that hits the running app), build the test production bundle:**
+**Dev mode (default):**
+- Start the dev server first: `bun run dev` (port 3000)
+- E2E tests will automatically detect and reuse the running dev server
+- No build step required — the dev server compiles routes on-demand
+- Route warmup is performed automatically (see `E2E_WARMUP_ROUTES` in `testServer.ts`)
+
+**Production mode (optional, set `TEST_SERVER_MODE=production`):**
+
+Before E2E tests in production mode, build the test production bundle:
 
 ```bash
 bun run build:test
@@ -14,40 +22,43 @@ bun run build:test
 - Uses **only** `.env.test` — injected into the `next build` / `next start` process env (no parent shell env). Per [Next.js test env rules](https://nextjs.org/docs/app/guides/environment-variables#test-environment-variables), keys already set in `process.env` are not overridden by `.env.local` or other files on disk
 - Tests do **not** run `next build` automatically; missing build fails fast with a clear error
 
-**Rebuild `build:test` after changes to:** server code, auth/cookies, middleware, API routes, or anything that affects the running Next.js app.
+**Rebuild `build:test` after changes to:** server code, auth/cookies, middleware, API routes, or anything that affects the running Next.js app. (Only needed for production mode — dev mode hot-reloads automatically.)
 
 ## Test Layers
 
 | Layer | Path | Server | Notes |
 |-------|------|--------|-------|
 | Component | `test/ui/components/` | None | Happy DOM + mocked Apollo. No browser, no network. |
-| E2E | `test/ui/e2e/` | Production (`next start`) | Playwright via `bun:test`. Uses `setupBrowserLifecycle()` → `setupTestServerLifecycle()`. |
+| E2E | `test/ui/e2e/` | Dev (default) or Production (`next start`) | Playwright via `bun:test`. Uses `setupBrowserLifecycle()` → `setupTestServerLifecycle()`. |
 | Static checks | `test/ui/mobile-desktop-isolation.test.ts` | None | Import-boundary scans only. |
 
-Component tests do not need `build:test`. E2E tests **do**.
+Component tests do not need `build:test`. E2E tests in production mode **do**.
 
 ## Commands
 
 ```bash
-bun run build:test          # Build .next-test-prod (required before E2E)
+bun run dev                 # Start dev server on port 3000 (required for dev-mode E2E)
+bun run build:test          # Build .next-test-prod (required for production-mode E2E)
 bun run test:ui:components  # Happy DOM component tests
-bun run test:ui:e2e         # Playwright E2E (production server)
+bun run test:ui:e2e         # Playwright E2E (dev server by default, reuses port 3000 if running)
 bun run test:ui:static      # Mobile/desktop isolation checks
 bun run test:ui             # All of the above
 bun run test:ui:kill        # Kill test servers on port 3066 only (never dev:3000 or start:4000)
 ```
 
-All `test:ui*` scripts preload `test/ui/test-env.ts`, which sets `TEST_SERVER_MODE=production`.
+All `test:ui*` scripts preload `test/ui/test-env.ts`, which sets `TEST_SERVER_MODE=dev` by default. Override with `TEST_SERVER_MODE=production` for production-mode E2E.
 
 ## Shared Test Server Infrastructure
 
 E2E reuses the GraphQL test harness in `frontend/common/graphql/test/`:
 
-- `lifecycle.ts` — `setupTestServerLifecycle()` (port allocation, start/stop)
-- `testServer.ts` — spawns `next start` when mode is production
-- `testPort.ts` — `getTestServerMode()` defaults to production for any run under `test/ui/`
+- `lifecycle.ts` — `setupTestServerLifecycle()` (port allocation, start/stop, dev-server reuse)
+- `testServer.ts` — in dev mode, detects and reuses a running dev server on port 3000; otherwise spawns a test dev server on port 3066. In production mode, spawns `next start` on port 3066.
+- `testPort.ts` — `getTestServerMode()` defaults to dev for `test/ui/` runs; `DEV_SERVER_PORT = 3000`; `isServerRunningOnPort()` detects existing dev server
 
-**GraphQL integration tests** (`frontend/common/graphql/test/`) still use the **dev** server by default. Do not change that unless explicitly requested — `test-helper` mutations are blocked in production `NODE_ENV`.
+**Dev-server reuse behavior:** When `TEST_SERVER_MODE=dev` and a dev server is already running on port 3000, the E2E test harness sets the test port to 3000 and skips spawning a separate server. The `stopTestServer()` function detects this case and does **not** kill the externally-managed dev server — only the Playwright browser is closed.
+
+**GraphQL integration tests** (`frontend/common/graphql/test/`) use the **dev** server by default. This is the same default as E2E tests.
 
 ## E2E Conventions
 
@@ -55,7 +66,8 @@ E2E reuses the GraphQL test harness in `frontend/common/graphql/test/`:
 - Login helpers: `test/ui/e2e/helpers.ts` (`loginAsDemoUser` via `Bun.fetch`, not Playwright `context.request`)
 - No `happydom-preload` in E2E — conflicts with Playwright
 - No `waitForTimeout` / `networkidle` — use auto-waiting Playwright assertions
-- Auth cookies: `AUTH_COOKIE_SECURE=false` in `.env.test` so `http://localhost` works in production mode
+- Auth cookies: `AUTH_COOKIE_SECURE=false` in `.env.test` so `http://localhost` works in both dev and production modes
+- **Never stop the dev server (port 3000)** — E2E tests reuse it when running in dev mode
 
 ### E2E Translation Rules (CRITICAL — No Hardcoded Strings)
 
