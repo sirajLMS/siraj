@@ -7,7 +7,7 @@ import {
 } from "@/backend/services/profile/profile-field-filter-bridge";
 import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
 import { STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
-import type { ProfileFieldGroupDefinition, StudentFieldGroupDefinition } from "@/backend/types";
+import type { ProfileFieldGroupDefinition } from "@/backend/types";
 
 export type FieldFilterContext = {
   readonly actorUserId: string;
@@ -79,17 +79,6 @@ export function filterProfileByFieldGroups<T extends Record<string, unknown>>(pa
   }
 
   return filtered;
-}
-
-function getStudentScope(ctx: StudentFieldFilterContext): ProfileScope {
-  return ctx.actorUserId === ctx.studentUserId ? ProfileScope.OWN : ProfileScope.OTHER;
-}
-
-export function getStudentEditPermission(
-  group: StudentFieldGroupDefinition,
-  ctx: StudentFieldFilterContext
-): AppPermission {
-  return getStudentScope(ctx) === ProfileScope.OWN ? group.editOwn : group.editOther;
 }
 
 export function filterStudentProfileByFieldGroups<T extends Record<string, unknown>>(

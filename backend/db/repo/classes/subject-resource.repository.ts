@@ -3,6 +3,7 @@ import { db, queryDb } from "@/backend/db";
 import { learningResources, subjectResources } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type { DBTransaction, SubjectResourceAttachInput, SubjectResourceReturnType } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale";
 
 type SubjectResourceRow = {
   id: string;
@@ -93,7 +94,7 @@ export namespace SubjectResourceRepository {
 
   export async function attachResource(
     input: SubjectResourceAttachInput,
-    _locale?: string,
+    locale?: string,
     tx?: DBTransaction
   ): Promise<SubjectResourceReturnType> {
     try {
@@ -109,7 +110,8 @@ export namespace SubjectResourceRepository {
           .returning();
 
         if (!result) {
-          throw new Error("Failed to attach resource to subject");
+          const { subjectResource } = getServerTranslations(locale ?? "en").errorsTranslations;
+          throw new Error(subjectResource.attachFailed);
         }
 
         logger.info("Resource attached to subject", {
@@ -135,7 +137,7 @@ export namespace SubjectResourceRepository {
   export async function detachResource(
     subjectId: string,
     learningResourceId: string,
-    _locale?: string,
+    locale?: string,
     tx?: DBTransaction
   ): Promise<{ id: string }> {
     try {
@@ -149,7 +151,8 @@ export namespace SubjectResourceRepository {
           .limit(1);
 
         if (!existing) {
-          throw new Error("Resource link not found");
+          const { subjectResource } = getServerTranslations(locale ?? "en").errorsTranslations;
+          throw new Error(subjectResource.linkNotFound);
         }
 
         await t
@@ -171,7 +174,7 @@ export namespace SubjectResourceRepository {
   export async function reorderResource(
     id: string,
     sortOrder: number,
-    _locale?: string,
+    locale?: string,
     tx?: DBTransaction
   ): Promise<{ id: string; sortOrder: number }> {
     try {
@@ -183,7 +186,8 @@ export namespace SubjectResourceRepository {
           .returning({ id: subjectResources.id, sortOrder: subjectResources.sortOrder });
 
         if (!updated) {
-          throw new Error("Subject resource not found");
+          const { subjectResource } = getServerTranslations(locale ?? "en").errorsTranslations;
+          throw new Error(subjectResource.notFound);
         }
 
         logger.info("Resource reordered", { subjectResourceId: id, sortOrder });

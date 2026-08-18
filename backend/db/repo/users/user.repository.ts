@@ -15,7 +15,7 @@ import {
   type UserReturnType,
   type UserSelectType,
 } from "@/backend/types";
-import { AuthUtils } from "@/backend/utils";
+import { AuthUtils, escapeLikeWildcards } from "@/backend/utils";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseAccountStatus } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
@@ -193,7 +193,12 @@ export namespace UserRepository {
     const conditions: (SQL | undefined)[] = [];
     const trimmedSearch = opts.search?.trim();
     if (trimmedSearch) {
-      conditions.push(or(ilike(users.name, `%${trimmedSearch}%`), ilike(users.email, `%${trimmedSearch}%`)));
+      conditions.push(
+        or(
+          ilike(users.name, `%${escapeLikeWildcards(trimmedSearch)}%`),
+          ilike(users.email, `%${escapeLikeWildcards(trimmedSearch)}%`)
+        )
+      );
     }
 
     // Build the conditions dynamically for prepared statement

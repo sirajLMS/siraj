@@ -8,7 +8,7 @@ import type {
   DBTransaction,
 } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
-import type { ErrorsLabels } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 export namespace CurrencyHedgeRepository {
   export async function listAll(tx?: DBTransaction): Promise<CurrencyHedgeSelectType[]> {
@@ -24,7 +24,8 @@ export namespace CurrencyHedgeRepository {
 
   export async function create(
     input: Omit<CurrencyHedgeInsertType, "id">,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<CurrencyHedgeSelectType> {
     const client = tx ?? db;
     const now = new Date();
@@ -38,7 +39,8 @@ export namespace CurrencyHedgeRepository {
       .returning();
 
     if (!created) {
-      throw new Error("Failed to create currency hedge");
+      const { billing } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(billing.currencyHedgeCreateFailed);
     }
 
     return created;

@@ -317,7 +317,8 @@ export namespace StorageService {
       );
       return { success: true, message: file.fileUsageRegistered };
     } catch (error) {
-      return { success: false, message: file.fileUsageRegisterFailed(String(error)) };
+      logger.error("Failed to register file usage", { error: error instanceof Error ? error.message : String(error) });
+      return { success: false, message: file.fileUsageRegisterFailedGeneric };
     }
   }
 
@@ -377,9 +378,12 @@ export namespace StorageService {
         message: updated ? file.directoryPermissionsUpdated : file.directoryPermissionsUpdateFailed,
       };
     } catch (error) {
+      logger.error("Failed to update directory permissions", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return {
         success: false,
-        message: file.permissionsUpdateFailed(String(error)),
+        message: file.directoryPermissionsUpdateFailed,
       };
     }
   }
@@ -419,7 +423,10 @@ export namespace StorageService {
 
       return { success: false, message: file.fileOrDirectoryNotFound };
     } catch (error) {
-      return { success: false, message: file.protectionUpdateFailed(String(error)) };
+      logger.error("Failed to update storage item protection", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return { success: false, message: file.directoryProtectionUpdateFailed };
     }
   }
 }

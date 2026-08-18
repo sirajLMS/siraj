@@ -126,19 +126,6 @@ export const resetCacheService = (): void => {
 };
 
 /**
- * Health check for cache connection
- */
-export const checkCacheHealth = async (): Promise<boolean> => {
-  try {
-    const cache = await getCacheService();
-    return await cache.ping();
-  } catch (error) {
-    logger.error("Cache health check failed:", error);
-    return false;
-  }
-};
-
-/**
  * Export singleton cache service instance
  * This provides a direct instance for synchronous usage where methods
  * will automatically wait for the underlying service to initialize.

@@ -36,8 +36,8 @@ gqlSchemaBuilder.mutationField("reassignStudentTeacher", t =>
     type: ReassignStudentTeacherResultRef,
     authScopes: { permission: AppPermission.STUDENT_REASSIGN_TEACHER },
     args: {
-      studentId: t.arg.string({ required: true }),
-      newTeacherId: t.arg.string({ required: true }),
+      studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      newTeacherId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       expectedVersion: t.arg.int({ required: false }),
     },
     resolve: async (_root, args, ctx) => {
@@ -58,7 +58,7 @@ gqlSchemaBuilder.mutationField("changeStudentStatus", t =>
     type: ChangeStudentStatusResultRef,
     authScopes: { permission: AppPermission.STUDENT_MANAGE_STATUS },
     args: {
-      studentId: t.arg.string({ required: true }),
+      studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       newStatus: t.arg({ type: StudentStatusPothosObject, required: true }),
       expectedVersion: t.arg.int({ required: false }),
     },

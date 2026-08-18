@@ -552,7 +552,8 @@ export namespace StudentRepository {
       timezoneOverride: string | null;
       idempotencyKey: string;
     },
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.StudentSelectType> => {
     const executor = tx ?? db;
     const now = new Date();
@@ -585,7 +586,10 @@ export namespace StudentRepository {
         },
       })
       .returning();
-    if (!row) throw new Error("Student upsert failed");
+    if (!row) {
+      const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(i18n.student.upsertFailed);
+    }
     return row;
   };
 

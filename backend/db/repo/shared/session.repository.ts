@@ -15,6 +15,7 @@ import type {
   SessionMetadataSelectType,
   SessionSelectType,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale";
 
 // Default session configuration
 const DEFAULT_SESSION_TTL = 7 * 24 * 60 * 60; // 7 days in seconds
@@ -251,11 +252,12 @@ export namespace SessionRepository {
   export const create = async (
     input: SessionCreationOptions,
     tx?: DBTransaction,
-    _locale?: string
+    locale?: string
   ): Promise<SessionSelectType> => {
     const runner = async (t: DBTransaction) => {
       if (!input.userId) {
-        throw new Error("User ID (userId) is required to create a session");
+        const { session } = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(session.userIdRequired);
       }
 
       const hashedId = hashSessionId(input.hashedId);
@@ -314,11 +316,12 @@ export namespace SessionRepository {
   export const update = async (
     input: Omit<SessionInsertType, "lastActivity"> & { roleName?: string },
     tx?: DBTransaction,
-    _locale?: string
+    locale?: string
   ): Promise<SessionSelectType> => {
     const runner = async (t: DBTransaction) => {
       if (!input.userId) {
-        throw new Error("User ID (userId) is required to update a session");
+        const { session } = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(session.userIdRequired);
       }
 
       const hashedId = hashSessionId(input.hashedId);

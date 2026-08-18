@@ -257,7 +257,7 @@ gqlSchemaBuilder.queryField("meetingIntegrationConnectedAccounts", t =>
     type: [MeetingIntegrationConnectedAccountPothosObject],
     authScopes: { loggedIn: true },
     args: {
-      providerSlug: t.arg.string({ required: true }),
+      providerSlug: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const { actorUserId, tErrors } = await resolveAuthCtx(ctx);

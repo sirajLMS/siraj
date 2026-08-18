@@ -66,14 +66,55 @@ async function resolveAuthFromRequest(
 }
 
 const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+const IPV6_REGEX = /^[0-9a-fA-F:]+$/;
 
+/**
+ * Extracts the client IP from request headers. Only trusts platform-trusted
+ * headers (x-vercel-forwarded-for on Vercel, cf-connecting-ip behind Cloudflare)
+ * when the deployment is on that platform. Falls back to x-forwarded-for (first
+ * entry) and x-real-ip. Defaults to 127.0.0.1 if no valid IP is found.
+ */
 function getIpAddress(headersList: Headers): string {
-  const forwardedFor = headersList.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const isOnVercel = process.env.VERCEL === "1";
+  const isBehindCloudflare = process.env.CLOUDFLARE === "1";
+
+  if (isOnVercel) {
+    const vercelIp = headersList.get("x-vercel-forwarded-for");
+    if (vercelIp) {
+      return vercelIp.trim();
+    }
+  }
+
+  if (isBehindCloudflare) {
+    const cfConnectingIp = headersList.get("cf-connecting-ip");
+    if (cfConnectingIp) {
+      return cfConnectingIp.trim();
+    }
+  }
+
+  const forwardedFor = headersList.get("x-forwarded-for");
+  if (forwardedFor) {
+    const ips = forwardedFor
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (ips.length > 0) {
+      const ip = ips[0];
+      if (IPV4_REGEX.test(ip) || IPV6_REGEX.test(ip)) {
+        return ip;
+      }
+    }
+  }
+
   const realIp = headersList.get("x-real-ip");
-  const raw = realIp ?? forwardedFor ?? "127.0.0.1";
-  const parts = raw.split(":");
-  const ip = parts.length === 2 ? parts[0] : raw;
-  return IPV4_REGEX.test(ip) ? ip : "127.0.0.1";
+  if (realIp) {
+    const ip = realIp.trim();
+    if (IPV4_REGEX.test(ip) || IPV6_REGEX.test(ip)) {
+      return ip;
+    }
+  }
+
+  return "127.0.0.1";
 }
 
 /**

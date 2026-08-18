@@ -1,5 +1,6 @@
 import path from "node:path";
 import { getStringEnv } from "@/backend/lib/env";
+import { getAbsolutePath } from "@/backend/storage/disk/local/utils";
 
 const DEFAULT_STORAGE_DIR = "storage";
 
@@ -13,16 +14,11 @@ export function getLocalStorageBasePath(): string {
 
 export function resolveLocalStoragePath(relativePath: string): string {
   const basePath = getLocalStorageBasePath();
-  const resolvedPath = path.resolve(/* turbopackIgnore: true */ basePath, relativePath);
-  const relativeToBase = path.relative(basePath, resolvedPath);
-
-  if (relativeToBase.startsWith("..") || path.isAbsolute(relativeToBase)) {
-    throw new Error("Path traversal detected");
-  }
-
-  return resolvedPath;
+  return getAbsolutePath(basePath, relativePath);
 }
 
 export function resolvePublicStoragePath(subPath: string): string {
-  return path.join(/* turbopackIgnore: true */ getLocalStorageBasePath(), "public", subPath);
+  const basePath = getLocalStorageBasePath();
+  const publicRoot = path.join(/* turbopackIgnore: true */ basePath, "public");
+  return getAbsolutePath(publicRoot, subPath);
 }

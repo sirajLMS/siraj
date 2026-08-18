@@ -11,28 +11,40 @@ import {
   validateDeletePermissions,
 } from "@/backend/storage/disk/shared/delete-operations.helper";
 import type * as Types from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale";
 
-export async function deleteFile(ctx: LocalContext, filePath: string): Promise<Types.FileOperationResult> {
-  return executeDeleteFile(filePath, async () => {
-    const absolutePath = getAbsolutePath(ctx.basePath, filePath);
-    await fs.unlink(absolutePath);
-  });
+export async function deleteFile(
+  ctx: LocalContext,
+  filePath: string,
+  locale?: string
+): Promise<Types.FileOperationResult> {
+  return executeDeleteFile(
+    filePath,
+    async () => {
+      const absolutePath = getAbsolutePath(ctx.basePath, filePath);
+      await fs.unlink(absolutePath);
+    },
+    locale
+  );
 }
 
 export async function deleteItems(
   ctx: LocalContext,
-  input: Types.StorageItemsDeleteInput
+  input: Types.StorageItemsDeleteInput,
+  locale?: string
 ): Promise<Types.BulkOperationResult> {
-  return executeBulkDelete(ctx, input, processDelete);
+  return executeBulkDelete(ctx, input, (delCtx, params) => processDelete(delCtx, params, locale), locale);
 }
 
 async function processDelete(
   ctx: LocalContext,
-  params: DeleteFnParams
+  params: DeleteFnParams,
+  locale?: string
 ): Promise<Types.FileInfo | Types.DirectoryInfo | null> {
   const { itemPath, force, dbFile, dbDirectory, parentDir, usageCheck } = params;
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
 
-  validateDeletePermissions({ force, usageCheck, dbFile, dbDirectory, parentDir });
+  validateDeletePermissions({ force, usageCheck, dbFile, dbDirectory, parentDir }, tFile);
 
   const fileEntity = await fileInfoByPath(ctx, itemPath);
   const folderEntity = fileEntity ? null : await directoryInfoByPath(ctx, itemPath);

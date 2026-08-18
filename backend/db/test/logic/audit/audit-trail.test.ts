@@ -33,7 +33,7 @@ async function createAuditActor(tx: DBTransaction, name: string): Promise<string
     .values({
       name,
       email: `audit-${randomUUID()}@example.com`,
-      password: randomUUID(),
+      password: `TestPass-${randomUUID().slice(0, 8)}!`,
       createdAt: now,
       updatedAt: now,
     })

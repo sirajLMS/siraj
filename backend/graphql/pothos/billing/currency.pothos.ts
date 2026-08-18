@@ -40,6 +40,7 @@ export const SupportedCurrencyUpsertInputPothos = gqlSchemaBuilder.inputType("Su
 gqlSchemaBuilder.queryField("supportedCurrencies", t =>
   t.field({
     type: [SupportedCurrencyPothosObject],
+    authScopes: { loggedIn: true },
     args: {
       activeOnly: t.arg.boolean({ required: false }),
     },

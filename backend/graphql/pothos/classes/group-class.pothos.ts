@@ -5,6 +5,7 @@ import {
   ClassOutcomePothosObject,
   GroupClassAttendanceStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { requireAuthWithRateLimit } from "@/backend/graphql/shared";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { GroupClassService } from "@/backend/services";
 import type {
@@ -108,7 +109,7 @@ gqlSchemaBuilder.queryField("groupClassAudit", t =>
     type: GroupClassAuditRef,
     authScopes: { superAdmin: true },
     args: {
-      classInstanceId: t.arg.string({ required: true }),
+      classInstanceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
@@ -123,8 +124,8 @@ gqlSchemaBuilder.mutationField("updateClassAdminNote", t =>
     type: GroupClassAuditRef,
     authScopes: { superAdmin: true },
     args: {
-      classInstanceId: t.arg.string({ required: true }),
-      content: t.arg.string({ required: true }),
+      classInstanceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      content: t.arg.string({ required: true, directives: { constraint: { maxLength: 10000 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
@@ -139,11 +140,10 @@ gqlSchemaBuilder.mutationField("resendClassNotifications", t =>
     type: SupportRequestResultPothosObject,
     authScopes: { superAdmin: true },
     args: {
-      classInstanceId: t.arg.string({ required: true }),
+      classInstanceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
       return GroupClassService.resendNotifications(userId, args.classInstanceId, tErrors);
     },
   })

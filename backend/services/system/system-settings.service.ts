@@ -112,7 +112,7 @@ export namespace SystemSettingsService {
     const storageService = await getStorageService();
     const uploadResult = await storageService.uploadFile(bucketPath, "application/pdf", fileBuffer);
     if (!uploadResult.success) {
-      throw new Error(`Failed to upload ${config.logLabel}: ${uploadResult.message}`);
+      throw new Error(tErrors.resource.handbookUploadFailed);
     }
 
     if (config.registerLogMessage) {

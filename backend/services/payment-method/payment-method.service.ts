@@ -53,7 +53,7 @@ async function getPaymentMethodOrThrow(
 ): Promise<NonNullable<Awaited<ReturnType<typeof UserPaymentMethodRepository.getById>>>> {
   const method = await UserPaymentMethodRepository.getById(id, tx);
   if (method === null) {
-    throw new Error(tErrors.file.recordNotFound({ tableName: "user_payment_methods", entityId: id }));
+    throw new Error(tErrors.billing.paymentMethodNotFound(id));
   }
   return method;
 }

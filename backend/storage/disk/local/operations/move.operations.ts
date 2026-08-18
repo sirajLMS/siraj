@@ -12,23 +12,27 @@ import {
   validateAndCalculateNewPath,
 } from "@/backend/storage/disk/shared/move-operations.helper";
 import type * as Types from "@/backend/types";
+import { type FileErrors, getServerTranslations } from "@/shared/locale";
 
 export async function moveItems(
   ctx: LocalContext,
-  input: Types.StorageItemsMoveInput
+  input: Types.StorageItemsMoveInput,
+  locale?: string
 ): Promise<Types.BulkOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   return executeBulkOperation({
     ctx,
     sourcePaths: input.sourcePaths,
     destinationPath: input.destinationPath,
     existsFn: fileExists,
     operationName: "processed",
+    locale,
     beforeProcess: async (_, validSources) => {
       return await loadMoveEntities(validSources);
     },
     processFn: async (opCtx, sourcePath, entities) => {
       if (!entities) throw new Error("Move entities not loaded");
-      return await moveItem(opCtx, sourcePath, input.destinationPath, entities);
+      return await moveItem(opCtx, sourcePath, input.destinationPath, entities, tFile);
     },
   });
 }
@@ -37,9 +41,10 @@ async function moveItem(
   ctx: LocalContext,
   sourcePath: string,
   destinationPath: string,
-  { dbFileMap, dbDirectoryMap, dbSourceDirMap }: MoveEntities
+  { dbFileMap, dbDirectoryMap, dbSourceDirMap }: MoveEntities,
+  tFile: FileErrors
 ): Promise<Types.FileInfo | Types.DirectoryInfo | null> {
-  const newPath = validateAndCalculateNewPath(sourcePath, destinationPath, dbSourceDirMap);
+  const newPath = validateAndCalculateNewPath(sourcePath, destinationPath, dbSourceDirMap, tFile);
 
   const sourceAbsolutePath = getAbsolutePath(ctx.basePath, sourcePath);
   const destAbsolutePath = getAbsolutePath(ctx.basePath, newPath);

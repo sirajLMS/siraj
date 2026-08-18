@@ -3,10 +3,14 @@ import { logger } from "@/backend/lib/logger";
 import { fileInfoByPath } from "@/backend/storage/disk/gcp/operations/file.operations";
 import { directoryInfoByPath } from "@/backend/storage/disk/gcp/operations/folder.operations";
 import type { GcpContext, GenericOperationResult } from "@/backend/storage/disk/gcp/types";
+import { formatBulkOperationResult } from "@/backend/storage/disk/shared/bulk-operations.helper";
+import { validateDeletePermissions } from "@/backend/storage/disk/shared/delete-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { type FileErrors, getServerTranslations } from "@/shared/locale";
 
-export async function deleteFile(ctx: GcpContext, path: string): Promise<Types.FileOperationResult> {
+export async function deleteFile(ctx: GcpContext, path: string, locale?: string): Promise<Types.FileOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   try {
     const pathErr = StorageUtils.validatePath(path);
     if (pathErr) {
@@ -20,7 +24,7 @@ export async function deleteFile(ctx: GcpContext, path: string): Promise<Types.F
     if (usageCheck.isInUse) {
       return {
         success: false,
-        message: usageCheck.deleteBlockReason ?? "File is in use",
+        message: usageCheck.deleteBlockReason ?? tFile.fileIsInUse,
       };
     }
 
@@ -28,7 +32,7 @@ export async function deleteFile(ctx: GcpContext, path: string): Promise<Types.F
     if (dbFile?.isProtected === true) {
       return {
         success: false,
-        message: "File is protected from deletion",
+        message: tFile.fileProtectedFromDeletion,
       };
     }
 
@@ -37,7 +41,7 @@ export async function deleteFile(ctx: GcpContext, path: string): Promise<Types.F
     if (parentDir && !parentDir.allowDeleteFiles) {
       return {
         success: false,
-        message: "File deletion not allowed in this directory",
+        message: tFile.fileDeletionNotAllowedInDirectory,
       };
     }
 
@@ -52,23 +56,24 @@ export async function deleteFile(ctx: GcpContext, path: string): Promise<Types.F
 
     return {
       success: true,
-      message: "File deleted successfully",
+      message: tFile.fileDeletedSuccessfully,
     };
   } catch (error) {
     logger.error(`Failed to delete file: ${path}`, error);
     return {
       success: false,
-      message: `Failed to delete file: ${error instanceof Error ? error.message : String(error)}`,
+      message: tFile.failedToDeleteFile(error instanceof Error ? error.message : String(error)),
     };
   }
 }
 
 export async function deleteItems(
   ctx: GcpContext,
-  input: Types.StorageItemsDeleteInput
+  input: Types.StorageItemsDeleteInput,
+  locale?: string
 ): Promise<Types.BulkOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   let successCount = 0;
-  let failureCount = 0;
   const failures: Array<{ path: string; error: string }> = [];
   const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
@@ -76,14 +81,18 @@ export async function deleteItems(
 
   const results = await Promise.all(
     input.paths.map(path =>
-      deleteSingleItem(ctx, {
-        path,
-        force: input.force ?? false,
-        dbFile: context.dbFileMap.get(path),
-        dbDirectory: context.dbDirectoryMap.get(path),
-        parentDir: context.dbParentDirMap.get(path.substring(0, path.lastIndexOf("/"))),
-        usageCheck: context.usageCheckMap.get(path),
-      })
+      deleteSingleItem(
+        ctx,
+        {
+          path,
+          force: input.force ?? false,
+          dbFile: context.dbFileMap.get(path),
+          dbDirectory: context.dbDirectoryMap.get(path),
+          parentDir: context.dbParentDirMap.get(path.substring(0, path.lastIndexOf("/"))),
+          usageCheck: context.usageCheckMap.get(path),
+        },
+        tFile
+      )
     )
   );
 
@@ -93,20 +102,11 @@ export async function deleteItems(
       successCount++;
       successfulItems.push(result.data);
     } else {
-      failureCount++;
-      failures.push({ path, error: result.message ?? "Unknown error" });
+      failures.push({ path, error: result.message ?? tFile.unknownError });
     }
   });
 
-  return {
-    success: failureCount === 0,
-    message:
-      failureCount === 0 ? "All items deleted successfully" : `${successCount} items deleted, ${failureCount} failed`,
-    successCount,
-    failureCount,
-    failures,
-    successfulItems,
-  };
+  return formatBulkOperationResult(successCount, failures, successfulItems, "deleted", locale);
 }
 
 async function getDeleteContext(paths: string[], force: boolean) {
@@ -150,39 +150,34 @@ async function deleteSingleItem(
     dbDirectory?: Types.DirectorySelectType;
     parentDir?: Types.DirectorySelectType;
     usageCheck?: Types.FileUsageResult;
-  }
+  },
+  tFile: FileErrors
 ): Promise<GenericOperationResult<Types.FileInfo | Types.DirectoryInfo>> {
   const { path, force, dbFile, dbDirectory, parentDir, usageCheck } = params;
 
   try {
-    if (!force && usageCheck?.isInUse) {
-      return {
-        success: false,
-        message: usageCheck.deleteBlockReason ?? "File is currently in use",
-      };
-    }
-
-    if (dbFile?.isProtected === true || dbDirectory?.isProtected === true) {
-      return { success: false, message: "Item is protected from deletion" };
-    }
-
-    if (parentDir) {
-      const isFile = dbFile != null;
-      const canDelete = isFile ? parentDir.allowDeleteFiles : parentDir.allowDelete;
-      if (!canDelete) {
-        return {
-          success: false,
-          message: "Deletion not allowed in parent directory",
-        };
-      }
-    }
+    validateDeletePermissions(
+      {
+        force,
+        usageCheck: usageCheck
+          ? {
+              isInUse: usageCheck.isInUse,
+              deleteBlockReason: usageCheck.deleteBlockReason,
+            }
+          : undefined,
+        dbFile,
+        dbDirectory,
+        parentDir,
+      },
+      tFile
+    );
 
     const fileEntity = await fileInfoByPath(ctx, path);
     const folderEntity = fileEntity ? null : await directoryInfoByPath(ctx, path);
     const resultEntity = fileEntity ?? folderEntity;
 
     if (!resultEntity) {
-      return { success: false, message: "Item not found in bucket" };
+      return { success: false, message: tFile.itemNotFoundInBucket };
     }
 
     await ctx.bucket.file(path).delete();

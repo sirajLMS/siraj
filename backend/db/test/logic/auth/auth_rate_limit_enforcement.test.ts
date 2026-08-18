@@ -29,13 +29,15 @@ describe("Authentication Rate Limiting Enforcement", () => {
   // repo calls themselves. Per AGENTS.md rule 9, we provide afterAll/afterEach
   // hooks to hard-delete the created records.
   afterEach(async () => {
-    for (const { ip, email } of testIps) {
-      try {
-        await RateLimitRepository.resetAttempts(ip, email);
-      } catch {
-        // ignore — record may already be gone
-      }
-    }
+    await Promise.all(
+      testIps.map(async ({ ip, email }) => {
+        try {
+          await RateLimitRepository.resetAttempts(ip, email);
+        } catch {
+          // ignore — record may already be gone
+        }
+      })
+    );
     testIps.length = 0;
   });
 

@@ -9,6 +9,7 @@ import type {
   RecurringScheduleSelectType,
   RecurringScheduleUpsertInput,
 } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 
 export type ScheduleDayKey = `${string}:${string}`;
 
@@ -223,7 +224,7 @@ export namespace RecurringScheduleRepository {
     const whereConditions = [isNull(recurringSchedules.deletedAt)];
 
     if (options?.search) {
-      const searchPattern = `%${options.search}%`;
+      const searchPattern = `%${escapeLikeWildcards(options.search)}%`;
       whereConditions.push(sql`(${students.name} ILIKE ${searchPattern} OR ${users.name} ILIKE ${searchPattern})`);
     }
 

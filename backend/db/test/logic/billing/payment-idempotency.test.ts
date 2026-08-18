@@ -22,7 +22,7 @@ async function createTestParent(args: { tx: DBTransaction; suffix: string; now: 
     .values({
       name: "Idempotency Test Parent",
       email: parentEmail,
-      password: randomUUID(),
+      password: `TestPass-${randomUUID().slice(0, 8)}!`,
       createdAt: now,
       updatedAt: now,
     })
@@ -48,7 +48,7 @@ async function createTestStudent(args: { tx: DBTransaction; parentId: string; su
     .values({
       name: "Idempotency Test Student User",
       email: `student-${suffix}@example.com`,
-      password: randomUUID(),
+      password: `TestPass-${randomUUID().slice(0, 8)}!`,
       createdAt: now,
       updatedAt: now,
     })

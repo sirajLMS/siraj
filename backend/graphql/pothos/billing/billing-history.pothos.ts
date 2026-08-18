@@ -218,10 +218,10 @@ gqlSchemaBuilder.queryField("parentInvoiceHistory", t =>
     type: ParentInvoiceHistoryResultPothosObject,
     authScopes: { loggedIn: true },
     args: {
-      parentId: t.arg.string({ required: false }),
-      userId: t.arg.string({ required: false }),
+      parentId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
+      userId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
-      search: t.arg.string({ required: false }),
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const { callerUserId, tErrors } = await prepareParentScopedResolver(ctx, args);
@@ -251,7 +251,7 @@ gqlSchemaBuilder.queryField("adminInvoices", t =>
     authScopes: { permission: AppPermission.BILLING_VIEW_HISTORY },
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
-      search: t.arg.string({ required: false }),
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
@@ -304,8 +304,8 @@ gqlSchemaBuilder.queryField("parentBillingSummary", t =>
     type: ParentBillingSummaryPothosObject,
     authScopes: { loggedIn: true },
     args: {
-      parentId: t.arg.string({ required: false }),
-      userId: t.arg.string({ required: false }),
+      parentId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
+      userId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const { callerUserId, tErrors } = await prepareParentScopedResolver(ctx, args);

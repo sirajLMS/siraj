@@ -1,5 +1,5 @@
 import { decryptField, encryptField } from "@/backend/lib/field-encryption";
-import type { BankTransferDetails, PaymentMethodDetails } from "@/backend/types";
+import type { BankTransferDetails } from "@/backend/types";
 
 // Sensitive bank routing fields inside `BankTransferDetails` JSONB that must be
 // encrypted at rest (AES-256-GCM via `field-encryption`). `beneficiaryName` and
@@ -44,20 +44,4 @@ export function decryptBankTransferDetails(details: BankTransferDetails): BankTr
     }
   }
   return decrypted;
-}
-
-/**
- * No-op passthrough for non-bank `PaymentMethodDetails`. Only `BANK_TRANSFER`
- * carries sensitive nested fields today; every other type is safe to persist
- * as-is. The caller (service) knows the row `type` and dispatches to
- * `encryptBankTransferDetails` / `decryptBankTransferDetails` directly when
- * the type is `BANK_TRANSFER`. This stub exists to document the contract and
- * keep a single import surface for future per-type encryptors.
- */
-export function encryptPaymentMethodDetails(details: PaymentMethodDetails): PaymentMethodDetails {
-  return details;
-}
-
-export function decryptPaymentMethodDetails(details: PaymentMethodDetails): PaymentMethodDetails {
-  return details;
 }

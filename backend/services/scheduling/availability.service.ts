@@ -4,6 +4,13 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teache
 import { VacationRequestStatus } from "@/backend/enum";
 import { ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
+import {
+  computeSlotBounds,
+  getUtcDateString,
+  isVacationRequestStatus,
+  timeToMinutes,
+  validateSlotInMemory,
+} from "@/backend/services/scheduling/availability.helpers";
 import type {
   AssertSchedulePatternAvailableInput,
   AvailabilitySearchResult,
@@ -16,13 +23,6 @@ import type {
   TeacherVacationRequestSelectType,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-import {
-  computeSlotBounds,
-  getUtcDateString,
-  isVacationRequestStatus,
-  timeToMinutes,
-  validateSlotInMemory,
-} from "./availability.helpers";
 
 type ReadExecutor = DBTransaction | typeof db;
 
@@ -315,7 +315,7 @@ export namespace AvailabilityService {
   ): Promise<TeacherVacationRequestSelectType> => {
     if (input.startAt >= input.endAt) {
       const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new ValidationError(`${errorsTranslations.invalidInput}; Vacation start date must be before end date`);
+      throw new ValidationError(errorsTranslations.scheduling.vacationStartBeforeEnd);
     }
 
     return TeacherAvailabilityRepository.insertVacationRequest(input, requestedByUserId, teacherId, tx);
@@ -397,8 +397,8 @@ export namespace AvailabilityService {
       const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
       throw new ValidationError(
         errorKey === "vacationRequestNotPending"
-          ? `Vacation request ${vacationRequestId} is not in pending status. ${errorsTranslations.invalidInput}`
-          : `Vacation request ${vacationRequestId} is already cancelled. ${errorsTranslations.invalidInput}`
+          ? errorsTranslations.scheduling.vacationRequestNotPending(vacationRequestId)
+          : errorsTranslations.scheduling.vacationRequestAlreadyCancelled(vacationRequestId)
       );
     }
   }
@@ -409,22 +409,32 @@ export namespace AvailabilityService {
 
   export const searchCrossStaffAvailability = async (
     input: CrossStaffSearchInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<AvailabilitySearchResult> => {
     const fromMinutes = timeToMinutes(input.fromTime);
     const toMinutes = timeToMinutes(input.toTime);
 
     if (fromMinutes >= toMinutes) {
-      const { invalidInput } = getServerTranslations("en").errorsTranslations;
-      throw new ValidationError(`${invalidInput}; Start time must be before end time`);
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new ValidationError(errorsTranslations.scheduling.startTimeBeforeEndTime);
     }
 
     const fromDate = input.fromDate ?? getUtcDateString(new Date());
     const toDate = input.toDate ?? getUtcDateString(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
 
     if (fromDate > toDate) {
-      const { invalidInput } = getServerTranslations("en").errorsTranslations;
-      throw new ValidationError(`${invalidInput}; Vacation start date must be before end date`);
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new ValidationError(errorsTranslations.scheduling.vacationStartBeforeEnd);
+    }
+
+    const MAX_AVAILABILITY_SEARCH_SPAN_DAYS = 90;
+    const fromDateMs = Date.parse(`${fromDate}T00:00:00.000Z`);
+    const toDateMs = Date.parse(`${toDate}T00:00:00.000Z`);
+    const spanDays = (toDateMs - fromDateMs) / (24 * 60 * 60 * 1000);
+    if (spanDays > MAX_AVAILABILITY_SEARCH_SPAN_DAYS) {
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new ValidationError(errorsTranslations.scheduling.dateRangeExceedsMax(MAX_AVAILABILITY_SEARCH_SPAN_DAYS));
     }
 
     return TeacherAvailabilityRepository.searchCrossStaffAvailabilityData(input, tx);

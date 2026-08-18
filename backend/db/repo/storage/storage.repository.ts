@@ -15,6 +15,7 @@ import {
   userFiles,
 } from "@/backend/db/schema";
 import { logger } from "@/backend/lib";
+import { isAllowedMimeType } from "@/backend/lib/storage/mime-allowlist";
 import type * as StorageTypes from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
@@ -776,7 +777,9 @@ export namespace StorageDbRepository {
       return tErrors.contentTypeRequired;
     }
 
-    // Additional validation can be added here (e.g., allowed content types)
+    if (!isAllowedMimeType(contentType)) {
+      return tErrors.invalidFileType;
+    }
 
     return null;
   };

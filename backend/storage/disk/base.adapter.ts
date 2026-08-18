@@ -3,20 +3,34 @@ import type * as Types from "@/backend/types";
 
 export interface AdapterOperations<TContext> {
   fileExists: (ctx: TContext, path: string) => Promise<boolean>;
-  prepareUpload: (ctx: TContext, input: Types.UploadPreparationInput) => Promise<Types.UploadPreparationResult>;
-  uploadFile: (ctx: TContext, path: string, contentType: string, buffer: Buffer) => Promise<Types.FileUploadResult>;
+  prepareUpload: (
+    ctx: TContext,
+    input: Types.UploadPreparationInput,
+    locale?: string
+  ) => Promise<Types.UploadPreparationResult>;
+  uploadFile: (
+    ctx: TContext,
+    path: string,
+    contentType: string,
+    buffer: Buffer,
+    locale?: string
+  ) => Promise<Types.FileUploadResult>;
   listFiles: (ctx: TContext, input: Types.FilesListSearchInput) => Promise<Types.StorageObjectList>;
-  createFolder: (ctx: TContext, input: Types.FolderCreateInput) => Promise<Types.FileOperationResult>;
-  renameFile: (ctx: TContext, input: Types.FileRenameInput) => Promise<Types.FileOperationResult>;
-  deleteFile: (ctx: TContext, path: string) => Promise<Types.FileOperationResult>;
+  createFolder: (ctx: TContext, input: Types.FolderCreateInput, locale?: string) => Promise<Types.FileOperationResult>;
+  renameFile: (ctx: TContext, input: Types.FileRenameInput, locale?: string) => Promise<Types.FileOperationResult>;
+  deleteFile: (ctx: TContext, path: string, locale?: string) => Promise<Types.FileOperationResult>;
   directoryInfoByPath: (ctx: TContext, path: string) => Promise<Types.DirectoryInfo | null>;
   fileInfoByPath: (ctx: TContext, path: string) => Promise<Types.FileInfo | null>;
   fileInfoByDbFileId: (ctx: TContext, id: string) => Promise<Types.FileInfo | null>;
   storageStatistics: (ctx: TContext, path?: string | null) => Promise<Types.StorageStats>;
   fetchDirectoryChildren: (ctx: TContext, path?: string | null) => Promise<Types.DirectoryInfo[]>;
-  moveItems: (ctx: TContext, input: Types.StorageItemsMoveInput) => Promise<Types.BulkOperationResult>;
-  copyItems: (ctx: TContext, input: Types.StorageItemsCopyInput) => Promise<Types.BulkOperationResult>;
-  deleteItems: (ctx: TContext, input: Types.StorageItemsDeleteInput) => Promise<Types.BulkOperationResult>;
+  moveItems: (ctx: TContext, input: Types.StorageItemsMoveInput, locale?: string) => Promise<Types.BulkOperationResult>;
+  copyItems: (ctx: TContext, input: Types.StorageItemsCopyInput, locale?: string) => Promise<Types.BulkOperationResult>;
+  deleteItems: (
+    ctx: TContext,
+    input: Types.StorageItemsDeleteInput,
+    locale?: string
+  ) => Promise<Types.BulkOperationResult>;
 }
 
 export abstract class BaseAdapter<TContext> implements StorageService {
@@ -29,28 +43,33 @@ export abstract class BaseAdapter<TContext> implements StorageService {
     return this.ops.fileExists(this.context, path);
   }
 
-  async prepareUpload(input: Types.UploadPreparationInput): Promise<Types.UploadPreparationResult> {
-    return this.ops.prepareUpload(this.context, input);
+  async prepareUpload(input: Types.UploadPreparationInput, locale?: string): Promise<Types.UploadPreparationResult> {
+    return this.ops.prepareUpload(this.context, input, locale);
   }
 
-  async uploadFile(path: string, contentType: string, buffer: Buffer): Promise<Types.FileUploadResult> {
-    return this.ops.uploadFile(this.context, path, contentType, buffer);
+  async uploadFile(
+    path: string,
+    contentType: string,
+    buffer: Buffer,
+    locale?: string
+  ): Promise<Types.FileUploadResult> {
+    return this.ops.uploadFile(this.context, path, contentType, buffer, locale);
   }
 
   async listFiles(input: Types.FilesListSearchInput): Promise<Types.StorageObjectList> {
     return this.ops.listFiles(this.context, input);
   }
 
-  async createFolder(input: Types.FolderCreateInput): Promise<Types.FileOperationResult> {
-    return this.ops.createFolder(this.context, input);
+  async createFolder(input: Types.FolderCreateInput, locale?: string): Promise<Types.FileOperationResult> {
+    return this.ops.createFolder(this.context, input, locale);
   }
 
-  async renameFile(input: Types.FileRenameInput): Promise<Types.FileOperationResult> {
-    return this.ops.renameFile(this.context, input);
+  async renameFile(input: Types.FileRenameInput, locale?: string): Promise<Types.FileOperationResult> {
+    return this.ops.renameFile(this.context, input, locale);
   }
 
-  async deleteFile(path: string): Promise<Types.FileOperationResult> {
-    return this.ops.deleteFile(this.context, path);
+  async deleteFile(path: string, locale?: string): Promise<Types.FileOperationResult> {
+    return this.ops.deleteFile(this.context, path, locale);
   }
 
   async directoryInfoByPath(path: string): Promise<Types.DirectoryInfo | null> {
@@ -73,15 +92,15 @@ export abstract class BaseAdapter<TContext> implements StorageService {
     return this.ops.fetchDirectoryChildren(this.context, path);
   }
 
-  async moveItems(input: Types.StorageItemsMoveInput): Promise<Types.BulkOperationResult> {
-    return this.ops.moveItems(this.context, input);
+  async moveItems(input: Types.StorageItemsMoveInput, locale?: string): Promise<Types.BulkOperationResult> {
+    return this.ops.moveItems(this.context, input, locale);
   }
 
-  async copyItems(input: Types.StorageItemsCopyInput): Promise<Types.BulkOperationResult> {
-    return this.ops.copyItems(this.context, input);
+  async copyItems(input: Types.StorageItemsCopyInput, locale?: string): Promise<Types.BulkOperationResult> {
+    return this.ops.copyItems(this.context, input, locale);
   }
 
-  async deleteItems(input: Types.StorageItemsDeleteInput): Promise<Types.BulkOperationResult> {
-    return this.ops.deleteItems(this.context, input);
+  async deleteItems(input: Types.StorageItemsDeleteInput, locale?: string): Promise<Types.BulkOperationResult> {
+    return this.ops.deleteItems(this.context, input, locale);
   }
 }

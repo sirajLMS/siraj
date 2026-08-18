@@ -160,8 +160,8 @@ gqlSchemaBuilder.queryField("managerDirectory", t =>
     authScopes: { loggedIn: true },
     args: {
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
-      roleFilter: t.arg.string({ required: false }),
-      statusFilter: t.arg.string({ required: false }),
+      roleFilter: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
+      statusFilter: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);

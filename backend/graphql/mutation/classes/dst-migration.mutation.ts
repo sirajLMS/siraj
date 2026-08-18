@@ -10,7 +10,7 @@ gqlSchemaBuilder.mutationField("executeDstBulkUpdate", t =>
       offsetMinutes: t.arg.int({ required: true }),
       description: t.arg.string({ required: true }),
     },
-    authScopes: { loggedIn: true },
+    authScopes: { superAdmin: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;

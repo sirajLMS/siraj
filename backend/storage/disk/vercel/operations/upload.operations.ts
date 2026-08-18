@@ -30,17 +30,24 @@ export async function uploadFile(
   ctx: VercelContext,
   filePath: string,
   contentType: string,
-  buffer: Buffer
+  buffer: Buffer,
+  locale?: string
 ): Promise<Types.FileUploadResult> {
-  return uploadFileHelper(filePath, contentType, buffer, async cleanedFilePath => {
-    const blob = await put(cleanedFilePath, buffer, {
-      token: ctx.token,
-      contentType: contentType,
-      access: ctx.access,
-    });
+  return uploadFileHelper(
+    filePath,
+    contentType,
+    buffer,
+    async cleanedFilePath => {
+      const blob = await put(cleanedFilePath, buffer, {
+        token: ctx.token,
+        contentType: contentType,
+        access: ctx.access,
+      });
 
-    const hash = calculateHash(buffer);
+      const hash = calculateHash(buffer);
 
-    return { url: blob.url, hash };
-  });
+      return { url: blob.url, hash };
+    },
+    locale
+  );
 }

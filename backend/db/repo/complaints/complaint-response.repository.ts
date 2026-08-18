@@ -3,6 +3,7 @@ import { db } from "@/backend/db";
 import { complaintResponses, complaints, users } from "@/backend/db/schema";
 import { ComplaintStatus } from "@/backend/enum";
 import type { ComplaintResponseReturnType, CreateComplaintResponseInput, DBTransaction } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace ComplaintResponseRepository {
   export const findByComplaintId = async (complaintId: string, tx?: DBTransaction) => {
@@ -46,7 +47,7 @@ export namespace ComplaintResponseRepository {
     return row;
   };
 
-  export const createResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction, _locale?: string) => {
+  export const createResponse = async (input: CreateComplaintResponseInput, tx?: DBTransaction, locale?: string) => {
     const runner = async (t: DBTransaction) => {
       const now = new Date();
 
@@ -62,7 +63,8 @@ export namespace ComplaintResponseRepository {
         .returning();
 
       if (!created) {
-        throw new Error("Failed to create complaint response");
+        const { complaint } = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(complaint.responseCreateFailed);
       }
 
       await t

@@ -7,6 +7,7 @@ import type { LocalContext } from "@/backend/storage/disk/local/types";
 import { calculateFileHash, ensureDirectory, getAbsolutePath } from "@/backend/storage/disk/local/utils";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale";
 import { extToMime } from "@/shared/utils/storage.utils";
 
 /**
@@ -112,7 +113,12 @@ export async function fileInfoByDbFileId(ctx: LocalContext, id: string): Promise
   }
 }
 
-export async function renameFile(ctx: LocalContext, input: Types.FileRenameInput): Promise<Types.FileOperationResult> {
+export async function renameFile(
+  ctx: LocalContext,
+  input: Types.FileRenameInput,
+  locale?: string
+): Promise<Types.FileOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   try {
     const pathErr = StorageUtils.validatePath(input.currentPath);
     if (pathErr) return { success: false, message: pathErr };
@@ -161,14 +167,14 @@ export async function renameFile(ctx: LocalContext, input: Types.FileRenameInput
 
     return {
       success: true,
-      message: "File renamed successfully",
+      message: tFile.fileRenamedSuccessfully,
       data: StorageUtils.combineFileData(bucketFile, fileEntity),
     };
   } catch (error) {
     logger.error(`Failed to rename file: ${input.currentPath}`, error);
     return {
       success: false,
-      message: `Failed to rename file: ${error instanceof Error ? error.message : String(error)}`,
+      message: tFile.failedToRenameFile(error instanceof Error ? error.message : String(error)),
     };
   }
 }

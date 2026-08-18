@@ -40,7 +40,7 @@ function mockTargetUser(overrides: Partial<{ isSuperAdmin: boolean; status: stri
     id: TARGET_ID,
     name: "Target User",
     email: "target@example.com",
-    password: randomUUID(),
+    password: `TestPass-${randomUUID().slice(0, 8)}!`,
     status: overrides.status ?? AccountStatus.ACTIVATED,
     isSuperAdmin: overrides.isSuperAdmin ?? false,
     deletedAt: overrides.deletedAt ?? null,

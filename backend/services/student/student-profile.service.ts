@@ -208,12 +208,6 @@ export namespace StudentProfileService {
       throw new Error(tErrors.studentNotFound(targetStudentId));
     }
 
-    const isOwnProfile = profile.userId === actorUserId;
-
-    if (!isOwnProfile && !input.studentId?.trim()) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
-
     const submittedGroups = collectStudentProfileEditGroups(input);
     if (submittedGroups.length === 0) {
       throw new Error(tErrors.invalidInput);

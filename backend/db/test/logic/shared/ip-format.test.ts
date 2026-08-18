@@ -19,7 +19,7 @@ describe("IP Address Formatting", () => {
         .values({
           name: "IP Test User",
           email,
-          password: randomUUID(),
+          password: `TestPass-${randomUUID().slice(0, 8)}!`,
           createdAt: now,
           updatedAt: now,
         })
@@ -48,7 +48,7 @@ describe("IP Address Formatting", () => {
         .values({
           name: "IP Test User 2",
           email,
-          password: randomUUID(),
+          password: `TestPass-${randomUUID().slice(0, 8)}!`,
           createdAt: now,
           updatedAt: now,
         })
@@ -88,7 +88,7 @@ describe("IP Address Formatting", () => {
         .values({
           name: "IP Test User 3",
           email,
-          password: randomUUID(),
+          password: `TestPass-${randomUUID().slice(0, 8)}!`,
           createdAt: now,
           updatedAt: now,
         })
@@ -117,7 +117,7 @@ describe("IP Address Formatting", () => {
         .values({
           name: "IP Test User 4",
           email,
-          password: randomUUID(),
+          password: `TestPass-${randomUUID().slice(0, 8)}!`,
           createdAt: now,
           updatedAt: now,
         })

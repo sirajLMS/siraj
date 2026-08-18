@@ -5,6 +5,7 @@ import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import { getVercelBlobPath } from "@/backend/storage/disk/vercel/utils";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale";
 import { extToMime } from "@/shared/utils/storage.utils";
 
 export async function fileExists(ctx: VercelContext, filePath: string): Promise<boolean> {
@@ -165,7 +166,12 @@ async function updateDbFilePath(oldPath: string, newPath: string): Promise<Types
   }
 }
 
-export async function renameFile(ctx: VercelContext, input: Types.FileRenameInput): Promise<Types.FileOperationResult> {
+export async function renameFile(
+  ctx: VercelContext,
+  input: Types.FileRenameInput,
+  locale?: string
+): Promise<Types.FileOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   try {
     const pathErr = StorageUtils.validatePath(input.currentPath);
     if (pathErr) return { success: false, message: pathErr };
@@ -180,7 +186,7 @@ export async function renameFile(ctx: VercelContext, input: Types.FileRenameInpu
     try {
       originalBlob = await head(input.currentPath, { token: ctx.token });
     } catch {
-      return { success: false, message: `File not found: ${input.currentPath}` };
+      return { success: false, message: tFile.itemNotFound(input.currentPath) };
     }
 
     logger.info(`Renaming blob: ${input.currentPath} -> ${newPath}`);
@@ -208,14 +214,14 @@ export async function renameFile(ctx: VercelContext, input: Types.FileRenameInpu
 
     return {
       success: true,
-      message: "File renamed successfully",
+      message: tFile.fileRenamedSuccessfully,
       data: StorageUtils.combineFileData(bucketFile, fileEntity),
     };
   } catch (error) {
     logger.error(`Failed to rename file: ${input.currentPath}`, error);
     return {
       success: false,
-      message: `Failed to rename file: ${error instanceof Error ? error.message : String(error)}`,
+      message: tFile.failedToRenameFile(error instanceof Error ? error.message : String(error)),
     };
   }
 }

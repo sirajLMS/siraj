@@ -2,6 +2,7 @@ import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { logger } from "@/backend/lib/logger";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import type { FileErrors } from "@/shared/locale";
 
 export interface MoveEntities {
   dbFileMap: Map<string, Types.FileSelectType>;
@@ -50,13 +51,14 @@ export async function loadMoveEntities(sources: string[]): Promise<MoveEntities>
 export function validateAndCalculateNewPath(
   sourcePath: string,
   destinationPath: string,
-  dbSourceDirMap: Map<string, Types.DirectorySelectType>
+  dbSourceDirMap: Map<string, Types.DirectorySelectType>,
+  tFile: FileErrors
 ): string {
   const sourceDir = sourcePath.substring(0, sourcePath.lastIndexOf("/"));
   const dbSourceDir = dbSourceDirMap.get(sourceDir);
 
   if (dbSourceDir && !dbSourceDir.allowMove) {
-    throw new Error(`Move not allowed from directory: ${sourceDir}`);
+    throw new Error(tFile.moveNotAllowedFromDirectory(sourceDir));
   }
 
   const fileName = StorageUtils.extractFileName(sourcePath);

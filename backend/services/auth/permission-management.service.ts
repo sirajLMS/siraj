@@ -143,6 +143,9 @@ export namespace PermissionManagementService {
     checkType: "exists" | "existsFull" | "nonSuperAdmin",
     tErrors: ErrorsLabels
   ) {
+    if (userId === actorUserId) {
+      throw new Error(tErrors.permissionManagement.cannotModifySelf);
+    }
     if (accessType === "assign") {
       await requireAssignAccess(actorUserId, tErrors);
     } else {
@@ -397,6 +400,9 @@ export namespace PermissionManagementService {
     input: { userIds: string[]; groupId: string },
     tErrors: ErrorsLabels
   ): Promise<boolean> {
+    if (input.userIds.includes(actorUserId)) {
+      throw new Error(tErrors.permissionManagement.cannotModifySelf);
+    }
     await requireBulkGroupSetup(actorUserId, input.groupId, tErrors);
     return input.userIds.length === 0;
   }

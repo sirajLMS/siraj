@@ -2,6 +2,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { meetingProviderTokens } from "@/backend/db/schema";
 import type { DBTransaction, MeetingProviderTokenSelectType, MeetingProviderTokenUpsertInput } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace MeetingProviderTokenRepository {
   export async function getByUserAndProvider(
@@ -41,7 +42,8 @@ export namespace MeetingProviderTokenRepository {
 
   export async function upsert(
     input: MeetingProviderTokenUpsertInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<MeetingProviderTokenSelectType> {
     const now = new Date();
     const values = {
@@ -73,7 +75,8 @@ export namespace MeetingProviderTokenRepository {
           .where(eq(meetingProviderTokens.id, existing.id))
           .returning();
         if (!updated) {
-          throw new Error("Failed to update meeting provider token");
+          const { meeting } = getServerTranslations(locale ?? "en").errorsTranslations;
+          throw new Error(meeting.providerTokenUpdateFailed);
         }
         return updated;
       }
@@ -83,7 +86,8 @@ export namespace MeetingProviderTokenRepository {
         .values({ ...values, createdAt: now })
         .returning();
       if (!row) {
-        throw new Error("Failed to insert meeting provider token");
+        const { meeting } = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(meeting.providerTokenInsertFailed);
       }
       return row;
     };

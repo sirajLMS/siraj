@@ -26,7 +26,8 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     errorCaught = error;
   }
   expect(errorCaught).not.toBeNull();
-  return errorCaught as Error;
+  if (errorCaught instanceof Error) return errorCaught;
+  return new Error(String(errorCaught));
 }
 
 function configTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {

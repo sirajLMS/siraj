@@ -37,18 +37,25 @@ function resourceReturnShape(resource: {
   };
 }
 
+async function findResourceBy(
+  condition: ReturnType<typeof eq>,
+  tx?: DBTransaction
+): Promise<LearningResourceReturnType | null> {
+  const q = queryDb(tx);
+  const results = await q
+    .select(resourceSelectColumns)
+    .from(learningResources)
+    .where(and(condition, isNull(learningResources.deletedAt)))
+    .limit(1);
+  return results[0] ?? null;
+}
+
 export namespace LearningResourceRepository {
   export async function findByFilePath(
     filePath: string,
     tx?: DBTransaction
   ): Promise<LearningResourceReturnType | null> {
-    const q = queryDb(tx);
-    const results = await q
-      .select(resourceSelectColumns)
-      .from(learningResources)
-      .where(and(eq(learningResources.filePath, filePath), isNull(learningResources.deletedAt)))
-      .limit(1);
-    return results[0] ?? null;
+    return findResourceBy(eq(learningResources.filePath, filePath), tx);
   }
 
   export async function insertResource(
@@ -68,7 +75,8 @@ export namespace LearningResourceRepository {
       .returning();
 
     if (!resource) {
-      throw new Error("Failed to create seed learning resource");
+      const { resource: resourceErrors } = getServerTranslations("en").errorsTranslations;
+      throw new Error(resourceErrors.seedCreateFailed);
     }
 
     return resourceReturnShape(resource);
@@ -82,51 +90,34 @@ export namespace LearningResourceRepository {
 
     const baseWhere = isNull(learningResources.deletedAt);
 
-    if (pagination) {
-      const perPage = pagination.perPage;
-      const offset = pagination.offset;
-
-      const [rows, countResult] = await Promise.all([
-        q
-          .select(resourceSelectColumns)
-          .from(learningResources)
-          .where(baseWhere)
-          .orderBy(desc(learningResources.createdAt))
-          .limit(perPage)
-          .offset(offset),
-        q
-          .select({ count: sql<number>`count(*)`.mapWith(Number) })
-          .from(learningResources)
-          .where(baseWhere),
-      ]);
-
-      const totalCount = countResult[0]?.count ?? 0;
-
-      return { rows, totalCount };
-    }
-
-    const rowsQuery = q
-      .select(resourceSelectColumns)
-      .from(learningResources)
-      .where(baseWhere)
-      .orderBy(desc(learningResources.createdAt))
-      .limit(200);
-
     const countQuery = q
       .select({ count: sql<number>`count(*)`.mapWith(Number) })
       .from(learningResources)
       .where(baseWhere);
 
-    const [rows, countResult] = await Promise.all([rowsQuery, countQuery]);
+    const rowsQuery = q
+      .select(resourceSelectColumns)
+      .from(learningResources)
+      .where(baseWhere)
+      .orderBy(desc(learningResources.createdAt));
 
-    const totalCount = countResult[0]?.count ?? 0;
+    if (pagination) {
+      const [rows, countResult] = await Promise.all([
+        rowsQuery.limit(pagination.perPage).offset(pagination.offset),
+        countQuery,
+      ]);
 
-    return { rows, totalCount };
+      return { rows, totalCount: countResult[0]?.count ?? 0 };
+    }
+
+    const [rows, countResult] = await Promise.all([rowsQuery.limit(200), countQuery]);
+
+    return { rows, totalCount: countResult[0]?.count ?? 0 };
   }
 
   export async function createResource(
     input: LearningResourceCreateInput,
-    _locale?: string,
+    locale?: string,
     tx?: DBTransaction
   ): Promise<LearningResourceReturnType> {
     const createTx = async (t: DBTransaction): Promise<LearningResourceReturnType> => {
@@ -143,7 +134,8 @@ export namespace LearningResourceRepository {
         .returning();
 
       if (!resource) {
-        throw new Error("Failed to create learning resource");
+        const { resource: resourceErrors } = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(resourceErrors.createFailed);
       }
 
       await t.insert(learningResourceFiles).values({
@@ -169,15 +161,7 @@ export namespace LearningResourceRepository {
   }
 
   export async function findById(resourceId: string, tx?: DBTransaction): Promise<LearningResourceReturnType | null> {
-    const q = queryDb(tx);
-
-    const results = await q
-      .select(resourceSelectColumns)
-      .from(learningResources)
-      .where(and(eq(learningResources.id, resourceId), isNull(learningResources.deletedAt)))
-      .limit(1);
-
-    return results[0] ?? null;
+    return findResourceBy(eq(learningResources.id, resourceId), tx);
   }
 
   /**

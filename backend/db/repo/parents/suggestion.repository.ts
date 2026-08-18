@@ -10,6 +10,7 @@ import type {
   SuggestionSubmitInput,
 } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale";
 
 function isSuggestionStatus(value: string): value is SuggestionStatus {
   return (Object.values(SuggestionStatus) as readonly string[]).includes(value);
@@ -56,7 +57,8 @@ export namespace SuggestionRepository {
       })
       .returning();
     if (!created) {
-      throw new Error("Failed to submit suggestion");
+      const { parent } = getServerTranslations("en").errorsTranslations;
+      throw new Error(parent.suggestionSubmitFailed);
     }
     return created;
   };
@@ -64,7 +66,7 @@ export namespace SuggestionRepository {
   export const submitSuggestion = async (
     input: SuggestionSubmitInput & { parentId: string },
     tx?: DBTransaction,
-    _locale?: string
+    locale?: string
   ) => {
     const q = queryDb(tx);
     const now = new Date();
@@ -80,7 +82,8 @@ export namespace SuggestionRepository {
       .returning();
 
     if (!created) {
-      throw new Error("Failed to submit suggestion");
+      const { parent } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(parent.suggestionSubmitFailed);
     }
 
     return created;

@@ -47,7 +47,8 @@ export namespace TeacherRepository {
       .returning();
 
     if (!created) {
-      throw new Error("Failed to create teacher profile");
+      const { teacher } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(teacher.createFailed);
     }
 
     const [userRow] = await executor
@@ -309,7 +310,8 @@ export namespace TeacherRepository {
   export const upsertByUserId = async (
     userId: string,
     extraValues?: { hourlyRate?: string | null; rateCurrency?: CurrencyCode | null },
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<TeacherSelectType> => {
     const executor = tx ?? db;
     const now = new Date();
@@ -322,7 +324,8 @@ export namespace TeacherRepository {
       })
       .returning();
     if (!row) {
-      throw new Error("Teacher upsert failed");
+      const { teacher } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(teacher.upsertFailed);
     }
     return row;
   };

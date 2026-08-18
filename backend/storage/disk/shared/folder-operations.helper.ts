@@ -3,11 +3,12 @@ import { logger } from "@/backend/lib/logger";
 import { StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { type FileErrors, getServerTranslations } from "@/shared/locale";
 
 /**
  * Check if the parent directory allows creating subdirectories
  */
-async function checkParentPermissions(fullPath: string): Promise<Types.FileOperationResult | null> {
+async function checkParentPermissions(fullPath: string, tFile: FileErrors): Promise<Types.FileOperationResult | null> {
   const parentPath = fullPath.substring(0, fullPath.lastIndexOf("/"));
   if (parentPath.length === 0) return null;
 
@@ -15,7 +16,7 @@ async function checkParentPermissions(fullPath: string): Promise<Types.FileOpera
   if (parentDir && !parentDir.allowCreateSubDirs) {
     return {
       success: false,
-      message: "Creating subdirectories not allowed in parent directory",
+      message: tFile.creatingSubdirectoriesNotAllowed,
     };
   }
 
@@ -57,8 +58,10 @@ async function createDirectoryRecord(fullPath: string, input: Types.FolderCreate
  */
 export async function createFolderHelper(
   input: Types.FolderCreateInput,
-  createOnStorageFn: (path: string) => Promise<void>
+  createOnStorageFn: (path: string) => Promise<void>,
+  locale?: string
 ): Promise<Types.FileOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   try {
     const fullPath = normalizePath(input.path);
 
@@ -67,7 +70,7 @@ export async function createFolderHelper(
       throw new StorageValidationError(validationError);
     }
 
-    const permissionResult = await checkParentPermissions(fullPath);
+    const permissionResult = await checkParentPermissions(fullPath, tFile);
     if (permissionResult) return permissionResult;
 
     // Call adapter-specific creation logic
@@ -77,14 +80,14 @@ export async function createFolderHelper(
 
     return {
       success: true,
-      message: "Folder created successfully",
+      message: tFile.folderCreatedSuccessfully,
       data: newDirectoryInfo,
     };
   } catch (error) {
     logger.error(`Failed to create folder: ${input.path}`, error);
     return {
       success: false,
-      message: `Failed to create folder: ${error instanceof Error ? error.message : String(error)}`,
+      message: tFile.failedToCreateFolder(error instanceof Error ? error.message : String(error)),
     };
   }
 }

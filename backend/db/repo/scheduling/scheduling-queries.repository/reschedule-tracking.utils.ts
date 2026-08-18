@@ -4,6 +4,7 @@ import { classInstances, students, teachers, users } from "@/backend/db/schema";
 import { LeaveRequestStatus, RescheduleDateLabel } from "@/backend/enum";
 import type * as Types from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 
 export function buildRescheduleConditions(
   input: Types.RescheduleTrackingInput,
@@ -20,7 +21,7 @@ export function buildRescheduleConditions(
   }
 
   if (input.search) {
-    const searchPattern = `%${input.search}%`;
+    const searchPattern = `%${escapeLikeWildcards(input.search)}%`;
     conditions = and(
       conditions,
       or(sql`${users.name} ILIKE ${searchPattern}`, sql`${students.name} ILIKE ${searchPattern}`)

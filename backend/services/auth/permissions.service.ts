@@ -5,6 +5,7 @@ import { groupPermissions, permissionGroups, permissions, userPermissionGroups, 
 import { type AppPermission, filterKnownAppPermissions, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import type { UserPermissionContext } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace PermissionsService {
   export async function getUserContext(userId: string): Promise<UserPermissionContext> {
@@ -93,7 +94,8 @@ export namespace PermissionsService {
         .limit(1);
 
       if (!group) {
-        throw new Error("Permission group not found");
+        const tErrors = getServerTranslations("en").errorsTranslations;
+        throw new Error(tErrors.permissionManagement.permissionGroupNotFound(normalizedSlug));
       }
 
       const groupPermissionRows = await db

@@ -122,7 +122,7 @@ gqlSchemaBuilder.queryField("sessionConfig", t =>
     authScopes: { loggedIn: true },
     description: "Fetches the session configuration for a single role.",
     args: {
-      roleName: t.arg.string({ required: true }),
+      roleName: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },
     resolve: async (_root, args, ctx) => {
       return executeSessionConfigQuery(ctx, () => SessionConfigService.getSessionConfig(args.roleName));
@@ -152,7 +152,7 @@ gqlSchemaBuilder.mutationField("deleteSessionConfig", t =>
     authScopes: { permission: AppPermission.SETTINGS_EDIT_SESSION, notImpersonating: true },
     description: "Deletes a per-role session configuration.",
     args: {
-      roleName: t.arg.string({ required: true }),
+      roleName: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },
     resolve: async (_root, args, ctx) => {
       await executeSessionConfigMutation(ctx, async (userId, tErrors) => {

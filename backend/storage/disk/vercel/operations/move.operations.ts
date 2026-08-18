@@ -13,23 +13,27 @@ import { directoryInfoByPath } from "@/backend/storage/disk/vercel/operations/fo
 import { getBlobs, isDirectory } from "@/backend/storage/disk/vercel/shared";
 import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import type * as Types from "@/backend/types";
+import { type FileErrors, getServerTranslations } from "@/shared/locale";
 
 export async function moveItems(
   ctx: VercelContext,
-  input: Types.StorageItemsMoveInput
+  input: Types.StorageItemsMoveInput,
+  locale?: string
 ): Promise<Types.BulkOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   return executeBulkOperation({
     ctx,
     sourcePaths: input.sourcePaths,
     destinationPath: input.destinationPath,
     existsFn: fileExists,
     operationName: "moved",
+    locale,
     beforeProcess: async (_, validSources) => {
       return await loadMoveEntities(validSources);
     },
     processFn: async (opCtx, sourcePath, entities: MoveEntities | undefined) => {
       if (!entities) throw new Error("Move entities not loaded");
-      return await moveItem(opCtx, sourcePath, input.destinationPath, entities);
+      return await moveItem(opCtx, sourcePath, input.destinationPath, entities, tFile);
     },
   });
 }
@@ -38,9 +42,10 @@ async function moveItem(
   ctx: VercelContext,
   sourcePath: string,
   destinationPath: string,
-  { dbFileMap, dbDirectoryMap, dbSourceDirMap }: MoveEntities
+  { dbFileMap, dbDirectoryMap, dbSourceDirMap }: MoveEntities,
+  tFile: FileErrors
 ): Promise<Types.FileInfo | Types.DirectoryInfo> {
-  const newPath = validateAndCalculateNewPath(sourcePath, destinationPath, dbSourceDirMap);
+  const newPath = validateAndCalculateNewPath(sourcePath, destinationPath, dbSourceDirMap, tFile);
 
   const isDir = await isDirectory(ctx, sourcePath);
 
@@ -57,12 +62,12 @@ async function moveItem(
 
   if (dbDirectory) {
     const dirInfo = await directoryInfoByPath(ctx, newPath);
-    if (!dirInfo) throw new Error("Failed to get directory info after move");
+    if (!dirInfo) throw new Error(tFile.failedToRetrieveMovedItemInfo);
     return dirInfo;
   }
 
   const info = await fileInfoByPath(ctx, newPath);
-  if (!info) throw new Error("Failed to get info after move");
+  if (!info) throw new Error(tFile.failedToRetrieveMovedItemInfo);
   return info;
 }
 

@@ -27,6 +27,7 @@ import type {
   StaffProfileCreateResult,
   StaffProfileInsertType,
 } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 import { parseAccountStatus, parseCurrencyCodeOrNull, parseOverrideState } from "@/shared/lib/enum";
 import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
 import { getServerTranslations } from "@/shared/locale";
@@ -61,7 +62,8 @@ export namespace StaffProfileRepository {
       .returning();
 
     if (!created) {
-      throw new Error("Failed to create staff profile");
+      const { teacher } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(teacher.staffProfileCreateFailed);
     }
 
     const [userRow] = await executor
@@ -247,7 +249,12 @@ export namespace StaffProfileRepository {
     const searchConditions: ReturnType<typeof or>[] = [];
     const trimmedSearch = options.search?.trim();
     if (trimmedSearch) {
-      searchConditions.push(or(ilike(users.name, `%${trimmedSearch}%`), ilike(users.email, `%${trimmedSearch}%`)));
+      searchConditions.push(
+        or(
+          ilike(users.name, `%${escapeLikeWildcards(trimmedSearch)}%`),
+          ilike(users.email, `%${escapeLikeWildcards(trimmedSearch)}%`)
+        )
+      );
     }
 
     const whereClause = searchConditions.length > 0 ? and(roleWhere, searchConditions[0]) : roleWhere;
@@ -412,7 +419,7 @@ export namespace StaffProfileRepository {
         .limit(1);
 
       if (updated.length === 0) {
-        throw new Error("Failed to update staff profile");
+        throw new Error(errorsTranslations.teacher.staffProfileUpdateFailed);
       }
 
       logger.info("Manager profile updated", { staffProfileId });

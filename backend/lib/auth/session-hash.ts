@@ -1,7 +1,5 @@
-import { createHash, createHmac } from "node:crypto";
+import { createHash, createHmac, randomBytes } from "node:crypto";
 import { logger } from "@/backend/lib/logger";
-
-const FALLBACK_DEV_KEY = "siraj-session-hmac:fallback-dev-key";
 
 function resolveSessionHmacKey(): string {
   if (process.env.JWT_SECRET) {
@@ -12,10 +10,11 @@ function resolveSessionHmacKey(): string {
     throw new Error("CRITICAL: JWT_SECRET is not set in production environment. Session hash key cannot be derived.");
   }
 
+  const randomKey = randomBytes(32).toString("hex");
   logger.warn(
-    "⚠️  JWT_SECRET not set. Using fallback HMAC key for session hashing. Set JWT_SECRET for production-grade security."
+    "⚠️  JWT_SECRET not set. Using random ephemeral HMAC key for session hashing. Set JWT_SECRET for production-grade security."
   );
-  return FALLBACK_DEV_KEY;
+  return `siraj-session-hmac:ephemeral:${randomKey}`;
 }
 
 const SESSION_HMAC_KEY = resolveSessionHmacKey();

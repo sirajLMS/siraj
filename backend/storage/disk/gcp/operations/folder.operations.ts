@@ -6,15 +6,20 @@ import { StorageUtils } from "@/backend/utils";
 
 export async function createFolder(
   ctx: GcpContext,
-  input: Types.FolderCreateInput
+  input: Types.FolderCreateInput,
+  locale?: string
 ): Promise<Types.FileOperationResult> {
-  return createFolderHelper(input, async fullPath => {
-    const folderPath = `${fullPath}/`;
-    const file = ctx.bucket.file(folderPath);
-    await file.save("", {
-      contentType: "application/x-directory",
-    });
-  });
+  return createFolderHelper(
+    input,
+    async fullPath => {
+      const folderPath = `${fullPath}/`;
+      const file = ctx.bucket.file(folderPath);
+      await file.save("", {
+        contentType: "application/x-directory",
+      });
+    },
+    locale
+  );
 }
 
 export async function directoryInfoByPath(ctx: GcpContext, path: string): Promise<Types.DirectoryInfo | null> {

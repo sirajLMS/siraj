@@ -63,7 +63,7 @@ export class PaginationArgs {
   get perPage(): number {
     return Math.min(
       this.first ?? this.defaultCount ?? PaginationArgs.DEFAULT_COUNT,
-      this.maxCount ?? PaginationArgs.MAX_COUNT
+      Math.min(this.maxCount ?? PaginationArgs.MAX_COUNT, PaginationArgs.MAX_COUNT)
     );
   }
 

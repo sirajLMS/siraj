@@ -10,6 +10,12 @@ import {
 } from "@/backend/graphql/pothos/parents/parent-portal.pothos";
 import { ParentProfilePothosObject } from "@/backend/graphql/pothos/parents/parent-profile.pothos";
 import {
+  parentAdminBillingInputFields,
+  profileContactInputFields,
+  profileSocialInputFields,
+  teacherSpecificInputFields,
+} from "@/backend/graphql/pothos/profile/__shared__/profileFieldHelpers";
+import {
   AccountStatusPothosObject,
   CurrencyCodePothosObject,
   GenderPothosObject,
@@ -114,9 +120,9 @@ export const CoreUserProfileFieldsInputPothosObject = gqlSchemaBuilder
   .inputRef<CoreUserProfileFields>("CoreUserProfileFieldsInput")
   .implement({
     fields: t => ({
-      name: t.string({ required: false }),
-      email: t.string({ required: false }),
-      avatarUrl: t.string({ required: false }),
+      name: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+      email: t.string({ required: false, directives: { constraint: { maxLength: 320 } } }),
+      avatarUrl: t.string({ required: false, directives: { constraint: { maxLength: 2048 } } }),
       displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
       timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
       status: t.field({
@@ -131,15 +137,9 @@ export const TeacherOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
   .inputRef<TeacherOwnProfileUpdateInput>("TeacherOwnProfileUpdateInput")
   .implement({
     fields: t => ({
-      phone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
-      nationality: t.string({ required: false }),
-      countryCode: t.string({ required: false }),
-      nationalId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-      dateOfBirth: t.string({ required: false }),
+      ...profileContactInputFields(t),
+      ...teacherSpecificInputFields(t),
       gender: t.field({ type: GenderPothosObject, required: false }),
-      address: t.string({ required: false }),
-      qualifications: t.string({ required: false }),
-      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
     }),
   });
 
@@ -147,13 +147,8 @@ export const ParentOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
   .inputRef<ParentOwnProfileUpdateInput>("ParentOwnProfileUpdateInput")
   .implement({
     fields: t => ({
-      phone: t.string({ required: false }),
-      facebook: t.string({ required: false }),
-      whatsapp: t.string({ required: false }),
-      twitter: t.string({ required: false }),
-      nationality: t.string({ required: false }),
-      address: t.string({ required: false }),
-      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
+      ...profileContactInputFields(t),
+      ...profileSocialInputFields(t),
     }),
   });
 
@@ -161,16 +156,10 @@ export const ParentAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
   .inputRef<ParentAdminProfileUpdateInput>("ParentAdminProfileUpdateInput")
   .implement({
     fields: t => ({
-      phone: t.string({ required: false }),
-      nationality: t.string({ required: false }),
-      address: t.string({ required: false }),
-      facebook: t.string({ required: false }),
-      whatsapp: t.string({ required: false }),
-      twitter: t.string({ required: false }),
-      invoiceType: t.string({ required: false }),
-      feeAmount: t.string({ required: false }),
+      ...profileContactInputFields(t),
+      ...profileSocialInputFields(t),
+      ...parentAdminBillingInputFields(t),
       currency: t.field({ type: CurrencyCodePothosObject, required: false }),
-      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
     }),
   });
 
@@ -178,7 +167,7 @@ export const StaffOwnProfileUpdateInputPothosObject = gqlSchemaBuilder
   .inputRef<StaffOwnProfileUpdateInput>("StaffOwnProfileUpdateInput")
   .implement({
     fields: t => ({
-      phone: t.string({ required: false }),
+      phone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
     }),
   });
 
@@ -186,8 +175,8 @@ export const StaffAdminProfileUpdateInputPothosObject = gqlSchemaBuilder
   .inputRef<StaffAdminProfileUpdateInput>("StaffAdminProfileUpdateInput")
   .implement({
     fields: t => ({
-      phone: t.string({ required: false }),
-      status: t.string({ required: false }),
+      phone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+      status: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
     }),
   });
 

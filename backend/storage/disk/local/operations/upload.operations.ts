@@ -32,16 +32,23 @@ export async function uploadFile(
   ctx: LocalContext,
   filePath: string,
   contentType: string,
-  buffer: Buffer
+  buffer: Buffer,
+  locale?: string
 ): Promise<Types.FileUploadResult> {
-  return uploadFileHelper(filePath, contentType, buffer, async cleanedFilePath => {
-    const absolutePath = getAbsolutePath(ctx.basePath, cleanedFilePath);
-    await ensureDirectory(path.dirname(absolutePath));
-    await fs.writeFile(absolutePath, buffer);
+  return uploadFileHelper(
+    filePath,
+    contentType,
+    buffer,
+    async cleanedFilePath => {
+      const absolutePath = getAbsolutePath(ctx.basePath, cleanedFilePath);
+      await ensureDirectory(path.dirname(absolutePath));
+      await fs.writeFile(absolutePath, buffer);
 
-    const hash = await calculateFileHash(absolutePath);
-    const url = `${ctx.baseUrl}/api/storage/files/${cleanedFilePath}`;
+      const hash = await calculateFileHash(absolutePath);
+      const url = `${ctx.baseUrl}/api/storage/files/${cleanedFilePath}`;
 
-    return { url, hash };
-  });
+      return { url, hash };
+    },
+    locale
+  );
 }

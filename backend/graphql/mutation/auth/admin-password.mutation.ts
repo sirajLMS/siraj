@@ -2,7 +2,7 @@ import { GraphQLError } from "graphql";
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { AdminResetPasswordInputPothosObject, AdminResetPasswordResultPothosObject } from "@/backend/graphql/pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { requireAuthWithRateLimit } from "@/backend/graphql/shared";
 import { logger } from "@/backend/lib/logger";
 import { AuthPasswordService } from "@/backend/services";
 
@@ -17,8 +17,7 @@ gqlSchemaBuilder.mutationField("adminResetPassword", t =>
       input: t.arg({ type: AdminResetPasswordInputPothosObject, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const tErrors = ctx.t().errorsTranslations;
-      const actorUserId = await requireAuth(ctx);
+      const { userId: actorUserId, tErrors } = await requireAuthWithRateLimit(ctx);
 
       // Handle potential null sendNotificationEmail (Pothos sets defaultValue: true but can be null)
       const input = {

@@ -88,11 +88,12 @@ export namespace FxIngestionService {
     return SKIPPED_RESULT;
   }
 
-  async function rejectConcurrentSync(_locale?: string): Promise<void> {
+  async function rejectConcurrentSync(locale?: string): Promise<void> {
     const running = await FxSyncRepository.getRunningSyncRun();
     if (!running) return;
     logger.warn("FX sync already running; rejecting concurrent sync", { runningId: running.id });
-    throw new Error("fxSyncAlreadyRunning");
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(tErrors.fx.syncAlreadyRunning);
   }
 
   async function persistPairsInTx(
@@ -187,13 +188,14 @@ export namespace FxIngestionService {
         errorMessage: message,
       });
 
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
       return {
         id: `fx-refresh-${syncRun.id}`,
         success: false,
         pairsWritten: 0,
         pairsFailed: 0,
         syncRunId: syncRun.id,
-        errorMessage: message,
+        errorMessage: tErrors.fx.syncFailed,
       };
     }
   }

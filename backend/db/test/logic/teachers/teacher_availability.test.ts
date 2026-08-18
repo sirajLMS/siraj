@@ -17,7 +17,7 @@ async function createTestUser(tx: DBTransaction, name: string, emailPrefix: stri
     .values({
       name,
       email: `${emailPrefix}-${randomUUID()}@example.com`,
-      password: randomUUID(),
+      password: `TestPass-${randomUUID().slice(0, 8)}!`,
       createdAt: now,
       updatedAt: now,
     })

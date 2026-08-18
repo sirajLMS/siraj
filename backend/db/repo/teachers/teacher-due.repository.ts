@@ -13,13 +13,19 @@ import type {
 } from "@/backend/types";
 import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace TeacherDueRepository {
-  export async function create(input: TeacherDueInsertType, tx?: DBTransaction): Promise<TeacherDueSelectType> {
+  export async function create(
+    input: TeacherDueInsertType,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<TeacherDueSelectType> {
     const executor = tx ?? db;
     const [row] = await executor.insert(teacherDues).values(input).returning();
     if (!row) {
-      throw new Error("Failed to insert teacher due row");
+      const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(i18n.teacherDue.insertFailed);
     }
     return row;
   }

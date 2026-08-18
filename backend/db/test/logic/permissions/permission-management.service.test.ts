@@ -212,7 +212,7 @@ describe("PermissionManagementService Business Logic", () => {
     PermissionsService.getUserContext = originalGetUserContext;
 
     // Cleanup users created in beforeAll (use specific IDs, not email pattern)
-    const userIds = [adminUser?.id, regularUser?.id, superAdminUser?.id].filter(Boolean) as string[];
+    const userIds = [adminUser.id, regularUser.id, superAdminUser.id];
     if (userIds.length > 0) {
       await db.delete(users).where(inArray(users.id, userIds));
     }

@@ -721,18 +721,20 @@ export namespace QuotaService {
   export const refreshPeriodic = async (
     tx: DBTransaction,
     quotaId: string,
-    actorUserId?: string | null
+    actorUserId?: string | null,
+    locale: string = "en"
   ): Promise<QuotaReturnType> => {
     // --- Lock the quota row (data access) ---
     const target = await lockQuotaForRefresh(tx, quotaId);
     if (!target) throw new QuotaNotFoundError("Quota not found");
 
     // --- Business rules: validation ---
+    const tErrors = getServerTranslations(locale).errorsTranslations;
     if (target.kind !== "PERIODIC") {
-      throw new ValidationError("Cannot refresh non-periodic quota");
+      throw new ValidationError(tErrors.quota.cannotRefreshNonPeriodic);
     }
     if (!target.periodDays || target.periodDays <= 0) {
-      throw new ValidationError("Quota has no valid period days configured");
+      throw new ValidationError(tErrors.quota.noValidPeriodDays);
     }
 
     // --- Business rules: period expiry check ---

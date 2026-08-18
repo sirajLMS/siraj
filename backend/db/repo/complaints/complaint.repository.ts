@@ -16,6 +16,7 @@ import type {
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
 import { escapeLikeWildcards, PaginationUtils } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 function buildComplaintQueueConditions(
   options: { search?: string | null; status?: string | null },
@@ -129,7 +130,7 @@ export namespace ComplaintRepository {
     input: ComplaintSubmitInput,
     parentId: string,
     tx?: DBTransaction,
-    _locale?: string
+    locale?: string
   ): Promise<ComplaintSelectType> => {
     const q = queryDb(tx);
     const now = new Date();
@@ -146,7 +147,8 @@ export namespace ComplaintRepository {
       .returning();
 
     if (!created) {
-      throw new Error("Failed to create complaint");
+      const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(i18n.complaint.createFailed);
     }
 
     return {

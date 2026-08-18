@@ -3,6 +3,7 @@ import { logger } from "@/backend/lib/logger";
 import type { GcpContext } from "@/backend/storage/disk/gcp/types";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale";
 
 export async function fileExists(ctx: GcpContext, path: string): Promise<boolean> {
   try {
@@ -59,7 +60,12 @@ export async function fileInfoByDbFileId(ctx: GcpContext, id: string): Promise<T
   }
 }
 
-export async function renameFile(ctx: GcpContext, input: Types.FileRenameInput): Promise<Types.FileOperationResult> {
+export async function renameFile(
+  ctx: GcpContext,
+  input: Types.FileRenameInput,
+  locale?: string
+): Promise<Types.FileOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   try {
     const pathErr = StorageUtils.validatePath(input.currentPath);
     if (pathErr) {
@@ -105,14 +111,14 @@ export async function renameFile(ctx: GcpContext, input: Types.FileRenameInput):
 
     return {
       success: true,
-      message: "File renamed successfully",
+      message: tFile.fileRenamedSuccessfully,
       data: fileInfo,
     };
   } catch (error) {
     logger.error(`Failed to rename file: ${input.currentPath}`, error);
     return {
       success: false,
-      message: `Failed to rename file: ${error instanceof Error ? error.message : String(error)}`,
+      message: tFile.failedToRenameFile(error instanceof Error ? error.message : String(error)),
     };
   }
 }

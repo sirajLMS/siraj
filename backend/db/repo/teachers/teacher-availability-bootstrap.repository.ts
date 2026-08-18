@@ -15,6 +15,7 @@ import type {
   TeacherVacationRequestSelectType,
   VacationRequestCreateInput,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace TeacherAvailabilityBootstrapRepository {
   export async function findWindowByTeacherAndDay(
@@ -35,7 +36,8 @@ export namespace TeacherAvailabilityBootstrapRepository {
 
   export async function upsertAvailabilityWindow(
     input: AvailabilityWindowUpsertInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<TeacherAvailabilityWindowSelectType> {
     const executor = tx ?? db;
     const now = new Date();
@@ -54,7 +56,10 @@ export namespace TeacherAvailabilityBootstrapRepository {
         })
         .where(eq(teacherAvailabilityWindows.id, existing.id))
         .returning();
-      if (!updated) throw new Error("Availability window update failed");
+      if (!updated) {
+        const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(i18n.teacher.availabilityUpdateFailed);
+      }
       return updated;
     }
     const [inserted] = await executor
@@ -72,7 +77,10 @@ export namespace TeacherAvailabilityBootstrapRepository {
         updatedAt: now,
       })
       .returning();
-    if (!inserted) throw new Error("Availability window insert failed");
+    if (!inserted) {
+      const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(i18n.teacher.availabilityInsertFailed);
+    }
     return inserted;
   }
 
@@ -97,7 +105,8 @@ export namespace TeacherAvailabilityBootstrapRepository {
 
   export async function createRecurringIfMissing(
     input: RecurringUnavailabilityCreateInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<TeacherRecurringUnavailabilitySelectType> {
     const existing = await findRecurringByTeacherAndDay(input.teacherId, input.dayOfWeek, tx);
     if (existing) return existing;
@@ -119,7 +128,10 @@ export namespace TeacherAvailabilityBootstrapRepository {
         updatedAt: now,
       })
       .returning();
-    if (!inserted) throw new Error("Recurring unavailability insert failed");
+    if (!inserted) {
+      const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(i18n.teacher.recurringUnavailabilityInsertFailed);
+    }
     return inserted;
   }
 
@@ -138,7 +150,8 @@ export namespace TeacherAvailabilityBootstrapRepository {
 
   export async function createVacationIfMissing(
     input: VacationRequestCreateInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<TeacherVacationRequestSelectType> {
     const existing = await findVacationByTeacherId(input.teacherId, tx);
     if (existing) return existing;
@@ -161,7 +174,10 @@ export namespace TeacherAvailabilityBootstrapRepository {
         updatedAt: now,
       })
       .returning();
-    if (!inserted) throw new Error("Vacation request insert failed");
+    if (!inserted) {
+      const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(i18n.teacher.vacationInsertFailed);
+    }
     return inserted;
   }
 }

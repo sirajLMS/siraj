@@ -67,9 +67,10 @@ export const UpdateRecurringClassRateInputPothos = gqlSchemaBuilder.inputType("U
 gqlSchemaBuilder.queryField("recurringSchedules", t =>
   t.field({
     type: RecurringSchedulesPaginatedResultRef,
+    authScopes: { loggedIn: true },
     args: {
       pagination: t.arg({ type: PaginationArgsObject, required: false }),
-      search: t.arg.string({ required: false }),
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;

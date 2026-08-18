@@ -6,6 +6,7 @@ import type { GcpContext } from "@/backend/storage/disk/gcp/types";
 import { STORAGE_CONFIG, StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { type FileErrors, getServerTranslations } from "@/shared/locale";
 
 /**
  * Prepares a signed URL for a direct client upload to GCP
@@ -68,21 +69,25 @@ export async function prepareUpload(
 /**
  * Check if upload is allowed to the specified directory
  */
-async function checkUploadPermissions(ctx: GcpContext, directoryPath: string): Promise<string | null> {
+async function checkUploadPermissions(
+  ctx: GcpContext,
+  directoryPath: string,
+  tFile: FileErrors
+): Promise<string | null> {
   if (directoryPath.length === 0) return null;
 
   const dbDirectory = await StorageDbRepository.directoryByPath(directoryPath);
 
   if (dbDirectory) {
-    return dbDirectory.allowUploads ? null : "Uploads not allowed in this directory";
+    return dbDirectory.allowUploads ? null : tFile.uploadsNotAllowedInDirectory;
   }
 
   try {
     const folderBlob = `${directoryPath}/`;
     const [exists] = await ctx.bucket.file(folderBlob).exists();
-    if (!exists) return "Directory does not exist";
+    if (!exists) return tFile.directoryDoesNotExist;
   } catch {
-    return "Directory does not exist";
+    return tFile.directoryDoesNotExist;
   }
 
   return null;
@@ -108,8 +113,10 @@ export async function uploadFile(
   ctx: GcpContext,
   path: string,
   contentType: string,
-  buffer: Buffer
+  buffer: Buffer,
+  locale?: string
 ): Promise<Types.FileUploadResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   try {
     const fileSize = buffer.byteLength;
 
@@ -123,7 +130,7 @@ export async function uploadFile(
     }
 
     const directoryPath = path.substring(0, path.lastIndexOf("/"));
-    const permissionErr = await checkUploadPermissions(ctx, directoryPath);
+    const permissionErr = await checkUploadPermissions(ctx, directoryPath, tFile);
     if (permissionErr) {
       return { success: false, message: permissionErr, data: null };
     }
@@ -136,14 +143,14 @@ export async function uploadFile(
 
     return {
       success: true,
-      message: "File uploaded successfully",
+      message: tFile.fileUploadedSuccessfully,
       data: fileInfo,
     };
   } catch (error) {
     logger.error(`Failed to upload file: ${path}`, error);
     return {
       success: false,
-      message: `Failed to upload file: ${error instanceof Error ? error.message : String(error)}`,
+      message: tFile.failedToUploadFile(error instanceof Error ? error.message : String(error)),
       data: null,
     };
   }

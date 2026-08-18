@@ -8,13 +8,18 @@ import { StorageUtils } from "@/backend/utils";
 
 export async function createFolder(
   _ctx: VercelContext,
-  input: Types.FolderCreateInput
+  input: Types.FolderCreateInput,
+  locale?: string
 ): Promise<Types.FileOperationResult> {
-  return createFolderHelper(input, _fullPath => {
-    // Vercel Blob doesn't have a specific "create directory" operation
-    // as it is a flat structure. We just need to handle the DB entry if needed.
-    return Promise.resolve();
-  });
+  return createFolderHelper(
+    input,
+    _fullPath => {
+      // Vercel Blob doesn't have a specific "create directory" operation
+      // as it is a flat structure. We just need to handle the DB entry if needed.
+      return Promise.resolve();
+    },
+    locale
+  );
 }
 
 export async function directoryInfoByPath(ctx: VercelContext, dirPath: string): Promise<Types.DirectoryInfo | null> {

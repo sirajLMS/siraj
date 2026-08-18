@@ -4,7 +4,6 @@
  * throughout the backend.
  */
 
-import { z } from "zod";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
@@ -16,12 +15,6 @@ export function isCurrencyCode(value: unknown): value is CurrencyCode {
   if (typeof value !== "string") return false;
   return (Object.values(CurrencyCode) as readonly string[]).includes(value);
 }
-
-/**
- * Zod schema for CurrencyCode validation.
- * Use this for form data, input validation, etc.
- */
-export const currencyCodeSchema = z.enum(CurrencyCode);
 
 /**
  * Safe parse function for CurrencyCode.

@@ -6,6 +6,7 @@ import {
 } from "@/backend/db/repo/notifications/notification-status.constants";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";
+import { NotFoundError } from "@/backend/lib/errors";
 import type {
   CreateNotificationDeliveryInput,
   DBTransaction,
@@ -368,7 +369,8 @@ export namespace NotificationRepository {
         .limit(1);
 
       if (results.length === 0) {
-        throw new Error(`Notification delivery ${input.deliveryId} not found`);
+        const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new NotFoundError("NOTIFICATION_DELIVERY", tErrors.notification.deliveryNotFound(input.deliveryId));
       }
 
       const current = results[0];

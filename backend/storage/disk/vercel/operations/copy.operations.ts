@@ -9,7 +9,8 @@ import { StorageUtils } from "@/backend/utils";
 
 export async function copyItems(
   ctx: VercelContext,
-  input: Types.StorageItemsCopyInput
+  input: Types.StorageItemsCopyInput,
+  locale?: string
 ): Promise<Types.BulkOperationResult> {
   return executeBulkOperation({
     ctx,
@@ -17,6 +18,7 @@ export async function copyItems(
     destinationPath: input.destinationPath,
     existsFn: fileExists,
     operationName: "copied",
+    locale,
     processFn: async (opCtx, sourcePath) => {
       const fileName = StorageUtils.extractFileName(sourcePath);
       const destPath = `${input.destinationPath.replace(/\/$/, "")}/${fileName}`;

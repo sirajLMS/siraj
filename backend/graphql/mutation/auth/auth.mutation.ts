@@ -10,7 +10,7 @@ import {
   LoginResponsePothosObject,
   RefreshTokenResponsePothosObject,
 } from "@/backend/graphql/pothos";
-import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { requireAuthWithRateLimit } from "@/backend/graphql/shared";
 import { extractTokenFromHeader, generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
 import { setAuthCookies as applyAuthCookies, clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { createAuthSession } from "@/backend/lib/auth/createAuthSession";
@@ -282,6 +282,17 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
+      const ipAddress = ctx.ipAddress ?? "127.0.0.1";
+
+      // 0. Enforce auth rate limit before any checks
+      const rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
+      if (!rateLimitResult.success) {
+        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
+          // ← compile-time ✅
+          extensions: { code: "TOO_MANY_ATTEMPTS" },
+        });
+      }
+
       const isDemo = getBooleanEnv("IS_DEMO");
       if (!isDemo) {
         throw new GraphQLError(tErrors.auth.demoLoginNotEnabled, {
@@ -314,6 +325,15 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: RefreshTokenResponsePothosObject,
     nullable: true,
     resolve: async (_parent, _args, ctx) => {
+      const tErrors = ctx.t().errorsTranslations;
+
+      const rateLimitResult = await checkRateLimit(ctx.ipAddress ?? "[unknown]", authRateLimiter);
+      if (!rateLimitResult.success) {
+        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
+          extensions: { code: "TOO_MANY_ATTEMPTS" },
+        });
+      }
+
       const sessionId = ctx.sessionId;
       const refreshToken = ctx.refreshToken;
 
@@ -396,7 +416,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       input: t.arg({ type: ChangePasswordInputPothosObject, required: true }),
     },
     resolve: async (_parent, args, ctx) => {
-      const actorUserId = await requireAuth(ctx);
+      const { userId: actorUserId } = await requireAuthWithRateLimit(ctx);
       return AuthPasswordService.changePassword(actorUserId, args.input, ctx.locale);
     },
   }),

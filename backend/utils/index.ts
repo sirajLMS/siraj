@@ -1,4 +1,5 @@
 export * from "./auth.utils";
+export * from "./availability-utils";
 export * from "./db.utils";
 export * from "./pagination.utils";
 export * from "./storage.utils";

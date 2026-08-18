@@ -30,6 +30,7 @@ import type {
   CronScheduleUpdateInput,
   DBTransaction,
 } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 
 const INFLIGHT_STATUSES = [CronRunStatus.PENDING, CronRunStatus.RUNNING, CronRunStatus.RETRYING] as const;
 
@@ -180,7 +181,7 @@ export namespace CronRepository {
     if (status) conditions.push(eq(cronSchedules.status, status));
     if (jobKind) conditions.push(eq(cronSchedules.jobKind, jobKind));
     if (name) {
-      const escapedName = name.replaceAll("%", String.raw`\%`).replaceAll("_", String.raw`\_`);
+      const escapedName = escapeLikeWildcards(name);
       conditions.push(ilike(cronSchedules.name, `%${escapedName}%`));
     }
 

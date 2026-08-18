@@ -48,6 +48,7 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("ensureDemoUsers", t =>
     t.field({
       type: "Boolean",
+      authScopes: { loggedIn: true },
       resolve: async () => {
         assertTestHelperAllowed();
         return await TestHelperService.ensureDemoUsers();

@@ -78,7 +78,7 @@ describe("Row Level Security and Soft Delete", () => {
         .values({
           name: "RLS Update User",
           email,
-          password: randomUUID(),
+          password: `TestPass-${randomUUID().slice(0, 8)}!`,
           createdAt: now,
           updatedAt: now,
         })
@@ -113,7 +113,7 @@ describe("Row Level Security and Soft Delete", () => {
         .values({
           name: "RLS Delete User",
           email,
-          password: randomUUID(),
+          password: `TestPass-${randomUUID().slice(0, 8)}!`,
           createdAt: now,
           updatedAt: now,
         })

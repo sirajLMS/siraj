@@ -52,6 +52,26 @@ function enforceBulkLimit(count: number, operation: string, tErrors: ErrorsLabel
 }
 
 /**
+ * Authenticate, sanitise/validate a single path, and check storage-manage permission.
+ * Shared by single-path mutation resolvers (prepareUpload, createFolder,
+ * updateDirectoryPermissions, setStorageItemProtection).
+ * @param ctx - GraphQL resolver context (for auth and locale).
+ * @param rawPath - Raw path string from the GraphQL input.
+ * @returns The sanitised path and the error labels.
+ */
+async function authAndSanitizeSinglePath(
+  ctx: BaseContext,
+  rawPath: string
+): Promise<{ sanitizedPath: string; tErrors: ErrorsLabels }> {
+  const userId = await requireAuth(ctx);
+  const sanitizedPath = sanitizeStoragePath(rawPath);
+  validateStoragePath(sanitizedPath);
+  const tErrors = ctx.t().errorsTranslations;
+  await StorageAuthService.requireStorageManage(userId, tErrors);
+  return { sanitizedPath, tErrors };
+}
+
+/**
  * Shared resolver logic for bulk move/copy mutations: validate paths, enforce limits,
  * authorise, then delegate to the service's bulk transfer method.
  * @param operation - "move" or "copy" — used both for the limit error and method dispatch.
@@ -77,7 +97,9 @@ async function resolveBulkTransfer(
     sourcePaths: sanitizedSourcePaths,
     destinationPath: sanitizedDestPath,
   };
-  return operation === "move" ? await storageService.moveItems(payload) : await storageService.copyItems(payload);
+  return operation === "move"
+    ? await storageService.moveItems(payload, ctx.locale)
+    : await storageService.copyItems(payload, ctx.locale);
 }
 
 gqlSchemaBuilder.mutationFields(t => ({
@@ -97,7 +119,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       const tErrors = ctx.t().errorsTranslations;
       await StorageAuthService.requireStorageManageOrOwner(userId, currentPath, tErrors);
       const storageService = await getStorageService();
-      return await storageService.renameFile({ ...input, currentPath });
+      return await storageService.renameFile({ ...input, currentPath }, ctx.locale);
     },
   }),
 
@@ -114,7 +136,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       const tErrors = ctx.t().errorsTranslations;
       await StorageAuthService.requireStorageManageOrOwner(userId, sanitizedPath, tErrors);
       const storageService = await getStorageService();
-      return await storageService.deleteFile(sanitizedPath);
+      return await storageService.deleteFile(sanitizedPath, ctx.locale);
     },
   }),
 
@@ -128,13 +150,9 @@ gqlSchemaBuilder.mutationFields(t => ({
       }),
     },
     resolve: async (_parent, { input }, ctx) => {
-      const userId = await requireAuth(ctx);
-      const sanitizedPath = sanitizeStoragePath(input.path);
-      validateStoragePath(sanitizedPath);
-      const tErrors = ctx.t().errorsTranslations;
-      await StorageAuthService.requireStorageManage(userId, tErrors);
+      const { sanitizedPath } = await authAndSanitizeSinglePath(ctx, input.path);
       const storageService = await getStorageService();
-      const result = await storageService.prepareUpload({ ...input, path: sanitizedPath });
+      const result = await storageService.prepareUpload({ ...input, path: sanitizedPath }, ctx.locale);
       logger.info("GraphQL mutation: prepareUpload completed", {
         uploadType: result.uploadType,
       });
@@ -152,13 +170,9 @@ gqlSchemaBuilder.mutationFields(t => ({
       }),
     },
     resolve: async (_parent, { input }, ctx) => {
-      const userId = await requireAuth(ctx);
-      const sanitizedPath = sanitizeStoragePath(input.path);
-      validateStoragePath(sanitizedPath);
-      const tErrors = ctx.t().errorsTranslations;
-      await StorageAuthService.requireStorageManage(userId, tErrors);
+      const { sanitizedPath } = await authAndSanitizeSinglePath(ctx, input.path);
       const storageService = await getStorageService();
-      return await storageService.createFolder({ ...input, path: sanitizedPath });
+      return await storageService.createFolder({ ...input, path: sanitizedPath }, ctx.locale);
     },
   }),
 
@@ -202,7 +216,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       enforceBulkLimit(sanitizedPaths.length, "delete", tErrors);
       await authorizeBulkPaths(userId, sanitizedPaths, tErrors);
       const storageService = await getStorageService();
-      return await storageService.deleteItems({ ...input, paths: sanitizedPaths });
+      return await storageService.deleteItems({ ...input, paths: sanitizedPaths }, ctx.locale);
     },
   }),
 
@@ -216,11 +230,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       }),
     },
     resolve: async (_parent, { input }, ctx) => {
-      const userId = await requireAuth(ctx);
-      const sanitizedPath = sanitizeStoragePath(input.path);
-      validateStoragePath(sanitizedPath);
-      const tErrors = ctx.t().errorsTranslations;
-      await StorageAuthService.requireStorageManage(userId, tErrors);
+      const { sanitizedPath } = await authAndSanitizeSinglePath(ctx, input.path);
       return await StorageManageService.updateDirectoryPermissions({ ...input, path: sanitizedPath });
     },
   }),
@@ -235,11 +245,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       }),
     },
     resolve: async (_parent, { input }, ctx) => {
-      const userId = await requireAuth(ctx);
-      const sanitizedPath = sanitizeStoragePath(input.path);
-      validateStoragePath(sanitizedPath);
-      const tErrors = ctx.t().errorsTranslations;
-      await StorageAuthService.requireStorageManage(userId, tErrors);
+      const { sanitizedPath } = await authAndSanitizeSinglePath(ctx, input.path);
       return await StorageManageService.setStorageItemProtection({ ...input, path: sanitizedPath });
     },
   }),

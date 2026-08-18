@@ -23,6 +23,8 @@ import type {
   QuotaSubmitInput,
   QuotaUpdateInput,
 } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale";
 
 type ReadExecutor = DBTransaction | typeof db;
 
@@ -353,7 +355,7 @@ export namespace QuotaRepository {
       conditions.push(eq(quotas.kind, filter.kind));
     }
     if (filter?.search) {
-      const searchPattern = `%${filter.search}%`;
+      const searchPattern = `%${escapeLikeWildcards(filter.search)}%`;
       conditions.push(sql`${quotas.name} ILIKE ${searchPattern}`);
     }
 
@@ -543,7 +545,8 @@ export namespace QuotaRepository {
       count: number;
       actorUserId?: string | null;
       idempotencyKey: string;
-    }
+    },
+    locale?: string
   ): Promise<QuotaSelectType> => {
     // Ledger-first pattern: Insert the ledger row BEFORE updating the balance.
     // If the idempotency key already exists (duplicate on retry), the insert affects 0 rows
@@ -588,7 +591,10 @@ export namespace QuotaRepository {
       )
       .returning();
 
-    if (!updated) throw new ConflictError("Failed to release quota reservation: insufficient reserved classes");
+    if (!updated) {
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new ConflictError(tErrors.billing.quotaReleaseReservationFailed);
+    }
 
     return updated;
   };
@@ -844,7 +850,8 @@ export namespace QuotaRepository {
       recurringScheduleId?: string | null;
       instanceIds: string[];
       actorUserId?: string | null;
-    }
+    },
+    locale?: string
   ): Promise<{ releasedCount: number; quota: QuotaSelectType | null }> => {
     if (input.instanceIds.length === 0) {
       return { releasedCount: 0, quota: null };
@@ -903,7 +910,8 @@ export namespace QuotaRepository {
       // Concurrent transaction archived/deleted the quota between ledger insert and this UPDATE.
       // Throwing forces tx rollback, discarding the already-inserted ledger rows and
       // preventing ledger/aggregate drift.
-      throw new ConflictError("Quota release failed: quota no longer active after concurrent modification");
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new ConflictError(tErrors.billing.quotaReleaseConcurrentModification);
     }
 
     return { releasedCount, quota: updated };
@@ -1043,7 +1051,8 @@ export namespace QuotaRepository {
       expiredAmount: number;
       periodStr: string;
       actorUserId?: string | null;
-    }
+    },
+    locale?: string
   ): Promise<QuotaReturnType> => {
     const now = new Date();
     const { newRemaining, newAnchor, expiredAmount, periodStr, actorUserId } = input;
@@ -1064,7 +1073,10 @@ export namespace QuotaRepository {
       .where(and(eq(quotas.id, target.id), eq(quotas.version, target.version)))
       .returning();
 
-    if (!updated) throw new ConflictError("Failed to refresh periodic quota due to concurrent write");
+    if (!updated) {
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new ConflictError(tErrors.billing.quotaRefreshConcurrentWrite);
+    }
 
     // After UPDATE succeeds: insert deferred ledger entries.
     // EXPIRE the unused classes that did not roll over from the just-ended period
@@ -1201,7 +1213,8 @@ export namespace QuotaRepository {
     tx: DBTransaction,
     quotaId: string,
     periodStr: string,
-    actorUserId?: string | null
+    actorUserId?: string | null,
+    locale?: string
   ): Promise<QuotaSelectType> => {
     const [existing] = await tx
       .select()
@@ -1221,7 +1234,10 @@ export namespace QuotaRepository {
       .where(and(eq(quotas.id, quotaId), eq(quotas.version, existing.version)))
       .returning();
 
-    if (!updated) throw new ConflictError("Failed to reset usedThisPeriod due to concurrent modification");
+    if (!updated) {
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new ConflictError(tErrors.billing.quotaResetConcurrentModification);
+    }
 
     // AUDIT: ledger entry required for ADJUST tracking and balance reconstruction
     await QuotaLedgerRepository.insert(tx, {

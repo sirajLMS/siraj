@@ -140,30 +140,30 @@ const MeetingConfigDetailsInputRef = gqlSchemaBuilder.inputRef<MeetingConfigDeta
 
 export const MeetingConfigDetailsInputPothos = MeetingConfigDetailsInputRef.implement({
   fields: t => ({
-    meetingUrl: t.string({ required: false }),
-    username: t.string({ required: false }),
-    tenantId: t.string({ required: false }),
+    meetingUrl: t.string({ required: false, directives: { constraint: { maxLength: 2048 } } }),
+    username: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+    tenantId: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
   }),
 });
 
 function meetingProviderInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
-    slug: t.string({ required }),
+    slug: t.string({ required, directives: { constraint: { maxLength: 100 } } }),
     name: t.field({ type: "LocalizedString", required }),
     description: t.field({ type: "LocalizedString", required: false }),
     instructions: t.field({ type: "LocalizedString", required: false }),
-    urlAllowlist: t.stringList({ required }),
-    urlExample: t.string({ required: false }),
-    logoUrl: t.string({ required: false }),
+    urlAllowlist: t.stringList({ required, directives: { constraint: { maxItems: 50, maxLength: 2048 } } }),
+    urlExample: t.string({ required: false, directives: { constraint: { maxLength: 2048 } } }),
+    logoUrl: t.string({ required: false, directives: { constraint: { maxLength: 2048 } } }),
     fieldSchema: t.field({ type: MeetingProviderFieldSchemaInputPothos, required }),
-    providerKind: t.string({ required: false }),
+    providerKind: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
     isActive: t.boolean({ required: false }),
   };
 }
 
 function meetingConfigDetailsInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
-    password: t.string({ required: false }),
+    password: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
     details: t.field({ type: MeetingConfigDetailsInputPothos, required }),
   };
 }
@@ -171,7 +171,7 @@ function meetingConfigDetailsInputCommonFields(t: PothosInputFieldBuilder, requi
 function meetingConfigLabelInputCommonFields(t: PothosInputFieldBuilder, required: boolean) {
   return {
     providerId: t.string({ required }),
-    label: t.string({ required: false }),
+    label: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     isDefault: t.boolean({ required }),
     ...meetingConfigDetailsInputCommonFields(t, required),
   };
@@ -187,7 +187,7 @@ export const MeetingProviderUpdateInputPothos = gqlSchemaBuilder.inputType("Meet
 
 export const UserMeetingConfigCreateInputPothos = gqlSchemaBuilder.inputType("UserMeetingConfigCreateInput", {
   fields: t => ({
-    userId: t.string({ required: true }),
+    userId: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     ...meetingConfigLabelInputCommonFields(t, true),
   }),
 });
@@ -215,18 +215,18 @@ export const ClassMeetingConfigPothosObject = ClassMeetingConfigRef.implement({
 
 export const ClassMeetingConfigCreateInputPothos = gqlSchemaBuilder.inputType("ClassMeetingConfigCreateInput", {
   fields: t => ({
-    classInstanceId: t.string({ required: false }),
-    recurringScheduleId: t.string({ required: false }),
+    classInstanceId: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
+    recurringScheduleId: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
     ...meetingConfigLabelInputCommonFields(t, true),
   }),
 });
 
 export const ClassMeetingConfigUpdateInputPothos = gqlSchemaBuilder.inputType("ClassMeetingConfigUpdateInput", {
   fields: t => ({
-    label: t.string({ required: false }),
+    label: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     isDefault: t.boolean({ required: false }),
     ...meetingConfigDetailsInputCommonFields(t, false),
-    providerId: t.string({ required: false }),
+    providerId: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
   }),
 });
 
@@ -236,7 +236,7 @@ export const ClassMeetingConfigUpdateInputPothos = gqlSchemaBuilder.inputType("C
 
 export const GenerateMeetingUrlInputPothos = gqlSchemaBuilder.inputType("GenerateMeetingUrlInput", {
   fields: t => ({
-    providerId: t.string({ required: true }),
+    providerId: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     topic: t.string({ required: true, directives: { constraint: { maxLength: 200 } } }),
     startDateTime: t.string({ required: false }),
     durationMinutes: t.int({ required: false }),

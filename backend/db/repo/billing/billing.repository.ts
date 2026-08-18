@@ -23,6 +23,7 @@ import type {
   ParentUserRow,
   PaymentRecordInput,
 } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -349,7 +350,7 @@ export namespace BillingRepository {
     const whereCondition = and(
       eq(currencyExchangeRates.fromCurrency, from),
       eq(currencyExchangeRates.toCurrency, to),
-      sql`${currencyExchangeRates.effectiveDate} >= NOW() - INTERVAL '${sql.raw(String(maxDays))} days'`
+      sql`${currencyExchangeRates.effectiveDate} >= NOW() - make_interval(days => ${maxDays})`
     );
 
     const historyId = `exchange-rate-history-${from}-${to}`;
@@ -688,11 +689,11 @@ export namespace BillingRepository {
     if (!normalized) {
       return undefined;
     }
-    const pattern = `%${normalized.toLowerCase()}%`;
+    const escapedPattern = `%${escapeLikeWildcards(normalized).toLowerCase()}%`;
     return or(
-      sql`LOWER(${invoices.id}::text) LIKE ${pattern}`,
-      sql`LOWER(COALESCE(${students.name}, '')::text) LIKE ${pattern}`,
-      sql`LOWER(${invoices.amount}::text) LIKE ${pattern}`
+      sql`LOWER(${invoices.id}::text) LIKE ${escapedPattern}`,
+      sql`LOWER(COALESCE(${students.name}, '')::text) LIKE ${escapedPattern}`,
+      sql`LOWER(${invoices.amount}::text) LIKE ${escapedPattern}`
     );
   }
 

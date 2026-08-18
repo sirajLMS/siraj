@@ -50,11 +50,3 @@ function getNextDevServerUrl(): string {
 }
 
 export const NEXT_PUBLIC_BASE_URL = getNextDevServerUrl();
-
-export function getGraphQLEndpoint(): string {
-  const GRAPHQL_PATH = "/api/graphql";
-  const baseUrl = trimTrailingSlashes(NEXT_PUBLIC_BASE_URL);
-  return `${baseUrl}${GRAPHQL_PATH}`;
-}
-
-export const GRAPHQL_ENDPOINT = getGraphQLEndpoint();

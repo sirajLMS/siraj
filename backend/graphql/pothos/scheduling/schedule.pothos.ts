@@ -1,3 +1,4 @@
+import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { classExecutionFields } from "@/backend/graphql/pothos/scheduling/__shared__/classExecutionFields";
 import { classSessionMetricsFields } from "@/backend/graphql/pothos/scheduling/__shared__/classSessionMetricsFields";
@@ -75,10 +76,10 @@ export const AdminDashboardScheduleInputPothosObject = gqlSchemaBuilder
   .inputRef<AdminDashboardScheduleInput>("AdminDashboardScheduleInput")
   .implement({
     fields: t => ({
-      date: t.string({ required: true }),
-      teacherId: t.string(),
-      search: t.string(),
-      metricFilter: t.string(),
+      date: t.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
+      teacherId: t.string({ directives: { constraint: { maxLength: 36 } } }),
+      search: t.string({ directives: { constraint: { maxLength: 255 } } }),
+      metricFilter: t.string({ directives: { constraint: { maxLength: 50 } } }),
       paginationArgs: t.field({ type: PaginationArgsObject, required: false }),
     }),
   });
@@ -181,9 +182,13 @@ export const StatusTrackingScheduleRowPothosObject = StatusTrackingScheduleRowRe
 gqlSchemaBuilder.queryField("statusTrackingSchedule", t =>
   t.field({
     type: [StatusTrackingScheduleRowRef],
+    authScopes: (_parent, _args, ctx) =>
+      ctx.isSuperAdmin ||
+      ctx.permissions.includes(AppPermission.SCHEDULE_VIEW_ALL) ||
+      ctx.permissions.includes(AppPermission.DASHBOARD_VIEW_METRICS),
     args: {
-      date: t.arg.string({ required: true }),
-      search: t.arg.string({ required: false }),
+      date: t.arg.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       viewerTimezone: t.arg({ type: IanaTimezonePothosObject, required: false }),
     },
     resolve: async (_root, args, ctx) => {

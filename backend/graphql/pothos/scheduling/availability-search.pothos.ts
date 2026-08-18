@@ -58,14 +58,14 @@ export const AvailabilitySearchInputPothosObject = gqlSchemaBuilder
   .inputRef<CrossStaffSearchInput>("AvailabilitySearchInput")
   .implement({
     fields: t => ({
-      fromTime: t.string({ required: true }),
-      toTime: t.string({ required: true }),
-      fromDate: t.string({ required: false }),
-      toDate: t.string({ required: false }),
+      fromTime: t.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
+      toTime: t.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
+      fromDate: t.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
+      toDate: t.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
       gender: t.field({ type: GenderPothosObject, required: false }),
       minAvailableDays: t.int({ required: false }),
       minTotalGaps: t.int({ required: false }),
-      teacherNameSearch: t.string({ required: false }),
+      teacherNameSearch: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       daysOfWeek: t.field({ type: [DayOfWeekPothosObject], required: false }),
       sortBy: t.field({ type: AvailabilitySearchSortByPothosObject, required: false }),
       paginationArgs: t.field({ type: PaginationArgsObject, required: false }),

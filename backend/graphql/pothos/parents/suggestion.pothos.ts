@@ -1,7 +1,8 @@
 import { GraphQLError } from "graphql";
-import { SuggestionStatus } from "@/backend/enum";
+import { AppPermission, SuggestionStatus } from "@/backend/enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { SuggestionService } from "@/backend/services";
 import type {
   DuplicateSuggestionInput,
@@ -133,8 +134,8 @@ export const SubmitSuggestionInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for submitting a new suggestion.",
     fields: t => ({
-      submitterName: t.string({ required: true }),
-      body: t.string({ required: true }),
+      submitterName: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+      body: t.string({ required: true, directives: { constraint: { maxLength: 5000 } } }),
     }),
   });
 
@@ -143,7 +144,7 @@ export const SuggestionFilterPothosObject = gqlSchemaBuilder
   .implement({
     description: "Filter and pagination options for the admin suggestion list.",
     fields: t => ({
-      search: t.string({ required: false }),
+      search: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       status: t.field({ type: SuggestionStatusPothosEnum, required: false }),
       limit: t.int({ required: true }),
       offset: t.int({ required: true }),
@@ -165,8 +166,8 @@ export const RespondToSuggestionInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for responding to a suggestion with an admin response.",
     fields: t => ({
-      suggestionId: t.string({ required: true }),
-      adminResponse: t.string({ required: true }),
+      suggestionId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      adminResponse: t.string({ required: true, directives: { constraint: { maxLength: 5000 } } }),
     }),
   });
 
@@ -175,8 +176,8 @@ export const MarkSuggestionDuplicateInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for marking a suggestion as a duplicate of another suggestion.",
     fields: t => ({
-      suggestionId: t.string({ required: true }),
-      duplicateOfId: t.string({ required: true }),
+      suggestionId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      duplicateOfId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     }),
   });
 
@@ -233,6 +234,7 @@ gqlSchemaBuilder.queryField("parentSuggestions", t =>
   t.field({
     type: [SuggestionPothosObject],
     description: "Returns the authenticated parent's suggestion history with review status.",
+    authScopes: { loggedIn: true },
     args: {
       options: t.arg({ type: ParentSuggestionOptionsPothosObject, required: true }),
     },
@@ -254,9 +256,10 @@ gqlSchemaBuilder.queryField("searchSuggestions", t =>
   t.field({
     type: [SuggestionSearchResultPothosObject],
     description: "Search suggestions for duplicate marking autocomplete. Requires suggestions.review permission.",
+    authScopes: { permission: AppPermission.SUGGESTIONS_REVIEW },
     args: {
-      query: t.arg.string({ required: true }),
-      excludeId: t.arg.string({ required: true }),
+      query: t.arg.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+      excludeId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = requireAuth(ctx);
@@ -271,6 +274,7 @@ gqlSchemaBuilder.queryField("suggestionContributorStats", t =>
   t.field({
     type: SuggestionContributorStatsPothosObject,
     description: "Returns contributor statistics for the suggestion social proof display.",
+    authScopes: { loggedIn: true },
     args: {
       days: t.arg.int({ required: true }),
     },
@@ -336,7 +340,7 @@ gqlSchemaBuilder.mutationField("markSuggestionReviewed", t =>
     authScopes: { superAdmin: true },
     description: "Marks a suggestion as reviewed (admin only).",
     args: {
-      suggestionId: t.arg.string({ required: true }),
+      suggestionId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) =>
       authenticatedSuggestionMutation(ctx, userId =>
@@ -353,10 +357,18 @@ gqlSchemaBuilder.mutationField("respondToSuggestion", t =>
     args: {
       input: t.arg({ type: RespondToSuggestionInputPothosObject, required: true }),
     },
-    resolve: async (_root, args, ctx) =>
-      authenticatedSuggestionMutation(ctx, userId =>
+    resolve: async (_root, args, ctx) => {
+      const tErrors = ctx.t().errorsTranslations;
+      const rateLimitResult = await checkRateLimit(ctx.ipAddress ?? "[unknown]", authRateLimiter);
+      if (!rateLimitResult.success) {
+        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
+          extensions: { code: "TOO_MANY_ATTEMPTS" },
+        });
+      }
+      return authenticatedSuggestionMutation(ctx, userId =>
         SuggestionService.respondToSuggestion(userId, args.input.suggestionId, args.input.adminResponse, ctx.locale)
-      ),
+      );
+    },
   })
 );
 
@@ -381,7 +393,7 @@ gqlSchemaBuilder.mutationField("deleteSuggestion", t =>
     authScopes: { superAdmin: true },
     description: "Soft-deletes a suggestion (super admin only). Returns true on success.",
     args: {
-      suggestionId: t.arg.string({ required: true }),
+      suggestionId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = requireAuth(ctx);

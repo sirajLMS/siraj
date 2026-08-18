@@ -8,6 +8,7 @@ import type {
   TeacherImportantNoteSubmitInput,
   TeacherImportantNoteUpdateInput,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale";
 
 export namespace TeacherNotesRepository {
   export async function getActiveNotes(
@@ -57,7 +58,8 @@ export namespace TeacherNotesRepository {
         .returning();
 
       if (!result) {
-        throw new Error("Failed to create teacher note");
+        const { teacher } = getServerTranslations(_locale ?? "en").errorsTranslations;
+        throw new Error(teacher.noteCreateFailed);
       }
 
       logger.info("Teacher note created", { noteId: result.id, title: result.title });

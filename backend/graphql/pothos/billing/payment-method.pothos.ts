@@ -181,19 +181,19 @@ export const SupportedOnlineAccountPothosObject = SupportedOnlineAccountRef.impl
 
 export const PaymentMethodDetailsInputPothos = gqlSchemaBuilder.inputType("PaymentMethodDetailsInput", {
   fields: t => ({
-    walletId: t.string({ required: false }),
-    phone: t.string({ required: false }),
-    paymentLinkId: t.string({ required: false }),
-    url: t.string({ required: false }),
-    onlineAccountId: t.string({ required: false }),
-    identifier: t.string({ required: false }),
-    iban: t.string({ required: false }),
-    bankName: t.string({ required: false }),
-    beneficiaryName: t.string({ required: false }),
-    swiftBic: t.string({ required: false }),
-    accountNumber: t.string({ required: false }),
-    routingNumber: t.string({ required: false }),
-    note: t.string({ required: false }),
+    walletId: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
+    phone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+    paymentLinkId: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
+    url: t.string({ required: false, directives: { constraint: { maxLength: 2048 } } }),
+    onlineAccountId: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
+    identifier: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+    iban: t.string({ required: false, directives: { constraint: { maxLength: 34 } } }),
+    bankName: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+    beneficiaryName: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+    swiftBic: t.string({ required: false, directives: { constraint: { maxLength: 11 } } }),
+    accountNumber: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+    routingNumber: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+    note: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
   }),
 });
 
@@ -234,7 +234,7 @@ function userPaymentMethodCommonInputFields(t: PothosInputFieldBuilder) {
     type: t.field({ type: PaymentMethodTypePothosEnum, required: true }),
     direction: t.field({ type: PaymentDirectionPothosEnum, required: true }),
     isDefault: t.boolean({ required: false }),
-    label: t.string({ required: false }),
+    label: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     details: t.field({ type: PaymentMethodDetailsInputPothos, required: true }),
   };
 }
@@ -243,7 +243,7 @@ export const UserPaymentMethodCreateInputPothos = gqlSchemaBuilder
   .inputRef<UserPaymentMethodSubmitGqlInput>("UserPaymentMethodCreateInput")
   .implement({
     fields: t => ({
-      userId: t.string({ required: true }),
+      userId: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
       ...userPaymentMethodCommonInputFields(t),
     }),
   });
@@ -260,7 +260,7 @@ export const UserPaymentMethodUpdateInputPothos = gqlSchemaBuilder
     fields: t => ({
       direction: t.field({ type: PaymentDirectionPothosEnum, required: false }),
       isDefault: t.boolean({ required: false }),
-      label: t.string({ required: false }),
+      label: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       details: t.field({ type: PaymentMethodDetailsInputPothos, required: false }),
     }),
   });
@@ -270,7 +270,7 @@ function supportedInputCommonFields(t: PothosInputFieldBuilder, required: boolea
     description: t.field({ type: "LocalizedString", required }),
     instructions: t.field({ type: "LocalizedString", required }),
     supportedDirections: t.field({ type: PaymentDirectionPothosEnum, required: false }),
-    logoUrl: t.string({ required: false }),
+    logoUrl: t.string({ required: false, directives: { constraint: { maxLength: 2048 } } }),
     isActive: t.boolean({ required: false }),
   };
 }
@@ -282,7 +282,7 @@ function mobileWalletInputCommonFields(t: PothosInputFieldBuilder, required: boo
     ...supportedInputCommonFields(t, false),
     countryCode: t.field({ type: CountryCodePothosObject, required: false }),
     currencyCode: t.field({ type: CurrencyCodePothosObject, required: false }),
-    phoneRegion: t.string({ required: false }),
+    phoneRegion: t.string({ required: false, directives: { constraint: { maxLength: 10 } } }),
   };
 }
 
@@ -291,8 +291,8 @@ function paymentLinkInputCommonFields(t: PothosInputFieldBuilder, required: bool
     slug: t.string({ required }),
     name: t.field({ type: "LocalizedString", required }),
     ...supportedInputCommonFields(t, false),
-    urlAllowlist: t.stringList({ required }),
-    urlExample: t.string({ required: false }),
+    urlAllowlist: t.stringList({ required, directives: { constraint: { maxItems: 50, maxLength: 2048 } } }),
+    urlExample: t.string({ required: false, directives: { constraint: { maxLength: 2048 } } }),
   };
 }
 
@@ -314,7 +314,7 @@ export const SupportedPaymentLinkUpdateInputPothos = gqlSchemaBuilder.inputType(
 
 export const SupportedOnlineAccountCreateInputPothos = gqlSchemaBuilder.inputType("SupportedOnlineAccountCreateInput", {
   fields: t => ({
-    slug: t.string({ required: true }),
+    slug: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     name: t.field({ type: "LocalizedString", required: true }),
     ...supportedInputCommonFields(t, false),
     identifierKind: t.field({ type: IdentifierKindPothosEnum, required: true }),
@@ -324,7 +324,7 @@ export const SupportedOnlineAccountCreateInputPothos = gqlSchemaBuilder.inputTyp
 
 export const SupportedOnlineAccountUpdateInputPothos = gqlSchemaBuilder.inputType("SupportedOnlineAccountUpdateInput", {
   fields: t => ({
-    slug: t.string({ required: false }),
+    slug: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
     name: t.field({ type: "LocalizedString", required: false }),
     ...supportedInputCommonFields(t, false),
     identifierKind: t.field({ type: IdentifierKindPothosEnum, required: false }),

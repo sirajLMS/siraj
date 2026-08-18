@@ -186,7 +186,7 @@ gqlSchemaBuilder.mutationField("deleteEnvConfigEntry", t =>
     type: EnvConfigDeleteResultPothosObject,
     authScopes: { permission: AppPermission.SETTINGS_EDIT_ENV, notImpersonating: true },
     args: {
-      key: t.arg.string({ required: true }),
+      key: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },
     resolve: async (_root, args, ctx) => {
       return executeEnvConfigMutation(ctx, args.key, "delete", () => deleteEnvConfigOverride(args.key));

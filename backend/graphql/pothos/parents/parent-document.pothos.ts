@@ -20,7 +20,7 @@ gqlSchemaBuilder.queryField("parentDocuments", t =>
     type: [ParentDocumentRef],
     authScopes: { loggedIn: true },
     args: {
-      parentId: t.arg.string({ required: true }),
+      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       return ParentDocumentService.getParentDocuments(ctx.user?.id ?? "", args.parentId, ctx.locale);
@@ -33,9 +33,9 @@ gqlSchemaBuilder.mutationField("linkDocumentToParent", t =>
     type: ParentDocumentRef,
     authScopes: { superAdmin: true },
     args: {
-      parentId: t.arg.string({ required: true }),
-      fileId: t.arg.string({ required: true }),
-      usageType: t.arg.string({ required: true }),
+      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      fileId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      usageType: t.arg.string({ required: true, directives: { constraint: { maxLength: 64 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const result = await ParentDocumentService.linkDocumentToParent(

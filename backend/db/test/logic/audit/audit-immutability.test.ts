@@ -18,7 +18,7 @@ describe("Audit Log Immutability", () => {
         .values({
           name: "Audit Log Actor",
           email,
-          password: randomUUID(),
+          password: `TestPass-${randomUUID().slice(0, 8)}!`,
           createdAt: now,
           updatedAt: now,
         })

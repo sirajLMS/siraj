@@ -46,7 +46,12 @@ function mapUserOverridesSafely(
 }
 
 function resolveActorId(ctx: PermissionCtx): string {
-  return ctx.user?.id ?? "";
+  if (!ctx.user) {
+    throw new GraphQLError("Unauthorized", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
+  }
+  return ctx.user.id;
 }
 
 function resolveErrorsTranslations(ctx: ErrorsTranslationsHolder): ErrorsLabels {
@@ -127,7 +132,7 @@ const CreatePermissionGroupInput = gqlSchemaBuilder.inputType("CreatePermissionG
   fields: t => ({
     name: t.field({ type: "LocalizedString", required: true }),
     description: t.field({ type: "LocalizedString", required: false }),
-    permissionIds: t.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
+    permissionIds: t.stringList({ required: true, directives: { constraint: { maxItems: 100, maxLength: 36 } } }),
   }),
 });
 
@@ -136,7 +141,7 @@ const UpdatePermissionGroupInput = gqlSchemaBuilder.inputType("UpdatePermissionG
     groupId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     name: t.field({ type: "LocalizedString", required: false }),
     description: t.field({ type: "LocalizedString", required: false }),
-    permissionIds: t.stringList({ required: false, directives: { constraint: { maxItems: 100 } } }),
+    permissionIds: t.stringList({ required: false, directives: { constraint: { maxItems: 100, maxLength: 36 } } }),
   }),
 });
 
@@ -228,7 +233,7 @@ gqlSchemaBuilder.mutationFields(t => {
       authScopes: { permission: AppPermission.PERMISSION_GROUPS_ASSIGN, notImpersonating: true },
       args: {
         groupId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-        userIds: t.arg.stringList({ required: true, directives: { constraint: { maxItems: 100 } } }),
+        userIds: t.arg.stringList({ required: true, directives: { constraint: { maxItems: 100, maxLength: 36 } } }),
       },
       resolve: async (_root, args, ctx) =>
         runBulkGroupMembershipMutation(

@@ -1,5 +1,6 @@
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import type * as Types from "@/backend/types";
+import { type FileErrors, getServerTranslations } from "@/shared/locale";
 
 /**
  * Validates source paths for existence and destination directory for upload permissions
@@ -8,7 +9,8 @@ export async function validateBulkOperation<TContext>(
   ctx: TContext,
   sourcePaths: string[],
   destinationPath: string | undefined,
-  existsFn: (ctx: TContext, path: string) => Promise<boolean>
+  existsFn: (ctx: TContext, path: string) => Promise<boolean>,
+  tFile: FileErrors
 ): Promise<{
   validSources: string[];
   failures: Array<{ path: string; error: string }>;
@@ -30,7 +32,7 @@ export async function validateBulkOperation<TContext>(
   const validSources = sourceExistenceChecks
     .filter(check => {
       if (!check.exists) {
-        failures.push({ path: check.path, error: "Source path not found" });
+        failures.push({ path: check.path, error: tFile.sourcePathNotFound });
         return false;
       }
       return true;
@@ -63,31 +65,34 @@ export async function executeBulkOperation<TContext, TExtraData = void>(params: 
   ) => Promise<Types.FileInfo | Types.DirectoryInfo | null>;
   beforeProcess?: (ctx: TContext, validSources: string[]) => Promise<TExtraData>;
   operationName: string;
+  locale?: string;
 }): Promise<Types.BulkOperationResult> {
-  const { ctx, sourcePaths, destinationPath, existsFn, processFn, beforeProcess, operationName } = params;
+  const { ctx, sourcePaths, destinationPath, existsFn, processFn, beforeProcess, operationName, locale } = params;
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   const { validSources, failures, destDirAllowed } = await validateBulkOperation(
     ctx,
     sourcePaths,
     destinationPath,
-    existsFn
+    existsFn,
+    tFile
   );
 
   const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
   let successCount = 0;
 
   if (validSources.length === 0) {
-    return formatBulkOperationResult(successCount, failures, successfulItems, operationName);
+    return formatBulkOperationResult(successCount, failures, successfulItems, operationName, locale);
   }
 
   if (!destDirAllowed) {
     return {
       success: false,
-      message: "Uploads not allowed to destination directory",
+      message: tFile.uploadsNotAllowedToDestination,
       successCount: 0,
       failureCount: validSources.length,
       failures: validSources.map(path => ({
         path,
-        error: "Uploads not allowed to destination directory",
+        error: tFile.uploadsNotAllowedToDestination,
       })),
       successfulItems,
     };
@@ -121,7 +126,7 @@ export async function executeBulkOperation<TContext, TExtraData = void>(params: 
     }
   }
 
-  return formatBulkOperationResult(successCount, failures, successfulItems, operationName);
+  return formatBulkOperationResult(successCount, failures, successfulItems, operationName, locale);
 }
 
 /**
@@ -131,14 +136,16 @@ export function formatBulkOperationResult(
   successCount: number,
   failures: Array<{ path: string; error: string }>,
   successfulItems: Array<Types.FileInfo | Types.DirectoryInfo>,
-  operationName: string
+  operationName: string,
+  locale?: string
 ): Types.BulkOperationResult {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   return {
     success: failures.length === 0,
     message:
       failures.length === 0
-        ? `All items ${operationName} successfully`
-        : `${successCount} items ${operationName}, ${failures.length} failed`,
+        ? tFile.allItemsProcessedSuccessfully(operationName)
+        : tFile.itemsProcessedWithFailures(successCount, failures.length, operationName),
     successCount,
     failureCount: failures.length,
     failures,

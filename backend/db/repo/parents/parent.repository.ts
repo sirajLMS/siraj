@@ -28,7 +28,7 @@ import type {
   StudentProgressReturnType,
   WorkshopPromoReturnType,
 } from "@/backend/types";
-import { PaginationUtils } from "@/backend/utils";
+import { escapeLikeWildcards, PaginationUtils } from "@/backend/utils";
 import { ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
@@ -129,7 +129,12 @@ export namespace ParentRepository {
   }): (SQL | undefined)[] {
     const conditions: (SQL | undefined)[] = [];
     if (options.search) {
-      conditions.push(or(ilike(users.name, `%${options.search}%`), ilike(users.email, `%${options.search}%`)));
+      conditions.push(
+        or(
+          ilike(users.name, `%${escapeLikeWildcards(options.search)}%`),
+          ilike(users.email, `%${escapeLikeWildcards(options.search)}%`)
+        )
+      );
     }
     if (options.lifecycleStatus) {
       conditions.push(eq(parents.status, options.lifecycleStatus));
@@ -650,7 +655,7 @@ export namespace ParentRepository {
     }
 
     if (input.search) {
-      const searchPattern = `%${input.search}%`;
+      const searchPattern = `%${escapeLikeWildcards(input.search)}%`;
       const searchCondition = or(ilike(students.name, searchPattern), ilike(users.name, searchPattern));
       if (searchCondition) {
         conditions.push(searchCondition);
@@ -928,7 +933,8 @@ export namespace ParentRepository {
   export const upsertByUserId = async (
     userId: string,
     status: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<ParentSelectType> => {
     const executor = tx ?? db;
     const now = new Date();
@@ -941,7 +947,8 @@ export namespace ParentRepository {
       })
       .returning();
     if (!row) {
-      throw new Error("Parent upsert failed");
+      const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(i18n.parent.upsertFailed);
     }
     return row;
   };

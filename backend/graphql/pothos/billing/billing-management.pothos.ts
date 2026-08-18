@@ -13,6 +13,7 @@ import {
   InvoiceStatusPothosObject,
   InvoiceTypePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { requireAuthWithRateLimit } from "@/backend/graphql/shared";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { BillingManagementService } from "@/backend/services";
 import type {
@@ -145,15 +146,15 @@ gqlSchemaBuilder.mutationField("createManualInvoice", t =>
     type: ManualInvoiceResultRef,
     authScopes: { permission: AppPermission.BILLING_CREATE_INVOICE, notImpersonating: true },
     args: {
-      parentId: t.arg.string({ required: true }),
-      studentId: t.arg.string({ required: false }),
-      amount: t.arg.string({ required: true }),
+      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      studentId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
+      amount: t.arg.string({ required: true, directives: { constraint: { maxLength: 64 } } }),
       currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
       invoiceType: t.arg({ type: InvoiceTypePothosObject, required: true }),
-      issueDate: t.arg.string({ required: true }),
-      dueDate: t.arg.string({ required: true }),
-      exchangeRateSnapshot: t.arg.string({ required: false }),
-      exchangeRateSource: t.arg.string({ required: false }),
+      issueDate: t.arg.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
+      dueDate: t.arg.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
+      exchangeRateSnapshot: t.arg.string({ required: false, directives: { constraint: { maxLength: 8192 } } }),
+      exchangeRateSource: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
       billingMonths: t.arg({ type: [BillingMonthInputRef], required: false }),
       sendEmail: t.arg.boolean({ required: false }),
     },
@@ -192,7 +193,7 @@ gqlSchemaBuilder.mutationField("submitPaymentProof", t =>
     type: MarkInvoicePaidResultRef,
     authScopes: { permission: AppPermission.BILLING_SUBMIT_PAYMENT_PROOF, notImpersonating: true },
     args: {
-      invoiceId: t.arg.string({ required: true }),
+      invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       proofFileId: t.arg.id({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
     },
@@ -213,7 +214,7 @@ gqlSchemaBuilder.mutationField("approvePaymentProof", t =>
     type: MarkInvoicePaidResultRef,
     authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
     args: {
-      invoiceId: t.arg.string({ required: true }),
+      invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       expectedVersion: t.arg.int({ required: false }),
     },
     resolve: markInvoicePaidResolver((_userId, _args, tErrors) =>
@@ -232,8 +233,8 @@ gqlSchemaBuilder.mutationField("rejectPaymentProof", t =>
     type: MarkInvoicePaidResultRef,
     authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
     args: {
-      invoiceId: t.arg.string({ required: true }),
-      rejectionReason: t.arg.string({ required: false }),
+      invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      rejectionReason: t.arg.string({ required: false, directives: { constraint: { maxLength: 1000 } } }),
       expectedVersion: t.arg.int({ required: false }),
     },
     resolve: markInvoicePaidResolver((_userId, _args, tErrors) =>
@@ -253,7 +254,7 @@ gqlSchemaBuilder.mutationField("markInvoicePaid", t =>
     type: MarkInvoicePaidResultRef,
     authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
     args: {
-      invoiceId: t.arg.string({ required: true }),
+      invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       expectedVersion: t.arg.int({ required: false }),
       proofFileId: t.arg.id({ required: true }),
     },
@@ -275,7 +276,7 @@ gqlSchemaBuilder.queryField("invoicePaymentSubmission", t =>
     nullable: true,
     authScopes: { loggedIn: true },
     args: {
-      invoiceId: t.arg.string({ required: true }),
+      invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
@@ -291,7 +292,7 @@ gqlSchemaBuilder.mutationField("deleteInvoice", t =>
     type: DeleteInvoiceResultRef,
     authScopes: { permission: AppPermission.BILLING_DELETE_INVOICE, notImpersonating: true },
     args: {
-      invoiceId: t.arg.string({ required: true }),
+      invoiceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
@@ -316,11 +317,10 @@ gqlSchemaBuilder.mutationField("sendPaymentReminder", t =>
     type: SendPaymentReminderResultRef,
     authScopes: { permission: AppPermission.BILLING_UPDATE_STATUS_PAID, notImpersonating: true },
     args: {
-      studentId: t.arg.string({ required: true }),
+      studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
       return BillingManagementService.sendPaymentReminder(userId, args.studentId, tErrors);
     },
   })

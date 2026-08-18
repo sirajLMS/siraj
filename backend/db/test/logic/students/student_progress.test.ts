@@ -29,7 +29,7 @@ async function insertUser(tx: DBTransaction, now: Date, name: string, prefix: st
     .values({
       name,
       email: `${prefix}-${randomUUID()}@x.com`,
-      password: randomUUID(),
+      password: `TestPass-${randomUUID().slice(0, 8)}!`,
       createdAt: now,
       updatedAt: now,
     })

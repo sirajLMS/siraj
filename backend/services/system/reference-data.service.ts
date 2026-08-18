@@ -23,8 +23,8 @@ import { PaginationUtils } from "@/backend/utils/pagination.utils";
 const KNOWN_TABLES: ReadonlySet<string> = (() => {
   const names = new Set<string>();
   for (const value of Object.values(schema)) {
-    if (isTable(value as never)) {
-      names.add(getTableName(value as never));
+    if (isTableLike(value)) {
+      names.add(getTableName(value));
     }
   }
   return names;
@@ -44,6 +44,10 @@ function isCountRow(value: unknown): value is CountRow {
 
 function isQueryResultLike(value: unknown): value is QueryResultLike {
   return typeof value === "object" && value !== null && !Array.isArray(value) && "rows" in value;
+}
+
+function isTableLike(value: unknown): value is Parameters<typeof getTableName>[0] {
+  return isTable(value);
 }
 
 function extractCount(result: unknown): number {

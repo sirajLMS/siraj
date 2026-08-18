@@ -11,6 +11,7 @@ import {
   TeacherOnboardingPothosObject,
 } from "@/backend/graphql/pothos";
 import { normalizePaymentMethodDetailsInput } from "@/backend/graphql/pothos/billing/payment-method.pothos";
+import { requireAuthWithRateLimit } from "@/backend/graphql/shared";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import {
   ManagerOnboardingService,
@@ -54,8 +55,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       input: t.arg({ type: TeacherOnboardingInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
       return await TeacherOnboardingService.createTeacher(
         userId,
         {
@@ -89,8 +89,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       input: t.arg({ type: ParentOnboardingInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
       return await ParentOnboardingService.createParent(
         userId,
         {
@@ -122,8 +121,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       input: t.arg({ type: StudentOnboardingInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      const userId = await requireAuth(ctx);
-      const tErrors = ctx.t().errorsTranslations;
+      const { userId, tErrors } = await requireAuthWithRateLimit(ctx);
       return await StudentOnboardingService.createStudent(userId, args.input, tErrors, ctx.locale);
     },
   }),

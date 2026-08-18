@@ -95,7 +95,7 @@ async function expectCreateManagerRejection({ context, name, email, assertError 
       {
         name,
         email,
-        password: randomUUID(),
+        password: `TestPass-${randomUUID().slice(0, 8)}!`,
         accountType: ManagerAccountType.manager,
       },
       "en"
@@ -121,7 +121,7 @@ describe("ManagerOnboardingService.createManager", () => {
       ManagerOnboardingService.createManager(DEFAULT_ACTOR_ID, {
         name: "Test",
         email: "test@test.com",
-        password: randomUUID(),
+        password: `TestPass-${randomUUID().slice(0, 8)}!`,
         accountType: ManagerAccountType.manager,
       })
     );
@@ -146,35 +146,50 @@ describe("ManagerOnboardingService.createManager", () => {
     });
   });
 
-  test("creates manager with manager account type", async () => {
-    await testCreateManagerInRollback(
-      {
-        name: "New Manager",
-        email: "newmanager@test.com",
-        password: randomUUID(),
-        accountType: ManagerAccountType.manager,
-      },
-      SystemPermissionGroupSlug.ACADEMY_ADMIN,
-      result => {
+  const createManagerTestCases: Array<{
+    name: string;
+    label: string;
+    email: string;
+    accountType: ManagerAccountType;
+    expectedGroupSlug: SystemPermissionGroupSlug;
+    assertExtra?: (result: ManagerOnboardingResult) => void;
+  }> = [
+    {
+      name: "New Manager",
+      label: "creates manager with manager account type",
+      email: "[EMAIL_REDACTED]",
+      accountType: ManagerAccountType.manager,
+      expectedGroupSlug: SystemPermissionGroupSlug.ACADEMY_ADMIN,
+      assertExtra: result => {
         expect(result.staffProfileId).toBeDefined();
-      }
-    );
-  });
-
-  test("creates supervisor with supervisor account type", async () => {
-    await testCreateManagerInRollback(
-      {
-        name: "New Supervisor",
-        email: "newsupervisor@test.com",
-        password: randomUUID(),
-        accountType: ManagerAccountType.supervisor,
       },
-      SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
-      result => {
+    },
+    {
+      name: "New Supervisor",
+      label: "creates supervisor with supervisor account type",
+      email: "[EMAIL_REDACTED]",
+      accountType: ManagerAccountType.supervisor,
+      expectedGroupSlug: SystemPermissionGroupSlug.SUPERVISOR_DEFAULT,
+      assertExtra: result => {
         expect(result.assignedGroupSlug).toBe(SystemPermissionGroupSlug.SUPERVISOR_DEFAULT);
-      }
-    );
-  });
+      },
+    },
+  ];
+
+  for (const tc of createManagerTestCases) {
+    test(tc.label, async () => {
+      await testCreateManagerInRollback(
+        {
+          name: tc.name,
+          email: tc.email,
+          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          accountType: tc.accountType,
+        },
+        tc.expectedGroupSlug,
+        tc.assertExtra
+      );
+    });
+  }
 
   test("rejects duplicate email", async () => {
     const { hasPermissionSpy, getUserContextSpy } = mockSuperAdmin();
@@ -186,7 +201,7 @@ describe("ManagerOnboardingService.createManager", () => {
         {
           name: "Dup Manager",
           email: "existing@test.com",
-          password: randomUUID(),
+          password: `TestPass-${randomUUID().slice(0, 8)}!`,
           accountType: ManagerAccountType.manager,
         },
         "en"
@@ -211,7 +226,7 @@ describe("ManagerOnboardingService.createManager", () => {
       ManagerOnboardingService.createManager(DEFAULT_ACTOR_ID, {
         name: "Rollback Manager",
         email: createdEmail,
-        password: randomUUID(),
+        password: `TestPass-${randomUUID().slice(0, 8)}!`,
         accountType: ManagerAccountType.manager,
       })
     );

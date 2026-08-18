@@ -231,6 +231,25 @@ export namespace EffectiveMeetingService {
     supportsAutoGeneration: false,
   };
 
+  function buildEffectiveFromSnapshot(
+    snapshot: Awaited<ReturnType<typeof MeetingConfigSnapshotService.buildClassSessionSnapshot>>,
+    source: EffectiveMeetingSource,
+    configId: string,
+    providerId: string
+  ): EffectiveMeetingReturnType {
+    return {
+      joinUrl: snapshot.details.meetingUrl ?? null,
+      providerSlug: snapshot.provider.catalogSlug,
+      providerName: snapshot.provider.catalogName,
+      logoUrl: snapshot.provider.logoUrl,
+      meetingId: snapshot.details.meetingUrl ? extractMeetingId(snapshot.details.meetingUrl) : null,
+      source,
+      configId,
+      providerId,
+      supportsAutoGeneration: snapshot.provider.supportsAutoGeneration,
+    };
+  }
+
   async function fromClassConfig(
     config: Awaited<ReturnType<typeof ClassMeetingConfigRepository.getDefaultForClassInstance>>,
     source: EffectiveMeetingSource.CLASS | EffectiveMeetingSource.RECURRING,
@@ -242,17 +261,7 @@ export namespace EffectiveMeetingService {
     }
 
     const snapshot = await MeetingConfigSnapshotService.buildClassSessionSnapshot(config.id, tErrors, tx);
-    return {
-      joinUrl: snapshot.details.meetingUrl ?? null,
-      providerSlug: snapshot.provider.catalogSlug,
-      providerName: snapshot.provider.catalogName,
-      logoUrl: snapshot.provider.logoUrl,
-      meetingId: snapshot.details.meetingUrl ? extractMeetingId(snapshot.details.meetingUrl) : null,
-      source,
-      configId: config.id,
-      providerId: config.providerId,
-      supportsAutoGeneration: snapshot.provider.supportsAutoGeneration,
-    };
+    return buildEffectiveFromSnapshot(snapshot, source, config.id, config.providerId);
   }
 
   async function fromTeacherDefault(
@@ -265,17 +274,12 @@ export namespace EffectiveMeetingService {
     }
 
     const snapshot = await MeetingConfigSnapshotService.buildSessionSnapshot(teacherDefault.id, tErrors, tx);
-    return {
-      joinUrl: snapshot.details.meetingUrl ?? null,
-      providerSlug: snapshot.provider.catalogSlug,
-      providerName: snapshot.provider.catalogName,
-      logoUrl: snapshot.provider.logoUrl,
-      meetingId: snapshot.details.meetingUrl ? extractMeetingId(snapshot.details.meetingUrl) : null,
-      source: EffectiveMeetingSource.TEACHER,
-      configId: teacherDefault.id,
-      providerId: teacherDefault.providerId,
-      supportsAutoGeneration: snapshot.provider.supportsAutoGeneration,
-    };
+    return buildEffectiveFromSnapshot(
+      snapshot,
+      EffectiveMeetingSource.TEACHER,
+      teacherDefault.id,
+      teacherDefault.providerId
+    );
   }
 
   async function resolveTeacherDefault(

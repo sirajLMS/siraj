@@ -89,7 +89,7 @@ gqlSchemaBuilder.queryField("systemSetting", t =>
     nullable: true,
     authScopes: { loggedIn: true },
     args: {
-      key: t.arg.string({ required: true }),
+      key: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const tErrors = resolveErrors(ctx);
@@ -140,7 +140,7 @@ gqlSchemaBuilder.mutationField("deleteSystemSetting", t =>
     type: "Boolean",
     authScopes: { permission: AppPermission.SETTINGS_EDIT_GENERAL, notImpersonating: true },
     args: {
-      key: t.arg.string({ required: true }),
+      key: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const { actorUserId, tErrors } = await resolveAuthCtx(ctx);

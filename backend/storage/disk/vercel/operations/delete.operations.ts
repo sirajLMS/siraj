@@ -12,40 +12,56 @@ import { directoryInfoByPath } from "@/backend/storage/disk/vercel/operations/fo
 import { getBlobs, isDirectory } from "@/backend/storage/disk/vercel/shared";
 import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import type * as Types from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale";
 
-export async function deleteFile(ctx: VercelContext, filePath: string): Promise<Types.FileOperationResult> {
-  return executeDeleteFile(filePath, async () => {
-    let blobUrl: string;
-    try {
-      const blobInfo = await head(filePath, { token: ctx.token });
-      blobUrl = blobInfo.url;
-    } catch (error) {
-      logger.warn(`File not found in Vercel Blob: ${filePath}`, error);
-      throw new Error("File not found", { cause: error });
-    }
+export async function deleteFile(
+  ctx: VercelContext,
+  filePath: string,
+  locale?: string
+): Promise<Types.FileOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
+  return executeDeleteFile(
+    filePath,
+    async () => {
+      let blobUrl: string;
+      try {
+        const blobInfo = await head(filePath, { token: ctx.token });
+        blobUrl = blobInfo.url;
+      } catch (error) {
+        logger.warn(`File not found in Vercel Blob: ${filePath}`, error);
+        throw new Error(tFile.itemNotFound(filePath), { cause: error });
+      }
 
-    logger.info("🗑️ deleteFile: Deleting from Vercel Blob", {
-      filePath,
-      url: blobUrl,
-    });
+      logger.info("🗑️ deleteFile: Deleting from Vercel Blob", {
+        filePath,
+        url: blobUrl,
+      });
 
-    await del(blobUrl, { token: ctx.token });
+      await del(blobUrl, { token: ctx.token });
 
-    logger.info("🗑️ deleteFile: Deleted from Vercel Blob successfully");
-  });
+      logger.info("🗑️ deleteFile: Deleted from Vercel Blob successfully");
+    },
+    locale
+  );
 }
 
 export async function deleteItems(
   ctx: VercelContext,
-  input: Types.StorageItemsDeleteInput
+  input: Types.StorageItemsDeleteInput,
+  locale?: string
 ): Promise<Types.BulkOperationResult> {
-  return executeBulkDelete(ctx, input, deleteItem);
+  return executeBulkDelete(ctx, input, (delCtx, params) => deleteItem(delCtx, params, locale), locale);
 }
 
-async function deleteItem(ctx: VercelContext, params: DeleteFnParams): Promise<Types.FileInfo | Types.DirectoryInfo> {
+async function deleteItem(
+  ctx: VercelContext,
+  params: DeleteFnParams,
+  locale?: string
+): Promise<Types.FileInfo | Types.DirectoryInfo> {
   const { itemPath, force, dbFile, dbDirectory, parentDir, usageCheck } = params;
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
 
-  validateDeletePermissions({ force, usageCheck, dbFile, dbDirectory, parentDir });
+  validateDeletePermissions({ force, usageCheck, dbFile, dbDirectory, parentDir }, tFile);
 
   const fileEntity = await fileInfoByPath(ctx, itemPath);
   const folderEntity = fileEntity ? null : await directoryInfoByPath(ctx, itemPath);
@@ -66,7 +82,7 @@ async function deleteItem(ctx: VercelContext, params: DeleteFnParams): Promise<T
 
   if (fileEntity) return fileEntity;
   if (folderEntity) return folderEntity;
-  throw new Error("Item not found");
+  throw new Error(tFile.itemNotFound(itemPath));
 }
 
 async function deleteSingleFile(ctx: VercelContext, filePath: string): Promise<void> {

@@ -114,7 +114,7 @@ gqlSchemaBuilder.queryField("parentProfile", t =>
     authScopes: { loggedIn: true },
     nullable: true,
     args: {
-      parentId: t.arg.string({ required: true }),
+      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       return ParentProfileService.getProfile(ctx.user?.id ?? "", args.parentId, ctx.locale);
@@ -127,7 +127,7 @@ gqlSchemaBuilder.queryField("parentAssociatedStudents", t =>
     type: [AssociatedStudentRef],
     authScopes: { loggedIn: true },
     args: {
-      parentId: t.arg.string({ required: true }),
+      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       return ParentProfileService.getAssociatedStudents(ctx.user?.id ?? "", args.parentId, ctx.locale);
@@ -141,7 +141,7 @@ gqlSchemaBuilder.queryField("studentById", t =>
     authScopes: { loggedIn: true },
     nullable: true,
     args: {
-      studentId: t.arg.string({ required: true }),
+      studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       // Reusing AssociatedStudentRef but fetching a single one.
@@ -159,7 +159,7 @@ gqlSchemaBuilder.mutationField("deactivateParent", t =>
     type: DeactivateParentResultRef,
     authScopes: { permission: AppPermission.PARENT_MANAGE_STATUS },
     args: {
-      parentId: t.arg.string({ required: true }),
+      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       return ParentProfileService.deactivateAccount(ctx.user?.id ?? "", args.parentId, ctx.locale);
@@ -172,7 +172,7 @@ gqlSchemaBuilder.mutationField("reactivateParent", t =>
     type: ReactivateParentResultRef,
     authScopes: { permission: AppPermission.PARENT_MANAGE_STATUS },
     args: {
-      parentId: t.arg.string({ required: true }),
+      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       return ParentProfileService.reactivateAccount(ctx.user?.id ?? "", args.parentId, ctx.locale);
@@ -185,7 +185,7 @@ gqlSchemaBuilder.mutationField("updateStudentQuota", t =>
     type: EditQuotaResultRef,
     authScopes: { permission: AppPermission.STUDENT_QUOTA_EDIT_EDIT_OTHER },
     args: {
-      studentId: t.arg.string({ required: true }),
+      studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       newClassesRemaining: t.arg.int({ required: true }),
       expectedVersion: t.arg.int({ required: false }),
     },

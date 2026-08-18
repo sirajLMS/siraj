@@ -50,7 +50,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: StartPermissionGroupSimulationResponsePothosObject,
     authScopes: { superAdmin: true, notImpersonating: true },
     args: {
-      groupSlug: t.arg.string({ required: true }),
+      groupSlug: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },
     resolve: async (_parent, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;

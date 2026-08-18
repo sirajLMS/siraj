@@ -28,7 +28,7 @@ function mockTargetUser() {
     id: TARGET_ID,
     name: "Target User",
     email: "target@example.com",
-    password: randomUUID(),
+    password: `TestPass-${randomUUID().slice(0, 8)}!`,
     status: "ACTIVATED" as const,
     isSuperAdmin: false,
     deletedAt: null,

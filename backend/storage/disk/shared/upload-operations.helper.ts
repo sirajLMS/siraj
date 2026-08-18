@@ -5,6 +5,7 @@ import { logger } from "@/backend/lib/logger";
 import { STORAGE_CONFIG, StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { getServerTranslations } from "@/shared/locale";
 
 /**
  * Common logic for preparing an upload across different storage providers
@@ -66,8 +67,10 @@ export async function uploadFileHelper(
   filePath: string,
   contentType: string,
   buffer: Buffer,
-  uploadToStorageFn: (cleanedPath: string) => Promise<{ url: string; mediaLink?: string; hash?: string }>
+  uploadToStorageFn: (cleanedPath: string) => Promise<{ url: string; mediaLink?: string; hash?: string }>,
+  locale?: string
 ): Promise<Types.FileUploadResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   try {
     const cleanedFilePath = normalizePath(filePath);
     const fileSize = buffer.byteLength;
@@ -87,7 +90,7 @@ export async function uploadFileHelper(
     if (dbDirectory && !dbDirectory.allowUploads) {
       return {
         success: false,
-        message: "Uploads not allowed in this directory",
+        message: tFile.uploadsNotAllowedInDirectory,
         data: null,
       };
     }
@@ -112,14 +115,14 @@ export async function uploadFileHelper(
 
     return {
       success: true,
-      message: "File uploaded successfully",
+      message: tFile.fileUploadedSuccessfully,
       data: StorageUtils.combineFileData(bucketFile, fileEntity),
     };
   } catch (error) {
     logger.error(`Failed to upload file: ${filePath}`, error);
     return {
       success: false,
-      message: `Failed to upload file: ${error instanceof Error ? error.message : String(error)}`,
+      message: tFile.failedToUploadFile(error instanceof Error ? error.message : String(error)),
       data: null,
     };
   }

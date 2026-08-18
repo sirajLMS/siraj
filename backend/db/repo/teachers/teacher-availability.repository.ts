@@ -8,291 +8,32 @@ import {
   teacherVacationRequests,
   users,
 } from "@/backend/db/schema";
-import { AvailabilitySearchSortBy, DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
+import { type DayOfWeek, type Gender, VacationRequestStatus } from "@/backend/enum";
 import { NotFoundError, ValidationError } from "@/backend/lib/errors";
 import type * as Types from "@/backend/types";
 import { type DBTransaction, PaginationArgs } from "@/backend/types";
-import { escapeLikeWildcards } from "@/backend/utils";
+import {
+  countAvailableDays,
+  escapeLikeWildcards,
+  expandDateRange,
+  findGapsForCalendarDate,
+  getBookingBlockedRangesForDate,
+  getDayOfWeekFromDateString,
+  getUtcDateString,
+  getVacationBlockedRangesForDate,
+  groupByTeacherId,
+  isWithinEffectiveRange,
+  type MinuteRange,
+  sortTeachers,
+  type TeacherShortInfo,
+  timeToMinutes,
+} from "@/backend/utils";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
-import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { parseDayOfWeek, parseGender, parseIanaTimezone } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
 
-type TeacherGender = string | null;
-
 function dayOfWeekEquals(value: string, day: DayOfWeek): boolean {
   return parseDayOfWeek(value) === parseDayOfWeek(day);
-}
-
-interface TeacherShortInfo {
-  teacherId: string;
-  teacherName: string | null;
-  teacherGender: TeacherGender;
-  teacherTimezone: IanaTimezone;
-}
-
-const JS_DAY_TO_ENUM: Record<number, DayOfWeek> = {
-  0: DayOfWeek.SUNDAY,
-  1: DayOfWeek.MONDAY,
-  2: DayOfWeek.TUESDAY,
-  3: DayOfWeek.WEDNESDAY,
-  4: DayOfWeek.THURSDAY,
-  5: DayOfWeek.FRIDAY,
-  6: DayOfWeek.SATURDAY,
-};
-
-function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(":").map(Number);
-  return hours * 60 + minutes;
-}
-
-function dateToTimeString(date: Date): string {
-  const hours = date.getUTCHours().toString().padStart(2, "0");
-  const minutes = date.getUTCMinutes().toString().padStart(2, "0");
-  const seconds = date.getUTCSeconds().toString().padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
-}
-
-function getUtcDayOfWeek(date: Date): DayOfWeek {
-  return JS_DAY_TO_ENUM[date.getUTCDay()];
-}
-
-function getUtcDateString(date: Date): string {
-  return date.toISOString().split("T")[0];
-}
-
-function isWithinEffectiveRange(
-  bookingDate: string,
-  effectiveFrom: string | null,
-  effectiveUntil: string | null
-): boolean {
-  if (effectiveFrom && bookingDate < effectiveFrom) {
-    return false;
-  }
-  if (effectiveUntil && bookingDate > effectiveUntil) {
-    return false;
-  }
-  return true;
-}
-
-function getBlockedRanges(
-  dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[],
-  searchStart: number,
-  searchEnd: number
-): { start: number; end: number }[] {
-  const blockedRanges: { start: number; end: number }[] = [];
-  for (const u of dayUnavail) {
-    const uStart = timeToMinutes(u.startTime);
-    const uEnd = timeToMinutes(u.endTime);
-    if (uStart < searchEnd && uEnd > searchStart) {
-      blockedRanges.push({
-        start: Math.max(uStart, searchStart),
-        end: Math.min(uEnd, searchEnd),
-      });
-    }
-  }
-  return blockedRanges;
-}
-
-function mergeBlockedRanges(blockedRanges: { start: number; end: number }[]): { start: number; end: number }[] {
-  const sorted = [...blockedRanges].toSorted((a, b) => a.start - b.start);
-  const mergedBlocked: { start: number; end: number }[] = [];
-  for (const range of sorted) {
-    const last = mergedBlocked.at(-1);
-    if (last && range.start <= last.end) {
-      last.end = Math.max(last.end, range.end);
-    } else {
-      mergedBlocked.push({ ...range });
-    }
-  }
-  return mergedBlocked;
-}
-
-function createGap(
-  teacher: TeacherShortInfo,
-  day: DayOfWeek,
-  calendarDate: string,
-  startMinutes: number,
-  endMinutes: number
-): Types.TeacherAvailabilityGap {
-  const startHoursStr = String(Math.floor(startMinutes / 60)).padStart(2, "0");
-  const startMinutesStr = String(startMinutes % 60).padStart(2, "0");
-  const endHoursStr = String(Math.floor(endMinutes / 60)).padStart(2, "0");
-  const endMinutesStr = String(endMinutes % 60).padStart(2, "0");
-
-  return {
-    id: `${teacher.teacherId}-${calendarDate}-${day}-${startMinutes}-${endMinutes}`,
-    teacherId: teacher.teacherId,
-    teacherName: teacher.teacherName ?? "Unknown",
-    teacherGender: teacher.teacherGender,
-    dayOfWeek: day,
-    calendarDate,
-    gapStartTime: `${startHoursStr}:${startMinutesStr}`,
-    gapEndTime: `${endHoursStr}:${endMinutesStr}`,
-    timezone: teacher.teacherTimezone,
-  };
-}
-
-function generateGapsFromBlocked(
-  teacher: TeacherShortInfo,
-  day: DayOfWeek,
-  calendarDate: string,
-  searchStart: number,
-  searchEnd: number,
-  mergedBlocked: { start: number; end: number }[]
-): Types.TeacherAvailabilityGap[] {
-  const gaps: Types.TeacherAvailabilityGap[] = [];
-  let cursor = searchStart;
-  for (const blocked of mergedBlocked) {
-    if (cursor < blocked.start) {
-      gaps.push(createGap(teacher, day, calendarDate, cursor, blocked.start));
-    }
-    cursor = Math.max(cursor, blocked.end);
-  }
-  if (cursor < searchEnd) {
-    gaps.push(createGap(teacher, day, calendarDate, cursor, searchEnd));
-  }
-  return gaps;
-}
-
-function expandDateRange(fromDate: string, toDate: string): string[] {
-  const dates: string[] = [];
-  let currentMs = Date.parse(`${fromDate}T00:00:00.000Z`);
-  const endMs = Date.parse(`${toDate}T00:00:00.000Z`);
-  while (currentMs <= endMs) {
-    dates.push(getUtcDateString(new Date(currentMs)));
-    currentMs += 24 * 60 * 60 * 1000;
-  }
-  return dates;
-}
-
-function getDayOfWeekFromDateString(dateStr: string): DayOfWeek {
-  return getUtcDayOfWeek(new Date(`${dateStr}T00:00:00.000Z`));
-}
-
-function getVacationBlockedRangesForDate(
-  calendarDate: string,
-  vacations: { startAt: Date; endAt: Date }[]
-): { start: number; end: number }[] {
-  const dayStart = new Date(`${calendarDate}T00:00:00.000Z`);
-  const dayEnd = new Date(`${calendarDate}T23:59:59.999Z`);
-  const blocked: { start: number; end: number }[] = [];
-
-  for (const vacation of vacations) {
-    if (vacation.endAt <= dayStart || vacation.startAt > dayEnd) {
-      continue;
-    }
-
-    const blockStart = vacation.startAt > dayStart ? timeToMinutes(dateToTimeString(vacation.startAt)) : 0;
-    const blockEnd = vacation.endAt < dayEnd ? timeToMinutes(dateToTimeString(vacation.endAt)) : 24 * 60;
-
-    if (blockStart < blockEnd) {
-      blocked.push({ start: blockStart, end: blockEnd });
-    }
-  }
-
-  return blocked;
-}
-
-function getBookingBlockedRangesForDate(
-  calendarDate: string,
-  bookings: { scheduledStartAt: Date; scheduledEndAt: Date }[]
-): { start: number; end: number }[] {
-  const blocked: { start: number; end: number }[] = [];
-
-  for (const booking of bookings) {
-    const bookingDate = getUtcDateString(booking.scheduledStartAt);
-    if (bookingDate !== calendarDate) {
-      continue;
-    }
-
-    blocked.push({
-      start: timeToMinutes(dateToTimeString(booking.scheduledStartAt)),
-      end: timeToMinutes(dateToTimeString(booking.scheduledEndAt)),
-    });
-  }
-
-  return blocked;
-}
-
-interface MinuteRange {
-  from: number;
-  to: number;
-}
-
-interface FindGapsForCalendarDateOptions {
-  teacher: TeacherShortInfo;
-  calendarDate: string;
-  day: DayOfWeek;
-  dayWindows: Types.TeacherAvailabilityWindowSelectType[];
-  dayUnavail: Types.TeacherRecurringUnavailabilitySelectType[];
-  extraBlocked: { start: number; end: number }[];
-  searchRange: MinuteRange;
-}
-
-function findGapsForCalendarDate(options: FindGapsForCalendarDateOptions): Types.TeacherAvailabilityGap[] {
-  const { teacher, calendarDate, day, dayWindows, dayUnavail, extraBlocked, searchRange } = options;
-  const { from: fromMinutes, to: toMinutes } = searchRange;
-  const gaps: Types.TeacherAvailabilityGap[] = [];
-  const effectiveWindows = dayWindows.filter(window =>
-    isWithinEffectiveRange(calendarDate, window.effectiveFrom, window.effectiveUntil)
-  );
-
-  for (const window of effectiveWindows) {
-    const windowStart = timeToMinutes(window.startTime);
-    const windowEnd = timeToMinutes(window.endTime);
-    const searchStart = Math.max(windowStart, fromMinutes);
-    const searchEnd = Math.min(windowEnd, toMinutes);
-
-    if (searchStart >= searchEnd) {
-      continue;
-    }
-
-    const clippedExtra = extraBlocked
-      .filter(blocked => blocked.start < searchEnd && blocked.end > searchStart)
-      .map(blocked => ({
-        start: Math.max(blocked.start, searchStart),
-        end: Math.min(blocked.end, searchEnd),
-      }));
-
-    const blockedRanges = [...getBlockedRanges(dayUnavail, searchStart, searchEnd), ...clippedExtra];
-    const mergedBlocked = mergeBlockedRanges(blockedRanges);
-    const windowGaps = generateGapsFromBlocked(teacher, day, calendarDate, searchStart, searchEnd, mergedBlocked);
-    gaps.push(...windowGaps);
-  }
-
-  return gaps;
-}
-
-function countAvailableDays(gaps: Types.TeacherAvailabilityGap[]): number {
-  return new Set(gaps.map(gap => gap.calendarDate)).size;
-}
-
-function sortTeachers(
-  teacherResults: Types.AvailabilitySearchTeacher[],
-  sortBy: AvailabilitySearchSortBy | null | undefined
-): Types.AvailabilitySearchTeacher[] {
-  const sorted = [...teacherResults];
-
-  switch (sortBy) {
-    case AvailabilitySearchSortBy.NAME_DESC:
-      sorted.sort((left, right) => right.name.localeCompare(left.name));
-      break;
-    case AvailabilitySearchSortBy.MOST_GAPS:
-      sorted.sort((left, right) => right.gaps.length - left.gaps.length);
-      break;
-    case AvailabilitySearchSortBy.MOST_AVAILABLE_DAYS:
-      sorted.sort((left, right) => right.availableDaysCount - left.availableDaysCount);
-      break;
-    case AvailabilitySearchSortBy.TIMEZONE_ASC:
-      sorted.sort((left, right) => left.timezone.localeCompare(right.timezone));
-      break;
-    default:
-      sorted.sort((left, right) => left.name.localeCompare(right.name));
-      break;
-  }
-
-  return sorted;
 }
 
 export namespace TeacherAvailabilityRepository {
@@ -348,47 +89,42 @@ export namespace TeacherAvailabilityRepository {
     input: Types.AvailabilityWindowInput,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<Types.TeacherAvailabilityWindowSelectType> => {
-    return withAvailabilityLock(
+  ): Promise<Types.TeacherAvailabilityWindowSelectType> =>
+    withAvailabilityLock(
       teacherId,
       input.startTime,
       input.endTime,
-      async t => {
-        const [created] = await t
+      t =>
+        t
           .insert(teacherAvailabilityWindows)
           .values(buildCommonWindowValues(teacherId, input))
-          .returning();
-        return created;
-      },
+          .returning()
+          .then(([created]) => created),
       tx,
       locale
     );
-  };
 
   export const addRecurringUnavailability = async (
     teacherId: string,
     input: Types.RecurringUnavailabilityInput,
     tx?: DBTransaction,
     locale?: string
-  ): Promise<Types.TeacherRecurringUnavailabilitySelectType> => {
-    return withAvailabilityLock(
+  ): Promise<Types.TeacherRecurringUnavailabilitySelectType> =>
+    withAvailabilityLock(
       teacherId,
       input.startTime,
       input.endTime,
       async t => {
-        const [created] = await t
-          .insert(teacherRecurringUnavailability)
-          .values({
-            ...buildCommonWindowValues(teacherId, input),
-            reason: input.reason ?? null,
-          })
-          .returning();
+        const values = {
+          ...buildCommonWindowValues(teacherId, input),
+          reason: input.reason ?? null,
+        };
+        const [created] = await t.insert(teacherRecurringUnavailability).values(values).returning();
         return created;
       },
       tx,
       locale
     );
-  };
 
   // ── Vacation request data-access methods ──────────────────────────────────
 
@@ -430,7 +166,8 @@ export namespace TeacherAvailabilityRepository {
    */
   export const fetchVacationRequestForUpdate = async (
     vacationRequestId: string,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<Types.TeacherVacationRequestSelectType> => {
     const runner = async (t: DBTransaction) => {
       const results = await t
@@ -440,7 +177,8 @@ export namespace TeacherAvailabilityRepository {
         .limit(1);
 
       if (results.length === 0) {
-        throw new NotFoundError("VACATION_REQUEST", `Vacation request ${vacationRequestId} not found`);
+        const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new NotFoundError("VACATION_REQUEST", tErrors.teacher.vacationRequestNotFound(vacationRequestId));
       }
 
       const current = results[0];
@@ -545,16 +283,6 @@ export namespace TeacherAvailabilityRepository {
           teacherTimezone: parseIanaTimezone(row.teacherTimezone),
         }))
       );
-  }
-
-  function groupByTeacherId<T extends { teacherId: string }>(rows: T[]): Map<string, T[]> {
-    const grouped = new Map<string, T[]>();
-    for (const row of rows) {
-      const list = grouped.get(row.teacherId) ?? [];
-      list.push(row);
-      grouped.set(row.teacherId, list);
-    }
-    return grouped;
   }
 
   async function fetchTeacherAvailabilityData(t: DBTransaction | typeof db, teacherIds: string[]) {

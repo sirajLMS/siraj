@@ -139,14 +139,16 @@ export namespace TeacherDueService {
     teacherPaymentId?: string | null;
     approvedAt?: Date;
     tx?: DBTransaction;
+    locale?: string;
   }): Promise<TeacherDueReturnType | null> {
     const existing = await TeacherDueRepository.findByClassInstanceId(input.classInstanceId, input.tx);
     if (existing) {
       return existing;
     }
 
-    if (input.hours <= 0) throw new Error("hours must be greater than 0");
-    if (input.amount < 0) throw new Error("amount must be non-negative");
+    const t = getServerTranslations(input.locale ?? "en").errorsTranslations;
+    if (input.hours <= 0) throw new Error(t.teacherDue.hoursMustBePositive);
+    if (input.amount < 0) throw new Error(t.teacherDue.amountMustBeNonNegative);
 
     const insertPayload: TeacherDueInsertType = {
       teacherId: input.teacherId,

@@ -2,6 +2,7 @@ import { and, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import type { ClassInstanceSelectType, DailyScheduleResult, DBTransaction } from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 import { parseClassExecutionState, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 
 export function buildDailyScheduleDayConditions(
@@ -98,7 +99,7 @@ export async function fetchDailyScheduleBaseRows(
   const dayConditions = buildDailyScheduleDayConditions(date, viewerTimezone, teacherId, getDayBoundaries);
 
   if (search) {
-    const searchPattern = `%${search}%`;
+    const searchPattern = `%${escapeLikeWildcards(search)}%`;
     const matchedRows = await t
       .select({ classInstance: classInstances })
       .from(classInstances)

@@ -15,7 +15,7 @@ import type {
   DBTransaction,
   UpdateClassMeetingConfigInput,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 type ClassScope = { readonly classInstanceId: string };
 type RecurringScope = { readonly recurringScheduleId: string };
@@ -100,7 +100,8 @@ export namespace ClassMeetingConfigRepository {
     if (input.recurringScheduleId) {
       return { recurringScheduleId: input.recurringScheduleId };
     }
-    throw new Error("Class meeting config requires classInstanceId or recurringScheduleId");
+    const { meetingConfig } = getServerTranslations("en").errorsTranslations;
+    throw new Error(meetingConfig.requiresInstanceOrSchedule);
   }
 
   export async function create(

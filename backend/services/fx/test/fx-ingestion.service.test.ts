@@ -115,13 +115,14 @@ await mock.module("@/backend/lib", () => ({
   },
 }));
 
-// Service now calls getServerTranslations(locale).errorsTranslations (real import).
-// Mock returns the required literal strings so the assertion expectations match.
-// fxSyncAlreadyRunning is preserved as a raw literal — no schema counterpart.
 await mock.module("@/shared/locale/server-graphql", () => ({
   getServerTranslations: () => ({
     errorsTranslations: {
       insufficientPermissions: "insufficientPermissions",
+      fx: {
+        syncAlreadyRunning: "fxSyncAlreadyRunning",
+        syncFailed: "fxSyncFailed",
+      },
     },
   }),
 }));
@@ -285,7 +286,7 @@ describe("FxIngestionService.refreshRates", () => {
 
     expect(result.success).toBe(false);
     expect(result.pairsWritten).toBe(0);
-    expect(result.errorMessage).toBe("provider boom");
+    expect(result.errorMessage).toBe("fxSyncFailed");
 
     expect(completeSyncRunMock).toHaveBeenCalledTimes(1);
     const completeCalls: ReadonlyArray<readonly unknown[]> = completeSyncRunMock.mock.calls;

@@ -19,7 +19,7 @@ gqlSchemaBuilder.mutationField("changeParentLifecycleStatus", t =>
     type: ChangeParentLifecycleResultRef,
     authScopes: { permission: AppPermission.PARENT_MANAGE_STATUS },
     args: {
-      parentId: t.arg.string({ required: true }),
+      parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       newStatus: t.arg({ type: ParentStatusPothosEnum, required: true }),
     },
     resolve: async (_root, args, ctx) => {

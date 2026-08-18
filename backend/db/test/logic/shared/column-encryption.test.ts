@@ -14,7 +14,7 @@ async function createTestUser(tx: DBTransaction, uniqueSuffix: string, now: Date
     .values({
       name: "Crypto Teacher",
       email,
-      password: randomUUID(),
+      password: `TestPass-${randomUUID().slice(0, 8)}!`,
       createdAt: now,
       updatedAt: now,
     })

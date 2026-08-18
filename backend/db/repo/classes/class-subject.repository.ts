@@ -9,6 +9,7 @@ import type {
   ClassSubjectUpdateInput,
   DBTransaction,
 } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 // ─── Shared helpers (eliminate intra-file duplication) ──────────────────────
 
@@ -106,7 +107,7 @@ export namespace ClassSubjectRepository {
 
   export async function createSubject(
     input: ClassSubjectSubmitInput,
-    _locale?: string,
+    locale?: string,
     tx?: DBTransaction
   ): Promise<ClassSubjectSelectType> {
     return runInClassTransaction(
@@ -115,7 +116,8 @@ export namespace ClassSubjectRepository {
         const [result] = await t.insert(classSubjects).values(buildSubjectInsertValues(input)).returning();
 
         if (!result) {
-          throw new Error("Failed to create class subject");
+          const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+          throw new Error(i18n.classSubject.createFailed);
         }
 
         logger.info("Class subject created", { subjectId: result.id, slug: result.slug });

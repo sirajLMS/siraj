@@ -1,11 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { type JWTPayload as JoseJWTPayload, jwtVerify, SignJWT } from "jose";
+import { getEnvironmentConfig } from "@/backend/lib/env";
 
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required");
-}
-
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = getEnvironmentConfig().jwtSecret;
 const JWT_ACCESS_TOKEN_EXPIRY = "15m"; // 15 minutes
 const JWT_REFRESH_TOKEN_EXPIRY = "7d"; // 7 days
 

@@ -8,14 +8,15 @@ import { isTestCi } from "@/backend/lib/test-ci-env";
  * - Dedicated test servers (`TEST_SERVER=1`) running `next start` against `.next-test-prod`
  * - CI jobs (`TEST_CI=true`)
  *
- * Hard-disabled on deployed Vercel production (`VERCEL_ENV=production`) even if a test
- * flag leaks into production env vars.
+ * Hard-disabled on deployed Vercel environments (both `production` and `preview`) even if a
+ * test flag leaks into env vars. Vercel preview URLs are publicly reachable and must NEVER
+ * expose test-helper mutations.
  *
  * Uses dynamic `process.env` lookups so Next.js production builds do not tree-shake
  * the registration block in `test-helper.mutation.ts`.
  */
 function isRealProductionDeployment(): boolean {
-  return process.env.VERCEL_ENV === "production";
+  return process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview";
 }
 
 function isTestHarness(): boolean {

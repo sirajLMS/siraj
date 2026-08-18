@@ -1,6 +1,7 @@
 import { GraphQLError } from "graphql";
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { authRateLimiter, checkRateLimit } from "@/backend/lib/ratelimit";
 import { ComplaintResponseService } from "@/backend/services";
 import type { ComplaintResponseReturnType, ComplaintResponseSubmitInput } from "@/backend/types";
 
@@ -40,6 +41,14 @@ gqlSchemaBuilder.mutationField("respondToComplaint", t =>
       if (!ctx.user?.id) {
         const tErrors = ctx.t().errorsTranslations;
         throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
+      }
+
+      const tErrors = ctx.t().errorsTranslations;
+      const rateLimitResult = await checkRateLimit(ctx.ipAddress ?? "[unknown]", authRateLimiter);
+      if (!rateLimitResult.success) {
+        throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
+          extensions: { code: "TOO_MANY_ATTEMPTS" },
+        });
       }
 
       const response = await ComplaintResponseService.respondToComplaint(

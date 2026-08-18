@@ -2,6 +2,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { leaveQuotaUsage } from "@/backend/db/schema";
 import type { DBTransaction, LeaveQuotaUsageSelectType, UpsertStudentLeaveQuotaInput } from "@/backend/types";
+import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 export namespace LeaveQuotaUsageRepository {
   export async function findStudentPeriodQuota(
@@ -28,7 +29,8 @@ export namespace LeaveQuotaUsageRepository {
 
   export async function upsertStudentPeriodQuota(
     input: UpsertStudentLeaveQuotaInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<LeaveQuotaUsageSelectType> {
     const executor = tx ?? db;
     const existing = await findStudentPeriodQuota(input.studentId, input.periodYear, input.periodMonth, tx);
@@ -38,7 +40,10 @@ export namespace LeaveQuotaUsageRepository {
         .set({ usedCount: input.usedCount })
         .where(eq(leaveQuotaUsage.id, existing.id))
         .returning();
-      if (!updated) throw new Error("Leave quota update failed");
+      if (!updated) {
+        const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(i18n.leaveQuota.updateFailed);
+      }
       return updated;
     }
     const [inserted] = await executor
@@ -51,7 +56,10 @@ export namespace LeaveQuotaUsageRepository {
         usedCount: input.usedCount,
       })
       .returning();
-    if (!inserted) throw new Error("Leave quota insert failed");
+    if (!inserted) {
+      const i18n = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(i18n.leaveQuota.insertFailed);
+    }
     return inserted;
   }
 }

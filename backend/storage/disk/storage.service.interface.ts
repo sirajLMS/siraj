@@ -8,81 +8,21 @@ type StorageProvider = "gcp";
  * Matches the Kotlin StorageService interface
  */
 export interface StorageService {
-  /**
-   * Check if a file exists in cloud storage
-   */
   fileExists(path: string): Promise<boolean>;
-
-  /**
-   * Prepare upload by generating upload instructions
-   * Returns upload preparation result with URL and upload type
-   */
-  prepareUpload(input: Types.UploadPreparationInput): Promise<Types.UploadPreparationResult>;
-
-  /**
-   * Upload a file to cloud storage
-   */
-  uploadFile(path: string, contentType: string, buffer: Buffer): Promise<Types.FileUploadResult>;
-
-  /**
-   * List files and directories with pagination and filtering
-   */
+  prepareUpload(input: Types.UploadPreparationInput, locale?: string): Promise<Types.UploadPreparationResult>;
+  uploadFile(path: string, contentType: string, buffer: Buffer, locale?: string): Promise<Types.FileUploadResult>;
   listFiles(input: Types.FilesListSearchInput): Promise<Types.StorageObjectList>;
-
-  /**
-   * Create a folder in cloud storage
-   */
-  createFolder(input: Types.FolderCreateInput): Promise<Types.FileOperationResult>;
-
-  /**
-   * Rename a file or folder
-   */
-  renameFile(input: Types.FileRenameInput): Promise<Types.FileOperationResult>;
-
-  /**
-   * Delete a single file
-   */
-  deleteFile(path: string): Promise<Types.FileOperationResult>;
-
-  /**
-   * Get directory information by path
-   */
+  createFolder(input: Types.FolderCreateInput, locale?: string): Promise<Types.FileOperationResult>;
+  renameFile(input: Types.FileRenameInput, locale?: string): Promise<Types.FileOperationResult>;
+  deleteFile(path: string, locale?: string): Promise<Types.FileOperationResult>;
   directoryInfoByPath(path: string): Promise<Types.DirectoryInfo | null>;
-
-  /**
-   * Get file information by path
-   */
   fileInfoByPath(path: string): Promise<Types.FileInfo | null>;
-
-  /**
-   * Get file information by database file ID
-   */
   fileInfoByDbFileId(id: string): Promise<Types.FileInfo | null>;
-
-  /**
-   * Get storage statistics
-   */
   storageStatistics(path?: string | null): Promise<Types.StorageStats>;
-
-  /**
-   * Fetch immediate directory children for lazy loading
-   */
   fetchDirectoryChildren(path?: string | null): Promise<Types.DirectoryInfo[]>;
-
-  /**
-   * Move multiple files/folders
-   */
-  moveItems(input: Types.StorageItemsMoveInput): Promise<Types.BulkOperationResult>;
-
-  /**
-   * Copy multiple files/folders
-   */
-  copyItems(input: Types.StorageItemsCopyInput): Promise<Types.BulkOperationResult>;
-
-  /**
-   * Delete multiple items
-   */
-  deleteItems(input: Types.StorageItemsDeleteInput): Promise<Types.BulkOperationResult>;
+  moveItems(input: Types.StorageItemsMoveInput, locale?: string): Promise<Types.BulkOperationResult>;
+  copyItems(input: Types.StorageItemsCopyInput, locale?: string): Promise<Types.BulkOperationResult>;
+  deleteItems(input: Types.StorageItemsDeleteInput, locale?: string): Promise<Types.BulkOperationResult>;
 }
 
 /**

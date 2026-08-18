@@ -118,7 +118,7 @@ const CronScheduleListInput = gqlSchemaBuilder.inputType("CronScheduleListInput"
   fields: t => ({
     status: t.field({ type: CronScheduleStatusPothosEnum, required: false }),
     jobKind: t.field({ type: CronJobKindPothosEnum, required: false }),
-    name: t.string({ required: false }),
+    name: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
     limit: t.int({ required: false }),
     offset: t.int({ required: false }),
   }),
@@ -126,7 +126,7 @@ const CronScheduleListInput = gqlSchemaBuilder.inputType("CronScheduleListInput"
 
 const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
   fields: t => ({
-    scheduleId: t.string({ required: false }),
+    scheduleId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     status: t.field({ type: CronRunStatusPothosEnum, required: false }),
     statuses: t.field({ type: [CronRunStatusPothosEnum], required: false }),
     from: t.field({ type: "DateTime", required: false }),
@@ -139,9 +139,9 @@ const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
 /** Fields shared by both submit and update input types — all optional. */
 function commonScheduleOptionalFields(t: Parameters<Parameters<typeof gqlSchemaBuilder.inputType>[1]["fields"]>[0]) {
   return {
-    description: t.string({ required: false }),
+    description: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
     payload: t.field({ type: "JSON", required: false }),
-    timezone: t.string({ required: false }),
+    timezone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
     concurrencyPolicy: t.field({ type: CronConcurrencyPolicyPothosEnum, required: false }),
     maxRetries: t.int({ required: false }),
     retryBackoffSeconds: t.int({ required: false }),
@@ -151,8 +151,8 @@ function commonScheduleOptionalFields(t: Parameters<Parameters<typeof gqlSchemaB
 
 const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmitInput", {
   fields: t => ({
-    name: t.string({ required: true }),
-    cronExpression: t.string({ required: true }),
+    name: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+    cronExpression: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     jobKind: t.field({ type: CronJobKindPothosEnum, required: true }),
     ...commonScheduleOptionalFields(t),
   }),
@@ -160,8 +160,8 @@ const CronScheduleSubmitInputRef = gqlSchemaBuilder.inputType("CronScheduleSubmi
 
 const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronScheduleUpdateInput", {
   fields: t => ({
-    name: t.string({ required: false }),
-    cronExpression: t.string({ required: false }),
+    name: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
+    cronExpression: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
     jobKind: t.field({ type: CronJobKindPothosEnum, required: false }),
     ...commonScheduleOptionalFields(t),
   }),
@@ -169,21 +169,21 @@ const CronScheduleUpdateInputRef = gqlSchemaBuilder.inputType("CronScheduleUpdat
 
 const CronScheduleDeleteInput = gqlSchemaBuilder.inputType("CronScheduleDeleteInput", {
   fields: t => ({
-    id: t.string({ required: true }),
+    id: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     hard: t.boolean({ required: false }),
   }),
 });
 
 const CronRunTriggerInput = gqlSchemaBuilder.inputType("CronRunTriggerInput", {
   fields: t => ({
-    id: t.string({ required: true }),
+    id: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     payload: t.field({ type: "JSON", required: false }),
   }),
 });
 
 const CronRunRetryInput = gqlSchemaBuilder.inputType("CronRunRetryInput", {
   fields: t => ({
-    runId: t.string({ required: true }),
+    runId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     attempt: t.int({ required: false }),
   }),
 });
@@ -317,7 +317,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: CronScheduleObject,
     authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       input: t.arg({ type: CronScheduleUpdateInputRef, required: true }),
     },
     description: "Update an existing cron schedule.",
@@ -344,7 +344,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: CronScheduleObject,
     nullable: true,
     authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
-    args: { id: t.arg.string({ required: true }) },
+    args: { id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Pause a cron schedule.",
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
@@ -357,7 +357,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     type: CronScheduleObject,
     nullable: true,
     authScopes: { permission: AppPermission.CRON_MANAGE, notImpersonating: true },
-    args: { id: t.arg.string({ required: true }) },
+    args: { id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }) },
     description: "Resume a paused cron schedule.",
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;

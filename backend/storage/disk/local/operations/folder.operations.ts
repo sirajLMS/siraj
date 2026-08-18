@@ -10,12 +10,17 @@ import { StorageUtils } from "@/backend/utils";
 
 export async function createFolder(
   ctx: LocalContext,
-  input: Types.FolderCreateInput
+  input: Types.FolderCreateInput,
+  locale?: string
 ): Promise<Types.FileOperationResult> {
-  return createFolderHelper(input, async fullPath => {
-    const absolutePath = getAbsolutePath(ctx.basePath, fullPath);
-    await fs.mkdir(absolutePath, { recursive: true, mode: 0o755 });
-  });
+  return createFolderHelper(
+    input,
+    async fullPath => {
+      const absolutePath = getAbsolutePath(ctx.basePath, fullPath);
+      await fs.mkdir(absolutePath, { recursive: true, mode: 0o755 });
+    },
+    locale
+  );
 }
 
 export async function directoryInfoByPath(ctx: LocalContext, dirPath: string): Promise<Types.DirectoryInfo | null> {

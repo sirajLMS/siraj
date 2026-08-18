@@ -27,7 +27,7 @@ export function formatInstantInTimezone(date: Date, ianaTimezone: string, locale
     logger.error("Failed to format date in timezone, falling back to UTC", {
       error,
       ianaTimezone,
-      date: date.toISOString(),
+      date: Number.isNaN(date.getTime()) ? "Invalid Date" : date.toISOString(),
     });
     return new Intl.DateTimeFormat(localeTag, {
       timeZone: "UTC",
@@ -80,11 +80,12 @@ export function getDayBoundaries(date: Date, ianaTimezone: string): { startOfDay
     logger.error("Failed to calculate day boundaries, falling back to UTC", {
       error,
       ianaTimezone,
-      date: date.toISOString(),
+      date: Number.isNaN(date.getTime()) ? "Invalid Date" : date.toISOString(),
     });
-    const startOfDayUtc = new Date(date);
+    const fallbackDate = Number.isNaN(date.getTime()) ? new Date() : date;
+    const startOfDayUtc = new Date(fallbackDate);
     startOfDayUtc.setUTCHours(0, 0, 0, 0);
-    const endOfDayUtc = new Date(date);
+    const endOfDayUtc = new Date(fallbackDate);
     endOfDayUtc.setUTCHours(24, 0, 0, 0);
     return { startOfDayUtc, endOfDayUtc };
   }

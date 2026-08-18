@@ -3,6 +3,7 @@ import { logger } from "@/backend/lib/logger";
 import { formatBulkOperationResult } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { type FileErrors, getServerTranslations } from "@/shared/locale";
 
 /**
  * Options for validating delete permissions
@@ -18,22 +19,22 @@ export interface DeletePermissionOptions {
 /**
  * Validates if an item can be deleted based on usage and protection status
  */
-export function validateDeletePermissions(options: DeletePermissionOptions): void {
+export function validateDeletePermissions(options: DeletePermissionOptions, tFile: FileErrors): void {
   const { force, usageCheck, dbFile, dbDirectory, parentDir } = options;
 
   if (!force && usageCheck?.isInUse) {
-    throw new Error(usageCheck.deleteBlockReason ?? "File is currently in use");
+    throw new Error(usageCheck.deleteBlockReason ?? tFile.fileCurrentlyInUse);
   }
 
   if (dbFile?.isProtected === true || dbDirectory?.isProtected === true) {
-    throw new Error("Item is protected from deletion");
+    throw new Error(tFile.itemProtectedFromDeletion);
   }
 
   if (parentDir) {
     const isFile = dbFile != null;
     const canDelete = isFile ? parentDir.allowDeleteFiles : parentDir.allowDelete;
     if (!canDelete) {
-      throw new Error(`Deletion not allowed in parent directory: ${parentDir.path}`);
+      throw new Error(tFile.deletionNotAllowedInParentDirectoryWithPath(parentDir.path));
     }
   }
 }
@@ -41,11 +42,15 @@ export function validateDeletePermissions(options: DeletePermissionOptions): voi
 /**
  * Common validation and entity loading for single file deletion
  */
-export async function prepareDeleteFile(filePath: string): Promise<{
+export async function prepareDeleteFile(
+  filePath: string,
+  locale?: string
+): Promise<{
   error?: string;
   dbFile?: Types.FileSelectType | null;
   parentDir?: Types.DirectorySelectType | null;
 }> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   const validationError = StorageUtils.validatePath(filePath);
   if (validationError) {
     return { error: validationError };
@@ -60,15 +65,18 @@ export async function prepareDeleteFile(filePath: string): Promise<{
   const parentDir = await StorageDbRepository.directoryByPath(parentPath);
 
   try {
-    validateDeletePermissions({
-      force: false,
-      usageCheck: {
-        isInUse: usageCheck.isInUse,
-        deleteBlockReason: usageCheck.deleteBlockReason ?? null,
+    validateDeletePermissions(
+      {
+        force: false,
+        usageCheck: {
+          isInUse: usageCheck.isInUse,
+          deleteBlockReason: usageCheck.deleteBlockReason ?? null,
+        },
+        dbFile: dbFile ?? undefined,
+        parentDir: parentDir ?? undefined,
       },
-      dbFile: dbFile ?? undefined,
-      parentDir: parentDir ?? undefined,
-    });
+      tFile
+    );
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : String(error),
@@ -83,10 +91,12 @@ export async function prepareDeleteFile(filePath: string): Promise<{
  */
 export async function executeDeleteFile(
   filePath: string,
-  onDelete: () => Promise<void>
+  onDelete: () => Promise<void>,
+  locale?: string
 ): Promise<Types.FileOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   try {
-    const { error } = await prepareDeleteFile(filePath);
+    const { error } = await prepareDeleteFile(filePath, locale);
     if (error) {
       return { success: false, message: error };
     }
@@ -99,12 +109,12 @@ export async function executeDeleteFile(
       logger.warn(`Failed to delete file from database: ${filePath}`, caughtError);
     }
 
-    return { success: true, message: "File deleted successfully" };
+    return { success: true, message: tFile.fileDeletedSuccessfully };
   } catch (error) {
     logger.error(`Failed to delete file: ${filePath}`, error);
     return {
       success: false,
-      message: `Failed to delete file: ${error instanceof Error ? error.message : String(error)}`,
+      message: tFile.failedToDeleteFile(error instanceof Error ? error.message : String(error)),
     };
   }
 }
@@ -166,7 +176,8 @@ export async function executeBulkDelete<
 >(
   ctx: TContext,
   input: Types.StorageItemsDeleteInput,
-  deleteFn: (ctx: TContext, params: DeleteFnParams) => Promise<TResult>
+  deleteFn: (ctx: TContext, params: DeleteFnParams) => Promise<TResult>,
+  locale?: string
 ): Promise<Types.BulkOperationResult> {
   const { dbFileMap, dbDirectoryMap, dbParentDirMap, usageCheckMap } = await loadDeleteEntities(
     input.paths,
@@ -207,7 +218,7 @@ export async function executeBulkDelete<
     }
   }
 
-  return formatBulkOperationResult(successCount, failures, successfulItems, "deleted");
+  return formatBulkOperationResult(successCount, failures, successfulItems, "deleted", locale);
 }
 
 async function checkFileUsages(paths: string[]) {

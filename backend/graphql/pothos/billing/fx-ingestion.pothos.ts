@@ -206,10 +206,13 @@ gqlSchemaBuilder.queryField("latestFxSyncRun", t =>
       if (!syncRun) {
         return null;
       }
-      // Discard `providerResponse` from the response — uses the `_`-prefix
-      const { providerResponse: _providerResponse, ...rest } = syncRun;
+      // Discard `providerResponse` and `errorMessage` from the response —
+      // `errorMessage` may contain raw provider/DB internals that should not
+      // be exposed to GraphQL clients.
+      const { providerResponse: _providerResponse, errorMessage: _errorMessage, ...rest } = syncRun;
       return {
         ...rest,
+        errorMessage: null,
         provider: isFxProvider(syncRun.provider) ? syncRun.provider : FxProvider.OpenExchangeRates,
         status: isFxSyncStatus(syncRun.status) ? syncRun.status : FxSyncStatus.Failed,
       };
@@ -276,7 +279,7 @@ gqlSchemaBuilder.mutationField("upsertManualExchangeRate", t =>
     args: {
       fromCurrency: t.arg({ type: CurrencyCodePothosObject, required: true }),
       toCurrency: t.arg({ type: CurrencyCodePothosObject, required: true }),
-      rate: t.arg.string({ required: true }),
+      rate: t.arg.string({ required: true, directives: { constraint: { maxLength: 32 } } }),
       effectiveDate: t.arg({ type: "DateTime", required: false }),
     },
     resolve: async (_root, args, ctx) => {

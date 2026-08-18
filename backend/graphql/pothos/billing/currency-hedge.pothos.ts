@@ -37,9 +37,9 @@ gqlSchemaBuilder.mutationField("createCurrencyHedge", t =>
     authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true },
     args: {
       currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
-      amount: t.arg.string({ required: true }),
-      hedgeType: t.arg.string({ required: true }),
-      notes: t.arg.string({ required: false }),
+      amount: t.arg.string({ required: true, directives: { constraint: { maxLength: 64 } } }),
+      hedgeType: t.arg.string({ required: true, directives: { constraint: { maxLength: 64 } } }),
+      notes: t.arg.string({ required: false, directives: { constraint: { maxLength: 10000 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
@@ -63,11 +63,11 @@ gqlSchemaBuilder.mutationField("updateCurrencyHedge", t =>
     type: CurrencyHedgePothosObject,
     authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true },
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       currency: t.arg({ type: CurrencyCodePothosObject, required: false }),
-      amount: t.arg.string({ required: false }),
-      hedgeType: t.arg.string({ required: false }),
-      notes: t.arg.string({ required: false }),
+      amount: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
+      hedgeType: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
+      notes: t.arg.string({ required: false, directives: { constraint: { maxLength: 10000 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
@@ -92,7 +92,7 @@ gqlSchemaBuilder.mutationField("deleteCurrencyHedge", t =>
     type: "Boolean",
     authScopes: { permission: AppPermission.BILLING_MANAGE_CURRENCY_HEDGES, notImpersonating: true },
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);

@@ -5,26 +5,30 @@ import type { GcpContext, GenericOperationResult } from "@/backend/storage/disk/
 import { formatBulkOperationResult, validateBulkOperation } from "@/backend/storage/disk/shared/bulk-operations.helper";
 import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
+import { type FileErrors, getServerTranslations } from "@/shared/locale";
 
 /**
  * Move multiple items in GCP storage
  */
 export async function moveItems(
   ctx: GcpContext,
-  input: Types.StorageItemsMoveInput
+  input: Types.StorageItemsMoveInput,
+  locale?: string
 ): Promise<Types.BulkOperationResult> {
+  const tFile = getServerTranslations(locale ?? "en").errorsTranslations.file;
   const { validSources, failures, destDirAllowed } = await validateBulkOperation(
     ctx,
     input.sourcePaths,
     input.destinationPath,
-    fileExists
+    fileExists,
+    tFile
   );
 
   let successCount = 0;
   const successfulItems: Array<Types.FileInfo | Types.DirectoryInfo> = [];
 
   if (validSources.length === 0) {
-    return formatBulkOperationResult(successCount, failures, successfulItems, "moved");
+    return formatBulkOperationResult(successCount, failures, successfulItems, "moved", locale);
   }
 
   const sourceDirectories = [...new Set(validSources.map(path => path.substring(0, path.lastIndexOf("/"))))];
@@ -42,12 +46,12 @@ export async function moveItems(
   if (!destDirAllowed) {
     return {
       success: false,
-      message: "Uploads not allowed to destination directory",
+      message: tFile.uploadsNotAllowedToDestination,
       successCount: 0,
       failureCount: validSources.length,
       failures: validSources.map(path => ({
         path,
-        error: "Uploads not allowed to destination directory",
+        error: tFile.uploadsNotAllowedToDestination,
       })),
       successfulItems: [],
     };
@@ -55,13 +59,17 @@ export async function moveItems(
 
   const results = await Promise.all(
     validSources.map(async sourcePath => {
-      const result = await moveSingleItem(ctx, {
-        sourcePath,
-        destinationPath: input.destinationPath,
-        dbFile: dbFileMap.get(sourcePath),
-        dbDirectory: dbDirectoryMap.get(sourcePath),
-        dbSourceDir: dbSourceDirMap.get(sourcePath.substring(0, sourcePath.lastIndexOf("/"))),
-      });
+      const result = await moveSingleItem(
+        ctx,
+        {
+          sourcePath,
+          destinationPath: input.destinationPath,
+          dbFile: dbFileMap.get(sourcePath),
+          dbDirectory: dbDirectoryMap.get(sourcePath),
+          dbSourceDir: dbSourceDirMap.get(sourcePath.substring(0, sourcePath.lastIndexOf("/"))),
+        },
+        tFile
+      );
       return { sourcePath, result };
     })
   );
@@ -73,12 +81,12 @@ export async function moveItems(
     } else {
       failures.push({
         path: sourcePath,
-        error: result.message ?? "Unknown error",
+        error: result.message ?? tFile.unknownError,
       });
     }
   }
 
-  return formatBulkOperationResult(successCount, failures, successfulItems, "moved");
+  return formatBulkOperationResult(successCount, failures, successfulItems, "moved", locale);
 }
 
 /**
@@ -97,7 +105,8 @@ interface MoveSingleItemOptions {
  */
 async function moveSingleItem(
   ctx: GcpContext,
-  options: MoveSingleItemOptions
+  options: MoveSingleItemOptions,
+  tFile: FileErrors
 ): Promise<GenericOperationResult<Types.FileInfo | Types.DirectoryInfo>> {
   const { sourcePath, destinationPath, dbFile, dbDirectory, dbSourceDir } = options;
 
@@ -106,7 +115,7 @@ async function moveSingleItem(
     if (dbSourceDir && !dbSourceDir.allowMove) {
       return {
         success: false,
-        message: `Move not allowed from directory: ${sourceDir}`,
+        message: tFile.moveNotAllowedFromDirectory(sourceDir),
       };
     }
 
@@ -139,7 +148,7 @@ async function moveSingleItem(
 
     return updatedItem
       ? { success: true, data: updatedItem }
-      : { success: false, message: "Failed to retrieve moved item info" };
+      : { success: false, message: tFile.failedToRetrieveMovedItemInfo };
   } catch (error) {
     return {
       success: false,

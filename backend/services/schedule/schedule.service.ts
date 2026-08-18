@@ -129,7 +129,8 @@ export namespace ScheduleService {
       );
 
       const viewerTimezone = await resolveViewerTimezone(userId);
-      const targetDate = new Date(input.date);
+      const parsedDate = new Date(input.date);
+      const targetDate = Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
       const teacherId = input.teacherId ?? undefined;
       const search = input.search ?? undefined;
       const metricFilter = input.metricFilter ?? undefined;

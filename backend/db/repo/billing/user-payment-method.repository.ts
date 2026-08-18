@@ -9,7 +9,7 @@ import type {
   UserPaymentMethodSelectType,
   UserPaymentMethodSubmitInput,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 type DefaultSlot = "PAYIN" | "PAYOUT";
 
@@ -62,7 +62,8 @@ export namespace UserPaymentMethodRepository {
 
   export async function create(
     input: UserPaymentMethodSubmitInput,
-    tx?: DBTransaction
+    tx?: DBTransaction,
+    locale?: string
   ): Promise<UserPaymentMethodReturnType> {
     const client = tx ?? db;
     const now = new Date();
@@ -76,7 +77,8 @@ export namespace UserPaymentMethodRepository {
       .returning();
 
     if (!created) {
-      throw new Error("Failed to create user payment method");
+      const { billing } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(billing.paymentMethodCreateFailed);
     }
 
     return toSelectType(created);
