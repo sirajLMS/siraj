@@ -18,6 +18,8 @@ export interface CatalogImageUploadLabels {
 export interface CountrySelectLabels {
   readonly selectCountry: string;
   readonly required: string;
+  readonly requestLimitReached: string;
+  readonly detectionFailed: string;
 }
 
 export interface CurrencySelectLabels {

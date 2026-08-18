@@ -34,7 +34,7 @@ bun run test:ui:components  # Happy DOM component tests
 bun run test:ui:e2e         # Playwright E2E (production server)
 bun run test:ui:static      # Mobile/desktop isolation checks
 bun run test:ui             # All of the above
-bun run test:ui:kill        # Kill test servers on ports 3001/3020–3199 only (never dev:3000 or start:4000)
+bun run test:ui:kill        # Kill test servers on port 3066 only (never dev:3000 or start:4000)
 ```
 
 All `test:ui*` scripts preload `test/ui/test-env.ts`, which sets `TEST_SERVER_MODE=production`.

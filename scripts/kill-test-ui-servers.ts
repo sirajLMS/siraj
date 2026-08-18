@@ -9,8 +9,7 @@ import { spawnSync } from "bun";
 import {
   getTestServerPortCandidates,
   PROTECTED_APP_PORTS,
-  TEST_SERVER_PORT_RANGE,
-  TEST_SERVER_PREFERRED_PORT,
+  TEST_SERVER_PORT,
 } from "@/frontend/common/graphql/test/testPort";
 
 function killListenersOnPort(port: number): number {
@@ -67,7 +66,7 @@ function main(): void {
   killPlaywrightTestBrowsers();
 
   process.stderr.write(
-    `[kill-test-ui-servers] Checked ports ${TEST_SERVER_PREFERRED_PORT} and ${TEST_SERVER_PORT_RANGE.start}-${TEST_SERVER_PORT_RANGE.end}; terminated ${totalKilled} listener(s). Protected ports: ${PROTECTED_APP_PORTS.join(", ")}\n`
+    `[kill-test-ui-servers] Checked test port ${TEST_SERVER_PORT}; terminated ${totalKilled} listener(s). Protected ports: ${PROTECTED_APP_PORTS.join(", ")}\n`
   );
 }
 

@@ -213,7 +213,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
   - `bun run test:ui:e2e` - E2E tests (production server; run `build:test` first)
   - `bun run test:ui:static` - mobile/desktop import isolation checks
   - `bun run test:ui` - all UI tests
-  - `bun run test:ui:kill` - kill test servers on ports 3001/3020–3199 only (never dev:3000 or start:4000)
+  - `bun run test:ui:kill` - kill test servers on port 3066 only (never dev:3000 or start:4000)
   - `bun run test` - all tests
 
 ### Meeting Integration Admin UI

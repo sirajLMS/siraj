@@ -40,6 +40,7 @@ export interface ClassAuditLabels {
     readonly present: string;
     readonly absent: string;
     readonly noEntries: string;
+    readonly viewStudentAriaLabel: (name: string) => string;
   };
   readonly venue: {
     readonly title: string;

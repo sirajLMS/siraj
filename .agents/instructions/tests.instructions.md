@@ -170,7 +170,7 @@ bun run build:test           # once before E2E (or after server code changes)
 bun run test:ui:components   # no build needed
 bun run test:ui:e2e          # requires build:test
 bun run test:ui              # components + e2e + static
-bun run test:ui:kill         # stop stale test servers (ports 3001, 3020–3199 only — never 3000/4000)
+bun run test:ui:kill         # stop stale test servers (port 3066 only — never 3000/4000)
 ```
 
 ### Test Execution Commands
@@ -184,7 +184,7 @@ bun run test:ui:kill         # stop stale test servers (ports 3001, 3020–3199 
 - `bun run test:ui:e2e` - E2E tests (production server; run `build:test` first)
 - `bun run test:ui:static` - mobile/desktop import isolation checks
 - `bun run test:ui` - all UI tests
-- `bun run test:ui:kill` - kill test servers on ports 3001/3020–3199 only (never dev:3000 or start:4000)
+- `bun run test:ui:kill` - kill test servers on port 3066 only (never dev:3000 or start:4000)
 - `bun run test` - all tests across all layers
 
 ### Quality

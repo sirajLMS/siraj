@@ -74,6 +74,7 @@ const teacher = {
   quotaMustBeNonNegative: "Quota must be a non-negative number.",
   quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
     `Quota (${requested}) exceeds total (${total}).`,
+  vacationRequestNotFound: (id: string) => `Vacation request not found: ${id}`,
 } as const;
 
 export const errorsEn: ErrorsLabels = {
@@ -149,6 +150,10 @@ export const errorsEn: ErrorsLabels = {
     }) => `Invoice ${id} version mismatch: expected ${expectedVersion}, got ${gotVersion}.`,
     exchangeRateStale: ({ fromCurrency, toCurrency }: { fromCurrency: string; toCurrency: string }) =>
       `Exchange rate for ${fromCurrency} to ${toCurrency} is stale (older than 24 hours)`,
+    quotaReleaseReservationFailed: "Failed to release quota reservation: insufficient reserved classes",
+    quotaReleaseConcurrentModification: "Quota release failed: quota no longer active after concurrent modification",
+    quotaRefreshConcurrentWrite: "Failed to refresh quota due to concurrent modification",
+    quotaResetConcurrentModification: "Failed to reset quota period due to concurrent modification",
   },
   credit: {
     duplicatePurchase: "This credit purchase has already been processed.",
@@ -203,6 +208,32 @@ export const errorsEn: ErrorsLabels = {
     uploadSessionAlreadyUsed: "Upload session already used",
     uploadSessionExpired: "Upload session expired",
     filePathMismatch: "File path mismatch",
+    fileDeletedSuccessfully: "File deleted successfully",
+    failedToDeleteFile: (error: string) => `Failed to delete file: ${error}`,
+    itemProtectedFromDeletion: "Item is protected from deletion",
+    fileProtectedFromDeletion: "File is protected from deletion",
+    deletionNotAllowedInParentDirectory: "Deletion not allowed in parent directory",
+    deletionNotAllowedInParentDirectoryWithPath: (path: string) => `Deletion not allowed in parent directory: ${path}`,
+    fileDeletionNotAllowedInDirectory: "File deletion not allowed in this directory",
+    sourcePathNotFound: "Source path not found",
+    uploadsNotAllowedToDestination: "Uploads not allowed to destination directory",
+    allItemsProcessedSuccessfully: (operationName: string) => `All items ${operationName} successfully`,
+    itemsProcessedWithFailures: (successCount: number, failureCount: number, operationName: string) =>
+      `${successCount} items ${operationName}, ${failureCount} failed`,
+    creatingSubdirectoriesNotAllowed: "Creating subdirectories not allowed in parent directory",
+    folderCreatedSuccessfully: "Folder created successfully",
+    failedToCreateFolder: (error: string) => `Failed to create folder: ${error}`,
+    fileUploadedSuccessfully: "File uploaded successfully",
+    failedToUploadFile: (error: string) => `Failed to upload file: ${error}`,
+    moveNotAllowedFromDirectory: (sourceDir: string) => `Move not allowed from directory: ${sourceDir}`,
+    fileRenamedSuccessfully: "File renamed successfully",
+    failedToRenameFile: (error: string) => `Failed to rename file: ${error}`,
+    fileIsInUse: "File is in use",
+    itemNotFound: (path: string) => `Item not found: ${path}`,
+    itemNotFoundInBucket: "Item not found in bucket",
+    directoryDoesNotExist: "Directory does not exist",
+    unknownError: "Unknown error",
+    failedToRetrieveMovedItemInfo: "Failed to retrieve moved item info",
   },
   meetingProvider: {
     meetingProviderInactive: "Meeting provider is inactive.",
@@ -243,6 +274,9 @@ export const errorsEn: ErrorsLabels = {
     bookDeleteFailed: "Failed to delete book.",
     resourceDeleteFailed: "Failed to delete learning resource.",
     permissionDenied: "You do not have permission to perform this action.",
+  },
+  notification: {
+    deliveryNotFound: (id: string) => `Notification delivery not found: ${id}`,
   },
   teacher,
   student,

@@ -74,6 +74,7 @@ const teacher = {
   quotaMustBeNonNegative: "الحصة يجب أن تكون رقمًا غير سالب.",
   quotaExceedsTotal: ({ requested, total }: { requested: number; total: number }) =>
     `الحصة (${requested}) تتجاوز الإجمالي (${total}).`,
+  vacationRequestNotFound: (id: string) => `طلب الإجازة غير موجود: ${id}`,
 } as const;
 
 export const errorsAr: ErrorsLabels = {
@@ -149,6 +150,10 @@ export const errorsAr: ErrorsLabels = {
     }) => `عدم تطابق في إصدار الفاتورة ${id}: المتوقع ${expectedVersion}، الفعلي ${gotVersion}.`,
     exchangeRateStale: ({ fromCurrency, toCurrency }: { fromCurrency: string; toCurrency: string }) =>
       `سعر الصرف لـ ${fromCurrency} إلى ${toCurrency} قديم (أقدم من 24 ساعة)`,
+    quotaReleaseReservationFailed: "فشل تحرير حجز الحصة: الحصص المحجوزة غير كافية",
+    quotaReleaseConcurrentModification: "فشل تحرير الحصة: لم تعد الحصة نشطة بعد تعديل متزامن",
+    quotaRefreshConcurrentWrite: "فشل تحديث الحصة بسبب تعديل متزامن",
+    quotaResetConcurrentModification: "فشل إعادة تعيين فترة الحصة بسبب تعديل متزامن",
   },
   credit: {
     duplicatePurchase: "تمت معالجة عملية شراء الرصيد هذه بالفعل.",
@@ -203,6 +208,32 @@ export const errorsAr: ErrorsLabels = {
     uploadSessionAlreadyUsed: "جلسة الرفع مستخدمة بالفعل",
     uploadSessionExpired: "جلسة الرفع منتهية الصلاحية",
     filePathMismatch: "عدم تطابق في مسار الملف",
+    fileDeletedSuccessfully: "تم حذف الملف بنجاح",
+    failedToDeleteFile: (error: string) => `فشل حذف الملف: ${error}`,
+    itemProtectedFromDeletion: "العنصر محمي من الحذف",
+    fileProtectedFromDeletion: "الملف محمي من الحذف",
+    deletionNotAllowedInParentDirectory: "الحذف غير مسموح في الدليل الأصل",
+    deletionNotAllowedInParentDirectoryWithPath: (path: string) => `الحذف غير مسموح في الدليل الأصل: ${path}`,
+    fileDeletionNotAllowedInDirectory: "حذف الملف غير مسموح في هذا الدليل",
+    sourcePathNotFound: "مسار المصدر غير موجود",
+    uploadsNotAllowedToDestination: "الرفع غير مسموح إلى الدليل الوجهة",
+    allItemsProcessedSuccessfully: (operationName: string) => `تمت معالجة جميع العناصر ${operationName} بنجاح`,
+    itemsProcessedWithFailures: (successCount: number, failureCount: number, operationName: string) =>
+      `تمت معالجة ${successCount} عناصر ${operationName}، فشل ${failureCount}`,
+    creatingSubdirectoriesNotAllowed: "إنشاء الأدلة الفرعية غير مسموح في الدليل الأصل",
+    folderCreatedSuccessfully: "تم إنشاء المجلد بنجاح",
+    failedToCreateFolder: (error: string) => `فشل إنشاء المجلد: ${error}`,
+    fileUploadedSuccessfully: "تم رفع الملف بنجاح",
+    failedToUploadFile: (error: string) => `فشل رفع الملف: ${error}`,
+    moveNotAllowedFromDirectory: (sourceDir: string) => `النقل غير مسموح من الدليل: ${sourceDir}`,
+    fileRenamedSuccessfully: "تمت إعادة تسمية الملف بنجاح",
+    failedToRenameFile: (error: string) => `فشل إعادة تسمية الملف: ${error}`,
+    fileIsInUse: "الملف قيد الاستخدام",
+    itemNotFound: (path: string) => `العنصر غير موجود: ${path}`,
+    itemNotFoundInBucket: "العنصر غير موجود في المخزن",
+    directoryDoesNotExist: "الدليل غير موجود",
+    unknownError: "خطأ غير معروف",
+    failedToRetrieveMovedItemInfo: "فشل في استرداد معلومات العنصر المنقول",
   },
   meetingProvider: {
     meetingProviderInactive: "موفر الاجتماعات غير نشط.",
@@ -242,6 +273,9 @@ export const errorsAr: ErrorsLabels = {
     bookDeleteFailed: "فشل حذف الكتاب.",
     resourceDeleteFailed: "فشل حذف مورد التعلم.",
     permissionDenied: "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
+  },
+  notification: {
+    deliveryNotFound: (id: string) => `تسليم الإشعار غير موجود: ${id}`,
   },
   teacher,
   student,

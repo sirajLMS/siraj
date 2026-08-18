@@ -42,6 +42,7 @@ export const dashboardClassAuditAr: ClassAuditLabels = {
     present: "حاضر",
     absent: "غائب",
     noEntries: "لا يوجد طلاب",
+    viewStudentAriaLabel: name => `عرض ${name}`,
   },
   venue: {
     title: "موقع القاعة",

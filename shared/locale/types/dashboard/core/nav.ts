@@ -116,4 +116,5 @@ export interface DashboardNavigationLabels {
       readonly returnToNormalRole: string;
     };
   };
+  readonly toggleGroupAriaLabel: (label: string) => string;
 }

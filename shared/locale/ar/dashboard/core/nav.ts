@@ -107,4 +107,5 @@ export const dashboardCoreNavAr: DashboardNavigationLabels = {
       returnToNormalRole: "العودة للدور العادي",
     },
   },
+  toggleGroupAriaLabel: label => `تبديل مجموعة ${label}`,
 };

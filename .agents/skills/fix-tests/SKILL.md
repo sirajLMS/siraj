@@ -106,8 +106,8 @@ Apply domain-specific rules based on where the test failure occurs:
 
 #### 5. End-to-End (E2E) (`test/ui/e2e/`)
 - **Build First**: ALWAYS run `bun run build:test` before running E2E tests.
-- **Test Server Ports**: Test servers use ports `3001` / `3020–3199`.
-- **Stuck Server Recovery**: If test ports are occupied, run `bun run test:ui:kill` (NEVER kill dev port 3000 or start port 4000).
+- **Test Server Port**: Test servers use fixed port `3066`.
+- **Stuck Server Recovery**: If the test port is occupied, run `bun run test:ui:kill` (NEVER kill dev port 3000 or start port 4000).
 
 ---
 

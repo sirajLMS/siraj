@@ -107,4 +107,5 @@ export const dashboardCoreNavEn: DashboardNavigationLabels = {
       returnToNormalRole: "Return to normal role",
     },
   },
+  toggleGroupAriaLabel: label => `Toggle ${label} group`,
 };

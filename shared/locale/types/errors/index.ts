@@ -75,6 +75,10 @@ export interface BillingErrors {
   readonly parentNotFound: string;
   readonly invoiceVersionMismatch: (params: { id: string; expectedVersion: number; gotVersion: number }) => string;
   readonly exchangeRateStale: (params: { fromCurrency: string; toCurrency: string }) => string;
+  readonly quotaReleaseReservationFailed: string;
+  readonly quotaReleaseConcurrentModification: string;
+  readonly quotaRefreshConcurrentWrite: string;
+  readonly quotaResetConcurrentModification: string;
 }
 
 /**
@@ -135,6 +139,31 @@ export interface FileErrors {
   readonly missingUploadSessionId: string;
   readonly invalidFileSize: string;
   readonly missingContentType: string;
+  readonly fileDeletedSuccessfully: string;
+  readonly failedToDeleteFile: (error: string) => string;
+  readonly itemProtectedFromDeletion: string;
+  readonly fileProtectedFromDeletion: string;
+  readonly deletionNotAllowedInParentDirectory: string;
+  readonly deletionNotAllowedInParentDirectoryWithPath: (path: string) => string;
+  readonly fileDeletionNotAllowedInDirectory: string;
+  readonly sourcePathNotFound: string;
+  readonly uploadsNotAllowedToDestination: string;
+  readonly allItemsProcessedSuccessfully: (operationName: string) => string;
+  readonly itemsProcessedWithFailures: (successCount: number, failureCount: number, operationName: string) => string;
+  readonly creatingSubdirectoriesNotAllowed: string;
+  readonly folderCreatedSuccessfully: string;
+  readonly failedToCreateFolder: (error: string) => string;
+  readonly fileUploadedSuccessfully: string;
+  readonly failedToUploadFile: (error: string) => string;
+  readonly moveNotAllowedFromDirectory: (sourceDir: string) => string;
+  readonly fileRenamedSuccessfully: string;
+  readonly failedToRenameFile: (error: string) => string;
+  readonly fileIsInUse: string;
+  readonly itemNotFound: (path: string) => string;
+  readonly itemNotFoundInBucket: string;
+  readonly directoryDoesNotExist: string;
+  readonly unknownError: string;
+  readonly failedToRetrieveMovedItemInfo: string;
 }
 
 /**
@@ -209,6 +238,7 @@ export interface TeacherErrors {
   readonly staffProfileNotFound: string;
   readonly quotaMustBeNonNegative: string;
   readonly quotaExceedsTotal: (params: { requested: number; total: number }) => string;
+  readonly vacationRequestNotFound: (id: string) => string;
 }
 
 /**
@@ -305,6 +335,13 @@ export interface QuotaErrors {
 }
 
 /**
+ * NotificationErrors — notification delivery specific errors.
+ */
+export interface NotificationErrors {
+  readonly deliveryNotFound: (id: string) => string;
+}
+
+/**
  * ErrorsLabels — the top-level errors namespace.
  * Only the subset needed by the login GraphQL mutation is defined here.
  * Grow this interface as more errors are migrated.
@@ -333,6 +370,7 @@ export interface ErrorsLabels
   readonly staff: StaffErrors;
   readonly lessonReport: LessonReportErrors;
   readonly resource: ResourceErrors;
+  readonly notification: NotificationErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;

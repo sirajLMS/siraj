@@ -52,7 +52,7 @@ bun run test:graphql           # GraphQL integration tests (dev server)
 bun run test:ui:components     # UI component tests (Happy DOM, no server)
 bun run test:ui:e2e            # End-to-end tests (production server — run build:test first)
 bun run test:ui                # All UI tests (components + e2e + static)
-bun run test:ui:kill           # Kill test servers on ports 3001/3020–3199 only (never dev:3000 or start:4000)
+bun run test:ui:kill           # Kill test servers on port 3066 only (never dev:3000 or start:4000)
 
 # Run database tests with log capture (AI agents MUST use this instead of raw `bun test`)
 bun run scripts/run-test/run-test.ts <test-path>        # Run with log capture
