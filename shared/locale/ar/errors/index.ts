@@ -59,6 +59,8 @@ const scheduling = {
   meetingUrlInUse: "رابط الاجتماع مستخدم بالفعل.",
   sessionNotActivated: "الجلسة غير مفعلة.",
   missedClassTime: "لقد فات وقت الحصة.",
+  absentTooEarly: ({ waitingMinutes }: { waitingMinutes: string }) =>
+    `لا يمكن وضع علامة الغياب بعد. يرجى الانتظار ${waitingMinutes} دقيقة بعد وقت البدء المجدول.`,
 } as const;
 
 const permissionGroup = {
@@ -158,6 +160,7 @@ export const errorsAr: ErrorsLabels = {
     recordNotFound: ({ tableName, entityId }: { tableName: string; entityId: string }) =>
       `${tableName} غير موجود: ${entityId}`,
     invalidFileType: "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و HEIC.",
+    invalidFileId: "معرف الملف غير صالح.",
     invoicePaymentProofPending: "لدى هذه الفاتورة إثبات دفع قيد المراجعة بالفعل.",
     fileUsageRegistered: "تم تسجيل استخدام الملف بنجاح",
     fileUsageRegisterFailed: (error: string) => `فشل تسجيل استخدام الملف: ${error}`,
@@ -227,6 +230,18 @@ export const errorsAr: ErrorsLabels = {
   },
   staff: {
     alreadyExists: "ملف الموظف لهذا المستخدم موجود بالفعل.",
+  },
+  lessonReport: {
+    notEligibleForReview: "هذه الحصة غير مؤهلة لمراجعة تقرير الدرس.",
+    alreadyExists: "يوجد بالفعل تقرير درس لهذه الحصة.",
+    createFailed: "فشل إنشاء تقرير الدرس.",
+    notFound: "تقرير الدرس غير موجود.",
+    alreadyReviewed: "تمت مراجعة تقرير الدرس هذا بالفعل.",
+  },
+  resource: {
+    bookDeleteFailed: "فشل حذف الكتاب.",
+    resourceDeleteFailed: "فشل حذف مورد التعلم.",
+    permissionDenied: "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
   },
   teacher,
   student,

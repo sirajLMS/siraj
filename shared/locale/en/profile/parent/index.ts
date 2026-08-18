@@ -4,6 +4,9 @@ export const profileParentEn: ProfileParentLabels = {
   ownSubtitle: "View and update your contact and communication details.",
   subtitle: "Manage contact and communication details for the student's primary guardian.",
   adminBanner: "Admin view: Identity and billing fields visible.",
+  validation: {
+    invalidTimezone: "Invalid timezone",
+  },
   convertedAmount: (lockedAmount, lockedCurrency, convertedApprox, displayCurrency) =>
     `${lockedAmount} ${lockedCurrency} (approx ${convertedApprox} ${displayCurrency})`,
   sections: {

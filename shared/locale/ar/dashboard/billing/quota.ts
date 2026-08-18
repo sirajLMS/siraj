@@ -2,6 +2,7 @@ import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota"
 
 export const quotaAr: QuotaLabels = {
   title: "حصص الطلاب",
+  breadcrumbLabel: "الحصص",
   newQuota: "حصة جديدة",
   editQuota: "تعديل الحصة",
   quotaDetails: "تفاصيل الحصة",

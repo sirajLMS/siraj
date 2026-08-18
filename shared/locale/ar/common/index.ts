@@ -20,6 +20,7 @@ export const commonAr: CommonLabels = {
   languageTooltip: "إعدادات اللغة",
   notifications: "الإشعارات",
   serverConnectionLost: "فقد الاتصال بالخادم",
+  serverNotAvailable: "الخادم غير متاح",
   retry: "إعادة المحاولة",
   checkNetworkConnection: "يرجى التحقق من اتصال الشبكة الخاص بك",
   connectionRestored: "تمت استعادة الاتصال",
@@ -40,4 +41,5 @@ export const commonAr: CommonLabels = {
   ariaMenu: "القائمة",
   ariaUserProfileMenu: "قائمة ملف المستخدم",
   ariaProfileSections: "أقسام الملف الشخصي",
+  noEntriesFound: "لا توجد إدخالات",
 };

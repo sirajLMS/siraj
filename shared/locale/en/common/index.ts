@@ -20,6 +20,7 @@ export const commonEn: CommonLabels = {
   languageTooltip: "Language settings",
   notifications: "Notifications",
   serverConnectionLost: "Server connection lost",
+  serverNotAvailable: "Server not available",
   retry: "Retry",
   checkNetworkConnection: "Please check your network connection",
   connectionRestored: "Connection restored",
@@ -40,4 +41,5 @@ export const commonEn: CommonLabels = {
   ariaMenu: "Menu",
   ariaUserProfileMenu: "User profile menu",
   ariaProfileSections: "Profile sections",
+  noEntriesFound: "No entries found",
 };

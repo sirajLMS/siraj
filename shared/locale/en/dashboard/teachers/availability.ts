@@ -21,6 +21,9 @@ export const dashboardTeacherAvailabilityEn: TeacherAvailabilityLabels = {
   errors: {
     missingTimeRange: "Please select a time range.",
   },
+  validation: {
+    invalidGender: "Invalid gender value",
+  },
   table: {
     time: "Time",
     monday: "Mon",

@@ -19,6 +19,7 @@
   "languageTooltip": "إعدادات اللغة",
   "notifications": "الإشعارات",
   "serverConnectionLost": "فقد الاتصال بالخادم",
+  "serverNotAvailable": "الخادم غير متاح",
   "retry": "إعادة المحاولة",
   "checkNetworkConnection": "يرجى التحقق من اتصال الشبكة الخاص بك",
   "connectionRestored": "تمت استعادة الاتصال",

@@ -228,6 +228,8 @@ export type MeetingConfigLabels = {
   readonly reauthNeeded: MeetingConfigReauthNeededLabels;
   readonly linkedClassInstances: MeetingConfigLinkedClassInstancesLabels;
   readonly enhancements: MeetingConfigEnhancementLabels;
+  readonly providerLogoAlt: (providerName: string) => string;
+  readonly providerLogoFallbackAlt: string;
 };
 
 export interface PaymentMethodTypeSelectorLabels {

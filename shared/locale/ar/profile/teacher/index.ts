@@ -54,6 +54,7 @@ export const profileTeacherAr: ProfileTeacherLabels = {
   validation: {
     nationalIdRequired: "الرقم القومي مطلوب.",
     nationalIdInvalid: "الرقم القومي غير صالح للجنسية المحددة.",
+    invalidTimezone: "المنطقة الزمنية غير صالحة",
   },
   shell: {
     tabs: {

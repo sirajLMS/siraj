@@ -38,6 +38,9 @@ export interface TeacherAvailabilityLabels {
   readonly errors: {
     readonly missingTimeRange: string;
   };
+  readonly validation: {
+    readonly invalidGender: string;
+  };
   readonly table: TeacherAvailabilityTableLabels;
   readonly insights: {
     readonly peakLoad: string;

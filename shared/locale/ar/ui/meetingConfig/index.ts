@@ -43,4 +43,6 @@ export const uiMeetingConfigAr = {
   reauthNeeded,
   linkedClassInstances,
   enhancements,
+  providerLogoAlt: (providerName: string) => `شعار ${providerName}`,
+  providerLogoFallbackAlt: "شعار مزود الاجتماع",
 };

@@ -2,6 +2,7 @@ import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota"
 
 export const quotaEn: QuotaLabels = {
   title: "Student Quotas",
+  breadcrumbLabel: "Quotas",
   newQuota: "New Quota",
   editQuota: "Edit Quota",
   quotaDetails: "Quota Details",

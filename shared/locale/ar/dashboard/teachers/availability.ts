@@ -21,6 +21,9 @@ export const dashboardTeacherAvailabilityAr: TeacherAvailabilityLabels = {
   errors: {
     missingTimeRange: "يرجى تحديد وقت البداية والنهاية.",
   },
+  validation: {
+    invalidGender: "قيمة الجنس غير صالحة",
+  },
   table: {
     time: "الوقت",
     monday: "الاثنين",

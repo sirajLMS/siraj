@@ -54,4 +54,7 @@ export const dashboardReportsEn: ReportsLabels = {
   noEntries: "No report data for this range",
   reportMultiCurrencyNote:
     "Financial distribution shows amounts in their original currencies. Use the report filter to narrow by teacher for currency-specific totals.",
+  validation: {
+    invalidDateRange: "Invalid date range",
+  },
 };

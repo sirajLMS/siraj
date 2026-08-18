@@ -102,6 +102,7 @@ export interface ProfileTeacherLabels {
   readonly validation: {
     readonly nationalIdRequired: string;
     readonly nationalIdInvalid: string;
+    readonly invalidTimezone: string;
   };
   readonly shell: ProfileShellLabels;
   readonly actions: ProfileActionsLabels;
@@ -112,6 +113,9 @@ export interface ProfileParentLabels {
   readonly ownSubtitle: string;
   readonly subtitle: string;
   readonly adminBanner: string;
+  readonly validation: {
+    readonly invalidTimezone: string;
+  };
   readonly convertedAmount: (
     lockedAmount: string,
     lockedCurrency: string,
@@ -203,6 +207,9 @@ export interface ProfileStaffLabels {
   readonly ownSubtitle: string;
   readonly subtitle: string;
   readonly adminBanner: string;
+  readonly validation: {
+    readonly invalidTimezone: string;
+  };
   readonly sections: {
     readonly account: string;
     readonly contact: string;

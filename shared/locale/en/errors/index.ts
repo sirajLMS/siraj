@@ -59,6 +59,8 @@ const scheduling = {
   meetingUrlInUse: "Meeting URL is already in use.",
   sessionNotActivated: "Session is not activated.",
   missedClassTime: "You have missed the class time.",
+  absentTooEarly: ({ waitingMinutes }: { waitingMinutes: string }) =>
+    `Cannot mark absent yet. Please wait ${waitingMinutes} minutes after scheduled start time.`,
 } as const;
 
 const permissionGroup = {
@@ -158,6 +160,7 @@ export const errorsEn: ErrorsLabels = {
     recordNotFound: ({ tableName, entityId }: { tableName: string; entityId: string }) =>
       `${tableName} not found: ${entityId}`,
     invalidFileType: "Invalid file type. Only PDF, JPG, PNG, and HEIC files are allowed.",
+    invalidFileId: "Invalid file ID.",
     invoicePaymentProofPending: "A payment proof is already pending review for this invoice.",
     fileUsageRegistered: "File usage registered successfully",
     fileUsageRegisterFailed: (error: string) => `Failed to register file usage: ${error}`,
@@ -228,6 +231,18 @@ export const errorsEn: ErrorsLabels = {
   },
   staff: {
     alreadyExists: "Staff profile for this user already exists.",
+  },
+  lessonReport: {
+    notEligibleForReview: "This class instance is not eligible for lesson report review.",
+    alreadyExists: "A lesson report already exists for this class instance.",
+    createFailed: "Failed to create lesson report.",
+    notFound: "Lesson report not found.",
+    alreadyReviewed: "This lesson report has already been reviewed.",
+  },
+  resource: {
+    bookDeleteFailed: "Failed to delete book.",
+    resourceDeleteFailed: "Failed to delete learning resource.",
+    permissionDenied: "You do not have permission to perform this action.",
   },
   teacher,
   student,

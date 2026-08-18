@@ -1,5 +1,6 @@
 export interface QuotaLabels {
   readonly title: string;
+  readonly breadcrumbLabel: string;
   readonly newQuota: string;
   readonly editQuota: string;
   readonly quotaDetails: string;

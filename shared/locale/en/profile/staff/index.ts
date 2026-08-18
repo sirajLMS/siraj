@@ -4,6 +4,9 @@ export const profileStaffEn: ProfileStaffLabels = {
   ownSubtitle: "View and update your account and contact details.",
   subtitle: "Manage system-wide roles and permissions for administrative staff.",
   adminBanner: "Admin view: Status and permissions visible.",
+  validation: {
+    invalidTimezone: "Invalid timezone",
+  },
   sections: {
     account: "Account Information",
     contact: "Contact Information",

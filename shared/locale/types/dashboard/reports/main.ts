@@ -55,4 +55,7 @@ export interface ReportsLabels {
   };
   readonly noEntries: string;
   readonly reportMultiCurrencyNote: string;
+  readonly validation: {
+    readonly invalidDateRange: string;
+  };
 }

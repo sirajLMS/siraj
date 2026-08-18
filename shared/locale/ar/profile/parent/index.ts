@@ -4,6 +4,9 @@ export const profileParentAr: ProfileParentLabels = {
   ownSubtitle: "عرض وتحديث بيانات الاتصال والتواصل الخاصة بك.",
   subtitle: "إدارة بيانات الاتصال والتواصل لولي الأمر الأساسي للطالب.",
   adminBanner: "عرض إداري: تظهر حقول الهوية والفوترة.",
+  validation: {
+    invalidTimezone: "المنطقة الزمنية غير صالحة",
+  },
   convertedAmount: (lockedAmount, lockedCurrency, convertedApprox, displayCurrency) =>
     `${lockedAmount} ${lockedCurrency} (تقريباً ${convertedApprox} ${displayCurrency})`,
   sections: {

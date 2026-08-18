@@ -27,6 +27,7 @@ export interface CommonLabels {
   readonly languageTooltip: string;
   readonly notifications: string;
   readonly serverConnectionLost: string;
+  readonly serverNotAvailable: string;
   readonly retry: string;
   readonly checkNetworkConnection: string;
   readonly connectionRestored: string;
@@ -47,4 +48,5 @@ export interface CommonLabels {
   readonly ariaMenu: string;
   readonly ariaUserProfileMenu: string;
   readonly ariaProfileSections: string;
+  readonly noEntriesFound: string;
 }

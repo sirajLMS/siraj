@@ -92,6 +92,7 @@ export interface CreditErrors {
 export interface FileErrors {
   readonly recordNotFound: (params: { tableName: string; entityId: string }) => string;
   readonly invalidFileType: string;
+  readonly invalidFileId: string;
   readonly invoicePaymentProofPending: string;
   readonly fileUsageRegistered: string;
   readonly fileUsageRegisterFailed: (error: string) => string;
@@ -180,6 +181,26 @@ export interface StaffErrors {
 }
 
 /**
+ * LessonReportErrors — lesson report specific errors.
+ */
+export interface LessonReportErrors {
+  readonly notEligibleForReview: string;
+  readonly alreadyExists: string;
+  readonly createFailed: string;
+  readonly notFound: string;
+  readonly alreadyReviewed: string;
+}
+
+/**
+ * ResourceErrors — learning resource specific errors.
+ */
+export interface ResourceErrors {
+  readonly bookDeleteFailed: string;
+  readonly resourceDeleteFailed: string;
+  readonly permissionDenied: string;
+}
+
+/**
  * TeacherErrors — teacher specific errors.
  */
 export interface TeacherErrors {
@@ -239,6 +260,7 @@ interface SchedulingSharedErrors {
   readonly studentBooked: string;
   readonly meetingUrlInUse: string;
   readonly sessionNotActivated: string;
+  readonly absentTooEarly: (params: { waitingMinutes: string }) => string;
 }
 
 /**
@@ -309,6 +331,8 @@ export interface ErrorsLabels
   readonly quota: QuotaErrors;
   readonly parent: ParentErrors;
   readonly staff: StaffErrors;
+  readonly lessonReport: LessonReportErrors;
+  readonly resource: ResourceErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;

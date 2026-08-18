@@ -54,6 +54,7 @@ export const profileTeacherEn: ProfileTeacherLabels = {
   validation: {
     nationalIdRequired: "National ID is required.",
     nationalIdInvalid: "National ID is invalid for the selected nationality.",
+    invalidTimezone: "Invalid timezone",
   },
   shell: {
     tabs: {

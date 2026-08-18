@@ -4,6 +4,9 @@ export const profileStaffAr: ProfileStaffLabels = {
   ownSubtitle: "عرض وتحديث بيانات حسابك ومعلومات الاتصال.",
   subtitle: "إدارة الأدوار والصلاحيات على مستوى النظام للموظفين الإداريين.",
   adminBanner: "عرض إداري: الحالة والصلاحيات مرئية.",
+  validation: {
+    invalidTimezone: "المنطقة الزمنية غير صالحة",
+  },
   sections: {
     account: "معلومات الحساب",
     contact: "معلومات الاتصال",

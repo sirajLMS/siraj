@@ -19,6 +19,7 @@
   "languageTooltip": "Language settings",
   "notifications": "Notifications",
   "serverConnectionLost": "Server connection lost",
+  "serverNotAvailable": "Server not available",
   "retry": "Retry",
   "checkNetworkConnection": "Please check your network connection",
   "connectionRestored": "Connection restored",

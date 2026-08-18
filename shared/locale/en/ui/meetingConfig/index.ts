@@ -43,4 +43,6 @@ export const uiMeetingConfigEn = {
   reauthNeeded,
   linkedClassInstances,
   enhancements,
+  providerLogoAlt: (providerName: string) => `${providerName} logo`,
+  providerLogoFallbackAlt: "Meeting provider logo",
 };
