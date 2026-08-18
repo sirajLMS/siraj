@@ -6,6 +6,7 @@ import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { type NextRequest, NextResponse } from "next/server";
 import { logger, resolveLocalStoragePath } from "@/backend/lib";
+import { isAllowedMimeType } from "@/backend/lib/storage/mime-allowlist";
 import { StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
@@ -35,6 +36,10 @@ function validateHeaders(request: NextRequest, signedUrl: SignedUrlData, tErrors
 
   if (contentType !== signedUrl.contentType) {
     return NextResponse.json({ error: tErrors.file.contentTypeMismatch(signedUrl.contentType) }, { status: 400 });
+  }
+
+  if (!isAllowedMimeType(signedUrl.contentType)) {
+    return NextResponse.json({ error: tErrors.file.invalidFileType }, { status: 400 });
   }
 
   if (!contentLength) {

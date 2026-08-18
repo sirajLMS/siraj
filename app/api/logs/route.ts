@@ -1,6 +1,7 @@
 import { mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
+import { getServerUserContext } from "@/backend/lib";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -28,6 +29,10 @@ function sanitizeSessionId(sessionId: string): string {
 
 interface BatchLogRequest {
   logs: LogEntry[];
+}
+
+function isBatchLogRequest(value: unknown): value is BatchLogRequest {
+  return typeof value === "object" && value !== null && "logs" in value && Array.isArray(value.logs);
 }
 
 const CLEANUP_ENABLED = getBooleanEnv("CLEANUP_ENABLED");
@@ -117,9 +122,12 @@ async function writeLogEntry(logEntry: LogEntry, logsDir: string): Promise<void>
     const safeSessionId = sanitizeSessionId(logEntry.sessionId);
     const logFilePath = join(logsDir, `client_${safeSessionId}.log`);
 
-    while (buffer.entries.length > 0) {
-      const entry = buffer.entries.shift();
-      if (!entry) break;
+    const entriesToWrite = buffer.entries.splice(0);
+    buffer.entries.length = 0;
+
+    // Process entries sequentially — ordered appends to the same file
+    await entriesToWrite.reduce(async (prev, entry) => {
+      await prev;
 
       // Fast-forward sequence if needed
       if (entry.sequence > buffer.nextSequence) {
@@ -135,7 +143,7 @@ async function writeLogEntry(logEntry: LogEntry, logsDir: string): Promise<void>
       if (entry.sequence === buffer.nextSequence) {
         buffer.nextSequence++;
       }
-    }
+    }, Promise.resolve());
   } finally {
     resolveWriteLock?.();
   }
@@ -151,12 +159,17 @@ async function writeBatchLogs(logs: LogEntry[], logsDir: string): Promise<void> 
     logsBySession.get(log.sessionId)?.push(log);
   }
 
-  for (const [sessionId, sessionLogs] of logsBySession) {
-    await cleanupOldClientLogs(logsDir, sessionId);
-    for (const log of sessionLogs) {
-      await writeLogEntry(log, logsDir);
-    }
-  }
+  // Sessions are independent — process them in parallel
+  await Promise.all(
+    [...logsBySession.entries()].map(async ([sessionId, sessionLogs]) => {
+      await cleanupOldClientLogs(logsDir, sessionId);
+      // Logs within a session must be written sequentially (ordered by sequence)
+      await sessionLogs.reduce(async (prev, log) => {
+        await prev;
+        return writeLogEntry(log, logsDir);
+      }, Promise.resolve());
+    })
+  );
 }
 
 function isValidLogEntry(log: LogEntry): boolean {
@@ -180,12 +193,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: tErrors.notFound }, { status: 404 });
   }
 
-  try {
-    const body = (await request.json()) as BatchLogRequest;
+  const { userId } = await getServerUserContext();
+  if (!userId) {
+    return NextResponse.json({ error: tErrors.file.authenticationRequired }, { status: 401 });
+  }
 
-    if (!Array.isArray(body.logs)) {
+  try {
+    const rawBody: unknown = await request.json();
+    if (!isBatchLogRequest(rawBody)) {
       return NextResponse.json({ error: tErrors.invalidRequestFormat }, { status: 400 });
     }
+    const body = rawBody;
 
     if (!body.logs.every(isValidLogEntry)) {
       return NextResponse.json({ error: tErrors.missingRequiredFields }, { status: 400 });

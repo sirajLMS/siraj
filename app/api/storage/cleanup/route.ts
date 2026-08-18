@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
-import { getEnvironmentConfig } from "@/backend/lib/env";
 import { SessionService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
@@ -45,8 +44,9 @@ async function authenticateAdmin(
     return NextResponse.json({ error: tErrors.file.authenticationRequired }, { status: 401 });
   }
 
-  const adminEmail = getEnvironmentConfig().adminEmail;
-  if (!adminEmail || user.email !== adminEmail) {
+  const { PermissionsService } = await import("@/backend/services/auth/permissions.service");
+  const permCtx = await PermissionsService.getUserContext(user.id);
+  if (!permCtx.isSuperAdmin) {
     logger.warn("Unauthorized cleanup attempt - non-admin user", { userId: user.id, email: user.email });
     return NextResponse.json({ error: tErrors.forbidden }, { status: 403 });
   }

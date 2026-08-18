@@ -101,16 +101,23 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
   const stream = createReadStream(absolutePath, { start, end });
   const body = streamToReadableStream(stream);
 
+  const isImage = contentType.startsWith("image/") && contentType !== "image/svg+xml";
+  const headers: Record<string, string> = {
+    "Content-Type": contentType,
+    "Content-Length": chunkSize.toString(),
+    "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+    "X-Content-Type-Options": "nosniff",
+    "Accept-Ranges": "bytes",
+    "Cache-Control": "public, max-age=3600",
+    "Last-Modified": lastModified,
+  };
+  if (!isImage) {
+    headers["Content-Disposition"] = "attachment";
+  }
+
   return new NextResponse(body, {
     status: 206,
-    headers: {
-      "Content-Type": contentType,
-      "Content-Length": chunkSize.toString(),
-      "Content-Range": `bytes ${start}-${end}/${fileSize}`,
-      "Accept-Ranges": "bytes",
-      "Cache-Control": "public, max-age=3600",
-      "Last-Modified": lastModified,
-    },
+    headers,
   });
 }
 
@@ -158,15 +165,22 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
   const stream = createReadStream(absolutePath);
   const body = streamToReadableStream(stream);
 
+  const isImage = contentType.startsWith("image/") && contentType !== "image/svg+xml";
+  const headers: Record<string, string> = {
+    "Content-Type": contentType,
+    "Content-Length": fileSize.toString(),
+    "X-Content-Type-Options": "nosniff",
+    "Accept-Ranges": "bytes",
+    "Cache-Control": "public, max-age=3600",
+    "Last-Modified": lastModified,
+  };
+  if (!isImage) {
+    headers["Content-Disposition"] = "attachment";
+  }
+
   return new NextResponse(body, {
     status: 200,
-    headers: {
-      "Content-Type": contentType,
-      "Content-Length": fileSize.toString(),
-      "Accept-Ranges": "bytes",
-      "Cache-Control": "public, max-age=3600",
-      "Last-Modified": lastModified,
-    },
+    headers,
   });
 }
 
