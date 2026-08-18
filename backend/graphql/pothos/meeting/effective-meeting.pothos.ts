@@ -12,6 +12,9 @@ const EffectiveMeetingRef = gqlSchemaBuilder.objectRef<EffectiveMeetingReturnTyp
 
 export const EffectiveMeetingPothosObject = EffectiveMeetingRef.implement({
   fields: t => ({
+    id: t.string({
+      resolve: parent => parent.configId ?? parent.meetingId ?? `effective-meeting-${parent.source}`,
+    }),
     joinUrl: t.exposeString("joinUrl", { nullable: true }),
     providerSlug: t.exposeString("providerSlug", { nullable: true }),
     providerName: t.expose("providerName", { type: "LocalizedString", nullable: true }),

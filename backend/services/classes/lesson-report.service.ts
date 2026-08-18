@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
-import { LessonReportRepository, type PendingReviewFilters } from "@/backend/db/repo/classes/lesson-report.repository";
+import { LessonReportRepository } from "@/backend/db/repo/classes/lesson-report.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
@@ -22,6 +22,7 @@ import {
   type LessonReviewInput,
   PaginationArgs,
   type PendingReviewCountReturnType,
+  type PendingReviewFilters,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 

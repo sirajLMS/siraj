@@ -108,6 +108,29 @@ export type UserPaymentMethodSubmitInput = Omit<
 
 export type UpdateUserPaymentMethodInput = Partial<Omit<UserPaymentMethodSubmitInput, "userId" | "type">>;
 
+/**
+ * GraphQL-specific submit input for user payment methods.
+ * Re-typifies `details` as `PaymentMethodDetails` (instead of the JSONB column type)
+ * and makes `isDefault` optional for GraphQL input flexibility.
+ */
+export type UserPaymentMethodSubmitGqlInput = Omit<UserPaymentMethodSubmitInput, "details" | "isDefault"> & {
+  readonly details: PaymentMethodDetails;
+  readonly isDefault?: boolean;
+};
+
+/**
+ * GraphQL-specific initial input for user payment methods (no `userId`).
+ * Used by onboarding mutations (parent/teacher) that attach the method to
+ * the newly-created user, so `userId` is not part of the input.
+ */
+export type UserPaymentMethodInitialGqlInput = Omit<
+  UserPaymentMethodSubmitInput,
+  "userId" | "details" | "isDefault"
+> & {
+  readonly details: PaymentMethodDetails;
+  readonly isDefault?: boolean;
+};
+
 // ============================================================================
 // `PaymentMethodDefaults` — computed per-user default slots
 // ============================================================================
@@ -191,3 +214,22 @@ export type SupportedOnlineAccountSubmitInput = Omit<
 };
 
 export type UpdateSupportedOnlineAccountInput = Partial<SupportedOnlineAccountSubmitInput>;
+
+/**
+ * Shared shape covering the common fields of `SupportedMobileWalletReturnType`,
+ * `SupportedPaymentLinkReturnType`, and `SupportedOnlineAccountReturnType`.
+ * Used by Pothos field helpers to type-check shared field definitions.
+ */
+export type SupportedCommonShape = Pick<
+  SupportedMobileWalletReturnType,
+  | "id"
+  | "slug"
+  | "name"
+  | "description"
+  | "instructions"
+  | "supportedDirections"
+  | "logoUrl"
+  | "isActive"
+  | "createdAt"
+  | "updatedAt"
+>;

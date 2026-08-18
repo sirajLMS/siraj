@@ -1,5 +1,4 @@
 import type { InputFieldBuilder, ObjectFieldBuilder } from "@pothos/core";
-import type { PaymentDirection } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CountryCodePothosObject,
@@ -13,31 +12,19 @@ import type {
   PaymentMethodDefaults,
   PaymentMethodDetails,
   PaymentMethodTransactionSnapshot,
+  SupportedCommonShape,
   SupportedMobileWalletReturnType,
   SupportedOnlineAccountReturnType,
   SupportedPaymentLinkReturnType,
   UpdateUserPaymentMethodInput,
+  UserPaymentMethodInitialGqlInput,
   UserPaymentMethodReturnType,
-  UserPaymentMethodSubmitInput,
+  UserPaymentMethodSubmitGqlInput,
 } from "@/backend/types";
-import type { LocalizedString } from "@/shared/types/localized-string";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
 type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
-
-interface SupportedCommonShape {
-  id: string;
-  slug: string;
-  name: LocalizedString;
-  description: LocalizedString | null;
-  instructions: LocalizedString | null;
-  supportedDirections: PaymentDirection;
-  logoUrl: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 function isRecordLike(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -95,6 +82,7 @@ const PaymentMethodCatalogSnapshotRef =
 
 export const PaymentMethodCatalogSnapshotPothosObject = PaymentMethodCatalogSnapshotRef.implement({
   fields: t => ({
+    id: t.string({ resolve: parent => parent.catalogId }),
     catalogId: t.exposeString("catalogId"),
     catalogSlug: t.exposeString("catalogSlug"),
     catalogName: t.expose("catalogName", { type: "LocalizedString" }),
@@ -241,11 +229,6 @@ export function normalizePaymentMethodDetailsInput(input: {
   };
 }
 
-export type UserPaymentMethodSubmitGqlInput = Omit<UserPaymentMethodSubmitInput, "details" | "isDefault"> & {
-  readonly details: PaymentMethodDetails;
-  readonly isDefault?: boolean;
-};
-
 function userPaymentMethodCommonInputFields(t: PothosInputFieldBuilder) {
   return {
     type: t.field({ type: PaymentMethodTypePothosEnum, required: true }),
@@ -264,14 +247,6 @@ export const UserPaymentMethodCreateInputPothos = gqlSchemaBuilder
       ...userPaymentMethodCommonInputFields(t),
     }),
   });
-
-export type UserPaymentMethodInitialGqlInput = Omit<
-  UserPaymentMethodSubmitInput,
-  "userId" | "details" | "isDefault"
-> & {
-  readonly details: PaymentMethodDetails;
-  readonly isDefault?: boolean;
-};
 
 export const UserPaymentMethodInitialInputPothos = gqlSchemaBuilder
   .inputRef<UserPaymentMethodInitialGqlInput>("UserPaymentMethodInitialInput")

@@ -3,7 +3,7 @@ import type {
   teacherRecurringUnavailability,
   teacherVacationRequests,
 } from "@/backend/db/schema";
-import type { AvailabilitySearchSortBy, DayOfWeek, Gender } from "@/backend/enum";
+import type { AvailabilitySearchSortBy, DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
 import type { PageInfo, PaginationInput } from "@/backend/types";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
@@ -40,6 +40,42 @@ export type SubmitVacationRequestInput = {
 
 export type ProcessVacationRequestInput = {
   vacationRequestId: string;
+};
+
+export type AvailabilityWindowUpsertInput = {
+  teacherId: string;
+  dayOfWeek: DayOfWeek;
+  startTime: string;
+  endTime: string;
+  timezone: string;
+  timezoneId: number | null;
+  effectiveFrom: string;
+  effectiveUntil: string;
+};
+
+export type RecurringUnavailabilityCreateInput = {
+  teacherId: string;
+  dayOfWeek: DayOfWeek;
+  startTime: string;
+  endTime: string;
+  timezone: string;
+  timezoneId: number | null;
+  effectiveFrom: string;
+  effectiveUntil: string;
+  reason: string;
+};
+
+export type VacationRequestCreateInput = {
+  teacherId: string;
+  requestedByUserId: string;
+  startAt: Date;
+  endAt: Date;
+  timezone: string;
+  timezoneId: number | null;
+  reason: string;
+  status: VacationRequestStatus;
+  processedAt: Date | null;
+  processedByUserId: string | null;
 };
 
 export interface CrossStaffSearchInput {

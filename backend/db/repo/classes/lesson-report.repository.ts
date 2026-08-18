@@ -12,12 +12,13 @@ import {
 } from "@/backend/db/schema";
 import { LessonReportStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import type { DBTransaction, LessonReportInsertType, LessonReportSelectType, PaginationArgs } from "@/backend/types";
-
-export interface PendingReviewFilters {
-  teacherId?: string;
-  studentId?: string;
-}
+import type {
+  DBTransaction,
+  LessonReportInsertType,
+  LessonReportSelectType,
+  PaginationArgs,
+  PendingReviewFilters,
+} from "@/backend/types";
 
 type LessonReportWithNames = LessonReportSelectType & {
   teacherName: string | null;

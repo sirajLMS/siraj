@@ -6,7 +6,8 @@ import { db } from "@/backend/db";
 import { AuditRepository } from "@/backend/db/repo/audit";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { auditLogs, users } from "@/backend/db/schema";
-import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import { createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
 const SOFT_DELETE_RLS_ROLE = "test_rls_user_soft_delete";
@@ -24,6 +25,9 @@ function getResultRows(result: unknown): Record<string, unknown>[] {
 }
 
 describe("Soft Delete Security (Issue #2)", () => {
+  // RLS role/policy setup must happen outside runInRollback — these are DDL
+  // operations that create database-level roles and policies, not transactional data.
+  // Per AGENTS.md, RLS test setup is an exception to the runInRollback rule.
   beforeAll(async () => {
     testLogger.info("Setting up soft delete security test role...");
     await setupRlsRole(SOFT_DELETE_RLS_ROLE);
@@ -46,80 +50,72 @@ describe("Soft Delete Security (Issue #2)", () => {
 
   test("Removes the SECURITY DEFINER soft_delete_row_trigger_fn function", async () => {
     testLogger.info("Verifying SECURITY DEFINER trigger function is removed...");
-    const result = await db.execute(sql`
-      SELECT proname, prosecdef
-      FROM pg_proc
-      JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid
-      WHERE nspname = 'public' AND proname = 'soft_delete_row_trigger_fn'
-    `);
+    await runInRollback(async tx => {
+      const result = await tx.execute(sql`
+        SELECT proname, prosecdef
+        FROM pg_proc
+        JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid
+        WHERE nspname = 'public' AND proname = 'soft_delete_row_trigger_fn'
+      `);
 
-    const rows = getResultRows(result);
-    expect(rows).toHaveLength(0);
-    testLogger.info("soft_delete_row_trigger_fn no longer exists.");
+      const rows = getResultRows(result);
+      expect(rows).toHaveLength(0);
+      testLogger.info("soft_delete_row_trigger_fn no longer exists.");
+    });
   });
 
   test("Verifies no SECURITY DEFINER functions remain in public schema for soft delete", async () => {
     testLogger.info("Scanning public schema for SECURITY DEFINER functions...");
-    const result = await db.execute(sql`
-      SELECT proname
-      FROM pg_proc
-      JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid
-      WHERE nspname = 'public' AND prosecdef = true AND proname LIKE '%soft_delete%'
-    `);
+    await runInRollback(async tx => {
+      const result = await tx.execute(sql`
+        SELECT proname
+        FROM pg_proc
+        JOIN pg_namespace ON pg_proc.pronamespace = pg_namespace.oid
+        WHERE nspname = 'public' AND prosecdef = true AND proname LIKE '%soft_delete%'
+      `);
 
-    const rows = getResultRows(result);
-    expect(rows).toHaveLength(0);
-    testLogger.info("No soft-delete SECURITY DEFINER functions found.");
+      const rows = getResultRows(result);
+      expect(rows).toHaveLength(0);
+      testLogger.info("No soft-delete SECURITY DEFINER functions found.");
+    });
   });
 
   test("Soft delete via repository creates audit log entry", async () => {
     testLogger.info("Testing audit trail on repository soft delete...");
-    const email = `soft-delete-audit-${randomUUID()}@example.com`;
-    const now = new Date();
-
-    const [user] = await db
-      .insert(users)
-      .values({
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, {
         name: "Soft Delete Audit User",
-        email,
-        password: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+        email: `soft-delete-audit-${randomUUID()}@example.com`,
+      });
 
-    const { entity, deletedAt } = await SoftDeleteRepository.softDeleteUser(user.id);
-    expect(entity.deletedAt).not.toBeNull();
-    expect(deletedAt).toBeDefined();
+      const { entity, deletedAt } = await SoftDeleteRepository.softDeleteUser(user.id, null, tx);
+      expect(entity.deletedAt).not.toBeNull();
+      expect(deletedAt).toBeDefined();
 
-    const auditEntries = await AuditRepository.getEntityAuditLogs("USER", user.id);
-    const softDeleteEntry = auditEntries.find(entry => entry.action === "DELETE");
+      const auditEntries = await AuditRepository.getEntityAuditLogs("USER", user.id, 50, tx);
+      const softDeleteEntry = auditEntries.find(entry => entry.action === "DELETE");
 
-    expect(softDeleteEntry).toBeDefined();
-    expect(softDeleteEntry?.metadata).toMatchObject({
-      tableName: "users",
-      softDelete: true,
+      expect(softDeleteEntry).toBeDefined();
+      expect(softDeleteEntry?.metadata).toMatchObject({
+        tableName: "users",
+        softDelete: true,
+      });
+
+      testLogger.info("Audit trail soft delete test passed.");
     });
-
-    await SoftDeleteRepository.hardDelete("users", user.id);
-    testLogger.info("Audit trail soft delete test passed.");
   });
 
   test("RLS role cannot hard delete or directly set deleted_at", async () => {
     testLogger.info("Testing RLS hard delete block and direct soft-delete block...");
-    const email = `soft-delete-rls-${randomUUID()}@example.com`;
-    const now = new Date();
-
-    const [user] = await db
-      .insert(users)
-      .values({
+    // RLS test: user must be created outside runInRollback because the RLS
+    // transaction uses SET LOCAL ROLE which requires a real committed row.
+    // Cleanup via hardDelete after the test. This is the AGENTS.md RLS exception.
+    const user = await db.transaction(async tx =>
+      createTestUser(tx, {
         name: "RLS Soft Delete User",
-        email,
-        password: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
+        email: `soft-delete-rls-${randomUUID()}@example.com`,
       })
-      .returning();
+    );
 
     try {
       await db.transaction(async tx => {
@@ -131,7 +127,7 @@ describe("Soft Delete Security (Issue #2)", () => {
 
         let directUpdateError: unknown = null;
         try {
-          await tx.update(users).set({ deletedAt: now, updatedAt: now }).where(eq(users.id, user.id));
+          await tx.update(users).set({ deletedAt: new Date(), updatedAt: new Date() }).where(eq(users.id, user.id));
         } catch (error) {
           directUpdateError = error;
         }
@@ -161,27 +157,20 @@ describe("Soft Delete Security (Issue #2)", () => {
 
   test("Superuser can hard delete a soft-deleted record", async () => {
     testLogger.info("Testing superuser hard delete of soft-deleted record...");
-    const email = `soft-delete-hard-${randomUUID()}@example.com`;
-    const now = new Date();
-
-    const [user] = await db
-      .insert(users)
-      .values({
+    await runInRollback(async tx => {
+      const user = await createTestUser(tx, {
         name: "Hard Delete User",
-        email,
-        password: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+        email: `soft-delete-hard-${randomUUID()}@example.com`,
+      });
 
-    await SoftDeleteRepository.softDeleteUser(user.id);
+      await SoftDeleteRepository.softDeleteUser(user.id, null, tx);
 
-    const hardDeleted = await SoftDeleteRepository.hardDelete("users", user.id);
-    expect(hardDeleted.id).toBe(user.id);
+      const hardDeleted = await SoftDeleteRepository.hardDelete("users", user.id, tx);
+      expect(hardDeleted.id).toBe(user.id);
 
-    const remaining = await db.select().from(users).where(eq(users.id, user.id));
-    expect(remaining).toHaveLength(0);
-    testLogger.info("Superuser hard delete test passed.");
+      const remaining = await tx.select().from(users).where(eq(users.id, user.id));
+      expect(remaining).toHaveLength(0);
+      testLogger.info("Superuser hard delete test passed.");
+    });
   });
 });

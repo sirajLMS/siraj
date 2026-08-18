@@ -3,8 +3,8 @@ import { NotificationRepository } from "@/backend/db/repo/notifications/notifica
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { assertHasPermission } from "@/backend/services/shared";
 import type {
   ClassCommunicationInsertType,
   ClassCommunicationSelectType,
@@ -26,10 +26,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace GroupClassService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
-    const isAuthorized = await PermissionsService.hasPermission(userId, permission);
-    if (!isAuthorized) {
-      throw new Error(tErrors.unauthorizedAction);
-    }
+    return assertHasPermission(userId, permission, tErrors.unauthorizedAction);
   }
 
   async function getGroupClassOrThrow(classInstanceId: string, tErrors: ErrorsLabels) {

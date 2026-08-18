@@ -12,19 +12,17 @@
  * @see backend/db/seeds/teachers/seed-teacher-vacation-requests.ts
  */
 
-import {
-  type AvailabilityWindowUpsertInput,
-  type RecurringUnavailabilityCreateInput,
-  TeacherAvailabilityBootstrapRepository,
-  type VacationRequestCreateInput,
-} from "@/backend/db/repo/teachers/teacher-availability-bootstrap.repository";
+import { TeacherAvailabilityBootstrapRepository } from "@/backend/db/repo/teachers/teacher-availability-bootstrap.repository";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
+  AvailabilityWindowUpsertInput,
   DBTransaction,
+  RecurringUnavailabilityCreateInput,
   TeacherAvailabilityWindowSelectType,
   TeacherRecurringUnavailabilitySelectType,
   TeacherVacationRequestSelectType,
+  VacationRequestCreateInput,
 } from "@/backend/types";
 
 export namespace TeacherAvailabilitySeedService {

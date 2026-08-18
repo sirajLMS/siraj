@@ -10,6 +10,7 @@ import type {
   PaginationArgs,
   PartialStudentUpdateInput,
   StudentFilterArgs,
+  StudentReturnType,
   StudentSelectType,
   StudentsOrderByClause,
   StudentsWithFiltersResponse,
@@ -111,6 +112,25 @@ export namespace StudentManagementService {
 
   export async function deleteById(id: string, tErrors: ErrorsLabels): Promise<StudentSelectType> {
     return StudentRepository.deleteById(id, tErrors);
+  }
+
+  /**
+   * Batch load students by IDs for Pothos DataLoader.
+   *
+   * Returns a positionally-aligned array (same length and order as `ids`)
+   * where each element is either the matching `StudentReturnType` or an
+   * `Error` (for IDs not found). Delegates to
+   * {@link StudentRepository.loadByIds}.
+   *
+   * Resolvers should call this method instead of accessing
+   * {@link StudentRepository} directly, keeping the service layer as the
+   * single entry point for data access.
+   *
+   * @param ids    Student IDs to fetch.
+   * @param locale Locale for the "student not found" error message (default `"en"`).
+   */
+  export async function loadByIds(ids: string[], locale?: string): Promise<(StudentReturnType | Error)[]> {
+    return StudentRepository.loadByIds(ids, locale);
   }
 }
 

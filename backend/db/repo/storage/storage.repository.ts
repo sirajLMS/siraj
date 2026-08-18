@@ -751,23 +751,27 @@ export namespace StorageDbRepository {
    * Validate upload parameters (path, size, contentType).
    * Returns an error message if validation fails, or null if valid.
    */
-  export const validateUpload = (params: { path: string; size: number; contentType: string }): string | null => {
+  export const validateUpload = (
+    params: { path: string; size: number; contentType: string },
+    locale?: string
+  ): string | null => {
     const { path, size, contentType } = params;
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
 
     // Check for path traversal attempts
     if (path.includes("..") || path.startsWith("/")) {
-      return "Invalid file path";
+      return tErrors.invalidFilePath;
     }
 
     // Check file size (max 100MB)
     const maxSize = 100 * 1024 * 1024; // 100MB
     if (size > maxSize) {
-      return `File size exceeds maximum allowed (${maxSize / (1024 * 1024)}MB)`;
+      return tErrors.fileSizeExceedsMaximum(maxSize / (1024 * 1024));
     }
 
     // Check content type is provided
     if (!contentType) {
-      return "Content type is required";
+      return tErrors.contentTypeRequired;
     }
 
     // Additional validation can be added here (e.g., allowed content types)

@@ -33,3 +33,16 @@ export interface LessonReviewInput {
 export interface PendingReviewCountReturnType {
   pendingCount: number;
 }
+
+export interface PendingReviewFilters {
+  teacherId?: string;
+  studentId?: string;
+}
+
+/**
+ * Paginated pending lesson reports awaiting review, with total count.
+ */
+export interface PendingLessonReportsPayload {
+  rows: LessonReportReturnType[];
+  totalCount: number;
+}

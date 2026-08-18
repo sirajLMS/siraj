@@ -238,7 +238,7 @@ describe("NotificationRepository — handleDeliveryWebhook rank guard", () => {
     expect(existing.status).toBe(NotificationDeliveryStatus.PENDING);
 
     // Update to FAILED via updateDeliveryStatus — this validates the
-    // transition using the repo-local isValidForwardTransition guard.
+    // transition using the isValidStatusTransition guard.
     // Before the fix this would throw the "invalidTransition" error.
     const updated = await NotificationRepository.updateDeliveryStatus(
       {

@@ -43,6 +43,9 @@ const TeacherMonthlyReportRef = gqlSchemaBuilder.objectRef<TeacherMonthlyReportR
 export const TeacherMonthlyReportPothosObject = TeacherMonthlyReportRef.implement({
   description: "Monthly earnings summary for a teacher (lessons, counts, totals)",
   fields: t => ({
+    id: t.string({
+      resolve: parent => `${parent.teacherId}-${parent.year}-${parent.month}`,
+    }),
     teacherId: t.exposeString("teacherId"),
     teacherName: t.exposeString("teacherName"),
     year: t.exposeInt("year"),

@@ -2,7 +2,6 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
-import type { RateSnapshot } from "@/backend/db/repo/scheduling/recurring";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
 import {
   createMockClassInstance,
@@ -14,7 +13,7 @@ import {
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { RateSource } from "@/backend/enum";
 import { DayOfWeek } from "@/backend/enum/teachers/teacher-availability.enum";
-import type { DBTransaction } from "@/backend/types";
+import type { DBTransaction, RateSnapshot } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 

@@ -17,3 +17,8 @@ export type ComplaintResponseInput = Omit<
 export type ComplaintResponseReturnType = Omit<ComplaintResponseSelectType, "responderUserId"> & {
   responderName?: string | null;
 };
+
+export type CreateComplaintResponseInput = ComplaintResponseInput & {
+  responderUserId: string | null;
+  emailSent: boolean;
+};

@@ -1,15 +1,12 @@
 import { ParentRepository } from "@/backend/db/repo/parents";
 import type { AppPermission } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { assertHasPermission } from "@/backend/services/shared";
 import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentServiceBase {
   export async function assertPermission(userId: string, permission: AppPermission, locale?: string) {
-    const isAuthorized = await PermissionsService.hasPermission(userId, permission);
-    if (!isAuthorized) {
-      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
-      throw new Error(t.unauthorizedAction);
-    }
+    const tErrors = getServerTranslations(locale ?? "ar").errorsTranslations;
+    return assertHasPermission(userId, permission, tErrors.unauthorizedAction);
   }
 
   export async function resolveParentForUser(userId: string, locale?: string) {

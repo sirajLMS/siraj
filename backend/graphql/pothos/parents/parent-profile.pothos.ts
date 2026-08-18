@@ -16,12 +16,9 @@ import type {
   ReactivateParentResult,
 } from "@/backend/types";
 
-/** Pothos object shape (decoupled from barrel re-exports). */
-type ParentProfileGraphQLShape = ParentProfileResult;
-
 // ─── ParentProfile Object ───────────────────────────────────────────────────
 
-const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileGraphQLShape>("ParentProfile");
+const ParentProfileRef = gqlSchemaBuilder.objectRef<ParentProfileResult>("ParentProfile");
 
 export const ParentProfilePothosObject = ParentProfileRef.implement({
   fields: t => ({

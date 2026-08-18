@@ -33,6 +33,7 @@ const ComplaintFileRef = gqlSchemaBuilder.objectRef<ComplaintFileReturnType>("Co
 export const ComplaintFilePothosObject = ComplaintFileRef.implement({
   description: "A file attached to a complaint.",
   fields: t => ({
+    id: t.string({ resolve: parent => parent.fileId }),
     fileId: t.exposeString("fileId"),
     publicUrl: t.exposeString("publicUrl"),
     isProtected: t.exposeBoolean("isProtected"),

@@ -1,24 +1,9 @@
 import type { ObjectFieldBuilder } from "@pothos/core";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import type { MetricsFieldOptions, MetricsSharedShape } from "@/backend/types";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
-
-/**
- * Shared shape for metrics objects that expose `pending`, `rescheduled`,
- * and `leave` integer fields alongside an `id` string field.
- */
-interface MetricsSharedShape {
-  readonly id?: string;
-  readonly pending: number;
-  readonly rescheduled: number;
-  readonly leave: number;
-}
-
-interface MetricsFieldOptions {
-  /** When true, `id` is nullable (e.g. DailyScheduleMetrics). */
-  readonly idNullable?: boolean;
-}
 
 /**
  * Shared metrics fields for `DailyScheduleMetrics` and

@@ -5,6 +5,7 @@ import { db } from "@/backend/db";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { storageFiles, userFiles, users } from "@/backend/db/schema";
+import { createTestUser } from "@/backend/db/test/entity-setup";
 import type { UserSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -14,24 +15,16 @@ describe("Consolidated File Usage Integrity (Junction Tables)", () => {
 
   beforeAll(async () => {
     testLogger.info("Setting up parent records for file usage tests...");
-    // Create a test user as a valid reference parent
-    const email = `poly-parent-${randomUUID()}@example.com`;
-    const now = new Date();
-    const [inserted] = await db
-      .insert(users)
-      .values({
+    // StorageDbRepository methods use the global `db` connection and do not
+    // accept a `tx` parameter, so these records are created outside runInRollback.
+    // afterAll cleanup ensures no leakage (AGENTS.md rule 9 exception).
+    testUser = await db.transaction(async tx =>
+      createTestUser(tx, {
         name: "Poly Parent User",
-        email,
-        password: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
+        email: `poly-parent-${randomUUID()}@example.com`,
       })
-      .returning();
-    if (!inserted) {
-      throw new Error("Failed to create test user");
-    }
-    testUser = inserted;
-    testLogger.info(`Created test user: ${inserted.id}`);
+    );
+    testLogger.info(`Created test user: ${testUser.id}`);
   });
 
   afterAll(async () => {
@@ -97,21 +90,14 @@ describe("Consolidated File Usage Integrity (Junction Tables)", () => {
   });
 
   test("Deleting parent row cascades and deletes associated junction records", async () => {
-    // 1. Create a temporary user
-    const email = `poly-cascade-${randomUUID()}@example.com`;
-    const now = new Date();
-    const [tempUser] = await db
-      .insert(users)
-      .values({
-        name: "Temp Cascade User",
-        email,
-        password: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+    // StorageDbRepository methods use global db (not tx), so this test cannot
+    // use runInRollback for the storage operations. Manual cleanup handles it.
+    const tempUser = await createTestUser(db, {
+      name: "Temp Cascade User",
+      email: `poly-cascade-${randomUUID()}@example.com`,
+    });
 
-    // 2. Register usage
+    // Register usage via repository (uses global db)
     const cascadePath = `/uploads/cascade-${randomUUID()}.png`;
     await StorageDbRepository.registerFileUsage({
       filePath: cascadePath,
@@ -120,25 +106,25 @@ describe("Consolidated File Usage Integrity (Junction Tables)", () => {
       referenceTable: "users",
     });
 
-    // 3. Verify usage exists
+    // 2. Verify usage exists
     let isInUse = await StorageDbRepository.isFileInUse(cascadePath);
     expect(isInUse).toBe(true);
 
-    // 4. Soft delete the temp user via repository
+    // 3. Soft delete the temp user via repository
     await SoftDeleteRepository.softDeleteUser(tempUser.id);
 
-    // Usage should still exist after soft delete (as user record is still there)
+    // Usage should still exist after soft delete (user record still there)
     isInUse = await StorageDbRepository.isFileInUse(cascadePath);
     expect(isInUse).toBe(true);
 
-    // Hard delete
+    // 4. Hard delete
     await SoftDeleteRepository.hardDelete("users", tempUser.id);
 
-    // 5. Verify that the junction record is now gone (native cascade delete)
+    // 5. Verify the junction record is now gone (native cascade delete)
     isInUse = await StorageDbRepository.isFileInUse(cascadePath);
     expect(isInUse).toBe(false);
 
-    // Cleanup storage_file
+    // Clean up storage file
     await db.delete(storageFiles).where(eq(storageFiles.path, cascadePath));
 
     testLogger.info("Cascade delete verified successfully.");

@@ -1,15 +1,15 @@
-import { type AttendanceReportFilters, ReportRepository } from "@/backend/db/repo/books/report.repository";
+import { ReportRepository } from "@/backend/db/repo/books/report.repository";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { AttendanceReportResult } from "@/backend/types";
+import type { AttendanceReportFilters, AttendanceReportResult } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
-export {
-  type AttendanceReportFilters,
-  type AttendanceReportRow,
-  ReportGroupingMode,
-} from "@/backend/db/repo/books/report.repository";
+export { ReportGroupingMode } from "@/backend/enum";
+export type {
+  AttendanceReportFilters,
+  AttendanceReportRow,
+} from "@/backend/types";
 
 export namespace ReportService {
   export async function generateAttendanceReport(

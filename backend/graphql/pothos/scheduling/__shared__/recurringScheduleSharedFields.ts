@@ -5,28 +5,11 @@ import type {
   RecurringScheduleDayDetailReturnType,
   RecurringScheduleDetailReturnType,
   RecurringScheduleListItem,
+  RecurringScheduleSharedShape,
 } from "@/backend/types";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
-
-/**
- * Shared shape covering the 9 fields common to both RecurringScheduleDetail
- * and RecurringScheduleListItem (id, studentId, studentName, teacherId,
- * teacherName, durationMinutes, defaultStartTime, hourlyRate, rateCurrency).
- */
-interface RecurringScheduleSharedShape {
-  readonly id: string;
-  readonly studentId: string;
-  readonly studentName: string;
-  readonly teacherId: string;
-  readonly teacherName: string;
-  readonly durationMinutes: number;
-  readonly defaultStartTime: string;
-  readonly hourlyRate?: string | null;
-  readonly rateCurrency?: CurrencyCode | null;
-}
 
 /**
  * Shared 9 field definitions for recurring schedule Pothos objects.

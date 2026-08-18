@@ -1,8 +1,9 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, like, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { groupPermissions, permissionGroups, permissions, users } from "@/backend/db/schema";
+import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
 import { PermissionManagementService, PermissionsService } from "@/backend/services";
@@ -116,41 +117,35 @@ describe("PermissionManagementService Business Logic", () => {
       return originalGetUserContext(userId);
     };
 
-    const now = new Date();
-    // Create test users directly in DB so they are visible to global db queries
-    [adminUser] = await db
-      .insert(users)
-      .values({
+    // PermissionManagementService methods use the global `db` internally and do not
+    // accept a `tx` parameter. Therefore these tests cannot use runInRollback for
+    // service-level calls — wrapping would mix tx and global db, causing deadlocks
+    // (AGENTS.md rule 9 exception). Instead, beforeAll creates test data and
+    // afterAll/afterEach clean up.
+    adminUser = await db.transaction(async tx =>
+      createTestUser(tx, {
         name: "Service Admin User",
         email: `svc-adm-${randomUUID().slice(0, 8)}@example.com`,
         password: "password",
-        createdAt: now,
-        updatedAt: now,
       })
-      .returning();
+    );
 
-    [regularUser] = await db
-      .insert(users)
-      .values({
-        name: "Service Regular User",
+    regularUser = await db.transaction(async tx =>
+      createTestUser(tx, {
+        name: "Service Regular user",
         email: `svc-reg-${randomUUID().slice(0, 8)}@example.com`,
         password: "password",
-        createdAt: now,
-        updatedAt: now,
       })
-      .returning();
+    );
 
-    [superAdminUser] = await db
-      .insert(users)
-      .values({
+    superAdminUser = await db.transaction(async tx =>
+      createTestUser(tx, {
         name: "Service SuperAdmin User",
         email: `svc-sa-${randomUUID().slice(0, 8)}@example.com`,
         password: "password",
         isSuperAdmin: true,
-        createdAt: now,
-        updatedAt: now,
       })
-      .returning();
+    );
 
     // Insert test permissions for tests that need them
     const existing1 = await db
@@ -198,6 +193,7 @@ describe("PermissionManagementService Business Logic", () => {
     }
 
     // Create a test system group (trigger only blocks UPDATE/DELETE of system groups, not INSERT)
+    const now = new Date();
     const [testSysGroup] = await db
       .insert(permissionGroups)
       .values({
@@ -215,8 +211,11 @@ describe("PermissionManagementService Business Logic", () => {
     // Restore original getUserContext
     PermissionsService.getUserContext = originalGetUserContext;
 
-    // Cleanup users
-    await db.delete(users).where(like(users.email, "service-test-%"));
+    // Cleanup users created in beforeAll (use specific IDs, not email pattern)
+    const userIds = [adminUser?.id, regularUser?.id, superAdminUser?.id].filter(Boolean) as string[];
+    if (userIds.length > 0) {
+      await db.delete(users).where(inArray(users.id, userIds));
+    }
 
     // Cleanup test permissions
     await db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ONLY));

@@ -1,3 +1,4 @@
+import type { ReportGroupingMode } from "@/backend/enum";
 import type { DisplayAmountReturnType } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
@@ -6,6 +7,13 @@ export interface AttendanceReportPaidAmountReturnType {
   readonly amount: string;
   readonly currency: CurrencyCode;
   readonly displayAmount?: DisplayAmountReturnType | null;
+}
+
+export interface AttendanceReportFilters {
+  fromDate: Date;
+  toDate: Date;
+  teacherId?: string;
+  groupBy: ReportGroupingMode;
 }
 
 export interface AttendanceReportRowReturnType {
@@ -24,3 +32,5 @@ export interface AttendanceReportResult {
   readonly rows: readonly AttendanceReportRowReturnType[];
   readonly engagementGrowth: number | null;
 }
+
+export type AttendanceReportRow = AttendanceReportRowReturnType;

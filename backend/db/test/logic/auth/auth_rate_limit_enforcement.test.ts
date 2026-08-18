@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, test } from "bun:test";
+import { afterAll, afterEach, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, like } from "drizzle-orm";
 import { db } from "@/backend/db";
@@ -18,7 +18,27 @@ function uniqueTestIp(): string {
 
 const CLEANUP_PREFIX = "test-rate-limits-";
 
+// Track rates created per test so afterEach can clean them even if the test
+// fails before the global afterAll runs (prevents leakage to other tests).
+const testIps: { ip: string; email: string }[] = [];
+
 describe("Authentication Rate Limiting Enforcement", () => {
+  // afterAll cleanup: RateLimitRepository methods use the global `db` connection
+  // (calling SQL functions like check_and_record_auth_attempt) and do not
+  // accept a `tx` parameter, so these tests cannot use runInRollback for the
+  // repo calls themselves. Per AGENTS.md rule 9, we provide afterAll/afterEach
+  // hooks to hard-delete the created records.
+  afterEach(async () => {
+    for (const { ip, email } of testIps) {
+      try {
+        await RateLimitRepository.resetAttempts(ip, email);
+      } catch {
+        // ignore — record may already be gone
+      }
+    }
+    testIps.length = 0;
+  });
+
   afterAll(async () => {
     testLogger.info("Cleaning up rate limit enforcement test records...");
     try {
@@ -36,6 +56,7 @@ describe("Authentication Rate Limiting Enforcement", () => {
     const email = `${CLEANUP_PREFIX}${randomUUID()}@example.com`;
     const ip = uniqueTestIp();
     const maxAttempts = 3;
+    testIps.push({ ip, email });
 
     // Simulate failed attempts — sequential via reduce (each attempt depends on
     // accumulated state from prior attempts; cannot parallelize)
@@ -70,6 +91,7 @@ describe("Authentication Rate Limiting Enforcement", () => {
 
     const email = `${CLEANUP_PREFIX}cleanup-${randomUUID()}@example.com`;
     const ip = uniqueTestIp();
+    testIps.push({ ip, email });
 
     // Create an expired record (maxAttempts=1, lockoutMinutes=-1 ensures it locks and expires immediately)
     const result = await RateLimitRepository.recordAttempt(ip, email, 1, -1);
@@ -83,7 +105,9 @@ describe("Authentication Rate Limiting Enforcement", () => {
     const records = await db.select().from(authRateLimits).where(eq(authRateLimits.email, email));
     expect(records).toHaveLength(1);
 
-    // Run cleanup
+    // Run cleanup — cleanupExpired() deletes ALL expired security data globally.
+    // We cannot use runInRollback here because cleanupExpired uses the global db
+    // connection and must see committed entries to delete them (AGENTS.md rule 9 exception).
     await RateLimitRepository.cleanupExpired();
 
     // Records should be gone

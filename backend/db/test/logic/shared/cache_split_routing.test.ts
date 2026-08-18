@@ -107,8 +107,10 @@ describe("Cache Split Routing & Functionality", () => {
     const EXPIRED_SESSION_KEY = `session:expired:${expiredUid}`;
     const PAST_DATE = new Date(Date.now() - 1000 * 60);
 
-    // Directly insert expired entries — these leak outside transactions,
-    // so we add them to afterAll cleanup
+    // Directly insert expired entries outside runInRollback — this is an
+    // exception (rule 9) because CacheDbRepository.deleteExpired() uses the
+    // global db connection and must see committed entries to delete them.
+    // afterAll cleanup ensures no leakage if the test fails before deleteExpired runs.
     allKeys.push(EXPIRED_RL_KEY, EXPIRED_SESSION_KEY);
 
     await db.insert(rateLimitCache).values({
@@ -122,22 +124,29 @@ describe("Cache Split Routing & Functionality", () => {
       expiresAt: PAST_DATE,
     });
 
-    // Run cleanup — deleteExpired() deletes ALL expired entries,
-    // so we don't assert on total count (it includes other tests' data)
-    const deletedCount = await CacheDbRepository.deleteExpired();
-    expect(deletedCount).toBeGreaterThanOrEqual(2);
+    try {
+      // Run cleanup — deleteExpired() deletes ALL expired entries,
+      // so we don't assert on total count (it includes other tests' data)
+      const deletedCount = await CacheDbRepository.deleteExpired();
+      expect(deletedCount).toBeGreaterThanOrEqual(2);
 
-    // Verify our specific test entries are gone via runInRollback
-    await runInRollback(async tx => {
-      const rlResult = await tx.select().from(rateLimitCache).where(eq(rateLimitCache.key, EXPIRED_RL_KEY)).limit(1);
-      expect(rlResult).toHaveLength(0);
+      // Verify our specific test entries are gone via runInRollback
+      await runInRollback(async tx => {
+        const rlResult = await tx.select().from(rateLimitCache).where(eq(rateLimitCache.key, EXPIRED_RL_KEY)).limit(1);
+        expect(rlResult).toHaveLength(0);
 
-      const sessionResult = await tx
-        .select()
-        .from(sessionCache)
-        .where(eq(sessionCache.key, EXPIRED_SESSION_KEY))
-        .limit(1);
-      expect(sessionResult).toHaveLength(0);
-    });
+        const sessionResult = await tx
+          .select()
+          .from(sessionCache)
+          .where(eq(sessionCache.key, EXPIRED_SESSION_KEY))
+          .limit(1);
+        expect(sessionResult).toHaveLength(0);
+      });
+    } catch (error) {
+      // Ensure cleanup even if test fails mid-way
+      await CacheDbRepository.del(EXPIRED_RL_KEY).catch(() => {});
+      await CacheDbRepository.del(EXPIRED_SESSION_KEY).catch(() => {});
+      throw error;
+    }
   });
 });

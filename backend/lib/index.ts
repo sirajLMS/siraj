@@ -5,6 +5,7 @@ export * from "./env";
 export * from "./env-config.helpers";
 export * from "./errors";
 export * from "./field-encryption";
+export * from "./ip-utils";
 export * from "./logger";
 export * from "./path-validator";
 export * from "./payment-method.validation";

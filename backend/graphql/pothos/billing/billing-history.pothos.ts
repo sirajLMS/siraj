@@ -19,11 +19,13 @@ import { BillingHistoryService } from "@/backend/services";
 import type {
   AdminBillingSummaryResult,
   BillingCurrencyTotal,
+  BillingSummaryWithCurrencyTotals,
   DisplayAmountReturnType,
   InvoiceHistoryPaginatedResult,
   InvoiceHistoryRow,
   NextUnpaidInvoiceSummary,
   ParentBillingSummaryResult,
+  ParentScopedResolverArgs,
   StudentCreditRow,
 } from "@/backend/types";
 
@@ -36,12 +38,6 @@ function enrichCurrencyTotalsWithDisplay(
     displayAmount: displayAmounts.get(t.id) ?? null,
   }));
 }
-
-type BillingSummaryWithCurrencyTotals = {
-  readonly id: string;
-  readonly outstandingByCurrency: readonly BillingCurrencyTotal[];
-  readonly [key: string]: unknown;
-};
 
 function extractCurrencyTotals(result: Record<string, unknown>, key: string): readonly BillingCurrencyTotal[] {
   const value = result[key];
@@ -74,11 +70,6 @@ async function enrichSummaryWithDisplayAmounts<T extends BillingSummaryWithCurre
     [firstArrayKey]: enrichCurrencyTotalsWithDisplay(firstArray, displayAmounts),
     [secondArrayKey]: enrichCurrencyTotalsWithDisplay(secondArray, displayAmounts),
   };
-}
-
-interface ParentScopedResolverArgs {
-  parentId?: string | null;
-  userId?: string | null;
 }
 
 async function prepareParentScopedResolver(

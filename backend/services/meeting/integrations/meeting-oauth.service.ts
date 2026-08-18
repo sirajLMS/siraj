@@ -30,7 +30,12 @@ import type {
   CreateAuditLogInput,
   DisconnectMeetingProviderOAuthReturnType,
   DisconnectMeetingProviderOAuthSubmitInput,
+  MeetingOAuthStatePayload,
+  MeetingProviderTokenSelectType,
+  MeetingProviderTokenUpsertInput,
   MyConnectedMeetingProviderReturnType,
+  OAuthCallbackConfig,
+  OAuthTokenResponse,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -67,12 +72,7 @@ async function assertCanManageOwnMeetingConfigs(actorUserId: string, tErrors: Er
 // State JWT helpers
 // ============================================================================
 
-export interface MeetingOAuthStatePayload extends JoseJWTPayload {
-  userId: string;
-  providerSlug: MeetingProvider;
-  returnPath: string;
-  nonce: string;
-}
+export type { MeetingOAuthStatePayload };
 
 const MEETING_PROVIDERS: readonly MeetingProvider[] = ["zoom", "google_meet", "microsoft_teams"];
 
@@ -194,6 +194,92 @@ function buildAuthorizeUrl(providerSlug: MeetingProvider, redirectUri: string, s
 }
 
 // ============================================================================
+// OAuth callback (code-for-tokens exchange + persistence)
+// ============================================================================
+
+export type { OAuthCallbackConfig, OAuthTokenResponse };
+
+/**
+ * Type guard that validates a token-endpoint response conforms to the minimal
+ * {@link OAuthTokenResponse} shape. Used instead of `as` to satisfy oxlint's
+ * `no-unsafe-type-assertion` rule.
+ */
+function isOAuthTokenResponse(value: unknown): value is OAuthTokenResponse {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  return (
+    "access_token" in value &&
+    typeof value.access_token === "string" &&
+    "token_type" in value &&
+    typeof value.token_type === "string" &&
+    "expires_in" in value &&
+    typeof value.expires_in === "number" &&
+    (!("refresh_token" in value) || value.refresh_token === undefined || typeof value.refresh_token === "string") &&
+    (!("scope" in value) || value.scope === undefined || typeof value.scope === "string")
+  );
+}
+
+/**
+ * Exchanges an authorization code for provider tokens at the provider's token
+ * endpoint. Throws on non-2xx with the provider's error body for diagnostics.
+ */
+async function exchangeCodeForTokens(
+  cfg: OAuthCallbackConfig,
+  code: string,
+  redirectUri: string
+): Promise<OAuthTokenResponse> {
+  const config = getEnvironmentConfig();
+
+  const params = new URLSearchParams({
+    grant_type: "authorization_code",
+    code,
+    redirect_uri: redirectUri,
+    client_id: cfg.resolveClientId(config),
+    client_secret: cfg.resolveClientSecret(config),
+  });
+
+  // Conditionally append provider-specific extra params to avoid creating an
+  // effectively empty object via spread when `extraTokenParams` is undefined.
+  if (cfg.extraTokenParams) {
+    for (const [key, value] of Object.entries(cfg.extraTokenParams)) {
+      // Ensure only string values are appended; the config type enforces this,
+      // but guard defensively in case of unexpected runtime values.
+      if (value != null) params.set(key, value);
+    }
+  }
+
+  const res = await fetch(cfg.buildTokenUrl(config), {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`${cfg.displayName} token exchange failed (${res.status}): ${body}`);
+  }
+
+  const data: unknown = await res.json();
+  if (!isOAuthTokenResponse(data)) {
+    throw new Error(`${cfg.displayName} token exchange returned unexpected shape: ${JSON.stringify(data)}`);
+  }
+  return data;
+}
+
+/**
+ * Builds the redirect URI for a provider's OAuth callback. Mirrors the
+ * `buildRedirectUri` helper used by the authorize-URL builders.
+ */
+export function buildCallbackRedirectUri(providerSlug: MeetingProvider): string {
+  const config = getEnvironmentConfig();
+  const baseUrlRaw = config.oauthRedirectBaseUrl ?? config.nextPublicBaseUrl ?? "";
+  const baseUrl = baseUrlRaw.endsWith("/") ? baseUrlRaw.slice(0, -1) : baseUrlRaw;
+  const pathSlug = providerSlug.split("_").join("-");
+  return `${baseUrl}/api/oauth/${pathSlug}/callback`;
+}
+
+// ============================================================================
 // Public API
 // ============================================================================
 
@@ -305,5 +391,44 @@ export namespace MeetingOAuthService {
       }
       return acc;
     }, []);
+  }
+
+  /**
+   * Exchanges an authorization code for provider tokens at the provider's
+   * token endpoint, computes the expiry timestamp, and upserts the decrypted
+   * token row for the user — the full callback-side persistence leg.
+   *
+   * This is the service-layer counterpart to the callback handler: the route
+   * handler stays responsible for HTTP request/response only, while this
+   * method owns the external HTTP exchange + database persistence.
+   *
+   * @returns the upserted token row (decrypted, fresh from the DB).
+   */
+  export async function exchangeAndPersistTokens(
+    cfg: OAuthCallbackConfig,
+    userId: string,
+    code: string,
+    redirectUri: string
+  ): Promise<MeetingProviderTokenSelectType> {
+    const tokenResponse = await exchangeCodeForTokens(cfg, code, redirectUri);
+    const expiresAt = new Date(Date.now() + tokenResponse.expires_in * 1000);
+
+    const upsertInput: MeetingProviderTokenUpsertInput = {
+      userId,
+      providerSlug: cfg.providerSlug,
+      accessToken: tokenResponse.access_token,
+      refreshToken: tokenResponse.refresh_token ?? null,
+      expiresAt,
+      scopes: tokenResponse.scope ? tokenResponse.scope.split(" ") : [],
+    };
+
+    const persisted = await MeetingProviderTokenRepository.upsert(upsertInput);
+
+    logger.info("Meeting OAuth: tokens persisted", {
+      userId,
+      providerSlug: cfg.providerSlug,
+    });
+
+    return persisted;
   }
 }

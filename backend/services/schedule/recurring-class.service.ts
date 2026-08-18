@@ -3,11 +3,8 @@ import { CreditRepository } from "@/backend/db/repo/billing";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { classLifecycleAffectedUserIds, SchedulingRepository } from "@/backend/db/repo/scheduling";
-import type { RateSnapshot } from "@/backend/db/repo/scheduling/recurring";
 import {
-  type RecurringScheduleDayUpsertInput,
   RecurringScheduleRepository,
-  type RecurringScheduleUpsertInput,
   type ScheduleDayKey,
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
@@ -25,8 +22,11 @@ import { AvailabilityService } from "@/backend/services/scheduling/availability.
 import type {
   CreateRecurringClassInput,
   DBTransaction,
+  RateSnapshot,
   RecurringScheduleDaySelectType,
+  RecurringScheduleDayUpsertInput,
   RecurringScheduleSelectType,
+  RecurringScheduleUpsertInput,
 } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";

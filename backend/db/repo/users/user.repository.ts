@@ -13,6 +13,7 @@ import {
   PaginationArgsDefault,
   type PaginationInput,
   type UserCreateInput,
+  type UserInsertType,
   type UserReturnType,
   type UserSelectType,
 } from "@/backend/types";
@@ -336,7 +337,7 @@ export namespace UserRepository {
       throw new Error(errorsTranslations.userNotFound(userId));
     }
 
-    const updateSet: Partial<typeof users.$inferInsert> = {
+    const updateSet: Partial<UserInsertType> = {
       updatedAt: new Date(),
     };
 
@@ -376,7 +377,7 @@ export namespace UserRepository {
 
   async function updateUserColumn(
     userId: string,
-    set: Partial<typeof users.$inferInsert>,
+    set: Partial<UserInsertType>,
     tx?: DBTransaction,
     locale?: string
   ): Promise<UserSelectType> {

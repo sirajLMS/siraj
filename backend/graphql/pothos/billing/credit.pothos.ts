@@ -14,6 +14,7 @@ const CreditBalanceRef = gqlSchemaBuilder.objectRef<CreditBalanceReturnType>("Cr
 export const CreditBalancePothosObject = CreditBalanceRef.implement({
   description: "Credit balance summary for a student (total classes purchased and remaining)",
   fields: t => ({
+    id: t.string({ resolve: parent => parent.studentId }),
     studentId: t.exposeString("studentId"),
     classesTotal: t.exposeInt("classesTotal"),
     classesRemaining: t.exposeInt("classesRemaining"),

@@ -11,3 +11,9 @@ export type SiteContentUpsertInput = {
   readonly isPublished: boolean;
   readonly updatedByUserId: string;
 };
+
+/**
+ * GraphQL-specific upsert input for site content.
+ * Omits `updatedByUserId` (resolved from the authenticated user context).
+ */
+export type SiteContentUpsertGraphQLInput = Omit<SiteContentUpsertInput, "updatedByUserId">;

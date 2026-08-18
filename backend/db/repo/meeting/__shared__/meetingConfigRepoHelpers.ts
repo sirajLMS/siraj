@@ -1,5 +1,5 @@
 import { type Column, eq, isNull } from "drizzle-orm";
-import type { MeetingConfigDetails } from "@/backend/types";
+import type { MeetingConfigInsertInput, MeetingConfigUpdateInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**
@@ -25,15 +25,6 @@ export function requireConfigOrThrow<TSelect>(row: TSelect | null, id: string, t
   throw new Error(tErrors.meetingConfigNotFound(id));
 }
 
-interface MeetingConfigInsertInput {
-  readonly providerId: string;
-  readonly label?: string | null;
-  readonly isDefault: boolean;
-  readonly details: MeetingConfigDetails;
-  readonly encryptedSecret?: string | null;
-  readonly providerMetadata?: Record<string, unknown> | null;
-}
-
 /**
  * Shared insert values builder for meeting config repos.
  *
@@ -53,15 +44,6 @@ export function buildMeetingConfigInsertValues(input: MeetingConfigInsertInput, 
     createdAt: now,
     updatedAt: now,
   };
-}
-
-interface MeetingConfigUpdateInput {
-  readonly providerId: string;
-  readonly label?: string | null;
-  readonly isDefault: boolean;
-  readonly details: MeetingConfigDetails;
-  readonly encryptedSecret?: string | null;
-  readonly providerMetadata?: Record<string, unknown> | null;
 }
 
 /**

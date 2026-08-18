@@ -7,10 +7,12 @@
  * and token revocation for admins.
  */
 
+import type { JWTPayload as JoseJWTPayload } from "jose";
 import type {
   MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
 } from "@/backend/enum/meeting/meeting-integrations.enum";
+import type { EnvironmentConfig } from "@/backend/lib/env";
 import type { MeetingProvider, MeetingProviderKind } from "@/backend/types";
 
 export type { MeetingConnectionTestMode, MeetingIntegrationConnectedAccountStatus };
@@ -119,3 +121,72 @@ export type MyConnectedMeetingProviderReturnType = {
   readonly connectedAt: Date | null;
   readonly expiresAt: Date | null;
 };
+
+// ============================================================================
+// Per-user OAuth token refresh
+// ============================================================================
+
+/**
+ * Result of exchanging a stored refresh token for a new access token.
+ */
+export interface RefreshedToken {
+  readonly accessToken: string;
+  readonly refreshToken?: string;
+  readonly expiresAt: Date;
+}
+
+// ============================================================================
+// Per-user OAuth state JWT + callback types
+// ============================================================================
+
+/**
+ * Payload of the signed state JWT minted by `MeetingOAuthService.connectProviderOAuth`.
+ * Carries `userId`, `providerSlug`, `returnPath`, and a random `nonce`.
+ */
+export interface MeetingOAuthStatePayload extends JoseJWTPayload {
+  userId: string;
+  providerSlug: MeetingProvider;
+  returnPath: string;
+  nonce: string;
+}
+
+/**
+ * Minimal token-response shape every meeting provider returns from its
+ * token endpoint during the code-for-tokens exchange.
+ */
+export interface OAuthTokenResponse {
+  readonly access_token: string;
+  readonly token_type: string;
+  readonly expires_in: number;
+  readonly refresh_token?: string;
+  readonly scope?: string;
+}
+
+/**
+ * Provider-specific callback configuration for the shared OAuth callback handler.
+ *
+ * Each route file constructs one of these and passes it to
+ * `MeetingOAuthService.exchangeAndPersistTokens`.
+ */
+export interface OAuthCallbackConfig {
+  /** Canonical meeting-provider slug. */
+  readonly providerSlug: MeetingProvider;
+  /** Human-readable provider name used in log messages (e.g. "Zoom"). */
+  readonly displayName: string;
+  /**
+   * Builds the absolute token-endpoint URL for the code-for-tokens exchange.
+   * Receives the resolved environment config so MS Teams can read its
+   * tenant id, etc.
+   */
+  readonly buildTokenUrl: (config: EnvironmentConfig) => string;
+  /** Returns the OAuth client id for this provider from env config. */
+  readonly resolveClientId: (config: EnvironmentConfig) => string;
+  /** Returns the OAuth client secret for this provider from env config. */
+  readonly resolveClientSecret: (config: EnvironmentConfig) => string;
+  /**
+   * Optional extra form params to merge into the token-exchange body
+   * (e.g. MS Teams sends `scope`). The base params (`grant_type`, `code`,
+   * `redirect_uri`, `client_id`, `client_secret`) are always included.
+   */
+  readonly extraTokenParams?: Record<string, string>;
+}

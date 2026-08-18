@@ -6,7 +6,7 @@
 
 export * from "./auth/auth.enum";
 export * from "./billing";
-export * from "./books/book.enum";
+export * from "./books";
 export * from "./classes";
 export * from "./complaints";
 export * from "./cron";

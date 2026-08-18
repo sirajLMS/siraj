@@ -5,49 +5,16 @@ import {
   teacherRecurringUnavailability,
   teacherVacationRequests,
 } from "@/backend/db/schema";
-import type { DayOfWeek, VacationRequestStatus } from "@/backend/enum";
+import type { DayOfWeek } from "@/backend/enum";
 import type {
+  AvailabilityWindowUpsertInput,
   DBTransaction,
+  RecurringUnavailabilityCreateInput,
   TeacherAvailabilityWindowSelectType,
   TeacherRecurringUnavailabilitySelectType,
   TeacherVacationRequestSelectType,
+  VacationRequestCreateInput,
 } from "@/backend/types";
-
-export type AvailabilityWindowUpsertInput = {
-  teacherId: string;
-  dayOfWeek: DayOfWeek;
-  startTime: string;
-  endTime: string;
-  timezone: string;
-  timezoneId: number | null;
-  effectiveFrom: string;
-  effectiveUntil: string;
-};
-
-export type RecurringUnavailabilityCreateInput = {
-  teacherId: string;
-  dayOfWeek: DayOfWeek;
-  startTime: string;
-  endTime: string;
-  timezone: string;
-  timezoneId: number | null;
-  effectiveFrom: string;
-  effectiveUntil: string;
-  reason: string;
-};
-
-export type VacationRequestCreateInput = {
-  teacherId: string;
-  requestedByUserId: string;
-  startAt: Date;
-  endAt: Date;
-  timezone: string;
-  timezoneId: number | null;
-  reason: string;
-  status: VacationRequestStatus;
-  processedAt: Date | null;
-  processedByUserId: string | null;
-};
 
 export namespace TeacherAvailabilityBootstrapRepository {
   export async function findWindowByTeacherAndDay(

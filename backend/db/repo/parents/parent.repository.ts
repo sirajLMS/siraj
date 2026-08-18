@@ -829,7 +829,7 @@ export namespace ParentRepository {
 
     const [avgRow] = await executor
       .select({
-        avgScore: sql<number>`COALESCE(AVG(${classInstancePerformance.engagementScore}), 0)`,
+        avgScore: sql<number>`COALESCE(AVG(${classInstancePerformance.engagementScore}), 0)`.mapWith(Number),
       })
       .from(classInstancePerformance)
       .innerJoin(classInstances, eq(classInstancePerformance.classInstanceId, classInstances.id))

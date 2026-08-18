@@ -1,7 +1,15 @@
 import type { studentStatusHistory } from "@/backend/db/schema";
+import type { StudentStatus } from "@/backend/enum";
 
 export type StudentStatusHistorySelectType = typeof studentStatusHistory.$inferSelect;
 export type StudentStatusHistoryInsertType = typeof studentStatusHistory.$inferInsert;
+
+export type CreateInitialStatusHistoryInput = {
+  studentId: string;
+  newStatus: StudentStatus;
+  changedByUserId: string | null;
+  createdAt: Date;
+};
 
 export type SessionSummary = {
   id: string;

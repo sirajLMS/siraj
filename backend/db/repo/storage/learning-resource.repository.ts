@@ -4,20 +4,12 @@ import { learningResourceFiles, learningResources } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
 import type {
   DBTransaction,
+  LearningResourceCreateInput,
   LearningResourceListResult,
   LearningResourceReturnType,
   PaginationArgs,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-
-export type LearningResourceRow = LearningResourceReturnType;
-
-export interface LearningResourceCreateInput {
-  readonly displayName: string;
-  readonly filePath: string;
-  readonly uploadedByUserId: string;
-  readonly fileId: string;
-}
 
 const resourceSelectColumns = {
   id: learningResources.id,
@@ -36,7 +28,7 @@ function resourceReturnShape(resource: {
   filePath: string;
   uploadedByUserId: string;
   createdAt: Date;
-}): LearningResourceRow {
+}): LearningResourceReturnType {
   return {
     ...resource,
     uploadedByUserName: null,
@@ -46,7 +38,10 @@ function resourceReturnShape(resource: {
 }
 
 export namespace LearningResourceRepository {
-  export async function findByFilePath(filePath: string, tx?: DBTransaction): Promise<LearningResourceRow | null> {
+  export async function findByFilePath(
+    filePath: string,
+    tx?: DBTransaction
+  ): Promise<LearningResourceReturnType | null> {
     const q = queryDb(tx);
     const results = await q
       .select(resourceSelectColumns)
@@ -59,7 +54,7 @@ export namespace LearningResourceRepository {
   export async function insertResource(
     input: { displayName: string; filePath: string; uploadedByUserId: string; createdAt?: Date },
     tx?: DBTransaction
-  ): Promise<LearningResourceRow> {
+  ): Promise<LearningResourceReturnType> {
     const q = queryDb(tx);
     const now = new Date();
     const [resource] = await q
@@ -133,8 +128,8 @@ export namespace LearningResourceRepository {
     input: LearningResourceCreateInput,
     _locale?: string,
     tx?: DBTransaction
-  ): Promise<LearningResourceRow> {
-    const createTx = async (t: DBTransaction): Promise<LearningResourceRow> => {
+  ): Promise<LearningResourceReturnType> {
+    const createTx = async (t: DBTransaction): Promise<LearningResourceReturnType> => {
       const now = new Date();
 
       const [resource] = await t
@@ -173,7 +168,7 @@ export namespace LearningResourceRepository {
     return await db.transaction(createTx);
   }
 
-  export async function findById(resourceId: string, tx?: DBTransaction): Promise<LearningResourceRow | null> {
+  export async function findById(resourceId: string, tx?: DBTransaction): Promise<LearningResourceReturnType | null> {
     const q = queryDb(tx);
 
     const results = await q

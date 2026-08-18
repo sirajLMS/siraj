@@ -59,6 +59,7 @@ const MeetingConfigDetailsRef = gqlSchemaBuilder.objectRef<MeetingConfigDetails>
 
 export const MeetingConfigDetailsPothosObject = MeetingConfigDetailsRef.implement({
   fields: t => ({
+    id: t.string({ resolve: () => "meeting-config-details" }),
     meetingUrl: t.exposeString("meetingUrl", { nullable: true }),
     username: t.exposeString("username", { nullable: true }),
     tenantId: t.exposeString("tenantId", { nullable: true }),

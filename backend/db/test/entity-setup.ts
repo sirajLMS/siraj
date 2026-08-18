@@ -92,7 +92,7 @@ export async function ensureTestSubjectId(tx: TestDb): Promise<string> {
 }
 
 export async function createTestUser(
-  tx: DBTransaction,
+  tx: TestDb,
   overrides: Partial<typeof users.$inferInsert> = {}
 ): Promise<UserSelectType> {
   const now = new Date();
@@ -112,7 +112,7 @@ export async function createTestUser(
 }
 
 export async function createTestPermission(
-  tx: DBTransaction,
+  tx: TestDb,
   key: AppPermission,
   overrides: Partial<typeof permissions.$inferInsert> = {}
 ): Promise<typeof permissions.$inferSelect> {
@@ -132,7 +132,7 @@ export async function createTestPermission(
 }
 
 export async function createTestTeacher(
-  tx: DBTransaction,
+  tx: TestDb,
   userId: string,
   overrides: Partial<typeof teachers.$inferInsert> = {}
 ): Promise<TeacherSelectType> {
@@ -150,7 +150,7 @@ export async function createTestTeacher(
 }
 
 export async function createTestParent(
-  tx: DBTransaction,
+  tx: TestDb,
   userId: string,
   overrides: Partial<typeof parents.$inferInsert> = {}
 ): Promise<ParentSelectType> {
@@ -169,7 +169,7 @@ export async function createTestParent(
 }
 
 export async function createTestStudent(
-  tx: DBTransaction,
+  tx: TestDb,
   parentId: string,
   overrides: Partial<typeof students.$inferInsert> = {}
 ): Promise<StudentSelectType> {
@@ -207,7 +207,7 @@ type TeacherSetupOverrides = Partial<typeof teachers.$inferInsert> & {
 };
 
 export async function setupTeacher(
-  tx: DBTransaction,
+  tx: TestDb,
   userOverrides: Partial<typeof users.$inferInsert> = {},
   teacherOverrides: TeacherSetupOverrides = {}
 ): Promise<{ user: UserSelectType; teacher: TeacherSelectType }> {
@@ -221,7 +221,7 @@ export async function setupTeacher(
 }
 
 export async function setupStudent(
-  tx: DBTransaction,
+  tx: TestDb,
   userOverrides: Partial<typeof users.$inferInsert> = {},
   parentOverrides: Partial<typeof parents.$inferInsert> = {},
   studentOverrides: Partial<typeof students.$inferInsert> = {}
@@ -233,7 +233,7 @@ export async function setupStudent(
 }
 
 export async function createMockClassInstance(
-  tx: DBTransaction,
+  tx: TestDb,
   studentId: string,
   teacherId: string,
   overrides: Partial<typeof classInstances.$inferInsert> = {}
@@ -265,7 +265,7 @@ export async function createMockClassInstance(
 }
 
 export async function setupTestEntities(
-  tx: DBTransaction,
+  tx: TestDb,
   prefix: string,
   options: { skipInstance?: boolean; classesRemaining?: number } = {}
 ): Promise<{
@@ -315,7 +315,7 @@ export async function setupTestEntities(
 }
 
 export async function createTestMeetingProvider(
-  tx: DBTransaction,
+  tx: TestDb,
   overrides: Partial<typeof meetingProviders.$inferInsert> = {}
 ): Promise<MeetingProviderSelectType> {
   const now = new Date();
@@ -345,7 +345,7 @@ export async function createTestMeetingProvider(
 }
 
 export async function createTestMeetingConfig(
-  tx: DBTransaction,
+  tx: TestDb,
   userId: string,
   providerId: string,
   overrides: Partial<typeof userMeetingConfigs.$inferInsert> = {}
@@ -373,7 +373,7 @@ export async function createTestMeetingConfig(
 }
 
 export async function createTestClassMeetingConfig(
-  tx: DBTransaction,
+  tx: TestDb,
   scope: { classInstanceId: string } | { recurringScheduleId: string },
   providerId: string,
   overrides: Partial<typeof classMeetingConfigs.$inferInsert> = {}
@@ -409,7 +409,7 @@ export async function createTestClassMeetingConfig(
  * @param overrides Optional field overrides (defaults: changeAmount=1, reason=PURCHASE)
  */
 export async function createTestCreditTransaction(
-  tx: DBTransaction,
+  tx: TestDb,
   studentId: string,
   creditedByUserId: string,
   overrides: Partial<typeof creditTransactions.$inferInsert> = {}
@@ -450,7 +450,7 @@ export async function createTestCreditTransaction(
  *  attendanceEvaluation=PRESENT, completionPercentage=100, lessonDate=now)
  */
 export async function createTestLessonReport(
-  tx: DBTransaction,
+  tx: TestDb,
   classInstanceId: string,
   studentId: string,
   teacherId: string,
@@ -500,7 +500,7 @@ export async function createTestLessonReport(
  *  currency=SAR, approvedAt=now)
  */
 export async function createTestTeacherDue(
-  tx: DBTransaction,
+  tx: TestDb,
   teacherId: string,
   classInstanceId: string,
   studentId: string,
@@ -545,7 +545,7 @@ export async function createTestTeacherDue(
  * @param overrides Optional field overrides
  */
 export async function createCompletedClassInstance(
-  tx: DBTransaction,
+  tx: TestDb,
   studentId: string,
   teacherId: string,
   overrides: Partial<typeof classInstances.$inferInsert> = {}

@@ -1,7 +1,7 @@
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { SubjectResourceRepository } from "@/backend/db/repo/classes/subject-resource.repository";
 import { AppPermission } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { assertHasPermission } from "@/backend/services/shared";
 import type {
   ClassSubjectReturnType,
   ClassSubjectSubmitInput,
@@ -16,10 +16,7 @@ const EMPTY_RESOURCES_MAP: Map<string, SubjectResourceReturnType[]> = new Map();
 
 export namespace ClassSubjectService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels): Promise<void> {
-    const hasPermission = await PermissionsService.hasPermission(userId, permission);
-    if (!hasPermission) {
-      throw new Error(tErrors.insufficientPermissions);
-    }
+    return assertHasPermission(userId, permission, tErrors.insufficientPermissions);
   }
 
   function buildSubjectReturnType<T extends { id: string }>(

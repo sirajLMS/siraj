@@ -5,3 +5,4 @@ export * from "./rate-resolver.types";
 export * from "./recurring-schedule-detail.types";
 export * from "./schedule.types";
 export * from "./scheduling.types";
+export * from "./scheduling-shared-field-shapes.types";

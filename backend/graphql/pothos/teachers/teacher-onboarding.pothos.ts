@@ -1,25 +1,12 @@
-import type { CountryCode, Gender } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  type UserPaymentMethodInitialGqlInput,
-  UserPaymentMethodInitialInputPothos,
-} from "@/backend/graphql/pothos/billing/payment-method.pothos";
+import { UserPaymentMethodInitialInputPothos } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import {
   CountryCodePothosObject,
   CurrencyCodePothosObject,
   GenderPothosObject,
   IanaTimezonePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type { Email } from "@/backend/lib/email";
-import type { TeacherOnboardingInput, TeacherOnboardingReturnType } from "@/backend/types";
-
-export interface TeacherOnboardingGqlInput
-  extends Omit<TeacherOnboardingInput, "email" | "gender" | "countryCode" | "initialPayoutMethod"> {
-  email: Email;
-  gender?: Gender | null;
-  countryCode?: CountryCode | null;
-  initialPayoutMethod?: UserPaymentMethodInitialGqlInput | null;
-}
+import type { TeacherOnboardingGqlInput, TeacherOnboardingReturnType } from "@/backend/types";
 
 export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
   .inputRef<TeacherOnboardingGqlInput>("TeacherOnboardingInput")

@@ -1,29 +1,16 @@
 import { and, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
 import { type QueryDbHandle, queryDb } from "@/backend/db";
 import { classInstances, students, teachers, users } from "@/backend/db/schema";
+import { ReportGroupingMode } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import type {
+  AttendanceReportFilters,
   AttendanceReportPaidAmountReturnType,
   AttendanceReportRowReturnType,
   DBTransaction,
 } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCode } from "@/shared/lib/enum";
-
-export enum ReportGroupingMode {
-  DATE = "DATE",
-  TEACHER = "TEACHER",
-  STUDENT = "STUDENT",
-}
-
-export interface AttendanceReportFilters {
-  fromDate: Date;
-  toDate: Date;
-  teacherId?: string;
-  groupBy: ReportGroupingMode;
-}
-
-export type AttendanceReportRow = AttendanceReportRowReturnType;
 
 function buildPaidAmountId(groupKey: string, currency: CurrencyCode): string {
   return `${groupKey}:${currency}`;
@@ -144,7 +131,7 @@ export namespace ReportRepository {
   export async function generateAttendanceReport(
     filters: AttendanceReportFilters,
     tx?: DBTransaction
-  ): Promise<AttendanceReportRow[]> {
+  ): Promise<AttendanceReportRowReturnType[]> {
     try {
       logger.debug(`[ReportRepository.generateAttendanceReport] Compiling query for groupBy: ${filters.groupBy}`);
 

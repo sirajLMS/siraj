@@ -5,6 +5,7 @@ import { SuggestionStatus } from "@/backend/enum";
 import type {
   DBTransaction,
   SuggestionContributorStats,
+  SuggestionInsertType,
   SuggestionReturnType,
   SuggestionSubmitInput,
 } from "@/backend/types";
@@ -243,7 +244,7 @@ export namespace SuggestionRepository {
 
   const updateSuggestionStatus = async (
     suggestionId: string,
-    fields: Partial<typeof suggestions.$inferInsert>,
+    fields: Partial<SuggestionInsertType>,
     tx?: DBTransaction,
     _locale?: string
   ) => {

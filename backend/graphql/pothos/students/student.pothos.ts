@@ -1,4 +1,3 @@
-import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { OrderSortDirection } from "@/backend/enum";
 import { StudentsOrderByColumn } from "@/backend/enum/students";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
@@ -9,6 +8,7 @@ import {
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
+import { StudentManagementService } from "@/backend/services";
 import type {
   PartialStudentUpdateInput,
   StudentCreateInput,
@@ -45,7 +45,7 @@ function optionalStudentInputFields(t: InputFieldBuilder) {
 
 export const StudentPothosObject = gqlSchemaBuilder
   .loadableObjectRef<StudentReturnType, string>("Student", {
-    load: async (ids: string[]) => StudentRepository.loadByIds(ids),
+    load: async (ids: string[]) => StudentManagementService.loadByIds(ids),
     sort: s => s.id,
   })
   .implement({

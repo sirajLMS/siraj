@@ -19,6 +19,30 @@ import { cacheService } from "@/backend/services";
 const MAX_TTL_SECONDS = 3600; // 1 hour
 
 /**
+ * Ensures a rate-limit key has a TTL set. On the first increment (count === 1),
+ * sets the TTL via `cacheService.expire`. If that fails, retries with the max
+ * TTL safeguard; if both attempts fail, deletes the key so it can't persist
+ * forever (r10-004 mitigation).
+ */
+async function ensureRateLimitTtl(key: string, ttlSeconds: number): Promise<void> {
+  const safeTtl = Math.min(ttlSeconds, MAX_TTL_SECONDS);
+  try {
+    await cacheService.expire(key, safeTtl);
+  } catch (expireError) {
+    logger.error("Rate limit TTL set failed on first increment (r10-004):", expireError);
+    try {
+      await cacheService.expire(key, MAX_TTL_SECONDS);
+    } catch {
+      try {
+        await cacheService.del(key);
+      } catch (delError) {
+        logger.error("Rate limit key cleanup failed (r10-004):", delError);
+      }
+    }
+  }
+}
+
+/**
  * Rate Limiter Class
  * Custom implementation using our cache service interface
  */
@@ -118,25 +142,8 @@ class RateLimiter {
       //      if it throws, we catch, log, and retry once with the max TTL
       //      as a fallback. If that also fails, we delete the key so the
       //      next request starts fresh rather than leaking forever.
-      const safeTtl = Math.min(ttlSeconds, MAX_TTL_SECONDS);
-
       if (count === 1) {
-        try {
-          await cacheService.expire(key, safeTtl);
-        } catch (expireError) {
-          logger.error("Rate limit TTL set failed on first increment (r10-004):", expireError);
-          try {
-            // Fallback: retry with max-TTL safeguard
-            await cacheService.expire(key, MAX_TTL_SECONDS);
-          } catch {
-            // Last resort: delete the key so it can't persist forever
-            try {
-              await cacheService.del(key);
-            } catch (delError) {
-              logger.error("Rate limit key cleanup failed (r10-004):", delError);
-            }
-          }
-        }
+        await ensureRateLimitTtl(key, ttlSeconds);
       }
 
       const remaining = Math.max(0, this.maxRequests - count);

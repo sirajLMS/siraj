@@ -1,5 +1,6 @@
-import type { Gender } from "@/backend/enum";
-import type { UserPaymentMethodSubmitInput } from "@/backend/types";
+import type { CountryCode, Gender } from "@/backend/enum";
+import type { Email } from "@/backend/lib/email";
+import type { UserPaymentMethodInitialGqlInput, UserPaymentMethodSubmitInput } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 /**
@@ -65,3 +66,16 @@ export type TeacherOnboardingReturnType = TeacherOnboardingResult & {
    */
   timezoneDisplay?: string;
 };
+
+/**
+ * GraphQL-specific onboarding input for teachers.
+ * Replaces `email`, `gender`, `countryCode`, and `initialPayoutMethod`
+ * with GraphQL-typed equivalents (Email scalar, enum types, and Pothos input ref).
+ */
+export interface TeacherOnboardingGqlInput
+  extends Omit<TeacherOnboardingInput, "email" | "gender" | "countryCode" | "initialPayoutMethod"> {
+  email: Email;
+  gender?: Gender | null;
+  countryCode?: CountryCode | null;
+  initialPayoutMethod?: UserPaymentMethodInitialGqlInput | null;
+}

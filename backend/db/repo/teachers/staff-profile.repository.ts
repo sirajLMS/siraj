@@ -18,6 +18,7 @@ import type {
   ManagerDirectoryMetrics,
   ManagerDirectoryResult,
   ManagerDirectoryRow,
+  ManagerProfileUpdateInput,
   OnboardingMetricsResult,
   PaginationArgs,
   StaffDirectoryAutocompleteRow,
@@ -30,17 +31,6 @@ import { parseAccountStatus, parseCurrencyCodeOrNull, parseOverrideState } from 
 import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
 import { getServerTranslations } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
-
-export interface ManagerProfileUpdateInput {
-  readonly phone?: string | null;
-  readonly phoneIsSet?: boolean;
-  readonly status?: string | null;
-  readonly statusIsSet?: boolean;
-  readonly hourlyRate?: string | null;
-  readonly hourlyRateIsSet?: boolean;
-  readonly rateCurrency?: string | null;
-  readonly rateCurrencyIsSet?: boolean;
-}
 
 export namespace StaffProfileRepository {
   export async function create(

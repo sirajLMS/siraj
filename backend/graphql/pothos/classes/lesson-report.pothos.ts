@@ -4,7 +4,11 @@ import {
   AttendanceEvaluationPothosEnum,
   LessonReportStatusPothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import type { LessonReportReturnType, PendingReviewCountReturnType } from "@/backend/types";
+import type {
+  LessonReportReturnType,
+  PendingLessonReportsPayload,
+  PendingReviewCountReturnType,
+} from "@/backend/types";
 
 const LessonReportRef = gqlSchemaBuilder.objectRef<LessonReportReturnType>("LessonReport");
 
@@ -80,11 +84,6 @@ export const PendingReviewCountPothosObject = PendingReviewCountRef.implement({
 });
 
 // ─── PendingLessonReportsPayload (paginated list wrapper) ─────────────────────
-
-type PendingLessonReportsPayload = {
-  rows: LessonReportReturnType[];
-  totalCount: number;
-};
 
 const PendingLessonReportsPayloadRef =
   gqlSchemaBuilder.objectRef<PendingLessonReportsPayload>("PendingLessonReportsPayload");

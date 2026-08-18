@@ -1,24 +1,16 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { authRateLimits } from "@/backend/db/schema";
+import { sanitizeIpAddress } from "@/backend/lib/ip-utils";
 
 export namespace RateLimitRepository {
-  const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-
-  function sanitizeIpAddress(ip: string): string {
-    if (IPV4_REGEX.test(ip)) return ip;
-    const parts = ip.split(":");
-    if (parts.length === 2 && IPV4_REGEX.test(parts[0])) return parts[0];
-    return "127.0.0.1";
-  }
-
   export const recordAttempt = async (
     ipAddress: string,
     email: string,
     maxAttempts: number = 5,
     lockoutMinutes: number = 15
   ): Promise<{ attempts: number; lockedUntil: Date | null; isLocked: boolean }> => {
-    const safeIp = sanitizeIpAddress(ipAddress);
+    const safeIp = sanitizeIpAddress(ipAddress) ?? "127.0.0.1";
     const result = await db.execute<{
       attempts: number;
       locked_until: string | null;
@@ -41,7 +33,7 @@ export namespace RateLimitRepository {
   };
 
   export const isLocked = async (ipAddress: string, email: string): Promise<boolean> => {
-    const safeIp = sanitizeIpAddress(ipAddress);
+    const safeIp = sanitizeIpAddress(ipAddress) ?? "127.0.0.1";
     const q = queryDb();
     const results = await q
       .select()
@@ -61,7 +53,7 @@ export namespace RateLimitRepository {
   };
 
   export const resetAttempts = async (ipAddress: string, email: string): Promise<void> => {
-    const safeIp = sanitizeIpAddress(ipAddress);
+    const safeIp = sanitizeIpAddress(ipAddress) ?? "127.0.0.1";
     await db.execute(sql`SELECT reset_auth_attempts(${safeIp}::inet, ${email})`);
   };
 

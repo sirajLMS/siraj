@@ -35,7 +35,7 @@ function buildStudentFilterBaseQuery() {
   return db
     .select({
       student: students,
-      total: sql<number>`cast(count(*) over() as int)`.mapWith(Number),
+      total: sql<number>`count(*) over()`.mapWith(Number),
     })
     .from(students)
     .$dynamic();

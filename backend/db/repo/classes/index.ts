@@ -3,6 +3,5 @@ export * from "./class-performance.repository";
 export * from "./class-subject.repository";
 export * from "./dst-migration.repository";
 export * from "./group-class.repository";
-export type { PendingReviewFilters } from "./lesson-report.repository";
 export { LessonReportRepository } from "./lesson-report.repository";
 export * from "./subject-resource.repository";

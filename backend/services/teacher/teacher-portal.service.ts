@@ -8,6 +8,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { FxDisplayService } from "@/backend/services/billing/fx-display.service";
 import { invalidateTeacherWrite } from "@/backend/services/cache";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { assertHasPermission } from "@/backend/services/shared";
 import type {
   TeacherAssignedClassesResult,
   TeacherAssignedStudentsResult,
@@ -20,10 +21,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace TeacherPortalService {
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
-    const isAuthorized = await PermissionsService.hasPermission(userId, permission);
-    if (!isAuthorized) {
-      throw new Error(tErrors.unauthorizedAction);
-    }
+    return assertHasPermission(userId, permission, tErrors.unauthorizedAction);
   }
 
   async function resolveTeacherForUser(userId: string, tErrors: ErrorsLabels) {

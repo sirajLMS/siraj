@@ -12,18 +12,19 @@
  */
 
 import { StudentRepository } from "@/backend/db/repo/students";
-import {
-  StudentProgressRepository,
-  type StudentProgressUpsertInput,
-} from "@/backend/db/repo/students/student-progress.repository";
-import {
-  type CreateInitialStatusHistoryInput,
-  StudentStatusHistoryRepository,
-  type StudentStatusHistoryRow,
-} from "@/backend/db/repo/students/student-status-history.repository";
+import { StudentProgressRepository } from "@/backend/db/repo/students/student-progress.repository";
+import { StudentStatusHistoryRepository } from "@/backend/db/repo/students/student-status-history.repository";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { DBTransaction, SeedStudentInput, StudentProgressSelectType, StudentSelectType } from "@/backend/types";
+import type {
+  CreateInitialStatusHistoryInput,
+  DBTransaction,
+  SeedStudentInput,
+  StudentProgressSelectType,
+  StudentProgressUpsertInput,
+  StudentSelectType,
+  StudentStatusHistorySelectType,
+} from "@/backend/types";
 
 export namespace StudentSeedService {
   /** Read helper — find seed students by stable idempotency keys. */
@@ -96,7 +97,7 @@ export namespace StudentSeedService {
   export async function seedManyInitialStatusHistory(
     inputs: readonly CreateInitialStatusHistoryInput[],
     tx?: DBTransaction
-  ): Promise<StudentStatusHistoryRow[]> {
+  ): Promise<StudentStatusHistorySelectType[]> {
     assertSeedWriteAllowed("Student seed writes");
     return StudentStatusHistoryRepository.createManyIfMissing(inputs, tx);
   }

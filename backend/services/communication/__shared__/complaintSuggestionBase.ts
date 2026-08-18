@@ -1,7 +1,7 @@
 import { ParentRepository } from "@/backend/db/repo/parents";
 import type { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { assertHasPermission } from "@/backend/services/shared";
 import type { BaseEntity, DBTx, ResolutionResult } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
@@ -20,11 +20,8 @@ import type { ErrorsLabels } from "@/shared/locale/types";
 
 /** Permission gate shared by every endpoint in both services. */
 export async function assertPermission(actorUserId: string, permission: AppPermission, locale?: string): Promise<void> {
-  const allowed = await PermissionsService.hasPermission(actorUserId, permission);
-  if (!allowed) {
-    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-    throw new Error(tErrors.insufficientPermissions);
-  }
+  const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+  return assertHasPermission(actorUserId, permission, tErrors.insufficientPermissions);
 }
 
 /**

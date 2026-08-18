@@ -66,6 +66,16 @@ export function stableStringify(value: unknown): string {
   return `{${entries}}`;
 }
 
+/** Parses a tag index JSON array from a cache string, returning null on failure. */
+function parseTagIndex(raw: string): string[] | null {
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function safeIndexTags(key: string, tags: string[]): Promise<void> {
   try {
     await Promise.all(
@@ -73,17 +83,8 @@ export async function safeIndexTags(key: string, tags: string[]): Promise<void> 
         const tagKey = `${CACHE_KEY_PREFIX_TAG}${tag}`;
         try {
           const raw = await cacheService.get(tagKey);
-          let arr: string[] = [];
-          if (raw) {
-            try {
-              const parsed = JSON.parse(raw);
-              if (Array.isArray(parsed)) {
-                arr = parsed;
-              }
-            } catch {
-              arr = [];
-            }
-          }
+          const existing = raw ? parseTagIndex(raw) : null;
+          const arr = existing ?? [];
           if (!arr.includes(key)) {
             arr.push(key);
             await cacheService.set(tagKey, JSON.stringify(arr), { ex: CACHE_TAG_INDEX_TTL });
@@ -112,26 +113,31 @@ export async function safeIndexTags(key: string, tags: string[]): Promise<void> 
 type CacheHit<T> = { hit: true; data: T } | { hit: false };
 
 async function readFromCache<T>(key: string, tags: string[], callerName: string): Promise<CacheHit<T>> {
+  let raw: string | null;
   try {
-    const raw = await cacheService.get(key);
-    if (raw) {
-      try {
-        const parsed = cacheDeserialize(raw);
-        if (validateEntry<T>(parsed)) {
-          if (tags.length > 0) {
-            await safeIndexTags(key, tags);
-          }
-          recordHitForKey(key);
-          return { hit: true, data: parsed.data };
-        }
-      } catch (pErr) {
-        logger.warn(`${callerName} JSON parse error for key ${key}:`, pErr);
-      }
-    }
+    raw = await cacheService.get(key);
   } catch (err) {
     logger.error(`${callerName} cache get failed for key ${key}:`, err);
+    return { hit: false };
   }
-  return { hit: false };
+
+  if (!raw) return { hit: false };
+
+  let parsed: unknown;
+  try {
+    parsed = cacheDeserialize(raw);
+  } catch (pErr) {
+    logger.warn(`${callerName} JSON parse error for key ${key}:`, pErr);
+    return { hit: false };
+  }
+
+  if (!validateEntry<T>(parsed)) return { hit: false };
+
+  if (tags.length > 0) {
+    await safeIndexTags(key, tags);
+  }
+  recordHitForKey(key);
+  return { hit: true, data: parsed.data };
 }
 
 async function setSingleFlight(key: string, value: string, ttlSeconds: number): Promise<boolean> {

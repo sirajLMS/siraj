@@ -1,17 +1,9 @@
 import { and, eq, type SQL } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { impersonationSessions } from "@/backend/db/schema";
+import { sanitizeIpAddress } from "@/backend/lib/ip-utils";
 import type * as Types from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";
-
-const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-
-function sanitizeIpAddress(ip: string | null | undefined): string | null {
-  if (!ip) return null;
-  const parts = ip.split(":");
-  const cleanIp = parts.length === 2 ? parts[0] : ip;
-  return IPV4_REGEX.test(cleanIp) ? cleanIp : "127.0.0.1";
-}
 
 async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTransaction) => Promise<T>): Promise<T> {
   return tx ? await fn(tx) : await db.transaction((t: DBTransaction) => fn(t));

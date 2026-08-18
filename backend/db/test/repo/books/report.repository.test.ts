@@ -1,8 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { type AttendanceReportRow, ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books";
+import { ReportRepository } from "@/backend/db/repo/books";
 import { createMockClassInstance, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
-import type { AttendanceReportPaidAmountReturnType, DBTransaction } from "@/backend/types";
+import { ReportGroupingMode } from "@/backend/enum";
+import type { AttendanceReportPaidAmountReturnType, AttendanceReportRow, DBTransaction } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 
 function paidAmountForCurrency(row: AttendanceReportRow, currency: CurrencyCode): number {

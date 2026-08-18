@@ -2,12 +2,12 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/backend/db";
-import { type ManagerProfileUpdateInput, StaffProfileRepository } from "@/backend/db/repo/teachers";
+import { StaffProfileRepository } from "@/backend/db/repo/teachers";
 import { permissionGroups, staffProfiles, userPermissionGroups, users } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AccountStatus } from "@/backend/enum";
-import { type DBTransaction, PaginationArgs } from "@/backend/types";
+import { type DBTransaction, type ManagerProfileUpdateInput, PaginationArgs } from "@/backend/types";
 
 function loc(en: string, ar?: string) {
   return { ar: ar ?? en, en };

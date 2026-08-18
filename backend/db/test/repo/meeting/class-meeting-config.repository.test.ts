@@ -18,6 +18,17 @@ beforeAll(() => {
   tErrors = getServerTranslations("en").errorsTranslations;
 });
 
+async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  expect(errorCaught).not.toBeNull();
+  return errorCaught as Error;
+}
+
 function configTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
   test(name, async () => {
     let completed = false;
@@ -54,7 +65,8 @@ describe("ClassMeetingConfigRepository", () => {
   });
 
   configTest("getByIdOrThrow throws when config is missing", async tx => {
-    expect(ClassMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tErrors, tx)).rejects.toThrow();
+    const error = await expectRepoError(() => ClassMeetingConfigRepository.getByIdOrThrow(NIL_UUID, tErrors, tx));
+    expect(error.message).toContain("not found");
   });
 
   configTest("setDefault clears previous default within same class instance", async tx => {

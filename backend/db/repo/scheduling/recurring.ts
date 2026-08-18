@@ -14,39 +14,10 @@ import {
   recurringSchedules,
   teachers,
 } from "@/backend/db/schema";
-import type { RateSource } from "@/backend/enum";
+import type { CreateRecurringScheduleInput, RateSnapshot } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
-
-export interface CreateRecurringScheduleInput {
-  studentId: string;
-  teacherId: string;
-  subjectId: string;
-  durationMinutes: number;
-  defaultStartTime: string;
-  timezone: string;
-  timezoneId?: number | null;
-  effectiveFrom?: Date | null;
-  effectiveUntil?: Date | null;
-  days: {
-    dayOfWeek: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
-    startTime: string;
-    isActive: boolean;
-  }[];
-  classType?: "REGULAR" | "TRIAL" | "ADVANCE";
-  generateInstancesForWeeks?: number;
-  quotaDeducted?: boolean;
-  /** Recurring-class-level hourly rate (highest non-override tier). Nullable. */
-  hourlyRate?: string | null;
-  /** Currency for `hourlyRate`. Required when `hourlyRate` is set. */
-  rateCurrency?: CurrencyCode | null;
-  quotaId?: string | null;
-  earmarkedClasses?: number | null;
-  schedulingMode?: import("@/backend/enum").SchedulingMode | null;
-  generationHorizonWeeks?: number | null;
-  ondemandNoCreditsOutcome?: import("@/backend/enum").OnDemandNoCreditsOutcome | null;
-}
 
 /**
  * Resolve the rate snapshot (amount + currency + source) for the class
@@ -421,7 +392,7 @@ async function insertInstanceBatch(
   input: CreateRecurringScheduleInput,
   recurringScheduleId: string,
   instanceRows: ComputedInstanceRow[],
-  rateSnapshot: { rateAmount: string; rateCurrency: CurrencyCode; rateSource: RateSource },
+  rateSnapshot: RateSnapshot,
   utcOffsetSnapshot: number | null,
   now: Date
 ): Promise<string[]> {
@@ -455,12 +426,6 @@ async function insertInstanceBatch(
     .returning({ id: classInstances.id });
 
   return insertedInstances.map(i => i.id);
-}
-
-export interface RateSnapshot {
-  rateAmount: string;
-  rateCurrency: CurrencyCode;
-  rateSource: RateSource;
 }
 
 export const createRecurringScheduleWithInstances = async (

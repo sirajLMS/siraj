@@ -1,20 +1,12 @@
 import type { ObjectFieldBuilder } from "@pothos/core";
 import { AppPermission } from "@/backend/enum";
-import type { PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import { PaymentMethodTransactionSnapshotPothosObject } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import { CurrencyCodePothosObject, PaymentMethodTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { buildMaskedTransactionSnapshot, PermissionsService } from "@/backend/services";
-import type {
-  DisplayAmountReturnType,
-  PaymentMethodTransactionSnapshot,
-  PaymentProofTransactionSnapshot,
-} from "@/backend/types";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
-
-type SnapshotUnion = PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot;
+import type { PaymentFieldShape, PaymentMethodTransactionSnapshot, SnapshotUnion } from "@/backend/types";
 
 function isMethodTransactionSnapshot(snapshot: SnapshotUnion | null): snapshot is PaymentMethodTransactionSnapshot {
   if (!snapshot) return false;
@@ -23,22 +15,6 @@ function isMethodTransactionSnapshot(snapshot: SnapshotUnion | null): snapshot i
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 type PothosObjectFieldBuilder<ParentShape> = ObjectFieldBuilder<BuilderTypes, ParentShape>;
-
-/**
- * Shared shape covering the fields common to both PaymentReturnType and
- * TeacherPaymentReturnType. Constraining the field builder's `expose`/`field`
- * calls so they type-check correctly.
- */
-interface PaymentFieldShape {
-  readonly amount: string;
-  readonly currency: CurrencyCode;
-  readonly displayAmount?: DisplayAmountReturnType | null;
-  readonly paymentDate: Date;
-  readonly userPaymentMethodId: string | null;
-  readonly paymentMethodType: PaymentMethodType;
-  readonly paymentMethodSnapshot: PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot | null;
-  readonly createdAt: Date;
-}
 
 async function shouldRevealPaymentSnapshot(ctx: BaseContext): Promise<boolean> {
   if (!ctx.user?.id) return false;

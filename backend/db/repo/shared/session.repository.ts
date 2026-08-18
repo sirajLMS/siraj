@@ -3,6 +3,7 @@ import { db } from "@/backend/db";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getEnvironmentConfig } from "@/backend/lib/env";
+import { sanitizeIpAddress } from "@/backend/lib/ip-utils";
 import { logger } from "@/backend/lib/logger";
 import type {
   DBTransaction,
@@ -47,15 +48,6 @@ async function getSessionRedisService(): Promise<ISessionRedisService> {
   }
   cachedRedisService = await redisServiceFactory();
   return cachedRedisService;
-}
-
-const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-
-function sanitizeIpAddress(ip: string | null | undefined): string | null {
-  if (!ip) return null;
-  const parts = ip.split(":");
-  const cleanIp = parts.length === 2 ? parts[0] : ip;
-  return IPV4_REGEX.test(cleanIp) ? cleanIp : "127.0.0.1";
 }
 
 export namespace SessionRepository {

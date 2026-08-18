@@ -5,6 +5,7 @@ import { OverrideStatePothosObject } from "@/backend/graphql/pothos/shared/enum.
 import { PermissionManagementService } from "@/backend/services";
 import type {
   BulkGroupMembershipInput,
+  ErrorsTranslationsHolder,
   GroupMembershipInput,
   GroupUserEntity,
   GroupWithPermissionIds,
@@ -42,10 +43,6 @@ function mapUserOverridesSafely(
     }
     return { ...o, state: o.state };
   });
-}
-
-interface ErrorsTranslationsHolder {
-  t(): { errorsTranslations: ErrorsLabels };
 }
 
 function resolveActorId(ctx: PermissionCtx): string {
@@ -115,6 +112,9 @@ export const PermissionGroupObject = gqlSchemaBuilder.objectRef<GroupWithPermiss
 
 export const UserOverrideObject = gqlSchemaBuilder.objectRef<UserOverrideReturnType>("UserOverride").implement({
   fields: t => ({
+    id: t.string({
+      resolve: parent => `${parent.userId}-${parent.permissionId}`,
+    }),
     permissionId: t.exposeString("permissionId"),
     state: t.expose("state", { type: OverrideStatePothosObject }),
     assignedBy: t.exposeString("assignedByUserId", { nullable: true }),

@@ -1,20 +1,7 @@
 import { and, inArray } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { studentProgress } from "@/backend/db/schema";
-import type { DBTransaction, StudentProgressInsertType, StudentProgressSelectType } from "@/backend/types";
-
-export type StudentProgressUpsertInput = Pick<
-  StudentProgressInsertType,
-  | "studentId"
-  | "classInstanceId"
-  | "teacherId"
-  | "topicsCovered"
-  | "homeworkAssigned"
-  | "notes"
-  | "parentVisible"
-  | "createdAt"
-  | "updatedAt"
->;
+import type { DBTransaction, StudentProgressSelectType, StudentProgressUpsertInput } from "@/backend/types";
 
 export namespace StudentProgressRepository {
   export async function upsertMany(

@@ -1,6 +1,9 @@
 import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
-import { DELIVERY_STATUS_RANK } from "@/backend/db/repo/notifications/notification-status.constants";
+import {
+  DELIVERY_STATUS_RANK,
+  isValidStatusTransition,
+} from "@/backend/db/repo/notifications/notification-status.constants";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";
 import type {
@@ -37,28 +40,6 @@ const toDeliveryStatus = (value: string): NotificationDeliveryStatus => {
     throw new Error(`Invalid NotificationDeliveryStatus: ${value}`);
   }
   return status;
-};
-
-/**
- * B3 forward-only rank guard for webhook idempotency.
- * Returns true if the incoming `nextStatus` represents a valid forward
- * transition from `currentStatus`. Mirrors the service-layer
- * `isValidStatusTransition` but is inlined here to avoid a repo→service
- * dependency. The function is used as a silent skip guard in webhook
- * handlers — it does NOT throw.
- */
-const isValidForwardTransition = (
-  currentStatus: NotificationDeliveryStatus,
-  nextStatus: NotificationDeliveryStatus
-): boolean => {
-  if (currentStatus === nextStatus) return true;
-
-  const currentRank = DELIVERY_STATUS_RANK[currentStatus];
-  const nextRank = DELIVERY_STATUS_RANK[nextStatus];
-
-  return (
-    nextRank > currentRank || nextStatus === NotificationDeliveryStatus.FAILED || (currentRank === -1 && nextRank > 0)
-  );
 };
 
 export namespace NotificationRepository {
@@ -171,7 +152,7 @@ export namespace NotificationRepository {
    * This function is exported (not private) because the same rank logic is
    * mirrored in the SQL ON CONFLICT upsert guard within
    * `updateDeliveryStatusFromWebhook` — the rank guard uses the repo-local
-   * `isValidForwardTransition` and `DELIVERY_STATUS_RANK` constant so no
+   * `isValidStatusTransition` and `DELIVERY_STATUS_RANK` constant so no
    * service-layer dependency is required.
    */
   function buildStatusTimestamps(
@@ -349,7 +330,7 @@ export namespace NotificationRepository {
 
     // Only update if the new status represents a valid forward transition
     // for the webhook-created row (B3 forward-only guard).
-    if (!isValidForwardTransition(webhookStatus, input.status)) {
+    if (!isValidStatusTransition(webhookStatus, input.status)) {
       return webhookRow;
     }
 
@@ -399,7 +380,7 @@ export namespace NotificationRepository {
       // here to avoid a repo→service dependency. The rank lookup and
       // transition logic are data-level concerns (which statuses can
       // overwrite which in the DB), not business orchestration.
-      if (!isValidForwardTransition(currentStatus, input.status)) {
+      if (!isValidStatusTransition(currentStatus, input.status)) {
         const { invalidTransition: invalidTransitionMsg } = getServerTranslations(locale ?? "en").errorsTranslations;
         throw new Error(`${invalidTransitionMsg}: ${currentStatus} -> ${input.status}`);
       }
@@ -551,9 +532,9 @@ export namespace NotificationRepository {
     }
 
     // B3: Forward-only rank guard.
-    // Uses the repo-local `isValidForwardTransition` helper to silently
+    // Uses the repo-local `isValidStatusTransition` helper to silently
     // skip stale/duplicate events instead of throwing (webhooks are idempotent).
-    if (!isValidForwardTransition(currentStatus, status)) {
+    if (!isValidStatusTransition(currentStatus, status)) {
       // Stale/duplicate webhook that would downgrade status — skip.
       return current;
     }
@@ -578,7 +559,7 @@ export namespace NotificationRepository {
     return updated;
   };
 
-  // B3: SQL rank guard for ON CONFLICT branch — mirrors isValidForwardTransition:
+  // B3: SQL rank guard for ON CONFLICT branch — mirrors isValidStatusTransition:
   //   nextRank > currentRank || status === FAILED || (currentRank === -1 && nextRank > 0)
   // IMPORTANT: These SQL CASE values must stay in sync with DELIVERY_STATUS_RANK
   // above. The values are derived from the actual NotificationDeliveryStatus

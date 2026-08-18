@@ -16,8 +16,9 @@ import type {
   InvoicePaymentSubmissionStatus,
   InvoiceStatus,
   InvoiceType,
+  PaymentMethodType,
 } from "@/backend/enum";
-import type { PageInfo } from "@/backend/types";
+import type { PageInfo, PaymentMethodTransactionSnapshot, PaymentProofTransactionSnapshot } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export type InvoiceSelectType = typeof invoices.$inferSelect;
@@ -366,3 +367,45 @@ export type DeleteInvoiceReturnType = {
   readonly version: number;
   readonly notificationSummaryUpdated: boolean;
 };
+
+/**
+ * Shape shared by `AdminBillingSummaryResult` and `ParentBillingSummaryResult`
+ * for display-amount enrichment. Both summaries carry at least one array
+ * of `BillingCurrencyTotal` keyed by a string property.
+ */
+export type BillingSummaryWithCurrencyTotals = {
+  readonly id: string;
+  readonly outstandingByCurrency: readonly BillingCurrencyTotal[];
+  readonly [key: string]: unknown;
+};
+
+/**
+ * Args for parent-scoped billing resolvers where either `parentId` or
+ * `userId` may be supplied (but not both required).
+ */
+export interface ParentScopedResolverArgs {
+  parentId?: string | null;
+  userId?: string | null;
+}
+
+/**
+ * Union of transaction snapshot types stored in the `payment_method_snapshot`
+ * JSONB column of `payments` and `teacher_payments`.
+ */
+export type SnapshotUnion = PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot;
+
+/**
+ * Shared shape covering the fields common to PaymentReturnType and
+ * TeacherPaymentReturnType. Constraining the field builder's `expose`/`field`
+ * calls so they type-check correctly.
+ */
+export interface PaymentFieldShape {
+  readonly amount: string;
+  readonly currency: CurrencyCode;
+  readonly displayAmount?: DisplayAmountReturnType | null;
+  readonly paymentDate: Date;
+  readonly userPaymentMethodId: string | null;
+  readonly paymentMethodType: PaymentMethodType;
+  readonly paymentMethodSnapshot: SnapshotUnion | null;
+  readonly createdAt: Date;
+}

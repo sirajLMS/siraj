@@ -1,26 +1,12 @@
-import type { InvoiceType } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  type UserPaymentMethodInitialGqlInput,
-  UserPaymentMethodInitialInputPothos,
-} from "@/backend/graphql/pothos/billing/payment-method.pothos";
+import { UserPaymentMethodInitialInputPothos } from "@/backend/graphql/pothos/billing/payment-method.pothos";
 import {
   CurrencyCodePothosObject,
   IanaTimezonePothosObject,
   InvoiceTypePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { safeParseCurrencyCode } from "@/backend/lib/currency.validation";
-import type { Email } from "@/backend/lib/email";
-import type { ParentOnboardingInput, ParentOnboardingResult } from "@/backend/types";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
-
-export interface ParentOnboardingGqlInput
-  extends Omit<ParentOnboardingInput, "email" | "invoiceType" | "currency" | "initialPayinMethod"> {
-  email: Email;
-  invoiceType?: InvoiceType | null;
-  currency?: CurrencyCode | null;
-  initialPayinMethod?: UserPaymentMethodInitialGqlInput | null;
-}
+import type { ParentOnboardingGqlInput, ParentOnboardingResult } from "@/backend/types";
 
 export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
   .inputRef<ParentOnboardingGqlInput>("ParentOnboardingInput")

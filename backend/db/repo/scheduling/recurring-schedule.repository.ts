@@ -5,21 +5,10 @@ import type {
   DBTransaction,
   RecurringScheduleDayInsertType,
   RecurringScheduleDaySelectType,
-  RecurringScheduleInsertType,
+  RecurringScheduleDayUpsertInput,
   RecurringScheduleSelectType,
+  RecurringScheduleUpsertInput,
 } from "@/backend/types";
-
-export type RecurringScheduleUpsertInput = Omit<
-  RecurringScheduleInsertType,
-  "id" | "createdAt" | "updatedAt" | "deletedAt"
-> & { studentId: string };
-
-export type RecurringScheduleDayUpsertInput = {
-  recurringScheduleId: string;
-  dayOfWeek: RecurringScheduleDayInsertType["dayOfWeek"];
-  startTime: string;
-  isActive: boolean;
-};
 
 export type ScheduleDayKey = `${string}:${string}`;
 
@@ -245,7 +234,7 @@ export namespace RecurringScheduleRepository {
         .limit(pageSize)
         .offset(offset),
       q
-        .select({ count: sql<number>`count(*)` })
+        .select({ count: sql<number>`count(*)`.mapWith(Number) })
         .from(recurringSchedules)
         .innerJoin(students, eq(recurringSchedules.studentId, students.id))
         .innerJoin(teachers, eq(recurringSchedules.teacherId, teachers.id))

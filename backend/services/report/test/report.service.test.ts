@@ -1,6 +1,6 @@
 import { describe, expect, spyOn, test } from "bun:test";
-import { ReportGroupingMode, ReportRepository } from "@/backend/db/repo/books/report.repository";
-import { AppPermission } from "@/backend/enum";
+import { ReportRepository } from "@/backend/db/repo/books/report.repository";
+import { AppPermission, ReportGroupingMode } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ReportService } from "@/backend/services/report/report.service";
 import { CurrencyCode } from "@/shared/constants/currency.enum";

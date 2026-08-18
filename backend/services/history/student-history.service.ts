@@ -3,6 +3,7 @@ import { StudentHistoryRepository } from "@/backend/db/repo/students/student-his
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
+import { assertHasPermission } from "@/backend/services/shared";
 import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -50,10 +51,7 @@ export namespace StudentHistoryService {
   }
 
   async function assertPermission(userId: string, permission: AppPermission, tErrors: ErrorsLabels) {
-    const isAuthorized = await PermissionsService.hasPermission(userId, permission);
-    if (!isAuthorized) {
-      throw new Error(tErrors.unauthorizedAction);
-    }
+    return assertHasPermission(userId, permission, tErrors.unauthorizedAction);
   }
 
   export async function getStudentClassHistory(

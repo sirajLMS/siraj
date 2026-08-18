@@ -9,6 +9,7 @@ import type {
   DayOfWeek,
   LeaveRequestStatus,
   OnDemandNoCreditsOutcome,
+  RateSource,
   RescheduleDateLabel,
   SchedulingMode,
   StudentStatus,
@@ -283,4 +284,65 @@ export type TeacherAssignedClassRow = {
   executionState: ClassExecutionState;
   outcome: ClassOutcome | null;
   isFrozen: boolean;
+};
+
+/**
+ * Repo-level input for creating a recurring schedule with class instances.
+ *
+ * Distinct from {@link CreateRecurringClassInput} which is the service-layer
+ * input shape (uses `IanaTimezone`, `string` dates, etc.). This repo-level
+ * type uses raw `string`/`Date` shapes that align with the DB insertion.
+ */
+export interface CreateRecurringScheduleInput {
+  studentId: string;
+  teacherId: string;
+  subjectId: string;
+  durationMinutes: number;
+  defaultStartTime: string;
+  timezone: string;
+  timezoneId?: number | null;
+  effectiveFrom?: Date | null;
+  effectiveUntil?: Date | null;
+  days: {
+    dayOfWeek: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+    startTime: string;
+    isActive: boolean;
+  }[];
+  classType?: "REGULAR" | "TRIAL" | "ADVANCE";
+  generateInstancesForWeeks?: number;
+  quotaDeducted?: boolean;
+  /** Recurring-class-level hourly rate (highest non-override tier). Nullable. */
+  hourlyRate?: string | null;
+  /** Currency for `hourlyRate`. Required when `hourlyRate` is set. */
+  rateCurrency?: CurrencyCode | null;
+  quotaId?: string | null;
+  earmarkedClasses?: number | null;
+  schedulingMode?: SchedulingMode | null;
+  generationHorizonWeeks?: number | null;
+  ondemandNoCreditsOutcome?: OnDemandNoCreditsOutcome | null;
+}
+
+/**
+ * Captured rate snapshot (amount + currency + source) frozen at booking time
+ * so future rate changes don't affect already-scheduled classes.
+ *
+ * Related to {@link ResolvedClassRate} in `rate-resolver.types.ts`, but uses
+ * the raw `rateAmount`/`rateCurrency` field names that match DB columns.
+ */
+export interface RateSnapshot {
+  rateAmount: string;
+  rateCurrency: CurrencyCode;
+  rateSource: RateSource;
+}
+
+export type RecurringScheduleUpsertInput = Omit<
+  RecurringScheduleInsertType,
+  "id" | "createdAt" | "updatedAt" | "deletedAt"
+> & { studentId: string };
+
+export type RecurringScheduleDayUpsertInput = {
+  recurringScheduleId: string;
+  dayOfWeek: RecurringScheduleDayInsertType["dayOfWeek"];
+  startTime: string;
+  isActive: boolean;
 };

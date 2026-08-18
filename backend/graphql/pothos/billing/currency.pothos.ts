@@ -5,10 +5,9 @@ import { CountryCodePothosObject, CurrencyCodePothosObject } from "@/backend/gra
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { CurrencyCatalogService as CurrencyService } from "@/backend/services";
 import type { SupportedCurrencyReturnType } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale";
 
-type ErrorsTranslations = ReturnType<BaseContext["t"]>["errorsTranslations"];
-
-async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsTranslations }> {
+async function resolveAuthCtx(ctx: BaseContext): Promise<{ actorUserId: string; tErrors: ErrorsLabels }> {
   const actorUserId = await requireAuth(ctx);
   const tErrors = ctx.t().errorsTranslations;
   return { actorUserId, tErrors };
@@ -18,6 +17,7 @@ const SupportedCurrencyRef = gqlSchemaBuilder.objectRef<SupportedCurrencyReturnT
 
 export const SupportedCurrencyPothosObject = SupportedCurrencyRef.implement({
   fields: t => ({
+    id: t.string({ resolve: parent => parent.code }),
     code: t.expose("code", { type: CurrencyCodePothosObject }),
     symbol: t.exposeString("symbol"),
     countryCode: t.expose("countryCode", { type: CountryCodePothosObject, nullable: true }),

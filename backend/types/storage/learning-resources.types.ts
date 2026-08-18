@@ -15,6 +15,13 @@ export type LearningResourceSubmitInput = {
   fileId: string;
 };
 
+export interface LearningResourceCreateInput {
+  readonly displayName: string;
+  readonly filePath: string;
+  readonly uploadedByUserId: string;
+  readonly fileId: string;
+}
+
 export interface LearningResourceListResult {
   readonly rows: LearningResourceReturnType[];
   readonly totalCount: number;

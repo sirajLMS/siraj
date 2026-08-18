@@ -1,10 +1,10 @@
 import { afterAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { config } from "dotenv";
-import { db } from "@/backend/db";
 import { SessionRepository } from "@/backend/db/repo/shared";
-import { users } from "@/backend/db/schema";
 import { IP_ADDRESS_1, IP_ADDRESS_2 } from "@/backend/db/test/const";
+import { createTestUser } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { resetEnvironmentCache } from "@/backend/lib/env";
 import { checkRedisHealth, getRedisService, resetCacheService, resetRedisService } from "@/backend/services";
@@ -18,39 +18,15 @@ resetRedisService();
 
 const redisAvailable = await checkRedisHealth();
 
-async function runInRollback(fn: (tx: DBTransaction) => Promise<void>): Promise<void> {
-  try {
-    await db.transaction(async tx => {
-      await fn(tx);
-      throw new Error("ROLLBACK");
-    });
-  } catch (error) {
-    if (error instanceof Error && error.message !== "ROLLBACK") {
-      throw error;
-    }
-  }
-}
-
-async function createTestUser(tx: DBTransaction, email: string) {
-  const [user] = await tx
-    .insert(users)
-    .values({
-      name: "Session Test User",
-      email,
-      password: randomUUID(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .returning();
-  return user;
-}
-
 async function setupTestSession(
   tx: DBTransaction,
   emailPrefix: string,
   overrides: Partial<Parameters<typeof SessionRepository.create>[0]> = {}
 ) {
-  const user = await createTestUser(tx, `${emailPrefix}-${randomUUID()}@example.com`);
+  const user = await createTestUser(tx, {
+    name: "Session Test User",
+    email: `${emailPrefix}-${randomUUID()}@example.com`,
+  });
   const sessionId = overrides.hashedId ?? `session-${randomUUID()}`;
   const hashedSessionId = hashSessionId(sessionId);
 
@@ -259,7 +235,10 @@ describe("Session Scalability and Redis Integration", () => {
   describe("Concurrent Session Limits", () => {
     it.skipIf(!redisAvailable)("should enforce concurrent session limit", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `concurrent-limit-${randomUUID()}@example.com`);
+        const user = await createTestUser(tx, {
+          name: "Session Test User",
+          email: `concurrent-limit-${randomUUID()}@example.com`,
+        });
 
         // Create custom config with limit of 3
         await SessionRepository.upsertSessionConfig(
@@ -303,7 +282,10 @@ describe("Session Scalability and Redis Integration", () => {
 
     it.skipIf(!redisAvailable)("should remove oldest sessions when limit exceeded", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `oldest-removal-${randomUUID()}@example.com`);
+        const user = await createTestUser(tx, {
+          name: "Session Test User",
+          email: `oldest-removal-${randomUUID()}@example.com`,
+        });
 
         await SessionRepository.upsertSessionConfig(
           {
@@ -372,8 +354,14 @@ describe("Session Scalability and Redis Integration", () => {
 
     it.skipIf(!redisAvailable)("should handle multiple users with different limits independently", async () => {
       await runInRollback(async tx => {
-        const user1 = await createTestUser(tx, `multi-user-1-${randomUUID()}@example.com`);
-        const user2 = await createTestUser(tx, `multi-user-2-${randomUUID()}@example.com`);
+        const user1 = await createTestUser(tx, {
+          name: "Session Test User",
+          email: `multi-user-1-${randomUUID()}@example.com`,
+        });
+        const user2 = await createTestUser(tx, {
+          name: "Session Test User",
+          email: `multi-user-2-${randomUUID()}@example.com`,
+        });
 
         await SessionRepository.upsertSessionConfig(
           {
@@ -441,7 +429,10 @@ describe("Session Scalability and Redis Integration", () => {
   describe("Logout Everywhere Functionality", () => {
     it.skipIf(!redisAvailable)("should delete all sessions for a user", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `logout-everywhere-${randomUUID()}@example.com`);
+        const user = await createTestUser(tx, {
+          name: "Session Test User",
+          email: `logout-everywhere-${randomUUID()}@example.com`,
+        });
 
         // Create multiple sessions
         const sessionIds = await Promise.all(
@@ -482,7 +473,10 @@ describe("Session Scalability and Redis Integration", () => {
 
     it.skipIf(!redisAvailable)("should remove metadata from PostgreSQL when logging out everywhere", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `logout-metadata-${randomUUID()}@example.com`);
+        const user = await createTestUser(tx, {
+          name: "Session Test User",
+          email: `logout-metadata-${randomUUID()}@example.com`,
+        });
 
         // Create sessions
         await Promise.all(
@@ -518,7 +512,10 @@ describe("Session Scalability and Redis Integration", () => {
   describe("Concurrency Control", () => {
     it.skipIf(!redisAvailable)("should prevent race conditions with advisory locks", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `race-condition-${randomUUID()}@example.com`);
+        const user = await createTestUser(tx, {
+          name: "Session Test User",
+          email: `race-condition-${randomUUID()}@example.com`,
+        });
 
         await SessionRepository.upsertSessionConfig(
           {
@@ -559,7 +556,10 @@ describe("Session Scalability and Redis Integration", () => {
   describe("Session Metadata Management", () => {
     it.skipIf(!redisAvailable)("should retrieve user session metadata ordered by last activity", async () => {
       await runInRollback(async tx => {
-        const user = await createTestUser(tx, `metadata-order-${randomUUID()}@example.com`);
+        const user = await createTestUser(tx, {
+          name: "Session Test User",
+          email: `metadata-order-${randomUUID()}@example.com`,
+        });
 
         const firstSessionId = `session-first-${randomUUID()}`;
         const secondSessionId = `session-second-${randomUUID()}`;

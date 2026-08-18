@@ -55,3 +55,35 @@ export type MeetingConfigBaseSubmitInput = Omit<
 > & {
   readonly password?: string | null;
 };
+
+/**
+ * Repo-level insert input for meeting config helper builders.
+ *
+ * A subset of {@link MeetingConfigBaseInsertType} — only the fields
+ * that {@link buildMeetingConfigInsertValues} needs to construct a
+ * DB insert payload (timestamps are added by the builder).
+ */
+export interface MeetingConfigInsertInput {
+  readonly providerId: string;
+  readonly label?: string | null;
+  readonly isDefault: boolean;
+  readonly details: MeetingConfigDetails;
+  readonly encryptedSecret?: string | null;
+  readonly providerMetadata?: Record<string, unknown> | null;
+}
+
+/**
+ * Repo-level update input for meeting config helper builders.
+ *
+ * A subset of {@link MeetingConfigBaseInsertType} — only the fields
+ * that {@link buildMeetingConfigUpdatePayload} needs to construct a
+ * DB update payload.
+ */
+export interface MeetingConfigUpdateInput {
+  readonly providerId: string;
+  readonly label?: string | null;
+  readonly isDefault: boolean;
+  readonly details: MeetingConfigDetails;
+  readonly encryptedSecret?: string | null;
+  readonly providerMetadata?: Record<string, unknown> | null;
+}

@@ -13,14 +13,16 @@ import {
 } from "@/backend/db/schema";
 import { StudentStatus } from "@/backend/enum";
 import type * as Types from "@/backend/types";
-import type { DBQueryExecutor, DBTransaction } from "@/backend/types";
+import type {
+  CurrencyExchangeRateSubmitInput,
+  DBQueryExecutor,
+  DBTransaction,
+  ManualInvoiceInsertType,
+  PaymentRecordInput,
+} from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseInvoiceStatus, parseInvoiceType, parseStudentStatus } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
-
-type CurrencyExchangeRateUpdateInput = Omit<Types.CurrencyExchangeRateInsertType, "id" | "createdAt" | "updatedAt">;
-type InvoiceCreateInput = Omit<Types.InvoiceInsertType, "id" | "createdAt" | "updatedAt">;
-type PaymentRecordInput = Omit<Types.PaymentInsertType, "id" | "createdAt" | "updatedAt">;
 
 export namespace BillingRepository {
   async function acquireInvoiceLock(tx: DBTransaction, invoiceId: string): Promise<void> {
@@ -71,7 +73,7 @@ export namespace BillingRepository {
   async function createBillingEntity(
     t: DBTransaction,
     table: typeof invoices,
-    input: InvoiceCreateInput,
+    input: ManualInvoiceInsertType,
     tErrors: ErrorsLabels
   ): Promise<Types.InvoiceSelectType>;
   async function createBillingEntity(
@@ -83,7 +85,7 @@ export namespace BillingRepository {
   async function createBillingEntity(
     t: DBTransaction,
     table: typeof invoices | typeof payments,
-    input: InvoiceCreateInput | PaymentRecordInput,
+    input: ManualInvoiceInsertType | PaymentRecordInput,
     tErrors: ErrorsLabels
   ): Promise<Types.InvoiceSelectType | Types.PaymentSelectType> {
     const { snapshot, source } = await resolveExchangeRateSnapshot(
@@ -201,7 +203,7 @@ export namespace BillingRepository {
    */
   async function writeExchangeRateWithAudit(
     t: DBTransaction,
-    input: CurrencyExchangeRateUpdateInput,
+    input: CurrencyExchangeRateSubmitInput,
     changedByUserId: string | null
   ): Promise<Types.CurrencyExchangeRateSelectType> {
     const results = await t
@@ -245,7 +247,7 @@ export namespace BillingRepository {
    * Accepts `changedByUserId: string | null` so the cron path can pass null.
    */
   export const updateExchangeRate = async (
-    input: CurrencyExchangeRateUpdateInput,
+    input: CurrencyExchangeRateSubmitInput,
     changedByUserId: string | null,
     tx?: DBTransaction
   ): Promise<Types.CurrencyExchangeRateSelectType> => {
@@ -259,7 +261,7 @@ export namespace BillingRepository {
    * Never starts a nested transaction — `tx` is required.
    */
   export const updateExchangeRateInTx = async (
-    input: CurrencyExchangeRateUpdateInput,
+    input: CurrencyExchangeRateSubmitInput,
     changedByUserId: string | null,
     tx: DBTransaction
   ): Promise<Types.CurrencyExchangeRateSelectType> => writeExchangeRateWithAudit(tx, input, changedByUserId);
@@ -405,7 +407,7 @@ export namespace BillingRepository {
    * Creates an invoice with a mandatory exchange rate snapshot if currency != 'USD'.
    */
   export const createInvoice = async (
-    input: InvoiceCreateInput,
+    input: ManualInvoiceInsertType,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType> => {
@@ -1170,7 +1172,7 @@ export namespace BillingRepository {
   };
 
   export const upsertManyInvoices = async (
-    inputs: readonly InvoiceCreateInput[],
+    inputs: readonly ManualInvoiceInsertType[],
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType[]> => {
     if (inputs.length === 0) return [];
@@ -1242,7 +1244,7 @@ export namespace BillingRepository {
   };
 
   export const upsertManyExchangeRates = async (
-    inputs: readonly CurrencyExchangeRateUpdateInput[],
+    inputs: readonly CurrencyExchangeRateSubmitInput[],
     tx?: DBTransaction
   ): Promise<Types.CurrencyExchangeRateSelectType[]> => {
     if (inputs.length === 0) return [];

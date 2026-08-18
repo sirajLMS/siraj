@@ -1,20 +1,12 @@
 import { eq, inArray } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { studentStatusHistory } from "@/backend/db/schema";
-import type { StudentStatus } from "@/backend/enum";
-import type { DBTransaction, StudentStatusHistorySelectType } from "@/backend/types";
-
-export type StudentStatusHistoryRow = StudentStatusHistorySelectType;
-
-export type CreateInitialStatusHistoryInput = {
-  studentId: string;
-  newStatus: StudentStatus;
-  changedByUserId: string | null;
-  createdAt: Date;
-};
-
+import type { CreateInitialStatusHistoryInput, DBTransaction, StudentStatusHistorySelectType } from "@/backend/types";
 export namespace StudentStatusHistoryRepository {
-  export async function findByStudentIds(studentIds: string[], tx?: DBTransaction): Promise<StudentStatusHistoryRow[]> {
+  export async function findByStudentIds(
+    studentIds: string[],
+    tx?: DBTransaction
+  ): Promise<StudentStatusHistorySelectType[]> {
     if (studentIds.length === 0) return [];
     const q = queryDb(tx);
     return q.select().from(studentStatusHistory).where(inArray(studentStatusHistory.studentId, studentIds));
@@ -23,7 +15,7 @@ export namespace StudentStatusHistoryRepository {
   export async function createManyIfMissing(
     inputs: readonly CreateInitialStatusHistoryInput[],
     tx?: DBTransaction
-  ): Promise<StudentStatusHistoryRow[]> {
+  ): Promise<StudentStatusHistorySelectType[]> {
     if (inputs.length === 0) return [];
     const executor = tx ?? db;
     const studentIds = inputs.map(i => i.studentId);
@@ -31,7 +23,7 @@ export namespace StudentStatusHistoryRepository {
     const existingStudentIds = new Set(existing.map(r => r.studentId));
     const toInsert = inputs.filter(input => !existingStudentIds.has(input.studentId));
 
-    const inserted: StudentStatusHistoryRow[] = [];
+    const inserted: StudentStatusHistorySelectType[] = [];
 
     async function processNext(index: number): Promise<void> {
       if (index >= toInsert.length) return;
@@ -58,7 +50,7 @@ export namespace StudentStatusHistoryRepository {
   export async function findFirstByStudentId(
     studentId: string,
     tx?: DBTransaction
-  ): Promise<StudentStatusHistoryRow | null> {
+  ): Promise<StudentStatusHistorySelectType | null> {
     const q = queryDb(tx);
     const [row] = await q
       .select()

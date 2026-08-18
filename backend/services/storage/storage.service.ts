@@ -79,8 +79,8 @@ export namespace StorageService {
    * Validate upload parameters (path, size, contentType).
    * Returns an error message if validation fails, or null if valid.
    */
-  export function validateUpload(params: StorageUploadValidationParams): string | null {
-    return StorageDbRepository.validateUpload(params);
+  export function validateUpload(params: StorageUploadValidationParams, locale?: string): string | null {
+    return StorageDbRepository.validateUpload(params, locale);
   }
 
   /**
@@ -89,26 +89,28 @@ export namespace StorageService {
    */
   export async function validateSignedUrlSession(
     sessionId: string,
-    filePath: string
+    filePath: string,
+    locale?: string
   ): Promise<{
     error: string;
     status: number;
   } | null> {
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
     const session = await SignedUrlRepository.getSignedUrlById(sessionId);
 
     if (!session) {
       logger.warn("Invalid upload session", { sessionId, filePath });
-      return { error: "Invalid upload session", status: 403 };
+      return { error: tErrors.invalidUploadSession, status: 403 };
     }
 
     if (session.used) {
       logger.warn("Upload session already used", { sessionId, filePath });
-      return { error: "Upload session already used", status: 403 };
+      return { error: tErrors.uploadSessionAlreadyUsed, status: 403 };
     }
 
     if (session.expiresAt < new Date()) {
       logger.warn("Upload session expired", { sessionId, filePath, expiresAt: session.expiresAt });
-      return { error: "Upload session expired", status: 403 };
+      return { error: tErrors.uploadSessionExpired, status: 403 };
     }
 
     if (session.filePath !== filePath) {
@@ -117,7 +119,7 @@ export namespace StorageService {
         expectedPath: session.filePath,
         receivedPath: filePath,
       });
-      return { error: "File path mismatch", status: 400 };
+      return { error: tErrors.filePathMismatch, status: 400 };
     }
 
     logger.info("✅ Validated upload session", { sessionId, filePath });
@@ -185,8 +187,10 @@ export namespace StorageService {
 
   export async function checkFileAccess(
     userId: string,
-    filePath: string
+    filePath: string,
+    locale?: string
   ): Promise<{ error: string; status: number } | null> {
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
     const usages = await StorageDbRepository.getFileUsages(filePath);
 
     // If no usages, file is accessible to all authenticated users
@@ -211,18 +215,22 @@ export namespace StorageService {
     const hasEntityAccess = (await Promise.all(entityChecks)).some(Boolean);
     if (hasEntityAccess) return null;
 
-    return { error: "Forbidden", status: 403 };
+    return { error: tErrors.forbidden, status: 403 };
   }
 
   /**
    * Check if uploads are allowed in a directory.
    * Returns an error message if uploads are not allowed, or null if allowed.
    */
-  export async function checkDirectoryUploadPermissions(directoryPath: string): Promise<string | null> {
+  export async function checkDirectoryUploadPermissions(
+    directoryPath: string,
+    locale?: string
+  ): Promise<string | null> {
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
     const dbDirectory = await StorageDbRepository.directoryByPath(directoryPath);
     if (dbDirectory && !dbDirectory.allowUploads) {
       logger.warn("Uploads not allowed in directory", { directoryPath });
-      return "Uploads not allowed in this directory";
+      return tErrors.uploadsNotAllowedInDirectory;
     }
     return null;
   }
@@ -447,8 +455,8 @@ export namespace StorageManageService {
   }
 
   /** @deprecated Use StorageService.checkDirectoryUploadPermissions instead */
-  export async function checkUploadPermissions(directoryPath: string): Promise<string | null> {
-    return StorageService.checkDirectoryUploadPermissions(directoryPath);
+  export async function checkUploadPermissions(directoryPath: string, locale?: string): Promise<string | null> {
+    return StorageService.checkDirectoryUploadPermissions(directoryPath, locale);
   }
 }
 
