@@ -19,9 +19,8 @@ export namespace BookService {
   }
 
   export async function deleteBook(bookId: string, actorUserId: string, locale?: string): Promise<boolean> {
+    const t = getServerTranslations(locale ?? "ar").errorsTranslations;
     try {
-      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
-
       const hasPermission = await PermissionsService.hasPermission(actorUserId, AppPermission.RESOURCES_DELETE);
       if (!hasPermission) {
         throw new UnauthorizedError(t.unauthorizedAction);
@@ -37,7 +36,7 @@ export namespace BookService {
           throw error;
         }
       }
-      throw new Error("bookDeleteFailed", { cause: error });
+      throw new Error(t.resource.bookDeleteFailed, { cause: error });
     }
   }
 

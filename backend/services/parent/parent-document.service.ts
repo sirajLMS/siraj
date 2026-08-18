@@ -49,7 +49,8 @@ export namespace ParentDocumentService {
     }
 
     if (!fileId || typeof fileId !== "string") {
-      throw new Error("invalidFileId");
+      const tFunc = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(tFunc.file.invalidFileId);
     }
 
     return StorageDbRepository.linkFileToParent(parentId, fileId, usageType);

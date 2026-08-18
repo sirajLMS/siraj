@@ -26,6 +26,9 @@ import type {
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
+const MAX_COMPLAINT_FILES = 5;
+const MAX_COMPLAINT_FILE_SIZE_MB = 25;
+
 async function dispatchNewComplaint(complaint: ComplaintSelectType, locale?: string): Promise<void> {
   const reviewerUserIds = await PermissionsService.getUserIdsWithPermission(AppPermission.COMPLAINTS_LIST);
   if (reviewerUserIds.length === 0) return;
@@ -363,12 +366,15 @@ export namespace ComplaintService {
 async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale?: string): Promise<void> {
   const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
-  const maxFiles = await SystemSettingsRepository.getIntValue("complaint_max_files_per_complaint", 5);
+  const maxFiles = await SystemSettingsRepository.getIntValue("complaint_max_files_per_complaint", MAX_COMPLAINT_FILES);
   if (files.length > maxFiles) {
     throw new Error(tErrors.complaintTooManyFiles(maxFiles));
   }
 
-  const maxSizeMb = await SystemSettingsRepository.getIntValue("complaint_max_file_size_mb", 25);
+  const maxSizeMb = await SystemSettingsRepository.getIntValue(
+    "complaint_max_file_size_mb",
+    MAX_COMPLAINT_FILE_SIZE_MB
+  );
   const maxSizeBytes = maxSizeMb * 1024 * 1024;
 
   const allowedMimeTypes = new Set<string>([

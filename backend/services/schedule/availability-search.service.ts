@@ -1,7 +1,7 @@
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { CrossStaffSearchInput } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -36,7 +36,7 @@ export namespace AvailabilitySearchService {
         throw new Error(tErrors.unauthorizedAction);
       }
 
-      return await TeacherAvailabilityRepository.searchCrossStaffAvailability(withSearchDefaults(input));
+      return await AvailabilityService.searchCrossStaffAvailability(withSearchDefaults(input));
     } catch (error) {
       logger.error("Error searching availability", { userId, error });
       throw error;

@@ -407,7 +407,13 @@ describe("PermissionManagementService Business Logic", () => {
     testSystemGroupGuard(
       "deleteGroup on system group should throw cannotDeleteSystemPermissionGroup",
       manageContext,
-      groupId => PermissionManagementService.deleteGroup(adminUser.id, groupId, tErrors, "ar"),
+      groupId =>
+        PermissionManagementService.deleteGroup(
+          adminUser.id,
+          groupId,
+          getServerTranslations("ar").errorsTranslations,
+          "ar"
+        ),
       "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام"
     );
   });

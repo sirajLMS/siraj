@@ -17,7 +17,10 @@ import type {
   CurrencyExchangeRateSubmitInput,
   DBQueryExecutor,
   DBTransaction,
+  ExchangeRateHistorySelectRow,
   ManualInvoiceInsertType,
+  OverdueInvoiceRow,
+  ParentUserRow,
   PaymentRecordInput,
 } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -315,20 +318,6 @@ export namespace BillingRepository {
     return latest;
   };
 
-  /**
-   * Returns paginated exchange-rate history for a single (from, to) pair
-   * filtered to the last `maxDays` days (default 90), capped at limit 100 (S5).
-   * Uses the same pagination pattern as {@link getInvoicesForParent}.
-   */
-  type ExchangeRateHistorySelectRow = {
-    id: string;
-    fromCurrency: CurrencyCode;
-    toCurrency: CurrencyCode;
-    rate: string;
-    source: string | null;
-    effectiveDate: Date;
-  };
-
   const exchangeRateHistoryFields = {
     id: currencyExchangeRates.id,
     fromCurrency: currencyExchangeRates.fromCurrency,
@@ -501,22 +490,6 @@ export namespace BillingRepository {
     };
 
     return tx ? runner(tx) : db.transaction(runner);
-  };
-
-  // Drizzle's $inferSelect gives the runtime types for columns (string, nullable, etc.)
-  type OverdueInvoiceRow = {
-    invoiceId: string;
-    parentId: string;
-    amount: string;
-    currency: CurrencyCode;
-    dueDate: string;
-  };
-
-  type ParentUserRow = {
-    parentId: string;
-    userId: string | null;
-    userName: string | null;
-    userEmail: string | null;
   };
 
   function createEmptySummary(totalOverdueInvoices: number): Types.UnpaidInvoicesSummaryResult {

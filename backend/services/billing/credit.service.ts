@@ -157,7 +157,7 @@ export namespace CreditService {
     const idempotencyKey = CreditRepository.generateIdempotencyKey({
       studentId: input.studentId,
       hours: input.hours,
-      notes: input.notes,
+      notes: input.notes ?? undefined,
       sourcePaymentId: input.sourcePaymentId,
     });
 

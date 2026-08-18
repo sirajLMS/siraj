@@ -382,23 +382,6 @@ export function invalidateEnvConfigCache(key?: string): void {
   }
 }
 
-/**
- * Returns basic stats about the module-scoped env-config cache for observability and tests.
- *
- * NOTE: this reports the live cache contents regardless of per-entry expiry. Entries that
- * have passed their TTL will still appear in `size` / `keys` until they are evicted by the
- * next lookup (lazy TTL). This matches the documented lazy-expiry cache model and keeps
- * the stats accessor side-effect-free.
- *
- * @returns `{ size, keys }` where `size` is the current entry count and `keys` lists them.
- */
-export function getEnvConfigCacheStats(): { size: number; keys: string[] } {
-  return {
-    size: cache.size,
-    keys: [...cache.keys()],
-  };
-}
-
 // ─── List path: Settings → Environment Config tab ───────────────────────────────
 
 /** Resolved source/value pair for a single env-config key. */

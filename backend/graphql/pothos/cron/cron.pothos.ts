@@ -198,7 +198,7 @@ function isRecordOrNull(value: unknown): value is Record<string, unknown> | null
 // ─── Error Handler ────────────────────────────────────────────────────────────
 
 function handleNotFoundError(result: unknown, id: string, tErrors: ErrorsLabels): asserts result {
-  if (result === null || result === undefined) {
+  if (result == null) {
     throw new GraphQLError(tErrors.notFound, {
       extensions: { code: "NOT_FOUND", id },
     });

@@ -24,6 +24,7 @@ import { checkRateLimit, getClientIdentifier, graphqlRateLimiter } from "@/backe
 import { ApolloCacheAdapter } from "@/backend/services";
 import { IdempotencyService } from "@/backend/services/idempotency.service";
 import { getServerTranslations } from "@/shared/locale";
+import { getLocale } from "@/shared/locale/server-cookies";
 
 ensureEnvironmentValidated();
 
@@ -133,7 +134,8 @@ async function withRateLimit(
 
   if (!success) {
     logger.warn(`Rate limit exceeded for ${identifier}`);
-    const errorsTranslations = getServerTranslations("ar").errorsTranslations;
+    const locale = await getLocale();
+    const errorsTranslations = getServerTranslations(locale).errorsTranslations;
 
     return NextResponse.json(
       {
@@ -198,7 +200,8 @@ async function withIdempotency(
 
   if (!isNew) {
     logger.warn(`Duplicate request detected with idempotency key: ${idempotencyKey} for ${identifier}`);
-    const errorsTranslations = getServerTranslations("ar").errorsTranslations;
+    const locale = await getLocale();
+    const errorsTranslations = getServerTranslations(locale).errorsTranslations;
     return NextResponse.json(
       {
         errors: [
@@ -236,7 +239,8 @@ export async function POST(request: NextRequest) {
     return await withRateLimit(request, req => withIdempotency(req, getHandler()));
   } catch (error) {
     logger.error("Unhandled error in GraphQL POST handler", error);
-    const errorsTranslations = getServerTranslations("ar").errorsTranslations;
+    const locale = await getLocale();
+    const errorsTranslations = getServerTranslations(locale).errorsTranslations;
     return NextResponse.json(
       {
         errors: [

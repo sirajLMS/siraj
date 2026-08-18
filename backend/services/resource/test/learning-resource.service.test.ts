@@ -71,14 +71,14 @@ describe("LearningResourceService — deleteResource", () => {
 
     let errorCaught: Error | null = null;
     try {
-      await LearningResourceService.deleteResource(dummyResourceId, dummyActorId);
+      await LearningResourceService.deleteResource(dummyResourceId, dummyActorId, "en");
     } catch (e) {
       errorCaught = e instanceof Error ? e : new Error(String(e));
     }
 
     expect(errorCaught).not.toBeNull();
     if (errorCaught) {
-      expect(errorCaught.message).toContain("resourceDeleteFailed");
+      expect(errorCaught.message).toContain("Failed to delete learning resource");
       expect(errorCaught.cause).toBeDefined();
       if (errorCaught.cause instanceof Error) {
         expect(errorCaught.cause.message).toContain("AWS S3 Timeout");

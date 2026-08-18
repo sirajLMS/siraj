@@ -1,10 +1,8 @@
-import { hash } from "bcryptjs";
 import { and, asc, count, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
 import type { AccountStatus } from "@/backend/enum";
-import { validatePasswordStrength } from "@/backend/lib/auth/password";
 import { logger } from "@/backend/lib/logger";
 import { isValidIanaTimezone, normalizeIanaTimezone } from "@/backend/lib/timezone";
 import {
@@ -27,16 +25,6 @@ import { getServerTranslations } from "@/shared/locale";
 // ============================================================================
 
 const usersTotalCountPrepared = db.select({ total: count() }).from(users).prepare("users_total_count");
-
-export async function findOne(condition: SQL | undefined): Promise<UserSelectType | null> {
-  try {
-    const results = await db.select().from(users).where(condition).limit(1);
-    return results[0] ?? null;
-  } catch (error) {
-    logger.error("Error finding one user:", error);
-    return null;
-  }
-}
 
 export namespace UserRepository {
   export const existsByEmail = async (email: string, tx?: DBTransaction): Promise<boolean> => {
@@ -279,16 +267,8 @@ export namespace UserRepository {
     tx?: DBTransaction
   ): Promise<UserReturnType> => {
     const executor = tx ?? db;
-    const exists = await existsByEmail(input.email.value, tx);
     const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-    if (exists) {
-      throw new Error(errorsTranslations.userEmailExists);
-    }
-
-    AuthUtils.validateUserName(input.name);
-    await validatePasswordStrength(input.password, locale);
     const now = new Date();
-    const hashedPassword = await hash(input.password, 12);
 
     try {
       const [result] = await executor
@@ -296,7 +276,7 @@ export namespace UserRepository {
         .values({
           name: input.name,
           email: input.email.value,
-          password: hashedPassword,
+          password: input.passwordHash,
           emailVerifiedAt: now,
           createdAt: now,
           updatedAt: now,

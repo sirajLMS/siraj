@@ -93,6 +93,16 @@ export type FileMetadata = {
   readonly sizeBytes: number;
 };
 
+/**
+ * GraphQL input shape for complaint file metadata (pre-uploaded attachment).
+ * Same structural shape as {@link FileMetadata} but named for Pothos inputRef use.
+ */
+export type ComplaintFileMetadataInput = {
+  readonly path: string;
+  readonly mimeType: string;
+  readonly sizeBytes: number;
+};
+
 export type ParentComplaintPaginatedResult = {
   readonly id: string;
   readonly complaints: ReadonlyArray<ComplaintReturnType>;

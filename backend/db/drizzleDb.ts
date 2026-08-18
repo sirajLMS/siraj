@@ -3,7 +3,7 @@ import type { relations } from "@/backend/db/drizzleRelations";
 import { createDatabase, createPool } from "@/backend/db/factory";
 import { clearHttpClientSingleton, getNeonHttpDb } from "@/backend/db/http-client";
 import { ensureEnvironmentValidated, getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
-import { clearGlobalSingleton, getGlobalSingleton, getGlobalSingletonIfExists } from "@/backend/lib/global-singleton";
+import { clearGlobalSingleton, getGlobalSingleton } from "@/backend/lib/global-singleton";
 import { logger } from "@/backend/lib/logger";
 
 const DB_KEY = Symbol.for("siraj.db");
@@ -11,10 +11,6 @@ const DB_POOL_KEY = Symbol.for("siraj.dbPool");
 const HTTP_DB_KEY = Symbol.for("siraj.httpDb");
 
 export const drizzleLogs: string[] = [];
-
-export function clearDrizzleLogs() {
-  drizzleLogs.length = 0;
-}
 
 function initDatabase() {
   ensureEnvironmentValidated();
@@ -72,21 +68,6 @@ export function getDrizzleDbPool(): ReturnType<typeof createPool> | null {
     return getGlobalSingleton(DB_POOL_KEY, () => createPool());
   } catch {
     return null;
-  }
-}
-
-/** Type guard: checks if a value is a pool with an `end()` method. */
-function isPoolWithEnd(value: unknown): value is { end(): Promise<void> } {
-  if (value == null || typeof value !== "object") return false;
-  const endFn = Reflect.get(value, "end");
-  return typeof endFn === "function";
-}
-
-export async function closeDrizzleDbPool(): Promise<void> {
-  const pool = getGlobalSingletonIfExists(DB_POOL_KEY);
-  if (isPoolWithEnd(pool)) {
-    await pool.end();
-    clearGlobalSingleton(DB_POOL_KEY);
   }
 }
 

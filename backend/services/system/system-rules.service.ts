@@ -31,7 +31,8 @@ export namespace SystemRulesService {
     requiredWaitTime.setMinutes(requiredWaitTime.getMinutes() + waitingMinutes);
 
     if (now < requiredWaitTime) {
-      throw new Error(`absentTooEarly:${waitingMinutes}:${locale ?? "ar"}`);
+      const t = getServerTranslations(locale ?? "ar").errorsTranslations;
+      throw new Error(t.scheduling.absentTooEarly({ waitingMinutes: String(waitingMinutes) }));
     }
   }
 

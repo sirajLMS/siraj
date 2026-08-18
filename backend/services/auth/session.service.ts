@@ -78,7 +78,7 @@ export namespace SessionService {
     return session;
   }
 
-  export async function getCurrentUserProfile(userId: string): Promise<CurrentUserProfile> {
+  export async function getCurrentUserProfile(userId: string, locale?: string): Promise<CurrentUserProfile> {
     const [safeUser, permContext, teacherId, parentId] = await Promise.all([
       UserRepository.findSafeById(userId),
       PermissionsService.getUserContext(userId),
@@ -87,7 +87,8 @@ export namespace SessionService {
     ]);
 
     if (!safeUser) {
-      throw new Error(`User not found: ${userId}`);
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.user.userNotFound(userId));
     }
 
     // For teachers, resolve whether the required profile fields (national ID)

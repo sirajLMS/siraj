@@ -53,7 +53,8 @@ export type UserUpdateSubmitInput = Omit<UserSubmitInput, "email">;
 export type UserCreateInput = {
   name: string;
   email: { value: string };
-  password: string;
+  /** Pre-hashed password (bcrypt). The repository layer stores this as-is — hashing is the service layer's responsibility. */
+  passwordHash: string;
   avatarUrl?: string | null;
 };
 

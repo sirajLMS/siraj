@@ -22,7 +22,6 @@ import type {
   UserPermissionOverrideSelectType,
 } from "@/backend/types";
 import { localeJsonKey, omitEmptyLocalizedString, resolveLocalizedString } from "@/shared/lib/localized-string";
-import { getServerTranslations } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE, type LocalizedString } from "@/shared/types";
 
 function toPermissionReturn(row: PermissionSelectType, locale?: string): PermissionReturnType {
@@ -288,10 +287,7 @@ export namespace PermissionManagementRepository {
     const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const now = new Date();
       const nameMap = omitEmptyLocalizedString(input.name);
-      const descriptionMap =
-        input.description === undefined || input.description === null
-          ? null
-          : omitEmptyLocalizedString(input.description);
+      const descriptionMap = input.description == null ? null : omitEmptyLocalizedString(input.description);
 
       const [insertedGroup] = await t
         .insert(permissionGroups)
@@ -371,10 +367,13 @@ export namespace PermissionManagementRepository {
   }
 
   /**
-   * Atomic transaction. Clears and replaces groupPermissions. Throws if isSystem.
+   * Atomic transaction. Clears and replaces groupPermissions.
    * Replaces the name/description JSONB maps with the incoming `LocalizedString`
    * maps (empty entries stripped); pass `undefined` to leave a column untouched
    * or `null` to clear the description.
+   *
+   * Business rules (system-group immutability, existence checks) are enforced
+   * by the service layer, not here.
    */
   export async function updateGroup(
     input: UpdateGroupInput,
@@ -383,18 +382,6 @@ export namespace PermissionManagementRepository {
   ): Promise<GroupWithPermissionIds> {
     const run = async (t: DBTransaction): Promise<GroupWithPermissionIds> => {
       const [existing] = await t.select().from(permissionGroups).where(eq(permissionGroups.id, input.id)).limit(1);
-
-      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-
-      if (!existing) {
-        throw new Error(errorsTranslations.permissionManagement.permissionGroupNotFound(input.id));
-      }
-
-      if (existing.isSystem) {
-        // System groups: only the permission bundle (permissionIds) is editable.
-        // Name, slug, and description are immutable.
-        return replaceGroupPermissionsAndReturn(t, input.id, existing, input.permissionIds, locale);
-      }
 
       const now = new Date();
       const nextName = input.name === undefined ? existing.name : omitEmptyLocalizedString(input.name);
@@ -434,22 +421,13 @@ export namespace PermissionManagementRepository {
   }
 
   /**
-   * Deletes a permission group. Throws if isSystem.
+   * Deletes a permission group by ID.
+   *
+   * Business rules (system-group deletion guard, existence checks) are enforced
+   * by the service layer, not here.
    */
-  export async function deleteGroup(groupId: string, locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
+  export async function deleteGroup(groupId: string, _locale?: string, tx?: DBTransaction): Promise<{ id: string }> {
     const run = async (t: DBTransaction): Promise<{ id: string }> => {
-      const [existing] = await t.select().from(permissionGroups).where(eq(permissionGroups.id, groupId)).limit(1);
-
-      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-
-      if (!existing) {
-        throw new Error(errorsTranslations.permissionManagement.permissionGroupNotFound(groupId));
-      }
-
-      if (existing.isSystem) {
-        throw new Error(errorsTranslations.permissionManagement.cannotDeleteSystemPermissionGroup);
-      }
-
       await t.delete(permissionGroups).where(eq(permissionGroups.id, groupId));
       return { id: groupId };
     };

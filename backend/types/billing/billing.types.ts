@@ -159,6 +159,41 @@ export type ExchangeRateHistoryRow = {
   readonly effectiveDate: Date;
 };
 
+/**
+ * Repository-level select row for exchange-rate history queries.
+ * Maps 1:1 to {@link ExchangeRateHistoryRow} via `mapExchangeRateHistoryRow`.
+ */
+export type ExchangeRateHistorySelectRow = {
+  readonly id: string;
+  readonly fromCurrency: CurrencyCode;
+  readonly toCurrency: CurrencyCode;
+  readonly rate: string;
+  readonly source: string | null;
+  readonly effectiveDate: Date;
+};
+
+/**
+ * Repository-level row for overdue invoice queries (unpaid + past due).
+ */
+export type OverdueInvoiceRow = {
+  readonly invoiceId: string;
+  readonly parentId: string;
+  readonly amount: string;
+  readonly currency: CurrencyCode;
+  readonly dueDate: string;
+};
+
+/**
+ * Repository-level row for parent-user join lookups used in
+ * unpaid-invoice summary grouping.
+ */
+export type ParentUserRow = {
+  readonly parentId: string;
+  readonly userId: string | null;
+  readonly userName: string | null;
+  readonly userEmail: string | null;
+};
+
 export type ExchangeRateHistoryPaginatedResult = {
   readonly id: string;
   readonly rows: ExchangeRateHistoryRow[];
@@ -387,6 +422,14 @@ export interface ParentScopedResolverArgs {
   parentId?: string | null;
   userId?: string | null;
 }
+
+/**
+ * Input for selecting a billing month (year + month).
+ */
+export type BillingMonthInput = {
+  readonly year: number;
+  readonly month: number;
+};
 
 /**
  * Union of transaction snapshot types stored in the `payment_method_snapshot`

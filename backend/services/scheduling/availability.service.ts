@@ -1,15 +1,28 @@
 import type { db } from "@/backend/db/drizzleDb";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
+import { VacationRequestStatus } from "@/backend/enum";
 import { ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import type {
   AssertSchedulePatternAvailableInput,
+  AvailabilitySearchResult,
   AvailableClassSlot,
+  CrossStaffSearchInput,
   DBTransaction,
+  ProcessVacationRequestInput,
   SlotAvailabilityInput,
+  SubmitVacationRequestInput,
+  TeacherVacationRequestSelectType,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
+import {
+  computeSlotBounds,
+  getUtcDateString,
+  isVacationRequestStatus,
+  timeToMinutes,
+  validateSlotInMemory,
+} from "./availability.helpers";
 
 type ReadExecutor = DBTransaction | typeof db;
 
@@ -39,13 +52,7 @@ export namespace AvailabilityService {
 
     // Check teacher availability windows, unavailability, and vacations
     try {
-      await TeacherAvailabilityRepository.validateBookingAvailability(
-        teacherId,
-        startAt,
-        endAt,
-        txParam(tx),
-        locale ?? "en"
-      );
+      await AvailabilityService.validateBookingAvailability(teacherId, startAt, endAt, txParam(tx), locale ?? "en");
     } catch (error) {
       logger.debug(error);
       return false;
@@ -100,7 +107,7 @@ export namespace AvailabilityService {
 
     // Single batched teacher-availability validation for all occurrences (3 DB queries total)
     try {
-      await TeacherAvailabilityRepository.validateBookingAvailabilityBatch(
+      await AvailabilityService.validateBookingAvailabilityBatch(
         teacherId,
         occurrences.map(occ => ({ startTime: occ.start, endTime: occ.end })),
         txParam(tx),
@@ -193,7 +200,7 @@ export namespace AvailabilityService {
     }
 
     // Batch-check teacher availability (returns boolean[] — no throw)
-    const teacherAvailable = await TeacherAvailabilityRepository.checkBookingAvailabilityBatch(
+    const teacherAvailable = await AvailabilityService.checkBookingAvailabilityBatch(
       teacherId,
       candidates,
       txParam(tx),
@@ -225,6 +232,203 @@ export namespace AvailabilityService {
 
     return result;
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Booking availability validation (moved from repository — business logic)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Validates that a teacher is available for the requested booking time.
+   * Checks vacation conflicts, recurring unavailability patterns, and
+   * availability windows — throws ValidationError on the first failure.
+   */
+  export const validateBookingAvailability = async (
+    teacherId: string,
+    startTime: Date,
+    endTime: Date,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<void> => {
+    const { vacationsRows, unavailabilityRows, windowRows } =
+      await TeacherAvailabilityRepository.fetchBookingAvailabilityData(teacherId, startTime, endTime, tx);
+
+    validateSlotInMemory({ startTime, endTime }, vacationsRows, unavailabilityRows, windowRows, locale);
+  };
+
+  /**
+   * Batched validation of a teacher's availability for multiple occurrences.
+   * Fetches data in 3 queries, then validates each slot in-memory.
+   * Throws the first conflict error.
+   */
+  export const validateBookingAvailabilityBatch = async (
+    teacherId: string,
+    slots: { startTime: Date; endTime: Date }[],
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<void> => {
+    if (slots.length === 0) return;
+    const { earliestStart, latestEnd } = computeSlotBounds(slots);
+    const { vacationsRows, unavailabilityRows, windowRows } =
+      await TeacherAvailabilityRepository.fetchBookingAvailabilityData(teacherId, earliestStart, latestEnd, tx);
+
+    for (const slot of slots) {
+      validateSlotInMemory(slot, vacationsRows, unavailabilityRows, windowRows, locale);
+    }
+  };
+
+  /**
+   * Non-throwing batched availability check. Returns boolean[] (same order as slots).
+   * true = available, false = conflicts with vacation, unavailability, or
+   * falls outside availability windows.
+   */
+  export const checkBookingAvailabilityBatch = async (
+    teacherId: string,
+    slots: { startTime: Date; endTime: Date }[],
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<boolean[]> => {
+    if (slots.length === 0) return [];
+    const { earliestStart, latestEnd } = computeSlotBounds(slots);
+    const { vacationsRows, unavailabilityRows, windowRows } =
+      await TeacherAvailabilityRepository.fetchBookingAvailabilityData(teacherId, earliestStart, latestEnd, tx);
+
+    return slots.map(slot => {
+      try {
+        validateSlotInMemory(slot, vacationsRows, unavailabilityRows, windowRows, locale);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Vacation workflow (moved from repository — business state machine)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  export const submitVacationRequest = async (
+    input: SubmitVacationRequestInput,
+    requestedByUserId: string,
+    teacherId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<TeacherVacationRequestSelectType> => {
+    if (input.startAt >= input.endAt) {
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new ValidationError(`${errorsTranslations.invalidInput}; Vacation start date must be before end date`);
+    }
+
+    return TeacherAvailabilityRepository.insertVacationRequest(input, requestedByUserId, teacherId, tx);
+  };
+
+  export const approveVacationRequest = async (
+    input: ProcessVacationRequestInput,
+    processedByUserId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<TeacherVacationRequestSelectType> => {
+    return processVacationRequest(input, VacationRequestStatus.APPROVED, processedByUserId, tx, locale);
+  };
+
+  export const rejectVacationRequest = async (
+    input: ProcessVacationRequestInput,
+    processedByUserId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<TeacherVacationRequestSelectType> => {
+    return processVacationRequest(input, VacationRequestStatus.REJECTED, processedByUserId, tx, locale);
+  };
+
+  async function processVacationRequest(
+    input: ProcessVacationRequestInput,
+    status: VacationRequestStatus.APPROVED | VacationRequestStatus.REJECTED,
+    processedByUserId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<TeacherVacationRequestSelectType> {
+    // Lock + fetch in the same transaction
+    const current = await TeacherAvailabilityRepository.fetchVacationRequestForUpdate(input.vacationRequestId, tx);
+
+    assertVacationStatus(
+      current,
+      s => s !== VacationRequestStatus.PENDING,
+      "vacationRequestNotPending",
+      input.vacationRequestId,
+      locale
+    );
+
+    return TeacherAvailabilityRepository.updateVacationRequestStatus(
+      input.vacationRequestId,
+      { status, processedByUserId },
+      tx
+    );
+  }
+
+  export const cancelVacationRequest = async (
+    vacationRequestId: string,
+    tx?: DBTransaction,
+    locale?: string
+  ): Promise<TeacherVacationRequestSelectType> => {
+    const current = await TeacherAvailabilityRepository.fetchVacationRequestForUpdate(vacationRequestId, tx);
+
+    assertVacationStatus(
+      current,
+      s => s === VacationRequestStatus.CANCELLED,
+      "vacationRequestAlreadyCancelled",
+      vacationRequestId,
+      locale
+    );
+
+    return TeacherAvailabilityRepository.updateVacationRequestStatus(
+      vacationRequestId,
+      { status: VacationRequestStatus.CANCELLED },
+      tx
+    );
+  };
+
+  function assertVacationStatus(
+    current: TeacherVacationRequestSelectType,
+    shouldFail: (status: VacationRequestStatus) => boolean,
+    errorKey: "vacationRequestNotPending" | "vacationRequestAlreadyCancelled",
+    vacationRequestId: string,
+    locale?: string
+  ): void {
+    if (!isVacationRequestStatus(current.status) || shouldFail(current.status)) {
+      const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new ValidationError(
+        errorKey === "vacationRequestNotPending"
+          ? `Vacation request ${vacationRequestId} is not in pending status. ${errorsTranslations.invalidInput}`
+          : `Vacation request ${vacationRequestId} is already cancelled. ${errorsTranslations.invalidInput}`
+      );
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Cross-staff availability search (moved from repository — business validation)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  export const searchCrossStaffAvailability = async (
+    input: CrossStaffSearchInput,
+    tx?: DBTransaction
+  ): Promise<AvailabilitySearchResult> => {
+    const fromMinutes = timeToMinutes(input.fromTime);
+    const toMinutes = timeToMinutes(input.toTime);
+
+    if (fromMinutes >= toMinutes) {
+      const { invalidInput } = getServerTranslations("en").errorsTranslations;
+      throw new ValidationError(`${invalidInput}; Start time must be before end time`);
+    }
+
+    const fromDate = input.fromDate ?? getUtcDateString(new Date());
+    const toDate = input.toDate ?? getUtcDateString(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+
+    if (fromDate > toDate) {
+      const { invalidInput } = getServerTranslations("en").errorsTranslations;
+      throw new ValidationError(`${invalidInput}; Vacation start date must be before end date`);
+    }
+
+    return TeacherAvailabilityRepository.searchCrossStaffAvailabilityData(input, tx);
+  };
 }
 
 /**

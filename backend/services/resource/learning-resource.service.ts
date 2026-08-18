@@ -158,7 +158,7 @@ export namespace LearningResourceService {
       if (error instanceof Error && (error.message === t.unauthorizedAction || error.message === t.resourceNotFound)) {
         throw error;
       }
-      throw new Error("resourceDeleteFailed", { cause: error });
+      throw new Error(t.resource.resourceDeleteFailed, { cause: error });
     }
   }
 

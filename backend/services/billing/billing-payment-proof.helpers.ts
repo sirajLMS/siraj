@@ -26,16 +26,17 @@ function isInvoicePaymentSubmissionStatus(value: string): value is InvoicePaymen
 export async function validateProofFile(
   proofFileId: string,
   invoiceId: string,
+  tErrors: ErrorsLabels,
   tx: DBTransaction
 ): Promise<{ filePath: string; mimeType: string }> {
   const file = await StorageDbRepository.fileById(proofFileId);
   if (!file) {
-    throw new NotFoundError("FILE", "Storage file not found");
+    throw new NotFoundError("FILE", tErrors.file.fileNotFound);
   }
 
   const mimeType = inferMimeFromPath(file.path);
   if (!mimeType || !isAllowedPaymentProofMimeType(mimeType)) {
-    throw new Error("Invalid file type");
+    throw new Error(tErrors.file.invalidFileType);
   }
 
   const existingInvoiceFiles = await StorageDbRepository.getFilesForInvoice(
@@ -47,7 +48,7 @@ export async function validateProofFile(
   if (!alreadyLinkedToInvoice) {
     const pending = await InvoicePaymentSubmissionRepository.getPendingByInvoiceId(invoiceId, tx);
     if (pending && pending.fileId !== proofFileId) {
-      throw new Error("A payment proof is already pending review for this invoice.");
+      throw new Error(tErrors.file.invoicePaymentProofPending);
     }
   }
 

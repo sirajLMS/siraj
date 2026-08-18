@@ -69,7 +69,7 @@ describe("Quota Expiry Sweeper Logic", () => {
         })
         .where(eq(quotas.id, quota.id));
 
-      const refreshed = await QuotaRepository.refreshPeriodic(tx, quota.id, null);
+      const refreshed = await QuotaService.refreshPeriodic(tx, quota.id, null);
       const refreshedRow = await tx.select().from(quotas).where(eq(quotas.id, quota.id)).limit(1);
       expect(refreshedRow[0].version).toBe(quota.version + 1);
       expect(refreshed.reservedClasses).toBe(0);

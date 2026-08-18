@@ -1,7 +1,9 @@
-import { sql } from "drizzle-orm";
+import { getTableName, isTable, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions/permission-management.repository";
 import { TimezoneRepository } from "@/backend/db/repo/shared/timezone.repository";
+import * as schema from "@/backend/db/schema";
+import { logger } from "@/backend/lib/logger";
 import type {
   GroupWithPermissionIds,
   PaginationArgs,
@@ -10,6 +12,23 @@ import type {
   TimezoneUpsertInput,
 } from "@/backend/types";
 import { PaginationUtils } from "@/backend/utils/pagination.utils";
+
+/**
+ * Allowlist of every Drizzle-managed table, built at module load time from the
+ * runtime schema so it tracks the codebase automatically as tables are added
+ * or removed. Guards {@link getTableRowCounts} against SQL injection by
+ * rejecting table names that are not part of the schema before they reach the
+ * database driver.
+ */
+const KNOWN_TABLES: ReadonlySet<string> = (() => {
+  const names = new Set<string>();
+  for (const value of Object.values(schema)) {
+    if (isTable(value as never)) {
+      names.add(getTableName(value as never));
+    }
+  }
+  return names;
+})();
 
 interface CountRow {
   count?: number;
@@ -83,9 +102,18 @@ export namespace ReferenceDataService {
   }
 
   export async function getTableRowCounts(tableNames: string[]): Promise<Record<string, number>> {
+    for (const tableName of tableNames) {
+      if (!KNOWN_TABLES.has(tableName)) {
+        logger.error(
+          `getTableRowCounts rejected unknown table name "${tableName}" — not present in Drizzle schema allowlist. This indicates either a stale caller or an injection attempt.`
+        );
+        throw new Error(`Table "${tableName}" is not a known database table; refusing to execute raw count query.`);
+      }
+    }
+
     const entries = await Promise.all(
       tableNames.map(async tableName => {
-        const result = await db.execute(sql.raw(`SELECT COUNT(*)::int AS count FROM "${tableName}"`));
+        const result = await db.execute(sql`SELECT COUNT(*)::int AS count FROM ${sql.identifier(tableName)}`);
         return [tableName, extractCount(result)] as const;
       })
     );

@@ -1,4 +1,3 @@
-import type { AttendanceEvaluation } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AttendanceEvaluationPothosEnum,
@@ -6,6 +5,8 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   LessonReportReturnType,
+  LessonReportSubmitInput as LessonReportSubmitInputType,
+  LessonReviewInput as LessonReviewInputType,
   PendingLessonReportsPayload,
   PendingReviewCountReturnType,
 } from "@/backend/types";
@@ -46,13 +47,7 @@ export const LessonReportPothosObject = LessonReportRef.implement({
 });
 
 export const LessonReportSubmitInput = gqlSchemaBuilder
-  .inputRef<{
-    classInstanceId: string;
-    attendanceEvaluation: AttendanceEvaluation;
-    durationMinutes: number;
-    teacherNotes?: string;
-    completionPercentage: number;
-  }>("LessonReportSubmitInput")
+  .inputRef<LessonReportSubmitInputType>("LessonReportSubmitInput")
   .implement({
     description: "Input for submitting a lesson report for a completed class instance",
     fields: t => ({
@@ -64,15 +59,13 @@ export const LessonReportSubmitInput = gqlSchemaBuilder
     }),
   });
 
-export const LessonReviewInput = gqlSchemaBuilder
-  .inputRef<{ reportId: string; rejectionReason?: string }>("LessonReviewInput")
-  .implement({
-    description: "Input for reviewing (approving/rejecting) a lesson report",
-    fields: t => ({
-      reportId: t.id({ required: true }),
-      rejectionReason: t.string({ required: false }),
-    }),
-  });
+export const LessonReviewInput = gqlSchemaBuilder.inputRef<LessonReviewInputType>("LessonReviewInput").implement({
+  description: "Input for reviewing (approving/rejecting) a lesson report",
+  fields: t => ({
+    reportId: t.id({ required: true }),
+    rejectionReason: t.string({ required: false }),
+  }),
+});
 
 const PendingReviewCountRef = gqlSchemaBuilder.objectRef<PendingReviewCountReturnType>("PendingReviewCount");
 

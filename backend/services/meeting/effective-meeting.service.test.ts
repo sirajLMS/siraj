@@ -8,6 +8,7 @@ import {
   setupTeacher,
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { EffectiveMeetingSource } from "@/backend/enum";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { DBTransaction } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -42,7 +43,7 @@ describe("EffectiveMeetingService", () => {
 
     const resolved = await EffectiveMeetingService.resolveForClassInstance(instance.id, tErrors, tx);
 
-    expect(resolved.source).toBe("class");
+    expect(resolved.source).toBe(EffectiveMeetingSource.CLASS);
     expect(resolved.joinUrl).toBe("https://zoom.us/j/class-override");
   });
 
@@ -58,7 +59,7 @@ describe("EffectiveMeetingService", () => {
 
     const resolved = await EffectiveMeetingService.resolveForClassInstance(instance.id, tErrors, tx);
 
-    expect(resolved.source).toBe("teacher");
+    expect(resolved.source).toBe(EffectiveMeetingSource.TEACHER);
     expect(resolved.joinUrl).toBe("https://zoom.us/j/teacher-only");
   });
 
@@ -67,7 +68,7 @@ describe("EffectiveMeetingService", () => {
 
     const resolved = await EffectiveMeetingService.resolveForNewBooking(teacher.id, { tErrors, tx });
 
-    expect(resolved.source).toBe("none");
+    expect(resolved.source).toBe(EffectiveMeetingSource.NONE);
     expect(resolved.joinUrl).toBeNull();
   });
 });

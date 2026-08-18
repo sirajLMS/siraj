@@ -2,23 +2,14 @@ import { RecurringScheduleRepository } from "@/backend/db/repo/scheduling/recurr
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { RecurringScheduleDetailReturnType, RecurringScheduleSelectType } from "@/backend/types";
+import type {
+  RecurringScheduleDetailReturnType,
+  RecurringScheduleListRow,
+  RecurringScheduleRepositoryRow,
+  RecurringScheduleSelectType,
+} from "@/backend/types";
 import { parseIanaTimezone } from "@/shared/lib/enum";
 import type { ErrorsLabels } from "@/shared/locale";
-
-/**
- * Repository returns rows with studentName and teacherUserName attached via Object.assign
- * but typed as RecurringScheduleSelectType[]. This type represents the actual shape.
- */
-type RecurringScheduleRepositoryRow = RecurringScheduleSelectType & {
-  studentName: string;
-  teacherUserName: string;
-};
-
-type RecurringScheduleListRow = RecurringScheduleSelectType & {
-  studentName: string;
-  teacherUserName: string;
-};
 
 /**
  * Type guard to check if a RecurringScheduleSelectType row has the extended properties

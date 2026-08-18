@@ -346,6 +346,16 @@ export namespace PermissionManagementService {
     locale?: string
   ): Promise<void> {
     await requireManageAccess(actorUserId, tErrors);
+
+    const existing = await PermissionManagementRepository.getGroupById(groupId, locale);
+    if (!existing) {
+      throw new Error(tErrors.permissionManagement.permissionGroupNotFound(groupId));
+    }
+
+    if (existing.isSystem) {
+      throw new Error(tErrors.permissionManagement.cannotDeleteSystemPermissionGroup);
+    }
+
     await PermissionManagementRepository.deleteGroup(groupId, locale);
   }
 

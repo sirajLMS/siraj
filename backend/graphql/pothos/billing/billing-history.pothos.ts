@@ -19,6 +19,7 @@ import { BillingHistoryService } from "@/backend/services";
 import type {
   AdminBillingSummaryResult,
   BillingCurrencyTotal,
+  BillingMonthInput,
   BillingSummaryWithCurrencyTotals,
   DisplayAmountReturnType,
   InvoiceHistoryPaginatedResult,
@@ -203,7 +204,7 @@ export const ParentBillingSummaryPothosObject = ParentBillingSummaryRef.implemen
   }),
 });
 
-export const BillingMonthInputRef = gqlSchemaBuilder.inputRef<{ year: number; month: number }>("BillingMonthInput");
+export const BillingMonthInputRef = gqlSchemaBuilder.inputRef<BillingMonthInput>("BillingMonthInput");
 
 BillingMonthInputRef.implement({
   fields: t => ({

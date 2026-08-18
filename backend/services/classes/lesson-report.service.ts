@@ -99,7 +99,8 @@ export namespace LessonReportService {
       throw new Error(tErrors.scheduling.classInstanceNotFound({ id: classInstanceId }));
     }
     if (instance.teacherId !== teacherId) {
-      throw new Error("lessonReport.notEligibleForReview");
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(tErrors.lessonReport.notEligibleForReview);
     }
   }
 
@@ -235,13 +236,13 @@ export namespace LessonReportService {
       throw new Error(tErrors.scheduling.classInstanceNotFound({ id: input.classInstanceId }));
     }
     if (instance.executionState !== "COMPLETED") {
-      throw new Error("lessonReport.notEligibleForReview");
+      throw new Error(tErrors.lessonReport.notEligibleForReview);
     }
 
     // Idempotency: at most one report per class instance
     const existing = await LessonReportRepository.findByClassInstanceId(input.classInstanceId);
     if (existing) {
-      throw new Error("lessonReport.alreadyExists");
+      throw new Error(tErrors.lessonReport.alreadyExists);
     }
 
     const idempotencyKey = `lesson-report:${input.classInstanceId}`;
@@ -273,7 +274,7 @@ export namespace LessonReportService {
       return toReturnType(created);
     } catch (error) {
       logger.error("Failed to submit lesson report", { classInstanceId: input.classInstanceId, error });
-      throw new Error("lessonReport.createFailed", { cause: error });
+      throw new Error(tErrors.lessonReport.createFailed, { cause: error });
     }
   }
 
@@ -394,10 +395,10 @@ export namespace LessonReportService {
 
     const report = await LessonReportRepository.findById(reportId);
     if (!report) {
-      throw new Error("lessonReport.notFound");
+      throw new Error(tErrors.lessonReport.notFound);
     }
     if (report.status !== "PENDING_REVIEW") {
-      throw new Error("lessonReport.alreadyReviewed");
+      throw new Error(tErrors.lessonReport.alreadyReviewed);
     }
 
     // Validate rejection reason using shared helper
@@ -607,7 +608,7 @@ export namespace LessonReportService {
 
     const report = await LessonReportRepository.findByClassInstanceId(classInstanceId);
     if (!report) {
-      throw new Error("lessonReport.notFound");
+      throw new Error(tErrors.lessonReport.notFound);
     }
 
     const studentId = await StudentRepository.getStudentIdByUserId(actorUserId);
@@ -617,7 +618,7 @@ export namespace LessonReportService {
 
     const updated = await LessonReportRepository.updateStudentNotes(classInstanceId, studentNotes);
     if (!updated) {
-      throw new Error("lessonReport.notFound");
+      throw new Error(tErrors.lessonReport.notFound);
     }
 
     return toReturnType(updated);

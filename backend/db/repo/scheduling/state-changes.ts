@@ -4,7 +4,6 @@ import { incrementTeacherLeaveQuota as incrementTeacherLeaveQuotaFn } from "@/ba
 import {
   createRescheduledSuccessor,
   type DBTransaction,
-  getClassInstanceByIdOrThrow,
   performRescheduleValidations,
 } from "@/backend/db/repo/scheduling/shared";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
@@ -579,63 +578,3 @@ export const rescheduleClassInstance = async (
 
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
 };
-
-export async function processAutomatedClassLeave(
-  id: string,
-  reason: string | null,
-  actorUserId: string,
-  tx?: DBTransaction,
-  tErrors?: ErrorsLabels,
-  hooks?: StateChangeHooks,
-  meetingJoinUrl?: string | null
-): Promise<{ originalId: string; successorId: string | null }> {
-  const runner = async (t: DBTransaction) => {
-    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
-    const existing = await getClassInstanceByIdOrThrow(t, id, tFuncErrors);
-    const offsetDays = await SystemSettingsRepository.getIntValue("session_leave_reschedule_offset_days", 7, t);
-    const successor = await createRescheduledSuccessor(
-      t,
-      existing,
-      offsetDays,
-      "Automated leave reschedule",
-      tFuncErrors,
-      meetingJoinUrl
-    );
-
-    const updated = await runStateChange(
-      id,
-      actorUserId,
-      async () => buildLeaveStateChangePayload(existing, successor.id, reason),
-      t,
-      tErrors,
-      hooks
-    );
-
-    const originalId = updated?.id ?? id;
-
-    const now = new Date();
-    await t
-      .insert(leaveRequests)
-      .values({
-        classInstanceId: id,
-        requestedByUserId: actorUserId,
-        requesterType: "ADMIN",
-        reason,
-        status: "RESCHEDULED",
-        createdAt: now,
-        processedAt: now,
-        processedByUserId: actorUserId,
-      })
-      .onConflictDoNothing();
-
-    const [teacherRow] = await t
-      .select({ id: teachers.id })
-      .from(teachers)
-      .where(eq(teachers.id, existing.teacherId))
-      .limit(1);
-    if (teacherRow) await incrementTeacherLeaveQuotaFn(teacherRow.id, t);
-
-    return { originalId, successorId: successor.id };
-  };
-  return tx ? runner(tx) : db.transaction((t: DBTransaction) => runner(t));
-}

@@ -6,6 +6,7 @@ import { parents, students, teacherAssignments, teachers, users } from "@/backen
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
+import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { DBTransaction, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
@@ -151,7 +152,7 @@ async function submitTestVacation(args: {
   end: string;
   reason?: string;
 }) {
-  return TeacherAvailabilityRepository.submitVacationRequest(
+  return AvailabilityService.submitVacationRequest(
     {
       startAt: new Date(args.start),
       endAt: new Date(args.end),
@@ -268,7 +269,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
 
       expect(pendingBooking.id).toBeDefined();
 
-      const approved = await TeacherAvailabilityRepository.approveVacationRequest(
+      const approved = await AvailabilityService.approveVacationRequest(
         {
           vacationRequestId: vacation.id,
         },
@@ -298,7 +299,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
         end: "2026-08-05T23:59:59Z",
       });
 
-      const rejected = await TeacherAvailabilityRepository.rejectVacationRequest(
+      const rejected = await AvailabilityService.rejectVacationRequest(
         {
           vacationRequestId: vacation.id,
         },
@@ -316,7 +317,7 @@ describe("Teacher Availability & Vacation Workflow", () => {
         end: "2026-09-05T23:59:59Z",
       });
 
-      const cancelled = await TeacherAvailabilityRepository.cancelVacationRequest(secondVacation.id, tx);
+      const cancelled = await AvailabilityService.cancelVacationRequest(secondVacation.id, tx);
       expect(cancelled.status).toBe(VacationRequestStatus.CANCELLED);
     }));
 });

@@ -11,7 +11,6 @@ import {
   QuotaAlreadyDeletedError,
   QuotaLedgerError,
   QuotaNotFoundError,
-  ValidationError,
 } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { mapQuotaToReturnType } from "@/backend/lib/quota-mapping";
@@ -71,20 +70,6 @@ export namespace QuotaRepository {
   const MAX_EXPIRING_QUOTAS_PER_RUN = 500;
 
   /**
-   * Type guard for the rich JSONB rollover policy shape enforced by
-   * `quotas_rollover_policy_valid_chk` (`maxRolloverPercent` + `accumulationCap`).
-   * Returns `false` for legacy plain-string policies (`"GRANT" | "EXPIRE"`).
-   */
-  const isRichRolloverPolicy = (
-    policy: unknown
-  ): policy is { maxRolloverPercent: number | null; accumulationCap: number | null } => {
-    if (typeof policy === "object" && policy !== null) {
-      return "maxRolloverPercent" in policy && "accumulationCap" in policy;
-    }
-    return false;
-  };
-
-  /**
    * Re-fetches the live (non-deleted) quota row for a student. Used by the
    * ledger-first duplicate-skip branches inside reserve/release/redeem methods
    * to return the current row on a duplicate idempotency hit.
@@ -109,39 +94,6 @@ export namespace QuotaRepository {
     const existing = await fetchLiveQuota(tx, input.quotaId, input.studentId);
     if (!existing) throw new QuotaNotFoundError("Quota not found");
     return existing;
-  };
-
-  /** Computes the period-end date from an anchor + periodDays. */
-  const computePeriodEnd = (anchor: Date, periodDays: number): Date =>
-    new Date(anchor.getTime() + periodDays * 24 * 60 * 60 * 1000);
-  /**
-   * Computes how many of `unused` classes carry over to the new period, honoring
-   * both the rich JSONB rollover policy (`maxRolloverPercent` + `accumulationCap`)
-   * and the legacy plain-string `"GRANT" | "EXPIRE"` policy.
-   */
-  const computeRolloverAmount = (rolloverPolicy: QuotaSelectType["rolloverPolicy"], unused: number): number => {
-    if (isRichRolloverPolicy(rolloverPolicy)) {
-      const percent = rolloverPolicy.maxRolloverPercent ?? 100;
-      const raw = Math.floor(unused * (percent / 100));
-      const cap = rolloverPolicy.accumulationCap;
-      return Math.min(raw, cap ?? raw);
-    }
-    if (typeof rolloverPolicy === "string") {
-      if (rolloverPolicy === "GRANT") {
-        return unused;
-      }
-      return 0;
-    }
-    return unused;
-  };
-
-  /** Advances an anchor forward in whole `periodDays` increments until it sits after `now`. */
-  const advancePeriodAnchor = (anchor: Date, periodDays: number, now: Date): Date => {
-    let next = anchor;
-    while (next <= now) {
-      next = new Date(next.getTime() + periodDays * 24 * 60 * 60 * 1000);
-    }
-    return next;
   };
 
   /**
@@ -1070,63 +1022,31 @@ export namespace QuotaRepository {
   };
 
   /**
-   * Refresh a single PERIODIC quota for its next period.
+   * Data-access method that applies a pre-computed periodic refresh to a single
+   * quota row.  All business-rule computation (rollover amount, period
+   * advancement, validation) must be performed by the caller
+   * (see `QuotaService.refreshPeriodic`) before invoking this method.
    *
-   * The `rolloverPolicy` column on `quotas` is a JSONB object of shape
-   * `{ maxRolloverPercent: number | null; accumulationCap: number | null }`
-   * (enforced by `quotas_rollover_policy_valid_chk`). When present, the rollover
-   * amount is computed as:
+   * Expects:
+   * - `target`   — the locked quota row (SELECT … FOR UPDATE already done by caller)
+   * - `newRemaining`, `newAnchor`, `expiredAmount`, `periodStr` — pre-computed by the service
    *
-   *   rollover = min(floor(remaining * maxRolloverPercent / 100), accumulationCap)
-   *
-   * The portion of `remaining` not rolled over is expired (EXPIRE ledger entry),
-   * and the full `totalClasses` is replenished for the new period (GRANT ledger
-   * entry). `remaining` is updated atomically to `rollover + totalClasses`,
-   * `usedThisPeriod` reset to 0, and `periodAnchor` advanced past `now`.
-   *
-   * For backward compatibility with legacy quotas whose `rolloverPolicy` is a
-   * plain `"GRANT" | "EXPIRE"` string, that policy is honored too:
-   *   - "GRANT":  all unused preserved, full replenish
-   *   - "EXPIRE": all unused expired, full replenish
-   *
-   * Idempotent: EXPIRE/GRANT keys are scoped to the ending period, and the
-   * method no-ops (returns the unchanged row) when the period has not ended.
-   * Optimistic concurrency: the `UPDATE` carries `version = ?` to detect
-   * concurrent refreshes.
+   * The method performs the version-checked UPDATE and the deferred ledger
+   * INSERTs (EXPIRE + GRANT) for audit-trail completeness (RB‑11).
    */
-  export const refreshPeriodic = async (
+  export const applyRefreshPeriodic = async (
     tx: DBTransaction,
-    quotaId: string,
-    actorUserId?: string | null
+    target: QuotaSelectType,
+    input: {
+      newRemaining: number;
+      newAnchor: Date;
+      expiredAmount: number;
+      periodStr: string;
+      actorUserId?: string | null;
+    }
   ): Promise<QuotaReturnType> => {
-    // Lock the quota row for the duration of this transaction to prevent TOCTOU races (RB-11).
-    const [target] = await tx
-      .select()
-      .from(quotas)
-      .where(and(eq(quotas.id, quotaId), isNull(quotas.deletedAt)))
-      .for("update")
-      .limit(1);
-    if (!target) throw new QuotaNotFoundError("Quota not found");
-    if (target.kind !== "PERIODIC") throw new ValidationError("Cannot refresh non-periodic quota");
-    if (!target.periodDays || target.periodDays <= 0)
-      throw new ValidationError("Quota has no valid period days configured");
-
     const now = new Date();
-    const periodAnchor = target.periodAnchor ?? target.createdAt;
-    const periodEnd = computePeriodEnd(periodAnchor, target.periodDays);
-
-    // Only refresh if the current period has expired
-    if (now <= periodEnd) return mapQuotaToReturnType(target);
-
-    const periodStr = periodEnd.toISOString().slice(0, 10);
-    const unused = Math.max(target.remaining, 0);
-    const rolloverAmount = computeRolloverAmount(target.rolloverPolicy, unused);
-
-    const newRemaining = rolloverAmount + target.totalClasses;
-    const expiredAmount = unused - rolloverAmount;
-
-    // Advance the period anchor to the first future period boundary
-    const newAnchor = advancePeriodAnchor(periodEnd, target.periodDays, now);
+    const { newRemaining, newAnchor, expiredAmount, periodStr, actorUserId } = input;
 
     // Version-checked UPDATE first. Ledger INSERTs are deferred to AFTER the UPDATE
     // succeeds so that a conflict (concurrent write) rolls back cleanly without
@@ -1141,7 +1061,7 @@ export namespace QuotaRepository {
         version: target.version + 1,
         updatedAt: now,
       })
-      .where(and(eq(quotas.id, quotaId), eq(quotas.version, target.version)))
+      .where(and(eq(quotas.id, target.id), eq(quotas.version, target.version)))
       .returning();
 
     if (!updated) throw new ConflictError("Failed to refresh periodic quota due to concurrent write");
@@ -1149,10 +1069,10 @@ export namespace QuotaRepository {
     // After UPDATE succeeds: insert deferred ledger entries.
     // EXPIRE the unused classes that did not roll over from the just-ended period
     if (expiredAmount > 0) {
-      const expireKey = deriveExpireIdempotencyKey(quotaId, periodStr);
+      const expireKey = deriveExpireIdempotencyKey(target.id, periodStr);
       // AUDIT: ledger entry required for EXPIRE tracking and balance reconstruction
       await QuotaLedgerRepository.insert(tx, {
-        quotaId,
+        quotaId: target.id,
         studentId: target.studentId,
         delta: -expiredAmount,
         reason: QuotaLedgerReason.EXPIRE,
@@ -1165,9 +1085,9 @@ export namespace QuotaRepository {
     // GRANT the full replenishment for the new period (per-period idempotency key
     // so grants from different periods never collide).
     // AUDIT: ledger entry required for GRANT tracking and balance reconstruction
-    const grantKey = derivePeriodicGrantIdempotencyKey(quotaId, periodStr);
+    const grantKey = derivePeriodicGrantIdempotencyKey(target.id, periodStr);
     await QuotaLedgerRepository.insert(tx, {
-      quotaId,
+      quotaId: target.id,
       studentId: target.studentId,
       delta: target.totalClasses,
       reason: QuotaLedgerReason.GRANT,

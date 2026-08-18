@@ -1,6 +1,6 @@
 import { mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { type NextRequest, NextResponse  } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -170,8 +170,7 @@ function isValidLogEntry(log: LogEntry): boolean {
 // `logs/client_<sessionId>.log` files for triaging browser-side diagnostics
 // (e.g. the auth recovery path) without requiring the user to copy logs out
 // of DevTools.
-const CLIENT_LOGS_ENABLED =
-  process.env.NODE_ENV === "development" || process.env.ENABLE_LOGGING === "true";
+const CLIENT_LOGS_ENABLED = process.env.NODE_ENV === "development" || process.env.ENABLE_LOGGING === "true";
 
 export async function POST(request: NextRequest) {
   const locale = request.headers.get("accept-language")?.split(",")[0]?.split("-")[0] ?? "ar";

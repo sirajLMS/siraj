@@ -289,7 +289,7 @@ export function isAppPermission(value: string): value is AppPermission {
  * Parses a string value into an AppPermission enum, returning null if invalid.
  */
 export function parseAppPermission(value: string | null | undefined): AppPermission | null {
-  if (value === null || value === undefined) {
+  if (value == null) {
     return null;
   }
   if (isAppPermission(value)) {

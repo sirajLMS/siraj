@@ -314,7 +314,7 @@ async function finalizeInvoicePaid(
     throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: existingInvoice.status }));
   }
 
-  const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tx);
+  const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tErrors, tx);
   await linkProofToInvoice(invoiceId, proofFileId, tx);
 
   const submittedAt = new Date();
@@ -392,7 +392,7 @@ export namespace BillingManagementService {
       actorUserId,
       invoiceId,
       async (tx, txErrors) => {
-        const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tx);
+        const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, txErrors, tx);
         await linkProofToInvoice(invoiceId, proofFileId, tx);
 
         const submittedAt = new Date();

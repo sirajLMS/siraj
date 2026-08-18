@@ -53,7 +53,7 @@ export function isCronConcurrencyPolicy(value: string): value is CronConcurrency
  * Parses a string value into a CronConcurrencyPolicy enum, returning null if invalid.
  */
 export function parseCronConcurrencyPolicy(value: string | null | undefined): CronConcurrencyPolicy | null {
-  if (value === null || value === undefined) {
+  if (value == null) {
     return null;
   }
   if (isCronConcurrencyPolicy(value)) {

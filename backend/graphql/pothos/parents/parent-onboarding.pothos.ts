@@ -37,6 +37,7 @@ export const ParentOnboardingResultPothosObject = gqlSchemaBuilder
   .implement({
     description: "Result of parent onboarding operation",
     fields: t => ({
+      id: t.string({ resolve: parent => parent.parentId }),
       userId: t.exposeString("userId"),
       parentId: t.exposeString("parentId"),
       name: t.exposeString("name"),

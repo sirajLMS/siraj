@@ -10,7 +10,8 @@ import type { ErrorsLabels } from "@/shared/locale/types";
  */
 async function authenticateAdmin(
   request: NextRequest,
-  tErrors: ErrorsLabels
+  tErrors: ErrorsLabels,
+  locale: string
 ): Promise<{ userId: string } | NextResponse> {
   const authHeader = request.headers.get("authorization");
   const accessToken = extractTokenFromHeader(authHeader) ?? request.cookies.get("access_token")?.value ?? null;
@@ -38,7 +39,7 @@ async function authenticateAdmin(
     return NextResponse.json({ error: tErrors.file.authenticationRequired }, { status: 401 });
   }
 
-  const user = await SessionService.getCurrentUserProfile(userId);
+  const user = await SessionService.getCurrentUserProfile(userId, locale);
   if (!user) {
     logger.warn("Unauthorized cleanup attempt - user not found", { userId });
     return NextResponse.json({ error: tErrors.file.authenticationRequired }, { status: 401 });
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
   const tErrors = getServerTranslations(locale).errorsTranslations;
 
   try {
-    const authResult = await authenticateAdmin(request, tErrors);
+    const authResult = await authenticateAdmin(request, tErrors, locale);
     if (authResult instanceof NextResponse) {
       return authResult;
     }

@@ -7,6 +7,7 @@ import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { isComplaintCategory, isComplaintStatus } from "@/backend/lib";
 import { ComplaintService } from "@/backend/services";
 import type {
+  ComplaintFileMetadataInput,
   ComplaintFileReturnType,
   ComplaintMetrics,
   ComplaintQueueFilter,
@@ -114,9 +115,8 @@ export const ComplaintQueuePaginatedResultPothosObject = ComplaintQueuePaginated
   }),
 });
 
-const ComplaintFileMetadataInputRef = gqlSchemaBuilder.inputRef<{ path: string; mimeType: string; sizeBytes: number }>(
-  "ComplaintFileMetadataInput"
-);
+const ComplaintFileMetadataInputRef =
+  gqlSchemaBuilder.inputRef<ComplaintFileMetadataInput>("ComplaintFileMetadataInput");
 
 export const ComplaintFileMetadataInputPothosObject = ComplaintFileMetadataInputRef.implement({
   description: "Input metadata for a pre-uploaded complaint attachment.",

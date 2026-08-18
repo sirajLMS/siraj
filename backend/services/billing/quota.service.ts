@@ -1,12 +1,14 @@
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo/billing/credit.repository";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.repository";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { StudentRepository } from "@/backend/db/repo/students";
+import { quotas } from "@/backend/db/schema";
 import { AppPermission, OnDemandStatus } from "@/backend/enum";
 import { mapQuotaLedgerToReturnType, mapQuotaToReturnType } from "@/backend/lib";
-import { QuotaNotFoundError, UnauthorizedError } from "@/backend/lib/errors";
+import { QuotaNotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -23,6 +25,7 @@ import type {
   QuotaLedgerPaginatedResult,
   QuotaPaginatedFilter,
   QuotaReturnType,
+  QuotaSelectType,
   QuotaSubmitInput,
   QuotaUpdateInput,
 } from "@/backend/types";
@@ -690,11 +693,142 @@ export namespace QuotaService {
 
   // V3-029: Repository already returns QuotaReturnType (mapped from raw
   // QuotaSelectType), so the service boundary is type-safe without re-mapping.
+  /**
+   * Refresh a single PERIODIC quota for its next period.
+   *
+   * All business rules — validation (kind must be PERIODIC, periodDays > 0),
+   * period expiry check, rollover computation (policy-based), and period
+   * anchor advancement — live here in the service layer.  The repository's
+   * `applyRefreshPeriodic` performs only the version-checked UPDATE and
+   * ledger INSERTs.
+   *
+   * The `rolloverPolicy` column on `quotas` is a JSONB object of shape
+   * `{ maxRolloverPercent: number | null; accumulationCap: number | null }`
+   * (enforced by `quotas_rollover_policy_valid_chk`). When present, the
+   * rollover amount is computed as:
+   *
+   *   rollover = min(floor(remaining * maxRolloverPercent / 100),
+   *                  accumulationCap)
+   *
+   * For backward compatibility with legacy quotas whose `rolloverPolicy` is a
+   * plain `"GRANT" | "EXPIRE"` string, that policy is honored too:
+   *   - "GRANT":  all unused preserved, full replenish
+   *   - "EXPIRE": all unused expired, full replenish
+   *
+   * Idempotent: EXPIRE/GRANT keys are scoped to the ending period, and the
+   * method no-ops (returns the unchanged row) when the period has not ended.
+   */
   export const refreshPeriodic = async (
     tx: DBTransaction,
     quotaId: string,
     actorUserId?: string | null
   ): Promise<QuotaReturnType> => {
-    return QuotaRepository.refreshPeriodic(tx, quotaId, actorUserId ?? null);
+    // --- Lock the quota row (data access) ---
+    const target = await lockQuotaForRefresh(tx, quotaId);
+    if (!target) throw new QuotaNotFoundError("Quota not found");
+
+    // --- Business rules: validation ---
+    if (target.kind !== "PERIODIC") {
+      throw new ValidationError("Cannot refresh non-periodic quota");
+    }
+    if (!target.periodDays || target.periodDays <= 0) {
+      throw new ValidationError("Quota has no valid period days configured");
+    }
+
+    // --- Business rules: period expiry check ---
+    const now = new Date();
+    const periodAnchor = target.periodAnchor ?? target.createdAt;
+    const periodEnd = computePeriodEnd(periodAnchor, target.periodDays);
+    if (now <= periodEnd) {
+      return mapQuotaToReturnType(target);
+    }
+
+    // --- Business rules: rollover computation ---
+    const periodStr = periodEnd.toISOString().slice(0, 10);
+    const unused = Math.max(target.remaining, 0);
+    const rolloverAmount = computeRolloverAmount(target.rolloverPolicy, unused);
+    const newRemaining = rolloverAmount + target.totalClasses;
+    const expiredAmount = unused - rolloverAmount;
+    const newAnchor = advancePeriodAnchor(periodEnd, target.periodDays, now);
+
+    // --- Data access: apply the pre-computed refresh ---
+    return QuotaRepository.applyRefreshPeriodic(tx, target, {
+      newRemaining,
+      newAnchor,
+      expiredAmount,
+      periodStr,
+      actorUserId: actorUserId ?? null,
+    });
   };
+
+  /**
+   * Locks the quota row for refresh (SELECT … FOR UPDATE).
+   * Data-access-only helper used by {@link refreshPeriodic}.
+   */
+  async function lockQuotaForRefresh(tx: DBTransaction, quotaId: string): Promise<QuotaSelectType | null> {
+    const [row] = await tx
+      .select()
+      .from(quotas)
+      .where(and(eq(quotas.id, quotaId), isNull(quotas.deletedAt)))
+      .for("update")
+      .limit(1);
+    return row ?? null;
+  }
+
+  /**
+   * Computes the period-end date from an anchor + periodDays.
+   * Business-rule helper used by {@link refreshPeriodic}.
+   */
+  function computePeriodEnd(anchor: Date, periodDays: number): Date {
+    return new Date(anchor.getTime() + periodDays * 24 * 60 * 60 * 1000);
+  }
+
+  /**
+   * Type guard for the rich JSONB rollover policy shape enforced by
+   * `quotas_rollover_policy_valid_chk` (`maxRolloverPercent` +
+   * `accumulationCap`). Returns `false` for legacy plain-string policies
+   * (`"GRANT" | "EXPIRE"`).
+   */
+  function isRichRolloverPolicy(
+    policy: unknown
+  ): policy is { maxRolloverPercent: number | null; accumulationCap: number | null } {
+    if (typeof policy === "object" && policy !== null) {
+      return "maxRolloverPercent" in policy && "accumulationCap" in policy;
+    }
+    return false;
+  }
+
+  /**
+   * Computes how many of `unused` classes carry over to the new period,
+   * honoring both the rich JSONB rollover policy and the legacy
+   * plain-string `"GRANT" | "EXPIRE"` policy.  Business-rule helper used by
+   * {@link refreshPeriodic}.
+   */
+  function computeRolloverAmount(rolloverPolicy: QuotaSelectType["rolloverPolicy"], unused: number): number {
+    if (isRichRolloverPolicy(rolloverPolicy)) {
+      const percent = rolloverPolicy.maxRolloverPercent ?? 100;
+      const raw = Math.floor(unused * (percent / 100));
+      const cap = rolloverPolicy.accumulationCap;
+      return Math.min(raw, cap ?? raw);
+    }
+    if (typeof rolloverPolicy === "string") {
+      if (rolloverPolicy === "GRANT") {
+        return unused;
+      }
+      return 0;
+    }
+    return unused;
+  }
+
+  /**
+   * Advances an anchor forward in whole `periodDays` increments until it
+   * sits after `now`.  Business-rule helper used by {@link refreshPeriodic}.
+   */
+  function advancePeriodAnchor(anchor: Date, periodDays: number, now: Date): Date {
+    let next = anchor;
+    while (next <= now) {
+      next = new Date(next.getTime() + periodDays * 24 * 60 * 60 * 1000);
+    }
+    return next;
+  }
 }

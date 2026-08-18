@@ -62,7 +62,7 @@ export namespace ReportService {
       if (error instanceof Error && error.message === tErrors.unauthorizedAction) {
         throw error;
       }
-      throw new Error("permissionDenied", { cause: error });
+      throw new Error(tErrors.resource.permissionDenied, { cause: error });
     }
   }
 }

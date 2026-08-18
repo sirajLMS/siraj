@@ -1,4 +1,4 @@
-import type { PageInfo } from "@/backend/types";
+import type { PageInfo, RecurringScheduleSelectType } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
@@ -53,4 +53,22 @@ export type UpdateRecurringClassRateInput = {
   readonly hourlyRate: string | null;
   /** Currency for `hourlyRate`. Required when `hourlyRate` is non-null. */
   readonly rateCurrency: CurrencyCode | null;
+};
+
+/**
+ * Repository returns rows with studentName and teacherUserName attached via Object.assign
+ * but typed as RecurringScheduleSelectType[]. This type represents the actual shape.
+ */
+export type RecurringScheduleRepositoryRow = RecurringScheduleSelectType & {
+  readonly studentName: string;
+  readonly teacherUserName: string;
+};
+
+/**
+ * Service-level list row — same shape as {@link RecurringScheduleRepositoryRow}
+ * but used for the `listAll` return value.
+ */
+export type RecurringScheduleListRow = RecurringScheduleSelectType & {
+  readonly studentName: string;
+  readonly teacherUserName: string;
 };

@@ -1,13 +1,18 @@
 import type { MetadataRoute } from "next";
+import { getTranslations } from "@/shared/locale/server";
+import { getLocale } from "@/shared/locale/server-cookies";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const locale = await getLocale();
+  const t = getTranslations(locale);
+
   return {
     name: "Siraj",
     short_name: "Siraj",
-    description: "Siraj Learning Management System — manage classes, schedules, students, teachers, and billing.",
+    description: t.commonTranslations.description,
     start_url: "/",
     display: "standalone",
-    background_color: "#1A1A1A",
+    background_color: "#121212",
     theme_color: "#2DD4BF",
     icons: [
       {

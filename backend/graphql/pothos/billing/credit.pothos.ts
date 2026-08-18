@@ -1,6 +1,10 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { creditTransactionFields } from "@/backend/graphql/pothos/billing/__shared__/creditFieldHelpers";
-import type { CreditBalanceReturnType, CreditTransactionReturnType } from "@/backend/types";
+import type {
+  CreditBalanceReturnType,
+  CreditTransactionReturnType,
+  CreditTransactionSubmitInput,
+} from "@/backend/types";
 
 const CreditTransactionRef = gqlSchemaBuilder.objectRef<CreditTransactionReturnType>("CreditTransaction");
 
@@ -29,9 +33,7 @@ export const CreditPurchaseResultPothosObject = PurchaseResultRef.implement({
 });
 
 export const RecordPurchaseInput = gqlSchemaBuilder
-  .inputRef<{ studentId: string; hours: number; notes?: string | null; sourcePaymentId?: string | null }>(
-    "RecordPurchaseInput"
-  )
+  .inputRef<CreditTransactionSubmitInput>("RecordPurchaseInput")
   .implement({
     description: "Input for recording a credit purchase for a student",
     fields: t => ({

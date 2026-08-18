@@ -6,7 +6,6 @@ import {
   type DBTransaction,
   validateTeacherAssignment,
 } from "@/backend/db/repo/scheduling/shared";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import {
   classInstances,
   classSubjects,
@@ -14,6 +13,7 @@ import {
   recurringSchedules,
   teachers,
 } from "@/backend/db/schema";
+import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { CreateRecurringScheduleInput, RateSnapshot } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
@@ -359,7 +359,7 @@ async function validateInstanceBatch(
   await validateTeacherAssignment(t, input.studentId, input.teacherId, earliestStart, tFuncErrors);
 
   // Batched availability check: 3 queries total instead of 3 per instance.
-  await TeacherAvailabilityRepository.validateBookingAvailabilityBatch(
+  await AvailabilityService.validateBookingAvailabilityBatch(
     input.teacherId,
     instanceRows.map(r => ({ startTime: r.scheduledStartAt, endTime: r.scheduledEndAt })),
     t,

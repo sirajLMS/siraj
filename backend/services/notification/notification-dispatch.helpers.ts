@@ -63,12 +63,6 @@ export const EVENT_CHANNEL_ALLOWLIST: Partial<Record<NotificationEventType, Noti
   [NotificationEventType.PASSWORD_RESET_BY_ADMIN]: [NotificationChannel.ON_APP, NotificationChannel.EMAIL],
 };
 
-// ─── Channel comparison helper ────────────────────────────────────────
-
-const ALL_ENUM_CHANNELS: readonly NotificationChannel[] = Object.values(NotificationChannel).filter(
-  ch => ch !== NotificationChannel.WHATSAPP
-);
-
 // String arrays for O(1) type guard lookup (avoids unsafe casts in includes)
 const NOTIFICATION_CHANNEL_STRINGS = Object.values(NotificationChannel) as readonly string[];
 const NOTIFICATION_EVENT_TYPE_STRINGS = Object.values(NotificationEventType) as readonly string[];
@@ -430,12 +424,4 @@ export async function dispatchWithPreferences(
   });
 
   return allResults;
-}
-
-/**
- * Convenience export: which channels an event allows. Used by callers that
- * want to introspect without dispatching (e.g. for UI hints or tests).
- */
-export function getEventChannels(eventType: NotificationEventType): NotificationChannel[] {
-  return EVENT_CHANNEL_ALLOWLIST[eventType] ?? [...ALL_ENUM_CHANNELS];
 }

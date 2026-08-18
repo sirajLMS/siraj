@@ -5,6 +5,7 @@ import {
   canViewStudentFieldGroup,
   type StudentFieldFilterContext,
 } from "@/backend/services/profile/profile-field-filter";
+import { getServerTranslations } from "@/shared/locale";
 
 /**
  * Build a student field filter context from the actor's effective permissions.
@@ -17,11 +18,13 @@ import {
  */
 export async function buildStudentFieldFilterContext(
   actorUserId: string,
-  studentId: string
+  studentId: string,
+  locale?: string
 ): Promise<StudentFieldFilterContext> {
   const profile = await StudentRepository.findProfileById(studentId);
   if (!profile) {
-    throw new Error("studentNotFound");
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(tErrors.student.studentNotFound(studentId));
   }
 
   const permissionContext = await PermissionsService.getUserContext(actorUserId);
@@ -35,14 +38,16 @@ export async function buildStudentFieldFilterContext(
   };
 }
 
-export function assertStudentFieldEdit(ctx: StudentFieldFilterContext, groupKey: string): void {
+export function assertStudentFieldEdit(ctx: StudentFieldFilterContext, groupKey: string, locale?: string): void {
   if (!canEditStudentFieldGroup(ctx, groupKey)) {
-    throw new Error("insufficientPermissions");
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(tErrors.insufficientPermissions);
   }
 }
 
-export function assertStudentFieldView(ctx: StudentFieldFilterContext, groupKey: string): void {
+export function assertStudentFieldView(ctx: StudentFieldFilterContext, groupKey: string, locale?: string): void {
   if (!canViewStudentFieldGroup(ctx, groupKey)) {
-    throw new Error("insufficientPermissions");
+    const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+    throw new Error(tErrors.insufficientPermissions);
   }
 }

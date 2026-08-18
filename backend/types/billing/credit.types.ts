@@ -11,8 +11,8 @@ export type CreditTransactionReturnType = Omit<CreditTransactionSelectType, "rea
 export interface CreditTransactionSubmitInput {
   studentId: string;
   hours: number;
-  notes?: string;
-  sourcePaymentId?: string;
+  notes?: string | null;
+  sourcePaymentId?: string | null;
 }
 
 export interface CreditBalanceReturnType {

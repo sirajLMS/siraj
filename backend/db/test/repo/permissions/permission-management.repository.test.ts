@@ -209,27 +209,33 @@ describe("PermissionManagementRepository", () => {
       expect(dbGroup.name).toEqual(loc("Updated Group Name"));
     });
 
-    testRepo("updateGroup should throw on non-existent group", async tx => {
-      const tFunc = getErrorMessage;
-      let errorThrown: unknown = null;
-      try {
-        await PermissionManagementRepository.updateGroup(
-          {
-            id: "00000000-0000-0000-0000-000000000000",
-            name: loc("Fail Update"),
-          },
-          "ar",
-          tx
-        );
-      } catch (err) {
-        errorThrown = err;
-      }
-      expect(errorThrown).not.toBeNull();
-      expect(tFunc(errorThrown)).toContain("مجموعة الأذونات غير موجودة");
+    testRepo("updateGroup with undefined fields preserves existing values", async tx => {
+      const perm1 = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ONLY);
+
+      const group = await PermissionManagementRepository.createGroup(
+        {
+          name: loc("Original Group"),
+          slug: "original_group_undef",
+          permissionIds: [perm1.id],
+        },
+        undefined,
+        tx
+      );
+
+      // Repo is pure data-access; passing undefined for fields keeps existing values
+      const result = await PermissionManagementRepository.updateGroup(
+        {
+          id: group.id,
+        },
+        undefined,
+        tx
+      );
+      expect(result.name).toEqual(group.name);
+      expect(result.slug).toBe(group.slug);
     });
 
-    testRepo("updateGroup on system group should ignore name change and return existing group", async tx => {
-      // Create a test system group inside the transaction (trigger only blocks UPDATE/DELETE, not INSERT)
+    testRepo("updateGroup on system group with undefined name preserves existing name", async tx => {
+      // Create a test system group inside the transaction
       const now = new Date();
       const [sysGroup] = await tx
         .insert(permissionGroups)
@@ -243,19 +249,18 @@ describe("PermissionManagementRepository", () => {
         .returning();
       expect(sysGroup).toBeDefined();
 
+      // Repo is pure data-access; service layer guards system-group immutability.
+      // Passing undefined for name keeps the existing name.
       const result = await PermissionManagementRepository.updateGroup(
         {
           id: sysGroup.id,
-          name: loc("Try Modifying System Group"),
         },
         "ar",
         tx
       );
 
-      // Name should NOT be changed — system group name is immutable
       expect(result.name).toEqual(sysGroup.name);
 
-      // Verify db — name unchanged
       const [dbGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.id, sysGroup.id)).limit(1);
       expect(dbGroup.name).toEqual(sysGroup.name);
     });
@@ -312,9 +317,7 @@ describe("PermissionManagementRepository", () => {
       )
     );
 
-    testRepo("deleteGroup should remove group, and throw on non-existent or system group", async tx => {
-      const tFunc = getErrorMessage;
-
+    testRepo("deleteGroup should remove group", async tx => {
       // 1. Create a custom group to delete
       const group = await PermissionManagementRepository.createGroup(
         {
@@ -332,44 +335,10 @@ describe("PermissionManagementRepository", () => {
       // Verify deleted in DB
       const [dbGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.id, group.id)).limit(1);
       expect(dbGroup).toBeUndefined();
-
-      // 2. Non-existent group
-      let errorThrown: unknown = null;
-      try {
-        await PermissionManagementRepository.deleteGroup("00000000-0000-0000-0000-000000000000", "ar", tx);
-      } catch (err) {
-        errorThrown = err;
-      }
-      expect(errorThrown).not.toBeNull();
-      expect(tFunc(errorThrown)).toContain("مجموعة الأذونات غير موجودة");
-
-      // 3. System group
-      // Create a test system group inside the transaction (trigger only blocks UPDATE/DELETE, not INSERT)
-      const sysNow = new Date();
-      const [sysGroup] = await tx
-        .insert(permissionGroups)
-        .values({
-          name: loc("Test System Group For Delete"),
-          slug: `test-system-group-delete-${randomUUID().slice(0, 8)}`,
-          isSystem: true,
-          createdAt: sysNow,
-          updatedAt: sysNow,
-        })
-        .returning();
-      expect(sysGroup).toBeDefined();
-
-      errorThrown = null;
-      try {
-        await PermissionManagementRepository.deleteGroup(sysGroup.id, "ar", tx);
-      } catch (err) {
-        errorThrown = err;
-      }
-      expect(errorThrown).not.toBeNull();
-      expect(tFunc(errorThrown)).toContain("لا يمكن حذف صلاحية أو مجموعة تابعة للنظام");
     });
 
     testRepoError("deleteGroup should throw on database error", () =>
-      PermissionManagementRepository.deleteGroup("00000000-0000-0000-0000-000000000000", undefined, badTx)
+      PermissionManagementRepository.deleteGroup("[CARD_REDACTED]-[CARD_REDACTED]", undefined, badTx)
     );
   });
 

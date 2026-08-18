@@ -830,7 +830,7 @@ export namespace ProfileService {
     }
     // core.status is non-null here because touchesStatus means status !== undefined
     // but it can still be null or undefined, so we guard against that
-    if (core.status === null || core.status === undefined) {
+    if (core.status == null) {
       return;
     }
     const newStatus = core.status;

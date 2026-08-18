@@ -11,6 +11,7 @@ const SimulatablePermissionGroupPothosObjectRef =
 
 export const SimulatablePermissionGroupPothosObject = SimulatablePermissionGroupPothosObjectRef.implement({
   fields: t => ({
+    id: t.string({ resolve: group => group.slug }),
     slug: t.exposeString("slug"),
     name: t.exposeString("name"),
     description: t.exposeString("description", { nullable: true }),

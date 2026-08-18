@@ -20,6 +20,8 @@ import type { DBTransaction } from "@/backend/types";
 import { escapeLikeWildcards } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 
+const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024; // 100MB
+
 export namespace StorageDbRepository {
   // File operations
   export const fileById = async (id: string): Promise<StorageTypes.FileSelectType | null> => {
@@ -764,7 +766,7 @@ export namespace StorageDbRepository {
     }
 
     // Check file size (max 100MB)
-    const maxSize = 100 * 1024 * 1024; // 100MB
+    const maxSize = MAX_FILE_SIZE_BYTES; // 100MB
     if (size > maxSize) {
       return tErrors.fileSizeExceedsMaximum(maxSize / (1024 * 1024));
     }

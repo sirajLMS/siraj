@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { teacherAvailabilityWindows, teacherRecurringUnavailability } from "@/backend/db/schema";
 import {
   createMockClassInstance,
@@ -10,6 +9,7 @@ import {
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AvailabilitySearchSortBy, DayOfWeek, Gender, VacationRequestStatus } from "@/backend/enum";
+import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type { CrossStaffSearchInput } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
@@ -115,18 +115,18 @@ async function setupTwoTestTeachers(
 }
 
 async function performSearchAndAssert(tx: DBTx, searchOptions: CrossStaffSearchInput, expectedTeacherName: string) {
-  const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(withMondayRange(searchOptions), tx);
+  const result = await AvailabilityService.searchCrossStaffAvailability(withMondayRange(searchOptions), tx);
   const matched = result.teachers.find(t => t.name === expectedTeacherName);
   expect(matched).toBeDefined();
   expect(matched?.gaps.length).toBeGreaterThan(0);
 }
 
-describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
+describe("AvailabilityService.searchCrossStaffAvailability", () => {
   test("throws error when fromTime >= toTime", async () => {
     await runInRollback(async tx => {
       let errorCaught = false;
       try {
-        await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+        await AvailabilityService.searchCrossStaffAvailability(
           withMondayRange({ fromTime: "17:00", toTime: "08:00" }),
           tx
         );
@@ -139,7 +139,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
 
   test("returns result structure when querying availability", async () => {
     await runInRollback(async tx => {
-      const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const result = await AvailabilityService.searchCrossStaffAvailability(
         withMondayRange({ fromTime: "08:00", toTime: "17:00" }),
         tx
       );
@@ -159,7 +159,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
 
-      const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const result = await AvailabilityService.searchCrossStaffAvailability(
         withMondayRange({ fromTime: "08:00", toTime: "12:00" }),
         tx
       );
@@ -186,7 +186,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.TUESDAY, "08:00", "12:00");
 
-      const mondayOnly = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const mondayOnly = await AvailabilityService.searchCrossStaffAvailability(
         {
           fromTime: "08:00",
           toTime: "12:00",
@@ -224,7 +224,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "17:00");
       await createRecurringUnavailability(tx, teacher.id, DayOfWeek.MONDAY, "12:00", "13:00");
 
-      const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const result = await AvailabilityService.searchCrossStaffAvailability(
         withMondayRange({ fromTime: "08:00", toTime: "17:00" }),
         tx
       );
@@ -263,7 +263,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "06:00", "08:00");
 
-      const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const result = await AvailabilityService.searchCrossStaffAvailability(
         withMondayRange({ fromTime: "10:00", toTime: "17:00" }),
         tx
       );
@@ -281,7 +281,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "17:00");
 
-      const vacation = await TeacherAvailabilityRepository.submitVacationRequest(
+      const vacation = await AvailabilityService.submitVacationRequest(
         {
           startAt: new Date("2026-01-05T00:00:00.000Z"),
           endAt: new Date("2026-01-05T23:59:59.999Z"),
@@ -292,13 +292,13 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
         tx
       );
 
-      const approvedVacation = await TeacherAvailabilityRepository.approveVacationRequest(
+      const approvedVacation = await AvailabilityService.approveVacationRequest(
         { vacationRequestId: vacation.id },
         adminUser.id,
         tx
       );
 
-      const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const result = await AvailabilityService.searchCrossStaffAvailability(
         withMondayRange({ fromTime: "08:00", toTime: "17:00" }),
         tx
       );
@@ -321,7 +321,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
         scheduledEndAt: new Date("2026-01-05T11:00:00.000Z"),
       });
 
-      const result = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const result = await AvailabilityService.searchCrossStaffAvailability(
         withMondayRange({ fromTime: "08:00", toTime: "17:00" }),
         tx
       );
@@ -342,7 +342,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
 
       await createAvailabilityWindow(tx, teacher.id, DayOfWeek.MONDAY, "08:00", "12:00");
 
-      const tooStrict = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const tooStrict = await AvailabilityService.searchCrossStaffAvailability(
         withMondayRange({
           fromTime: "08:00",
           toTime: "12:00",
@@ -354,7 +354,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
 
       expect(tooStrict.teachers.find(t => t.id === teacher.id)).toBeUndefined();
 
-      const passes = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const passes = await AvailabilityService.searchCrossStaffAvailability(
         withMondayRange({
           fromTime: "08:00",
           toTime: "12:00",
@@ -377,7 +377,7 @@ describe("TeacherAvailabilityRepository.searchCrossStaffAvailability", () => {
         teacher2Status: "ACTIVATED",
       });
 
-      const sorted = await TeacherAvailabilityRepository.searchCrossStaffAvailability(
+      const sorted = await AvailabilityService.searchCrossStaffAvailability(
         withMondayRange({
           fromTime: "08:00",
           toTime: "12:00",

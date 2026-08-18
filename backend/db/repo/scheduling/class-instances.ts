@@ -15,10 +15,10 @@ import {
 } from "@/backend/db/repo/scheduling/shared";
 import { updateInstanceState } from "@/backend/db/repo/scheduling/state-changes";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { OnDemandStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
+import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type * as Types from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
@@ -126,7 +126,7 @@ export const createClassInstance = async (
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     await acquireLocks(t, input.teacherId, input.studentId);
     await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, tFuncErrors);
-    await TeacherAvailabilityRepository.validateBookingAvailability(
+    await AvailabilityService.validateBookingAvailability(
       input.teacherId,
       input.scheduledStartAt,
       input.scheduledEndAt,
@@ -183,7 +183,7 @@ export const updateClassInstance = async (
 
     if (!isBeingSoftDeleted) {
       await validateTeacherAssignment(t, studentId, teacherId, startTime, tFuncErrors);
-      await TeacherAvailabilityRepository.validateBookingAvailability(teacherId, startTime, endTime, t, "ar");
+      await AvailabilityService.validateBookingAvailability(teacherId, startTime, endTime, t, "ar");
       await checkOverlaps(
         t,
         {

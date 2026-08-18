@@ -15,6 +15,7 @@ import {
   CronScheduleStatus,
   CronTriggerSource,
   DayOfWeek,
+  EffectiveMeetingSource,
   FxProvider,
   FxProviderConfigSource,
   FxSyncStatus,
@@ -321,4 +322,8 @@ export const OnDemandNoCreditsOutcomePothosEnum = gqlSchemaBuilder.enumType(OnDe
 
 export const OnDemandStatusPothosEnum = gqlSchemaBuilder.enumType(OnDemandStatus, {
   name: "OnDemandStatus",
+});
+
+export const EffectiveMeetingSourcePothosEnum = gqlSchemaBuilder.enumType(EffectiveMeetingSource, {
+  name: "EffectiveMeetingSource",
 });

@@ -4,7 +4,7 @@ import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-me
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
 import { classInstances, teachers } from "@/backend/db/schema";
-import { AppPermission } from "@/backend/enum";
+import { AppPermission, EffectiveMeetingSource } from "@/backend/enum";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -225,7 +225,7 @@ export namespace EffectiveMeetingService {
     providerName: null,
     logoUrl: null,
     meetingId: null,
-    source: "none",
+    source: EffectiveMeetingSource.NONE,
     configId: null,
     providerId: null,
     supportsAutoGeneration: false,
@@ -233,7 +233,7 @@ export namespace EffectiveMeetingService {
 
   async function fromClassConfig(
     config: Awaited<ReturnType<typeof ClassMeetingConfigRepository.getDefaultForClassInstance>>,
-    source: "class" | "recurring",
+    source: EffectiveMeetingSource.CLASS | EffectiveMeetingSource.RECURRING,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<EffectiveMeetingReturnType> {
@@ -271,7 +271,7 @@ export namespace EffectiveMeetingService {
       providerName: snapshot.provider.catalogName,
       logoUrl: snapshot.provider.logoUrl,
       meetingId: snapshot.details.meetingUrl ? extractMeetingId(snapshot.details.meetingUrl) : null,
-      source: "teacher",
+      source: EffectiveMeetingSource.TEACHER,
       configId: teacherDefault.id,
       providerId: teacherDefault.providerId,
       supportsAutoGeneration: snapshot.provider.supportsAutoGeneration,
@@ -295,7 +295,7 @@ export namespace EffectiveMeetingService {
     const client = tx ?? db;
     const classDefault = await ClassMeetingConfigRepository.getDefaultForClassInstance(classInstanceId, tx);
     if (classDefault) {
-      return fromClassConfig(classDefault, "class", tErrors, tx);
+      return fromClassConfig(classDefault, EffectiveMeetingSource.CLASS, tErrors, tx);
     }
 
     const [instance] = await client
@@ -317,7 +317,7 @@ export namespace EffectiveMeetingService {
         tx
       );
       if (recurringDefault) {
-        return fromClassConfig(recurringDefault, "recurring", tErrors, tx);
+        return fromClassConfig(recurringDefault, EffectiveMeetingSource.RECURRING, tErrors, tx);
       }
     }
 
@@ -337,7 +337,7 @@ export namespace EffectiveMeetingService {
   ): Promise<EffectiveMeetingReturnType> {
     const recurringDefault = await ClassMeetingConfigRepository.getDefaultForRecurringSchedule(recurringScheduleId, tx);
     if (recurringDefault) {
-      return fromClassConfig(recurringDefault, "recurring", tErrors, tx);
+      return fromClassConfig(recurringDefault, EffectiveMeetingSource.RECURRING, tErrors, tx);
     }
 
     const userId = await getTeacherUserId(teacherId, tx);

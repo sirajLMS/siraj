@@ -81,7 +81,7 @@ export namespace ManagerProfileService {
       await UserRepository.updateProfileFields(targetRow.id, { name: input.name ?? undefined }, locale);
     }
 
-    if (input.email !== undefined && input.email !== null) {
+    if (input.email != null) {
       await UserRepository.updateProfileFields(targetRow.id, { email: input.email }, locale);
     }
 
@@ -89,7 +89,7 @@ export namespace ManagerProfileService {
       await UserRepository.updateProfileFields(targetRow.id, { phone: input.phone }, locale);
     }
 
-    if (input.status !== undefined && input.status !== null) {
+    if (input.status != null) {
       await UserRepository.updateStatus(targetRow.id, parseAccountStatus(input.status), undefined, locale);
     }
 

@@ -17,6 +17,8 @@ interface CacheSetOptions {
   px?: number;
 }
 
+const DEFAULT_CACHE_TTL_SECONDS = 3600;
+
 function resolveTtlSeconds(options?: CacheSetOptions): number {
   if (options?.ex) {
     return options.ex;
@@ -24,7 +26,7 @@ function resolveTtlSeconds(options?: CacheSetOptions): number {
   if (options?.px) {
     return options.px / 1000;
   }
-  return 3600;
+  return DEFAULT_CACHE_TTL_SECONDS;
 }
 
 export class PostgresCacheAdapter extends CacheAdapterBase {

@@ -1,3 +1,4 @@
+import type { EffectiveMeetingSource } from "@/backend/enum";
 import type {
   MeetingConfigBaseInsertType,
   MeetingConfigBaseReturnType,
@@ -31,8 +32,6 @@ export type ClassMeetingConfigSubmitInput = MeetingConfigBaseSubmitInput & {
 export type UpdateClassMeetingConfigInput = Partial<
   Omit<ClassMeetingConfigSubmitInput, "classInstanceId" | "recurringScheduleId">
 >;
-
-export type EffectiveMeetingSource = "class" | "recurring" | "teacher" | "none";
 
 export type EffectiveMeetingReturnType = {
   readonly joinUrl: string | null;

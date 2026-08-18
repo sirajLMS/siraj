@@ -6,6 +6,7 @@ import { quotas } from "@/backend/db/schema";
 import { setupStudent } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/backend/enum";
+import { QuotaService } from "@/backend/services";
 import type { QuotaSubmitInput, QuotaUpdateInput } from "@/backend/types";
 
 describe("QuotaRepository", () => {
@@ -202,8 +203,8 @@ describe("QuotaRepository", () => {
       expect(created.remaining).toBe(8);
 
       // Backdate the period anchor so the 30-day period has expired and a refresh is triggered.
-      // Without this, refreshPeriodic is a no-op (returns the unchanged row) and the version
-      // would not bump — see the guard at the top of refreshPeriodic in the repository.
+      // Business rules (validation, rollover computation, period advancement) now live in
+      // QuotaService.refreshPeriodic — the repository's applyRefreshPeriodic only does data access.
       await tx
         .update(quotas)
         .set({
@@ -212,7 +213,7 @@ describe("QuotaRepository", () => {
         })
         .where(eq(quotas.id, created.id));
 
-      const refreshed = await QuotaRepository.refreshPeriodic(tx, created.id, null);
+      const refreshed = await QuotaService.refreshPeriodic(tx, created.id, null);
       expect(refreshed.id).toBe(created.id);
       const refreshedRow = await tx.select().from(quotas).where(eq(quotas.id, created.id)).limit(1);
       expect(refreshedRow[0].version).toBe(created.version + 1);

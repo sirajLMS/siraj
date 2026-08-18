@@ -6,8 +6,8 @@ import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 export type { DBTransaction };
 
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
-import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
+import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -122,25 +122,6 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
   }
 }
 
-/** Returns raw rows that overlap the given time range — lets the service layer check meeting URL conflicts. */
-export async function findOverlapInstances(
-  tx: DBTransaction,
-  params: { startTime: Date; endTime: Date; excludeId?: string }
-): Promise<{ id: string; meetingJoinUrl: string | null }[]> {
-  const { startTime, endTime, excludeId } = params;
-  const overlapCondition = sql`(${classInstances.scheduledStartAt}, ${classInstances.scheduledEndAt}) OVERLAPS (${startTime}, ${endTime})`;
-  const rows = await tx
-    .select({
-      id: classInstances.id,
-      meetingJoinUrl: classInstances.meetingJoinUrl,
-    })
-    .from(classInstances)
-    .where(
-      and(isNull(classInstances.deletedAt), overlapCondition, excludeId ? ne(classInstances.id, excludeId) : undefined)
-    );
-  return rows;
-}
-
 export async function performRescheduleValidations(
   t: DBTransaction,
   input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
@@ -148,7 +129,7 @@ export async function performRescheduleValidations(
 ) {
   await acquireLocks(t, input.teacherId, input.studentId);
   await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, tErrors);
-  await TeacherAvailabilityRepository.validateBookingAvailability(
+  await AvailabilityService.validateBookingAvailability(
     input.teacherId,
     input.scheduledStartAt,
     input.scheduledEndAt,

@@ -60,7 +60,7 @@ function isWhatsappTemplateMetadata(value: unknown): value is WhatsappTemplateMe
   const name = entries.find(([k]) => k === "name")?.[1];
   if (typeof name !== "string") return false;
   const languageCode = entries.find(([k]) => k === "languageCode")?.[1];
-  if (languageCode !== undefined && languageCode !== null && typeof languageCode !== "string") {
+  if (languageCode != null && typeof languageCode !== "string") {
     return false;
   }
   const paramsOrder = entries.find(([k]) => k === "paramsOrder")?.[1];
@@ -159,7 +159,7 @@ export namespace CommunicationService {
     const components: WhatsappTemplateComponent[] | undefined = templateRaw.paramsOrder
       ? templateRaw.paramsOrder.map(paramName => {
           const paramValue = payload.metadata?.[paramName];
-          if (paramValue === undefined || paramValue === null || paramValue === "") {
+          if (paramValue == null || paramValue === "") {
             // r7-021: Log a warning before substituting with empty string
             // so missing template params are observable — silently sending
             // blank values masks data-integrity bugs.
@@ -173,7 +173,7 @@ export namespace CommunicationService {
           // Safely stringify paramValue to avoid "[object Object]" for objects
           // (paramValue is unknown from Record<string, unknown>)
           const textValue = (() => {
-            if (paramValue === null || paramValue === undefined) {
+            if (paramValue == null) {
               return "";
             }
             if (Array.isArray(paramValue)) {
@@ -182,7 +182,7 @@ export namespace CommunicationService {
               // when an array contains objects
               return paramValue
                 .map(v => {
-                  if (v === null || v === undefined) {
+                  if (v == null) {
                     return "";
                   }
                   if (typeof v === "object") {

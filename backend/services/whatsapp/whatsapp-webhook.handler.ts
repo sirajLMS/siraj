@@ -528,7 +528,7 @@ function buildPhoneNumberUpdate(
   }
 
   const maxPhones = value.max_phone_numbers_per_business;
-  if (maxPhones !== undefined && maxPhones !== null) {
+  if (maxPhones != null) {
     const maxPhonesStr = parseMaxPhoneNumbers(maxPhones);
     if (maxPhonesStr !== null) {
       update.maxPhoneNumbersPerBusiness = maxPhonesStr;
