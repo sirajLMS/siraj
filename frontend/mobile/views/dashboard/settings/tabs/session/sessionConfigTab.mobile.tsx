@@ -24,7 +24,7 @@ function SessionConfigCard({ row, labels, canManage, onEdit, onDelete }: Session
       <Box sx={{ p: 2, width: "100%" }}>
         <Stack spacing={1.5}>
           <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
-            <Typography sx={{ typography: "titleMd" }}>{row.roleName}</Typography>
+            <Typography sx={{ typography: "titleLg" }}>{row.roleName}</Typography>
             {canManage ? (
               <Stack direction="row" spacing={0.5}>
                 <IconButton size="small" aria-label={labels.editLabel} onClick={() => onEdit(row)}>
@@ -38,10 +38,10 @@ function SessionConfigCard({ row, labels, canManage, onEdit, onDelete }: Session
           </Stack>
 
           <Stack spacing={0.5}>
-            <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
               {labels.ttlSecondsColumn}: {row.ttlSeconds}
             </Typography>
-            <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
               {labels.maxConcurrentSessionsColumn}: {row.maxConcurrentSessions}
             </Typography>
           </Stack>

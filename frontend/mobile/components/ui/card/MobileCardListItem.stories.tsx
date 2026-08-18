@@ -241,7 +241,7 @@ export const AllVariantsCombined: Story = {
 export const WithCustomSx: Story = {
   args: {
     variant: "rounded",
-    sx: { backgroundColor: "secondary.main", color: "secondary.contrastText" },
+    sx: theme => ({ backgroundColor: theme.palette.secondary.main, color: theme.palette.onSecondary }),
     children: (
       <Stack spacing={1} sx={{ width: "100%" }}>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>

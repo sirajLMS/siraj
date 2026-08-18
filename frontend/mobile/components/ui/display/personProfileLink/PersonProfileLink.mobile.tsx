@@ -27,7 +27,7 @@ export type MobilePersonProfileLinkProps = {
  */
 export function MobilePersonProfileLink({
   avatarSize = 24,
-  typographyVariant = "bodySm",
+  typographyVariant = "bodyMd",
   ...props
 }: MobilePersonProfileLinkProps) {
   return (

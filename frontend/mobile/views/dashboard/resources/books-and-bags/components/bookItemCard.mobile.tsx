@@ -40,7 +40,7 @@ export function BookItemCardMobile({ book, labels, onDelete }: Readonly<BookItem
           {book.name}
         </Typography>
         <IconButton
-          aria-label="Delete book"
+          aria-label={labels.ariaDeleteBook}
           onClick={handleDelete}
           size="small"
           sx={theme => ({ color: theme.palette.error.main })}

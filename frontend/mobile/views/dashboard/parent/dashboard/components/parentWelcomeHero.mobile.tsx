@@ -45,7 +45,7 @@ export function ParentWelcomeHeroMobile({
             gap: 0.75,
             py: 0.25,
             px: 1.25,
-            borderRadius: 999,
+            borderRadius: "9999px",
             backgroundColor: alpha(theme.palette.header, 0.4),
           })}
         >

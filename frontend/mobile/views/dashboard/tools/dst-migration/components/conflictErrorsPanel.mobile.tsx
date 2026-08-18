@@ -70,7 +70,7 @@ export function ConflictErrorsPanelMobile({ labels, conflictGroups }: Readonly<P
         >
           <CancelOutlined sx={{ fontSize: 16 }} />
         </Box>
-        <Typography sx={theme => ({ typography: "titleMd", color: theme.palette.error.main })}>
+        <Typography sx={theme => ({ typography: "titleLg", color: theme.palette.error.main })}>
           {labels.sections.errors}
         </Typography>
       </Box>

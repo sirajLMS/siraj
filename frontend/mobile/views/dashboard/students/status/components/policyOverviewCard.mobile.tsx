@@ -20,7 +20,7 @@ const MOBILE_OPTIONS: PolicyOverviewCardSharedOptions = {
   titleTypography: {
     variant: undefined,
     sx: theme => ({
-      typography: "titleMd",
+      typography: "titleLg",
       color: theme.palette.primary.main,
       fontWeight: 700,
       textTransform: "uppercase",

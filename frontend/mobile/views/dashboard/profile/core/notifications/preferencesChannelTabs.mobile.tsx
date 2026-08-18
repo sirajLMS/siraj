@@ -135,7 +135,7 @@ function CategoryToggleRow({
           }}
         />
       }
-      label={<Typography sx={{ typography: "labelLg", fontWeight: 700 }}>{categoryLabel}</Typography>}
+      label={<Typography sx={{ typography: "labelMd", fontWeight: 700 }}>{categoryLabel}</Typography>}
       labelPlacement="start"
       sx={theme => ({
         mx: 0,

@@ -17,7 +17,7 @@ export function MobileAppDataGridNoRowsOverlay({ message }: Readonly<MobileAppDa
         py: theme.spacing(6),
       })}
     >
-      <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary })}>{message}</Typography>
+      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>{message}</Typography>
     </Box>
   );
 }

@@ -59,7 +59,7 @@ export function MobilePaymentMethodList({
 
   return (
     <Stack spacing={1.5}>
-      {title ? <Typography sx={{ typography: "titleMd", px: 0.5 }}>{title}</Typography> : null}
+      {title ? <Typography sx={{ typography: "titleLg", px: 0.5 }}>{title}</Typography> : null}
 
       {methods.map(row => {
         const typeLabel = getPaymentMethodTypeLabel(row.type, key =>

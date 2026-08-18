@@ -48,7 +48,7 @@ export function AssociatedStudentsCardListMobile({ rows, labels }: Readonly<Base
               fallbackInitial="T"
               label={t.students.columns.teacher}
             />
-            <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
               {t.students.columns.hoursPerWeek}: {row.hoursPerWeek}
             </Typography>
           </Stack>

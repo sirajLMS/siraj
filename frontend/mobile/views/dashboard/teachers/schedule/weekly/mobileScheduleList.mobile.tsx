@@ -171,7 +171,7 @@ function SlotItemContent({ classItem, classInstanceId, subjectLabel, statusLabel
         href={classItem.studentId ? studentHref(classItem.studentId) : undefined}
         name={classItem.studentName ?? "—"}
         showAvatar={false}
-        typographyVariant="bodySm"
+        typographyVariant="bodyMd"
         fontWeight={500}
       />
 
@@ -301,7 +301,7 @@ function DaySelector({ selectedDay, onSelect, labels }: Readonly<DaySelectorProp
                 scrollSnapAlign: "start",
                 minWidth: 56,
                 minHeight: 40,
-                borderRadius: 999,
+                borderRadius: "9999px",
                 px: 2.5,
                 py: 1,
                 typography: "labelMd",

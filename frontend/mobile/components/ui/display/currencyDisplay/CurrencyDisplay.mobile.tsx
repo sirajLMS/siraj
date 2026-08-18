@@ -8,7 +8,7 @@ import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/local
 export type MobileCurrencyDisplayProps = CurrencyDisplayProps;
 
 /** Default typography variant for the mobile currency display (compact). */
-const DEFAULT_TYPOGRAPHY_VARIANT = "bodySm" as const;
+const DEFAULT_TYPOGRAPHY_VARIANT = "bodyMd" as const;
 
 /** Tighter spacing for dense inline mobile rows. */
 const DEFAULT_SPACING = 0.5;

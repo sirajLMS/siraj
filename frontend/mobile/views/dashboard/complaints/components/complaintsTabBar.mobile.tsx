@@ -57,7 +57,7 @@ export function ComplaintsTabBarMobile({
             sx={theme => ({
               px: 2,
               py: 1,
-              borderRadius: 999,
+              borderRadius: "9999px",
               flexShrink: 0,
               backgroundColor: isActive ? theme.palette.primary.main : "transparent",
               color: isActive ? theme.palette.onPrimary : theme.palette.text.secondary,

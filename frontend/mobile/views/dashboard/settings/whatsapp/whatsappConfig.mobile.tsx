@@ -25,6 +25,3 @@ export function WhatsappConfigMobileShell({ title, children }: Readonly<Whatsapp
     </MobilePageContainer>
   );
 }
-
-/** @deprecated Use `WhatsappConfigMobileShell` — the old per-tab view is replaced by URL-synced tab architecture. */
-export const WhatsappConfigMobileView = WhatsappConfigMobileShell;

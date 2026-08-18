@@ -1,3 +1,5 @@
+"use client";
+
 import { AccessTimeOutlined, CalendarTodayOutlined } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import { useCallback } from "react";

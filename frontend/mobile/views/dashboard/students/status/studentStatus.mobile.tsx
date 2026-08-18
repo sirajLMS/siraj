@@ -24,7 +24,7 @@ const MOBILE_READ_ONLY_OPTIONS: ReadOnlyStatusCardSharedOptions = {
   StatusBadge: MobileStatusBadge,
   headerSxPadding: { px: 2.5, py: 2, p: 2.5 },
   titleVariant: undefined,
-  titleSxTypography: "titleMd",
+  titleSxTypography: "titleLg",
 };
 
 export function StudentStatusMobileView({

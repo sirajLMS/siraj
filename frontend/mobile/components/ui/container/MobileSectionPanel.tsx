@@ -136,7 +136,7 @@ function renderTitle(title: ReactNode): ReactNode {
   let content: ReactNode;
   if (typeof title === "string") {
     content = (
-      <Typography sx={theme => ({ typography: "titleMd", color: theme.palette.onSurface })}>{title}</Typography>
+      <Typography sx={theme => ({ typography: "titleLg", color: theme.palette.onSurface })}>{title}</Typography>
     );
   } else {
     content = title;

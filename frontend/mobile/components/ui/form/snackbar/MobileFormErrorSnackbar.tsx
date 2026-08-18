@@ -20,7 +20,7 @@ export function MobileFormErrorSnackbar({ open, message, onClose }: Readonly<Mob
           gap: 1.5,
           px: 2.5,
           py: 1.5,
-          borderRadius: 10,
+          borderRadius: 12,
           backgroundColor: theme.palette.error.main,
           color: theme.palette.onError,
           boxShadow: theme.palette.shadow.card,

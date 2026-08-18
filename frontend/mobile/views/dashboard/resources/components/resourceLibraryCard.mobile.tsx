@@ -53,7 +53,7 @@ export function ResourceLibraryCardMobile({
 
       {canManage ? (
         <IconButton
-          aria-label="Delete resource"
+          aria-label={labels.notification.ariaDeleteResource}
           onClick={e => {
             e.stopPropagation();
             onDeleteRequest(resource.id);

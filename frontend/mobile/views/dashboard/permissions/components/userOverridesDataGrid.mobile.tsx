@@ -64,7 +64,7 @@ function UserOverridesCardMobile({ labels, user, groups, onManageOverrides }: Re
           <StatisticBox label={t.explicitDeny}>
             <OverridesCellBox userId={userId} userGroups={userGroups} type="revokes" />
           </StatisticBox>
-          <StatisticBox label="Status">
+          <StatisticBox label={t.columnStatus}>
             <OverridesCellBox userId={userId} userGroups={userGroups} type="status" />
           </StatisticBox>
         </Box>

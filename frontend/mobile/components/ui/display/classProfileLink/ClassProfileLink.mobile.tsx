@@ -27,7 +27,7 @@ export type MobileClassProfileLinkProps = {
  */
 export function MobileClassProfileLink({
   avatarSize = 24,
-  typographyVariant = "bodySm",
+  typographyVariant = "bodyMd",
   ...props
 }: MobileClassProfileLinkProps) {
   return (

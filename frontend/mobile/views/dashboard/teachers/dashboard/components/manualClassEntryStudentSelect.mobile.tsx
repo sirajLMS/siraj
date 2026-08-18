@@ -1,7 +1,7 @@
 "use client";
 
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
-import { useManualClassEntryStudentField } from "@/frontend/common/views/dashboard/teachers/dashboard/components/manualClassEntryStudentFieldContext";
+import { useManualClassEntryStudentField } from "@/frontend/common/views/dashboard/teachers/dashboard/components/useManualClassEntryStudentField";
 import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 
 export function ManualClassEntryStudentSelectMobile({

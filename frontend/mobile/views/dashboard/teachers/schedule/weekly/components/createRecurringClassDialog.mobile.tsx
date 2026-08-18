@@ -19,17 +19,19 @@ import type {
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/types";
 import { TimezoneSelectMobile } from "@/frontend/mobile/components/ui/input/timezoneSelect";
 import { StudentAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 function MobileDialogShell({
   onClose,
   title,
   children,
 }: Readonly<Omit<CreateRecurringClassDialogShellSlotProps, "open">>) {
+  const t = useAppTranslation(Translation.Common);
   return (
     <div>
       <AppBar sx={{ position: "relative" }}>
         <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={onClose} aria-label="close">
+          <IconButton edge="start" color="inherit" onClick={onClose} aria-label={t.ariaClose}>
             <CloseOutlined />
           </IconButton>
           <Typography

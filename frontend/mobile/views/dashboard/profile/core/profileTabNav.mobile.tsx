@@ -4,6 +4,7 @@ import { Box, Chip } from "@mui/material";
 import type { ProfileTabNavVariantProps } from "@/frontend/common/views/dashboard/profile/core/profileTabNavTypes";
 import type { ProfileTabDefinition } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
 import { MobileHorizontalScrollRow } from "@/frontend/mobile/components/ui/container";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type ProfileTabNavMobileViewProps = ProfileTabNavVariantProps;
 
@@ -13,6 +14,7 @@ export function ProfileTabNavMobileView({
   currentTab,
   onTabChange,
 }: Readonly<ProfileTabNavMobileViewProps>) {
+  const t = useAppTranslation(Translation.Common);
   if (availableTabs.length === 0) {
     return null;
   }
@@ -25,7 +27,7 @@ export function ProfileTabNavMobileView({
         mx: -2,
       })}
       role="tablist"
-      aria-label="Profile sections"
+      aria-label={t.ariaProfileSections}
     >
       <MobileHorizontalScrollRow>
         {availableTabs.map((tab: ProfileTabDefinition) => (

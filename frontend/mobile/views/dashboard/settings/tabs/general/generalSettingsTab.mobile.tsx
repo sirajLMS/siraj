@@ -30,9 +30,9 @@ function GeneralSettingCard({
     <MobileCardListItem variant="edge-to-edge">
       <Stack spacing={2}>
         <Box>
-          <Typography sx={{ typography: "titleSm", fontWeight: 700, wordBreak: "break-word" }}>{row.label}</Typography>
+          <Typography sx={{ typography: "labelSm", fontWeight: 700, wordBreak: "break-word" }}>{row.label}</Typography>
           <Typography
-            sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary, wordBreak: "break-word" }}
+            sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, wordBreak: "break-word" }}
           >
             {row.slug}
           </Typography>

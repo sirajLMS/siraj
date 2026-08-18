@@ -8,15 +8,15 @@ import {
 import type { MeetingConfigDisplayProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
 
 const MOBILE_OPTIONS = {
-  detailTypographyVariant: "bodySm",
-  titleTypographyVariant: "titleSm",
+  detailTypographyVariant: "bodyMd",
+  titleTypographyVariant: "labelSm",
   labelTypographyVariant: "labelSm",
   labelMinWidth: 72,
   spacing: 0.75,
   compactSpacing: 0.5,
   detailSpacing: 0.5,
   providerGap: 0.75,
-  providerTypographyVariant: "bodySm",
+  providerTypographyVariant: "bodyMd",
 } as const satisfies MeetingConfigDisplaySharedOptions;
 
 export function MobileMeetingConfigDisplay(props: MeetingConfigDisplayProps): React.ReactNode {

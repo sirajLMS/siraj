@@ -63,17 +63,17 @@ export function RecurringSchedulesListMobileView({
             >
               <Stack spacing={0.5}>
                 <Typography sx={{ fontWeight: 700 }}>{row.studentName ?? ""}</Typography>
-                <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>
+                <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>
                   {columns.teacher}: {row.teacherName ?? ""}
                 </Typography>
-                <Typography sx={{ typography: "bodySm" }}>
+                <Typography sx={{ typography: "bodyMd" }}>
                   {columns.schedule}: {row.defaultStartTime ?? ""}
                 </Typography>
-                <Typography sx={{ typography: "bodySm" }}>
+                <Typography sx={{ typography: "bodyMd" }}>
                   {columns.duration}: {row.durationMinutes ?? 0} min
                 </Typography>
                 {row.hourlyRate ? (
-                  <Typography sx={{ typography: "bodySm" }}>
+                  <Typography sx={{ typography: "bodyMd" }}>
                     {columns.rate}: {row.hourlyRate}
                   </Typography>
                 ) : null}

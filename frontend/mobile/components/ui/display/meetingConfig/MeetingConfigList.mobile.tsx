@@ -14,8 +14,8 @@ export type MobileMeetingConfigListItem = MeetingConfigListItem;
 export type MobileMeetingConfigListProps = MeetingConfigListProps;
 
 const MOBILE_OPTIONS = {
-  titleTypographyVariant: "titleSm",
-  providerTypographyVariant: "titleSm",
+  titleTypographyVariant: "labelSm",
+  providerTypographyVariant: "labelSm",
   providerSx: { fontWeight: 600 },
   outerGap: 1,
   cardPadding: 1.5,
@@ -24,7 +24,7 @@ const MOBILE_OPTIONS = {
   innerColumnGap: 0.25,
   chipGap: 0.75,
   actionGap: 0.25,
-  statusTypographyVariant: "bodySm",
+  statusTypographyVariant: "bodyMd",
   wrapUrlInTooltip: false,
   innerColumnFlex: true,
 } as const satisfies MeetingConfigListSharedOptions;

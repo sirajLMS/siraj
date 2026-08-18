@@ -1,6 +1,7 @@
 "use client";
 
-import { Chip, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
+import { StatusBadge } from "@/frontend/common/components/ui/badge";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { profileHrefForParent, studentHref } from "@/frontend/common/utils/profileHref";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
@@ -36,7 +37,7 @@ export function AssignedStudentsCardList({ rows, labels, paginationOptions }: Re
                 name={row.studentName}
                 fallbackInitial="S"
               />
-              <Chip size="small" variant="outlined" label={formatStatusLabel(row.status)} />
+              <StatusBadge category="studentAccount" status={row.status} label={formatStatusLabel(row.status)} />
             </Stack>
             <MobilePersonProfileLink
               href={profileHrefForParent({
@@ -51,13 +52,13 @@ export function AssignedStudentsCardList({ rows, labels, paginationOptions }: Re
               avatarSize={24}
               fontWeight={400}
             />
-            <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
               {columns.class}: {row.className}
             </Typography>
-            <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
               {columns.hoursPerWeek}: {row.hoursPerWeek}
             </Typography>
-            <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
               {columns.classes}: {row.classesRemaining} / {row.classesTotal}
             </Typography>
           </Stack>

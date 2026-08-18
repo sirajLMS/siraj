@@ -22,8 +22,8 @@ function MeetingProvidersMobileEmptyState({ title, body }: Readonly<{ title: str
   return (
     <Alert severity="info" sx={{ mx: 2, mb: 2 }}>
       <Stack spacing={0.5}>
-        <Box sx={{ typography: "titleSm" }}>{title}</Box>
-        <Box sx={{ typography: "bodySm" }}>{body}</Box>
+        <Box sx={{ typography: "labelSm" }}>{title}</Box>
+        <Box sx={{ typography: "bodyMd" }}>{body}</Box>
       </Stack>
     </Alert>
   );
@@ -58,7 +58,7 @@ function MobileProviderRow({ row, labels, onEdit, onDelete }: MobileProviderRowP
                 </Avatar>
               )}
               <Box sx={{ minWidth: 0, flex: 1 }}>
-                <Box sx={{ typography: "titleMd", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <Box sx={{ typography: "titleLg", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   <LocalizedStringDisplay value={row.name} />
                 </Box>
                 <Box sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>{row.slug}</Box>

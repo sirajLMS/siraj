@@ -32,8 +32,8 @@ function SiteContentCard({
     <MobileCardListItem variant="edge-to-edge">
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography sx={{ typography: "titleSm", fontWeight: 700, mb: 0.5 }}>{row.title}</Typography>
-          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary, mb: 1 }}>
+          <Typography sx={{ typography: "labelSm", fontWeight: 700, mb: 0.5 }}>{row.title}</Typography>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, mb: 1 }}>
             {labels.slugColumn}: {row.slug}
           </Typography>
           <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}>

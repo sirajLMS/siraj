@@ -30,7 +30,7 @@ function AccountCard({ account, labels, canEdit, isRevoking, onRevoke, onMetadat
     <MobileCardListItem variant="edge-to-edge">
       <Stack spacing={1.5} sx={{ py: 2, width: "100%" }}>
         <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
-          <Typography sx={{ typography: "titleMd" }}>{account.name ?? "—"}</Typography>
+          <Typography sx={{ typography: "titleLg" }}>{account.name ?? "—"}</Typography>
           {/* Placeholder: Replace with OAuthConnectionStatusBadge component in Phase 4 */}
           <Chip
             size="small"
@@ -41,13 +41,13 @@ function AccountCard({ account, labels, canEdit, isRevoking, onRevoke, onMetadat
         </Stack>
 
         <Stack spacing={0.5}>
-          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
             {labels.columns.email}: {account.email ?? "—"}
           </Typography>
-          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
             {labels.columns.connectedAt}: {formatConnectedAccountDate(account.connectedAt)}
           </Typography>
-          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
             {labels.columns.expiresAt}: {formatConnectedAccountDate(account.expiresAt)}
           </Typography>
         </Stack>

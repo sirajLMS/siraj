@@ -11,12 +11,13 @@ import {
 } from "@mui/icons-material";
 import { Alert, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { ReactNode } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui/badge";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CronScheduleStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CronScheduleFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { CronDialogsAndNotificationsShared } from "@/frontend/common/views/dashboard/cron/components/__shared__/cronDialogsAndNotificationsShared";
 import type { CronViewProps } from "@/frontend/common/views/dashboard/cron/types";
-import { getCronStatusColor, getCronStatusLabel } from "@/frontend/common/views/dashboard/cron/utils/cron-status-utils";
+import { getCronStatusLabel } from "@/frontend/common/views/dashboard/cron/utils/cron-status-utils";
 import {
   MobileBaseDeleteDialog,
   MobileCardList,
@@ -65,15 +66,16 @@ function MobileScheduleRow({
                 {row.cronExpression}
               </Box>
             </Box>
-            <Chip
-              size="small"
-              color={getCronStatusColor(row.status ?? CronScheduleStatus.Disabled)}
+            <StatusBadge
+              category="cronScheduleStatus"
+              status={row.status ?? CronScheduleStatus.Disabled}
               label={getCronStatusLabel(row.status ?? CronScheduleStatus.Disabled, labels)}
+              size="small"
             />
           </Stack>
 
           {row.description ? (
-            <Box sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>{row.description}</Box>
+            <Box sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>{row.description}</Box>
           ) : null}
 
           <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
