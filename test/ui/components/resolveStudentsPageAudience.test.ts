@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { resolveStudentsPageAudience } from "@/app/(dashboard)/lib/resolve-students-page-audience";
 import { AppPermission, UserRole } from "@/backend/enum";
-import type { UserPermissionContext } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 
 function buildContext(permissions: AppPermission[], isSuperAdmin = false): UserPermissionContext {
   return {

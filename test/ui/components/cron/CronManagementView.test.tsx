@@ -97,9 +97,7 @@ expect.extend(matchers);
 
 import { useCronViewModel } from "@/frontend/common/views/dashboard/cron/useCronViewModel";
 import {
-  getCronRunStatusColor,
   getCronRunStatusLabel,
-  getCronStatusColor,
   getCronStatusLabel,
 } from "@/frontend/common/views/dashboard/cron/utils/cron-status-utils";
 import { CronDesktopView } from "@/frontend/desktop/views/dashboard/cron/cronView.desktop";
@@ -264,20 +262,6 @@ describe("CronMobileView", () => {
   });
 });
 
-describe("getCronStatusColor", () => {
-  test("returns success for ACTIVE", () => {
-    expect(getCronStatusColor(CronScheduleStatus.Active)).toBe("success");
-  });
-
-  test("returns warning for PAUSED", () => {
-    expect(getCronStatusColor(CronScheduleStatus.Paused)).toBe("warning");
-  });
-
-  test("returns default for DISABLED", () => {
-    expect(getCronStatusColor(CronScheduleStatus.Disabled)).toBe("default");
-  });
-});
-
 describe("getCronStatusLabel", () => {
   test("returns statusActive label for ACTIVE", () => {
     expect(getCronStatusLabel(CronScheduleStatus.Active, labels)).toBe(labels.statusActive);
@@ -289,36 +273,6 @@ describe("getCronStatusLabel", () => {
 
   test("returns statusDisabled label for DISABLED", () => {
     expect(getCronStatusLabel(CronScheduleStatus.Disabled, labels)).toBe(labels.statusDisabled);
-  });
-});
-
-describe("getCronRunStatusColor", () => {
-  test("returns success for COMPLETED", () => {
-    expect(getCronRunStatusColor(CronRunStatus.Completed)).toBe("success");
-  });
-
-  test("returns info for RUNNING", () => {
-    expect(getCronRunStatusColor(CronRunStatus.Running)).toBe("info");
-  });
-
-  test("returns info for RETRYING", () => {
-    expect(getCronRunStatusColor(CronRunStatus.Retrying)).toBe("info");
-  });
-
-  test("returns error for FAILED", () => {
-    expect(getCronRunStatusColor(CronRunStatus.Failed)).toBe("error");
-  });
-
-  test("returns error for TIMEOUT", () => {
-    expect(getCronRunStatusColor(CronRunStatus.Timeout)).toBe("error");
-  });
-
-  test("returns warning for PENDING", () => {
-    expect(getCronRunStatusColor(CronRunStatus.Pending)).toBe("warning");
-  });
-
-  test("returns default for CANCELLED", () => {
-    expect(getCronRunStatusColor(CronRunStatus.Cancelled)).toBe("default");
   });
 });
 

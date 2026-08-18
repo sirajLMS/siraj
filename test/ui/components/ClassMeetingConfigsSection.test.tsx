@@ -18,11 +18,11 @@ if (!("clipboard" in navigator)) {
 }
 
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import {
   classMeetingConfigsQueryDocument,
   classMeetingConfigsWithStatusQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
-import type { ClassMeetingConfigFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { ClassMeetingConfigsSection } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigsSection";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
@@ -66,7 +66,6 @@ function makeConfig(overrides: Partial<ClassMeetingConfigFieldsFragment> = {}): 
     details: { meetingUrl: "https://zoom.us/j/123456789", username: null, tenantId: null },
     providerMetadata: {},
     provider: makeProvider("zoom"),
-    oauthTokenExpiresAt: null,
     createdAt: "2025-01-01T00:00:00Z",
     updatedAt: "2025-01-01T00:00:00Z",
     ...overrides,
