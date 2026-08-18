@@ -12,6 +12,9 @@
     "teacher": "المعلم",
     "schedule": "الجدول",
     "duration": "المدة",
+    "durationMinutesShort": {
+      "__fn": "(minutes) => `${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
+    },
     "rate": "السعر",
     "actions": "الإجراءات"
   },

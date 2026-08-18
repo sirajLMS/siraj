@@ -26,7 +26,8 @@
     "linkPending": "الرابط قيد الانتظار"
   },
   "fields": {
-    "phone": "الهاتف"
+    "phone": "الهاتف",
+    "searchTeachers": "ابحث عن المعلمين"
   },
   "status": {
     "active": "نشط",

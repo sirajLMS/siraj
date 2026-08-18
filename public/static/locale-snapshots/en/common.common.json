@@ -27,6 +27,7 @@
   "operationFailed": "Operation failed. Please try again.",
   "loadFailed": "Failed to load data. Please try again.",
   "loading": "Loading...",
+  "redirecting": "Redirecting...",
   "notSet": "Not set",
   "errors": "Errors",
   "cancel": "Cancel",
@@ -38,5 +39,6 @@
   "ariaDismiss": "Dismiss",
   "ariaMenu": "Menu",
   "ariaUserProfileMenu": "User profile menu",
-  "ariaProfileSections": "Profile sections"
+  "ariaProfileSections": "Profile sections",
+  "noEntriesFound": "No entries found"
 }

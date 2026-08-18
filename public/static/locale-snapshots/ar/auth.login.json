@@ -23,5 +23,7 @@
   "superAdmin": "مدير النظام",
   "teacher": "معلم",
   "parent": "ولي أمر",
-  "staff": "موظف"
+  "staff": "موظف",
+  "showPassword": "إظهار كلمة المرور",
+  "hidePassword": "إخفاء كلمة المرور"
 }

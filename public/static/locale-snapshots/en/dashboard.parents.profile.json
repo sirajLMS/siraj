@@ -89,7 +89,8 @@
       "regular": "Regular",
       "suspended": "Suspended",
       "on_leave": "On Leave",
-      "on_trial": "On Trial"
+      "on_trial": "On Trial",
+      "deactivated": "Deactivated"
     }
   }
 }

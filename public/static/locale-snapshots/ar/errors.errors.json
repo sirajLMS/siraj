@@ -52,6 +52,7 @@
     "permissionGroupNameTooLong": "اسم المجموعة طويل جداً (255 حرف كحد أقصى).",
     "permissionGroupInvalidName": "اسم المجموعة غير صالح.",
     "cannotModifySuperAdmin": "لا يمكن تعديل المستخدم المسؤول الأعلى.",
+    "cannotModifySelf": "لا يمكن تعديل صلاحياتك الخاصة.",
     "cannotModifySystemPermissionGroup": "لا يمكن تعديل الخصائص الأساسية لمجموعات صلاحيات النظام",
     "cannotDeleteSystemPermissionGroup": "لا يمكن حذف صلاحية أو مجموعة تابعة للنظام"
   },
@@ -80,7 +81,16 @@
     },
     "exchangeRateStale": {
       "__fn": "({ fromCurrency, toCurrency }) => `\\u0633\\u0639\\u0631 \\u0627\\u0644\\u0635\\u0631\\u0641 \\u0644\\u0640 ${fromCurrency} \\u0625\\u0644\\u0649 ${toCurrency} \\u0642\\u062F\\u064A\\u0645 (\\u0623\\u0642\\u062F\\u0645 \\u0645\\u0646 24 \\u0633\\u0627\\u0639\\u0629)`"
-    }
+    },
+    "quotaReleaseReservationFailed": "فشل تحرير حجز الحصة: الحصص المحجوزة غير كافية",
+    "quotaReleaseConcurrentModification": "فشل تحرير الحصة: لم تعد الحصة نشطة بعد تعديل متزامن",
+    "quotaRefreshConcurrentWrite": "فشل تحديث الحصة بسبب تعديل متزامن",
+    "quotaResetConcurrentModification": "فشل إعادة تعيين فترة الحصة بسبب تعديل متزامن",
+    "paymentMethodCreateFailed": "فشل إنشاء طريقة دفع المستخدم.",
+    "paymentMethodNotFound": {
+      "__fn": "(id) => `\\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F\\u0629 (\\u0627\\u0644\\u0645\\u0639\\u0631\\u0641: ${id}).`"
+    },
+    "currencyHedgeCreateFailed": "فشل إنشاء تغطية العملة."
   },
   "credit": {
     "duplicatePurchase": "تمت معالجة عملية شراء الرصيد هذه بالفعل.",
@@ -93,12 +103,14 @@
     "recordNotFound": {
       "__fn": "({ tableName, entityId }) => `${tableName} \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${entityId}`"
     },
-    "invalidFileType": "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و HEIC.",
+    "invalidFileType": "نوع الملف غير صالح. يُسمح فقط بملفات PDF و JPG و PNG و GIF و WebP و BMP و DOC و DOCX و XLS و XLSX و PPT و PPTX.",
+    "invalidFileId": "معرف الملف غير صالح.",
     "invoicePaymentProofPending": "لدى هذه الفاتورة إثبات دفع قيد المراجعة بالفعل.",
     "fileUsageRegistered": "تم تسجيل استخدام الملف بنجاح",
     "fileUsageRegisterFailed": {
       "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u062A\\u0633\\u062C\\u064A\\u0644 \\u0627\\u0633\\u062A\\u062E\\u062F\\u0627\\u0645 \\u0627\\u0644\\u0645\\u0644\\u0641: ${error}`"
     },
+    "fileUsageRegisterFailedGeneric": "فشل تسجيل استخدام الملف.",
     "fileCurrentlyInUse": "الملف قيد الاستخدام حاليًا",
     "unableToCheckFileUsage": "تعذر التحقق من استخدام الملف",
     "directoryNotFound": "الدليل غير موجود",
@@ -116,7 +128,81 @@
       "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u062A\\u0639\\u064A\\u064A\\u0646 \\u0627\\u0644\\u062D\\u0645\\u0627\\u064A\\u0629: ${error}`"
     },
     "sha256HashMismatch": "عدم تطابق في بصمة SHA-256",
-    "invalidUploadRequestBody": "نص طلب الرفع غير صالح"
+    "invalidUploadRequestBody": "نص طلب الرفع غير صالح",
+    "forbidden": "ممنوع",
+    "uploadsNotAllowedInDirectory": "الرفع غير مسموح في هذا الدليل",
+    "fileSizeExceedsMaximum": {
+      "__fn": "(maxSizeMb) => `\\u062D\\u062C\\u0645 \\u0627\\u0644\\u0645\\u0644\\u0641 \\u064A\\u062A\\u062C\\u0627\\u0648\\u0632 \\u0627\\u0644\\u062D\\u062F \\u0627\\u0644\\u0623\\u0642\\u0635\\u0649 \\u0627\\u0644\\u0645\\u0633\\u0645\\u0648\\u062D (${maxSizeMb} \\u0645\\u064A\\u062C\\u0627\\u0628\\u0627\\u064A\\u062A)`"
+    },
+    "contentTypeRequired": "نوع المحتوى مطلوب",
+    "contentTypeMismatch": {
+      "__fn": "(expected) => `\\u0639\\u062F\\u0645 \\u062A\\u0637\\u0627\\u0628\\u0642 \\u0641\\u064A \\u0646\\u0648\\u0639 \\u0627\\u0644\\u0645\\u062D\\u062A\\u0648\\u0649. \\u0627\\u0644\\u0645\\u062A\\u0648\\u0642\\u0639: ${expected}`"
+    },
+    "contentLengthRequired": "رأس Content-Length مطلوب",
+    "contentLengthExceedsSize": {
+      "__fn": "(size) => `\\u064A\\u062A\\u062C\\u0627\\u0648\\u0632 Content-Length \\u0627\\u0644\\u062D\\u062C\\u0645 \\u0627\\u0644\\u0645\\u0639\\u0644\\u0646 \\u0648\\u0647\\u0648 ${size} \\u0628\\u0627\\u064A\\u062A`"
+    },
+    "contentMd5Required": "رأس Content-MD5 مطلوب",
+    "contentMd5Mismatch": "عدم تطابق في Content-MD5",
+    "failedToCreateFileRecord": "فشل في إنشاء سجل الملف",
+    "invalidOrExpiredToken": "رمز غير صالح أو منتهي الصلاحية أو مستخدم بالفعل",
+    "invalidFilePath": "مسار الملف غير صالح",
+    "requestBodyRequired": "مطلوب نص الطلب",
+    "failedToWriteFile": "فشل في كتابة الملف",
+    "filePathRequired": "مسار الملف مطلوب",
+    "fileNotFound": "الملف غير موجود",
+    "authenticationRequired": "المصادقة مطلوبة",
+    "missingPathname": "مسار الملف مفقود في طلب الرفع",
+    "missingUploadSessionId": "معرف جلسة الرفع مفقود",
+    "invalidFileSize": "حجم الملف غير صالح في طلب الرفع",
+    "missingContentType": "نوع المحتوى مفقود في طلب الرفع",
+    "invalidUploadSession": "جلسة الرفع غير صالحة",
+    "uploadSessionAlreadyUsed": "جلسة الرفع مستخدمة بالفعل",
+    "uploadSessionExpired": "جلسة الرفع منتهية الصلاحية",
+    "filePathMismatch": "عدم تطابق في مسار الملف",
+    "fileDeletedSuccessfully": "تم حذف الملف بنجاح",
+    "failedToDeleteFile": {
+      "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u062D\\u0630\\u0641 \\u0627\\u0644\\u0645\\u0644\\u0641: ${error}`"
+    },
+    "itemProtectedFromDeletion": "العنصر محمي من الحذف",
+    "fileProtectedFromDeletion": "الملف محمي من الحذف",
+    "deletionNotAllowedInParentDirectory": "الحذف غير مسموح في الدليل الأصل",
+    "deletionNotAllowedInParentDirectoryWithPath": {
+      "__fn": "(path) => `\\u0627\\u0644\\u062D\\u0630\\u0641 \\u063A\\u064A\\u0631 \\u0645\\u0633\\u0645\\u0648\\u062D \\u0641\\u064A \\u0627\\u0644\\u062F\\u0644\\u064A\\u0644 \\u0627\\u0644\\u0623\\u0635\\u0644: ${path}`"
+    },
+    "fileDeletionNotAllowedInDirectory": "حذف الملف غير مسموح في هذا الدليل",
+    "sourcePathNotFound": "مسار المصدر غير موجود",
+    "uploadsNotAllowedToDestination": "الرفع غير مسموح إلى الدليل الوجهة",
+    "allItemsProcessedSuccessfully": {
+      "__fn": "(operationName) => `\\u062A\\u0645\\u062A \\u0645\\u0639\\u0627\\u0644\\u062C\\u0629 \\u062C\\u0645\\u064A\\u0639 \\u0627\\u0644\\u0639\\u0646\\u0627\\u0635\\u0631 ${operationName} \\u0628\\u0646\\u062C\\u0627\\u062D`"
+    },
+    "itemsProcessedWithFailures": {
+      "__fn": "(successCount, failureCount, operationName) => `\\u062A\\u0645\\u062A \\u0645\\u0639\\u0627\\u0644\\u062C\\u0629 ${successCount} \\u0639\\u0646\\u0627\\u0635\\u0631 ${operationName}\\u060C \\u0641\\u0634\\u0644 ${failureCount}`"
+    },
+    "creatingSubdirectoriesNotAllowed": "إنشاء الأدلة الفرعية غير مسموح في الدليل الأصل",
+    "folderCreatedSuccessfully": "تم إنشاء المجلد بنجاح",
+    "failedToCreateFolder": {
+      "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u0625\\u0646\\u0634\\u0627\\u0621 \\u0627\\u0644\\u0645\\u062C\\u0644\\u062F: ${error}`"
+    },
+    "fileUploadedSuccessfully": "تم رفع الملف بنجاح",
+    "failedToUploadFile": {
+      "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u0631\\u0641\\u0639 \\u0627\\u0644\\u0645\\u0644\\u0641: ${error}`"
+    },
+    "moveNotAllowedFromDirectory": {
+      "__fn": "(sourceDir) => `\\u0627\\u0644\\u0646\\u0642\\u0644 \\u063A\\u064A\\u0631 \\u0645\\u0633\\u0645\\u0648\\u062D \\u0645\\u0646 \\u0627\\u0644\\u062F\\u0644\\u064A\\u0644: ${sourceDir}`"
+    },
+    "fileRenamedSuccessfully": "تمت إعادة تسمية الملف بنجاح",
+    "failedToRenameFile": {
+      "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u0625\\u0639\\u0627\\u062F\\u0629 \\u062A\\u0633\\u0645\\u064A\\u0629 \\u0627\\u0644\\u0645\\u0644\\u0641: ${error}`"
+    },
+    "fileIsInUse": "الملف قيد الاستخدام",
+    "itemNotFound": {
+      "__fn": "(path) => `\\u0627\\u0644\\u0639\\u0646\\u0635\\u0631 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${path}`"
+    },
+    "itemNotFoundInBucket": "العنصر غير موجود في المخزن",
+    "directoryDoesNotExist": "الدليل غير موجود",
+    "unknownError": "خطأ غير معروف",
+    "failedToRetrieveMovedItemInfo": "فشل في استرداد معلومات العنصر المنقول"
   },
   "meetingProvider": {
     "meetingProviderInactive": "موفر الاجتماعات غير نشط.",
@@ -144,10 +230,65 @@
   "parent": {
     "alreadyExists": "ملف ولي الأمر لهذا المستخدم موجود بالفعل.",
     "invalidTimezone": "المنطقة الزمنية غير صالحة.",
-    "createFailed": "فشل إنشاء ملف ولي الأمر."
+    "createFailed": "فشل إنشاء ملف ولي الأمر.",
+    "suggestionSubmitFailed": "فشل إرسال الاقتراح.",
+    "upsertFailed": "فشل عملية إدراج/تحديث ولي الأمر."
   },
   "staff": {
     "alreadyExists": "ملف الموظف لهذا المستخدم موجود بالفعل."
+  },
+  "lessonReport": {
+    "notEligibleForReview": "هذه الحصة غير مؤهلة لمراجعة تقرير الدرس.",
+    "alreadyExists": "يوجد بالفعل تقرير درس لهذه الحصة.",
+    "createFailed": "فشل إنشاء تقرير الدرس.",
+    "notFound": "تقرير الدرس غير موجود.",
+    "alreadyReviewed": "تمت مراجعة تقرير الدرس هذا بالفعل."
+  },
+  "resource": {
+    "bookDeleteFailed": "فشل حذف الكتاب.",
+    "resourceDeleteFailed": "فشل حذف مورد التعلم.",
+    "permissionDenied": "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
+    "seedCreateFailed": "فشل إنشاء مورد التعلم الأولي.",
+    "createFailed": "فشل إنشاء مورد التعلم.",
+    "handbookUploadFailed": "فشل رفع ملف الدليل. يرجى المحاولة مرة أخرى."
+  },
+  "notification": {
+    "deliveryNotFound": {
+      "__fn": "(id) => `\\u062A\\u0633\\u0644\\u064A\\u0645 \\u0627\\u0644\\u0625\\u0634\\u0639\\u0627\\u0631 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+    }
+  },
+  "fx": {
+    "syncAlreadyRunning": "جاري مزامنة أسعار الصرف. يرجى المحاولة لاحقاً.",
+    "syncFailed": "فشلت مزامنة أسعار الصرف. يرجى المحاولة لاحقاً."
+  },
+  "complaint": {
+    "responseCreateFailed": "فشل إنشاء رد على الشكوى.",
+    "createFailed": "فشل إنشاء الشكوى."
+  },
+  "subjectResource": {
+    "attachFailed": "فشل إرفاق المورد بالمادة.",
+    "linkNotFound": "رابط المورد غير موجود.",
+    "notFound": "مورد المادة غير موجود."
+  },
+  "meetingConfig": {
+    "requiresInstanceOrSchedule": "يتطلب تكوين اجتماع الفصل معرف مثيل الفصل أو معرف الجدولة المتكررة."
+  },
+  "meeting": {
+    "providerTokenUpdateFailed": "فشل تحديث رمز موفر الاجتماعات.",
+    "providerTokenInsertFailed": "فشل إدراج رمز موفر الاجتماعات."
+  },
+  "session": {
+    "userIdRequired": "معرف المستخدم (userId) مطلوب."
+  },
+  "classSubject": {
+    "createFailed": "فشل إنشاء مادة الفصل."
+  },
+  "leaveQuota": {
+    "updateFailed": "فشل تحديث حصة الإجازة.",
+    "insertFailed": "فشل إدراج حصة الإجازة."
+  },
+  "classInstance": {
+    "idempotencyKeyRequired": "تتطلب عملية إدراج/تحديث مثيل الفصل مفتاح idempotency."
   },
   "teacher": {
     "alreadyExists": "ملف المعلم لهذا المستخدم موجود بالفعل.",
@@ -158,7 +299,24 @@
     "quotaMustBeNonNegative": "الحصة يجب أن تكون رقمًا غير سالب.",
     "quotaExceedsTotal": {
       "__fn": "({ requested, total }) => `\\u0627\\u0644\\u062D\\u0635\\u0629 (${requested}) \\u062A\\u062A\\u062C\\u0627\\u0648\\u0632 \\u0627\\u0644\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A (${total}).`"
-    }
+    },
+    "vacationRequestNotFound": {
+      "__fn": "(id) => `\\u0637\\u0644\\u0628 \\u0627\\u0644\\u0625\\u062C\\u0627\\u0632\\u0629 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+    },
+    "createFailed": "فشل إنشاء ملف المعلم.",
+    "upsertFailed": "فشل عملية إدراج/تحديث المعلم.",
+    "noteCreateFailed": "فشل إنشاء ملاحظة المعلم.",
+    "staffProfileCreateFailed": "فشل إنشاء ملف الموظف.",
+    "staffProfileUpdateFailed": "فشل تحديث ملف الموظف.",
+    "availabilityUpdateFailed": "فشل تحديث نافذة التوفر.",
+    "availabilityInsertFailed": "فشل إدراج نافذة التوفر.",
+    "recurringUnavailabilityInsertFailed": "فشل إدراج عدم التوفر المتكرر.",
+    "vacationInsertFailed": "فشل إدراج طلب الإجازة."
+  },
+  "teacherDue": {
+    "hoursMustBePositive": "يجب أن تكون الساعات أكبر من 0.",
+    "amountMustBeNonNegative": "المبلغ يجب أن يكون غير سالب.",
+    "insertFailed": "فشل إدراج صف مستحقات المعلم."
   },
   "student": {
     "studentNotFound": {
@@ -178,7 +336,8 @@
       "__fn": "({ currentStatus, newStatus }) => `\\u0627\\u0646\\u062A\\u0642\\u0627\\u0644 \\u062D\\u0627\\u0644\\u0629 \\u063A\\u064A\\u0631 \\u0635\\u0627\\u0644\\u062D: ${currentStatus} -> ${newStatus}.`"
     },
     "studentEmailRequired": "بريد الطالب الإلكتروني مطلوب.",
-    "studentPasswordRequired": "كلمة مرور الطالب مطلوبة."
+    "studentPasswordRequired": "كلمة مرور الطالب مطلوبة.",
+    "upsertFailed": "فشل عملية إدراج/تحديث الطالب."
   },
   "category": {
     "categoryNotFound": {
@@ -218,7 +377,21 @@
     "studentBooked": "الطالب محجوز بالفعل في هذا الوقت.",
     "meetingUrlInUse": "رابط الاجتماع مستخدم بالفعل.",
     "sessionNotActivated": "الجلسة غير مفعلة.",
-    "missedClassTime": "لقد فات وقت الحصة."
+    "missedClassTime": "لقد فات وقت الحصة.",
+    "absentTooEarly": {
+      "__fn": "({ waitingMinutes }) => `\\u0644\\u0627 \\u064A\\u0645\\u0643\\u0646 \\u0648\\u0636\\u0639 \\u0639\\u0644\\u0627\\u0645\\u0629 \\u0627\\u0644\\u063A\\u064A\\u0627\\u0628 \\u0628\\u0639\\u062F. \\u064A\\u0631\\u062C\\u0649 \\u0627\\u0644\\u0627\\u0646\\u062A\\u0638\\u0627\\u0631 ${waitingMinutes} \\u062F\\u0642\\u064A\\u0642\\u0629 \\u0628\\u0639\\u062F \\u0648\\u0642\\u062A \\u0627\\u0644\\u0628\\u062F\\u0621 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644.`"
+    },
+    "vacationStartBeforeEnd": "يجب أن يكون تاريخ بداية الإجازة قبل تاريخ النهاية",
+    "startTimeBeforeEndTime": "يجب أن يكون وقت البداية قبل وقت النهاية",
+    "dateRangeExceedsMax": {
+      "__fn": "(maxDays) => `\\u0644\\u0627 \\u064A\\u0645\\u0643\\u0646 \\u0623\\u0646 \\u064A\\u062A\\u062C\\u0627\\u0648\\u0632 \\u0646\\u0637\\u0627\\u0642 \\u0627\\u0644\\u062A\\u0627\\u0631\\u064A\\u062E ${maxDays} \\u064A\\u0648\\u0645\\u064B\\u0627`"
+    },
+    "vacationRequestNotPending": {
+      "__fn": "(id) => `\\u0637\\u0644\\u0628 \\u0627\\u0644\\u0625\\u062C\\u0627\\u0632\\u0629 ${id} \\u0644\\u064A\\u0633 \\u0641\\u064A \\u062D\\u0627\\u0644\\u0629 \\u0627\\u0644\\u0627\\u0646\\u062A\\u0638\\u0627\\u0631`"
+    },
+    "vacationRequestAlreadyCancelled": {
+      "__fn": "(id) => `\\u0637\\u0644\\u0628 \\u0627\\u0644\\u0625\\u062C\\u0627\\u0632\\u0629 ${id} \\u062A\\u0645 \\u0625\\u0644\\u063A\\u0627\\u0624\\u0647 \\u0628\\u0627\\u0644\\u0641\\u0639\\u0644`"
+    }
   },
   "permissionGroup": {
     "permissionGroupNotFound": "مجموعة الأذونات غير موجودة."
@@ -252,7 +425,9 @@
     },
     "onDemandNoCredits": {
       "__fn": "(studentName) => `\\u0644\\u0627 \\u062A\\u0648\\u062C\\u062F \\u0623\\u0631\\u0635\\u062F\\u0629 \\u0643\\u0627\\u0641\\u064A\\u0629 \\u0644\\u0644\\u062D\\u062C\\u0632 \\u0627\\u0644\\u0641\\u0648\\u0631\\u064A \\u0644\\u0640 ${studentName}`"
-    }
+    },
+    "cannotRefreshNonPeriodic": "لا يمكن تحديث حصة غير دورية",
+    "noValidPeriodDays": "الحصة لا تحتوي على أيام صالحة للفترة المحددة"
   },
   "rateLimitExceeded": "طلبات كثيرة جداً. يرجى المحاولة لاحقاً.",
   "duplicateRequest": "طلب مكرر. هذه العملية تمت معالجتها بالفعل.",
@@ -297,6 +472,7 @@
   },
   "studentEmailRequired": "بريد الطالب الإلكتروني مطلوب.",
   "studentPasswordRequired": "كلمة مرور الطالب مطلوبة.",
+  "upsertFailed": "فشل عملية إدراج/تحديث المعلم.",
   "categoryNotFound": {
     "__fn": "(id) => `\\u0627\\u0644\\u0641\\u0626\\u0629 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F\\u0629: ${id}`"
   },
@@ -331,6 +507,20 @@
   "meetingUrlInUse": "رابط الاجتماع مستخدم بالفعل.",
   "sessionNotActivated": "الجلسة غير مفعلة.",
   "missedClassTime": "لقد فات وقت الحصة.",
+  "absentTooEarly": {
+    "__fn": "({ waitingMinutes }) => `\\u0644\\u0627 \\u064A\\u0645\\u0643\\u0646 \\u0648\\u0636\\u0639 \\u0639\\u0644\\u0627\\u0645\\u0629 \\u0627\\u0644\\u063A\\u064A\\u0627\\u0628 \\u0628\\u0639\\u062F. \\u064A\\u0631\\u062C\\u0649 \\u0627\\u0644\\u0627\\u0646\\u062A\\u0638\\u0627\\u0631 ${waitingMinutes} \\u062F\\u0642\\u064A\\u0642\\u0629 \\u0628\\u0639\\u062F \\u0648\\u0642\\u062A \\u0627\\u0644\\u0628\\u062F\\u0621 \\u0627\\u0644\\u0645\\u062C\\u062F\\u0648\\u0644.`"
+  },
+  "vacationStartBeforeEnd": "يجب أن يكون تاريخ بداية الإجازة قبل تاريخ النهاية",
+  "startTimeBeforeEndTime": "يجب أن يكون وقت البداية قبل وقت النهاية",
+  "dateRangeExceedsMax": {
+    "__fn": "(maxDays) => `\\u0644\\u0627 \\u064A\\u0645\\u0643\\u0646 \\u0623\\u0646 \\u064A\\u062A\\u062C\\u0627\\u0648\\u0632 \\u0646\\u0637\\u0627\\u0642 \\u0627\\u0644\\u062A\\u0627\\u0631\\u064A\\u062E ${maxDays} \\u064A\\u0648\\u0645\\u064B\\u0627`"
+  },
+  "vacationRequestNotPending": {
+    "__fn": "(id) => `\\u0637\\u0644\\u0628 \\u0627\\u0644\\u0625\\u062C\\u0627\\u0632\\u0629 ${id} \\u0644\\u064A\\u0633 \\u0641\\u064A \\u062D\\u0627\\u0644\\u0629 \\u0627\\u0644\\u0627\\u0646\\u062A\\u0638\\u0627\\u0631`"
+  },
+  "vacationRequestAlreadyCancelled": {
+    "__fn": "(id) => `\\u0637\\u0644\\u0628 \\u0627\\u0644\\u0625\\u062C\\u0627\\u0632\\u0629 ${id} \\u062A\\u0645 \\u0625\\u0644\\u063A\\u0627\\u0624\\u0647 \\u0628\\u0627\\u0644\\u0641\\u0639\\u0644`"
+  },
   "permissionGroupNotFound": "مجموعة الأذونات غير موجودة.",
   "alreadyExists": "ملف المعلم لهذا المستخدم موجود بالفعل.",
   "teacherNotFound": {
@@ -341,6 +531,17 @@
   "quotaExceedsTotal": {
     "__fn": "({ requested, total }) => `\\u0627\\u0644\\u062D\\u0635\\u0629 (${requested}) \\u062A\\u062A\\u062C\\u0627\\u0648\\u0632 \\u0627\\u0644\\u0625\\u062C\\u0645\\u0627\\u0644\\u064A (${total}).`"
   },
+  "vacationRequestNotFound": {
+    "__fn": "(id) => `\\u0637\\u0644\\u0628 \\u0627\\u0644\\u0625\\u062C\\u0627\\u0632\\u0629 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
+  },
+  "createFailed": "فشل إنشاء ملف المعلم.",
+  "noteCreateFailed": "فشل إنشاء ملاحظة المعلم.",
+  "staffProfileCreateFailed": "فشل إنشاء ملف الموظف.",
+  "staffProfileUpdateFailed": "فشل تحديث ملف الموظف.",
+  "availabilityUpdateFailed": "فشل تحديث نافذة التوفر.",
+  "availabilityInsertFailed": "فشل إدراج نافذة التوفر.",
+  "recurringUnavailabilityInsertFailed": "فشل إدراج عدم التوفر المتكرر.",
+  "vacationInsertFailed": "فشل إدراج طلب الإجازة.",
   "meetingProviderNotFound": {
     "__fn": "(id) => `\\u0645\\u0648\\u0641\\u0631 \\u0627\\u0644\\u0627\\u062C\\u062A\\u0645\\u0627\\u0639\\u0627\\u062A \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F: ${id}`"
   },
@@ -409,5 +610,24 @@
   "invalidOverrideState": "قيمة حالة تجاوز الصلاحية غير صالحة.",
   "bulkOperationLimitExceeded": {
     "__fn": "(operation, limit) => `\\u0639\\u0645\\u0644\\u064A\\u0629 ${operation} \\u0627\\u0644\\u0645\\u062C\\u0645\\u0648\\u0639\\u0629 \\u0645\\u062D\\u062F\\u0648\\u062F\\u0629 \\u0628\\u0640 ${limit} \\u0639\\u0646\\u0635\\u0631 \\u0643\\u062D\\u062F \\u0623\\u0642\\u0635\\u0649`"
-  }
+  },
+  "forbidden": "محظور",
+  "noPdfAvailable": "لا تتوفر ملف PDF لهذه الفاتورة",
+  "invoiceNotFoundShort": "الفاتورة غير موجودة",
+  "invalidLocale": "اللغة غير صالحة",
+  "invalidOrigin": "المصدر غير صالح",
+  "failedToSetLocale": "فشل في تعيين اللغة",
+  "fxRefreshFailed": "فشل تحديث أسعار الصرف",
+  "deletedExpiredSignedUrls": {
+    "__fn": "(count) => `\\u062A\\u0645 \\u062D\\u0630\\u0641 ${count} \\u0631\\u0627\\u0628\\u0637 \\u0645\\u0648\\u0642\\u0639 \\u0645\\u0646\\u062A\\u0647\\u064A \\u0627\\u0644\\u0635\\u0644\\u0627\\u062D\\u064A\\u0629`"
+  },
+  "invalidRequestFormat": "تنسيق الطلب غير صالح. المتوقع { logs: LogEntry[] }",
+  "missingRequiredFields": "حقول مطلوبة مفقودة في إدخال السجل",
+  "invalidSessionId": "معرف الجلسة غير صالح في إدخال السجل",
+  "failedToWriteLogs": "فشل في كتابة السجلات",
+  "missingCodeOrState": "معامل الكود أو الحالة مفقود",
+  "invalidOrExpiredOAuthState": "حالة OAuth غير صالحة أو منتهية الصلاحية",
+  "providerMismatch": "عدم تطابق المزوّد في حالة OAuth",
+  "failedToCompleteOAuthTokenExchange": "فشل في إتمام تبادل رمز OAuth",
+  "invalidEventType": "نوع الحدث غير صالح"
 }

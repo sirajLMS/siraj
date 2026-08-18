@@ -23,5 +23,7 @@
   "superAdmin": "System Administrator",
   "teacher": "Teacher",
   "parent": "Parent",
-  "staff": "Staff"
+  "staff": "Staff",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password"
 }

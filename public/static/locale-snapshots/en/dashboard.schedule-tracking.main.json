@@ -1,6 +1,7 @@
 {
   "pageTitle": "Schedule Tracking",
   "pageSubtitle": "Monitor reschedules, class session status, and schedule alerts.",
+  "tabNavAriaLabel": "Schedule tracking sections",
   "tabs": {
     "reschedule": "Reschedule",
     "status": "Status",

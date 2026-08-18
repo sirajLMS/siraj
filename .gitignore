@@ -123,3 +123,4 @@ jscpd-all
 # locale JS transpiled artifacts
 shared/locale/**/*.js
 .openhands/agent-canvas/logs
+.next-locale-snapshots-version

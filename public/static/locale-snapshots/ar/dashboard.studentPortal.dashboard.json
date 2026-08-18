@@ -25,5 +25,14 @@
   "columnDate": "التاريخ",
   "columnDuration": "المدة",
   "columnStatus": "الحالة",
-  "columnActions": "الإجراءات"
+  "columnActions": "الإجراءات",
+  "minutesShort": {
+    "__fn": "(minutes) => `${minutes} \\u062F`"
+  },
+  "hoursShort": {
+    "__fn": "(hours) => `${hours} \\u0633`"
+  },
+  "durationMinutesShort": {
+    "__fn": "(minutes) => `${minutes} \\u062F\\u0642\\u064A\\u0642\\u0629`"
+  }
 }

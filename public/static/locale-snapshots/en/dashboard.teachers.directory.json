@@ -26,7 +26,8 @@
     "linkPending": "Link Pending"
   },
   "fields": {
-    "phone": "Phone"
+    "phone": "Phone",
+    "searchTeachers": "Search teachers"
   },
   "status": {
     "active": "Active",

@@ -203,5 +203,9 @@
     "disconnectError": "تعذّر فصل المزود. يرجى المحاولة مرة أخرى.",
     "navigateToAdminSettings": "إعدادات المزود الإدارية",
     "navigateToAdminSettingsAriaLabel": "فتح إعدادات مزود الاجتماعات الإدارية"
-  }
+  },
+  "providerLogoAlt": {
+    "__fn": "(providerName) => `\\u0634\\u0639\\u0627\\u0631 ${providerName}`"
+  },
+  "providerLogoFallbackAlt": "شعار مزود الاجتماع"
 }

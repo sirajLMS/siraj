@@ -8,39 +8,10 @@
 import { spawnSync } from "bun";
 import {
   getTestServerPortCandidates,
+  killListenersOnPort,
   PROTECTED_APP_PORTS,
   TEST_SERVER_PORT,
 } from "@/frontend/common/graphql/test/testPort";
-
-function killListenersOnPort(port: number): number {
-  if ((PROTECTED_APP_PORTS as readonly number[]).includes(port)) {
-    process.stderr.write(`[kill-test-ui-servers] Skipping protected app port ${port}\n`);
-    return 0;
-  }
-
-  const lsof = spawnSync(["lsof", "-ti", `tcp:${port}`, "-sTCP:LISTEN"], {
-    stdout: "pipe",
-    stderr: "ignore",
-  });
-  const pids = lsof.stdout?.toString().trim().split("\n").filter(Boolean) ?? [];
-  let killed = 0;
-
-  for (const pidText of pids) {
-    const pid = Number(pidText);
-    if (!Number.isInteger(pid) || pid <= 0 || pid === process.pid) {
-      continue;
-    }
-    try {
-      process.kill(pid, "SIGTERM");
-      killed++;
-      process.stderr.write(`[kill-test-ui-servers] Sent SIGTERM to pid ${pid} on port ${port}\n`);
-    } catch {
-      // already gone
-    }
-  }
-
-  return killed;
-}
 
 function killPlaywrightTestBrowsers(): void {
   const patterns = ["chrome-headless-shell", "chromium_headless", "ms-playwright.*headless"] as const;

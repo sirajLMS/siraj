@@ -37,7 +37,7 @@
     "test:ui": "bun run test:ui:components && bun run test:ui:e2e && bun run test:ui:static",
     "test:ui:components": "bun run scripts/lib/run-locked-cmd.ts test:ui:components TEST_SERVER_MODE=production bun --env-file=.env.test test --parallel=1 test/ui/components/ --preload ./test/ui/test-env.ts --preload ./test/ui/components/happydom-preload.ts --preload ./test/ui/components/translation-preload.ts --preload ./test/ui/components/next-dynamic-mock.ts",
     "test:ui:components:coverage": "bun run scripts/lib/run-locked-cmd.ts test:ui:components:coverage TEST_SERVER_MODE=production bun --env-file=.env.test test --parallel=1 --coverage test/ui/components/ --preload ./test/ui/test-env.ts --preload ./test/ui/components/happydom-preload.ts --preload ./test/ui/components/translation-preload.ts --preload ./test/ui/components/next-dynamic-mock.ts",
-    "test:ui:e2e": "bun run scripts/lib/run-locked-cmd.ts test:ui:e2e TEST_SERVER_MODE=dev bun --env-file=.env.test test --parallel=1 test/ui/e2e/ --preload ./test/ui/test-env.ts --timeout=300000",
+    "test:ui:e2e": "bun run scripts/lib/run-locked-cmd.ts test:ui:e2e TEST_SERVER_MODE=dev TEST_E2E_WARMUP=1 bun --env-file=.env.test test --parallel=1 test/ui/e2e/ --preload ./test/ui/test-env.ts --timeout=300000",
     "test:ui:static": "bun run scripts/lib/run-locked-cmd.ts test:ui:static TEST_SERVER_MODE=production bun --env-file=.env.test test --parallel=1 test/ui/mobile-desktop-isolation.test.ts --preload ./test/ui/test-env.ts",
     "test:ui:kill": "bun run scripts/kill-test-ui-servers.ts",
     "build:test": "bun run scripts/lib/run-locked-cmd.ts build:test bun run scripts/build-test.ts",

@@ -103,5 +103,8 @@
     "groupSimulation": {
       "returnToNormalRole": "Return to normal role"
     }
+  },
+  "toggleGroupAriaLabel": {
+    "__fn": "(label) => `Toggle ${label} group`"
   }
 }

@@ -1,5 +1,6 @@
 {
   "pageTitle": "WhatsApp Configuration",
+  "tabNavAriaLabel": "WhatsApp settings sections",
   "tabNumbers": "Numbers",
   "tabTemplates": "Templates",
   "tabOptIn": "Opt-in",

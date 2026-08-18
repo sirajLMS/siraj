@@ -1,4 +1,6 @@
 {
   "selectCountry": "Select country",
-  "required": "Country is required"
+  "required": "Country is required",
+  "requestLimitReached": "Request limit reached for today",
+  "detectionFailed": "Failed to detect country"
 }

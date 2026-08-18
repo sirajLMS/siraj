@@ -81,6 +81,15 @@
       "__fn": "(count) => `Student's performance trend over the last ${count} classes.`"
     }
   },
+  "hoursShort": {
+    "__fn": "(hours) => `${hours}h`"
+  },
+  "minutesShort": {
+    "__fn": "(minutes) => `${minutes}m`"
+  },
+  "percentValue": {
+    "__fn": "(value) => `${value}%`"
+  },
   "errors": {
     "loadFailed": "Failed to load student history."
   }

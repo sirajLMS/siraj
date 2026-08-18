@@ -1,4 +1,6 @@
 {
   "selectCountry": "اختر البلد",
-  "required": "البلد مطلوب"
+  "required": "البلد مطلوب",
+  "requestLimitReached": "تم الوصول إلى الحد الأقصى للطلبات اليوم",
+  "detectionFailed": "فشل في اكتشاف البلد"
 }

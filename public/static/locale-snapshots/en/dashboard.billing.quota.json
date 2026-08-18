@@ -1,5 +1,6 @@
 {
   "title": "Student Quotas",
+  "breadcrumbLabel": "Quotas",
   "newQuota": "New Quota",
   "editQuota": "Edit Quota",
   "quotaDetails": "Quota Details",

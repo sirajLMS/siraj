@@ -19,5 +19,7 @@
   "rateSourceOverride": "Override",
   "rateSourceRecurring": "Recurring",
   "rateSourceSubject": "Subject",
-  "rateSourceTeacher": "Teacher"
+  "rateSourceTeacher": "Teacher",
+  "statusPending": "Pending",
+  "statusPaid": "Paid"
 }

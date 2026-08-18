@@ -28,6 +28,9 @@
       "__fn": "(date) => `Last Updated: ${date}`"
     },
     "unknownSubject": "Class",
+    "minutesShort": {
+      "__fn": "(minutes) => `${minutes}m`"
+    },
     "status": {
       "ended": "Ended",
       "absent": "Absent",

@@ -43,7 +43,10 @@
     "pending": "Pending",
     "present": "Present",
     "absent": "Absent",
-    "noEntries": "No students"
+    "noEntries": "No students",
+    "viewStudentAriaLabel": {
+      "__fn": "(name) => `View ${name}`"
+    }
   },
   "venue": {
     "title": "Room Location",

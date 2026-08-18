@@ -25,5 +25,14 @@
   "columnDate": "Date",
   "columnDuration": "Duration",
   "columnStatus": "Status",
-  "columnActions": "Actions"
+  "columnActions": "Actions",
+  "minutesShort": {
+    "__fn": "(minutes) => `${minutes}m`"
+  },
+  "hoursShort": {
+    "__fn": "(hours) => `${hours}h`"
+  },
+  "durationMinutesShort": {
+    "__fn": "(minutes) => `${minutes} min`"
+  }
 }

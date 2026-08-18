@@ -43,7 +43,10 @@
     "pending": "معلّق",
     "present": "حاضر",
     "absent": "غائب",
-    "noEntries": "لا يوجد طلاب"
+    "noEntries": "لا يوجد طلاب",
+    "viewStudentAriaLabel": {
+      "__fn": "(name) => `\\u0639\\u0631\\u0636 ${name}`"
+    }
   },
   "venue": {
     "title": "موقع القاعة",

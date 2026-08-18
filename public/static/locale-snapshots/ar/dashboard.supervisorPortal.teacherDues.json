@@ -19,5 +19,7 @@
   "rateSourceOverride": "تجاوز",
   "rateSourceRecurring": "متكرر",
   "rateSourceSubject": "المادة",
-  "rateSourceTeacher": "المعلم"
+  "rateSourceTeacher": "المعلم",
+  "statusPending": "معلق",
+  "statusPaid": "مدفوع"
 }
