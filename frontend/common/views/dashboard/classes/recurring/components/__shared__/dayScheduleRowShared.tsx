@@ -32,7 +32,7 @@ const StyledDayScheduleRowContainer = styled(Box, {
   border: isActiveOverride ? 2 : 1,
   borderColor: isActiveOverride ? theme.palette.primary.main : theme.palette.outlineVariant,
   backgroundColor: isActiveOverride ? theme.palette.surfaceContainerHigh : theme.palette.surface,
-  transition: "background-color 0.2s",
+  transition: theme.transitions.create("background-color", { duration: 200 }),
   "&:hover": {
     backgroundColor: isActiveOverride ? theme.palette.surfaceContainerHighest : theme.palette.surfaceContainerLow,
   },

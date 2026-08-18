@@ -21,12 +21,12 @@ export function WorkshopPromoCardDesktop({ promo, labels, onLearnMore }: Readonl
         component="img"
         src={promo.imageUrl}
         alt={promo.title}
-        sx={{
+        sx={theme => ({
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          transition: "transform 0.7s ease",
-        }}
+          transition: theme.transitions.create("transform", { duration: 700, easing: "ease" }),
+        })}
       />
       <Box
         sx={theme => ({

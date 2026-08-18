@@ -27,6 +27,7 @@ export function useScheduleTrackingTabsViewModel(): ScheduleTrackingTabsViewMode
       title: labels.pageTitle,
       subtitle: labels.pageSubtitle,
       tabs: labels.tabs,
+      tabNavAriaLabel: labels.tabNavAriaLabel,
     }),
     [labels]
   );

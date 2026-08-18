@@ -28,7 +28,7 @@ export function CurrentTeacherCardShared({ props, slots }: Readonly<CurrentTeach
           ? {
               cursor: "pointer",
               "&:hover": { opacity: 0.9 },
-              transition: "opacity 0.2s",
+              transition: theme.transitions.create("opacity", { duration: 200 }),
             }
           : {}),
       })}

@@ -20,7 +20,7 @@ export function BillingMobileChrome({ labels, activeTab, tabNavItems }: Readonly
         breadcrumbOptions={{ currentTitle: resolveActiveTabLabel(activeTab, tabNavItems) }}
       />
       <Box sx={{ mt: 2 }}>
-        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="Billing sections" />
+        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

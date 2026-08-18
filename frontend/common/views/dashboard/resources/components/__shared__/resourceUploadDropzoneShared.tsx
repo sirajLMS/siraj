@@ -33,7 +33,7 @@ export function ResourceUploadDropzoneShared({
           p: config.padding,
           backgroundColor: theme.palette.surfaceContainerLow,
           cursor: "pointer",
-          transition: "border-color 0.15s ease, background-color 0.15s ease",
+          transition: theme.transitions.create(["border-color", "background-color"], { duration: 150, easing: "ease" }),
           "&:hover": {
             borderColor: theme.palette.primary.main,
             backgroundColor: theme.palette.surfaceContainer,

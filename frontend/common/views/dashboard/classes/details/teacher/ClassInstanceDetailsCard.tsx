@@ -159,24 +159,24 @@ function ClassInstanceDetailsFields({
                 <Typography variant="bodyLg">{displaySubjectName}</Typography>
               </Stack>
               {subjectId ? (
-                <Button
-                  component={Link}
-                  href={`/subjects/${subjectId}`}
-                  variant="outlined"
-                  size="small"
-                  startIcon={<MenuBookOutlined />}
-                  sx={theme => ({
-                    alignSelf: "flex-start",
-                    borderColor: theme.palette.outline,
-                    color: theme.palette.primary.main,
-                    "&:hover": {
-                      borderColor: theme.palette.primary.main,
-                      backgroundColor: theme.palette.action.hover,
-                    },
-                  })}
-                >
-                  {labels.viewSubject}
-                </Button>
+                <Link href={`/subjects/${subjectId}`} style={{ textDecoration: "none" }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<MenuBookOutlined />}
+                    sx={theme => ({
+                      alignSelf: "flex-start",
+                      borderColor: theme.palette.outline,
+                      color: theme.palette.primary.main,
+                      "&:hover": {
+                        borderColor: theme.palette.primary.main,
+                        backgroundColor: theme.palette.action.hover,
+                      },
+                    })}
+                  >
+                    {labels.viewSubject}
+                  </Button>
+                </Link>
               ) : null}
             </Stack>
           }

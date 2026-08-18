@@ -11,6 +11,6 @@ import type { SettingsTabNavVariantProps } from "@/frontend/common/views/dashboa
  * clarity. The per-tier Settings-specific tab nav files were removed — the
  * generic tiers already mirror their markup verbatim.
  */
-export function SettingsTabNav({ activeTab, tabs }: Readonly<SettingsTabNavVariantProps>) {
-  return <GenericTabNav activeTab={activeTab} tabs={tabs} ariaLabel="Settings sections" />;
+export function SettingsTabNav({ activeTab, tabs, ariaLabel }: Readonly<SettingsTabNavVariantProps>) {
+  return <GenericTabNav activeTab={activeTab} tabs={tabs} ariaLabel={ariaLabel} />;
 }

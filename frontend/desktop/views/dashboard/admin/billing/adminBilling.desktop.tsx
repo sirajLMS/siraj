@@ -36,13 +36,17 @@ function AdminBillingHeaderActions({
   return (
     <>
       {canViewExchangeRates ? (
-        <Button component={Link} href="/billing/exchange-rates" variant="outlined" startIcon={<TimelineOutlined />}>
-          {labels.exchangeRatesLink}
-        </Button>
+        <Link href="/billing/exchange-rates" style={{ textDecoration: "none" }}>
+          <Button variant="outlined" startIcon={<TimelineOutlined />}>
+            {labels.exchangeRatesLink}
+          </Button>
+        </Link>
       ) : null}
-      <Button component={Link} href="/quotas" variant="outlined" startIcon={<AccountBalanceWalletOutlined />}>
-        {labels.quotasLink}
-      </Button>
+      <Link href="/quotas" style={{ textDecoration: "none" }}>
+        <Button variant="outlined" startIcon={<AccountBalanceWalletOutlined />}>
+          {labels.quotasLink}
+        </Button>
+      </Link>
       {canCreate ? (
         <DesktopPrimaryPageAction startIcon={<AddOutlined />} onClick={onManualInvoice}>
           {labels.manualInvoice}

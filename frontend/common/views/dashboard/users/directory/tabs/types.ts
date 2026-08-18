@@ -6,6 +6,7 @@ export interface UsersDirectoryViewLabels {
   readonly subtitle: string;
   readonly tabs: UsersDirectoryTabsLabels;
   readonly createUserLabel: string;
+  readonly tabNavAriaLabel: string;
 }
 export type UsersDirectoryTabsViewModel = {
   readonly labels: UsersDirectoryViewLabels;

@@ -2,6 +2,7 @@
 
 import { CloseOutlined } from "@mui/icons-material";
 import {
+  Box,
   Button,
   DialogActions,
   DialogContent,
@@ -13,7 +14,6 @@ import {
   InputAdornment,
   Stack,
   TextField,
-  Typography,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -332,9 +332,9 @@ export function LocalizedStringDrawerShared({
       <DialogTitle
         sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexShrink: 0 }}
       >
-        <Typography variant="h6" component="span">
+        <Box component="span" sx={{ typography: "h6" }}>
           {headerTitle}
-        </Typography>
+        </Box>
         <IconButton onClick={handleDismiss} disabled={saving} size="small" aria-label={t.cancel}>
           <CloseOutlined fontSize="small" />
         </IconButton>

@@ -48,6 +48,7 @@ export function useUsersDirectoryTabsViewModel(): UsersDirectoryTabsViewModel {
       subtitle: labels.pageSubtitle,
       tabs: labels.tabs,
       createUserLabel: navLabels.createUser,
+      tabNavAriaLabel: labels.tabNavAriaLabel,
     }),
     [labels, navLabels.createUser]
   );

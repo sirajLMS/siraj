@@ -20,7 +20,7 @@ export function FeedbackManageDesktopChrome({ labels, activeTab, tabNavItems }: 
         breadcrumbOptions={{ currentTitle: resolveActiveTabLabel(activeTab, tabNavItems) }}
       />
       <Box sx={{ mt: 3 }}>
-        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="Feedback sections" />
+        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

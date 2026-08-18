@@ -1,7 +1,6 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import type { LocaleEmojiProps } from "@/frontend/common/components/ui/display/localeEmoji/types/localeEmoji.types";
 import type { CurrencyOptionRowProps } from "@/frontend/common/components/ui/input/currencySelect/currencyOptionRow.types";
@@ -28,25 +27,33 @@ export function CurrencyOptionRowShared({
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap, width: "100%", minHeight }}>
       <LocaleEmoji emoji={currency.flagEmoji} />
-      <Typography component="span" sx={{ flex: 1, fontSize: labelFontSize }}>
+      <Box component="span" sx={{ flex: 1, fontSize: labelFontSize }}>
         {getCurrencyDisplayName(currency.code, locale)}
-      </Typography>
+      </Box>
       {showSymbol ? (
-        <Typography
+        <Box
           component="span"
-          dir="ltr"
-          sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, fontSize: secondaryFontSize })}
+          sx={theme => ({
+            color: theme.palette.text.secondary,
+            flexShrink: 0,
+            fontSize: secondaryFontSize,
+            direction: "ltr",
+          })}
         >
           {currency.symbol}
-        </Typography>
+        </Box>
       ) : null}
-      <Typography
+      <Box
         component="span"
-        dir="ltr"
-        sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, fontSize: secondaryFontSize })}
+        sx={theme => ({
+          color: theme.palette.text.secondary,
+          flexShrink: 0,
+          fontSize: secondaryFontSize,
+          direction: "ltr",
+        })}
       >
         {currency.code as string}
-      </Typography>
+      </Box>
     </Box>
   );
 }

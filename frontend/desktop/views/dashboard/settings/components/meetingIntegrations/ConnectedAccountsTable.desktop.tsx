@@ -1,15 +1,24 @@
 "use client";
 
-import { Box, Button, Chip, TextField } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
+import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
-  getStatusColor,
   getStatusLabel,
   isMeetingIntegrationConnectedAccount,
   isRevokeDisabled,
   useConnectedAccountsFilter,
 } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/connectedAccounts.helpers";
+
+const OAUTH_STATUS_TO_SYNC: Record<MeetingIntegrationConnectedAccountStatus, string> = {
+  [MeetingIntegrationConnectedAccountStatus.Connected]: "success",
+  [MeetingIntegrationConnectedAccountStatus.ExpiringSoon]: "partial",
+  [MeetingIntegrationConnectedAccountStatus.ReauthNeeded]: "failed",
+  [MeetingIntegrationConnectedAccountStatus.Revoked]: "unknown",
+};
+
 import { StatusFilterSelect } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/StatusFilterSelect";
 import type { ConnectedAccountsTableProps } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
@@ -76,13 +85,11 @@ export function ConnectedAccountsTableDesktop({
           if (!isMeetingIntegrationConnectedAccount(params.row)) {
             return null;
           }
-          // Placeholder: Replace with OAuthConnectionStatusBadge component in Phase 4
           return (
-            <Chip
-              size="small"
+            <StatusBadge
+              category="syncStatus"
+              status={OAUTH_STATUS_TO_SYNC[params.row.status]}
               label={getStatusLabel(params.row.status, labels)}
-              color={getStatusColor(params.row.status)}
-              variant="outlined"
             />
           );
         },

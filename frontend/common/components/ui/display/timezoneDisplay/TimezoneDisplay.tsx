@@ -1,7 +1,7 @@
 "use client";
 
+import Box from "@mui/material/Box";
 import type { SxProps, Theme } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
@@ -25,9 +25,9 @@ export const TimezoneDisplay = ({
 }: TimezoneDisplayProps): React.JSX.Element | null => {
   const locale = useAppLocale();
   const fallbackNode = fallback ? (
-    <Typography component="span" variant={typographyVariant} sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
+    <Box component="span" sx={mergeSx({ typography: typographyVariant, whiteSpace: "nowrap" }, sx)}>
       {fallback}
-    </Typography>
+    </Box>
   ) : null;
 
   if (!timezone) {
@@ -40,8 +40,8 @@ export const TimezoneDisplay = ({
     : getTimezonePathLabel(normalizedTimezone, locale);
 
   return (
-    <Typography component="span" variant={typographyVariant} sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
+    <Box component="span" sx={mergeSx({ typography: typographyVariant, whiteSpace: "nowrap" }, sx)}>
       {display}
-    </Typography>
+    </Box>
   );
 };

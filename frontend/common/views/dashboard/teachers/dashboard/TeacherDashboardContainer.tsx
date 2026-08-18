@@ -73,6 +73,11 @@ export function TeacherDashboardContainer() {
     data,
   } = useTeacherDashboardStore();
 
+  const ensureFilterDate = useTeacherDashboardStore(state => state.ensureFilterDate);
+  useEffect(() => {
+    ensureFilterDate();
+  }, [ensureFilterDate]);
+
   const props: UseTeacherDashboardViewModelProps = {
     userName,
     metricItems: data.metricItems,

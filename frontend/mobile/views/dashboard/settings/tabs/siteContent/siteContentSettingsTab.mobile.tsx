@@ -7,7 +7,12 @@ import type {
   SiteContentRow,
   SiteContentSettingsViewModel,
 } from "@/frontend/common/views/dashboard/settings/types/siteContentSettings.types";
-import { MobileCardList, MobileCardListItem, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
+import {
+  MobileCardList,
+  MobileCardListItem,
+  MobilePrimaryPageAction,
+  MobileStatusBadge,
+} from "@/frontend/mobile/components/ui";
 
 function SiteContentCard({
   row,
@@ -54,10 +59,11 @@ function SiteContentCard({
                 label={row.isPublished ? labels.published : labels.draft}
               />
             ) : (
-              <Chip
-                size="small"
-                color={row.isPublished ? "success" : "default"}
+              <MobileStatusBadge
+                category="syncStatus"
+                status={row.isPublished ? "success" : "pending"}
                 label={row.isPublished ? labels.published : labels.draft}
+                size="small"
               />
             )}
           </Stack>

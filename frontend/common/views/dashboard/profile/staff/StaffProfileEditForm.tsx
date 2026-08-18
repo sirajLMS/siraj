@@ -28,8 +28,8 @@ import {
 } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import {
   type StaffAdminEditFormData,
-  staffAdminEditSchema,
-  staffOwnEditSchema,
+  staffAdminEditSchemaFactory,
+  staffOwnEditSchemaFactory,
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
 import { useStaffProfileEditFormViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileEditFormViewModel";
 
@@ -163,8 +163,11 @@ export function StaffProfileEditForm({
     labels.base.adminResetPassword.success,
     labels.base.adminResetPassword.error
   );
+  const validationLabels = { invalidTimezone: labels.staff.validation.invalidTimezone };
   const form = useForm<StaffAdminEditFormData>({
-    resolver: zodResolver(isAdminScope ? staffAdminEditSchema : staffOwnEditSchema),
+    resolver: zodResolver(
+      isAdminScope ? staffAdminEditSchemaFactory(validationLabels) : staffOwnEditSchemaFactory(validationLabels)
+    ),
     defaultValues: {
       name: "",
       email: "",

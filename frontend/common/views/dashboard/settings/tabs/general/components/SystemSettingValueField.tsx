@@ -1,6 +1,6 @@
 "use client";
 
-import { Switch, TextField, Typography } from "@mui/material";
+import { Box, Switch, TextField } from "@mui/material";
 import { type ReactNode, useEffect, useState } from "react";
 import type { SystemSettingRow } from "@/frontend/common/views/dashboard/settings/types/generalSettings.types";
 import { SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
@@ -35,7 +35,7 @@ export function SystemSettingValueField({
     if (row.dataType === SystemSettingDataType.Boolean) {
       return <Switch checked={row.value === "true"} readOnly size="small" disabled />;
     }
-    return <Typography component="span">{row.value}</Typography>;
+    return <Box component="span">{row.value}</Box>;
   }
 
   if (row.dataType === SystemSettingDataType.Boolean) {

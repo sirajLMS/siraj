@@ -1,7 +1,7 @@
 "use client";
 
 import { DownloadOutlined } from "@mui/icons-material";
-import { Box, Chip, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { useCallback } from "react";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import {
@@ -16,6 +16,7 @@ import type {
   WhatsappOptInAuditEntry,
   WhatsappOptInUserState,
 } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileExportButton } from "@/frontend/mobile/components/ui/button";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 import { MobileCardList } from "@/frontend/mobile/components/ui/container";
@@ -77,11 +78,10 @@ function MobileHistorySection({
         <Stack spacing={0.5} sx={{ py: 1 }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Typography variant="labelMd">{entry.date}</Typography>
-            <Chip
+            <MobileStatusBadge
+              category="syncStatus"
+              status={entry.action === "optIn" ? "success" : "cancelled"}
               label={entry.action === "optIn" ? t.optInActionOptedIn : t.optInActionOptedOut}
-              size="small"
-              color={entry.action === "optIn" ? "success" : "default"}
-              variant="outlined"
             />
           </Box>
           <Typography variant="bodyMd" sx={{ color: theme => theme.palette.text.secondary }}>
@@ -155,11 +155,10 @@ function MobileAdminSection({ labels, adminUsers }: Readonly<OptInTabSharedProps
         <Stack spacing={0.5} sx={{ py: 1 }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Typography variant="labelMd">{user.userName}</Typography>
-            <Chip
+            <MobileStatusBadge
+              category="syncStatus"
+              status={user.optedIn ? "success" : "cancelled"}
               label={user.optedIn ? t.optInAdminYes : t.optInAdminNo}
-              size="small"
-              color={user.optedIn ? "success" : "default"}
-              variant="outlined"
             />
           </Box>
           {user.optedInAt && (

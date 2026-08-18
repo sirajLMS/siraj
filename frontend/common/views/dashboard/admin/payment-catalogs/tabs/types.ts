@@ -5,6 +5,7 @@ export interface PaymentCatalogsViewLabels {
   readonly title: string;
   readonly subtitle: string;
   readonly tabs: PaymentCatalogsTabsLabels;
+  readonly tabNavAriaLabel: string;
 }
 export type PaymentCatalogsTabsViewModel = {
   readonly labels: PaymentCatalogsViewLabels;

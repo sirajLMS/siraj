@@ -51,9 +51,11 @@ export function MeetingProviderSelect({
               {canManageCatalog ? t.emptyCatalogBody : t.emptyCatalogContactAdmin}
             </Stack>
             {canManageCatalog ? (
-              <Button component={Link} href="/meeting-providers" size="small" variant="outlined">
-                {t.emptyCatalogAdminLink}
-              </Button>
+              <Link href="/meeting-providers" style={{ textDecoration: "none" }}>
+                <Button size="small" variant="outlined">
+                  {t.emptyCatalogAdminLink}
+                </Button>
+              </Link>
             ) : null}
           </Stack>
         </Alert>

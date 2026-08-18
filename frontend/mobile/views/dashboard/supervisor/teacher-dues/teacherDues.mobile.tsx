@@ -79,7 +79,11 @@ function DueCard({
               {labels.classDateColumn}: {row.classDate || "-"}
             </Typography>
           </Box>
-          <MobileStatusBadge category="invoice" status={row.status ?? "PENDING"} label={row.status ?? "PENDING"} />
+          <MobileStatusBadge
+            category="invoice"
+            status={row.status ?? "PENDING"}
+            label={row.status === "PAID" ? labels.statusPaid : labels.statusPending}
+          />{" "}
         </Stack>
 
         <Stack sx={{ flexDirection: "row", justifyContent: "space-between", gap: 1 }}>

@@ -146,6 +146,7 @@ export const permissionGroupSimulationStatusQueryDocument: TypedDocumentNode<Ope
 export const simulatablePermissionGroupsQueryDocument: TypedDocumentNode<Operations.SimulatablePermissionGroupsQuery> = gql`
   query simulatablePermissionGroups {
     simulatablePermissionGroups {
+      id
       slug
       name
       description

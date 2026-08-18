@@ -74,6 +74,7 @@ export const WithEffectiveMeeting: Story = {
   args: {
     ...baseProps,
     effectiveMeeting: {
+      id: "story-effective-meeting-1",
       joinUrl: "https://zoom.us/j/987654321",
       providerSlug: "zoom",
       providerName: { en: "Zoom", ar: "Zoom" },

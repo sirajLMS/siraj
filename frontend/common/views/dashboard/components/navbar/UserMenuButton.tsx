@@ -207,7 +207,7 @@ function UserMenuTrigger({
         borderRadius: isImpersonating || isSimulatingGroup ? 2 : "50%",
         padding: 0.5,
         border: isImpersonating || isSimulatingGroup ? "none" : `2px solid ${theme.palette.onHeaderContainer}`,
-        transition: "all 0.2s ease-in-out",
+        transition: theme.transitions.create("all", { duration: 200, easing: theme.transitions.easing.easeInOut }),
         display: "flex",
         alignItems: "center",
         gap: 1,

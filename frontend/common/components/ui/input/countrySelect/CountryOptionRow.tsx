@@ -1,7 +1,6 @@
 "use client";
 
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display";
 import type { CountryOptionRowProps } from "@/frontend/common/components/ui/input/countrySelect/countryOptionRow.types";
@@ -16,13 +15,13 @@ export function CountryOptionRow({
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "100%" }}>
       <EmojiComponent emoji={country.emoji} />
-      <Typography component="span" sx={{ flex: 1 }}>
+      <Box component="span" sx={{ flex: 1 }}>
         {getCountryDisplayName(country.code, locale)}
-      </Typography>
+      </Box>
       {showPhonePrefix ? (
-        <Typography component="span" dir="ltr" sx={{ color: "text.secondary", flexShrink: 0 }}>
+        <Box component="span" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, direction: "ltr" })}>
           +{country.phone}
-        </Typography>
+        </Box>
       ) : null}
     </Box>
   );

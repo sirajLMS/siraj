@@ -9,4 +9,5 @@ export type SettingsTabNavItem = {
 export type SettingsTabNavVariantProps = {
   readonly activeTab: SettingsTabId;
   readonly tabs: readonly SettingsTabNavItem[];
+  readonly ariaLabel: string;
 };

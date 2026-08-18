@@ -11,7 +11,7 @@ export const StyledTopAccentBar = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
 }));
 
-export const StyledViewProfileButton = styled(Link)(() => ({
+export const StyledViewProfileButton = styled(Link)(({ theme }) => ({
   display: "block",
   width: "100%",
   textAlign: "center",
@@ -21,7 +21,7 @@ export const StyledViewProfileButton = styled(Link)(() => ({
   paddingBlock: 1.25,
   textDecoration: "none",
   typography: "labelUppercase",
-  transition: "all 0.2s ease",
+  transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
 }));
 
 export const viewProfileButtonSx = (theme: {

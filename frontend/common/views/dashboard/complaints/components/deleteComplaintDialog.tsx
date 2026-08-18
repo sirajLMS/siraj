@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import type { DeleteComplaintDialogProps } from "@/frontend/common/views/dashboard/complaints/types/complaintsViewTypes";
 
 export function DeleteComplaintDialog({
@@ -11,17 +11,15 @@ export function DeleteComplaintDialog({
   labels,
 }: Readonly<DeleteComplaintDialogProps>) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{labels.deleteConfirmTitle}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{labels.deleteConfirmBody}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{labels.deleteConfirmCancel}</Button>
-        <Button onClick={onConfirm} color="error" variant="contained" disabled={isDeleting}>
-          {labels.deleteConfirmConfirm}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      onClose={onClose}
+      onConfirm={onConfirm}
+      isLoading={isDeleting}
+      title={labels.deleteConfirmTitle}
+      body={labels.deleteConfirmBody}
+      cancelLabel={labels.deleteConfirmCancel}
+      confirmLabel={labels.deleteConfirmConfirm}
+    />
   );
 }

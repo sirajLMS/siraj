@@ -29,9 +29,11 @@ export function ParentLifecycleMobileView({
         ]}
         actions={
           profileHref ? (
-            <Button component={Link} href={profileHref} variant="outlined" size="small">
-              {labels.actions.viewProfile}
-            </Button>
+            <Link href={profileHref} style={{ textDecoration: "none" }}>
+              <Button variant="outlined" size="small">
+                {labels.actions.viewProfile}
+              </Button>
+            </Link>
           ) : undefined
         }
       />

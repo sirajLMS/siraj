@@ -32,7 +32,7 @@ import type { TeacherProfileViewLabels } from "@/frontend/common/views/dashboard
 import {
   type TeacherAdminEditFormData,
   type TeacherEditData,
-  teacherAdminEditSchema,
+  teacherAdminEditSchemaFactory,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
 
 type FieldScope = ReturnType<typeof useProfileFieldAccess>["canEdit"];
@@ -57,9 +57,9 @@ function buildDefaultFormValues(data?: TeacherEditData | null): TeacherAdminEdit
   };
 }
 
-function useTeacherEditForm(teacherData: TeacherEditData) {
+function useTeacherEditForm(teacherData: TeacherEditData, labels: { readonly invalidTimezone: string }) {
   const form = useForm<TeacherAdminEditFormData>({
-    resolver: zodResolver(teacherAdminEditSchema),
+    resolver: zodResolver(teacherAdminEditSchemaFactory(labels)),
     defaultValues: buildDefaultFormValues(),
   });
 
@@ -154,7 +154,7 @@ export function TeacherAdminEditForm({
   const { canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
   const { successOpen, errorOpen, setSuccessOpen, setErrorOpen } = useSubmitFeedbackStates();
-  const form = useTeacherEditForm(teacherData);
+  const form = useTeacherEditForm(teacherData, { invalidTimezone: t.validation.invalidTimezone });
   const resetPasswordRef = useRef<AdminResetPasswordSectionRef>(null);
   const { resetPassword } = useAdminResetPassword(base.adminResetPassword.success, base.adminResetPassword.error);
 

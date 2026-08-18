@@ -149,14 +149,11 @@ function BillingViewSection({
               label={isLifecycleStatusKey(lifecycleStatus) ? t.status[lifecycleStatus] : t.status.regular}
             />
             {parentId ? (
-              <Typography
-                component={Link}
-                href={`/parents/${parentId}/lifecycle`}
-                variant="labelMd"
-                sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}
-              >
-                {t.actions.manageLifecycle}
-              </Typography>
+              <Link href={`/parents/${parentId}/lifecycle`} style={{ textDecoration: "none" }}>
+                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.primary.main, fontWeight: 600 })}>
+                  {t.actions.manageLifecycle}
+                </Typography>
+              </Link>
             ) : null}
           </Stack>
         </Stack>

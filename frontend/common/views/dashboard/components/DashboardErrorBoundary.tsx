@@ -44,7 +44,7 @@ export function DashboardErrorBoundary<TLabels extends DashboardErrorBoundaryLab
         <Typography variant="h6" sx={{ color: theme => theme.palette.error.main }}>
           {t.errorGenericTitle}
         </Typography>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+        <Typography variant="body2" sx={theme => ({ color: theme.palette.text.secondary })}>
           {t.errorGeneric}
         </Typography>
         <Button variant="outlined" onClick={reset}>

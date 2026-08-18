@@ -33,6 +33,7 @@ export function RecurringSchedulesListMobileView({
       onRetry={onRetry}
       pageTitle={shell.pageTitle}
       subtitle={shell.subtitle}
+      retryLabel={shell.retryLabel}
       mobileBreadcrumbs={shell.breadcrumbs}
     >
       <MobileContentInset>
@@ -63,7 +64,7 @@ export function RecurringSchedulesListMobileView({
             >
               <Stack spacing={0.5}>
                 <Typography sx={{ fontWeight: 700 }}>{row.studentName ?? ""}</Typography>
-                <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>
+                <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
                   {columns.teacher}: {row.teacherName ?? ""}
                 </Typography>
                 <Typography sx={{ typography: "bodyMd" }}>

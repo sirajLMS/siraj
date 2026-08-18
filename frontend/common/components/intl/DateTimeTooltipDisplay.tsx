@@ -4,6 +4,7 @@ import { Box, Tooltip, Typography, type TypographyProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { formatDate, formatTime, parseDateInput } from "@/frontend/common/components/intl/dateFormat";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
+import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 
 type DateTimeTooltipTone = "default" | "highlight" | "meta" | "muted";
 
@@ -94,9 +95,9 @@ export function DateTimeTooltipDisplay({
         </Box>
       }
     >
-      <Typography component="span" variant={variant} sx={displaySx}>
+      <Box component="span" sx={mergeSx({ typography: variant }, displaySx)}>
         {dateLabel}
-      </Typography>
+      </Box>
     </Tooltip>
   );
 }

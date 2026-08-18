@@ -137,10 +137,10 @@ function useStudentProfileTabState(
 function useStudentProfileQueryState(
   studentId: string,
   activeTabForQuery: StudentProfileTab | null,
-  currentMonth: Date
+  currentMonth: Date | null
 ): StudentProfileQueryState {
-  const year = activeTabForQuery === "history" ? currentMonth.getFullYear() : undefined;
-  const month = activeTabForQuery === "history" ? currentMonth.getMonth() + 1 : undefined;
+  const year = activeTabForQuery === "history" && currentMonth ? currentMonth.getFullYear() : undefined;
+  const month = activeTabForQuery === "history" && currentMonth ? currentMonth.getMonth() + 1 : undefined;
 
   const { data, loading, refetch } = useQuery(studentProfileQueryDocument, {
     variables: { studentId, year: year ?? null, month: month ?? null, includeUpcomingClasses: true },
@@ -212,10 +212,16 @@ export function useStudentProfilePageViewModel(
   const tStatus = useAppTranslation(Translation.Dashboard.StudentStatus);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { currentMonth } = useStudentHistoryStore();
+  const { currentMonth, ensureCurrentMonth } = useStudentHistoryStore();
   const tabParam = searchParams.get("tab");
 
-  const { profile, loading, loadingState, refetch } = useStudentProfileQueryState(studentId, null, currentMonth);
+  useEffect(() => {
+    ensureCurrentMonth();
+  }, [ensureCurrentMonth]);
+
+  const safeCurrentMonth = currentMonth;
+
+  const { profile, loading, loadingState, refetch } = useStudentProfileQueryState(studentId, null, safeCurrentMonth);
 
   const access = useStudentFieldAccess({
     isOwnStudentProfileOverride: profile?.isOwnStudentProfile ?? undefined,
@@ -229,8 +235,8 @@ export function useStudentProfilePageViewModel(
     router
   );
 
-  const historyYear = currentMonth.getFullYear();
-  const historyMonth = currentMonth.getMonth() + 1;
+  const historyYear = safeCurrentMonth ? safeCurrentMonth.getFullYear() : 0;
+  const historyMonth = safeCurrentMonth ? safeCurrentMonth.getMonth() + 1 : 0;
 
   useEffect(() => {
     if (activeTabForQuery !== "history") {

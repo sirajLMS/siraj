@@ -122,9 +122,11 @@ function renderSetupAlert(ctx: JoinContext, setupHref: string, emptyRole: Meetin
     <Alert severity="info" sx={{ width: "100%" }}>
       <Stack spacing={1}>
         <Typography sx={{ typography: "bodyMd" }}>{resolveEmptyMessage(ctx.t, emptyRole)}</Typography>
-        <Button component={Link} href={setupHref} size="small" variant="outlined" startIcon={<SettingsOutlinedIcon />}>
-          {ctx.t.setupLink}
-        </Button>
+        <Link href={setupHref} style={{ textDecoration: "none" }}>
+          <Button size="small" variant="outlined" startIcon={<SettingsOutlinedIcon />}>
+            {ctx.t.setupLink}
+          </Button>
+        </Link>
       </Stack>
     </Alert>
   );
@@ -176,22 +178,22 @@ function renderIconVariant(
   if (!ctx.hasUrl && setupHref) {
     return (
       <Tooltip title={ctx.tooltip}>
-        <IconButton
-          component={Link}
-          href={setupHref}
-          id={ctx.id}
-          size={opts.iconButtonSize ?? undefined}
-          aria-label={ctx.t.setupLink}
-          sx={theme => ({
-            ...(opts.iconButtonSize === null ? { width: 40, height: 40 } : {}),
-            color: theme.palette.warning.main,
-            "&:hover": {
-              backgroundColor: alpha(theme.palette.warning.main, 0.08),
-            },
-          })}
-        >
-          <SettingsOutlinedIcon fontSize={opts.iconFontSize} />
-        </IconButton>
+        <Link href={setupHref} style={{ textDecoration: "none" }}>
+          <IconButton
+            id={ctx.id}
+            size={opts.iconButtonSize ?? undefined}
+            aria-label={ctx.t.setupLink}
+            sx={theme => ({
+              ...(opts.iconButtonSize === null ? { width: 40, height: 40 } : {}),
+              color: theme.palette.warning.main,
+              "&:hover": {
+                backgroundColor: alpha(theme.palette.warning.main, 0.08),
+              },
+            })}
+          >
+            <SettingsOutlinedIcon fontSize={opts.iconFontSize} />
+          </IconButton>
+        </Link>
       </Tooltip>
     );
   }

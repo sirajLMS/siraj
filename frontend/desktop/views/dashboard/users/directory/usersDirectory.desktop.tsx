@@ -34,7 +34,7 @@ export function UsersDirectoryDesktopChrome({
         }
       />
       <Box sx={{ mt: 3 }}>
-        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="Users directory sections" />
+        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

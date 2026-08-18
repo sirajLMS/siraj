@@ -93,9 +93,9 @@ function LinkedAvatar({
   // Prefer a positive condition for readability and to satisfy static analysis rules.
   if (href) {
     return (
-      <Box component={Link} href={href} sx={{ display: "inline-flex", textDecoration: "none", flexShrink: 0 }}>
-        {avatar}
-      </Box>
+      <Link href={href} style={{ textDecoration: "none" }}>
+        <Box sx={{ display: "inline-flex", flexShrink: 0 }}>{avatar}</Box>
+      </Link>
     );
   }
 
@@ -229,16 +229,16 @@ function SubjectHeaderBlock({
           </Typography>
         ) : null}
         {subjectId ? (
-          <Button
-            component={Link}
-            href={`/subjects/${subjectId}`}
-            variant="outlined"
-            size="small"
-            startIcon={<MenuBookOutlined />}
-            sx={theme => ({ mt: theme.spacing(1.5) })}
-          >
-            {labels.viewSubject}
-          </Button>
+          <Link href={`/subjects/${subjectId}`} style={{ textDecoration: "none" }}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<MenuBookOutlined />}
+              sx={theme => ({ mt: theme.spacing(1.5) })}
+            >
+              {labels.viewSubject}
+            </Button>
+          </Link>
         ) : null}
       </Box>
     </Stack>

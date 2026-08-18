@@ -13,12 +13,12 @@ export interface QuotaListDesktopActionsProps {
 export function QuotaListDesktopActions({ t }: Readonly<QuotaListDesktopActionsProps>) {
   return (
     <Stack direction="row" spacing={1.5}>
-      <DesktopExportButton startIcon={<InsightsOutlined />} component={Link} href="/quotas/insights">
-        {t.insights}
-      </DesktopExportButton>
-      <DesktopPrimaryPageAction startIcon={<AddOutlined />} component={Link} href="/quotas/new">
-        {t.newQuota}
-      </DesktopPrimaryPageAction>
+      <Link href="/quotas/insights" style={{ textDecoration: "none" }}>
+        <DesktopExportButton startIcon={<InsightsOutlined />}>{t.insights}</DesktopExportButton>
+      </Link>
+      <Link href="/quotas/new" style={{ textDecoration: "none" }}>
+        <DesktopPrimaryPageAction startIcon={<AddOutlined />}>{t.newQuota}</DesktopPrimaryPageAction>
+      </Link>
     </Stack>
   );
 }

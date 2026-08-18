@@ -8,6 +8,7 @@ export const createParentMutationDocument: TypedDocumentNode<
 > = gql`
   mutation createParent($input: ParentOnboardingInput!) {
     createParent(input: $input) {
+      id
       userId
       parentId
       name

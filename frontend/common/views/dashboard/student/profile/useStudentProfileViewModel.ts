@@ -11,6 +11,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import {
   type StudentPortalProfileEditDraft,
   useStudentPortalProfileStore,
@@ -70,7 +71,7 @@ export interface StudentProfileViewModel {
   readonly formattedDateOfBirth: string;
   readonly snackbarOpen: boolean;
   readonly snackbarMessage: string;
-  readonly snackbarSeverity: "success" | "error";
+  readonly snackbarSeverity: SnackbarSeverity;
   readonly scope: ProfileScope;
   readonly mode: ProfileMode;
   readonly targetUserId: string;

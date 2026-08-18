@@ -5,6 +5,7 @@ import type { SystemStyleObject } from "@mui/system";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter/paginationControls.mobile";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 const DEFAULT_CLIENT_PAGE_SIZE = 10;
 
@@ -81,7 +82,7 @@ export function MobileCardList<T>({
   renderItem,
   getKey,
   loading,
-  emptyMessage = "No entries found",
+  emptyMessage,
   renderSkeleton,
   renderEmptyState,
   gap = 2,
@@ -89,6 +90,8 @@ export function MobileCardList<T>({
   paginationOptions,
   sx,
 }: MobileCardListProps<T>) {
+  const commonLabels = useAppTranslation(Translation.Common);
+  const resolvedEmptyMessage = emptyMessage ?? commonLabels.noEntriesFound;
   const isEdgeToEdge = layout === "edge-to-edge";
   const sxArray = normalizeSx(sx);
   const baseSx: SystemStyleObject<Theme> = {
@@ -150,11 +153,11 @@ export function MobileCardList<T>({
     return (
       <Box sx={listSx}>
         {renderEmptyState ? (
-          renderEmptyState(emptyMessage)
+          renderEmptyState(resolvedEmptyMessage)
         ) : (
           <Box sx={{ py: 4, px: 2, textAlign: "center" }}>
             <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {emptyMessage}
+              {resolvedEmptyMessage}
             </Typography>
           </Box>
         )}

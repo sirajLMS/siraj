@@ -34,7 +34,7 @@ export const StyledCard = styled(BaseCard, {
   height: "100%",
   overflow: "hidden",
   cursor: isInteractive ? "pointer" : "default",
-  transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+  transition: theme.transitions.create(["border-color", "box-shadow"], { duration: 150, easing: "ease" }),
   ...cardFeedbackSx(theme, isHighlight, isError),
 }));
 
@@ -95,7 +95,10 @@ export const StyledIconWrap = styled(Box, {
   alignItems: "center",
   justifyContent: "center",
   flexShrink: 0,
-  transition: "background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, color 0.2s ease",
+  transition: theme.transitions.create(["background-color", "border-color", "transform", "color"], {
+    duration: 200,
+    easing: "ease",
+  }),
   ...(isHighlight && filledIconWrapSx(theme, isError)),
 }));
 
@@ -113,7 +116,7 @@ export const StyledIcon = styled(
 )<Omit<StyledIconProps, "icon">>(({ theme, fontSizeValue, isError }) => ({
   fontSize: fontSizeValue,
   color: isError ? theme.palette.error.main : theme.palette.primary.main,
-  transition: "color 0.2s ease",
+  transition: theme.transitions.create("color", { duration: 200, easing: "ease" }),
 }));
 
 export interface StyledSubLabelProps {

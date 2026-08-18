@@ -1,5 +1,6 @@
-import { Chip, Switch } from "@mui/material";
+import { Switch } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import type { SiteContentRow } from "@/frontend/common/views/dashboard/settings/types/siteContentSettings.types";
 import { buildEditDeleteActionsColumn } from "@/frontend/common/views/dashboard/settings/utils/editDeleteActionsColumn";
 import type { SettingsSiteContentTabLabels } from "@/shared/locale/types/dashboard/settings/siteContent";
@@ -62,9 +63,9 @@ export function buildSiteContentColumns(
         }
 
         return (
-          <Chip
-            size="small"
-            color={row.isPublished ? "success" : "default"}
+          <StatusBadge
+            category="syncStatus"
+            status={row.isPublished ? "success" : "pending"}
             label={row.isPublished ? labels.published : labels.draft}
           />
         );

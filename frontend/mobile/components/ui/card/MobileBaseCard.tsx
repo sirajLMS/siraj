@@ -21,7 +21,10 @@ const baseCardSx =
     backgroundColor: theme.palette.background.paper,
     padding: edgeToEdge ? theme.layout.cardPadding : theme.spacing(2),
     cursor: interactive ? "pointer" : undefined,
-    transition: "border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
+    transition: theme.transitions.create(["border-color", "box-shadow", "transform"], {
+      duration: 150,
+      easing: "ease",
+    }),
     ...(interactive && {
       "&:hover": {
         borderColor: theme.palette.primary.main,

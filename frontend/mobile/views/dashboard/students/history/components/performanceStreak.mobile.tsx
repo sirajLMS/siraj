@@ -47,7 +47,7 @@ export function PerformanceStreakMobile({ streakDays }: Readonly<PerformanceStre
                   borderTopLeftRadius: 4,
                   borderTopRightRadius: 4,
                   height: barHeight,
-                  transition: "all 0.2s",
+                  transition: theme.transitions.create("all", { duration: 200 }),
                   "&:hover": {
                     height: barHeight > 0 ? 40 : 0,
                     opacity: barHeight > 0 ? 0.4 : 0.2,

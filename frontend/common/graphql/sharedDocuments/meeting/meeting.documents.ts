@@ -202,6 +202,7 @@ const CLASS_MEETING_CONFIG_FIELDS = gql`
 
 const EFFECTIVE_MEETING_FIELDS = gql`
   fragment EffectiveMeetingFields on EffectiveMeeting {
+    id
     joinUrl
     providerSlug
     providerName

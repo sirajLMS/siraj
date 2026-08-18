@@ -20,6 +20,7 @@ export interface RecurringViewShellSharedProps {
   readonly onRetry: () => void;
   readonly pageTitle: string;
   readonly subtitle: string;
+  readonly retryLabel: string;
   readonly children: ReactNode;
   readonly variant: "desktop" | "mobile";
   readonly desktopBreadcrumbs?: readonly PageHeaderBreadcrumb[];
@@ -33,6 +34,7 @@ export function RecurringViewShellShared({
   onRetry,
   pageTitle,
   subtitle,
+  retryLabel,
   desktopBreadcrumbs,
   mobileBreadcrumbs,
   children,
@@ -52,7 +54,7 @@ export function RecurringViewShellShared({
     if (error) {
       return (
         <DesktopPageContainer>
-          <ErrorState embedded message={error} retryLabel="Retry" onRetry={onRetry} />
+          <ErrorState embedded message={error} retryLabel={retryLabel} onRetry={onRetry} />
         </DesktopPageContainer>
       );
     }
@@ -79,7 +81,7 @@ export function RecurringViewShellShared({
     return (
       <MobilePageContainer>
         <MobilePageHeader title={pageTitle} edgeToEdge={false} />
-        <ErrorState embedded message={error} retryLabel="Retry" onRetry={onRetry} />
+        <ErrorState embedded message={error} retryLabel={retryLabel} onRetry={onRetry} />
       </MobilePageContainer>
     );
   }

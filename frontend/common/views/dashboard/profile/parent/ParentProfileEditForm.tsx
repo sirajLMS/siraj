@@ -17,8 +17,8 @@ import { ChangePasswordSection } from "@/frontend/common/views/dashboard/profile
 import {
   type ParentAdminEditFormData,
   type ParentEditData,
-  parentAdminEditSchema,
-  parentOwnEditSchema,
+  parentAdminEditSchemaFactory,
+  parentOwnEditSchemaFactory,
 } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import { AccountSection } from "@/frontend/common/views/dashboard/profile/parent/sections/AccountSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/parent/sections/AdminOnlySection";
@@ -86,8 +86,10 @@ function buildFormDefaults(parentData: ParentEditData): ParentAdminEditFormData 
   };
 }
 
-function useParentEditForm(parentData: ParentEditData, isAdminScope: boolean) {
-  const schema = isAdminScope ? parentAdminEditSchema : parentOwnEditSchema;
+function useParentEditForm(parentData: ParentEditData, isAdminScope: boolean, invalidTimezone: string) {
+  const schema = isAdminScope
+    ? parentAdminEditSchemaFactory({ invalidTimezone })
+    : parentOwnEditSchemaFactory({ invalidTimezone });
   const form = useForm<ParentAdminEditFormData>({
     resolver: zodResolver(schema),
     defaultValues: EMPTY_DEFAULTS,
@@ -225,7 +227,7 @@ export function ParentProfileEditForm({
   const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
   const { canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar }: AvatarUploader = useAvatarUpload({ storageOwnerKey: targetUserId });
-  const form = useParentEditForm(parentData, isAdminScope);
+  const form = useParentEditForm(parentData, isAdminScope, pt.validation.invalidTimezone);
   const resetPasswordRef = useRef<AdminResetPasswordSectionRef>(null);
   const { resetPassword } = useAdminResetPassword(t.adminResetPassword.success, t.adminResetPassword.error);
   const feedback = useParentSubmitFeedback(onSubmit, resetPasswordRef, resetPassword, targetUserId);

@@ -44,6 +44,7 @@ import {
 } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/whatsappAnimations";
 import type { NumbersTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
 import type { WhatsappAccountRow } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
+import { MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 type CredentialField = "accessToken" | "twoStepPin";
@@ -298,9 +299,9 @@ function AccountsListMobile({
           {labels.noAccounts}
         </Typography>
         <RequirePermission permissions={AppPermission.WhatsappConfigManage}>
-          <Button variant="contained" startIcon={<AddOutlined />} onClick={onAddAccount}>
+          <MobilePrimaryPageAction startIcon={<AddOutlined />} onClick={onAddAccount}>
             {labels.addFirstNumber}
-          </Button>
+          </MobilePrimaryPageAction>
         </RequirePermission>
       </Box>
     );
@@ -438,8 +439,8 @@ function SkeletonAccountCard() {
           &nbsp;
         </Typography>
         <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
-          <Box sx={{ width: 80, height: 20, bgcolor: "action.hover", borderRadius: 1 }} />
-          <Box sx={{ width: 100, height: 20, bgcolor: "action.hover", borderRadius: 1 }} />
+          <Box sx={theme => ({ width: 80, height: 20, bgcolor: theme.palette.action.hover, borderRadius: 1 })} />
+          <Box sx={theme => ({ width: 100, height: 20, bgcolor: theme.palette.action.hover, borderRadius: 1 })} />
         </Box>
       </Box>
     </Box>

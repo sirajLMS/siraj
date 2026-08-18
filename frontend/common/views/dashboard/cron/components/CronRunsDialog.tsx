@@ -1,9 +1,9 @@
 "use client";
 
-import { Chip, Dialog, DialogContent, DialogTitle, Stack, Tooltip, Typography } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Stack, Tooltip, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useCallback, useMemo } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui/badge";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { CronRunStatus, CronTriggerSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CronRunFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { safeEnum, safeString } from "@/frontend/common/views/dashboard/cron/utils";
@@ -141,14 +141,14 @@ export function CronRunsDialog({ open, scheduleName, labels, runs, loading, onCl
     if (loading) {
       return (
         <Stack sx={{ py: 4, alignItems: "center" }}>
-          <Chip label={labels.runsTitle} />
+          <StatusBadge category="cronRunStatus" status="RUNNING" label={labels.runsTitle} />
         </Stack>
       );
     }
     if (runs.length === 0) {
       return (
         <Stack sx={{ py: 4, alignItems: "center" }}>
-          <Chip label={labels.emptyMessage} />
+          <StatusBadge category="cronRunStatus" status="PENDING" label={labels.emptyMessage} />
         </Stack>
       );
     }

@@ -16,6 +16,8 @@ export interface StudentPortalHistoryState {
   readonly setSelectedWeek: (week: number) => void;
   readonly setSubjectFilter: (subject: string) => void;
   readonly setStatusFilter: (status: string) => void;
+  /** Lazily initializes year/month on first access. Idempotent. */
+  readonly ensureYearMonth: () => void;
 }
 
 function shiftMonth(year: number, month: number, delta: number): { year: number; month: number } {
@@ -23,15 +25,22 @@ function shiftMonth(year: number, month: number, delta: number): { year: number;
   return { year: date.getFullYear(), month: date.getMonth() + 1 };
 }
 
-const now = new Date();
+const SENTINEL_YEAR = 0;
 
-export const useStudentPortalHistoryStore = create<StudentPortalHistoryState>(set => ({
-  year: now.getFullYear(),
-  month: now.getMonth() + 1,
+export const useStudentPortalHistoryStore = create<StudentPortalHistoryState>((set, get) => ({
+  year: SENTINEL_YEAR,
+  month: 0,
   selectedDay: null,
   selectedWeek: 1,
   subjectFilter: "",
   statusFilter: "",
+
+  ensureYearMonth: () => {
+    if (get().year === SENTINEL_YEAR) {
+      const now = new Date();
+      set({ year: now.getFullYear(), month: now.getMonth() + 1 });
+    }
+  },
 
   setYearMonth: (year, month) => set({ year, month, selectedDay: null, selectedWeek: 1 }),
   goPrevMonth: () =>

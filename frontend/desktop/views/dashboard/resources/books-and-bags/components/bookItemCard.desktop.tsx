@@ -45,7 +45,7 @@ export function BookItemCardDesktop({ book, labels, onDelete }: Readonly<BookIte
         gap: 1,
         position: "relative",
         minHeight: 120,
-        transition: "border-color 0.15s ease",
+        transition: theme.transitions.create("border-color", { duration: 150, easing: "ease" }),
         "&:hover": { borderColor: theme.palette.primary.main },
       })}
     >

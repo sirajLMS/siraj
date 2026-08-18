@@ -41,7 +41,7 @@ const LanguageOption = styled(Paper, {
 
   cursor: "pointer",
 
-  transition: "all 0.2s ease-in-out",
+  transition: theme.transitions.create("all", { duration: 200, easing: theme.transitions.easing.easeInOut }),
 
   backgroundColor: isSelected ? theme.palette.action.selected : theme.palette.background.paper,
 

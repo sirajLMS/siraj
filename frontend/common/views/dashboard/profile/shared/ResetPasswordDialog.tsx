@@ -77,7 +77,7 @@ export function ResetPasswordDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle component="div" sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <DialogTitle sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Box
           sx={theme => ({
             width: 64,
@@ -156,13 +156,13 @@ export function ResetPasswordDialog({
                 onChange={e => setSendEmail(e.target.checked)}
                 disabled={isLoading}
               />
-              <Typography
+              <Box
                 component="label"
                 htmlFor="send-email-checkbox"
                 sx={{ cursor: "pointer", fontSize: "0.875rem", fontWeight: 500 }}
               >
                 {t.adminResetPassword.sendEmailLabel}
-              </Typography>
+              </Box>
             </Stack>
           </FormControl>
         </Stack>

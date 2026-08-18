@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { formatMonthYear } from "@/frontend/common/components/intl/dateFormat";
 import { studentClassHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-history.documents";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
@@ -23,10 +23,15 @@ import {
 } from "@/frontend/common/views/dashboard/student/history/utils/studentHistoryMappers";
 
 export function useStudentPortalHistoryDates(locale: string) {
+  const ensureYearMonth = useStudentPortalHistoryStore(s => s.ensureYearMonth);
   const year = useStudentPortalHistoryStore(s => s.year);
   const month = useStudentPortalHistoryStore(s => s.month);
   const goPrevMonth = useStudentPortalHistoryStore(s => s.goPrevMonth);
   const goNextMonth = useStudentPortalHistoryStore(s => s.goNextMonth);
+
+  useEffect(() => {
+    ensureYearMonth();
+  }, [ensureYearMonth]);
 
   const currentMonth = useMemo(() => new Date(year, month - 1, 1), [year, month]);
   const monthLabel = formatMonthYear(currentMonth, locale);

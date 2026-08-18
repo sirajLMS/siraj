@@ -15,6 +15,7 @@ import {
   DesktopAppDataGrid,
   DesktopPageContainer,
   DesktopPageHeader,
+  DesktopPrimaryPageAction,
   DesktopSectionPanel,
   DesktopStatusBadge,
   desktopSectionContentInsetSx,
@@ -127,9 +128,9 @@ export function ExchangeRatesDesktopView({
         subtitle={labels.pageSubtitle}
         actions={
           canRefresh ? (
-            <Button variant="contained" onClick={onRefresh} disabled={refreshing || billingActionsDisabled}>
+            <DesktopPrimaryPageAction onClick={onRefresh} disabled={refreshing || billingActionsDisabled}>
               {refreshing ? labels.refreshing : labels.syncStatus.refresh}
-            </Button>
+            </DesktopPrimaryPageAction>
           ) : null
         }
       />

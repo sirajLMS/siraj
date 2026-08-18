@@ -3,10 +3,10 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
-import { Button, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
-import { ErrorState, SectionPanel } from "@/frontend/common/components/ui";
+import { ErrorState, PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
 import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/types";
@@ -63,7 +63,9 @@ function configLabel(config: ClassMeetingConfigFieldsFragment, locale: string): 
   return config.provider?.slug ?? config.id ?? "";
 }
 
-function resolveGenerationStatus(statusValue: string | null | undefined): "pending" | "generated" | "failed" {
+type MeetingGenerationStatus = "pending" | "generated" | "failed";
+
+function resolveGenerationStatus(statusValue: string | null | undefined): MeetingGenerationStatus {
   if (statusValue === "generated") return "generated";
   if (statusValue === "failed") return "failed";
   return "pending";
@@ -73,23 +75,16 @@ function MeetingGenerationStatusIndicator({
   status,
   labels,
 }: {
-  readonly status: "pending" | "generated" | "failed";
+  readonly status: MeetingGenerationStatus;
   readonly labels: MeetingConfigEnhancementLabels;
 }): React.ReactNode {
-  let chipLabel: string;
-  let chipColor: "default" | "success" | "error";
-  if (status === "generated") {
-    chipLabel = labels.generationSuccess;
-    chipColor = "success";
-  } else if (status === "failed") {
-    chipLabel = labels.generationFailed;
-    chipColor = "error";
-  } else {
-    chipLabel = labels.generationPending;
-    chipColor = "default";
-  }
-  // Placeholder: MeetingGenerationStatusIndicator will be a dedicated component in Phase 4
-  return <Chip size="small" color={chipColor} variant="outlined" label={chipLabel} />;
+  const statusMap: Record<MeetingGenerationStatus, { badgeStatus: string; label: string }> = {
+    pending: { badgeStatus: "pending", label: labels.generationPending },
+    generated: { badgeStatus: "success", label: labels.generationSuccess },
+    failed: { badgeStatus: "failed", label: labels.generationFailed },
+  };
+  const entry = statusMap[status];
+  return <StatusBadge category="syncStatus" status={entry.badgeStatus} label={entry.label} />;
 }
 
 function formatExpiry(expiresAt: string | null, labels: MeetingConfigEnhancementLabels): string | null {
@@ -207,9 +202,9 @@ function ConfigsContent({
 
       {resolvedCanManage ? (
         <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
-          <Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={handleAdd}>
+          <PrimaryPageAction startIcon={<AddOutlinedIcon />} onClick={handleAdd}>
             {tManager.add}
-          </Button>
+          </PrimaryPageAction>
         </Stack>
       ) : null}
 

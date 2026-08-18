@@ -152,7 +152,7 @@ export function TeacherCardList({
       <TeacherSearchField
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
-        placeholder="placeholders.searchTeachers"
+        placeholder={labels.fields.searchTeachers}
       />
 
       <MobileCardList

@@ -1,9 +1,10 @@
 "use client";
 
 import { PlayCircleOutlined } from "@mui/icons-material";
-import { Box, Button, Chip, LinearProgress, Stack, Typography } from "@mui/material";
+import { Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { formatDateTime } from "@/frontend/common/components/intl/dateFormat";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
 import type { UpcomingLessonRow } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
@@ -39,29 +40,10 @@ type NextClassChipProps = {
 
 function NextClassChip({ isFrozen, countdown, frozenLabel }: NextClassChipProps): ReactNode {
   if (isFrozen) {
-    return (
-      <Chip
-        size="small"
-        label={frozenLabel}
-        sx={theme => ({
-          backgroundColor: theme.palette.errorContainer,
-          color: theme.palette.onErrorContainer,
-        })}
-      />
-    );
+    return <StatusBadge category="classSession" status="hold" label={frozenLabel} />;
   }
   if (countdown) {
-    return (
-      <Chip
-        size="small"
-        label={countdown}
-        sx={theme => ({
-          backgroundColor: theme.palette.tertiaryContainer,
-          color: theme.palette.onTertiaryContainer,
-          fontWeight: 700,
-        })}
-      />
-    );
+    return <StatusBadge category="session" status="confirmed" label={countdown} />;
   }
   return null;
 }

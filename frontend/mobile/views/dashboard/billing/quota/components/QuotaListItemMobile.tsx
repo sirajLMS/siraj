@@ -21,47 +21,49 @@ export function QuotaListItemMobile({ quota, t }: Readonly<QuotaListItemMobilePr
   const kindLabel = formatQuotaKind(quota.kind ?? "", t);
 
   return (
-    <Box component={Link} href={`/quotas/${quota.id}`} sx={{ textDecoration: "none", display: "block" }}>
-      <Stack spacing={1} sx={{ py: 1 }}>
-        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
-            {quota.name ?? ""}
-          </Typography>
-          <StatusBadge
-            category="quotaStatus"
-            status={quota.status ?? ""}
-            label={statusLabel}
-            size="small"
-            component="output"
-          />
-        </Stack>
+    <Link href={`/quotas/${quota.id}`} style={{ textDecoration: "none" }}>
+      <Box sx={{ display: "block" }}>
+        <Stack spacing={1} sx={{ py: 1 }}>
+          <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+            <Typography variant="headlineMd" sx={{ fontWeight: 700 }}>
+              {quota.name ?? ""}
+            </Typography>
+            <StatusBadge
+              category="quotaStatus"
+              status={quota.status ?? ""}
+              label={statusLabel}
+              size="small"
+              component="output"
+            />
+          </Stack>
 
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <StatusBadge
-            category="quotaStatus"
-            status={quota.kind ?? ""}
-            label={kindLabel}
-            size="small"
-            component="output"
-          />
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.fields.validUntil}: {formatQuotaDate(quota.validUntil)}
-          </Typography>
-        </Stack>
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+            <StatusBadge
+              category="quotaStatus"
+              status={quota.kind ?? ""}
+              label={kindLabel}
+              size="small"
+              component="output"
+            />
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {t.fields.validUntil}: {formatQuotaDate(quota.validUntil)}
+            </Typography>
+          </Stack>
 
-        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-          <Typography variant="bodyMd">
-            {t.fields.remaining}:{" "}
-            <Box component="span" sx={{ fontWeight: 700 }}>
-              {quota.remaining ?? 0}
-            </Box>{" "}
-            / {quota.totalClasses ?? 0}
-          </Typography>
-          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
-            {t.fields.reservedClasses}: {quota.reservedClasses ?? 0}
-          </Typography>
+          <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+            <Typography variant="bodyMd">
+              {t.fields.remaining}:{" "}
+              <Box component="span" sx={{ fontWeight: 700 }}>
+                {quota.remaining ?? 0}
+              </Box>{" "}
+              / {quota.totalClasses ?? 0}
+            </Typography>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+              {t.fields.reservedClasses}: {quota.reservedClasses ?? 0}
+            </Typography>
+          </Stack>
         </Stack>
-      </Stack>
-    </Box>
+      </Box>
+    </Link>
   );
 }

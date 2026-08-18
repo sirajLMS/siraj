@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Alert, Box, Stack } from "@mui/material";
+import { Alert, Stack } from "@mui/material";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { CronDialogsAndNotificationsShared } from "@/frontend/common/views/dashboard/cron/components/__shared__/cronDialogsAndNotificationsShared";
 import type { CronViewProps } from "@/frontend/common/views/dashboard/cron/types";
@@ -11,6 +11,7 @@ import {
   DesktopPageContainer,
   DesktopPageHeader,
   DesktopPrimaryPageAction,
+  DesktopSectionPanel,
 } from "@/frontend/desktop/components/ui";
 import { DesktopBaseDeleteDialog } from "@/frontend/desktop/components/ui/dialog/DesktopBaseDeleteDialog";
 
@@ -74,7 +75,7 @@ export function CronDesktopView(props: Readonly<CronViewProps>) {
       <CronQueueStatsBanner labels={labels} queueStats={queueStats} queueStatsLoading={queueStatsLoading} />
       <CronEmptyStateBanner labels={labels} loading={loading} rowsLength={rows.length} />
 
-      <Box sx={{ height: 600 }}>
+      <DesktopSectionPanel contentPadding={false}>
         <DesktopAppDataGrid
           rows={rows}
           columns={columns}
@@ -82,7 +83,7 @@ export function CronDesktopView(props: Readonly<CronViewProps>) {
           getRowId={row => row.id ?? row.name ?? ""}
           paginationOptions={{ mode: "client" }}
         />
-      </Box>
+      </DesktopSectionPanel>
 
       <CronDialogsAndNotificationsShared
         props={props}

@@ -32,7 +32,9 @@ export function SettingsTabShell({
       errorLabel={errorLabel}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{description}</Typography>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+          {description}
+        </Typography>
         {children}
       </Box>
     </ConfigTabLoadingGuard>

@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
@@ -97,9 +98,9 @@ export function StudentManagerProfileTab() {
   return (
     <Stack spacing={3}>
       {editViewModel.canEditProfile ? (
-        <Button variant="contained" onClick={editViewModel.onStartEdit} sx={{ alignSelf: "flex-start" }}>
+        <PrimaryPageAction onClick={editViewModel.onStartEdit} sx={{ alignSelf: "flex-start" }}>
           {labels.editProfile}
-        </Button>
+        </PrimaryPageAction>
       ) : null}
 
       <StudentProfileUserDetailsSection

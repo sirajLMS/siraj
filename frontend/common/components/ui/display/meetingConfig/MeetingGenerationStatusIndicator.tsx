@@ -116,7 +116,7 @@ function renderSuccess({
         {url ? (
           <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 0.5 }}>
             <LinkOutlinedIcon fontSize="small" sx={(theme: Theme) => ({ color: theme.palette.onSurfaceVariant })} />
-            <Typography
+            <Box
               component="span"
               sx={{
                 typography: "bodyMd",
@@ -127,7 +127,7 @@ function renderSuccess({
               }}
             >
               {url}
-            </Typography>
+            </Box>
             {onCopyUrl ? (
               <Tooltip title={successLabel}>
                 <IconButton size="small" onClick={handleCopy} aria-label={successLabel}>
@@ -136,16 +136,11 @@ function renderSuccess({
               </Tooltip>
             ) : null}
             <Tooltip title={successLabel}>
-              <IconButton
-                size="small"
-                component={Link}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={successLabel}
-              >
-                <OpenInNewOutlinedIcon fontSize="small" />
-              </IconButton>
+              <Link href={url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
+                <IconButton size="small" aria-label={successLabel}>
+                  <OpenInNewOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Link>
             </Tooltip>
           </Stack>
         ) : null}
@@ -159,9 +154,9 @@ function renderSuccess({
             }}
           >
             <ScheduleOutlinedIcon fontSize="small" />
-            <Typography component="span" sx={{ typography: "bodyMd" }}>
+            <Box component="span" sx={{ typography: "bodyMd" }}>
               {formatExpiresAt(expiresAt)}
-            </Typography>
+            </Box>
           </Stack>
         ) : null}
       </Stack>

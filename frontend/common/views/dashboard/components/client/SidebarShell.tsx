@@ -58,7 +58,7 @@ interface SidebarNavItemProps {
 }
 
 function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter = false): SxProps<Theme> {
-  return {
+  return (theme: Theme) => ({
     borderRadius: 2,
     py: isCollapsed ? 1 : 1.25,
     px: isCollapsed ? 0 : 2,
@@ -70,7 +70,7 @@ function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter =
       backgroundColor: "color-mix(in srgb, var(--mui-palette-primary-main) 8%, transparent)",
       color: "var(--mui-palette-primary-main)",
     },
-    transition: "all 0.2s ease",
+    transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
     ...(!isFooter && {
       fontWeight: isActive ? 700 : 400,
       "&.Mui-selected": {
@@ -81,7 +81,7 @@ function getSidebarItemStyles(isCollapsed: boolean, isActive = false, isFooter =
         },
       },
     }),
-  };
+  });
 }
 
 function SidebarNavItem({ item, isActive = false, isCollapsed, isFooter = false }: SidebarNavItemProps) {
@@ -427,36 +427,36 @@ function SidebarAccountFooter({
   const isExpanded = !isCollapsed;
 
   const profileButton = (
-    <ListItemButton
-      component={Link}
-      href="/profile"
-      selected={isProfileActive}
-      sx={mergeSx(getSidebarItemStyles(isCollapsed, isProfileActive), {
-        py: 1,
-        flex: 1,
-        minWidth: 0,
-      })}
-    >
-      <ListItemIcon sx={{ minWidth: isCollapsed ? "unset" : 40, color: "inherit" }}>
-        <UserAvatar src={avatarUrl} sx={{ width: 32, height: 32 }} />
-      </ListItemIcon>
-      {isExpanded && (
-        <ListItemText
-          primary={userName}
-          slotProps={{
-            primary: {
-              sx: {
-                typography: "labelMd",
-                fontWeight: isProfileActive ? 700 : 600,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+    <Link href="/profile" style={{ textDecoration: "none" }}>
+      <ListItemButton
+        selected={isProfileActive}
+        sx={mergeSx(getSidebarItemStyles(isCollapsed, isProfileActive), {
+          py: 1,
+          flex: 1,
+          minWidth: 0,
+        })}
+      >
+        <ListItemIcon sx={{ minWidth: isCollapsed ? "unset" : 40, color: "inherit" }}>
+          <UserAvatar src={avatarUrl} sx={{ width: 32, height: 32 }} />
+        </ListItemIcon>
+        {isExpanded && (
+          <ListItemText
+            primary={userName}
+            slotProps={{
+              primary: {
+                sx: {
+                  typography: "labelMd",
+                  fontWeight: isProfileActive ? 700 : 600,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                },
               },
-            },
-          }}
-        />
-      )}
-    </ListItemButton>
+            }}
+          />
+        )}
+      </ListItemButton>
+    </Link>
   );
 
   const logoutButton = (
@@ -661,7 +661,7 @@ function SidebarDesktop({
 
   return (
     <Box
-      sx={{
+      sx={(theme: Theme) => ({
         display: { xs: "none", md: "flex" },
         flexDirection: "column",
         width: isCollapsed ? collapsedWidth : sidebarWidth,
@@ -673,8 +673,8 @@ function SidebarDesktop({
         borderRight: "1px solid var(--mui-palette-border-light)",
         overflow: "hidden",
         position: "relative",
-        transition: "width 0.3s ease",
-      }}
+        transition: theme.transitions.create("width", { duration: 300, easing: "ease" }),
+      })}
     >
       <SidebarContent
         navGroups={navGroups}
@@ -688,14 +688,14 @@ function SidebarDesktop({
 
       <Box
         onClick={toggleSidebar}
-        sx={{
+        sx={(theme: Theme) => ({
           position: "absolute",
           insetInlineEnd: 0,
           top: 0,
           bottom: 0,
           width: "8px",
           cursor: "pointer",
-          transition: "all 0.2s ease",
+          transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
           "&:hover": {
             width: "12px",
             backgroundColor: "var(--mui-palette-background-paper)",
@@ -704,17 +704,17 @@ function SidebarDesktop({
               transform: "scale(1)",
             },
           },
-        }}
+        })}
       >
         <IconButton
           className="toggle-button"
-          sx={{
+          sx={(theme: Theme) => ({
             position: "absolute",
             top: "50%",
             insetInlineEnd: "-16px",
             transform: "translateY(-50%) scale(0.8)",
             opacity: 0,
-            transition: "all 0.2s ease",
+            transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
             backgroundColor: "var(--mui-palette-background-paper)",
             border: "1px solid var(--mui-palette-border-light)",
             width: "32px",
@@ -724,7 +724,7 @@ function SidebarDesktop({
               backgroundColor: "var(--mui-palette-background-paper)",
               borderColor: "var(--mui-palette-border-light)",
             },
-          }}
+          })}
         >
           {isCollapsed ? (
             <ChevronRight

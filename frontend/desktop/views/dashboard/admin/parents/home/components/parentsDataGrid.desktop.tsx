@@ -143,25 +143,25 @@ export function ParentsDataGridDesktop({
             ) : null}
             {canParentManageStatus ? (
               <Tooltip title={labels.manageLifecycle}>
-                <IconButton
-                  component={Link}
-                  href={`/parents/${row.id}/lifecycle`}
-                  size="small"
-                  onClick={e => {
-                    e.stopPropagation();
-                  }}
-                  sx={theme => ({
-                    backgroundColor: alpha(theme.palette.secondary.main, 0.08),
-                    color: theme.palette.secondary.main,
-                    borderRadius: 1.5,
-                    "&:hover": {
-                      backgroundColor: theme.palette.secondary.main,
-                      color: theme.palette.onSecondary,
-                    },
-                  })}
-                >
-                  <LifecycleIcon fontSize="small" />
-                </IconButton>
+                <Link href={`/parents/${row.id}/lifecycle`} style={{ textDecoration: "none" }}>
+                  <IconButton
+                    size="small"
+                    onClick={e => {
+                      e.stopPropagation();
+                    }}
+                    sx={theme => ({
+                      backgroundColor: alpha(theme.palette.secondary.main, 0.08),
+                      color: theme.palette.secondary.main,
+                      borderRadius: 1.5,
+                      "&:hover": {
+                        backgroundColor: theme.palette.secondary.main,
+                        color: theme.palette.onSecondary,
+                      },
+                    })}
+                  >
+                    <LifecycleIcon fontSize="small" />
+                  </IconButton>
+                </Link>
               </Tooltip>
             ) : null}
             <IconButton

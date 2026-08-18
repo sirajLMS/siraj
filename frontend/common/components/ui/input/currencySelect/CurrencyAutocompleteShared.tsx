@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import type { SxProps, Theme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { getCurrencyOptionRowLabel } from "@/frontend/common/components/ui/input/currencySelect/currencyOptionRow.utils";
@@ -87,13 +86,12 @@ const renderCurrencyInput = ({
             <>
               {params.slotProps.input?.endAdornment}
               <InputAdornment position="end">
-                <Typography
+                <Box
                   component="span"
-                  dir="ltr"
-                  sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}
+                  sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, direction: "ltr" })}
                 >
                   {showSymbol ? getCurrencySymbol(currency.code) : (currency.code as string)}
-                </Typography>
+                </Box>
               </InputAdornment>
             </>
           ) : (

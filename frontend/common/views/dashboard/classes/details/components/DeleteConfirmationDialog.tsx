@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 
 export function DeleteConfirmationDialog({
   open,
@@ -18,17 +18,15 @@ export function DeleteConfirmationDialog({
   readonly confirmLabel: string;
 }) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText>{message}</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{cancelLabel}</Button>
-        <Button onClick={onConfirm} color="error" variant="contained">
-          {confirmLabel}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <BaseDeleteDialog
+      open={open}
+      onClose={onClose}
+      onConfirm={onConfirm}
+      isLoading={false}
+      title={title}
+      body={message}
+      cancelLabel={cancelLabel}
+      confirmLabel={confirmLabel}
+    />
   );
 }

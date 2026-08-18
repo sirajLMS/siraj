@@ -27,7 +27,7 @@ function CategoryChip({ label, active, onClick }: Readonly<CategoryChipProps>) {
         backgroundColor: active ? theme.palette.primaryContainer : theme.palette.surfaceContainer,
         color: active ? theme.palette.onPrimaryContainer : theme.palette.onSurfaceVariant,
         border: `1px solid ${active ? theme.palette.primaryContainer : theme.palette.outlineVariant}`,
-        transition: "all 0.2s",
+        transition: theme.transitions.create("all", { duration: 200 }),
       })}
     >
       {label}

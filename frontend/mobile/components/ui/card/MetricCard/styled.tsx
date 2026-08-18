@@ -26,7 +26,7 @@ export const StyledCard = styled(MobileBaseCard, {
   minHeight: 88,
   overflow: "hidden",
   cursor: isInteractive ? "pointer" : "default",
-  transition: "border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
+  transition: theme.transitions.create(["border-color", "box-shadow", "transform"], { duration: 150, easing: "ease" }),
   ...(isInteractive && {
     "&:active": {
       transform: "scale(0.99)",

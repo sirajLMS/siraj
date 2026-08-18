@@ -66,7 +66,7 @@ export function StatusBadgeShared({
             borderRadius: theme.layout.radius.badge,
             height: dimensions.height,
             paddingInline: chipPaddingInline ? chipPaddingInline(theme) : theme.spacing(0.5),
-            transition: "background-color 200ms ease, color 200ms ease",
+            transition: theme.transitions.create(["background-color", "color"], { duration: 200, easing: "ease" }),
             "@media (prefers-reduced-motion: reduce)": {
               transition: "none",
             },
@@ -97,7 +97,7 @@ export function StatusBadgeShared({
           borderRadius: theme.layout.radius.badge,
           backgroundColor,
           color,
-          transition: "background-color 200ms ease, color 200ms ease",
+          transition: theme.transitions.create(["background-color", "color"], { duration: 200, easing: "ease" }),
           "@media (prefers-reduced-motion: reduce)": {
             transition: "none",
           },

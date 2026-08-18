@@ -778,6 +778,7 @@ enum ComplaintCategory {
 type ComplaintFile {
   createdAt: DateTime
   fileId: String
+  id: String
   isProtected: Boolean
   publicUrl: String
   usageType: String
@@ -1178,6 +1179,7 @@ Credit balance summary for a student (total classes purchased and remaining)
 type CreditBalance {
   classesRemaining: Int
   classesTotal: Int
+  id: String
   studentId: String
 }
 
@@ -1500,6 +1502,7 @@ type DirectoryInfo implements StorageObject {
   createdAt: DateTime
   fileCount: Int
   folderCount: Int
+  id: String
   isFromBucket: Boolean
   isProtected: Boolean
   lastModified: DateTime
@@ -1600,6 +1603,7 @@ type EditQuotaResult {
 
 type EffectiveMeeting {
   configId: String
+  id: String
   joinUrl: String
   logoUrl: String
   meetingId: String
@@ -1611,10 +1615,10 @@ type EffectiveMeeting {
 }
 
 enum EffectiveMeetingSource {
-  class
-  none
-  recurring
-  teacher
+  CLASS
+  NONE
+  RECURRING
+  TEACHER
 }
 
 """A type representing a validated email address"""
@@ -1695,6 +1699,7 @@ type FileInfo implements StorageObject {
   createdAt: DateTime
   directoryPath: String
   fileType: FileType
+  id: String
   isFromBucket: Boolean
   isInUse: Boolean
   isProtected: Boolean
@@ -2634,6 +2639,7 @@ input MarkSuggestionDuplicateInput {
 }
 
 type MeetingConfigDetails {
+  id: String
   meetingUrl: String
   tenantId: String
   username: String
@@ -3389,6 +3395,7 @@ input ParentOnboardingInput {
 type ParentOnboardingResult {
   currency: CurrencyCode
   email: String
+  id: String
   invoiceType: String
   name: String
   parentId: String
@@ -3492,6 +3499,7 @@ type PaymentMethodCatalogSnapshot {
   catalogId: String
   catalogName: LocalizedString
   catalogSlug: String
+  id: String
 }
 
 type PaymentMethodDefaults {
@@ -4288,6 +4296,7 @@ type SettingsTimezonesResult {
 
 type SimulatablePermissionGroup {
   description: String
+  id: String
   name: String
   slug: String
 }
@@ -4615,6 +4624,7 @@ input StudentOnboardingInput {
 
 """Result of student onboarding operation"""
 type StudentOnboardingResult {
+  id: String
   name: String
   parentId: String
   primaryTeacherId: String
@@ -4865,6 +4875,7 @@ type SupportedCurrency {
   code: CurrencyCode
   countryCode: CountryCode
   decimals: Int
+  id: String
   isActive: Boolean
   sortOrder: Int
   symbol: String
@@ -5234,6 +5245,7 @@ type TeacherMonthlyReport {
   approvedCount: Int
   cancelledCount: Int
   currency: CurrencyCode
+  id: String
   lessonsTaught: Int
   month: Int
   teacherId: String
@@ -5655,6 +5667,7 @@ input UserMeetingConfigUpdateInput {
 
 type UserOverride {
   assignedBy: String
+  id: String
   permissionId: String
   state: OverrideState
 }

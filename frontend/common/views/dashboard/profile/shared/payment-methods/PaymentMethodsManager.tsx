@@ -3,7 +3,7 @@
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import { Button, Stack } from "@mui/material";
-import { ErrorState } from "@/frontend/common/components/ui";
+import { ErrorState, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { PaymentMethodList } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodList";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import { type PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -130,9 +130,9 @@ function renderEmptyState(t: PaymentMethodManagerLabels, refetch: () => Promise<
 function renderAddButton(t: PaymentMethodManagerLabels, onClick: () => void) {
   return (
     <Stack sx={{ flexDirection: "row", justifyContent: "flex-end" }}>
-      <Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={onClick}>
+      <PrimaryPageAction startIcon={<AddOutlinedIcon />} onClick={onClick}>
         {t.add}
-      </Button>
+      </PrimaryPageAction>
     </Stack>
   );
 }

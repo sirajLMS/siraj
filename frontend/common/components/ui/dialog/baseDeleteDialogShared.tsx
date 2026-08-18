@@ -25,7 +25,7 @@ export function BaseDeleteDialogScaffold({
 }: Readonly<BaseDeleteDialogScaffoldProps>) {
   return (
     <Dialog open={open} onClose={isLoading ? undefined : onClose} maxWidth="xs" fullWidth fullScreen={fullScreen}>
-      <DialogTitle component="div" sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <DialogTitle sx={{ pt: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <Box
           sx={theme => ({
             width: 64,

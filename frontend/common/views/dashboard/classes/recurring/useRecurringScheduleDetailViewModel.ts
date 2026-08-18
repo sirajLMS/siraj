@@ -81,6 +81,7 @@ function buildBreadcrumbs(t: RecurringScheduleTranslations) {
 function buildLabelsBySection(
   t: RecurringScheduleTranslations,
   tManager: ManagerTranslations,
+  retryLabel: string,
   summary: string,
   breadcrumbs: ReturnType<typeof buildBreadcrumbs>
 ): RecurringScheduleDetailLabelsBySection {
@@ -91,6 +92,7 @@ function buildLabelsBySection(
       breadcrumbs,
       invalidId: t.invalidId,
       loadError: tManager.loadError,
+      retryLabel,
     },
     form: {
       rate: {
@@ -187,7 +189,7 @@ export function useRecurringScheduleDetailViewModel(
   }, [onRetry, refetch]);
 
   const labelsBySection = useMemo(
-    () => buildLabelsBySection(t, tManager, summary, breadcrumbs),
+    () => buildLabelsBySection(t, tManager, tManager.retry, summary, breadcrumbs),
     [t, tManager, summary, breadcrumbs]
   );
 

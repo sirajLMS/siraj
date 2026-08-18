@@ -77,9 +77,9 @@ function TokenIdRow({ tokenId, labels }: TokenIdRowProps) {
           {copied ? labels.metadata.tokenIdCopied : labels.metadata.copyTokenId}
         </Button>
       </Tooltip>
-      <Typography component="output" sx={srOnlySx} aria-live="polite">
+      <Box component="output" sx={srOnlySx} aria-live="polite">
         {copied ? labels.metadata.tokenIdCopied : ""}
-      </Typography>
+      </Box>
     </Box>
   );
 }
@@ -92,7 +92,11 @@ type ScopesChipsProps = {
 function ScopesChips({ scopes, labels }: ScopesChipsProps) {
   const visibleScopes = scopes ?? [];
   if (visibleScopes.length === 0) {
-    return <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.metadata.noScopes}</Typography>;
+    return (
+      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+        {labels.metadata.noScopes}
+      </Typography>
+    );
   }
   return (
     <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
@@ -166,7 +170,7 @@ export function TokenMetadataDialog({
         {loading && !account && (
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, py: 3 }}>
             <CircularProgress size={20} />
-            <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>
+            <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
               {labels.metadata.loadingHint}
             </Typography>
           </Box>

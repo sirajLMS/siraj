@@ -34,18 +34,18 @@ interface AdminActionsBarProps {
 
 const StyledActionsDivider = styled(Box)(() => ({}));
 
-const StyledForceActivateButton = styled(IconButton)(() => ({
+const StyledForceActivateButton = styled(IconButton)(({ theme }) => ({
   borderRadius: 1.5,
-  transition: "all 0.15s ease",
+  transition: theme.transitions.create("all", { duration: 150, easing: "ease" }),
 }));
 
 const StyledStopPauseButton = styled(IconButton)(() => ({
   borderRadius: 1.5,
 }));
 
-const StyledDeleteIconButton = styled(IconButton)(() => ({
+const StyledDeleteIconButton = styled(IconButton)(({ theme }) => ({
   borderRadius: 1.5,
-  transition: "all 0.15s ease",
+  transition: theme.transitions.create("all", { duration: 150, easing: "ease" }),
 }));
 
 const StyledAdminActionsBar = styled(Box)(({ theme }) => ({
@@ -75,7 +75,7 @@ const textActionButtonSx = (theme: Theme) => ({
   display: "flex",
   alignItems: "center",
   gap: 1,
-  transition: "background 0.15s ease",
+  transition: theme.transitions.create("background", { duration: 150, easing: "ease" }),
   "&:hover": { backgroundColor: theme.palette.primaryContainer, filter: "brightness(0.9)" },
 });
 

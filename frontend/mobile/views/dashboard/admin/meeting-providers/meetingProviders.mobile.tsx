@@ -15,6 +15,7 @@ import {
   MobileFormErrorSnackbar,
   MobilePageContainer,
   MobilePageHeader,
+  MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
@@ -66,9 +67,9 @@ function MobileProviderRow({ row, labels, onEdit, onDelete }: MobileProviderRowP
             </Stack>
 
             <Stack direction="row" sx={{ gap: 0.5, alignItems: "center" }}>
-              <Chip
-                size="small"
-                color={isActive ? "success" : "default"}
+              <MobileStatusBadge
+                category="paymentMethod"
+                status={isActive ? "active" : "inactive"}
                 label={isActive ? labels.active : labels.inactive}
               />
               <IconButton size="small" aria-label={labels.edit} onClick={() => onEdit(row)}>
@@ -101,13 +102,13 @@ function MobileProviderRow({ row, labels, onEdit, onDelete }: MobileProviderRowP
           {/* Capability Flags */}
           <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
             {row.fieldSchema?.supportsUsername ? (
-              <Chip size="small" color="info" variant="outlined" label={labels.supportsUsername} />
+              <MobileStatusBadge category="session" status="confirmed" label={labels.supportsUsername ?? ""} />
             ) : null}
             {row.fieldSchema?.supportsPassword ? (
-              <Chip size="small" color="info" variant="outlined" label={labels.supportsPassword} />
+              <MobileStatusBadge category="session" status="confirmed" label={labels.supportsPassword ?? ""} />
             ) : null}
             {row.fieldSchema?.supportsTenantId ? (
-              <Chip size="small" color="info" variant="outlined" label={labels.supportsTenantId} />
+              <MobileStatusBadge category="session" status="confirmed" label={labels.supportsTenantId ?? ""} />
             ) : null}
           </Stack>
         </Stack>

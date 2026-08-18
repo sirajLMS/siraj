@@ -28,6 +28,7 @@ export function RecurringScheduleDetailDesktopView({
       onRetry={onRetry}
       pageTitle={shell.pageTitle}
       subtitle={shell.subtitle}
+      retryLabel={shell.retryLabel}
       desktopBreadcrumbs={shell.breadcrumbs}
     >
       <RecurringRateSection

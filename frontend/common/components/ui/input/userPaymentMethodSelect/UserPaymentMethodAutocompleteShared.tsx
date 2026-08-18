@@ -154,7 +154,7 @@ export function UserPaymentMethodAutocompleteShared({
               </Typography>
               {method.isDefault ? <Chip size="small" label={t.display.defaultBadge} /> : null}
               {typeLabel ? (
-                <Typography variant="labelMd" sx={{ color: "text.secondary", flexShrink: 0 }}>
+                <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}>
                   {typeLabel}
                 </Typography>
               ) : null}

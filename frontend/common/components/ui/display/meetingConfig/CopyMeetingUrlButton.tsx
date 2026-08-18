@@ -2,7 +2,7 @@
 
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
-import { alpha, Box, Button, Fade, IconButton, type Theme, Tooltip, Typography, useMediaQuery } from "@mui/material";
+import { alpha, Box, Button, Fade, IconButton, type Theme, Tooltip, useMediaQuery } from "@mui/material";
 import { type ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@/frontend/common/utils/logger";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -214,9 +214,9 @@ export function CopyMeetingUrlButton({
           })}
         >
           {iconNode}
-          <Typography component="span" sx={{ typography: "bodyMd" }}>
+          <Box component="span" sx={{ typography: "bodyMd" }}>
             {labels.copyMeetingUrl}
-          </Typography>
+          </Box>
         </Box>
       </Tooltip>
     );

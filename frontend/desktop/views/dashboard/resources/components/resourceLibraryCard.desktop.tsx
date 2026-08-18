@@ -36,7 +36,7 @@ export function ResourceLibraryCardDesktop({
         position: "relative",
         minHeight: 160,
         justifyContent: "space-between",
-        transition: "border-color 0.15s ease",
+        transition: theme.transitions.create("border-color", { duration: 150, easing: "ease" }),
         cursor: "pointer",
         "&:hover": { borderColor: theme.palette.primary.main },
       })}

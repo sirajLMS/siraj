@@ -14,9 +14,15 @@ function renderDesktopHeaderRow(labels: EnvironmentConfigViewModel["labels"]): R
         gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1.6fr)",
       }}
     >
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{labels.columns.key}</Typography>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{labels.columns.source}</Typography>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{labels.columns.value}</Typography>
+      <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary })}>
+        {labels.columns.key}
+      </Typography>
+      <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary })}>
+        {labels.columns.source}
+      </Typography>
+      <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary })}>
+        {labels.columns.value}
+      </Typography>
     </Box>
   );
 }

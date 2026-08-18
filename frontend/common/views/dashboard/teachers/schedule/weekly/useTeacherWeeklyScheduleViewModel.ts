@@ -2,7 +2,7 @@
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import {
   AppPermission,
   type CreateRecurringClassInput,
@@ -479,7 +479,11 @@ export function useTeacherWeeklyScheduleViewModel(
   const notifications = useNotifications();
   const client = useApolloClient();
   const router = useRouter();
-  const { selectedWeekDate } = useWeeklyScheduleStore();
+  const { selectedWeekDate, ensureSelectedWeekDate } = useWeeklyScheduleStore();
+
+  useEffect(() => {
+    ensureSelectedWeekDate();
+  }, [ensureSelectedWeekDate]);
   // NEW FOR PLAN v5: the ViewModel subscribes to the dialog store directly so
   // the tier dialog files don't (specs §6.2 + N2 — ViewModel owns state).
   const { openDialog, isDialogOpen, closeDialog, days, toggleDay, setTimeOverride, toggleTimeOverride, resetDays } =

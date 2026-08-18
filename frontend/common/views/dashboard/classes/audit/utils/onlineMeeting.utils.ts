@@ -24,6 +24,7 @@ export function toEffectiveMeeting(
 ): EffectiveMeetingFieldsFragment | null {
   if (!meetingInfo) return null;
   return {
+    id: `effective-meeting-${meetingInfo.meetingId ?? "unknown"}`,
     joinUrl: meetingInfo.joinUrl,
     logoUrl: meetingInfo.logoUrl,
     providerName: meetingInfo.providerName,

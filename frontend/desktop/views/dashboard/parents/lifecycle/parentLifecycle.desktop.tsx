@@ -28,9 +28,9 @@ export function ParentLifecycleDesktopView({
         ]}
         actions={
           profileHref ? (
-            <Button component={Link} href={profileHref} variant="outlined">
-              {labels.actions.viewProfile}
-            </Button>
+            <Link href={profileHref} style={{ textDecoration: "none" }}>
+              <Button variant="outlined">{labels.actions.viewProfile}</Button>
+            </Link>
           ) : undefined
         }
       />

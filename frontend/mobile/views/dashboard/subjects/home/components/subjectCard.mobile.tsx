@@ -3,6 +3,7 @@
 import { BookOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subjects/home/types";
+import { MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import { MobileClassAvatar } from "@/frontend/mobile/components/ui/avatar/MobileClassAvatar";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
 
@@ -70,17 +71,12 @@ export function SubjectCardMobile({
             </Typography>
           </Stack>
 
-          {subject.isActive === false ? (
-            <Chip
-              label={t.inactive}
-              size="small"
-              sx={theme => ({
-                backgroundColor: theme.palette.errorContainer,
-                color: theme.palette.onErrorContainer,
-                alignSelf: "flex-start",
-              })}
-            />
-          ) : null}
+          <MobileStatusBadge
+            category="paymentMethod"
+            status={subject.isActive ? "active" : "inactive"}
+            label={subject.isActive ? t.activeLabel : t.inactive}
+            size="small"
+          />
         </Stack>
       </Box>
 

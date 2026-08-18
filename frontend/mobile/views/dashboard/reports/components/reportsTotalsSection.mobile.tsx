@@ -30,7 +30,7 @@ export function ReportsTotalsSectionMobile({
           {totalsLabel}
         </Typography>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {summary.totalHours}
           </Typography>
           <TotalsAmount display={totalsDisplay} breakdownMaxWidth="100%" />

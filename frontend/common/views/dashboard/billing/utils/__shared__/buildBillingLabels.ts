@@ -280,6 +280,7 @@ export function buildBillingLabels(t: BillingLabels): BillingLabels {
     manual: buildManualInvoiceLabels(t.manual),
     tabsPageTitle: t.tabsPageTitle,
     tabsPageSubtitle: t.tabsPageSubtitle,
+    tabNavAriaLabel: t.tabNavAriaLabel,
     billingTabs: t.billingTabs,
   };
 }

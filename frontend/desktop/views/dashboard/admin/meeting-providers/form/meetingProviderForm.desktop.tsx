@@ -39,15 +39,11 @@ export function MeetingProviderFormDesktopView(props: Readonly<MeetingProviderFo
       slots={desktopSlots}
       styles={desktopStyles}
       BackAction={
-        <Button
-          component={Link}
-          href="/meeting-providers"
-          variant="outlined"
-          startIcon={<ArrowBackOutlined />}
-          size="small"
-        >
-          {props.t.backToProviders}
-        </Button>
+        <Link href="/meeting-providers" style={{ textDecoration: "none" }}>
+          <Button variant="outlined" startIcon={<ArrowBackOutlined />} size="small">
+            {props.t.backToProviders}
+          </Button>
+        </Link>
       }
     />
   );

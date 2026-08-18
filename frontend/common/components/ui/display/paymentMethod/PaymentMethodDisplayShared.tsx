@@ -97,7 +97,9 @@ function DetailRow({
 }) {
   return (
     <Box sx={{ display: "flex", gap: detailRowGap, alignItems: "baseline", flexWrap: "wrap" }}>
-      <Typography sx={{ typography: labelTypography, color: "text.secondary", minWidth: labelMinWidth }}>
+      <Typography
+        sx={theme => ({ typography: labelTypography, color: theme.palette.text.secondary, minWidth: labelMinWidth })}
+      >
         {label}
       </Typography>
       <Box sx={{ flex: 1, minWidth: 0 }}>{children}</Box>

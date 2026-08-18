@@ -47,6 +47,7 @@ const PERMISSION_GROUP_DETAIL_FIELDS = gql`
 
 const USER_OVERRIDE_FIELDS = gql`
   fragment UserOverrideFields on UserOverride {
+    id
     permissionId
     state
     assignedBy

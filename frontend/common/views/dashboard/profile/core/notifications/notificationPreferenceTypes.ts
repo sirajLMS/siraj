@@ -1,5 +1,6 @@
 import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import { preferenceKey } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceUtils";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
@@ -172,7 +173,7 @@ export interface NotificationPreferencesTabVariantProps {
   readonly loading: boolean;
   readonly snackbarOpen: boolean;
   readonly snackbarMessage: string;
-  readonly snackbarSeverity: "success" | "error";
+  readonly snackbarSeverity: SnackbarSeverity;
   readonly onSnackbarClose: () => void;
   readonly errorLoading: boolean;
   readonly activeChannel?: NotificationChannel;

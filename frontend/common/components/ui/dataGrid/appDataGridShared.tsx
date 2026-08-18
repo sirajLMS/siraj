@@ -10,6 +10,7 @@ import type {
   AppDataGridSlotProps,
 } from "@/frontend/common/components/ui/dataGrid/types/appDataGridShared.types";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export function AppDataGridChrome<R extends GridValidRowModel>({
   props,
@@ -18,8 +19,9 @@ export function AppDataGridChrome<R extends GridValidRowModel>({
   props: Readonly<AppDataGridSharedProps<R>>;
   slots: Readonly<AppDataGridSlotProps<R>>;
 }>) {
+  const commonLabels = useAppTranslation(Translation.Common);
   const {
-    emptyMessage = "No entries found",
+    emptyMessage = commonLabels.noEntriesFound,
     ariaLabel,
     paginationOptions,
     initialState,

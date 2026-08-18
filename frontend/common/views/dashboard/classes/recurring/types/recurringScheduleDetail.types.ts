@@ -6,6 +6,7 @@ export interface RecurringScheduleDetailShellLabels {
   readonly breadcrumbs: readonly { readonly label: string; readonly href?: string }[];
   readonly invalidId: string;
   readonly loadError: string;
+  readonly retryLabel: string;
 }
 
 export interface RecurringScheduleDetailFormLabels {

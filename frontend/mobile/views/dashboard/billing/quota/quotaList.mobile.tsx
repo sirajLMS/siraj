@@ -169,15 +169,11 @@ export function QuotaListMobile(props: Readonly<QuotaListViewModel>) {
             title={t.title}
             breadcrumbs={[{ label: t.title, current: true }]}
             actions={
-              <Button
-                component={Link}
-                href="/quotas/insights"
-                variant="outlined"
-                size="small"
-                startIcon={<InsightsOutlined />}
-              >
-                {t.insights}
-              </Button>
+              <Link href="/quotas/insights" style={{ textDecoration: "none" }}>
+                <Button variant="outlined" size="small" startIcon={<InsightsOutlined />}>
+                  {t.insights}
+                </Button>
+              </Link>
             }
           />
 

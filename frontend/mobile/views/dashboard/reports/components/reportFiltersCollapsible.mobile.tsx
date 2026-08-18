@@ -73,10 +73,10 @@ export function ReportFiltersCollapsibleMobile({
         <IconButton
           size="small"
           aria-label={title}
-          sx={{
+          sx={theme => ({
             transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s ease",
-          }}
+            transition: theme.transitions.create("transform", { duration: 200, easing: "ease" }),
+          })}
         >
           <ExpandMoreOutlined />
         </IconButton>

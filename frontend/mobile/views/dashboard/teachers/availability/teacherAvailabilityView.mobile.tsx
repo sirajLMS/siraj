@@ -4,7 +4,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
-import { availabilitySearchResolver } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
+import { availabilitySearchResolverFactory } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type {
   AvailabilitySearchFormData,
   TeacherAvailabilityInsights,
@@ -46,7 +46,7 @@ export function TeacherAvailabilityMobileView({
   );
 
   const methods = useForm<AvailabilitySearchFormData>({
-    resolver: availabilitySearchResolver,
+    resolver: availabilitySearchResolverFactory({ invalidGender: labels.validation.invalidGender }),
     defaultValues: resolveDefaultFilters(defaultFilters, storeFilters),
   });
 

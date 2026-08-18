@@ -58,9 +58,11 @@ export function DisplayCurrencyHint({
 
     const action = (
       <>
-        <Button component={Link} href="/profile/edit" color="inherit" size="small">
-          {t.cta}
-        </Button>
+        <Link href="/profile/edit" style={{ textDecoration: "none" }}>
+          <Button color="inherit" size="small">
+            {t.cta}
+          </Button>
+        </Link>
         {dismissButton}
       </>
     );
@@ -99,9 +101,11 @@ export function DisplayCurrencyHint({
       sx={{ mb: 2 }}
       action={
         <>
-          <Button component={Link} href={editHref} color="inherit" size="small">
-            {t.subject.cta}
-          </Button>
+          <Link href={editHref} style={{ textDecoration: "none" }}>
+            <Button color="inherit" size="small">
+              {t.subject.cta}
+            </Button>
+          </Link>
           {dismissButton}
         </>
       }

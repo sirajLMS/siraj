@@ -8,7 +8,9 @@ export function SettingsComingSoonTab() {
 
   return (
     <Box sx={{ py: 4 }}>
-      <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t.comingSoon}</Typography>
+      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+        {t.comingSoon}
+      </Typography>
     </Box>
   );
 }

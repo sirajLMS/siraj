@@ -23,7 +23,12 @@ export function useFeedbackManageTabsViewModel(): FeedbackManageTabsViewModel {
   const visibleTabs = useMemo(() => getVisibleFeedbackManageTabs(hasPermission), [hasPermission]);
 
   const viewLabels: FeedbackManageViewLabels = useMemo(
-    () => ({ title: labels.pageTitle, subtitle: labels.pageSubtitle, tabs: labels.tabs }),
+    () => ({
+      title: labels.pageTitle,
+      subtitle: labels.pageSubtitle,
+      tabs: labels.tabs,
+      tabNavAriaLabel: labels.tabNavAriaLabel,
+    }),
     [labels]
   );
 

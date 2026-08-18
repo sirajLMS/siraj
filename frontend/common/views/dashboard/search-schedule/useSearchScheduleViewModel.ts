@@ -156,6 +156,7 @@ interface SearchScheduleStoreSlice {
   readonly openMonthDrawer: (teacher: SearchScheduleMonthDrawerTeacher, anchorFromDate: string) => void;
   readonly closeMonthDrawer: () => void;
   readonly setMonthDrawerCurrentMonth: (isoMonth: string) => void;
+  readonly ensureDraftDates: () => void;
 }
 
 function useSearchScheduleStoreSlice(): SearchScheduleStoreSlice {
@@ -185,6 +186,7 @@ function useSearchScheduleStoreSlice(): SearchScheduleStoreSlice {
   const openMonthDrawer = useSearchScheduleStore(state => state.openMonthDrawer);
   const closeMonthDrawer = useSearchScheduleStore(state => state.closeMonthDrawer);
   const setMonthDrawerCurrentMonth = useSearchScheduleStore(state => state.setMonthDrawerCurrentMonth);
+  const ensureDraftDates = useSearchScheduleStore(state => state.ensureDraftDates);
 
   return {
     draft,
@@ -207,6 +209,7 @@ function useSearchScheduleStoreSlice(): SearchScheduleStoreSlice {
     openMonthDrawer,
     closeMonthDrawer,
     setMonthDrawerCurrentMonth,
+    ensureDraftDates,
   };
 }
 
@@ -394,6 +397,10 @@ export function useSearchScheduleViewModel(props?: Readonly<UseSearchScheduleVie
 
     commitSearch();
   }, [commitSearch, hasHydrated, hasSearched]);
+
+  useEffect(() => {
+    store.ensureDraftDates();
+  }, [store.ensureDraftDates]);
 
   const handlers = useSearchScheduleHandlers(
     store.setDraft,

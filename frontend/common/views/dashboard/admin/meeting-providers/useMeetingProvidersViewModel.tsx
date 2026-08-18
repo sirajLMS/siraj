@@ -7,6 +7,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display/localizedStringDisplay/LocalizedStringDisplay";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
@@ -105,7 +106,11 @@ function buildMeetingProviderColumns(
       headerName: labels.active,
       width: 100,
       renderCell: ({ value }) => (
-        <Chip size="small" color={value ? "success" : "default"} label={value ? labels.active : labels.inactive} />
+        <StatusBadge
+          category="syncStatus"
+          status={value ? "success" : "pending"}
+          label={value ? labels.active : labels.inactive}
+        />
       ),
     },
     {

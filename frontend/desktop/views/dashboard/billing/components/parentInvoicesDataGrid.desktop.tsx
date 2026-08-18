@@ -88,7 +88,7 @@ export function ParentInvoicesDataGridDesktop({
           <Box>
             <Typography variant="bodyMd">{row.paidDate}</Typography>
             {row.status === InvoiceStatus.Paid && row.hasPaymentProof ? (
-              <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
+              <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
                 {labels.hasPaymentProofHint}
               </Typography>
             ) : null}

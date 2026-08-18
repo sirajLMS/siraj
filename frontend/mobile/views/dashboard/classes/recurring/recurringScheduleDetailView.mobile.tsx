@@ -29,6 +29,7 @@ export function RecurringScheduleDetailMobileView({
       onRetry={onRetry}
       pageTitle={shell.pageTitle}
       subtitle={shell.subtitle}
+      retryLabel={shell.retryLabel}
       mobileBreadcrumbs={shell.breadcrumbs}
     >
       <RecurringRateSection

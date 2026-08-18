@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import type {
   CreditFilter,
   MarkPaidInvoiceTarget,
@@ -21,7 +22,7 @@ export interface AdminBillingState {
   readonly sendingReminderId: string | null;
   readonly snackbarOpen: boolean;
   readonly snackbarMessage: string;
-  readonly snackbarSeverity: "success" | "error";
+  readonly snackbarSeverity: SnackbarSeverity;
   setPage: (page: number) => void;
   setSearchQuery: (value: string) => void;
   setDebouncedSearch: (value: string) => void;
@@ -31,7 +32,7 @@ export interface AdminBillingState {
   setDeleteTargetId: (id: string | null) => void;
   setSendingReminderId: (id: string | null) => void;
   setSnackbarOpen: (open: boolean) => void;
-  showFeedback: (message: string, severity: "success" | "error") => void;
+  showFeedback: (message: string, severity: SnackbarSeverity) => void;
   resetDialogs: () => void;
 }
 

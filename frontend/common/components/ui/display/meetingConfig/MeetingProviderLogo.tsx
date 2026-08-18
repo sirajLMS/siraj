@@ -5,6 +5,7 @@ import { Avatar, Box } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type MeetingProviderLogoSize = "small" | "medium" | "large";
 
@@ -32,11 +33,6 @@ const PROVIDER_LOGO_SOURCES: Record<string, string> = {
 function resolveLogoSrc(slug: string): string | null {
   const normalized = slug.toLowerCase();
   return PROVIDER_LOGO_SOURCES[normalized] ?? null;
-}
-
-function resolveAltText(providerName: string | null | undefined, providerSlug: string | null | undefined): string {
-  const displayName = providerName ?? providerSlug ?? "";
-  return displayName ? `${displayName} logo` : "Meeting provider logo";
 }
 
 function renderImageLogo(src: string, dimension: number, alt: string, sx: SxProps<Theme> | undefined): React.ReactNode {
@@ -73,8 +69,10 @@ export function MeetingProviderLogo({
   size = "medium",
   sx,
 }: Readonly<MeetingProviderLogoProps>): React.ReactNode {
+  const labels = useAppTranslation(Translation.Ui.MeetingConfig);
   const dimension = SIZE_MAP[size];
-  const altText = resolveAltText(providerName, providerSlug);
+  const displayName = providerName ?? providerSlug ?? "";
+  const altText = displayName ? labels.providerLogoAlt(displayName) : labels.providerLogoFallbackAlt;
 
   if (logoUrl) {
     return renderImageLogo(logoUrl, dimension, altText, sx);

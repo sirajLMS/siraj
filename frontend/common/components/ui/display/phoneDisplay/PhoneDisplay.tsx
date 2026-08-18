@@ -1,7 +1,7 @@
 "use client";
 
+import Box from "@mui/material/Box";
 import type { SxProps, Theme } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
@@ -28,9 +28,9 @@ export const PhoneDisplay = ({
   const locale = useAppLocale();
   const fallbackNode: React.JSX.Element | null =
     fallback == null ? null : (
-      <Typography component="span" variant={typographyVariant} dir="ltr" sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
+      <Box component="span" sx={mergeSx({ typography: typographyVariant, whiteSpace: "nowrap", direction: "ltr" }, sx)}>
         {fallback}
-      </Typography>
+      </Box>
     );
 
   if (!phone) {
@@ -40,8 +40,8 @@ export const PhoneDisplay = ({
   const display = masked ? maskPhone(phone, defaultRegion) : formatPhoneDisplay(phone, locale);
 
   return (
-    <Typography component="span" variant={typographyVariant} dir="ltr" sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
+    <Box component="span" sx={mergeSx({ typography: typographyVariant, whiteSpace: "nowrap", direction: "ltr" }, sx)}>
       {display}
-    </Typography>
+    </Box>
   );
 };

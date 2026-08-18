@@ -7,4 +7,4 @@ export * from "./display";
 export * from "./filter";
 export * from "./input";
 export * from "./state";
-export * from "./story/StoryBookPageContainer";
+export * from "./story";

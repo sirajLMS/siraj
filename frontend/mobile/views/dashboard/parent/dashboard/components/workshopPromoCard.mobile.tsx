@@ -21,12 +21,12 @@ export function WorkshopPromoCardMobile({ promo, labels, onLearnMore }: Readonly
         component="img"
         src={promo.imageUrl}
         alt={promo.title}
-        sx={{
+        sx={theme => ({
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          transition: "transform 0.4s ease",
-        }}
+          transition: theme.transitions.create("transform", { duration: 400, easing: "ease" }),
+        })}
       />
       <Box
         sx={theme => ({

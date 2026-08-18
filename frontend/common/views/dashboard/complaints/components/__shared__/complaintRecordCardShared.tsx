@@ -42,7 +42,7 @@ const StyledRecordCardPaper = styled(Paper)(({ theme }) => ({
   border: `1px solid ${theme.palette.outlineVariant}`,
   backgroundColor: theme.palette.surfaceContainerLowest,
   overflow: "hidden",
-  transition: "border-color 0.15s ease",
+  transition: theme.transitions.create("border-color", { duration: 150, easing: "ease" }),
   "&:hover": { borderColor: theme.palette.primary.main },
 }));
 

@@ -14,7 +14,7 @@ import {
   ScheduleOutlined,
   SchoolOutlined,
 } from "@mui/icons-material";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   studentMonthlyReportQueryDocument,
   teacherMonthlyReportQueryDocument,
@@ -46,6 +46,11 @@ export function useMonthlyReportsViewModel(
   const setMonth = useSupervisorMonthlyReportsStore(s => s.setMonth);
   const setSelectedTeacher = useSupervisorMonthlyReportsStore(s => s.setSelectedTeacher);
   const setStudentSelection = useSupervisorMonthlyReportsStore(s => s.setStudentSelection);
+  const ensureYearMonth = useSupervisorMonthlyReportsStore(s => s.ensureYearMonth);
+
+  useEffect(() => {
+    ensureYearMonth();
+  }, [ensureYearMonth]);
 
   const teacherId = selectedTeacher?.id ?? "";
   const studentId = studentSelection?.id ?? "";

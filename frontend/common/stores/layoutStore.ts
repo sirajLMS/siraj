@@ -62,6 +62,10 @@ export const useLayoutStore = create<LayoutState>()(
     }),
     {
       name: "layout-storage",
+      partialize: state => ({
+        sidebarOpen: state.sidebarOpen,
+        collapsedGroups: state.collapsedGroups,
+      }),
     }
   )
 );

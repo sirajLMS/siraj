@@ -161,22 +161,21 @@ function StudentNameLink({
 }) {
   if (href) {
     return (
-      <Typography
-        component={Link}
-        href={href}
-        sx={{
-          typography: "titleLg",
-          color: theme => theme.palette.primary.main,
-          textDecoration: "none",
-          display: "block",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          "&:hover": { textDecoration: "underline" },
-        }}
-      >
-        {studentName}
-      </Typography>
+      <Link href={href} style={{ textDecoration: "none" }}>
+        <Typography
+          sx={{
+            typography: "titleLg",
+            color: theme => theme.palette.primary.main,
+            display: "block",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            "&:hover": { textDecoration: "underline" },
+          }}
+        >
+          {studentName}
+        </Typography>
+      </Link>
     );
   }
   return (
@@ -296,21 +295,20 @@ function StudentInfoRow({ row }: { readonly row: TeacherScheduleRow }) {
         {row.studentInitials}
       </MobileUserAvatar>
       {href ? (
-        <Typography
-          component={Link}
-          href={href}
-          sx={{
-            typography: "bodyMd",
-            color: theme => theme.palette.primary.main,
-            textDecoration: "none",
-            minWidth: 0,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            "&:hover": { textDecoration: "underline" },
-          }}
-        >
-          {row.studentName}
-        </Typography>
+        <Link href={href} style={{ textDecoration: "none" }}>
+          <Typography
+            sx={{
+              typography: "bodyMd",
+              color: theme => theme.palette.primary.main,
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            {row.studentName}
+          </Typography>
+        </Link>
       ) : (
         <Typography sx={{ typography: "bodyMd", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
           {row.studentName}

@@ -2,6 +2,10 @@ import { z } from "zod";
 import { CurrencyCode, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 
+export type ParentProfileValidationLabels = {
+  readonly invalidTimezone: string;
+};
+
 const coreSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
@@ -16,10 +20,6 @@ const ownParentSchema = z.object({
   twitter: z.string().optional(),
   nationality: z.string().optional(),
   address: z.string().optional(),
-  timezone: z
-    .string()
-    .optional()
-    .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
 });
 
 const adminParentSchema = ownParentSchema.extend({
@@ -29,11 +29,28 @@ const adminParentSchema = ownParentSchema.extend({
   currency: z.enum(CurrencyCode).optional(),
 });
 
-export const parentOwnEditSchema = z.object({ ...coreSchema.shape, ...ownParentSchema.shape });
-export const parentAdminEditSchema = z.object({ ...coreSchema.shape, ...adminParentSchema.shape });
+export const parentOwnEditSchemaFactory = (labels: ParentProfileValidationLabels) =>
+  z.object({
+    ...coreSchema.shape,
+    ...ownParentSchema.shape,
+    timezone: z
+      .string()
+      .optional()
+      .refine(value => !value || isValidIanaTimezoneId(value), { message: labels.invalidTimezone }),
+  });
 
-export type ParentOwnEditFormData = z.infer<typeof parentOwnEditSchema>;
-export type ParentAdminEditFormData = z.infer<typeof parentAdminEditSchema>;
+export const parentAdminEditSchemaFactory = (labels: ParentProfileValidationLabels) =>
+  z.object({
+    ...coreSchema.shape,
+    ...adminParentSchema.shape,
+    timezone: z
+      .string()
+      .optional()
+      .refine(value => !value || isValidIanaTimezoneId(value), { message: labels.invalidTimezone }),
+  });
+
+export type ParentOwnEditFormData = z.infer<ReturnType<typeof parentOwnEditSchemaFactory>>;
+export type ParentAdminEditFormData = z.infer<ReturnType<typeof parentAdminEditSchemaFactory>>;
 
 export type ParentEditData = {
   readonly name?: string | null;

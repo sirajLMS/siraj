@@ -12,6 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { ClassAvatar } from "@/frontend/common/components/ui/avatar/ClassAvatar";
 import type { SubjectCardProps } from "@/frontend/common/views/dashboard/subjects/home/types";
 
@@ -93,17 +94,12 @@ export function SubjectCardDesktop({
               </Typography>
             </Stack>
 
-            {subject.isActive === false && (
-              <Chip
-                label={t.inactive}
-                size="small"
-                sx={theme => ({
-                  backgroundColor: theme.palette.errorContainer,
-                  color: theme.palette.onErrorContainer,
-                  alignSelf: "flex-start",
-                })}
-              />
-            )}
+            <StatusBadge
+              category="paymentMethod"
+              status={subject.isActive ? "active" : "inactive"}
+              label={subject.isActive ? t.activeLabel : t.inactive}
+              size="small"
+            />
           </Stack>
         </CardContent>
       </CardActionArea>

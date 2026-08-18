@@ -52,12 +52,14 @@ type CredentialFormLabels = Pick<
 function CredentialFormLoadingState({ labels }: { readonly labels: CredentialFormLabels }) {
   return (
     <Box>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 0.5 }}>
+      <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary, mb: 0.5 })}>
         {labels.credentialFormCreateTitle}
       </Typography>
       <Stack direction="row" sx={{ alignItems: "center", gap: 1, py: 1 }}>
         <CircularProgress size={20} />
-        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.loading}</Typography>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+          {labels.loading}
+        </Typography>
       </Stack>
     </Box>
   );
@@ -66,7 +68,7 @@ function CredentialFormLoadingState({ labels }: { readonly labels: CredentialFor
 function CredentialFormErrorState({ labels }: { readonly labels: CredentialFormLabels }) {
   return (
     <Box>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 0.5 }}>
+      <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary, mb: 0.5 })}>
         {labels.credentialFormCreateTitle}
       </Typography>
       <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>
@@ -353,10 +355,12 @@ function renderEarlyReturn(
   if (providerEntries.length === 0) {
     return (
       <Box>
-        <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 0.5 }}>
+        <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary, mb: 0.5 })}>
           {hasExistingCredentials ? labels.credentialFormEditTitle : labels.credentialFormCreateTitle}
         </Typography>
-        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.credentialForm.noFields}</Typography>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+          {labels.credentialForm.noFields}
+        </Typography>
       </Box>
     );
   }
@@ -455,7 +459,7 @@ export function MeetingProviderCredentialForm({
 
   return (
     <Box>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 1 }}>
+      <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary, mb: 1 })}>
         {hasExistingCredentials ? labels.credentialFormEditTitle : labels.credentialFormCreateTitle}
       </Typography>
       <form id={formId} onSubmit={handleSubmit(onSubmit)} noValidate>

@@ -54,7 +54,7 @@ export function ExchangeRatesSyncPanelShared({
       );
     }
     return (
-      <Typography variant="bodyMd" color="textSecondary">
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
         {labels.noSyncRuns}
       </Typography>
     );
@@ -74,31 +74,31 @@ export function ExchangeRatesSyncPanelShared({
       }
     >
       <Box sx={isGrid ? undefined : {}}>
-        <Typography variant="bodyMd" color="textSecondary">
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {labels.syncStatus.lastSync}
         </Typography>
         <Typography variant="bodyMd">{formatExchangeRateTimestamp(syncRun.finishedAt ?? syncRun.startedAt)}</Typography>
       </Box>
       <Box sx={isGrid ? undefined : {}}>
-        <Typography variant="bodyMd" color="textSecondary">
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {labels.syncStatus.provider}
         </Typography>
         <Typography variant="bodyMd">{syncRun.provider}</Typography>
       </Box>
       <Box sx={isGrid ? undefined : {}}>
-        <Typography variant="bodyMd" color="textSecondary">
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {labels.syncStatus.pairsWritten}
         </Typography>
         <Typography variant="bodyMd">{syncRun.pairsWritten}</Typography>
       </Box>
       <Box sx={isGrid ? undefined : {}}>
-        <Typography variant="bodyMd" color="textSecondary">
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {labels.syncStatus.pairsFailed}
         </Typography>
         <Typography variant="bodyMd">{syncRun.pairsFailed}</Typography>
       </Box>
       <Box sx={isGrid ? { gridColumn: { sm: "span 2" } } : undefined}>
-        <Typography variant="bodyMd" color="textSecondary">
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {labels.status}
         </Typography>
         <StatusBadge

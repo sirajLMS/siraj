@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
+import { useEffect } from "react";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   logTeacherSupportRequestMutationDocument,
@@ -83,6 +84,11 @@ export function useFutureScheduleViewModel(props: Readonly<UseFutureScheduleView
 
   const selectedDate = useFutureScheduleDateStore(s => s.selectedDate);
   const setSelectedDate = useFutureScheduleDateStore(s => s.setSelectedDate);
+  const ensureSelectedDate = useFutureScheduleDateStore(s => s.ensureSelectedDate);
+
+  useEffect(() => {
+    ensureSelectedDate();
+  }, [ensureSelectedDate]);
 
   const schedule = data?.teacherFutureSchedule;
 

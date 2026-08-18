@@ -48,7 +48,7 @@ export type SubmitPaymentProofDialogProps = {
 function InvoiceSummaryRow({ label, value }: { readonly label: string; readonly value: string }) {
   return (
     <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
-      <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
+      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
         {label}
       </Typography>
       <Typography variant="bodyMd" sx={{ fontWeight: 600, textAlign: "end" }}>
@@ -251,7 +251,7 @@ function SubmitPaymentProofDialogBody({
 
       <Stack spacing={1}>
         <Typography variant="labelMd">{labels.selectFile}</Typography>
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {labels.fileHint}
         </Typography>
         <Button variant="outlined" component="label" disabled={busy}>

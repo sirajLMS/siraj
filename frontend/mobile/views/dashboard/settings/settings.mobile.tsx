@@ -20,7 +20,7 @@ export function SettingsMobileChrome({ labels, activeTab, tabNavItems }: Readonl
         breadcrumbOptions={{ currentTitle: resolveActiveTabLabel(activeTab, tabNavItems) }}
       />
       <Box sx={{ mt: 2 }}>
-        <SettingsTabNav activeTab={activeTab} tabs={tabNavItems} />
+        <SettingsTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

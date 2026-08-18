@@ -36,7 +36,7 @@ const StyledDesktopFab = styled(Fab)(({ theme }) => ({
     backgroundColor: theme.palette.primary.dark,
     transform: "scale(1.1)",
   },
-  transition: "transform 0.15s ease, background-color 0.15s ease",
+  transition: theme.transitions.create(["transform", "background-color"], { duration: 150, easing: "ease" }),
   "&:active": { transform: "scale(0.95)" },
 }));
 

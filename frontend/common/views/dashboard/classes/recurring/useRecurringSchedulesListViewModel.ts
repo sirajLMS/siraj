@@ -95,12 +95,13 @@ export function useRecurringSchedulesListViewModel(
         breadcrumbs,
         emptyMessage: t.shell.emptyMessage,
         loadError: t.shell.loadError,
+        retryLabel: tCommon.retry,
       },
       columns: t.columns,
       actions: t.actions,
       filters: t.filters,
     }),
-    [t.shell, t.columns, t.actions, t.filters, breadcrumbs]
+    [t.shell, t.columns, t.actions, t.filters, tCommon.retry, breadcrumbs]
   );
 
   const rows = data?.recurringSchedules?.rows ?? [];

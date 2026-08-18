@@ -39,9 +39,11 @@ function QuotaDetailNotFound({
       <Typography variant="body1" sx={theme => ({ color: theme.palette.text.secondary })}>
         {message}
       </Typography>
-      <Button startIcon={<ArrowBackOutlined />} component={Link} href="/quotas" variant="outlined">
-        {backButton}
-      </Button>
+      <Link href="/quotas" style={{ textDecoration: "none" }}>
+        <Button startIcon={<ArrowBackOutlined />} variant="outlined">
+          {backButton}
+        </Button>
+      </Link>
     </Box>
   );
 }

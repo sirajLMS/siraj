@@ -47,10 +47,9 @@ const TagContainer = styled(Paper)(({ theme }) => ({
   },
 }));
 
-const baseChipAnimationSx = {
+const baseChipAnimationSx: SxProps<Theme> = (theme: Theme) => ({
   m: 0.5,
-  transition: "all 0.2s ease",
-  animation: "fadeIn 0.3s",
+  transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
   "@keyframes fadeIn": {
     "0%": {
       opacity: 0,
@@ -61,7 +60,7 @@ const baseChipAnimationSx = {
       transform: "scale(1)",
     },
   },
-} as const;
+});
 
 const baseLabelSx: SxProps<Theme> = (theme: Theme) => ({
   mb: 1,

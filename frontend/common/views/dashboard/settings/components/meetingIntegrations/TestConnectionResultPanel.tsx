@@ -92,13 +92,16 @@ function RawPayloadSection({ labels, payload }: RawPayloadSectionProps) {
   return (
     <details>
       <summary>
-        <Typography component="span" sx={{ typography: "bodyMd", color: "text.secondary", cursor: "pointer" }}>
+        <Box
+          component="span"
+          sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary, cursor: "pointer" })}
+        >
           {labels.testPanel.rawResponse}
-        </Typography>
+        </Box>
       </summary>
       <Box
         component="pre"
-        sx={{
+        sx={theme => ({
           typography: "bodyMd",
           fontFamily: "monospace",
           p: 1,
@@ -106,8 +109,8 @@ function RawPayloadSection({ labels, payload }: RawPayloadSectionProps) {
           mt: 0.5,
           overflow: "auto",
           maxHeight: 240,
-          bgcolor: "action.hover",
-        }}
+          bgcolor: theme.palette.action.hover,
+        })}
       >
         {JSON.stringify(payload, null, 2)}
       </Box>
@@ -230,7 +233,11 @@ type IdleContentProps = {
 };
 
 function IdleContent({ labels }: IdleContentProps) {
-  return <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.testPanel.idleHint}</Typography>;
+  return (
+    <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+      {labels.testPanel.idleHint}
+    </Typography>
+  );
 }
 
 type TestingContentProps = {

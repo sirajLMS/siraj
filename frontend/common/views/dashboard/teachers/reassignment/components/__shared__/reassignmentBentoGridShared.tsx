@@ -31,7 +31,7 @@ function BentoCard({
         gap: 1.5,
         cursor: onClick ? "pointer" : "default",
         "&:hover": onClick ? { boxShadow: theme.palette.shadow.card } : undefined,
-        transition: "box-shadow 0.2s",
+        transition: theme.transitions.create("box-shadow", { duration: 200 }),
       })}
     >
       <UserAvatar

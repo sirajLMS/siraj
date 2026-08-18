@@ -26,14 +26,11 @@ export function EffectiveMeetingSectionShared({
       <Divider />
       <Stack spacing={1}>
         <MeetingConfigDisplay config={effectiveMeetingToDisplayData(session.effectiveMeeting)} showSource />
-        <MuiLink
-          component={Link}
-          href={`/classes/${session.sessionId}#meeting-configs`}
-          underline="hover"
-          sx={{ typography: "labelMd" }}
-        >
-          {meetingConfigLabels.summary.manageLink}
-        </MuiLink>
+        <Link href={`/classes/${session.sessionId}#meeting-configs`} style={{ textDecoration: "none" }}>
+          <MuiLink underline="hover" sx={{ typography: "labelMd" }}>
+            {meetingConfigLabels.summary.manageLink}
+          </MuiLink>
+        </Link>
       </Stack>
     </>
   );

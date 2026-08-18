@@ -9,6 +9,7 @@ import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { MobileAppDataGridLoadingOverlay } from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGridLoadingOverlay";
 import { MobileAppDataGridNoRowsOverlay } from "@/frontend/mobile/components/ui/dataGrid/MobileAppDataGridNoRowsOverlay";
 import { MobileGridPagination } from "@/frontend/mobile/components/ui/filter/paginationControls.mobile";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type OmittedDataGridProps =
   | "paginationMode"
@@ -34,7 +35,7 @@ function createNoRowsOverlay(message: string) {
 }
 
 export function MobileAppDataGrid<R extends GridValidRowModel>({
-  emptyMessage = "No entries found",
+  emptyMessage,
   ariaLabel,
   paginationOptions,
   getRowHeight,
@@ -44,6 +45,8 @@ export function MobileAppDataGrid<R extends GridValidRowModel>({
   sx,
   ...props
 }: Readonly<MobileAppDataGridProps<R>>) {
+  const commonLabels = useAppTranslation(Translation.Common);
+  const resolvedEmptyMessage = emptyMessage ?? commonLabels.noEntriesFound;
   const defaultGridSx = {
     border: "none",
     borderRadius: 0,
@@ -61,7 +64,7 @@ export function MobileAppDataGrid<R extends GridValidRowModel>({
     },
   };
 
-  const NoRowsOverlay = useMemo(() => createNoRowsOverlay(emptyMessage), [emptyMessage]);
+  const NoRowsOverlay = useMemo(() => createNoRowsOverlay(resolvedEmptyMessage), [resolvedEmptyMessage]);
   const paginationProps = mapPaginationOptionsToDataGridProps(paginationOptions);
 
   return (

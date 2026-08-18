@@ -119,7 +119,7 @@ function PaymentProofPreview({
 
   if (!filePath) {
     return (
-      <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
         {noProofLabel}
       </Typography>
     );
@@ -134,7 +134,13 @@ function PaymentProofPreview({
         src={url}
         alt={viewProofLabel}
         onError={() => setImageFailed(true)}
-        sx={{ maxWidth: "100%", maxHeight: 280, borderRadius: 1, border: 1, borderColor: "outlineVariant" }}
+        sx={theme => ({
+          maxWidth: "100%",
+          maxHeight: 280,
+          borderRadius: 1,
+          border: 1,
+          borderColor: theme.palette.outlineVariant,
+        })}
       />
     );
   }
@@ -142,7 +148,7 @@ function PaymentProofPreview({
   if (isImageMimeType(mimeType) && imageFailed) {
     return (
       <Stack spacing={1}>
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {viewProofFailedLabel}
         </Typography>
         <Link href={url} target="_blank" rel="noopener noreferrer" underline="hover">
@@ -178,7 +184,7 @@ function SubmissionDetailsSection({
   return (
     <Stack spacing={1.5}>
       {submission.status === InvoicePaymentSubmissionStatus.Pending ? (
-        <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {labels.pending}
         </Typography>
       ) : null}
@@ -187,7 +193,7 @@ function SubmissionDetailsSection({
           {labels.rejected}
         </Typography>
       ) : null}
-      <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
+      <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
         {labels.submittedAt}: {formatPaymentDate(submission.submittedAt ?? null, locale)}
       </Typography>
       <PaymentProofPreview
@@ -247,7 +253,7 @@ function PaymentProofReviewActions({
             disabled={reviewBusy}
           />
           {showRejectConfirm ? (
-            <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {labels.confirmRejectMessage}
             </Typography>
           ) : null}
@@ -309,7 +315,7 @@ function PaymentRecordsSection({
       {payments.map(payment => (
         <Box key={payment.id ?? `${payment.paymentDate}-${payment.amount}`}>
           <Stack spacing={1}>
-            <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {amountLabel}:{" "}
               {formatCurrencyForDisplay(
                 payment.amount ?? "0",
@@ -319,7 +325,7 @@ function PaymentRecordsSection({
                 fxMessages
               )}
             </Typography>
-            <Typography variant="labelMd" sx={{ color: "text.secondary" }}>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {dateLabel}: {formatPaymentDate(payment.paymentDate ?? null, locale)}
             </Typography>
           </Stack>
@@ -375,7 +381,7 @@ function renderPaymentsOrEmpty({
   }
   if (submissionData === null) {
     return (
-      <Typography variant="bodyMd" sx={{ color: "text.secondary" }}>
+      <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
         {emptyLabelText}
       </Typography>
     );

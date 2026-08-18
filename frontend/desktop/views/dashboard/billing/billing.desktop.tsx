@@ -20,7 +20,7 @@ export function BillingDesktopChrome({ labels, activeTab, tabNavItems }: Readonl
         breadcrumbOptions={{ currentTitle: resolveActiveTabLabel(activeTab, tabNavItems) }}
       />
       <Box sx={{ mt: 3 }}>
-        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="Billing sections" />
+        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

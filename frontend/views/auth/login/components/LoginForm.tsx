@@ -104,7 +104,7 @@ const FormFields = ({
                       }}
                       edge="end"
                       disabled={isSubmitting}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={showPassword ? labels.hidePassword : labels.showPassword}
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>

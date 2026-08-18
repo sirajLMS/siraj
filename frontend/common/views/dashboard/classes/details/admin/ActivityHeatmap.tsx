@@ -134,7 +134,7 @@ export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
                     borderRadius: "4px 4px 0 0",
                     backgroundColor: i % 2 === 0 ? theme.palette.primary.main : theme.palette.secondary.main,
                     opacity: i % 2 === 0 ? 0.85 : 0.5,
-                    transition: "height 0.6s ease",
+                    transition: theme.transitions.create("height", { duration: 600, easing: "ease" }),
                     "&:hover": { opacity: 1, filter: "brightness(1.15)" },
                     cursor: "pointer",
                   })}

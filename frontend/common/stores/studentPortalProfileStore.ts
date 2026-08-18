@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 
 export interface StudentPortalProfileEditDraft {
   readonly phone: string;
@@ -18,7 +19,7 @@ export interface StudentPortalProfileEditDraft {
 export interface StudentPortalProfileSnackbar {
   readonly open: boolean;
   readonly message: string;
-  readonly severity: "success" | "error";
+  readonly severity: SnackbarSeverity;
 }
 
 export interface StudentPortalProfileState {
@@ -28,7 +29,7 @@ export interface StudentPortalProfileState {
   readonly setIsEditing: (isEditing: boolean) => void;
   readonly setDraft: (draft: StudentPortalProfileEditDraft) => void;
   readonly patchDraft: (patch: Partial<StudentPortalProfileEditDraft>) => void;
-  readonly showSnackbar: (message: string, severity: "success" | "error") => void;
+  readonly showSnackbar: (message: string, severity: SnackbarSeverity) => void;
   readonly closeSnackbar: () => void;
   readonly resetEdit: () => void;
 }

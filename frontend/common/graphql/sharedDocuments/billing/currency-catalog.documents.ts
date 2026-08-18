@@ -3,6 +3,7 @@ import type * as Operations from "@/frontend/common/graphql/generated/gql/operat
 
 export const SUPPORTED_CURRENCY_FIELDS = gql`
   fragment SupportedCurrencyFields on SupportedCurrency {
+    id
     code
     symbol
     countryCode

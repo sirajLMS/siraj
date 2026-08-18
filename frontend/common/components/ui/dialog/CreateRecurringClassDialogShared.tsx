@@ -214,9 +214,9 @@ function SchedulingFields({
   return (
     <Stack sx={{ gap: 2 }}>
       <FormControl fullWidth disabled={mutationLoading}>
-        <Typography component="label" variant="body2" sx={{ mb: 1 }}>
+        <Box component="label" sx={{ typography: "body2", mb: 1 }}>
           {t.scheduling.mode}
-        </Typography>
+        </Box>
         <RadioGroup row value={state.schedulingMode ?? ""} onChange={e => onSchedulingModeChange(e.target.value)}>
           <FormControlLabel
             value={SchedulingMode.NumberOfClasses}

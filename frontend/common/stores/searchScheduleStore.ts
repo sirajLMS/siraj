@@ -74,10 +74,8 @@ interface PersistedSearchScheduleState {
   readonly draftFilters: PersistedSearchScheduleFilters;
   readonly selectedTeacher: SearchScheduleTeacherOption | null;
   readonly pageSize: number;
-  // NEW FOR PLAN v5: persisted lifted UI state. sortMenuAnchorEl is intentionally absent
-  // (DOM element — non-serializable; reset to null on rehydrate).
-  readonly formFilterDrawerOpen: boolean;
-  readonly monthDrawerOpen: boolean;
+  // Transient UI state (formFilterDrawerOpen, monthDrawerOpen) is intentionally NOT persisted —
+  // it resets to false on rehydrate.
   readonly monthDrawerAnchorFromDate: string;
   readonly monthDrawerCurrentMonth: string;
   readonly monthDrawerTeacher: SearchScheduleMonthDrawerTeacher | null;
@@ -87,8 +85,8 @@ function createDefaultDraftFilters(): SearchScheduleDraftFilters {
   return {
     fromTime: "08:00",
     toTime: "17:00",
-    fromDate: getDefaultFromDate(),
-    toDate: getDefaultToDate(),
+    fromDate: "",
+    toDate: "",
     gender: null,
     minAvailableDays: null,
     minTotalGaps: null,
@@ -144,8 +142,6 @@ function isPersistedSearchScheduleState(value: unknown): value is PersistedSearc
     "draftFilters",
     "selectedTeacher",
     "pageSize",
-    "formFilterDrawerOpen",
-    "monthDrawerOpen",
     "monthDrawerAnchorFromDate",
     "monthDrawerCurrentMonth",
     "monthDrawerTeacher",
@@ -156,11 +152,6 @@ function isPersistedSearchScheduleState(value: unknown): value is PersistedSearc
 
   // Validate pageSize: finite positive integer.
   if (typeof v.pageSize !== "number" || !Number.isFinite(v.pageSize) || v.pageSize < 1) {
-    return false;
-  }
-
-  // Validate boolean lifted UI flags.
-  if (typeof v.formFilterDrawerOpen !== "boolean" || typeof v.monthDrawerOpen !== "boolean") {
     return false;
   }
 
@@ -281,6 +272,8 @@ interface SearchScheduleState {
   setPage: (page: number) => void;
   clearFilters: () => void;
   buildActiveInput: () => AvailabilitySearchInput | null;
+  /** Lazily initializes draft.fromDate and draft.toDate on first access. Idempotent. */
+  readonly ensureDraftDates: () => void;
   // NEW FOR PLAN v5: setters for the lifted drawer/menu/month state.
   setFormFilterDrawerOpen: (open: boolean) => void;
   setSortMenuAnchorEl: (anchor: HTMLElement | null) => void;
@@ -364,6 +357,18 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           monthDrawerCurrentMonth: "",
           monthDrawerTeacher: null,
         }),
+      ensureDraftDates: () => {
+        const { draft } = get();
+        if (draft.fromDate === "" || draft.toDate === "") {
+          set({
+            draft: {
+              ...draft,
+              fromDate: draft.fromDate === "" ? getDefaultFromDate() : draft.fromDate,
+              toDate: draft.toDate === "" ? getDefaultToDate() : draft.toDate,
+            },
+          });
+        }
+      },
       buildActiveInput: () => {
         const { draft, page, pageSize, activeInput, selectedTeacher } = get();
         if (!activeInput) {
@@ -379,10 +384,8 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
         draftFilters: extractPersistedDraftFilters(state.draft),
         selectedTeacher: state.selectedTeacher,
         pageSize: state.pageSize,
-        // NEW FOR PLAN v5: include the lifted UI state. sortMenuAnchorEl is excluded because it
-        // is a DOM element (non-serializable); the menu closes on rehydrate.
-        formFilterDrawerOpen: state.formFilterDrawerOpen,
-        monthDrawerOpen: state.monthDrawerOpen,
+        // Transient UI state (formFilterDrawerOpen, monthDrawerOpen) is excluded —
+        // not persisted. sortMenuAnchorEl is excluded (DOM element, non-serializable).
         monthDrawerAnchorFromDate: state.monthDrawerAnchorFromDate,
         monthDrawerCurrentMonth: state.monthDrawerCurrentMonth,
         monthDrawerTeacher: state.monthDrawerTeacher,
@@ -395,11 +398,10 @@ export const useSearchScheduleStore = create<SearchScheduleState>()(
           draft: mergeDraftWithPersistedFilters(persisted?.draftFilters),
           selectedTeacher: persisted?.selectedTeacher ?? null,
           pageSize: persisted?.pageSize ?? currentState.pageSize,
-          // NEW FOR PLAN v5: restore lifted UI state from persistence. sortMenuAnchorEl stays
-          // null (non-serializable DOM element — menu starts closed after refresh).
-          formFilterDrawerOpen: persisted?.formFilterDrawerOpen ?? false,
+          // Transient UI state resets on rehydrate (not persisted).
+          formFilterDrawerOpen: false,
           sortMenuAnchorEl: null,
-          monthDrawerOpen: persisted?.monthDrawerOpen ?? false,
+          monthDrawerOpen: false,
           monthDrawerAnchorFromDate: persisted?.monthDrawerAnchorFromDate ?? "",
           monthDrawerCurrentMonth: persisted?.monthDrawerCurrentMonth ?? "",
           monthDrawerTeacher: persisted?.monthDrawerTeacher ?? null,

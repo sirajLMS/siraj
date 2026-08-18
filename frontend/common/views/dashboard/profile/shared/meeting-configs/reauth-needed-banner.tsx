@@ -3,6 +3,7 @@
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import { Alert, AlertTitle, Button, IconButton, Slide, Stack, useMediaQuery } from "@mui/material";
 import { useState } from "react";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import {
   expiryLabel,
   type ReauthNeededBannerProps,
@@ -28,9 +29,9 @@ function ReconnectAllButton({
   readonly severity: "error" | "warning";
 }) {
   return (
-    <Button variant="contained" color={severity} onClick={onReconnectAll} sx={{ minHeight: 48 }}>
+    <PrimaryPageAction color={severity} onClick={onReconnectAll} sx={{ minHeight: 48 }}>
       {label}
-    </Button>
+    </PrimaryPageAction>
   );
 }
 

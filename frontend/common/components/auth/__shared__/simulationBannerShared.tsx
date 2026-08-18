@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Link, Typography } from "@mui/material";
+import { Box, Link } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 
 type SxCallback = (theme: Theme) => Record<string, unknown>;
@@ -46,9 +46,9 @@ export function SimulationBannerShared({
         ...bannerSx(theme),
       })}
     >
-      <Typography component="span" sx={{ fontWeight: 600, textAlign: "center" }}>
+      <Box component="span" sx={{ fontWeight: 600, textAlign: "center" }}>
         {message}
-      </Typography>
+      </Box>
       <Link
         component="button"
         type="button"

@@ -10,9 +10,12 @@ import {
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
 
-function formatStatusLabel(status: string): string {
-  const normalized = status.replaceAll("_", " ").toLowerCase();
-  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+function studentStatusLabel(
+  status: string,
+  labels: { regular: string; suspended: string; on_leave: string; on_trial: string; deactivated: string }
+): string {
+  const key = status.toLowerCase() as keyof typeof labels;
+  return labels[key] ?? labels.regular;
 }
 
 export function AssociatedStudentsCardListMobile({ rows, labels }: Readonly<BaseAssociatedStudentsListProps>) {
@@ -38,7 +41,7 @@ export function AssociatedStudentsCardListMobile({ rows, labels }: Readonly<Base
               <MobileStatusBadge
                 category="studentAccount"
                 status={(row.status ?? "REGULAR").toLowerCase()}
-                label={formatStatusLabel(row.status ?? "REGULAR")}
+                label={studentStatusLabel(row.status ?? "REGULAR", t.students.statusLabel)}
               />
             </Stack>
             <MobilePersonProfileLink

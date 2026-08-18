@@ -39,7 +39,9 @@ interface KeyBlockProps {
 function KeyBlock({ configKey, description, editable, labels }: KeyBlockProps) {
   return (
     <Stack sx={{ gap: 0.75, minWidth: 0 }}>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{labels.columns.key}</Typography>
+      <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary })}>
+        {labels.columns.key}
+      </Typography>
       <Typography
         sx={{
           typography: "bodyMd",
@@ -51,10 +53,14 @@ function KeyBlock({ configKey, description, editable, labels }: KeyBlockProps) {
         {configKey}
       </Typography>
       {description ? (
-        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{description}</Typography>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+          {description}
+        </Typography>
       ) : null}
       {editable ? null : (
-        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.readOnlyHint}</Typography>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+          {labels.readOnlyHint}
+        </Typography>
       )}
     </Stack>
   );
@@ -69,7 +75,9 @@ interface SourceBlockProps {
 function SourceBlock({ sourceLabel, hasDbOverride, labels }: SourceBlockProps) {
   return (
     <Stack sx={{ gap: 1, minWidth: 0 }}>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary" }}>{labels.columns.source}</Typography>
+      <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary })}>
+        {labels.columns.source}
+      </Typography>
       <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
         <Chip size="small" variant="outlined" label={sourceLabel} />
         {hasDbOverride ? (

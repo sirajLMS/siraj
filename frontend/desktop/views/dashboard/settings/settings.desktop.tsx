@@ -20,7 +20,7 @@ export function SettingsDesktopChrome({ labels, activeTab, tabNavItems }: Readon
         breadcrumbOptions={{ currentTitle: resolveActiveTabLabel(activeTab, tabNavItems) }}
       />
       <Box sx={{ mt: 3 }}>
-        <SettingsTabNav activeTab={activeTab} tabs={tabNavItems} />
+        <SettingsTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

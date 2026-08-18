@@ -210,7 +210,9 @@ export function RecurringMeetingConfigSection({
   return (
     <Stack spacing={2}>
       <Typography sx={{ typography: "titleLg" }}>{t.recurringSectionTitle}</Typography>
-      <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t.recurringSectionSubtitle}</Typography>
+      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+        {t.recurringSectionSubtitle}
+      </Typography>
 
       <RadioGroup
         value={mode}

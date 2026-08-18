@@ -39,14 +39,11 @@ export function FxStaleBanner(): React.ReactNode {
       severity="warning"
       sx={{ mb: 2 }}
       action={
-        <Button
-          component={Link}
-          href={isAdmin ? "/billing/exchange-rates" : "/profile/edit"}
-          color="inherit"
-          size="small"
-        >
-          {isAdmin ? t.adminCta : t.userCta}
-        </Button>
+        <Link href={isAdmin ? "/billing/exchange-rates" : "/profile/edit"} style={{ textDecoration: "none" }}>
+          <Button color="inherit" size="small">
+            {isAdmin ? t.adminCta : t.userCta}
+          </Button>
+        </Link>
       }
     >
       {isAdmin ? t.adminBody : t.userBody}

@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import type { SxProps, Theme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useMemo } from "react";
 import type {
@@ -44,12 +43,12 @@ const renderTimezoneOption = ({
       {...optionProps}
     >
       <LocaleEmojiComponent emoji={option.emoji} />
-      <Typography component="span" variant="bodyMd">
+      <Box component="span" sx={{ typography: "bodyMd" }}>
         {option.pathLabel}
-      </Typography>
-      <Typography component="span" variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+      </Box>
+      <Box component="span" sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
         ({option.offsetLabel})
-      </Typography>
+      </Box>
     </Box>
   );
 };

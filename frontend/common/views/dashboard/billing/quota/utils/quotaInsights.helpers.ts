@@ -234,9 +234,9 @@ export function buildQuotaInsightsMetrics(vm: Readonly<QuotaInsightsViewModel>):
   ];
 }
 
-export function quotaInsightsBreadcrumbs(t: { readonly insights: string }) {
+export function quotaInsightsBreadcrumbs(t: { readonly insights: string; readonly breadcrumbLabel: string }) {
   return [
-    { label: "Quotas", href: "/quotas" },
+    { label: t.breadcrumbLabel, href: "/quotas" },
     { label: t.insights, current: true },
   ];
 }

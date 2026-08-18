@@ -1,24 +1,11 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Typography,
-} from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select, type SelectChangeEvent, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { SectionPanel } from "@/frontend/common/components/ui";
+import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
+import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
 import {
   AppPermission,
   FxProvider,
@@ -105,11 +92,11 @@ export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = 
     <RequirePermission permissions={AppPermission.BillingManageFxProvider}>
       <SectionPanel title={labels.title}>
         <Box sx={{ display: "grid", gap: 2, maxWidth: 480 }}>
-          <Typography variant="bodyMd" color="textSecondary">
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {sourceLabel}
           </Typography>
           {lastChangedLabel ? (
-            <Typography variant="bodyMd" color="textSecondary">
+            <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
               {lastChangedLabel}
             </Typography>
           ) : null}
@@ -126,29 +113,32 @@ export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = 
             </Select>
           </FormControl>
           <Box>
-            <Button
-              variant="contained"
+            <PrimaryPageAction
               onClick={handleSaveClick}
               disabled={loading || saving || actionsDisabled || selectedProvider === activeProvider}
             >
               {labels.save}
-            </Button>
+            </PrimaryPageAction>
           </Box>
         </Box>
       </SectionPanel>
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>{labels.confirmTitle}</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{labels.confirmBody}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>{labels.cancel}</Button>
-          <Button variant="contained" onClick={() => void handleConfirm()} disabled={saving}>
-            {labels.save}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <BaseDeleteDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => void handleConfirm()}
+        isLoading={saving}
+        title={labels.confirmTitle}
+        body={labels.confirmBody}
+        cancelLabel={labels.cancel}
+        confirmLabel={labels.save}
+        confirmSx={theme => ({
+          py: 1.5,
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.onPrimary,
+          "&:hover": { backgroundColor: theme.palette.primary.dark },
+        })}
+      />
     </RequirePermission>
   );
 }

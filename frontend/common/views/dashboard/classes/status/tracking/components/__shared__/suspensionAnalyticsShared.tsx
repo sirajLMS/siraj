@@ -279,7 +279,7 @@ const ChartBar = styled(Box, {
   flex: 1,
   backgroundColor: isHighlighted ? theme.palette.error.main : theme.palette.primaryContainer,
   borderRadius: "3px 3px 0 0",
-  transition: "height 0.3s ease",
+  transition: theme.transitions.create("height", { duration: 300, easing: "ease" }),
   ...(hasHover ? { "&:hover": { opacity: 0.85 } } : {}),
 }));
 

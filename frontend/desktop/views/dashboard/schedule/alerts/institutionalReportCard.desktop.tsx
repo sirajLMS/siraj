@@ -87,7 +87,7 @@ export function InstitutionalReportCardDesktop({
           fontSize: 160,
           color: alpha(theme.palette.onSidebar, 0.1),
           opacity: 0.1,
-          transition: "opacity 0.2s ease",
+          transition: theme.transitions.create("opacity", { duration: 200, easing: "ease" }),
           pointerEvents: "none",
         })}
       />

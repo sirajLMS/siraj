@@ -82,6 +82,8 @@ export interface TeacherDashboardUIState {
   readonly setMode: (mode: TeacherDashboardMode) => void;
   readonly setFilterDate: (date: string) => void;
   readonly setPage: (page: number) => void;
+  /** Lazily initializes filterDate on first access. Idempotent. */
+  readonly ensureFilterDate: () => void;
   // Lifted `absentDialogOpen` from teacherActiveSessionControls.{mobile,desktop}.tsx
   // so the dialog state is owned by the TeacherDashboard Zustand store and flows
   // down via Container → ViewModel → tier props. The single shared dialog
@@ -130,11 +132,16 @@ export interface TeacherDashboardUIState {
   readonly setHandlers: (handlers: Partial<TeacherDashboardHandlers>) => void;
 }
 
-export const useTeacherDashboardStore = create<TeacherDashboardUIState>(set => ({
+export const useTeacherDashboardStore = create<TeacherDashboardUIState>((set, get) => ({
   mode: "standard",
-  filterDate: getTodayScheduleFilterDate(),
+  filterDate: "",
   page: 0,
   pageSize: DEFAULT_PAGE_SIZE,
+  ensureFilterDate: () => {
+    if (get().filterDate === "") {
+      set({ filterDate: getTodayScheduleFilterDate() });
+    }
+  },
   setMode: mode => set({ mode }),
   setFilterDate: filterDate => set({ filterDate, page: 0 }),
   setPage: page => set({ page }),

@@ -1,5 +1,6 @@
 "use client";
 
+import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import type { SxProps, Theme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
@@ -58,24 +59,19 @@ function renderCurrencyPart(
       );
     case CurrencyDisplayPart.Symbol:
       return (
-        <Typography
-          key={part}
-          component="span"
-          sx={theme => ({ color: theme.palette.text.secondary, whiteSpace: "nowrap" })}
-        >
+        <Box key={part} component="span" sx={theme => ({ color: theme.palette.text.secondary, whiteSpace: "nowrap" })}>
           {symbol}
-        </Typography>
+        </Box>
       );
     case CurrencyDisplayPart.Code:
       return (
-        <Typography
+        <Box
           key={part}
           component="span"
-          dir="ltr"
-          sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}
+          sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, direction: "ltr" })}
         >
           {shortCode}
-        </Typography>
+        </Box>
       );
     default:
       return null;

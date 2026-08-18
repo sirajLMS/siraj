@@ -20,6 +20,8 @@ export interface DashboardState {
   readonly setDebouncedSearchQuery: (query: string) => void;
   readonly setSelectedStatus: (status: AdminMetricKey | null) => void;
   readonly resetFilters: () => void;
+  /** Lazily initializes filters.date on first access. Idempotent. */
+  readonly ensureFilterDate: () => void;
 
   // Mock properties (fully defined in both stores for clean type checking)
   readonly todayClasses: readonly MetricItem[];
@@ -30,14 +32,19 @@ export interface DashboardState {
   readonly setPage: (page: number) => void;
 }
 
-export const useDashboardStore = create<DashboardState>(set => ({
+export const useDashboardStore = create<DashboardState>((set, get) => ({
   filters: {
-    date: getTodayScheduleFilterDate(),
+    date: "",
     teacherId: "",
     selectedTeacher: null,
     searchQuery: "",
     debouncedSearchQuery: "",
     selectedStatus: null,
+  },
+  ensureFilterDate: () => {
+    if (get().filters.date === "") {
+      set(state => ({ filters: { ...state.filters, date: getTodayScheduleFilterDate() } }));
+    }
   },
   setDateFilter: date => set(state => ({ filters: { ...state.filters, date } })),
   setTeacherFilter: teacher =>

@@ -32,6 +32,7 @@ export function RecurringSchedulesListDesktopView({
       onRetry={onRetry}
       pageTitle={shell.pageTitle}
       subtitle={shell.subtitle}
+      retryLabel={shell.retryLabel}
       desktopBreadcrumbs={shell.breadcrumbs}
     >
       <Box sx={{ mb: 2 }}>
@@ -44,7 +45,7 @@ export function RecurringSchedulesListDesktopView({
         />
       </Box>
       {rows.length === 0 ? (
-        <Typography sx={{ color: "text.secondary" }}>{shell.emptyMessage}</Typography>
+        <Typography sx={theme => ({ color: theme.palette.text.secondary })}>{shell.emptyMessage}</Typography>
       ) : (
         <AppDataGrid
           rows={rows}

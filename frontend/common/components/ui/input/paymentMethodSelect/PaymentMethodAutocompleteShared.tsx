@@ -7,7 +7,6 @@ import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import type { SxProps, Theme } from "@mui/material/styles";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -88,9 +87,9 @@ const EndAdornment: React.FC<{
     <>
       {existingAdornment}
       <InputAdornment position="end">
-        <Typography component="span" dir="ltr" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}>
+        <Box component="span" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, direction: "ltr" })}>
           {option.slug}
-        </Typography>
+        </Box>
       </InputAdornment>
     </>
   ) : (

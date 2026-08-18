@@ -121,11 +121,13 @@ export function MobilePaymentMethodList({
               </Stack>
 
               <Stack sx={{ flexDirection: "row", gap: 0.75, flexWrap: "wrap", alignItems: "center" }}>
-                <Typography sx={{ typography: "labelSm", color: "text.secondary" }}>{tList.columnType}</Typography>
+                <Typography sx={theme => ({ typography: "labelSm", color: theme.palette.text.secondary })}>
+                  {tList.columnType}
+                </Typography>
                 <Typography sx={{ typography: "bodyMd" }}>{typeLabel}</Typography>
                 {directionLabel ? (
                   <>
-                    <Typography sx={{ typography: "labelSm", color: "text.secondary" }}>
+                    <Typography sx={theme => ({ typography: "labelSm", color: theme.palette.text.secondary })}>
                       {tList.columnDirection}
                     </Typography>
                     <Typography sx={{ typography: "bodyMd" }}>{directionLabel}</Typography>

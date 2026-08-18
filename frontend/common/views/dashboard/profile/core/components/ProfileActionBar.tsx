@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Stack } from "@mui/material";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ProfileActionBarLabels } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
 import { useRouter } from "@/shared/i18n/navigation";
@@ -34,9 +35,9 @@ export function ProfileActionBar({
           </Button>
         ) : null}
         {onSave ? (
-          <Button variant="contained" onClick={onSave} disabled={saving}>
+          <PrimaryPageAction onClick={onSave} disabled={saving}>
             {t.save}
-          </Button>
+          </PrimaryPageAction>
         ) : null}
       </Stack>
     );
@@ -46,9 +47,5 @@ export function ProfileActionBar({
     return null;
   }
 
-  return (
-    <Button variant="contained" onClick={() => router.push(editHref)}>
-      {t.edit}
-    </Button>
-  );
+  return <PrimaryPageAction onClick={() => router.push(editHref)}>{t.edit}</PrimaryPageAction>;
 }

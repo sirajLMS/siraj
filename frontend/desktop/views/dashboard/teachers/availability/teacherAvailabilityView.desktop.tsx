@@ -3,7 +3,7 @@
 import { Box, CircularProgress } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
-import { availabilitySearchResolver } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
+import { availabilitySearchResolverFactory } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type { AvailabilitySearchFormData } from "@/frontend/common/views/dashboard/teachers/availability/types";
 import type { TeacherAvailabilityViewModel } from "@/frontend/common/views/dashboard/teachers/availability/useTeacherAvailabilityViewModel";
 import { DesktopExportButton, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
@@ -30,7 +30,7 @@ export function TeacherAvailabilityDesktopView({
   const storeHasDraft = storeFilters.fromTime !== null || storeFilters.toTime !== null || storeFilters.gender !== null;
 
   const methods = useForm<AvailabilitySearchFormData>({
-    resolver: availabilitySearchResolver,
+    resolver: availabilitySearchResolverFactory({ invalidGender: labels.validation.invalidGender }),
     defaultValues: storeHasDraft ? storeFilters : defaultFilters,
   });
 

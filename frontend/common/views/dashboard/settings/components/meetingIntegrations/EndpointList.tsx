@@ -18,7 +18,7 @@ type EndpointListProps = {
 export function EndpointList({ endpoints, labels }: EndpointListProps) {
   return (
     <Box>
-      <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 0.5 }}>
+      <Typography sx={theme => ({ typography: "labelUppercase", color: theme.palette.text.secondary, mb: 0.5 })}>
         {labels.endpoints}
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }} aria-label={labels.endpoints}>
@@ -52,9 +52,9 @@ function EndpointRow({ url, labels }: EndpointRowProps) {
       >
         {copied ? labels.endpointCopied : labels.copyEndpointUrl}
       </Button>
-      <Typography component="output" aria-live="polite" sx={srOnlySx}>
+      <Box component="output" aria-live="polite" sx={srOnlySx}>
         {copied ? labels.endpointCopied : ""}
-      </Typography>
+      </Box>
     </Box>
   );
 }

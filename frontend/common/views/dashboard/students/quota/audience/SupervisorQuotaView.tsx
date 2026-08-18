@@ -6,7 +6,7 @@ import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 import type { ReactElement } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui/badge";
+import { PrimaryPageAction, StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota } from "@/frontend/common/graphql/generated/gql/operations";
@@ -130,25 +130,21 @@ function buildQuotaColumns(t: StudentQuotaLabels, canManage: boolean): GridColDe
     filterable: false,
     renderCell: params => (
       <Stack sx={{ flexDirection: "row", gap: 0.5, alignItems: "center" }}>
-        <Button
-          size="small"
-          startIcon={<EditOutlined />}
-          component={Link}
-          href={`/quotas/${params.row.id ?? ""}/edit`}
-          sx={{ minWidth: "auto", textTransform: "none" }}
-        >
-          {t.audience.editQuota}
-        </Button>
-        <Button
-          size="small"
-          color="error"
-          startIcon={<DeleteOutlined />}
-          component={Link}
-          href={`/quotas/${params.row.id ?? ""}/delete`}
-          sx={{ minWidth: "auto", textTransform: "none" }}
-        >
-          {t.audience.deleteQuota}
-        </Button>
+        <Link href={`/quotas/${params.row.id ?? ""}/edit`} style={{ textDecoration: "none" }}>
+          <Button size="small" startIcon={<EditOutlined />} sx={{ minWidth: "auto", textTransform: "none" }}>
+            {t.audience.editQuota}
+          </Button>
+        </Link>
+        <Link href={`/quotas/${params.row.id ?? ""}/delete`} style={{ textDecoration: "none" }}>
+          <Button
+            size="small"
+            color="error"
+            startIcon={<DeleteOutlined />}
+            sx={{ minWidth: "auto", textTransform: "none" }}
+          >
+            {t.audience.deleteQuota}
+          </Button>
+        </Link>
       </Stack>
     ),
   };
@@ -191,9 +187,11 @@ export function SupervisorQuotaView({ t }: Readonly<SupervisorQuotaViewProps>): 
       >
         <Typography variant="titleLg">{t.audience.supervisorTitle}</Typography>
         {canManage && (
-          <Button variant="contained" color="primary" startIcon={<AddOutlined />} component={Link} href="/quotas/new">
-            {t.audience.newQuota}
-          </Button>
+          <Link href="/quotas/new" style={{ textDecoration: "none" }}>
+            <PrimaryPageAction color="primary" startIcon={<AddOutlined />}>
+              {t.audience.newQuota}
+            </PrimaryPageAction>
+          </Link>
         )}
       </Stack>
       <Stack sx={{ flexDirection: "row", gap: 2, flexWrap: "wrap" }}>

@@ -44,7 +44,9 @@ export function MeetingConfigFields({
       {labels.sectionTitle !== undefined && (
         <Typography sx={{ typography: "titleLg" }}>{labels.sectionTitle}</Typography>
       )}
-      <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.optionalHint}</Typography>
+      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
+        {labels.optionalHint}
+      </Typography>
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
           <MeetingProviderSelect

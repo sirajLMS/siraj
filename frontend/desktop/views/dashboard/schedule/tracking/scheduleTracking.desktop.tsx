@@ -24,7 +24,7 @@ export function ScheduleTrackingDesktopChrome({
         breadcrumbOptions={{ currentTitle: resolveActiveTabLabel(activeTab, tabNavItems) }}
       />
       <Box sx={{ mt: 3 }}>
-        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="Schedule tracking sections" />
+        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

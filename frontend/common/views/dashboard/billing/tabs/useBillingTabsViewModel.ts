@@ -34,6 +34,7 @@ export function useBillingTabsViewModel(): BillingTabsViewModel {
         hedges: labels.billingTabs.hedges,
         manual: labels.billingTabs.manual,
       },
+      tabNavAriaLabel: labels.tabNavAriaLabel,
     }),
     [labels]
   );

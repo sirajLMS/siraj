@@ -48,6 +48,7 @@ export function TeacherProfileEditForm({
   const schema = teacherOwnEditSchemaFactory({
     nationalIdRequired: t.validation.nationalIdRequired,
     nationalIdInvalid: t.validation.nationalIdInvalid,
+    invalidTimezone: t.validation.invalidTimezone,
   });
   const form = useForm<TeacherOwnEditFormData>({
     resolver: zodResolver(schema),

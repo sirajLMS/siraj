@@ -14,6 +14,7 @@ import {
   MobileContentStack,
   MobilePageContainer,
   MobilePageHeader,
+  MobilePrimaryPageAction,
   MobileSectionPanel,
   MobileStatusBadge,
 } from "@/frontend/mobile/components/ui";
@@ -258,9 +259,9 @@ export function ExchangeRatesMobileView({
         edgeToEdge={false}
         actions={
           canRefresh ? (
-            <Button variant="contained" onClick={onRefresh} disabled={refreshing || billingActionsDisabled}>
+            <MobilePrimaryPageAction onClick={onRefresh} disabled={refreshing || billingActionsDisabled}>
               {refreshing ? labels.refreshing : labels.syncStatus.refresh}
-            </Button>
+            </MobilePrimaryPageAction>
           ) : null
         }
       />

@@ -10,6 +10,7 @@ export interface ScheduleTrackingViewLabels {
   readonly title: string;
   readonly subtitle: string;
   readonly tabs: ScheduleTrackingTabsLabels;
+  readonly tabNavAriaLabel: string;
 }
 
 export type ScheduleTrackingTabsViewModel = {

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDropDown } from "@mui/icons-material";
-import { Box, IconButton, Popover, Stack, styled, Typography } from "@mui/material";
+import { Box, IconButton, Popover, Stack, styled } from "@mui/material";
 import type { PopoverOrigin as MuiPopoverOrigin } from "@mui/material/Popover";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { useCallback, useState } from "react";
@@ -34,7 +34,10 @@ const BaseLanguageOption = styled(Box, {
   shouldForwardProp: prop => prop !== "isSelected" && prop !== "isLastItem",
 })<{ readonly isSelected: boolean; readonly isLastItem: boolean }>(({ theme, isSelected, isLastItem }) => ({
   cursor: "pointer",
-  transition: "background-color 0.2s ease-in-out",
+  transition: theme.transitions.create("background-color", {
+    duration: 200,
+    easing: theme.transitions.easing.easeInOut,
+  }),
   backgroundColor: isSelected ? theme.palette.action.selected : "transparent",
   borderBottom: isLastItem ? "none" : `1px solid ${theme.palette.outlineVariant}`,
   display: "flex",
@@ -83,9 +86,9 @@ function LocaleList({
             sx={optionSx}
           >
             <LocaleEmoji emoji={language.emoji} />
-            <Typography component="span" sx={{ flex: 1, fontSize: "0.875rem" }}>
+            <Box component="span" sx={{ flex: 1, fontSize: "0.875rem" }}>
               {getLanguageDisplayName(language.code, uiLocale)}
-            </Typography>
+            </Box>
             {isSelected ? (
               <Box
                 aria-hidden={true}
@@ -185,9 +188,9 @@ export function LocaleAdornmentSwitchShared({
       >
         <LocaleEmoji emoji={emoji} />
         {compact ? null : (
-          <Typography component="span" sx={{ whiteSpace: "nowrap", fontSize: "0.875rem" }}>
+          <Box component="span" sx={{ whiteSpace: "nowrap", fontSize: "0.875rem" }}>
             {label}
-          </Typography>
+          </Box>
         )}
         <ArrowDropDown fontSize="small" />
       </IconButton>

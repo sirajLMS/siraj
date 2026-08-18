@@ -32,6 +32,7 @@ const apolloLinkState = {
   checkConnectivity: (): Promise<boolean> => Promise.resolve(true),
   notifyIfDisconnected: (): void => undefined,
   setConnected: (_v: boolean): void => undefined,
+  serverNotAvailableMessage: "Server not available",
 };
 
 /**
@@ -49,7 +50,8 @@ const apolloClient = new ApolloClient({
       () => apolloLinkState.isConnected,
       v => apolloLinkState.setConnected(v),
       () => apolloLinkState.checkConnectivity(),
-      () => apolloLinkState.notifyIfDisconnected()
+      () => apolloLinkState.notifyIfDisconnected(),
+      () => apolloLinkState.serverNotAvailableMessage
     ),
     createAuthLink(() => apolloLinkState.authToken),
     new PersistedQueryLink({ sha256 }),
@@ -93,6 +95,10 @@ export function AppApolloProvider({ children }: { readonly children: React.React
   useEffect(() => {
     apolloLinkState.setConnected = setConnected;
   }, [setConnected]);
+
+  useEffect(() => {
+    apolloLinkState.serverNotAvailableMessage = t.serverNotAvailable;
+  }, [t.serverNotAvailable]);
 
   const updateAuthToken = useCallback((token: string) => {
     setAuthToken(token);

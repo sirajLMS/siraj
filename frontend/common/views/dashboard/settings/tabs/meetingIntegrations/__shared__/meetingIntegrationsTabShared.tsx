@@ -6,12 +6,12 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  Chip,
   type SxProps,
   type Theme,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ConnectedAccountsTable } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectedAccountsTable";
 import { ConnectProviderAction } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/ConnectProviderAction";
@@ -94,15 +94,14 @@ export function MeetingIntegrationsTabShared(props: MeetingIntegrationsTabShared
             <Box sx={summaryContentSx}>
               <Box sx={summaryRowSx}>
                 <Typography sx={{ typography: "titleLg" }}>{getProviderLabel(provider.slug, labels)}</Typography>
-                <Chip
-                  size="small"
+                <StatusBadge
+                  category="syncStatus"
+                  status={provider.credentialsHealthy ? "success" : "failed"}
                   label={provider.credentialsHealthy ? labels.testSuccess : labels.testFailure}
-                  color={provider.credentialsHealthy ? "success" : "error"}
-                  variant="outlined"
                 />
               </Box>
               {provider.reauthNeededCount > 0 && (
-                <Chip size="small" label={labels.reauthNeeded} color="warning" variant="outlined" />
+                <StatusBadge category="syncStatus" status="partial" label={labels.reauthNeeded} />
               )}
             </Box>
           </AccordionSummary>

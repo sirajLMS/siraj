@@ -24,6 +24,7 @@ export const QuotaFormAccessContextDefaultValue: QuotaFormAccessContextValue = {
   fieldAccess: RESTRICTED_FIELD_DEFAULTS,
   labels: {
     title: "",
+    breadcrumbLabel: "",
     newQuota: "",
     editQuota: "",
     quotaDetails: "",

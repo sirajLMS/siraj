@@ -1,7 +1,8 @@
 "use client";
 
+import Box from "@mui/material/Box";
 import type { SxProps, Theme } from "@mui/material/styles";
-import Typography, { type TypographyProps } from "@mui/material/Typography";
+import type { TypographyProps } from "@mui/material/Typography";
 
 import type * as React from "react";
 import {
@@ -56,9 +57,9 @@ export const MobileTimezoneDisplay: React.FC<MobileTimezoneDisplayProps> = ({
         ? getTimezoneSelectLabel(normalizedTimezone, locale)
         : getTimezonePathLabel(normalizedTimezone, locale);
       content = (
-        <Typography component="span" variant={typographyVariant} sx={mergeSx({ whiteSpace: "nowrap" }, sx)}>
+        <Box component="span" sx={mergeSx({ typography: typographyVariant, whiteSpace: "nowrap" }, sx)}>
           {display}
-        </Typography>
+        </Box>
       );
     }
   }

@@ -2,9 +2,11 @@
 
 import { Box, Button, Stack } from "@mui/material";
 import { useRef } from "react";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";
 import type { AdminResetPasswordSectionRef } from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
@@ -22,7 +24,7 @@ type StudentProfileEditBodyProps = {
   readonly saving: boolean;
   readonly snackbarOpen: boolean;
   readonly snackbarMessage: string;
-  readonly snackbarSeverity: "success" | "error";
+  readonly snackbarSeverity: SnackbarSeverity;
   readonly onDraftChange: (patch: Partial<StudentPortalProfileEditDraft>) => void;
   readonly onSave: () => Promise<void>;
   readonly onSnackbarClose: () => void;
@@ -108,9 +110,9 @@ export function StudentProfileEditBody({
             {labels.cancel}
           </Button>
         ) : null}
-        <Button variant="contained" onClick={() => void handleSave()} disabled={saving}>
+        <PrimaryPageAction onClick={() => void handleSave()} disabled={saving}>
           {labels.saveChanges}
-        </Button>
+        </PrimaryPageAction>
       </Stack>
 
       {snackbarSeverity === "success" ? (

@@ -17,6 +17,7 @@ const coreSchema = z.object({
 export type TeacherProfileValidationLabels = {
   readonly nationalIdRequired: string;
   readonly nationalIdInvalid: string;
+  readonly invalidTimezone: string;
 };
 
 const ownTeacherSchemaBase = z.object({
@@ -27,11 +28,13 @@ const ownTeacherSchemaBase = z.object({
   gender: z.enum(Gender).optional().nullable(),
   address: z.string().optional(),
   qualifications: z.string().optional(),
-  timezone: z
+});
+
+const timezoneField = (invalidTimezone: string) =>
+  z
     .string()
     .optional()
-    .refine(value => !value || isValidIanaTimezoneId(value), { message: "Invalid timezone" }),
-});
+    .refine(value => !value || isValidIanaTimezoneId(value), { message: invalidTimezone });
 
 /**
  * Build the own-profile edit schema with translated validation messages.
@@ -51,6 +54,7 @@ export const teacherOwnEditSchemaFactory = (labels: TeacherProfileValidationLabe
     .object({
       ...coreSchema.shape,
       ...ownTeacherSchemaBase.shape,
+      timezone: timezoneField(labels.invalidTimezone),
       nationalId: z
         .string()
         .optional()
@@ -75,12 +79,19 @@ export const teacherOwnEditSchemaFactory = (labels: TeacherProfileValidationLabe
       }
     });
 
-const adminTeacherSchema = ownTeacherSchemaBase.extend({
+const adminTeacherSchemaBase = ownTeacherSchemaBase.extend({
   nationalId: z.string().optional(),
   hourlyRate: z.string().optional(),
   rateCurrency: z.enum(CurrencyCode).optional(),
   status: z.enum(AccountStatus).optional().nullable(),
 });
+
+export const teacherAdminEditSchemaFactory = (labels: Pick<TeacherProfileValidationLabels, "invalidTimezone">) =>
+  z.object({
+    ...coreSchema.shape,
+    ...adminTeacherSchemaBase.shape,
+    timezone: timezoneField(labels.invalidTimezone),
+  });
 
 /**
  * Backwards-compatible static schema (no translated messages). Used by callers
@@ -92,10 +103,10 @@ export const teacherOwnEditSchema = z.object({
   nationalId: z.string().optional(),
 });
 
-export const teacherAdminEditSchema = z.object({ ...coreSchema.shape, ...adminTeacherSchema.shape });
+export const teacherAdminEditSchema = z.object({ ...coreSchema.shape, ...adminTeacherSchemaBase.shape });
 
 export type TeacherOwnEditFormData = z.infer<ReturnType<typeof teacherOwnEditSchemaFactory>>;
-export type TeacherAdminEditFormData = z.infer<typeof teacherAdminEditSchema>;
+export type TeacherAdminEditFormData = z.infer<ReturnType<typeof teacherAdminEditSchemaFactory>>;
 
 export type TeacherEditData = {
   readonly name?: string | null;

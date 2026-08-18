@@ -65,7 +65,7 @@ export function ParentInvoicesCardListMobile({
             </Typography>
           </Box>
           {row.status === InvoiceStatus.Paid && row.hasPaymentProof ? (
-            <Typography variant="labelMd" sx={{ color: "text.secondary", mb: 1 }}>
+            <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.secondary, mb: 1 })}>
               {labels.hasPaymentProofHint}
             </Typography>
           ) : null}

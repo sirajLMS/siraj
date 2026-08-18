@@ -199,7 +199,7 @@ function ActionButtons({ item, onRequestLeave, labels, style }: Readonly<ActionB
 const desktopCardSx = (theme: Theme) => ({
   p: 3,
   "&:hover": { border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` },
-  transition: "all 0.2s",
+  transition: theme.transitions.create("all", { duration: 200 }),
 });
 
 function buildCardSx(outerDirection: "row" | "column") {

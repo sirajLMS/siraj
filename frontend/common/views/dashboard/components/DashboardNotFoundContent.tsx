@@ -1,8 +1,9 @@
 "use client";
 
 import SearchOffOutlined from "@mui/icons-material/SearchOffOutlined";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Link from "next/link";
+import { PrimaryPageAction } from "@/frontend/common/components/ui";
 
 export interface DashboardNotFoundContentProps {
   readonly title: string;
@@ -57,9 +58,9 @@ export function DashboardNotFoundContent({
       >
         {description}
       </Typography>
-      <Button component={Link} href={backHref} variant="contained" sx={{ mt: 1 }}>
-        {backLabel}
-      </Button>
+      <Link href={backHref} style={{ textDecoration: "none" }}>
+        <PrimaryPageAction sx={{ mt: 1 }}>{backLabel}</PrimaryPageAction>
+      </Link>
     </Box>
   );
 }

@@ -26,24 +26,16 @@ import { Link } from "@/shared/i18n";
 function ExchangeRatesLink({ labels }: { readonly labels: AdminBillingViewModel["labels"] }) {
   return (
     <Box sx={{ mb: 2, px: { xs: 2, md: 0 }, display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-      <Button
-        component={Link}
-        href="/billing/exchange-rates"
-        variant="outlined"
-        size="small"
-        startIcon={<TimelineOutlined />}
-      >
-        {labels.exchangeRatesLink}
-      </Button>
-      <Button
-        component={Link}
-        href="/quotas"
-        variant="outlined"
-        size="small"
-        startIcon={<AccountBalanceWalletOutlined />}
-      >
-        {labels.quotasLink}
-      </Button>
+      <Link href="/billing/exchange-rates" style={{ textDecoration: "none" }}>
+        <Button variant="outlined" size="small" startIcon={<TimelineOutlined />}>
+          {labels.exchangeRatesLink}
+        </Button>
+      </Link>
+      <Link href="/quotas" style={{ textDecoration: "none" }}>
+        <Button variant="outlined" size="small" startIcon={<AccountBalanceWalletOutlined />}>
+          {labels.quotasLink}
+        </Button>
+      </Link>
     </Box>
   );
 }

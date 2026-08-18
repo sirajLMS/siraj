@@ -157,9 +157,9 @@ export const UrlFallbackField: React.FC<UrlFallbackFieldProps> = ({
 }): React.ReactNode => (
   <>
     <Divider sx={{ my: 0 }}>
-      <Typography variant="labelMd" component="span" sx={theme => ({ color: theme.palette.text.secondary })}>
+      <Box component="span" sx={theme => ({ typography: "labelMd", color: theme.palette.text.secondary })}>
         {optionalLabel}
-      </Typography>
+      </Box>
     </Divider>
     <TextField
       label={label}
@@ -267,9 +267,9 @@ function CatalogImageUploadBody({
   return (
     <>
       {label ? (
-        <Typography variant="labelMd" component="span" sx={theme => ({ color: theme.palette.text.secondary })}>
+        <Box component="span" sx={theme => ({ typography: "labelMd", color: theme.palette.text.secondary })}>
           {label}
-        </Typography>
+        </Box>
       ) : null}
       <Box sx={getPreviewContentSx(previewShape, buttonLayout)}>
         <PreviewBox

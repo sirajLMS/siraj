@@ -29,6 +29,7 @@ function getDevTestServerEnv(distDir: string): Record<string, string | undefined
     NEXT_DIST_DIR: distDir,
     IS_DEMO: "true",
     TEST_SERVER: "1",
+    ADMIN_PASSWORD: "TestAdminPass1!",
   };
 }
 

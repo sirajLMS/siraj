@@ -17,7 +17,7 @@ const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").The
   borderRight: `1px solid ${theme.palette.border.light}`,
   borderBottom: `1px solid ${theme.palette.border.light}`,
   padding: theme.spacing(1.5),
-  transition: "all 0.2s ease-in-out",
+  transition: theme.transitions.create("all", { duration: 200, easing: theme.transitions.easing.easeInOut }),
   backgroundColor: theme.palette.background.paper,
   position: "relative" as const,
 });
@@ -72,11 +72,11 @@ function CalendarDayCell({ day, session }: Readonly<{ day: number; session?: Cla
     <>
       <Typography
         variant="labelMd"
-        sx={{
-          color: theme => theme.palette.onSurfaceVariant,
-          transition: "colors 0.2s",
-          ...(session && { "&:hover": { color: theme => theme.palette.primary.main } }),
-        }}
+        sx={theme => ({
+          color: theme.palette.onSurfaceVariant,
+          transition: theme.transitions.create("colors", { duration: 200 }),
+          ...(session && { "&:hover": { color: theme.palette.primary.main } }),
+        })}
       >
         {day}
       </Typography>

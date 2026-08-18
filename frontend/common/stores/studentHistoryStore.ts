@@ -14,19 +14,26 @@ import { create } from "zustand";
  * first converting `currentMonth` to an ISO string and updating all consumers.
  */
 export interface StudentHistoryState {
-  readonly currentMonth: Date;
+  readonly currentMonth: Date | null;
   readonly selectedDay: number | null;
   readonly selectedWeek: number;
   setSelectedDay: (day: number | null) => void;
   setCurrentMonth: (date: Date) => void;
   setSelectedWeek: (week: number) => void;
+  /** Lazily initializes currentMonth on first access. Idempotent. */
+  ensureCurrentMonth: () => void;
 }
 
-export const useStudentHistoryStore = create<StudentHistoryState>(set => ({
-  currentMonth: new Date(),
+export const useStudentHistoryStore = create<StudentHistoryState>((set, get) => ({
+  currentMonth: null,
   selectedDay: null,
   selectedWeek: 1,
 
+  ensureCurrentMonth: () => {
+    if (get().currentMonth === null) {
+      set({ currentMonth: new Date() });
+    }
+  },
   setSelectedDay: day => {
     set({ selectedDay: day });
   },

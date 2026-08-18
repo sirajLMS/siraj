@@ -10,6 +10,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import type { FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import { useUserBillingProfileStore } from "@/frontend/common/stores/userBillingProfileStore";
 import {
   buildInvoiceRow,
@@ -40,7 +41,6 @@ export type UserBillingProfileViewModel = UserBillingProfileViewProps;
 
 export type UseUserBillingProfileViewModelProps = Pick<UserBillingProfileViewModel, "userId">;
 
-type SnackbarSeverity = "success" | "error" | "info";
 type ProofMode = "submit" | "markPaid";
 
 type SummaryRow =

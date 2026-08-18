@@ -66,8 +66,13 @@ export function useLastUpdatedLabel(data: unknown, labels: AdminDashboardLastUpd
 /** Fetches the admin dashboard schedule with pagination and filter variables derived from the dashboard store. */
 export function useAdminScheduleQuery() {
   const { filters } = useDashboardStore();
+  const ensureFilterDate = useDashboardStore(s => s.ensureFilterDate);
   const [page, setPage] = useState(0);
   const selectedMetricFilter = resolveDailyScheduleMetricFilter(filters.selectedStatus);
+
+  useEffect(() => {
+    ensureFilterDate();
+  }, [ensureFilterDate]);
 
   const {
     data: dashboardData,

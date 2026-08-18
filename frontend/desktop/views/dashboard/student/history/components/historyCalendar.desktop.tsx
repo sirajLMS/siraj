@@ -101,7 +101,7 @@ function renderDayCell(
         borderRight: `1px solid ${theme.palette.outlineVariant}`,
         borderBottom: `1px solid ${theme.palette.outlineVariant}`,
         backgroundColor: isSelected ? theme.palette.primaryContainer : theme.palette.surfaceContainerLowest,
-        transition: "background-color 0.15s ease",
+        transition: theme.transitions.create("background-color", { duration: 150, easing: "ease" }),
         "&:hover": {
           boxShadow: `inset 0 0 0 2px ${theme.palette.primary.main}`,
         },
@@ -118,24 +118,23 @@ function renderDayCell(
       </Typography>
       {session ? (
         <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
-          <Typography
-            component={Link}
-            href={classHref(session.id)}
-            variant="labelMd"
-            onClick={e => e.stopPropagation()}
-            sx={theme => ({
-              color: theme.palette.primary.main,
-              fontWeight: 700,
-              textDecoration: "none",
-              display: "block",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              "&:hover": { textDecoration: "underline" },
-            })}
-          >
-            {session.title}
-          </Typography>
+          <Link href={classHref(session.id)} style={{ textDecoration: "none" }} onClick={e => e.stopPropagation()}>
+            <Typography
+              variant="labelMd"
+              sx={theme => ({
+                color: theme.palette.primary.main,
+                fontWeight: 700,
+                textDecoration: "none",
+                display: "block",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                "&:hover": { textDecoration: "underline" },
+              })}
+            >
+              {session.title}
+            </Typography>
+          </Link>
           <DesktopStatusBadge category="classStatus" status={badgeStatus} label={statusLabel} />
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <ScheduleOutlined sx={theme => ({ fontSize: 12, color: theme.palette.onSurfaceVariant })} />

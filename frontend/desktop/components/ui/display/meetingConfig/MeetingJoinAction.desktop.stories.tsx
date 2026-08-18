@@ -5,6 +5,7 @@ import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/g
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig/MeetingJoinAction.desktop";
 
 const mockMeeting: EffectiveMeetingFieldsFragment = {
+  id: "mock-meeting-1",
   joinUrl: "https://meet.example.com/abc-123",
   providerSlug: "zoom",
   providerName: { en: "Zoom", ar: "زووم" },
@@ -71,6 +72,7 @@ export const DisabledIcon: Story = {
 };
 
 const urlPendingMeeting: EffectiveMeetingFieldsFragment = {
+  id: "mock-meeting-url-pending",
   joinUrl: null,
   providerSlug: "zoom",
   providerName: { en: "Zoom", ar: "زووم" },

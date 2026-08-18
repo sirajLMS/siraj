@@ -116,9 +116,9 @@ function ClassRow({
             onViewClassAudit={handleViewClassAudit}
           />
         )}
-        <PrimaryPageAction component={Link} href={`/classes/${classId}`} size="small">
-          {labels.viewDetails}
-        </PrimaryPageAction>
+        <Link href={`/classes/${classId}`} style={{ textDecoration: "none" }}>
+          <PrimaryPageAction size="small">{labels.viewDetails}</PrimaryPageAction>
+        </Link>
       </Box>
     </slots.RowWrapper>
   );

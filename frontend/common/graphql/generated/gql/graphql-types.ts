@@ -829,6 +829,7 @@ export type ComplaintFile = {
   __typename?: 'ComplaintFile';
   createdAt: Maybe<Scalars['DateTime']['output']>;
   fileId: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   isProtected: Maybe<Scalars['Boolean']['output']>;
   publicUrl: Maybe<Scalars['String']['output']>;
   usageType: Maybe<Scalars['String']['output']>;
@@ -1233,6 +1234,7 @@ export type CreditBalance = {
   __typename?: 'CreditBalance';
   classesRemaining: Maybe<Scalars['Int']['output']>;
   classesTotal: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   studentId: Maybe<Scalars['String']['output']>;
 };
 
@@ -1557,6 +1559,7 @@ export type DirectoryInfo = StorageObject & {
   createdAt: Maybe<Scalars['DateTime']['output']>;
   fileCount: Maybe<Scalars['Int']['output']>;
   folderCount: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   isFromBucket: Maybe<Scalars['Boolean']['output']>;
   isProtected: Maybe<Scalars['Boolean']['output']>;
   lastModified: Maybe<Scalars['DateTime']['output']>;
@@ -1667,6 +1670,7 @@ export type EditQuotaResult = {
 export type EffectiveMeeting = {
   __typename?: 'EffectiveMeeting';
   configId: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   joinUrl: Maybe<Scalars['String']['output']>;
   logoUrl: Maybe<Scalars['String']['output']>;
   meetingId: Maybe<Scalars['String']['output']>;
@@ -1678,10 +1682,10 @@ export type EffectiveMeeting = {
 };
 
 export enum EffectiveMeetingSource {
-  Class = 'class',
-  None = 'none',
-  Recurring = 'recurring',
-  Teacher = 'teacher'
+  Class = 'CLASS',
+  None = 'NONE',
+  Recurring = 'RECURRING',
+  Teacher = 'TEACHER'
 }
 
 export type EndImpersonationResponse = {
@@ -1768,6 +1772,7 @@ export type FileInfo = StorageObject & {
   createdAt: Maybe<Scalars['DateTime']['output']>;
   directoryPath: Maybe<Scalars['String']['output']>;
   fileType: Maybe<FileType>;
+  id: Maybe<Scalars['String']['output']>;
   isFromBucket: Maybe<Scalars['Boolean']['output']>;
   isInUse: Maybe<Scalars['Boolean']['output']>;
   isProtected: Maybe<Scalars['Boolean']['output']>;
@@ -2725,6 +2730,7 @@ export type MarkSuggestionDuplicateInput = {
 
 export type MeetingConfigDetails = {
   __typename?: 'MeetingConfigDetails';
+  id: Maybe<Scalars['String']['output']>;
   meetingUrl: Maybe<Scalars['String']['output']>;
   tenantId: Maybe<Scalars['String']['output']>;
   username: Maybe<Scalars['String']['output']>;
@@ -4382,6 +4388,7 @@ export type ParentOnboardingResult = {
   __typename?: 'ParentOnboardingResult';
   currency: Maybe<CurrencyCode>;
   email: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   invoiceType: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
@@ -4489,6 +4496,7 @@ export type PaymentMethodCatalogSnapshot = {
   catalogId: Maybe<Scalars['String']['output']>;
   catalogName: Maybe<Scalars['LocalizedString']['output']>;
   catalogSlug: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
 };
 
 export type PaymentMethodDefaults = {
@@ -5814,6 +5822,7 @@ export type SettingsTimezonesResult = {
 export type SimulatablePermissionGroup = {
   __typename?: 'SimulatablePermissionGroup';
   description: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   slug: Maybe<Scalars['String']['output']>;
 };
@@ -6147,6 +6156,7 @@ export type StudentOnboardingInput = {
 /** Result of student onboarding operation */
 export type StudentOnboardingResult = {
   __typename?: 'StudentOnboardingResult';
+  id: Maybe<Scalars['String']['output']>;
   name: Maybe<Scalars['String']['output']>;
   parentId: Maybe<Scalars['String']['output']>;
   primaryTeacherId: Maybe<Scalars['String']['output']>;
@@ -6412,6 +6422,7 @@ export type SupportedCurrency = {
   code: Maybe<CurrencyCode>;
   countryCode: Maybe<CountryCode>;
   decimals: Maybe<Scalars['Int']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   isActive: Maybe<Scalars['Boolean']['output']>;
   sortOrder: Maybe<Scalars['Int']['output']>;
   symbol: Maybe<Scalars['String']['output']>;
@@ -6801,6 +6812,7 @@ export type TeacherMonthlyReport = {
   approvedCount: Maybe<Scalars['Int']['output']>;
   cancelledCount: Maybe<Scalars['Int']['output']>;
   currency: Maybe<CurrencyCode>;
+  id: Maybe<Scalars['String']['output']>;
   lessonsTaught: Maybe<Scalars['Int']['output']>;
   month: Maybe<Scalars['Int']['output']>;
   teacherId: Maybe<Scalars['String']['output']>;
@@ -7220,6 +7232,7 @@ export type UserMeetingConfigUpdateInput = {
 export type UserOverride = {
   __typename?: 'UserOverride';
   assignedBy: Maybe<Scalars['String']['output']>;
+  id: Maybe<Scalars['String']['output']>;
   permissionId: Maybe<Scalars['String']['output']>;
   state: Maybe<OverrideState>;
 };

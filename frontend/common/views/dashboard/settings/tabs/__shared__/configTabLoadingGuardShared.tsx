@@ -24,7 +24,9 @@ export function ConfigTabLoadingGuard({
     return (
       <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
         <CircularProgress size={28} />
-        <Typography sx={{ typography: "bodyMd", color: "text.secondary", ml: 2 }}>{loadingLabel}</Typography>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary, ml: 2 })}>
+          {loadingLabel}
+        </Typography>
       </Box>
     );
   }

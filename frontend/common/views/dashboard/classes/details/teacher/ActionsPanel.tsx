@@ -7,7 +7,7 @@ import HelpOutlinedIcon from "@mui/icons-material/HelpOutlined";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import { alpha, Box, Grid, Stack, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { styled, type Theme } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { BaseCard } from "@/frontend/common/components/ui";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -148,7 +148,7 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
                     cursor: "pointer",
                     color: mainColor,
                     boxShadow: theme.palette.shadow.button,
-                    transition: "all 0.15s ease",
+                    transition: theme.transitions.create("all", { duration: 150, easing: "ease" }),
                     "&:hover": {
                       backgroundColor: alpha(mainColor, 0.08),
                       boxShadow: theme.palette.shadow.buttonHover,
@@ -158,7 +158,13 @@ export function ActionsPanel({ onActivate, onStop, onInfoEdit, onDelete, labels 
                   };
                 }}
               >
-                <Icon className="action-icon" sx={{ fontSize: 36, transition: "transform 0.15s ease" }} />
+                <Icon
+                  className="action-icon"
+                  sx={(theme: Theme) => ({
+                    fontSize: 36,
+                    transition: theme.transitions.create("transform", { duration: 150, easing: "ease" }),
+                  })}
+                />
                 <Typography variant="labelUppercase" sx={{ color: "inherit" }}>
                   {actionLabels[config.key]}
                 </Typography>

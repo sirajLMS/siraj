@@ -1,9 +1,10 @@
 "use client";
 
 import { DownloadOutlined, FilterListOutlined } from "@mui/icons-material";
-import { Box, Chip, Popover, Stack, TextField } from "@mui/material";
+import { Box, Popover, Stack, TextField } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo, useState } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import {
@@ -35,12 +36,13 @@ function buildHistoryColumns(t: WhatsappLabels): GridColDef<WhatsappOptInAuditEn
       headerName: t.optInHistoryAction,
       flex: 0.4,
       minWidth: 100,
-      renderCell: ({ value }) =>
-        value === "optIn" ? (
-          <Chip label={t.optInActionOptedIn} size="small" color="success" variant="outlined" />
-        ) : (
-          <Chip label={t.optInActionOptedOut} size="small" color="default" variant="outlined" />
-        ),
+      renderCell: ({ value }) => (
+        <StatusBadge
+          category="syncStatus"
+          status={value === "optIn" ? "success" : "cancelled"}
+          label={value === "optIn" ? t.optInActionOptedIn : t.optInActionOptedOut}
+        />
+      ),
     },
     {
       field: "changedBy",
@@ -64,12 +66,13 @@ function buildAdminColumns(t: WhatsappLabels): GridColDef<WhatsappOptInUserState
       headerName: t.optInAdminOptedIn,
       flex: 0.4,
       minWidth: 100,
-      renderCell: ({ value }) =>
-        value ? (
-          <Chip label={t.optInAdminYes} size="small" color="success" variant="outlined" />
-        ) : (
-          <Chip label={t.optInAdminNo} size="small" color="default" variant="outlined" />
-        ),
+      renderCell: ({ value }) => (
+        <StatusBadge
+          category="syncStatus"
+          status={value ? "success" : "cancelled"}
+          label={value ? t.optInAdminYes : t.optInAdminNo}
+        />
+      ),
     },
     {
       field: "optedInAt",

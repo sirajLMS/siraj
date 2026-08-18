@@ -1,10 +1,10 @@
 "use client";
 
-import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   formatConnectedAccountDate,
-  getStatusColor,
   getStatusLabel,
   useConnectedAccountsFilter,
 } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/connectedAccounts.helpers";
@@ -13,8 +13,15 @@ import type {
   ConnectedAccountsTableProps,
   MeetingIntegrationConnectedAccount,
 } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
-import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
+import { MobileCardList, MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
+
+const OAUTH_STATUS_TO_SYNC: Record<MeetingIntegrationConnectedAccountStatus, string> = {
+  [MeetingIntegrationConnectedAccountStatus.Connected]: "success",
+  [MeetingIntegrationConnectedAccountStatus.ExpiringSoon]: "partial",
+  [MeetingIntegrationConnectedAccountStatus.ReauthNeeded]: "failed",
+  [MeetingIntegrationConnectedAccountStatus.Revoked]: "unknown",
+};
 
 interface AccountCardProps {
   readonly account: MeetingIntegrationConnectedAccount;
@@ -31,12 +38,10 @@ function AccountCard({ account, labels, canEdit, isRevoking, onRevoke, onMetadat
       <Stack spacing={1.5} sx={{ py: 2, width: "100%" }}>
         <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}>
           <Typography sx={{ typography: "titleLg" }}>{account.name ?? "—"}</Typography>
-          {/* Placeholder: Replace with OAuthConnectionStatusBadge component in Phase 4 */}
-          <Chip
-            size="small"
+          <MobileStatusBadge
+            category="syncStatus"
+            status={OAUTH_STATUS_TO_SYNC[account.status]}
             label={getStatusLabel(account.status, labels)}
-            color={getStatusColor(account.status)}
-            variant="outlined"
           />
         </Stack>
 

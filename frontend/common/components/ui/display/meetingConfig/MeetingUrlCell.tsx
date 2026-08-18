@@ -188,9 +188,11 @@ function renderNullState(
     >
       <span>{labels.urlNotGenerated}</span>
       {setupHref ? (
-        <Button component={Link} href={setupHref} size="small" variant="text" startIcon={<SettingsOutlinedIcon />}>
-          {labels.setupMeetingConfig}
-        </Button>
+        <Link href={setupHref} style={{ textDecoration: "none" }}>
+          <Button size="small" variant="text" startIcon={<SettingsOutlinedIcon />}>
+            {labels.setupMeetingConfig}
+          </Button>
+        </Link>
       ) : null}
     </Stack>
   );

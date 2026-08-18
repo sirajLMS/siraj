@@ -36,5 +36,5 @@ export function WhatsappTabNav({ activeTab, pageLabels }: Readonly<WhatsappTabNa
     href: buildTabHref(pathname, searchParams, tab),
   }));
 
-  return <GenericTabNav activeTab={activeTab} tabs={tabs} ariaLabel="WhatsApp settings sections" />;
+  return <GenericTabNav activeTab={activeTab} tabs={tabs} ariaLabel={pageLabels.tabNavAriaLabel} />;
 }

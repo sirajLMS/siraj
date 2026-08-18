@@ -119,7 +119,7 @@ function AvailabilityBlock({
         alignItems: "center",
         p: padding,
         cursor: onClick ? "pointer" : "default",
-        transition: "all 0.2s",
+        transition: theme.transitions.create("all", { duration: 200 }),
         "&:hover": onClick
           ? {
               backgroundColor: theme.palette.primary.dark,

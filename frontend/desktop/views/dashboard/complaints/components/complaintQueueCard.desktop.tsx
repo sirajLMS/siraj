@@ -26,7 +26,7 @@ const StyledQueueCardPaper = styled(Paper, {
   borderRadius: theme.layout.radius.card,
   border: `1px solid ${theme.palette.outlineVariant}`,
   backgroundColor: isUnanswered ? theme.palette.surface : theme.palette.surfaceContainerLow,
-  transition: "background-color 0.15s ease",
+  transition: theme.transitions.create("background-color", { duration: 150, easing: "ease" }),
 }));
 
 function DesktopRoot({ children, isUnanswered }: Readonly<{ children: ReactNode; isUnanswered: boolean }>) {

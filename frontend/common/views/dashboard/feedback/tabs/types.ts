@@ -5,6 +5,7 @@ export interface FeedbackManageViewLabels {
   readonly title: string;
   readonly subtitle: string;
   readonly tabs: FeedbackManageTabsLabels;
+  readonly tabNavAriaLabel: string;
 }
 export type FeedbackManageTabsViewModel = {
   readonly labels: FeedbackManageViewLabels;

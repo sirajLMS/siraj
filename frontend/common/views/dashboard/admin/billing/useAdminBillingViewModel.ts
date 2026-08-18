@@ -23,6 +23,7 @@ import {
   mapBillingCurrencyBuckets,
 } from "@/frontend/common/lib/formatBillingCurrencyTotals";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import { useAdminBillingStore } from "@/frontend/common/stores/adminBillingStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -104,7 +105,7 @@ export interface AdminBillingViewModel {
   readonly deleteTargetId: string | null;
   readonly snackbarOpen: boolean;
   readonly snackbarMessage: string;
-  readonly snackbarSeverity: "success" | "error";
+  readonly snackbarSeverity: SnackbarSeverity;
   readonly onCloseSnackbar: () => void;
   readonly onCloseProofDialog: () => void;
   readonly onCloseDetailsDialog: () => void;

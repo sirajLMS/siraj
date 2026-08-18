@@ -11,6 +11,7 @@ export interface BillingViewLabels {
   readonly title: string;
   readonly subtitle: string;
   readonly tabs: BillingTabsLabels;
+  readonly tabNavAriaLabel: string;
 }
 
 export type BillingTabsViewModel = {

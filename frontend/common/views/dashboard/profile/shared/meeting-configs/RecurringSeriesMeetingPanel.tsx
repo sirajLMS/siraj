@@ -24,9 +24,11 @@ export function RecurringSeriesMeetingPanel({
     <SectionPanel title={t.seriesSectionTitle} subTitle={t.seriesSectionSubtitle}>
       <Stack spacing={2}>
         <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
-          <Button component={Link} href={`/recurring-schedules/${recurringScheduleId}`} size="small" variant="outlined">
-            {t.manageSeriesLink}
-          </Button>
+          <Link href={`/recurring-schedules/${recurringScheduleId}`} style={{ textDecoration: "none" }}>
+            <Button size="small" variant="outlined">
+              {t.manageSeriesLink}
+            </Button>
+          </Link>
         </Stack>
         <ClassMeetingConfigsSection recurringScheduleId={recurringScheduleId} effectiveMeeting={effectiveMeeting} />
       </Stack>

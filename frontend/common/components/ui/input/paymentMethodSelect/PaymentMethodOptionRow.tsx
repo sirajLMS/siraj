@@ -2,7 +2,6 @@
 
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import type { PaymentMethodOptionRowProps } from "@/frontend/common/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.types";
 import { resolvePaymentMethodTypeIcon } from "@/frontend/common/components/ui/input/paymentMethodSelect/utils";
@@ -19,13 +18,13 @@ export function PaymentMethodOptionRow({
       ) : (
         <Avatar sx={{ width: 24, height: 24 }}>{resolvePaymentMethodTypeIcon(type)}</Avatar>
       )}
-      <Typography component="span" sx={{ flex: 1 }}>
+      <Box component="span" sx={{ flex: 1 }}>
         {option.displayName}
-      </Typography>
+      </Box>
       {showSlug ? (
-        <Typography component="span" dir="ltr" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0 })}>
+        <Box component="span" sx={theme => ({ color: theme.palette.text.secondary, flexShrink: 0, direction: "ltr" })}>
           {option.slug}
-        </Typography>
+        </Box>
       ) : null}
     </Box>
   );

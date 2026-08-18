@@ -1,7 +1,7 @@
 "use client";
 
 import { AddOutlined, DeleteOutlined, EditOutlined } from "@mui/icons-material";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography } from "@mui/material";
 import { getCurrencyDisplayName } from "@/frontend/common/lib/currency";
 import { BillingMobileListShellShared } from "@/frontend/common/views/dashboard/admin/billing/__shared__/billingMobileListShellShared";
 import type {
@@ -9,7 +9,7 @@ import type {
   HedgeRow,
 } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/useCurrencyHedgesViewModel";
 import { formatHedgeTimestamp } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/utils";
-import { MobileCardListItem } from "@/frontend/mobile/components/ui";
+import { MobileCardListItem, MobilePrimaryPageAction } from "@/frontend/mobile/components/ui";
 import { useAppLocale } from "@/shared/locale";
 
 export function CurrencyHedgesMobileView({
@@ -28,9 +28,9 @@ export function CurrencyHedgesMobileView({
       pageTitle={shell.pageTitle}
       pageSubtitle={shell.pageSubtitle}
       actions={
-        <Button variant="contained" startIcon={<AddOutlined />} onClick={onAdd}>
+        <MobilePrimaryPageAction startIcon={<AddOutlined />} onClick={onAdd}>
           {actions.addHedge}
-        </Button>
+        </MobilePrimaryPageAction>
       }
       rows={rows}
       loading={loading}

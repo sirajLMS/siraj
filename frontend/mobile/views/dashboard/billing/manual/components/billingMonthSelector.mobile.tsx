@@ -26,7 +26,7 @@ function MobileMonthItem({ monthId, isChecked, onToggle, label }: Readonly<Billi
         typography: "labelMd",
         fontWeight: 500,
         textTransform: "uppercase",
-        transition: "background-color 0.15s ease, border-color 0.15s ease",
+        transition: theme.transitions.create(["background-color", "border-color"], { duration: 150, easing: "ease" }),
         borderColor: isChecked ? theme.palette.primaryContainer : theme.palette.outlineVariant,
       })}
     >

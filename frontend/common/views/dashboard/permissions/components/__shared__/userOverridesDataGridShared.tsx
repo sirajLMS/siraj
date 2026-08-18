@@ -110,7 +110,7 @@ export function EditOverridesButton({
           color: theme.palette.primary.dark,
           transform: "scale(1.02)",
         },
-        transition: "all 0.15s ease",
+        transition: theme.transitions.create("all", { duration: 150, easing: "ease" }),
       })}
       startIcon={showIcon ? <EditOutlined fontSize="small" /> : undefined}
     >

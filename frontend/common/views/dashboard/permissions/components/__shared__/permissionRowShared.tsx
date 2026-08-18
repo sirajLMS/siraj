@@ -23,7 +23,7 @@ const StyledPermissionRowContainer = styled(Box, {
     backgroundColor: isChecked ? theme.palette.primaryContainer : theme.palette.action.hover,
   },
   opacity: isSystem ? 0.7 : 1,
-  transition: "background-color 0.2s",
+  transition: theme.transitions.create("background-color", { duration: 200 }),
 }));
 
 const StyledPermissionContent = styled(Box)(({ theme }) => ({

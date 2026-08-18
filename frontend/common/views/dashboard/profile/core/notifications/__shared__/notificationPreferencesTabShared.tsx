@@ -2,6 +2,7 @@
 
 import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
@@ -56,7 +57,7 @@ function NotificationPreferencesTabHeader({ labels }: Readonly<{ readonly labels
 function NotificationPreferencesTabSnackbar(props: {
   readonly open: boolean;
   readonly message: string;
-  readonly severity: "success" | "error";
+  readonly severity: SnackbarSeverity;
   readonly onClose: () => void;
 }) {
   return (

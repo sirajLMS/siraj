@@ -24,7 +24,7 @@ export function PaymentCatalogsDesktopChrome({
         breadcrumbOptions={{ currentTitle: resolveActiveTabLabel(activeTab, tabNavItems) }}
       />
       <Box sx={{ mt: 3 }}>
-        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="Payment catalog sections" />
+        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

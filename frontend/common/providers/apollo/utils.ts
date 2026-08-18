@@ -52,7 +52,8 @@ export const createConnectivityLink = (
   getConnected: () => boolean,
   setConnected: (v: boolean) => void,
   checkConnection: () => Promise<boolean>,
-  notifyDisconnected: () => void
+  notifyDisconnected: () => void,
+  getServerNotAvailableMessage: () => string
 ) => {
   const subscribeToRequest = (
     forward: (operation: ApolloLink.Operation) => Observable<ApolloLink.Result>,
@@ -72,7 +73,7 @@ export const createConnectivityLink = (
       data: null,
       errors: [
         {
-          message: "Server not available",
+          message: getServerNotAvailableMessage(),
           extensions: { code: "NETWORK_ERROR", connectivityError: true },
         },
       ],

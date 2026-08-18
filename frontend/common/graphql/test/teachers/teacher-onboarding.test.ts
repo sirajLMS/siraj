@@ -28,7 +28,7 @@ const createMinimalTeacherInput = (
   name: overrides?.name ?? "Test Teacher",
   email: overrides?.email ?? `test_teacher_${Date.now()}@test.com`,
   avatarUrl: null,
-  password: randomUUID(),
+  password: `Pwd_${randomUUID()}`,
   timezone: IanaTimezone.Utc,
   nationality: CountryCode.Us,
   countryCode: CountryCode.Us,
@@ -228,7 +228,7 @@ describe("Teacher Onboarding GraphQL API", () => {
     const minimalInput = {
       name: "Minimal Teacher",
       email: `minimal_${Date.now()}@test.com`,
-      password: randomUUID(),
+      password: `Pwd_${randomUUID()}`,
       timezone: IanaTimezone.Utc,
       avatarUrl: null,
       nationality: null,

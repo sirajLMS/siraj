@@ -8,6 +8,7 @@ export const createStudentMutationDocument: TypedDocumentNode<
 > = gql`
   mutation createStudent($input: StudentOnboardingInput!) {
     createStudent(input: $input) {
+      id
       studentId
       parentId
       name

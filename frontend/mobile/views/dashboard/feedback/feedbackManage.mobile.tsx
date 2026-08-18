@@ -20,7 +20,7 @@ export function FeedbackManageMobileChrome({ labels, activeTab, tabNavItems }: R
         breadcrumbOptions={{ currentTitle: resolveActiveTabLabel(activeTab, tabNavItems) }}
       />
       <Box sx={{ mt: 2 }}>
-        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="Feedback sections" />
+        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

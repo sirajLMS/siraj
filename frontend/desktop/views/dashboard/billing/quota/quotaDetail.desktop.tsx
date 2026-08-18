@@ -113,17 +113,16 @@ export function QuotaDetailDesktop(props: Readonly<QuotaDetailViewModel>) {
             titleVariant="headlineLg"
             actions={
               <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-                <Button startIcon={<ArrowBackOutlined />} component={Link} href="/quotas" color="inherit">
-                  {t.actions.cancel}
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<EditOutlined />}
-                  component={Link}
-                  href={`/quotas/${quota.id}/edit`}
-                >
-                  {t.actions.edit}
-                </Button>
+                <Link href="/quotas" style={{ textDecoration: "none" }}>
+                  <Button startIcon={<ArrowBackOutlined />} color="inherit">
+                    {t.actions.cancel}
+                  </Button>
+                </Link>
+                <Link href={`/quotas/${quota.id}/edit`} style={{ textDecoration: "none" }}>
+                  <Button variant="outlined" startIcon={<EditOutlined />}>
+                    {t.actions.edit}
+                  </Button>
+                </Link>
                 <Button variant="outlined" color="error" startIcon={<DeleteOutlined />} onClick={onDeleteDialogOpen}>
                   {t.actions.delete}
                 </Button>

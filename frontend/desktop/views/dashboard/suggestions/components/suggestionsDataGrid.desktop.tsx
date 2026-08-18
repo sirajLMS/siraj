@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -32,7 +32,7 @@ function actionButtons(
   }
 
   return (
-    <Typography component="div" sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
+    <Box sx={{ display: "flex", gap: 0.5, justifyContent: "flex-end" }}>
       {canManage && row.status === SuggestionStatus.Pending && (
         <>
           <Button
@@ -80,7 +80,7 @@ function actionButtons(
           {labels.table.delete}
         </Button>
       )}
-    </Typography>
+    </Box>
   );
 }
 

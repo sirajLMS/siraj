@@ -178,19 +178,18 @@ export function QuotaListDesktop(props: Readonly<QuotaListViewModel>) {
       renderCell: params => (
         <Stack direction="row" spacing={0.5}>
           <Tooltip title={t.actions.viewLedger}>
-            <IconButton size="small" aria-label={t.actions.view} component={Link} href={`/quotas/${params.row.id}`}>
-              <VisibilityOutlined fontSize="small" />
-            </IconButton>
+            <Link href={`/quotas/${params.row.id}`} style={{ textDecoration: "none" }}>
+              <IconButton size="small" aria-label={t.actions.view}>
+                <VisibilityOutlined fontSize="small" />
+              </IconButton>
+            </Link>
           </Tooltip>
           <Tooltip title={t.actions.edit}>
-            <IconButton
-              size="small"
-              aria-label={t.actions.edit}
-              component={Link}
-              href={`/quotas/${params.row.id}/edit`}
-            >
-              <EditOutlined fontSize="small" />
-            </IconButton>
+            <Link href={`/quotas/${params.row.id}/edit`} style={{ textDecoration: "none" }}>
+              <IconButton size="small" aria-label={t.actions.edit}>
+                <EditOutlined fontSize="small" />
+              </IconButton>
+            </Link>
           </Tooltip>
           <Tooltip title={t.actions.delete}>
             <IconButton

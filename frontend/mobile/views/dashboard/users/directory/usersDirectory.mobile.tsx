@@ -34,7 +34,7 @@ export function UsersDirectoryMobileChrome({
         }
       />
       <Box sx={{ mt: 2 }}>
-        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel="Users directory sections" />
+        <GenericTabNav activeTab={activeTab} tabs={tabNavItems} ariaLabel={labels.tabNavAriaLabel} />
       </Box>
     </>
   );

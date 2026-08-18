@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { StyledMonospaceLabel } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewDataGrid.styles";
 import { buildScheduleTimezoneOffsetDetail } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -33,23 +33,23 @@ function ScheduleTimezoneOffsetTooltipBody({
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, py: 0.25 }}>
       {time ? (
-        <Typography variant="bodyMd" component="span">
+        <Box component="span" sx={{ typography: "bodyMd" }}>
           {labels.time}: {time}
-        </Typography>
+        </Box>
       ) : null}
       {timezoneName ? (
-        <Typography variant="bodyMd" component="span">
+        <Box component="span" sx={{ typography: "bodyMd" }}>
           {labels.timezone}: {timezoneName}
-        </Typography>
+        </Box>
       ) : null}
       {timezoneUtcOffset ? (
-        <Typography variant="bodyMd" component="span">
+        <Box component="span" sx={{ typography: "bodyMd" }}>
           {labels.utcOffset}: {timezoneUtcOffset}
-        </Typography>
+        </Box>
       ) : null}
-      <Typography variant="bodyMd" component="span">
+      <Box component="span" sx={{ typography: "bodyMd" }}>
         {labels.yourOffset}: {yourUtcOffset}
-      </Typography>
+      </Box>
     </Box>
   );
 }
