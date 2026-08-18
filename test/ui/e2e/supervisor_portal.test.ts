@@ -27,6 +27,7 @@ const SUPERVISOR_DASHBOARD_TITLE = tr(dashboard.pageTitle);
 const GO_TO_REVIEWS = tr(dashboard.goToReviews);
 const RECENT_APPROVALS = tr(dashboard.recentApprovals);
 const NO_RECENT_APPROVALS = tr(dashboard.noRecentApprovals);
+const APPROVED_STATUS = tr(dashboard.approvedStatus);
 const TEACHER_DUES_SUMMARY = tr(dashboard.teacherDuesSummary);
 const TOTAL_PENDING_DUES = tr(dashboard.totalPendingDues);
 const GO_TO_DUES = tr(dashboard.goToDues);
@@ -54,7 +55,7 @@ const SELECT_YEAR = tr(reports.selectYear);
 const SELECT_MONTH = tr(reports.selectMonth);
 const SELECT_TEACHER = tr(reports.selectTeacher);
 
-const PROFILE_TITLE = tr(profile.pageTitle);
+const PROFILE_CONTACT_SECTION = tr(profile.sections.contact);
 
 let context: BrowserContext;
 let page: Page;
@@ -68,39 +69,54 @@ afterEach(async () => {
   }
 });
 
+async function expectVisible(locator: import("playwright").Locator): Promise<void> {
+  await locator.first().waitFor({ state: "visible" });
+  expect(await locator.first().isVisible()).toBe(true);
+}
+
+async function isVisibleSafe(locator: import("playwright").Locator): Promise<boolean> {
+  try {
+    await locator.first().waitFor({ state: "visible", timeout: 5000 });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 describe("Supervisor Portal E2E", () => {
   test("Supervisor login -> dashboard loads with pending reviews hero card", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     // Dashboard page title
-    expect(await page.getByRole("heading", { name: SUPERVISOR_DASHBOARD_TITLE }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("heading", { name: SUPERVISOR_DASHBOARD_TITLE }));
 
     // Pending reviews hero card - shows count
-    expect(await page.getByText(PENDING_REVIEWS_HERO).isVisible()).toBe(true);
+    await expectVisible(page.getByText(PENDING_REVIEWS_HERO));
 
     // Go to reviews button
-    expect(await page.getByRole("button", { name: GO_TO_REVIEWS }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("button", { name: GO_TO_REVIEWS }));
   });
 
   test("Supervisor dashboard shows Recent Approvals section (not empty-state-only)", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
-    expect(await page.getByText(RECENT_APPROVALS).isVisible()).toBe(true);
+    await expectVisible(page.getByText(RECENT_APPROVALS));
 
     const emptyState = page.getByText(NO_RECENT_APPROVALS);
-    const approvalRow = page.locator("button").filter({ hasText: /·/ });
+    // Approval cards contain "مقبول" (approved) status text
+    const approvalCard = page.locator('[class*="MuiPaper-root"]').filter({ hasText: APPROVED_STATUS });
 
-    const hasEmptyState = await emptyState.isVisible().catch(() => false);
-    const hasApprovals = (await approvalRow.count()) > 0;
+    const hasEmptyState = await isVisibleSafe(emptyState);
+    const hasApprovals = (await approvalCard.count()) > 0;
 
     // Section must render meaningful content: either approval rows or the empty label
     expect(hasApprovals || hasEmptyState).toBe(true);
     // When seed data has approvals, prefer asserting rows (not empty-state-only)
     if (hasApprovals) {
       expect(hasEmptyState).toBe(false);
-      expect(await approvalRow.first().isVisible()).toBe(true);
+      await expectVisible(approvalCard.first());
     }
   });
 
@@ -109,9 +125,9 @@ describe("Supervisor Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     // Teacher dues summary section
-    expect(await page.getByRole("heading", { name: TEACHER_DUES_SUMMARY }).isVisible()).toBe(true);
-    expect(await page.getByText(TOTAL_PENDING_DUES).isVisible()).toBe(true);
-    expect(await page.getByRole("button", { name: GO_TO_DUES }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("heading", { name: TEACHER_DUES_SUMMARY }));
+    await expectVisible(page.getByText(TOTAL_PENDING_DUES));
+    await expectVisible(page.getByRole("button", { name: GO_TO_DUES }));
   });
 
   test("Supervisor dashboard shows monthly reports shortcut", async () => {
@@ -119,8 +135,8 @@ describe("Supervisor Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     // Monthly reports shortcut section
-    expect(await page.getByRole("heading", { name: MONTHLY_REPORTS_SHORTCUT }).isVisible()).toBe(true);
-    expect(await page.getByRole("button", { name: GO_TO_MONTHLY_REPORTS }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("heading", { name: MONTHLY_REPORTS_SHORTCUT }));
+    await expectVisible(page.getByRole("button", { name: GO_TO_MONTHLY_REPORTS }));
   });
 
   test("Supervisor can navigate to pending reviews page", async () => {
@@ -131,11 +147,11 @@ describe("Supervisor Portal E2E", () => {
     await page.getByRole("button", { name: GO_TO_REVIEWS }).click();
     await page.waitForURL("**/lesson-reports**");
     // Pending reviews page title
-    expect(await page.getByRole("heading", { name: PENDING_REVIEWS_TITLE }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("heading", { name: PENDING_REVIEWS_TITLE }));
 
     // Filter Autocomplete fields
-    expect(await page.getByLabel(FILTER_BY_TEACHER).isVisible()).toBe(true);
-    expect(await page.getByLabel(FILTER_BY_STUDENT).isVisible()).toBe(true);
+    await expectVisible(page.getByLabel(FILTER_BY_TEACHER));
+    await expectVisible(page.getByLabel(FILTER_BY_STUDENT));
   });
 
   test("Pending reviews page shows queue with approve/reject buttons or empty state", async () => {
@@ -149,9 +165,8 @@ describe("Supervisor Portal E2E", () => {
     const emptyState = page.getByText(NO_PENDING_REVIEWS);
 
     // At least one of these should be visible
-    const hasButtons =
-      (await approveButton.isVisible().catch(() => false)) || (await rejectButton.isVisible().catch(() => false));
-    const hasEmptyState = await emptyState.isVisible().catch(() => false);
+    const hasButtons = (await isVisibleSafe(approveButton)) || (await isVisibleSafe(rejectButton));
+    const hasEmptyState = await isVisibleSafe(emptyState);
 
     expect(hasButtons || hasEmptyState).toBe(true);
   });
@@ -164,24 +179,19 @@ describe("Supervisor Portal E2E", () => {
     await page.getByRole("button", { name: GO_TO_DUES }).click();
     await page.waitForURL("**/teacher-dues**");
     // Teacher dues page title
-    expect(await page.getByRole("heading", { name: TEACHER_DUES_TITLE }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("heading", { name: TEACHER_DUES_TITLE }));
 
     // Mark as Paid — column header and/or row action button (permission-gated)
     const markPaidHeader = page.getByRole("columnheader", { name: MARK_AS_PAID });
     const markPaidButton = page.getByRole("button", { name: MARK_AS_PAID });
-    const hasMarkPaid =
-      (await markPaidHeader.isVisible().catch(() => false)) ||
-      (await markPaidButton
-        .first()
-        .isVisible()
-        .catch(() => false));
+    const hasMarkPaid = (await isVisibleSafe(markPaidHeader)) || (await isVisibleSafe(markPaidButton));
     expect(hasMarkPaid).toBe(true);
 
     // Table columns
-    expect(await page.getByRole("columnheader", { name: TEACHER_COLUMN }).isVisible()).toBe(true);
-    expect(await page.getByRole("columnheader", { name: CLASS_DATE_COLUMN }).isVisible()).toBe(true);
-    expect(await page.getByRole("columnheader", { name: STUDENT_COLUMN }).isVisible()).toBe(true);
-    expect(await page.getByRole("columnheader", { name: STATUS_COLUMN }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("columnheader", { name: TEACHER_COLUMN }));
+    await expectVisible(page.getByRole("columnheader", { name: CLASS_DATE_COLUMN }));
+    await expectVisible(page.getByRole("columnheader", { name: STUDENT_COLUMN }));
+    await expectVisible(page.getByRole("columnheader", { name: STATUS_COLUMN }));
   });
 
   test("Supervisor can navigate to monthly reports page with Generate and Autocomplete", async () => {
@@ -192,20 +202,20 @@ describe("Supervisor Portal E2E", () => {
     await page.getByRole("button", { name: GO_TO_MONTHLY_REPORTS }).click();
     await page.waitForURL("**/monthly-reports**");
     // Monthly reports page title
-    expect(await page.getByRole("heading", { name: MONTHLY_REPORTS_TITLE }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("heading", { name: MONTHLY_REPORTS_TITLE }));
 
     // Report type toggle
-    expect(await page.getByText(REPORT_TYPE_TOGGLE).isVisible()).toBe(true);
+    await expectVisible(page.getByText(REPORT_TYPE_TOGGLE));
 
     // Generate report button
-    expect(await page.getByRole("button", { name: GENERATE_REPORT }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("button", { name: GENERATE_REPORT }));
 
     // Year/Month selectors
-    expect(await page.getByLabel(SELECT_YEAR).isVisible()).toBe(true);
-    expect(await page.getByLabel(SELECT_MONTH).isVisible()).toBe(true);
+    await expectVisible(page.getByLabel(SELECT_YEAR));
+    await expectVisible(page.getByLabel(SELECT_MONTH));
 
     // Teacher Autocomplete (default report type is teacher)
-    expect(await page.getByLabel(SELECT_TEACHER).isVisible()).toBe(true);
+    await expectVisible(page.getByLabel(SELECT_TEACHER));
   });
 
   test("Supervisor can navigate to profile page", async () => {
@@ -213,8 +223,8 @@ describe("Supervisor Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     await page.goto("/profile");
-    // Canonical own-profile route (same as teachers/students)
-    expect(await page.getByRole("heading", { name: PROFILE_TITLE }).isVisible()).toBe(true);
+    // Profile page shows contact information section
+    await expectVisible(page.getByRole("heading", { name: PROFILE_CONTACT_SECTION }));
   });
 
   test("Mobile viewport: supervisor dashboard renders mobile view", async () => {
@@ -222,18 +232,18 @@ describe("Supervisor Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     // Dashboard page title visible
-    expect(await page.getByRole("heading", { name: SUPERVISOR_DASHBOARD_TITLE }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("heading", { name: SUPERVISOR_DASHBOARD_TITLE }));
 
     // Pending reviews card visible (mobile uses card layout)
-    expect(await page.getByText(PENDING_REVIEWS_HERO).isVisible()).toBe(true);
+    await expectVisible(page.getByText(PENDING_REVIEWS_HERO));
 
     // Teacher dues summary visible
-    expect(await page.getByRole("heading", { name: TEACHER_DUES_SUMMARY }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("heading", { name: TEACHER_DUES_SUMMARY }));
 
     // Monthly reports shortcut visible
-    expect(await page.getByRole("button", { name: GO_TO_MONTHLY_REPORTS }).isVisible()).toBe(true);
+    await expectVisible(page.getByRole("button", { name: GO_TO_MONTHLY_REPORTS }));
 
     // Recent Approvals section
-    expect(await page.getByText(RECENT_APPROVALS).isVisible()).toBe(true);
+    await expectVisible(page.getByText(RECENT_APPROVALS));
   });
 });

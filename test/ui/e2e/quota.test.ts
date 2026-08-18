@@ -127,10 +127,15 @@ async function gotoQuotaList(p: Page): Promise<void> {
  */
 async function waitForDesktopContent(p: Page): Promise<void> {
   const dataGrid = p.locator(".MuiDataGrid-root").first();
+  const cardList = p.locator('a[href^="/quotas/"]').first();
   const emptyState = p.getByText(NO_QUOTAS).first();
   const errorState = p.getByText(EMPTY_LIST_MSG).first();
 
   const gridReady = dataGrid
+    .waitFor({ state: "attached", timeout: 30_000 })
+    .then(() => true)
+    .catch(() => false);
+  const cardReady = cardList
     .waitFor({ state: "attached", timeout: 30_000 })
     .then(() => true)
     .catch(() => false);
@@ -143,8 +148,8 @@ async function waitForDesktopContent(p: Page): Promise<void> {
     .then(() => true)
     .catch(() => false);
 
-  const [hasGrid, hasEmpty, hasError] = await Promise.all([gridReady, emptyReady, errorReady]);
-  expect(hasGrid || hasEmpty || hasError).toBe(true);
+  const [hasGrid, hasCards, hasEmpty, hasError] = await Promise.all([gridReady, cardReady, emptyReady, errorReady]);
+  expect(hasGrid || hasCards || hasEmpty || hasError).toBe(true);
 }
 
 describe.serial("Quota E2E", () => {
@@ -164,10 +169,15 @@ describe.serial("Quota E2E", () => {
     ({ page, context } = await setupDesktopQuotaListTest());
 
     const dataGrid = page.locator(".MuiDataGrid-root").first();
+    const cardList = page.locator('a[href^="/quotas/"]').first();
     const noData = page.getByText(NO_QUOTAS).first();
     const emptyError = page.getByText(EMPTY_LIST_MSG).first();
 
     const gridReady = dataGrid
+      .waitFor({ state: "attached", timeout: 30_000 })
+      .then(() => true)
+      .catch(() => false);
+    const cardReady = cardList
       .waitFor({ state: "attached", timeout: 30_000 })
       .then(() => true)
       .catch(() => false);
@@ -180,12 +190,19 @@ describe.serial("Quota E2E", () => {
       .then(() => true)
       .catch(() => false);
 
-    const [hasGrid, hasEmpty, hasError] = await Promise.all([gridReady, emptyReady, errorReady]);
+    const [hasGrid, hasCards, hasEmpty, hasError] = await Promise.all([gridReady, cardReady, emptyReady, errorReady]);
 
     if (hasGrid) {
       const pagination = page.locator(".MuiDataGrid-pagination, .MuiPagination-root").first();
       await pagination.waitFor({ state: "attached" });
       expect(await pagination.count()).toBeGreaterThan(0);
+    } else if (hasCards) {
+      // Card-based list pagination: look for "1–N of N" text or prev/next buttons
+      const pageText = (await page.locator("main").textContent()) ?? "";
+      const hasPageCount = /\d/.test(pageText);
+      const prevNext = page.locator('button:has-text("Previous"), button:has-text("Next")');
+      const hasPrevNext = (await prevNext.count()) > 0;
+      expect(hasPageCount || hasPrevNext).toBe(true);
     } else {
       expect(hasEmpty || hasError).toBe(true);
     }

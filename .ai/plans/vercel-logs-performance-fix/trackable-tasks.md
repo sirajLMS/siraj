@@ -198,20 +198,22 @@ Phase H (knowledge propagation)
 
 ## Phase A3: Eliminate Query.me Redundant User Fetch (NEW — R3-8) ⚠️ MEDIUM
 
-> **R3-8 finding:** `auth.query.ts` line 17 calls `UserService.findById(ctx.user.id)` to re-fetch a user already loaded by `createContext` (`gqlContext.ts:80`). Fires 16×/hour (60s poll). `me` uses `loggedIn: true` scope — NOT a scopeAuth issue. Type caveat: `ctx.user` is safe-user shape; verify `AuthUtils.toUserReturnType` accepts it.
+> **R3-8 finding:** `auth.query.ts` line 17 calls `UserService.findById(ctx.user.id)` to re-fetch a user already loaded by `createContext` (`gqlContext.ts:80` via `findSafeById`). Fires 16×/hour (60s poll). `me` uses `loggedIn: true` scope — NOT a scopeAuth issue. **R4-31 correction:** `ctx.user` is typed as `{ id: string; displayCurrency: CurrencyCode | null }` — a 2-field minimal object, NOT `UserSelectType`. Calling `AuthUtils.toUserReturnType(ctx.user)` would fail type-checking. The fix MUST either store the full `safeUser` on `BaseContext` (option a) or replace `findById` with `findSafeById` in the resolver (option b).
 
 ### Task A3.1: Return ctx.user Directly in Query.me Resolver
 
-- [ ] A3.1.1 Replace UserService.findById with ctx.user
+- [ ] A3.1.1 Eliminate redundant UserService.findById in Query.me resolver
   - File: `backend/graphql/query/auth/auth.query.ts`
-  - Line 17: Replace `const user = await UserService.findById(ctx.user.id)` with `const user = AuthUtils.toUserReturnType(ctx.user)`
-  - **Type caveat (R3-8)**: Verify `AuthUtils.toUserReturnType` accepts `SafeUser` shape (from `findSafeById`). If it requires fields not in `SafeUser`, either: (a) cache the full user object in `createContext` (fetch via `findById` once, store alongside `ctx.user` as `SafeUser` — does NOT change `findSafeById` itself, which is excluded per Non-Goals), or (b) keep `findById` with documentation explaining why the fuller shape is needed.
+  - Line 17: Replace `const user = await UserService.findById(ctx.user.id)` with one of:
+    - **Option (a) — preferred (0 DB):** Add `safeUser: UserSelectType | null` field to `BaseContext` in `gqlContext.ts`, populate it at line 80 (already calls `findSafeById` — just store the result: `safeUser`), then use `AuthUtils.toUserReturnType(ctx.safeUser, { role: ctx.role })` in the resolver. Adds zero DB queries.
+    - **Option (b) — fallback (1 DB, narrower):** Replace `findById` with `findSafeById` — same DB cost but `SAFE_USER_SELECT` column subset is narrower.
+  - **R4-31 critical:** `ctx.user` is `{ id: string; displayCurrency: CurrencyCode | null }` — NOT `UserSelectType`. Calling `AuthUtils.toUserReturnType(ctx.user)` would fail type-checking. **R4-28:** "SafeUser" is NOT a named type. **R4-34:** If option (a), strip `password` and `rememberTokenHash` from the stored object (both included in `SAFE_USER_SELECT`).
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1.6_
 
 - [ ] A3.1.2 Write paired unit test
   - Test file: `backend/graphql/query/auth/test/auth.query.test.ts` (or existing location)
-  - Cover: `Query.me` returns user from `ctx.user` without calling `UserService.findById`, `AuthUtils.toUserReturnType` transformation works correctly
+  - Cover: `Query.me` returns user from `ctx.safeUser` (option a) or `findSafeById` (option b) without calling `UserService.findById`, `AuthUtils.toUserReturnType` transformation works correctly on `UserSelectType`
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 1.6_
 

@@ -120,19 +120,19 @@ Eliminate redundant DB queries, reduce cold-start overhead, suppress excessive c
 
 **User Story:** As a dashboard user, I want the `me` query to not re-fetch user data already loaded in the GraphQL context, so that 16 redundant DB queries per hour are eliminated.
 
-> **R3-8 new finding** — the plan missed this entirely. `auth.query.ts` line 17 calls `UserService.findById(ctx.user.id)` to re-fetch the user that `createContext` already loaded as `ctx.user` at `gqlContext.ts` line 80.
+> **R3-8 new finding** — the plan missed this entirely. `auth.query.ts` line 17 calls `UserService.findById(ctx.user.id)` to re-fetch the user that `createContext` already loaded via `findSafeById` at `gqlContext.ts` line 80. **R4-31 correction:** `ctx.user` is NOT the full user object — it's a 2-field `{ id, displayCurrency }` shape. The full `safeUser` is fetched at line 80 but NOT stored on the context. See AC#2 for the corrected fix direction.
 
 #### Acceptance Criteria
 
-1. WHEN `Query.me` executes THEN system SHALL return `ctx.user` (or `AuthUtils.toUserReturnType(ctx.user)` if type shaping is needed) instead of calling `UserService.findById(ctx.user.id)`.
-2. WHEN `ctx.user` shape is insufficient for `AuthUtils.toUserReturnType` THEN system SHALL cache the full user object in `createContext` (so both `ctx.user` safe-shape and the full user object are available without a second fetch).
-3. WHEN `Query.me` executes on a warm invocation THEN system SHALL issue 0 DB queries for the user lookup.
+1. WHEN `Query.me` executes THEN system SHALL NOT call `UserService.findById(ctx.user.id)` at line 17.
+2. WHEN `Query.me` executes THEN system SHALL obtain the user data from the GraphQL context. **R4-31 correction:** `ctx.user` is typed as `{ id: string; displayCurrency: CurrencyCode | null }` — a 2-field minimal object (gqlContext.ts lines 8–13) that lacks `name`, `email`, `role`, `status`, `timezone`, etc. The fix MUST either: (a) add `safeUser: UserSelectType | null` to `BaseContext` and populate it in `createContext` (line 80 already calls `findSafeById` — just store the result, at zero extra DB cost), then use `AuthUtils.toUserReturnType(ctx.safeUser, { role: ctx.role })` in the resolver; OR (b) replace `findById` with `findSafeById` in the resolver (same DB cost, narrower column subset). **R4-28:** "SafeUser" is NOT a named TypeScript type — both `findById` and `findSafeById` return `UserSelectType`. **R4-34:** If option (a) is chosen, strip `password` and `rememberTokenHash` from the stored object (both are included in `SAFE_USER_SELECT`).
+3. WHEN `Query.me` executes on a warm invocation THEN system SHALL issue 0 DB queries for the user lookup (option (a) only — option (b) still costs 1 DB but uses the narrower `findSafeById`).
 
 #### Additional Details
 - **Priority**: Medium
 - **Complexity**: Low
 - **Dependencies**: None
-- **Type caveat**: `ctx.user` is the safe-user shape from `findSafeById` (strips sensitive fields); `findById` may return a fuller shape. The implementer must confirm whether `AuthUtils.toUserReturnType` works on the safe-user shape or requires the full shape (in which case the full user must be cached in `createContext`).
+- **Type caveat (R4-31)**: `ctx.user` is `{ id: string; displayCurrency: CurrencyCode | null }` — NOT `UserSelectType`. Calling `AuthUtils.toUserReturnType(ctx.user)` would fail type-checking. The fix must store the full `safeUser` on the context (option a) or replace `findById` with `findSafeById` in the resolver (option b). **R4-28:** "SafeUser" is NOT a named type — `findSafeById` returns `UserSelectType`.
 
 ### Requirement 2: Pre-Warm `env-config` Cache for Env-Fallback Keys ⚠️ MEDIUM
 

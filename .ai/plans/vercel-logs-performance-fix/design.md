@@ -386,19 +386,21 @@ graph LR
 > **R3-8 finding:** `auth.query.ts` line 17 calls `UserService.findById(ctx.user.id)` to re-fetch a user that was already loaded by `createContext` at `gqlContext.ts` line 80 (`findSafeById`). This fires 16×/hour (60s poll) — 16 redundant DB queries/hour. The `me` resolver uses `authScopes: { loggedIn: true }`, so this is NOT a scopeAuth issue (Req 1.5 does not apply here).
 
 **Responsibilities**:
-- Return `ctx.user` directly (with `AuthUtils.toUserReturnType` transformation) instead of calling `UserService.findById(ctx.user.id)`
-- **Type caveat (R3-8)**: `ctx.user` is the safe-user shape from `findSafeById` (excludes sensitive fields). `UserService.findById` may return a fuller shape. Verify that `AuthUtils.toUserReturnType` accepts the `ctx.user` shape — if not, create a narrow adapter or extend `findSafeById` to return the needed fields.
+- **R4-31 critical correction:** `ctx.user` is typed as `{ id: string; displayCurrency: CurrencyCode | null }` (gqlContext.ts lines 8–13) — a 2-field minimal object, NOT `UserSelectType`. The previous plan direction ("return `ctx.user`") is NOT viable. The fix MUST use one of:
+  - **Option (a) — preferred (0 DB):** Add `safeUser: UserSelectType | null` to `BaseContext`, populate it in `createContext` at line 80 (already calls `findSafeById` — just store the result on context), then use `AuthUtils.toUserReturnType(ctx.safeUser, { role: ctx.role })` in the resolver. Zero additional DB queries.
+  - **Option (b) — fallback (1 DB, narrower):** Replace `findById` with `findSafeById` in the resolver — same DB cost but narrower column subset (`SAFE_USER_SELECT`).
+- **R4-28:** "SafeUser" is NOT a named TypeScript type — both `findById` and `findSafeById` return `UserSelectType`. `AuthUtils.toUserReturnType` accepts `UserSelectType` (auth.utils.ts line 14).
+- **R4-34 security note:** `SAFE_USER_SELECT` includes `password` and `rememberTokenHash` — if option (a), strip these from the stored object before storing on context.
 
 **Interfaces**:
-- **Input**: `ctx.user` (SafeUser from `findSafeById`)
+- **Input**: `ctx.safeUser` (`UserSelectType` from `findSafeById`, stored on `BaseContext`) — option (a); OR `findSafeById(ctx.user.id)` result — option (b)
 - **Output**: `UserReturnType` (via `AuthUtils.toUserReturnType`)
-- **Dependencies**: `AuthUtils`, `BaseContext`
+- **Dependencies**: `AuthUtils`, `BaseContext` (modified — add `safeUser` field if option a)
 
 **Implementation Notes**:
 - File: `backend/graphql/query/auth/auth.query.ts`
-- Line 17: `const user = await UserService.findById(ctx.user.id);` → `const user = AuthUtils.toUserReturnType(ctx.user);`
-- Verify `AuthUtils.toUserReturnType` accepts `SafeUser` shape (check if `SafeUser` → `UserReturnType` is a valid mapping)
-- If `toUserReturnType` needs fields not in `SafeUser`, either: (a) cache the full user object in `createContext` (fetch via `findById` once, store alongside `ctx.user` as `SafeUser` — does NOT change `findSafeById` itself, which is excluded per Non-Goals), or (b) keep `findById` but add a comment documenting why the fuller shape is needed
+- Line 17: `const user = await UserService.findById(ctx.user.id);` → option (a): `const user = AuthUtils.toUserReturnType(ctx.safeUser, { role: ctx.role });` OR option (b): `const user = AuthUtils.toUserReturnType(await UserService.findSafeById(ctx.user.id), { role: ctx.role });`
+- If option (a): also modify `backend/graphql/gqlContext.ts` — add `safeUser: UserSelectType | null` to `BaseContext` type and set `safeUser` = the result of `findSafeById` at line 80. Strip `password`/`rememberTokenHash` before storing.
 
 ## Data Models
 

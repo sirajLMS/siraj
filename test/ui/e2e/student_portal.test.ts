@@ -29,9 +29,9 @@ const DATE_COLUMN = tr(credits.dateColumn);
 const TYPE_COLUMN = tr(credits.typeColumn);
 const AMOUNT_COLUMN = tr(credits.amountColumn);
 const NOTES_COLUMN = tr(credits.notesColumn);
-const TODAY_CLASSES_LINK = tr(nav.todayClasses);
-const MY_SCHEDULE_LINK = tr(nav.studentSchedule);
-const MY_PROFILE_LINK = tr(nav.studentProfile);
+const TODAY_CLASSES_LINK = tr(nav.studentTodayClasses);
+const LESSON_HISTORY_LINK = tr(nav.studentLessonHistory);
+const SESSIONS_LINK = tr(nav.studentSessions);
 const LOGOUT_BUTTON = tr(nav.logout);
 
 let context: BrowserContext;
@@ -47,6 +47,7 @@ afterEach(async () => {
 });
 
 async function expectVisible(locator: Locator): Promise<void> {
+  await locator.first().waitFor({ state: "visible" });
   expect(await locator.first().isVisible()).toBe(true);
 }
 
@@ -58,18 +59,11 @@ describe("Student Portal E2E", () => {
 
     await page.waitForURL("**/dashboard**");
     // Hero: Next Class label, or empty-state copy when no upcoming lesson
-    const nextClass = page.getByText(NEXT_CLASS);
-    const noUpcoming = page.getByText(NO_UPCOMING);
-    const hasHero =
-      (await nextClass
-        .first()
-        .isVisible()
-        .catch(() => false)) ||
-      (await noUpcoming
-        .first()
-        .isVisible()
-        .catch(() => false));
-    expect(hasHero).toBe(true);
+    const hero = page
+      .locator('[class*="MuiPaper-root"], [class*="MuiBox-root"]')
+      .filter({ hasText: new RegExp(`${NEXT_CLASS.source}|${NO_UPCOMING.source}`, "i") });
+    await hero.first().waitFor({ state: "visible" });
+    expect(await hero.first().isVisible()).toBe(true);
 
     // Join button when a joinable lesson is present
     const joinButton = page.getByRole("button", { name: JOIN_BUTTON });
@@ -146,9 +140,9 @@ describe("Student Portal E2E", () => {
 
     await page.waitForURL("**/dashboard**");
     await expectVisible(page.getByRole("link", { name: TODAY_CLASSES_LINK }));
-    await expectVisible(page.getByRole("link", { name: MY_SCHEDULE_LINK }));
+    await expectVisible(page.getByRole("link", { name: LESSON_HISTORY_LINK }));
+    await expectVisible(page.getByRole("link", { name: SESSIONS_LINK }));
     await expectVisible(page.getByRole("link", { name: CREDITS_LINK }));
-    await expectVisible(page.getByRole("link", { name: MY_PROFILE_LINK }));
     await expectVisible(page.getByRole("button", { name: LOGOUT_BUTTON }));
   });
 });

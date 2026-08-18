@@ -46,7 +46,8 @@ type LocatorLike = ReturnType<Page["getByRole"]>;
 
 async function isVisible(locator: LocatorLike): Promise<boolean> {
   try {
-    return await locator.isVisible();
+    await locator.first().waitFor({ state: "visible", timeout: 5000 });
+    return true;
   } catch {
     return false;
   }
@@ -114,7 +115,8 @@ async function submitTeacherLessonReportIfAvailable(pageNumber: Page): Promise<v
   const hasMarkCompletedButton = await isVisible(markCompletedButton);
 
   if (!hasMarkCompletedButton) {
-    const pageTitle = pageNumber.getByRole("heading", { level: 1 });
+    const pageTitle = pageNumber.getByRole("heading", { level: 2 });
+    await pageTitle.first().waitFor({ state: "visible" });
     expect(await pageTitle.first().isVisible()).toBe(true);
     return;
   }
@@ -162,7 +164,8 @@ describe("Teacher Lesson Report E2E Flow", () => {
     await page.waitForURL("**/dashboard**");
     expect(page.url()).toContain("/dashboard");
 
-    const pageTitle = page.getByRole("heading", { level: 1 });
+    const pageTitle = page.getByRole("heading", { level: 2 });
+    await pageTitle.first().waitFor({ state: "visible" });
     expect(await pageTitle.first().isVisible()).toBe(true);
 
     await submitTeacherLessonReportIfAvailable(page);
@@ -190,7 +193,8 @@ describe("Teacher Lesson Report E2E Flow", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.teacher.groupSlug);
 
     // Verify teacher dashboard loads
-    const dashboardTitle = page.getByRole("heading", { level: 1 });
+    const dashboardTitle = page.getByRole("heading", { level: 2 });
+    await dashboardTitle.first().waitFor({ state: "visible" });
     expect(await dashboardTitle.first().isVisible()).toBe(true);
 
     // Check for Mark Completed button (either enabled or disabled)

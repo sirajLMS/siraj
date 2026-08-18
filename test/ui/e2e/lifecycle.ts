@@ -34,6 +34,7 @@ export async function createContext(viewport = DEFAULT_VIEWPORT): Promise<Browse
   const context = await browser.newContext({
     baseURL: getTestBaseUrl(),
     viewport,
+    extraHTTPHeaders: { "Accept-Language": "ar" },
   });
   context.setDefaultTimeout(30_000);
   context.setDefaultNavigationTimeout(60_000);
@@ -49,6 +50,7 @@ export async function createMobileContext(): Promise<BrowserContext> {
     viewport: { width: 375, height: 812 },
     isMobile: true,
     hasTouch: true,
+    extraHTTPHeaders: { "Accept-Language": "ar" },
   });
   context.setDefaultTimeout(30_000);
   context.setDefaultNavigationTimeout(60_000);

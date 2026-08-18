@@ -36,38 +36,51 @@ describe("Teacher Onboarding E2E", () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUserAtRoute(page, context, DEMO_USERS.superAdmin.groupSlug, "/teachers/onboarding");
-    await page.getByRole("heading", { name: PAGE_TITLE }).waitFor({ state: "visible", timeout: headingTimeout });
-    expect(await page.getByRole("heading", { name: PAGE_TITLE }).isVisible()).toBe(true);
+    const heading = page.getByRole("heading", { name: PAGE_TITLE });
+    await heading.first().waitFor({ state: "visible", timeout: headingTimeout });
+    expect(await heading.first().isVisible()).toBe(true);
   });
 
-  test("phone field shows validation error when exceeding 50 characters", async () => {
+  test("phone field prevents entering more than 50 characters", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUserAtRoute(page, context, DEMO_USERS.superAdmin.groupSlug, "/teachers/onboarding");
-    await page.getByRole("heading", { name: PAGE_TITLE }).waitFor({ state: "visible", timeout: headingTimeout });
+    const heading = page.getByRole("heading", { name: PAGE_TITLE });
+    await heading.first().waitFor({ state: "visible", timeout: headingTimeout });
 
     await page.getByLabel(FULL_NAME_LABEL).fill("E2E Test Teacher");
     await page.getByLabel(EMAIL_LABEL).fill("[EMAIL_REDACTED]");
     await page.getByLabel(PASSWORD_LABEL).fill("TestPassword123!");
 
+    // The PhoneInput enforces maxLength=50 at the DOM level, so entering 51
+    // characters is silently truncated to 50. The Zod .max(50) validator never
+    // fires from typed input because the value never exceeds 50.
     const longPhone = "1".repeat(51);
     const phoneField = page.getByLabel(PHONE_LABEL);
     await phoneField.fill(longPhone);
     await phoneField.blur();
 
-    // PhoneInput validates inline — a 51-digit phone is structurally invalid
-    // (50 national digits after prefix "1" parsing), so the validation error
-    // appears without needing form submit.
-    const errorMsg = page.getByText(PHONE_MAX_LENGTH_ERROR);
-    await errorMsg.waitFor({ state: "visible", timeout: 30_000 });
-    expect(await errorMsg.isVisible()).toBe(true);
+    // Verify the DOM truncated the value to exactly 50 characters.
+    const actualValue = await phoneField.inputValue();
+    expect(actualValue.length).toBeLessThanOrEqual(50);
+    expect(actualValue).toHaveLength(50);
+
+    // The max-length validation error should NOT appear because the value
+    // was truncated to 50 (within the limit).
+    expect(
+      await page
+        .getByText(PHONE_MAX_LENGTH_ERROR)
+        .isVisible()
+        .catch(() => false)
+    ).toBe(false);
   });
 
   test("phone field accepts valid phone number under 50 characters", async () => {
     context = await createContext();
     page = await context.newPage();
     await loginAsDemoUserAtRoute(page, context, DEMO_USERS.superAdmin.groupSlug, "/teachers/onboarding");
-    await page.getByRole("heading", { name: PAGE_TITLE }).waitFor({ state: "visible", timeout: headingTimeout });
+    const heading = page.getByRole("heading", { name: PAGE_TITLE });
+    await heading.first().waitFor({ state: "visible", timeout: headingTimeout });
 
     await page.getByLabel(FULL_NAME_LABEL).fill("E2E Test Teacher");
     await page.getByLabel(EMAIL_LABEL).fill("[EMAIL_REDACTED]");

@@ -47,7 +47,9 @@ function getBellButton(p: Page): Locator {
 describe("Notifications & Billing E2E", () => {
   test("Admin sees notification bell icon", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
-    expect(await getBellButton(p).isVisible()).toBe(true);
+    const bellButton = getBellButton(p);
+    await bellButton.waitFor({ state: "visible" });
+    expect(await bellButton.isVisible()).toBe(true);
   });
 
   test("Clicking bell opens popover with notifications", async () => {
@@ -94,8 +96,10 @@ describe("Notifications & Billing E2E", () => {
 
   test("Mobile: bell icon visible and popover renders", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug, createMobileContext);
-    expect(await getBellButton(p).isVisible()).toBe(true);
-    await getBellButton(p).click();
+    const bellButton = getBellButton(p);
+    await bellButton.waitFor({ state: "visible" });
+    expect(await bellButton.isVisible()).toBe(true);
+    await bellButton.click();
     const drawerTitle = p.getByText(NOTIFICATIONS).first();
     await drawerTitle.waitFor({ state: "visible" });
     expect(await drawerTitle.isVisible()).toBe(true);
