@@ -34,14 +34,15 @@ function formatCountdown(dateString: string | null): string | null {
 type NextClassChipProps = {
   readonly isFrozen: boolean | null | undefined;
   readonly countdown: string | null;
+  readonly frozenLabel: string;
 };
 
-function NextClassChip({ isFrozen, countdown }: NextClassChipProps): ReactNode {
+function NextClassChip({ isFrozen, countdown, frozenLabel }: NextClassChipProps): ReactNode {
   if (isFrozen) {
     return (
       <Chip
         size="small"
-        label="Frozen"
+        label={frozenLabel}
         sx={theme => ({
           backgroundColor: theme.palette.errorContainer,
           color: theme.palette.onErrorContainer,
@@ -164,7 +165,7 @@ export function NextClassJoinCard({ lesson, labels, locale, onJoin }: Readonly<N
         <Typography variant="labelUppercase" sx={theme => ({ color: theme.palette.onPrimaryContainer, opacity: 0.8 })}>
           {labels.nextClass}
         </Typography>
-        <NextClassChip isFrozen={lesson.isFrozen} countdown={countdown} />
+        <NextClassChip isFrozen={lesson.isFrozen} countdown={countdown} frozenLabel={labels.frozen} />
       </Stack>
 
       <Box>

@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { SiteContentRow } from "@/frontend/common/views/dashboard/settings/types/siteContentSettings.types";
 

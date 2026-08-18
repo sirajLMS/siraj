@@ -31,8 +31,8 @@ export function buildGeneralSettingsColumns(
       minWidth: 180,
       renderCell: ({ row }) => (
         <Box>
-          <Typography sx={{ typography: "bodySm", fontWeight: 600 }}>{row.slug}</Typography>
-          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+          <Typography sx={{ typography: "bodyMd", fontWeight: 600 }}>{row.slug}</Typography>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
             {row.label}
           </Typography>
         </Box>
@@ -49,7 +49,7 @@ export function buildGeneralSettingsColumns(
       headerName: labels.categoryColumn,
       flex: 1,
       minWidth: 120,
-      renderCell: ({ row }) => <Typography sx={{ typography: "bodySm" }}>{labels.categories[row.category]}</Typography>,
+      renderCell: ({ row }) => <Typography sx={{ typography: "bodyMd" }}>{labels.categories[row.category]}</Typography>,
     },
     {
       field: "value",
@@ -72,7 +72,7 @@ export function buildGeneralSettingsColumns(
       flex: 1.5,
       minWidth: 200,
       renderCell: ({ row }) => (
-        <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary, whiteSpace: "normal" }}>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, whiteSpace: "normal" }}>
           {row.description}
         </Typography>
       ),

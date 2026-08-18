@@ -358,8 +358,8 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
           wrapUrlInTooltip: true,
           ...(isMobile
             ? {
-                titleTypographyVariant: "titleSm" as const,
-                providerTypographyVariant: "titleSm" as const,
+                titleTypographyVariant: "labelSm" as const,
+                providerTypographyVariant: "labelSm" as const,
                 providerSx: { fontWeight: 600 },
                 outerGap: 1,
                 cardPadding: 1.5,
@@ -368,7 +368,7 @@ export function MeetingConfigsManager({ targetUserId, canManage }: MeetingConfig
                 innerColumnGap: 0.25,
                 chipGap: 0.75,
                 actionGap: 0.25,
-                statusTypographyVariant: "bodySm" as const,
+                statusTypographyVariant: "bodyMd" as const,
                 innerColumnFlex: true,
               }
             : {}),

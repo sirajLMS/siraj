@@ -11,9 +11,9 @@ import {
   updateStudentQuotaMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
-import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
+import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/useStudentProfileContext";
 import {
   createStudentQuotaSchema,
   type StudentQuotaFormData,

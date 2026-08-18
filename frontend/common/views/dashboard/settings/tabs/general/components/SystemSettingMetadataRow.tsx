@@ -32,10 +32,10 @@ export function SystemSettingMetadataRow({ icon, label, value }: Readonly<System
       >
         {icon}
       </Box>
-      <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary, flex: 1 }}>
+      <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary, flex: 1 }}>
         {label}
       </Typography>
-      <Typography sx={{ typography: "bodySm", fontWeight: 600, textAlign: "end" }}>{value}</Typography>
+      <Typography sx={{ typography: "bodyMd", fontWeight: 600, textAlign: "end" }}>{value}</Typography>
     </Box>
   );
 }

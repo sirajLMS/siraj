@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 

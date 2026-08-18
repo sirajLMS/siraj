@@ -46,8 +46,8 @@ export function MeetingProviderSelect({
       {showEmptyCatalog ? (
         <Alert severity="info">
           <Stack spacing={1}>
-            <Stack sx={{ typography: "titleSm" }}>{t.emptyCatalogTitle}</Stack>
-            <Stack sx={{ typography: "bodySm" }}>
+            <Stack sx={{ typography: "labelSm" }}>{t.emptyCatalogTitle}</Stack>
+            <Stack sx={{ typography: "bodyMd" }}>
               {canManageCatalog ? t.emptyCatalogBody : t.emptyCatalogContactAdmin}
             </Stack>
             {canManageCatalog ? (

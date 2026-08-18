@@ -1,3 +1,5 @@
+"use client";
+
 import { createTabbedPaneStore } from "@/frontend/common/stores/createTabbedPaneStore";
 import {
   FEEDBACK_MANAGE_TAB_IDS,

@@ -1,3 +1,5 @@
+"use client";
+
 import { createTabbedPaneStore } from "@/frontend/common/stores/createTabbedPaneStore";
 import {
   SCHEDULE_TRACKING_TAB_IDS,

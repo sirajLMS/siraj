@@ -14,7 +14,9 @@ export type StatusBadgeCategory =
   | "invoice"
   | "paymentMethod"
   | "syncStatus"
-  | "quotaStatus";
+  | "quotaStatus"
+  | "cronRunStatus"
+  | "cronScheduleStatus";
 
 export type StatusPaletteKey = "active" | "pending" | "blocked" | "confirmed" | "completed" | "cancelled";
 

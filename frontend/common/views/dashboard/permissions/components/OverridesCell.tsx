@@ -58,7 +58,7 @@ function renderGrants(info: UserOverrideInfo) {
       <Box
         sx={theme => ({
           fontSize: theme.typography.bodyMd.fontSize,
-          fontWeight: "bold",
+          fontWeight: 700,
           minWidth: 24,
           height: 24,
           borderRadius: 1,
@@ -88,7 +88,7 @@ function renderRevokes(info: UserOverrideInfo) {
       <Box
         sx={theme => ({
           fontSize: theme.typography.bodyMd.fontSize,
-          fontWeight: "bold",
+          fontWeight: 700,
           minWidth: 24,
           height: 24,
           borderRadius: 1,

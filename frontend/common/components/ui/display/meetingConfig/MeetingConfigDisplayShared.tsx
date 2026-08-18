@@ -7,8 +7,8 @@ import type {
   MeetingConfigDisplayData,
   MeetingConfigDisplayProps,
 } from "@/frontend/common/components/ui/display/meetingConfig/types";
+import type { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
-import type { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import type { UiTypographyVariant, UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import { type MeetingConfigDisplayLabels, Translation, useAppTranslation } from "@/shared/locale";
@@ -23,9 +23,9 @@ export interface ProviderNameDisplayProps {
 }
 
 export interface MeetingConfigDisplaySharedOptions {
-  /** Typography variant used for detail row values (default "bodyMd"; mobile uses "bodySm"). */
+  /** Typography variant used for detail row values (default "bodyMd"; mobile uses "bodyMd"). */
   readonly detailTypographyVariant?: UiTypographyVariantLoose;
-  /** Typography variant used for the non-provider-row title fallback (default "titleMd"; mobile uses "titleSm"). */
+  /** Typography variant used for the non-provider-row title fallback (default "titleLg"; mobile uses "labelSm"). */
   readonly titleTypographyVariant?: UiTypographyVariantLoose;
   /** Typography variant used for detail row labels (default "labelMd"; mobile uses "labelSm"). */
   readonly labelTypographyVariant?: UiTypographyVariantLoose;
@@ -39,14 +39,14 @@ export interface MeetingConfigDisplaySharedOptions {
   readonly detailSpacing?: number;
   /** Gap value for the provider-name row (default 1; mobile uses 0.75). */
   readonly providerGap?: number;
-  /** Typography variant forwarded to the ProviderNameDisplay slot (default "bodyMd"; mobile uses "bodySm"). */
+  /** Typography variant forwarded to the ProviderNameDisplay slot (default "bodyMd"; mobile uses "bodyMd"). */
   readonly providerTypographyVariant?: UiTypographyVariantLoose;
 }
 
 export interface MeetingConfigDisplaySharedSlots {
   /** Tier-specific provider-name display component (optional; falls back to inline Typography). */
   readonly ProviderNameDisplay?: React.ComponentType<ProviderNameDisplayProps>;
-  /** Tier-specific provider-name display typography variant (default "bodyMd"; mobile uses "bodySm"). */
+  /** Tier-specific provider-name display typography variant (default "bodyMd"; mobile uses "bodyMd"). */
   readonly options?: MeetingConfigDisplaySharedOptions;
 }
 
@@ -54,7 +54,7 @@ export type MeetingConfigDisplaySharedProps = MeetingConfigDisplayProps & Meetin
 
 const DEFAULT_OPTIONS: Required<MeetingConfigDisplaySharedOptions> = {
   detailTypographyVariant: "bodyMd",
-  titleTypographyVariant: "titleMd",
+  titleTypographyVariant: "titleLg",
   labelTypographyVariant: "labelMd",
   labelMinWidth: 96,
   spacing: 1.5,

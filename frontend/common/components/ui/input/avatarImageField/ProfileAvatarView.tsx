@@ -33,7 +33,7 @@ export function ProfileAvatarView({ imageUrl, label, title }: Readonly<ProfileAv
     >
       <Typography
         sx={theme => ({
-          typography: "titleMd",
+          typography: "titleLg",
           color: theme.palette.onSurface,
           mb: 2,
           textAlign: "center",

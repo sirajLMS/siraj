@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import type { DailyScheduleList } from "@/frontend/common/graphql/generated/gql/graphql-types";

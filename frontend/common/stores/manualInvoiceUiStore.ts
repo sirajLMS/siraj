@@ -1,3 +1,5 @@
+"use client";
+
 // NEW FOR PLAN v5 (newly created for the migration wave): Zustand store for the
 // Manual Invoice screen's UI state — owns the parent picker value, the
 // student-options derivation flag, submission lifecycle flag, and success

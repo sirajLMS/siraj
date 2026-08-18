@@ -7,7 +7,7 @@ const StyledFilterContainer = styled("div", {
   shouldForwardProp: prop => prop !== "variant",
 })<{ readonly variant: "desktop" | "mobile" }>(({ theme, variant }) => ({
   padding: theme.spacing(2),
-  borderRadius: 8,
+  borderRadius: Number(theme.shape.borderRadius) / 2,
   backgroundColor: theme.palette.surfaceContainerLow ?? theme.palette.background.paper,
   border: `1px solid ${theme.palette.divider}`,
   display: "flex",

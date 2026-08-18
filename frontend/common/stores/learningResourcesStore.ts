@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { ResourceFilterType, ResourceSortBy } from "@/frontend/common/types/shared.types";
 

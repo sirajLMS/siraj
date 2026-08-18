@@ -52,6 +52,7 @@ export function useBooksAndBagsViewModel(props: Readonly<UseBooksAndBagsViewMode
       statusOutOfStock: tBooks.statusOutOfStock,
       deleteSuccess: tBooks.deleteSuccess,
       deleteFailed: tBooks.deleteFailed,
+      ariaDeleteBook: tBooks.ariaDeleteBook,
     }),
     [tBooks]
   );

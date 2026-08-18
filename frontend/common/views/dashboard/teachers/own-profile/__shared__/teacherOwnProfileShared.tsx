@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
+import { LoadingState } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
@@ -29,11 +30,7 @@ export function TeacherOwnProfileShared({
   return (
     <PageContainer>
       <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : null}
+      {loading ? <LoadingState /> : null}
       {error ? (
         <Typography sx={{ color: theme => theme.palette.error.main }}>{t.errors.failedToLoad}</Typography>
       ) : null}

@@ -39,7 +39,7 @@ function FxDisplayStory({ lockedAmount, lockedCurrency, displayAmount }: FxStory
 
   return (
     <Stack spacing={2} sx={{ p: 2, maxWidth: 480 }}>
-      <Typography sx={{ typography: "titleMd" }}>{formatted}</Typography>
+      <Typography sx={{ typography: "titleLg" }}>{formatted}</Typography>
       <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
         <Typography sx={{ typography: "labelMd", color: theme => theme.palette.text.secondary }}>Locked</Typography>
         <CurrencyDisplay
@@ -56,7 +56,7 @@ function FxDisplayStory({ lockedAmount, lockedCurrency, displayAmount }: FxStory
           />
         </Stack>
       ) : (
-        <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
           No display currency set
         </Typography>
       )}

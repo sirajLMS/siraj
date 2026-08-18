@@ -113,7 +113,7 @@ export function TokenExpiryWarning({
     >
       <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
         <Box sx={visual.colorSx}>{visual.icon}</Box>
-        <Typography sx={theme => ({ typography: "bodySm", ...visual.colorSx(theme) })}>
+        <Typography sx={theme => ({ typography: "bodyMd", ...visual.colorSx(theme) })}>
           {providerName} &middot; {countdownText}
         </Typography>
       </Stack>

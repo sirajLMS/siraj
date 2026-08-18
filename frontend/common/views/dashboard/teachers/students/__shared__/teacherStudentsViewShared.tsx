@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type { FC, ReactNode } from "react";
+import { LoadingState } from "@/frontend/common/components/ui";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type { TeacherStudentsViewModel } from "@/frontend/common/views/dashboard/teachers/students/useTeacherStudentsViewModel";
 
@@ -97,11 +98,7 @@ export function TeacherStudentsViewShared({
   return (
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : null}
+      {loading ? <LoadingState /> : null}
       {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.failedToLoad}</Typography> : null}
       {!loading && !error ? renderBody() : null}
     </PageContainer>

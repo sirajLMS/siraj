@@ -48,7 +48,7 @@ export function LinkedClassInstancesList({
     return (
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 2 }}>
         <CircularProgress size={16} />
-        <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary })}>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
           {labels.linkedClassInstancesTitle}
         </Typography>
       </Box>
@@ -57,7 +57,7 @@ export function LinkedClassInstancesList({
 
   if (instances.length === 0) {
     return (
-      <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary, py: 1 })}>
+      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary, py: 1 })}>
         {emptyMessage ?? labels.linkedClassInstancesEmpty}
       </Typography>
     );
@@ -80,7 +80,7 @@ export function LinkedClassInstancesList({
             {instance.title || labels.classInstanceTitle}
           </Typography>
           {instance.startTime ? (
-            <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary })}>
+            <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
               {labels.startTime}: {formatStartTime(instance.startTime)}
             </Typography>
           ) : null}
@@ -90,7 +90,7 @@ export function LinkedClassInstancesList({
               target="_blank"
               rel="noopener noreferrer"
               sx={{
-                typography: "bodySm",
+                typography: "bodyMd",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 0.5,

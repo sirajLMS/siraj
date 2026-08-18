@@ -1,4 +1,7 @@
+"use client";
+
 import { create } from "zustand";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
@@ -13,7 +16,7 @@ export interface ParentBillingState {
   readonly debouncedSearch: string;
   readonly snackbarOpen: boolean;
   readonly snackbarMessage: string;
-  readonly snackbarSeverity: "success" | "error" | "info";
+  readonly snackbarSeverity: SnackbarSeverity;
   // NEW FOR PLAN v5 (parent-billing wave): proof dialog target owned by the
   // store so it survives tier switches (per specs.md §6.2 + §6.4).
   readonly proofTarget: MarkPaidInvoiceTarget | null;
@@ -23,7 +26,7 @@ export interface ParentBillingState {
   readonly setPage: (page: number) => void;
   readonly setSearchQuery: (query: string) => void;
   readonly setDebouncedSearch: (value: string) => void;
-  readonly showFeedback: (message: string, severity: "success" | "error" | "info") => void;
+  readonly showFeedback: (message: string, severity: SnackbarSeverity) => void;
   readonly closeSnackbar: () => void;
   // NEW FOR PLAN v5 (parent-billing wave): proof dialog setter (per §6.4).
   readonly setProofTarget: (target: MarkPaidInvoiceTarget | null) => void;

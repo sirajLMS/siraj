@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { PersonOption, UserSelectAudience } from "@/frontend/common/components/ui/input/userSelect/types";
 import { USER_SELECT_CACHE_MAX_KEYS_PER_AUDIENCE } from "@/frontend/common/components/ui/input/userSelect/userSelect.constants";

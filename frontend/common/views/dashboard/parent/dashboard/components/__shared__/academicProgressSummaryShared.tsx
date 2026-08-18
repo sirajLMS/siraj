@@ -33,10 +33,10 @@ export function AcademicProgressRowShared({ student, completionLabel, options }:
         value={student.completionPercent}
         sx={theme => ({
           height: options.linearProgressHeight,
-          borderRadius: 999,
+          borderRadius: "9999px",
           backgroundColor: theme.palette.surfaceContainer,
           "& .MuiLinearProgress-bar": {
-            borderRadius: 999,
+            borderRadius: "9999px",
             backgroundColor: theme.palette.header,
           },
         })}

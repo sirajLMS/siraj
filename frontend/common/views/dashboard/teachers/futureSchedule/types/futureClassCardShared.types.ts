@@ -1,6 +1,6 @@
 import type { StatusBadgeCategory } from "@/frontend/common/components/ui/badge/types/statusBadgeShared.types";
 import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers/futureSchedule";
 
 /** Props shared across both tiers — identical for FutureClassCardDesktop and FutureClassCardMobile. */

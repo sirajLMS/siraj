@@ -14,9 +14,6 @@ export interface AssignGroupFormBindings {
   readonly reset: ReturnType<typeof useForm<AssignGroupFormData>>["reset"];
 }
 
-/** @deprecated alias kept for callers expecting the older name */
-export type AssignGroupFormState = AssignGroupFormBindings;
-
 interface UseAssignGroupFormParams {
   readonly open: boolean;
 }

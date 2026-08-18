@@ -214,7 +214,7 @@ export function CopyMeetingUrlButton({
           })}
         >
           {iconNode}
-          <Typography component="span" sx={{ typography: "bodySm" }}>
+          <Typography component="span" sx={{ typography: "bodyMd" }}>
             {labels.copyMeetingUrl}
           </Typography>
         </Box>

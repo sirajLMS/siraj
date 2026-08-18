@@ -1,6 +1,5 @@
 "use client";
 
-import ContentCopyOutlined from "@mui/icons-material/ContentCopyOutlined";
 import {
   Alert,
   Box,
@@ -10,13 +9,13 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
-  IconButton,
   InputAdornment,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
+import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
 import { MeetingConfigTypeFields } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
 import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
 import type { UseMeetingConfigFormStateReturn } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
@@ -30,14 +29,6 @@ export type MeetingConfigFormContentEnhancementLabels = Pick<
 >;
 
 function TestConfigPreviewUrl({ previewUrl, copyLabel }: { readonly previewUrl: string; readonly copyLabel: string }) {
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(previewUrl);
-    } catch {
-      // Clipboard not available — silently ignore
-    }
-  };
-
   return (
     <Stack spacing={0.5}>
       <TextField
@@ -49,9 +40,7 @@ function TestConfigPreviewUrl({ previewUrl, copyLabel }: { readonly previewUrl: 
             readOnly: true,
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton onClick={handleCopy} edge="end" size="small" aria-label={copyLabel}>
-                  <ContentCopyOutlined fontSize="small" />
-                </IconButton>
+                <CopyMeetingUrlButton meetingUrl={previewUrl} ariaLabel={copyLabel} tooltipLabel={copyLabel} />
               </InputAdornment>
             ),
           },
@@ -92,7 +81,7 @@ function TestConfigSection({
       {testError ? <Alert severity="error">{testError}</Alert> : null}
       {previewUrl ? (
         <Stack spacing={0.5}>
-          <Typography sx={{ typography: "bodySm", fontWeight: 700 }}>
+          <Typography sx={{ typography: "bodyMd", fontWeight: 700 }}>
             {enhancementLabels.previewUrlGenerated}
           </Typography>
           <TestConfigPreviewUrl previewUrl={previewUrl} copyLabel={enhancementLabels.copyMeetingUrl} />
@@ -192,7 +181,7 @@ export function MeetingConfigFormDialogContent({
                 {provider?.name ? (
                   <LocalizedStringDisplay value={provider.name} typographyVariant="labelMd" sx={{ fontWeight: 700 }} />
                 ) : null}
-                <Typography sx={{ typography: "bodySm", mt: provider?.name ? 0.5 : 0 }}>{instructions}</Typography>
+                <Typography sx={{ typography: "bodyMd", mt: provider?.name ? 0.5 : 0 }}>{instructions}</Typography>
               </Alert>
             ) : null}
             <MeetingConfigTypeFields
@@ -213,7 +202,7 @@ export function MeetingConfigFormDialogContent({
               generationError={generationError}
             />
             {urlError ? (
-              <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>
+              <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>
                 {urlError}
               </Typography>
             ) : null}

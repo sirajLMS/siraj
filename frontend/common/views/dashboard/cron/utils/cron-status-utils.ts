@@ -5,18 +5,6 @@ import {
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CronLabels } from "@/shared/locale/types/dashboard/cron";
 
-/** Returns theme palette color key for a schedule status. */
-export function getCronStatusColor(status: CronScheduleStatus): "success" | "warning" | "default" {
-  switch (status) {
-    case CronScheduleStatus.Active:
-      return "success";
-    case CronScheduleStatus.Paused:
-      return "warning";
-    default:
-      return "default";
-  }
-}
-
 /** Returns localized label for a schedule status. */
 export function getCronStatusLabel(status: CronScheduleStatus, labels: CronLabels): string {
   switch (status) {
@@ -26,24 +14,6 @@ export function getCronStatusLabel(status: CronScheduleStatus, labels: CronLabel
       return labels.statusPaused;
     default:
       return labels.statusDisabled;
-  }
-}
-
-/** Returns theme palette color key for a run status. */
-export function getCronRunStatusColor(status: CronRunStatus): "success" | "warning" | "error" | "default" | "info" {
-  switch (status) {
-    case CronRunStatus.Completed:
-      return "success";
-    case CronRunStatus.Running:
-    case CronRunStatus.Retrying:
-      return "info";
-    case CronRunStatus.Failed:
-    case CronRunStatus.Timeout:
-      return "error";
-    case CronRunStatus.Pending:
-      return "warning";
-    default:
-      return "default";
   }
 }
 

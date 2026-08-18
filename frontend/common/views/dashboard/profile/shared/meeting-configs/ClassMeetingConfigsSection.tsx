@@ -2,18 +2,22 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import { Button, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import type * as React from "react";
 import { useCallback, useMemo, useState } from "react";
 import { ErrorState, SectionPanel } from "@/frontend/common/components/ui";
+import { CopyMeetingUrlButton } from "@/frontend/common/components/ui/display/meetingConfig";
 import { MeetingConfigList } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ClassMeetingConfigFieldsFragment,
+  EffectiveMeetingFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/operations";
 import {
   classMeetingConfigsQueryDocument,
   classMeetingConfigsWithStatusQueryDocument,
@@ -23,10 +27,6 @@ import {
   setDefaultClassMeetingConfigMutationDocument,
   updateClassMeetingConfigMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
-import type {
-  ClassMeetingConfigFieldsFragment,
-  EffectiveMeetingFieldsFragment,
-} from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ClassMeetingConfigFormDialog } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ClassMeetingConfigFormDialog";
@@ -128,13 +128,6 @@ function StatusExtra({
   const expiryText = statusEntry ? formatExpiry(statusEntry.meetingUrlExpiresAt, enhancements) : null;
   const isFailed = status === "failed";
 
-  const handleCopyUrl = useCallback(() => {
-    if (!meetingUrl) return;
-    navigator.clipboard.writeText(meetingUrl).catch(() => {
-      // Clipboard write failed silently; user may not have permissions
-    });
-  }, [meetingUrl]);
-
   if (!configId || !statusEntry) return null;
 
   return (
@@ -149,16 +142,16 @@ function StatusExtra({
         </Tooltip>
       ) : null}
 
-      {hasUrl ? (
-        <Tooltip title={enhancements.copyMeetingUrl}>
-          <IconButton size="small" aria-label={enhancements.copyMeetingUrl} onClick={handleCopyUrl}>
-            <ContentCopyOutlinedIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+      {hasUrl && meetingUrl ? (
+        <CopyMeetingUrlButton
+          meetingUrl={meetingUrl}
+          ariaLabel={enhancements.copyMeetingUrl}
+          tooltipLabel={enhancements.copyMeetingUrl}
+        />
       ) : null}
 
       {expiryText ? (
-        <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary })}>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
           {expiryText}
         </Typography>
       ) : null}
@@ -232,7 +225,7 @@ function ConfigsContent({
       />
 
       {!resolvedCanManage && configs.length === 0 ? (
-        <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary })}>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
           {t.noConfigs}
         </Typography>
       ) : null}
@@ -483,7 +476,9 @@ export function ClassMeetingConfigsSection({
     async (id: string) => {
       setRetryingId(id);
       try {
-        await retryMutation({ variables: { id, input: {} } });
+        await retryMutation({
+          variables: { id, input: { details: null, isDefault: null, label: null, password: null, providerId: null } },
+        });
         await refetch();
       } catch {
         setErrorMessage(tManager.saveError);

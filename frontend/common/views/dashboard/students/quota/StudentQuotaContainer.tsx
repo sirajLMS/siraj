@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
+import { LoadingState } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
@@ -28,21 +29,13 @@ export function StudentQuotaView(props: Readonly<UseStudentQuotaViewModelProps>)
   // Dashboard overview mode (no specific studentId) — render per-audience view
   if (!props.studentId) {
     if (viewModel.loadingState === "loading") {
-      return (
-        <Box component="output" aria-busy="true" sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-          <CircularProgress />
-        </Box>
-      );
+      return <LoadingState />;
     }
     return <QuotaAudienceView t={viewModel.t} />;
   }
 
   if (viewModel.loadingState === "loading") {
-    return (
-      <Box component="output" aria-busy="true" sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingState />;
   }
 
   if (viewModel.loadingState === "missing") {

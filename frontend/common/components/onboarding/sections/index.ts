@@ -5,3 +5,4 @@ export type {
   UserOnboardingCoreFieldsShape,
 } from "./types";
 export * from "./UserEntityFieldsSection";
+export * from "./userPersonalFieldComponents";

@@ -38,10 +38,10 @@ export function DaysScheduleSectionShared({
 
   return (
     <Box>
-      <Box component="label" sx={{ typography: "labelLg", color: theme => theme.palette.onSurfaceVariant, mb: 1 }}>
+      <Box component="label" sx={{ typography: "labelMd", color: theme => theme.palette.onSurfaceVariant, mb: 1 }}>
         {labels.classSchedule}
       </Box>
-      <Box sx={{ mb: 1, display: "flex", alignItems: "center", typography: "labelLg" }}>{labels.daysSelection}</Box>
+      <Box sx={{ mb: 1, display: "flex", alignItems: "center", typography: "labelMd" }}>{labels.daysSelection}</Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         {days.map((day, index) => {
           const labelKey = resolveDayLabelKey(day.day);

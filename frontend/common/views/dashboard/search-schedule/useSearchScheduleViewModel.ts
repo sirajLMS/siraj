@@ -131,7 +131,7 @@ function adaptResultItemToStoreTeacher(teacher: SearchScheduleResultItem): Searc
     gender: teacher.gender ?? null,
     timezone: teacher.timezone ?? null,
     availableDaysCount: teacher.availableDaysCount ?? null,
-    gaps: teacher.gaps ?? undefined,
+    gaps: teacher.gaps ?? null,
   };
 }
 

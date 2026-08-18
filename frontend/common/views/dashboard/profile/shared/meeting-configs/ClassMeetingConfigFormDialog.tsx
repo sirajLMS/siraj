@@ -10,7 +10,7 @@ import type {
   CreateClassMeetingConfigMutationVariables,
   UpdateClassMeetingConfigMutation,
   UpdateClassMeetingConfigMutationVariables,
-} from "@/frontend/common/graphql/types/meeting-class-config.operations";
+} from "@/frontend/common/graphql/generated/gql/operations";
 import { MeetingConfigFormDialogContent } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent";
 import { useMeetingConfigFormState } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
 import type { MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
@@ -80,7 +80,7 @@ export function ClassMeetingConfigFormDialog({
                 username: details.username.trim() || null,
                 tenantId: details.tenantId.trim() || null,
               },
-              ...(providerChanged && provider?.id ? { providerId: provider.id } : {}),
+              providerId: providerChanged && provider?.id ? provider.id : null,
             },
           },
         });

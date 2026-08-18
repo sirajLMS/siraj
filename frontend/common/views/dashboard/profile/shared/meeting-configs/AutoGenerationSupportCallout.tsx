@@ -100,7 +100,7 @@ function StepItem({ step }: { readonly step: GuideStep }) {
         <Typography sx={theme => ({ typography: "labelMd", fontWeight: 700, color: theme.palette.onInfo })}>
           {step.title}
         </Typography>
-        <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.onInfo })}>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onInfo })}>
           {step.description}
         </Typography>
       </Stack>
@@ -123,10 +123,10 @@ function CollapsedSummary({
     <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.25 }}>
       <VisualIllustration />
       <Stack spacing={0.25} sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={theme => ({ typography: "titleSm", fontWeight: 700, color: theme.palette.onInfo })}>
+        <Typography sx={theme => ({ typography: "labelSm", fontWeight: 700, color: theme.palette.onInfo })}>
           {labels.title}
         </Typography>
-        <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.onInfo })}>{labels.summary}</Typography>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onInfo })}>{labels.summary}</Typography>
       </Stack>
       <Button
         onClick={onToggle}
@@ -168,7 +168,7 @@ function ExpandedGuide({
         {modes.map(mode => (
           <Stack key={mode.title} sx={{ flexDirection: "row", alignItems: "flex-start", gap: 1.25 }}>
             <Icon sx={theme => ({ color: theme.palette.onInfo, fontSize: 20, mt: 0.25 })}>{mode.icon}</Icon>
-            <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.onInfo })}>{mode.title}</Typography>
+            <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.onInfo })}>{mode.title}</Typography>
           </Stack>
         ))}
       </Stack>

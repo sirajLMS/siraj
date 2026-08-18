@@ -70,7 +70,12 @@ export function ComplaintRecordCardListShared({
           <Button
             onClick={onLoadOlderRecords}
             endIcon={<ExpandMoreOutlined />}
-            sx={{ color: "primary.main", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}
+            sx={theme => ({
+              color: theme.palette.primary.main,
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+            })}
           >
             {labels.loadOlder}
           </Button>

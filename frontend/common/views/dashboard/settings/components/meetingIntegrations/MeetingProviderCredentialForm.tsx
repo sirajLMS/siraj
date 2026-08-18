@@ -57,7 +57,7 @@ function CredentialFormLoadingState({ labels }: { readonly labels: CredentialFor
       </Typography>
       <Stack direction="row" sx={{ alignItems: "center", gap: 1, py: 1 }}>
         <CircularProgress size={20} />
-        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.loading}</Typography>
+        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.loading}</Typography>
       </Stack>
     </Box>
   );
@@ -69,7 +69,9 @@ function CredentialFormErrorState({ labels }: { readonly labels: CredentialFormL
       <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 0.5 }}>
         {labels.credentialFormCreateTitle}
       </Typography>
-      <Typography sx={{ typography: "bodySm", color: "error.main" }}>{labels.loadError}</Typography>
+      <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>
+        {labels.loadError}
+      </Typography>
     </Box>
   );
 }
@@ -354,7 +356,7 @@ function renderEarlyReturn(
         <Typography sx={{ typography: "labelUppercase", color: "text.secondary", mb: 0.5 }}>
           {hasExistingCredentials ? labels.credentialFormEditTitle : labels.credentialFormCreateTitle}
         </Typography>
-        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.credentialForm.noFields}</Typography>
+        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.credentialForm.noFields}</Typography>
       </Box>
     );
   }

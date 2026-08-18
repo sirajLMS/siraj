@@ -1,5 +1,5 @@
 // NEW FOR PLAN v5 (lifted from frontend/{mobile,desktop}/components/ui/display/meetingConfig/MeetingJoinAction.{mobile,desktop}.tsx)
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 
 export type MeetingJoinEmptyRole = "teacher" | "parent" | "class";
 

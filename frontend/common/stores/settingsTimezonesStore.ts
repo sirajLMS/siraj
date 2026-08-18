@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 
 export const SETTINGS_TIMEZONES_PAGE_SIZE = 25;

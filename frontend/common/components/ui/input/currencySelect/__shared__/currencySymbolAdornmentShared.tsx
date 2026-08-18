@@ -12,7 +12,7 @@ export interface CurrencySymbolAdornmentProps {
 }
 
 const BOX_ADORNMENT_SX: SxProps<Theme> = (theme: Theme) => ({
-  fontWeight: "bold",
+  fontWeight: 700,
   color: theme.palette.primary.main,
   opacity: 0.6,
 });

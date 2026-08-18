@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 
 const DEFAULT_PAGE_SIZE = 5;

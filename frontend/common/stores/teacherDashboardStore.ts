@@ -1,14 +1,19 @@
+"use client";
+
 import { create } from "zustand";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import type {
   MissedClassAlert,
   StudentProgressFeedItem,
   TeacherScheduleRow,
 } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
+
+export type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
+
 import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 
 export type TeacherDashboardMode = "standard" | "active";
-export type SnackbarSeverity = "success" | "error" | "info";
 export type SupportRequestType = "COORDINATOR" | "SUPPORT";
 
 const DEFAULT_PAGE_SIZE = 10;

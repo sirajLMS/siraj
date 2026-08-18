@@ -11,12 +11,12 @@ import {
   isQuotaKind,
   isQuotaPeriodType,
 } from "@/frontend/common/views/dashboard/billing/quota/components/__shared__/quotaFormSectionShared.options";
-import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/billing/quota/quotaFormAccessContext";
 import type { QuotaFormFieldAccess } from "@/frontend/common/views/dashboard/billing/quota/quotaFormAccessContext.types";
 import type {
   QuotaFormData,
   QuotaFormInput,
 } from "@/frontend/common/views/dashboard/billing/quota/schemas/quotaSchema";
+import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/billing/quota/useQuotaFormAccess";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
 // --- Date picker slot ---

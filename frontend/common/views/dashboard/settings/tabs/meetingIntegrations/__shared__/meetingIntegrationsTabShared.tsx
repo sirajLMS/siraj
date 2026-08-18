@@ -93,7 +93,7 @@ export function MeetingIntegrationsTabShared(props: MeetingIntegrationsTabShared
           <AccordionSummary expandIcon={<ExpandMoreOutlined />}>
             <Box sx={summaryContentSx}>
               <Box sx={summaryRowSx}>
-                <Typography sx={{ typography: "titleMd" }}>{getProviderLabel(provider.slug, labels)}</Typography>
+                <Typography sx={{ typography: "titleLg" }}>{getProviderLabel(provider.slug, labels)}</Typography>
                 <Chip
                   size="small"
                   label={provider.credentialsHealthy ? labels.testSuccess : labels.testFailure}

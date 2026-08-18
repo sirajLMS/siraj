@@ -119,7 +119,7 @@ function renderSuccess({
             <Typography
               component="span"
               sx={{
-                typography: "bodySm",
+                typography: "bodyMd",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -159,7 +159,7 @@ function renderSuccess({
             }}
           >
             <ScheduleOutlinedIcon fontSize="small" />
-            <Typography component="span" sx={{ typography: "bodySm" }}>
+            <Typography component="span" sx={{ typography: "bodyMd" }}>
               {formatExpiresAt(expiresAt)}
             </Typography>
           </Stack>
@@ -236,7 +236,7 @@ function renderFailed({
                 icon={false}
                 sx={(theme: Theme) => ({ bgcolor: alpha(theme.palette.error.main, 0.04) })}
               >
-                <Typography sx={{ typography: "bodySm" }}>{error}</Typography>
+                <Typography sx={{ typography: "bodyMd" }}>{error}</Typography>
               </Alert>
             </Collapse>
           </>

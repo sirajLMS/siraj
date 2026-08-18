@@ -14,6 +14,7 @@ import { Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { CronExpressionParser } from "cron-parser";
 import { useCallback, useMemo, useState } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui/badge";
 import {
   AppPermission,
   CronConcurrencyPolicy,
@@ -42,7 +43,7 @@ import type {
   CronViewProps,
 } from "@/frontend/common/views/dashboard/cron/types";
 import { safeEnum, safeString } from "@/frontend/common/views/dashboard/cron/utils";
-import { getCronStatusColor, getCronStatusLabel } from "@/frontend/common/views/dashboard/cron/utils/cron-status-utils";
+import { getCronStatusLabel } from "@/frontend/common/views/dashboard/cron/utils/cron-status-utils";
 import { Translation, useAppLocale, useAppTranslation } from "@/shared/locale";
 import type { CronLabels } from "@/shared/locale/types/dashboard/cron";
 
@@ -157,7 +158,14 @@ function buildColumns(
       width: 120,
       renderCell: ({ value }) => {
         const status = safeEnum(value, Object.values(CronScheduleStatus)) ?? CronScheduleStatus.Disabled;
-        return <Chip size="small" color={getCronStatusColor(status)} label={getCronStatusLabel(status, labels)} />;
+        return (
+          <StatusBadge
+            category="cronScheduleStatus"
+            status={status}
+            label={getCronStatusLabel(status, labels)}
+            size="small"
+          />
+        );
       },
     },
     {

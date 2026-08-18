@@ -8,9 +8,9 @@ import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/studen
 import { StudentProfileUserDetailsSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileUserDetailsSection";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
 import { StudentAdminSection } from "@/frontend/common/views/dashboard/students/profile/sections/StudentAdminSection";
-import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
 import { useStudentManagerProfileTabViewModel } from "@/frontend/common/views/dashboard/students/profile/useStudentManagerProfileTabViewModel";
+import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/useStudentProfileContext";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 function toStudentProfileRow(profile: StudentProfileQueryData): StudentProfileRow {

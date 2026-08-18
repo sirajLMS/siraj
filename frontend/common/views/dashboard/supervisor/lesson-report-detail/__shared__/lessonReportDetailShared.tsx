@@ -1,7 +1,8 @@
 "use client";
 
-import { Alert, Box, CircularProgress, Typography } from "@mui/material";
+import { Alert, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
+import { LoadingState } from "@/frontend/common/components/ui";
 import type { LessonReportDetailViewModel } from "@/frontend/common/views/dashboard/supervisor/lesson-report-detail/useLessonReportDetailViewModel";
 
 interface PageHeaderProps {
@@ -26,11 +27,7 @@ export function LessonReportDetailShared({
   return (
     <PageContainer>
       <PageHeader title={pageTitle} />
-      {loading && !report ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : null}
+      {loading && !report ? <LoadingState /> : null}
       {error && !report ? (
         <Alert severity="error" sx={{ mt: 2 }}>
           {notFoundMessage}

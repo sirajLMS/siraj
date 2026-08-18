@@ -183,7 +183,7 @@ function SubmissionDetailsSection({
         </Typography>
       ) : null}
       {submission.status === InvoicePaymentSubmissionStatus.Rejected ? (
-        <Typography variant="bodyMd" sx={{ color: "error.main" }}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main })}>
           {labels.rejected}
         </Typography>
       ) : null}
@@ -198,7 +198,7 @@ function SubmissionDetailsSection({
         viewProofFailedLabel={labels.viewProofFailed}
       />
       {submission.rejectionReason ? (
-        <Typography variant="bodyMd" sx={{ color: "error.main" }}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main })}>
           {submission.rejectionReason}
         </Typography>
       ) : null}
@@ -228,7 +228,7 @@ function PaymentProofReviewActions({
     <Stack spacing={1.5}>
       <Typography variant="titleLg">{labels.reviewActions}</Typography>
       {actionError ? (
-        <Typography variant="bodyMd" sx={{ color: "error.main" }}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main })}>
           {actionError}
         </Typography>
       ) : null}
@@ -456,7 +456,7 @@ function PaymentDetailsDialogContent({
   if (loadFailed) {
     return (
       <Stack spacing={1.5} sx={{ py: 1 }}>
-        <Typography variant="bodyMd" sx={{ color: "error.main" }}>
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.error.main })}>
           {loadFailedLabel}
         </Typography>
         <Button variant="outlined" onClick={onRetry}>

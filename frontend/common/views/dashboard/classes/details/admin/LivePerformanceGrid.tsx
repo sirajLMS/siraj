@@ -5,9 +5,10 @@ import ChecklistIcon from "@mui/icons-material/Checklist";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { MetricCardGrid } from "@/frontend/common/components/reports/MetricCardGrid";
+import { SectionPanel } from "@/frontend/common/components/ui/container";
 import type { PerformanceMetric } from "@/frontend/common/views/dashboard/types/dashboard";
 
 const METRIC_ICONS: Record<string, SvgIconComponent> = {
@@ -58,38 +59,42 @@ export function LivePerformanceGrid({ metrics, hasData, labels }: LivePerformanc
 
   return (
     <Box sx={classDetailsContentPaddingSx}>
-      <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <StyledSectionTitle variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
-          {labels.livePerformanceOverview}
-        </StyledSectionTitle>
+      <SectionPanel
+        title={
+          <StyledSectionTitle variant="headlineMd" sx={theme => ({ color: theme.palette.primary.main })}>
+            {labels.livePerformanceOverview}
+          </StyledSectionTitle>
+        }
+        actions={
+          hasData ? (
+            <StyledTimeRangeChip
+              sx={theme => ({
+                paddingInline: theme.spacing(2),
+                paddingBlock: theme.spacing(0.75),
+                border: 1,
+                borderColor: theme.palette.border.light,
+                borderRadius: 2,
+                backgroundColor: theme.palette.background.paper,
+              })}
+            >
+              <StyledTimeRangeCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
+                {labels.last30Mins}
+              </StyledTimeRangeCaption>
+            </StyledTimeRangeChip>
+          ) : null
+        }
+      >
         {hasData ? (
-          <StyledTimeRangeChip
-            sx={theme => ({
-              paddingInline: theme.spacing(2),
-              paddingBlock: theme.spacing(0.75),
-              border: 1,
-              borderColor: theme.palette.border.light,
-              borderRadius: 2,
-              backgroundColor: theme.palette.background.paper,
-            })}
+          <MetricCardGrid metrics={metricItems} layout="scroll" />
+        ) : (
+          <Typography
+            variant="body2"
+            sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 4, textAlign: "center" })}
           >
-            <StyledTimeRangeCaption variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
-              {labels.last30Mins}
-            </StyledTimeRangeCaption>
-          </StyledTimeRangeChip>
-        ) : null}
-      </Stack>
-
-      {hasData ? (
-        <MetricCardGrid metrics={metricItems} layout="scroll" />
-      ) : (
-        <Typography
-          variant="body2"
-          sx={theme => ({ color: theme.palette.onSurfaceVariant, py: 4, textAlign: "center" })}
-        >
-          {labels.noData}
-        </Typography>
-      )}
+            {labels.noData}
+          </Typography>
+        )}
+      </SectionPanel>
     </Box>
   );
 }

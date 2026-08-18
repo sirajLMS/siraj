@@ -330,7 +330,7 @@ function GroupedNavList({
         "&::-webkit-scrollbar": { width: 4 },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor: "var(--mui-palette-outlineVariant)",
-          borderRadius: 10,
+          borderRadius: 12,
         },
       }}
     >

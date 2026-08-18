@@ -1,4 +1,4 @@
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 
 export interface StudentHistoryMetrics {
   readonly totalClasses: number;

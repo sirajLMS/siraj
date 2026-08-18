@@ -5,11 +5,11 @@ import { Alert, FormControlLabel, Radio, RadioGroup, Stack, TextField, Typograph
 import { useMemo, useState } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { MeetingConfigSelect } from "@/frontend/common/components/ui/input/meetingConfigSelect/MeetingConfigSelect";
+import type { MeetingConfigSelectOption } from "@/frontend/common/components/ui/input/meetingConfigSelect/types";
 import { MeetingConfigTypeFields } from "@/frontend/common/components/ui/input/meetingConfigTypeFields/MeetingConfigTypeFields";
 import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { userMeetingConfigsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
-import type { MeetingConfigSelectOption } from "@/frontend/common/graphql/types/meeting-class-config.operations";
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
 import {
   getRecurringMeetingConfigErrorKey,
@@ -88,7 +88,7 @@ function RecurringMeetingConfigNewModeFields({
               sx={{ fontWeight: 700 }}
             />
           ) : null}
-          <Typography sx={{ typography: "bodySm", mt: value.newProvider?.name ? 0.5 : 0 }}>{instructions}</Typography>
+          <Typography sx={{ typography: "bodyMd", mt: value.newProvider?.name ? 0.5 : 0 }}>{instructions}</Typography>
         </Alert>
       ) : null}
       <TextField
@@ -115,8 +115,12 @@ function RecurringMeetingConfigNewModeFields({
         onMeetingUrlBlur={onValidateUrl}
         disabled={disabled}
       />
-      {urlError ? <Typography sx={{ typography: "bodySm", color: "error.main" }}>{urlError}</Typography> : null}
-      {fieldsError ? <Typography sx={{ typography: "bodySm", color: "error.main" }}>{fieldsError}</Typography> : null}
+      {urlError ? (
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>{urlError}</Typography>
+      ) : null}
+      {fieldsError ? (
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>{fieldsError}</Typography>
+      ) : null}
     </Stack>
   );
 }
@@ -205,8 +209,8 @@ export function RecurringMeetingConfigSection({
 
   return (
     <Stack spacing={2}>
-      <Typography sx={{ typography: "titleMd" }}>{t.recurringSectionTitle}</Typography>
-      <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{t.recurringSectionSubtitle}</Typography>
+      <Typography sx={{ typography: "titleLg" }}>{t.recurringSectionTitle}</Typography>
+      <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{t.recurringSectionSubtitle}</Typography>
 
       <RadioGroup
         value={mode}

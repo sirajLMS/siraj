@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
+import { LoadingState } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display";
 import { LabeledField } from "@/frontend/common/components/ui/display/labeledField/LabeledField";
 import { SupervisorAdminSection } from "@/frontend/common/views/dashboard/supervisor/profile/sections/SupervisorAdminSection";
@@ -28,11 +29,7 @@ export function SupervisorProfileShared({
   return (
     <PageContainer>
       <PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
-      {loading && !profile ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : null}
+      {loading && !profile ? <LoadingState /> : null}
       {error && !profile ? (
         <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.errors.failedToLoad}</Typography>
       ) : null}

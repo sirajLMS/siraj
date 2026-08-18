@@ -117,7 +117,9 @@ export function MeetingConfigTypeFieldsShared({
             {generateButtonText}
           </Button>
           {generationError ? (
-            <Typography sx={{ typography: "bodySm", color: "error.main" }}>{generationError}</Typography>
+            <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>
+              {generationError}
+            </Typography>
           ) : null}
         </Stack>
       ) : null}

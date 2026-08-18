@@ -1,7 +1,9 @@
 "use client";
 
-import { Box, Button, CircularProgress, Link, Stack, Typography } from "@mui/material";
+import { Box, Link, Stack, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
+import { LoadingState } from "@/frontend/common/components/ui";
+import { PrimaryPageAction } from "@/frontend/common/components/ui/button";
 import type { MeetingJoinActionProps } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import {
@@ -74,7 +76,7 @@ function ClassRow({
         </Typography>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", mt: 0.5 }}>
           {row.durationMinutes ? (
-            <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+            <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
               {labels.durationMinutes(row.durationMinutes)}
             </Typography>
           ) : null}
@@ -114,9 +116,9 @@ function ClassRow({
             onViewClassAudit={handleViewClassAudit}
           />
         )}
-        <Button component={Link} href={`/classes/${classId}`} variant="outlined" size="small">
+        <PrimaryPageAction component={Link} href={`/classes/${classId}`} size="small">
           {labels.viewDetails}
-        </Button>
+        </PrimaryPageAction>
       </Box>
     </slots.RowWrapper>
   );
@@ -135,11 +137,7 @@ export function TeacherClassListViewShared({
   return (
     <slots.PageContainer>
       <slots.PageHeader title={labels.pageTitle} subtitle={labels.pageSubtitle} />
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : null}
+      {loading ? <LoadingState /> : null}
       {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.failedToLoad}</Typography> : null}
       {!loading && !error ? (
         <slots.ListContainer>

@@ -15,9 +15,9 @@ import { Translation, useAppTranslation } from "@/shared/locale";
 // ── Slot types ──────────────────────────────────────────────────────────────
 
 export interface MeetingConfigListSharedOptions {
-  /** Typography variant for the section title (default "titleMd"; mobile uses "titleSm"). */
+  /** Typography variant for the section title (default "titleLg"; mobile uses "labelSm"). */
   readonly titleTypographyVariant?: UiTypographyVariantLoose;
-  /** Typography variant for the provider name within each card (default "titleMd"; mobile uses "titleSm"). */
+  /** Typography variant for the provider name within each card (default "titleLg"; mobile uses "labelSm"). */
   readonly providerTypographyVariant?: UiTypographyVariantLoose;
   /** Extra sx prop for the provider Typography (mobile adds `fontWeight: 600`). */
   readonly providerSx?: React.CSSProperties;
@@ -35,7 +35,7 @@ export interface MeetingConfigListSharedOptions {
   readonly chipGap?: number;
   /** Gap between action icon buttons (default 0.5; mobile uses 0.25). */
   readonly actionGap?: number;
-  /** Typography variant used for loading/empty messages (default "bodyMd"; mobile uses "bodySm"). */
+  /** Typography variant used for loading/empty messages (default "bodyMd"; mobile uses "bodyMd"). */
   readonly statusTypographyVariant?: UiTypographyVariantLoose;
   /** Wrap the meeting URL row in a Tooltip (default false; common variant uses Tooltip). */
   readonly wrapUrlInTooltip?: boolean;
@@ -44,8 +44,8 @@ export interface MeetingConfigListSharedOptions {
 }
 
 const DEFAULT_OPTIONS: Required<MeetingConfigListSharedOptions> = {
-  titleTypographyVariant: "titleMd",
-  providerTypographyVariant: "titleMd",
+  titleTypographyVariant: "titleLg",
+  providerTypographyVariant: "titleLg",
   providerSx: {},
   outerGap: 1.5,
   cardPadding: 2,
@@ -65,7 +65,7 @@ function withOptions(options?: MeetingConfigListSharedOptions): Required<Meeting
 
 function renderUrlTypography(meetingUrl: string, opts: Required<MeetingConfigListSharedOptions>): React.ReactNode {
   const typography = (
-    <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary })} dir="ltr">
+    <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })} dir="ltr">
       {meetingUrl}
     </Typography>
   );
@@ -168,7 +168,7 @@ export function MeetingConfigListShared({
                     <Chip size="small" label={tDisplay.passwordProtected} variant="outlined" />
                   ) : null}
                   {config.label ? (
-                    <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.text.secondary })}>
+                    <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
                       {config.label}
                     </Typography>
                   ) : null}

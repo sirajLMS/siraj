@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
 

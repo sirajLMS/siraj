@@ -1,5 +1,5 @@
-import type { ApiLogOptions, LogEntry, LoggerConfig, LogLevel } from "@/frontend/common/lib/logger/types";
 import { formatTimestamp } from "@/shared/utils/date-utils";
+import type { ApiLogOptions, LogEntry, LoggerConfig, LogLevel } from "./types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

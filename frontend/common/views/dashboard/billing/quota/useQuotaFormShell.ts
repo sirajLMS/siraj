@@ -1,5 +1,5 @@
-import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/billing/quota/quotaFormAccessContext";
 import type { QuotaFormInput } from "@/frontend/common/views/dashboard/billing/quota/schemas/quotaSchema";
+import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/billing/quota/useQuotaFormAccess";
 import type { UseQuotaFormViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaFormViewModel";
 
 export interface QuotaFormShell {

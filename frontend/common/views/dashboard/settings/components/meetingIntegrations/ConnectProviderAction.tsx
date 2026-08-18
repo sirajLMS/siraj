@@ -1,7 +1,8 @@
 "use client";
 
 import { LinkOutlined } from "@mui/icons-material";
-import { Alert, AlertTitle, Box, Button, CircularProgress } from "@mui/material";
+import { Alert, AlertTitle, Box, CircularProgress } from "@mui/material";
+import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui/button";
 import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
@@ -40,9 +41,9 @@ export function ConnectProviderAction({
         icon={false}
         sx={theme => ({ borderColor: theme.palette.error.main })}
         action={
-          <Button size="small" color="error" onClick={handleConnect} aria-label={ariaLabel}>
+          <FilterButton size="small" color="error" onClick={handleConnect} aria-label={ariaLabel}>
             {labels.connectProvider}
-          </Button>
+          </FilterButton>
         }
       >
         <AlertTitle>{labels.connectProviderError}</AlertTitle>
@@ -52,21 +53,16 @@ export function ConnectProviderAction({
 
   return (
     <Box>
-      <Button
-        variant="contained"
+      <PrimaryPageAction
         color="primary"
         size="small"
         disabled={connecting}
         startIcon={connecting ? <CircularProgress size={16} /> : <LinkOutlined />}
         onClick={handleConnect}
         aria-label={ariaLabel}
-        sx={theme => ({
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.onPrimary,
-        })}
       >
         {connecting ? labels.connecting : labels.connectProvider}
-      </Button>
+      </PrimaryPageAction>
     </Box>
   );
 }

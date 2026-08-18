@@ -107,7 +107,7 @@ export interface RescheduleSession {
   readonly studentName: string;
   readonly teacherTimezone: string;
   readonly effectiveMeeting?:
-    | import("@/frontend/common/graphql/types/meeting-class-config.operations").EffectiveMeetingFieldsFragment
+    | import("@/frontend/common/graphql/generated/gql/operations").EffectiveMeetingFieldsFragment
     | null;
 }
 

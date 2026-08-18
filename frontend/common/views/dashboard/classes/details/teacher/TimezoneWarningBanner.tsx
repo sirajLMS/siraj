@@ -9,6 +9,7 @@ import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { edgeToEdgeSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { classDetailsContentPaddingSx } from "@/frontend/common/views/dashboard/classes/details/classDetailsMobileLayout";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface TimezoneWarningBannerProps {
   readonly studentTimezone: string;
@@ -48,6 +49,7 @@ export function TimezoneWarningBanner({
   labels,
 }: TimezoneWarningBannerProps) {
   const locale = useAppLocale();
+  const tCommon = useAppTranslation(Translation.Common);
   const studentLabel = formatTimezoneLabel(studentTimezone, locale);
   const teacherLabel = formatTimezoneLabel(teacherTimezone, locale);
 
@@ -58,7 +60,7 @@ export function TimezoneWarningBanner({
       sx={mergeSx({ mb: { xs: 0, lg: 3 } }, edgeToEdgeSx, classDetailsContentPaddingSx)}
       action={
         <IconButton
-          aria-label="close"
+          aria-label={tCommon.ariaClose}
           color="inherit"
           size="small"
           onClick={onDismiss}

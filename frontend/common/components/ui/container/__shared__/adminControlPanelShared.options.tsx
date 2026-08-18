@@ -15,5 +15,5 @@ export const MOBILE_OPTIONS: AdminControlPanelSharedOptions = {
   headerGap: 1,
   bodyPadding: 2.5,
   iconSx: theme => ({ color: theme.palette.primary.main, fontSize: 20 }),
-  titleSx: theme => ({ typography: "titleMd", color: theme.palette.primary.main, fontWeight: 700 }),
+  titleSx: theme => ({ typography: "titleLg", color: theme.palette.primary.main, fontWeight: 700 }),
 };

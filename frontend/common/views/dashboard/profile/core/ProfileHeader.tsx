@@ -57,7 +57,7 @@ export function ProfileHeader({ name, email, roleLabel, avatarUrl, showAvatar = 
                   color: theme.palette.onInfo,
                   px: 1.25,
                   py: 0.5,
-                  borderRadius: 999,
+                  borderRadius: "9999px",
                   fontSize: theme.typography.labelSm.fontSize,
                   fontWeight: 600,
                   lineHeight: 1.2,

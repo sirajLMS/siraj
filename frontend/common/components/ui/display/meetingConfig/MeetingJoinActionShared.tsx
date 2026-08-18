@@ -109,13 +109,19 @@ function renderExpiresAt(expiresAt: string | null): ReactElement | null {
 }
 
 const wrapSpan = (children: ReactNode, fullWidth: boolean): ReactElement =>
-  fullWidth ? <span style={{ display: "block", width: "100%" }}>{children}</span> : <span>{children}</span>;
+  fullWidth ? (
+    <Box component="span" sx={{ display: "block", width: "100%" }}>
+      {children}
+    </Box>
+  ) : (
+    <span>{children}</span>
+  );
 
 function renderSetupAlert(ctx: JoinContext, setupHref: string, emptyRole: MeetingJoinEmptyRole): ReactElement {
   return (
     <Alert severity="info" sx={{ width: "100%" }}>
       <Stack spacing={1}>
-        <Typography sx={{ typography: "bodySm" }}>{resolveEmptyMessage(ctx.t, emptyRole)}</Typography>
+        <Typography sx={{ typography: "bodyMd" }}>{resolveEmptyMessage(ctx.t, emptyRole)}</Typography>
         <Button component={Link} href={setupHref} size="small" variant="outlined" startIcon={<SettingsOutlinedIcon />}>
           {ctx.t.setupLink}
         </Button>

@@ -1,5 +1,4 @@
 export * from "./buildFxDisplayMessages";
-export * from "./console";
 export {
   type CurrencyOption,
   currencies,

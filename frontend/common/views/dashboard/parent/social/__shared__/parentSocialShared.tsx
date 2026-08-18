@@ -1,5 +1,6 @@
-import { Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
+import { Link, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
+import { LoadingState } from "@/frontend/common/components/ui";
 import type { ParentSocialViewModel } from "@/frontend/common/views/dashboard/parent/social/useParentSocialViewModel";
 import { isSafeUrl } from "@/shared/lib/safe-url";
 
@@ -100,11 +101,7 @@ export function ParentSocialShared({
   return options.renderPageContainer(
     <>
       {options.renderPageHeader(labels.pageTitle, labels.pageSubtitle)}
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
-        </Box>
-      ) : null}
+      {loading ? <LoadingState /> : null}
       {error ? (
         <Typography sx={{ color: theme => theme.palette.error.main }}>{labels.errors.failedToLoad}</Typography>
       ) : null}

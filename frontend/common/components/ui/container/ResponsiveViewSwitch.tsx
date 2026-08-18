@@ -4,12 +4,14 @@ import { Alert, Box, Button, CircularProgress, Typography } from "@mui/material"
 import { Component, type ComponentType, type ErrorInfo, type ReactNode, Suspense } from "react";
 import { useViewport } from "@/frontend/common/hooks/useViewport";
 import { logger } from "@/frontend/common/utils/logger";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 type ViewProps<T> = Readonly<T>;
 
 interface ViewSwitchErrorBoundaryProps {
   readonly children: ReactNode;
   readonly errorFallback?: ReactNode;
+  readonly labels: { readonly retry: string; readonly loadFailed: string };
 }
 
 interface ViewSwitchErrorBoundaryState {
@@ -37,11 +39,11 @@ class ViewSwitchErrorBoundary extends Component<ViewSwitchErrorBoundaryProps, Vi
           sx={{ m: 2 }}
           action={
             <Button color="inherit" size="small" onClick={() => globalThis.location.reload()}>
-              Retry
+              {this.props.labels.retry}
             </Button>
           }
         >
-          <Typography variant="bodyMd">Failed to load view. Please refresh the page.</Typography>
+          <Typography variant="bodyMd">{this.props.labels.loadFailed}</Typography>
         </Alert>
       );
     } else {
@@ -73,10 +75,11 @@ export function ResponsiveViewSwitch<T>({
   errorFallback,
 }: Readonly<ResponsiveViewSwitchProps<T>>) {
   const { isMobile } = useViewport();
+  const t = useAppTranslation(Translation.Common);
   const suspenseFallback = fallback ?? defaultFallback;
 
   return (
-    <ViewSwitchErrorBoundary errorFallback={errorFallback}>
+    <ViewSwitchErrorBoundary errorFallback={errorFallback} labels={{ retry: t.retry, loadFailed: t.loadFailed }}>
       <Suspense fallback={suspenseFallback}>
         {isMobile ? <MobileComponent {...props} /> : <DesktopComponent {...props} />}
       </Suspense>

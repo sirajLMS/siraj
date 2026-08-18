@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, currencies } from "@/frontend/common/lib/currency";

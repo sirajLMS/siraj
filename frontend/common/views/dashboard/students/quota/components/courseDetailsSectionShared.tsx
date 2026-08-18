@@ -17,8 +17,8 @@ import { teachersQueryDocument } from "@/frontend/common/graphql/sharedDocuments
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import type { CourseDetailsSectionSharedProps } from "@/frontend/common/views/dashboard/students/quota/components/courseDetailsSectionShared.types";
 import { quotaInputSx } from "@/frontend/common/views/dashboard/students/quota/components/quotaFieldStyles";
-import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
+import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/useQuotaFormAccess";
 
 function TeacherField({ teacherLabelId }: Readonly<{ teacherLabelId: string }>) {
   const { labels: t, canViewTeacher } = useQuotaFormAccess();

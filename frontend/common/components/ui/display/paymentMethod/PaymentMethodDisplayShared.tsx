@@ -255,7 +255,7 @@ export function PaymentMethodDisplayShared({
   const labelTypography = options.labelTypography ?? "labelMd";
   const labelMinWidth = options.labelMinWidth ?? 96;
   const detailRowGap = options.detailRowGap ?? 1;
-  const titleTypography = options.titleTypography ?? "titleMd";
+  const titleTypography = options.titleTypography ?? "titleLg";
 
   return (
     <Stack spacing={compact ? compactSpacing : normalSpacing}>

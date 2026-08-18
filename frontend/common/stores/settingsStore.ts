@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { SettingsTabId } from "@/frontend/common/views/dashboard/settings/types/settings.types";
 

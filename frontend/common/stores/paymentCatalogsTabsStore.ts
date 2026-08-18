@@ -1,3 +1,5 @@
+"use client";
+
 import { createTabbedPaneStore } from "@/frontend/common/stores/createTabbedPaneStore";
 import {
   PAYMENT_CATALOGS_TAB_IDS,

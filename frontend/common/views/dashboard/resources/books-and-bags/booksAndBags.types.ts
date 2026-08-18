@@ -14,6 +14,7 @@ export interface BooksAndBagsLabels {
   readonly statusOutOfStock: string;
   readonly deleteSuccess: string;
   readonly deleteFailed: string;
+  readonly ariaDeleteBook: string;
 }
 
 export interface BooksAndBagsClientProps {

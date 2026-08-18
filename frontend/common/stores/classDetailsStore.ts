@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { ActionFeedbackState } from "@/frontend/common/views/dashboard/classes/details/types";
 

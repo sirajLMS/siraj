@@ -42,7 +42,7 @@ function EndpointRow({ url, labels }: EndpointRowProps) {
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap" }}>
-      <Typography sx={{ typography: "bodySm", fontFamily: "monospace", wordBreak: "break-all" }}>{url}</Typography>
+      <Typography sx={{ typography: "bodyMd", fontFamily: "monospace", wordBreak: "break-all" }}>{url}</Typography>
       <Button
         size="small"
         variant="outlined"

@@ -1,13 +1,14 @@
 "use client";
 
 import { ContentCopyOutlined, OpenInNewOutlined } from "@mui/icons-material";
-import { Alert, Box, Button, Chip, CircularProgress, Link, Stack, Typography } from "@mui/material";
+import { Alert, Box, Chip, CircularProgress, Link, Stack, Typography } from "@mui/material";
 import type * as React from "react";
-import { useState } from "react";
+import { FilterButton } from "@/frontend/common/components/ui/button";
 import {
   MeetingConnectionTestMode,
   MeetingIntegrationProviderSlug,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { useCopyFeedback } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/useCopyFeedback";
 import type { TestConnectionState } from "@/frontend/common/views/dashboard/settings/types/meeting-ui.types";
 import type { TestMeetingConnectionResult } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
@@ -38,23 +39,21 @@ type TestButtonRowProps = {
 function TestButtonRow({ labels, testing, providerSlug, onRunTest }: TestButtonRowProps) {
   return (
     <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-      <Button
+      <FilterButton
         size="small"
-        variant="outlined"
         disabled={testing}
         onClick={() => onRunTest(providerSlug, MeetingConnectionTestMode.ValidateConfig)}
         startIcon={testing ? <CircularProgress size={16} /> : undefined}
       >
         {labels.validateConfig}
-      </Button>
-      <Button
+      </FilterButton>
+      <FilterButton
         size="small"
-        variant="outlined"
         disabled={testing}
         onClick={() => onRunTest(providerSlug, MeetingConnectionTestMode.GenerateAndDelete)}
       >
         {labels.generateAndDelete}
-      </Button>
+      </FilterButton>
     </Box>
   );
 }
@@ -69,7 +68,7 @@ type TestJoinUrlRowProps = {
 function TestJoinUrlRow({ labels, url, copied, onCopy }: TestJoinUrlRowProps) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}>
-      <Typography sx={{ typography: "bodySm" }}>
+      <Typography sx={{ typography: "bodyMd" }}>
         {labels.joinUrl}: {url}
       </Typography>
       <Chip
@@ -93,14 +92,14 @@ function RawPayloadSection({ labels, payload }: RawPayloadSectionProps) {
   return (
     <details>
       <summary>
-        <Typography component="span" sx={{ typography: "bodySm", color: "text.secondary", cursor: "pointer" }}>
+        <Typography component="span" sx={{ typography: "bodyMd", color: "text.secondary", cursor: "pointer" }}>
           {labels.testPanel.rawResponse}
         </Typography>
       </summary>
       <Box
         component="pre"
         sx={{
-          typography: "bodySm",
+          typography: "bodyMd",
           fontFamily: "monospace",
           p: 1,
           m: 0,
@@ -130,7 +129,7 @@ function MarketplaceLink({ labels, marketplaceUrl }: MarketplaceLinkProps) {
       href={marketplaceUrl}
       target="_blank"
       rel="noopener noreferrer"
-      sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, typography: "bodySm" }}
+      sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, typography: "bodyMd" }}
     >
       {labels.testPanel.marketplaceHint}
       <OpenInNewOutlined sx={{ fontSize: 14 }} />
@@ -153,13 +152,13 @@ type ConnectionSummaryMetricsProps = {
 function ConnectionSummaryMetrics({ labels, result, authStatusLabel }: ConnectionSummaryMetricsProps) {
   return (
     <>
-      <Typography sx={{ typography: "bodySm" }}>
+      <Typography sx={{ typography: "bodyMd" }}>
         {labels.latency}: {result.latencyMs}ms
       </Typography>
-      <Typography sx={{ typography: "bodySm" }}>
+      <Typography sx={{ typography: "bodyMd" }}>
         {labels.testPanel.endpointReached}: {result.upstreamResponseSummary}
       </Typography>
-      <Typography sx={{ typography: "bodySm" }}>
+      <Typography sx={{ typography: "bodyMd" }}>
         {labels.testPanel.authStatus}: {authStatusLabel}
       </Typography>
     </>
@@ -167,17 +166,7 @@ function ConnectionSummaryMetrics({ labels, result, authStatusLabel }: Connectio
 }
 
 function SuccessContent({ labels, result, marketplaceUrl }: SuccessContentProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyUrl = async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      globalThis.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard not available — silently ignore
-    }
-  };
+  const [copied, handleCopyUrl] = useCopyFeedback();
 
   return (
     <Alert severity="success" icon={false}>
@@ -188,7 +177,7 @@ function SuccessContent({ labels, result, marketplaceUrl }: SuccessContentProps)
           <TestJoinUrlRow labels={labels} url={result.testJoinUrl} copied={copied} onCopy={handleCopyUrl} />
         )}
         {result.deleted !== null && (
-          <Typography sx={{ typography: "bodySm" }}>
+          <Typography sx={{ typography: "bodyMd" }}>
             {labels.deleted}: {result.deleted ? labels.testSuccess : labels.notDeleted}
           </Typography>
         )}
@@ -212,25 +201,21 @@ function FailureContent({ labels, result, providerSlug, onRunTest }: FailureCont
       severity="error"
       icon={false}
       action={
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={() => onRunTest(providerSlug, MeetingConnectionTestMode.ValidateConfig)}
-        >
+        <FilterButton size="small" onClick={() => onRunTest(providerSlug, MeetingConnectionTestMode.ValidateConfig)}>
           {labels.retryTest}
-        </Button>
+        </FilterButton>
       }
     >
       <Stack sx={{ gap: 0.5 }}>
         <Typography sx={{ fontWeight: 600 }}>{labels.testConnectionFailure}</Typography>
         <ConnectionSummaryMetrics labels={labels} result={result} authStatusLabel={labels.testPanel.authFailure} />
         {result.errorCode && (
-          <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>
+          <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>
             {labels.errorCode}: {result.errorCode}
           </Typography>
         )}
         {result.errorMessage && (
-          <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>
+          <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>
             {labels.errorMessage}: {result.errorMessage}
           </Typography>
         )}
@@ -245,7 +230,7 @@ type IdleContentProps = {
 };
 
 function IdleContent({ labels }: IdleContentProps) {
-  return <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.testPanel.idleHint}</Typography>;
+  return <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.testPanel.idleHint}</Typography>;
 }
 
 type TestingContentProps = {
@@ -256,7 +241,7 @@ function TestingContent({ labels }: TestingContentProps) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       <CircularProgress size={20} />
-      <Typography sx={{ typography: "bodySm" }}>{labels.testConnectionTesting}</Typography>
+      <Typography sx={{ typography: "bodyMd" }}>{labels.testConnectionTesting}</Typography>
     </Box>
   );
 }

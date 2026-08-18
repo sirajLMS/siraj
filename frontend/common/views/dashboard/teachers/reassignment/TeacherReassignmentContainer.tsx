@@ -1,10 +1,11 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { LoadingState } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -63,14 +64,6 @@ function mapStudentData(studentData: StudentQueryData | undefined): Reassignment
     version: s.version ?? null,
     updatedAt: s.updatedAt ?? null,
   };
-}
-
-function ReassignmentLoadingState() {
-  return (
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-      <CircularProgress />
-    </Box>
-  );
 }
 
 function ReassignmentErrorState({ message }: { readonly message: string }) {
@@ -195,7 +188,7 @@ export function TeacherReassignmentContainer(_props: TeacherReassignmentContaine
   }
 
   if (studentLoading) {
-    return <ReassignmentLoadingState />;
+    return <LoadingState />;
   }
 
   if (studentError) {

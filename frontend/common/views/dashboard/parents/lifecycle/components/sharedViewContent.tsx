@@ -54,12 +54,10 @@ export function LifecycleParentSummaryCard({
       <Stack sx={{ flexDirection: "row", gap: 2, alignItems: "center" }}>
         <PersonOutlined sx={theme => ({ color: theme.palette.primary.main, fontSize: size === "lg" ? 40 : 32 })} />
         <Box>
-          <Typography sx={{ typography: size === "lg" ? "titleLg" : "titleMd", fontWeight: 700 }}>
-            {parent.name}
-          </Typography>
+          <Typography sx={{ typography: "titleLg", fontWeight: 700 }}>{parent.name}</Typography>
           <Typography
             sx={theme => ({
-              typography: size === "lg" ? "bodyMd" : "bodySm",
+              typography: "bodyMd",
               color: theme.palette.text.secondary,
             })}
           >

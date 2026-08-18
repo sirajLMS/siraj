@@ -98,8 +98,10 @@ export function RecurringRateSection({
           label={labels.currencyLabel}
           fullWidth
         />
-        {error ? <Box sx={{ color: "error.main" }}>{labels.errorMessage}</Box> : null}
-        {success && !error ? <Box sx={{ color: "success.main" }}>{labels.successMessage}</Box> : null}
+        {error ? <Box sx={theme => ({ color: theme.palette.error.main })}>{labels.errorMessage}</Box> : null}
+        {success && !error ? (
+          <Box sx={theme => ({ color: theme.palette.success.main })}>{labels.successMessage}</Box>
+        ) : null}
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button type="submit" variant="contained" disabled={saving}>
             {labels.saveLabel}

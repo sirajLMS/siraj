@@ -248,7 +248,7 @@ function SecondaryAdminActions({
         </Box>
       </Tooltip>
       <StyledDeleteIconButton
-        aria-label="delete-instance"
+        aria-label={labels.deleteInstance}
         title={labels.deleteInstance}
         onClick={onDelete}
         sx={theme => ({

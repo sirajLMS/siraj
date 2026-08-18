@@ -26,9 +26,9 @@ import type {
   StudentInformationSectionSharedProps,
   StudentInformationSectionSlotProps,
 } from "@/frontend/common/views/dashboard/students/quota/components/studentInformationSectionShared.types";
-import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/quotaFormAccessContext";
 import type { StudentQuotaFormData } from "@/frontend/common/views/dashboard/students/quota/schemas/studentQuotaSchema";
 import { GENDER_OPTIONS } from "@/frontend/common/views/dashboard/students/quota/types";
+import { useQuotaFormAccess } from "@/frontend/common/views/dashboard/students/quota/useQuotaFormAccess";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 const DATE_FORMAT = "yyyy-MM-dd";

@@ -39,7 +39,7 @@ export function EnvironmentConfigTabShared({
           elevation={0}
         >
           <AccordionSummary expandIcon={<ExpandMoreOutlined />}>
-            <Typography sx={{ typography: "titleMd" }}>{labels.categories[group.category]}</Typography>
+            <Typography sx={{ typography: "titleLg" }}>{labels.categories[group.category]}</Typography>
           </AccordionSummary>
           <AccordionDetails sx={options.accordionDetailsSx}>
             {options.renderHeaderRow ? options.renderHeaderRow(labels) : null}

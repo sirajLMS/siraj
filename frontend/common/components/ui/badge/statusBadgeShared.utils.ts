@@ -116,6 +116,26 @@ export const resolveStatusPaletteKey: ResolveStatusPaletteKeyFn = (
       };
       return map[status] ?? "pending";
     }
+    case "cronRunStatus": {
+      const map: Record<string, "completed" | "pending" | "blocked" | "cancelled"> = {
+        COMPLETED: "completed",
+        PENDING: "pending",
+        RUNNING: "pending",
+        FAILED: "blocked",
+        TIMEOUT: "blocked",
+        CANCELLED: "cancelled",
+        RETRYING: "pending",
+      };
+      return map[status] ?? "pending";
+    }
+    case "cronScheduleStatus": {
+      const map: Record<string, "active" | "pending" | "cancelled"> = {
+        ACTIVE: "active",
+        PAUSED: "pending",
+        DISABLED: "cancelled",
+      };
+      return map[status] ?? "pending";
+    }
     default:
       return null;
   }

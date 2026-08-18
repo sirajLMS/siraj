@@ -7,9 +7,9 @@ import type {
   MeetingJoinActionProps,
   MeetingJoinEmptyRole,
 } from "@/frontend/common/components/ui/display/meetingConfig/types/meetingJoinAction.types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
+import type { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { safeOpenWindow } from "@/frontend/common/lib/safeOpenWindow";
-import type { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { MeetingConfigDisplayLabels, MeetingConfigJoinLabels } from "@/shared/locale";
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
+import { ExportButton } from "@/frontend/common/components/ui/button";
 import type { ParentRulesViewModel } from "@/frontend/common/views/dashboard/parent/rules/useParentRulesViewModel";
 
 interface PageHeaderProps {
@@ -44,9 +45,7 @@ export function ParentRulesShared({
           <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
             {labels.policyBilling}
           </Typography>
-          <Button variant="outlined" onClick={onDownloadHandbook}>
-            {labels.downloadHandbook}
-          </Button>
+          <ExportButton onClick={onDownloadHandbook}>{labels.downloadHandbook}</ExportButton>
         </Stack>
       </SectionPanel>
     </PageContainer>

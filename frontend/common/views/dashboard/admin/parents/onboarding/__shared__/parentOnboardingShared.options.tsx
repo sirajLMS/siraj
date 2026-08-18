@@ -40,7 +40,7 @@ export const DESKTOP_OPTIONS: ParentOnboardingSharedOptions = {
     flexDirection: { xs: "column", sm: "row" },
     gap: 2,
   }),
-  submitButtonSx: { px: 6, py: 2, fontWeight: "bold", letterSpacing: "0.1em", minWidth: 200 },
+  submitButtonSx: { px: 6, py: 2, fontWeight: 700, letterSpacing: "0.1em", minWidth: 200 },
   renderPageContainer: children => <DesktopPageContainer>{children}</DesktopPageContainer>,
   renderPageHeader: (title, subtitle, actions) => (
     <DesktopPageHeader title={title} subtitle={subtitle} actions={actions} />
@@ -88,7 +88,7 @@ export const MOBILE_OPTIONS: ParentOnboardingSharedOptions = {
     alignItems: "stretch",
     gap: 2,
   }),
-  submitButtonSx: { py: 2, fontWeight: "bold", letterSpacing: "0.1em" },
+  submitButtonSx: { py: 2, fontWeight: 700, letterSpacing: "0.1em" },
   renderPageContainer: children => <MobilePageContainer>{children}</MobilePageContainer>,
   renderPageHeader: (title, subtitle, actions) => (
     <MobilePageHeader title={title} subtitle={subtitle} edgeToEdge={false} actions={actions} />

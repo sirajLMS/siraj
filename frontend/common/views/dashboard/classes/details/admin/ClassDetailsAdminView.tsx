@@ -1,3 +1,5 @@
+"use client";
+
 // NEW FOR PLAN v5: tier-agnostic admin view composed from existing admin/ sub-components.
 // specs.md §6.1 — this view lives in frontend/common/views/dashboard/classes/details/admin/ and
 // is consumed by BOTH mobile and desktop ClassDetailsContent wrappers via `<ClassDetailsAdminView

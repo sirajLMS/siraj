@@ -2,6 +2,7 @@
 
 import { CheckCircleOutlined, CloseOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
+import { Translation, useAppTranslation } from "@/shared/locale";
 
 interface SubmissionSuccessBannerProps {
   readonly message: string;
@@ -9,6 +10,7 @@ interface SubmissionSuccessBannerProps {
 }
 
 export function SubmissionSuccessBanner({ message, onDismiss }: Readonly<SubmissionSuccessBannerProps>) {
+  const t = useAppTranslation(Translation.Common);
   return (
     <Box
       sx={theme => ({
@@ -29,7 +31,7 @@ export function SubmissionSuccessBanner({ message, onDismiss }: Readonly<Submiss
         <CheckCircleOutlined />
         <Typography variant="titleLg">{message}</Typography>
       </Box>
-      <IconButton aria-label="Dismiss" onClick={onDismiss} sx={{ color: "inherit", opacity: 0.7 }}>
+      <IconButton aria-label={t.ariaDismiss} onClick={onDismiss} sx={{ color: "inherit", opacity: 0.7 }}>
         <CloseOutlined />
       </IconButton>
     </Box>

@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 
 export interface ManualClassEntryStudentFieldContextValue {
   readonly studentId: string;
@@ -7,11 +7,3 @@ export interface ManualClassEntryStudentFieldContextValue {
 }
 
 export const ManualClassEntryStudentFieldContext = createContext<ManualClassEntryStudentFieldContextValue | null>(null);
-
-export function useManualClassEntryStudentField(): ManualClassEntryStudentFieldContextValue {
-  const context = useContext(ManualClassEntryStudentFieldContext);
-  if (!context) {
-    throw new Error("useManualClassEntryStudentField must be used within ManualClassEntryDialog");
-  }
-  return context;
-}

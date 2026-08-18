@@ -1,9 +1,10 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
+import { LoadingState } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
 import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -132,11 +133,7 @@ export function RescheduleContainer() {
   const viewModel = useRescheduleViewModel(props);
 
   if (loading && !data) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingState />;
   }
 
   if (!classInstanceId || !classInstance) {

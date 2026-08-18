@@ -58,6 +58,7 @@ function useStudentDashboardLabels(t: StudentDashboardLabels): StudentDashboardL
       columnDuration: t.columnDuration,
       columnStatus: t.columnStatus,
       columnActions: t.columnActions,
+      frozen: t.frozen,
     }),
     [t]
   );

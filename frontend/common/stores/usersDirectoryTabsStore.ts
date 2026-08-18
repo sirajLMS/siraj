@@ -1,3 +1,5 @@
+"use client";
+
 import { createTabbedPaneStore } from "@/frontend/common/stores/createTabbedPaneStore";
 import {
   USERS_DIRECTORY_TAB_IDS,

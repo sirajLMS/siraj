@@ -1,4 +1,4 @@
-import type { Components, Theme } from "@mui/material/styles";
+import { alpha, type Components, type Theme } from "@mui/material/styles";
 
 /**
  * CSS-variable-based autofill color tokens.
@@ -285,7 +285,10 @@ const getMuiDataGrid = (): Components<Omit<Theme, "components">>["MuiDataGrid"] 
         borderColor: theme.palette.border.light,
       },
       "& .MuiDataGrid-row:hover": {
-        backgroundColor: theme.palette.mode === "light" ? "rgba(13, 148, 136, 0.04)" : "rgba(45, 212, 191, 0.06)",
+        backgroundColor:
+          theme.palette.mode === "light"
+            ? alpha(theme.palette.primary.main, 0.04)
+            : alpha(theme.palette.primary.main, 0.06),
       },
       "& .MuiDataGrid-footerContainer": {
         borderTop: `1px solid`,

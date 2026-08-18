@@ -1,6 +1,7 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import { Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   classMeetingConfigsQueryDocument,
   classMeetingConfigsWithStatusQueryDocument,
@@ -78,7 +79,7 @@ export const WithEffectiveMeeting: Story = {
       providerName: { en: "Zoom", ar: "Zoom" },
       logoUrl: null,
       meetingId: "987654321",
-      source: "AUTO_GENERATED",
+      source: EffectiveMeetingSource.Recurring,
       configId: "config-1",
       providerId: "prov-zoom-1",
       supportsAutoGeneration: true,

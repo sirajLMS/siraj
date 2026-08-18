@@ -1,5 +1,18 @@
+"use client";
+
 import { create } from "zustand";
 
+/**
+ * Student history month/week/day selection store.
+ *
+ * NOTE: This store intentionally does NOT use the `persist` middleware. The
+ * `currentMonth` field holds a `Date` object (non-serializable) which would be
+ * destroyed by `JSON.stringify` on rehydration. Per the AGENTS.md serialization
+ * rules (Strategy 1: Non-persisted store), keeping the store in-memory only is
+ * the accepted mitigation — state survives SPA navigation / tier switches but
+ * resets to defaults on hard page refresh. Do NOT add `persist` here without
+ * first converting `currentMonth` to an ISO string and updating all consumers.
+ */
 export interface StudentHistoryState {
   readonly currentMonth: Date;
   readonly selectedDay: number | null;

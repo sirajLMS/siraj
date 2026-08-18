@@ -1,5 +1,5 @@
 // NEW FOR PLAN v5 (lifted from frontend/{mobile,desktop}/components/ui/display/meetingConfig/meetingConfigDisplay.types.ts)
-import type { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
+import type { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 export type MeetingConfigDisplayData = {
   readonly id?: string;

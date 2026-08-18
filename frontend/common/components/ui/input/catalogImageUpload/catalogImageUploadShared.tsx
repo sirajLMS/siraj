@@ -1,7 +1,7 @@
 "use client";
 
 import { CloudUploadOutlined, DeleteOutlined, ErrorOutlined, LinkOutlined } from "@mui/icons-material";
-import { Box, Button, CircularProgress, Divider, InputAdornment, TextField, Typography } from "@mui/material";
+import { alpha, Box, Button, CircularProgress, Divider, InputAdornment, TextField, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import Image from "next/image";
 import type * as React from "react";
@@ -19,7 +19,7 @@ import { ACCEPTED_TYPES, DEFAULT_MAX_SIZE_MB, useImageUpload } from "@/frontend/
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 const DEFAULT_PREVIEW_SIZE = 96;
-const DEFAULT_HELPER_TEXT_VARIANT = "bodySm";
+const DEFAULT_HELPER_TEXT_VARIANT = "bodyMd";
 const DEFAULT_BUTTON_LAYOUT: CatalogImageUploadButtonLayout = "vertical";
 
 export const PreviewBox: React.FC<PreviewBoxProps> = ({
@@ -67,7 +67,7 @@ export const PreviewBox: React.FC<PreviewBoxProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "rgba(0,0,0,0.5)",
+          backgroundColor: (theme: Theme) => alpha(theme.palette.scrim, 0.5),
         }}
       >
         <CircularProgress size={previewSize >= 128 ? 32 : 28} />

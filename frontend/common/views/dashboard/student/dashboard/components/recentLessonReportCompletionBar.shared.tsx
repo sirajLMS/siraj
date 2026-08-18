@@ -34,10 +34,10 @@ export function RecentLessonReportCompletionBar({
           value={value}
           sx={theme => ({
             height: 6,
-            borderRadius: 999,
+            borderRadius: "9999px",
             backgroundColor: theme.palette.surfaceContainer,
             "& .MuiLinearProgress-bar": {
-              borderRadius: 999,
+              borderRadius: "9999px",
               backgroundColor: resolveCompletionProgressColor(theme, value),
             },
           })}

@@ -199,6 +199,7 @@ function UserMenuTrigger({
   open: boolean;
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
 }>) {
+  const tCommon = useAppTranslation(Translation.Common);
   return (
     <ButtonBase
       onClick={onClick}
@@ -215,7 +216,7 @@ function UserMenuTrigger({
           boxShadow: theme.palette.shadow.cardHover,
         },
       })}
-      aria-label="user profile menu"
+      aria-label={tCommon.ariaUserProfileMenu}
       aria-controls={open ? "user-profile-menu" : undefined}
       aria-haspopup="true"
       aria-expanded={open ? "true" : undefined}

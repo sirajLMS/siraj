@@ -42,9 +42,9 @@ export function MeetingConfigFields({
   return (
     <Stack spacing={3} sx={theme => ({ p: theme.spacing(3) })}>
       {labels.sectionTitle !== undefined && (
-        <Typography sx={{ typography: "titleMd" }}>{labels.sectionTitle}</Typography>
+        <Typography sx={{ typography: "titleLg" }}>{labels.sectionTitle}</Typography>
       )}
-      <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.optionalHint}</Typography>
+      <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.optionalHint}</Typography>
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
           <MeetingProviderSelect

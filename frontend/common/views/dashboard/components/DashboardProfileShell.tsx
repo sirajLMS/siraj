@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { isPrefetchRequest } from "@/backend/lib/auth/is-prefetch";
 import { mapBackendPermissionsToGraphql } from "@/backend/lib/auth/map-graphql-permissions";
 import { logger } from "@/backend/lib/logger";
-import type { UserPermissionContext } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 import {
   AccountStatus,
   AppPermission,

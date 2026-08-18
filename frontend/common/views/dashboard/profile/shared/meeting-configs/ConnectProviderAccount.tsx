@@ -3,9 +3,8 @@
 import LinkOffOutlinedIcon from "@mui/icons-material/LinkOffOutlined";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
-import { Alert, AlertTitle, Box, Button, Chip, CircularProgress, Stack, Typography } from "@mui/material";
-import type { Theme } from "@mui/material/styles";
-import type { SystemStyleObject } from "@mui/system";
+import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
+import { OAuthConnectionStatusBadge } from "@/frontend/common/components/ui/display/meetingConfig/OAuthConnectionStatusBadge";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
 
 export type ConnectionState = "disconnected" | "connecting" | "connected" | "expiring" | "expired";
@@ -34,59 +33,6 @@ export interface ConnectProviderAccountProps {
   readonly onReconnect: (providerSlug: string) => void;
   readonly onDisconnect: (providerSlug: string) => void;
   readonly loading?: boolean;
-}
-
-// ---------------------------------------------------------------------------
-// OAuthConnectionStatusBadge — Placeholder
-// ---------------------------------------------------------------------------
-
-function OAuthConnectionStatusBadge({
-  labels,
-  status,
-}: {
-  readonly labels: ConnectProviderAccountLabels;
-  readonly status: "connected" | "expiring" | "expired" | "disconnected";
-}) {
-  // Placeholder: OAuthConnectionStatusBadge will be built in Phase 4 as a
-  // dedicated component with icon support, tooltip, and time-remaining text.
-  // For now a simple Chip with theme-palette colors serves as the placeholder.
-  const badgeConfig: Record<
-    "connected" | "expiring" | "expired" | "disconnected",
-    { label: string; sx: (theme: Theme) => SystemStyleObject<Theme> }
-  > = {
-    connected: {
-      label: labels.statusConnected,
-      sx: theme => ({
-        backgroundColor: theme.palette.success.main,
-        color: theme.palette.onSuccess,
-      }),
-    },
-    expiring: {
-      label: labels.statusExpiring,
-      sx: theme => ({
-        backgroundColor: theme.palette.warning.main,
-        color: theme.palette.onWarning,
-      }),
-    },
-    expired: {
-      label: labels.statusExpired,
-      sx: theme => ({
-        backgroundColor: theme.palette.error.main,
-        color: theme.palette.onError,
-      }),
-    },
-    disconnected: {
-      label: labels.statusDisconnected,
-      sx: theme => ({
-        backgroundColor: theme.palette.grey[500],
-        color: theme.palette.onSurface,
-      }),
-    },
-  };
-
-  const config = badgeConfig[status];
-
-  return <Chip label={config.label} size="small" sx={config.sx} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -131,7 +77,7 @@ function DisconnectedState({
     <Box sx={{ position: "relative" }}>
       <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.5, mb: 1.5 }}>
         <Typography sx={{ typography: "bodyMd" }}>{providerName}</Typography>
-        <OAuthConnectionStatusBadge labels={labels} status="disconnected" />
+        <OAuthConnectionStatusBadge status="disconnected" />
       </Stack>
       <Button
         variant="contained"
@@ -193,7 +139,7 @@ function ConnectedState({
     <Stack sx={{ gap: 1.5 }}>
       <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
         <Typography sx={{ typography: "bodyMd" }}>{providerName}</Typography>
-        <OAuthConnectionStatusBadge labels={labels} status="connected" />
+        <OAuthConnectionStatusBadge status="connected" />
         {connectedEmail ? (
           <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
             {labels.connectedAs(connectedEmail)}
@@ -246,7 +192,7 @@ function ReconnectAlertState({
     <Stack sx={{ gap: 1.5 }}>
       <Stack sx={{ flexDirection: "row", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
         <Typography sx={{ typography: "bodyMd" }}>{providerName}</Typography>
-        <OAuthConnectionStatusBadge labels={labels} status={status} />
+        <OAuthConnectionStatusBadge status={status} />
         {connectedEmail ? (
           <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.text.secondary })}>
             {labels.connectedAs(connectedEmail)}

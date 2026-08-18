@@ -51,6 +51,7 @@ export function buildResourcesLabels(t: ResourcesTranslator): ResourcesLabels {
       uploadRetryFailed: t.notification.uploadRetryFailed,
       deleteSuccess: t.notification.deleteSuccess,
       deleteFailed: t.notification.deleteFailed,
+      ariaDeleteResource: t.notification.ariaDeleteResource,
     },
   };
 }

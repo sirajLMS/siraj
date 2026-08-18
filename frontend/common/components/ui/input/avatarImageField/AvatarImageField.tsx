@@ -48,7 +48,7 @@ type UploadStatusTexts = {
 
 function avatarHeadingSx(theme: Theme, displayValue: Record<string, string>) {
   return {
-    typography: "titleMd" as const,
+    typography: "titleLg" as const,
     color: theme.palette.onSurface,
     mb: { xs: 2, md: 2.5 },
     textAlign: { xs: "center", md: "start" } as const,
@@ -81,7 +81,7 @@ function UploadProgressOverlay({ isUploading }: Readonly<UploadProgressOverlayPr
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "rgba(0,0,0,0.45)",
+        backgroundColor: (theme: Theme) => alpha(theme.palette.scrim, 0.45),
       }}
     >
       <CircularProgress size={28} />
@@ -241,7 +241,7 @@ function AvatarActionsStack({
       </Button>
       <Typography
         sx={theme => ({
-          typography: "bodySm",
+          typography: "bodyMd",
           color: theme.palette.text.secondary,
           display: "flex",
           alignItems: "center",
@@ -254,7 +254,7 @@ function AvatarActionsStack({
         {helperText}
       </Typography>
       {localError ? (
-        <Typography sx={theme => ({ typography: "bodySm", color: theme.palette.error.main })}>{localError}</Typography>
+        <Typography sx={theme => ({ typography: "bodyMd", color: theme.palette.error.main })}>{localError}</Typography>
       ) : null}
     </Box>
   );

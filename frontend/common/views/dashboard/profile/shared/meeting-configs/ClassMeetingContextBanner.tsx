@@ -1,8 +1,8 @@
 "use client";
 
 import { Alert, Chip, Stack } from "@mui/material";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/types/meeting-class-config.operations";
-import { EffectiveMeetingSource } from "@/frontend/common/types/meeting-class-config.graphql.types";
+import { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import type { MeetingConfigClassScopeLabels, MeetingConfigDisplayLabels } from "@/shared/locale/types/ui";
 
 export type ClassMeetingContextBannerProps = {
@@ -43,7 +43,7 @@ export function ClassMeetingContextBanner({
   return (
     <Stack spacing={1}>
       {effectiveMeeting ? (
-        <Alert severity="info" sx={{ typography: "bodySm" }}>
+        <Alert severity="info" sx={{ typography: "bodyMd" }}>
           {t.effectiveSourceBanner(sourceLabel)}
         </Alert>
       ) : null}

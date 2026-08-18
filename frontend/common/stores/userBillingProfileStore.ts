@@ -1,4 +1,7 @@
+"use client";
+
 import { create } from "zustand";
+import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import type {
   MarkPaidInvoiceTarget,
   PaymentDetailsTarget,
@@ -15,13 +18,13 @@ export interface UserBillingProfileState {
   readonly detailsTarget: PaymentDetailsTarget | null;
   readonly snackbarOpen: boolean;
   readonly snackbarMessage: string;
-  readonly snackbarSeverity: "success" | "error" | "info";
+  readonly snackbarSeverity: SnackbarSeverity;
   readonly setPage: (page: number) => void;
   readonly setSearchQuery: (query: string) => void;
   readonly setDebouncedSearch: (value: string) => void;
   readonly setProofTarget: (target: MarkPaidInvoiceTarget | null) => void;
   readonly setDetailsTarget: (target: PaymentDetailsTarget | null) => void;
-  readonly showFeedback: (message: string, severity: "success" | "error" | "info") => void;
+  readonly showFeedback: (message: string, severity: SnackbarSeverity) => void;
   readonly closeSnackbar: () => void;
 }
 

@@ -51,10 +51,10 @@ function KeyBlock({ configKey, description, editable, labels }: KeyBlockProps) {
         {configKey}
       </Typography>
       {description ? (
-        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{description}</Typography>
+        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{description}</Typography>
       ) : null}
       {editable ? null : (
-        <Typography sx={{ typography: "bodySm", color: "text.secondary" }}>{labels.readOnlyHint}</Typography>
+        <Typography sx={{ typography: "bodyMd", color: "text.secondary" }}>{labels.readOnlyHint}</Typography>
       )}
     </Stack>
   );

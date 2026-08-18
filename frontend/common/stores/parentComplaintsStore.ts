@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import type { ParentStudentOption } from "@/frontend/common/types/shared.types";
 

@@ -54,10 +54,10 @@ export function ResourceLibraryHeaderShared({
 
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2 }}>
-      <FilterButton startIcon={<FilterListOutlined />} onClick={handleFilterToggle} sx={{ borderRadius: 999 }}>
+      <FilterButton startIcon={<FilterListOutlined />} onClick={handleFilterToggle} sx={{ borderRadius: "9999px" }}>
         {filterLabel}
       </FilterButton>
-      <FilterButton startIcon={<SortOutlined />} onClick={handleSortToggle} sx={{ borderRadius: 999 }}>
+      <FilterButton startIcon={<SortOutlined />} onClick={handleSortToggle} sx={{ borderRadius: "9999px" }}>
         {sortLabel}
       </FilterButton>
     </Box>

@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 import { ReportGroupingMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ReportType } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";

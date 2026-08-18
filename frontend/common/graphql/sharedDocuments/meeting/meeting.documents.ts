@@ -1,7 +1,6 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
 import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
-import type * as ClassOps from "@/frontend/common/graphql/types/meeting-class-config.operations";
 
 const MEETING_PROVIDER_FIELDS = gql`
   fragment MeetingProviderFields on MeetingProvider {
@@ -216,8 +215,8 @@ const EFFECTIVE_MEETING_FIELDS = gql`
 `;
 
 export const classMeetingConfigsQueryDocument: TypedDocumentNode<
-  ClassOps.ClassMeetingConfigsQuery,
-  ClassOps.ClassMeetingConfigsQueryVariables
+  Operations.ClassMeetingConfigsQuery,
+  Operations.ClassMeetingConfigsQueryVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   query classMeetingConfigs($classInstanceId: ID!) {
@@ -270,8 +269,8 @@ export const classMeetingConfigsWithStatusQueryDocument: TypedDocumentNode<
 `;
 
 export const recurringMeetingConfigsQueryDocument: TypedDocumentNode<
-  ClassOps.RecurringMeetingConfigsQuery,
-  ClassOps.RecurringMeetingConfigsQueryVariables
+  Operations.RecurringMeetingConfigsQuery,
+  Operations.RecurringMeetingConfigsQueryVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   query recurringMeetingConfigs($recurringScheduleId: ID!) {
@@ -282,8 +281,8 @@ export const recurringMeetingConfigsQueryDocument: TypedDocumentNode<
 `;
 
 export const createClassMeetingConfigMutationDocument: TypedDocumentNode<
-  ClassOps.CreateClassMeetingConfigMutation,
-  ClassOps.CreateClassMeetingConfigMutationVariables
+  Operations.CreateClassMeetingConfigMutation,
+  Operations.CreateClassMeetingConfigMutationVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   mutation createClassMeetingConfig($input: ClassMeetingConfigCreateInput!) {
@@ -294,8 +293,8 @@ export const createClassMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const updateClassMeetingConfigMutationDocument: TypedDocumentNode<
-  ClassOps.UpdateClassMeetingConfigMutation,
-  ClassOps.UpdateClassMeetingConfigMutationVariables
+  Operations.UpdateClassMeetingConfigMutation,
+  Operations.UpdateClassMeetingConfigMutationVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   mutation updateClassMeetingConfig($id: ID!, $input: ClassMeetingConfigUpdateInput!) {
@@ -306,8 +305,8 @@ export const updateClassMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteClassMeetingConfigMutationDocument: TypedDocumentNode<
-  ClassOps.DeleteClassMeetingConfigMutation,
-  ClassOps.DeleteClassMeetingConfigMutationVariables
+  Operations.DeleteClassMeetingConfigMutation,
+  Operations.DeleteClassMeetingConfigMutationVariables
 > = gql`
   mutation deleteClassMeetingConfig($id: ID!) {
     deleteClassMeetingConfig(id: $id)
@@ -315,8 +314,8 @@ export const deleteClassMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const setDefaultClassMeetingConfigMutationDocument: TypedDocumentNode<
-  ClassOps.SetDefaultClassMeetingConfigMutation,
-  ClassOps.SetDefaultClassMeetingConfigMutationVariables
+  Operations.SetDefaultClassMeetingConfigMutation,
+  Operations.SetDefaultClassMeetingConfigMutationVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   mutation setDefaultClassMeetingConfig($id: ID!) {

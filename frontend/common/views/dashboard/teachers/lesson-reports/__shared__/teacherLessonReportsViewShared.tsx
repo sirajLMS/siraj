@@ -1,8 +1,8 @@
 "use client";
 
-import { Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
+import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
-import { StatusBadge } from "@/frontend/common/components/ui";
+import { LoadingState, StatusBadge } from "@/frontend/common/components/ui";
 import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { TeacherLessonReportsViewModel } from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
 
@@ -66,17 +66,17 @@ function LessonReportCardContent({
       </Box>
       <Stack direction="row" spacing={2} sx={{ flexWrap: "wrap", gap: 1, mt: cardMarginTop }}>
         {row.durationMinutes != null ? (
-          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
             {labels.durationMinutes}: {row.durationMinutes}
           </Typography>
         ) : null}
         {row.completionPercentage != null ? (
-          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
             {labels.completionPercentage}: {row.completionPercentage}%
           </Typography>
         ) : null}
         {row.submittedAt ? (
-          <Typography sx={{ typography: "bodySm", color: theme => theme.palette.text.secondary }}>
+          <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.text.secondary }}>
             {labels.submittedAt}: {new Date(row.submittedAt).toLocaleDateString(locale)}
           </Typography>
         ) : null}
@@ -87,7 +87,7 @@ function LessonReportCardContent({
         </Typography>
       ) : null}
       {row.status === LessonReportStatus.Rejected && row.rejectionReason ? (
-        <Typography sx={{ typography: "bodySm", color: theme => theme.palette.error.main, mt: cardMarginTop }}>
+        <Typography sx={{ typography: "bodyMd", color: theme => theme.palette.error.main, mt: cardMarginTop }}>
           {labels.rejectionReason}: {row.rejectionReason}
         </Typography>
       ) : null}
@@ -158,11 +158,7 @@ export function TeacherLessonReportsViewShared({
           </Select>
         </FormControl>
 
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : null}
+        {loading ? <LoadingState /> : null}
 
         {error ? <Typography sx={{ color: theme => theme.palette.error.main }}>{shell.emptyMessage}</Typography> : null}
 

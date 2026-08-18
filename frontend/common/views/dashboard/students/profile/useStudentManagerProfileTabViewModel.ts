@@ -14,8 +14,8 @@ import {
   profileToDraft,
 } from "@/frontend/common/views/dashboard/student/profile/__shared__/studentProfileDraftHelpers";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
-import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
+import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/useStudentProfileContext";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 const EMPTY_DRAFT: StudentPortalProfileEditDraft = {

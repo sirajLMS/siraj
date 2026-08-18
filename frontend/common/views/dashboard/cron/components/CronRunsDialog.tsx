@@ -3,11 +3,11 @@
 import { Chip, Dialog, DialogContent, DialogTitle, Stack, Tooltip, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useCallback, useMemo } from "react";
+import { StatusBadge } from "@/frontend/common/components/ui/badge";
 import { CronRunStatus, CronTriggerSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CronRunFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { safeEnum, safeString } from "@/frontend/common/views/dashboard/cron/utils";
 import {
-  getCronRunStatusColor,
   getCronRunStatusLabel,
   getCronTriggerSourceLabel,
 } from "@/frontend/common/views/dashboard/cron/utils/cron-status-utils";
@@ -66,7 +66,12 @@ export function CronRunsDialog({ open, scheduleName, labels, runs, loading, onCl
         renderCell: ({ value }) => {
           const status = safeEnum(value, Object.values(CronRunStatus)) ?? CronRunStatus.Pending;
           return (
-            <Chip size="small" color={getCronRunStatusColor(status)} label={getCronRunStatusLabel(status, labels)} />
+            <StatusBadge
+              category="cronRunStatus"
+              status={status}
+              label={getCronRunStatusLabel(status, labels)}
+              size="small"
+            />
           );
         },
       },

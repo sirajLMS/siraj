@@ -1,6 +1,6 @@
 "use client";
 
-import { Checkbox, FormControlLabel, Stack } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, Stack } from "@mui/material";
 import { type ChangeEvent, useState } from "react";
 import {
   type Control,
@@ -158,7 +158,9 @@ export function OnboardingPaymentMethodSection<T extends FieldValues>({
             }}
           />
           {typeErrorMessage ? (
-            <span style={{ color: "var(--mui-palette-error-main)", fontSize: 12 }}>{typeErrorMessage}</span>
+            <Box component="span" sx={theme => ({ color: theme.palette.error.main, fontSize: 12 })}>
+              {typeErrorMessage}
+            </Box>
           ) : null}
         </>
       ) : null}

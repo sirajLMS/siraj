@@ -1,10 +1,14 @@
+"use client";
+
 import { addDays, format } from "date-fns";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
   type AvailabilitySearchInput,
   AvailabilitySearchSortBy,
-  type Gender,
+  type AvailabilitySearchTeacher,
+  Gender,
+  type TeacherAvailabilityGap,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
 
 const DATE_FILTER_FORMAT = "yyyy-MM-dd";
@@ -21,26 +25,22 @@ export interface SearchScheduleTeacherOption {
 // used by TeacherAvailabilityMonthDrawer (id + name + timezone + gender + availableDaysCount +
 // gaps). Kept in the store so the drawer state survives tier switches. Nullable to structurally
 // satisfy SearchScheduleResultItem's optional-null field shapes from the GraphQL layer.
-export interface SearchScheduleGapItem {
-  readonly id?: string | null;
-  readonly teacherId?: string | null;
-  readonly teacherName?: string | null;
-  readonly teacherGender?: string | null;
-  readonly dayOfWeek?: string | null;
-  readonly calendarDate?: string | null;
-  readonly gapStartTime?: string | null;
-  readonly gapEndTime?: string | null;
-  readonly timezone?: string | null;
-}
+export type SearchScheduleGapItem = Pick<
+  TeacherAvailabilityGap,
+  "id" | "teacherId" | "teacherName" | "teacherGender" | "calendarDate" | "gapStartTime" | "gapEndTime"
+> & {
+  readonly dayOfWeek: string | null;
+  readonly timezone: string | null;
+};
 
-export interface SearchScheduleMonthDrawerTeacher {
-  readonly id?: string | null;
-  readonly name?: string | null;
-  readonly gender?: string | null;
-  readonly timezone?: string | null;
-  readonly availableDaysCount?: number | null;
-  readonly gaps?: readonly (SearchScheduleGapItem | null)[];
-}
+export type SearchScheduleMonthDrawerTeacher = Omit<
+  Pick<AvailabilitySearchTeacher, "id" | "name" | "gender" | "timezone" | "availableDaysCount" | "gaps">,
+  "gender" | "timezone" | "gaps"
+> & {
+  readonly gender: string | null;
+  readonly timezone: string | null;
+  readonly gaps: readonly (SearchScheduleGapItem | null)[] | null;
+};
 
 function getDefaultFromDate(): string {
   return format(new Date(), DATE_FILTER_FORMAT);
@@ -107,20 +107,102 @@ function extractPersistedDraftFilters(draft: SearchScheduleDraftFilters): Persis
   };
 }
 
+const VALID_SORT_BY_VALUES = [
+  AvailabilitySearchSortBy.MostAvailableDays,
+  AvailabilitySearchSortBy.MostGaps,
+  AvailabilitySearchSortBy.NameAsc,
+  AvailabilitySearchSortBy.NameDesc,
+  AvailabilitySearchSortBy.TimezoneAsc,
+] as const;
+
+const VALID_GENDER_VALUES = [Gender.Female, Gender.Male] as const;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasValidTeacherFields(value: unknown): boolean {
+  return isRecord(value) && typeof value.id === "string" && typeof value.name === "string";
+}
+
+function isValidEnumValue<T extends string>(value: unknown, validValues: readonly T[]): value is T {
+  return typeof value === "string" && (validValues as readonly string[]).includes(value);
+}
+
+function isValidNullableNumber(value: unknown): boolean {
+  return value === null || (typeof value === "number" && Number.isFinite(value));
+}
+
 function isPersistedSearchScheduleState(value: unknown): value is PersistedSearchScheduleState {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    !Array.isArray(value) &&
-    "draftFilters" in value &&
-    "selectedTeacher" in value &&
-    "pageSize" in value &&
-    "formFilterDrawerOpen" in value &&
-    "monthDrawerOpen" in value &&
-    "monthDrawerAnchorFromDate" in value &&
-    "monthDrawerCurrentMonth" in value &&
-    "monthDrawerTeacher" in value
-  );
+  if (!isRecord(value)) {
+    return false;
+  }
+  const v = value;
+
+  // Required top-level keys.
+  const requiredKeys = [
+    "draftFilters",
+    "selectedTeacher",
+    "pageSize",
+    "formFilterDrawerOpen",
+    "monthDrawerOpen",
+    "monthDrawerAnchorFromDate",
+    "monthDrawerCurrentMonth",
+    "monthDrawerTeacher",
+  ] as const;
+  if (!requiredKeys.every(key => key in v)) {
+    return false;
+  }
+
+  // Validate pageSize: finite positive integer.
+  if (typeof v.pageSize !== "number" || !Number.isFinite(v.pageSize) || v.pageSize < 1) {
+    return false;
+  }
+
+  // Validate boolean lifted UI flags.
+  if (typeof v.formFilterDrawerOpen !== "boolean" || typeof v.monthDrawerOpen !== "boolean") {
+    return false;
+  }
+
+  // Validate string-shaped lifted UI state.
+  if (typeof v.monthDrawerAnchorFromDate !== "string" || typeof v.monthDrawerCurrentMonth !== "string") {
+    return false;
+  }
+
+  // Validate selectedTeacher shape (allow null — missing/invalid resets to null on merge).
+  if (v.selectedTeacher !== null && !hasValidTeacherFields(v.selectedTeacher)) {
+    return false;
+  }
+
+  // Validate draftFilters shape — must be a plain object with valid enum values.
+  const draft = v.draftFilters;
+  if (!isRecord(draft)) {
+    return false;
+  }
+
+  // sortBy is required and must be a known enum value (post-JSON.parse string drift protection).
+  if (!isValidEnumValue(draft.sortBy, VALID_SORT_BY_VALUES)) {
+    return false;
+  }
+
+  // gender is nullable — null is valid; non-null must be a known enum value.
+  if (draft.gender !== null && !isValidEnumValue(draft.gender, VALID_GENDER_VALUES)) {
+    return false;
+  }
+
+  // minAvailableDays / minTotalGaps are nullable numbers (or NaN-safe finite check).
+  if (!isValidNullableNumber(draft.minAvailableDays) || !isValidNullableNumber(draft.minTotalGaps)) {
+    return false;
+  }
+
+  // daysOfWeek is nullable; when present must be an array of strings (DayOfWeek enum strings).
+  if (draft.daysOfWeek !== null) {
+    if (!Array.isArray(draft.daysOfWeek) || !draft.daysOfWeek.every((d: unknown) => typeof d === "string")) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function mergeDraftWithPersistedFilters(
