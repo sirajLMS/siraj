@@ -1,5 +1,5 @@
-import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
+import { StudentManagementService } from "@/backend/services";
 
 type ErrorsTranslations = ReturnType<BaseContext["t"]>["errorsTranslations"];
 
@@ -20,7 +20,7 @@ export async function resolveStudentIdFromArgsOrUser(
   }
   let studentId = argsStudentId;
   if (!studentId) {
-    studentId = await StudentRepository.getStudentIdByUserId(ctx.user.id);
+    studentId = await StudentManagementService.getStudentIdByUserId(ctx.user.id);
     if (!studentId) {
       throw new Error(tErrors.studentNotFound(ctx.user.id));
     }

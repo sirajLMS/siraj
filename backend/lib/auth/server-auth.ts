@@ -8,8 +8,8 @@ import {
   PermissionGroupSimulationService,
   PermissionsService,
   SessionService,
-  type UserPermissionContext,
 } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 
 type ServerUserContextResult = {
   userId: string | null;

@@ -92,7 +92,7 @@ function identifyChildren(
 function processFiles(
   filePaths: string[],
   blobMap: Map<string, { size: number; uploadedAt: Date; url: string }>,
-  dbFileMap: Map<string, Types.FileEntity>
+  dbFileMap: Map<string, Types.FileSelectType>
 ): Types.FileInfo[] {
   const items: Types.FileInfo[] = [];
 
@@ -132,7 +132,7 @@ function processFiles(
 function processDirectories(
   dirPaths: string[],
   allBlobs: Array<{ pathname: string; uploadedAt: Date }>,
-  dbDirMap: Map<string, Types.DirectoryEntity>
+  dbDirMap: Map<string, Types.DirectorySelectType>
 ): Types.DirectoryInfo[] {
   const items: Types.DirectoryInfo[] = [];
 
@@ -220,7 +220,7 @@ function identifyChildDirectories(
 function processChildDirectory(
   dirPath: string,
   allBlobs: Array<{ pathname: string; uploadedAt: Date }>,
-  dbDirectoriesByPath: Map<string, Types.DirectoryEntity>
+  dbDirectoriesByPath: Map<string, Types.DirectorySelectType>
 ): Types.DirectoryInfo {
   const dbDir = dbDirectoriesByPath.get(dirPath);
   const dirPrefix = `${dirPath}/`;

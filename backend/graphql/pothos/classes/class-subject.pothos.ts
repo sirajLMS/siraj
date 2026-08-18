@@ -1,8 +1,8 @@
-import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { classSubjectInputFields } from "@/backend/graphql/pothos/classes/__shared__/classSubjectFieldHelpers";
 import { ClassCategoryPothosObject } from "@/backend/graphql/pothos/classes/class-category.pothos";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { ClassCategoryService } from "@/backend/services";
 import type { ClassSubjectReturnType, SubjectResourceReturnType } from "@/backend/types";
 
 const SubjectResourceRef = gqlSchemaBuilder.objectRef<SubjectResourceReturnType>("SubjectResource");
@@ -37,7 +37,7 @@ export const ClassSubjectPothosObject = ClassSubjectRef.implement({
       type: ClassCategoryPothosObject,
       nullable: true,
       load: async (ids: string[]) => {
-        const categories = await ClassCategoryRepository.loadByIds(ids);
+        const categories = await ClassCategoryService.loadByIds(ids);
         const map = new Map(categories.map(c => [c.id, c]));
         return ids.map(id => map.get(id) ?? null);
       },

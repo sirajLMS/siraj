@@ -174,7 +174,7 @@ export namespace CacheDbRepository {
       const now = new Date();
       const q = queryDb();
       const result = await q
-        .select({ count: sql<number>`count(*)::int` })
+        .select({ count: sql<number>`count(*)`.mapWith(Number) })
         .from(table)
         .where(sql`${table.key} LIKE ${prefix + "%"} AND ${table.expiresAt} > ${now}`);
 

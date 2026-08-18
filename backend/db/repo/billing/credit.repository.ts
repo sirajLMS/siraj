@@ -5,7 +5,7 @@ import { creditTransactions, students } from "@/backend/db/schema";
 import { CreditReason } from "@/backend/enum";
 import { DomainError } from "@/backend/lib/errors";
 import {
-  type CreditInsertInput,
+  type CreditInsertType,
   type CreditTransactionSelectType,
   type DBTransaction,
   PaginationArgs,
@@ -85,7 +85,7 @@ export namespace CreditRepository {
 
   const insertCreditTransaction = async (
     tx: DBTransaction,
-    input: CreditInsertInput
+    input: CreditInsertType
   ): Promise<CreditTransactionSelectType> => {
     const now = new Date();
     const [row] = await tx
@@ -174,7 +174,7 @@ export namespace CreditRepository {
    */
   export const insertBatch = async (
     tx: DBTransaction,
-    rows: CreditInsertInput[]
+    rows: CreditInsertType[]
   ): Promise<CreditTransactionSelectType[]> => {
     if (rows.length === 0) return [];
 
@@ -236,8 +236,11 @@ export namespace CreditRepository {
     const q = queryDb(actualTx);
     const [row] = await q
       .select({
-        classesTotal: sql<number>`COALESCE(SUM(CASE WHEN ${creditTransactions.reason} = 'PURCHASE' THEN ${creditTransactions.changeAmount} ELSE 0 END), 0)::int`,
-        classesRemaining: sql<number>`COALESCE(SUM(${creditTransactions.changeAmount}), 0)::int`,
+        classesTotal:
+          sql<number>`COALESCE(SUM(CASE WHEN ${creditTransactions.reason} = 'PURCHASE' THEN ${creditTransactions.changeAmount} ELSE 0 END), 0)`.mapWith(
+            Number
+          ),
+        classesRemaining: sql<number>`COALESCE(SUM(${creditTransactions.changeAmount}), 0)`.mapWith(Number),
       })
       .from(creditTransactions)
       .where(eq(creditTransactions.studentId, actualStudentId));

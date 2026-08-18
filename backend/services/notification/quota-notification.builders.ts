@@ -2,7 +2,7 @@ import { NotificationEventCategory, NotificationEventType } from "@/backend/enum
 import { fanOutToUsers } from "@/backend/services/notification/notification-payloads.builders";
 import type { CommunicationPayload } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-import type { NotificationsLabels } from "@/shared/locale/notifications";
+import type { NotificationsLabels } from "@/shared/locale/types/notifications";
 
 /**
  * Shared skeleton for the seven quota/on-demand notification builders.

@@ -1,3 +1,4 @@
+import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherNotesRepository } from "@/backend/db/repo/teachers/teacher-notes.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -24,13 +25,19 @@ export namespace TeacherNotesService {
 
   export async function createNote(
     userId: string,
-    input: TeacherImportantNoteSubmitInput,
-    teacherId: string | null,
-    tErrors: ErrorsLabels
+    input: Omit<TeacherImportantNoteSubmitInput, "createdByUserId">,
+    tErrors: ErrorsLabels,
+    teacherIdOverride?: string | null
   ): Promise<TeacherImportantNoteReturnType> {
     const hasPermission = await PermissionsService.hasPermission(userId, AppPermission.NOTES_CREATE);
     if (!hasPermission) {
       throw new Error(tErrors.insufficientPermissions);
+    }
+
+    let teacherId = teacherIdOverride ?? null;
+    if (!teacherId) {
+      const teacher = await SchedulingRepository.getTeacherByUserId(userId);
+      teacherId = teacher?.id ?? null;
     }
 
     return await TeacherNotesRepository.createNote({ ...input, createdByUserId: userId, teacherId });

@@ -1,5 +1,6 @@
 import { logger } from "@/backend/lib/logger";
-import { type CronQueueAdapter, CronQueueBackendNotAvailable } from "@/backend/types";
+import { CronQueueBackendNotAvailable } from "@/backend/services/cron/cron.helpers";
+import type { CronQueueAdapter } from "@/backend/types";
 
 /**
  * Maximum number of entries retained in closure-scoped Maps before pruning kicks in.

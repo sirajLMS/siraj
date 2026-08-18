@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { permissionGroups, userPermissionGroups, users } from "@/backend/db/schema";
 import { createAuthSession } from "@/backend/lib/auth/createAuthSession";
 import { logger } from "@/backend/lib/logger";
-import type { SafeUser, UserSelectType } from "@/backend/types";
+import type { UserReturnType, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
@@ -57,7 +57,7 @@ export namespace DemoAuthService {
     groupSlug: string,
     tErrors: ErrorsLabels
   ): Promise<{
-    user: SafeUser;
+    user: UserReturnType;
     accessToken: string;
     refreshToken: string;
     sessionId: string;

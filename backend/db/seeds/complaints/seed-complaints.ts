@@ -9,10 +9,10 @@ import {
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
 import { ComplaintService } from "@/backend/services";
-import type { ParentEntity, StudentSelectType, UserSelectType } from "@/backend/types";
+import type { ParentSelectType, StudentSelectType, UserSelectType } from "@/backend/types";
 
 export async function seedOrGet(
-  parentsList: ParentEntity[],
+  parentsList: ParentSelectType[],
   studentsList: StudentSelectType[],
   usersList: UserSelectType[],
   config?: SeedConfig

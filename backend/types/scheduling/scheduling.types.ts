@@ -1,4 +1,10 @@
-import type { leaveQuotaUsage, recurringScheduleDays, recurringSchedules, timezones } from "@/backend/db/schema";
+import type {
+  leaveQuotaUsage,
+  leaveRequests,
+  recurringScheduleDays,
+  recurringSchedules,
+  timezones,
+} from "@/backend/db/schema";
 import type {
   DayOfWeek,
   LeaveRequestStatus,
@@ -10,6 +16,7 @@ import type {
 import type {
   ClassInstancePerformanceSelectType,
   ClassInstanceSelectType,
+  EffectiveMeetingReturnType,
   PageInfo,
   PaginationArgs,
   StudentSelectType,
@@ -70,6 +77,11 @@ export type AdminDashboardScheduleResult = {
 
 export type LeaveQuotaUsageSelectType = typeof leaveQuotaUsage.$inferSelect;
 export type LeaveQuotaUsageInsertType = typeof leaveQuotaUsage.$inferInsert;
+
+export type LeaveRequestSelectType = typeof leaveRequests.$inferSelect;
+export type LeaveRequestInsertType = typeof leaveRequests.$inferInsert;
+
+export type CreateLeaveRequestInput = Omit<LeaveRequestInsertType, "id">;
 
 export type UpsertStudentLeaveQuotaInput = {
   studentId: string;
@@ -243,7 +255,7 @@ export type StatusTrackingRow = {
   outcome: ClassOutcome;
   isFrozen: boolean;
   meetingJoinUrl?: string | null;
-  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
+  effectiveMeeting?: EffectiveMeetingReturnType | null;
 };
 
 export type UpcomingClassRow = {

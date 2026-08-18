@@ -1,3 +1,4 @@
+import { GraphQLError } from "graphql";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
 import { AppPermission } from "@/backend/enum/permissions/permission.enum";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
@@ -32,6 +33,7 @@ import type {
   MeetingProviderKind,
   MeetingProviderSubmitInput,
 } from "@/backend/types";
+import type { ErrorsLabels } from "@/shared/locale/types/errors";
 import type { LocalizedString } from "@/shared/types";
 
 const VALID_PROVIDER_KINDS: readonly MeetingProviderKind[] = [
@@ -121,18 +123,18 @@ function resolveProviderKind(kind: string | null | undefined): MeetingProviderKi
   return isMeetingProviderKind(kind) ? kind : "manual";
 }
 
-function normalizeProviderCreateInput(input: ProviderInputShape): MeetingProviderSubmitInput {
+function normalizeProviderCreateInput(input: ProviderInputShape, tErrors: ErrorsLabels): MeetingProviderSubmitInput {
   const slug = input.slug;
   if (slug == null) {
-    throw new Error("slug is required");
+    throw new GraphQLError(tErrors.meetingProvider.slugIsRequired, { extensions: { code: "BAD_USER_INPUT" } });
   }
   const urlAllowlist = input.urlAllowlist;
   if (urlAllowlist == null) {
-    throw new Error("urlAllowlist is required");
+    throw new GraphQLError(tErrors.meetingProvider.urlAllowlistIsRequired, { extensions: { code: "BAD_USER_INPUT" } });
   }
   const fieldSchema = input.fieldSchema;
   if (fieldSchema == null) {
-    throw new Error("fieldSchema is required");
+    throw new GraphQLError(tErrors.meetingProvider.fieldSchemaIsRequired, { extensions: { code: "BAD_USER_INPUT" } });
   }
 
   return {
@@ -190,28 +192,31 @@ function normalizeConfigUpdateInput(input: {
   };
 }
 
-function extractCommonMeetingConfigFields(input: {
-  readonly providerId?: string | null;
-  readonly label?: string | null;
-  readonly isDefault?: boolean | null;
-  readonly password?: string | null;
-  readonly details?: {
-    readonly meetingUrl?: string | null;
-    readonly username?: string | null;
-    readonly tenantId?: string | null;
-  } | null;
-}) {
+function extractCommonMeetingConfigFields(
+  input: {
+    readonly providerId?: string | null;
+    readonly label?: string | null;
+    readonly isDefault?: boolean | null;
+    readonly password?: string | null;
+    readonly details?: {
+      readonly meetingUrl?: string | null;
+      readonly username?: string | null;
+      readonly tenantId?: string | null;
+    } | null;
+  },
+  tErrors: ErrorsLabels
+) {
   const providerId = input.providerId;
   if (providerId == null) {
-    throw new Error("providerId is required");
+    throw new GraphQLError(tErrors.meetingProvider.providerIdIsRequired, { extensions: { code: "BAD_USER_INPUT" } });
   }
   const isDefault = input.isDefault;
   if (isDefault == null) {
-    throw new Error("isDefault is required");
+    throw new GraphQLError(tErrors.meetingProvider.isDefaultIsRequired, { extensions: { code: "BAD_USER_INPUT" } });
   }
   const details = input.details;
   if (details == null) {
-    throw new Error("details is required");
+    throw new GraphQLError(tErrors.meetingProvider.detailsIsRequired, { extensions: { code: "BAD_USER_INPUT" } });
   }
 
   return {
@@ -231,7 +236,7 @@ gqlSchemaBuilder.mutationField("createMeetingProvider", t =>
     },
     authScopes: { loggedIn: true },
     resolve: withAuthResult((userId, args, tErrors) =>
-      MeetingProviderCatalogService.createProvider(userId, normalizeProviderCreateInput(args.input), tErrors)
+      MeetingProviderCatalogService.createProvider(userId, normalizeProviderCreateInput(args.input, tErrors), tErrors)
     ),
   })
 );
@@ -275,7 +280,7 @@ gqlSchemaBuilder.mutationField("createUserMeetingConfig", t =>
         actorUserId,
         {
           userId: args.input.userId,
-          ...extractCommonMeetingConfigFields(args.input),
+          ...extractCommonMeetingConfigFields(args.input, tErrors),
         },
         tErrors
       )
@@ -341,7 +346,7 @@ gqlSchemaBuilder.mutationField("createClassMeetingConfig", t =>
         {
           classInstanceId: args.input.classInstanceId,
           recurringScheduleId: args.input.recurringScheduleId,
-          ...extractCommonMeetingConfigFields(args.input),
+          ...extractCommonMeetingConfigFields(args.input, tErrors),
         },
         tErrors
       )

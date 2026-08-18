@@ -3,12 +3,12 @@ import { logger } from "@/backend/lib/logger";
 import { LeaveRequestSeedService } from "@/backend/services";
 import type { StudentSelectType } from "@/backend/types";
 
-type LeaveRequestRow = {
+type LeaveRequestCreatedAt = {
   createdAt: Date;
 };
 
 export async function seedOrGet(
-  leaveRequestsList: LeaveRequestRow[],
+  leaveRequestsList: LeaveRequestCreatedAt[],
   studentsList: StudentSelectType[],
   config?: SeedConfig
 ) {

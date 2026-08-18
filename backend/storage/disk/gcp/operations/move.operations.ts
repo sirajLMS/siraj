@@ -35,9 +35,9 @@ export async function moveItems(
     StorageDbRepository.directoriesByPaths(sourceDirectories),
   ]);
 
-  const dbFileMap = new Map<string, Types.FileEntity>(dbFiles.map(f => [f.path, f]));
-  const dbDirectoryMap = new Map<string, Types.DirectoryEntity>(dbDirectories.map(d => [d.path, d]));
-  const dbSourceDirMap = new Map<string, Types.DirectoryEntity>(dbSourceDirs.map(d => [d.path, d]));
+  const dbFileMap = new Map<string, Types.FileSelectType>(dbFiles.map(f => [f.path, f]));
+  const dbDirectoryMap = new Map<string, Types.DirectorySelectType>(dbDirectories.map(d => [d.path, d]));
+  const dbSourceDirMap = new Map<string, Types.DirectorySelectType>(dbSourceDirs.map(d => [d.path, d]));
 
   if (!destDirAllowed) {
     return {
@@ -87,9 +87,9 @@ export async function moveItems(
 interface MoveSingleItemOptions {
   sourcePath: string;
   destinationPath: string;
-  dbFile?: Types.FileEntity;
-  dbDirectory?: Types.DirectoryEntity;
-  dbSourceDir?: Types.DirectoryEntity;
+  dbFile?: Types.FileSelectType;
+  dbDirectory?: Types.DirectorySelectType;
+  dbSourceDir?: Types.DirectorySelectType;
 }
 
 /**

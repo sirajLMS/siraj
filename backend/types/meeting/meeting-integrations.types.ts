@@ -7,14 +7,13 @@
  * and token revocation for admins.
  */
 
-import {
+import type {
   MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
 } from "@/backend/enum/meeting/meeting-integrations.enum";
-import type { MeetingProvider } from "@/backend/services";
-import type { MeetingProviderKind } from "@/backend/types";
+import type { MeetingProvider, MeetingProviderKind } from "@/backend/types";
 
-export { MeetingConnectionTestMode, MeetingIntegrationConnectedAccountStatus };
+export type { MeetingConnectionTestMode, MeetingIntegrationConnectedAccountStatus };
 
 // ============================================================================
 // Provider summary

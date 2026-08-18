@@ -46,7 +46,11 @@ export async function listFiles(ctx: GcpContext, input: Types.FilesListSearchInp
 /**
  * Map GCS File objects to FileInfo
  */
-function mapGcsFiles(files: File[], dbFileMap: Map<string, Types.FileEntity>, gcpBaseUrl: string): Types.FileInfo[] {
+function mapGcsFiles(
+  files: File[],
+  dbFileMap: Map<string, Types.FileSelectType>,
+  gcpBaseUrl: string
+): Types.FileInfo[] {
   return files.map(file => {
     const bucketFile = StorageUtils.blobToFileInfo(file.metadata, gcpBaseUrl);
     const dbFile = dbFileMap.get(file.name);
@@ -59,7 +63,7 @@ function mapGcsFiles(files: File[], dbFileMap: Map<string, Types.FileEntity>, gc
  */
 function mapGcsDirectories(
   prefixes: string[],
-  dbDirMap: Map<string, Types.DirectoryEntity>,
+  dbDirMap: Map<string, Types.DirectorySelectType>,
   folderFileCountMap: Map<string, number>
 ): Types.DirectoryInfo[] {
   return prefixes.map(dirPrefix => {

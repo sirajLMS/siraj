@@ -8,13 +8,15 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import type {
   DirectoryPermissionsUpdateInput,
   FileOperationResult,
+  FileUsageCheckInput,
   FileUsageInfo,
+  FileUsageResult,
   SiteContentUpsertInput,
   StorageItemProtectionUpdateInput,
   StorageUploadValidationParams,
   ValidReferenceTable,
 } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
+import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
 const VALID_REFERENCE_TABLES: readonly ValidReferenceTable[] = [
   "users",
@@ -278,44 +280,139 @@ export namespace StorageService {
 
   /**
    * Links an uploaded file path to an entity junction table.
+   * Owns the success/message derivation (business logic) — the repo does pure DB ops.
    */
-  export async function linkFileToEntity(input: {
-    referenceTable: string;
-    referenceId: string;
-    usageType: string;
-    filePath: string;
-  }): Promise<FileOperationResult> {
+  export async function linkFileToEntity(
+    input: {
+      referenceTable: string;
+      referenceId: string;
+      usageType: string;
+      filePath: string;
+    },
+    locale?: string
+  ): Promise<FileOperationResult> {
     if (!isValidReferenceTable(input.referenceTable)) {
       throw new Error(`Invalid reference table: ${input.referenceTable}`);
     }
-    return StorageDbRepository.registerFileUsage({
-      referenceTable: input.referenceTable,
-      referenceId: input.referenceId,
-      usageType: input.usageType,
-      filePath: input.filePath,
-    });
+    const { file } = getServerTranslations(locale ?? "en").errorsTranslations;
+    try {
+      const createdFile = await StorageDbRepository.createFile(input.filePath);
+      await StorageDbRepository.performJunctionInsert(
+        {
+          table: input.referenceTable,
+          fileId: createdFile.id,
+          refId: input.referenceId,
+          type: input.usageType,
+          createdAt: new Date(),
+        },
+        locale
+      );
+      return { success: true, message: file.fileUsageRegistered };
+    } catch (error) {
+      return { success: false, message: file.fileUsageRegisterFailed(String(error)) };
+    }
+  }
+
+  /**
+   * Checks file usage and derives whether the file can be deleted.
+   * Owns the `canDelete`/`deleteBlockReason` business logic — the repo only
+   * queries raw usage data.
+   */
+  export async function checkFileUsage(input: FileUsageCheckInput, locale?: string): Promise<FileUsageResult> {
+    const { file } = getServerTranslations(locale ?? "en").errorsTranslations;
+    try {
+      const usages = await StorageDbRepository.getFileUsages(input.path);
+      const isInUse = usages.length > 0;
+      return {
+        isInUse,
+        usages,
+        canDelete: !isInUse,
+        deleteBlockReason: isInUse ? file.fileCurrentlyInUse : undefined,
+      };
+    } catch (err) {
+      logger.error("Error checking file usage:", err);
+      return {
+        isInUse: false,
+        usages: [],
+        canDelete: false,
+        deleteBlockReason: file.unableToCheckFileUsage,
+      };
+    }
   }
 
   /**
    * Update directory permissions.
-   * Delegates to the repository after the caller has verified authorization.
+   * Owns the success/message derivation (business logic) — the repo does pure DB ops.
    */
   export async function updateDirectoryPermissions(
-    input: DirectoryPermissionsUpdateInput
+    input: DirectoryPermissionsUpdateInput,
+    locale?: string
   ): Promise<FileOperationResult> {
+    const { file } = getServerTranslations(locale ?? "en").errorsTranslations;
     logger.info("Updating directory permissions", { path: input.path });
-    return await StorageDbRepository.updateDirectoryPermissions(input);
+    try {
+      const directory = await StorageDbRepository.directoryByPath(input.path);
+      if (!directory) return { success: false, message: file.directoryNotFound };
+
+      const updated = await StorageDbRepository.updateDirectory({
+        ...directory,
+        allowUploads: input.permissions.allowUploads,
+        allowDelete: input.permissions.allowDelete,
+        allowMove: input.permissions.allowMove,
+        allowCreateSubDirs: input.permissions.allowCreateSubDirs,
+        allowDeleteFiles: input.permissions.allowDeleteFiles,
+        allowMoveFiles: input.permissions.allowMoveFiles,
+      });
+
+      return {
+        success: !!updated,
+        message: updated ? file.directoryPermissionsUpdated : file.directoryPermissionsUpdateFailed,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: file.permissionsUpdateFailed(String(error)),
+      };
+    }
   }
 
   /**
    * Set protection status on a storage item (file or directory).
-   * Delegates to the repository after the caller has verified authorization.
+   * Owns the success/message derivation (business logic) — the repo does pure DB ops.
    */
   export async function setStorageItemProtection(
-    input: StorageItemProtectionUpdateInput
+    input: StorageItemProtectionUpdateInput,
+    locale?: string
   ): Promise<FileOperationResult> {
+    const { file } = getServerTranslations(locale ?? "en").errorsTranslations;
     logger.info("Setting storage item protection", { path: input.path, isProtected: input.isProtected });
-    return await StorageDbRepository.setProtection(input);
+    try {
+      const fileEntity = await StorageDbRepository.fileByPath(input.path);
+      if (fileEntity) {
+        const updated = await StorageDbRepository.updateFile({ ...fileEntity, isProtected: input.isProtected });
+        return {
+          success: !!updated,
+          message: updated ? file.fileProtectionUpdated : file.fileProtectionUpdateFailed,
+        };
+      }
+
+      const directory = await StorageDbRepository.directoryByPath(input.path);
+      if (directory) {
+        const updated = await StorageDbRepository.updateDirectory({
+          ...directory,
+          isProtected: input.isProtected,
+          protectChildren: input.protectChildren ?? false,
+        });
+        return {
+          success: !!updated,
+          message: updated ? file.directoryProtectionUpdated : file.directoryProtectionUpdateFailed,
+        };
+      }
+
+      return { success: false, message: file.fileOrDirectoryNotFound };
+    } catch (error) {
+      return { success: false, message: file.protectionUpdateFailed(String(error)) };
+    }
   }
 }
 
@@ -336,15 +433,17 @@ export namespace StorageAuthService {
 
 export namespace StorageManageService {
   export async function updateDirectoryPermissions(
-    input: DirectoryPermissionsUpdateInput
+    input: DirectoryPermissionsUpdateInput,
+    locale?: string
   ): Promise<FileOperationResult> {
-    return StorageService.updateDirectoryPermissions(input);
+    return StorageService.updateDirectoryPermissions(input, locale);
   }
 
   export async function setStorageItemProtection(
-    input: StorageItemProtectionUpdateInput
+    input: StorageItemProtectionUpdateInput,
+    locale?: string
   ): Promise<FileOperationResult> {
-    return StorageService.setStorageItemProtection(input);
+    return StorageService.setStorageItemProtection(input, locale);
   }
 
   /** @deprecated Use StorageService.checkDirectoryUploadPermissions instead */

@@ -1,7 +1,7 @@
-import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { UserPothosObject } from "@/backend/graphql/pothos";
+import { UserService } from "@/backend/services";
 import { AuthUtils } from "@/backend/utils";
 
 gqlSchemaBuilder.queryFields(t => ({
@@ -14,7 +14,7 @@ gqlSchemaBuilder.queryFields(t => ({
     resolve: async (_parent, _args, ctx) => {
       if (!ctx.user) return null;
 
-      const user = await UserRepository.findById(ctx.user.id);
+      const user = await UserService.findById(ctx.user.id);
       return user ? AuthUtils.toUserReturnType(user) : null;
     },
   }),
@@ -29,7 +29,7 @@ gqlSchemaBuilder.queryFields(t => ({
       id: t.arg.string({ required: true }),
     },
     resolve: async (_parent, args) => {
-      const user = await UserRepository.findById(args.id);
+      const user = await UserService.findById(args.id);
       return user ? AuthUtils.toUserReturnType(user) : null;
     },
   }),
@@ -46,7 +46,7 @@ gqlSchemaBuilder.queryFields(t => ({
       const limit = Math.min(args.limit ?? 50, 200);
       const offset = args.offset ?? 0;
       const search = args.search?.trim() ?? null;
-      return await UserRepository.findUsers({ limit, offset, search });
+      return await UserService.findUsers({ limit, offset, search });
     },
   }),
 }));

@@ -1,10 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { UploadType } from "@/backend/enum/storage";
 import { logger } from "@/backend/lib/logger";
 import type { LocalContext } from "@/backend/storage/disk/local/types";
 import { calculateFileHash, ensureDirectory, getAbsolutePath } from "@/backend/storage/disk/local/utils";
 import { prepareUploadHelper, uploadFileHelper } from "@/backend/storage/disk/shared/upload-operations.helper";
-import * as Types from "@/backend/types";
+import type * as Types from "@/backend/types";
 
 export async function prepareUpload(
   ctx: LocalContext,
@@ -16,13 +17,13 @@ export async function prepareUpload(
     logger.info("Prepared upload successfully", {
       tokenId: sessionId,
       path: cleanedPath,
-      uploadType: Types.UploadType.SIGNED_URL,
+      uploadType: UploadType.SIGNED_URL,
     });
 
     return {
       id: sessionId,
       url: signedUrl,
-      uploadType: Types.UploadType.SIGNED_URL,
+      uploadType: UploadType.SIGNED_URL,
     };
   });
 }

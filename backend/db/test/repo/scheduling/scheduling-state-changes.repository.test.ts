@@ -14,9 +14,11 @@ import {
 import { expectRepositoryError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { type AppPermission, TeacherProgressFeedEventKind } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services";
+import { checkStateChangeAuth, PermissionsService, validateStateTransition } from "@/backend/services";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { getServerTranslations } from "@/shared/locale";
+
+const stateChangeHooks = { onAuth: checkStateChangeAuth, onValidate: validateStateTransition };
 
 describe("Scheduling Repository — State Changes & Leave Quota", () => {
   describe("State transitions and IDOR checks", () => {
@@ -27,10 +29,10 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const u1 = t1.userId;
         if (!id1 || !u1) throw new Error("setup error");
 
-        await SchedulingRepository.activateClassInstance(id1, u1, { force: false }, tx);
-        const started1 = await SchedulingRepository.startClassInstance(id1, u1, tx);
+        await SchedulingRepository.activateClassInstance(id1, u1, { force: false }, tx, undefined, stateChangeHooks);
+        const started1 = await SchedulingRepository.startClassInstance(id1, u1, tx, undefined, stateChangeHooks);
         expect(started1?.executionState).toBe("RUNNING");
-        const absent = await SchedulingRepository.markClassAbsent(id1, u1, tx);
+        const absent = await SchedulingRepository.markClassAbsent(id1, u1, tx, undefined, stateChangeHooks);
         expect(absent?.executionState).toBe("COMPLETED");
         expect(absent?.outcome).toBe("ABSENT");
 
@@ -39,9 +41,16 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const u2 = t2.userId;
         if (!id2 || !u2) throw new Error("setup error");
 
-        await SchedulingRepository.activateClassInstance(id2, u2, { force: false }, tx);
-        await SchedulingRepository.startClassInstance(id2, u2, tx);
-        const leave = await SchedulingRepository.processClassLeave(id2, "Feeling sick", u2, tx);
+        await SchedulingRepository.activateClassInstance(id2, u2, { force: false }, tx, undefined, stateChangeHooks);
+        await SchedulingRepository.startClassInstance(id2, u2, tx, undefined, stateChangeHooks);
+        const leave = await SchedulingRepository.processClassLeave(
+          id2,
+          "Feeling sick",
+          u2,
+          tx,
+          undefined,
+          stateChangeHooks
+        );
         const [leaveInst] = await tx
           .select()
           .from(classInstances)
@@ -55,9 +64,9 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const u3 = t3.userId;
         if (!id3 || !u3) throw new Error("setup error");
 
-        await SchedulingRepository.activateClassInstance(id3, u3, { force: false }, tx);
-        await SchedulingRepository.startClassInstance(id3, u3, tx);
-        const excused = await SchedulingRepository.processClassLeave(id3, null, u3, tx);
+        await SchedulingRepository.activateClassInstance(id3, u3, { force: false }, tx, undefined, stateChangeHooks);
+        await SchedulingRepository.startClassInstance(id3, u3, tx, undefined, stateChangeHooks);
+        const excused = await SchedulingRepository.processClassLeave(id3, null, u3, tx, undefined, stateChangeHooks);
         const [excusedInst] = await tx
           .select()
           .from(classInstances)
@@ -66,7 +75,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         expect(excusedInst?.executionState).toBe("COMPLETED");
         expect(excusedInst?.outcome).toBe("LEAVE");
 
-        const reverted = await SchedulingRepository.resetClassInstance(id1, u1, tx);
+        const reverted = await SchedulingRepository.resetClassInstance(id1, u1, tx, undefined, stateChangeHooks);
         expect(reverted?.executionState).toBe("NOT_ACTIVATED");
         expect(reverted?.outcome).toBe("PENDING");
       });
@@ -86,7 +95,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         if (!otherUserId) throw new Error("setup error");
 
         const teacherError = await expectRepositoryError(() =>
-          SchedulingRepository.activateClassInstance(id, otherUserId, { force: false }, tx)
+          SchedulingRepository.activateClassInstance(id, otherUserId, { force: false }, tx, undefined, stateChangeHooks)
         );
         expect(teacherError.message).toContain("You are not authorized to perform this action");
 
@@ -98,7 +107,14 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         if (!otherParentUserId) throw new Error("setup error");
 
         const parentError = await expectRepositoryError(() =>
-          SchedulingRepository.activateClassInstance(id, otherParentUserId, { force: false }, tx)
+          SchedulingRepository.activateClassInstance(
+            id,
+            otherParentUserId,
+            { force: false },
+            tx,
+            undefined,
+            stateChangeHooks
+          )
         );
         expect(parentError.message).toContain("You are not authorized to perform this action");
       });
@@ -123,7 +139,14 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         };
 
         try {
-          const activated = await SchedulingRepository.activateClassInstance(id, adminUser.id, { force: false }, tx);
+          const activated = await SchedulingRepository.activateClassInstance(
+            id,
+            adminUser.id,
+            { force: false },
+            tx,
+            undefined,
+            stateChangeHooks
+          );
           expect(activated).not.toBeNull();
           expect(activated?.executionState).toBe("ACTIVATED");
         } finally {
@@ -141,7 +164,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
 
         await tx.update(classInstances).set({ executionState: "ACTIVATED" }).where(eq(classInstances.id, id));
         const activatedError = await expectRepositoryError(() =>
-          SchedulingRepository.activateClassInstance(id, u, { force: false }, tx)
+          SchedulingRepository.activateClassInstance(id, u, { force: false }, tx, undefined, stateChangeHooks)
         );
         expect(activatedError.message).toContain("Invalid transition");
 
@@ -149,14 +172,18 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const id2 = instance2?.id;
         const u2 = teacher2.userId;
         if (!id2 || !u2) throw new Error("setup error");
-        const startError = await expectRepositoryError(() => SchedulingRepository.startClassInstance(id2, u2, tx));
+        const startError = await expectRepositoryError(() =>
+          SchedulingRepository.startClassInstance(id2, u2, tx, undefined, stateChangeHooks)
+        );
         expect(startError.message).toContain("Invalid transition");
 
         const { instance: instance3, teacher: teacher3 } = await setupTestEntities(tx, "Trans3");
         const id3 = instance3?.id;
         const u3 = teacher3.userId;
         if (!id3 || !u3) throw new Error("setup error");
-        const absentError = await expectRepositoryError(() => SchedulingRepository.stopClassInstance(id3, u3, tx));
+        const absentError = await expectRepositoryError(() =>
+          SchedulingRepository.stopClassInstance(id3, u3, tx, undefined, stateChangeHooks)
+        );
         expect(absentError.message).toContain("Invalid transition");
       });
     });
@@ -193,7 +220,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         const u = teacher.userId;
         if (!id || !u) throw new Error("setup error");
 
-        await SchedulingRepository.activateClassInstance(id, u, { force: false }, tx);
+        await SchedulingRepository.activateClassInstance(id, u, { force: false }, tx, undefined, stateChangeHooks);
 
         const events = await SchedulingRepository.getClassStatusEvents(id, tx);
         expect(events.length).toBeGreaterThan(0);
@@ -231,7 +258,7 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           .where(eq(classInstances.id, id));
         const [sBefore] = await tx.select().from(students).where(eq(students.id, student.id));
 
-        const reverted = await SchedulingRepository.resetClassInstance(id, u, tx);
+        const reverted = await SchedulingRepository.resetClassInstance(id, u, tx, undefined, stateChangeHooks);
         expect(reverted?.executionState).toBe("NOT_ACTIVATED");
         expect(reverted?.quotaDeducted).toBe(false);
 
@@ -260,7 +287,9 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
           instance.id,
           parentUser.id,
           { force: true },
-          tx
+          tx,
+          undefined,
+          stateChangeHooks
         );
         expect(activated).not.toBeNull();
         expect(activated?.executionState).toBe("ACTIVATED");

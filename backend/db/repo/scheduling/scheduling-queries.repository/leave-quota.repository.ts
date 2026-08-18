@@ -1,40 +1,7 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
-import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { leaveQuotaUsage, teachers } from "@/backend/db/schema";
 import type { DBTransaction } from "@/backend/types";
-import type { ErrorsLabels } from "@/shared/locale";
-
-function collectErrorMessages(error: unknown): string {
-  const messages: string[] = [];
-  let current: unknown = error;
-  while (current instanceof Error) {
-    messages.push(current.message);
-    current = current.cause;
-  }
-  return messages.join(" ");
-}
-
-function hasErrorCode(value: unknown): value is { code?: string } {
-  return typeof value === "object" && value !== null && "code" in value;
-}
-
-function isLeaveQuotaViolation(error: unknown): boolean {
-  const combined = collectErrorMessages(error);
-  if (combined.includes("Leave quota exceeded")) {
-    return true;
-  }
-
-  let current: unknown = error;
-  while (current instanceof Error) {
-    if (hasErrorCode(current) && current.code === "P0001") {
-      return true;
-    }
-    current = current.cause;
-  }
-
-  return false;
-}
 
 export async function getTeacherLeaveQuotaUsage(
   teacherId: string,
@@ -58,50 +25,40 @@ export async function getTeacherLeaveQuotaUsage(
   return row?.usedCount ?? 0;
 }
 
-export async function incrementTeacherLeaveQuota(
-  teacherId: string,
-  tx: DBTransaction,
-  tErrors: ErrorsLabels
-): Promise<void> {
+export async function incrementTeacherLeaveQuota(teacherId: string, tx: DBTransaction): Promise<void> {
   const now = new Date();
   const periodYear = now.getUTCFullYear();
   const periodMonth = now.getUTCMonth() + 1;
 
   const dbToQuery = tx ?? db;
 
-  const maxLeaves = await SystemSettingsRepository.getIntValue("teacher_max_leaves", 2, tx);
+  const maxLeavesPerMonth = 2;
   const currentUsage = await getTeacherLeaveQuotaUsage(teacherId, periodYear, periodMonth, tx);
-
-  if (currentUsage >= maxLeaves) {
-    throw new Error(tErrors.leaveQuotaExceeded({ maxLeaves: String(maxLeaves) }));
+  if (currentUsage >= maxLeavesPerMonth) {
+    throw new Error(
+      `Leave quota exceeded: ${currentUsage}/${maxLeavesPerMonth} for ${periodYear}-${String(periodMonth).padStart(2, "0")}`
+    );
   }
 
-  try {
-    const [updated] = await dbToQuery
-      .update(leaveQuotaUsage)
-      .set({ usedCount: sql`${leaveQuotaUsage.usedCount} + 1` })
-      .where(
-        and(
-          eq(leaveQuotaUsage.teacherId, teacherId),
-          eq(leaveQuotaUsage.periodYear, periodYear),
-          eq(leaveQuotaUsage.periodMonth, periodMonth)
-        )
+  const [updated] = await dbToQuery
+    .update(leaveQuotaUsage)
+    .set({ usedCount: sql`${leaveQuotaUsage.usedCount} + 1` })
+    .where(
+      and(
+        eq(leaveQuotaUsage.teacherId, teacherId),
+        eq(leaveQuotaUsage.periodYear, periodYear),
+        eq(leaveQuotaUsage.periodMonth, periodMonth)
       )
-      .returning({ id: leaveQuotaUsage.id });
+    )
+    .returning({ id: leaveQuotaUsage.id });
 
-    if (!updated) {
-      await dbToQuery.insert(leaveQuotaUsage).values({
-        teacherId,
-        periodYear,
-        periodMonth,
-        usedCount: 1,
-      });
-    }
-  } catch (error) {
-    if (isLeaveQuotaViolation(error)) {
-      throw new Error(tErrors.leaveQuotaExceeded({ maxLeaves: String(maxLeaves) }), { cause: error });
-    }
-    throw error;
+  if (!updated) {
+    await dbToQuery.insert(leaveQuotaUsage).values({
+      teacherId,
+      periodYear,
+      periodMonth,
+      usedCount: 1,
+    });
   }
 }
 

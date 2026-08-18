@@ -5,6 +5,7 @@ import {
   ClassOutcomePothosObject,
   GroupClassAttendanceStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import { GroupClassService } from "@/backend/services";
 import type {
   GroupClassAdminNoteReturnType,
@@ -110,11 +111,9 @@ gqlSchemaBuilder.queryField("groupClassAudit", t =>
       classInstanceId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      if (!ctx.user) {
-        throw new Error("Unauthorized");
-      }
+      const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return GroupClassService.getGroupClassAudit(ctx.user.id, args.classInstanceId, tErrors);
+      return GroupClassService.getGroupClassAudit(userId, args.classInstanceId, tErrors);
     },
   })
 );
@@ -128,11 +127,9 @@ gqlSchemaBuilder.mutationField("updateClassAdminNote", t =>
       content: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      if (!ctx.user) {
-        throw new Error("Unauthorized");
-      }
+      const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return GroupClassService.updateAdminNote(ctx.user.id, args.classInstanceId, args.content, tErrors);
+      return GroupClassService.updateAdminNote(userId, args.classInstanceId, args.content, tErrors);
     },
   })
 );
@@ -145,11 +142,9 @@ gqlSchemaBuilder.mutationField("resendClassNotifications", t =>
       classInstanceId: t.arg.string({ required: true }),
     },
     resolve: async (_root, args, ctx) => {
-      if (!ctx.user) {
-        throw new Error("Unauthorized");
-      }
+      const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
-      return GroupClassService.resendNotifications(ctx.user.id, args.classInstanceId, tErrors);
+      return GroupClassService.resendNotifications(userId, args.classInstanceId, tErrors);
     },
   })
 );

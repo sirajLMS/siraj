@@ -1,9 +1,10 @@
 import { put } from "@vercel/blob";
+import { UploadType } from "@/backend/enum/storage";
 import { logger } from "@/backend/lib/logger";
 import { prepareUploadHelper, uploadFileHelper } from "@/backend/storage/disk/shared/upload-operations.helper";
 import type { VercelContext } from "@/backend/storage/disk/vercel/types";
 import { calculateHash } from "@/backend/storage/disk/vercel/utils";
-import * as Types from "@/backend/types";
+import type * as Types from "@/backend/types";
 
 export async function prepareUpload(
   ctx: VercelContext,
@@ -19,7 +20,7 @@ export async function prepareUpload(
     return {
       id: sessionId,
       url: `${ctx.baseUrl}/api/storage/vercel-upload`,
-      uploadType: Types.UploadType.VERCEL_BLOB_CLIENT,
+      uploadType: UploadType.VERCEL_BLOB_CLIENT,
       access: ctx.access,
     };
   });

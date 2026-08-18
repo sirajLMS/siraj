@@ -1,10 +1,7 @@
-import { BillingRepository } from "@/backend/db/repo/billing";
-import { ParentRepository } from "@/backend/db/repo/parents";
-import { UserRepository } from "@/backend/db/repo/users";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { FxDisplayService } from "@/backend/services";
+import { BillingHistoryService, FxDisplayService, StudentManagementService, UserService } from "@/backend/services";
 import type { DisplayAmountReturnType } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { parseCurrencyCode } from "@/shared/lib/enum";
@@ -41,7 +38,7 @@ export async function setBillingFxDisplayCurrencyForSubject(
     return;
   }
 
-  const user = await UserRepository.findSafeById(subjectUserId);
+  const user = await UserService.findSafeById(subjectUserId);
   ctx.billingFxDisplayCurrency = user?.displayCurrency ?? null;
 }
 
@@ -50,12 +47,12 @@ export async function setBillingFxDisplayCurrencyForInvoiceParent(
   invoiceId: string,
   callerUserId: string
 ): Promise<void> {
-  const invoice = await BillingRepository.getInvoiceById(invoiceId);
+  const invoice = await BillingHistoryService.getInvoiceById(invoiceId);
   if (!invoice?.parentId) {
     return;
   }
 
-  const parentUserId = await ParentRepository.findUserIdByParentId(invoice.parentId);
+  const parentUserId = await StudentManagementService.findParentUserIdByParentId(invoice.parentId);
   await setBillingFxDisplayCurrencyForSubject(ctx, parentUserId, callerUserId);
 }
 
@@ -71,7 +68,7 @@ export async function populateBillingFxDisplayCurrencyByUserId(
   const map = ctx.billingFxDisplayCurrencyByUserId ?? new Map<string, CurrencyCode | null>();
   const missingIds = uniqueIds.filter(id => !map.has(id));
   if (missingIds.length > 0) {
-    const currencies = await UserRepository.findDisplayCurrenciesByIds(missingIds);
+    const currencies = await UserService.findDisplayCurrenciesByIds(missingIds);
     for (const [id, displayCurrency] of currencies) {
       map.set(id, displayCurrency);
     }

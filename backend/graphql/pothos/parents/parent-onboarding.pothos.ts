@@ -11,7 +11,7 @@ import {
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { safeParseCurrencyCode } from "@/backend/lib/currency.validation";
 import type { Email } from "@/backend/lib/email";
-import type { ParentOnboardingInput, ParentOnboardingResult } from "@/backend/services";
+import type { ParentOnboardingInput, ParentOnboardingResult } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 export interface ParentOnboardingGqlInput

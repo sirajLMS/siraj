@@ -14,13 +14,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  */
 function validateStringMap(value: unknown): Record<string, string> {
   if (!isRecord(value)) {
-    throw new GraphQLError("StringMap must be an object");
+    throw new GraphQLError("StringMap must be an object", {
+      extensions: { code: "BAD_USER_INPUT" },
+    });
   }
 
   const entries = Object.entries(value);
 
   if (entries.length > MAX_ENTRIES) {
-    throw new GraphQLError(`StringMap must have at most ${MAX_ENTRIES} entries, got ${entries.length}`);
+    throw new GraphQLError("StringMap exceeds maximum number of entries.", {
+      extensions: { code: "BAD_USER_INPUT", maxEntries: MAX_ENTRIES, received: entries.length },
+    });
   }
 
   const result: Record<string, string> = {};
@@ -28,17 +32,19 @@ function validateStringMap(value: unknown): Record<string, string> {
   // Validate all values are strings with length constraints
   for (const [key, val] of entries) {
     if (key.length > MAX_KEY_LENGTH) {
-      throw new GraphQLError(
-        `StringMap keys must be at most ${MAX_KEY_LENGTH} characters. Key "${key.slice(0, 20)}..." exceeds limit`
-      );
+      throw new GraphQLError("StringMap key exceeds maximum length.", {
+        extensions: { code: "BAD_USER_INPUT", key: key.slice(0, 20), maxLength: MAX_KEY_LENGTH },
+      });
     }
     if (typeof val !== "string") {
-      throw new GraphQLError(`StringMap values must be strings. Key "${key}" has value of type ${typeof val}`);
+      throw new GraphQLError("StringMap values must be strings.", {
+        extensions: { code: "BAD_USER_INPUT", key },
+      });
     }
     if (val.length > MAX_VALUE_LENGTH) {
-      throw new GraphQLError(
-        `StringMap values must be at most ${MAX_VALUE_LENGTH} characters. Key "${key}" exceeds limit`
-      );
+      throw new GraphQLError("StringMap value exceeds maximum length.", {
+        extensions: { code: "BAD_USER_INPUT", key, maxLength: MAX_VALUE_LENGTH },
+      });
     }
     result[key] = val;
   }
@@ -66,11 +72,15 @@ export const StringMapScalar = new GraphQLScalarType({
   parseLiteral(ast: ValueNode): Record<string, string> {
     // Parse inline object literals from queries
     if (ast.kind !== Kind.OBJECT) {
-      throw new GraphQLError("StringMap must be an object");
+      throw new GraphQLError("StringMap must be an object", {
+        extensions: { code: "BAD_USER_INPUT" },
+      });
     }
 
     if (ast.fields.length > MAX_ENTRIES) {
-      throw new GraphQLError(`StringMap must have at most ${MAX_ENTRIES} entries, got ${ast.fields.length}`);
+      throw new GraphQLError("StringMap exceeds maximum number of entries.", {
+        extensions: { code: "BAD_USER_INPUT", maxEntries: MAX_ENTRIES, received: ast.fields.length },
+      });
     }
 
     const result: Record<string, string> = {};
@@ -79,19 +89,21 @@ export const StringMapScalar = new GraphQLScalarType({
       const key = field.name.value;
 
       if (key.length > MAX_KEY_LENGTH) {
-        throw new GraphQLError(
-          `StringMap keys must be at most ${MAX_KEY_LENGTH} characters. Key "${key.slice(0, 20)}..." exceeds limit`
-        );
+        throw new GraphQLError("StringMap key exceeds maximum length.", {
+          extensions: { code: "BAD_USER_INPUT", key: key.slice(0, 20), maxLength: MAX_KEY_LENGTH },
+        });
       }
 
       if (field.value.kind !== Kind.STRING) {
-        throw new GraphQLError(`StringMap values must be strings. Key "${key}" has non-string value`);
+        throw new GraphQLError("StringMap values must be strings.", {
+          extensions: { code: "BAD_USER_INPUT", key },
+        });
       }
 
       if (field.value.value.length > MAX_VALUE_LENGTH) {
-        throw new GraphQLError(
-          `StringMap values must be at most ${MAX_VALUE_LENGTH} characters. Key "${key}" exceeds limit`
-        );
+        throw new GraphQLError("StringMap value exceeds maximum length.", {
+          extensions: { code: "BAD_USER_INPUT", key, maxLength: MAX_VALUE_LENGTH },
+        });
       }
 
       result[key] = field.value.value;

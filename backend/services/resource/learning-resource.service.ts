@@ -3,14 +3,12 @@ import { AppPermission } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { getStorageService } from "@/backend/storage/storage.service";
-import type { LearningResourceListResult, LearningResourceReturnType } from "@/backend/types";
+import type {
+  LearningResourceListResult,
+  LearningResourceReturnType,
+  LearningResourceSubmitInput,
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-
-export interface CreateResourceInput {
-  readonly displayName: string;
-  readonly filePath: string;
-  readonly fileId: string;
-}
 
 export namespace LearningResourceService {
   /**
@@ -38,7 +36,7 @@ export namespace LearningResourceService {
    */
   export async function createResource(
     actorUserId: string,
-    input: CreateResourceInput,
+    input: LearningResourceSubmitInput,
     locale?: string
   ): Promise<LearningResourceReturnType> {
     const t = getServerTranslations(locale ?? "ar").errorsTranslations;

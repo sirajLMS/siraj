@@ -16,16 +16,11 @@ import { type Job, PgBoss, type SendOptions } from "pg-boss";
 import { createPool } from "@/backend/db/factory";
 import { DomainError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
+import { CronQueueBackendNotAvailable, safeCronJobKind } from "@/backend/services/cron/cron.helpers";
 import { computeHeartbeatSeconds } from "@/backend/services/cron/cron-heartbeat.utils";
 import { formatError } from "@/backend/services/cron/cron-utils";
 import { pruneMaps } from "@/backend/services/cron/queue-adapters/bullmq-shared";
-import {
-  type CronJobPayload,
-  type CronQueueAdapter,
-  CronQueueBackendNotAvailable,
-  type CronQueueStats,
-  safeCronJobKind,
-} from "@/backend/types";
+import type { CronJobPayload, CronQueueAdapter, CronQueueStats } from "@/backend/types";
 
 const QUEUE_NAME_PREFIX = "cron_";
 
@@ -76,77 +71,285 @@ function shouldDisableListenNotify(): boolean {
   return false;
 }
 
-export function createPgBossAdapter(): CronQueueAdapter {
-  let boss: PgBoss | null = null;
-  let started = false;
-  const knownQueues = new Set<string>();
-  const jobIdToPayload = new Map<string, CronJobPayload>();
-  const jobIdToQueue = new Map<string, string>();
+/**
+ * Closure-scoped mutable state shared across all adapter methods.
+ * Created inside `createPgBossAdapter` so each call produces an independent instance.
+ */
+interface PgBossState {
+  boss: PgBoss | null;
+  started: boolean;
+  knownQueues: Set<string>;
+  jobIdToPayload: Map<string, CronJobPayload>;
+  jobIdToQueue: Map<string, string>;
+}
 
-  async function ensureStarted(): Promise<PgBoss> {
-    if (boss && started) return boss;
+async function ensureStarted(state: PgBossState): Promise<PgBoss> {
+  if (state.boss && state.started) return state.boss;
 
-    const pool = createPool();
-    const bossOptions: Record<string, unknown> = { db: pool };
-    if (shouldDisableListenNotify()) {
-      bossOptions.useListenNotify = false;
-    }
+  const pool = createPool();
+  const bossOptions: Record<string, unknown> = { db: pool };
+  if (shouldDisableListenNotify()) {
+    bossOptions.useListenNotify = false;
+  }
 
-    boss = new PgBoss(bossOptions);
-    boss.on("error", (err: Error) => {
-      logger.error("cron.queue.pgboss.error", { message: err.message, stack: err.stack });
+  state.boss = new PgBoss(bossOptions);
+  state.boss.on("error", (err: Error) => {
+    logger.error("cron.queue.pgboss.error", { message: err.message, stack: err.stack });
+  });
+
+  try {
+    await state.boss.start();
+    state.started = true;
+    logger.info("cron.pgboss.started", { useListenNotify: !bossOptions.useListenNotify });
+  } catch (err) {
+    logger.error("cron.pgboss.start.failed", {
+      message: formatError(err),
+      stack: err instanceof Error ? err.stack : undefined,
     });
+    state.boss = null;
+    state.started = false;
+    throw new CronQueueBackendNotAvailable(`Failed to start pg-boss: ${formatError(err)}`);
+  }
+  return state.boss;
+}
 
+async function ensureQueue(
+  state: PgBossState,
+  b: PgBoss,
+  jobKind: string,
+  opts?: { maxRetries?: number; retryBackoffSeconds?: number; timeoutSeconds?: number }
+): Promise<string> {
+  const name = getQueueName(jobKind);
+  if (state.knownQueues.has(name)) return name;
+
+  const maxRetries = opts?.maxRetries ?? 3;
+  const retryBackoffSeconds = opts?.retryBackoffSeconds ?? 60;
+  const timeoutSeconds = opts?.timeoutSeconds ?? 300;
+
+  await b.createQueue(name, {
+    retryLimit: maxRetries,
+    retryDelay: retryBackoffSeconds,
+    retryBackoff: true,
+    expireInSeconds: timeoutSeconds,
+    heartbeatSeconds: computeHeartbeatSeconds(timeoutSeconds),
+    deadLetter: `${name}__dlq`,
+  });
+  state.knownQueues.add(name);
+  return name;
+}
+
+function pruneState(state: PgBossState): void {
+  pruneMaps(state.jobIdToPayload, state.jobIdToQueue, (_payload, jid) => jid, "cron.pgboss.mapPruned");
+}
+
+/**
+ * Adapter-internal shape of the `data` payload on a raw pg-boss fetched
+ * job. Used as the generic type argument to `b.fetch<T>()` so the return
+ * value is already typed.
+ */
+type FetchedJobData = {
+  runId: string;
+  scheduleId: string;
+  jobKind: string;
+  payload: Record<string, unknown> | null;
+  attempt: number;
+  timeoutSeconds: number;
+  maxRetries?: number;
+  retryBackoffSeconds?: number;
+};
+
+/** Adapter-internal: per-queue result of the fan-out `fetch` call. */
+type FetchedBatch = { name: string; jobs: Job<FetchedJobData>[] | null };
+
+async function fetchFromQueues(state: PgBossState, b: PgBoss, count: number): Promise<CronJobPayload[]> {
+  const queues = state.knownQueues.size > 0 ? [...state.knownQueues] : [];
+  if (queues.length === 0) return [];
+
+  const batchPerQueue = Math.max(1, Math.ceil(count / queues.length));
+
+  const batchResults: FetchedBatch[] = await Promise.all(
+    queues.map(async name => {
+      try {
+        const raw = await b.fetch<FetchedJobData>(name, { batchSize: batchPerQueue });
+        return { name, jobs: raw };
+      } catch (err) {
+        logger.warn("cron.pgboss.fetch.failed", { queue: name, error: formatError(err) });
+        return { name, jobs: null };
+      }
+    })
+  );
+
+  const results: CronJobPayload[] = [];
+  for (const { name, jobs } of batchResults) {
+    if (jobs) {
+      const jobArray = Array.isArray(jobs) ? jobs : [jobs];
+      for (const j of jobArray) {
+        const data: CronJobPayload = {
+          runId: j.data.runId,
+          scheduleId: j.data.scheduleId,
+          jobKind: safeCronJobKind(j.data.jobKind),
+          payload: j.data.payload,
+          attempt: j.data.attempt,
+          timeoutSeconds: j.data.timeoutSeconds,
+          queueJobId: j.id,
+          maxRetries: j.data.maxRetries,
+          retryBackoffSeconds: j.data.retryBackoffSeconds,
+        };
+        state.jobIdToQueue.set(j.id, name);
+        state.jobIdToPayload.set(j.id, data);
+        results.push(data);
+      }
+    }
+  }
+  return results.slice(0, count);
+}
+
+function completeKnownQueue(state: PgBossState, b: PgBoss, jobId: string, queueName: string): void | Promise<void> {
+  return (async () => {
     try {
-      await boss.start();
-      started = true;
-      logger.info("cron.pgboss.started", { useListenNotify: !bossOptions.useListenNotify });
+      await b.complete(queueName, [jobId]);
     } catch (err) {
-      logger.error("cron.pgboss.start.failed", {
-        message: formatError(err),
-        stack: err instanceof Error ? err.stack : undefined,
-      });
-      boss = null;
-      started = false;
-      throw new CronQueueBackendNotAvailable(`Failed to start pg-boss: ${formatError(err)}`);
+      logger.warn("cron.pgboss.complete.failed", { jobId, queueName, error: formatError(err) });
     }
-    return boss;
+    state.jobIdToPayload.delete(jobId);
+    state.jobIdToQueue.delete(jobId);
+    pruneState(state);
+  })();
+}
+
+async function completeFallback(state: PgBossState, b: PgBoss, jobId: string): Promise<void> {
+  await Promise.all(
+    [...state.knownQueues].map(async q => {
+      try {
+        await b.complete(q, [jobId]);
+      } catch (err) {
+        logger.debug("cron.pgboss.complete.fallbackMiss", { jobId, queue: q, error: formatError(err) });
+      }
+    })
+  );
+  state.jobIdToPayload.delete(jobId);
+  state.jobIdToQueue.delete(jobId);
+  pruneState(state);
+  logger.warn("cron.pgboss.complete.queueNotFound", { jobId, knownQueues: [...state.knownQueues] });
+}
+
+async function failKnownQueue(
+  _state: PgBossState,
+  b: PgBoss,
+  jobId: string,
+  queueName: string,
+  failData: { message: string; stack: string | null }
+): Promise<void> {
+  try {
+    await b.fail(queueName, [jobId], failData);
+  } catch (err) {
+    logger.warn("cron.pgboss.fail.failed", { jobId, queueName, error: formatError(err) });
   }
+}
 
-  async function ensureQueue(
-    b: PgBoss,
-    jobKind: string,
-    opts?: { maxRetries?: number; retryBackoffSeconds?: number; timeoutSeconds?: number }
-  ): Promise<string> {
-    const name = getQueueName(jobKind);
-    if (knownQueues.has(name)) return name;
+async function failFallback(
+  state: PgBossState,
+  b: PgBoss,
+  jobId: string,
+  failData: { message: string; stack: string | null }
+): Promise<void> {
+  await Promise.all(
+    [...state.knownQueues].map(async q => {
+      try {
+        await b.fail(q, [jobId], failData);
+      } catch (err) {
+        logger.debug("cron.pgboss.fail.fallbackMiss", { jobId, queue: q, error: formatError(err) });
+      }
+    })
+  );
+  logger.warn("cron.pgboss.fail.queueNotFound", { jobId, knownQueues: [...state.knownQueues] });
+}
 
-    const maxRetries = opts?.maxRetries ?? 3;
-    const retryBackoffSeconds = opts?.retryBackoffSeconds ?? 60;
-    const timeoutSeconds = opts?.timeoutSeconds ?? 300;
-
-    await b.createQueue(name, {
-      retryLimit: maxRetries,
-      retryDelay: retryBackoffSeconds,
-      retryBackoff: true,
-      expireInSeconds: timeoutSeconds,
-      heartbeatSeconds: computeHeartbeatSeconds(timeoutSeconds),
-      deadLetter: `${name}__dlq`,
-    });
-    knownQueues.add(name);
-    return name;
+async function retryKnownQueue(
+  state: PgBossState,
+  b: PgBoss,
+  jobId: string,
+  queueName: string,
+  originalPayload: CronJobPayload,
+  delaySeconds: number,
+  newAttempt?: number
+): Promise<void> {
+  try {
+    await b.complete(queueName, jobId);
+    const nextAttempt = newAttempt ?? originalPayload.attempt + 1;
+    const { queueJobId: _omit, ...sendData } = { ...originalPayload, attempt: nextAttempt };
+    const newJobId = await b.send(queueName, sendData, { startAfter: delaySeconds } as SendOptions);
+    if (newJobId) {
+      state.jobIdToPayload.set(newJobId, { ...originalPayload, attempt: nextAttempt });
+      state.jobIdToQueue.set(newJobId, queueName);
+    } else {
+      logger.warn("cron.pgboss.retry.sendReturnedNull", { jobId, queueName });
+    }
+  } catch (err) {
+    logger.warn("cron.pgboss.retry.failed", { jobId, queueName, error: formatError(err) });
   }
+}
 
-  const prune = () => pruneMaps(jobIdToPayload, jobIdToQueue, (_payload, jid) => jid, "cron.pgboss.mapPruned");
+async function collectQueueStats(state: PgBossState, b: PgBoss): Promise<CronQueueStats> {
+  const stats: CronQueueStats = { backend: "pgboss", pending: 0, inFlight: 0, failed: 0, byJobKind: {} };
+  const queueNames = [...state.knownQueues];
+
+  await Promise.all(
+    queueNames.map(async name => {
+      try {
+        await b.createQueue(name);
+      } catch (err) {
+        logger.warn("cron.pgboss.getQueueStats.ensureQueue.failed", { queue: name, error: formatError(err) });
+      }
+    })
+  );
+
+  const queueStatsResults = await Promise.all(
+    queueNames.map(async name => {
+      try {
+        const qsArray = await b.getQueueStats(name);
+        const qs = qsArray[0];
+        if (!qs) return null;
+        const jobKind = name.replace(QUEUE_NAME_PREFIX, "");
+        const pending = qs.queuedCount + qs.deferredCount + qs.readyCount;
+        const inFlight = qs.activeCount;
+        const failed = qs.failedCount;
+        return { jobKind, pending, inFlight, failed };
+      } catch (err) {
+        logger.warn("cron.pgboss.getQueueStats.failed", { queue: name, error: formatError(err) });
+        return null;
+      }
+    })
+  );
+
+  for (const result of queueStatsResults) {
+    if (!result) continue;
+    const { jobKind, pending, inFlight, failed } = result;
+    stats.pending += pending;
+    stats.inFlight += inFlight;
+    stats.failed += failed;
+    stats.byJobKind[jobKind] = { pending, inFlight, failed };
+  }
+  return stats;
+}
+
+export function createPgBossAdapter(): CronQueueAdapter {
+  const state: PgBossState = {
+    boss: null,
+    started: false,
+    knownQueues: new Set(),
+    jobIdToPayload: new Map(),
+    jobIdToQueue: new Map(),
+  };
 
   return {
     async init() {
-      await ensureStarted();
+      await ensureStarted(state);
     },
 
     async send(job: CronJobPayload) {
-      const b = await ensureStarted();
-      const name = await ensureQueue(b, job.jobKind, {
+      const b = await ensureStarted(state);
+      const name = await ensureQueue(state, b, job.jobKind, {
         maxRetries: job.maxRetries,
         retryBackoffSeconds: job.retryBackoffSeconds,
         timeoutSeconds: job.timeoutSeconds,
@@ -154,257 +357,73 @@ export function createPgBossAdapter(): CronQueueAdapter {
       const { queueJobId: _omit, ...sendData } = { ...job };
       const jobId = await b.send(name, sendData);
       if (!jobId) throw new DomainError("CRON_QUEUE_SEND_FAILED", `pg-boss send returned null for queue ${name}`);
-      jobIdToPayload.set(jobId, job);
-      jobIdToQueue.set(jobId, name);
-      prune();
+      state.jobIdToPayload.set(jobId, job);
+      state.jobIdToQueue.set(jobId, name);
+      pruneState(state);
       logger.debug("cron.pgboss.send", { jobId, queue: name, runId: job.runId });
       return jobId;
     },
 
     async fetch({ count }) {
-      const b = await ensureStarted();
-      const queues = knownQueues.size > 0 ? [...knownQueues] : [];
-      if (queues.length === 0) return [];
-
-      const batchPerQueue = Math.max(1, Math.ceil(count / queues.length));
-
-      /**
-       * Adapter-internal shape of the `data` payload on a raw pg-boss fetched
-       * job. Used as the generic type argument to `b.fetch<T>()` so the return
-       * value is already typed — no `as` cast needed. The fields mirror
-       * {@link CronJobPayload} (see `@/backend/types/cron/cron.types.ts`).
-       */
-      type FetchedJobData = {
-        runId: string;
-        scheduleId: string;
-        jobKind: string;
-        payload: Record<string, unknown> | null;
-        attempt: number;
-        timeoutSeconds: number;
-        maxRetries?: number;
-        retryBackoffSeconds?: number;
-      };
-
-      /** Adapter-internal: per-queue result of the fan-out `fetch` call. */
-      type FetchedBatch = { name: string; jobs: Job<FetchedJobData>[] | null };
-      const batchResults: FetchedBatch[] = await Promise.all(
-        queues.map(async name => {
-          try {
-            const raw = await b.fetch<FetchedJobData>(name, { batchSize: batchPerQueue });
-            return { name, jobs: raw };
-          } catch (err) {
-            logger.warn("cron.pgboss.fetch.failed", {
-              queue: name,
-              error: formatError(err),
-            });
-            return { name, jobs: null };
-          }
-        })
-      );
-
-      const results: CronJobPayload[] = [];
-      for (const { name, jobs } of batchResults) {
-        if (jobs) {
-          const jobArray = Array.isArray(jobs) ? jobs : [jobs];
-          for (const j of jobArray) {
-            const data: CronJobPayload = {
-              runId: j.data.runId,
-              scheduleId: j.data.scheduleId,
-              jobKind: safeCronJobKind(j.data.jobKind),
-              payload: j.data.payload,
-              attempt: j.data.attempt,
-              timeoutSeconds: j.data.timeoutSeconds,
-              queueJobId: j.id,
-              maxRetries: j.data.maxRetries,
-              retryBackoffSeconds: j.data.retryBackoffSeconds,
-            };
-            jobIdToQueue.set(j.id, name);
-            jobIdToPayload.set(j.id, data);
-            results.push(data);
-          }
-        }
-      }
-
-      return results.slice(0, count);
+      const b = await ensureStarted(state);
+      return fetchFromQueues(state, b, count);
     },
 
     async complete(jobId) {
-      const queueName = jobIdToQueue.get(jobId);
+      const queueName = state.jobIdToQueue.get(jobId);
+      const b = await ensureStarted(state);
       if (queueName !== undefined) {
-        const b = await ensureStarted();
-        try {
-          await b.complete(queueName, [jobId]);
-        } catch (err) {
-          logger.warn("cron.pgboss.complete.failed", {
-            jobId,
-            queueName,
-            error: formatError(err),
-          });
-        }
-        jobIdToPayload.delete(jobId);
-        jobIdToQueue.delete(jobId);
-        prune();
+        await completeKnownQueue(state, b, jobId, queueName);
         return;
       }
-      // Fallback for cross-instance jobs: try each known queue. pg-boss
-      // silently affects 0 rows when the jobId is not in that queue, so this
-      // is safe — it just costs one round-trip per known queue.
-      const b = await ensureStarted();
-      await Promise.all(
-        [...knownQueues].map(async q => {
-          try {
-            await b.complete(q, [jobId]);
-          } catch (err) {
-            logger.debug("cron.pgboss.complete.fallbackMiss", {
-              jobId,
-              queue: q,
-              error: formatError(err),
-            });
-          }
-        })
-      );
-      jobIdToPayload.delete(jobId);
-      jobIdToQueue.delete(jobId);
-      prune();
-      logger.warn("cron.pgboss.complete.queueNotFound", { jobId, knownQueues: [...knownQueues] });
+      // Fallback for cross-instance jobs: try each known queue.
+      await completeFallback(state, b, jobId);
     },
 
     async fail(jobId, error, stack) {
-      const b = await ensureStarted();
-      const queueName = jobIdToQueue.get(jobId);
+      const b = await ensureStarted(state);
+      const queueName = state.jobIdToQueue.get(jobId);
       const failData = { message: error, stack: stack ?? null };
       if (queueName) {
-        try {
-          await b.fail(queueName, [jobId], failData);
-        } catch (err) {
-          logger.warn("cron.pgboss.fail.failed", {
-            jobId,
-            queueName,
-            error: formatError(err),
-          });
-        }
+        await failKnownQueue(state, b, jobId, queueName, failData);
       } else {
-        // Fallback for cross-instance jobs: try each known queue.
-        await Promise.all(
-          [...knownQueues].map(async q => {
-            try {
-              await b.fail(q, [jobId], failData);
-            } catch (err) {
-              logger.debug("cron.pgboss.fail.fallbackMiss", {
-                jobId,
-                queue: q,
-                error: formatError(err),
-              });
-            }
-          })
-        );
-        logger.warn("cron.pgboss.fail.queueNotFound", { jobId, knownQueues: [...knownQueues] });
+        await failFallback(state, b, jobId, failData);
       }
-      jobIdToPayload.delete(jobId);
-      jobIdToQueue.delete(jobId);
-      prune();
+      state.jobIdToPayload.delete(jobId);
+      state.jobIdToQueue.delete(jobId);
+      pruneState(state);
     },
 
     async retry(jobId, delaySeconds, newAttempt) {
-      const b = await ensureStarted();
-      const queueName = jobIdToQueue.get(jobId);
-      const originalPayload = jobIdToPayload.get(jobId);
+      const b = await ensureStarted(state);
+      const queueName = state.jobIdToQueue.get(jobId);
+      const originalPayload = state.jobIdToPayload.get(jobId);
 
       if (queueName && originalPayload) {
-        try {
-          await b.complete(queueName, jobId);
-          const nextAttempt = newAttempt ?? originalPayload.attempt + 1;
-          const { queueJobId: _omit, ...sendData } = { ...originalPayload, attempt: nextAttempt };
-          const newJobId = await b.send(queueName, sendData, { startAfter: delaySeconds } as SendOptions);
-          if (newJobId) {
-            jobIdToPayload.set(newJobId, { ...originalPayload, attempt: nextAttempt });
-            jobIdToQueue.set(newJobId, queueName);
-          } else {
-            logger.warn("cron.pgboss.retry.sendReturnedNull", { jobId, queueName });
-          }
-        } catch (err) {
-          logger.warn("cron.pgboss.retry.failed", {
-            jobId,
-            queueName,
-            error: formatError(err),
-          });
-        }
+        await retryKnownQueue(state, b, jobId, queueName, originalPayload, delaySeconds, newAttempt);
       } else if (queueName && originalPayload === undefined) {
-        // Queue origin known but payload missing — fall back to minimal retry
         logger.warn("cron.pgboss.retry.payloadMissing", { jobId, queueName });
       } else {
         logger.warn("cron.pgboss.retry.queueNotFound", { jobId });
       }
 
-      jobIdToPayload.delete(jobId);
-      jobIdToQueue.delete(jobId);
-      prune();
+      state.jobIdToPayload.delete(jobId);
+      state.jobIdToQueue.delete(jobId);
+      pruneState(state);
     },
 
     async getQueueStats() {
-      const b = await ensureStarted();
-      const stats: CronQueueStats = {
-        backend: "pgboss",
-        pending: 0,
-        inFlight: 0,
-        failed: 0,
-        byJobKind: {},
-      };
-
-      const queueNames = [...knownQueues];
-      // Ensure each queue exists before fetching stats
-      await Promise.all(
-        queueNames.map(async name => {
-          try {
-            await b.createQueue(name);
-          } catch (err) {
-            logger.warn("cron.pgboss.getQueueStats.ensureQueue.failed", {
-              queue: name,
-              error: formatError(err),
-            });
-          }
-        })
-      );
-      const queueStatsResults = await Promise.all(
-        queueNames.map(async name => {
-          try {
-            const qsArray = await b.getQueueStats(name);
-            const qs = qsArray[0];
-            if (!qs) return null;
-            const jobKind = name.replace(QUEUE_NAME_PREFIX, "");
-            const pending = qs.queuedCount + qs.deferredCount + qs.readyCount;
-            const inFlight = qs.activeCount;
-            const failed = qs.failedCount;
-            return { jobKind, pending, inFlight, failed };
-          } catch (err) {
-            logger.warn("cron.pgboss.getQueueStats.failed", {
-              queue: name,
-              error: formatError(err),
-            });
-            return null;
-          }
-        })
-      );
-
-      for (const result of queueStatsResults) {
-        if (!result) continue;
-        const { jobKind, pending, inFlight, failed } = result;
-        stats.pending += pending;
-        stats.inFlight += inFlight;
-        stats.failed += failed;
-        stats.byJobKind[jobKind] = { pending, inFlight, failed };
-      }
-
-      return stats;
+      const b = await ensureStarted(state);
+      return collectQueueStats(state, b);
     },
 
     async shutdown() {
-      if (!boss || !started) return;
-      await boss.stop({ close: false });
-      started = false;
-      knownQueues.clear();
-      jobIdToPayload.clear();
-      jobIdToQueue.clear();
+      if (!state.boss || !state.started) return;
+      await state.boss.stop({ close: false });
+      state.started = false;
+      state.knownQueues.clear();
+      state.jobIdToPayload.clear();
+      state.jobIdToQueue.clear();
       logger.info("cron.pgboss.stopped");
     },
   };

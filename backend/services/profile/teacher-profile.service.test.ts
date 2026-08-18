@@ -8,7 +8,7 @@ import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.
 import type { TeacherProfileReturnType, TeacherSelectType } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import { getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 const baseProfile: TeacherProfileReturnType = {
   id: "teacher-1",
@@ -76,7 +76,7 @@ describe("StaffProfileService teacher profile masking", () => {
 
 describe("TeacherPortalService own profile", () => {
   const ownProfileSetup = () => {
-    const tErrors = getServerTranslations("en").errorsTranslations;
+    const tErrors = errorsEn;
     spyOn(PermissionsService, "hasPermission").mockImplementation(
       async (_userId, permission) => permission === AppPermission.PROFILE_CORE_IDENTITY_VIEW_OWN
     );
@@ -102,7 +102,7 @@ describe("TeacherPortalService own profile", () => {
 });
 
 describe("TeacherPortalService.updateOwnProfile nationalId validation", () => {
-  const tErrors = getServerTranslations("en").errorsTranslations;
+  const tErrors = errorsEn;
 
   afterEach(() => {
     spyOn(PermissionsService, "hasPermission").mockRestore();

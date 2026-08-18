@@ -22,9 +22,9 @@ import type {
   ParentDirectoryAutocompleteRow,
   ParentDirectoryRawMetrics,
   ParentDirectoryRawRow,
-  ParentEntity,
-  ParentEntityInput,
+  ParentInsertType,
   ParentProfileUpdateInput,
+  ParentSelectType,
   StudentProgressReturnType,
   WorkshopPromoReturnType,
 } from "@/backend/types";
@@ -45,7 +45,7 @@ import { getServerTranslations } from "@/shared/locale";
 
 export namespace ParentRepository {
   export async function create(
-    input: ParentEntityInput,
+    input: ParentInsertType,
     tx?: DBTransaction,
     locale?: string
   ): Promise<ParentCreateResult> {
@@ -373,7 +373,7 @@ export namespace ParentRepository {
     return updated;
   };
 
-  export const findByUserId = async (userId: string, tx?: DBTransaction): Promise<ParentEntity | null> => {
+  export const findByUserId = async (userId: string, tx?: DBTransaction): Promise<ParentSelectType | null> => {
     const q = queryDb(tx);
     const [parent] = await q.select().from(parents).where(eq(parents.userId, userId)).limit(1);
     return parent ?? null;
@@ -925,7 +925,11 @@ export namespace ParentRepository {
       imageUrl: "",
     };
   };
-  export const upsertByUserId = async (userId: string, status: string, tx?: DBTransaction): Promise<ParentEntity> => {
+  export const upsertByUserId = async (
+    userId: string,
+    status: string,
+    tx?: DBTransaction
+  ): Promise<ParentSelectType> => {
     const executor = tx ?? db;
     const now = new Date();
     const [row] = await executor

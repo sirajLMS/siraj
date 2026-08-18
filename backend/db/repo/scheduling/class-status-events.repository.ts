@@ -2,17 +2,9 @@ import { inArray } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { bulkInsertOnConflictDoNothing, DEFAULT_BULK_CHUNK_SIZE } from "@/backend/db/repo/shared";
 import { classStatusEvents } from "@/backend/db/schema";
-import type { ClassStatusEventSelectType, DBTransaction } from "@/backend/types";
+import type { ClassStatusEventInsertType, ClassStatusEventSelectType, DBTransaction } from "@/backend/types";
 
-export type ClassStatusEventSeedInsertInput = {
-  classInstanceId: string;
-  eventType: string;
-  fromState: Record<string, unknown> | null;
-  toState: Record<string, unknown> | null;
-  description: string | null;
-  actorUserId: string | null;
-  createdAt: Date;
-};
+export type ClassStatusEventSeedInsertInput = Omit<ClassStatusEventInsertType, "id">;
 
 async function runInTransaction<T>(tx: DBTransaction | undefined, fn: (t: DBTransaction) => Promise<T>): Promise<T> {
   return tx ? fn(tx) : db.transaction(fn);

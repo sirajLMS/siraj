@@ -1,6 +1,9 @@
 import type {
   ClassInstanceDetailReturnType,
   EffectiveMeetingReturnType,
+  PageInfo,
+  PaginationInput,
+  StatusTrackingRow,
   SupportContactReturnType,
   TeacherImportantNoteReturnType,
 } from "@/backend/types";
@@ -140,7 +143,7 @@ export type AdminDashboardScheduleInput = {
   teacherId?: string | null;
   search?: string | null;
   metricFilter?: string | null;
-  paginationArgs?: import("@/backend/types/shared/pagination.types").PaginationInput | null;
+  paginationArgs?: PaginationInput | null;
 };
 
 export type DailyScheduleArgs = {
@@ -155,13 +158,13 @@ export type AdminDashboardScheduleReturnType = {
   totalCount: number;
   metrics: ClassSessionMetrics;
   rows: DailyScheduleListReturnType[];
-  pageInfo: import("@/backend/types/shared/pagination.types").PageInfo | null;
+  pageInfo: PageInfo | null;
 };
 
 // Canonical definition lives in ./scheduling.types.ts as StatusTrackingRow.
 // This alias preserves the GraphQL-facing name (StatusTrackingScheduleRow)
 // used by the Pothos layer and frontend codegen without duplicating fields.
-export type StatusTrackingScheduleRow = import("./scheduling.types").StatusTrackingRow;
+export type StatusTrackingScheduleRow = StatusTrackingRow;
 
 export type AvailableClassSlot = {
   teacherId: string;

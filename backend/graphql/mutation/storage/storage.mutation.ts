@@ -1,3 +1,4 @@
+import { GraphQLError } from "graphql";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import * as StoragePothos from "@/backend/graphql/pothos";
@@ -40,10 +41,13 @@ async function authorizeBulkPaths(userId: string, itemPaths: string[], tErrors: 
  * Enforce the bulk-item limit and throw an error when exceeded.
  * @param count - Actual number of items in the request.
  * @param operation - Human-readable label (e.g. "move", "copy") for the error message.
+ * @param tErrors - Error labels for localized error messages.
  */
-function enforceBulkLimit(count: number, operation: string): void {
+function enforceBulkLimit(count: number, operation: string, tErrors: ErrorsLabels): void {
   if (count > BULK_ITEM_LIMIT) {
-    throw new Error(`Bulk ${operation} operation limited to ${BULK_ITEM_LIMIT} items maximum`);
+    throw new GraphQLError(tErrors.bulkOperationLimitExceeded(operation, BULK_ITEM_LIMIT), {
+      extensions: { code: "BAD_USER_INPUT", operation, limit: BULK_ITEM_LIMIT },
+    });
   }
 }
 
@@ -64,8 +68,8 @@ async function resolveBulkTransfer(
   const sanitizedSourcePaths = sanitizeAndValidatePaths(input.sourcePaths);
   const sanitizedDestPath = sanitizeStoragePath(input.destinationPath);
   validateStoragePath(sanitizedDestPath);
-  enforceBulkLimit(sanitizedSourcePaths.length, operation);
   const tErrors = ctx.t().errorsTranslations;
+  enforceBulkLimit(sanitizedSourcePaths.length, operation, tErrors);
   await authorizeBulkPaths(userId, sanitizedSourcePaths, tErrors);
   const storageService = await getStorageService();
   const payload = {
@@ -194,8 +198,8 @@ gqlSchemaBuilder.mutationFields(t => ({
     resolve: async (_parent, { input }, ctx) => {
       const userId = await requireAuth(ctx);
       const sanitizedPaths = sanitizeAndValidatePaths(input.paths);
-      enforceBulkLimit(sanitizedPaths.length, "delete");
       const tErrors = ctx.t().errorsTranslations;
+      enforceBulkLimit(sanitizedPaths.length, "delete", tErrors);
       await authorizeBulkPaths(userId, sanitizedPaths, tErrors);
       const storageService = await getStorageService();
       return await storageService.deleteItems({ ...input, paths: sanitizedPaths });

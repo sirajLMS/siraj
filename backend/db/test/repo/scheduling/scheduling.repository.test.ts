@@ -10,18 +10,15 @@ import {
   teacherAssignments,
   users,
 } from "@/backend/db/schema";
-import {
-  createMockClassInstance,
-  createTestMeetingConfig,
-  createTestMeetingProvider,
-  ensureTestSubjectId,
-  setupTestEntities,
-} from "@/backend/db/test/entity-setup";
+import { createMockClassInstance, ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity-setup";
 import { testRepoError } from "@/backend/db/test/repo/scheduling/scheduling-test-helpers";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { validateRescheduleState } from "@/backend/services";
 import type { DBTransaction } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
+
+const rescheduleHooks = { validateRescheduleState };
 
 interface ClassStatusEventState {
   executionState?: string;
@@ -173,38 +170,8 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       await expectOverlapError(tx, firstEntities, secondEntities, now);
     });
 
-    testRepoError("throws on zoomUrl overlap", async tx => {
-      const { student, teacher, now } = await setupTestEntities(tx, "CreateZoom");
-      const start = new Date(now.getTime() + 86400000);
-      const end = new Date(start.getTime() + 3600000);
-      const zoomUrl = "https://zoom.us/j/123456789";
-      // Create first instance with a meeting config
-      const provider = await createTestMeetingProvider(tx, { slug: `zoom-${randomUUID().slice(0, 8)}` });
-      const config = await createTestMeetingConfig(tx, teacher.userId, provider.id, {
-        details: { meetingUrl: zoomUrl },
-        isDefault: true,
-      });
-      await createMockClassInstance(tx, student.id, teacher.id, {
-        scheduledStartAt: start,
-        scheduledEndAt: end,
-        userMeetingConfigId: config.id,
-        meetingJoinUrl: zoomUrl,
-      });
-      const { student: s2, teacher: t2 } = await setupTestEntities(tx, "CreateZoom2");
-      // Create a meeting config for the second teacher with the same zoom URL
-      const provider2 = await createTestMeetingProvider(tx, { slug: `zoom-${randomUUID().slice(0, 8)}` });
-      const config2 = await createTestMeetingConfig(tx, t2.userId, provider2.id, {
-        details: { meetingUrl: zoomUrl },
-        isDefault: true,
-      });
-      await SchedulingRepository.createClassInstance(
-        await getCreatePayload(tx, s2.id, t2.id, start, end, {
-          userMeetingConfigId: config2.id,
-          meetingJoinUrl: zoomUrl,
-        }),
-        tx
-      );
-    });
+    // NOTE: zoomUrl overlap detection moved to service layer (meetingUrlInUse is no longer a repo concern).
+    // See service-layer tests for meeting URL conflict detection.
   });
 
   describe("updateClassInstance", () => {
@@ -280,6 +247,31 @@ describe("Scheduling Repository — CRUD & Queries", () => {
   });
 
   describe("rescheduleClassInstance", () => {
+    const testRescheduleError = (
+      name: string,
+      prefix: string,
+      config: {
+        instanceOverrides?:
+          | Partial<typeof classInstances.$inferInsert>
+          | ((now: Date) => Partial<typeof classInstances.$inferInsert>);
+        payloadOverrides?: (instanceId: string) => Partial<typeof classInstances.$inferInsert>;
+      } = {}
+    ) =>
+      testRepoError(name, async tx => {
+        const { student, teacher, now } = await setupTestEntities(tx, prefix);
+        const instOverrides =
+          typeof config.instanceOverrides === "function" ? config.instanceOverrides(now) : config.instanceOverrides;
+        const instance = await createMockClassInstance(tx, student.id, teacher.id, instOverrides ?? {});
+        const payloadOvr = config.payloadOverrides ? config.payloadOverrides(instance.id) : {};
+        await SchedulingRepository.rescheduleClassInstance(
+          instance.id,
+          await getReschedulePayload(tx, student.id, teacher.id, payloadOvr),
+          tx,
+          undefined,
+          rescheduleHooks
+        );
+      });
+
     testRepoError("throws if original class not found", async tx => {
       const { student, teacher } = await setupTestEntities(tx, "Resched1");
       await SchedulingRepository.rescheduleClassInstance(
@@ -289,39 +281,21 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       );
     });
 
-    testRepoError("throws if rescheduling to self", async tx => {
-      const { student, teacher } = await setupTestEntities(tx, "Resched2");
-      const instance = await createMockClassInstance(tx, student.id, teacher.id);
-      await SchedulingRepository.rescheduleClassInstance(
-        instance.id,
-        await getReschedulePayload(tx, student.id, teacher.id, { id: instance.id }),
-        tx
-      );
+    testRescheduleError("throws if rescheduling to self", "Resched2", {
+      payloadOverrides: id => ({ id }),
     });
 
-    testRepoError("throws if original is completed or taken", async tx => {
-      const { student, teacher, now } = await setupTestEntities(tx, "Resched3");
-      const instance = await createMockClassInstance(tx, student.id, teacher.id, {
+    testRescheduleError("throws if original is completed or taken", "Resched3", {
+      instanceOverrides: now => ({
         executionState: "COMPLETED",
         outcome: "TAKEN",
         actualStartAt: now,
         actualEndAt: new Date(now.getTime() + 3600000),
-      });
-      await SchedulingRepository.rescheduleClassInstance(
-        instance.id,
-        await getReschedulePayload(tx, student.id, teacher.id),
-        tx
-      );
+      }),
     });
 
-    testRepoError("throws if already rescheduled", async tx => {
-      const { student, teacher } = await setupTestEntities(tx, "Resched4");
-      const instance = await createMockClassInstance(tx, student.id, teacher.id, { isRescheduled: true });
-      await SchedulingRepository.rescheduleClassInstance(
-        instance.id,
-        await getReschedulePayload(tx, student.id, teacher.id),
-        tx
-      );
+    testRescheduleError("throws if already rescheduled", "Resched4", {
+      instanceOverrides: { isRescheduled: true },
     });
 
     test("creates new instance, marks old as rescheduled, and refunds quota", async () => {
@@ -625,31 +599,39 @@ describe("Scheduling Repository — CRUD & Queries", () => {
       return updated;
     };
 
-    test("activateClassInstance sets flags and creates event", async () => {
-      await runInRollback(async tx => {
-        const result = await runStateTransitionTest(
-          tx,
-          "activate",
-          { executionState: "NOT_ACTIVATED" },
-          (id, userId, t) => SchedulingRepository.activateClassInstance(id, userId, { force: true }, t),
-          { executionState: "ACTIVATED", expectForceActivated: true }
-        );
-        expect(result.executionState).toBe("ACTIVATED");
+    const testStateTransition = (
+      name: string,
+      prefix: string,
+      instanceOverrides: Partial<typeof classInstances.$inferInsert>,
+      transitionFn: (
+        instanceId: string,
+        userId: string,
+        t: DBTransaction
+      ) => Promise<typeof classInstances.$inferSelect | null>,
+      expectations: StateTransitionExpectations
+    ) =>
+      test(name, async () => {
+        await runInRollback(async tx => {
+          const result = await runStateTransitionTest(tx, prefix, instanceOverrides, transitionFn, expectations);
+          expect(result.executionState).toBe(expectations.executionState);
+        });
       });
-    });
 
-    test("stopClassInstance sets flags and creates event", async () => {
-      await runInRollback(async tx => {
-        const result = await runStateTransitionTest(
-          tx,
-          "stop",
-          { executionState: "RUNNING", actualStartAt: new Date() },
-          (id, userId, t) => SchedulingRepository.stopClassInstance(id, userId, t),
-          { executionState: "COMPLETED", outcome: "TAKEN", expectActualEndAt: true }
-        );
-        expect(result.executionState).toBe("COMPLETED");
-      });
-    });
+    testStateTransition(
+      "activateClassInstance sets flags and creates event",
+      "activate",
+      { executionState: "NOT_ACTIVATED" },
+      (id, userId, t) => SchedulingRepository.activateClassInstance(id, userId, { force: true }, t),
+      { executionState: "ACTIVATED", expectForceActivated: true }
+    );
+
+    testStateTransition(
+      "stopClassInstance sets flags and creates event",
+      "stop",
+      { executionState: "RUNNING", actualStartAt: new Date() },
+      (id, userId, t) => SchedulingRepository.stopClassInstance(id, userId, t),
+      { executionState: "COMPLETED", outcome: "TAKEN", expectActualEndAt: true }
+    );
 
     test("softDeleteClassInstance creates event and restores quota", async () => {
       await runInRollback(async tx => {

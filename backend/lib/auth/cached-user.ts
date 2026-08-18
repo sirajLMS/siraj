@@ -1,6 +1,6 @@
 import { cache } from "react";
-import { cachedRead, SessionService, type UserPermissionContext } from "@/backend/services";
-import type { CurrentUserProfile } from "@/backend/types";
+import { cachedRead, SessionService } from "@/backend/services";
+import type { CurrentUserProfile, UserPermissionContext } from "@/backend/types";
 
 export const getCurrentUser = cache(
   async (userId: string, permissionContext?: UserPermissionContext | null): Promise<CurrentUserProfile> => {

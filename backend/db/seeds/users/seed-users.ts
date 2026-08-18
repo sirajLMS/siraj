@@ -10,8 +10,8 @@ import {
   shouldSeedExtendedFiles,
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
-import { ReferenceDataService, type SeedDemoUserInput, UserSeedService } from "@/backend/services";
-import type { GroupWithPermissionIds, UserSelectType } from "@/backend/types";
+import { ReferenceDataService, UserSeedService } from "@/backend/services";
+import type { GroupWithPermissionIds, SeedDemoUserInput, UserSelectType } from "@/backend/types";
 import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 
 function resolvePlainPassword(

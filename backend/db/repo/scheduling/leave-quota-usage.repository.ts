@@ -1,9 +1,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { leaveQuotaUsage } from "@/backend/db/schema";
-import type { DBTransaction, UpsertStudentLeaveQuotaInput } from "@/backend/types";
-
-export type LeaveQuotaUsageRow = typeof leaveQuotaUsage.$inferSelect;
+import type { DBTransaction, LeaveQuotaUsageSelectType, UpsertStudentLeaveQuotaInput } from "@/backend/types";
 
 export namespace LeaveQuotaUsageRepository {
   export async function findStudentPeriodQuota(
@@ -11,7 +9,7 @@ export namespace LeaveQuotaUsageRepository {
     periodYear: number,
     periodMonth: number,
     tx?: DBTransaction
-  ): Promise<LeaveQuotaUsageRow | null> {
+  ): Promise<LeaveQuotaUsageSelectType | null> {
     const executor = queryDb(tx);
     const [row] = await executor
       .select()
@@ -31,7 +29,7 @@ export namespace LeaveQuotaUsageRepository {
   export async function upsertStudentPeriodQuota(
     input: UpsertStudentLeaveQuotaInput,
     tx?: DBTransaction
-  ): Promise<LeaveQuotaUsageRow> {
+  ): Promise<LeaveQuotaUsageSelectType> {
     const executor = tx ?? db;
     const existing = await findStudentPeriodQuota(input.studentId, input.periodYear, input.periodMonth, tx);
     if (existing) {

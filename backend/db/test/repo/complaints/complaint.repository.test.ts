@@ -7,6 +7,7 @@ import { complaintFiles, complaints, storageFiles } from "@/backend/db/schema";
 import { createTestParent, createTestStudent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
+import { deriveComplaintMetrics } from "@/backend/services/communication";
 import type { ComplaintSubmitInput, DBTransaction } from "@/backend/types";
 
 async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
@@ -21,6 +22,11 @@ async function expectRepoError(fn: () => Promise<unknown>): Promise<Error> {
     return errorCaught;
   }
   return new Error(String(errorCaught));
+}
+
+async function getMetricsRaw(tx?: DBTransaction) {
+  const raw = await ComplaintRepository.getComplaintMetricsRaw(undefined, tx);
+  return deriveComplaintMetrics(raw.statusCounts, { avgHours: raw.avgResolutionHours }, 0);
 }
 
 function complaintTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {
@@ -251,7 +257,6 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
 
     const result = await ComplaintRepository.getComplaintQueue({ limit: 50, offset: 0 }, tx);
 
-    expect(result.metrics.totalCount).toBeGreaterThanOrEqual(1);
     expect(result.complaints.length).toBeGreaterThanOrEqual(1);
 
     const matched = result.complaints.find(r => r.body === "Admin queue complaint");
@@ -297,7 +302,7 @@ describe("ComplaintRepository — getAdminComplaintQueue", () => {
 
     expect(page1.complaints.length).toBeLessThanOrEqual(2);
     expect(page2.complaints.length).toBeLessThanOrEqual(2);
-    expect(page1.metrics.totalCount).toBeGreaterThanOrEqual(3);
+    expect(page1.rawMetrics.statusCounts.reduce((sum, r) => sum + r.count, 0)).toBeGreaterThanOrEqual(3);
   });
 
   complaintTest("excludes soft-deleted complaints", async tx => {
@@ -353,7 +358,7 @@ describe("ComplaintRepository — getComplaintMetrics", () => {
   complaintTest("returns correct counts for unanswered and answered", async tx => {
     const { parent } = await setupParentWithStudent(tx, "Metrics");
 
-    const beforeMetrics = await ComplaintRepository.getComplaintMetrics(undefined, tx);
+    const beforeMetrics = await getMetricsRaw(tx);
     const initialUnanswered = beforeMetrics.unanswered;
     const initialAnswered = beforeMetrics.answered;
 
@@ -361,7 +366,7 @@ describe("ComplaintRepository — getComplaintMetrics", () => {
     await insertComplaint(tx, parent.id, { status: "UNANSWERED" });
     await insertComplaint(tx, parent.id, { status: "ANSWERED" });
 
-    const metrics = await ComplaintRepository.getComplaintMetrics(undefined, tx);
+    const metrics = await getMetricsRaw(tx);
 
     expect(metrics.unanswered).toBe(initialUnanswered + 2);
     expect(metrics.answered).toBe(initialAnswered + 1);
@@ -371,11 +376,11 @@ describe("ComplaintRepository — getComplaintMetrics", () => {
   complaintTest("excludes soft-deleted from metrics", async tx => {
     const { parent } = await setupParentWithStudent(tx, "MetricsSoft");
 
-    const beforeMetrics = await ComplaintRepository.getComplaintMetrics(undefined, tx);
+    const beforeMetrics = await getMetricsRaw(tx);
 
     await insertComplaint(tx, parent.id, { status: "UNANSWERED", deletedAt: new Date() });
 
-    const afterMetrics = await ComplaintRepository.getComplaintMetrics(undefined, tx);
+    const afterMetrics = await getMetricsRaw(tx);
 
     expect(afterMetrics.unanswered).toBe(beforeMetrics.unanswered);
   });
@@ -519,14 +524,13 @@ describe("ComplaintRepository — non-transactional coverage fallback", () => {
   test("supports calls without tx for getAdminComplaintQueue", async () => {
     const result = await ComplaintRepository.getComplaintQueue({ limit: 1, offset: 0 });
     expect(result.complaints.length).toBeGreaterThanOrEqual(0);
-    expect(typeof result.metrics.totalCount).toBe("number");
+    expect(typeof result.rawMetrics.avgResolutionHours).toBe("number");
   });
 
   test("supports calls without tx for getComplaintMetrics", async () => {
-    const metrics = await ComplaintRepository.getComplaintMetrics();
-    expect(typeof metrics.unanswered).toBe("number");
-    expect(typeof metrics.answered).toBe("number");
-    expect(typeof metrics.avgResolutionHours).toBe("number");
+    const raw = await ComplaintRepository.getComplaintMetricsRaw();
+    expect(typeof raw.avgResolutionHours).toBe("number");
+    expect(Array.isArray(raw.statusCounts)).toBe(true);
   });
 
   test("supports calls without tx for getUnansweredComplaints", async () => {

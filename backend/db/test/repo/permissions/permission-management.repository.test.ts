@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { permissionGroups, permissions } from "@/backend/db/schema";
@@ -228,8 +229,18 @@ describe("PermissionManagementRepository", () => {
     });
 
     testRepo("updateGroup on system group should ignore name change and return existing group", async tx => {
-      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
-      const [sysGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
+      // Create a test system group inside the transaction (trigger only blocks UPDATE/DELETE, not INSERT)
+      const now = new Date();
+      const [sysGroup] = await tx
+        .insert(permissionGroups)
+        .values({
+          name: loc("Test System Group"),
+          slug: `test-system-group-${randomUUID().slice(0, 8)}`,
+          isSystem: true,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
       expect(sysGroup).toBeDefined();
 
       const result = await PermissionManagementRepository.updateGroup(
@@ -250,23 +261,33 @@ describe("PermissionManagementRepository", () => {
     });
 
     testRepo("updateGroup on system group should update permissionIds bundle", async tx => {
-      const [sysGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
+      // Create a test system group inside the transaction
+      const now = new Date();
+      const [sysGroup] = await tx
+        .insert(permissionGroups)
+        .values({
+          name: loc("Test System Group For Perms"),
+          slug: `test-system-group-perms-${randomUUID().slice(0, 8)}`,
+          isSystem: true,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
       expect(sysGroup).toBeDefined();
 
-      // Use an existing permission from the DB (seed permissions are already present)
-      const [existingPerm] = await tx.select().from(permissions).limit(1);
-      expect(existingPerm).toBeDefined();
+      // Create a test permission to use as test input
+      const testPerm = await createTestPermission(tx, AppPermission.TEST_CUSTOM_ONLY);
 
       const result = await PermissionManagementRepository.updateGroup(
         {
           id: sysGroup.id,
-          permissionIds: [existingPerm.id],
+          permissionIds: [testPerm.id],
         },
         "ar",
         tx
       );
 
-      expect(result.permissionIds).toContain(existingPerm.id);
+      expect(result.permissionIds).toContain(testPerm.id);
 
       // Clear permissions
       const cleared = await PermissionManagementRepository.updateGroup(
@@ -323,8 +344,18 @@ describe("PermissionManagementRepository", () => {
       expect(tFunc(errorThrown)).toContain("مجموعة الأذونات غير موجودة");
 
       // 3. System group
-      // Uses seed system group — required: DB trigger prevents creating isSystem=true groups
-      const [sysGroup] = await tx.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
+      // Create a test system group inside the transaction (trigger only blocks UPDATE/DELETE, not INSERT)
+      const sysNow = new Date();
+      const [sysGroup] = await tx
+        .insert(permissionGroups)
+        .values({
+          name: loc("Test System Group For Delete"),
+          slug: `test-system-group-delete-${randomUUID().slice(0, 8)}`,
+          isSystem: true,
+          createdAt: sysNow,
+          updatedAt: sysNow,
+        })
+        .returning();
       expect(sysGroup).toBeDefined();
 
       errorThrown = null;

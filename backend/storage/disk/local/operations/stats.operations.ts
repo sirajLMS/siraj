@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import type { FileTypes } from "@/backend/enum/storage";
 import { logger } from "@/backend/lib/logger";
 import type { LocalContext } from "@/backend/storage/disk/local/types";
 import { getAbsolutePath } from "@/backend/storage/disk/local/utils";
@@ -14,7 +15,7 @@ import { extToMime } from "@/shared/utils/storage.utils";
 
 interface StatsState {
   totalSize: bigint;
-  fileTypeMap: Map<Types.FileTypes, { count: number; size: bigint }>;
+  fileTypeMap: Map<FileTypes, { count: number; size: bigint }>;
   directories: Set<string>;
 }
 
@@ -64,7 +65,7 @@ export async function storageStatistics(ctx: LocalContext, searchPath?: string |
 
     const state: StatsState = {
       totalSize: BigInt(0),
-      fileTypeMap: new Map<Types.FileTypes, { count: number; size: bigint }>(),
+      fileTypeMap: new Map<FileTypes, { count: number; size: bigint }>(),
       directories: new Set<string>(),
     };
 

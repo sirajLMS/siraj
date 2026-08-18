@@ -150,7 +150,7 @@ async function moveVercelBlob(ctx: VercelContext, fromUrl: string, toPath: strin
 /**
  * Update file path in the database
  */
-async function updateDbFilePath(oldPath: string, newPath: string): Promise<Types.FileEntity | undefined> {
+async function updateDbFilePath(oldPath: string, newPath: string): Promise<Types.FileSelectType | undefined> {
   try {
     const dbFile = await StorageDbRepository.fileByPath(oldPath);
     if (!dbFile) return undefined;

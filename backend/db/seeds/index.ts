@@ -77,7 +77,7 @@ import type {
   GroupWithPermissionIds,
   InvoiceSelectType,
   LessonReportReturnType,
-  ParentEntity,
+  ParentSelectType,
   RecurringScheduleDaySelectType,
   RecurringScheduleSelectType,
   StudentSelectType,
@@ -96,7 +96,7 @@ export type SeedContext = {
   permissionGroups?: GroupWithPermissionIds[];
   users?: UserSelectType[];
   teachers?: TeacherSelectType[];
-  parents?: ParentEntity[];
+  parents?: ParentSelectType[];
   students?: StudentSelectType[];
   classes?: RecurringScheduleSelectType[];
   recurringScheduleDays?: RecurringScheduleDaySelectType[];

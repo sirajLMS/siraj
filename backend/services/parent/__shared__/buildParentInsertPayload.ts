@@ -1,5 +1,4 @@
-import type { ParentOnboardingInput } from "@/backend/services/parent/parent-onboarding.service";
-import type { ParentEntityInput } from "@/backend/types";
+import type { ParentInsertType, ParentOnboardingInput } from "@/backend/types";
 
 /**
  * Builds the insert payload for `ParentRepository.create()` from the
@@ -8,7 +7,7 @@ import type { ParentEntityInput } from "@/backend/types";
  * Captures the inline payload construction that was previously duplicated
  * in `parent-onboarding.service.ts`.
  */
-export function buildParentInsertPayload(input: ParentOnboardingInput, userId: string): ParentEntityInput {
+export function buildParentInsertPayload(input: ParentOnboardingInput, userId: string): ParentInsertType {
   return {
     userId,
     status: input.status ?? "REGULAR",

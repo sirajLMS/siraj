@@ -1,19 +1,15 @@
-import { beforeAll, describe, expect, spyOn, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import { SessionRepository } from "@/backend/db/repo/shared";
 import { UserRole } from "@/backend/enum";
 import type { CustomJWTPayload } from "@/backend/lib/auth/jwt";
 import { PermissionGroupSimulationService } from "@/backend/services/auth/permission-group-simulation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
 const SESSION_ID = "session-raw-id";
 
-let tErrors: ErrorsLabels;
-
-beforeAll(() => {
-  tErrors = getServerTranslations("en").errorsTranslations;
-});
+const tErrors = errorsEn;
 
 function mockSuperAdminActor() {
   return spyOn(PermissionsService, "getUserContext").mockResolvedValue({

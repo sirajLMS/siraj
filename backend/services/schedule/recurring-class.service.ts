@@ -3,6 +3,7 @@ import { CreditRepository } from "@/backend/db/repo/billing";
 import { QuotaRepository } from "@/backend/db/repo/billing/quota.repository";
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { classLifecycleAffectedUserIds, SchedulingRepository } from "@/backend/db/repo/scheduling";
+import type { RateSnapshot } from "@/backend/db/repo/scheduling/recurring";
 import {
   type RecurringScheduleDayUpsertInput,
   RecurringScheduleRepository,
@@ -16,8 +17,10 @@ import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { QuotaService } from "@/backend/services/billing/quota.service";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
+import { resolveClassRate } from "@/backend/services/pricing/rate-resolver.service";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type {
   CreateRecurringClassInput,
@@ -198,29 +201,63 @@ export namespace RecurringClassService {
       const isOndemand = input.schedulingMode === SchedulingMode.ON_DEMAND;
       const instanceWeeks = isOndemand ? 0 : input.generateInstancesForWeeks;
 
-      const created = await SchedulingRepository.createRecurringScheduleWithInstances(
-        {
-          studentId: input.studentId,
-          teacherId: input.teacherId,
-          subjectId: input.subjectId,
-          durationMinutes: input.durationMinutes,
-          defaultStartTime: input.defaultStartTime,
-          timezone: input.timezone,
-          timezoneId: input.timezoneId,
-          effectiveFrom: input.effectiveFrom ? new Date(input.effectiveFrom) : null,
-          effectiveUntil: input.effectiveUntil ? new Date(input.effectiveUntil) : null,
-          days: input.days,
-          classType: input.classType ?? undefined,
-          generateInstancesForWeeks: instanceWeeks ?? undefined,
-          quotaDeducted: false,
-          hourlyRate: input.hourlyRate ?? null,
-          rateCurrency: input.rateCurrency ?? null,
-          quotaId: input.quotaId ?? null,
-          earmarkedClasses: input.earmarkedClasses ?? null,
-          schedulingMode: input.schedulingMode ?? SchedulingMode.NUMBER_OF_CLASSES,
-          generationHorizonWeeks: input.generationHorizonWeeks ?? null,
-          ondemandNoCreditsOutcome: input.ondemandNoCreditsOutcome ?? null,
+      const recurringScheduleInput = {
+        studentId: input.studentId,
+        teacherId: input.teacherId,
+        subjectId: input.subjectId,
+        durationMinutes: input.durationMinutes,
+        defaultStartTime: input.defaultStartTime,
+        timezone: input.timezone,
+        timezoneId: input.timezoneId,
+        effectiveFrom: input.effectiveFrom ? new Date(input.effectiveFrom) : null,
+        effectiveUntil: input.effectiveUntil ? new Date(input.effectiveUntil) : null,
+        days: input.days,
+        classType: input.classType ?? undefined,
+        generateInstancesForWeeks: instanceWeeks ?? undefined,
+        quotaDeducted: false,
+        hourlyRate: input.hourlyRate ?? null,
+        rateCurrency: input.rateCurrency ?? null,
+        quotaId: input.quotaId ?? null,
+        earmarkedClasses: input.earmarkedClasses ?? null,
+        schedulingMode: input.schedulingMode ?? SchedulingMode.NUMBER_OF_CLASSES,
+        generationHorizonWeeks: input.generationHorizonWeeks ?? null,
+        ondemandNoCreditsOutcome: input.ondemandNoCreditsOutcome ?? null,
+      };
+
+      const meeting = await EffectiveMeetingService.resolveForNewBooking(input.teacherId, {
+        recurringScheduleId: null,
+        tErrors,
+        tx,
+      });
+
+      const rawData = await SchedulingRepository.fetchRawRateData(tx, {
+        hourlyRate: recurringScheduleInput.hourlyRate,
+        rateCurrency: recurringScheduleInput.rateCurrency,
+        subjectId: recurringScheduleInput.subjectId,
+        teacherId: recurringScheduleInput.teacherId,
+      });
+
+      const resolvedRate = resolveClassRate({
+        classInstance: {
+          isRateOverridden: false,
+          rateAmount: null,
+          rateCurrency: null,
         },
+        recurringSchedule: rawData.recurringSchedule,
+        subject: rawData.subject,
+        teacher: rawData.teacher,
+      });
+
+      const rateSnapshot: RateSnapshot = {
+        rateAmount: resolvedRate.hourlyRate,
+        rateCurrency: resolvedRate.currency,
+        rateSource: resolvedRate.source,
+      };
+
+      const created = await SchedulingRepository.createRecurringScheduleWithInstances(
+        recurringScheduleInput,
+        meeting.joinUrl,
+        rateSnapshot,
         tx
       );
 

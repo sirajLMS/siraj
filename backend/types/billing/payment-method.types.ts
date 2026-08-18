@@ -1,3 +1,9 @@
+import type {
+  supportedMobileWallets,
+  supportedOnlineAccounts,
+  supportedPaymentLinks,
+  userPaymentMethods,
+} from "@/backend/db/schema";
 import type { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import type { LocalizedString } from "@/shared/types";
 
@@ -82,51 +88,23 @@ export type PaymentMethodTransactionSnapshot = {
 
 // ============================================================================
 // `user_payment_methods` — live/mutable saved methods
-//
-// NOTE: the Drizzle table does not exist yet (created in Phase 2), so these
-// types are defined explicitly per the spec rather than via `$inferSelect`.
-// Once Phase 2 lands the table, these can be refactored to derive from the
-// schema the way `InvoiceSelectType`/`PaymentSelectType` do in billing.types.ts.
 // ============================================================================
 
-export type UserPaymentMethodSelectType = {
-  readonly id: string;
-  readonly userId: string;
-  readonly type: PaymentMethodType;
-  readonly direction: PaymentDirection;
-  readonly isDefault: boolean;
-  readonly label: string | null;
-  readonly details: PaymentMethodDetails;
-  readonly verifiedAt: Date | null;
-  readonly verifiedByUserId: string | null;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-};
+export type UserPaymentMethodSelectType = typeof userPaymentMethods.$inferSelect;
+export type UserPaymentMethodInsertType = typeof userPaymentMethods.$inferInsert;
 
-export type UserPaymentMethodInsertType = {
-  readonly id?: string;
-  readonly userId: string;
-  readonly type: PaymentMethodType;
-  readonly direction: PaymentDirection;
-  readonly isDefault: boolean;
-  readonly label?: string | null;
-  readonly details: PaymentMethodDetails;
-  readonly verifiedAt?: Date | null;
-  readonly verifiedByUserId?: string | null;
-  readonly createdAt?: Date;
-  readonly updatedAt?: Date;
-};
-
-export type UserPaymentMethodReturnType = Omit<UserPaymentMethodSelectType, never> & {
-  // Reapply enums (compile-time only; runtime value already matches)
+export type UserPaymentMethodReturnType = Omit<UserPaymentMethodSelectType, "type" | "direction"> & {
   type: PaymentMethodType;
   direction: PaymentDirection;
 };
 
 export type UserPaymentMethodSubmitInput = Omit<
   UserPaymentMethodInsertType,
-  "id" | "createdAt" | "updatedAt" | "verifiedAt" | "verifiedByUserId"
->;
+  "id" | "createdAt" | "updatedAt" | "verifiedAt" | "verifiedByUserId" | "type" | "direction"
+> & {
+  type: PaymentMethodType;
+  direction: PaymentDirection;
+};
 
 export type UpdateUserPaymentMethodInput = Partial<Omit<UserPaymentMethodSubmitInput, "userId" | "type">>;
 
@@ -146,52 +124,26 @@ export type PaymentMethodDefaults = {
 // `supported_payment_links`    — payment-link catalog
 // `supported_online_accounts`  — online account catalog
 //
-// As with `user_payment_methods`, the Drizzle tables for these do not exist
-// yet (Phase 2), so the types are defined explicitly per the spec. `ReturnType`
-// variants reapply enum typing on top of the `SelectType` shape.
+// `ReturnType` variants reapply enum typing on top of the `SelectType` shape.
 // ============================================================================
 
 // ---------------------------------------------------------------------------
 // supported_mobile_wallets
 // ---------------------------------------------------------------------------
 
-export type SupportedMobileWalletSelectType = {
-  readonly id: string;
-  readonly slug: string;
-  readonly name: LocalizedString;
-  readonly description: LocalizedString | null;
-  readonly instructions: LocalizedString | null;
-  readonly countryCode: string | null;
-  readonly currencyCode: string | null;
-  readonly phoneRegion: string | null;
-  readonly supportedDirections: PaymentDirection;
-  readonly logoUrl: string | null;
-  readonly isActive: boolean;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-};
+export type SupportedMobileWalletSelectType = typeof supportedMobileWallets.$inferSelect;
+export type SupportedMobileWalletInsertType = typeof supportedMobileWallets.$inferInsert;
 
-export type SupportedMobileWalletInsertType = {
-  readonly id?: string;
-  readonly slug: string;
-  readonly name: LocalizedString;
-  readonly description?: LocalizedString | null;
-  readonly instructions?: LocalizedString | null;
-  readonly countryCode?: string | null;
-  readonly currencyCode?: string | null;
-  readonly phoneRegion?: string | null;
-  readonly supportedDirections?: PaymentDirection;
-  readonly logoUrl?: string | null;
-  readonly isActive?: boolean;
-  readonly createdAt?: Date;
-  readonly updatedAt?: Date;
-};
-
-export type SupportedMobileWalletReturnType = Omit<SupportedMobileWalletSelectType, never> & {
+export type SupportedMobileWalletReturnType = Omit<SupportedMobileWalletSelectType, "supportedDirections"> & {
   supportedDirections: PaymentDirection;
 };
 
-export type SupportedMobileWalletSubmitInput = Omit<SupportedMobileWalletInsertType, "id" | "createdAt" | "updatedAt">;
+export type SupportedMobileWalletSubmitInput = Omit<
+  SupportedMobileWalletInsertType,
+  "id" | "createdAt" | "updatedAt" | "supportedDirections"
+> & {
+  supportedDirections: PaymentDirection;
+};
 
 export type UpdateSupportedMobileWalletInput = Partial<SupportedMobileWalletSubmitInput>;
 
@@ -199,41 +151,19 @@ export type UpdateSupportedMobileWalletInput = Partial<SupportedMobileWalletSubm
 // supported_payment_links
 // ---------------------------------------------------------------------------
 
-export type SupportedPaymentLinkSelectType = {
-  readonly id: string;
-  readonly slug: string;
-  readonly name: LocalizedString;
-  readonly description: LocalizedString | null;
-  readonly instructions: LocalizedString | null;
-  readonly urlAllowlist: readonly string[];
-  readonly urlExample: string | null;
-  readonly supportedDirections: PaymentDirection;
-  readonly logoUrl: string | null;
-  readonly isActive: boolean;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-};
+export type SupportedPaymentLinkSelectType = typeof supportedPaymentLinks.$inferSelect;
+export type SupportedPaymentLinkInsertType = typeof supportedPaymentLinks.$inferInsert;
 
-export type SupportedPaymentLinkInsertType = {
-  readonly id?: string;
-  readonly slug: string;
-  readonly name: LocalizedString;
-  readonly description?: LocalizedString | null;
-  readonly instructions?: LocalizedString | null;
-  readonly urlAllowlist: readonly string[];
-  readonly urlExample?: string | null;
-  readonly supportedDirections?: PaymentDirection;
-  readonly logoUrl?: string | null;
-  readonly isActive?: boolean;
-  readonly createdAt?: Date;
-  readonly updatedAt?: Date;
-};
-
-export type SupportedPaymentLinkReturnType = Omit<SupportedPaymentLinkSelectType, never> & {
+export type SupportedPaymentLinkReturnType = Omit<SupportedPaymentLinkSelectType, "supportedDirections"> & {
   supportedDirections: PaymentDirection;
 };
 
-export type SupportedPaymentLinkSubmitInput = Omit<SupportedPaymentLinkInsertType, "id" | "createdAt" | "updatedAt">;
+export type SupportedPaymentLinkSubmitInput = Omit<
+  SupportedPaymentLinkInsertType,
+  "id" | "createdAt" | "updatedAt" | "supportedDirections"
+> & {
+  supportedDirections: PaymentDirection;
+};
 
 export type UpdateSupportedPaymentLinkInput = Partial<SupportedPaymentLinkSubmitInput>;
 
@@ -241,44 +171,23 @@ export type UpdateSupportedPaymentLinkInput = Partial<SupportedPaymentLinkSubmit
 // supported_online_accounts
 // ---------------------------------------------------------------------------
 
-export type SupportedOnlineAccountSelectType = {
-  readonly id: string;
-  readonly slug: string;
-  readonly name: LocalizedString;
-  readonly description: LocalizedString | null;
-  readonly instructions: LocalizedString | null;
-  readonly identifierKind: IdentifierKind;
-  readonly identifierLabel: LocalizedString;
-  readonly supportedDirections: PaymentDirection;
-  readonly logoUrl: string | null;
-  readonly isActive: boolean;
-  readonly createdAt: Date;
-  readonly updatedAt: Date;
-};
+export type SupportedOnlineAccountSelectType = typeof supportedOnlineAccounts.$inferSelect;
+export type SupportedOnlineAccountInsertType = typeof supportedOnlineAccounts.$inferInsert;
 
-export type SupportedOnlineAccountInsertType = {
-  readonly id?: string;
-  readonly slug: string;
-  readonly name: LocalizedString;
-  readonly description?: LocalizedString | null;
-  readonly instructions?: LocalizedString | null;
-  readonly identifierKind: IdentifierKind;
-  readonly identifierLabel?: LocalizedString;
-  readonly supportedDirections?: PaymentDirection;
-  readonly logoUrl?: string | null;
-  readonly isActive?: boolean;
-  readonly createdAt?: Date;
-  readonly updatedAt?: Date;
-};
-
-export type SupportedOnlineAccountReturnType = Omit<SupportedOnlineAccountSelectType, never> & {
+export type SupportedOnlineAccountReturnType = Omit<
+  SupportedOnlineAccountSelectType,
+  "identifierKind" | "supportedDirections"
+> & {
   identifierKind: IdentifierKind;
   supportedDirections: PaymentDirection;
 };
 
 export type SupportedOnlineAccountSubmitInput = Omit<
   SupportedOnlineAccountInsertType,
-  "id" | "createdAt" | "updatedAt"
->;
+  "id" | "createdAt" | "updatedAt" | "identifierKind" | "supportedDirections"
+> & {
+  identifierKind: IdentifierKind;
+  supportedDirections: PaymentDirection;
+};
 
 export type UpdateSupportedOnlineAccountInput = Partial<SupportedOnlineAccountSubmitInput>;

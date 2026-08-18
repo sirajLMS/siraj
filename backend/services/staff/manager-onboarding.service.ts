@@ -4,33 +4,14 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { UserOnboardingService } from "@/backend/services/user/user-onboarding.service";
 import type {
   DBTransaction,
+  ManagerOnboardingInput,
+  ManagerOnboardingResult,
   StaffProfileCreateResult,
   UserCreateCoreInput,
   UserCreateProfileFieldsInput,
   UserReturnType,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
-
-export interface ManagerOnboardingInput {
-  readonly name: string;
-  readonly email: string;
-  readonly password: string;
-  readonly avatarUrl?: string | null;
-  readonly phone?: string | null;
-  readonly accountType: ManagerAccountType;
-  readonly timezone?: string | null;
-  readonly displayCurrency?: string | null;
-}
-
-export interface ManagerOnboardingResult {
-  readonly id: string;
-  readonly userId: string;
-  readonly staffProfileId: string;
-  readonly name: string;
-  readonly email: string;
-  readonly status: string;
-  readonly assignedGroupSlug: string;
-}
 
 function resolveTargetGroupSlug(accountType: ManagerAccountType): SystemPermissionGroupSlug {
   if (accountType === ManagerAccountType.supervisor) {

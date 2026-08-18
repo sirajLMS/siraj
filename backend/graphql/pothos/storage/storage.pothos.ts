@@ -1,18 +1,19 @@
+import { FileSortField, FileTypes, UploadType } from "@/backend/enum/storage";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { OrderSortDirectionPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
-import * as Types from "@/backend/types";
+import type * as Types from "@/backend/types";
 
 // File type enum
-export const FileTypePothosObject = gqlSchemaBuilder.enumType(Types.FileTypes, {
+export const FileTypePothosObject = gqlSchemaBuilder.enumType(FileTypes, {
   name: "FileType",
 });
 
 // Upload type enum
-export const UploadTypePothosObject = gqlSchemaBuilder.enumType(Types.UploadType, {
+export const UploadTypePothosObject = gqlSchemaBuilder.enumType(UploadType, {
   name: "UploadType",
 });
 
-export const SortByPothosObject = gqlSchemaBuilder.enumType(Types.FileSortField, {
+export const SortByPothosObject = gqlSchemaBuilder.enumType(FileSortField, {
   name: "FileSortField",
 });
 
@@ -151,11 +152,7 @@ export const ListFileInputPothosObject = gqlSchemaBuilder
 
 // File type breakdown for storage stats
 export const FileTypeBreakdownPothosObject = gqlSchemaBuilder
-  .objectRef<{
-    type: string;
-    count: number;
-    size: bigint;
-  }>("FileTypeBreakdown")
+  .objectRef<Types.FileTypeBreakdown>("FileTypeBreakdown")
   .implement({
     fields: t => ({
       type: t.exposeString("type"),
@@ -223,7 +220,7 @@ export const FileOperationResultPothosObject = gqlSchemaBuilder
 
 // Bulk operation failure object
 export const BulkOperationFailurePothosObject = gqlSchemaBuilder
-  .objectRef<{ path: string; error: string }>("BulkOperationFailure")
+  .objectRef<Types.BulkOperationFailure>("BulkOperationFailure")
   .implement({
     fields: t => ({
       path: t.exposeString("path"),

@@ -10,9 +10,9 @@ import { StorageUtils } from "@/backend/utils";
 export interface DeletePermissionOptions {
   force: boolean;
   usageCheck?: { isInUse: boolean; deleteBlockReason: string | null | undefined };
-  dbFile?: Types.FileEntity;
-  dbDirectory?: Types.DirectoryEntity;
-  parentDir?: Types.DirectoryEntity;
+  dbFile?: Types.FileSelectType;
+  dbDirectory?: Types.DirectorySelectType;
+  parentDir?: Types.DirectorySelectType;
 }
 
 /**
@@ -43,8 +43,8 @@ export function validateDeletePermissions(options: DeletePermissionOptions): voi
  */
 export async function prepareDeleteFile(filePath: string): Promise<{
   error?: string;
-  dbFile?: Types.FileEntity | null;
-  parentDir?: Types.DirectoryEntity | null;
+  dbFile?: Types.FileSelectType | null;
+  parentDir?: Types.DirectorySelectType | null;
 }> {
   const validationError = StorageUtils.validatePath(filePath);
   if (validationError) {
@@ -122,17 +122,17 @@ export async function loadDeleteEntities(paths: string[], force: boolean) {
     force ? Promise.resolve([]) : checkFileUsages(paths),
   ]);
 
-  const dbFileMap = new Map<string, Types.FileEntity>();
+  const dbFileMap = new Map<string, Types.FileSelectType>();
   for (const file of dbFiles) {
     dbFileMap.set(file.path, file);
   }
 
-  const dbDirectoryMap = new Map<string, Types.DirectoryEntity>();
+  const dbDirectoryMap = new Map<string, Types.DirectorySelectType>();
   for (const dir of dbDirectories) {
     dbDirectoryMap.set(dir.path, dir);
   }
 
-  const dbParentDirMap = new Map<string, Types.DirectoryEntity>();
+  const dbParentDirMap = new Map<string, Types.DirectorySelectType>();
   for (const dir of dbParentDirs) {
     dbParentDirMap.set(dir.path, dir);
   }
@@ -151,9 +151,9 @@ export async function loadDeleteEntities(paths: string[], force: boolean) {
 export interface DeleteFnParams {
   itemPath: string;
   force: boolean;
-  dbFile?: Types.FileEntity;
-  dbDirectory?: Types.DirectoryEntity;
-  parentDir?: Types.DirectoryEntity;
+  dbFile?: Types.FileSelectType;
+  dbDirectory?: Types.DirectorySelectType;
+  parentDir?: Types.DirectorySelectType;
   usageCheck?: { isInUse: boolean; deleteBlockReason: string | null | undefined };
 }
 

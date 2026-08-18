@@ -3,7 +3,12 @@ import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers/teacher-availability.repository";
 import { ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
-import type { AvailableClassSlot, DBTransaction } from "@/backend/types";
+import type {
+  AssertSchedulePatternAvailableInput,
+  AvailableClassSlot,
+  DBTransaction,
+  SlotAvailabilityInput,
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 type ReadExecutor = DBTransaction | typeof db;
@@ -17,32 +22,6 @@ const isDbTransaction = (_tx: ReadExecutor): _tx is DBTransaction => true;
 // Helper to narrow `ReadExecutor` to `DBTransaction` for repository calls.
 const txParam = (tx?: ReadExecutor): DBTransaction | undefined =>
   tx !== undefined && isDbTransaction(tx) ? tx : undefined;
-
-export interface SlotAvailabilityInput {
-  studentId: string;
-  teacherId: string;
-  startAt: Date;
-  endAt: Date;
-  ignoreInstanceIds?: string[];
-  locale?: string;
-}
-
-export interface AssertSchedulePatternAvailableOptions {
-  ignoreInstanceIds?: string[];
-  locale?: string;
-  tx?: ReadExecutor;
-  durationMinutes?: number;
-  timezone?: string;
-}
-
-export interface AssertSchedulePatternAvailableInput {
-  studentId: string;
-  teacherId: string;
-  days: { dayOfWeek: string; startTime: string }[];
-  startDate: Date;
-  endDate: Date;
-  options?: AssertSchedulePatternAvailableOptions;
-}
 
 export namespace AvailabilityService {
   export const isSlotAvailable = async (input: SlotAvailabilityInput, tx?: ReadExecutor): Promise<boolean> => {

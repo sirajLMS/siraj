@@ -1,6 +1,6 @@
-import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import * as Pothos from "@/backend/graphql/pothos";
+import { StorageService } from "@/backend/services/storage";
 import { getStorageService } from "@/backend/storage/storage.service";
 
 // IMPORTANT: Service layer must verify user has access to the requested storage path
@@ -119,6 +119,6 @@ gqlSchemaBuilder.queryFields(t => ({
         required: true,
       }),
     },
-    resolve: async (_parent, { input }) => await StorageDbRepository.checkFileUsage(input),
+    resolve: async (_parent, { input }) => await StorageService.checkFileUsage(input),
   }),
 }));

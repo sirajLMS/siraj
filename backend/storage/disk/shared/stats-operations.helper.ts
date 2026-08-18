@@ -1,11 +1,11 @@
-import type * as Types from "@/backend/types";
+import type { FileTypes } from "@/backend/enum/storage";
 
 /**
  * Shared logic for aggregating file types and sizes into a map
  */
 export function updateFileTypeMap(
-  fileTypeMap: Map<Types.FileTypes, { count: number; size: bigint }>,
-  fileType: Types.FileTypes,
+  fileTypeMap: Map<FileTypes, { count: number; size: bigint }>,
+  fileType: FileTypes,
   size: bigint
 ): void {
   const current = fileTypeMap.get(fileType) ?? {
@@ -22,8 +22,8 @@ export function updateFileTypeMap(
  * Shared logic for converting a file type map to the breakdown format
  */
 export function formatFileTypeBreakdown(
-  fileTypeMap: Map<Types.FileTypes, { count: number; size: bigint }>
-): Array<{ type: Types.FileTypes; count: number; size: bigint }> {
+  fileTypeMap: Map<FileTypes, { count: number; size: bigint }>
+): Array<{ type: FileTypes; count: number; size: bigint }> {
   return Array.from(fileTypeMap.entries()).map(([type, data]) => ({
     type,
     count: data.count,
@@ -34,6 +34,6 @@ export function formatFileTypeBreakdown(
 /**
  * Shared logic for calculating total files from the map
  */
-export function calculateTotalFiles(fileTypeMap: Map<Types.FileTypes, { count: number; size: bigint }>): number {
+export function calculateTotalFiles(fileTypeMap: Map<FileTypes, { count: number; size: bigint }>): number {
   return Array.from(fileTypeMap.values()).reduce((sum, data) => sum + data.count, 0);
 }

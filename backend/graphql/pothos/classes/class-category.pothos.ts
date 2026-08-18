@@ -1,11 +1,11 @@
-import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-category.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { ClassCategoryService } from "@/backend/services";
 import type { ClassCategoryReturnType } from "@/backend/types";
 
 export const ClassCategoryPothosObject = gqlSchemaBuilder
   .loadableObjectRef<ClassCategoryReturnType, string>("ClassCategory", {
     load: async (ids: string[], ctx) => {
-      const categories = await ClassCategoryRepository.loadByIds(ids);
+      const categories = await ClassCategoryService.loadByIds(ids);
       const map = new Map(categories.map(c => [c.id, c]));
       const tErrors = ctx.t().errorsTranslations;
       return ids.map(id => map.get(id) ?? new Error(tErrors.categoryNotFound(id)));

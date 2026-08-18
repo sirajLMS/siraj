@@ -1,11 +1,12 @@
 import type { invoiceFiles, parentFiles, storageDirectories, storageFiles } from "@/backend/db/schema/storage/storage";
 import type { OrderSortDirection } from "@/backend/enum";
+import type { FileSortField, FileTypes, UploadType } from "@/backend/enum/storage/storage.enum";
 // Type aliases to match Kotlin entities
-export type FileEntity = typeof storageFiles.$inferSelect;
-export type FileEntityInput = typeof storageFiles.$inferInsert;
+export type FileSelectType = typeof storageFiles.$inferSelect;
+export type FileInsertType = typeof storageFiles.$inferInsert;
 
-export type DirectoryEntity = typeof storageDirectories.$inferSelect;
-export type DirectoryEntityInput = typeof storageDirectories.$inferInsert;
+export type DirectorySelectType = typeof storageDirectories.$inferSelect;
+export type DirectoryInsertType = typeof storageDirectories.$inferInsert;
 
 export interface DirectoryPermissions {
   allowUploads: boolean;
@@ -54,7 +55,7 @@ export type BucketDirectory = {
 };
 
 export type DirectoryInfo = StorageObject &
-  Omit<DirectoryEntity, keyof DirectoryPermissions | "id"> &
+  Omit<DirectorySelectType, keyof DirectoryPermissions | "id"> &
   BucketDirectory & {
     path: string;
     name: string;
@@ -82,7 +83,7 @@ export type BucketFile = {
   isPublic: boolean;
 };
 
-export type FileInfo = Omit<FileEntity, "id"> &
+export type FileInfo = Omit<FileSelectType, "id"> &
   BucketFile &
   StorageObject & {
     path: string;
@@ -101,24 +102,6 @@ export type StorageObjectList = {
   offset: number;
   limit: number;
 };
-
-export enum FileTypes {
-  IMAGE = "IMAGE",
-  VIDEO = "VIDEO",
-  AUDIO = "AUDIO",
-  DOCUMENT = "DOCUMENT",
-  ARCHIVE = "ARCHIVE",
-  FONT = "FONT",
-  OTHER = "OTHER",
-}
-
-export enum FileSortField {
-  NAME = "NAME",
-  SIZE = "SIZE",
-  TYPE = "TYPE",
-  CREATED = "CREATED",
-  MODIFIED = "MODIFIED",
-}
 
 // Input types
 /** Path traversal protection is enforced server-side — never trust client-provided paths without sanitization */
@@ -238,12 +221,17 @@ export interface FileUsageResult {
   deleteBlockReason?: string;
 }
 
+export type BulkOperationFailure = {
+  path: string;
+  error: string;
+};
+
 export interface BulkOperationResult {
   success: boolean;
   message: string;
   successCount: number;
   failureCount: number;
-  failures: Array<{ path: string; error: string }>;
+  failures: BulkOperationFailure[];
   successfulItems: Array<FileInfo | DirectoryInfo>;
 }
 
@@ -253,14 +241,16 @@ export interface FileUploadResult {
   data?: FileInfo | null;
 }
 
+export type FileTypeBreakdown = {
+  type: FileTypes;
+  count: number;
+  size: bigint;
+};
+
 export interface StorageStats {
   totalFiles: number;
   totalSize: bigint;
-  fileTypeBreakdown: Array<{
-    type: FileTypes;
-    count: number;
-    size: bigint;
-  }>;
+  fileTypeBreakdown: FileTypeBreakdown[];
   directoryCount: number;
 }
 
@@ -279,10 +269,6 @@ export type BlobMetadata = {
  * - SIGNED_URL: Traditional flow (GCP, Local) - client uploads to signed URL
  * - VERCEL_BLOB_CLIENT: Vercel Blob flow - client uploads directly using Vercel SDK
  */
-export enum UploadType {
-  SIGNED_URL = "SIGNED_URL",
-  VERCEL_BLOB_CLIENT = "VERCEL_BLOB_CLIENT",
-}
 
 /**
  * Upload preparation result

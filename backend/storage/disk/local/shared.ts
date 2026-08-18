@@ -9,7 +9,7 @@ import { extToMime } from "@/shared/utils/storage.utils";
 export async function processFile(
   ctx: LocalContext,
   filePath: string,
-  dbFile: Types.FileEntity | undefined
+  dbFile: Types.FileSelectType | undefined
 ): Promise<Types.FileInfo> {
   const absoluteFilePath = getAbsolutePath(ctx.basePath, filePath);
   const stats = await fs.stat(absoluteFilePath);
@@ -39,7 +39,7 @@ export async function processFile(
 export async function processDirectory(
   ctx: LocalContext,
   dirPath: string,
-  dbDir: Types.DirectoryEntity | undefined
+  dbDir: Types.DirectorySelectType | undefined
 ): Promise<Types.DirectoryInfo> {
   const absoluteDirPath = getAbsolutePath(ctx.basePath, dirPath);
   const stats = await fs.stat(absoluteDirPath);

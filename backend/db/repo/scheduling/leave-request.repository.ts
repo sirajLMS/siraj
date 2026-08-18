@@ -1,27 +1,13 @@
 import { eq, inArray } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { leaveRequests } from "@/backend/db/schema";
-import type { LeaveRequesterType, LeaveRequestStatus } from "@/backend/enum";
-import type { DBTransaction } from "@/backend/types";
-
-export type LeaveRequestRow = typeof leaveRequests.$inferSelect;
-
-export type CreateLeaveRequestInput = {
-  classInstanceId: string;
-  requestedByUserId: string;
-  requesterType: LeaveRequesterType;
-  reason: string;
-  status: LeaveRequestStatus;
-  createdAt: Date;
-  processedAt: Date | null;
-  processedByUserId: string | null;
-};
+import type { CreateLeaveRequestInput, DBTransaction, LeaveRequestSelectType } from "@/backend/types";
 
 export namespace LeaveRequestRepository {
   export async function findByClassInstanceIds(
     classInstanceIds: string[],
     tx?: DBTransaction
-  ): Promise<LeaveRequestRow[]> {
+  ): Promise<LeaveRequestSelectType[]> {
     if (classInstanceIds.length === 0) return [];
     const executor = queryDb(tx);
     return executor.select().from(leaveRequests).where(inArray(leaveRequests.classInstanceId, classInstanceIds));
@@ -30,13 +16,13 @@ export namespace LeaveRequestRepository {
   export async function createManyIfMissing(
     inputs: readonly CreateLeaveRequestInput[],
     tx?: DBTransaction
-  ): Promise<LeaveRequestRow[]> {
+  ): Promise<LeaveRequestSelectType[]> {
     if (inputs.length === 0) return [];
     const executor = tx ?? db;
     const classInstanceIds = inputs.map(i => i.classInstanceId);
     const existing = await findByClassInstanceIds(classInstanceIds, tx);
     const existingByClass = new Map(existing.map(r => [r.classInstanceId, r]));
-    const results: LeaveRequestRow[] = [...existing];
+    const results: LeaveRequestSelectType[] = [...existing];
 
     const processNext = async (index: number): Promise<void> => {
       if (index >= inputs.length) return;
@@ -60,7 +46,7 @@ export namespace LeaveRequestRepository {
   export async function findByClassInstanceId(
     classInstanceId: string,
     tx?: DBTransaction
-  ): Promise<LeaveRequestRow | null> {
+  ): Promise<LeaveRequestSelectType | null> {
     const executor = queryDb(tx);
     const [row] = await executor
       .select()

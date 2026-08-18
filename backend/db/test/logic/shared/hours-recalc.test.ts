@@ -5,7 +5,7 @@ import { db } from "@/backend/db";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { parents, recurringScheduleDays, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
-import type { ParentEntity, StudentSelectType, TeacherSelectType, UserReturnType } from "@/backend/types";
+import type { ParentSelectType, StudentSelectType, TeacherSelectType, UserReturnType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -13,7 +13,7 @@ describe("hoursPerWeek Recalculation Triggers", () => {
   let parentUser: Pick<UserReturnType, "id"> | null = null;
   let teacherUser: Pick<UserReturnType, "id"> | null = null;
   let studentUser: Pick<UserReturnType, "id"> | null = null;
-  let testParent: ParentEntity | null = null;
+  let testParent: ParentSelectType | null = null;
   let testTeacher: TeacherSelectType | null = null;
   let testStudent: StudentSelectType | null = null;
 

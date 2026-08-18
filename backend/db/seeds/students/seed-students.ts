@@ -14,7 +14,7 @@ import {
 import { StudentStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { StudentSeedService } from "@/backend/services";
-import type { ParentEntity, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
+import type { ParentSelectType, StudentSelectType, TeacherSelectType, UserSelectType } from "@/backend/types";
 
 const DEMO_STUDENTS = [
   { name: "Demo Student", idempotencyKey: "demo_student_1", timezoneOverride: null as string | null, avatarIndex: 1 },
@@ -48,7 +48,7 @@ interface StudentSeedContext {
 async function prepareStudentSeedContext(
   users: UserSelectType[],
   seedConfig: SeedConfig,
-  parentsList: ParentEntity[],
+  parentsList: ParentSelectType[],
   teachersList: TeacherSelectType[]
 ): Promise<StudentSeedContext> {
   if (!parentsList?.length) {
@@ -94,7 +94,7 @@ interface StudentRowSpec {
 function buildStudentRowSpec(
   index: number,
   ctx: StudentSeedContext,
-  parentsList: ParentEntity[],
+  parentsList: ParentSelectType[],
   teachersList: TeacherSelectType[]
 ): StudentRowSpec {
   const parent = parentsList[index % parentsList.length];
@@ -150,7 +150,7 @@ async function upsertStudentRow(spec: StudentRowSpec, assignmentDate: Date): Pro
 }
 
 export async function seedOrGet(
-  parentsList: ParentEntity[],
+  parentsList: ParentSelectType[],
   teachersList: TeacherSelectType[],
   config?: SeedConfig,
   users: UserSelectType[] = []

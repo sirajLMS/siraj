@@ -22,27 +22,30 @@ import { getServerTranslations } from "@/shared/locale";
 
 export namespace StorageDbRepository {
   // File operations
-  export const fileById = async (id: string): Promise<StorageTypes.FileEntity | null> => {
+  export const fileById = async (id: string): Promise<StorageTypes.FileSelectType | null> => {
     const results = await db.select().from(storageFiles).where(eq(storageFiles.id, id)).limit(1);
     return results[0] ?? null;
   };
 
-  export const fileByPath = async (path: string): Promise<StorageTypes.FileEntity | null> => {
+  export const fileByPath = async (path: string): Promise<StorageTypes.FileSelectType | null> => {
     const results = await db.select().from(storageFiles).where(eq(storageFiles.path, path)).limit(1);
     return results[0] ?? null;
   };
 
-  export const filesByIds = async (ids: string[]): Promise<StorageTypes.FileEntity[]> => {
+  export const filesByIds = async (ids: string[]): Promise<StorageTypes.FileSelectType[]> => {
     if (ids.length === 0) return [];
     return await db.select().from(storageFiles).where(inArray(storageFiles.id, ids));
   };
 
-  export const filesByPaths = async (paths: string[]): Promise<StorageTypes.FileEntity[]> => {
+  export const filesByPaths = async (paths: string[]): Promise<StorageTypes.FileSelectType[]> => {
     if (paths.length === 0) return [];
     return await db.select().from(storageFiles).where(inArray(storageFiles.path, paths));
   };
 
-  export const createFile = async (path: string, isProtected: boolean = false): Promise<StorageTypes.FileEntity> => {
+  export const createFile = async (
+    path: string,
+    isProtected: boolean = false
+  ): Promise<StorageTypes.FileSelectType> => {
     const results = await db
       .insert(storageFiles)
       .values({ path, isProtected })
@@ -55,8 +58,8 @@ export namespace StorageDbRepository {
   };
 
   export const updateFile = async (
-    file: StorageTypes.FileEntityInput & { id: string }
-  ): Promise<StorageTypes.FileEntity | undefined> => {
+    file: StorageTypes.FileInsertType & { id: string }
+  ): Promise<StorageTypes.FileSelectType | undefined> => {
     const results = await db
       .update(storageFiles)
       .set({
@@ -79,7 +82,7 @@ export namespace StorageDbRepository {
   };
 
   // Directory operations
-  export const directoryByPath = async (path: string): Promise<StorageTypes.DirectoryEntity | null> => {
+  export const directoryByPath = async (path: string): Promise<StorageTypes.DirectorySelectType | null> => {
     try {
       const result = await db.select().from(storageDirectories).where(eq(storageDirectories.path, path)).limit(1);
       return result[0] ?? null;
@@ -89,7 +92,7 @@ export namespace StorageDbRepository {
     }
   };
 
-  export const directoriesByParentPath = async (parentPath?: string): Promise<StorageTypes.DirectoryEntity[]> => {
+  export const directoriesByParentPath = async (parentPath?: string): Promise<StorageTypes.DirectorySelectType[]> => {
     if (parentPath) {
       return await db
         .select()
@@ -99,21 +102,21 @@ export namespace StorageDbRepository {
     return await db.select().from(storageDirectories).limit(500);
   };
 
-  export const directoriesByPaths = async (paths: string[]): Promise<StorageTypes.DirectoryEntity[]> => {
+  export const directoriesByPaths = async (paths: string[]): Promise<StorageTypes.DirectorySelectType[]> => {
     if (paths.length === 0) return [];
     return await db.select().from(storageDirectories).where(inArray(storageDirectories.path, paths));
   };
 
   export const createDirectory = async (
     input: StorageTypes.FolderCreateInput
-  ): Promise<StorageTypes.DirectoryEntity> => {
+  ): Promise<StorageTypes.DirectorySelectType> => {
     const record = await ensureDirectoryRecord(input);
     return record;
   };
 
   export const ensureDirectoryRecord = async (
     input: StorageTypes.FolderCreateInput
-  ): Promise<StorageTypes.DirectoryEntity> => {
+  ): Promise<StorageTypes.DirectorySelectType> => {
     const permissions = input.permissions ?? {
       allowUploads: true,
       allowDelete: true,
@@ -148,8 +151,8 @@ export namespace StorageDbRepository {
   };
 
   export const updateDirectory = async (
-    directory: StorageTypes.DirectoryEntity
-  ): Promise<StorageTypes.DirectoryEntity | undefined> => {
+    directory: StorageTypes.DirectorySelectType
+  ): Promise<StorageTypes.DirectorySelectType | undefined> => {
     const [updated] = await db
       .update(storageDirectories)
       .set({
@@ -371,7 +374,7 @@ export namespace StorageDbRepository {
     }
   };
 
-  interface JunctionInsertParams {
+  export interface JunctionInsertParams {
     table: string;
     fileId: string;
     refId: string;
@@ -381,8 +384,9 @@ export namespace StorageDbRepository {
 
   /**
    * Helper to perform the actual junction table insertion in a type-safe way.
+   * Exported so StorageService can call it from the service layer.
    */
-  async function performJunctionInsert(params: JunctionInsertParams, locale?: string): Promise<void> {
+  export async function performJunctionInsert(params: JunctionInsertParams, locale?: string): Promise<void> {
     const { table, fileId, refId, type, createdAt } = params;
     switch (table) {
       case "users":

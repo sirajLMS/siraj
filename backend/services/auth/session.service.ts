@@ -1,4 +1,4 @@
-import { SessionRepository } from "@/backend/db/repo/shared";
+import { SessionRepository, setSessionRedisServiceFactory } from "@/backend/db/repo/shared";
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { verifyToken } from "@/backend/lib/auth/jwt";
@@ -7,17 +7,16 @@ import { logger } from "@/backend/lib/logger";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
+import { getRedisService } from "@/backend/services/redis/RedisServiceFactory";
+import { SessionRedisService } from "@/backend/services/redis/SessionRedisService";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
-import type { CurrentUserProfile, SessionSelectType } from "@/backend/types";
+import type { CurrentUserProfile, LogoutUserInput, SessionInsertType, SessionSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 import { getServerTranslations } from "@/shared/locale";
 
-export type LogoutUserInput = {
-  sessionId?: string | null;
-  accessToken?: string | null;
-  ipAddress?: string | null;
-  locale?: string;
-};
+// Register the SessionRedisService factory so the session repository can
+// obtain a Redis-backed session service without importing @/backend/services.
+setSessionRedisServiceFactory(async () => new SessionRedisService(await getRedisService()));
 
 export namespace SessionService {
   /**
@@ -111,6 +110,22 @@ export namespace SessionService {
       parentId: parentId ?? null,
       nationalIdComplete,
     };
+  }
+
+  export async function findByUserId(userId: string): Promise<SessionSelectType | null> {
+    return SessionRepository.findByUserId(userId);
+  }
+
+  export async function createSession(
+    input: Omit<SessionInsertType, "lastActivity"> & { deviceType?: string; deviceName?: string; roleName?: string }
+  ): Promise<SessionSelectType> {
+    return SessionRepository.create(input);
+  }
+
+  export async function updateSession(
+    input: Omit<SessionInsertType, "lastActivity"> & { roleName?: string }
+  ): Promise<SessionSelectType> {
+    return SessionRepository.update(input);
   }
 
   /**

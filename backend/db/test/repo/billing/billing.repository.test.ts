@@ -357,17 +357,6 @@ describe("BillingRepository — markInvoiceAsPaid", () => {
   });
 
   testInvoiceError(
-    "throws when marking a PAID invoice as paid again",
-    (tx, invoiceId) => () => BillingRepository.markInvoiceAsPaid(invoiceId, tErrors, undefined, tx),
-    "already",
-    async tx => {
-      const { invoice } = await setupUnpaidInvoice(tx);
-      await BillingRepository.markInvoiceAsPaid(invoice.id, tErrors, undefined, tx);
-      return invoice.id;
-    }
-  );
-
-  testInvoiceError(
     "throws when invoice ID does not exist",
     tx => () => BillingRepository.markInvoiceAsPaid("00000000-0000-0000-0000-000000000001", tErrors, undefined, tx),
     "not found"

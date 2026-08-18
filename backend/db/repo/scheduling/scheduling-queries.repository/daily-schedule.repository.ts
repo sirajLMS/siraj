@@ -20,11 +20,6 @@ export const getAdminDashboardSchedule = async (
   input: AdminDashboardScheduleRepoInput,
   tx?: DBTransaction
 ): Promise<AdminDashboardScheduleResult> => {
-  if (!tx) {
-    const { ClassInstanceExpiryService } = await import("@/backend/services/session/class-instance-expiry.service");
-    await ClassInstanceExpiryService.processExpiredInstances({ locale: input.locale });
-  }
-
   const runner = async (t: DBTransaction): Promise<AdminDashboardScheduleResult> => {
     const { SystemSettingsRepository } = await import("@/backend/db/repo/shared/system-settings.repository");
     const { DEFAULT_MISSED_GRACE_MINUTES } = await import("@/shared/lib/schedule/schedule-instance-dashboard-status");

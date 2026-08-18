@@ -1,4 +1,3 @@
-import { StudentRepository } from "@/backend/db/repo/students";
 import { AppLanguage } from "@/backend/enum/auth/auth.enum";
 import { AppPermission } from "@/backend/enum/permissions/permission.enum";
 import { StudentStatus } from "@/backend/enum/students/student-lifecycle.enum";
@@ -6,7 +5,7 @@ import { Gender } from "@/backend/enum/users/user.enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import * as Pothos from "@/backend/graphql/pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { StudentDirectoryService } from "@/backend/services";
+import { StudentDirectoryService, StudentManagementService } from "@/backend/services";
 import * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
 
@@ -133,7 +132,7 @@ gqlSchemaBuilder.queryFields(t => ({
       id: t.arg.string({ required: true }),
     },
     resolve: async (_query, args) =>
-      await StudentRepository.findById(args.id).then(s => StudentUtils.mapEntityToDto(s)),
+      await StudentManagementService.getStudentById(args.id).then(s => StudentUtils.mapEntityToDto(s)),
   }),
 
   students: t.field({
@@ -155,7 +154,7 @@ gqlSchemaBuilder.queryFields(t => ({
       }),
     },
     resolve: async (_, args) =>
-      await StudentRepository.fetchWithFilters(
+      await StudentManagementService.getStudentsWithFilters(
         new Types.PaginationArgs({ ...args.paginationArgs }),
         toStudentFilterArgsOrNull(args.filterArgs)
       ),

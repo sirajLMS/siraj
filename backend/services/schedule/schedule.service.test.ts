@@ -5,9 +5,9 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import * as resolveViewerTimezoneModule from "@/backend/services/schedule/resolve-viewer-timezone";
 import { ScheduleService } from "@/backend/services/schedule/schedule.service";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import { getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
-const tErrors = getServerTranslations("en").errorsTranslations;
+const tErrors = errorsEn;
 
 afterEach(() => {
   spyOn(PermissionsService, "hasAnyPermission").mockRestore();

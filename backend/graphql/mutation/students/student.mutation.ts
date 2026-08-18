@@ -1,4 +1,4 @@
-import { StudentRepository } from "@/backend/db/repo/students/student.repository";
+import { GraphQLError } from "graphql";
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
@@ -7,7 +7,8 @@ import {
   StudentPothosObject,
 } from "@/backend/graphql/pothos";
 import { requireAuth } from "@/backend/graphql/utils/requireAuth";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService, StudentManagementService } from "@/backend/services";
+import { StudentLifecycleService } from "@/backend/services/student/student-lifecycle.service";
 import type * as Types from "@/backend/types";
 import { StudentUtils } from "@/backend/utils";
 
@@ -45,14 +46,16 @@ gqlSchemaBuilder.mutationFields(t => ({
         }
       }
       if (!isPartialStudentUpdateInput(input)) {
-        throw new Error("invalid_input");
+        throw new GraphQLError(tErrors.invalidInput, { extensions: { code: "BAD_USER_INPUT" } });
       }
       const { status, ...restInput } = input;
       if (status) {
         await requireStudentManageStatus(userId, tErrors);
-        await StudentRepository.changeStatus(input.id, status, tErrors);
+        await StudentLifecycleService.changeStudentStatus(userId, input.id, status, tErrors);
       }
-      return await StudentRepository.partiallyUpdate(restInput, tErrors).then(s => StudentUtils.mapEntityToDto(s));
+      return await StudentManagementService.partiallyUpdate(restInput, tErrors).then(s =>
+        StudentUtils.mapEntityToDto(s)
+      );
     },
   }),
 
@@ -66,7 +69,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       const userId = await requireAuth(ctx);
       const tErrors = ctx.t().errorsTranslations;
       await requireStudentManageStatus(userId, tErrors);
-      return await StudentRepository.deleteById(args.id, tErrors).then(s => StudentUtils.mapEntityToDto(s));
+      return await StudentManagementService.deleteById(args.id, tErrors).then(s => StudentUtils.mapEntityToDto(s));
     },
   }),
 }));

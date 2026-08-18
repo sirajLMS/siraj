@@ -1,7 +1,6 @@
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
-import { UserRepository } from "@/backend/db/repo/users";
 import { type AppPermission, UserRole } from "@/backend/enum";
-import { PermissionsService } from "@/backend/services";
+import { PermissionsService, UserService } from "@/backend/services";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { getServerTranslations, type Translations } from "@/shared/locale";
 
@@ -78,7 +77,7 @@ export async function createContext({
       ? await PermissionsService.getPermissionGroupContext(simulatedGroupSlug)
       : await PermissionsService.getUserContext(userId);
 
-  const safeUser = await UserRepository.findSafeById(userId);
+  const safeUser = await UserService.findSafeById(userId);
 
   return {
     user: { id: userId, displayCurrency: safeUser?.displayCurrency ?? null },

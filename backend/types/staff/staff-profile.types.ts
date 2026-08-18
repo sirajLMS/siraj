@@ -2,10 +2,10 @@ import type { staffProfiles } from "@/backend/db/schema";
 import type { AccountStatus, OverrideState } from "@/backend/enum";
 import type { PageInfo } from "@/backend/types";
 
-export type StaffProfileEntity = typeof staffProfiles.$inferSelect;
-export type StaffProfileEntityInput = typeof staffProfiles.$inferInsert;
+export type StaffProfileSelectType = typeof staffProfiles.$inferSelect;
+export type StaffProfileInsertType = typeof staffProfiles.$inferInsert;
 
-export type StaffProfileCreateResult = Pick<StaffProfileEntity, "id" | "userId" | "createdAt"> & {
+export type StaffProfileCreateResult = Pick<StaffProfileSelectType, "id" | "userId" | "createdAt"> & {
   readonly phone: string | null;
   readonly status: AccountStatus;
 };
@@ -61,6 +61,8 @@ export interface OnboardingMetricsResult {
 }
 
 export interface UpdateManagerProfileInput {
+  name?: string | null;
+  email?: string | null;
   phone?: string | null;
   status?: AccountStatus | null;
   hourlyRate?: string | null;

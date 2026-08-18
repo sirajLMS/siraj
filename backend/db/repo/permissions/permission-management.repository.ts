@@ -18,8 +18,8 @@ import type {
   PermissionReturnType,
   PermissionSelectType,
   UpdateGroupInput,
-  UserOverrideEntity,
   UserOverrideInput,
+  UserPermissionOverrideSelectType,
 } from "@/backend/types";
 import { localeJsonKey, omitEmptyLocalizedString, resolveLocalizedString } from "@/shared/lib/localized-string";
 import { getServerTranslations } from "@/shared/locale";
@@ -89,7 +89,7 @@ export namespace PermissionManagementRepository {
       assignedByUserId: string | null;
     },
     tx?: DBTransaction
-  ): Promise<UserOverrideEntity> {
+  ): Promise<UserPermissionOverrideSelectType> {
     const client = tx ?? db;
     const now = new Date();
     const [row] = await client
@@ -555,7 +555,10 @@ export namespace PermissionManagementRepository {
   /**
    * Returns all explicit GRANTS and DENIES for a single user.
    */
-  export async function getUserOverrides(userId: string, tx?: DBTransaction): Promise<UserOverrideEntity[]> {
+  export async function getUserOverrides(
+    userId: string,
+    tx?: DBTransaction
+  ): Promise<UserPermissionOverrideSelectType[]> {
     try {
       const client = tx ?? db;
       return await client.select().from(userPermissionOverrides).where(eq(userPermissionOverrides.userId, userId));

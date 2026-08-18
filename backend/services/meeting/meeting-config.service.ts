@@ -1,5 +1,6 @@
 import { ClassMeetingConfigRepository } from "@/backend/db/repo/meeting/class-meeting-config.repository";
 import { MeetingProviderRepository } from "@/backend/db/repo/meeting/meeting-provider.repository";
+import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
 import { UserMeetingConfigRepository } from "@/backend/db/repo/meeting/user-meeting-config.repository";
 import { AppPermission } from "@/backend/enum";
 import { parseMeetingConfigDetails } from "@/backend/lib/meeting-config.validation";
@@ -233,6 +234,19 @@ export namespace MeetingConfigService {
     const { isAdminScope } = await loadConfigForActor(actorUserId, id, tErrors);
     const updated = await UserMeetingConfigRepository.setDefault(id, tErrors);
     return buildMaskedConfigResult(updated, isAdminScope);
+  }
+
+  /**
+   * Resolve the OAuth token expiration date for a user + provider slug.
+   * Used by the `UserMeetingConfig.oauthTokenExpiresAt` field resolver.
+   */
+  export async function getOAuthTokenExpiresAt(userId: string, providerSlug: string): Promise<Date | null> {
+    try {
+      const token = await MeetingProviderTokenRepository.getByUserAndProvider(userId, providerSlug);
+      return token?.expiresAt ?? null;
+    } catch {
+      return null;
+    }
   }
 
   // ─── Bootstrap / Seeder Operations (no auth) ──────────────────────────────

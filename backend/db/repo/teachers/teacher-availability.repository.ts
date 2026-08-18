@@ -769,8 +769,8 @@ export namespace TeacherAvailabilityRepository {
   const validateSlotInMemory = (
     slot: { startTime: Date; endTime: Date },
     vacationsRows: { startAt: Date; endAt: Date }[],
-    unavailabilityRows: (typeof teacherRecurringUnavailability.$inferSelect)[],
-    windowRows: (typeof teacherAvailabilityWindows.$inferSelect)[],
+    unavailabilityRows: Types.TeacherRecurringUnavailabilitySelectType[],
+    windowRows: Types.TeacherAvailabilityWindowSelectType[],
     locale?: string
   ): void => {
     const bookingDate = getUtcDateString(slot.startTime);
@@ -798,8 +798,8 @@ export namespace TeacherAvailabilityRepository {
 
   type BatchAvailabilityRows = [
     { startAt: Date; endAt: Date }[],
-    (typeof teacherRecurringUnavailability.$inferSelect)[],
-    (typeof teacherAvailabilityWindows.$inferSelect)[],
+    Types.TeacherRecurringUnavailabilitySelectType[],
+    Types.TeacherAvailabilityWindowSelectType[],
   ];
 
   function computeSlotBounds(slots: { startTime: Date; endTime: Date }[]): { earliestStart: Date; latestEnd: Date } {

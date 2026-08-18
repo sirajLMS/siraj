@@ -1,7 +1,7 @@
 import type { InputFieldBuilder, ObjectFieldBuilder } from "@pothos/core";
-import { MeetingProviderTokenRepository } from "@/backend/db/repo/meeting/meeting-provider-token.repository";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { logger } from "@/backend/lib/logger";
+import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import type {
   ClassMeetingConfigReturnType,
   GenerateMeetingUrlResult,
@@ -110,8 +110,7 @@ export const UserMeetingConfigPothosObject = UserMeetingConfigRef.implement({
       resolve: async parent => {
         if (!parent.provider?.slug) return null;
         try {
-          const token = await MeetingProviderTokenRepository.getByUserAndProvider(parent.userId, parent.provider.slug);
-          return token?.expiresAt ?? null;
+          return await MeetingConfigService.getOAuthTokenExpiresAt(parent.userId, parent.provider.slug);
         } catch (error) {
           logger.error("Failed to resolve oauthTokenExpiresAt", { error });
           return null;

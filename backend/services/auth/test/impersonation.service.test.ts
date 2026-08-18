@@ -1,11 +1,11 @@
-import { beforeAll, describe, expect, spyOn, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AccountStatus, UserRole } from "@/backend/enum";
 import { ImpersonationService } from "@/backend/services/auth/impersonation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 /* Test constants */
 
@@ -13,11 +13,7 @@ const ACTOR_ID = "11111111-1111-1111-1111-111111111111";
 const TARGET_ID = "22222222-2222-2222-2222-222222222222";
 const SUPER_TARGET_ID = "33333333-3333-3333-3333-333333333333";
 
-let tErrors: ErrorsLabels;
-
-beforeAll(() => {
-  tErrors = getServerTranslations("en").errorsTranslations;
-});
+const tErrors = errorsEn;
 
 /* Test fixtures */
 

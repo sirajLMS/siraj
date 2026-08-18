@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { getCurrentUser } from "@/backend/lib";
-import { isRedirect, ProfileService, type UserPermissionContext } from "@/backend/services";
-import type { ProfileMode, ProfilePageContext, ProfilePageResolution } from "@/backend/types";
+import { isRedirect, ProfileService } from "@/backend/services";
+import type { ProfileMode, ProfilePageContext, ProfilePageResolution, UserPermissionContext } from "@/backend/types";
 
 export { isRedirect };
 

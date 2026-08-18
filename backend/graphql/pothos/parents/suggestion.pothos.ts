@@ -1,4 +1,6 @@
+import { GraphQLError } from "graphql";
 import { SuggestionStatus } from "@/backend/enum";
+import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { SuggestionService } from "@/backend/services";
 import type {
@@ -15,9 +17,10 @@ import type {
   SuggestionSubmitInput,
 } from "@/backend/types";
 
-function requireAuth(ctx: { user?: { id: string } }): string {
+function requireAuth(ctx: Pick<BaseContext, "user" | "t">): string {
   if (!ctx.user?.id) {
-    throw new Error("unauthenticated");
+    const tErrors = ctx.t().errorsTranslations;
+    throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
   }
   return ctx.user.id;
 }
@@ -300,7 +303,7 @@ function toSuggestionReturnType(result: SuggestionSelectType): SuggestionReturnT
 }
 
 async function authenticatedSuggestionMutation(
-  ctx: { user?: { id: string }; locale: string },
+  ctx: Pick<BaseContext, "user" | "t" | "locale">,
   serviceCall: (userId: string) => Promise<SuggestionSelectType>
 ): Promise<SuggestionReturnType> {
   const userId = requireAuth(ctx);

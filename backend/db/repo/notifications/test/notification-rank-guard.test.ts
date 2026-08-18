@@ -229,7 +229,7 @@ describe("NotificationRepository — handleDeliveryWebhook rank guard", () => {
   // the plain nextRank>currentRank check would reject it). All notification
   // adapters create deliveries at PENDING then call updateDeliveryStatus(FAILED)
   // on send errors — so this transition MUST succeed.
-  notificationTest("critical: pending → failed via assertValidStatusTransition is allowed", async tx => {
+  notificationTest("critical: pending → failed via rank guard is allowed", async tx => {
     const user = await makeUser(tx, "RgPendFail");
     const pmi = `rgpendfail-${randomUUID()}`;
 
@@ -237,8 +237,8 @@ describe("NotificationRepository — handleDeliveryWebhook rank guard", () => {
     const existing = await insertDeliveryWithStatus(tx, user.id, pmi, NotificationDeliveryStatus.PENDING);
     expect(existing.status).toBe(NotificationDeliveryStatus.PENDING);
 
-    // Update to FAILED via updateDeliveryStatus — this calls
-    // assertValidStatusTransition internally.
+    // Update to FAILED via updateDeliveryStatus — this validates the
+    // transition using the repo-local isValidForwardTransition guard.
     // Before the fix this would throw the "invalidTransition" error.
     const updated = await NotificationRepository.updateDeliveryStatus(
       {

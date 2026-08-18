@@ -1,7 +1,45 @@
-// Canonical type definitions for Teacher Onboarding.
-// Aligned with TeacherOnboardingInput (service) and TeacherOnboardingResult (service/graphql).
 import type { Gender } from "@/backend/enum";
-import type { TeacherOnboardingResult } from "@/backend/services";
+import type { UserPaymentMethodSubmitInput } from "@/backend/types";
+import type { CurrencyCode } from "@/shared/constants/currency.enum";
+
+/**
+ * Input for teacher onboarding — canonical interface shared across
+ * service, GraphQL (Pothos), and seed layers.
+ */
+export interface TeacherOnboardingInput {
+  readonly name: string;
+  readonly email: string;
+  readonly password: string;
+  readonly avatarUrl?: string | null;
+  readonly nationality?: string | null;
+  readonly nationalId?: string | null;
+  readonly phone?: string | null;
+  readonly dateOfBirth?: string | null;
+  readonly gender?: Gender | null;
+  readonly address?: string | null;
+  readonly qualifications?: string | null;
+  readonly countryCode?: string | null;
+  readonly timezoneId?: number | null;
+  readonly timezone: string;
+  readonly hourlyRate?: string | null;
+  readonly rateCurrency?: CurrencyCode | null;
+  readonly displayCurrency?: CurrencyCode | null;
+  readonly initialPayoutMethod?: Omit<UserPaymentMethodSubmitInput, "userId"> | null;
+}
+
+/**
+ * Result of teacher onboarding — canonical interface shared across
+ * service, GraphQL (Pothos), and test layers.
+ */
+export interface TeacherOnboardingResult {
+  readonly userId: string;
+  readonly teacherId: string;
+  readonly name: string;
+  readonly email: string;
+  readonly status: string;
+  readonly phone?: string | null;
+  readonly gender?: Gender | null;
+}
 
 /**
  * TeacherOnboardingReturnType:

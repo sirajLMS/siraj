@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { CronQueueBackend } from "@/backend/enum/cron/cron.enums";
 import {
+  CronQueueBackendNotAvailable,
+  CronQueueBackendUnknown,
   getQueueAdapter,
   resetQueueAdapterFactory,
   resolveQueueBackend,
-} from "@/backend/services/cron/queue-adapter.factory";
+} from "@/backend/services/cron";
 
 // ── Mock resolveEnvConfig so tests don't touch the DB ──
 // Default mock returns undefined (no DB override) so the factory falls through to process.env.
@@ -55,7 +57,6 @@ describe("queue-adapter.factory", () => {
       await resolveQueueBackend();
       throw new Error("should have thrown");
     } catch (error) {
-      const { CronQueueBackendUnknown } = await import("@/backend/types/cron/cron.types");
       expect(error).toBeInstanceOf(CronQueueBackendUnknown);
       if (error instanceof Error) {
         expect(error.name).toBe("CronQueueBackendUnknown");
@@ -86,7 +87,6 @@ describe("queue-adapter.factory", () => {
       await getQueueAdapter();
       throw new Error("should have thrown");
     } catch (error) {
-      const { CronQueueBackendNotAvailable } = await import("@/backend/types/cron/cron.types");
       expect(error).toBeInstanceOf(CronQueueBackendNotAvailable);
       if (error instanceof Error) {
         expect(error.name).toBe("CronQueueBackendNotAvailable");

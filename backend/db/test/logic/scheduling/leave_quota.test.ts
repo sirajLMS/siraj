@@ -14,7 +14,6 @@ import type {
 } from "@/backend/types";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { getServerTranslations } from "@/shared/locale";
 
 async function expectLeaveQuotaExceeded(fn: () => Promise<unknown>) {
   let errorCaught: Error | null = null;
@@ -253,13 +252,12 @@ describe("Leave Quota Repository Methods", () => {
     testLogger.info("Testing incrementTeacherLeaveQuota atomic increment...");
     await runInRollback(async tx => {
       const { teacher } = await setupTeacherAndStudent(tx);
-      const tErrors = getServerTranslations("en").errorsTranslations;
 
-      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, tErrors);
+      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx);
       const usage1 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
       expect(usage1).toBe(1);
 
-      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, tErrors);
+      await SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx);
       const usage2 = await SchedulingRepository.getTeacherLeaveQuotaUsage(teacher.id, currentYear, currentMonth, tx);
       expect(usage2).toBe(2);
     });
@@ -271,9 +269,8 @@ describe("Leave Quota Repository Methods", () => {
     await runInRollback(async tx => {
       const { teacher } = await setupTeacherAndStudent(tx);
       await insertLeaveQuota(tx, { teacherId: teacher.id, year: currentYear, month: currentMonth, count: 2 });
-      const tErrors = getServerTranslations("en").errorsTranslations;
 
-      await expectLeaveQuotaExceeded(() => SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx, tErrors));
+      await expectLeaveQuotaExceeded(() => SchedulingRepository.incrementTeacherLeaveQuota(teacher.id, tx));
     });
     testLogger.info("incrementTeacherLeaveQuota trigger block passed.");
   });

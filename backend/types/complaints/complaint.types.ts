@@ -67,6 +67,12 @@ export type ComplaintQueueResult = {
   pageInfo?: PageInfo | null;
 };
 
+export type ComplaintQueueRawResult = {
+  id: string;
+  complaints: ReadonlyArray<ComplaintReturnType>;
+  rawMetrics: { statusCounts: { status: string; count: number }[]; avgResolutionHours: number };
+};
+
 export type ComplaintQueuePaginatedResult = {
   rows: ReadonlyArray<ComplaintReturnType>;
   totalCount: number;

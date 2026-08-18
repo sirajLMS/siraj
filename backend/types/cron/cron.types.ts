@@ -1,10 +1,10 @@
 import type { cronHeartbeats, cronRuns, cronSchedules } from "@/backend/db/schema";
-import {
-  type CronConcurrencyPolicy,
+import type {
+  CronConcurrencyPolicy,
   CronJobKind,
-  type CronRunStatus,
-  type CronScheduleStatus,
-  type CronTriggerSource,
+  CronRunStatus,
+  CronScheduleStatus,
+  CronTriggerSource,
 } from "@/backend/enum/cron/cron.enums";
 
 // ── cron_schedules ──
@@ -174,20 +174,6 @@ export type WorkerDrainResult = {
 
 // ── Queue adapter contract ──
 
-export class CronQueueBackendUnknown extends Error {
-  constructor(backend: string) {
-    super(`CronQueueBackendUnknown: Unknown queue backend "${backend}"`);
-    this.name = "CronQueueBackendUnknown";
-  }
-}
-
-export class CronQueueBackendNotAvailable extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "CronQueueBackendNotAvailable";
-  }
-}
-
 export type CronJobResult = {
   success: boolean;
   error?: string;
@@ -203,18 +189,6 @@ export type CronJobHandlerContext = {
 
 /** Handler function type: receives the job payload and optional execution context, returns a result. */
 export type CronJobHandler = (job: CronJobPayload, context?: CronJobHandlerContext) => Promise<CronJobResult>;
-
-function isCronJobKind(value: string): value is CronJobKind {
-  return (Object.values(CronJobKind) as readonly string[]).includes(value);
-}
-
-/** Runtime guard: validates that a raw string is a `CronJobKind` enum member, throws otherwise. */
-export function safeCronJobKind(value: string): CronJobKind {
-  if (isCronJobKind(value)) {
-    return value;
-  }
-  throw new Error(`Invalid CronJobKind: "${value}"`);
-}
 
 export type CronQueueAdapter = {
   init(): Promise<void>;

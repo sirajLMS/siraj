@@ -5,7 +5,6 @@ import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet() {
   logger.info("Seeding supported mobile wallets...");
-  const now = new Date();
   const slugs = MOBILE_WALLET_CATALOG_SEEDS.map((spec: MobileWalletCatalogSeed) => spec.slug);
   const logoUrls = await seedCatalogLogoUrls("payment", slugs);
 
@@ -20,8 +19,6 @@ export async function seedOrGet() {
     supportedDirections: spec.supportedDirections,
     logoUrl: logoUrls.get(spec.slug) ?? null,
     isActive: true,
-    createdAt: now,
-    updatedAt: now,
   }));
 
   const tErrors = getServerTranslations("en").errorsTranslations;

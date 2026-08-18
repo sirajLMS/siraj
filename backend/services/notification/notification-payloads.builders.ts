@@ -36,7 +36,7 @@ import type {
   ClassLifecycleBodyParams,
   NotificationsLabels,
   StudentTeacherReassignmentRecipient,
-} from "@/shared/locale/notifications";
+} from "@/shared/locale/types/notifications";
 
 /** Structured notification metadata plus channel-adapter bag fields (`to`, `data`, etc.). */
 type PayloadMetadata = NotificationMetadata & Record<string, unknown>;

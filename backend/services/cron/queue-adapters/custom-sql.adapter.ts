@@ -11,14 +11,9 @@ import { randomUUID } from "node:crypto";
 
 import { createPool } from "@/backend/db/factory";
 import { logger } from "@/backend/lib/logger";
+import { safeCronJobKind } from "@/backend/services/cron/cron.helpers";
 import { pruneMaps } from "@/backend/services/cron/queue-adapters/bullmq-shared";
-import {
-  type CronJobPayload,
-  type CronQueueAdapter,
-  type CronQueueRow,
-  type CronQueueStats,
-  safeCronJobKind,
-} from "@/backend/types";
+import type { CronJobPayload, CronQueueAdapter, CronQueueRow, CronQueueStats } from "@/backend/types";
 
 /**
  * Adapter-internal interface for a pg-compatible connection pool.
@@ -87,163 +82,204 @@ function genId(): string {
   return `cq_${randomUUID()}`;
 }
 
-export function createCustomSqlAdapter(): CronQueueAdapter {
-  let pool: QueryablePool | null = null;
-  const runIdToQueueId = new Map<string, string>();
-  const queueIdToRunId = new Map<string, string>();
+interface CustomSqlState {
+  pool: QueryablePool | null;
+  runIdToQueueId: Map<string, string>;
+  queueIdToRunId: Map<string, string>;
+}
 
-  async function ensureInit(): Promise<QueryablePool> {
-    if (pool) return pool;
-    pool = createPool();
-    await pool.query(CREATE_TABLE_SQL);
-    logger.info("cron.customSql.initialized", {});
-    return pool;
+async function ensureInit(state: CustomSqlState): Promise<QueryablePool> {
+  if (state.pool) return state.pool;
+  state.pool = createPool();
+  await state.pool.query(CREATE_TABLE_SQL);
+  logger.info("cron.customSql.initialized", {});
+  return state.pool;
+}
+
+function trackRunId(state: CustomSqlState, runId: string, queueId: string): void {
+  state.runIdToQueueId.set(runId, queueId);
+  state.queueIdToRunId.set(queueId, runId);
+}
+
+function untrackQueueId(state: CustomSqlState, queueId: string): void {
+  const runId = state.queueIdToRunId.get(queueId);
+  if (runId) {
+    state.runIdToQueueId.delete(runId);
+    state.queueIdToRunId.delete(queueId);
   }
+}
+
+function pruneState(state: CustomSqlState): void {
+  pruneMaps(state.runIdToQueueId, state.queueIdToRunId, (_runId, queueId) => queueId, "cron.customSql.mapPruned");
+}
+
+async function sendJob(state: CustomSqlState, job: CronJobPayload): Promise<string> {
+  const p = await ensureInit(state);
+  const id = genId();
+  await p.query(
+    `INSERT INTO cron_queue (id, run_id, schedule_id, job_kind, payload, attempt, timeout_seconds, max_retries, retry_backoff_seconds, status, available_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending', now())`,
+    [
+      id,
+      job.runId,
+      job.scheduleId,
+      job.jobKind,
+      JSON.stringify(job.payload ?? null),
+      job.attempt,
+      job.timeoutSeconds,
+      job.maxRetries ?? 3,
+      job.retryBackoffSeconds ?? 60,
+    ]
+  );
+  trackRunId(state, job.runId, id);
+  pruneState(state);
+  return id;
+}
+
+async function fetchJobs(state: CustomSqlState, count: number): Promise<CronJobPayload[]> {
+  const p = await ensureInit(state);
+  const result = await p.query(
+    `WITH claimed AS (
+       SELECT id, run_id, schedule_id, job_kind, payload, attempt, timeout_seconds, max_retries, retry_backoff_seconds
+       FROM cron_queue
+       WHERE status = 'pending' AND available_at <= now()
+       ORDER BY available_at
+       FOR UPDATE SKIP LOCKED
+       LIMIT $1
+     )
+     UPDATE cron_queue
+     SET status = 'in_flight', locked_at = now()
+     FROM claimed
+     WHERE cron_queue.id = claimed.id
+     RETURNING claimed.id, claimed.run_id, claimed.schedule_id, claimed.job_kind, claimed.payload, claimed.attempt, claimed.timeout_seconds, claimed.max_retries, claimed.retry_backoff_seconds`,
+    [count]
+  );
+  const rows = (result.rows ?? []).map(parseCronQueueRow);
+  for (const r of rows) {
+    trackRunId(state, r.run_id, r.id);
+  }
+  pruneState(state);
+  return rows.map(r => ({
+    runId: r.run_id,
+    scheduleId: r.schedule_id,
+    jobKind: safeCronJobKind(r.job_kind),
+    payload: r.payload ?? null,
+    attempt: r.attempt,
+    timeoutSeconds: r.timeout_seconds,
+    queueJobId: r.id,
+    maxRetries: r.max_retries,
+    retryBackoffSeconds: r.retry_backoff_seconds,
+  }));
+}
+
+async function completeJob(state: CustomSqlState, jobId: string): Promise<void> {
+  const p = await ensureInit(state);
+  await p.query(`DELETE FROM cron_queue WHERE id = $1`, [jobId]);
+  untrackQueueId(state, jobId);
+}
+
+async function failJob(state: CustomSqlState, jobId: string, error: string, stack?: string | null): Promise<void> {
+  const p = await ensureInit(state);
+  await p.query(
+    `UPDATE cron_queue SET status = 'failed', error_message = $2, error_stack = $3, locked_at = NULL WHERE id = $1`,
+    [jobId, error, stack ?? null]
+  );
+  untrackQueueId(state, jobId);
+}
+
+async function retryJob(
+  state: CustomSqlState,
+  jobId: string,
+  delaySeconds: number,
+  newAttempt?: number
+): Promise<void> {
+  const p = await ensureInit(state);
+  await p.query(
+    `UPDATE cron_queue
+     SET status = 'pending', available_at = now() + make_interval(0, 0, 0, 0, 0, 0, LEAST(GREATEST($1, 0), 86400)), locked_at = NULL, attempt = $3
+     WHERE id = $2`,
+    [delaySeconds, jobId, newAttempt ?? 0]
+  );
+}
+
+async function getStats(state: CustomSqlState): Promise<CronQueueStats> {
+  const p = await ensureInit(state);
+  const result = await p.query(
+    `SELECT job_kind, status, COUNT(*)::TEXT as count
+     FROM cron_queue
+     GROUP BY job_kind, status`
+  );
+  const stats: CronQueueStats = {
+    backend: "custom-sql",
+    pending: 0,
+    inFlight: 0,
+    failed: 0,
+    byJobKind: {},
+  };
+  for (const row of result.rows ?? []) {
+    const jobKind = String(row.job_kind);
+    const status = String(row.status);
+    const count = Number.parseInt(String(row.count), 10);
+    if (!stats.byJobKind[jobKind]) {
+      stats.byJobKind[jobKind] = { pending: 0, inFlight: 0, failed: 0 };
+    }
+    if (status === "pending") {
+      stats.pending += count;
+      stats.byJobKind[jobKind].pending += count;
+    } else if (status === "in_flight") {
+      stats.inFlight += count;
+      stats.byJobKind[jobKind].inFlight += count;
+    } else if (status === "failed") {
+      stats.failed += count;
+      stats.byJobKind[jobKind].failed += count;
+    }
+  }
+  return stats;
+}
+
+export function createCustomSqlAdapter(): CronQueueAdapter {
+  const state: CustomSqlState = {
+    pool: null,
+    runIdToQueueId: new Map(),
+    queueIdToRunId: new Map(),
+  };
 
   return {
     async init() {
-      await ensureInit();
+      await ensureInit(state);
     },
 
     async send(job) {
-      const p = await ensureInit();
-      const id = genId();
-      await p.query(
-        `INSERT INTO cron_queue (id, run_id, schedule_id, job_kind, payload, attempt, timeout_seconds, max_retries, retry_backoff_seconds, status, available_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending', now())`,
-        [
-          id,
-          job.runId,
-          job.scheduleId,
-          job.jobKind,
-          JSON.stringify(job.payload ?? null),
-          job.attempt,
-          job.timeoutSeconds,
-          job.maxRetries ?? 3,
-          job.retryBackoffSeconds ?? 60,
-        ]
-      );
-      runIdToQueueId.set(job.runId, id);
-      queueIdToRunId.set(id, job.runId);
-      pruneMaps(runIdToQueueId, queueIdToRunId, (_runId, queueId) => queueId, "cron.customSql.mapPruned");
-      return id;
+      return sendJob(state, job);
     },
 
     async fetch({ count }) {
-      const p = await ensureInit();
-      const result = await p.query(
-        `WITH claimed AS (
-           SELECT id, run_id, schedule_id, job_kind, payload, attempt, timeout_seconds, max_retries, retry_backoff_seconds
-           FROM cron_queue
-           WHERE status = 'pending' AND available_at <= now()
-           ORDER BY available_at
-           FOR UPDATE SKIP LOCKED
-           LIMIT $1
-         )
-         UPDATE cron_queue
-         SET status = 'in_flight', locked_at = now()
-         FROM claimed
-         WHERE cron_queue.id = claimed.id
-         RETURNING claimed.id, claimed.run_id, claimed.schedule_id, claimed.job_kind, claimed.payload, claimed.attempt, claimed.timeout_seconds, claimed.max_retries, claimed.retry_backoff_seconds`,
-        [count]
-      );
-      const rows = (result.rows ?? []).map(parseCronQueueRow);
-      for (const r of rows) {
-        runIdToQueueId.set(r.run_id, r.id);
-        queueIdToRunId.set(r.id, r.run_id);
-      }
-      pruneMaps(runIdToQueueId, queueIdToRunId, (_runId, queueId) => queueId, "cron.customSql.mapPruned");
-      const payloads: CronJobPayload[] = rows.map(r => {
-        return {
-          runId: r.run_id,
-          scheduleId: r.schedule_id,
-          jobKind: safeCronJobKind(r.job_kind),
-          payload: r.payload ?? null,
-          attempt: r.attempt,
-          timeoutSeconds: r.timeout_seconds,
-          queueJobId: r.id,
-          maxRetries: r.max_retries,
-          retryBackoffSeconds: r.retry_backoff_seconds,
-        };
-      });
-      return payloads;
+      return fetchJobs(state, count);
     },
 
     async complete(jobId) {
-      const p = await ensureInit();
-      await p.query(`DELETE FROM cron_queue WHERE id = $1`, [jobId]);
-      const runId = queueIdToRunId.get(jobId);
-      if (runId) {
-        runIdToQueueId.delete(runId);
-        queueIdToRunId.delete(jobId);
-      }
+      await completeJob(state, jobId);
     },
 
     async fail(jobId, _error, _stack) {
-      const p = await ensureInit();
-      await p.query(
-        `UPDATE cron_queue SET status = 'failed', error_message = $2, error_stack = $3, locked_at = NULL WHERE id = $1`,
-        [jobId, _error, _stack ?? null]
-      );
-      const runId = queueIdToRunId.get(jobId);
-      if (runId) {
-        runIdToQueueId.delete(runId);
-        queueIdToRunId.delete(jobId);
-      }
+      await failJob(state, jobId, _error, _stack);
     },
 
     async retry(jobId, delaySeconds, newAttempt) {
-      const p = await ensureInit();
-      await p.query(
-        `UPDATE cron_queue
-         SET status = 'pending', available_at = now() + make_interval(0, 0, 0, 0, 0, 0, LEAST(GREATEST($1, 0), 86400)), locked_at = NULL, attempt = $3
-         WHERE id = $2`,
-        [delaySeconds, jobId, newAttempt ?? 0]
-      );
+      await retryJob(state, jobId, delaySeconds, newAttempt);
     },
 
     async getQueueStats() {
-      const p = await ensureInit();
-      const result = await p.query(
-        `SELECT job_kind, status, COUNT(*)::TEXT as count
-         FROM cron_queue
-         GROUP BY job_kind, status`
-      );
-      const stats: CronQueueStats = {
-        backend: "custom-sql",
-        pending: 0,
-        inFlight: 0,
-        failed: 0,
-        byJobKind: {},
-      };
-      for (const row of result.rows ?? []) {
-        const jobKind = String(row.job_kind);
-        const status = String(row.status);
-        const count = Number.parseInt(String(row.count), 10);
-        if (!stats.byJobKind[jobKind]) {
-          stats.byJobKind[jobKind] = { pending: 0, inFlight: 0, failed: 0 };
-        }
-        if (status === "pending") {
-          stats.pending += count;
-          stats.byJobKind[jobKind].pending += count;
-        } else if (status === "in_flight") {
-          stats.inFlight += count;
-          stats.byJobKind[jobKind].inFlight += count;
-        } else if (status === "failed") {
-          stats.failed += count;
-          stats.byJobKind[jobKind].failed += count;
-        }
-      }
-      return stats;
+      return getStats(state);
     },
 
     async shutdown() {
-      if (pool) {
-        await pool.end();
-        pool = null;
+      if (state.pool) {
+        await state.pool.end();
+        state.pool = null;
       }
-      runIdToQueueId.clear();
-      queueIdToRunId.clear();
+      state.runIdToQueueId.clear();
+      state.queueIdToRunId.clear();
     },
   };
 }

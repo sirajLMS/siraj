@@ -134,9 +134,9 @@ async function getDeleteContext(paths: string[], force: boolean) {
   ]);
 
   return {
-    dbFileMap: new Map<string, Types.FileEntity>(dbFiles.map(f => [f.path, f])),
-    dbDirectoryMap: new Map<string, Types.DirectoryEntity>(dbDirectories.map(d => [d.path, d])),
-    dbParentDirMap: new Map<string, Types.DirectoryEntity>(dbParentDirs.map(d => [d.path, d])),
+    dbFileMap: new Map<string, Types.FileSelectType>(dbFiles.map(f => [f.path, f])),
+    dbDirectoryMap: new Map<string, Types.DirectorySelectType>(dbDirectories.map(d => [d.path, d])),
+    dbParentDirMap: new Map<string, Types.DirectorySelectType>(dbParentDirs.map(d => [d.path, d])),
     usageCheckMap: new Map<string, Types.FileUsageResult>(usageChecks.map(c => [c.path, c])),
   };
 }
@@ -146,9 +146,9 @@ async function deleteSingleItem(
   params: {
     path: string;
     force: boolean;
-    dbFile?: Types.FileEntity;
-    dbDirectory?: Types.DirectoryEntity;
-    parentDir?: Types.DirectoryEntity;
+    dbFile?: Types.FileSelectType;
+    dbDirectory?: Types.DirectorySelectType;
+    parentDir?: Types.DirectorySelectType;
     usageCheck?: Types.FileUsageResult;
   }
 ): Promise<GenericOperationResult<Types.FileInfo | Types.DirectoryInfo>> {

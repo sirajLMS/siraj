@@ -3,7 +3,7 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { StaffProfileRepository, TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, ProfileAudience, ProfileMode, ProfileScope } from "@/backend/enum";
-import { PermissionsService, type UserPermissionContext } from "@/backend/services/auth/permissions.service";
+import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { MeetingConfigService } from "@/backend/services/meeting/meeting-config.service";
 import { ParentPortalService } from "@/backend/services/parent/parent-portal.service";
 import { ParentProfileService } from "@/backend/services/parent/parent-profile.service";
@@ -14,35 +14,37 @@ import {
   type FieldFilterContext,
   filterProfileByFieldGroups,
 } from "@/backend/services/profile/profile-field-filter";
+import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
 import { ManagerProfileService } from "@/backend/services/staff/manager-profile.service";
 import { StaffProfileService } from "@/backend/services/staff/staff-profile.service";
+import { STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
 import { AuditService } from "@/backend/services/system/audit.service";
 import { TeacherPortalService } from "@/backend/services/teacher/teacher-portal.service";
-import {
-  type CoreUserProfileFields,
-  type ManagerDirectoryRow,
-  type ParentAdminProfileUpdateInput,
-  type ParentAssignedStudentsResult,
-  type ParentOwnProfileReturnType,
-  type ParentOwnProfileUpdateInput,
-  type ParentProfileResult,
-  type ParentProfileUpdateInput,
-  type PaymentMethodDefaults,
-  PROFILE_FIELD_GROUPS,
-  type ProfilePageContext,
-  type ProfilePageResolution,
-  STUDENT_FIELD_GROUPS,
-  type StaffPermissionGroupReturnType,
-  type StaffPermissionOverrideReturnType,
-  type TeacherAssignedStudentsResult,
-  type TeacherOwnProfileReturnType,
-  type TeacherProfileReturnType,
-  type TeacherProfileUpdateInputType,
-  type UnifiedProfileReturnType,
-  type UpdateOwnProfileInput,
-  type UpdateUserProfileInput,
-  type UserMeetingConfigReturnType,
-  type UserPaymentMethodReturnType,
+import type {
+  CoreUserProfileFields,
+  ManagerDirectoryRow,
+  ParentAdminProfileUpdateInput,
+  ParentAssignedStudentsResult,
+  ParentOwnProfileReturnType,
+  ParentOwnProfileUpdateInput,
+  ParentProfileResult,
+  ParentProfileUpdateInput,
+  PaymentMethodDefaults,
+  ProfileAccessOptions,
+  ProfilePageContext,
+  ProfilePageResolution,
+  ProfilePermissionContext,
+  StaffPermissionGroupReturnType,
+  StaffPermissionOverrideReturnType,
+  TeacherAssignedStudentsResult,
+  TeacherOwnProfileReturnType,
+  TeacherProfileReturnType,
+  TeacherProfileUpdateInputType,
+  UnifiedProfileReturnType,
+  UpdateOwnProfileInput,
+  UpdateUserProfileInput,
+  UserMeetingConfigReturnType,
+  UserPaymentMethodReturnType,
 } from "@/backend/types";
 import { parseAccountStatus, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 import { getServerTranslations } from "@/shared/locale";
@@ -155,12 +157,6 @@ function getStudentProfilePermissions(scope: ProfileScope, action: "view" | "edi
     return scope === ProfileScope.OWN ? group.editOwn : group.editOther;
   });
 }
-
-export type ProfilePermissionContext = Pick<UserPermissionContext, "permissions" | "isSuperAdmin">;
-
-export type ProfileAccessOptions = {
-  readonly permissionContext?: ProfilePermissionContext;
-};
 
 async function hasAnyPermissionForProfile(
   actorUserId: string,

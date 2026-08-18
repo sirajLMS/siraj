@@ -15,6 +15,7 @@ export * from "./permissions";
 export * from "./profile";
 export * from "./report";
 export * from "./scheduling";
+export * from "./seed";
 export * from "./shared";
 export * from "./simulation";
 export * from "./staff";

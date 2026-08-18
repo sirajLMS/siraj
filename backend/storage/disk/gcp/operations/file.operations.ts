@@ -87,7 +87,7 @@ export async function renameFile(ctx: GcpContext, input: Types.FileRenameInput):
     await sourceFile.move(destFile);
 
     // Update database
-    let fileEntity: Types.FileEntity | undefined;
+    let fileEntity: Types.FileSelectType | undefined;
     try {
       const dbFile = await StorageDbRepository.fileByPath(input.currentPath);
       if (dbFile) {

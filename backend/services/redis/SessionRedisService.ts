@@ -1,7 +1,7 @@
 // cspell:ignore: SADD, SREM, smembers, SCARD
 import { logger } from "@/backend/lib/logger";
 import type { IRedisService } from "@/backend/services/redis/IRedisService";
-import type { RedisSessionData } from "@/backend/types";
+import type { ISessionRedisService, RedisSessionData } from "@/backend/types";
 
 /**
  * Options for storing a session in Redis
@@ -16,7 +16,7 @@ export interface SetSessionOptions {
  * Session Redis Service
  * Manages session storage and operations in Redis with TTL support
  */
-export class SessionRedisService {
+export class SessionRedisService implements ISessionRedisService {
   private readonly keyPrefix = "session:";
   private readonly userSessionsKeyPrefix = "user_sessions:";
 

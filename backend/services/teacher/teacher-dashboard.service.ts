@@ -11,6 +11,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
+import { ClassInstanceExpiryService } from "@/backend/services/session/class-instance-expiry.service";
 import { SystemSettingsService } from "@/backend/services/system/system-settings.service";
 import type { ClassInstanceInsertType, CreateAuditLogInput, PaginationArgs } from "@/backend/types";
 import { parseClassExecutionState, parseClassOutcome, parseIanaTimezone } from "@/shared/lib/enum";
@@ -38,11 +39,13 @@ export namespace TeacherDashboardService {
     const viewerTimezone = parseIanaTimezone(user?.timezone);
 
     const targetDate = new Date(date);
+    await ClassInstanceExpiryService.processExpiredInstances({ locale });
     const result = await SchedulingRepository.getAdminDashboardSchedule({
       date: targetDate,
       teacherId: teacher.id,
       viewerTimezone,
       pagination: pagination ?? null,
+      locale,
     });
 
     const metrics = await SchedulingRepository.getDailyMetrics(targetDate, teacher.id);

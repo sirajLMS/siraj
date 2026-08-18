@@ -5,7 +5,6 @@ import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet() {
   logger.info("Seeding supported payment links...");
-  const now = new Date();
   const slugs = PAYMENT_LINK_CATALOG_SEEDS.map((spec: PaymentLinkCatalogSeed) => spec.slug);
   const logoUrls = await seedCatalogLogoUrls("payment", slugs);
 
@@ -19,8 +18,6 @@ export async function seedOrGet() {
     supportedDirections: spec.supportedDirections,
     logoUrl: logoUrls.get(spec.slug) ?? null,
     isActive: true,
-    createdAt: now,
-    updatedAt: now,
   }));
 
   const tErrors = getServerTranslations("en").errorsTranslations;

@@ -73,10 +73,12 @@ export interface BillingRepoConfig<TRow extends BillingRow, TSelect, TInsert, TU
    * applied in the original per-repo `create` (e.g. `identifierLabel`).
    *
    * The hook receives the original `input` and MUST return a value
-   * assignable to `TInsert`. It is called BEFORE the factory adds
-   * `createdAt`/`updatedAt` defaults.
+   * assignable to `Omit<TInsert, "createdAt" | "updatedAt">`. It is called
+   * BEFORE the factory adds `createdAt`/`updatedAt` defaults.
    */
-  readonly prepareInsert?: (input: TInsert) => TInsert;
+  readonly prepareInsert?: (
+    input: Omit<TInsert, "createdAt" | "updatedAt">
+  ) => Omit<TInsert, "createdAt" | "updatedAt">;
 }
 
 // ---- Output method bag -------------------------------------------------------
@@ -89,7 +91,7 @@ export interface BillingRepoMethods<TSelect, TInsert, TUpdateInput, TFilters> {
   listActive: (filters?: TFilters, tx?: DBTransaction) => Promise<TSelect[]>;
   getById: (id: string, tx?: DBTransaction) => Promise<TSelect | null>;
   getBySlug: (slug: string, tx?: DBTransaction) => Promise<TSelect | null>;
-  create: (input: TInsert, tx?: DBTransaction) => Promise<TSelect>;
+  create: (input: Omit<TInsert, "createdAt" | "updatedAt">, tx?: DBTransaction) => Promise<TSelect>;
   update: (id: string, input: TUpdateInput, tErrors: ErrorsLabels, tx?: DBTransaction) => Promise<TSelect>;
   deactivate: (id: string, tErrors: ErrorsLabels, tx?: DBTransaction) => Promise<TSelect>;
   listByIds: (ids: readonly string[], tx?: DBTransaction) => Promise<TSelect[]>;
@@ -108,17 +110,6 @@ function getDirectionFilter(filters: unknown): PaymentDirection | undefined {
       const match = Object.values(PaymentDirection).find(v => (v as string) === d);
       if (match) return match;
     }
-  }
-  return undefined;
-}
-
-/**
- * Type guard: extracts `createdAt` or `updatedAt` from an unknown input.
- */
-function getDateField(value: unknown, field: string): Date | undefined {
-  if (isRecord(value)) {
-    const v = value[field];
-    if (v instanceof Date) return v;
   }
   return undefined;
 }
@@ -191,7 +182,7 @@ export function makeBillingRepo<
     return row ? toSelectType(validateRow(row)) : null;
   }
 
-  async function create(input: TInsert, tx?: DBTransaction): Promise<TSelect> {
+  async function create(input: Omit<TInsert, "createdAt" | "updatedAt">, tx?: DBTransaction): Promise<TSelect> {
     const client = tx ?? db;
     const now = new Date();
     const prepared = prepareInsert ? prepareInsert(input) : input;
@@ -199,8 +190,8 @@ export function makeBillingRepo<
       .insert(table)
       .values({
         ...prepared,
-        createdAt: getDateField(prepared, "createdAt") ?? now,
-        updatedAt: getDateField(prepared, "updatedAt") ?? now,
+        createdAt: now,
+        updatedAt: now,
       })
       .returning();
 

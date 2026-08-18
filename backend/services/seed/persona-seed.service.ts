@@ -14,25 +14,14 @@
 import { ParentRepository } from "@/backend/db/repo/parents";
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
-import type { AccountStatus } from "@/backend/enum";
-import type { ParentStatus } from "@/backend/enum/parents/parent.enum";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
-import type { DBTransaction, ParentEntity, TeacherSelectType } from "@/backend/types";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
-
-export type SeedTeacherProfileInput = {
-  userId: string;
-  timezone: string;
-  status?: AccountStatus;
-  hourlyRate?: string;
-  rateCurrency?: CurrencyCode;
-};
-
-export type SeedParentProfileInput = {
-  userId: string;
-  timezone: string;
-  status: ParentStatus;
-};
+import type {
+  DBTransaction,
+  ParentSelectType,
+  SeedParentProfileInput,
+  SeedTeacherProfileInput,
+  TeacherSelectType,
+} from "@/backend/types";
 
 export namespace PersonaSeedService {
   /** Idempotently upsert a teacher profile for a demo user. */
@@ -55,7 +44,10 @@ export namespace PersonaSeedService {
   }
 
   /** Idempotently upsert a parent profile for a demo user. */
-  export async function seedParentProfile(input: SeedParentProfileInput, tx?: DBTransaction): Promise<ParentEntity> {
+  export async function seedParentProfile(
+    input: SeedParentProfileInput,
+    tx?: DBTransaction
+  ): Promise<ParentSelectType> {
     assertSeedWriteAllowed("Persona seed writes");
     await UserRepository.updateTimezone(input.userId, input.timezone, tx);
     return ParentRepository.upsertByUserId(input.userId, input.status, tx);
@@ -68,8 +60,8 @@ export namespace PersonaSeedService {
   }
 
   /** Read helper for seed / test-helper scripts. */
-  export async function listParentsByUserIds(userIds: string[], tx?: DBTransaction): Promise<ParentEntity[]> {
+  export async function listParentsByUserIds(userIds: string[], tx?: DBTransaction): Promise<ParentSelectType[]> {
     const parents = await Promise.all(userIds.map(userId => ParentRepository.findByUserId(userId, tx)));
-    return parents.filter((parent): parent is ParentEntity => parent !== null);
+    return parents.filter((parent): parent is ParentSelectType => parent !== null);
   }
 }

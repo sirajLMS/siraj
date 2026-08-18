@@ -11,7 +11,7 @@
 // Provider slug union — the three adapters that support auto-generation
 // ============================================================================
 
-export type MeetingProvider = "zoom" | "google_meet" | "microsoft_teams";
+export type { MeetingProvider } from "@/backend/types";
 
 // ============================================================================
 // Input / Output shapes

@@ -8,6 +8,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { resolveTeacherId } from "@/backend/services/schedule/__shared__/resolveTeacherId";
 import { resolveViewerTimezone } from "@/backend/services/schedule/resolve-viewer-timezone";
+import { ClassInstanceExpiryService } from "@/backend/services/session/class-instance-expiry.service";
 import { TeacherNotesService } from "@/backend/services/subject/teacher-notes.service";
 import type {
   DailyScheduleResult,
@@ -108,7 +109,8 @@ export namespace ScheduleService {
       metricFilter?: string | null;
       paginationArgs?: PaginationArgs | null;
     },
-    tErrors: ErrorsLabels
+    tErrors: ErrorsLabels,
+    locale: string
   ) {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
@@ -132,6 +134,7 @@ export namespace ScheduleService {
       const search = input.search ?? undefined;
       const metricFilter = input.metricFilter ?? undefined;
 
+      await ClassInstanceExpiryService.processExpiredInstances({ locale });
       const { metrics, rows, totalCount, pageInfo } = await SchedulingRepository.getAdminDashboardSchedule({
         date: targetDate,
         teacherId,
@@ -139,6 +142,7 @@ export namespace ScheduleService {
         viewerTimezone,
         metricFilter,
         pagination: input.paginationArgs ?? null,
+        locale,
       });
 
       const mappedRows = await Promise.all(rows.map(row => mapDailyScheduleListItem(row, tErrors)));

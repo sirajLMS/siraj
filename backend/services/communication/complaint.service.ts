@@ -10,6 +10,7 @@ import {
   requireParentByActorUserId,
   softDeleteEntityLog,
 } from "@/backend/services/communication/__shared__/complaintSuggestionBase";
+import { deriveComplaintMetrics } from "@/backend/services/communication/complaint-validation.helpers";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
 import { buildNewComplaintPayloads } from "@/backend/services/notification/notification-payloads.builders";
 import type {
@@ -187,7 +188,7 @@ export namespace ComplaintService {
     await assertPermission(actorUserId, AppPermission.COMPLAINTS_LIST, locale);
 
     try {
-      const [queueResult, metrics] = await Promise.all([
+      const [queueResult, metricsRaw] = await Promise.all([
         ComplaintRepository.getComplaintQueuePaginated(
           {
             status: options.status ?? null,
@@ -195,8 +196,10 @@ export namespace ComplaintService {
           },
           null
         ),
-        ComplaintRepository.getComplaintMetrics(),
+        ComplaintRepository.getComplaintMetricsRaw(),
       ]);
+
+      const metrics = deriveComplaintMetrics(metricsRaw.statusCounts, { avgHours: metricsRaw.avgResolutionHours }, 0);
 
       return {
         id: "complaint-queue-result",
@@ -230,7 +233,7 @@ export namespace ComplaintService {
     await assertPermission(actorUserId, AppPermission.COMPLAINTS_LIST, locale);
 
     try {
-      const [paginatedResult, metrics] = await Promise.all([
+      const [paginatedResult, metricsRaw] = await Promise.all([
         ComplaintRepository.getComplaintQueuePaginated(
           {
             status: options.status ?? null,
@@ -238,7 +241,7 @@ export namespace ComplaintService {
           },
           paginationArgs
         ),
-        ComplaintRepository.getComplaintMetrics(),
+        ComplaintRepository.getComplaintMetricsRaw(),
       ]);
 
       const complaintIds = paginatedResult.rows.map(r => r.id);
@@ -248,6 +251,12 @@ export namespace ComplaintService {
         ...row,
         responses: responsesMap.get(row.id) ?? [],
       }));
+
+      const metrics = deriveComplaintMetrics(
+        metricsRaw.statusCounts,
+        { avgHours: metricsRaw.avgResolutionHours },
+        paginatedResult.totalCount
+      );
 
       return {
         id: "complaint-queue-result",

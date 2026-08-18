@@ -4,6 +4,13 @@ import { NotificationPreferencesRepository } from "@/backend/db/repo/notificatio
 import { WhatsappAccountRepository } from "@/backend/db/repo/whatsapp";
 import { AppPermission, NotificationChannel, NotificationEventType, SystemPermissionGroupSlug } from "@/backend/enum";
 import { WhatsappTemplateCategory, WhatsappTemplateStatus } from "@/backend/enum/whatsapp/whatsapp.enum";
+import {
+  buildReturnType,
+  coerceLimitTier,
+  coerceQualityRating,
+  isValidLimitTier,
+  isValidQualityRating,
+} from "@/backend/lib";
 import { logger } from "@/backend/lib/logger";
 import {
   FETCH_TIMEOUT_MS,
@@ -23,27 +30,23 @@ import { resolveEnvConfig } from "@/backend/services/system";
 import { AuditService } from "@/backend/services/system/audit.service";
 // r10-043/r10-044/r10-045: Canonical types imported from the types layer,
 // not from service-layer barrels or request builders.
-import {
-  type AuditAction,
-  buildReturnType,
-  type CreateAuditLogInput,
-  coerceLimitTier,
-  coerceQualityRating,
-  type DBTransaction,
-  type GetPhoneNumberResult,
-  type GraphApiRequestContext,
-  type GraphApiRequestInit,
-  isValidLimitTier,
-  isValidQualityRating,
-  type ListMessageTemplatesResponseBody,
-  type ListPhoneNumbersResponseBody,
-  type NotificationPreferenceUpdateInput,
-  type WhatsappAccountCreateSubmitInput,
-  type WhatsappAccountReturnType,
-  type WhatsappAccountUpdateInput,
-  type WhatsappPhoneNumber,
-  type WhatsappSyncFromMetaReturnType,
-  type WhatsappTemplateSnapshot,
+import type {
+  AuditAction,
+  CreateAuditLogInput,
+  DBTransaction,
+  GetPhoneNumberResult,
+  GraphApiRequestContext,
+  GraphApiRequestInit,
+  ListMessageTemplatesResponseBody,
+  ListPhoneNumbersResponseBody,
+  NotificationPreferenceUpdateInput,
+  WhatsappAccountCreateSubmitInput,
+  WhatsappAccountReturnType,
+  WhatsappAccountUpdateInput,
+  WhatsappMessageTemplate,
+  WhatsappPhoneNumber,
+  WhatsappSyncFromMetaReturnType,
+  WhatsappTemplateSnapshot,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -595,127 +598,125 @@ export namespace WhatsappAccountService {
     return phoneDetails;
   }
 
-  export async function syncFromMeta(
-    actorUserId: string,
-    tErrors: ErrorsLabels,
-    tx?: DBTransaction
-  ): Promise<WhatsappSyncFromMetaReturnType> {
-    await assertCanManage(actorUserId, tErrors);
+  /**
+   * Process a single phone number: coerce Meta enums, upsert the account,
+   * and return the result. Returns null on per-account write failure
+   * (counts toward `failedCount`).
+   */
+  async function processPhoneNumber(
+    phone: WhatsappPhoneNumber,
+    detail: GetPhoneNumberResult | undefined,
+    existing: WhatsappAccountReturnType | null,
+    wabaId: string,
+    tx: DBTransaction | undefined,
+    onFail: () => void
+  ): Promise<WhatsappAccountReturnType | null> {
+    if (!detail) {
+      return null;
+    }
+    // r10-012: Warn when Meta sends an unrecognized enum value, but do not
+    // log the raw Meta enum string (which could echo arbitrary enum text
+    // from the provider). Use a generic description instead.
+    const qualityRating = coerceQualityRating(detail.quality_rating);
+    if (!isValidQualityRating(detail.quality_rating)) {
+      logger.warn("whatsapp-account-service: quality rating from Meta was not recognized — falling back to UNKNOWN", {
+        qualityRatingFallback: "UNKNOWN",
+      });
+    }
+    const portfolioMessagingLimitTier = coerceLimitTier(detail.portfolio_messaging_limit_tier);
+    if (!isValidLimitTier(detail.portfolio_messaging_limit_tier)) {
+      logger.warn(
+        "whatsapp-account-service: messaging limit tier from Meta was not recognized — falling back to TIER_NOT_SET",
+        { messagingLimitTierFallback: "TIER_NOT_SET" }
+      );
+    }
 
-    const { ctx, wabaId } = await resolveGraphApiContext(tErrors);
-
-    const phoneNumbers = await collectAllPhoneNumbers(ctx, { wabaId }, async request => {
-      return executeGraphApiFetch<ListPhoneNumbersResponseBody>(request, phoneNumberListSchema);
-    });
-
-    const phoneDetails = await fetchPhoneDetailsBatch(ctx, phoneNumbers);
-
-    // Batch-fetch all existing accounts by phone number ID in a single query
-    // (avoids N*2 round-trips for N phone numbers).
-    const phoneIds = phoneNumbers.map(p => p.id);
-    const existingByPhoneId = await WhatsappAccountRepository.findByPhoneNumberIds(phoneIds, tx);
-
-    // Track per-account write failures so they are not silently swallowed.
-    let failedCount = 0;
-
-    // When tx is provided, all writes share a single drizzle pg connection — running
-    // them in parallel is unsafe. Use sequential execution in that case. When tx is
-    // absent (default db), each write gets its own connection and parallel is fine.
-
-    // Coerce raw Meta enum strings into valid enum members once per phone detail,
-    // then reuse the coerced values for both the repo write and the return object
-    // (previously the repo received raw strings while the return used coerced values).
-
-    const processPhoneNumber = async (phone: WhatsappPhoneNumber): Promise<WhatsappAccountReturnType | null> => {
-      const detail = phoneDetails.get(phone.id);
-      if (!detail) {
-        return null;
-      }
-      // r10-012: Warn when Meta sends an unrecognized enum value, but do not
-      // log the raw Meta enum string (which could echo arbitrary enum text
-      // from the provider). Use a generic description instead.
-      const qualityRating = coerceQualityRating(detail.quality_rating);
-      if (!isValidQualityRating(detail.quality_rating)) {
-        logger.warn("whatsapp-account-service: quality rating from Meta was not recognized — falling back to UNKNOWN", {
-          qualityRatingFallback: "UNKNOWN",
-        });
-      }
-      const portfolioMessagingLimitTier = coerceLimitTier(detail.portfolio_messaging_limit_tier);
-      if (!isValidLimitTier(detail.portfolio_messaging_limit_tier)) {
-        logger.warn(
-          "whatsapp-account-service: messaging limit tier from Meta was not recognized — falling back to TIER_NOT_SET",
-          { messagingLimitTierFallback: "TIER_NOT_SET" }
-        );
-      }
-
-      const existing = existingByPhoneId.get(phone.id) ?? null;
-      try {
-        if (existing) {
-          await WhatsappAccountRepository.update(
-            existing.id,
-            {
-              displayPhoneNumber: detail.display_phone_number,
-              qualityRating,
-              portfolioMessagingLimitTier,
-              throughputLevel: detail.throughput_level,
-            },
-            tx
-          );
-          return {
-            ...existing,
-            displayPhoneNumber: detail.display_phone_number,
-            qualityRating,
-            portfolioMessagingLimitTier,
-            throughputLevel: detail.throughput_level,
-          } satisfies WhatsappAccountReturnType;
-        }
-        return WhatsappAccountRepository.create(
+    try {
+      if (existing) {
+        await WhatsappAccountRepository.update(
+          existing.id,
           {
-            wabaId,
-            phoneNumberId: phone.id,
             displayPhoneNumber: detail.display_phone_number,
             qualityRating,
             portfolioMessagingLimitTier,
             throughputLevel: detail.throughput_level,
-            encryptedAccessToken: SYNC_STATUS_PENDING,
-            encryptedTwoStepPin: SYNC_STATUS_PENDING,
-            isActive: false,
           },
           tx
         );
-      } catch (error) {
-        failedCount++;
-        // r10-036: Avoid leaking DB internals (constraint messages reveal
-        // schema/row internals). For known validation errors, log their
-        // message; for unknown errors, log only the constructor name.
-        const errorDescription = getErrorDescription(error);
-        logger.warn(
-          `whatsapp-account-service: syncFromMeta failed to write account for phoneNumberId=${phone.id}: ${errorDescription}`,
-          { phoneNumberId: phone.id, errorType: errorDescription }
-        );
-        return null;
+        return {
+          ...existing,
+          displayPhoneNumber: detail.display_phone_number,
+          qualityRating,
+          portfolioMessagingLimitTier,
+          throughputLevel: detail.throughput_level,
+        } satisfies WhatsappAccountReturnType;
       }
+      return WhatsappAccountRepository.create(
+        {
+          wabaId,
+          phoneNumberId: phone.id,
+          displayPhoneNumber: detail.display_phone_number,
+          qualityRating,
+          portfolioMessagingLimitTier,
+          throughputLevel: detail.throughput_level,
+          encryptedAccessToken: SYNC_STATUS_PENDING,
+          encryptedTwoStepPin: SYNC_STATUS_PENDING,
+          isActive: false,
+        },
+        tx
+      );
+    } catch (error) {
+      onFail();
+      // r10-036: Avoid leaking DB internals.
+      const errorDescription = getErrorDescription(error);
+      logger.warn(
+        `whatsapp-account-service: syncFromMeta failed to write account for phoneNumberId=${phone.id}: ${errorDescription}`,
+        { phoneNumberId: phone.id, errorType: errorDescription }
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Collect account results from phone numbers, respecting the transaction
+   * boundary. When `tx` is provided, writes run sequentially. When absent,
+   * writes run in bounded parallel chunks.
+   */
+  async function collectAccountResults(
+    phoneNumbers: readonly WhatsappPhoneNumber[],
+    phoneDetails: Map<string, GetPhoneNumberResult>,
+    existingByPhoneId: Map<string, WhatsappAccountReturnType | null>,
+    wabaId: string,
+    tx: DBTransaction | undefined
+  ): Promise<{ accounts: WhatsappAccountReturnType[]; failedCount: number }> {
+    let failedCount = 0;
+    const onFail = () => {
+      failedCount++;
     };
 
-    // r10-032: When tx is provided, all writes share a single drizzle pg
-    // connection — running them in parallel is unsafe. Use sequential execution
-    // via collectSequentially in that case. When tx is absent (default db),
-    // each write gets its own connection, but we still bound the concurrency to
-    // MAX_CONCURRENT_PHONES to avoid saturating the connection pool with one
-    // unbounded `Promise.all` over every phone number.
+    const processOne = (phone: WhatsappPhoneNumber) =>
+      processPhoneNumber(
+        phone,
+        phoneDetails.get(phone.id),
+        existingByPhoneId.get(phone.id) ?? null,
+        wabaId,
+        tx,
+        onFail
+      );
+
     let accountResults: (WhatsappAccountReturnType | null)[];
     if (tx) {
-      accountResults = await collectSequentially(phoneNumbers, processPhoneNumber);
+      accountResults = await collectSequentially([...phoneNumbers], processOne);
     } else {
       accountResults = [];
       const phoneChunks: WhatsappPhoneNumber[][] = [];
       for (let i = 0; i < phoneNumbers.length; i += MAX_CONCURRENT_PHONES) {
-        phoneChunks.push(phoneNumbers.slice(i, i + MAX_CONCURRENT_PHONES));
+        phoneChunks.push([...phoneNumbers].slice(i, i + MAX_CONCURRENT_PHONES));
       }
       await phoneChunks.reduce(
         (chain, chunk) =>
           chain
-            .then(() => Promise.all(chunk.map(processPhoneNumber)))
+            .then(() => Promise.all(chunk.map(processOne)))
             .then(chunkResults => {
               accountResults.push(...chunkResults);
               return accountResults;
@@ -724,16 +725,14 @@ export namespace WhatsappAccountService {
       );
     }
 
-    const accounts: WhatsappAccountReturnType[] = accountResults.filter(
-      (r): r is WhatsappAccountReturnType => r !== null
-    );
+    const accounts = accountResults.filter((r): r is WhatsappAccountReturnType => r !== null);
+    return { accounts, failedCount };
+  }
 
-    const templates = await collectAllTemplates(ctx, { wabaId }, async request => {
-      return executeGraphApiFetch<ListMessageTemplatesResponseBody>(request, messageTemplateListSchema);
-    });
-
+  /** Map collected templates to the snapshot type, coercing unknown enums. */
+  function buildTemplateSnapshot(templates: readonly WhatsappMessageTemplate[]): WhatsappTemplateSnapshot[] {
     const now = new Date();
-    const templateSnapshot: WhatsappTemplateSnapshot[] = templates.map(t => {
+    return templates.map(t => {
       let status: WhatsappTemplateStatus;
       if (isValidTemplateStatus(t.status)) {
         status = t.status;
@@ -763,6 +762,41 @@ export namespace WhatsappAccountService {
         lastSyncedAt: now,
       };
     });
+  }
+
+  export async function syncFromMeta(
+    actorUserId: string,
+    tErrors: ErrorsLabels,
+    tx?: DBTransaction
+  ): Promise<WhatsappSyncFromMetaReturnType> {
+    await assertCanManage(actorUserId, tErrors);
+
+    const { ctx, wabaId } = await resolveGraphApiContext(tErrors);
+
+    const phoneNumbers = await collectAllPhoneNumbers(ctx, { wabaId }, async request => {
+      return executeGraphApiFetch<ListPhoneNumbersResponseBody>(request, phoneNumberListSchema);
+    });
+
+    const phoneDetails = await fetchPhoneDetailsBatch(ctx, phoneNumbers);
+
+    // Batch-fetch all existing accounts by phone number ID in a single query
+    // (avoids N*2 round-trips for N phone numbers).
+    const phoneIds = phoneNumbers.map(p => p.id);
+    const existingByPhoneId = await WhatsappAccountRepository.findByPhoneNumberIds(phoneIds, tx);
+
+    const { accounts, failedCount } = await collectAccountResults(
+      phoneNumbers,
+      phoneDetails,
+      existingByPhoneId,
+      wabaId,
+      tx
+    );
+
+    const templates = await collectAllTemplates(ctx, { wabaId }, async request => {
+      return executeGraphApiFetch<ListMessageTemplatesResponseBody>(request, messageTemplateListSchema);
+    });
+
+    const templateSnapshot = buildTemplateSnapshot(templates);
 
     const failedNote = failedCount > 0 ? ` ${failedCount} account writes failed` : "";
     await auditChange(

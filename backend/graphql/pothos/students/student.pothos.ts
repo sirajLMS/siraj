@@ -1,5 +1,6 @@
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { OrderSortDirection } from "@/backend/enum";
+import { StudentsOrderByColumn } from "@/backend/enum/students";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AppLanguagePothosObject,
@@ -8,14 +9,13 @@ import {
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject } from "@/backend/graphql/pothos/shared/pagination.objects";
-import {
-  type PartialStudentUpdateInput,
-  type StudentCreateInput,
-  type StudentFilterArgs,
-  type StudentReturnType,
-  type StudentsOrderByClause,
-  StudentsOrderByColumn,
-  type StudentsWithFiltersResponse,
+import type {
+  PartialStudentUpdateInput,
+  StudentCreateInput,
+  StudentFilterArgs,
+  StudentReturnType,
+  StudentsOrderByClause,
+  StudentsWithFiltersResponse,
 } from "@/backend/types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {

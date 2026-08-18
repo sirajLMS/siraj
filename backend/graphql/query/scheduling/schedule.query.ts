@@ -33,7 +33,7 @@ async function fetchDailySchedule(
   tErrors: ErrorsLabels
 ): Promise<AdminDashboardResult> {
   const userId = await requireAuth(ctx);
-  return ScheduleService.getAdminDashboardSchedule(userId, args, tErrors);
+  return ScheduleService.getAdminDashboardSchedule(userId, args, tErrors, ctx.locale);
 }
 
 function selectDailySchedule<T>(
@@ -64,7 +64,8 @@ gqlSchemaBuilder.queryField("adminDashboardSchedule", t =>
           ...args.input,
           paginationArgs: pagination,
         },
-        tErrors
+        tErrors,
+        ctx.locale
       );
     },
   })

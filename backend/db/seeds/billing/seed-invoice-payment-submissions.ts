@@ -3,13 +3,13 @@ import { InvoiceStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { BillingManagementService, StorageService } from "@/backend/services";
 import { createFileSeedingService } from "@/backend/storage/demo/fileInitializationService";
-import type { InvoiceSelectType, ParentEntity, UserSelectType } from "@/backend/types";
+import type { InvoiceSelectType, ParentSelectType, UserSelectType } from "@/backend/types";
 
 const targetStatuses = new Set<string>([InvoiceStatus.UNPAID, InvoiceStatus.PAYMENT_PENDING]);
 
 export async function seedOrGet(
   invoicesList: InvoiceSelectType[],
-  parentsList: ParentEntity[],
+  parentsList: ParentSelectType[],
   usersList: UserSelectType[],
   config?: SeedConfig
 ) {

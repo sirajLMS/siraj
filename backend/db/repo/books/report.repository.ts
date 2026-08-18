@@ -104,11 +104,11 @@ function buildAttendanceSelectQuery(
   return q.select({
     groupKey: sql<string>`${groupKeyExpr}::text`,
     groupLabel: sql<string>`COALESCE(${groupLabelExpr}, ${groupKeyExpr}::text)`,
-    takenClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)::int`,
-    absentClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)::int`,
-    leaveClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)::int`,
-    pendingClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'PENDING' THEN 1 ELSE 0 END)::int`,
-    totalHours: sql<number>`SUM(${classInstances.durationMinutes}::float / 60.0)::float`,
+    takenClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)`.mapWith(Number),
+    absentClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)`.mapWith(Number),
+    leaveClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)`.mapWith(Number),
+    pendingClasses: sql<number>`SUM(CASE WHEN ${classInstances.outcome} = 'PENDING' THEN 1 ELSE 0 END)`.mapWith(Number),
+    totalHours: sql<number>`SUM(${classInstances.durationMinutes} / 60.0)`.mapWith(Number),
   });
 }
 
@@ -217,12 +217,30 @@ export namespace ReportRepository {
 
       const result = await q
         .select({
-          prevTaken: sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${previousFromDate} AND ${classInstances.scheduledStartAt} <= ${previousToDate} AND ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)::int`,
-          prevAbsent: sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${previousFromDate} AND ${classInstances.scheduledStartAt} <= ${previousToDate} AND ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)::int`,
-          prevLeave: sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${previousFromDate} AND ${classInstances.scheduledStartAt} <= ${previousToDate} AND ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)::int`,
-          currTaken: sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${filters.fromDate} AND ${classInstances.scheduledStartAt} <= ${filters.toDate} AND ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)::int`,
-          currAbsent: sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${filters.fromDate} AND ${classInstances.scheduledStartAt} <= ${filters.toDate} AND ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)::int`,
-          currLeave: sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${filters.fromDate} AND ${classInstances.scheduledStartAt} <= ${filters.toDate} AND ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)::int`,
+          prevTaken:
+            sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${previousFromDate} AND ${classInstances.scheduledStartAt} <= ${previousToDate} AND ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)`.mapWith(
+              Number
+            ),
+          prevAbsent:
+            sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${previousFromDate} AND ${classInstances.scheduledStartAt} <= ${previousToDate} AND ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)`.mapWith(
+              Number
+            ),
+          prevLeave:
+            sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${previousFromDate} AND ${classInstances.scheduledStartAt} <= ${previousToDate} AND ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)`.mapWith(
+              Number
+            ),
+          currTaken:
+            sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${filters.fromDate} AND ${classInstances.scheduledStartAt} <= ${filters.toDate} AND ${classInstances.outcome} = 'TAKEN' THEN 1 ELSE 0 END)`.mapWith(
+              Number
+            ),
+          currAbsent:
+            sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${filters.fromDate} AND ${classInstances.scheduledStartAt} <= ${filters.toDate} AND ${classInstances.outcome} = 'ABSENT' THEN 1 ELSE 0 END)`.mapWith(
+              Number
+            ),
+          currLeave:
+            sql<number>`SUM(CASE WHEN ${classInstances.scheduledStartAt} >= ${filters.fromDate} AND ${classInstances.scheduledStartAt} <= ${filters.toDate} AND ${classInstances.outcome} = 'LEAVE' THEN 1 ELSE 0 END)`.mapWith(
+              Number
+            ),
         })
         .from(classInstances)
         .where(

@@ -8,7 +8,6 @@ export type { DBTransaction };
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
-import { EffectiveMeetingService } from "@/backend/services";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
@@ -64,12 +63,12 @@ export interface OverlapCheckParams {
   teacherId: string;
   startTime: Date;
   endTime: Date;
-  meetingJoinUrl?: string | null;
   excludeId?: string;
+  meetingJoinUrl?: string | null;
 }
 
 export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParams, tErrors: ErrorsLabels) {
-  const { studentId, teacherId, startTime, endTime, meetingJoinUrl, excludeId } = params;
+  const { teacherId, studentId, startTime, endTime, excludeId, meetingJoinUrl } = params;
   const overlapCondition = sql`(${classInstances.scheduledStartAt}, ${classInstances.scheduledEndAt}) OVERLAPS (${startTime}, ${endTime})`;
 
   const teacherOverlaps = await tx
@@ -105,35 +104,41 @@ export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParam
   }
 
   if (meetingJoinUrl) {
-    const meetingUrlOverlaps = await tx
-      .select({
-        id: classInstances.id,
-        meetingJoinUrl: classInstances.meetingJoinUrl,
-      })
+    const urlOverlaps = await tx
+      .select({ id: classInstances.id })
       .from(classInstances)
       .where(
         and(
+          eq(classInstances.meetingJoinUrl, meetingJoinUrl),
           isNull(classInstances.deletedAt),
           overlapCondition,
           excludeId ? ne(classInstances.id, excludeId) : undefined
         )
-      );
-
-    const resolvedUrls = await Promise.all(
-      meetingUrlOverlaps.map(row => EffectiveMeetingService.resolveForClassInstance(row.id, tErrors, tx))
-    );
-
-    for (const [index, row] of meetingUrlOverlaps.entries()) {
-      // Check direct meetingJoinUrl column first
-      if (row.meetingJoinUrl === meetingJoinUrl) {
-        throw new Error(tErrors.meetingUrlInUse);
-      }
-      // Also check resolved meeting URL from config service
-      if (resolvedUrls[index].joinUrl === meetingJoinUrl) {
-        throw new Error(tErrors.meetingUrlInUse);
-      }
+      )
+      .limit(1);
+    if (urlOverlaps.length > 0) {
+      throw new Error(tErrors.meetingUrlInUse);
     }
   }
+}
+
+/** Returns raw rows that overlap the given time range — lets the service layer check meeting URL conflicts. */
+export async function findOverlapInstances(
+  tx: DBTransaction,
+  params: { startTime: Date; endTime: Date; excludeId?: string }
+): Promise<{ id: string; meetingJoinUrl: string | null }[]> {
+  const { startTime, endTime, excludeId } = params;
+  const overlapCondition = sql`(${classInstances.scheduledStartAt}, ${classInstances.scheduledEndAt}) OVERLAPS (${startTime}, ${endTime})`;
+  const rows = await tx
+    .select({
+      id: classInstances.id,
+      meetingJoinUrl: classInstances.meetingJoinUrl,
+    })
+    .from(classInstances)
+    .where(
+      and(isNull(classInstances.deletedAt), overlapCondition, excludeId ? ne(classInstances.id, excludeId) : undefined)
+    );
+  return rows;
 }
 
 export async function performRescheduleValidations(
@@ -168,7 +173,8 @@ export async function createRescheduledSuccessor(
   existing: Types.ClassInstanceSelectType,
   offsetDays: number,
   remarks: string,
-  tErrors: ErrorsLabels
+  tErrors: ErrorsLabels,
+  meetingJoinUrl?: string | null
 ): Promise<Types.ClassInstanceSelectType> {
   const offsetMs = offsetDays * 24 * 60 * 60 * 1000;
   const newScheduledStartAt = new Date(existing.scheduledStartAt.getTime() + offsetMs);
@@ -176,11 +182,6 @@ export async function createRescheduledSuccessor(
 
   const successorIdempotencyKey = `leave-reschedule-${existing.id}-${newScheduledStartAt.toISOString()}`;
 
-  const effectiveMeeting = await EffectiveMeetingService.resolveForNewBooking(existing.teacherId, {
-    recurringScheduleId: existing.recurringScheduleId,
-    tErrors,
-    tx: t,
-  });
   const successorInput = {
     studentId: existing.studentId,
     teacherId: existing.teacherId,
@@ -202,14 +203,10 @@ export async function createRescheduledSuccessor(
     rateSource: existing.rateSource,
     remarks,
     idempotencyKey: successorIdempotencyKey,
+    meetingJoinUrl: meetingJoinUrl ?? existing.meetingJoinUrl,
   };
 
-  const successorWithMeeting = {
-    ...successorInput,
-    meetingJoinUrl: effectiveMeeting.joinUrl,
-  };
-
-  await performRescheduleValidations(t, successorWithMeeting, tErrors);
+  await performRescheduleValidations(t, successorInput, tErrors);
 
   const [successor] = await t
     .insert(classInstances)

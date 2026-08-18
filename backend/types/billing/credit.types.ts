@@ -21,7 +21,7 @@ export interface CreditBalanceReturnType {
   classesRemaining: number;
 }
 
-export interface CreditInsertInput {
+export interface CreditInsertType {
   studentId: string;
   changeAmount: number;
   reason: CreditReason;

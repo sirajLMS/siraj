@@ -1,9 +1,8 @@
-import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { meetingProviderTokens } from "@/backend/db/schema";
 
-export type MeetingProviderTokenSelectType = InferSelectModel<typeof meetingProviderTokens>;
+export type MeetingProviderTokenSelectType = typeof meetingProviderTokens.$inferSelect;
 
-export type MeetingProviderTokenInsertType = InferInsertModel<typeof meetingProviderTokens>;
+export type MeetingProviderTokenInsertType = typeof meetingProviderTokens.$inferInsert;
 
 /**
  * Represents the return type of meeting-provider token operations (mint, refresh, etc.).

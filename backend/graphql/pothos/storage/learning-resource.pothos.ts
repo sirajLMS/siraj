@@ -1,3 +1,4 @@
+import { GraphQLError } from "graphql";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { LearningResourceService } from "@/backend/services";
 import type { LearningResourceReturnType } from "@/backend/types";
@@ -81,7 +82,8 @@ gqlSchemaBuilder.mutationField("deleteLearningResource", t =>
     resolve: async (_root, args, ctx) => {
       // 1. Authentication Check
       if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
+        const tErrors = ctx.t().errorsTranslations;
+        throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
       }
 
       // 2. Delegate to Service Layer

@@ -3,7 +3,8 @@ import type { PgSelect } from "drizzle-orm/pg-core";
 import { fullTextSearch } from "@/backend/db/query.extensions";
 import { students } from "@/backend/db/schema";
 import { OrderSortDirection } from "@/backend/enum";
-import * as Types from "@/backend/types";
+import { StudentsOrderByColumn } from "@/backend/enum/students";
+import type * as Types from "@/backend/types";
 
 export namespace StudentFilterUtils {
   export function applyFilters<T extends PgSelect>(qb: T, args?: Types.StudentFilterArgs | null): T {
@@ -161,36 +162,36 @@ export namespace StudentFilterUtils {
         | typeof students.classesTotal
         | typeof students.createdAt;
       switch (clause.column) {
-        case Types.StudentsOrderByColumn.ID:
+        case StudentsOrderByColumn.ID:
           column = students.id;
           break;
-        case Types.StudentsOrderByColumn.NAME:
+        case StudentsOrderByColumn.NAME:
           column = students.name;
           break;
-        case Types.StudentsOrderByColumn.PARENT_ID:
+        case StudentsOrderByColumn.PARENT_ID:
           column = students.parentId;
           break;
-        case Types.StudentsOrderByColumn.DATE_OF_BIRTH:
+        case StudentsOrderByColumn.DATE_OF_BIRTH:
           column = students.dateOfBirth;
           break;
-        case Types.StudentsOrderByColumn.GENDER:
+        case StudentsOrderByColumn.GENDER:
           column = students.gender;
           break;
-        case Types.StudentsOrderByColumn.STATUS:
+        case StudentsOrderByColumn.STATUS:
           column = students.status;
           break;
-        case Types.StudentsOrderByColumn.CLASSES_TOTAL:
+        case StudentsOrderByColumn.CLASSES_TOTAL:
           column = students.classesTotal;
           break;
-        case Types.StudentsOrderByColumn.CLASSES_REMAINING:
+        case StudentsOrderByColumn.CLASSES_REMAINING:
           column = students.classesRemaining;
           break;
-        case Types.StudentsOrderByColumn.CREATED_AT:
+        case StudentsOrderByColumn.CREATED_AT:
           column = students.createdAt;
           // Track if primary sort is DESC for id tie-breaker
           primaryIsDesc = clause.order === OrderSortDirection.DESC;
           break;
-        case Types.StudentsOrderByColumn.UPDATED_AT:
+        case StudentsOrderByColumn.UPDATED_AT:
           column = students.updatedAt;
           break;
         default:

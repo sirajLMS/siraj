@@ -8,7 +8,7 @@ import {
 import { SuggestionStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { SuggestionService } from "@/backend/services";
-import type { ParentEntity, UserSelectType } from "@/backend/types";
+import type { ParentSelectType, UserSelectType } from "@/backend/types";
 
 function resolveAdminResponse(status: SuggestionStatus): string | null {
   if (status === SuggestionStatus.REVIEWED) {
@@ -20,7 +20,7 @@ function resolveAdminResponse(status: SuggestionStatus): string | null {
   return null;
 }
 
-export async function seedOrGet(parentsList: ParentEntity[], usersList: UserSelectType[], config?: SeedConfig) {
+export async function seedOrGet(parentsList: ParentSelectType[], usersList: UserSelectType[], config?: SeedConfig) {
   logger.info("Seeding suggestions...");
   const now = new Date();
   const seedConfig = config ?? loadSeedConfig();

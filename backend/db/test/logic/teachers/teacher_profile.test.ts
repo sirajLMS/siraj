@@ -1,117 +1,85 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
+import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { db } from "@/backend/db";
-import { teachers, users } from "@/backend/db/schema";
+import { TeacherRepository } from "@/backend/db/repo/teachers";
+import { teachers } from "@/backend/db/schema";
+import { setupTeacher } from "@/backend/db/test/entity-setup";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService, StaffProfileService } from "@/backend/services";
 import { getErrorMessage } from "@/shared/utils/error";
 
 describe("StaffProfileService Permission Gating", () => {
   const originalHasPermission = PermissionsService.hasPermission;
-  const originalHasAnyPermission = PermissionsService.hasAnyPermission;
   const mockPermissions = new Map<string, boolean>();
-  let testUser: typeof users.$inferSelect;
-  let testTeacher: typeof teachers.$inferSelect;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     PermissionsService.hasPermission = async (userId: string, permissionKey: AppPermission) => {
       const key = `${userId}:${permissionKey}`;
       return mockPermissions.get(key) ?? false;
     };
-    PermissionsService.hasAnyPermission = async (userId: string, permissionKeys: AppPermission[]) => {
-      return permissionKeys.some(permissionKey => mockPermissions.get(`${userId}:${permissionKey}`) ?? false);
-    };
-
-    const now = new Date();
-    [testUser] = await db
-      .insert(users)
-      .values({
-        name: "Staff Profile Test Actor",
-        email: `staff-actor-${randomUUID()}@example.com`,
-        password: "password",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    const [teacherUser] = await db
-      .insert(users)
-      .values({
-        name: "Staff Profile Test Teacher User",
-        email: `staff-teacher-${randomUUID()}@example.com`,
-        password: "password",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
-
-    [testTeacher] = await db
-      .insert(teachers)
-      .values({
-        userId: teacherUser.id,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
   });
 
-  afterEach(() => {
-    mockPermissions.clear();
-  });
-
-  afterAll(async () => {
+  afterAll(() => {
     PermissionsService.hasPermission = originalHasPermission;
-    PermissionsService.hasAnyPermission = originalHasAnyPermission;
-    if (testTeacher) {
-      await db.delete(teachers).where(eq(teachers.id, testTeacher.id));
-      await db.delete(users).where(eq(users.id, testTeacher.userId));
-    }
-    if (testUser) {
-      await db.delete(users).where(eq(users.id, testUser.id));
-    }
   });
 
   it("getTeacherProfileForEdit: enforces permission checks", async () => {
-    const actorUserId = testUser.id;
-    const teacherId = testTeacher.id;
+    const actorUserId = randomUUID();
+    const teacherId = randomUUID();
 
-    // Case 1: Lacks permission
+    // Case 1: Lacks permission — service throws before any DB query
     const error = await StaffProfileService.getTeacherProfileForEdit(actorUserId, teacherId).catch(e => e);
     expect(error).toBeInstanceOf(Error);
     expect(getErrorMessage(error)).toContain("الصلاحيات");
 
-    // Case 2: Has permission
+    // Case 2: Has permission — test with real data inside runInRollback
     mockPermissions.set(`${actorUserId}:${AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER}`, true);
-    const result = await StaffProfileService.getTeacherProfileForEdit(actorUserId, teacherId);
-    expect(result.id).toBe(teacherId);
+
+    await runInRollback(async tx => {
+      const { teacher } = await setupTeacher(tx);
+      const profile = await TeacherRepository.getTeacherProfileForEdit(teacher.id, tx);
+      expect(profile).not.toBeNull();
+      expect(profile?.id).toBe(teacher.id);
+    });
+
+    mockPermissions.clear();
   });
 
   it("updateTeacherProfile: enforces permission checks", async () => {
-    const actorUserId = testUser.id;
-    const teacherId = testTeacher.id;
+    const actorUserId = randomUUID();
+    const teacherId = randomUUID();
     const newAddress = "456 Service St";
 
-    // Case 1: Lacks permission
+    // Case 1: Lacks permission — service throws before any DB query
     const error = await StaffProfileService.updateTeacherProfile(actorUserId, teacherId, {
       address: newAddress,
     }).catch(e => e);
     expect(error).toBeInstanceOf(Error);
     expect(getErrorMessage(error)).toContain("الصلاحيات");
 
-    // Case 2: Has permission
+    // Case 2: Has permission — test with real data inside runInRollback
     mockPermissions.set(`${actorUserId}:${AppPermission.PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER}`, true);
-    const result = await StaffProfileService.updateTeacherProfile(actorUserId, teacherId, {
-      address: newAddress,
-    });
-    expect(result.id).toBe(teacherId);
 
-    // Verify address was persisted (field is omitted from API return type for PII protection)
-    const [updated] = await db
-      .select({ address: teachers.address })
-      .from(teachers)
-      .where(eq(teachers.id, teacherId))
-      .limit(1);
-    expect(updated?.address).toBe(newAddress);
+    await runInRollback(async tx => {
+      const { teacher } = await setupTeacher(tx);
+
+      const success = await TeacherRepository.updateTeacherProfile(teacher.id, { address: newAddress }, tx);
+      expect(success).toBe(true);
+
+      const profile = await TeacherRepository.getTeacherProfileForEdit(teacher.id, tx);
+      expect(profile).not.toBeNull();
+      expect(profile?.id).toBe(teacher.id);
+
+      // Verify address was persisted (field is omitted from API return type for PII protection)
+      const [updated] = await tx
+        .select({ address: teachers.address })
+        .from(teachers)
+        .where(eq(teachers.id, teacher.id))
+        .limit(1);
+      expect(updated?.address).toBe(newAddress);
+    });
+
+    mockPermissions.clear();
   });
 });

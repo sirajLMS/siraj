@@ -21,6 +21,8 @@ export type UserReturnType = Omit<
   UserSelectType,
   | "deletedAt"
   | "internalNotes"
+  | "password"
+  | "rememberTokenHash"
   | "role" // Re-apply enum
   | "status" // Re-apply enum
   | "timezone" // Re-apply enum
@@ -47,8 +49,6 @@ export type UserFilterInput = {
 
 // Add canonical UserUpdateSubmitInput for consistency with patterns
 export type UserUpdateSubmitInput = Omit<UserSubmitInput, "email">;
-
-export type SafeUser = Omit<UserReturnType, "password" | "rememberTokenHash">;
 
 export type UserCreateInput = {
   name: string;

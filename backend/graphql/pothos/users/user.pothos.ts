@@ -1,11 +1,10 @@
-import { UserRepository } from "@/backend/db/repo/users";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   AccountStatusPothosObject,
   AppPermissionPothosEnum,
   CurrencyCodePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
-import { ParentPortalService, PermissionsService, TeacherPortalService } from "@/backend/services";
+import { ParentPortalService, PermissionsService, TeacherPortalService, UserService } from "@/backend/services";
 import type { UserReturnType } from "@/backend/types";
 
 const UserPothosObjectRef = gqlSchemaBuilder.objectRef<UserReturnType>("User");
@@ -16,7 +15,7 @@ export const UserPothosObject = gqlSchemaBuilder.loadableObject<
   [],
   typeof UserPothosObjectRef
 >(UserPothosObjectRef, {
-  load: async (ids: string[]) => UserRepository.loadByIds(ids),
+  load: async (ids: string[]) => UserService.loadByIds(ids),
   sort: user => user.id,
   fields: t => ({
     id: t.exposeString("id"),

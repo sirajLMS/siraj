@@ -6,7 +6,7 @@ import type {
   ClassMeetingConfigSubmitInput,
   MeetingProviderSelectType,
 } from "@/backend/types";
-import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -30,7 +30,7 @@ const PROVIDER_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const CONFIG_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const CLASS_INSTANCE_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 
-const FAKE_ERRORS: ErrorsLabels = getServerTranslations("en").errorsTranslations;
+const FAKE_ERRORS = errorsEn;
 
 // ---------------------------------------------------------------------------
 // Mock helpers

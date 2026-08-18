@@ -9,7 +9,6 @@ import { getServerTranslations } from "@/shared/locale";
 
 export async function seedOrGet() {
   logger.info("Seeding supported online accounts...");
-  const now = new Date();
   const slugs = ONLINE_ACCOUNT_CATALOG_SEEDS.map((spec: OnlineAccountCatalogSeed) => spec.slug);
   const logoUrls = await seedCatalogLogoUrls("payment", slugs);
 
@@ -23,8 +22,6 @@ export async function seedOrGet() {
     supportedDirections: spec.supportedDirections,
     logoUrl: logoUrls.get(spec.slug) ?? null,
     isActive: true,
-    createdAt: now,
-    updatedAt: now,
   }));
 
   const tErrors = getServerTranslations("en").errorsTranslations;

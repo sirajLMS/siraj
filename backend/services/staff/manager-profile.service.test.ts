@@ -34,8 +34,6 @@ const updateProfileFieldsResult: UserReturnType = {
   name: targetRow.name,
   email: targetRow.email,
   emailVerifiedAt: null,
-  password: "redacted",
-  rememberTokenHash: null,
   avatarFilePath: null,
   avatarUrl: null,
   phone: "+966500000000",

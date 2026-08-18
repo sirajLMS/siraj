@@ -19,7 +19,6 @@ import { TeacherAvailabilityRepository } from "@/backend/db/repo/teachers";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { OnDemandStatus } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import { EffectiveMeetingService } from "@/backend/services";
 import type * as Types from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 
@@ -135,15 +134,6 @@ export const createClassInstance = async (
       "ar"
     );
 
-    const effectiveMeeting = await EffectiveMeetingService.resolveForNewBooking(input.teacherId, {
-      recurringScheduleId: input.recurringScheduleId,
-      tx: t,
-      tErrors: tFuncErrors,
-    });
-
-    // Use the meetingJoinUrl from input if provided, otherwise fall back to effective meeting
-    const meetingJoinUrl = input.meetingJoinUrl ?? effectiveMeeting.joinUrl;
-
     await checkOverlaps(
       t,
       {
@@ -151,7 +141,7 @@ export const createClassInstance = async (
         teacherId: input.teacherId,
         startTime: input.scheduledStartAt,
         endTime: input.scheduledEndAt,
-        meetingJoinUrl,
+        meetingJoinUrl: input.meetingJoinUrl,
       },
       tFuncErrors
     );
@@ -188,7 +178,6 @@ export const updateClassInstance = async (
     const startTime = input.scheduledStartAt ?? existing.scheduledStartAt;
     const endTime = input.scheduledEndAt ?? existing.scheduledEndAt;
     const isBeingSoftDeleted = Boolean(input.deletedAt);
-    const effectiveMeeting = await EffectiveMeetingService.resolveForClassInstance(id, tFuncErrors, t);
 
     await acquireLocks(t, teacherId, studentId);
 
@@ -202,8 +191,8 @@ export const updateClassInstance = async (
           teacherId,
           startTime,
           endTime,
-          meetingJoinUrl: effectiveMeeting.joinUrl,
           excludeId: id,
+          meetingJoinUrl: input.meetingJoinUrl ?? existing.meetingJoinUrl,
         },
         tFuncErrors
       );

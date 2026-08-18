@@ -2,9 +2,7 @@ import { and, eq, gt, lt, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { signedUrls } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
-
-export type SignedUrlEntity = typeof signedUrls.$inferSelect;
-export type SignedUrlEntityInput = typeof signedUrls.$inferInsert;
+import type { SignedUrlInsertType, SignedUrlSelectType } from "@/backend/types";
 
 // ============================================================================
 // Prepared Statements (Drizzle Prepared Statements 2.0)
@@ -21,7 +19,7 @@ export namespace SignedUrlRepository {
   /**
    * Create a new signed URL entry in the database
    */
-  export const createSignedUrl = async (data: SignedUrlEntityInput): Promise<SignedUrlEntity> => {
+  export const createSignedUrl = async (data: SignedUrlInsertType): Promise<SignedUrlSelectType> => {
     const [result] = await db.insert(signedUrls).values(data).returning();
     logger.info(`Created signed URL: ${result.id} for path: ${result.filePath}`);
     return result;
@@ -31,7 +29,7 @@ export namespace SignedUrlRepository {
    * Get a signed URL by its token ID
    * // NOTE: Authorization should be checked by the calling service before using this method
    */
-  export const getSignedUrlById = async (id: string): Promise<SignedUrlEntity | null> => {
+  export const getSignedUrlById = async (id: string): Promise<SignedUrlSelectType | null> => {
     const result = await findSignedUrlByIdPrepared.execute({ id });
     return result[0] || null;
   };
@@ -41,7 +39,7 @@ export namespace SignedUrlRepository {
    * Uses row-level locking to prevent race conditions
    * Returns the signed URL entity if successfully claimed, or null if invalid/used/expired
    */
-  export const claimSignedUrl = async (id: string): Promise<SignedUrlEntity | null> => {
+  export const claimSignedUrl = async (id: string): Promise<SignedUrlSelectType | null> => {
     try {
       const now = new Date();
 

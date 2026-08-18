@@ -4,7 +4,7 @@ import {
   buildTransactionSnapshotFromInline,
   buildTransactionSnapshotFromMethod,
 } from "@/backend/services/payment-method/payment-method-snapshot";
-import type { UserPaymentMethodSelectType } from "@/backend/types";
+import type { UserPaymentMethodReturnType } from "@/backend/types";
 
 describe("PaymentMethodSnapshotService", () => {
   test("builds inline cash snapshot for pay-in", () => {
@@ -26,7 +26,7 @@ describe("PaymentMethodSnapshotService", () => {
   });
 
   test("builds snapshot from saved method", () => {
-    const method: UserPaymentMethodSelectType = {
+    const method: UserPaymentMethodReturnType = {
       id: "00000000-0000-0000-0000-000000000003",
       userId: "00000000-0000-0000-0000-000000000004",
       type: PaymentMethodType.CASH,

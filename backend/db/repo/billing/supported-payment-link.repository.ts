@@ -7,18 +7,17 @@ import {
 import { supportedPaymentLinks } from "@/backend/db/schema";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
-  SupportedPaymentLinkInsertType,
+  SupportedPaymentLinkReturnType,
   SupportedPaymentLinkSelectType,
+  SupportedPaymentLinkSubmitInput,
   UpdateSupportedPaymentLinkInput,
 } from "@/backend/types";
-
-type LinkRow = typeof supportedPaymentLinks.$inferSelect;
 
 function isPaymentDirection(value: string): value is PaymentDirection {
   return (Object.values(PaymentDirection) as readonly string[]).includes(value);
 }
 
-function toSelectType(row: LinkRow): SupportedPaymentLinkSelectType {
+function toSelectType(row: SupportedPaymentLinkSelectType): SupportedPaymentLinkReturnType {
   return {
     id: row.id,
     slug: row.slug,
@@ -40,9 +39,9 @@ type ListActiveFilters = {
 };
 
 const baseRepo = makeBillingRepo<
-  LinkRow,
   SupportedPaymentLinkSelectType,
-  SupportedPaymentLinkInsertType,
+  SupportedPaymentLinkReturnType,
+  SupportedPaymentLinkSubmitInput,
   UpdateSupportedPaymentLinkInput,
   ListActiveFilters
 >({
@@ -69,9 +68,9 @@ export namespace SupportedPaymentLinkRepository {
   export const listByIds = baseRepo.listByIds;
 
   export const upsertMany = makeBillingUpsertMany<
-    LinkRow,
     SupportedPaymentLinkSelectType,
-    SupportedPaymentLinkInsertType
+    SupportedPaymentLinkReturnType,
+    SupportedPaymentLinkSubmitInput
   >({
     table: supportedPaymentLinks,
     slug: supportedPaymentLinks.slug,

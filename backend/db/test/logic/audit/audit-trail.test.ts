@@ -10,214 +10,223 @@
  * 6. Statistics and reporting
  */
 
-import { beforeAll, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
-import { db } from "@/backend/db";
 import { AuditRepository } from "@/backend/db/repo/audit";
 import { auditLogs, users } from "@/backend/db/schema";
 import { IP_ADDRESS_1 } from "@/backend/db/test/const";
-import { AccountStatus, StudentStatus, UserRole } from "@/backend/enum";
-import type { CreateAuditLogInput, DBTransaction, UserReturnType } from "@/backend/types";
+import { runInRollback } from "@/backend/db/test/test-utils";
+import { StudentStatus } from "@/backend/enum";
+import type { CreateAuditLogInput, DBTransaction } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-import { parseIanaTimezone } from "@/shared/lib/enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
+/**
+ * Creates a test user inside a transaction for audit trail tests.
+ * Returns the user's id (the only field needed by AuditRepository).
+ */
+async function createAuditActor(tx: DBTransaction, name: string): Promise<string> {
+  const now = new Date();
+  const [user] = await tx
+    .insert(users)
+    .values({
+      name,
+      email: `audit-${randomUUID()}@example.com`,
+      password: randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
+  return user.id;
+}
+
 describe("Audit Trail System", () => {
-  let testUser1: UserReturnType;
-  let testUser2: UserReturnType;
-
-  beforeAll(async () => {
-    testLogger.info("Setting up test users for audit trail tests");
-
-    await db.transaction(async tx => {
-      // Create test users with unique emails using randomUUID to avoid conflicts
-      const now = new Date();
-      const uniqueId1 = randomUUID();
-      const uniqueId2 = randomUUID();
-
-      const [user1] = await tx
-        .insert(users)
-        .values({
-          name: "Audit Test User 1",
-          email: `audit.test1.${uniqueId1}@example.com`,
-          password: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-
-      const [user2] = await tx
-        .insert(users)
-        .values({
-          name: "Audit Test User 2",
-          email: `audit.test2.${uniqueId2}@example.com`,
-          password: randomUUID(),
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-
-      // Construct UserReturnType with resolved fields
-      testUser1 = {
-        ...user1,
-        timezone: parseIanaTimezone(user1.timezone),
-        role: UserRole.SUPER_ADMIN,
-        status: AccountStatus.ACTIVATED,
-        teacherId: null,
-        parentId: null,
-      };
-
-      testUser2 = {
-        ...user2,
-        timezone: parseIanaTimezone(user2.timezone),
-        role: UserRole.SUPER_ADMIN,
-        status: AccountStatus.ACTIVATED,
-        teacherId: null,
-        parentId: null,
-      };
-
-      testLogger.info("Test users created", { user1: testUser1.id, user2: testUser2.id });
-    });
-  });
-
   test("should create a basic audit log entry", async () => {
-    const input = {
-      actorUserId: testUser1.id,
-      actorType: "USER",
-      entityType: "STUDENT",
-      entityId: "00000000-0000-0000-0000-000000000001",
-      action: "CREATE",
-      description: "Created new student",
-    } as CreateAuditLogInput;
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
 
-    const auditLog = await AuditRepository.createAuditLog(input);
+      const input = {
+        actorUserId,
+        actorType: "USER",
+        entityType: "STUDENT",
+        entityId: "[CARD_REDACTED]-[CARD_REDACTED]",
+        action: "CREATE",
+        description: "Created new student",
+      } as CreateAuditLogInput;
 
-    expect(auditLog).toBeDefined();
-    expect(auditLog.id).toBeDefined();
-    expect(auditLog.actorUserId).toBe(testUser1.id);
-    expect(auditLog.actorType).toBe("USER");
-    expect(auditLog.entityType).toBe("STUDENT");
-    expect(auditLog.action).toBe("CREATE");
+      const auditLog = await AuditRepository.createAuditLog(input, tx);
 
-    testLogger.info("Basic audit log created", { auditLogId: auditLog.id });
+      expect(auditLog).toBeDefined();
+      expect(auditLog.id).toBeDefined();
+      expect(auditLog.actorUserId).toBe(actorUserId);
+      expect(auditLog.actorType).toBe("USER");
+      expect(auditLog.entityType).toBe("STUDENT");
+      expect(auditLog.action).toBe("CREATE");
+
+      testLogger.info("Basic audit log created", { auditLogId: auditLog.id });
+    });
   });
 
   test("should create audit log with state changes", async () => {
-    const input = {
-      actorUserId: testUser1.id,
-      actorType: "USER",
-      entityType: "INVOICE",
-      entityId: "00000000-0000-0000-0000-000000000002",
-      action: "UPDATE",
-      description: "Updated invoice amount",
-      previousState: { amount: 100, currency: CurrencyCode.USD },
-      newState: { amount: 150, currency: CurrencyCode.USD },
-      changes: { amount: { from: 100, to: 150 } },
-    } as CreateAuditLogInput;
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
 
-    const auditLog = await AuditRepository.createAuditLog(input);
+      const input = {
+        actorUserId,
+        actorType: "USER",
+        entityType: "INVOICE",
+        entityId: "[CARD_REDACTED]-[CARD_REDACTED]",
+        action: "UPDATE",
+        description: "Updated invoice amount",
+        previousState: { amount: 100, currency: CurrencyCode.USD },
+        newState: { amount: 150, currency: CurrencyCode.USD },
+        changes: { amount: { from: 100, to: 150 } },
+      } as CreateAuditLogInput;
 
-    expect(auditLog.previousState).toEqual({ amount: 100, currency: CurrencyCode.USD });
-    expect(auditLog.newState).toEqual({ amount: 150, currency: CurrencyCode.USD });
-    expect(auditLog.changes).toEqual({ amount: { from: 100, to: 150 } });
+      const auditLog = await AuditRepository.createAuditLog(input, tx);
 
-    testLogger.info("Audit log with state changes created", { auditLogId: auditLog.id });
+      expect(auditLog.previousState).toEqual({ amount: 100, currency: CurrencyCode.USD });
+      expect(auditLog.newState).toEqual({ amount: 150, currency: CurrencyCode.USD });
+      expect(auditLog.changes).toEqual({ amount: { from: 100, to: 150 } });
+
+      testLogger.info("Audit log with state changes created", { auditLogId: auditLog.id });
+    });
   });
 
   test("should create audit log with metadata", async () => {
-    const input = {
-      actorUserId: null,
-      actorType: "SYSTEM",
-      entityType: "PAYMENT",
-      entityId: "00000000-0000-0000-0000-000000000003",
-      action: "REFUND",
-      description: "Automatic refund processed",
-      ipAddress: IP_ADDRESS_1,
-      userAgent: "Mozilla/5.0",
-      metadata: {
+    await runInRollback(async tx => {
+      const input = {
+        actorUserId: null,
+        actorType: "SYSTEM",
+        entityType: "PAYMENT",
+        entityId: "[CARD_REDACTED]-[CARD_REDACTED]",
+        action: "REFUND",
+        description: "Automatic refund processed",
+        ipAddress: IP_ADDRESS_1,
+        userAgent: "Mozilla/5.0",
+        metadata: {
+          refundAmount: 50,
+          currency: CurrencyCode.USD,
+          reason: "Duplicate payment",
+        },
+      } as CreateAuditLogInput;
+
+      const auditLog = await AuditRepository.createAuditLog(input, tx);
+
+      expect(auditLog.actorType).toBe("SYSTEM");
+      expect(auditLog.actorUserId).toBeNull();
+      expect(auditLog.ipAddress).toBe(IP_ADDRESS_1);
+      expect(auditLog.metadata).toEqual({
         refundAmount: 50,
         currency: CurrencyCode.USD,
         reason: "Duplicate payment",
-      },
-    } as CreateAuditLogInput;
+      });
 
-    const auditLog = await AuditRepository.createAuditLog(input);
-
-    expect(auditLog.actorType).toBe("SYSTEM");
-    expect(auditLog.actorUserId).toBeNull();
-    expect(auditLog.ipAddress).toBe(IP_ADDRESS_1);
-    expect(auditLog.metadata).toEqual({
-      refundAmount: 50,
-      currency: CurrencyCode.USD,
-      reason: "Duplicate payment",
+      testLogger.info("Audit log with metadata created", { auditLogId: auditLog.id });
     });
-
-    testLogger.info("Audit log with metadata created", { auditLogId: auditLog.id });
   });
 
   test("should query audit logs with filters", async () => {
-    // Create multiple audit logs
-    await AuditRepository.createAuditLog({
-      actorUserId: testUser1.id,
-      actorType: "USER",
-      entityType: "STUDENT",
-      entityId: "00000000-0000-0000-0000-000000000004",
-      action: "UPDATE",
-    });
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
 
-    await AuditRepository.createAuditLog({
-      actorUserId: testUser1.id,
-      actorType: "USER",
-      entityType: "STUDENT",
-      entityId: "00000000-0000-0000-0000-000000000005",
-      action: "DELETE",
-    });
+      // Create multiple audit logs
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId,
+          actorType: "USER",
+          entityType: "STUDENT",
+          entityId: "[CARD_REDACTED]-[CARD_REDACTED]",
+          action: "UPDATE",
+        },
+        tx
+      );
 
-    // Query by actor
-    const result = await AuditRepository.queryAuditLogs({
-      actorUserId: testUser1.id,
-      entityType: "STUDENT",
-    });
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId,
+          actorType: "USER",
+          entityType: "STUDENT",
+          entityId: "[CARD_REDACTED]-[CARD_REDACTED]",
+          action: "DELETE",
+        },
+        tx
+      );
 
-    expect(result.logs.length).toBeGreaterThan(0);
-    expect(result.total).toBeGreaterThan(0);
-    testLogger.info("Query audit logs successful", { count: result.logs.length });
+      // Query by actor
+      const result = await AuditRepository.queryAuditLogs(
+        {
+          actorUserId,
+          entityType: "STUDENT",
+        },
+        tx
+      );
+
+      expect(result.logs.length).toBeGreaterThan(0);
+      expect(result.total).toBeGreaterThan(0);
+      testLogger.info("Query audit logs successful", { count: result.logs.length });
+    });
   });
 
   test("should get entity audit logs", async () => {
-    const entityId = "00000000-0000-0000-0000-000000000006";
+    await runInRollback(async tx => {
+      const actorUserId1 = await createAuditActor(tx, "Audit Test User 1");
+      const actorUserId2 = await createAuditActor(tx, "Audit Test User 2");
+      const entityId = "[CARD_REDACTED]-[CARD_REDACTED]";
 
-    // Create multiple logs for the same entity
-    await AuditRepository.createAuditLog({
-      actorUserId: testUser1.id,
-      actorType: "USER",
-      entityType: "INVOICE",
-      entityId,
-      action: "CREATE",
+      // Create multiple logs for the same entity
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId: actorUserId1,
+          actorType: "USER",
+          entityType: "INVOICE",
+          entityId,
+          action: "CREATE",
+        },
+        tx
+      );
+
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId: actorUserId2,
+          actorType: "USER",
+          entityType: "INVOICE",
+          entityId,
+          action: "UPDATE",
+        },
+        tx
+      );
+
+      const logs = await AuditRepository.getEntityAuditLogs("INVOICE", entityId, 50, tx);
+
+      expect(logs.length).toBeGreaterThanOrEqual(2);
+      expect(logs.every(log => log.entityId === entityId)).toBe(true);
+      testLogger.info("Entity audit logs retrieved", { count: logs.length });
     });
-
-    await AuditRepository.createAuditLog({
-      actorUserId: testUser2.id,
-      actorType: "USER",
-      entityType: "INVOICE",
-      entityId,
-      action: "UPDATE",
-    });
-
-    const logs = await AuditRepository.getEntityAuditLogs("INVOICE", entityId);
-
-    expect(logs.length).toBeGreaterThanOrEqual(2);
-    expect(logs.every(log => log.entityId === entityId)).toBe(true);
-    testLogger.info("Entity audit logs retrieved", { count: logs.length });
   });
 
   test("should get actor audit logs", async () => {
-    const logs = await AuditRepository.getActorAuditLogs(testUser1.id);
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
 
-    expect(logs.length).toBeGreaterThan(0);
-    expect(logs.every(log => log.actorUserId === testUser1.id)).toBe(true);
-    testLogger.info("Actor audit logs retrieved", { count: logs.length });
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId,
+          actorType: "USER",
+          entityType: "STUDENT",
+          entityId: "[CARD_REDACTED]-[CARD_REDACTED]",
+          action: "CREATE",
+        },
+        tx
+      );
+
+      const logs = await AuditRepository.getActorAuditLogs(actorUserId, 50, tx);
+
+      expect(logs.length).toBeGreaterThan(0);
+      expect(logs.every(log => log.actorUserId === actorUserId)).toBe(true);
+      testLogger.info("Actor audit logs retrieved", { count: logs.length });
+    });
   });
 
   test("should compute changes correctly", () => {
@@ -234,121 +243,162 @@ describe("Audit Trail System", () => {
   });
 
   test("should log student status change", async () => {
-    const studentId = "00000000-0000-0000-0000-000000000007";
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
+      const studentId = "[CARD_REDACTED]-[CARD_REDACTED]";
 
-    const auditLog = await AuditRepository.logStudentStatusChange({
-      studentId,
-      oldStatus: StudentStatus.REGULAR,
-      newStatus: StudentStatus.SUSPENDED,
-      actorUserId: testUser1.id,
-      description: "Student requested suspension",
+      const auditLog = await AuditRepository.logStudentStatusChange(
+        {
+          studentId,
+          oldStatus: StudentStatus.REGULAR,
+          newStatus: StudentStatus.SUSPENDED,
+          actorUserId,
+          description: "Student requested suspension",
+        },
+        tx
+      );
+
+      expect(auditLog.entityType).toBe("STUDENT");
+      expect(auditLog.action).toBe("STATUS_CHANGE");
+      expect(auditLog.previousState).toEqual({ status: "REGULAR" });
+      expect(auditLog.newState).toEqual({ status: "SUSPENDED" });
+      testLogger.info("Student status change logged", { auditLogId: auditLog.id });
     });
-
-    expect(auditLog.entityType).toBe("STUDENT");
-    expect(auditLog.action).toBe("STATUS_CHANGE");
-    expect(auditLog.previousState).toEqual({ status: "REGULAR" });
-    expect(auditLog.newState).toEqual({ status: "SUSPENDED" });
-    testLogger.info("Student status change logged", { auditLogId: auditLog.id });
   });
 
   test("should log invoice change", async () => {
-    const invoiceId = "00000000-0000-0000-0000-000000000008";
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
+      const invoiceId = "[CARD_REDACTED]-[CARD_REDACTED]";
 
-    const auditLog = await AuditRepository.logInvoiceChange({
-      invoiceId,
-      action: "UPDATE",
-      previousState: { amount: 100, status: "PENDING" },
-      newState: { amount: 100, status: "PAID" },
-      actorUserId: testUser1.id,
-      description: "Invoice payment confirmed",
+      const auditLog = await AuditRepository.logInvoiceChange(
+        {
+          invoiceId,
+          action: "UPDATE",
+          previousState: { amount: 100, status: "PENDING" },
+          newState: { amount: 100, status: "PAID" },
+          actorUserId,
+          description: "Invoice payment confirmed",
+        },
+        tx
+      );
+
+      expect(auditLog.entityType).toBe("INVOICE");
+      expect(auditLog.action).toBe("UPDATE");
+      expect(auditLog.changes).toBeDefined();
+      testLogger.info("Invoice change logged", { auditLogId: auditLog.id });
     });
-
-    expect(auditLog.entityType).toBe("INVOICE");
-    expect(auditLog.action).toBe("UPDATE");
-    expect(auditLog.changes).toBeDefined();
-    testLogger.info("Invoice change logged", { auditLogId: auditLog.id });
   });
 
   test("should log payment refund", async () => {
-    const paymentId = "00000000-0000-0000-0000-000000000009";
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
+      const paymentId = "[CARD_REDACTED]-[CARD_REDACTED]";
 
-    const auditLog = await AuditRepository.logPaymentRefund({
-      paymentId,
-      refundAmount: 50,
-      currency: CurrencyCode.USD,
-      actorUserId: testUser1.id,
-      reason: "Customer requested refund",
-    });
+      const auditLog = await AuditRepository.logPaymentRefund(
+        {
+          paymentId,
+          refundAmount: 50,
+          currency: CurrencyCode.USD,
+          actorUserId,
+          reason: "Customer requested refund",
+        },
+        tx
+      );
 
-    expect(auditLog.entityType).toBe("PAYMENT");
-    expect(auditLog.action).toBe("REFUND");
-    expect(auditLog.metadata).toEqual({
-      refundAmount: 50,
-      currency: CurrencyCode.USD,
-      reason: "Customer requested refund",
+      expect(auditLog.entityType).toBe("PAYMENT");
+      expect(auditLog.action).toBe("REFUND");
+      expect(auditLog.metadata).toEqual({
+        refundAmount: 50,
+        currency: CurrencyCode.USD,
+        reason: "Customer requested refund",
+      });
+      testLogger.info("Payment refund logged", { auditLogId: auditLog.id });
     });
-    testLogger.info("Payment refund logged", { auditLogId: auditLog.id });
   });
 
   test("should log permission change", async () => {
-    const auditLog = await AuditRepository.logPermissionChange({
-      userId: testUser2.id,
-      action: "GRANT",
-      permissionOrGroupId: "00000000-0000-0000-0000-00000000000a",
-      permissionType: "PERMISSION_GROUP",
-      actorUserId: testUser1.id,
-      description: "Added admin role",
-    });
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
+      const targetUserId = await createAuditActor(tx, "Audit Test User 2");
 
-    expect(auditLog.entityType).toBe("PERMISSION_GROUP");
-    expect(auditLog.action).toBe("GRANT");
-    expect(auditLog.metadata).toHaveProperty("targetUserId", testUser2.id);
-    testLogger.info("Permission change logged", { auditLogId: auditLog.id });
+      const auditLog = await AuditRepository.logPermissionChange(
+        {
+          userId: targetUserId,
+          action: "GRANT",
+          permissionOrGroupId: "[CARD_REDACTED]-0000-00000000000a",
+          permissionType: "PERMISSION_GROUP",
+          actorUserId,
+          description: "Added admin role",
+        },
+        tx
+      );
+
+      expect(auditLog.entityType).toBe("PERMISSION_GROUP");
+      expect(auditLog.action).toBe("GRANT");
+      expect(auditLog.metadata).toHaveProperty("targetUserId", targetUserId);
+      testLogger.info("Permission change logged", { auditLogId: auditLog.id });
+    });
   });
 
   test("should log exchange rate update", async () => {
-    const rateId = "00000000-0000-0000-0000-00000000000b";
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
+      const rateId = "[CARD_REDACTED]-0000-00000000000b";
 
-    const auditLog = await AuditRepository.logExchangeRateUpdate({
-      rateId,
-      fromCurrency: CurrencyCode.USD,
-      toCurrency: CurrencyCode.EUR,
-      oldRate: 0.85,
-      newRate: 0.87,
-      actorUserId: testUser1.id,
-      source: "ECB",
+      const auditLog = await AuditRepository.logExchangeRateUpdate(
+        {
+          rateId,
+          fromCurrency: CurrencyCode.USD,
+          toCurrency: CurrencyCode.EUR,
+          oldRate: 0.85,
+          newRate: 0.87,
+          actorUserId,
+          source: "ECB",
+        },
+        tx
+      );
+
+      expect(auditLog.entityType).toBe("EXCHANGE_RATE");
+      expect(auditLog.action).toBe("UPDATE");
+      expect(auditLog.previousState).toEqual({ rate: 0.85 });
+      expect(auditLog.newState).toEqual({ rate: 0.87 });
+      testLogger.info("Exchange rate update logged", { auditLogId: auditLog.id });
     });
-
-    expect(auditLog.entityType).toBe("EXCHANGE_RATE");
-    expect(auditLog.action).toBe("UPDATE");
-    expect(auditLog.previousState).toEqual({ rate: 0.85 });
-    expect(auditLog.newState).toEqual({ rate: 0.87 });
-    testLogger.info("Exchange rate update logged", { auditLogId: auditLog.id });
   });
 
   test("should log system setting change", async () => {
-    const auditLog = await AuditRepository.logSystemSettingChange({
-      settingKey: "max_students_per_teacher",
-      oldValue: 10,
-      newValue: 15,
-      actorUserId: testUser1.id,
-      description: "Increased capacity",
-    });
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
 
-    expect(auditLog.entityType).toBe("SYSTEM_SETTING");
-    expect(auditLog.action).toBe("UPDATE");
-    expect(auditLog.changes).toEqual({ value: { from: 10, to: 15 } });
-    testLogger.info("System setting change logged", { auditLogId: auditLog.id });
+      const auditLog = await AuditRepository.logSystemSettingChange(
+        {
+          settingKey: "max_students_per_teacher",
+          oldValue: 10,
+          newValue: 15,
+          actorUserId,
+          description: "Increased capacity",
+        },
+        tx
+      );
+
+      expect(auditLog.entityType).toBe("SYSTEM_SETTING");
+      expect(auditLog.action).toBe("UPDATE");
+      expect(auditLog.changes).toEqual({ value: { from: 10, to: 15 } });
+      testLogger.info("System setting change logged", { auditLogId: auditLog.id });
+    });
   });
 
   test("should support transactional audit logging", async () => {
-    await db.transaction(async tx => {
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
+
       const auditLog1 = await AuditRepository.createAuditLog(
         {
-          actorUserId: testUser1.id,
+          actorUserId,
           actorType: "USER",
           entityType: "STUDENT",
-          entityId: "00000000-0000-0000-0000-00000000000c",
+          entityId: "[CARD_REDACTED]-0000-00000000000c",
           action: "CREATE",
         },
         tx
@@ -356,10 +406,10 @@ describe("Audit Trail System", () => {
 
       const auditLog2 = await AuditRepository.createAuditLog(
         {
-          actorUserId: testUser1.id,
+          actorUserId,
           actorType: "USER",
           entityType: "STUDENT",
-          entityId: "00000000-0000-0000-0000-00000000000c",
+          entityId: "[CARD_REDACTED]-0000-00000000000c",
           action: "UPDATE",
         },
         tx
@@ -372,27 +422,44 @@ describe("Audit Trail System", () => {
   });
 
   test("should get audit statistics", async () => {
-    const now = new Date();
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
 
-    const stats = await AuditRepository.getAuditStatistics(yesterday, now);
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId,
+          actorType: "USER",
+          entityType: "STUDENT",
+          entityId: "[CARD_REDACTED]-[CARD_REDACTED]",
+          action: "CREATE",
+        },
+        tx
+      );
 
-    expect(stats.length).toBeGreaterThan(0);
-    expect(stats[0]).toHaveProperty("entityType");
-    expect(stats[0]).toHaveProperty("action");
-    expect(stats[0]).toHaveProperty("count");
-    testLogger.info("Audit statistics retrieved", { statsCount: stats.length });
+      const now = new Date();
+      const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+      const stats = await AuditRepository.getAuditStatistics(yesterday, now, tx);
+
+      expect(stats.length).toBeGreaterThan(0);
+      expect(stats[0]).toHaveProperty("entityType");
+      expect(stats[0]).toHaveProperty("action");
+      expect(stats[0]).toHaveProperty("count");
+      testLogger.info("Audit statistics retrieved", { statsCount: stats.length });
+    });
   });
 
   test("should prevent audit log updates (immutability)", async () => {
-    await db.transaction(async (tx: DBTransaction) => {
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
+
       // Create an audit log
       const auditLog = await AuditRepository.createAuditLog(
         {
-          actorUserId: testUser1.id,
+          actorUserId,
           actorType: "USER",
           entityType: "STUDENT",
-          entityId: "00000000-0000-0000-0000-00000000000d",
+          entityId: "[CARD_REDACTED]-0000-00000000000d",
           action: "CREATE",
           description: "Original description",
         },
@@ -404,8 +471,6 @@ describe("Audit Trail System", () => {
       try {
         await tx.update(auditLogs).set({ description: "Modified description" }).where(sql`id = ${auditLog.id}`);
       } catch {
-        // The trigger prevents the operation - any error means it worked
-        // We just verify that an error was thrown, not the specific message
         updateThrew = true;
       }
 
@@ -415,14 +480,16 @@ describe("Audit Trail System", () => {
   });
 
   test("should prevent audit log deletion (immutability)", async () => {
-    await db.transaction(async (tx: DBTransaction) => {
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
+
       // Create an audit log
       const auditLog = await AuditRepository.createAuditLog(
         {
-          actorUserId: testUser1.id,
+          actorUserId,
           actorType: "USER",
           entityType: "STUDENT",
-          entityId: "00000000-0000-0000-0000-00000000000e",
+          entityId: "[CARD_REDACTED]-0000-00000000000e",
           action: "DELETE",
         },
         tx
@@ -433,8 +500,6 @@ describe("Audit Trail System", () => {
       try {
         await tx.delete(auditLogs).where(sql`id = ${auditLog.id}`);
       } catch {
-        // The trigger prevents the operation - any error means it worked
-        // We just verify that an error was thrown, not the specific message
         deleteThrew = true;
       }
 
@@ -444,99 +509,169 @@ describe("Audit Trail System", () => {
   });
 
   test("should get recent audit logs", async () => {
-    const recentLogs = await AuditRepository.getRecentAuditLogs(10);
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
 
-    expect(recentLogs.length).toBeGreaterThan(0);
-    expect(recentLogs.length).toBeLessThanOrEqual(10);
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId,
+          actorType: "USER",
+          entityType: "STUDENT",
+          entityId: "[CARD_REDACTED]-[CARD_REDACTED]",
+          action: "CREATE",
+        },
+        tx
+      );
 
-    // Check that logs are ordered by createdAt desc
-    for (let i = 1; i < recentLogs.length; i++) {
-      expect(recentLogs[i - 1].createdAt.getTime()).toBeGreaterThanOrEqual(recentLogs[i].createdAt.getTime());
-    }
+      const recentLogs = await AuditRepository.getRecentAuditLogs(10, tx);
 
-    testLogger.info("Recent audit logs retrieved", { count: recentLogs.length });
+      expect(recentLogs.length).toBeGreaterThan(0);
+      expect(recentLogs.length).toBeLessThanOrEqual(10);
+
+      // Check that logs are ordered by createdAt desc
+      for (let i = 1; i < recentLogs.length; i++) {
+        expect(recentLogs[i - 1].createdAt.getTime()).toBeGreaterThanOrEqual(recentLogs[i].createdAt.getTime());
+      }
+
+      testLogger.info("Recent audit logs retrieved", { count: recentLogs.length });
+    });
   });
 
   test("should handle pagination in queries", async () => {
-    // Query first page
-    const page1 = await AuditRepository.queryAuditLogs({
-      limit: 5,
-      offset: 0,
-    });
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
 
-    expect(page1.logs.length).toBeGreaterThan(0);
-    expect(page1.total).toBeGreaterThan(0);
+      // Create enough logs for pagination
+      await Array.from({ length: 7 }, (_, i) => i).reduce(async (prev, i) => {
+        await prev;
+        await AuditRepository.createAuditLog(
+          {
+            actorUserId,
+            actorType: "USER",
+            entityType: "INVOICE",
+            entityId: `[CARD_REDACTED]-[CARD_REDACTED]-${i}`,
+            action: "CREATE",
+          },
+          tx
+        );
+      }, Promise.resolve());
 
-    // Query second page
-    const page2 = await AuditRepository.queryAuditLogs({
-      limit: 5,
-      offset: 5,
-    });
+      // Query first page
+      const page1 = await AuditRepository.queryAuditLogs(
+        {
+          limit: 5,
+          offset: 0,
+        },
+        tx
+      );
 
-    // Ensure pages don't overlap
-    if (page1.logs.length > 0 && page2.logs.length > 0) {
-      expect(page1.logs[0].id).not.toBe(page2.logs[0].id);
-    }
+      expect(page1.logs.length).toBeGreaterThan(0);
+      expect(page1.total).toBeGreaterThan(0);
 
-    testLogger.info("Pagination working correctly", {
-      page1Count: page1.logs.length,
-      page2Count: page2.logs.length,
+      // Query second page
+      const page2 = await AuditRepository.queryAuditLogs(
+        {
+          limit: 5,
+          offset: 5,
+        },
+        tx
+      );
+
+      // Ensure pages don't overlap
+      if (page1.logs.length > 0 && page2.logs.length > 0) {
+        expect(page1.logs[0].id).not.toBe(page2.logs[0].id);
+      }
+
+      testLogger.info("Pagination working correctly", {
+        page1Count: page1.logs.length,
+        page2Count: page2.logs.length,
+      });
     });
   });
 
   test("should filter by date range", async () => {
-    const now = new Date();
-    const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
 
-    const result = await AuditRepository.queryAuditLogs({
-      startDate: twoDaysAgo,
-      endDate: now,
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId,
+          actorType: "USER",
+          entityType: "STUDENT",
+          entityId: "[CARD_REDACTED]-[CARD_REDACTED]",
+          action: "CREATE",
+        },
+        tx
+      );
+
+      const now = new Date();
+      const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+
+      const result = await AuditRepository.queryAuditLogs(
+        {
+          startDate: twoDaysAgo,
+          endDate: now,
+        },
+        tx
+      );
+
+      expect(result.logs.length).toBeGreaterThan(0);
+
+      // All logs should be within the date range
+      for (const log of result.logs) {
+        expect(log.createdAt.getTime()).toBeGreaterThanOrEqual(twoDaysAgo.getTime());
+        expect(log.createdAt.getTime()).toBeLessThanOrEqual(now.getTime());
+      }
+
+      testLogger.info("Date range filtering working", { count: result.logs.length });
     });
-
-    expect(result.logs.length).toBeGreaterThan(0);
-
-    // All logs should be within the date range
-    for (const log of result.logs) {
-      expect(log.createdAt.getTime()).toBeGreaterThanOrEqual(twoDaysAgo.getTime());
-      expect(log.createdAt.getTime()).toBeLessThanOrEqual(now.getTime());
-    }
-
-    testLogger.info("Date range filtering working", { count: result.logs.length });
   });
 
   test("should filter by multiple criteria", async () => {
-    const entityId = "00000000-0000-0000-0000-00000000000f";
+    await runInRollback(async tx => {
+      const actorUserId = await createAuditActor(tx, "Audit Test User 1");
+      const entityId = "[CARD_REDACTED]-0000-00000000000f";
 
-    // Create specific audit logs
-    await AuditRepository.createAuditLog({
-      actorUserId: testUser1.id,
-      actorType: "USER",
-      entityType: "INVOICE",
-      entityId,
-      action: "CREATE",
+      // Create specific audit logs
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId,
+          actorType: "USER",
+          entityType: "INVOICE",
+          entityId,
+          action: "CREATE",
+        },
+        tx
+      );
+
+      await AuditRepository.createAuditLog(
+        {
+          actorUserId,
+          actorType: "USER",
+          entityType: "INVOICE",
+          entityId,
+          action: "UPDATE",
+        },
+        tx
+      );
+
+      // Query with multiple filters
+      const result = await AuditRepository.queryAuditLogs(
+        {
+          actorUserId,
+          entityType: "INVOICE",
+          entityId,
+          action: "UPDATE",
+        },
+        tx
+      );
+
+      expect(result.logs.length).toBeGreaterThanOrEqual(1);
+      expect(result.logs.every(log => log.actorUserId === actorUserId)).toBe(true);
+      expect(result.logs.every(log => log.entityType === "INVOICE")).toBe(true);
+      expect(result.logs.every(log => log.action === "UPDATE")).toBe(true);
+
+      testLogger.info("Multiple criteria filtering working", { count: result.logs.length });
     });
-
-    await AuditRepository.createAuditLog({
-      actorUserId: testUser1.id,
-      actorType: "USER",
-      entityType: "INVOICE",
-      entityId,
-      action: "UPDATE",
-    });
-
-    // Query with multiple filters
-    const result = await AuditRepository.queryAuditLogs({
-      actorUserId: testUser1.id,
-      entityType: "INVOICE",
-      entityId,
-      action: "UPDATE",
-    });
-
-    expect(result.logs.length).toBeGreaterThanOrEqual(1);
-    expect(result.logs.every(log => log.actorUserId === testUser1.id)).toBe(true);
-    expect(result.logs.every(log => log.entityType === "INVOICE")).toBe(true);
-    expect(result.logs.every(log => log.action === "UPDATE")).toBe(true);
-
-    testLogger.info("Multiple criteria filtering working", { count: result.logs.length });
   });
 });

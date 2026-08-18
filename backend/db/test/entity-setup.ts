@@ -32,7 +32,7 @@ import type {
   DBTransaction,
   LessonReportSelectType,
   MeetingProviderSelectType,
-  ParentEntity,
+  ParentSelectType,
   StudentSelectType,
   TeacherDueSelectType,
   TeacherSelectType,
@@ -153,7 +153,7 @@ export async function createTestParent(
   tx: DBTransaction,
   userId: string,
   overrides: Partial<typeof parents.$inferInsert> = {}
-): Promise<ParentEntity> {
+): Promise<ParentSelectType> {
   const now = new Date();
   const [parent] = await tx
     .insert(parents)
@@ -225,7 +225,7 @@ export async function setupStudent(
   userOverrides: Partial<typeof users.$inferInsert> = {},
   parentOverrides: Partial<typeof parents.$inferInsert> = {},
   studentOverrides: Partial<typeof students.$inferInsert> = {}
-): Promise<{ user: UserSelectType; parent: ParentEntity; student: StudentSelectType }> {
+): Promise<{ user: UserSelectType; parent: ParentSelectType; student: StudentSelectType }> {
   const user = await createTestUser(tx, userOverrides);
   const parent = await createTestParent(tx, user.id, parentOverrides);
   const student = await createTestStudent(tx, parent.id, studentOverrides);
@@ -270,7 +270,7 @@ export async function setupTestEntities(
   options: { skipInstance?: boolean; classesRemaining?: number } = {}
 ): Promise<{
   parentUser: UserSelectType;
-  parent: ParentEntity;
+  parent: ParentSelectType;
   student: StudentSelectType;
   teacherUser: UserSelectType;
   teacher: TeacherSelectType;

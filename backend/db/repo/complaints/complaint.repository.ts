@@ -1,12 +1,12 @@
 import { and, count, desc, eq, ilike, isNull, type SQL, sql } from "drizzle-orm";
 import { type db, type QueryDbHandle, queryDb, queryWithPagination } from "@/backend/db";
 import { complaintFiles, complaints, parents, storageFiles, students, users } from "@/backend/db/schema";
-import { ComplaintCategory, ComplaintStatus } from "@/backend/enum";
+import { ComplaintStatus } from "@/backend/enum";
+import { assertComplaintCategory, assertComplaintStatus } from "@/backend/lib";
 import type {
   ComplaintFileReturnType,
-  ComplaintMetrics,
   ComplaintQueuePaginatedResult,
-  ComplaintQueueResult,
+  ComplaintQueueRawResult,
   ComplaintResponseReturnType,
   ComplaintReturnType,
   ComplaintSelectType,
@@ -15,38 +15,7 @@ import type {
   PaginationArgs,
   ParentComplaintPaginatedResult,
 } from "@/backend/types";
-
-function isComplaintCategory(value: string): value is ComplaintCategory {
-  return (Object.values(ComplaintCategory) as readonly string[]).includes(value);
-}
-
-function isComplaintStatus(value: string): value is ComplaintStatus {
-  return (Object.values(ComplaintStatus) as readonly string[]).includes(value);
-}
-
-function assertComplaintCategory(value: string): ComplaintCategory {
-  if (!isComplaintCategory(value)) throw new Error(`Invalid complaint category: ${value}`);
-  return value;
-}
-
-function assertComplaintStatus(value: string): ComplaintStatus {
-  if (!isComplaintStatus(value)) throw new Error(`Invalid complaint status: ${value}`);
-  return value;
-}
-
 import { escapeLikeWildcards, PaginationUtils } from "@/backend/utils";
-
-function formatDuration(hours: number): string {
-  if (hours < 1) {
-    return `${Math.round(hours * 60)}m`;
-  } else if (hours < 24) {
-    return `${Math.round(hours)}h`;
-  } else {
-    const days = Math.floor(hours / 24);
-    const remainingHours = Math.round(hours % 24);
-    return `${days}d ${remainingHours}h`;
-  }
-}
 
 function buildComplaintQueueConditions(
   options: { search?: string | null; status?: string | null },
@@ -244,7 +213,7 @@ export namespace ComplaintRepository {
   export const getComplaintQueue = async (
     options: { search?: string | null; status?: string | null; limit: number; offset: number },
     tx?: DBTransaction
-  ): Promise<ComplaintQueueResult> => {
+  ): Promise<ComplaintQueueRawResult> => {
     const q = queryDb(tx);
     const whereClause = buildComplaintQueueConditions(options, q);
 
@@ -255,12 +224,12 @@ export namespace ComplaintRepository {
       .offset(options.offset);
 
     const typedRows: ComplaintReturnType[] = rows.map(mapComplaintQueueRow);
-    const metrics = await getComplaintMetrics(whereClause, tx);
+    const { statusCounts, avgResolutionHours } = await getComplaintMetricsRaw(whereClause, tx);
 
     return {
       id: `complaint-queue-${Date.now()}`,
       complaints: typedRows,
-      metrics,
+      rawMetrics: { statusCounts, avgResolutionHours },
     };
   };
 
@@ -327,16 +296,20 @@ export namespace ComplaintRepository {
     return results[0] ?? null;
   };
 
-  export const getComplaintMetrics = async (
+  /**
+   * Raw status counts for complaint metrics — the service layer
+   * (`deriveComplaintMetrics`) computes the final `ComplaintMetrics`.
+   */
+  export const getComplaintStatusCounts = async (
     whereClause?: SQL,
     txOrDb?: DBTransaction | typeof db
-  ): Promise<ComplaintMetrics> => {
+  ): Promise<{ status: string; count: number }[]> => {
     const q = queryDb(typeof txOrDb === "function" ? undefined : txOrDb);
 
     const baseCondition = isNull(complaints.deletedAt);
     const finalWhereClause = whereClause ? and(baseCondition, whereClause) : baseCondition;
 
-    const statusCounts = await q
+    return q
       .select({
         status: complaints.status,
         count: count(),
@@ -346,14 +319,14 @@ export namespace ComplaintRepository {
       .leftJoin(users, eq(parents.userId, users.id))
       .where(finalWhereClause)
       .groupBy(complaints.status);
+  };
 
-    const validStatuses = Object.values(ComplaintStatus) as readonly string[];
-    const unansweredStr = ComplaintStatus.UNANSWERED as string;
-    const answeredStr = ComplaintStatus.ANSWERED as string;
-    const unanswered =
-      statusCounts.find(r => validStatuses.includes(r.status) && r.status === unansweredStr)?.count ?? 0;
-    const answered = statusCounts.find(r => validStatuses.includes(r.status) && r.status === answeredStr)?.count ?? 0;
-    const totalCount = statusCounts.reduce((sum, r) => sum + r.count, 0);
+  /**
+   * Raw average resolution hours for ANSWERED complaints — the service layer
+   * (`deriveComplaintMetrics`) uses this to compute formatted display strings.
+   */
+  export const getComplaintAvgResolutionHours = async (txOrDb?: DBTransaction | typeof db): Promise<number> => {
+    const q = queryDb(typeof txOrDb === "function" ? undefined : txOrDb);
 
     const [avgResult] = await q
       .select({
@@ -366,17 +339,26 @@ export namespace ComplaintRepository {
       .from(complaints)
       .where(and(eq(complaints.status, ComplaintStatus.ANSWERED), isNull(complaints.deletedAt)));
 
-    const avgResolutionHours = Math.round((avgResult?.avgHours ?? 0) * 100) / 100;
-    const avgResolutionTime = avgResolutionHours > 0 ? formatDuration(avgResolutionHours) : null;
+    return avgResult?.avgHours ?? 0;
+  };
 
-    return {
-      id: "complaint-metrics",
-      unanswered,
-      answered,
-      avgResolutionHours,
-      avgResolutionTime,
-      totalCount,
-    };
+  /**
+   * Convenience wrapper — returns raw status counts and avg hours.
+   * The service layer (`ComplaintService`) calls this and then uses
+   * `deriveComplaintMetrics` to build the final `ComplaintMetrics`.
+   */
+  export const getComplaintMetricsRaw = async (
+    whereClause?: SQL,
+    txOrDb?: DBTransaction | typeof db
+  ): Promise<{
+    statusCounts: { status: string; count: number }[];
+    avgResolutionHours: number;
+  }> => {
+    const [statusCounts, avgResolutionHours] = await Promise.all([
+      getComplaintStatusCounts(whereClause, txOrDb),
+      getComplaintAvgResolutionHours(txOrDb),
+    ]);
+    return { statusCounts, avgResolutionHours };
   };
 
   export const getUnansweredComplaints = async (limit: number, tx?: DBTransaction) => {

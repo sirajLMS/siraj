@@ -17,7 +17,7 @@ import type {
   DBTransaction,
   TeacherPaymentInsertType,
   TeacherPaymentSelectType,
-  UserPaymentMethodSelectType,
+  UserPaymentMethodReturnType,
 } from "@/backend/types";
 
 export namespace TeacherPaymentSeedService {
@@ -25,7 +25,7 @@ export namespace TeacherPaymentSeedService {
   export async function findDefaultPayoutMethod(
     userId: string,
     tx?: DBTransaction
-  ): Promise<UserPaymentMethodSelectType | null> {
+  ): Promise<UserPaymentMethodReturnType | null> {
     return UserPaymentMethodRepository.findDefaultForSlot(userId, "PAYOUT", tx);
   }
 

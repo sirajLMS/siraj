@@ -1,4 +1,3 @@
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   CreateTeacherNoteInputPothos,
@@ -17,8 +16,6 @@ gqlSchemaBuilder.mutationField("createTeacherImportantNote", t =>
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);
-      const teacher = await SchedulingRepository.getTeacherByUserId(userId);
-      const teacherId = teacher?.id ?? null;
       const tErrors = ctx.t().errorsTranslations;
       const { title } = args.input;
       if (!title) {
@@ -34,7 +31,6 @@ gqlSchemaBuilder.mutationField("createTeacherImportantNote", t =>
           startsAt: args.input.startsAt ?? null,
           expiresAt: args.input.expiresAt ?? null,
         },
-        teacherId,
         tErrors
       );
     },

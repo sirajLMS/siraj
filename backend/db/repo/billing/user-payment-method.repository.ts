@@ -2,12 +2,16 @@ import { and, asc, eq, inArray, type SQL } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { userPaymentMethods } from "@/backend/db/schema";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
-import type { DBTransaction, UserPaymentMethodInsertType, UserPaymentMethodSelectType } from "@/backend/types";
+import type {
+  DBTransaction,
+  UserPaymentMethodInsertType,
+  UserPaymentMethodReturnType,
+  UserPaymentMethodSelectType,
+  UserPaymentMethodSubmitInput,
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 type DefaultSlot = "PAYIN" | "PAYOUT";
-
-type UserPaymentMethodRow = typeof userPaymentMethods.$inferSelect;
 
 const PAYMENT_METHOD_TYPE_VALUES = new Set<string>(Object.values(PaymentMethodType));
 const PAYMENT_DIRECTION_VALUES = new Set<string>(Object.values(PaymentDirection));
@@ -20,7 +24,7 @@ function isPaymentDirection(value: string): value is PaymentDirection {
   return PAYMENT_DIRECTION_VALUES.has(value);
 }
 
-function toSelectType(row: UserPaymentMethodRow): UserPaymentMethodSelectType {
+function toSelectType(row: UserPaymentMethodSelectType): UserPaymentMethodReturnType {
   return {
     ...row,
     type: isPaymentMethodType(row.type) ? row.type : PaymentMethodType.CASH,
@@ -38,7 +42,7 @@ async function selectByCondition(
   condition: SQL | undefined,
   tx: DBTransaction | undefined,
   orderBy?: SQL
-): Promise<UserPaymentMethodSelectType[]> {
+): Promise<UserPaymentMethodReturnType[]> {
   const client = queryDb(tx);
   const baseQuery = client.select().from(userPaymentMethods);
   const withWhere = condition ? baseQuery.where(condition) : baseQuery;
@@ -46,28 +50,28 @@ async function selectByCondition(
 }
 
 export namespace UserPaymentMethodRepository {
-  export async function listByUserId(userId: string, tx?: DBTransaction): Promise<UserPaymentMethodSelectType[]> {
+  export async function listByUserId(userId: string, tx?: DBTransaction): Promise<UserPaymentMethodReturnType[]> {
     return selectByCondition(eq(userPaymentMethods.userId, userId), tx, asc(userPaymentMethods.createdAt));
   }
 
-  export async function getById(id: string, tx?: DBTransaction): Promise<UserPaymentMethodSelectType | null> {
+  export async function getById(id: string, tx?: DBTransaction): Promise<UserPaymentMethodReturnType | null> {
     const client = queryDb(tx);
     const [row] = await client.select().from(userPaymentMethods).where(eq(userPaymentMethods.id, id)).limit(1);
     return row ? toSelectType(row) : null;
   }
 
   export async function create(
-    input: UserPaymentMethodInsertType,
+    input: UserPaymentMethodSubmitInput,
     tx?: DBTransaction
-  ): Promise<UserPaymentMethodSelectType> {
+  ): Promise<UserPaymentMethodReturnType> {
     const client = tx ?? db;
     const now = new Date();
     const [created] = await client
       .insert(userPaymentMethods)
       .values({
         ...input,
-        createdAt: input.createdAt ?? now,
-        updatedAt: input.updatedAt ?? now,
+        createdAt: now,
+        updatedAt: now,
       })
       .returning();
 
@@ -83,7 +87,7 @@ export namespace UserPaymentMethodRepository {
     input: Partial<UserPaymentMethodInsertType>,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
-  ): Promise<UserPaymentMethodSelectType> {
+  ): Promise<UserPaymentMethodReturnType> {
     const client = tx ?? db;
     const [updated] = await client
       .update(userPaymentMethods)
@@ -129,7 +133,7 @@ export namespace UserPaymentMethodRepository {
     verifiedByUserId: string,
     tErrors: ErrorsLabels,
     tx?: DBTransaction
-  ): Promise<UserPaymentMethodSelectType> {
+  ): Promise<UserPaymentMethodReturnType> {
     return update(
       id,
       {
@@ -144,7 +148,7 @@ export namespace UserPaymentMethodRepository {
   export async function listDefaultsByUserId(
     userId: string,
     tx?: DBTransaction
-  ): Promise<UserPaymentMethodSelectType[]> {
+  ): Promise<UserPaymentMethodReturnType[]> {
     return selectByCondition(and(eq(userPaymentMethods.userId, userId), eq(userPaymentMethods.isDefault, true)), tx);
   }
 
@@ -152,7 +156,7 @@ export namespace UserPaymentMethodRepository {
     userId: string,
     slot: DefaultSlot,
     tx?: DBTransaction
-  ): Promise<UserPaymentMethodSelectType | null> {
+  ): Promise<UserPaymentMethodReturnType | null> {
     const client = queryDb(tx);
     const [row] = await client
       .select()

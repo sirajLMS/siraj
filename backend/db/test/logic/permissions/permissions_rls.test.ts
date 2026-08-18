@@ -1,11 +1,15 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { db } from "@/backend/db";
 import { parents, students, users } from "@/backend/db/schema";
-import { setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import type { DBTransaction } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+
+function setLocalUserId(tx: DBTransaction, userId: string) {
+  const quotedUserId = `'${userId}'`;
+  return tx.execute(sql`SET LOCAL app.current_user_id = ${sql.raw(quotedUserId)}`);
+}
 
 /**
  * Helper to create a user with a given name and unique email
@@ -107,33 +111,25 @@ describe("Row Level Security for Students", () => {
   test("Allows parents to see only their own students", async () => {
     testLogger.info("Testing parents selecting own students under RLS...");
 
-    // We run in transaction to use SET LOCAL and auto-rollback to keep DB clean
-    await db
-      .transaction(async tx => {
-        const { parentAUser, parentBUser, studentA, studentB } = await setupTestData(tx);
+    await runInRollback(async tx => {
+      const { parentAUser, parentBUser, studentA, studentB } = await setupTestData(tx);
 
-        // Switch to the non-superuser RLS role
-        await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
+      const studentIds = sql`id IN (${studentA.id}, ${studentB.id})`;
 
-        // 5. Query as Parent A
-        await tx.execute(sql`SET LOCAL app.current_user_id = ${parentAUser.id}`);
+      await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
 
-        const parentAView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
+      await setLocalUserId(tx, parentAUser.id);
+      const parentAView = await tx.select().from(students).where(studentIds);
 
-        expect(parentAView).toHaveLength(1);
-        expect(parentAView[0].id).toBe(studentA.id);
+      expect(parentAView).toHaveLength(1);
+      expect(parentAView[0]?.id).toBe(studentA.id);
 
-        // 6. Query as Parent B
-        await tx.execute(sql`SET LOCAL app.current_user_id = ${parentBUser.id}`);
+      await setLocalUserId(tx, parentBUser.id);
+      const parentBView = await tx.select().from(students).where(studentIds);
 
-        const parentBView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
-
-        expect(parentBView).toHaveLength(1);
-        expect(parentBView[0].id).toBe(studentB.id);
-
-        tx.rollback();
-      })
-      .catch(() => {});
+      expect(parentBView).toHaveLength(1);
+      expect(parentBView[0]?.id).toBe(studentB.id);
+    });
 
     testLogger.info("Parent SELECT RLS test passed.");
   });
@@ -141,40 +137,32 @@ describe("Row Level Security for Students", () => {
   test("Allows parents to update or delete only their own students", async () => {
     testLogger.info("Testing parents updating/deleting own students under RLS...");
 
-    await db
-      .transaction(async tx => {
-        const { parentAUser, studentA, studentB } = await setupTestData(tx);
+    await runInRollback(async tx => {
+      const { parentAUser, studentA, studentB } = await setupTestData(tx);
 
-        await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
-        await tx.execute(sql`SET LOCAL app.current_user_id = ${parentAUser.id}`);
+      await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
+      await setLocalUserId(tx, parentAUser.id);
 
-        // 5. Parent A tries to update Student A (should succeed)
-        const updateResult = await tx
-          .update(students)
-          .set({ name: "Updated Student A" })
-          .where(eq(students.id, studentA.id))
-          .returning();
-        expect(updateResult).toHaveLength(1);
+      const updateResult = await tx
+        .update(students)
+        .set({ name: "Updated Student A" })
+        .where(eq(students.id, studentA.id))
+        .returning();
+      expect(updateResult).toHaveLength(1);
 
-        // 6. Parent A tries to update Student B (should fail/return 0 rows)
-        const updateBResult = await tx
-          .update(students)
-          .set({ name: "Malicious Update" })
-          .where(eq(students.id, studentB.id))
-          .returning();
-        expect(updateBResult).toHaveLength(0);
+      const updateBResult = await tx
+        .update(students)
+        .set({ name: "Malicious Update" })
+        .where(eq(students.id, studentB.id))
+        .returning();
+      expect(updateBResult).toHaveLength(0);
 
-        // 7. Parent A tries to delete Student B (should fail/return 0 rows)
-        const deleteBResult = await tx.delete(students).where(eq(students.id, studentB.id)).returning();
-        expect(deleteBResult).toHaveLength(0);
+      const deleteBResult = await tx.delete(students).where(eq(students.id, studentB.id)).returning();
+      expect(deleteBResult).toHaveLength(0);
 
-        // 8. Parent A tries to delete Student A (should succeed)
-        const deleteResult = await tx.delete(students).where(eq(students.id, studentA.id)).returning();
-        expect(deleteResult).toHaveLength(1);
-
-        tx.rollback();
-      })
-      .catch(() => {});
+      const deleteResult = await tx.delete(students).where(eq(students.id, studentA.id)).returning();
+      expect(deleteResult).toHaveLength(1);
+    });
 
     testLogger.info("Parent UPDATE/DELETE RLS test passed.");
   });
@@ -182,24 +170,18 @@ describe("Row Level Security for Students", () => {
   test("Allows administrators to view all students", async () => {
     testLogger.info("Testing administrators selecting all students under RLS...");
 
-    await db
-      .transaction(async tx => {
-        const { studentA, studentB } = await setupTestData(tx);
+    await runInRollback(async tx => {
+      const { studentA, studentB } = await setupTestData(tx);
 
-        await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
+      await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
 
-        // We set app.current_user_id to a new admin user ID (not linked to any parent)
-        const adminUserId = randomUUID();
-        await tx.execute(sql`SET LOCAL app.current_user_id = ${adminUserId}`);
+      const adminUserId = randomUUID();
+      await setLocalUserId(tx, adminUserId);
 
-        const adminView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
+      const adminView = await tx.select().from(students).where(sql`id IN (${studentA.id}, ${studentB.id})`);
 
-        // Admin should see both students since they are not a parent
-        expect(adminView).toHaveLength(2);
-
-        tx.rollback();
-      })
-      .catch(() => {});
+      expect(adminView).toHaveLength(2);
+    });
 
     testLogger.info("Admin SELECT RLS test passed.");
   });

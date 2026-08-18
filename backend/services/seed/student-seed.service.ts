@@ -21,23 +21,9 @@ import {
   StudentStatusHistoryRepository,
   type StudentStatusHistoryRow,
 } from "@/backend/db/repo/students/student-status-history.repository";
-import type { StudentStatus } from "@/backend/enum";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { DBTransaction, StudentProgressSelectType, StudentSelectType } from "@/backend/types";
-
-export type SeedStudentInput = {
-  parentId: string;
-  userId: string;
-  primaryTeacherId: string;
-  name: string;
-  avatarUrl: string | null;
-  status: StudentStatus;
-  classesTotal: number;
-  classesRemaining: number;
-  timezoneOverride: string | null;
-  idempotencyKey: string;
-};
+import type { DBTransaction, SeedStudentInput, StudentProgressSelectType, StudentSelectType } from "@/backend/types";
 
 export namespace StudentSeedService {
   /** Read helper — find seed students by stable idempotency keys. */

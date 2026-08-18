@@ -22,7 +22,7 @@ import { AppPermission } from "@/backend/enum";
 import { DstMigrationService, PermissionsService } from "@/backend/services";
 import type {
   ClassInstanceInsertType,
-  ParentEntity,
+  ParentSelectType,
   StudentSelectType,
   TeacherSelectType,
   UserSelectType,
@@ -54,7 +54,7 @@ describe("Timezone Handling & DST Adjustment", () => {
   let testUser: UserSelectType | null = null;
   let testParentUser: UserSelectType | null = null;
   let testTeacher: TeacherSelectType | null = null;
-  let testParent: ParentEntity | null = null;
+  let testParent: ParentSelectType | null = null;
   let testStudent: StudentSelectType | null = null;
 
   beforeAll(async () => {

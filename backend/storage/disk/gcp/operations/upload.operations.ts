@@ -1,9 +1,10 @@
 import crypto from "node:crypto";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
+import { UploadType } from "@/backend/enum/storage";
 import { logger } from "@/backend/lib/logger";
 import type { GcpContext } from "@/backend/storage/disk/gcp/types";
 import { STORAGE_CONFIG, StorageValidationError } from "@/backend/storage/disk/storage.service.interface";
-import * as Types from "@/backend/types";
+import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 
 /**
@@ -46,13 +47,13 @@ export async function prepareUpload(
     logger.info("Prepared upload successfully", {
       uploadId,
       path: input.path,
-      uploadType: Types.UploadType.SIGNED_URL,
+      uploadType: UploadType.SIGNED_URL,
     });
 
     return {
       id: uploadId,
       url: signedUrl,
-      uploadType: Types.UploadType.SIGNED_URL,
+      uploadType: UploadType.SIGNED_URL,
     };
   } catch (error) {
     logger.error("Failed to prepare upload", {
@@ -90,7 +91,11 @@ async function checkUploadPermissions(ctx: GcpContext, directoryPath: string): P
 /**
  * Get FileInfo for a newly uploaded file
  */
-async function getUploadedFileInfo(ctx: GcpContext, path: string, dbFile: Types.FileEntity): Promise<Types.FileInfo> {
+async function getUploadedFileInfo(
+  ctx: GcpContext,
+  path: string,
+  dbFile: Types.FileSelectType
+): Promise<Types.FileInfo> {
   const [metadata] = await ctx.bucket.file(path).getMetadata();
   const bucketFile = StorageUtils.blobToFileInfo(metadata, ctx.gcpBaseUrl);
   return StorageUtils.combineFileData(bucketFile, dbFile);

@@ -1,4 +1,4 @@
-import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import type { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
 import { ClassSessionService, EffectiveMeetingService } from "@/backend/services";
 import type { ClassInstanceDetailReturnType, ClassInstancePerformanceSelectType } from "@/backend/types";
@@ -84,7 +84,7 @@ export async function buildClassInstanceDetail(
 
   const start = instance.scheduledStartAt;
   const end = instance.scheduledEndAt;
-  const studentTimezone = parseIanaTimezone(await SchedulingRepository.resolveStudentTimezone(instance.studentId));
+  const studentTimezone = parseIanaTimezone(await ClassSessionService.resolveStudentTimezone(instance.studentId));
   const teacherTimezone = parseIanaTimezoneOrNull(instance.teacher?.user?.timezone ?? null);
   const hasTimezoneMismatch = teacherTimezone != null && studentTimezone != null && teacherTimezone !== studentTimezone;
 

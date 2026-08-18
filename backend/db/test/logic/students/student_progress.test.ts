@@ -16,7 +16,7 @@ import { Gender } from "@/backend/enum";
 import type {
   ClassInstanceSelectType,
   DBTransaction,
-  ParentEntity,
+  ParentSelectType,
   StudentProgressSelectType,
   StudentSelectType,
   TeacherSelectType,
@@ -37,7 +37,7 @@ async function insertUser(tx: DBTransaction, now: Date, name: string, prefix: st
   return user;
 }
 
-async function insertParent(tx: DBTransaction, now: Date, userId: string): Promise<ParentEntity> {
+async function insertParent(tx: DBTransaction, now: Date, userId: string): Promise<ParentSelectType> {
   const [parent] = await tx
     .insert(parents)
     .values({ userId, status: "REGULAR", createdAt: now, updatedAt: now })

@@ -1,5 +1,13 @@
 import type { permissions } from "@/backend/db/schema/permissions/permissions";
+import type { AppPermission, UserRole } from "@/backend/enum";
 import type { LocalizedString } from "@/shared/types";
+
+export type UserPermissionContext = {
+  readonly permissions: AppPermission[];
+  readonly permissionGroups: string[];
+  readonly isSuperAdmin: boolean;
+  readonly role: UserRole;
+};
 
 // Canonical: {Entity}SelectType and {Entity}InsertType must be derived from Drizzle
 //--------------------------------------------------------------------------------

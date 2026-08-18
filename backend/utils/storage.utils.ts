@@ -1,7 +1,8 @@
 import { OrderSortDirection } from "@/backend/enum";
+import { FileSortField, FileTypes } from "@/backend/enum/storage";
 import { logger } from "@/backend/lib/logger";
 import { STORAGE_CONFIG } from "@/backend/storage/disk/storage.service.interface";
-import * as Types from "@/backend/types";
+import type * as Types from "@/backend/types";
 import { isAllowedMimeType, validateFileName as sharedValidateFileName } from "@/shared/utils/storage.utils";
 
 export namespace StorageUtils {
@@ -65,20 +66,20 @@ export namespace StorageUtils {
     return errors.length > 0 ? errors.join("\n") : null;
   };
 
-  export const getFileTypeFromContentType = (contentType?: string): Types.FileTypes => {
-    if (!contentType) return Types.FileTypes.OTHER;
+  export const getFileTypeFromContentType = (contentType?: string): FileTypes => {
+    if (!contentType) return FileTypes.OTHER;
 
-    if (contentType.startsWith("image/")) return Types.FileTypes.IMAGE;
-    if (contentType.startsWith("video/")) return Types.FileTypes.VIDEO;
-    if (contentType.startsWith("audio/")) return Types.FileTypes.AUDIO;
+    if (contentType.startsWith("image/")) return FileTypes.IMAGE;
+    if (contentType.startsWith("video/")) return FileTypes.VIDEO;
+    if (contentType.startsWith("audio/")) return FileTypes.AUDIO;
     if (contentType.includes("pdf") || contentType.includes("document") || contentType.includes("text"))
-      return Types.FileTypes.DOCUMENT;
-    if (contentType.includes("zip") || contentType.includes("rar")) return Types.FileTypes.ARCHIVE;
+      return FileTypes.DOCUMENT;
+    if (contentType.includes("zip") || contentType.includes("rar")) return FileTypes.ARCHIVE;
 
     // fonts
-    if (contentType.includes("font")) return Types.FileTypes.FONT;
+    if (contentType.includes("font")) return FileTypes.FONT;
 
-    return Types.FileTypes.OTHER;
+    return FileTypes.OTHER;
   };
 
   export const extractDirectoryPath = (filePath: string): string => {
@@ -141,7 +142,7 @@ export namespace StorageUtils {
 
   export const combineDirectoryData = (
     bucketDir: Types.BucketDirectory,
-    dbEntity?: Types.DirectoryEntity | null,
+    dbEntity?: Types.DirectorySelectType | null,
     fileCount: number = 0
   ): Types.DirectoryInfo => {
     const permissions: Types.DirectoryPermissions = dbEntity
@@ -181,7 +182,10 @@ export namespace StorageUtils {
     return result;
   };
 
-  export const combineFileData = (bucketFile: Types.BucketFile, dbEntity?: Types.FileEntity | null): Types.FileInfo => {
+  export const combineFileData = (
+    bucketFile: Types.BucketFile,
+    dbEntity?: Types.FileSelectType | null
+  ): Types.FileInfo => {
     const usages: Types.FileUsageInfo[] = [];
     const isProtected = dbEntity?.isProtected ?? false;
 
@@ -304,32 +308,32 @@ export namespace StorageUtils {
 
   export const sortItems = (
     items: Array<Types.FileInfo | Types.DirectoryInfo>,
-    sortBy: Types.FileSortField,
+    sortBy: FileSortField,
     direction: OrderSortDirection
   ): Array<Types.FileInfo | Types.DirectoryInfo> => {
     const sorted = [...items].toSorted((a, b) => {
       let comparison = 0;
 
       switch (sortBy) {
-        case Types.FileSortField.NAME:
+        case FileSortField.NAME:
           comparison = a.name.localeCompare(b.name);
           break;
-        case Types.FileSortField.SIZE: {
+        case FileSortField.SIZE: {
           const sizeA = "size" in a ? Number(a.size) : 0;
           const sizeB = "size" in b ? Number(b.size) : 0;
           comparison = sizeA - sizeB;
           break;
         }
-        case Types.FileSortField.TYPE: {
+        case FileSortField.TYPE: {
           const typeA = "fileType" in a ? a.fileType : "DIRECTORY";
           const typeB = "fileType" in b ? b.fileType : "DIRECTORY";
           comparison = typeA.localeCompare(typeB);
           break;
         }
-        case Types.FileSortField.CREATED:
+        case FileSortField.CREATED:
           comparison = a.createdAt.getTime() - b.createdAt.getTime();
           break;
-        case Types.FileSortField.MODIFIED:
+        case FileSortField.MODIFIED:
           comparison = a.lastModified.getTime() - b.lastModified.getTime();
           break;
       }

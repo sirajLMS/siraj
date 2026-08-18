@@ -341,7 +341,7 @@ export type CreateManualInvoiceInput = {
   readonly idempotencyKey?: string;
 };
 
-export type ManualInvoiceInsertInput = Omit<InvoiceInsertType, "id" | "createdAt" | "updatedAt">;
+export type ManualInvoiceInsertType = Omit<InvoiceInsertType, "id" | "createdAt" | "updatedAt">;
 
 export type InvoiceCoverageMonthSelectType = typeof invoiceCoverageMonths.$inferSelect;
 

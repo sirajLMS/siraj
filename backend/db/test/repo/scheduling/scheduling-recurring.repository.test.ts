@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import type { RateSnapshot } from "@/backend/db/repo/scheduling/recurring";
 import { classInstances, recurringSchedules, students, teacherAssignments } from "@/backend/db/schema";
 import {
   createMockClassInstance,
@@ -11,9 +12,17 @@ import {
   setupTestEntities,
 } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
+import { RateSource } from "@/backend/enum";
 import { DayOfWeek } from "@/backend/enum/teachers/teacher-availability.enum";
 import type { DBTransaction } from "@/backend/types";
+import { CurrencyCode } from "@/shared/constants";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+
+const TEST_RATE_SNAPSHOT: RateSnapshot = {
+  rateAmount: "100",
+  rateCurrency: CurrencyCode.SAR,
+  rateSource: RateSource.TEACHER,
+};
 
 async function expectRepositoryError(fn: () => Promise<unknown>) {
   let errorCaught: unknown = null;
@@ -176,6 +185,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             generateInstancesForWeeks: 2,
             quotaDeducted: true,
           },
+          null,
+          TEST_RATE_SNAPSHOT,
           tx
         );
 
@@ -226,6 +237,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             generateInstancesForWeeks: 1,
             quotaDeducted: false,
           },
+          null,
+          TEST_RATE_SNAPSHOT,
           tx
         );
 
@@ -249,6 +262,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
               generateInstancesForWeeks: 1,
               quotaDeducted: false,
             },
+            null,
+            TEST_RATE_SNAPSHOT,
             tx
           );
         } catch (error) {
@@ -270,6 +285,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             { dayOfWeek: "TUESDAY", startTime: "11:00:00", isActive: false },
             { dayOfWeek: "WEDNESDAY", startTime: "12:00:00", isActive: true },
           ]),
+          null,
+          TEST_RATE_SNAPSHOT,
           tx
         );
 
@@ -288,6 +305,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             { dayOfWeek: "WEDNESDAY", startTime: "14:00:00", isActive: true },
             { dayOfWeek: "FRIDAY", startTime: "09:00:00", isActive: false },
           ]),
+          null,
+          TEST_RATE_SNAPSHOT,
           tx
         );
 
@@ -314,6 +333,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             { dayOfWeek: "MONDAY", startTime: "08:00:00", isActive: true },
             { dayOfWeek: "WEDNESDAY", startTime: "16:00:00", isActive: true },
           ]),
+          null,
+          TEST_RATE_SNAPSHOT,
           tx
         );
 
@@ -358,6 +379,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
           generateInstancesForWeeks: 1,
           quotaDeducted: false,
         },
+        null,
+        TEST_RATE_SNAPSHOT,
         tx
       );
     });
@@ -416,6 +439,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             generateInstancesForWeeks: 1,
             quotaDeducted: false,
           },
+          null,
+          TEST_RATE_SNAPSHOT,
           tx
         );
 
@@ -434,6 +459,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             generateInstancesForWeeks: 1,
             quotaDeducted: false,
           },
+          null,
+          TEST_RATE_SNAPSHOT,
           tx
         );
 
@@ -568,6 +595,8 @@ describe("Scheduling Repository – Recurring & Weekly", () => {
             generateInstancesForWeeks: 1,
             quotaDeducted: false,
           },
+          null,
+          TEST_RATE_SNAPSHOT,
           tx
         );
 

@@ -10,7 +10,9 @@ function isStringRecord(value: unknown): value is Record<string, unknown> {
 
 function validateLocalizedMap(value: unknown): LocalizedString {
   if (!isStringRecord(value)) {
-    throw new GraphQLError("LocalizedString must be an object keyed by AppLocale");
+    throw new GraphQLError("LocalizedString must be an object keyed by AppLocale", {
+      extensions: { code: "BAD_USER_INPUT" },
+    });
   }
 
   const obj: Record<string, unknown> = value;
@@ -18,15 +20,19 @@ function validateLocalizedMap(value: unknown): LocalizedString {
 
   for (const [key, val] of Object.entries(obj)) {
     if (!isAppLocale(key)) {
-      throw new GraphQLError(`LocalizedString keys must be AppLocale values ("ar" | "en"). Unexpected key "${key}"`);
+      throw new GraphQLError('LocalizedString keys must be AppLocale values ("ar" | "en").', {
+        extensions: { code: "BAD_USER_INPUT", key },
+      });
     }
     if (typeof val !== "string") {
-      throw new GraphQLError(`LocalizedString values must be strings. Key "${key}" has value of type ${typeof val}`);
+      throw new GraphQLError("LocalizedString values must be strings.", {
+        extensions: { code: "BAD_USER_INPUT", key },
+      });
     }
     if (val.length > MAX_VALUE_LENGTH) {
-      throw new GraphQLError(
-        `LocalizedString values must be at most ${MAX_VALUE_LENGTH} characters. Key "${key}" exceeds limit`
-      );
+      throw new GraphQLError("LocalizedString value exceeds maximum length.", {
+        extensions: { code: "BAD_USER_INPUT", key, maxLength: MAX_VALUE_LENGTH },
+      });
     }
     result[key] = val;
   }
@@ -36,7 +42,9 @@ function validateLocalizedMap(value: unknown): LocalizedString {
 
 function parseLiteral(ast: ValueNode): LocalizedString {
   if (ast.kind !== Kind.OBJECT) {
-    throw new GraphQLError("LocalizedString must be an object keyed by AppLocale");
+    throw new GraphQLError("LocalizedString must be an object keyed by AppLocale", {
+      extensions: { code: "BAD_USER_INPUT" },
+    });
   }
 
   const result: Record<string, string> = {};
@@ -44,15 +52,19 @@ function parseLiteral(ast: ValueNode): LocalizedString {
   for (const field of ast.fields) {
     const key = field.name.value;
     if (!isAppLocale(key)) {
-      throw new GraphQLError(`LocalizedString keys must be AppLocale values ("ar" | "en"). Unexpected key "${key}"`);
+      throw new GraphQLError('LocalizedString keys must be AppLocale values ("ar" | "en").', {
+        extensions: { code: "BAD_USER_INPUT", key },
+      });
     }
     if (field.value.kind !== Kind.STRING) {
-      throw new GraphQLError(`LocalizedString values must be strings. Key "${key}" has non-string value`);
+      throw new GraphQLError("LocalizedString values must be strings.", {
+        extensions: { code: "BAD_USER_INPUT", key },
+      });
     }
     if (field.value.value.length > MAX_VALUE_LENGTH) {
-      throw new GraphQLError(
-        `LocalizedString values must be at most ${MAX_VALUE_LENGTH} characters. Key "${key}" exceeds limit`
-      );
+      throw new GraphQLError("LocalizedString value exceeds maximum length.", {
+        extensions: { code: "BAD_USER_INPUT", key, maxLength: MAX_VALUE_LENGTH },
+      });
     }
     result[key] = field.value.value;
   }

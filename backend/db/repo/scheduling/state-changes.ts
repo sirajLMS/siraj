@@ -10,12 +10,6 @@ import {
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { classInstances, classStatusEvents, leaveRequests, parents, teachers } from "@/backend/db/schema";
 import { RateSource } from "@/backend/enum";
-import {
-  checkStateChangeAuth,
-  EffectiveMeetingService,
-  validateRescheduleState,
-  validateStateTransition,
-} from "@/backend/services";
 import type * as Types from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -55,6 +49,21 @@ export async function updateInstanceState(
   return updated;
 }
 
+/** Optional hooks the service caller provides so auth/validation execute inside the transaction. */
+export interface StateChangeHooks {
+  onAuth?: (
+    t: DBTransaction,
+    existing: Types.ClassInstanceSelectType,
+    actorUserId: string,
+    tErrors: ErrorsLabels
+  ) => Promise<void>;
+  onValidate?: (
+    existing: Types.ClassInstanceSelectType,
+    state: Partial<Types.ClassInstanceInsertType>,
+    tErrors: ErrorsLabels
+  ) => Promise<void>;
+}
+
 async function runStateChange(
   id: string,
   actorUserId: string,
@@ -70,7 +79,8 @@ async function runStateChange(
     };
   }>,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  tErrors?: ErrorsLabels,
+  hooks?: StateChangeHooks
 ): Promise<Types.ClassInstanceSelectType | null> {
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
@@ -78,11 +88,15 @@ async function runStateChange(
 
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
 
-    await checkStateChangeAuth(t, existing, actorUserId, tFuncErrors);
+    if (hooks?.onAuth) {
+      await hooks.onAuth(t, existing, actorUserId, tFuncErrors);
+    }
 
     const { state, event } = await logic(t, existing);
 
-    await validateStateTransition(existing, state, tFuncErrors);
+    if (hooks?.onValidate) {
+      await hooks.onValidate(existing, state, tFuncErrors);
+    }
 
     return updateInstanceState(t, id, actorUserId, state, event);
   };
@@ -95,7 +109,8 @@ async function transitionToCompleted(
   outcome: "ABSENT" | "LEAVE" | "TAKEN",
   description: string,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  tErrors?: ErrorsLabels,
+  hooks?: StateChangeHooks
 ) {
   return runStateChange(
     id,
@@ -117,7 +132,8 @@ async function transitionToCompleted(
       };
     },
     tx,
-    tErrors
+    tErrors,
+    hooks
   );
 }
 
@@ -188,7 +204,9 @@ async function executeProcessClassLeave(
   id: string,
   reason: string | null,
   actorUserId: string,
-  tErrors: ErrorsLabels
+  tErrors: ErrorsLabels,
+  hooks?: StateChangeHooks,
+  meetingJoinUrl?: string | null
 ): Promise<{ originalId: string; successorId: string }> {
   const tFuncSession = getServerTranslations("en").sessionTranslations;
   const tFuncErrors = tErrors;
@@ -197,8 +215,6 @@ async function executeProcessClassLeave(
   if (!existing) {
     throw new Error(tFuncErrors.classInstanceNotFound({ id }));
   }
-
-  await checkStateChangeAuth(t, existing, actorUserId, tFuncErrors);
 
   if (existing.executionState !== "ACTIVATED" && existing.executionState !== "RUNNING") {
     throw new Error(tFuncErrors.sessionNotActivated);
@@ -210,7 +226,8 @@ async function executeProcessClassLeave(
     existing,
     offsetDays,
     tFuncSession.leaveRescheduledRemark,
-    tErrors
+    tErrors,
+    meetingJoinUrl
   );
 
   const updated = await runStateChange(
@@ -218,7 +235,8 @@ async function executeProcessClassLeave(
     actorUserId,
     async () => buildLeaveStateChangePayload(existing, successor.id, reason),
     t,
-    tErrors
+    tErrors,
+    hooks
   );
 
   const originalId = updated?.id ?? id;
@@ -231,7 +249,7 @@ async function executeProcessClassLeave(
     .where(eq(teachers.id, existing.teacherId))
     .limit(1);
   if (teacherRow) {
-    await incrementTeacherLeaveQuotaFn(teacherRow.id, t, tErrors);
+    await incrementTeacherLeaveQuotaFn(teacherRow.id, t);
   }
 
   return { originalId, successorId: successor.id };
@@ -242,7 +260,8 @@ export const activateClassInstance = async (
   actorUserId: string,
   options: { force: boolean },
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  tErrors?: ErrorsLabels,
+  hooks?: StateChangeHooks
 ) => {
   return runStateChange(
     id,
@@ -265,7 +284,8 @@ export const activateClassInstance = async (
       };
     },
     tx,
-    tErrors
+    tErrors,
+    hooks
   );
 };
 
@@ -273,17 +293,19 @@ export const stopClassInstance = async (
   id: string,
   actorUserId: string,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  tErrors?: ErrorsLabels,
+  hooks?: StateChangeHooks
 ) => {
   const tFuncSession = getServerTranslations("en").sessionTranslations;
-  return transitionToCompleted(id, actorUserId, "TAKEN", tFuncSession.stopDescription, tx, tErrors);
+  return transitionToCompleted(id, actorUserId, "TAKEN", tFuncSession.stopDescription, tx, tErrors, hooks);
 };
 
 export const startClassInstance = async (
   id: string,
   actorUserId: string,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  tErrors?: ErrorsLabels,
+  hooks?: StateChangeHooks
 ) => {
   return runStateChange(
     id,
@@ -300,11 +322,18 @@ export const startClassInstance = async (
       };
     },
     tx,
-    tErrors
+    tErrors,
+    hooks
   );
 };
 
-export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTransaction, tErrors?: ErrorsLabels) => {
+export const markClassAbsent = async (
+  id: string,
+  actorUserId: string,
+  tx?: DBTransaction,
+  tErrors?: ErrorsLabels,
+  hooks?: StateChangeHooks
+) => {
   return runStateChange(
     id,
     actorUserId,
@@ -328,14 +357,15 @@ export const markClassAbsent = async (id: string, actorUserId: string, tx?: DBTr
       };
     },
     tx,
-    tErrors
+    tErrors,
+    hooks
   );
 };
 
 export const markClassMissedBySystem = async (
   id: string,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  _tErrors?: ErrorsLabels
 ): Promise<Types.ClassInstanceSelectType | null> => {
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
@@ -344,7 +374,6 @@ export const markClassMissedBySystem = async (
     }
 
     const tFuncSession = getServerTranslations("en").sessionTranslations;
-    const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
     const now = new Date();
     const state = {
       executionState: "COMPLETED" as const,
@@ -354,8 +383,6 @@ export const markClassMissedBySystem = async (
       payrollCredited: true,
       remarks: existing.remarks ?? tFuncSession.autoMissedEventDescription,
     };
-
-    await validateStateTransition(existing, state, tFuncErrors);
 
     return updateInstanceState(t, id, null, state, {
       fromState: { executionState: existing.executionState, outcome: existing.outcome },
@@ -372,11 +399,13 @@ export const processClassLeave = async (
   reason: string | null,
   actorUserId: string,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  tErrors?: ErrorsLabels,
+  hooks?: StateChangeHooks,
+  meetingJoinUrl?: string | null
 ) => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
-    return executeProcessClassLeave(t, id, reason, actorUserId, tErrors ?? tFuncErrors);
+    return executeProcessClassLeave(t, id, reason, actorUserId, tErrors ?? tFuncErrors, hooks, meetingJoinUrl);
   };
   return tx ? await runner(tx) : await db.transaction(runner);
 };
@@ -385,7 +414,8 @@ export const resetClassInstance = async (
   id: string,
   actorUserId: string,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  tErrors?: ErrorsLabels,
+  hooks?: StateChangeHooks
 ) => {
   const runner = async (t: DBTransaction) => {
     const [existing] = await t.select().from(classInstances).where(eq(classInstances.id, id)).limit(1);
@@ -424,7 +454,8 @@ export const resetClassInstance = async (
         };
       },
       t,
-      tErrors
+      tErrors,
+      hooks
     );
   };
   return tx ? await runner(tx) : await db.transaction((t: DBTransaction) => runner(t));
@@ -491,11 +522,21 @@ export async function overrideClassInstanceRate(
   return updated ?? null;
 }
 
+/** Optional hook for reschedule state validation, provided by the service caller. */
+export interface RescheduleHooks {
+  validateRescheduleState?: (
+    original: Types.ClassInstanceSelectType,
+    input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
+    tErrors: ErrorsLabels
+  ) => Promise<void>;
+}
+
 export const rescheduleClassInstance = async (
   originalClassId: string,
   input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  tErrors?: ErrorsLabels,
+  hooks?: RescheduleHooks
 ): Promise<Types.ClassInstanceSelectType> => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
@@ -505,20 +546,22 @@ export const rescheduleClassInstance = async (
     }
     const original = results[0];
 
-    await validateRescheduleState(original, input, tFuncErrors);
+    // Hard data-integrity checks (completed/rescheduled) remain in repo
+    if (original.executionState === "COMPLETED") {
+      throw new Error(tFuncErrors.cannotRescheduleCompleted);
+    }
+    if (original.isRescheduled) {
+      throw new Error(tFuncErrors.cannotRescheduleAlreadyRescheduled);
+    }
+
+    // Service-layer hooks for additional validation (auth, state machine)
+    if (hooks?.validateRescheduleState) {
+      await hooks.validateRescheduleState(original, input, tFuncErrors);
+    }
 
     const newInstanceInput = buildRescheduledClassInput(original, input, originalClassId);
-    const effectiveMeeting = await EffectiveMeetingService.resolveForNewBooking(newInstanceInput.teacherId, {
-      recurringScheduleId: newInstanceInput.recurringScheduleId,
-      tErrors: tFuncErrors,
-      tx: t,
-    });
-    const instanceWithMeeting = {
-      ...newInstanceInput,
-      meetingJoinUrl: effectiveMeeting.joinUrl,
-    };
 
-    await performRescheduleValidations(t, instanceWithMeeting, tFuncErrors);
+    await performRescheduleValidations(t, newInstanceInput, tFuncErrors);
 
     const [created] = await t
       .insert(classInstances)
@@ -531,8 +574,6 @@ export const rescheduleClassInstance = async (
 
     await markOriginalAsRescheduled(t, originalClassId);
 
-    // Quota operations are now handled by QuotaService + quota_ledger
-
     return created;
   };
 
@@ -544,7 +585,9 @@ export async function processAutomatedClassLeave(
   reason: string | null,
   actorUserId: string,
   tx?: DBTransaction,
-  tErrors?: ErrorsLabels
+  tErrors?: ErrorsLabels,
+  hooks?: StateChangeHooks,
+  meetingJoinUrl?: string | null
 ): Promise<{ originalId: string; successorId: string | null }> {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
@@ -555,7 +598,8 @@ export async function processAutomatedClassLeave(
       existing,
       offsetDays,
       "Automated leave reschedule",
-      tFuncErrors
+      tFuncErrors,
+      meetingJoinUrl
     );
 
     const updated = await runStateChange(
@@ -563,7 +607,8 @@ export async function processAutomatedClassLeave(
       actorUserId,
       async () => buildLeaveStateChangePayload(existing, successor.id, reason),
       t,
-      tErrors
+      tErrors,
+      hooks
     );
 
     const originalId = updated?.id ?? id;
@@ -588,7 +633,7 @@ export async function processAutomatedClassLeave(
       .from(teachers)
       .where(eq(teachers.id, existing.teacherId))
       .limit(1);
-    if (teacherRow) await incrementTeacherLeaveQuotaFn(teacherRow.id, t, tFuncErrors);
+    if (teacherRow) await incrementTeacherLeaveQuotaFn(teacherRow.id, t);
 
     return { originalId, successorId: successor.id };
   };

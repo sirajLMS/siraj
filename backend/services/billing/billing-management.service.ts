@@ -310,6 +310,10 @@ async function finalizeInvoicePaid(
     throw new NotFoundError("INVOICE", tErrors.billing.invoiceNotFound(invoiceId));
   }
 
+  if (existingInvoice.status !== "UNPAID" && existingInvoice.status !== "PAYMENT_PENDING") {
+    throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: existingInvoice.status }));
+  }
+
   const { filePath, mimeType } = await validateProofFile(proofFileId, invoiceId, tx);
   await linkProofToInvoice(invoiceId, proofFileId, tx);
 
@@ -690,7 +694,7 @@ export namespace BillingManagementService {
   }
 
   export async function createManyManualInvoices(
-    inputs: readonly Types.ManualInvoiceInsertInput[],
+    inputs: readonly Types.ManualInvoiceInsertType[],
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType[]> {
     return BillingRepository.upsertManyInvoices(inputs, tx);

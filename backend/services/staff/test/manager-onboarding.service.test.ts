@@ -5,11 +5,8 @@ import { UserRepository } from "@/backend/db/repo/users";
 import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, ManagerAccountType, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import {
-  type ManagerOnboardingInput,
-  type ManagerOnboardingResult,
-  ManagerOnboardingService,
-} from "@/backend/services/staff/manager-onboarding.service";
+import { ManagerOnboardingService } from "@/backend/services/staff/manager-onboarding.service";
+import type { ManagerOnboardingInput, ManagerOnboardingResult } from "@/backend/types";
 
 const DEFAULT_ACTOR_ID = "00000000-0000-0000-0000-000000000000";
 

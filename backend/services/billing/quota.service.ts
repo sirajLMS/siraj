@@ -5,6 +5,7 @@ import { QuotaLedgerRepository } from "@/backend/db/repo/billing/quota-ledger.re
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { AppPermission, OnDemandStatus } from "@/backend/enum";
+import { mapQuotaLedgerToReturnType, mapQuotaToReturnType } from "@/backend/lib";
 import { QuotaNotFoundError, UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
@@ -14,18 +15,16 @@ import {
   resolveAssociatedViewer,
   requirePermission as sharedRequirePermission,
 } from "@/backend/services/billing/permission-utils";
-import {
-  type DBTransaction,
-  mapQuotaLedgerToReturnType,
-  mapQuotaToReturnType,
-  type PaginationArgs,
-  type QuotaBalanceReturnType,
-  type QuotaExpirationBreakdown,
-  type QuotaLedgerPaginatedResult,
-  type QuotaPaginatedFilter,
-  type QuotaReturnType,
-  type QuotaSubmitInput,
-  type QuotaUpdateInput,
+import type {
+  DBTransaction,
+  PaginationArgs,
+  QuotaBalanceReturnType,
+  QuotaExpirationBreakdown,
+  QuotaLedgerPaginatedResult,
+  QuotaPaginatedFilter,
+  QuotaReturnType,
+  QuotaSubmitInput,
+  QuotaUpdateInput,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale/server-graphql";
 
@@ -625,6 +624,15 @@ export namespace QuotaService {
         const creditPortion = flippedCount - quotaDeducted;
         if (creditPortion > 0) {
           const tErrors = getServerTranslations(_locale).errorsTranslations;
+          if (creditBalance.classesRemaining < creditPortion) {
+            throw new Error(
+              tErrors.insufficientClasses({
+                id: studentId,
+                remaining: creditBalance.classesRemaining,
+                required: creditPortion,
+              })
+            );
+          }
           await StudentRepository.deductClasses(studentId, tErrors, creditPortion, undefined, t);
         }
       }

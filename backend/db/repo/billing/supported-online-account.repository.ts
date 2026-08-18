@@ -7,23 +7,46 @@ import {
 import { supportedOnlineAccounts } from "@/backend/db/schema";
 import { IdentifierKind, PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
-  SupportedOnlineAccountInsertType,
+  SupportedOnlineAccountReturnType,
   SupportedOnlineAccountSelectType,
+  SupportedOnlineAccountSubmitInput,
   UpdateSupportedOnlineAccountInput,
 } from "@/backend/types";
-
-type AccountRow = typeof supportedOnlineAccounts.$inferSelect;
+import { getServerTranslations } from "@/shared/locale";
 
 const VALID_IDENTIFIER_KINDS = new Set<string>(Object.values(IdentifierKind));
 const VALID_PAYMENT_DIRECTIONS = new Set<string>(Object.values(PaymentDirection));
 
-function isSupportedOnlineAccountSelectType(row: AccountRow): row is SupportedOnlineAccountSelectType {
-  return VALID_IDENTIFIER_KINDS.has(row.identifierKind) && VALID_PAYMENT_DIRECTIONS.has(row.supportedDirections);
+function isIdentifierKind(value: string): value is IdentifierKind {
+  return VALID_IDENTIFIER_KINDS.has(value);
 }
 
-function toSelectType(row: AccountRow): SupportedOnlineAccountSelectType {
-  if (isSupportedOnlineAccountSelectType(row)) return row;
-  throw new Error(`Invalid account row: unsupported identifierKind or supportedDirections`);
+function isPaymentDirection(value: string): value is PaymentDirection {
+  return VALID_PAYMENT_DIRECTIONS.has(value);
+}
+
+function toSelectType(row: SupportedOnlineAccountSelectType): SupportedOnlineAccountReturnType {
+  const { invalidIdentifierKind, invalidSupportedDirections } = getServerTranslations("en").errorsTranslations;
+  if (!isIdentifierKind(row.identifierKind)) {
+    throw new Error(invalidIdentifierKind(row.identifierKind));
+  }
+  if (!isPaymentDirection(row.supportedDirections)) {
+    throw new Error(invalidSupportedDirections(row.supportedDirections));
+  }
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    description: row.description,
+    instructions: row.instructions,
+    identifierKind: row.identifierKind,
+    identifierLabel: row.identifierLabel,
+    supportedDirections: row.supportedDirections,
+    logoUrl: row.logoUrl,
+    isActive: row.isActive,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
 type ListActiveFilters = {
@@ -31,9 +54,9 @@ type ListActiveFilters = {
 };
 
 const baseRepo = makeBillingRepo<
-  AccountRow,
   SupportedOnlineAccountSelectType,
-  SupportedOnlineAccountInsertType,
+  SupportedOnlineAccountReturnType,
+  SupportedOnlineAccountSubmitInput,
   UpdateSupportedOnlineAccountInput,
   ListActiveFilters
 >({
@@ -64,9 +87,9 @@ export namespace SupportedOnlineAccountRepository {
   export const listByIds = baseRepo.listByIds;
 
   export const upsertMany = makeBillingUpsertMany<
-    AccountRow,
     SupportedOnlineAccountSelectType,
-    SupportedOnlineAccountInsertType
+    SupportedOnlineAccountReturnType,
+    SupportedOnlineAccountSubmitInput
   >({
     table: supportedOnlineAccounts,
     slug: supportedOnlineAccounts.slug,

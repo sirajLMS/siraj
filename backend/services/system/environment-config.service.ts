@@ -48,6 +48,7 @@
  */
 
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
+import { maskSecretValue } from "@/backend/lib";
 import {
   ENV_CONFIG_KEYS,
   type EnvConfigKeyDescriptor,
@@ -55,16 +56,15 @@ import {
 } from "@/backend/lib/env-config-keys";
 import { logger } from "@/backend/lib/logger";
 import { AuditService } from "@/backend/services/system/audit.service";
-import {
-  type CreateAuditLogInput,
-  type EnvConfigAuditCreateInput,
-  type EnvConfigAuditEvent,
-  type EnvConfigCategory,
-  type EnvConfigDeleteReturnType,
-  type EnvConfigEntry,
-  type EnvConfigUpsertInput,
-  type EnvConfigUpsertReturnType,
-  maskSecretValue,
+import type {
+  CreateAuditLogInput,
+  EnvConfigAuditCreateInput,
+  EnvConfigAuditEvent,
+  EnvConfigCategory,
+  EnvConfigDeleteReturnType,
+  EnvConfigEntry,
+  EnvConfigUpsertInput,
+  EnvConfigUpsertReturnType,
 } from "@/backend/types";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 

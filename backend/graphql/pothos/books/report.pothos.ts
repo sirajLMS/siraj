@@ -1,3 +1,4 @@
+import { GraphQLError } from "graphql";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   DisplayAmountPothosObject,
@@ -92,7 +93,8 @@ gqlSchemaBuilder.queryField("generateAttendanceReport", t =>
     },
     resolve: async (_root, args, ctx) => {
       if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
+        const tErrors = ctx.t().errorsTranslations;
+        throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
       }
 
       const filters = {

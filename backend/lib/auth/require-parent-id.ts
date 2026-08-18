@@ -1,7 +1,7 @@
 import { forbidden } from "next/navigation";
 import { getCurrentUser } from "@/backend/lib/auth/cached-user";
 import { isPrefetchRequest } from "@/backend/lib/auth/is-prefetch";
-import type { UserPermissionContext } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 import { redirect } from "@/shared/i18n/routing";
 
 export async function requireParentIdForPage(

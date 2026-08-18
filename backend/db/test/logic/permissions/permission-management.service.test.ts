@@ -1,11 +1,12 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq, like } from "drizzle-orm";
+import { eq, like, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { groupPermissions, permissionGroups, permissions, users } from "@/backend/db/schema";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
-import { PermissionManagementService, PermissionsService, type UserPermissionContext } from "@/backend/services";
+import { PermissionManagementService, PermissionsService } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
 
@@ -26,8 +27,14 @@ async function assertThrows(fn: () => Promise<unknown>, message: string) {
   expect(getErrorMessage(err)).toContain(message);
 }
 
+let testSystemGroupId: string;
+
 async function getSystemGroup() {
-  const [sysGroup] = await db.select().from(permissionGroups).where(eq(permissionGroups.isSystem, true)).limit(1);
+  const [sysGroup] = await db
+    .select()
+    .from(permissionGroups)
+    .where(eq(permissionGroups.id, testSystemGroupId))
+    .limit(1);
   expect(sysGroup).toBeDefined();
   return sysGroup;
 }
@@ -189,6 +196,19 @@ describe("PermissionManagementService Business Logic", () => {
         })
         .returning();
     }
+
+    // Create a test system group (trigger only blocks UPDATE/DELETE of system groups, not INSERT)
+    const [testSysGroup] = await db
+      .insert(permissionGroups)
+      .values({
+        name: loc("Service Test System Group"),
+        slug: `svc-sys-group-${randomUUID().slice(0, 8)}`,
+        isSystem: true,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+    testSystemGroupId = testSysGroup.id;
   });
 
   afterAll(async () => {
@@ -201,6 +221,14 @@ describe("PermissionManagementService Business Logic", () => {
     // Cleanup test permissions
     await db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ONLY));
     await db.delete(permissions).where(eq(permissions.key, AppPermission.TEST_CUSTOM_ALT));
+
+    // Cleanup test system group — disable trigger to allow DELETE of isSystem=true group
+    await db.execute(sql`ALTER TABLE permission_groups DISABLE TRIGGER trg_protect_system_permission_groups`);
+    try {
+      await db.delete(permissionGroups).where(eq(permissionGroups.id, testSystemGroupId));
+    } finally {
+      await db.execute(sql`ALTER TABLE permission_groups ENABLE TRIGGER trg_protect_system_permission_groups`);
+    }
   });
 
   afterEach(async () => {

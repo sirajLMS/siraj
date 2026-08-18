@@ -3,10 +3,10 @@ import type { OverrideState } from "@/backend/enum";
 import type { PermissionGroupReturnType, UserReturnType } from "@/backend/types";
 import type { LocalizedString } from "@/shared/types";
 
-export type UserOverrideEntity = typeof userPermissionOverrides.$inferSelect;
-export type UserPermissionOverrideEntityInput = typeof userPermissionOverrides.$inferInsert;
+export type UserPermissionOverrideSelectType = typeof userPermissionOverrides.$inferSelect;
+export type UserPermissionOverrideInsertType = typeof userPermissionOverrides.$inferInsert;
 
-export type UserOverrideReturnType = Omit<UserOverrideEntity, "state"> & {
+export type UserOverrideReturnType = Omit<UserPermissionOverrideSelectType, "state"> & {
   state: OverrideState;
 };
 

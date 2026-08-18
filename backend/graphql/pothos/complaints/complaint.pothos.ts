@@ -3,6 +3,8 @@ import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponsePothosObject } from "@/backend/graphql/pothos/complaints/complaintResponses.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { parsePaginationArgs } from "@/backend/graphql/utils/pagination-utils";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
+import { isComplaintCategory, isComplaintStatus } from "@/backend/lib";
 import { ComplaintService } from "@/backend/services";
 import type {
   ComplaintFileReturnType,
@@ -147,14 +149,6 @@ export const ComplaintQueueFilterPothosObject = gqlSchemaBuilder
     }),
   });
 
-function isComplaintCategory(value: string): value is ComplaintCategory {
-  return (Object.values(ComplaintCategory) as readonly string[]).includes(value);
-}
-
-function isComplaintStatus(value: string): value is ComplaintStatus {
-  return (Object.values(ComplaintStatus) as readonly string[]).includes(value);
-}
-
 function normalizeComplaint(complaint: ComplaintReturnType): ComplaintReturnType {
   return {
     ...complaint,
@@ -175,13 +169,11 @@ gqlSchemaBuilder.queryField("parentComplaints", t =>
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     resolve: async (_root, args, ctx): Promise<ParentComplaintPaginatedResult> => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
+      const userId = await requireAuth(ctx);
 
       const pagination = parsePaginationArgs(args.paginationArgs);
 
-      const result = await ComplaintService.getParentComplaints(ctx.user.id, pagination, ctx.locale);
+      const result = await ComplaintService.getParentComplaints(userId, pagination, ctx.locale);
 
       return {
         id: result.id,
@@ -203,14 +195,12 @@ gqlSchemaBuilder.queryField("adminComplaintQueue", t =>
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     resolve: async (_root, args, ctx): Promise<ComplaintQueueResult> => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
+      const userId = await requireAuth(ctx);
 
       const paginationArgs = parsePaginationArgs(args.paginationArgs);
 
       const result = await ComplaintService.getQueueWithMetricsPaginated(
-        ctx.user.id,
+        userId,
         {
           status: args.filter.status ?? null,
           search: args.filter.search ?? null,
@@ -246,11 +236,8 @@ gqlSchemaBuilder.queryField("complaintFiles", t =>
       complaintId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
-
-      return await ComplaintService.getComplaintFiles(ctx.user.id, args.complaintId, ctx.locale);
+      const userId = await requireAuth(ctx);
+      return await ComplaintService.getComplaintFiles(userId, args.complaintId, ctx.locale);
     },
   })
 );
@@ -264,12 +251,10 @@ gqlSchemaBuilder.mutationField("submitComplaint", t =>
       input: t.arg({ type: SubmitComplaintInputPothosObject, required: true }),
     },
     resolve: async (_root, args, ctx): Promise<ComplaintReturnType> => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
+      const userId = await requireAuth(ctx);
 
       const created: ComplaintSelectType = await ComplaintService.submitComplaint(
-        ctx.user.id,
+        userId,
         {
           studentId: args.input.studentId ?? null,
           category: args.input.category,
@@ -309,11 +294,8 @@ gqlSchemaBuilder.mutationField("deleteComplaint", t =>
       complaintId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
-      }
-
-      await ComplaintService.deleteComplaint(ctx.user.id, args.complaintId, ctx.locale);
+      const userId = await requireAuth(ctx);
+      await ComplaintService.deleteComplaint(userId, args.complaintId, ctx.locale);
 
       return true;
     },

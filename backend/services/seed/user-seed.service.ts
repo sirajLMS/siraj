@@ -19,18 +19,9 @@ import { UserRepository } from "@/backend/db/repo/users";
 import { hashPassword } from "@/backend/lib/auth/password";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { logger } from "@/backend/lib/logger";
-import type { DBTransaction, UserSelectType } from "@/backend/types";
+import type { DBTransaction, SeedDemoUserInput, UserSelectType } from "@/backend/types";
 
 const STAFF_GROUP_SLUGS = new Set(["super_admin", "academy_admin", "staff_default", "supervisor_default"]);
-
-/** Input for idempotent demo-user upsert during seeding or test setup. */
-export type SeedDemoUserInput = {
-  name: string;
-  email: string;
-  plainPassword: string;
-  isSuperAdmin?: boolean;
-  groupSlug: string;
-};
 
 export namespace UserSeedService {
   /** Idempotently upsert one demo user with permission group and optional staff profile. */

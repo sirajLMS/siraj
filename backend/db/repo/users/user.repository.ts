@@ -305,7 +305,7 @@ export namespace UserRepository {
       return AuthUtils.toUserReturnType(result);
     } catch (err) {
       logger.error(err);
-      throw new Error(`Failed to create user with email: ${input.email.value}`, { cause: err });
+      throw new Error(errorsTranslations.userCreateFailed(input.email.value), { cause: err });
     }
   };
 

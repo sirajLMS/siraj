@@ -136,7 +136,7 @@ export namespace QuotaLedgerRepository {
     if (!quotaId) return 0;
     const q = queryDb(tx);
     const [row] = await q
-      .select({ value: sql<number>`count(*)::int` })
+      .select({ value: sql<number>`count(*)`.mapWith(Number) })
       .from(quotaLedger)
       .where(eq(quotaLedger.quotaId, quotaId));
     return row?.value ?? 0;
@@ -149,8 +149,11 @@ export namespace QuotaLedgerRepository {
     const q = queryDb(tx);
     const [row] = await q
       .select({
-        netSum: sql<number>`COALESCE(SUM(${quotaLedger.delta}), 0)::int`,
-        reservedSum: sql<number>`COALESCE(SUM(CASE WHEN ${quotaLedger.reason} = 'RESERVE' THEN ${quotaLedger.delta} WHEN ${quotaLedger.reason} = 'RELEASE' AND ${quotaLedger.classInstanceId} IS NULL THEN ${quotaLedger.delta} ELSE 0 END), 0)::int`,
+        netSum: sql<number>`COALESCE(SUM(${quotaLedger.delta}), 0)`.mapWith(Number),
+        reservedSum:
+          sql<number>`COALESCE(SUM(CASE WHEN ${quotaLedger.reason} = 'RESERVE' THEN ${quotaLedger.delta} WHEN ${quotaLedger.reason} = 'RELEASE' AND ${quotaLedger.classInstanceId} IS NULL THEN ${quotaLedger.delta} ELSE 0 END), 0)`.mapWith(
+            Number
+          ),
       })
       .from(quotaLedger)
       .where(eq(quotaLedger.quotaId, quotaId));

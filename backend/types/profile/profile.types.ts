@@ -13,7 +13,9 @@ import type {
   TeacherOwnProfileUpdateInput,
   TeacherProfileReturnType,
   TeacherProfileUpdateInputType,
+  UserMeetingConfigReturnType,
   UserPaymentMethodReturnType,
+  UserPermissionContext,
 } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
@@ -42,6 +44,12 @@ export type ProfilePageRedirect = {
 };
 
 export type ProfilePageResolution = ProfilePageContext | ProfilePageRedirect;
+
+export type ProfilePermissionContext = Pick<UserPermissionContext, "permissions" | "isSuperAdmin">;
+
+export type ProfileAccessOptions = {
+  readonly permissionContext?: ProfilePermissionContext;
+};
 
 export type CoreUserProfileFields = {
   readonly name?: string;
@@ -79,7 +87,7 @@ export type StaffOwnProfileUpdateInput = {
 export type StaffAdminProfileUpdateInput = {
   readonly status?: string | null;
   readonly hourlyRate?: string | null;
-  readonly rateCurrency?: import("@/shared/constants/currency.enum").CurrencyCode | null;
+  readonly rateCurrency?: CurrencyCode | null;
 };
 
 export type UpdateOwnProfileInput = {
@@ -117,9 +125,7 @@ export type UnifiedProfileReturnType = {
   readonly staffPermissionOverrides: StaffPermissionOverrideReturnType[] | null;
   readonly paymentMethods: readonly UserPaymentMethodReturnType[] | null;
   readonly paymentMethodDefaults: PaymentMethodDefaults | null;
-  readonly meetingConfigs:
-    | readonly import("@/backend/types/meeting/meeting-config.types").UserMeetingConfigReturnType[]
-    | null;
+  readonly meetingConfigs: readonly UserMeetingConfigReturnType[] | null;
   readonly assignedStudents: TeacherAssignedStudentsResult | null;
   readonly displayCurrency: CurrencyCode | null;
   readonly timezone: IanaTimezone | null;

@@ -9,18 +9,17 @@ import { supportedMobileWallets } from "@/backend/db/schema";
 import type { CountryCode } from "@/backend/enum";
 import { PaymentDirection } from "@/backend/enum/billing/payment-method.enum";
 import type {
-  SupportedMobileWalletInsertType,
+  SupportedMobileWalletReturnType,
   SupportedMobileWalletSelectType,
+  SupportedMobileWalletSubmitInput,
   UpdateSupportedMobileWalletInput,
 } from "@/backend/types";
-
-type WalletRow = typeof supportedMobileWallets.$inferSelect;
 
 function isPaymentDirection(value: string): value is PaymentDirection {
   return (Object.values(PaymentDirection) as readonly string[]).includes(value);
 }
 
-function toSelectType(row: WalletRow): SupportedMobileWalletSelectType {
+function toSelectType(row: SupportedMobileWalletSelectType): SupportedMobileWalletReturnType {
   return {
     id: row.id,
     slug: row.slug,
@@ -44,9 +43,9 @@ type ListActiveFilters = {
 };
 
 const baseRepo = makeBillingRepo<
-  WalletRow,
   SupportedMobileWalletSelectType,
-  SupportedMobileWalletInsertType,
+  SupportedMobileWalletReturnType,
+  SupportedMobileWalletSubmitInput,
   UpdateSupportedMobileWalletInput,
   ListActiveFilters
 >({
@@ -77,9 +76,9 @@ export namespace SupportedMobileWalletRepository {
   export const listByIds = baseRepo.listByIds;
 
   export const upsertMany = makeBillingUpsertMany<
-    WalletRow,
     SupportedMobileWalletSelectType,
-    SupportedMobileWalletInsertType
+    SupportedMobileWalletReturnType,
+    SupportedMobileWalletSubmitInput
   >({
     table: supportedMobileWallets,
     slug: supportedMobileWallets.slug,

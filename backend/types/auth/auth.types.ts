@@ -10,7 +10,7 @@ import type {
 } from "@/backend/db/schema";
 import type { AccountStatus, AppPermission, UserRole } from "@/backend/enum";
 import type { Email } from "@/backend/lib/email";
-import type { SafeUser, UserReturnType } from "@/backend/types";
+import type { UserReturnType } from "@/backend/types";
 
 export type UserUpdateInput = {
   name: string;
@@ -151,6 +151,13 @@ export type DemoLoginInput = {
   groupSlug: string;
 };
 
+export type LogoutUserInput = {
+  readonly sessionId?: string | null;
+  readonly accessToken?: string | null;
+  readonly ipAddress?: string | null;
+  readonly locale?: string;
+};
+
 export type AdminResetPasswordInput = {
   readonly userId: string;
   readonly newPassword: string;
@@ -165,13 +172,13 @@ export type AdminResetPasswordResult = {
 };
 
 export type LoginResponse = {
-  user: SafeUser;
+  user: UserReturnType;
   token: string;
 };
 
 export type RefreshTokenResponse = {
   token: string;
-  user: SafeUser;
+  user: UserReturnType;
 };
 
 export type AuthRateLimitSelectType = typeof authRateLimits.$inferSelect;

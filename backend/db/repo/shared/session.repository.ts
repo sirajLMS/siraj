@@ -4,9 +4,9 @@ import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getEnvironmentConfig } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
-import { getRedisService, SessionRedisService } from "@/backend/services";
 import type {
   DBTransaction,
+  ISessionRedisService,
   RedisGroupSimulationSessionData,
   RedisSessionData,
   SessionConfigSelectType,
@@ -19,8 +19,15 @@ import type {
 const DEFAULT_SESSION_TTL = 7 * 24 * 60 * 60; // 7 days in seconds
 const DEFAULT_MAX_CONCURRENT_SESSIONS = 5;
 
-// Lazy-load Redis session service
-let sessionRedisService: SessionRedisService | null = null;
+// Injected from the service layer — avoids importing @/backend/services.
+// The service layer registers a lazy factory so the Redis connection is
+// established on first use rather than at module load time.
+let redisServiceFactory: (() => Promise<ISessionRedisService>) | null = null;
+let cachedRedisService: ISessionRedisService | null = null;
+
+export function setSessionRedisServiceFactory(factory: () => Promise<ISessionRedisService>): void {
+  redisServiceFactory = factory;
+}
 
 /**
  * Whether sessions should use Redis.
@@ -29,9 +36,17 @@ function redisSessionsEnabled(): boolean {
   return getEnvironmentConfig().cacheProvider !== "postgres";
 }
 
-async function getSessionRedisService(): Promise<SessionRedisService> {
-  sessionRedisService ??= new SessionRedisService(await getRedisService());
-  return sessionRedisService;
+async function getSessionRedisService(): Promise<ISessionRedisService> {
+  if (cachedRedisService) {
+    return cachedRedisService;
+  }
+  if (!redisServiceFactory) {
+    throw new Error(
+      "SessionRedisService factory has not been registered. Call setSessionRedisServiceFactory() from the service layer."
+    );
+  }
+  cachedRedisService = await redisServiceFactory();
+  return cachedRedisService;
 }
 
 const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;

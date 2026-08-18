@@ -2,7 +2,12 @@ import { ClassCategoryRepository } from "@/backend/db/repo/classes/class-categor
 import { ClassSubjectRepository } from "@/backend/db/repo/classes/class-subject.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
-import type { ClassCategoryReturnType, ClassCategorySubmitInput, ClassCategoryUpdateInput } from "@/backend/types";
+import type {
+  ClassCategoryReturnType,
+  ClassCategorySelectType,
+  ClassCategorySubmitInput,
+  ClassCategoryUpdateInput,
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace ClassCategoryService {
@@ -67,5 +72,20 @@ export namespace ClassCategoryService {
     }
 
     return await ClassCategoryRepository.deleteCategory(id, tErrors);
+  }
+
+  /**
+   * Batch load class categories by IDs for Pothos DataLoader.
+   *
+   * Returns the matching categories in undefined order (no positional
+   * alignment — callers build their own `Map`). Categories that are not
+   * found are omitted from the result. Delegates to
+   * {@link ClassCategoryRepository.loadByIds}.
+   *
+   * No permission gating — this is a faithful entity lookup used by
+   * DataLoaders that already control access at the parent resolver.
+   */
+  export async function loadByIds(ids: string[]): Promise<ClassCategorySelectType[]> {
+    return ClassCategoryRepository.loadByIds(ids);
   }
 }

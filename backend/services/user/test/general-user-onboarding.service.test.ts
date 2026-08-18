@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, spyOn, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
@@ -6,16 +6,12 @@ import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/tes
 import { SystemPermissionGroupSlug } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { GeneralUserOnboardingService } from "@/backend/services/user/general-user-onboarding.service";
-import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 const DEFAULT_ACTOR_ID = "[CARD_REDACTED]-[CARD_REDACTED]";
 const NONEXISTENT_SLUG = `nonexistent-${randomUUID()}`;
 
-let tErrors: ErrorsLabels;
-
-beforeAll(() => {
-  tErrors = getServerTranslations("en").errorsTranslations;
-});
+const tErrors = errorsEn;
 
 function generateTestPassword(): string {
   return `TestPass-${randomUUID().slice(0, 8)}!`;

@@ -1,20 +1,17 @@
-import { beforeAll, describe, expect, spyOn, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
 import { createTestUserWithDefaults, runInRollback } from "@/backend/db/test/test-utils";
+import { Gender } from "@/backend/enum";
 import { PaymentDirection, PaymentMethodType } from "@/backend/enum/billing/payment-method.enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { TeacherOnboardingService } from "@/backend/services/teacher/teacher-onboarding.service";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
-let tErrors: ErrorsLabels;
-
-beforeAll(() => {
-  tErrors = getServerTranslations("en").errorsTranslations;
-});
+const tErrors = errorsEn;
 
 function generateTestPassword(): string {
   return `TestPassword-${randomUUID().slice(0, 8)}!`;
@@ -62,7 +59,7 @@ describe("TeacherOnboardingService.createTeacher", () => {
           timezone: IanaTimezone.America_New_York,
           nationality: "US",
           phone: "+1234567890",
-          gender: "MALE",
+          gender: Gender.MALE,
           hourlyRate: "30.00",
           rateCurrency: CurrencyCode.USD,
           initialPayoutMethod: {

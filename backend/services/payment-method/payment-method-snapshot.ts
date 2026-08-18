@@ -12,7 +12,7 @@ import type {
   PaymentMethodCatalogSnapshot,
   PaymentMethodDetails,
   PaymentMethodTransactionSnapshot,
-  UserPaymentMethodSelectType,
+  UserPaymentMethodReturnType,
   UserPaymentMethodSubmitInput,
 } from "@/backend/types";
 
@@ -55,7 +55,7 @@ function encryptDetailsForSnapshot(type: PaymentMethodType, details: PaymentMeth
 }
 
 export function buildTransactionSnapshotFromMethod(
-  method: UserPaymentMethodSelectType,
+  method: UserPaymentMethodReturnType,
   catalog: PaymentMethodCatalogSnapshot | null,
   transactionDirection: TransactionDirection
 ): PaymentMethodTransactionSnapshot {

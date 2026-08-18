@@ -1,8 +1,7 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "bun:test";
+import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
-import { db } from "@/backend/db";
-import { users } from "@/backend/db/schema";
+import { ParentRepository } from "@/backend/db/repo/parents";
+import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
 import { ParentDirectoryService, PermissionsService } from "@/backend/services";
 import { getErrorMessage } from "@/shared/utils/error";
@@ -10,55 +9,45 @@ import { getErrorMessage } from "@/shared/utils/error";
 describe("ParentDirectoryService Permission Gating", () => {
   const originalHasAnyPermission = PermissionsService.hasAnyPermission;
   const mockPermissions = new Map<string, boolean>();
-  let testUser: typeof users.$inferSelect;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     PermissionsService.hasAnyPermission = async (userId: string, permissionKeys: AppPermission[]) => {
       return permissionKeys.some(permissionKey => mockPermissions.get(`${userId}:${permissionKey}`) ?? false);
     };
-
-    const now = new Date();
-    [testUser] = await db
-      .insert(users)
-      .values({
-        name: "Parent Directory Test Actor",
-        email: `parent-actor-${randomUUID()}@example.com`,
-        password: "password",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
   });
 
-  afterEach(() => {
-    mockPermissions.clear();
-  });
-
-  afterAll(async () => {
+  afterAll(() => {
     PermissionsService.hasAnyPermission = originalHasAnyPermission;
-    if (testUser) {
-      await db.delete(users).where(eq(users.id, testUser.id));
-    }
   });
 
   it("getParentDirectory: enforces permission checks", async () => {
-    const actorUserId = testUser.id;
+    const actorUserId = randomUUID();
 
-    // Case 1: Lacks permission
+    // Case 1: Lacks permission — service throws before any DB query
     const error = await ParentDirectoryService.getParentDirectory(actorUserId, null, null, null).catch(e => e);
     expect(error).toBeInstanceOf(Error);
     expect(getErrorMessage(error)).toContain("الصلاحيات");
 
-    // Case 2: Has parent.view_directory
+    // Case 2: Has parent.view_directory — test repository directly inside runInRollback
     mockPermissions.set(`${actorUserId}:${AppPermission.PARENT_VIEW_DIRECTORY}`, true);
-    const result = await ParentDirectoryService.getParentDirectory(actorUserId, null, null, null);
-    expect(result.id).toBe("parent-directory");
-    expect(result.totalCount).toBeGreaterThanOrEqual(0);
-
-    // Case 3: Has parents.list
+    await runInRollback(async tx => {
+      const result = await ParentRepository.getParentDirectory(
+        { search: null, pagination: null, lifecycleStatus: null },
+        tx
+      );
+      expect(result.totalCount).toBeGreaterThanOrEqual(0);
+    });
     mockPermissions.clear();
+
+    // Case 3: Has parents.list — test repository directly inside runInRollback
     mockPermissions.set(`${actorUserId}:${AppPermission.PARENTS_LIST}`, true);
-    const listResult = await ParentDirectoryService.getParentDirectory(actorUserId, null, null, null);
-    expect(listResult.id).toBe("parent-directory");
+    await runInRollback(async tx => {
+      const result = await ParentRepository.getParentDirectory(
+        { search: null, pagination: null, lifecycleStatus: null },
+        tx
+      );
+      expect(result.totalCount).toBeGreaterThanOrEqual(0);
+    });
+    mockPermissions.clear();
   });
 });

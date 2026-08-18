@@ -1,4 +1,5 @@
 import type { File, GetFilesResponse } from "@google-cloud/storage";
+import type { FileTypes } from "@/backend/enum/storage";
 import { logger } from "@/backend/lib/logger";
 import type { GcpContext, GcsApiResponse } from "@/backend/storage/disk/gcp/types";
 import { formatFileTypeBreakdown, updateFileTypeMap } from "@/backend/storage/disk/shared/stats-operations.helper";
@@ -54,7 +55,7 @@ export async function storageStatistics(ctx: GcpContext, path?: string | null): 
  */
 function processGcsFiles(files: File[]) {
   let totalSize = BigInt(0);
-  const fileTypeMap = new Map<Types.FileTypes, { count: number; size: bigint }>();
+  const fileTypeMap = new Map<FileTypes, { count: number; size: bigint }>();
 
   for (const file of files) {
     const size = BigInt(file.metadata.size ?? 0);

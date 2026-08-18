@@ -1,3 +1,4 @@
+import { GraphQLError } from "graphql";
 import { AppPermission } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ComplaintResponseService } from "@/backend/services";
@@ -37,7 +38,8 @@ gqlSchemaBuilder.mutationField("respondToComplaint", t =>
     },
     resolve: async (_root, args, ctx) => {
       if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
+        const tErrors = ctx.t().errorsTranslations;
+        throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
       }
 
       const response = await ComplaintResponseService.respondToComplaint(

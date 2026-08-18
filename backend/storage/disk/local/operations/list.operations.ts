@@ -149,7 +149,7 @@ async function processLocalDirectoryEntry(
   ctx: LocalContext,
   entryName: string,
   targetPath: string,
-  dbDirectoriesByPath: Map<string, Types.DirectoryEntity>
+  dbDirectoriesByPath: Map<string, Types.DirectorySelectType>
 ): Promise<Types.DirectoryInfo> {
   const dirPath = targetPath ? `${targetPath}/${entryName}` : entryName;
   const absoluteDirPath = getAbsolutePath(ctx.basePath, dirPath);

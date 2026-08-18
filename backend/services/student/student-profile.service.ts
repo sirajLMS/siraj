@@ -10,8 +10,9 @@ import {
   filterStudentProfileByFieldGroups,
   type StudentFieldFilterContext,
 } from "@/backend/services/profile/profile-field-filter";
+import { STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
 import { StudentStatusService } from "@/backend/services/student/student-status.service";
-import { STUDENT_FIELD_GROUPS, type StudentProfileEditInput, type StudentProfileReturnType } from "@/backend/types";
+import type { StudentProfileEditInput, StudentProfileReturnType } from "@/backend/types";
 import {
   parseAppLanguage,
   parseCurrencyCodeOrNull,

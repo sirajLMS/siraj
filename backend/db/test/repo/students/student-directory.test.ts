@@ -4,12 +4,12 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { OrderSortDirection, StudentStatus } from "@/backend/enum";
+import { StudentsOrderByColumn } from "@/backend/enum/students";
 import {
   type DBTransaction,
   PaginationArgs,
   type StudentFilterArgs,
   type StudentsOrderByClause,
-  StudentsOrderByColumn,
 } from "@/backend/types";
 
 function dirTest(name: string, fn: (tx: DBTransaction) => Promise<void>) {

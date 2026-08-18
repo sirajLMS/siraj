@@ -5,8 +5,10 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import type {
   AdminBillingSummaryResult,
   InvoiceHistoryPaginatedResult,
+  InvoiceSelectType,
   PaginationArgs,
   ParentBillingSummaryResult,
+  PaymentSelectType,
   StudentCreditRow,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -70,6 +72,10 @@ export namespace BillingHistoryService {
     return BillingRepository.getAdminBillingSummary();
   }
 
+  export async function getPaymentsByInvoiceId(invoiceId: string): Promise<PaymentSelectType[]> {
+    return BillingRepository.getPaymentsByInvoiceId(invoiceId);
+  }
+
   export async function getStudentCreditStatus(
     actorUserId: string,
     tErrors: ErrorsLabels
@@ -87,5 +93,9 @@ export namespace BillingHistoryService {
     await assertBillingViewPermission(actorUserId, tErrors);
     const resolvedParentId = await resolveParentId(parentId, userId ?? actorUserId, tErrors);
     return BillingRepository.getParentBillingSummary(resolvedParentId);
+  }
+
+  export async function getInvoiceById(invoiceId: string): Promise<InvoiceSelectType | null> {
+    return BillingRepository.getInvoiceById(invoiceId);
   }
 }

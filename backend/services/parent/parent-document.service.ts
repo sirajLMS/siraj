@@ -1,24 +1,8 @@
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import type { LinkedDocumentResult, ParentDocumentRow } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
-
-export interface ParentDocumentRow {
-  readonly id: string;
-  readonly fileId: string;
-  readonly filePath: string;
-  readonly isProtected: boolean;
-  readonly usageType: string;
-  readonly createdAt: Date;
-}
-
-export interface LinkedDocumentResult {
-  readonly id: string;
-  readonly fileId: string;
-  readonly parentId: string;
-  readonly usageType: string;
-  readonly createdAt: Date;
-}
 
 export namespace ParentDocumentService {
   /**

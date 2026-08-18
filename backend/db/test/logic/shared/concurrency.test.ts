@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "bun:test";
-import { eq } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
+import { eq, sql } from "drizzle-orm";
 import { BillingRepository } from "@/backend/db/repo/billing";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { invoices, parents, students, users } from "@/backend/db/schema";
@@ -98,6 +99,38 @@ async function expectRepositoryError(fn: () => Promise<unknown>, expectedError: 
   }
 }
 
+/**
+ * Runs `fn` inside a PostgreSQL SAVEPOINT so that a constraint violation
+ * (e.g. a CHECK constraint failure) does not poison the outer transaction.
+ * After the error, `ROLLBACK TO SAVEPOINT` restores the transaction to a
+ * usable state so subsequent queries in the test can run safely.
+ */
+async function expectSavepointError(
+  fn: () => Promise<unknown>,
+  tx: DBTransaction,
+  expectedError: string
+): Promise<void> {
+  const sp = `sp_${randomUUID().replaceAll("-", "_")}`;
+  await tx.execute(sql.raw(`SAVEPOINT ${sp}`));
+  let errorCaught: unknown = null;
+  try {
+    await fn();
+  } catch (error) {
+    errorCaught = error;
+  }
+  if (errorCaught) {
+    await tx.execute(sql.raw(`ROLLBACK TO SAVEPOINT ${sp}`));
+  } else {
+    await tx.execute(sql.raw(`RELEASE SAVEPOINT ${sp}`));
+  }
+  expect(errorCaught).not.toBeNull();
+  expect(errorCaught).toBeInstanceOf(Error);
+  if (errorCaught instanceof Error) {
+    expect(errorCaught.message).toContain(expectedError);
+    testLogger.info(`Caught expected error: ${errorCaught.message}`);
+  }
+}
+
 async function verifyOptimisticLock(
   initialVersion: number,
   firstUpdate: () => Promise<unknown>,
@@ -181,20 +214,30 @@ describe("Concurrency Control Tests", () => {
       });
     });
 
-    it("should prevent booking when insufficient classes available", async () => {
+    it("should prevent booking when insufficient classes available (DB CHECK constraint)", async () => {
       await runInRollback(async tx => {
         // Setup
         const { testStudent } = await setupStudentTest(tx, "Insufficient Classes Test", 2);
 
         testLogger.info(`Initial classesRemaining: 2`);
 
-        // Try to deduct 3 classes (should fail)
-        await expectRepositoryError(
+        // Try to deduct 3 classes via the repo layer. The business-logic
+        // check was moved to the service layer (CreditService), so the repo
+        // no longer guards against over-deduction. The DB CHECK constraint
+        // (students_classes_remaining_chk: classes_remaining >= 0) is the
+        // safety net — it rejects the UPDATE because 2 - 3 = -1.
+        // Drizzle wraps the constraint violation in a "Failed query" error.
+        //
+        // We use a SAVEPOINT so the outer transaction stays usable after the
+        // constraint violation — without it, PostgreSQL aborts the entire
+        // transaction and subsequent queries fail with 25P02.
+        await expectSavepointError(
           () => StudentRepository.deductClasses(testStudent.id, tErrors, 3, undefined, tx),
-          "Insufficient class balance"
+          tx,
+          "Failed query"
         );
 
-        // Verify state unchanged
+        // Verify state unchanged (the UPDATE was rolled back to the savepoint)
         const [finalStudent] = await tx.select().from(students).where(eq(students.id, testStudent.id));
         expect(finalStudent.classesRemaining).toBe(2);
         expect(finalStudent.version).toBe(0);

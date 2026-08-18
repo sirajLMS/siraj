@@ -4,12 +4,12 @@ import type { ClassExecutionState, ClassOutcome } from "@/shared/constants/class
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
-export type ParentEntity = typeof import("@/backend/db/schema").parents.$inferSelect;
+export type ParentSelectType = typeof import("@/backend/db/schema").parents.$inferSelect;
 
-export type ParentEntityInput = typeof import("@/backend/db/schema").parents.$inferInsert;
+export type ParentInsertType = typeof import("@/backend/db/schema").parents.$inferInsert;
 
 export type ParentCreateResult = Pick<
-  ParentEntity,
+  ParentSelectType,
   "id" | "userId" | "status" | "invoiceType" | "feeAmount" | "currency" | "createdAt"
 > & {
   readonly timezone: IanaTimezone;

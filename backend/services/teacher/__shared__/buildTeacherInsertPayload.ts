@@ -1,5 +1,4 @@
-import type { TeacherOnboardingInput } from "@/backend/services/teacher/teacher-onboarding.service";
-import type { TeacherInsertType } from "@/backend/types";
+import type { TeacherInsertType, TeacherOnboardingInput } from "@/backend/types";
 
 /**
  * Builds the insert payload for `TeacherRepository.create()` from the

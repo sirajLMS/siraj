@@ -463,7 +463,7 @@ export namespace BillingRepository {
       await acquireInvoiceLock(t, invoiceId);
 
       const results = await t.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
-      if (results.length === 0) {
+      if (results.length === 0 || results[0].deletedAt !== null) {
         throw new Error(tErrors.billing.invoiceNotFound(invoiceId));
       }
       const current = results[0];
@@ -1143,39 +1143,7 @@ export namespace BillingRepository {
     expectedVersion?: number,
     tx?: DBTransaction
   ): Promise<Types.InvoiceSelectType> => {
-    const runner = async (t: DBTransaction) => {
-      const current = await getExistingInvoiceOrThrow(t, invoiceId, tErrors);
-
-      if (current.status !== "UNPAID" && current.status !== "PAYMENT_PENDING") {
-        throw new Error(tErrors.billing.invoiceAlreadyPaid({ id: invoiceId, status: current.status }));
-      }
-
-      if (expectedVersion !== undefined && current.version !== expectedVersion) {
-        throw new Error(
-          tErrors.billing.invoiceVersionMismatch({
-            id: invoiceId,
-            expectedVersion,
-            gotVersion: current.version,
-          })
-        );
-      }
-
-      const paidDate = new Date();
-      const [updated] = await t
-        .update(invoices)
-        .set({
-          status: "PAID",
-          paidDate: paidDate.toISOString().split("T")[0],
-          version: sql`${invoices.version} + 1`,
-          updatedAt: new Date(),
-        })
-        .where(eq(invoices.id, invoiceId))
-        .returning();
-
-      return updated;
-    };
-
-    return tx ? runner(tx) : db.transaction(runner);
+    return updateInvoiceStatus(invoiceId, "PAID", tErrors, new Date(), expectedVersion, tx);
   };
 
   async function upsertManyWithRunner<TRow>(

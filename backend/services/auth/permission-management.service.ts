@@ -10,8 +10,8 @@ import type {
   GroupWithPermissionIds,
   PermissionReturnType,
   SystemPermissionUpsertInput,
-  UserOverrideEntity,
   UserOverrideInput,
+  UserPermissionOverrideSelectType,
 } from "@/backend/types";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
@@ -46,7 +46,7 @@ export namespace PermissionManagementService {
 
   function applyOverrides(
     effectiveSet: Set<AppPermission>,
-    overrides: UserOverrideEntity[],
+    overrides: UserPermissionOverrideSelectType[],
     permMap: Map<string, AppPermission>
   ): Set<AppPermission> {
     for (const override of overrides) {
@@ -428,7 +428,7 @@ export namespace PermissionManagementService {
     actorUserId: string,
     userId: string,
     tErrors: ErrorsLabels
-  ): Promise<UserOverrideEntity[]> {
+  ): Promise<UserPermissionOverrideSelectType[]> {
     await requireUserSetup(actorUserId, userId, "manage", "exists", tErrors);
     return PermissionManagementRepository.getUserOverrides(userId);
   }
@@ -601,7 +601,7 @@ export namespace PermissionManagementService {
     permissionKey: AppPermission;
     state: UserOverrideInput["state"];
     assignedByUserId: string | null;
-  }): Promise<UserOverrideEntity | null> {
+  }): Promise<UserPermissionOverrideSelectType | null> {
     const permissionId = await PermissionManagementRepository.getPermissionIdByKey(input.permissionKey);
     if (!permissionId) return null;
 

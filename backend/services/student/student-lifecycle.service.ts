@@ -2,7 +2,7 @@ import { ParentRepository } from "@/backend/db/repo/parents";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { UserRepository } from "@/backend/db/repo/users";
-import { AppPermission, NotificationEventType, StudentStatus } from "@/backend/enum";
+import { ALLOWED_STATUS_TRANSITIONS, AppPermission, NotificationEventType, StudentStatus } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
@@ -92,6 +92,8 @@ export namespace StudentLifecycleService {
       throw new Error(tErrors.studentNotFound(studentId));
     }
     const oldStatus = current.status;
+
+    validateStatusTransition(oldStatus, newStatus, tErrors);
 
     try {
       const updated = await StudentRepository.changeStatus(studentId, newStatus, tErrors, expectedVersion);
@@ -230,4 +232,12 @@ async function dispatchStudentStatusChangedNotifications(
   );
 
   await dispatchWithPreferences(payloads, targetUserIds, locale);
+}
+
+function validateStatusTransition(currentStatus: string, newStatus: StudentStatus, tErrors: ErrorsLabels): void {
+  const parsed = parseStudentStatus(currentStatus) ?? StudentStatus.REGULAR;
+  const allowedTargets = ALLOWED_STATUS_TRANSITIONS[parsed] ?? [];
+  if (!allowedTargets.includes(newStatus)) {
+    throw new Error(tErrors.invalidStatusTransition({ currentStatus, newStatus }));
+  }
 }

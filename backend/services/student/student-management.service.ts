@@ -5,7 +5,15 @@ import { logger } from "@/backend/lib/logger";
 import { dispatchWithPreferences } from "@/backend/services/notification/notification-dispatch.helpers";
 import { buildStudentLifecyclePayloads } from "@/backend/services/notification/notification-payloads.builders";
 import { assertStudentFieldEdit, buildStudentFieldFilterContext } from "@/backend/services/student/student-field-acl";
-import type { EditQuotaResult } from "@/backend/types";
+import type {
+  EditQuotaResult,
+  PaginationArgs,
+  PartialStudentUpdateInput,
+  StudentFilterArgs,
+  StudentSelectType,
+  StudentsOrderByClause,
+  StudentsWithFiltersResponse,
+} from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace StudentManagementService {
@@ -71,6 +79,38 @@ export namespace StudentManagementService {
       classesTotal: updated.classesTotal,
       version: updated.version,
     };
+  }
+
+  export async function getStudentById(studentId: string): Promise<StudentSelectType | null | undefined> {
+    return StudentRepository.findById(studentId);
+  }
+
+  export async function getStudentsWithFilters(
+    paginationArgs: PaginationArgs | null,
+    filters?: StudentFilterArgs | null,
+    orderBy?: StudentsOrderByClause[] | null
+  ): Promise<StudentsWithFiltersResponse> {
+    return StudentRepository.fetchWithFilters(paginationArgs, filters, orderBy);
+  }
+
+  export async function getStudentIdByUserId(userId: string): Promise<string | null> {
+    return StudentRepository.getStudentIdByUserId(userId);
+  }
+
+  export async function findParentUserIdByParentId(parentId: string): Promise<string | null> {
+    return ParentRepository.findUserIdByParentId(parentId);
+  }
+
+  export async function partiallyUpdate(
+    input: PartialStudentUpdateInput,
+    tErrors: ErrorsLabels,
+    locale?: string
+  ): Promise<StudentSelectType> {
+    return StudentRepository.partiallyUpdate(input, tErrors, locale);
+  }
+
+  export async function deleteById(id: string, tErrors: ErrorsLabels): Promise<StudentSelectType> {
+    return StudentRepository.deleteById(id, tErrors);
   }
 }
 

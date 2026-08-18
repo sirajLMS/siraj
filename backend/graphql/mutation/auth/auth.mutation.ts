@@ -1,8 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { GraphQLError } from "graphql";
 import { cookies, headers } from "next/headers";
-import { RateLimitRepository, SessionRepository } from "@/backend/db/repo/shared";
-import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
@@ -25,9 +23,11 @@ import {
   DemoAuthService,
   ImpersonationService,
   PermissionGroupSimulationService,
+  RateLimitService,
   SessionService,
+  UserService,
 } from "@/backend/services";
-import type { SafeUser, SessionSelectType, UserSelectType } from "@/backend/types";
+import type { SessionSelectType, UserReturnType, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 
 function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string, accessToken?: string) {
@@ -40,7 +40,7 @@ async function resolveUserFromSession(
   const session = await SessionService.validateSession(sessionId);
   if (!session?.userId) return { session: session ?? null, user: null };
 
-  const user = (await UserRepository.findById(session.userId)) ?? null;
+  const user = (await UserService.findById(session.userId)) ?? null;
   if (!user) {
     logger.warn("[RefreshToken] Session found but user not found", {
       userId: session.userId,
@@ -55,10 +55,10 @@ async function resolveUserFromRefreshToken(
   const payload = await verifyToken(refreshToken);
   if (payload?.type !== "refresh") return { session: null, user: null };
 
-  const user = (await UserRepository.findById(payload.userId)) ?? null;
+  const user = (await UserService.findById(payload.userId)) ?? null;
   if (!user) return { session: null, user: null };
 
-  const session = (await SessionRepository.findByUserId(user.id)) ?? null;
+  const session = (await SessionService.findByUserId(user.id)) ?? null;
   if (!session) {
     logger.warn("[RefreshToken] User found but no session exists", {
       userId: user.id,
@@ -139,7 +139,7 @@ async function rotateTokensAndSession(
   session: SessionSelectType,
   ctx: BaseContext,
   rawSessionId?: string
-): Promise<{ token: string; user: SafeUser } | null> {
+): Promise<{ token: string; user: UserReturnType } | null> {
   const sessionIdForUpdate = rawSessionId ?? session.hashedId;
   const newAccessToken =
     (rawSessionId ? await ImpersonationService.issueAccessTokenForSession(user.id, rawSessionId) : null) ??
@@ -155,7 +155,7 @@ async function rotateTokensAndSession(
 
   // Use the raw (plaintext) session ID for the update call — the repository
   // hashes it internally before storage lookup.
-  await SessionRepository.update({
+  await SessionService.updateSession({
     hashedId: sessionIdForUpdate,
     userId: session.userId,
     ipAddress: session.ipAddress,
@@ -169,7 +169,7 @@ async function rotateTokensAndSession(
   }
 
   const effectiveUserId = ctx.isImpersonating && ctx.user ? ctx.user.id : user.id;
-  const effectiveUser = (await UserRepository.findById(effectiveUserId)) ?? user;
+  const effectiveUser = (await UserService.findById(effectiveUserId)) ?? user;
 
   return { token: newAccessToken, user: AuthUtils.toSafeUser(AuthUtils.toUserReturnType(effectiveUser)) };
 }
@@ -195,7 +195,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       }
 
       // 1. Check if already locked
-      const isLocked = await RateLimitRepository.isLocked(ipAddress, email.value);
+      const isLocked = await RateLimitService.isLocked(ipAddress, email.value);
       if (isLocked) {
         throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
           // ← compile-time ✅
@@ -205,7 +205,7 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       let user: UserSelectType | null;
       try {
-        user = (await UserRepository.findByEmail(email.value)) ?? null;
+        user = (await UserService.findByEmail(email.value)) ?? null;
       } catch (err) {
         logger.error(err);
         throw new GraphQLError(tErrors.auth.serviceUnavailable, {
@@ -216,7 +216,7 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       if (!user) {
         // Still record attempt even if user doesn't exist to prevent enumeration
-        await RateLimitRepository.recordAttempt(ipAddress, email.value);
+        await RateLimitService.recordAttempt(ipAddress, email.value);
         throw new GraphQLError(tErrors.auth.invalidCredentials, {
           // ← compile-time ✅
           extensions: { code: "INVALID_CREDENTIALS" },
@@ -228,7 +228,7 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       if (!isPasswordValid) {
         // Record failed attempt
-        const result = await RateLimitRepository.recordAttempt(ipAddress, email.value);
+        const result = await RateLimitService.recordAttempt(ipAddress, email.value);
         if (result.isLocked) {
           throw new GraphQLError(tErrors.auth.accountLocked, {
             // ← compile-time ✅
@@ -249,7 +249,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       }
 
       // 3. Successful login - reset attempts
-      await RateLimitRepository.resetAttempts(ipAddress, email.value);
+      await RateLimitService.resetAttempts(ipAddress, email.value);
 
       // Generate tokens and create session in database.
       // Store session metadata only, not sensitive tokens.
@@ -351,7 +351,7 @@ gqlSchemaBuilder.mutationFields(t => ({
       let rawSessionIdForCookies: string | undefined = resolvedViaSessionId ? sessionId : undefined;
       if (!resolvedViaSessionId) {
         rawSessionIdForCookies = randomUUID();
-        session = await SessionRepository.create({
+        session = await SessionService.createSession({
           hashedId: rawSessionIdForCookies,
           userId: user.id,
           ipAddress: ctx.ipAddress ?? null,

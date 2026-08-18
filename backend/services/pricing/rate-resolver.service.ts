@@ -1,40 +1,6 @@
 import { RateSource } from "@/backend/enum";
-import type {
-  ClassInstanceSelectType,
-  ClassSubjectSelectType,
-  RecurringScheduleSelectType,
-  TeacherSelectType,
-} from "@/backend/types";
+import type { ResolveClassRateInput, ResolvedClassRate } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-
-/**
- * Input shape for {@link resolveClassRate}. All four tiers are optional; the
- * resolver walks them in precedence order (highest first) and picks the first
- * tier that defines a non-null `hourlyRate`.
- *
- * Currency inheritance: when the chosen tier sets an amount but omits the
- * currency, the resolver walks down the remaining tiers for the first non-null
- * currency, defaulting to {@link CurrencyCode.SAR} (`"SAR"`) if none is found.
- */
-export interface ResolveClassRateInput {
-  /** The class instance row (carries the optional admin override snapshot). */
-  readonly classInstance: Pick<ClassInstanceSelectType, "rateAmount" | "rateCurrency" | "isRateOverridden">;
-  /** The parent recurring schedule (nullable for ad-hoc bookings). */
-  readonly recurringSchedule?: Pick<RecurringScheduleSelectType, "hourlyRate" | "rateCurrency"> | null;
-  /** The subject row. */
-  readonly subject?: Pick<ClassSubjectSelectType, "hourlyRate" | "rateCurrency"> | null;
-  /** The teacher row (lowest-precedence fallback). */
-  readonly teacher: Pick<TeacherSelectType, "hourlyRate" | "rateCurrency">;
-}
-
-export interface ResolvedClassRate {
-  /** Hourly rate as a numeric string (matches the `numeric(12,2)` column type). */
-  readonly hourlyRate: string;
-  /** Currency for `hourlyRate`. */
-  readonly currency: CurrencyCode;
-  /** Which precedence tier the rate was resolved from. */
-  readonly source: RateSource;
-}
 
 /** Default currency when no tier defines one. */
 const DEFAULT_CURRENCY: CurrencyCode = CurrencyCode.SAR;

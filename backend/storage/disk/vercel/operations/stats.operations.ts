@@ -1,3 +1,4 @@
+import type { FileTypes } from "@/backend/enum/storage";
 import { logger } from "@/backend/lib/logger";
 import {
   calculateTotalFiles,
@@ -79,7 +80,7 @@ function processStorageStatisticsBlobs(
   targetPath: string
 ) {
   let totalSize = BigInt(0);
-  const fileTypeMap = new Map<Types.FileTypes, { count: number; size: bigint }>();
+  const fileTypeMap = new Map<FileTypes, { count: number; size: bigint }>();
   const directories = new Set<string>();
 
   for (const blob of allBlobs) {

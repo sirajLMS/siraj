@@ -1,5 +1,5 @@
 import { UserRole } from "@/backend/enum";
-import type { SafeUser, UserReturnType, UserSelectType } from "@/backend/types";
+import type { UserReturnType, UserSelectType } from "@/backend/types";
 import { parseAccountStatus, parseIanaTimezone } from "@/shared/lib/enum";
 
 type UserResolvedFields = Pick<UserReturnType, "role" | "status" | "teacherId" | "parentId" | "displayCurrency">;
@@ -15,7 +15,7 @@ export namespace AuthUtils {
     user: UserSelectType,
     resolved: Partial<UserResolvedFields> = {}
   ): UserReturnType => {
-    const rest: Omit<UserSelectType, "deletedAt"> = { ...user };
+    const rest: Omit<UserSelectType, "deletedAt" | "password" | "rememberTokenHash"> = { ...user };
     delete (rest as Record<string, unknown>).deletedAt;
     return {
       ...rest,
@@ -28,11 +28,8 @@ export namespace AuthUtils {
     };
   };
 
-  export const toSafeUser = (user: UserReturnType | UserSelectType): SafeUser => {
+  export const toSafeUser = (user: UserReturnType | UserSelectType): UserReturnType => {
     const resolved = "role" in user && "status" in user ? user : toUserReturnType(user);
-    const safeUser: SafeUser = { ...resolved };
-    delete (safeUser as Record<string, unknown>).password;
-    delete (safeUser as Record<string, unknown>).rememberTokenHash;
-    return safeUser;
+    return { ...resolved };
   };
 }

@@ -94,11 +94,28 @@ export async function createTestUserWithDefaults(
  */
 const rlsRoleRefCounts = new Map<string, number>();
 
+function isRecordArray(value: unknown): value is Record<string, unknown>[] {
+  return Array.isArray(value);
+}
+
+function getResultRows(result: unknown): Record<string, unknown>[] {
+  if (typeof result === "object" && result !== null && "rows" in result && isRecordArray(result.rows)) {
+    return result.rows;
+  }
+  if (isRecordArray(result)) return result;
+  return [];
+}
+
 export async function setupRlsRole(roleName: string = "test_rls_user"): Promise<void> {
   const currentCount = rlsRoleRefCounts.get(roleName) ?? 0;
   rlsRoleRefCounts.set(roleName, currentCount + 1);
 
   const quotedRole = quoteIdent(roleName);
+
+  const roleCheck = await db.execute(sql`SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = ${roleName}`);
+  if (getResultRows(roleCheck).length > 0) {
+    return;
+  }
 
   await db.execute(
     sql.raw(`
@@ -198,7 +215,12 @@ async function installPolicy(policy: RlsPolicyDef): Promise<void> {
 
   async function attemptInstall(attempt: number): Promise<void> {
     try {
-      await db.execute(sql.raw(`DROP POLICY IF EXISTS ${pol} ON ${tbl}`));
+      const existing = await db.execute(
+        sql`SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = ${policy.table} AND policyname = ${policy.name}`
+      );
+      if (getResultRows(existing).length > 0) {
+        return;
+      }
       await db.execute(sql.raw(`CREATE POLICY ${pol} ON ${tbl} ${policy.definition}`));
     } catch (e) {
       const isConflict = isPolicyConflictError(e);
@@ -224,6 +246,13 @@ async function dropLegacySoftDeletePolicy(table: string): Promise<void> {
 async function enableRowLevelSecurity(table: string): Promise<void> {
   const tbl = quoteIdent(table);
   await retryOnConcurrentConflict(async () => {
+    const status = await db.execute(
+      sql`SELECT relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname = ${table} AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'public')`
+    );
+    const rows = getResultRows(status);
+    if (rows.length > 0 && rows[0].relrowsecurity === true && rows[0].relforcerowsecurity === true) {
+      return;
+    }
     await db.execute(sql.raw(`ALTER TABLE ${tbl} ENABLE ROW LEVEL SECURITY`));
     await db.execute(sql.raw(`ALTER TABLE ${tbl} FORCE ROW LEVEL SECURITY`));
   }, 5);

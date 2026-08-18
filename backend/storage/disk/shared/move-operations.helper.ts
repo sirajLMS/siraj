@@ -4,9 +4,9 @@ import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 
 export interface MoveEntities {
-  dbFileMap: Map<string, Types.FileEntity>;
-  dbDirectoryMap: Map<string, Types.DirectoryEntity>;
-  dbSourceDirMap: Map<string, Types.DirectoryEntity>;
+  dbFileMap: Map<string, Types.FileSelectType>;
+  dbDirectoryMap: Map<string, Types.DirectorySelectType>;
+  dbSourceDirMap: Map<string, Types.DirectorySelectType>;
 }
 
 /**
@@ -26,17 +26,17 @@ export async function loadMoveEntities(sources: string[]): Promise<MoveEntities>
     StorageDbRepository.directoriesByPaths(sourceDirectories),
   ]);
 
-  const dbFileMap = new Map<string, Types.FileEntity>();
+  const dbFileMap = new Map<string, Types.FileSelectType>();
   for (const file of dbFiles) {
     dbFileMap.set(file.path, file);
   }
 
-  const dbDirectoryMap = new Map<string, Types.DirectoryEntity>();
+  const dbDirectoryMap = new Map<string, Types.DirectorySelectType>();
   for (const dir of dbDirectories) {
     dbDirectoryMap.set(dir.path, dir);
   }
 
-  const dbSourceDirMap = new Map<string, Types.DirectoryEntity>();
+  const dbSourceDirMap = new Map<string, Types.DirectorySelectType>();
   for (const dir of dbSourceDirs) {
     dbSourceDirMap.set(dir.path, dir);
   }
@@ -50,7 +50,7 @@ export async function loadMoveEntities(sources: string[]): Promise<MoveEntities>
 export function validateAndCalculateNewPath(
   sourcePath: string,
   destinationPath: string,
-  dbSourceDirMap: Map<string, Types.DirectoryEntity>
+  dbSourceDirMap: Map<string, Types.DirectorySelectType>
 ): string {
   const sourceDir = sourcePath.substring(0, sourcePath.lastIndexOf("/"));
   const dbSourceDir = dbSourceDirMap.get(sourceDir);
@@ -67,8 +67,8 @@ export function validateAndCalculateNewPath(
  * Shared database update logic after move
  */
 export async function updateDbAfterMove(
-  dbFile: Types.FileEntity | undefined,
-  dbDirectory: Types.DirectoryEntity | undefined,
+  dbFile: Types.FileSelectType | undefined,
+  dbDirectory: Types.DirectorySelectType | undefined,
   newPath: string
 ): Promise<void> {
   if (dbFile) {

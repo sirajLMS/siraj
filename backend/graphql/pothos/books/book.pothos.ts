@@ -1,3 +1,4 @@
+import { GraphQLError } from "graphql";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { AvailabilityStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { BookService } from "@/backend/services";
@@ -20,7 +21,8 @@ gqlSchemaBuilder.queryField("booksAndBags", t =>
     authScopes: { loggedIn: true },
     resolve: async (_root, _args, ctx) => {
       if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
+        const tErrors = ctx.t().errorsTranslations;
+        throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
       }
 
       const locale = ctx.locale || "en";
@@ -41,7 +43,8 @@ gqlSchemaBuilder.mutationField("deleteBook", t =>
     },
     resolve: async (_root, args, ctx) => {
       if (!ctx.user?.id) {
-        throw new Error("unauthenticated");
+        const tErrors = ctx.t().errorsTranslations;
+        throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
       }
 
       return BookService.deleteBook(args.id, ctx.user.id, ctx.locale);

@@ -12,7 +12,7 @@ import { logger } from "@/backend/lib/logger";
 import { LeaveRequestSeedService } from "@/backend/services";
 import type {
   ClassInstanceSelectType,
-  ParentEntity,
+  ParentSelectType,
   StudentSelectType,
   TeacherSelectType,
   UserSelectType,
@@ -120,7 +120,7 @@ export async function seedOrGet(
   teachersList: TeacherSelectType[],
   usersList: UserSelectType[],
   studentsList: StudentSelectType[],
-  parentsList: ParentEntity[],
+  parentsList: ParentSelectType[],
   config?: SeedConfig
 ) {
   logger.info("Seeding leave requests...");

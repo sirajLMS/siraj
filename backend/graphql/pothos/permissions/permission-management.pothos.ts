@@ -1,3 +1,4 @@
+import { GraphQLError } from "graphql";
 import { AppPermission, OverrideState } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { OverrideStatePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
@@ -9,8 +10,8 @@ import type {
   GroupWithPermissionIds,
   PermissionCtx,
   PermissionReturnType,
-  UserOverrideEntity,
   UserOverrideReturnType,
+  UserPermissionOverrideSelectType,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
 
@@ -29,10 +30,15 @@ function isOverrideState(state: string): state is OverrideState {
  * @returns Array of user overrides with validated OverrideState values.
  * @throws Error if any state is not a valid OverrideState.
  */
-function mapUserOverridesSafely(overrides: UserOverrideEntity[]): UserOverrideReturnType[] {
+function mapUserOverridesSafely(
+  overrides: UserPermissionOverrideSelectType[],
+  tErrors: ErrorsLabels
+): UserOverrideReturnType[] {
   return overrides.map(o => {
     if (!isOverrideState(o.state)) {
-      throw new Error(`Invalid OverrideState value: ${o.state}`);
+      throw new GraphQLError(tErrors.invalidOverrideState, {
+        extensions: { code: "BAD_USER_INPUT", value: o.state },
+      });
     }
     return { ...o, state: o.state };
   });
@@ -197,7 +203,7 @@ gqlSchemaBuilder.queryFields(t => ({
         resolveActorId(ctx),
         args.userId,
         resolveErrorsTranslations(ctx)
-      ).then(mapUserOverridesSafely),
+      ).then(overrides => mapUserOverridesSafely(overrides, resolveErrorsTranslations(ctx))),
   }),
   effectiveUserPermissions: t.stringList({
     authScopes: { permission: AppPermission.PERMISSION_GROUPS_MANAGE, notImpersonating: true },

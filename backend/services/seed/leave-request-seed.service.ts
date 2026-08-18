@@ -10,25 +10,24 @@
  * @see backend/db/seeds/teachers/seed-leave-quota-usage.ts
  */
 
-import {
-  LeaveQuotaUsageRepository,
-  type LeaveQuotaUsageRow,
-} from "@/backend/db/repo/scheduling/leave-quota-usage.repository";
-import {
-  type CreateLeaveRequestInput,
-  LeaveRequestRepository,
-  type LeaveRequestRow,
-} from "@/backend/db/repo/scheduling/leave-request.repository";
+import { LeaveQuotaUsageRepository } from "@/backend/db/repo/scheduling/leave-quota-usage.repository";
+import { LeaveRequestRepository } from "@/backend/db/repo/scheduling/leave-request.repository";
 import { assertSeedWriteAllowed } from "@/backend/lib/bootstrap-gate";
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
-import type { DBTransaction, UpsertStudentLeaveQuotaInput } from "@/backend/types";
+import type {
+  CreateLeaveRequestInput,
+  DBTransaction,
+  LeaveQuotaUsageSelectType,
+  LeaveRequestSelectType,
+  UpsertStudentLeaveQuotaInput,
+} from "@/backend/types";
 
 export namespace LeaveRequestSeedService {
   /** Idempotently create leave request rows for demo class instances. */
   export async function seedLeaveRequestsIfMissing(
     inputs: readonly CreateLeaveRequestInput[],
     tx?: DBTransaction
-  ): Promise<LeaveRequestRow[]> {
+  ): Promise<LeaveRequestSelectType[]> {
     assertSeedWriteAllowed("Leave request seed writes");
     try {
       return await LeaveRequestRepository.createManyIfMissing(inputs, tx);
@@ -43,7 +42,7 @@ export namespace LeaveRequestSeedService {
   export async function seedStudentLeaveQuota(
     input: UpsertStudentLeaveQuotaInput,
     tx?: DBTransaction
-  ): Promise<LeaveQuotaUsageRow> {
+  ): Promise<LeaveQuotaUsageSelectType> {
     assertSeedWriteAllowed("Leave request seed writes");
     try {
       return await LeaveQuotaUsageRepository.upsertStudentPeriodQuota(input, tx);

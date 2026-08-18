@@ -12,12 +12,12 @@ import {
 } from "@/backend/db/seeds/lib";
 import { logger } from "@/backend/lib/logger";
 import { BillingManagementService } from "@/backend/services";
-import type { ManualInvoiceInsertInput, ParentEntity, StudentSelectType, UserSelectType } from "@/backend/types";
+import type { ManualInvoiceInsertType, ParentSelectType, StudentSelectType, UserSelectType } from "@/backend/types";
 
-type InvoiceSeedSpec = ManualInvoiceInsertInput & { readonly idempotencyKey: string };
+type InvoiceSeedSpec = ManualInvoiceInsertType & { readonly idempotencyKey: string };
 
 function buildInvoiceSpecs(
-  parentsList: ParentEntity[],
+  parentsList: ParentSelectType[],
   studentsList: StudentSelectType[],
   usersList: UserSelectType[],
   seedConfig: SeedConfig
@@ -61,7 +61,7 @@ async function findInvoicesByKeys(keys: readonly string[]) {
 }
 
 export async function seedOrGet(
-  parentsList: ParentEntity[],
+  parentsList: ParentSelectType[],
   studentsList: StudentSelectType[],
   usersList: UserSelectType[],
   config?: SeedConfig

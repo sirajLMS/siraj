@@ -2,7 +2,12 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { learningResourceFiles, learningResources } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
-import type { DBTransaction, LearningResourceReturnType, PaginationArgs } from "@/backend/types";
+import type {
+  DBTransaction,
+  LearningResourceListResult,
+  LearningResourceReturnType,
+  PaginationArgs,
+} from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
 export type LearningResourceRow = LearningResourceReturnType;
@@ -12,11 +17,6 @@ export interface LearningResourceCreateInput {
   readonly filePath: string;
   readonly uploadedByUserId: string;
   readonly fileId: string;
-}
-
-export interface LearningResourceListResult {
-  readonly rows: LearningResourceRow[];
-  readonly totalCount: number;
 }
 
 const resourceSelectColumns = {
@@ -99,7 +99,10 @@ export namespace LearningResourceRepository {
           .orderBy(desc(learningResources.createdAt))
           .limit(perPage)
           .offset(offset),
-        q.select({ count: sql<number>`count(*)::int` }).from(learningResources).where(baseWhere),
+        q
+          .select({ count: sql<number>`count(*)`.mapWith(Number) })
+          .from(learningResources)
+          .where(baseWhere),
       ]);
 
       const totalCount = countResult[0]?.count ?? 0;
@@ -114,7 +117,10 @@ export namespace LearningResourceRepository {
       .orderBy(desc(learningResources.createdAt))
       .limit(200);
 
-    const countQuery = q.select({ count: sql<number>`count(*)::int` }).from(learningResources).where(baseWhere);
+    const countQuery = q
+      .select({ count: sql<number>`count(*)`.mapWith(Number) })
+      .from(learningResources)
+      .where(baseWhere);
 
     const [rows, countResult] = await Promise.all([rowsQuery, countQuery]);
 

@@ -11,8 +11,7 @@ import {
   IanaTimezonePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { Email } from "@/backend/lib/email";
-import type { TeacherOnboardingInput } from "@/backend/services";
-import type { TeacherOnboardingReturnType } from "@/backend/types";
+import type { TeacherOnboardingInput, TeacherOnboardingReturnType } from "@/backend/types";
 
 export interface TeacherOnboardingGqlInput
   extends Omit<TeacherOnboardingInput, "email" | "gender" | "countryCode" | "initialPayoutMethod"> {

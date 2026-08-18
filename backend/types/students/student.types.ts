@@ -1,6 +1,6 @@
 import type { students } from "@/backend/db/schema";
-import type { AppLanguage, Gender, OrderSortDirection, StudentStatus } from "@/backend/enum";
-import type { PageInfo } from "@/backend/types";
+import type { AppLanguage, Gender, OrderSortDirection, StudentStatus, StudentsOrderByColumn } from "@/backend/enum";
+import type { EffectiveMeetingReturnType, PageInfo } from "@/backend/types";
 import type { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-instance-detail.enum";
 
 export type StudentSelectType = typeof students.$inferSelect;
@@ -152,19 +152,6 @@ export type StudentsOrderByClause = {
   order: OrderSortDirection | null | undefined;
 };
 
-export enum StudentsOrderByColumn {
-  ID = "ID",
-  NAME = "NAME",
-  PARENT_ID = "PARENT_ID",
-  DATE_OF_BIRTH = "DATE_OF_BIRTH",
-  GENDER = "GENDER",
-  STATUS = "STATUS",
-  CLASSES_TOTAL = "CLASSES_TOTAL",
-  CLASSES_REMAINING = "CLASSES_REMAINING",
-  CREATED_AT = "CREATED_AT",
-  UPDATED_AT = "UPDATED_AT",
-}
-
 export type StudentHistoryMetricsType = {
   totalClasses: number;
   attendanceRate: number;
@@ -187,7 +174,7 @@ export type StudentHistorySession = {
   notes: string;
   dayOfMonth: number;
   meetingJoinUrl?: string | null;
-  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
+  effectiveMeeting?: EffectiveMeetingReturnType | null;
 };
 
 export type StudentClassHistory = {
@@ -204,7 +191,7 @@ export type StudentSessionDetail = {
   outcome: ClassOutcome | null;
   remarks: string | null;
   meetingJoinUrl: string | null;
-  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
+  effectiveMeeting?: EffectiveMeetingReturnType | null;
   teacherName: string;
   scheduledStartAt: Date | string;
   scheduledEndAt: Date | string;

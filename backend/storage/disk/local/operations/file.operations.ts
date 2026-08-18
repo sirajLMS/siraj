@@ -129,7 +129,7 @@ export async function renameFile(ctx: LocalContext, input: Types.FileRenameInput
     await ensureDirectory(path.dirname(newAbsolutePath));
     await fs.rename(currentAbsolutePath, newAbsolutePath);
 
-    let fileEntity: Types.FileEntity | undefined;
+    let fileEntity: Types.FileSelectType | undefined;
     try {
       const dbFile = await StorageDbRepository.fileByPath(input.currentPath);
       if (dbFile) {

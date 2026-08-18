@@ -8,7 +8,6 @@ import type {
   PaymentMethodDetails,
   PaymentMethodTransactionSnapshot,
   UserPaymentMethodReturnType,
-  UserPaymentMethodSelectType,
 } from "@/backend/types";
 
 function maskNumericField(value: string | null | undefined): string | null {
@@ -124,7 +123,7 @@ function maskDetails(
   }
 }
 
-export function buildMaskedPaymentMethod(method: UserPaymentMethodSelectType, revealSensitive: boolean) {
+export function buildMaskedPaymentMethod(method: UserPaymentMethodReturnType, revealSensitive: boolean) {
   return {
     ...method,
     details: maskDetails(method.type, method.details, revealSensitive),
@@ -132,7 +131,7 @@ export function buildMaskedPaymentMethod(method: UserPaymentMethodSelectType, re
 }
 
 export function buildMaskedPaymentMethods(
-  methods: UserPaymentMethodSelectType[],
+  methods: UserPaymentMethodReturnType[],
   revealSensitive: boolean
 ): UserPaymentMethodReturnType[] {
   return methods.map(method => buildMaskedPaymentMethod(method, revealSensitive));

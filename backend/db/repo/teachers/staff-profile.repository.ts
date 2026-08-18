@@ -24,7 +24,7 @@ import type {
   StaffPermissionGroupReturnType,
   StaffPermissionOverrideReturnType,
   StaffProfileCreateResult,
-  StaffProfileEntityInput,
+  StaffProfileInsertType,
 } from "@/backend/types";
 import { parseAccountStatus, parseCurrencyCodeOrNull, parseOverrideState } from "@/shared/lib/enum";
 import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
@@ -44,7 +44,7 @@ export interface ManagerProfileUpdateInput {
 
 export namespace StaffProfileRepository {
   export async function create(
-    input: StaffProfileEntityInput,
+    input: StaffProfileInsertType,
     tx?: DBTransaction,
     locale?: string
   ): Promise<StaffProfileCreateResult> {

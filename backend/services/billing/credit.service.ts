@@ -3,7 +3,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { CreditRepository } from "@/backend/db/repo/billing";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { AppPermission, CreditReason } from "@/backend/enum";
-import { ConflictError, DomainError, logger, NotFoundError, ValidationError } from "@/backend/lib";
+import { ConflictError, logger, NotFoundError, ValidationError } from "@/backend/lib";
 import { assertAssociatedOrManage, requirePermission } from "@/backend/services/billing/permission-utils";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import type {
@@ -15,7 +15,6 @@ import type {
   PaginationArgs,
 } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
 
 function deriveBookingIdempotencyKey(input: {
   studentId: string;
@@ -245,18 +244,11 @@ export namespace CreditService {
     idempotencyKey: string,
     tx: DBTransaction,
     tErrors: ErrorsLabels,
-    locale = "en"
+    _locale = "en"
   ): Promise<void> {
     const balance = await CreditRepository.getBalance(tx, studentId);
-    if (balance.classesRemaining <= 0) {
-      const { errorsTranslations } = getServerTranslations(locale);
-      throw new DomainError(
-        "INSUFFICIENT_CLASSES",
-        errorsTranslations.credit.insufficientBalance({
-          studentId,
-          remaining: balance.classesRemaining,
-        })
-      );
+    if (balance.classesRemaining < 1) {
+      throw new Error(tErrors.insufficientClasses({ id: studentId, remaining: balance.classesRemaining, required: 1 }));
     }
 
     await runIdempotentBookingLedgerOp({

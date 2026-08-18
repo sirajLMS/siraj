@@ -1,7 +1,7 @@
 import { and, eq, gte, ilike, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { classInstances, classSubjects, recurringSchedules, students, teachers, users } from "@/backend/db/schema";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import type { DailyScheduleResult, DBTransaction } from "@/backend/types";
+import type { ClassInstanceSelectType, DailyScheduleResult, DBTransaction } from "@/backend/types";
 import { parseClassExecutionState, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 
 export function buildDailyScheduleDayConditions(
@@ -22,7 +22,7 @@ export function buildDailyScheduleDayConditions(
 
 export async function hydrateDailyScheduleRows(
   t: DBTransaction,
-  instances: (typeof classInstances.$inferSelect)[]
+  instances: ClassInstanceSelectType[]
 ): Promise<DailyScheduleResult[]> {
   const studentIds = Array.from(new Set(instances.map(instance => instance.studentId)));
   const teacherIds = Array.from(new Set(instances.map(instance => instance.teacherId)));

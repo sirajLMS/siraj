@@ -9,11 +9,8 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { isDuplicateError } from "@/backend/services/shared/is-duplicate-error";
 import type {
   DBTransaction,
-  SupportedMobileWalletInsertType,
   SupportedMobileWalletSubmitInput,
-  SupportedOnlineAccountInsertType,
   SupportedOnlineAccountSubmitInput,
-  SupportedPaymentLinkInsertType,
   SupportedPaymentLinkSubmitInput,
   UpdateSupportedMobileWalletInput,
   UpdateSupportedOnlineAccountInput,
@@ -224,7 +221,7 @@ export namespace PaymentCatalogService {
   }
 
   export async function upsertManyMobileWallets(
-    inputs: readonly SupportedMobileWalletInsertType[],
+    inputs: readonly SupportedMobileWalletSubmitInput[],
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ) {
@@ -240,7 +237,7 @@ export namespace PaymentCatalogService {
   }
 
   export async function upsertManyPaymentLinks(
-    inputs: readonly SupportedPaymentLinkInsertType[],
+    inputs: readonly SupportedPaymentLinkSubmitInput[],
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ) {
@@ -264,7 +261,7 @@ export namespace PaymentCatalogService {
   }
 
   export async function upsertManyOnlineAccounts(
-    inputs: readonly SupportedOnlineAccountInsertType[],
+    inputs: readonly SupportedOnlineAccountSubmitInput[],
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ) {

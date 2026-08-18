@@ -8,20 +8,18 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type { AdminResetPasswordInput } from "@/backend/types";
-import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 const ACTOR_ID = randomUUID();
 const TARGET_ID = randomUUID();
+const tErrors = errorsEn;
 function generateTestPassword(): string {
   return `TestPass-${randomUUID().slice(0, 8)}!`;
 }
 
 let testPassword: string;
 
-let tErrors: ErrorsLabels;
-
 beforeAll(() => {
-  tErrors = getServerTranslations("en").errorsTranslations;
   testPassword = generateTestPassword();
 });
 

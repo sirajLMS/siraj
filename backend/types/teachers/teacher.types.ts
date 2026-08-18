@@ -202,7 +202,7 @@ export type TeacherAssignedClassReturnType = {
   outcome: ClassOutcome | null;
   isFrozen: boolean;
   meetingJoinUrl?: string | null;
-  effectiveMeeting?: import("@/backend/types/meeting/class-meeting-config.types").EffectiveMeetingReturnType | null;
+  effectiveMeeting?: EffectiveMeetingReturnType | null;
 };
 
 export type TeacherAssignedClassesResult = {

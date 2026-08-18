@@ -1,5 +1,6 @@
 import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
+import { DELIVERY_STATUS_RANK } from "@/backend/db/repo/notifications/notification-status.constants";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";
 import type {
@@ -19,14 +20,6 @@ import type {
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
-const STATUS_ORDER: Record<NotificationDeliveryStatus, number> = {
-  [NotificationDeliveryStatus.PENDING]: 0,
-  [NotificationDeliveryStatus.SENT]: 1,
-  [NotificationDeliveryStatus.DELIVERED]: 2,
-  [NotificationDeliveryStatus.OPENED]: 3,
-  [NotificationDeliveryStatus.FAILED]: -1,
-};
-
 // Lookup map from the raw DB status string to the NotificationDeliveryStatus enum.
 // The pgEnum column infers as `string` at the Drizzle level, so this map restores
 // the enum type without resorting to an unsafe type assertion.
@@ -44,6 +37,28 @@ const toDeliveryStatus = (value: string): NotificationDeliveryStatus => {
     throw new Error(`Invalid NotificationDeliveryStatus: ${value}`);
   }
   return status;
+};
+
+/**
+ * B3 forward-only rank guard for webhook idempotency.
+ * Returns true if the incoming `nextStatus` represents a valid forward
+ * transition from `currentStatus`. Mirrors the service-layer
+ * `isValidStatusTransition` but is inlined here to avoid a repo→service
+ * dependency. The function is used as a silent skip guard in webhook
+ * handlers — it does NOT throw.
+ */
+const isValidForwardTransition = (
+  currentStatus: NotificationDeliveryStatus,
+  nextStatus: NotificationDeliveryStatus
+): boolean => {
+  if (currentStatus === nextStatus) return true;
+
+  const currentRank = DELIVERY_STATUS_RANK[currentStatus];
+  const nextRank = DELIVERY_STATUS_RANK[nextStatus];
+
+  return (
+    nextRank > currentRank || nextStatus === NotificationDeliveryStatus.FAILED || (currentRank === -1 && nextRank > 0)
+  );
 };
 
 export namespace NotificationRepository {
@@ -155,38 +170,10 @@ export namespace NotificationRepository {
    *
    * This function is exported (not private) because the same rank logic is
    * mirrored in the SQL ON CONFLICT upsert guard within
-   * `updateDeliveryStatusFromWebhook` — keeping it exported ensures the
-   * contract is visible and testable at the repository level.
+   * `updateDeliveryStatusFromWebhook` — the rank guard uses the repo-local
+   * `isValidForwardTransition` and `DELIVERY_STATUS_RANK` constant so no
+   * service-layer dependency is required.
    */
-  async function assertValidStatusTransition(
-    currentStatus: NotificationDeliveryStatus,
-    nextStatus: NotificationDeliveryStatus,
-    locale?: string
-  ): Promise<void> {
-    if (currentStatus === nextStatus) {
-      return;
-    }
-
-    // B3: Forward-only rank map with FAILED=-1.
-    // A transition is valid if:
-    //   - nextRank > currentRank (normal forward progression), OR
-    //   - nextStatus === FAILED (terminal failure reachable from any state), OR
-    //   - currentRank === -1 (FAILED) and nextRank > 0 (resurrect transient failed)
-    const currentRank = STATUS_ORDER[currentStatus];
-    const nextRank = STATUS_ORDER[nextStatus];
-
-    if (
-      nextRank > currentRank ||
-      nextStatus === NotificationDeliveryStatus.FAILED ||
-      (currentRank === -1 && nextRank > 0)
-    ) {
-      return;
-    }
-
-    const { invalidTransition: invalidTransitionMsg } = getServerTranslations(locale ?? "en").errorsTranslations;
-    throw new Error(`${invalidTransitionMsg}: ${currentStatus} -> ${nextStatus}`);
-  }
-
   function buildStatusTimestamps(
     status: NotificationDeliveryStatus,
     now: Date
@@ -362,14 +349,7 @@ export namespace NotificationRepository {
 
     // Only update if the new status represents a valid forward transition
     // for the webhook-created row (B3 forward-only guard).
-    const webhookRank = STATUS_ORDER[webhookStatus];
-    const nextRank = STATUS_ORDER[input.status];
-    const isValidTransition =
-      nextRank > webhookRank ||
-      input.status === NotificationDeliveryStatus.FAILED ||
-      (webhookRank === -1 && nextRank > 0);
-
-    if (!isValidTransition) {
+    if (!isValidForwardTransition(webhookStatus, input.status)) {
       return webhookRow;
     }
 
@@ -411,7 +391,18 @@ export namespace NotificationRepository {
       }
 
       const current = results[0];
-      await assertValidStatusTransition(toDeliveryStatus(current.status), input.status, locale);
+
+      const currentStatus = toDeliveryStatus(current.status);
+
+      // B3 forward-only rank guard: reject invalid transitions.
+      // Mirrors the service-layer assertValidStatusTransition but inlined
+      // here to avoid a repo→service dependency. The rank lookup and
+      // transition logic are data-level concerns (which statuses can
+      // overwrite which in the DB), not business orchestration.
+      if (!isValidForwardTransition(currentStatus, input.status)) {
+        const { invalidTransition: invalidTransitionMsg } = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new Error(`${invalidTransitionMsg}: ${currentStatus} -> ${input.status}`);
+      }
 
       const statusTimestamps = buildStatusTimestamps(input.status, now);
 
@@ -560,17 +551,9 @@ export namespace NotificationRepository {
     }
 
     // B3: Forward-only rank guard.
-    // Use the same logic as assertValidStatusTransition but silently skip
-    // stale/duplicate events instead of throwing (webhooks are idempotent).
-    //   - nextRank > currentRank (normal forward progression), OR
-    //   - status === FAILED (terminal failure reachable from any state), OR
-    //   - currentRank === -1 and nextRank > 0 (resurrect transient failed)
-    const currentRank = STATUS_ORDER[currentStatus];
-    const nextRank = STATUS_ORDER[status];
-    const isValidTransition =
-      nextRank > currentRank || status === NotificationDeliveryStatus.FAILED || (currentRank === -1 && nextRank > 0);
-
-    if (!isValidTransition) {
+    // Uses the repo-local `isValidForwardTransition` helper to silently
+    // skip stale/duplicate events instead of throwing (webhooks are idempotent).
+    if (!isValidForwardTransition(currentStatus, status)) {
       // Stale/duplicate webhook that would downgrade status — skip.
       return current;
     }
@@ -595,6 +578,17 @@ export namespace NotificationRepository {
     return updated;
   };
 
+  // B3: SQL rank guard for ON CONFLICT branch — mirrors isValidForwardTransition:
+  //   nextRank > currentRank || status === FAILED || (currentRank === -1 && nextRank > 0)
+  // IMPORTANT: These SQL CASE values must stay in sync with DELIVERY_STATUS_RANK
+  // above. The values are derived from the actual NotificationDeliveryStatus
+  // enum members and DELIVERY_STATUS_RANK map so any drift surfaces at compile time.
+  // See test at backend/db/repo/notifications/test/notification-rank-guard.test.ts.
+  const statusRankSql = (col: unknown) =>
+    sql<number>`CASE ${col} WHEN ${NotificationDeliveryStatus.PENDING} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.PENDING]} WHEN ${NotificationDeliveryStatus.SENT} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.SENT]} WHEN ${NotificationDeliveryStatus.DELIVERED} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.DELIVERED]} WHEN ${NotificationDeliveryStatus.OPENED} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.OPENED]} WHEN ${NotificationDeliveryStatus.FAILED} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.FAILED]} ELSE -2 END`.mapWith(
+      Number
+    );
+
   const insertWebhookDelivery = async (
     t: DBTransaction,
     input: {
@@ -618,18 +612,13 @@ export namespace NotificationRepository {
 
     const statusTimestamps = buildStatusTimestamps(status, now);
 
-    // B3: SQL rank guard for ON CONFLICT branch — mirrors isValidTransition:
-    //   nextRank > currentRank || status === FAILED || (currentRank === -1 && nextRank > 0)
-    // IMPORTANT: These SQL CASE values must stay in sync with STATUS_ORDER
-    // above. The values are derived from the actual NotificationDeliveryStatus
-    // enum members and STATUS_ORDER map so any drift surfaces at compile time.
-    // See test at backend/db/repo/notifications/test/notification-rank-guard.test.ts.
-    const statusRankSql = (col: unknown) =>
-      sql`CASE ${col} WHEN ${NotificationDeliveryStatus.PENDING} THEN ${STATUS_ORDER[NotificationDeliveryStatus.PENDING]} WHEN ${NotificationDeliveryStatus.SENT} THEN ${STATUS_ORDER[NotificationDeliveryStatus.SENT]} WHEN ${NotificationDeliveryStatus.DELIVERED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.DELIVERED]} WHEN ${NotificationDeliveryStatus.OPENED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.OPENED]} WHEN ${NotificationDeliveryStatus.FAILED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.FAILED]} ELSE -2 END`;
     const currentRankSql = statusRankSql(notificationDeliveries.status);
-    // Incoming rank — uses the same STATUS_ORDER mapping via sql.raw()
+    // Incoming rank — uses the same DELIVERY_STATUS_RANK mapping via sql.raw()
     // referencing the actual NotificationDeliveryStatus enum members.
-    const incomingRankSql = sql`(CASE WHEN ${status} = ${NotificationDeliveryStatus.PENDING} THEN ${STATUS_ORDER[NotificationDeliveryStatus.PENDING]} WHEN ${status} = ${NotificationDeliveryStatus.SENT} THEN ${STATUS_ORDER[NotificationDeliveryStatus.SENT]} WHEN ${status} = ${NotificationDeliveryStatus.DELIVERED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.DELIVERED]} WHEN ${status} = ${NotificationDeliveryStatus.OPENED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.OPENED]} WHEN ${status} = ${NotificationDeliveryStatus.FAILED} THEN ${STATUS_ORDER[NotificationDeliveryStatus.FAILED]} ELSE -2 END)`;
+    const incomingRankSql =
+      sql<number>`(CASE WHEN ${status} = ${NotificationDeliveryStatus.PENDING} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.PENDING]} WHEN ${status} = ${NotificationDeliveryStatus.SENT} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.SENT]} WHEN ${status} = ${NotificationDeliveryStatus.DELIVERED} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.DELIVERED]} WHEN ${status} = ${NotificationDeliveryStatus.OPENED} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.OPENED]} WHEN ${status} = ${NotificationDeliveryStatus.FAILED} THEN ${DELIVERY_STATUS_RANK[NotificationDeliveryStatus.FAILED]} ELSE -2 END)`.mapWith(
+        Number
+      );
     const rankGuardSql = sql`(${incomingRankSql} > ${currentRankSql} OR ${incomingRankSql} = -1 OR (${currentRankSql} = -1 AND ${incomingRankSql} > 0))`;
 
     const [inserted] = await t

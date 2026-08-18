@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, spyOn, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions";
 import { UserRepository } from "@/backend/db/repo/users";
@@ -11,13 +11,9 @@ import {
 } from "@/backend/services/user/user-onboarding.service";
 import type { GroupWithPermissionIds, UserReturnType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
-let tErrors: ErrorsLabels;
-
-beforeAll(() => {
-  tErrors = getServerTranslations("en").errorsTranslations;
-});
+const tErrors = errorsEn;
 
 function generateTestPassword(): string {
   return `TestPass-${randomUUID().slice(0, 8)}!`;

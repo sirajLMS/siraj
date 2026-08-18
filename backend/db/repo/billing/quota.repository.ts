@@ -14,15 +14,15 @@ import {
   ValidationError,
 } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
-import {
-  type DBTransaction,
-  mapQuotaToReturnType,
-  type PaginationArgs,
-  type QuotaPaginatedFilter,
-  type QuotaReturnType,
-  type QuotaSelectType,
-  type QuotaSubmitInput,
-  type QuotaUpdateInput,
+import { mapQuotaToReturnType } from "@/backend/lib/quota-mapping";
+import type {
+  DBTransaction,
+  PaginationArgs,
+  QuotaPaginatedFilter,
+  QuotaReturnType,
+  QuotaSelectType,
+  QuotaSubmitInput,
+  QuotaUpdateInput,
 } from "@/backend/types";
 
 type ReadExecutor = DBTransaction | typeof db;

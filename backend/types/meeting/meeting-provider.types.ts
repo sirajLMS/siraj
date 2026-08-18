@@ -1,9 +1,14 @@
-import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers";
 
 // ============================================================================
 // `meeting_providers` — admin-managed catalog
 // ============================================================================
+
+/**
+ * Provider slug union — the three adapters that support auto-generation.
+ * Canonical home; `backend/services/meeting/channels/IMeetingChannel.ts` re-exports.
+ */
+export type MeetingProvider = "zoom" | "google_meet" | "microsoft_teams";
 
 /**
  * Discriminator that controls whether a provider uses the manual-URL entry
@@ -79,9 +84,9 @@ export type MeetingProviderMetadata<Kind extends string = string> = Extract<
   { kind: Kind }
 >;
 
-export type MeetingProviderSelectType = InferSelectModel<typeof meetingProviders>;
+export type MeetingProviderSelectType = typeof meetingProviders.$inferSelect;
 
-export type MeetingProviderInsertType = InferInsertModel<typeof meetingProviders>;
+export type MeetingProviderInsertType = typeof meetingProviders.$inferInsert;
 
 export type MeetingProviderSubmitInput = Omit<MeetingProviderInsertType, "id" | "createdAt" | "updatedAt">;
 

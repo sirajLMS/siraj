@@ -1,6 +1,6 @@
 import type { ObjectRef } from "@pothos/core";
-import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
+import { requireAuth } from "@/backend/graphql/utils/requireAuth";
 import type { StudentMonthlyReportReturnType, TeacherMonthlyReportReturnType } from "@/backend/types";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
@@ -58,8 +58,8 @@ export function makeTeacherMonthlyReportQueryField(opts: TeacherMonthlyReportQue
         month: t.arg.int({ required: true }),
       },
       resolve: async (_root, args, ctx) => {
-        assertAuthenticated(ctx);
-        return opts.getReport(ctx.user.id, args.teacherId, args.year, args.month, ctx.locale);
+        const userId = await requireAuth(ctx);
+        return opts.getReport(userId, args.teacherId, args.year, args.month, ctx.locale);
       },
     })
   );
@@ -86,15 +86,9 @@ export function makeStudentMonthlyReportQueryField(opts: StudentMonthlyReportQue
         month: t.arg.int({ required: true }),
       },
       resolve: async (_root, args, ctx) => {
-        assertAuthenticated(ctx);
-        return opts.getReport(ctx.user.id, args.studentId, args.year, args.month, ctx.locale);
+        const userId = await requireAuth(ctx);
+        return opts.getReport(userId, args.studentId, args.year, args.month, ctx.locale);
       },
     })
   );
-}
-
-function assertAuthenticated(ctx: BaseContext): asserts ctx is BaseContext & { user: { id: string } } {
-  if (!ctx.user?.id) {
-    throw new Error("unauthenticated");
-  }
 }

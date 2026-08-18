@@ -10,13 +10,14 @@ import {
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import type { DBTransaction } from "@/backend/types";
-import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import type { ErrorsLabels } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 function resolutionTest(name: string, fn: (tx: DBTransaction, tErrors: ErrorsLabels) => Promise<void>) {
   test(name, async () => {
     let completed = false;
     await runInRollback(async tx => {
-      const tErrors = getServerTranslations("en").errorsTranslations;
+      const tErrors = errorsEn;
       await fn(tx, tErrors);
       completed = true;
     });

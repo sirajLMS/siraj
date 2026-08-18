@@ -6,50 +6,19 @@ import { UserOnboardingService } from "@/backend/services/user/user-onboarding.s
 import type {
   DBTransaction,
   TeacherCreateReturnType,
+  TeacherOnboardingInput,
+  TeacherOnboardingResult,
   UserCreateCoreInput,
   UserCreateProfileFieldsInput,
-  UserPaymentMethodSubmitInput,
   UserReturnType,
 } from "@/backend/types";
-import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import type { ErrorsLabels } from "@/shared/locale";
-
-export interface TeacherOnboardingInput {
-  readonly name: string;
-  readonly email: string;
-  readonly password: string;
-  readonly avatarUrl?: string | null;
-  readonly nationality?: string | null;
-  readonly nationalId?: string | null;
-  readonly phone?: string | null;
-  readonly dateOfBirth?: string | null;
-  readonly gender?: "MALE" | "FEMALE" | null;
-  readonly address?: string | null;
-  readonly qualifications?: string | null;
-  readonly countryCode?: string | null;
-  readonly timezoneId?: number | null;
-  readonly timezone: string;
-  readonly hourlyRate?: string | null;
-  readonly rateCurrency?: CurrencyCode | null;
-  readonly displayCurrency?: CurrencyCode | null;
-  readonly initialPayoutMethod?: Omit<UserPaymentMethodSubmitInput, "userId"> | null;
-}
 
 const VALID_GENDERS = new Set(Object.values(Gender) as readonly string[]);
 
 function isGenderOrNull(value: string | null): value is Gender | null {
   if (value === null) return true;
   return VALID_GENDERS.has(value);
-}
-
-export interface TeacherOnboardingResult {
-  readonly userId: string;
-  readonly teacherId: string;
-  readonly name: string;
-  readonly email: string;
-  readonly status: string;
-  readonly phone?: string | null;
-  readonly gender?: Gender | null;
 }
 
 export namespace TeacherOnboardingService {

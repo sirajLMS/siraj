@@ -15,7 +15,6 @@ import {
   teachers,
 } from "@/backend/db/schema";
 import type { RateSource } from "@/backend/enum";
-import { EffectiveMeetingService, resolveClassRate } from "@/backend/services";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -58,7 +57,11 @@ export interface CreateRecurringScheduleInput {
  * (Instance override is not applicable at booking time — it's set later by
  * an admin via `overrideClassInstanceRate`.)
  */
-async function resolveRateSnapshotForRecurring(
+/**
+ * Fetches raw rate data from the DB (subject + teacher rates) so the service
+ * layer can call `resolveClassRate` with this data to compute the final snapshot.
+ */
+export async function fetchRawRateData(
   t: DBTransaction,
   recurringSchedule: {
     hourlyRate: string | null;
@@ -66,7 +69,11 @@ async function resolveRateSnapshotForRecurring(
     subjectId: string;
     teacherId: string;
   }
-): Promise<{ rateAmount: string; rateCurrency: CurrencyCode; rateSource: RateSource }> {
+): Promise<{
+  recurringSchedule: { hourlyRate: string | null; rateCurrency: CurrencyCode | null };
+  subject: { hourlyRate: string | null; rateCurrency: CurrencyCode | null } | null;
+  teacher: { hourlyRate: string | null; rateCurrency: CurrencyCode | null };
+}> {
   const [subjectRow] = await t
     .select({ hourlyRate: classSubjects.hourlyRate, rateCurrency: classSubjects.rateCurrency })
     .from(classSubjects)
@@ -78,13 +85,11 @@ async function resolveRateSnapshotForRecurring(
     .where(eq(teachers.id, recurringSchedule.teacherId))
     .limit(1);
 
-  const resolved = resolveClassRate({
-    classInstance: { rateAmount: null, rateCurrency: null, isRateOverridden: false },
+  return {
     recurringSchedule: { hourlyRate: recurringSchedule.hourlyRate, rateCurrency: recurringSchedule.rateCurrency },
     subject: subjectRow ?? null,
     teacher: teacherRow ?? { hourlyRate: null, rateCurrency: null },
-  });
-  return { rateAmount: resolved.hourlyRate, rateCurrency: resolved.currency, rateSource: resolved.source };
+  };
 }
 
 function computeScheduledStartForDay(
@@ -374,7 +379,6 @@ async function validateInstanceBatch(
   t: DBTransaction,
   input: CreateRecurringScheduleInput,
   instanceRows: ComputedInstanceRow[],
-  joinUrl: string | null,
   tFuncErrors: ErrorsLabels
 ): Promise<void> {
   // Validate teacher assignment once with the earliest start date — if the
@@ -406,7 +410,6 @@ async function validateInstanceBatch(
         teacherId: input.teacherId,
         startTime: row.scheduledStartAt,
         endTime: row.scheduledEndAt,
-        meetingJoinUrl: joinUrl,
       },
       tFuncErrors
     );
@@ -454,8 +457,16 @@ async function insertInstanceBatch(
   return insertedInstances.map(i => i.id);
 }
 
+export interface RateSnapshot {
+  rateAmount: string;
+  rateCurrency: CurrencyCode;
+  rateSource: RateSource;
+}
+
 export const createRecurringScheduleWithInstances = async (
   input: CreateRecurringScheduleInput,
+  _meetingJoinUrl: string | null,
+  rateSnapshot: RateSnapshot,
   tx?: DBTransaction,
   tErrors?: ErrorsLabels
 ): Promise<{ recurringScheduleId: string; classInstanceIds: string[] }> => {
@@ -465,10 +476,6 @@ export const createRecurringScheduleWithInstances = async (
 
     const { recurringSchedule, utcOffsetSnapshot } = await insertRecurringScheduleRow(t, input, now);
 
-    // Resolve the rate snapshot once for all generated instances (same
-    // student+teacher+subject → same resolved rate). Captured at booking time.
-    const rateSnapshot = await resolveRateSnapshotForRecurring(t, recurringSchedule);
-
     const insertedDays = await insertScheduleDays(t, recurringSchedule.id, input);
 
     const weeksToGenerate = input.generateInstancesForWeeks ?? 1;
@@ -477,15 +484,6 @@ export const createRecurringScheduleWithInstances = async (
     // Acquire the teacher+student advisory locks once for the whole batch
     // (pg_advisory_xact_lock is reentrant within the same transaction).
     await acquireLocks(t, input.teacherId, input.studentId);
-
-    // Resolve the effective meeting once — same teacher + recurring schedule
-    // means the resolved meeting URL is identical for every generated instance.
-    const effectiveMeeting = await EffectiveMeetingService.resolveForRecurringSchedule(
-      recurringSchedule.id,
-      input.teacherId,
-      tFuncErrors,
-      t
-    );
 
     // Compute all instance rows up front (no DB hits in the loop), then run
     // availability + overlap validations once per batch, and batch-insert.
@@ -505,7 +503,7 @@ export const createRecurringScheduleWithInstances = async (
       };
     }
 
-    await validateInstanceBatch(t, input, instanceRows, effectiveMeeting.joinUrl, tFuncErrors);
+    await validateInstanceBatch(t, input, instanceRows, tFuncErrors);
 
     const classInstanceIds = await insertInstanceBatch(
       t,

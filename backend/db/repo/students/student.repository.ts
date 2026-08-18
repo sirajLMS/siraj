@@ -3,9 +3,10 @@ import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db, queryDb, queryWithPagination } from "@/backend/db";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
-import { ALLOWED_STATUS_TRANSITIONS, OrderSortDirection, StudentStatus } from "@/backend/enum";
+import { OrderSortDirection, StudentStatus } from "@/backend/enum";
+import { StudentsOrderByColumn } from "@/backend/enum/students";
+import type * as Types from "@/backend/types";
 import type { DBTransaction } from "@/backend/types";
-import * as Types from "@/backend/types";
 import { PaginationUtils, StudentFilterUtils, StudentUtils } from "@/backend/utils";
 import { parseStudentStatus } from "@/shared/lib/enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -34,7 +35,7 @@ function buildStudentFilterBaseQuery() {
   return db
     .select({
       student: students,
-      total: sql<number>`cast(count(*) over() as int)`,
+      total: sql<number>`cast(count(*) over() as int)`.mapWith(Number),
     })
     .from(students)
     .$dynamic();
@@ -50,7 +51,7 @@ function applyCursorCondition(
   const cursorDate = new Date(cursor.createdAt);
   const cursorId = cursor.id;
   const isDesc = orderBy?.some(
-    o => o.column === Types.StudentsOrderByColumn.CREATED_AT && o.order === OrderSortDirection.DESC
+    o => o.column === StudentsOrderByColumn.CREATED_AT && o.order === OrderSortDirection.DESC
   );
   if (isDesc) {
     return query.where(
@@ -341,25 +342,14 @@ export namespace StudentRepository {
     amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentSelectType> => {
-    const runner = async (t: DBTransaction) =>
-      adjustClassesQuota(
-        t,
-        studentId,
-        async current => {
-          if (current.classesRemaining < amount) {
-            throw new Error(
-              tErrors.insufficientClasses({ id: studentId, remaining: current.classesRemaining, required: amount })
-            );
-          }
-          return { classesRemaining: sql`${students.classesRemaining} - ${amount}` };
-        },
-        tErrors,
-        expectedVersion
-      );
-
-    return tx ? runner(tx) : db.transaction(runner);
-  };
+  ): Promise<Types.StudentSelectType> =>
+    runStudentUpdate(
+      studentId,
+      () => ({ classesRemaining: sql`${students.classesRemaining} - ${amount}` }),
+      tErrors,
+      expectedVersion,
+      tx
+    );
 
   export const addClasses = async (
     studentId: string,
@@ -367,25 +357,21 @@ export namespace StudentRepository {
     amount: number = 1,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentSelectType> => {
-    const runner = async (t: DBTransaction) =>
-      adjustClassesQuota(
-        t,
-        studentId,
-        () => ({
-          classesRemaining: sql`${students.classesRemaining} + ${amount}`,
-          classesTotal: sql`${students.classesTotal} + ${amount}`,
-        }),
-        tErrors,
-        expectedVersion
-      );
-
-    return tx ? runner(tx) : db.transaction(runner);
-  };
+  ): Promise<Types.StudentSelectType> =>
+    runStudentUpdate(
+      studentId,
+      () => ({
+        classesRemaining: sql`${students.classesRemaining} + ${amount}`,
+        classesTotal: sql`${students.classesTotal} + ${amount}`,
+      }),
+      tErrors,
+      expectedVersion,
+      tx
+    );
 
   function runStudentUpdate(
     studentId: string,
-    updates: () => Partial<Types.StudentSelectType>,
+    updates: () => Record<string, unknown>,
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
@@ -418,25 +404,8 @@ export namespace StudentRepository {
     tErrors: ErrorsLabels,
     expectedVersion?: number,
     tx?: DBTransaction
-  ): Promise<Types.StudentSelectType> => {
-    const runner = async (t: DBTransaction) =>
-      adjustClassesQuota(
-        t,
-        studentId,
-        async current => {
-          const currentStatus = parseStudentStatus(current.status) ?? StudentStatus.REGULAR;
-          const allowedTargets = ALLOWED_STATUS_TRANSITIONS[currentStatus] ?? [];
-          if (!allowedTargets.includes(newStatus)) {
-            throw new Error(tErrors.invalidStatusTransition({ currentStatus: current.status, newStatus }));
-          }
-          return { status: newStatus };
-        },
-        tErrors,
-        expectedVersion
-      );
-
-    return tx ? runner(tx) : db.transaction(runner);
-  };
+  ): Promise<Types.StudentSelectType> =>
+    runStudentUpdate(studentId, () => ({ status: newStatus }), tErrors, expectedVersion, tx);
 
   export const getDirectoryRows = async (
     paginationArgs: Types.PaginationArgs | null,
@@ -485,7 +454,10 @@ export namespace StudentRepository {
       baseQuery = queryWithPagination(baseQuery, paginationArgs);
     }
 
-    let countQuery = executor.select({ count: sql<number>`count(*)::int` }).from(students).$dynamic();
+    let countQuery = executor
+      .select({ count: sql<number>`count(*)`.mapWith(Number) })
+      .from(students)
+      .$dynamic();
 
     if (filters) {
       countQuery = StudentFilterUtils.applyFilters(countQuery, filters);

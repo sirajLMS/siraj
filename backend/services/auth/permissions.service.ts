@@ -4,13 +4,7 @@ import { PermissionManagementRepository } from "@/backend/db/repo/permissions/pe
 import { groupPermissions, permissionGroups, permissions, userPermissionGroups, users } from "@/backend/db/schema";
 import { type AppPermission, filterKnownAppPermissions, SystemPermissionGroupSlug, UserRole } from "@/backend/enum";
 import { logger } from "@/backend/lib/logger";
-
-export type UserPermissionContext = {
-  permissions: AppPermission[];
-  permissionGroups: string[];
-  isSuperAdmin: boolean;
-  role: UserRole;
-};
+import type { UserPermissionContext } from "@/backend/types";
 
 export namespace PermissionsService {
   export async function getUserContext(userId: string): Promise<UserPermissionContext> {

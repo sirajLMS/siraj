@@ -1,6 +1,7 @@
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { OrderSortDirection } from "@/backend/enum";
-import * as Types from "@/backend/types";
+import { FileSortField } from "@/backend/enum/storage";
+import type * as Types from "@/backend/types";
 import { StorageUtils } from "@/backend/utils";
 
 /**
@@ -12,12 +13,12 @@ export async function loadListEntities(filePaths: string[], dirPaths: string[]) 
     dirPaths.length > 0 ? StorageDbRepository.directoriesByPaths(dirPaths) : [],
   ]);
 
-  const dbFileMap = new Map<string, Types.FileEntity>();
+  const dbFileMap = new Map<string, Types.FileSelectType>();
   for (const dbFile of dbFiles) {
     dbFileMap.set(dbFile.path, dbFile);
   }
 
-  const dbDirMap = new Map<string, Types.DirectoryEntity>();
+  const dbDirMap = new Map<string, Types.DirectorySelectType>();
   for (const dbDir of dbDirectories) {
     dbDirMap.set(dbDir.path, dbDir);
   }
@@ -51,7 +52,7 @@ export function paginateStorageItems(
   // Sort items
   const sortedItems = StorageUtils.sortItems(
     filteredItems,
-    input.sortBy ?? Types.FileSortField.NAME,
+    input.sortBy ?? FileSortField.NAME,
     input.sortDirection ?? OrderSortDirection.ASC
   );
 

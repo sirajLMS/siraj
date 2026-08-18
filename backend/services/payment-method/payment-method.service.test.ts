@@ -9,7 +9,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { PaymentMethodService } from "@/backend/services/payment-method/payment-method.service";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
+import { errorsEn } from "@/shared/locale/en/errors";
 
 interface CommunicationPayloadShape {
   readonly userId: string;
@@ -92,11 +92,9 @@ function createMockUserMap(ids: string[]): FindSafeByIdsReturn {
 describe("PaymentMethodService notification dispatch", () => {
   const spies: ReturnType<typeof spyOn>[] = [];
   let dispatchMultiSpy: ReturnType<typeof spyOn>;
-  let tErrors: ErrorsLabels;
+  const tErrors = errorsEn;
 
   beforeEach(() => {
-    tErrors = getServerTranslations("en").errorsTranslations;
-
     const userSpy = spyOn(UserRepository, "findSafeByIds").mockImplementation(async (ids: string[]) => {
       return createMockUserMap(ids);
     });

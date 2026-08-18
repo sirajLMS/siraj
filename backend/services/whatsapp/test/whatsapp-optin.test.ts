@@ -120,10 +120,9 @@ async function importService() {
 const MOCK_USER_ID = "aaaa0001-aaaa-aaaa-aaaa-aaaa0001aaaa";
 const MOCK_ACTOR_ID = "bbbb0002-bbbb-bbbb-bbbb-bbbb0002bbbb";
 
-import type { ErrorsLabels } from "@/shared/locale";
-import { getServerTranslations } from "@/shared/locale/server-graphql";
+import { errorsEn } from "@/shared/locale/en/errors";
 
-const mockErrors: ErrorsLabels = getServerTranslations("en").errorsTranslations;
+const mockErrors = errorsEn;
 
 function resetMocks() {
   getByUserIdMock.mockReset();

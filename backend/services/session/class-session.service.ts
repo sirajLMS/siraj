@@ -17,9 +17,15 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import { CreditService } from "@/backend/services/billing/credit.service";
 import { QuotaService } from "@/backend/services/billing/quota.service";
 import { invalidateClassLifecycle } from "@/backend/services/cache";
+import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
 import { MeetingConfigSnapshotService } from "@/backend/services/meeting/meeting-config-snapshot";
 import { buildClassLifecyclePayloads, dispatchWithPreferences } from "@/backend/services/notification";
 import { ClassPerformanceService } from "@/backend/services/performance/class-performance.service";
+import {
+  checkStateChangeAuth,
+  validateRescheduleState,
+  validateStateTransition,
+} from "@/backend/services/scheduling/state-change-validation.service";
 import { SystemRulesService } from "@/backend/services/system/system-rules.service";
 import type {
   ClassInstanceDetailReturnType,
@@ -367,14 +373,29 @@ export namespace ClassSessionService {
     );
   }
 
+  async function activateClassInstanceTx(
+    instance: Awaited<ReturnType<typeof getOrThrow>>,
+    userId: string,
+    classInstanceId: string,
+    tErrors: ErrorsLabels,
+    force: boolean,
+    locale: string,
+    tx: DBTransaction
+  ) {
+    await handleOndemandSessionStartCreditDeduction(instance, userId, tErrors, tx, locale);
+    return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force }, tx, tErrors, {
+      onAuth: checkStateChangeAuth,
+      onValidate: validateStateTransition,
+    });
+  }
+
   export async function activate(userId: string, classInstanceId: string, tErrors: ErrorsLabels, locale = "en") {
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_CLASS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
     await SystemRulesService.assertActivationTimeWindow(instance);
-    const result = await db.transaction(async tx => {
-      await handleOndemandSessionStartCreditDeduction(instance, userId, tErrors, tx, locale);
-      return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: false }, tx, tErrors);
-    });
+    const result = await db.transaction(async tx =>
+      activateClassInstanceTx(instance, userId, classInstanceId, tErrors, false, locale, tx)
+    );
     await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_ACTIVATED);
     return result;
   }
@@ -388,10 +409,9 @@ export namespace ClassSessionService {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
     await assertPermission(userId, AppPermission.SESSION_ACTIVATE_OVERRIDE, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
-    const result = await db.transaction(async tx => {
-      await handleOndemandSessionStartCreditDeduction(instance, userId, tErrors, tx, locale);
-      return SchedulingRepository.activateClassInstance(classInstanceId, userId, { force: true }, tx, tErrors);
-    });
+    const result = await db.transaction(async tx =>
+      activateClassInstanceTx(instance, userId, classInstanceId, tErrors, true, locale, tx)
+    );
     await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_ACTIVATED, {
       override: "true",
     });
@@ -400,7 +420,10 @@ export namespace ClassSessionService {
 
   export async function stop(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
-    const result = await SchedulingRepository.stopClassInstance(classInstanceId, userId);
+    const result = await SchedulingRepository.stopClassInstance(classInstanceId, userId, undefined, tErrors, {
+      onAuth: checkStateChangeAuth,
+      onValidate: validateStateTransition,
+    });
     await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_COMPLETED);
     return result;
   }
@@ -446,36 +469,48 @@ export namespace ClassSessionService {
     return result;
   }
 
-  export const updateStatusStart: ClassActionFn<ClassInstanceSelectType> = async (userId, classInstanceId, tErrors) => {
-    const result = await runActivatedClassAction(
+  async function runActivatedClassActionWithNotify<T>(
+    userId: string,
+    classInstanceId: string,
+    permission: AppPermission,
+    action: (instance: Awaited<ReturnType<typeof getOrThrow>>) => Promise<T | null>,
+    tErrors: ErrorsLabels,
+    eventType: NotificationEventType
+  ): Promise<T> {
+    const result = await runActivatedClassAction(userId, classInstanceId, permission, action, tErrors);
+    await notifyAffectedForInstance(result, classInstanceId, eventType);
+    return result;
+  }
+
+  export const updateStatusStart: ClassActionFn<ClassInstanceSelectType> = async (userId, classInstanceId, tErrors) =>
+    runActivatedClassActionWithNotify(
       userId,
       classInstanceId,
       AppPermission.SESSION_UPDATE_STATUS_START,
-      () => SchedulingRepository.startClassInstance(classInstanceId, userId),
-      tErrors
+      () =>
+        SchedulingRepository.startClassInstance(classInstanceId, userId, undefined, tErrors, {
+          onAuth: checkStateChangeAuth,
+          onValidate: validateStateTransition,
+        }),
+      tErrors,
+      NotificationEventType.CLASS_STARTED
     );
-    await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_STARTED);
-    return result;
-  };
 
-  export const updateStatusAbsent: ClassActionFn<ClassInstanceSelectType> = async (
-    userId,
-    classInstanceId,
-    tErrors
-  ) => {
-    const result = await runActivatedClassAction(
+  export const updateStatusAbsent: ClassActionFn<ClassInstanceSelectType> = async (userId, classInstanceId, tErrors) =>
+    runActivatedClassActionWithNotify(
       userId,
       classInstanceId,
       AppPermission.SESSION_UPDATE_STATUS_ABSENT,
       async instance => {
         await SystemRulesService.assertAbsentWaitingPeriod(instance);
-        return SchedulingRepository.markClassAbsent(classInstanceId, userId);
+        return SchedulingRepository.markClassAbsent(classInstanceId, userId, undefined, tErrors, {
+          onAuth: checkStateChangeAuth,
+          onValidate: validateStateTransition,
+        });
       },
-      tErrors
+      tErrors,
+      NotificationEventType.CLASS_MARKED_ABSENT
     );
-    await notifyAffectedForInstance(result, classInstanceId, NotificationEventType.CLASS_MARKED_ABSENT);
-    return result;
-  };
 
   export async function updateStatusLeave(
     userId: string,
@@ -489,7 +524,16 @@ export namespace ClassSessionService {
     await SystemRulesService.assertLeaveQuotaAvailable(instance.teacherId);
 
     const result = await db.transaction(async tx => {
-      const processed = await SchedulingRepository.processClassLeave(classInstanceId, reason ?? null, userId, tx);
+      const meeting = await EffectiveMeetingService.resolveForNewBooking(instance.teacherId, { tErrors, tx });
+      const processed = await SchedulingRepository.processClassLeave(
+        classInstanceId,
+        reason ?? null,
+        userId,
+        tx,
+        tErrors,
+        { onAuth: checkStateChangeAuth, onValidate: validateStateTransition },
+        meeting.joinUrl
+      );
       if (instance.quotaDeducted) {
         const { quotaReleased } = await releaseQuotaIfDeducted(instance, userId, tx);
         if (!quotaReleased) {
@@ -590,7 +634,15 @@ export namespace ClassSessionService {
 
     const created = await db.transaction(async tx => {
       const insertPayload = buildRescheduleInsert(classInstanceId, existing, input, finalRemarks);
-      const newInstance = await SchedulingRepository.rescheduleClassInstance(classInstanceId, insertPayload, tx);
+      const newInstance = await SchedulingRepository.rescheduleClassInstance(
+        classInstanceId,
+        insertPayload,
+        tx,
+        tErrors,
+        {
+          validateRescheduleState,
+        }
+      );
 
       // Re-deduct the quota/credit against the successor that was refunded from
       // the original instance. Without this step the reschedule leaks a free
@@ -666,7 +718,10 @@ export namespace ClassSessionService {
     const instance = await getOrThrow(classInstanceId, tErrors);
 
     const resetInstance = await db.transaction(async tx => {
-      const resetResult = await SchedulingRepository.resetClassInstance(classInstanceId, userId, tx);
+      const resetResult = await SchedulingRepository.resetClassInstance(classInstanceId, userId, tx, tErrors, {
+        onAuth: checkStateChangeAuth,
+        onValidate: validateStateTransition,
+      });
       if (!resetResult) {
         throw new NotFoundError("CLASS_INSTANCE", tErrors.notFound);
       }
@@ -757,6 +812,10 @@ export namespace ClassSessionService {
         throw new NotFoundError("CLASS_INSTANCE", tErrors.notFound);
       }
     });
+  }
+
+  export async function resolveStudentTimezone(studentId: string): Promise<string | null> {
+    return SchedulingRepository.resolveStudentTimezone(studentId);
   }
 }
 
