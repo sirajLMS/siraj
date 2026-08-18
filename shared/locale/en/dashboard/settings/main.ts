@@ -45,6 +45,7 @@ const auditActions = {
 export const dashboardSettingsEn: SettingsLabels = {
   title: "Settings",
   subtitle: "Manage system configuration, environment variables, and platform defaults.",
+  tabNavAriaLabel: "Settings sections",
   comingSoon: "Coming soon",
   tabs: {
     general: "General",

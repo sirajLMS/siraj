@@ -22,4 +22,6 @@ export const dashboardSupervisorPortalTeacherDuesAr: SupervisorTeacherDuesLabels
   rateSourceRecurring: "متكرر",
   rateSourceSubject: "المادة",
   rateSourceTeacher: "المعلم",
+  statusPending: "معلق",
+  statusPaid: "مدفوع",
 };

@@ -26,4 +26,6 @@ export const authLoginAr: AuthLoginLabels = {
   teacher: "معلم",
   parent: "ولي أمر",
   staff: "موظف",
+  showPassword: "إظهار كلمة المرور",
+  hidePassword: "إخفاء كلمة المرور",
 };

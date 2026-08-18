@@ -3,6 +3,7 @@ import type { ScheduleTrackingParentLabels } from "@/shared/locale/types/dashboa
 export const dashboardScheduleTrackingParentEn: ScheduleTrackingParentLabels = {
   pageTitle: "Schedule Tracking",
   pageSubtitle: "Monitor reschedules, class session status, and schedule alerts.",
+  tabNavAriaLabel: "Schedule tracking sections",
   tabs: {
     reschedule: "Reschedule",
     status: "Status",

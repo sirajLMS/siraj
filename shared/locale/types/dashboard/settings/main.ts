@@ -30,6 +30,7 @@ export interface SettingsAuditLabels {
 export interface SettingsLabels {
   readonly title: string;
   readonly subtitle: string;
+  readonly tabNavAriaLabel: string;
   readonly comingSoon: string;
   readonly tabs: {
     readonly general: string;

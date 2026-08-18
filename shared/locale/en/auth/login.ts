@@ -26,4 +26,6 @@ export const authLoginEn: AuthLoginLabels = {
   teacher: "Teacher",
   parent: "Parent",
   staff: "Staff",
+  showPassword: "Show password",
+  hidePassword: "Hide password",
 };

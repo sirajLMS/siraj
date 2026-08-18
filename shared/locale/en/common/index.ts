@@ -27,6 +27,7 @@ export const commonEn: CommonLabels = {
   operationFailed: "Operation failed. Please try again.",
   loadFailed: "Failed to load data. Please try again.",
   loading: "Loading...",
+  redirecting: "Redirecting...",
   notSet: "Not set",
   errors: "Errors",
   cancel: "Cancel",

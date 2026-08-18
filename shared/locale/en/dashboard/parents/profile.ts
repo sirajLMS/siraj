@@ -90,6 +90,7 @@ export const dashboardParentProfileEn: ParentProfileLabels = {
       suspended: "Suspended",
       on_leave: "On Leave",
       on_trial: "On Trial",
+      deactivated: "Deactivated",
     },
   },
 };

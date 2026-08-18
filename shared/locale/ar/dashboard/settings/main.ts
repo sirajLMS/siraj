@@ -45,6 +45,7 @@ const auditActions = {
 export const dashboardSettingsAr: SettingsLabels = {
   title: "الإعدادات",
   subtitle: "إدارة إعدادات النظام، متغيرات البيئة، والإعدادات الافتراضية للمنصة.",
+  tabNavAriaLabel: "أقسام الإعدادات",
   comingSoon: "قريباً",
   tabs: {
     general: "عام",

@@ -27,6 +27,7 @@ export const commonAr: CommonLabels = {
   operationFailed: "فشلت العملية. يرجى المحاولة مرة أخرى.",
   loadFailed: "فشل تحميل البيانات. يرجى المحاولة مرة أخرى.",
   loading: "جارٍ التحميل...",
+  redirecting: "جارٍ إعادة التوجيه...",
   errors: "أخطاء",
   notSet: "غير محدد",
   cancel: "إلغاء",

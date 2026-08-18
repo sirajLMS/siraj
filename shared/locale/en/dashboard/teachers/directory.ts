@@ -27,6 +27,7 @@ export const dashboardTeachersDirectoryEn: TeachersDirectoryLabels = {
   },
   fields: {
     phone: "Phone",
+    searchTeachers: "Search teachers",
   },
   status: {
     active: "Active",

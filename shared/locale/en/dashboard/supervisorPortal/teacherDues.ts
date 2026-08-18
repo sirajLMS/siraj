@@ -22,4 +22,6 @@ export const dashboardSupervisorPortalTeacherDuesEn: SupervisorTeacherDuesLabels
   rateSourceRecurring: "Recurring",
   rateSourceSubject: "Subject",
   rateSourceTeacher: "Teacher",
+  statusPending: "Pending",
+  statusPaid: "Paid",
 };

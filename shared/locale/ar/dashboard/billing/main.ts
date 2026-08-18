@@ -199,6 +199,7 @@ export const dashboardBillingAr: BillingLabels = {
   supportedCurrencies,
   tabsPageTitle: "الفوترة",
   tabsPageSubtitle: "تتبع الفواتير، التعرض للعملات، أسعار الصرف، وإنشاء الفواتير اليدوية.",
+  tabNavAriaLabel: "أقسام الفوترة",
   billingTabs: {
     overview: "نظرة عامة",
     invoices: "الفواتير",

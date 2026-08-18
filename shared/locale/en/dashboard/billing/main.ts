@@ -199,6 +199,7 @@ export const dashboardBillingEn: BillingLabels = {
   supportedCurrencies,
   tabsPageTitle: "Billing",
   tabsPageSubtitle: "Track invoices, currency exposure, exchange rates, and create manual invoices.",
+  tabNavAriaLabel: "Billing sections",
   billingTabs: {
     overview: "Overview",
     invoices: "Invoices",

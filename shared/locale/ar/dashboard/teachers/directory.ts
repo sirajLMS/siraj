@@ -27,6 +27,7 @@ export const dashboardTeachersDirectoryAr: TeachersDirectoryLabels = {
   },
   fields: {
     phone: "الهاتف",
+    searchTeachers: "ابحث عن المعلمين",
   },
   status: {
     active: "نشط",

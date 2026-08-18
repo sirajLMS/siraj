@@ -20,4 +20,6 @@ export interface SupervisorTeacherDuesLabels {
   readonly rateSourceRecurring: string;
   readonly rateSourceSubject: string;
   readonly rateSourceTeacher: string;
+  readonly statusPending: string;
+  readonly statusPaid: string;
 }

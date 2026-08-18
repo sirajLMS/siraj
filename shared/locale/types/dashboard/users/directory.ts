@@ -1,6 +1,7 @@
 export interface UsersDirectoryParentLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
+  readonly tabNavAriaLabel: string;
   readonly tabs: {
     readonly teachers: string;
     readonly parents: string;

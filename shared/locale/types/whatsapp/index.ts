@@ -18,6 +18,7 @@ export type WhatsappThroughputLevel = "STANDARD" | "COEXISTENCE" | "HIGH" | "UNK
 export interface WhatsappLabels {
   // ─── Page / Tab labels ──────────────────────────────────────────────
   readonly pageTitle: string;
+  readonly tabNavAriaLabel: string;
   readonly tabNumbers: string;
   readonly tabTemplates: string;
   readonly tabOptIn: string;

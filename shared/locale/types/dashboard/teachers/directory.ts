@@ -25,6 +25,7 @@ export interface TeachersDirectoryLabels {
   };
   readonly fields: {
     readonly phone: string;
+    readonly searchTeachers: string;
   };
   readonly status: {
     readonly active: string;

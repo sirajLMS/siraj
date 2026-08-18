@@ -362,6 +362,7 @@ const mockLabels: BillingLabels = {
   },
   tabsPageTitle: "Billing",
   tabsPageSubtitle: "Track invoices, currency exposure, exchange rates, and create manual invoices.",
+  tabNavAriaLabel: "Billing sections",
   billingTabs: {
     overview: "Overview",
     invoices: "Invoices",

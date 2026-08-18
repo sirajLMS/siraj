@@ -91,6 +91,7 @@ export const dashboardParentProfileAr: ParentProfileLabels = {
       suspended: "موقوف",
       on_leave: "في إجازة",
       on_trial: "تحت التجربة",
+      deactivated: "غير نشط",
     },
   },
 };

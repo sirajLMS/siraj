@@ -109,6 +109,31 @@ export interface FileErrors {
   readonly protectionUpdateFailed: (error: string) => string;
   readonly sha256HashMismatch: string;
   readonly invalidUploadRequestBody: string;
+  readonly invalidUploadSession: string;
+  readonly uploadSessionAlreadyUsed: string;
+  readonly uploadSessionExpired: string;
+  readonly filePathMismatch: string;
+  readonly forbidden: string;
+  readonly uploadsNotAllowedInDirectory: string;
+  readonly invalidFilePath: string;
+  readonly fileSizeExceedsMaximum: (maxSizeMb: number) => string;
+  readonly contentTypeRequired: string;
+  readonly contentTypeMismatch: (expected: string) => string;
+  readonly contentLengthRequired: string;
+  readonly contentLengthExceedsSize: (size: string) => string;
+  readonly contentMd5Required: string;
+  readonly contentMd5Mismatch: string;
+  readonly failedToCreateFileRecord: string;
+  readonly invalidOrExpiredToken: string;
+  readonly requestBodyRequired: string;
+  readonly failedToWriteFile: string;
+  readonly filePathRequired: string;
+  readonly fileNotFound: string;
+  readonly authenticationRequired: string;
+  readonly missingPathname: string;
+  readonly missingUploadSessionId: string;
+  readonly invalidFileSize: string;
+  readonly missingContentType: string;
 }
 
 /**
@@ -388,4 +413,23 @@ export interface ErrorsLabels
 
   // ─── Storage bulk operation errors ──────────────────────────────
   readonly bulkOperationLimitExceeded: (operation: string, limit: number) => string;
+
+  // ─── API route errors ─────────────────────────────────────────────
+  readonly forbidden: string;
+  readonly noPdfAvailable: string;
+  readonly invoiceNotFoundShort: string;
+  readonly invalidLocale: string;
+  readonly invalidOrigin: string;
+  readonly failedToSetLocale: string;
+  readonly fxRefreshFailed: string;
+  readonly deletedExpiredSignedUrls: (count: number) => string;
+  readonly invalidRequestFormat: string;
+  readonly missingRequiredFields: string;
+  readonly invalidSessionId: string;
+  readonly failedToWriteLogs: string;
+  readonly missingCodeOrState: string;
+  readonly invalidOrExpiredOAuthState: string;
+  readonly providerMismatch: string;
+  readonly failedToCompleteOAuthTokenExchange: string;
+  readonly invalidEventType: string;
 }

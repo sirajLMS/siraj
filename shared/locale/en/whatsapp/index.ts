@@ -3,6 +3,7 @@ import type { WhatsappLabels } from "../../types/whatsapp";
 export const whatsappEn: WhatsappLabels = {
   // ─── Page / Tab labels ──────────────────────────────────────────────
   pageTitle: "WhatsApp Configuration",
+  tabNavAriaLabel: "WhatsApp settings sections",
   tabNumbers: "Numbers",
   tabTemplates: "Templates",
   tabOptIn: "Opt-in",

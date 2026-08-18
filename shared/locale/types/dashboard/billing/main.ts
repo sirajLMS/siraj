@@ -192,6 +192,7 @@ export interface BillingLabels extends PaymentComponentLabels {
    */
   readonly tabsPageTitle: string;
   readonly tabsPageSubtitle: string;
+  readonly tabNavAriaLabel: string;
   readonly billingTabs: {
     readonly overview: string;
     readonly invoices: string;

@@ -3,6 +3,7 @@ import type { UsersDirectoryParentLabels } from "@/shared/locale/types/dashboard
 export const dashboardUsersDirectoryParentEn: UsersDirectoryParentLabels = {
   pageTitle: "Users",
   pageSubtitle: "Browse teachers, parents, students, and staff directories.",
+  tabNavAriaLabel: "Users directory sections",
   tabs: {
     teachers: "Teachers",
     parents: "Parents",
