@@ -283,7 +283,17 @@ export async function waitForDashboardReady(page: Page): Promise<void> {
 
   const isDevMode = process.env.TEST_SERVER_MODE === "dev";
   const timeout = isDevMode ? 180_000 : 30_000;
+  // Wait for main content to be visible (SSR shell rendered)
   await page.locator("main, [role='main']").first().waitFor({ state: "visible", timeout });
+  // Best-effort wait for a sidebar/bottom-nav link to appear — proves React
+  // hydration has attached event listeners. Use a short timeout so mobile
+  // tests (where the bottom nav is lazy-loaded) don't stall if compilation
+  // is slow. Tests that specifically check sidebar links have their own waits.
+  await page
+    .locator("nav a, nav [role='link']")
+    .first()
+    .waitFor({ state: "visible", timeout: 10_000 })
+    .catch(() => {});
 }
 
 async function retryWithBackoffAttempt<T>(

@@ -100,10 +100,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
   }
 
   private async checkRateLimit(userId: string): Promise<SmsSendResult | null> {
-    if (
-      ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") &&
-      process.env.TEST_ENFORCE_RATE_LIMIT !== "true"
-    ) {
+    if (process.env.DISABLE_RATE_LIMITING === "true") {
       return null;
     }
 
@@ -125,7 +122,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
   }
 
   private async sendTwilioMessage(payload: SmsPayload, deliveryId: string, locale: string): Promise<SmsSendResult> {
-    if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
+    if (process.env.TEST_SERVER === "1") {
       await NotificationRepository.updateDeliveryStatus({
         deliveryId,
         status: NotificationDeliveryStatus.SENT,

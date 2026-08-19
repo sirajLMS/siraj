@@ -9,11 +9,7 @@ let serverStartPromise: Promise<void> | null = null;
 /**
  * Setup the shared Next.js test server for this describe block.
  *
- * - In dev mode: if a dev server is already running on port 3000, it is reused
- *   (no separate test server is spawned). This avoids the Next.js 16 dist-dir
- *   conflict that prevents a second dev server from starting.
- * - In dev mode with no dev server running: a separate test dev server is
- *   spawned on port 3099 using .next-dev.
+ * - In dev mode: a dedicated test dev server is spawned on port 3099 using .next-test-dev.
  * - In production mode: a `next start` server is spawned on port 3099 using
  *   .next-test-prod (requires `bun run build:test` beforehand).
  * - Sequential tests reuse the already-running server instantly.

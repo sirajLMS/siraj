@@ -47,8 +47,11 @@ afterEach(async () => {
 });
 
 async function expectVisible(locator: Locator): Promise<void> {
+  // waitFor({ state: "visible" }) is auto-waiting and proves the element
+  // is visible. The previous pattern of waitFor + isVisible() races because
+  // isVisible() is not auto-waiting and can return false during hydration
+  // re-renders that happen between the two calls.
   await locator.first().waitFor({ state: "visible" });
-  expect(await locator.first().isVisible()).toBe(true);
 }
 
 describe("Student Portal E2E", () => {
@@ -102,7 +105,13 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**");
-    await page.getByRole("link", { name: CREDITS_LINK }).click();
+    // Wait for the credits link to be visible and clickable.
+    // The sidebar is a lazy-loaded client component — in dev mode it may
+    // take a while to compile. Using waitFor({ state: "visible" }) ensures
+    // the link is rendered and hydrated before clicking.
+    const creditsLink = page.getByRole("link", { name: CREDITS_LINK });
+    await creditsLink.first().waitFor({ state: "visible", timeout: 60_000 });
+    await creditsLink.click();
     await page.waitForURL("**/students/credits**");
     await expectVisible(page.getByRole("heading", { name: CREDITS_LINK }));
   });

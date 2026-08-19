@@ -217,6 +217,7 @@ describe("GraphQL Schedule Integration Tests", () => {
           paginationArgs: null,
         },
       },
+      errorPolicy: "all",
       context: {
         headers: {
           Authorization: `Bearer ${teacherToken}`,
@@ -237,6 +238,7 @@ describe("GraphQL Schedule Integration Tests", () => {
         search: "SchedTest",
         metricFilter: null,
       },
+      errorPolicy: "all",
       context: {
         headers: {
           Authorization: `Bearer ${teacherToken}`,

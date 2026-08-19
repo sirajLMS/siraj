@@ -36,6 +36,7 @@ interface TestState {
   failingTest: string;
   serverWarnings: Map<string, number>;
   serverErrors: Map<string, number>;
+  rawTestOutput: string[];
 }
 
 async function discoverTestFiles(testPaths: string[]): Promise<string[]> {
@@ -139,12 +140,16 @@ async function pollServerReady(url: string, deadline: number): Promise<boolean> 
   return pollServerReady(url, deadline);
 }
 
-function spawnDevServer(port: number, logStream: NodeJS.WritableStream): ChildProcess {
+function spawnTestServer(port: number, logStream: NodeJS.WritableStream): ChildProcess {
   const bunBin = process.execPath;
+  const isProductionMode = process.env.TEST_SERVER_MODE === "production";
+  const distDir = isProductionMode ? ".next-test-prod" : ".next-test-dev";
+  const nodeEnv = isProductionMode ? "production" : "development";
+
   const serverEnv: NodeJS.ProcessEnv = {
     ...process.env,
-    NODE_ENV: "development",
-    NEXT_DIST_DIR: ".next-dev",
+    NODE_ENV: nodeEnv,
+    NEXT_DIST_DIR: distDir,
     IS_DEMO: "true",
     TEST_SERVER: "1",
     PORT: String(port),
@@ -153,15 +158,15 @@ function spawnDevServer(port: number, logStream: NodeJS.WritableStream): ChildPr
     DISABLE_RATE_LIMITING: "true",
   };
 
-  const proc = spawnChild(
-    bunBin,
-    ["--env-file=.env.test", "run", "next", "dev", "--turbopack", "-p", String(port), "-H", "0.0.0.0"],
-    {
-      cwd: process.cwd(),
-      env: serverEnv,
-      stdio: ["ignore", "pipe", "pipe"],
-    }
-  );
+  const args = isProductionMode
+    ? ["--env-file=.env.test", "run", "next", "start", "-p", String(port), "-H", "0.0.0.0"]
+    : ["--env-file=.env.test", "run", "next", "dev", "--turbopack", "-p", String(port), "-H", "0.0.0.0"];
+
+  const proc = spawnChild(bunBin, args, {
+    cwd: process.cwd(),
+    env: serverEnv,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
 
   proc.stdout?.pipe(logStream, { end: false });
   proc.stderr?.pipe(logStream, { end: false });
@@ -322,9 +327,13 @@ function formatFinalReport(state: TestState, success: boolean, logPath: string, 
       out += `  • \x1b[1mAssertions:\x1b[0m    ${state.totalExpects} expect() calls\n`;
     }
     out += `  • \x1b[1mTotal Time:\x1b[0m    \x1b[33m${elapsed}s\x1b[0m (from runner start to teardown)\n`;
+    out += `  • \x1b[1mServer Log:\x1b[0m    \x1b[90m${logPath}\x1b[0m\n`;
 
     if (state.serverWarnings.size > 0) {
       out += formatLogMap(state.serverWarnings, "⚠️  SERVER WARNINGS (AGGREGATED):", "\x1b[33m");
+    }
+    if (state.serverErrors.size > 0) {
+      out += formatLogMap(state.serverErrors, "❌ SERVER ERRORS (AGGREGATED):", "\x1b[31m");
     }
 
     out += `${rule}\n`;
@@ -342,7 +351,13 @@ function formatFinalReport(state: TestState, success: boolean, logPath: string, 
 
   out += `\n\x1b[1m🔍 ERROR DETAILS:\x1b[0m\n`;
   out += `${thinRule}\n`;
-  out += `${deduplicateLines(state.failureReason || "Server reported an unhandled exception.")}\n`;
+  const errDetails =
+    state.failureReason ||
+    state.rawTestOutput
+      .filter(l => l.includes("fail") || l.includes("error:") || l.includes("Expected") || l.includes("Received"))
+      .join("\n") ||
+    "Server reported an unhandled exception.";
+  out += `${deduplicateLines(errDetails)}\n`;
   out += `${thinRule}\n`;
 
   if (state.serverWarnings.size > 0) {
@@ -481,6 +496,7 @@ function handleSummaryStats(clean: string, state: TestState): boolean {
 }
 
 function processTestOutputLine(line: string, state: TestState, onFail: (reason: string) => void): void {
+  state.rawTestOutput.push(line);
   const clean = stripAnsiCodes(line).trim();
 
   if (isTestFileBoundary(clean)) {
@@ -493,14 +509,27 @@ function processTestOutputLine(line: string, state: TestState, onFail: (reason: 
     return;
   }
 
-  if (clean.startsWith("✗ ") || clean.startsWith("(fail) ") || clean.startsWith("FAIL ")) {
-    handleFailMatch(clean, state, onFail);
-    return;
+  if (
+    clean.startsWith("✗") ||
+    clean.startsWith("(fail)") ||
+    clean.startsWith("FAIL") ||
+    clean.includes("(fail)") ||
+    clean.startsWith("error:")
+  ) {
+    if (!state.failingTest && !clean.startsWith("error:")) {
+      handleFailMatch(clean, state, onFail);
+      return;
+    }
   }
 
   const matchedSummary = handleSummaryStats(clean, state);
 
-  if (state.failingTest && clean.length > 0 && !matchedSummary && state.failureReason.length < 4000) {
+  if (
+    (state.failingTest || state.failedTests > 0 || clean.startsWith("error:")) &&
+    clean.length > 0 &&
+    !matchedSummary &&
+    state.failureReason.length < 6000
+  ) {
     state.failureReason += `\n${clean}`;
   }
 }
@@ -574,6 +603,7 @@ async function main(): Promise<void> {
     failingTest: "",
     serverWarnings: new Map<string, number>(),
     serverErrors: new Map<string, number>(),
+    rawTestOutput: [],
   };
 
   const logDir = join(process.cwd(), "logs");
@@ -583,7 +613,7 @@ async function main(): Promise<void> {
 
   killListenersOnPort(port);
   const logStream = createWriteStream(fullLogPath, { flags: "w" });
-  const serverProc = spawnDevServer(port, logStream);
+  const serverProc = spawnTestServer(port, logStream);
 
   if (isTty) {
     process.stdout.write("\x1b[?25l"); // Hide cursor
@@ -596,7 +626,6 @@ async function main(): Promise<void> {
   const cleanup = () => {
     if (isCleanedUp) return;
     isCleanedUp = true;
-    errorCaptured = true;
     if (isTty) {
       process.stdout.write("\x1b[?25h"); // Restore cursor
     }
@@ -624,6 +653,7 @@ async function main(): Promise<void> {
   });
 
   const handleAbort = (reason: string) => {
+    errorCaptured = true;
     if (!state.failureReason) {
       state.failureReason = reason;
     }
@@ -692,6 +722,10 @@ async function main(): Promise<void> {
     }
     testArgs.push(...testPaths);
 
+    const isProductionMode = process.env.TEST_SERVER_MODE === "production";
+    const distDir = isProductionMode ? ".next-test-prod" : ".next-test-dev";
+    const serverMode = isProductionMode ? "production" : "dev";
+
     const testProc = bunSpawn(testArgs, {
       cwd: process.cwd(),
       env: {
@@ -699,9 +733,9 @@ async function main(): Promise<void> {
         SIRAJ_TEST_RUNNER_OK: "1",
         GRAPHQL_TEST_PORT: String(port),
         TEST_SERVER_PORT: String(port),
-        TEST_SERVER_MODE: "dev",
+        TEST_SERVER_MODE: serverMode,
         TEST_E2E_WARMUP: e2e ? "1" : "0",
-        NEXT_DIST_DIR: ".next-dev",
+        NEXT_DIST_DIR: distDir,
       },
       stdio: ["ignore", "pipe", "pipe"],
     });

@@ -26,6 +26,7 @@ const deleteMock = mock(() => ({ where: () => Promise.resolve() }));
 
 const transactionMock = mock(async (cb: (tx: unknown) => Promise<unknown>) => {
   const mockTx = {
+    execute: mock(() => Promise.resolve()),
     delete: (table: Record<string | symbol, unknown>) => ({
       where: () => {
         deleteOrder.push(getTableName(table));

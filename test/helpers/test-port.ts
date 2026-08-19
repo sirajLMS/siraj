@@ -116,7 +116,7 @@ export function getTestDistDir(): string {
   if (getTestServerMode() === "production") {
     return getProductionBuildDistDir();
   }
-  return ".next-dev";
+  return ".next-test-dev";
 }
 
 export function getProductionBuildDistDir(): string {

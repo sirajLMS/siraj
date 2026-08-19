@@ -241,8 +241,8 @@ function stampRecipientAddress(
 
   const totalDropped = Object.values(droppedByChannel).reduce((a, b) => a + b, 0);
   if (totalDropped > 0) {
-    const isTestMode = process.env.NODE_ENV === "test" || process.env.TEST_SERVER === "1";
-    if (isTestMode) {
+    const isTestServer = process.env.TEST_SERVER === "1";
+    if (isTestServer) {
       logger.debug("dispatchWithPreferences: dropped contactless payloads for user", {
         userId,
         droppedCount: totalDropped,

@@ -125,7 +125,7 @@ export namespace ScheduleService {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
-        logger.warn("Unauthorized access to daily metrics", { userId });
+        logDomainIssue("Unauthorized access to daily metrics", { userId });
         throw new UnauthorizedError(tErrors.unauthorizedViewMetrics);
       }
 

@@ -238,8 +238,8 @@ export namespace ClassSessionService {
     if (!instance.quotaDeducted) return { quotaReleased: false, quotaId: null, isQuotaBacked: false, warning: null };
     if (!instance.recurringScheduleId) {
       const warning = "quota_release_skipped_no_schedule";
-      const isTestMode = (process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1";
-      if (isTestMode) {
+      const isTestServer = process.env.TEST_SERVER === "1";
+      if (isTestServer) {
         logger.debug(warning, {
           classInstanceId: instance.id,
           studentId: instance.studentId,
