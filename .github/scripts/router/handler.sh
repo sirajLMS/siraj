@@ -12,8 +12,9 @@ source "${ROUTER_DIR}/sanitize.sh"
 ROUTER_PORT="${1:-${ROUTER_PORT:-20128}}"
 STATE_DIR="${2:-${STATE_DIR:-/tmp/nvidia_router_state_${ROUTER_PORT}}}"
 UPSTREAM_URL="${UPSTREAM_URL:-https://integrate.api.nvidia.com/v1/chat/completions}"
-MAX_RETRIES="${MAX_RETRIES:-10}"
-CURL_TIMEOUT="${CURL_TIMEOUT:-90}"
+MAX_RETRIES="${MAX_RETRIES:-6}"
+CURL_TIMEOUT="${CURL_TIMEOUT:-40}"
+REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-220}"
 
 # Send formatted OpenAI JSON response
 send_openai_json_response() {
@@ -111,7 +112,17 @@ handle_http_connection() {
 
         echo "[Router] 📥 [REQ #${req_num}] Incoming review request for model '${requested_model}' (${total_keys} active keys in pool)..." >&2
 
+        local req_start_sec
+        req_start_sec=$(date +%s)
+
         while [ "$attempts" -lt "$max_attempts" ]; do
+            local current_sec
+            current_sec=$(date +%s)
+            if [ $((current_sec - req_start_sec)) -ge "$REQUEST_DEADLINE_SEC" ]; then
+                echo "[Router] [REQ #${req_num}] ⏱️ Request reached ${REQUEST_DEADLINE_SEC}s safety deadline. Returning error to prevent client timeout." >&2
+                break
+            fi
+
             attempts=$((attempts + 1))
             local key
             key=$(get_available_key "$STATE_DIR" || true)
@@ -131,6 +142,7 @@ handle_http_connection() {
 
             # Execute upstream request with curl (clean separation of headers and body)
             curl -s --http1.1 \
+                --connect-timeout 10 \
                 --max-time "$CURL_TIMEOUT" \
                 -X POST "$UPSTREAM_URL" \
                 -H "Content-Type: application/json" \
