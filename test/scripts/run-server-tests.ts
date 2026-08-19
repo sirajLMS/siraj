@@ -34,6 +34,8 @@ interface TestState {
   failureReason: string;
   failingFile: string;
   failingTest: string;
+  serverWarnings: Map<string, number>;
+  serverErrors: Map<string, number>;
 }
 
 async function discoverTestFiles(testPaths: string[]): Promise<string[]> {
@@ -43,7 +45,7 @@ async function discoverTestFiles(testPaths: string[]): Promise<string[]> {
     const st = statSync(p);
     if (st.isDirectory()) {
       const glob = new Glob("**/*.test.{ts,tsx}");
-      for await (const file of glob.scan({ cwd: p })) {
+      for (const file of glob.scanSync({ cwd: p })) {
         files.push(join(p, file));
       }
     } else if (p.endsWith(".test.ts") || p.endsWith(".test.tsx")) {
@@ -149,7 +151,6 @@ function spawnDevServer(port: number, logStream: NodeJS.WritableStream): ChildPr
     GRAPHQL_TEST_PORT: String(port),
     TEST_SERVER_PORT: String(port),
     DISABLE_RATE_LIMITING: "true",
-    EXIT_ON_ERROR: "true",
   };
 
   const proc = spawnChild(
@@ -199,7 +200,8 @@ function renderTuiFrame(state: TestState, port: number, isTty: boolean): void {
   out += `\x1b[90m${rule}\x1b[0m\n`;
   out += `  \x1b[1m📁 File:\x1b[0m    \x1b[34m${file || "Starting..."}\x1b[0m\n`;
   out += `  \x1b[1m▶ Test:\x1b[0m    \x1b[37m${test || "Initializing..."}\x1b[0m\n`;
-  out += `  \x1b[1m📊 Tests:\x1b[0m   \x1b[32m${state.passedTests} passed\x1b[0m • \x1b[31m${state.failedTests} failed\x1b[0m${state.totalExpects > 0 ? ` • \x1b[90m${state.totalExpects} asserts\x1b[0m` : ""}\n`;
+  const assertsBadge = state.totalExpects > 0 ? ` • \x1b[90m${state.totalExpects} asserts\x1b[0m` : "";
+  out += `  \x1b[1m📊 Tests:\x1b[0m   \x1b[32m${state.passedTests} passed\x1b[0m • \x1b[31m${state.failedTests} failed\x1b[0m${assertsBadge}\n`;
   out += `  \x1b[1m📦 Files:\x1b[0m   ${progressBar}\n`;
   out += `  \x1b[1m📡 Server:\x1b[0m  \x1b[90m${action || "Idle"}\x1b[0m\n`;
   out += `\x1b[90m${rule}\x1b[0m\n`;
@@ -221,6 +223,77 @@ function parseServerChunk(chunk: Buffer | string): string {
     }
   }
   return lines[lines.length - 1].slice(0, 60);
+}
+
+function deduplicateLines(text: string): string {
+  if (!text) return "";
+  const lines = text.split("\n");
+  const result: string[] = [];
+  let currentLine = "";
+  let currentCount = 0;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+    if (line === currentLine && line.length > 0) {
+      currentCount++;
+    } else {
+      if (currentCount > 1) {
+        result.push(`  \x1b[90m⤷ (repeated ${currentCount - 1} more times)\x1b[0m`);
+      }
+      currentLine = line;
+      currentCount = 1;
+      result.push(line);
+    }
+  }
+
+  if (currentCount > 1) {
+    result.push(`  \x1b[90m⤷ (repeated ${currentCount - 1} more times)\x1b[0m`);
+  }
+
+  return result.join("\n");
+}
+
+function formatLogMap(map: Map<string, number>, label: string, colorCode: string): string {
+  if (map.size === 0) return "";
+  let out = `\n${colorCode}\x1b[1m${label}\x1b[0m\n`;
+  out += `────────────────────────────────────────────────────────────────────────────────\n`;
+  for (const [msg, count] of map.entries()) {
+    const countBadge = count > 1 ? ` \x1b[33m(x${count} occurrences)\x1b[0m` : "";
+    out += `  • ${msg}${countBadge}\n`;
+  }
+  return out;
+}
+
+function stripLogPrefix(line: string, tag: string): string {
+  const idx = line.indexOf(tag);
+  if (idx === -1) return line;
+  return line.slice(idx + tag.length).replace(/^\s+/, "");
+}
+
+function stripJsonObjectSuffix(line: string): string {
+  const braceIdx = line.indexOf("{");
+  if (braceIdx === -1) return line.trim();
+  return line.slice(0, braceIdx).trimEnd().trim();
+}
+
+function recordServerLogs(chunk: Buffer | string, state: TestState): void {
+  const text = chunk.toString();
+  const lines = text.split("\n");
+  for (const line of lines) {
+    const clean = line.trim();
+    if (!clean) continue;
+    if (clean.includes("[WARN]")) {
+      const msg = stripJsonObjectSuffix(stripLogPrefix(clean, "[WARN]"));
+      if (msg) {
+        state.serverWarnings.set(msg, (state.serverWarnings.get(msg) ?? 0) + 1);
+      }
+    } else if (clean.includes("[ERROR]")) {
+      const msg = stripJsonObjectSuffix(stripLogPrefix(clean, "[ERROR]"));
+      if (msg) {
+        state.serverErrors.set(msg, (state.serverErrors.get(msg) ?? 0) + 1);
+      }
+    }
+  }
 }
 
 function formatFinalReport(state: TestState, success: boolean, logPath: string, isTty: boolean): string {
@@ -249,6 +322,11 @@ function formatFinalReport(state: TestState, success: boolean, logPath: string, 
       out += `  • \x1b[1mAssertions:\x1b[0m    ${state.totalExpects} expect() calls\n`;
     }
     out += `  • \x1b[1mTotal Time:\x1b[0m    \x1b[33m${elapsed}s\x1b[0m (from runner start to teardown)\n`;
+
+    if (state.serverWarnings.size > 0) {
+      out += formatLogMap(state.serverWarnings, "⚠️  SERVER WARNINGS (AGGREGATED):", "\x1b[33m");
+    }
+
     out += `${rule}\n`;
     return out;
   }
@@ -264,8 +342,18 @@ function formatFinalReport(state: TestState, success: boolean, logPath: string, 
 
   out += `\n\x1b[1m🔍 ERROR DETAILS:\x1b[0m\n`;
   out += `${thinRule}\n`;
-  out += `${state.failureReason || "Server reported an unhandled exception."}\n`;
+  out += `${deduplicateLines(state.failureReason || "Server reported an unhandled exception.")}\n`;
   out += `${thinRule}\n`;
+
+  if (state.serverWarnings.size > 0) {
+    out += formatLogMap(state.serverWarnings, "⚠️  SERVER WARNINGS (AGGREGATED):", "\x1b[33m");
+    out += `${thinRule}\n`;
+  }
+  if (state.serverErrors.size > 0) {
+    out += formatLogMap(state.serverErrors, "❌ SERVER ERRORS (AGGREGATED):", "\x1b[31m");
+    out += `${thinRule}\n`;
+  }
+
   out += `  • \x1b[1mTest Files:\x1b[0m    \x1b[32m${filesPassedCount} passed\x1b[0m, \x1b[31m${Math.max(1, state.filesFailed.size)} failed\x1b[0m \x1b[90m(${state.completedFiles.size} / ${totalFiles} completed)\x1b[0m\n`;
   out += `  • \x1b[1mTotal Tests:\x1b[0m   \x1b[32m${state.passedTests} passed\x1b[0m, \x1b[31m${Math.max(1, state.failedTests)} failed\x1b[0m\n`;
   if (state.totalExpects > 0) {
@@ -278,69 +366,103 @@ function formatFinalReport(state: TestState, success: boolean, logPath: string, 
   return out;
 }
 
-function processTestOutputLine(line: string, state: TestState, onFail: (reason: string) => void): void {
+function stripAnsiCodes(line: string): string {
   const esc = String.fromCharCode(27);
-  const clean = line.replaceAll(new RegExp(`${esc}\\[\\d*(?:;\\d*)*[a-zA-Z]`, "g"), "").trim();
+  const result: string[] = [];
+  let i = 0;
+  while (i < line.length) {
+    if (line[i] === esc && i + 1 < line.length && line[i + 1] === "[") {
+      i += 2;
+      while (
+        i < line.length &&
+        !(
+          (line.charCodeAt(i) >= 65 && line.charCodeAt(i) <= 90) ||
+          (line.charCodeAt(i) >= 97 && line.charCodeAt(i) <= 122)
+        )
+      ) {
+        i++;
+      }
+      i++;
+    } else {
+      result.push(line[i]);
+      i++;
+    }
+  }
+  return result.join("");
+}
 
-  // Test file boundary detection
-  if (
+function isTestFileBoundary(clean: string): boolean {
+  return (
     clean.endsWith(".test.ts:") ||
     clean.endsWith(".test.ts") ||
     clean.endsWith(".test.tsx:") ||
     clean.endsWith(".test.tsx")
-  ) {
-    const nextFile = clean.replace(/:$/, "").trim();
-    if (state.currentFile && state.currentFile !== nextFile) {
-      if (!state.filesFailed.has(state.currentFile)) {
-        state.filesPassed.add(state.currentFile);
-      }
-      state.completedFiles.add(state.currentFile);
-    }
-    state.currentFile = nextFile;
-    state.completedFiles.add(nextFile);
-    return;
-  }
+  );
+}
 
-  // Pass match: ✓ or (pass)
-  if (clean.startsWith("✓ ") || clean.startsWith("(pass) ")) {
-    state.passedTests++;
-    state.currentTest = clean
-      .replace(/^(?:✓|\(pass\))\s+/, "")
-      .replace(/\s*\[[\d.]+m?s\]$/, "")
-      .trim();
-    if (state.currentFile) {
-      state.completedFiles.add(state.currentFile);
+function handleTestFileBoundary(clean: string, state: TestState): void {
+  const nextFile = clean.replace(/:$/, "").trim();
+  if (state.currentFile && state.currentFile !== nextFile) {
+    if (!state.filesFailed.has(state.currentFile)) {
+      state.filesPassed.add(state.currentFile);
     }
-    return;
+    state.completedFiles.add(state.currentFile);
   }
+  state.currentFile = nextFile;
+  state.completedFiles.add(nextFile);
+}
 
-  // Fail match: ✗ or (fail) or FAIL
-  if (clean.startsWith("✗ ") || clean.startsWith("(fail) ") || clean.startsWith("FAIL ")) {
-    state.failedTests++;
-    state.failingFile = state.currentFile;
-    state.failingTest = clean.replace(/^(?:✗|\(fail\)|FAIL)\s+/, "").trim();
-    if (state.currentFile) {
-      state.filesFailed.add(state.currentFile);
-      state.completedFiles.add(state.currentFile);
-    }
-    onFail(clean);
-    return;
+function stripTimingSuffix(text: string): string {
+  const trimmed = text.trimEnd();
+  const bracketIdx = trimmed.lastIndexOf("[");
+  if (bracketIdx === -1) return trimmed;
+  const suffix = trimmed.slice(bracketIdx + 1);
+  if (!suffix.endsWith("]")) return trimmed;
+  const inner = suffix.slice(0, -1);
+  const lastChar = inner.slice(-1);
+  if (lastChar !== "m" && lastChar !== "s") return trimmed;
+  const numPart = inner.slice(0, -1);
+  return numPart.length > 0 && /^[0-9.]+$/.test(numPart) ? trimmed.slice(0, bracketIdx).trimEnd() : trimmed;
+}
+
+function handlePassMatch(clean: string, state: TestState): void {
+  state.passedTests++;
+  const withoutPrefix = clean.replace(/^(?:✓|\(pass\))\s+/, "");
+  const trimmed = stripTimingSuffix(withoutPrefix);
+  state.currentTest = trimmed.trim();
+  if (state.currentFile) {
+    state.completedFiles.add(state.currentFile);
   }
+}
 
-  // Summary stats lines
+function handleFailMatch(clean: string, state: TestState, onFail: (reason: string) => void): void {
+  state.failedTests++;
+  state.failingFile = state.currentFile;
+  state.failingTest = clean.replace(/^(?:✗|\(fail\)|FAIL)\s+/, "").trim();
+  if (state.currentFile) {
+    state.filesFailed.add(state.currentFile);
+    state.completedFiles.add(state.currentFile);
+  }
+  onFail(clean);
+}
+
+function handleSummaryStats(clean: string, state: TestState): boolean {
   const passMatch = /^\s*(\d+)\s+pass/i.exec(clean);
   if (passMatch) {
     state.passedTests = Math.max(state.passedTests, Number.parseInt(passMatch[1], 10));
+    return true;
   }
 
   const failMatch = /^\s*(\d+)\s+fail/i.exec(clean);
   if (failMatch) {
     state.failedTests = Math.max(state.failedTests, Number.parseInt(failMatch[1], 10));
+    return true;
   }
 
   const expectMatch = /^\s*(\d+)\s+expect\(\)\s+calls/i.exec(clean);
   if (expectMatch) {
     state.totalExpects = Number.parseInt(expectMatch[1], 10);
+    return true;
   }
 
   const runMatch = /^\s*Ran\s+(\d+)\s+tests?\s+across\s+(\d+)\s+files?/i.exec(clean);
@@ -352,19 +474,60 @@ function processTestOutputLine(line: string, state: TestState, onFail: (reason: 
         state.filesPassed.add(`file-${i}`);
       }
     }
+    return true;
+  }
+
+  return false;
+}
+
+function processTestOutputLine(line: string, state: TestState, onFail: (reason: string) => void): void {
+  const clean = stripAnsiCodes(line).trim();
+
+  if (isTestFileBoundary(clean)) {
+    handleTestFileBoundary(clean, state);
+    return;
+  }
+
+  if (clean.startsWith("✓ ") || clean.startsWith("(pass) ")) {
+    handlePassMatch(clean, state);
+    return;
+  }
+
+  if (clean.startsWith("✗ ") || clean.startsWith("(fail) ") || clean.startsWith("FAIL ")) {
+    handleFailMatch(clean, state, onFail);
+    return;
+  }
+
+  const matchedSummary = handleSummaryStats(clean, state);
+
+  if (state.failingTest && clean.length > 0 && !matchedSummary && state.failureReason.length < 4000) {
+    state.failureReason += `\n${clean}`;
   }
 }
 
-function setupTestParser(testProc: Subprocess, state: TestState, onFail: (reason: string) => void) {
+function isReadableStream(stream: unknown): stream is ReadableStream<Uint8Array> {
+  return (
+    typeof stream === "object" &&
+    stream !== null &&
+    "getReader" in stream &&
+    typeof (stream as Record<string, unknown>).getReader === "function"
+  );
+}
+
+async function setupTestParser(
+  testProc: Subprocess,
+  state: TestState,
+  onFail: (reason: string) => void
+): Promise<void> {
   const handleTestOutput = async (stream: unknown) => {
-    if (!stream || typeof stream !== "object" || !("getReader" in stream)) return;
-    const reader = (stream as ReadableStream<Uint8Array>).getReader();
+    if (!isReadableStream(stream)) return;
+    const reader = stream.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
 
-    while (true) {
+    const readLoop = async (): Promise<void> => {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) return;
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
       buffer = lines.pop() ?? "";
@@ -372,11 +535,16 @@ function setupTestParser(testProc: Subprocess, state: TestState, onFail: (reason
       for (const line of lines) {
         processTestOutputLine(line, state, onFail);
       }
+      return readLoop();
+    };
+
+    await readLoop();
+    if (buffer.length > 0) {
+      processTestOutputLine(buffer, state, onFail);
     }
   };
 
-  void handleTestOutput(testProc.stdout);
-  void handleTestOutput(testProc.stderr);
+  await Promise.all([handleTestOutput(testProc.stdout), handleTestOutput(testProc.stderr), testProc.exited]);
 }
 
 async function main(): Promise<void> {
@@ -388,7 +556,7 @@ async function main(): Promise<void> {
   }
 
   const scheduledFiles = await discoverTestFiles(testPaths);
-  const isTty = Boolean(process.stdout.isTTY);
+  const isTty = process.stdout.isTTY;
   const state: TestState = {
     startTime: performance.now(),
     currentFile: "",
@@ -404,6 +572,8 @@ async function main(): Promise<void> {
     failureReason: "",
     failingFile: "",
     failingTest: "",
+    serverWarnings: new Map<string, number>(),
+    serverErrors: new Map<string, number>(),
   };
 
   const logDir = join(process.cwd(), "logs");
@@ -420,13 +590,20 @@ async function main(): Promise<void> {
   }
 
   let isCleanedUp = false;
+  let errorCaptured = false;
   let activeTestProc: Subprocess | undefined;
 
   const cleanup = () => {
     if (isCleanedUp) return;
     isCleanedUp = true;
+    errorCaptured = true;
     if (isTty) {
       process.stdout.write("\x1b[?25h"); // Restore cursor
+    }
+    try {
+      activeTestProc?.kill();
+    } catch {
+      // ignore
     }
     try {
       serverProc.kill("SIGKILL");
@@ -446,24 +623,19 @@ async function main(): Promise<void> {
     process.exit(1);
   });
 
-  let errorCaptured = false;
   const handleAbort = (reason: string) => {
-    if (errorCaptured) return;
-    errorCaptured = true;
-    state.failureReason = reason;
+    if (!state.failureReason) {
+      state.failureReason = reason;
+    }
     state.failingFile = state.failingFile || state.currentFile;
     state.failingTest = state.failingTest || state.currentTest;
     if (state.failingFile) {
       state.filesFailed.add(state.failingFile);
     }
-    try {
-      activeTestProc?.kill();
-    } catch {
-      // ignore
-    }
   };
 
   serverProc.stdout?.on("data", (chunk: Buffer) => {
+    recordServerLogs(chunk, state);
     const action = parseServerChunk(chunk);
     if (action) {
       state.lastServerAction = action;
@@ -472,15 +644,16 @@ async function main(): Promise<void> {
 
   let serverErrBuffer = "";
   serverProc.stderr?.on("data", (chunk: Buffer) => {
+    recordServerLogs(chunk, state);
     const text = chunk.toString();
     serverErrBuffer += text;
-    if (text.includes("[ERROR]") || text.includes("DrizzleQueryError")) {
+    if (text.includes("FatalError") || text.includes("panic:") || text.includes("Segmentation fault")) {
       handleAbort(serverErrBuffer.trim());
     }
   });
 
   serverProc.on("exit", (code, signal) => {
-    if (!isCleanedUp && !errorCaptured) {
+    if (!isCleanedUp && !errorCaptured && code !== 0 && code !== null) {
       handleAbort(`Dev server exited unexpectedly (code: ${code}, signal: ${signal})\n${serverErrBuffer}`);
     }
   });
@@ -534,13 +707,13 @@ async function main(): Promise<void> {
     });
     activeTestProc = testProc;
 
-    setupTestParser(testProc, state, reason => handleAbort(reason));
+    await setupTestParser(testProc, state, reason => handleAbort(reason));
 
     const exitCode = await testProc.exited;
     clearInterval(ticker);
     cleanup();
 
-    const isSuccess = exitCode === 0 && !errorCaptured;
+    const isSuccess = exitCode === 0 && !errorCaptured && state.filesFailed.size === 0 && state.failedTests === 0;
     const report = formatFinalReport(state, isSuccess, logFilePath, isTty);
     process.stdout.write(report);
     process.exit(isSuccess ? 0 : 1);

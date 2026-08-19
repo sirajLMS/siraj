@@ -1,6 +1,6 @@
 import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { CombinedGraphQLErrors, type OperationVariables, type TypedDocumentNode } from "@apollo/client";
+import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
 import {
   ClassType,
   type CreateRecurringClassInput,
@@ -30,8 +30,8 @@ import {
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { DEFAULT_SEED_ADMIN_PASSWORD } from "@/shared/demo-users";
-import { testClient } from "./test-client";
-import { isTestServerRunning } from "./test-server";
+import { testClient } from "@/test/helpers/test-client";
+import { isTestServerRunning } from "@/test/helpers/test-server";
 
 export const TEST_USER_PASSWORD = DEFAULT_SEED_ADMIN_PASSWORD;
 
@@ -198,21 +198,30 @@ export async function assertOperationDenied<TData = unknown, TVars extends Opera
   const token = await loginDemoUser(roleGroupSlug);
   const context = { headers: { Authorization: `Bearer ${token}` } };
 
-  const result =
-    type === "query"
-      ? await testClient.query({
-          query: document,
-          variables,
-          context,
-        } as Parameters<typeof testClient.query>[0])
-      : await testClient.mutate({
-          mutation: document,
-          variables,
-          context,
-        } as Parameters<typeof testClient.mutate>[0]);
+  let result: { error?: unknown } | undefined;
+  let thrownError: unknown;
+  try {
+    result =
+      type === "query"
+        ? await testClient.query({
+            query: document,
+            variables,
+            errorPolicy: "all",
+            context,
+          } as Parameters<typeof testClient.query>[0])
+        : await testClient.mutate({
+            mutation: document,
+            variables,
+            errorPolicy: "all",
+            context,
+          } as Parameters<typeof testClient.mutate>[0]);
+  } catch (thrown) {
+    thrownError = thrown;
+  }
 
-  expect(result.error).toBeDefined();
-  return true;
+  const wasDenied = Boolean(thrownError ?? result?.error);
+  expect(wasDenied).toBeTruthy();
+  return wasDenied;
 }
 
 /**
@@ -354,16 +363,20 @@ export async function authenticatedRequest<TData, TVariables extends OperationVa
   if (type === "query") {
     const options = Object.assign({ query: document, context }, variables !== undefined ? { variables } : undefined);
     const result = await testClient.query(options);
+    if (result.error) {
+      throw new Error(`GraphQL query error: ${result.error.message}`);
+    }
     expect(result.data).toBeDefined();
-    expect(result.error).toBeUndefined();
     if (!result.data) throw new Error("No data");
     return result.data;
   }
 
   const options = Object.assign({ mutation: document, context }, variables !== undefined ? { variables } : undefined);
   const result = await testClient.mutate(options);
+  if (result.error) {
+    throw new Error(`GraphQL mutation error: ${result.error.message}`);
+  }
   expect(result.data).toBeDefined();
-  expect(result.error).toBeUndefined();
   if (!result.data) throw new Error("No data");
   return result.data;
 }
@@ -555,17 +568,89 @@ export async function expectMutationError<TData, TVars extends OperationVariable
   variables: TVars,
   expectedCode?: string
 ): Promise<void> {
-  const result = await testClient.mutate({
-    mutation: document,
-    variables,
-    context: { headers: { Authorization: `Bearer ${token}` } },
-  } as Parameters<typeof testClient.mutate>[0]);
-  expect(result.error).toBeDefined();
+  let result: Record<string, unknown> | undefined;
+  let thrownError: unknown;
+  try {
+    result = await testClient.mutate({
+      mutation: document,
+      variables,
+      errorPolicy: "all",
+      context: { headers: { Authorization: `Bearer ${token}` } },
+    } as Parameters<typeof testClient.mutate>[0]);
+  } catch (thrown) {
+    thrownError = thrown;
+  }
+
+  if (thrownError) {
+    if (expectedCode !== undefined) {
+      const actualCode = extractGqlErrorCode(thrownError);
+      expect(actualCode).toBe(expectedCode);
+    } else {
+      expect(thrownError).toBeDefined();
+    }
+    return;
+  }
+
+  const resultErrors = result?.errors;
+  expect(result?.error ?? (Array.isArray(resultErrors) && resultErrors.length > 0)).toBeTruthy();
   if (expectedCode !== undefined) {
-    const actualCode = extractGqlErrorCode(result.error);
-    expect(typeof actualCode).toBe("string");
+    const actualCode = extractGqlErrorCode(result?.error ?? result);
     expect(actualCode).toBe(expectedCode);
   }
+}
+
+function toRecord(value: unknown): Record<string, unknown> | undefined {
+  if (isRecord(value)) return value;
+  return undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function extractCodeFromErrorArray(errors: unknown[]): string | undefined {
+  const firstErr = toRecord(errors[0]);
+  const code = toRecord(firstErr?.extensions)?.code ?? firstErr?.code;
+  return typeof code === "string" ? code : undefined;
+}
+
+function extractCodeFromErrorsField(err: Record<string, unknown>): string | undefined {
+  if (Array.isArray(err.errors) && err.errors.length > 0) {
+    return extractCodeFromErrorArray(err.errors);
+  }
+  return undefined;
+}
+
+function extractCodeFromGraphQLErrorsField(err: Record<string, unknown>): string | undefined {
+  if (Array.isArray(err.graphQLErrors) && err.graphQLErrors.length > 0) {
+    return extractCodeFromErrorArray(err.graphQLErrors);
+  }
+  return undefined;
+}
+
+function extractCodeFromNetworkError(err: Record<string, unknown>): string | undefined {
+  const netErr = toRecord(err.networkError);
+  const netResult = toRecord(netErr?.result);
+  if (netResult && Array.isArray(netResult.errors) && netResult.errors.length > 0) {
+    return extractCodeFromErrorArray(netResult.errors);
+  }
+  return undefined;
+}
+
+function extractCodeFromExtensions(err: Record<string, unknown>): string | undefined {
+  const ext = toRecord(err.extensions);
+  if (ext) {
+    const code = ext.code;
+    if (typeof code === "string") return code;
+  }
+  return undefined;
+}
+
+function extractCodeFromDirectField(err: Record<string, unknown>): string | undefined {
+  if (typeof err.code === "string" && err.code !== "ERR_ASSERTION") {
+    return err.code;
+  }
+  return undefined;
 }
 
 /**
@@ -573,11 +658,16 @@ export async function expectMutationError<TData, TVars extends OperationVariable
  * Returns undefined if the error is not a CombinedGraphQLErrors or has no errors.
  */
 export function extractGqlErrorCode(error: unknown): string | undefined {
-  if (error instanceof CombinedGraphQLErrors) {
-    const code = error.errors?.[0]?.extensions?.code;
-    return typeof code === "string" ? code : undefined;
-  }
-  return undefined;
+  const err = toRecord(error);
+  if (!err) return undefined;
+
+  return (
+    extractCodeFromErrorsField(err) ??
+    extractCodeFromGraphQLErrorsField(err) ??
+    extractCodeFromNetworkError(err) ??
+    extractCodeFromExtensions(err) ??
+    extractCodeFromDirectField(err)
+  );
 }
 
 export async function provisionTestManager(

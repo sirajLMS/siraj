@@ -231,7 +231,6 @@ export async function checkRateLimit(
     }
 
     if (disableRateLimiting && (!isProduction || isTestHarness)) {
-      logger.warn(`Rate limiting explicitly disabled (DISABLE_RATE_LIMITING=true) for identifier: ${identifier}`);
       return { success: true, limit, remaining, reset };
     }
 

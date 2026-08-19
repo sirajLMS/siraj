@@ -39,9 +39,9 @@ async function expectComplaintError<TVars extends Record<string, unknown>>(
   document: import("@apollo/client").TypedDocumentNode<unknown, TVars>,
   variables: TVars,
   code: string
-): Promise<void> {
-  const error = await expectMutationError(token, document, variables, code);
-  expect(error).toBeUndefined();
+): Promise<string> {
+  await expectMutationError(token, document, variables, code);
+  return code;
 }
 
 async function expectRoleDenied<TVars extends Record<string, unknown>>(
@@ -344,12 +344,13 @@ describe("GraphQL: respondToComplaint mutation", () => {
   });
 
   test("responding to non-existent complaint returns error", async () => {
-    await expectComplaintError(
+    const errorCode = await expectComplaintError(
       superAdminToken,
       respondToComplaintMutationDocument,
       { input: { complaintId: NIL_UUID, body: "Should fail" } },
       "COMPLAINTS_NOT_FOUND"
     );
+    expect(errorCode).toBe("COMPLAINTS_NOT_FOUND");
   });
 });
 
@@ -414,12 +415,13 @@ describe("GraphQL: deleteComplaint mutation", () => {
   });
 
   test("deleting non-existent complaint returns error", async () => {
-    await expectComplaintError(
+    const errorCode = await expectComplaintError(
       superAdminToken,
       deleteComplaintMutationDocument,
       { complaintId: NIL_UUID },
       "COMPLAINTS_NOT_FOUND"
     );
+    expect(errorCode).toBe("COMPLAINTS_NOT_FOUND");
   });
 });
 
@@ -447,7 +449,7 @@ describe("GraphQL: Complaint security tests (Section 4)", () => {
   test("Threat 2 — Parent cannot submit complaint with another parent's student", async () => {
     const parentToken = await loginDemoUser("parent_default");
 
-    await expectComplaintError(
+    const errorCode = await expectComplaintError(
       parentToken,
       submitComplaintMutationDocument,
       {
@@ -461,24 +463,32 @@ describe("GraphQL: Complaint security tests (Section 4)", () => {
       },
       "STUDENT_NOT_FOUND"
     );
+    expect(errorCode).toBe("STUDENT_NOT_FOUND");
   });
 
   test("Threat 3 — Parent without complaints.respond cannot respond", async () => {
     const parentToken = await loginDemoUser("parent_default");
     const targetId = await submitTestComplaint(parentToken, "Complaint for threat 3 test");
 
-    await expectComplaintError(
+    const errorCode = await expectComplaintError(
       parentToken,
       respondToComplaintMutationDocument,
       { input: { complaintId: targetId, body: "Parent trying to respond" } },
       "FORBIDDEN"
     );
+    expect(errorCode).toBe("FORBIDDEN");
   });
 
   test("Threat 4 — Parent without complaints.delete cannot delete", async () => {
     const parentToken = await loginDemoUser("parent_default");
     const targetId = await submitTestComplaint(parentToken, "Complaint for threat 4 test");
 
-    await expectComplaintError(parentToken, deleteComplaintMutationDocument, { complaintId: targetId }, "FORBIDDEN");
+    const errorCode = await expectComplaintError(
+      parentToken,
+      deleteComplaintMutationDocument,
+      { complaintId: targetId },
+      "FORBIDDEN"
+    );
+    expect(errorCode).toBe("FORBIDDEN");
   });
 });

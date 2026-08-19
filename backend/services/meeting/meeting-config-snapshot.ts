@@ -242,10 +242,18 @@ export namespace MeetingConfigSnapshotService {
 
     const resolved = await resolveProviderForInstance(instance, tx);
     if (!resolved) {
-      logger.warn("generateAndAttachForClassInstance: no provider resolved, skipping", {
-        classInstanceId,
-        providerLookupReason: "no_provider_resolved",
-      });
+      const isTestMode = (process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1";
+      if (isTestMode) {
+        logger.debug("generateAndAttachForClassInstance: no provider resolved, skipping", {
+          classInstanceId,
+          providerLookupReason: "no_provider_resolved",
+        });
+      } else {
+        logger.warn("generateAndAttachForClassInstance: no provider resolved, skipping", {
+          classInstanceId,
+          providerLookupReason: "no_provider_resolved",
+        });
+      }
       return { success: false, joinUrl: null };
     }
 

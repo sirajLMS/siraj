@@ -3,7 +3,7 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { AppPermission } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
-import { UnauthorizedError } from "@/backend/lib/errors";
+import { DomainError, UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
@@ -30,6 +30,15 @@ function formatTime(date: Date): string {
     minute: "2-digit",
     hour12: true,
   });
+}
+
+function logDomainIssue(message: string, context: Record<string, unknown>): void {
+  const isTestMode = (process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1";
+  if (isTestMode) {
+    logger.debug(message, context);
+  } else {
+    logger.warn(message, context);
+  }
 }
 
 export namespace ScheduleService {
@@ -173,7 +182,11 @@ export namespace ScheduleService {
         pageInfo,
       };
     } catch (error) {
-      logger.error("Error fetching admin dashboard schedule", { userId, error });
+      if (error instanceof DomainError) {
+        logDomainIssue("Admin dashboard schedule access issue", { userId, error: error.message });
+      } else {
+        logger.error("Error fetching admin dashboard schedule", { userId, error });
+      }
       throw error;
     }
   }
@@ -182,7 +195,7 @@ export namespace ScheduleService {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
-        logger.warn("Unauthorized access to daily metrics", { userId });
+        logDomainIssue("Unauthorized access to daily metrics", { userId });
         throw new UnauthorizedError(tErrors.unauthorizedViewMetrics);
       }
 
@@ -194,7 +207,11 @@ export namespace ScheduleService {
         ...metrics,
       };
     } catch (error) {
-      logger.error("Error fetching daily metrics", { userId, error });
+      if (error instanceof DomainError) {
+        logDomainIssue("Daily metrics access issue", { userId, error: error.message });
+      } else {
+        logger.error("Error fetching daily metrics", { userId, error });
+      }
       throw error;
     }
   }
@@ -221,7 +238,11 @@ export namespace ScheduleService {
 
       return await Promise.all(list.map(item => mapDailyScheduleListItem(item, tErrors)));
     } catch (error) {
-      logger.error("Error fetching daily schedule", { userId, error });
+      if (error instanceof DomainError) {
+        logger.warn("Daily schedule access issue", { userId, error: error.message });
+      } else {
+        logger.error("Error fetching daily schedule", { userId, error });
+      }
       throw error;
     }
   }

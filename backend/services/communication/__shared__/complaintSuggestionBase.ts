@@ -145,10 +145,21 @@ export async function softDeleteEntityLog(args: SoftDeleteEntityLogArgs): Promis
 
     return { deletedAt: result.deletedAt.toISOString() };
   } catch (error) {
-    logger.error(`Failed to delete ${args.entityLabel.toLowerCase()}`, {
-      ...logFields,
-      error,
-    });
+    if (error instanceof NotFoundError) {
+      const isTestMode = (process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1";
+      const logFn = isTestMode
+        ? (msg: string, ctx?: Record<string, unknown>) => logger.debug(msg, ctx)
+        : (msg: string, ctx?: Record<string, unknown>) => logger.warn(msg, ctx);
+      logFn(`Failed to delete ${args.entityLabel.toLowerCase()} (not found)`, {
+        ...logFields,
+        error,
+      });
+    } else {
+      logger.error(`Failed to delete ${args.entityLabel.toLowerCase()}`, {
+        ...logFields,
+        error,
+      });
+    }
     throw error;
   }
 }

@@ -9,7 +9,7 @@ import {
 } from "@/backend/db/repo/scheduling/recurring-schedule.repository";
 import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { AppPermission, NotificationEventType, SchedulingMode } from "@/backend/enum";
-import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
+import { DomainError, NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CreditService } from "@/backend/services/billing/credit.service";
@@ -349,7 +349,15 @@ export namespace RecurringClassService {
         meetingUrl,
       };
     } catch (error) {
-      logger.error("Error creating recurring class", { userId, input, error });
+      if (error instanceof DomainError) {
+        const isTestMode = (process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1";
+        const logFn = isTestMode
+          ? (msg: string, ctx: Record<string, unknown>) => logger.debug(msg, ctx)
+          : (msg: string, ctx: Record<string, unknown>) => logger.warn(msg, ctx);
+        logFn("Validation or business rule error creating recurring class", { userId, error: error.message });
+      } else {
+        logger.error("Error creating recurring class", { userId, input, error });
+      }
       throw error;
     }
   }

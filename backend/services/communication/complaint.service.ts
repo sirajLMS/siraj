@@ -9,6 +9,7 @@ import { PermissionsService } from "@/backend/services/auth/permissions.service"
 import {
   assertPermission,
   requireParentByActorUserId,
+  resolveEntityById,
   softDeleteEntityLog,
 } from "@/backend/services/communication/__shared__/complaintSuggestionBase";
 import { deriveComplaintMetrics } from "@/backend/services/communication/complaint-validation.helpers";
@@ -286,7 +287,15 @@ export namespace ComplaintService {
     complaintId: string,
     locale?: string
   ): Promise<{ readonly deletedAt: string }> {
-    await assertPermission(actorUserId, AppPermission.COMPLAINTS_DELETE, locale);
+    await resolveEntityById({
+      actorUserId,
+      permission: AppPermission.COMPLAINTS_DELETE,
+      entityId: complaintId,
+      findFn: ComplaintRepository.getComplaintById,
+      notFoundErrorKey: "complaintNotFound",
+      entityCode: "COMPLAINTS",
+      locale,
+    });
 
     return softDeleteEntityLog({
       actorUserId,

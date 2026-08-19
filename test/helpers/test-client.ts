@@ -1,5 +1,5 @@
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
-import { getTestGraphqlUrl } from "./test-port";
+import { getTestGraphqlUrl } from "@/test/helpers/test-port";
 
 export const TEST_HOST = "http://localhost";
 

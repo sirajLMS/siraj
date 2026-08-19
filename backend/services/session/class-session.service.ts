@@ -238,10 +238,18 @@ export namespace ClassSessionService {
     if (!instance.quotaDeducted) return { quotaReleased: false, quotaId: null, isQuotaBacked: false, warning: null };
     if (!instance.recurringScheduleId) {
       const warning = "quota_release_skipped_no_schedule";
-      logger.warn(warning, {
-        classInstanceId: instance.id,
-        studentId: instance.studentId,
-      });
+      const isTestMode = (process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1";
+      if (isTestMode) {
+        logger.debug(warning, {
+          classInstanceId: instance.id,
+          studentId: instance.studentId,
+        });
+      } else {
+        logger.warn(warning, {
+          classInstanceId: instance.id,
+          studentId: instance.studentId,
+        });
+      }
       return { quotaReleased: false, quotaId: null, isQuotaBacked: false, warning };
     }
 

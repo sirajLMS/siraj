@@ -100,6 +100,13 @@ export class TwilioSmsAdapter implements ISmsChannel {
   }
 
   private async checkRateLimit(userId: string): Promise<SmsSendResult | null> {
+    if (
+      ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") &&
+      process.env.TEST_ENFORCE_RATE_LIMIT !== "true"
+    ) {
+      return null;
+    }
+
     const smsCount = await NotificationRepository.getSmsCountInLastHour(userId);
 
     if (smsCount < this.rateLimitConfig.maxSmsPerHour) return null;
@@ -118,6 +125,19 @@ export class TwilioSmsAdapter implements ISmsChannel {
   }
 
   private async sendTwilioMessage(payload: SmsPayload, deliveryId: string, locale: string): Promise<SmsSendResult> {
+    if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
+      await NotificationRepository.updateDeliveryStatus({
+        deliveryId,
+        status: NotificationDeliveryStatus.SENT,
+        providerMessageId: `mock-twilio-${deliveryId}`,
+      });
+
+      return {
+        success: true,
+        providerMessageId: `mock-twilio-${deliveryId}`,
+      };
+    }
+
     try {
       const message = await this.context.client.messages.create({
         to: payload.to,
@@ -147,7 +167,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
-      if (process.env.NODE_ENV === "test" || process.env.TEST_SERVER === "1") {
+      if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
         logger.warn("Failed to send SMS via Twilio in test mode", {
           deliveryId,
           error: errorMessage,
@@ -177,7 +197,7 @@ export class TwilioSmsAdapter implements ISmsChannel {
     message: { sid: string; errorCode: number | null; errorMessage: string | null },
     locale: string
   ): Promise<SmsSendResult> {
-    if (process.env.NODE_ENV === "test" || process.env.TEST_SERVER === "1") {
+    if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
       logger.warn("Twilio API returned an error in test mode", {
         deliveryId,
         errorCode: message.errorCode,

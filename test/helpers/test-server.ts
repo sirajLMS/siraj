@@ -21,7 +21,7 @@ import {
   releaseTcpPortReservation,
   setTestPort,
   TEST_SERVER_PORT,
-} from "./test-port";
+} from "@/test/helpers/test-port";
 
 const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? ["Test", "Admin", "Pass1!"].join("");
 
@@ -325,7 +325,7 @@ export async function startTestServer() {
  */
 async function ensureDemoUsersForTestsSafe(): Promise<void> {
   try {
-    const { ensureDemoUsersForTests } = await import("./graphql-test-helpers");
+    const { ensureDemoUsersForTests } = await import("@/test/helpers/graphql-test-helpers");
     await ensureDemoUsersForTests();
   } catch (err) {
     testLogger.warn(`Could not ensure demo users for E2E tests: ${err instanceof Error ? err.message : String(err)}`);

@@ -1,5 +1,5 @@
 // Parallel test runner for database repository tests.
-import { runParallelTests } from "./run-parallel-tests";
+import { runParallelTests } from "@/test/scripts/run-parallel-tests";
 
 // Each worker creates a pg pool (max: 3 in test env via factory.ts).
 // Cap workers so total connections stay well within PostgreSQL's max_connections.

@@ -504,9 +504,16 @@ class MetaCloudApiAdapter implements IWhatsappChannel {
   }
 
   private async handleEmptyRecipient(payload: WhatsappPayload, locale: string): Promise<WhatsappSendResult> {
-    logger.warn("MetaCloudApiAdapter: empty recipient in payload", {
-      templateName: payload.template?.name,
-    });
+    const isTestMode = (process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1";
+    if (isTestMode) {
+      logger.debug("MetaCloudApiAdapter: empty recipient in payload", {
+        templateName: payload.template?.name,
+      });
+    } else {
+      logger.warn("MetaCloudApiAdapter: empty recipient in payload", {
+        templateName: payload.template?.name,
+      });
+    }
 
     return {
       success: false,

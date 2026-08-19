@@ -32,6 +32,32 @@ const envConfig = getEnvironmentConfig();
 const isProduction = envConfig.nodeEnv === "production";
 const MAX_GRAPHQL_DEPTH = 7;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function findCode(err: unknown): string | null {
+  if (!isRecord(err)) return null;
+  if (typeof err.code === "string" && err.code !== "INTERNAL_SERVER_ERROR") {
+    return err.code;
+  }
+  if (isRecord(err.extensions)) {
+    const extCode = err.extensions.code;
+    if (typeof extCode === "string" && extCode !== "INTERNAL_SERVER_ERROR") {
+      return extCode;
+    }
+  }
+  if (err.originalError) {
+    const origCode = findCode(err.originalError);
+    if (origCode) return origCode;
+  }
+  if (err.cause) {
+    const causeCode = findCode(err.cause);
+    if (causeCode) return causeCode;
+  }
+  return null;
+}
+
 function createApolloServer(schema: typeof graphQLSchema) {
   return new ApolloServer({
     schema,
@@ -60,6 +86,22 @@ function createApolloServer(schema: typeof graphQLSchema) {
     // With BatchHttpLink on the client, multiple operations are POSTed as a
     // single JSON array body, reducing Vercel function invocations (8→1 POSTs).
     allowBatchedHttpRequests: true,
+    formatError: (formattedError, error) => {
+      const code =
+        findCode(error) ??
+        (typeof formattedError.extensions?.code === "string" ? formattedError.extensions.code : null);
+
+      if (code) {
+        return {
+          ...formattedError,
+          extensions: {
+            ...formattedError.extensions,
+            code,
+          },
+        };
+      }
+      return formattedError;
+    },
   });
 }
 

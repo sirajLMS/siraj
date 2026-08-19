@@ -14,6 +14,7 @@ export interface EmailSendResult {
   readonly success: boolean;
   readonly providerMessageId?: string;
   readonly error?: string;
+  readonly rateLimited?: boolean;
 }
 
 export interface IEmailChannel {

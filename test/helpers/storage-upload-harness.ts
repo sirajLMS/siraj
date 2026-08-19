@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { prepareUploadMutationDocument } from "@/frontend/common/graphql/sharedDocuments/resources/learning-resource.documents";
-import { authenticatedRequest } from "./graphql-test-helpers";
-import { getTestApiUrl } from "./test-port";
+import { authenticatedRequest } from "@/test/helpers/graphql-test-helpers";
+import { getTestApiUrl } from "@/test/helpers/test-port";
 
 export interface UploadFileToStorageOptions {
   /** The authenticated user's token. */

@@ -1,8 +1,8 @@
 import { beforeAll } from "bun:test";
 import { testLogger } from "@/shared/lib/logger/testlogger";
-import { ensureDemoUsersForTests } from "./graphql-test-helpers";
-import { getTestPort, getTestServerMode } from "./test-port";
-import { isTestServerRunning, startTestServer } from "./test-server";
+import { ensureDemoUsersForTests } from "@/test/helpers/graphql-test-helpers";
+import { getTestPort, getTestServerMode } from "@/test/helpers/test-port";
+import { isTestServerRunning, startTestServer } from "@/test/helpers/test-server";
 
 let serverStartPromise: Promise<void> | null = null;
 

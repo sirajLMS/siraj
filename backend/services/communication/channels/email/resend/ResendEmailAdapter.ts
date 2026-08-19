@@ -136,6 +136,13 @@ export class ResendEmailAdapter implements IEmailChannel {
     recipient: string,
     locale: string
   ): Promise<EmailSendResult> {
+    if (
+      ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") &&
+      !recipient.endsWith(RESEND_SIMULATOR_DOMAIN)
+    ) {
+      return this.handleSendSuccess(delivery.id, `mock-resend-msg-${delivery.id}`);
+    }
+
     try {
       const response = await this.context.client.emails.send({
         from: this.context.fromEmail,
@@ -159,8 +166,22 @@ export class ResendEmailAdapter implements IEmailChannel {
     error: { name: string; message: string },
     locale: string
   ): Promise<EmailSendResult> {
-    if (process.env.NODE_ENV === "test" || process.env.TEST_SERVER === "1") {
-      logger.warn("Resend API returned an error in test mode", {
+    const isRateLimit =
+      error.name === "rate_limit_exceeded" ||
+      error.name?.toLowerCase().includes("rate_limit") ||
+      error.message?.toLowerCase().includes("rate limit") ||
+      error.message?.includes("429");
+
+    if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
+      logger.debug(
+        isRateLimit ? "Resend API rate limit reached in test mode" : "Resend API returned an error in test mode",
+        {
+          errorName: error.name,
+          errorMessage: error.message,
+        }
+      );
+    } else if (isRateLimit) {
+      logger.warn("Resend API rate limit exceeded", {
         errorName: error.name,
         errorMessage: error.message,
       });
@@ -174,11 +195,12 @@ export class ResendEmailAdapter implements IEmailChannel {
     await NotificationRepository.updateDeliveryStatus({
       deliveryId,
       status: NotificationDeliveryStatus.FAILED,
-      failureReason: error.message,
+      failureReason: isRateLimit ? `Rate limit exceeded: ${error.message}` : error.message,
     });
 
     return {
       success: false,
+      rateLimited: isRateLimit,
       error: deliveryFailedMessage(NotificationChannel.EMAIL, locale),
     };
   }
@@ -203,9 +225,15 @@ export class ResendEmailAdapter implements IEmailChannel {
 
   private async handleSendException(deliveryId: string, error: unknown, locale: string): Promise<EmailSendResult> {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const isRateLimit = errorMessage.toLowerCase().includes("rate limit") || errorMessage.includes("429");
 
-    if (process.env.NODE_ENV === "test" || process.env.TEST_SERVER === "1") {
-      logger.warn("Failed to send email via Resend in test mode", {
+    if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
+      logger.debug("Failed to send email via Resend in test mode", {
+        deliveryId,
+        error: errorMessage,
+      });
+    } else if (isRateLimit) {
+      logger.warn("Resend email send rate limited", {
         deliveryId,
         error: errorMessage,
       });
@@ -224,6 +252,7 @@ export class ResendEmailAdapter implements IEmailChannel {
 
     return {
       success: false,
+      rateLimited: isRateLimit,
       error: deliveryFailedMessage(NotificationChannel.EMAIL, locale),
     };
   }
