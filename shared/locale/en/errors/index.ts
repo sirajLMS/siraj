@@ -45,6 +45,9 @@ const scheduling = {
   dateRangeExceedsMax: (maxDays: number) => `Date range cannot exceed ${maxDays} days`,
   vacationRequestNotPending: (id: string) => `Vacation request ${id} is not in pending status`,
   vacationRequestAlreadyCancelled: (id: string) => `Vacation request ${id} is already cancelled`,
+  recurringClassDaysRequired: () => "At least one day is required.",
+  invalidDuration: () => "Duration must be greater than zero.",
+  subjectRequired: () => "Subject is required.",
 } as const;
 
 const permissionGroup = {

@@ -453,6 +453,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/workflows/plan-doc-reconciliation.md` - Plan-vs-canonical-doc reconciliation workflow (docs-only plan pattern, anchor-on-text, outcome-pointer rule, known-open-issues propagation, phantom-spec-code handling, markdown link-integrity loop)
 - `docs/backend/serverless-cold-start-optimization.md` - Serverless cold-start optimization patterns (permission context, env-config pre-warm, singleton persistence, HTTP batching, client log batching)
 - `docs/backend/login-cold-start-resilience.md` - Login cold-start resilience patterns (fail-open rate limiter, retryTransient on DB reads, frontend retry on SERVICE_UNAVAILABLE, env-config transient short TTL)
+- `docs/graphql/domain-error-extensions-code.md` - DomainError → GraphQLError extensions.code propagation pattern
 
 
 ## Linting Rules

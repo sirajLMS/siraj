@@ -381,6 +381,9 @@ interface SchedulingSharedErrors {
   readonly meetingUrlInUse: string;
   readonly sessionNotActivated: string;
   readonly absentTooEarly: (params: { waitingMinutes: string }) => string;
+  readonly recurringClassDaysRequired: () => string;
+  readonly invalidDuration: () => string;
+  readonly subjectRequired: () => string;
 }
 
 /**

@@ -67,6 +67,9 @@ const scheduling = {
   dateRangeExceedsMax: (maxDays: number) => `لا يمكن أن يتجاوز نطاق التاريخ ${maxDays} يومًا`,
   vacationRequestNotPending: (id: string) => `طلب الإجازة ${id} ليس في حالة الانتظار`,
   vacationRequestAlreadyCancelled: (id: string) => `طلب الإجازة ${id} تم إلغاؤه بالفعل`,
+  recurringClassDaysRequired: () => "يوم واحد على الأقل مطلوب.",
+  invalidDuration: () => "يجب أن تكون المدة أكبر من صفر.",
+  subjectRequired: () => "المادة مطلوبة.",
 } as const;
 
 const permissionGroup = {
