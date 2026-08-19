@@ -23,10 +23,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies (socat & jq)
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y socat jq
+      - name: Install dependencies (socat)
+        run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends socat
 
       - name: Start Shell NVIDIA Router
         env:
