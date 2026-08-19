@@ -10,7 +10,7 @@
 
 ## Phase 1: Dependencies & Configuration
 
-- [ ] 1. Install New Relic dependencies
+- [x] 1. Install New Relic dependencies
   - Add to `package.json` dependencies: `newrelic` (latest v14+), `@pothos/tracing-newrelic`
   - Add to `package.json` devDependencies: `@types/newrelic`
   - Run `bun install`
@@ -18,23 +18,23 @@
   - Applicable AGENTS.md: root `AGENTS.md`
   - Applicable instructions: `backend.instructions.md`
 
-- [ ] 1.1 Quality loop on `package.json`
+- [x] 1.1 Quality loop on `package.json`
   - Run `bun run scripts/health/sub-loop.ts package.json --lifecycle codescene`
   - Fix any errors, re-run until exit 0
   - Write outcome: `.ai/plans/new-relic-integration/outcome/1.1-outcome.md`
 
-- [ ] 2. Create `newrelic.cjs` config file
+- [x] 2. Create `newrelic.cjs` config file
   - Create `newrelic.cjs` at project root
   - Enable `opentelemetry: { enabled: true }`
   - Disable `instrumentation.http`, `instrumentation.next`, `instrumentation.undici`
-  - Set `logging.level` to `info`
+  - Set `logging.level` to `warn` (reduce serverless log noise; use `NEW_RELIC_LOG_LEVEL=debug` for troubleshooting)
   - NOTE: `.cjs` files are NOT linted by the project ESLint config (only `.ts`/`.tsx` files are). No inline eslint-disable comments needed. NEVER add `oxlint-disable` comments.
   - Comment that on Vercel, env vars override this file
   - _Requirements: AC-2, AC-3, AC-9_
   - Applicable AGENTS.md: root `AGENTS.md`
   - Applicable instructions: `backend.instructions.md`
 
-- [ ] 2.1 Quality loop on `newrelic.cjs`
+- [x] 2.1 Quality loop on `newrelic.cjs`
   - Run `bun run scripts/health/sub-loop.ts newrelic.cjs --lifecycle codescene`
   - Fix any errors, re-run until exit 0
   - Write outcome: `.ai/plans/new-relic-integration/outcome/2.1-outcome.md`
@@ -43,7 +43,7 @@
 
 ## Phase 2: Agent Loading Infrastructure
 
-- [ ] 3. Create `backend/lib/newrelic-agent.ts` — agent loading helper
+- [x] 3. Create `backend/lib/newrelic-agent.ts` — agent loading helper
   - Export `loadNewRelicAgent()` async function
   - Dynamic `import('newrelic')` — module never loaded if not called
   - Wait for agent connection (up to 8s timeout, per official example)
@@ -55,18 +55,18 @@
   - Applicable AGENTS.md: `backend/AGENTS.md`, root `AGENTS.md`
   - Applicable instructions: `backend.instructions.md`
 
-- [ ] 3.0 Add `export * from "./newrelic-agent"` to `backend/lib/index.ts` barrel
+- [x] 3.0 Add `export * from "./newrelic-agent"` to `backend/lib/index.ts` barrel
   - Add the export line in alphabetical order (after "logger" line)
   - This file has no `/` in export paths, uses `./` prefix — follows barrel conventions
   - _Requirements: AC-1_
 
-- [ ] 3.1 Quality loop on `backend/lib/newrelic-agent.ts` AND `backend/lib/index.ts`
+- [x] 3.1 Quality loop on `backend/lib/newrelic-agent.ts` AND `backend/lib/index.ts`
   - Run `bun run scripts/health/sub-loop.ts backend/lib/newrelic-agent.ts --lifecycle codescene`
   - Run `bun run scripts/health/sub-loop.ts backend/lib/index.ts --lifecycle codescene`
   - Fix any errors, re-run until exit 0
   - Write outcome: `.ai/plans/new-relic-integration/outcome/3.1-outcome.md`
 
-- [ ] 4. Modify `instrumentation.ts` — load New Relic in production
+- [x] 4. Modify `instrumentation.ts` — load New Relic in production
   - Add New Relic agent loading after existing env validation
   - Gate: `process.env.NODE_ENV === 'production'` AND `process.env.NEXT_RUNTIME === 'nodejs'`
   - Call `loadNewRelicAgent()` from `@/backend/lib/newrelic-agent` (async — `await` the call)
@@ -77,7 +77,7 @@
   - Applicable AGENTS.md: root `AGENTS.md`
   - Applicable instructions: `backend.instructions.md` (root-level file importing backend lib)
 
-- [ ] 4.1 Quality loop on `instrumentation.ts`
+- [x] 4.1 Quality loop on `instrumentation.ts`
   - Run `bun run scripts/health/sub-loop.ts instrumentation.ts --lifecycle codescene`
   - Fix any errors, re-run until exit 0
   - Write outcome: `.ai/plans/new-relic-integration/outcome/4.1-outcome.md`
@@ -86,7 +86,7 @@
 
 ## Phase 3: Vercel Deployment Configuration
 
-- [ ] 5. Modify `next.config.ts` — add `outputFileTracingIncludes`
+- [x] 5. Modify `next.config.ts` — add `outputFileTracingIncludes`
   - Add `outputFileTracingIncludes: { "/*": ["./node_modules/newrelic/**/*"] }` to config
   - This tells Vercel's @vercel/nft to include the full newrelic package in serverless function traces
   - Keep existing config intact — only add the new property
@@ -94,7 +94,7 @@
   - Applicable AGENTS.md: root `AGENTS.md`
   - Applicable instructions: `frontend.instructions.md` (Next.js config file)
 
-- [ ] 5.1 Quality loop on `next.config.ts`
+- [x] 5.1 Quality loop on `next.config.ts`
   - Run `bun run scripts/health/sub-loop.ts next.config.ts --lifecycle codescene`
   - Fix any errors, re-run until exit 0
   - Write outcome: `.ai/plans/new-relic-integration/outcome/5.1-outcome.md`
@@ -103,7 +103,7 @@
 
 ## Phase 4: Pothos GraphQL Tracing Integration
 
-- [ ] 6. Modify `backend/graphql/gqlSchemaBuilder.ts` — integrate `@pothos/tracing-newrelic` via conditional `require()`
+- [x] 6. Modify `backend/graphql/gqlSchemaBuilder.ts` — integrate `@pothos/tracing-newrelic` via conditional `require()`
   - **LOCKED APPROACH**: Use conditional `require()` gated by `process.env.NODE_ENV === "production"` — NOT dynamic `import()` (builder is synchronous) and NOT static import (would load `newrelic` in dev/test)
   - `@pothos/tracing-newrelic` does `import newrelic from 'newrelic'` at its top level. A static import would load `newrelic` in dev/test, violating AC-6. Conditional `require()` is synchronous and only executes in production.
   - Implementation (replace the existing `tracing.wrap` function):
@@ -137,7 +137,7 @@
   - Applicable AGENTS.md: `backend/graphql/AGENTS.md`, `backend/AGENTS.md`, root `AGENTS.md`
   - Applicable instructions: `backend.instructions.md`
 
-- [ ] 6.1 Quality loop on `backend/graphql/gqlSchemaBuilder.ts`
+- [x] 6.1 Quality loop on `backend/graphql/gqlSchemaBuilder.ts`
   - Run `bun run scripts/health/sub-loop.ts backend/graphql/gqlSchemaBuilder.ts --lifecycle codescene`
   - Fix any errors, re-run until exit 0
   - Write outcome: `.ai/plans/new-relic-integration/outcome/6.1-outcome.md`
@@ -146,7 +146,7 @@
 
 ## Phase 5: Documentation & Knowledge Propagation
 
-- [ ] 7. Create canonical reference doc `docs/observability/new-relic-integration.md`
+- [x] 7. Create canonical reference doc `docs/observability/new-relic-integration.md`
   - Create `docs/observability/` directory if it doesn't exist
   - Document the Hybrid Agent architecture and how it works
   - Document the `newrelic.cjs` config file and why it's `.cjs` not `.ts`
@@ -159,18 +159,18 @@
   - Include troubleshooting section (agent not reporting, missing traces, etc.)
   - _Requirements: AC-22, AC-23_
 
-- [ ] 7.1 Quality loop on `docs/observability/new-relic-integration.md`
+- [x] 7.1 Quality loop on `docs/observability/new-relic-integration.md`
   - Run `bun run scripts/health/sub-loop.ts docs/observability/new-relic-integration.md --lifecycle codescene`
   - Fix any errors, re-run until exit 0
   - Write outcome: `.ai/plans/new-relic-integration/outcome/7.1-outcome.md`
 
-- [ ] 8. Update root `AGENTS.md` — add reference to new doc
+- [x] 8. Update root `AGENTS.md` — add reference to new doc
   - Add `docs/observability/new-relic-integration.md` to Important References section
   - Add one-line description
   - _Requirements: AC-23_
   - Applicable AGENTS.md: root `AGENTS.md`
 
-- [ ] 8.1 Quality loop on `AGENTS.md`
+- [x] 8.1 Quality loop on `AGENTS.md`
   - Run `bun run scripts/health/sub-loop.ts AGENTS.md --lifecycle codescene`
   - Fix any errors, re-run until exit 0
   - Write outcome: `.ai/plans/new-relic-integration/outcome/8.1-outcome.md`
@@ -179,13 +179,13 @@
 
 ## Phase 6: Post-Implementation Review
 
-- [ ] 9. Run Plan Review skill
+- [x] 9. Run Plan Review skill
   - Invoke `@plan-review` on the complete plan
   - Fix all violations reported
   - Re-run until "Plan passes all AGENTS.md rules"
   - Write outcome: `.ai/plans/new-relic-integration/outcome/plan-review-R1.md`
 
-- [ ] 10. Parallel Review Wave
+- [x] 10. Parallel Review Wave
   - Dispatch `review-backend` subagent on all modified `backend/` files
   - Dispatch `review-types` on any type changes
   - Dispatch `review-config` on `next.config.ts`, `instrumentation.ts`, `newrelic.cjs`

@@ -454,6 +454,7 @@ After reading the applicable instruction files and AGENTS.md, subagents check fo
 - `docs/backend/serverless-cold-start-optimization.md` - Serverless cold-start optimization patterns (permission context, env-config pre-warm, singleton persistence, HTTP batching, client log batching)
 - `docs/backend/login-cold-start-resilience.md` - Login cold-start resilience patterns (fail-open rate limiter, retryTransient on DB reads, frontend retry on SERVICE_UNAVAILABLE, env-config transient short TTL)
 - `docs/graphql/domain-error-extensions-code.md` - DomainError → GraphQLError extensions.code propagation pattern
+- `docs/observability/new-relic-integration.md` - New Relic APM integration (Hybrid Agent, GraphQL resolver tracing, zero dev/test overhead)
 
 
 ## Linting Rules

@@ -59,7 +59,10 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BUILD_ID: buildId,
     NEXT_PUBLIC_LOCALE_SNAPSHOT_BASE: "/static/locale-snapshots",
   },
-  serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions"],
+  serverExternalPackages: ["pg", "@neondatabase/serverless", "drizzle-orm", "ws", "@vercel/functions", "newrelic"],
+  // Ensure the full newrelic package is traced into serverless function bundles on Vercel.
+  // Without this, @vercel/nft may tree-shake parts of the agent that are dynamically loaded.
+  outputFileTracingIncludes: { "/*": ["./node_modules/newrelic/**/*"] },
   turbopack: {},
   experimental: {
     useTypeScriptCli: false,

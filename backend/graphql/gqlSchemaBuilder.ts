@@ -169,11 +169,20 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
   tracing: {
     // Enable tracing for rootFields by default, other fields need to opt in
     default: config => isRootField(config),
-    // Log resolver execution duration
-    wrap: (resolver, _options, config) =>
-      wrapResolver(resolver, (_error, duration) => {
+    wrap: (resolver, _options, config) => {
+      if (process.env.NODE_ENV === "production" && process.env.NEXT_RUNTIME === "nodejs") {
+        // Conditional require: newrelic module is NEVER loaded in dev/test.
+        // @pothos/tracing-newrelic imports newrelic at module top level.
+        // The NODE_ENV gate guarantees newrelic is never evaluated in dev.
+        // eslint-disable-next-line @typescript-eslint/no-require-imports -- gated by NODE_ENV + NEXT_RUNTIME; CommonJS require is the only synchronous way to conditionally load @pothos/tracing-newrelic
+        const { createNewrelicWrapper } = require("@pothos/tracing-newrelic");
+        return createNewrelicWrapper({ includeArgs: true, includeSource: true })(resolver, _options, config);
+      }
+      // Dev/test fallback: existing wrapResolver duration logging
+      return wrapResolver(resolver, (_error, duration) => {
         logger.log(`Executed resolver ${config.parentType}.${config.name} in ${duration}ms`);
-      }),
+      });
+    },
   },
 });
 

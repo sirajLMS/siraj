@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { DEMO_USERS, devWaitTimeout, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { closeE2eSession, DEMO_USERS, devWaitTimeout, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -37,12 +37,7 @@ let context: BrowserContext | undefined;
 let page: Page | undefined;
 
 afterEach(async () => {
-  if (page) {
-    await page.close();
-  }
-  if (context) {
-    await context.close();
-  }
+  await closeE2eSession(page, context);
   page = undefined;
   context = undefined;
 });

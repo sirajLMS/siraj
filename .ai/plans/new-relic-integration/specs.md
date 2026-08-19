@@ -45,7 +45,7 @@ As an **ops engineer**, I want telemetry from all production deployments aggrega
 4. WHEN the agent is loaded THEN the system SHALL wait up to 8 seconds for agent connection before continuing, using a non-blocking timeout pattern
 
 ### AC-2: Hybrid Agent Configuration
-5. WHEN the New Relic agent is active THEN `opentelemetry.enabled` SHALL be `true`
+5. WHEN the New Relic agent is active THEN `opentelemetry_bridge.enabled` SHALL be `true` (newrelic@12.x config key)
 6. WHEN the New Relic agent is active THEN `instrumentation.http.enabled` SHALL be `false` (to avoid duplicate spans with Next.js OTel)
 7. WHEN the New Relic agent is active THEN `instrumentation.next.enabled` SHALL be `false`
 8. WHEN the New Relic agent is active THEN `instrumentation.undici.enabled` SHALL be `false`

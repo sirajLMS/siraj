@@ -7,6 +7,7 @@ export * from "./errors";
 export * from "./field-encryption";
 export * from "./ip-utils";
 export * from "./logger";
+export * from "./newrelic-agent";
 export * from "./path-validator";
 export * from "./payment-method.validation";
 export * from "./payment-method-jsonb";

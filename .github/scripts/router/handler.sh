@@ -13,10 +13,10 @@ ROUTER_PORT="${1:-${ROUTER_PORT:-20128}}"
 STATE_DIR="${2:-${STATE_DIR:-/tmp/nvidia_router_state_${ROUTER_PORT}}}"
 UPSTREAM_URL="${UPSTREAM_URL:-https://integrate.api.nvidia.com/v1/chat/completions}"
 MAX_RETRIES="${MAX_RETRIES:-60}"
-# 25s per attempt: fast-fail so we stay under undici's 30s headersTimeout
-CURL_TIMEOUT="${CURL_TIMEOUT:-25}"
-# Total budget: 90s (3 attempts × 25s + rotation overhead)
-REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-90}"
+# Max per-attempt curl timeout — the remaining-time cap ensures we never exceed REQUEST_DEADLINE_SEC
+CURL_TIMEOUT="${CURL_TIMEOUT:-200}"
+# Hard deadline: router ALWAYS responds within this many seconds (capped per-curl via effective_timeout)
+REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-300}"
 
 # Send formatted OpenAI JSON response
 send_openai_json_response() {
