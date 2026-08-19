@@ -79,6 +79,9 @@ export abstract class BaseLogger {
 
   public error(...args: unknown[]): void {
     this.logToConsole("error", ...args);
+    if (process.env.EXIT_ON_ERROR === "true") {
+      process.exit(1);
+    }
   }
 
   public debug(...args: unknown[]): void {

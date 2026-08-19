@@ -1,11 +1,14 @@
-export class DomainError extends Error {
+import { GraphQLError } from "graphql";
+
+export class DomainError extends GraphQLError {
   constructor(
     public readonly code: string,
     message: string,
     options?: ErrorOptions
   ) {
-    super(message, options);
-    this.name = this.constructor.name;
+    super(message, { ...options, extensions: { code } });
+    this.name = new.target.name;
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
@@ -28,8 +31,12 @@ export class ForbiddenError extends DomainError {
 }
 
 export class ValidationError extends DomainError {
-  constructor(message: string, options?: ErrorOptions) {
-    super("VALIDATION", message, options);
+  constructor(codeOrMessage: string, messageOrOptions?: string | ErrorOptions, options?: ErrorOptions) {
+    if (typeof messageOrOptions === "string") {
+      super(codeOrMessage, messageOrOptions, options);
+    } else {
+      super("VALIDATION", codeOrMessage, messageOrOptions);
+    }
   }
 }
 

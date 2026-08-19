@@ -2,6 +2,7 @@ import { ParentRepository, SuggestionRepository } from "@/backend/db/repo/parent
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, NotificationChannel, NotificationEventType, SuggestionStatus } from "@/backend/enum";
+import { NotFoundError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import {
   assertPermission,
@@ -225,6 +226,7 @@ export namespace SuggestionService {
       entityId: suggestionId,
       findFn: SuggestionRepository.getSuggestionById,
       notFoundErrorKey: "suggestionNotFound",
+      entityCode: "SUGGESTION",
       locale,
     });
 
@@ -291,25 +293,25 @@ export namespace SuggestionService {
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
 
     if (suggestionId === duplicateOfId) {
-      throw new Error(tErrors.suggestionCannotMarkSelfAsDuplicate);
+      throw new ValidationError("SELF_REFERENCE", tErrors.suggestionCannotMarkSelfAsDuplicate);
     }
 
     const sourceSuggestion = await SuggestionRepository.getSuggestionById(suggestionId);
     if (!sourceSuggestion) {
-      throw new Error(tErrors.suggestionNotFound);
+      throw new NotFoundError("SUGGESTION", tErrors.suggestionNotFound);
     }
 
     const targetSuggestion = await SuggestionRepository.getSuggestionById(duplicateOfId);
     if (!targetSuggestion) {
-      throw new Error(tErrors.suggestionNotFound);
+      throw new NotFoundError("SUGGESTION", tErrors.suggestionNotFound);
     }
 
     if (targetSuggestion.status === "DUPLICATE") {
-      throw new Error(tErrors.suggestionTargetIsAlreadyDuplicate);
+      throw new ValidationError("DUPLICATE_TARGET", tErrors.suggestionTargetIsAlreadyDuplicate);
     }
 
     if (targetSuggestion.duplicateOfId === suggestionId) {
-      throw new Error(tErrors.suggestionCircularDuplicate);
+      throw new ValidationError("CIRCULAR_DUPLICATE", tErrors.suggestionCircularDuplicate);
     }
 
     try {
@@ -362,6 +364,7 @@ export namespace SuggestionService {
       entityId: suggestionId,
       findFn: SuggestionRepository.getSuggestionById,
       notFoundErrorKey: "suggestionNotFound",
+      entityCode: "SUGGESTION",
       locale,
     });
 
@@ -383,7 +386,7 @@ export namespace SuggestionService {
 
     if (days < 1 || days > 365) {
       const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.invalidInput);
+      throw new ValidationError("INVALID_INPUT", tErrors.invalidInput);
     }
 
     try {

@@ -145,8 +145,14 @@ export namespace RecurringClassService {
       throw new UnauthorizedError(tErrors.unauthorizedAction);
     }
 
-    if (!input.days || input.days.length === 0 || input.durationMinutes <= 0 || !input.subjectId) {
-      throw new ValidationError(tErrors.invalidInput);
+    if (!input.days || input.days.length === 0) {
+      throw new ValidationError("RECURRING_CLASS_DAYS_REQUIRED", tErrors.recurringClassDaysRequired());
+    }
+    if (input.durationMinutes <= 0) {
+      throw new ValidationError("INVALID_DURATION", tErrors.invalidDuration());
+    }
+    if (!input.subjectId) {
+      throw new ValidationError("SUBJECT_REQUIRED", tErrors.subjectRequired());
     }
 
     let subject: Awaited<ReturnType<typeof ClassSubjectRepository.getSubjectById>>;
@@ -326,11 +332,21 @@ export namespace RecurringClassService {
         })
       );
 
+      // Query the first instance's join_url to expose meetingUrl in the result.
+      // Null when no provider resolved or meeting URL generation was skipped.
+      let meetingUrl: string | null = null;
+      if (result.classInstanceIds.length > 0) {
+        const instanceMap = await SchedulingRepository.getClassInstancesByIds([result.classInstanceIds[0]]);
+        const firstInstance = instanceMap.get(result.classInstanceIds[0]);
+        meetingUrl = firstInstance?.meetingJoinUrl ?? null;
+      }
+
       return {
         id: result.recurringScheduleId,
         recurringScheduleId: result.recurringScheduleId,
         classInstanceIds: result.classInstanceIds,
         classInstanceCount: result.classInstanceIds.length,
+        meetingUrl,
       };
     } catch (error) {
       logger.error("Error creating recurring class", { userId, input, error });

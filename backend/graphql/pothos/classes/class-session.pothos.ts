@@ -225,6 +225,19 @@ export const TeacherFutureSchedulePothosObject = TeacherFutureScheduleRef.implem
   }),
 });
 
+// ─── Delete Class Instance Result ────────────────────────────────────────────
+
+const DeleteClassInstanceResultRef = gqlSchemaBuilder.objectRef<{ success: boolean; warnings: string[] }>(
+  "DeleteClassInstanceResult"
+);
+
+export const DeleteClassInstanceResultPothosObject = DeleteClassInstanceResultRef.implement({
+  fields: t => ({
+    success: t.exposeBoolean("success"),
+    warnings: t.exposeStringList("warnings"),
+  }),
+});
+
 // ─── Leave Process Result ───────────────────────────────────────────────────
 
 const LeaveProcessResultRef = gqlSchemaBuilder.objectRef<LeaveProcessResultReturnType>("LeaveProcessResult");

@@ -3,6 +3,7 @@ import { ParentRepository } from "@/backend/db/repo/parents";
 import { SoftDeleteRepository, SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { AppPermission } from "@/backend/enum";
+import { NotFoundError, UnauthorizedError, ValidationError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import {
@@ -61,7 +62,7 @@ export namespace ComplaintService {
       const student = await ParentRepository.getAssociatedStudentById(input.studentId);
       if (!student) {
         const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(tErrors.studentNotFound(input.studentId));
+        throw new NotFoundError("STUDENT", tErrors.studentNotFound(input.studentId));
       }
     }
 
@@ -306,20 +307,20 @@ export namespace ComplaintService {
 
     if (!canListComplaints && !canViewHistory) {
       const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.insufficientPermissions);
+      throw new UnauthorizedError(tErrors.insufficientPermissions);
     }
 
     const complaint = await ComplaintRepository.getComplaintById(complaintId);
     if (!complaint) {
       const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new Error(tErrors.complaintNotFound);
+      throw new NotFoundError("COMPLAINTS", tErrors.complaintNotFound);
     }
 
     if (!canListComplaints) {
       const parent = await ParentRepository.findByUserId(actorUserId);
       if (parent?.id !== complaint.parentId) {
         const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
-        throw new Error(tErrors.insufficientPermissions);
+        throw new UnauthorizedError(tErrors.insufficientPermissions);
       }
     }
 
@@ -368,7 +369,7 @@ async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale
 
   const maxFiles = await SystemSettingsRepository.getIntValue("complaint_max_files_per_complaint", MAX_COMPLAINT_FILES);
   if (files.length > maxFiles) {
-    throw new Error(tErrors.complaintTooManyFiles(maxFiles));
+    throw new ValidationError("TOO_MANY_FILES", tErrors.complaintTooManyFiles(maxFiles));
   }
 
   const maxSizeMb = await SystemSettingsRepository.getIntValue(
@@ -391,11 +392,11 @@ async function validateComplaintFiles(files: ReadonlyArray<FileMetadata>, locale
 
   for (const file of files) {
     if (file.sizeBytes > maxSizeBytes) {
-      throw new Error(tErrors.complaintFileTooLarge(maxSizeMb));
+      throw new ValidationError("FILE_TOO_LARGE", tErrors.complaintFileTooLarge(maxSizeMb));
     }
 
     if (!allowedMimeTypes.has(file.mimeType)) {
-      throw new Error(tErrors.file.invalidFileType);
+      throw new ValidationError("INVALID_FILE_TYPE", tErrors.file.invalidFileType);
     }
   }
 }

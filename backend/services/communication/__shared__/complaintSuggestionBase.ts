@@ -1,5 +1,6 @@
 import { ParentRepository } from "@/backend/db/repo/parents";
 import type { AppPermission } from "@/backend/enum";
+import { NotFoundError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { assertHasPermission } from "@/backend/services/shared";
 import type { BaseEntity, DBTx, ResolutionResult } from "@/backend/types";
@@ -73,6 +74,8 @@ interface ResolveEntityByIdArgs<T extends BaseEntity> {
    * {@link ErrorsLabels}.
    */
   notFoundErrorKey: ResolveNotFoundErrorKey;
+  /** Entity prefix for the DomainError code (e.g. "SUGGESTION" → "SUGGESTION_NOT_FOUND"). */
+  entityCode: string;
   /** Optional transaction to share with downstream writes. */
   tx?: DBTx;
   locale?: string;
@@ -97,7 +100,7 @@ export async function resolveEntityById<T extends BaseEntity>(args: ResolveEntit
   if (!entity) {
     const tErrors = getServerTranslations(args.locale ?? "en").errorsTranslations;
     const message = resolveNotFoundMessage(args.notFoundErrorKey, tErrors);
-    throw new Error(message);
+    throw new NotFoundError(args.entityCode, message);
   }
 
   if (args.logLabel) {

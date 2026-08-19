@@ -213,9 +213,9 @@ function stampRecipientAddress(
   userId: string,
   payloads: readonly CommunicationPayload[],
   user: { readonly email: string | null; readonly phone: string | null } | null
-): CommunicationPayload[] {
+): { stamped: CommunicationPayload[]; droppedByChannel: Record<string, number> } {
   const stamped: CommunicationPayload[] = [];
-  let droppedContactless = 0;
+  const droppedByChannel: Record<string, number> = {};
 
   for (const payload of payloads) {
     const address = recipientAddressForChannel(payload.channel, user);
@@ -226,7 +226,8 @@ function stampRecipientAddress(
     }
     if (!address) {
       // email/sms but user has no contact field — drop this payload.
-      droppedContactless++;
+      const channelKey = payload.channel as string;
+      droppedByChannel[channelKey] = (droppedByChannel[channelKey] ?? 0) + 1;
       continue;
     }
     stamped.push({
@@ -238,15 +239,17 @@ function stampRecipientAddress(
     });
   }
 
-  if (droppedContactless > 0) {
+  const totalDropped = Object.values(droppedByChannel).reduce((a, b) => a + b, 0);
+  if (totalDropped > 0) {
     logger.warn("dispatchWithPreferences: dropped contactless payloads for user", {
       userId,
-      droppedCount: droppedContactless,
+      droppedCount: totalDropped,
+      droppedByChannel,
       userFound: user !== null,
     });
   }
 
-  return stamped;
+  return { stamped, droppedByChannel };
 }
 
 // ─── dispatchWithPreferences ──────────────────────────────────────────
@@ -257,6 +260,7 @@ interface UserDispatchOutcome {
   readonly dispatched: number;
   readonly failed: number;
   readonly skippedByPref: number;
+  readonly skippedContactless: Readonly<Record<string, number>>;
 }
 
 /**
@@ -292,7 +296,7 @@ async function dispatchForUser(
   }
 
   if (userPayloads.length === 0) {
-    return { results: [], dispatched: 0, failed: 0, skippedByPref };
+    return { results: [], dispatched: 0, failed: 0, skippedByPref, skippedContactless: {} };
   }
 
   // Stamp recipient addresses using pre-loaded user data. Pure builders
@@ -300,10 +304,14 @@ async function dispatchForUser(
   // address is populated for the builder-driven dispatch path. Contactless
   // payloads (user has no email or phone) are dropped here with a warn —
   // per-user isolation (§5.2).
-  const dispatchPayloads = stampRecipientAddress(userId, userPayloads, user);
+  const { stamped: dispatchPayloads, droppedByChannel: skippedContactless } = stampRecipientAddress(
+    userId,
+    userPayloads,
+    user
+  );
 
   if (dispatchPayloads.length === 0) {
-    return { results: [], dispatched: 0, failed: 0, skippedByPref };
+    return { results: [], dispatched: 0, failed: 0, skippedByPref, skippedContactless };
   }
 
   try {
@@ -314,7 +322,7 @@ async function dispatchForUser(
       if (r.success) dispatched++;
       else failed++;
     }
-    return { results, dispatched, failed, skippedByPref };
+    return { results, dispatched, failed, skippedByPref, skippedContactless };
   } catch (error) {
     const message = error instanceof Error ? error.message : "dispatchMulti threw";
     logger.error("dispatchWithPreferences: per-user dispatchMulti failed", {
@@ -327,7 +335,7 @@ async function dispatchForUser(
       success: false,
       error: message,
     }));
-    return { results: failResults, dispatched: 0, failed: dispatchPayloads.length, skippedByPref };
+    return { results: failResults, dispatched: 0, failed: dispatchPayloads.length, skippedByPref, skippedContactless };
   }
 }
 
@@ -392,6 +400,7 @@ export async function dispatchWithPreferences(
   let skippedByPref = 0;
   let failedCount = 0;
   const allResults: ChannelDispatchResult[] = [];
+  const skippedContactlessByChannel: Record<string, number> = {};
 
   for (const result of settled) {
     // `dispatchForUser` catches its own errors internally and returns a
@@ -410,6 +419,9 @@ export async function dispatchWithPreferences(
     dispatchedCount += outcome.dispatched;
     failedCount += outcome.failed;
     skippedByPref += outcome.skippedByPref;
+    for (const [channel, count] of Object.entries(outcome.skippedContactless)) {
+      skippedContactlessByChannel[channel] = (skippedContactlessByChannel[channel] ?? 0) + count;
+    }
   }
 
   // Step 6 — log dispatch stats.
@@ -419,6 +431,7 @@ export async function dispatchWithPreferences(
     allowlistedPayloads: allowlistedPayloads.length,
     skippedByAllowlist,
     skippedByPref,
+    skippedContactlessByChannel,
     dispatchedCount,
     failedCount,
   });

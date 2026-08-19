@@ -31,6 +31,11 @@ let logFilePath: string | undefined;
 let reusesExistingDevServer = false;
 
 function getDevTestServerEnv(distDir: string): NodeJS.ProcessEnv {
+  // When TEST_ENFORCE_RATE_LIMIT=true is set on the test process, the spawned
+  // dev server must enforce rate limiting (not disable it). This is needed for
+  // the rate-limit.test.ts integration test.
+  const enforceRateLimit = process.env.TEST_ENFORCE_RATE_LIMIT?.toLowerCase() === "true";
+
   return Object.assign({}, process.env, {
     NODE_ENV: "development",
     DATABASE_URL: process.env.DATABASE_URL,
@@ -38,7 +43,7 @@ function getDevTestServerEnv(distDir: string): NodeJS.ProcessEnv {
     IS_DEMO: "true",
     TEST_SERVER: "1",
     ADMIN_PASSWORD: TEST_ADMIN_PASSWORD,
-    DISABLE_RATE_LIMITING: "true",
+    ...(enforceRateLimit ? { TEST_ENFORCE_RATE_LIMIT: "true" } : { DISABLE_RATE_LIMITING: "true" }),
   });
 }
 
@@ -295,7 +300,11 @@ export async function startTestServer() {
   // Dev mode: if a dev server is already running on port 3000, reuse it instead
   // of spawning a separate test server. Next.js 16 refuses to start a second dev
   // server using the same dist directory, so we piggyback on the existing one.
-  if (getTestServerMode() === "dev" && (await isServerRunningOnPort(DEV_SERVER_PORT))) {
+  if (
+    !process.env.GRAPHQL_TEST_PORT &&
+    getTestServerMode() === "dev" &&
+    (await isServerRunningOnPort(DEV_SERVER_PORT))
+  ) {
     testLogger.info(`Reusing existing Next.js dev server on port ${DEV_SERVER_PORT} for E2E tests.`);
     setTestPort(DEV_SERVER_PORT);
     reusesExistingDevServer = true;

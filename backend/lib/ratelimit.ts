@@ -236,6 +236,11 @@ export async function checkRateLimit(
     }
 
     if (isDev && !disableRateLimiting) {
+      const enforceRateLimit = getBooleanEnv("TEST_ENFORCE_RATE_LIMIT");
+      if (enforceRateLimit) {
+        logger.warn(`Rate limit exceeded for identifier: ${identifier} (TEST_ENFORCE_RATE_LIMIT=1, enforced in dev)`);
+        return { success, limit, remaining, reset };
+      }
       logger.warn(`Rate limit would have been exceeded for identifier: ${identifier} (development mode, not enforced)`);
       return { success: true, limit, remaining, reset };
     }

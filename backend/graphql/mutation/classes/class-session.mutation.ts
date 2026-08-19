@@ -2,6 +2,7 @@ import type { BaseContext } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   ClassInstanceDetailPothosObject,
+  DeleteClassInstanceResultPothosObject,
   LeaveProcessResultPothosObject,
   RescheduleClassInputPothosObject,
 } from "@/backend/graphql/pothos/classes/class-session.pothos";
@@ -144,7 +145,7 @@ gqlSchemaBuilder.mutationField("resetClass", t =>
 
 gqlSchemaBuilder.mutationField("deleteClassInstance", t =>
   t.field({
-    type: "Boolean",
+    type: DeleteClassInstanceResultPothosObject,
     args: { classInstanceId: t.arg.id({ required: true }) },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {

@@ -305,6 +305,40 @@ describe("GraphQL Class Session Integration Tests", () => {
     expect(absentData.updateSessionStatusAbsent?.payrollCredited).toBe(true);
   });
 
+  test("deleteClassInstance returns true — quota SKIpped instances delete cleanly (logger WARN only)", async () => {
+    if (!adminToken || !teacherToken || !studentId || !teacherId || !sharedSubjectId)
+      throw new Error("Missing test context");
+
+    const now = new Date();
+    const startOutside = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    const endOutside = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+
+    const createRes = await createManualClassEntry(
+      teacherToken,
+      studentId,
+      teacherId,
+      startOutside.toISOString(),
+      endOutside.toISOString(),
+      sharedSubjectId
+    );
+
+    expect(createRes.data).toBeDefined();
+    expect(createRes.error).toBeUndefined();
+    const createdId = createRes.data?.createTeacherManualClassEntry?.id;
+    if (!createdId) throw new Error("Failed to create manual entry for quota-skip delete test");
+
+    const deleteRes = await testClient.mutate({
+      mutation: deleteClassInstanceMutationDocument,
+      variables: { classInstanceId: createdId },
+      errorPolicy: "all",
+      context: { headers: { Authorization: `Bearer ${adminToken}` } },
+    });
+
+    expect(deleteRes.data?.deleteClassInstance?.success).toBe(true);
+    expect(deleteRes.data?.deleteClassInstance?.warnings).toEqual(["quota_release_skipped_no_schedule"]);
+    expect(deleteRes.error).toBeUndefined();
+  });
+
   afterAll(async () => {
     if (adminToken && studentUserId && teacherUserId && parentUserId) {
       await authenticatedRequest(adminToken, "mutate", cleanupTestEntitiesMutationDocument, {

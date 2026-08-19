@@ -4,7 +4,12 @@ import {
   markSuggestionReviewedMutationDocument,
   submitSuggestionMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { assertOperationDenied, authenticatedRequest, loginDemoUser } from "@/frontend/common/graphql/test/helpers";
+import {
+  assertOperationDenied,
+  authenticatedRequest,
+  extractGqlErrorCode,
+  loginDemoUser,
+} from "@/frontend/common/graphql/test/helpers";
 import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { testClient } from "@/frontend/common/graphql/test/testClient";
 
@@ -194,7 +199,7 @@ describe("GraphQL: markSuggestionReviewed mutation", () => {
     expect(teacherDenied).toBe(true);
   });
 
-  test("marking non-existent suggestion returns error", async () => {
+  test("marking non-existent suggestion returns error with SUGGESTION_NOT_FOUND code", async () => {
     const result = await testClient.mutate({
       mutation: markSuggestionReviewedMutationDocument,
       variables: { suggestionId: NIL_UUID },
@@ -202,5 +207,8 @@ describe("GraphQL: markSuggestionReviewed mutation", () => {
     });
     expect(result.error).toBeDefined();
     expect(result.data?.markSuggestionReviewed).toBeFalsy();
+    const actualCode = extractGqlErrorCode(result.error);
+    expect(typeof actualCode).toBe("string");
+    expect(actualCode).toBe("SUGGESTION_NOT_FOUND");
   });
 });

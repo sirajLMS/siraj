@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 import { eq, inArray, or } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
+  adminAuditLogs,
   classInstances,
+  classStatusEvents,
   groupClassEnrollments,
   groupClasses,
   parents,
@@ -141,6 +143,7 @@ export namespace TestHelperService {
   async function cleanupStaffUser(userId: string, label: string): Promise<boolean> {
     try {
       await db.transaction(async tx => {
+        await tx.delete(adminAuditLogs).where(eq(adminAuditLogs.actorUserId, userId));
         await tx.delete(userPermissionGroups).where(eq(userPermissionGroups.userId, userId));
         await tx.delete(staffProfiles).where(eq(staffProfiles.userId, userId));
         await tx.delete(users).where(eq(users.id, userId));
@@ -369,12 +372,23 @@ export namespace TestHelperService {
     try {
       await db.transaction(async tx => {
         // Delete in order to satisfy restrict foreign key constraints
-        // 1. Delete class instances referencing student/teacher
+        // 1. Delete class_status_events referencing class instances
+        const instanceIds = (
+          await tx
+            .select({ id: classInstances.id })
+            .from(classInstances)
+            .where(or(eq(classInstances.studentId, studentId), eq(classInstances.teacherId, teacherId)))
+        ).map(r => r.id);
+        if (instanceIds.length > 0) {
+          await tx.delete(classStatusEvents).where(inArray(classStatusEvents.classInstanceId, instanceIds));
+        }
+
+        // 2. Delete class instances referencing student/teacher
         await tx
           .delete(classInstances)
           .where(or(eq(classInstances.studentId, studentId), eq(classInstances.teacherId, teacherId)));
 
-        // 2. Delete teacher assignments
+        // 3. Delete teacher assignments
         await tx.delete(teacherAssignments).where(eq(teacherAssignments.studentId, studentId));
 
         // 3. Delete student profile

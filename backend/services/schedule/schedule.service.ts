@@ -3,6 +3,7 @@ import { SystemSettingsRepository } from "@/backend/db/repo/shared/system-settin
 import { StaffProfileRepository } from "@/backend/db/repo/teachers/staff-profile.repository";
 import { AppPermission } from "@/backend/enum";
 import { resolveClassAvatarUrl } from "@/backend/lib/avatar";
+import { UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
@@ -77,14 +78,14 @@ export namespace ScheduleService {
     ]);
     if (!isAuthorized) {
       logger.warn("Unauthorized access to daily schedule", { userId });
-      throw new Error(tErrors.unauthorizedViewList);
+      throw new UnauthorizedError(tErrors.unauthorizedViewList);
     }
 
     if (options.search) {
       const canSearch = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_SEARCH);
       if (!canSearch) {
         logger.warn("Unauthorized search access to daily schedule", { userId });
-        throw new Error(tErrors.unauthorizedSearch);
+        throw new UnauthorizedError(tErrors.unauthorizedSearch);
       }
     }
 
@@ -95,7 +96,7 @@ export namespace ScheduleService {
           userId,
           metricFilter: options.metricFilter,
         });
-        throw new Error(tErrors.unauthorizedAction);
+        throw new UnauthorizedError(tErrors.unauthorizedAction);
       }
     }
   }
@@ -116,7 +117,7 @@ export namespace ScheduleService {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
         logger.warn("Unauthorized access to daily metrics", { userId });
-        throw new Error(tErrors.unauthorizedViewMetrics);
+        throw new UnauthorizedError(tErrors.unauthorizedViewMetrics);
       }
 
       await assertDailyScheduleListAccess(
@@ -182,7 +183,7 @@ export namespace ScheduleService {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
         logger.warn("Unauthorized access to daily metrics", { userId });
-        throw new Error(tErrors.unauthorizedViewMetrics);
+        throw new UnauthorizedError(tErrors.unauthorizedViewMetrics);
       }
 
       const viewerTimezone = await resolveViewerTimezone(userId);
@@ -233,7 +234,7 @@ export namespace ScheduleService {
   ) {
     const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SESSION_RESCHEDULE);
     if (!isAuthorized) {
-      throw new Error(tErrors.unauthorizedAction);
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
     }
 
     return SchedulingRepository.getRescheduleTrackingRows(input, pagination);
@@ -242,7 +243,7 @@ export namespace ScheduleService {
   export async function getRescheduleTrackingMetrics(userId: string, tErrors: ErrorsLabels) {
     const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.SESSION_RESCHEDULE);
     if (!isAuthorized) {
-      throw new Error(tErrors.unauthorizedAction);
+      throw new UnauthorizedError(tErrors.unauthorizedAction);
     }
 
     const metrics = await SchedulingRepository.getRescheduleTrackingMetrics();

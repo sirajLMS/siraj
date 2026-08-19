@@ -7,6 +7,7 @@ import { suggestions } from "@/backend/db/schema";
 import { createTestParent, createTestUser } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { SuggestionStatus } from "@/backend/enum";
+import { NotFoundError } from "@/backend/lib/errors";
 import type { DBTransaction } from "@/backend/types";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
@@ -132,11 +133,26 @@ function expectDuplicateInfo(
   expect(result?.duplicateOfBody).toBe(originalBody);
 }
 
-async function expectNonExistentError(name: string, operation: (tx: DBTransaction) => Promise<unknown>) {
+async function expectNonExistentError(
+  name: string,
+  operation: (tx: DBTransaction) => Promise<unknown>,
+  expectedCode?: string,
+  expectedErrorType?: abstract new (...args: never[]) => unknown
+) {
   suggestionTest(name, async tx => {
     await setupParentForSuggestion(tx, "NFSetup");
     const error = await expectRepoError(() => operation(tx));
     expect(error.message.length).toBeGreaterThan(0);
+    if (expectedErrorType) {
+      expect(error).toBeInstanceOf(expectedErrorType);
+    }
+    if (expectedCode) {
+      if (error instanceof Error && "code" in error) {
+        expect(error.code).toBe(expectedCode);
+      } else {
+        throw new Error("Error does not have a code property");
+      }
+    }
   });
 }
 
@@ -432,8 +448,11 @@ describe("SuggestionRepository — markSuggestionReviewed (Story 15)", () => {
     expectReviewedFields(result, user.id);
   });
 
-  void expectNonExistentError("throws for non-existent suggestion ID", tx =>
-    SuggestionRepository.markSuggestionReviewed({ suggestionId: NIL_UUID, reviewedByUserId: NIL_UUID }, tx)
+  void expectNonExistentError(
+    "throws for non-existent suggestion ID",
+    tx => SuggestionRepository.markSuggestionReviewed({ suggestionId: NIL_UUID, reviewedByUserId: NIL_UUID }, tx),
+    "SUGGESTION_NOT_FOUND",
+    NotFoundError
   );
 });
 
@@ -455,11 +474,15 @@ describe("SuggestionRepository — respondToSuggestion", () => {
     expectReviewedFields(result, user.id);
   });
 
-  void expectNonExistentError("throws for non-existent suggestion ID", tx =>
-    SuggestionRepository.respondToSuggestion(
-      { suggestionId: NIL_UUID, adminResponse: "Should fail", reviewedByUserId: NIL_UUID },
-      tx
-    )
+  void expectNonExistentError(
+    "throws for non-existent suggestion ID",
+    tx =>
+      SuggestionRepository.respondToSuggestion(
+        { suggestionId: NIL_UUID, adminResponse: "Should fail", reviewedByUserId: NIL_UUID },
+        tx
+      ),
+    "SUGGESTION_NOT_FOUND",
+    NotFoundError
   );
 
   suggestionTest("overwrites existing adminResponse on re-response", async tx => {

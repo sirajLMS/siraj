@@ -24,6 +24,8 @@ import {
   authenticatedRequest,
   cleanupTestEntities,
   cleanupTestSuperAdmin,
+  ensureTestSubjectId,
+  extractGqlErrorCode,
   fetchFirstClassInstanceId,
   loginAndProvision,
   mutateCreateRecurringClass,
@@ -203,7 +205,30 @@ describe("GraphQL Schedule Integration Tests", () => {
     }
   });
 
-  test("user without dashboard.search + search arg returns GraphQL error", async () => {
+  test("adminDashboardSchedule returns UNAUTHORIZED error code for teacher role", async () => {
+    const result = await testClient.query({
+      query: adminDashboardScheduleQueryDocument,
+      variables: {
+        input: {
+          date: testDate,
+          teacherId: null,
+          search: null,
+          metricFilter: null,
+          paginationArgs: null,
+        },
+      },
+      context: {
+        headers: {
+          Authorization: `Bearer ${teacherToken}`,
+        },
+      },
+    });
+
+    expect(result.error).toBeDefined();
+    expect(extractGqlErrorCode(result.error)).toBe("UNAUTHORIZED");
+  });
+
+  test("user without dashboard.search + search arg returns GraphQL error with UNAUTHORIZED code", async () => {
     const result = await testClient.query({
       query: dailyScheduleListQueryDocument,
       variables: {
@@ -220,6 +245,7 @@ describe("GraphQL Schedule Integration Tests", () => {
     });
 
     expect(result.error).toBeDefined();
+    expect(extractGqlErrorCode(result.error)).toBe("UNAUTHORIZED");
   });
 
   test("teacherWeeklyScheduleGrid returns schedule for admin", async () => {
@@ -277,15 +303,17 @@ describe("GraphQL Schedule Integration Tests", () => {
     expect(data.teacherWorkloadMetrics).toBeDefined();
   });
 
-  test("createRecurringClass denied for teacher role", async () => {
-    await assertRecurringClassDenied(teacherToken, [
-      { dayOfWeek: DayOfWeek.Monday, startTime: "10:00:00", isActive: true },
-    ]);
+  test("createRecurringClass denied for teacher role with FORBIDDEN code", async () => {
+    await assertRecurringClassDenied(
+      teacherToken,
+      [{ dayOfWeek: DayOfWeek.Monday, startTime: "10:00:00", isActive: true }],
+      "FORBIDDEN"
+    );
     expect(teacherToken).not.toBe("");
   });
 
-  test("createRecurringClass denied for invalid input (no days)", async () => {
-    await assertRecurringClassDenied(superAdminToken, []);
+  test("createRecurringClass denied for invalid input (no days) with RECURRING_CLASS_DAYS_REQUIRED code", async () => {
+    await assertRecurringClassDenied(superAdminToken, [], "RECURRING_CLASS_DAYS_REQUIRED");
     expect(superAdminToken).not.toBe("");
   });
 
@@ -311,6 +339,7 @@ describe("GraphQL Schedule Integration Tests", () => {
       ondemandNoCreditsOutcome: null,
     });
     expect(result.error).toBeDefined();
+    expect(extractGqlErrorCode(result.error)).toBe("SUBJECT_REQUIRED");
   });
 
   // DST Migration tests
@@ -389,6 +418,32 @@ describe("GraphQL Schedule Integration Tests", () => {
       classInstanceId,
     });
     expect(deleteData.deleteRecurringClass).toBeTrue();
+  });
+
+  test("createRecurringClass returns meetingUrl null when no meeting provider configured", async () => {
+    const subjectId = await ensureTestSubjectId(superAdminToken);
+    const result = await mutateCreateRecurringClass(superAdminToken, {
+      studentId,
+      teacherId,
+      subjectId,
+      durationMinutes: 60,
+      defaultStartTime: "10:00:00",
+      timezone: IanaTimezone.Utc,
+      days: [{ dayOfWeek: DayOfWeek.Monday, startTime: "10:00:00", isActive: true }],
+      classType: ClassType.Regular,
+      generateInstancesForWeeks: 1,
+      effectiveFrom: null,
+      effectiveUntil: null,
+      hourlyRate: null,
+      rateCurrency: null,
+      quotaId: null,
+      earmarkedClasses: null,
+      schedulingMode: null,
+      generationHorizonWeeks: null,
+      ondemandNoCreditsOutcome: null,
+    });
+    expect(result.error).toBeUndefined();
+    expect(result.data?.createRecurringClass?.meetingUrl).toBeNull();
   });
 
   test("cleanup provisioned entities", async () => {

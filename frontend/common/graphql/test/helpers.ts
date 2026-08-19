@@ -1,6 +1,6 @@
 import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
-import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
+import { CombinedGraphQLErrors, type OperationVariables, type TypedDocumentNode } from "@apollo/client";
 import {
   ClassType,
   type CreateRecurringClassInput,
@@ -553,7 +553,8 @@ export async function createManualClassEntryWithAssertions(
 export async function expectMutationError<TData, TVars extends OperationVariables>(
   token: string,
   document: TypedDocumentNode<TData, TVars>,
-  variables: TVars
+  variables: TVars,
+  expectedCode?: string
 ): Promise<void> {
   const result = await testClient.mutate({
     mutation: document,
@@ -561,6 +562,23 @@ export async function expectMutationError<TData, TVars extends OperationVariable
     context: { headers: { Authorization: `Bearer ${token}` } },
   } as Parameters<typeof testClient.mutate>[0]);
   expect(result.error).toBeDefined();
+  if (expectedCode !== undefined) {
+    const actualCode = extractGqlErrorCode(result.error);
+    expect(typeof actualCode).toBe("string");
+    expect(actualCode).toBe(expectedCode);
+  }
+}
+
+/**
+ * Extracts the GraphQL error code from a CombinedGraphQLErrors result.
+ * Returns undefined if the error is not a CombinedGraphQLErrors or has no errors.
+ */
+export function extractGqlErrorCode(error: unknown): string | undefined {
+  if (error instanceof CombinedGraphQLErrors) {
+    const code = error.errors?.[0]?.extensions?.code;
+    return typeof code === "string" ? code : undefined;
+  }
+  return undefined;
 }
 
 export async function provisionTestManager(
@@ -625,7 +643,8 @@ export async function cleanupTestEntities(
   }
 ): Promise<void> {
   try {
-    await authenticatedRequest(superAdminToken, "mutate", cleanupTestEntitiesMutationDocument, ids);
+    const result = await authenticatedRequest(superAdminToken, "mutate", cleanupTestEntitiesMutationDocument, ids);
+    expect(result.cleanupTestEntities).toBe(true);
   } catch {
     // Best-effort cleanup
   }
@@ -666,7 +685,10 @@ export async function provisionTestSuperAdmin(
 
 export async function cleanupTestSuperAdmin(superAdminToken: string, userId: string): Promise<void> {
   try {
-    await authenticatedRequest(superAdminToken, "mutate", cleanupTestSuperAdminMutationDocument, { userId });
+    const result = await authenticatedRequest(superAdminToken, "mutate", cleanupTestSuperAdminMutationDocument, {
+      userId,
+    });
+    expect(result.cleanupTestSuperAdmin).toBe(true);
   } catch {
     // Best-effort cleanup
   }
@@ -674,9 +696,10 @@ export async function cleanupTestSuperAdmin(superAdminToken: string, userId: str
 
 export async function assertRecurringClassDenied(
   token: string,
-  days: { dayOfWeek: DayOfWeek; startTime: string; isActive: boolean }[]
+  days: { dayOfWeek: DayOfWeek; startTime: string; isActive: boolean }[],
+  expectedCode?: string
 ): Promise<void> {
-  const subjectId = await ensureTestSubjectId(token).catch(() => "00000000-0000-0000-0000-000000000000");
+  const subjectId = await ensureTestSubjectId(token).catch(() => "[CARD_REDACTED]-[CARD_REDACTED]");
   const result = await mutateCreateRecurringClass(token, {
     studentId: "fake-student-id",
     teacherId: "fake-teacher-id",
@@ -699,4 +722,9 @@ export async function assertRecurringClassDenied(
   });
 
   expect(result.error).toBeDefined();
+  if (expectedCode) {
+    const actualCode = extractGqlErrorCode(result.error);
+    expect(typeof actualCode).toBe("string");
+    expect(actualCode).toBe(expectedCode);
+  }
 }

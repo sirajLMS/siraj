@@ -61,5 +61,6 @@ export const CreateRecurringClassResultPothosObject = CreateRecurringClassResult
     recurringScheduleId: t.exposeString("recurringScheduleId"),
     classInstanceIds: t.exposeStringList("classInstanceIds"),
     classInstanceCount: t.exposeInt("classInstanceCount"),
+    meetingUrl: t.exposeString("meetingUrl", { nullable: true }),
   }),
 });

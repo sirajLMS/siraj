@@ -213,7 +213,10 @@ export const deleteClassInstanceMutationDocument: TypedDocumentNode<
   Types.MutationDeleteClassInstanceArgs
 > = gql`
   mutation deleteClassInstance($classInstanceId: ID!) {
-    deleteClassInstance(classInstanceId: $classInstanceId)
+    deleteClassInstance(classInstanceId: $classInstanceId) {
+      success
+      warnings
+    }
   }
 `;
 

@@ -180,6 +180,7 @@ export type CreateRecurringClassReturnType = {
   recurringScheduleId: string;
   classInstanceIds: string[];
   classInstanceCount: number;
+  meetingUrl: string | null;
 };
 
 export type DailyScheduleMetricFilter =

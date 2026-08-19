@@ -2,6 +2,7 @@ import { aliasedTable, and, count, desc, eq, gte, ilike, isNull, ne, sql } from 
 import { db, queryDb } from "@/backend/db";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { SuggestionStatus } from "@/backend/enum";
+import { NotFoundError } from "@/backend/lib/errors";
 import type {
   DBTransaction,
   SuggestionContributorStats,
@@ -259,7 +260,7 @@ export namespace SuggestionRepository {
         .returning();
 
       if (!updated) {
-        throw new Error(`Suggestion ${suggestionId} not found`);
+        throw new NotFoundError("SUGGESTION", `Suggestion ${suggestionId} not found`);
       }
 
       return updated;

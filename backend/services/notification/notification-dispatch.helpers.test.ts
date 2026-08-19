@@ -324,6 +324,34 @@ describe("dispatchWithPreferences — recipient resolution", () => {
     expect(dispatched).toHaveLength(2);
   });
 
+  test("logger.warn includes channel type when contactless payloads are dropped", async () => {
+    findSafeByIdsSpy.mockResolvedValue(new Map([[PARENT_USER_ID, null]]));
+    const { logger } = await import("@/backend/lib/logger");
+    const warnSpy = spyOn(logger, "warn");
+
+    const payloads = buildFourChannelPayloads(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);
+    await dispatchWithPreferences(payloads, [PARENT_USER_ID]);
+
+    const droppedWarn = warnSpy.mock.calls.find(
+      (call: unknown[]) => typeof call[0] === "string" && call[0].includes("dropped contactless payloads")
+    );
+    expect(droppedWarn).toBeDefined();
+    const ctx = droppedWarn?.[1];
+    if (ctx !== null && typeof ctx === "object" && "droppedByChannel" in ctx) {
+      const droppedByChannel = ctx.droppedByChannel;
+      if (typeof droppedByChannel === "object" && droppedByChannel !== null) {
+        expect(droppedByChannel).toHaveProperty("EMAIL");
+        expect(droppedByChannel).toHaveProperty("SMS");
+      } else {
+        throw new Error("Expected droppedByChannel to be an object");
+      }
+    } else {
+      throw new Error("Expected warn call to have a context object with droppedByChannel");
+    }
+
+    warnSpy.mockRestore();
+  });
+
   test("does NOT stamp `to` on on_app or push payloads", async () => {
     mockFindSafeByIdsWithUser({ email: "[EMAIL_REDACTED]", phone: "+[PHONE_REDACTED]" });
     const dispatched = await dispatchAndGetResults(PARENT_USER_ID, NotificationEventType.INVOICE_GENERATED);

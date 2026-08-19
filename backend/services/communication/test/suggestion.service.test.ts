@@ -3,6 +3,7 @@ import { ParentRepository, SuggestionRepository } from "@/backend/db/repo/parent
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AccountStatus, AppPermission, NotificationChannel, SuggestionStatus } from "@/backend/enum";
+import { NotFoundError } from "@/backend/lib/errors";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
 import { SuggestionService } from "@/backend/services/communication/suggestion.service";
@@ -278,10 +279,20 @@ describe("SuggestionService", () => {
     test("throws not found when suggestion does not exist", async () => {
       hasPermissionSpy.mockResolvedValue(true);
       getSuggestionByIdSpy.mockResolvedValue(null);
-      await expectErrorMatching(
-        SuggestionService.respondToSuggestion(MOCK_ACTOR_ID, "nonexistent-uuid", "Response"),
-        msg => msg.includes("suggestion not found")
-      );
+      let errorCaught: Error | null = null;
+      try {
+        await SuggestionService.respondToSuggestion(MOCK_ACTOR_ID, "nonexistent-uuid", "Response");
+      } catch (e) {
+        if (e instanceof Error) {
+          errorCaught = e;
+        }
+      }
+      expect(errorCaught).toBeInstanceOf(NotFoundError);
+      if (errorCaught instanceof Error && "code" in errorCaught) {
+        expect(errorCaught.code).toBe("SUGGESTION_NOT_FOUND");
+      } else {
+        throw new Error("Error does not have a code property");
+      }
     });
   });
 
@@ -375,10 +386,20 @@ describe("SuggestionService", () => {
     test("deleted target throws not found error", async () => {
       hasPermissionSpy.mockResolvedValue(true);
       mockSuggestionLookup();
-      await expectErrorMatching(
-        SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID),
-        msg => msg.includes("suggestion not found")
-      );
+      let errorCaught: Error | null = null;
+      try {
+        await SuggestionService.markAsDuplicate(MOCK_ACTOR_ID, MOCK_SUGGESTION_ID, MOCK_DUPLICATE_TARGET_ID);
+      } catch (e) {
+        if (e instanceof Error) {
+          errorCaught = e;
+        }
+      }
+      expect(errorCaught).toBeInstanceOf(NotFoundError);
+      if (errorCaught instanceof Error && "code" in errorCaught) {
+        expect(errorCaught.code).toBe("SUGGESTION_NOT_FOUND");
+      } else {
+        throw new Error("Error does not have a code property");
+      }
     });
 
     test("unauthorized actor throws permission error", async () => {

@@ -234,21 +234,22 @@ export namespace ClassSessionService {
     actorUserId: string,
     tx: DBTransaction,
     locale = "en"
-  ): Promise<{ quotaReleased: boolean; quotaId: string | null; isQuotaBacked: boolean }> {
-    if (!instance.quotaDeducted) return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
+  ): Promise<{ quotaReleased: boolean; quotaId: string | null; isQuotaBacked: boolean; warning: string | null }> {
+    if (!instance.quotaDeducted) return { quotaReleased: false, quotaId: null, isQuotaBacked: false, warning: null };
     if (!instance.recurringScheduleId) {
-      logger.warn("Quota-deducted instance has no recurringScheduleId — cannot resolve quota", {
+      const warning = "quota_release_skipped_no_schedule";
+      logger.warn(warning, {
         classInstanceId: instance.id,
         studentId: instance.studentId,
       });
-      return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
+      return { quotaReleased: false, quotaId: null, isQuotaBacked: false, warning };
     }
 
     // Resolve quotaId from the parent recurring schedule via repository
     const scheduleRow = await RecurringScheduleRepository.findById(instance.recurringScheduleId, tx);
     const quotaId = scheduleRow?.schedule.quotaId ?? null;
 
-    if (!quotaId) return { quotaReleased: false, quotaId: null, isQuotaBacked: false };
+    if (!quotaId) return { quotaReleased: false, quotaId: null, isQuotaBacked: false, warning: null };
 
     const result = await QuotaService.tryReleaseForInstance(
       instance.studentId,
@@ -258,7 +259,7 @@ export namespace ClassSessionService {
       tx,
       locale
     );
-    return { quotaReleased: result.ok, quotaId: result.ok ? quotaId : null, isQuotaBacked: true };
+    return { quotaReleased: result.ok, quotaId: result.ok ? quotaId : null, isQuotaBacked: true, warning: null };
   }
 
   /**
@@ -428,7 +429,11 @@ export namespace ClassSessionService {
     return result;
   }
 
-  export async function deleteInstance(userId: string, classInstanceId: string, tErrors: ErrorsLabels) {
+  export async function deleteInstance(
+    userId: string,
+    classInstanceId: string,
+    tErrors: ErrorsLabels
+  ): Promise<{ success: boolean; warnings: string[] }> {
     await assertPermission(userId, AppPermission.SESSION_OVERRIDE_ACTIONS, tErrors);
     const instance = await getOrThrow(classInstanceId, tErrors);
 
@@ -437,13 +442,16 @@ export namespace ClassSessionService {
     // resolve would yield `null`.
     const affected = await SchedulingRepository.getClassInstanceAffectedUsers(classInstanceId);
 
+    const warnings: string[] = [];
+
     const result = await db.transaction(async tx => {
       const deleted = await SchedulingRepository.softDeleteClassInstance(classInstanceId, userId, tx);
       if (!deleted) return false;
 
       const wasDeducted = instance.quotaDeducted && instance.deletedAt === null;
       if (wasDeducted) {
-        const { quotaReleased } = await releaseQuotaIfDeducted(instance, userId, tx);
+        const { quotaReleased, warning } = await releaseQuotaIfDeducted(instance, userId, tx);
+        if (warning) warnings.push(warning);
         if (!quotaReleased) {
           await refundCreditIfDeducted(instance, userId, tErrors, tx);
         }
@@ -466,7 +474,7 @@ export namespace ClassSessionService {
         });
       }
     }
-    return result;
+    return { success: result, warnings };
   }
 
   async function runActivatedClassActionWithNotify<T>(

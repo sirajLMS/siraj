@@ -2,6 +2,7 @@ import { ComplaintRepository, ComplaintResponseRepository } from "@/backend/db/r
 import { ParentRepository } from "@/backend/db/repo/parents";
 import { UserRepository } from "@/backend/db/repo/users";
 import { AppPermission, NotificationChannel, NotificationEventType } from "@/backend/enum";
+import { NotFoundError, UnauthorizedError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { CommunicationService } from "@/backend/services/communication/communication.service";
@@ -19,12 +20,12 @@ async function assertCanRespondToComplaint(
 
   const hasPermission = await PermissionsService.hasPermission(responderUserId, AppPermission.COMPLAINTS_RESPOND);
   if (!hasPermission) {
-    throw new Error(tErrors.insufficientPermissions);
+    throw new UnauthorizedError(tErrors.insufficientPermissions);
   }
 
   const complaint = await ComplaintRepository.getComplaintById(complaintId);
   if (!complaint) {
-    throw new Error(tErrors.complaintNotFound);
+    throw new NotFoundError("COMPLAINTS", tErrors.complaintNotFound);
   }
 
   return complaint;

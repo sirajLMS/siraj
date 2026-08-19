@@ -12,6 +12,7 @@ export const createRecurringClassMutationDocument: TypedDocumentNode<
       recurringScheduleId
       classInstanceIds
       classInstanceCount
+      meetingUrl
     }
   }
 `;

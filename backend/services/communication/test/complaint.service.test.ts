@@ -4,6 +4,7 @@ import { ParentRepository } from "@/backend/db/repo/parents";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { StorageDbRepository } from "@/backend/db/repo/storage";
 import { AppPermission, ComplaintCategory, ComplaintStatus } from "@/backend/enum";
+import { NotFoundError } from "@/backend/lib/errors";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { ComplaintService } from "@/backend/services/communication/complaint.service";
 import * as NotificationDispatchHelpers from "@/backend/services/notification/notification-dispatch.helpers";
@@ -235,6 +236,26 @@ describe("ComplaintService", () => {
         () => ComplaintService.getComplaintFiles("unauthorized-uuid", MOCK_COMPLAINT_ID),
         "permission"
       );
+    });
+
+    test("throws NotFoundError with COMPLAINTS_NOT_FOUND for non-existent complaint", async () => {
+      hasPermissionSpy.mockResolvedValue(true);
+      getComplaintByIdSpy.mockResolvedValue(null);
+
+      let errorCaught: Error | null = null;
+      try {
+        await ComplaintService.getComplaintFiles(MOCK_ACTOR_ID, "nonexistent-uuid");
+      } catch (e) {
+        if (e instanceof Error) {
+          errorCaught = e;
+        }
+      }
+      expect(errorCaught).toBeInstanceOf(NotFoundError);
+      if (errorCaught instanceof Error && "code" in errorCaught) {
+        expect(errorCaught.code).toBe("COMPLAINTS_NOT_FOUND");
+      } else {
+        throw new Error("Error does not have a code property");
+      }
     });
   });
 });
