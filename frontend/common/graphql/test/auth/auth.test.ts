@@ -9,9 +9,14 @@ import {
   userQueryDocument,
   usersQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { authenticatedRequest, loginDemoUser } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { clearCookies, getTestCookie, testClient } from "@/frontend/common/graphql/test/testClient";
+import {
+  authenticatedRequest,
+  clearCookies,
+  getTestCookie,
+  loginDemoUser,
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 async function expectDemoLoginSucceeds(groupSlug: string): Promise<void> {
   const result = await testClient.mutate({

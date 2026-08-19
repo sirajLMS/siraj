@@ -1,10 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { demoLoginMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { extractGqlErrorCode } from "@/frontend/common/graphql/test/helpers";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
-import { getTestPort } from "@/frontend/common/graphql/test/testPort";
-import { isTestServerRunning, startTestServer } from "@/frontend/common/graphql/test/testServer";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+import { extractGqlErrorCode, getTestPort, isTestServerRunning, startTestServer, testClient } from "@/test/helpers";
 
 /**
  * Clear the auth rate-limit counter in Redis so subsequent test files that call

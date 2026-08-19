@@ -1,8 +1,0 @@
-// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
-
-exports[`Bun test features basic matchers toMatchSnapshot() 1`] = `
-{
-  "name": "snapshot-test",
-  "value": 42,
-}
-`;

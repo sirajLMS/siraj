@@ -4,9 +4,8 @@ import {
   envConfigEntriesQueryDocument,
   upsertEnvConfigEntryMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/settings/environment-config.documents";
-import { authenticatedRequest, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
 import { HIDDEN_ENV_CONFIG_KEYS } from "@/shared/constants/env-config-keys";
+import { authenticatedRequest, loginAndProvision, setupTestServerLifecycle } from "@/test/helpers";
 
 const TEST_ENV_KEY = "STORAGE_PROVIDER";
 const TEST_ENV_VALUE = "gcp";

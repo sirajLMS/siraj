@@ -6,8 +6,7 @@ import {
   sessionConfigsQueryDocument,
   upsertSessionConfigMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/settings/session-config.documents";
-import { authenticatedRequest, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+import { authenticatedRequest, loginAndProvision, setupTestServerLifecycle } from "@/test/helpers";
 
 describe("GraphQL Session Config Integration Tests", () => {
   setupTestServerLifecycle();

@@ -12,12 +12,13 @@ import {
   authenticatedRequest,
   cleanupTestEntities,
   cleanupTestSuperAdmin,
+  clearCookies,
   loginAndProvision,
   loginDemoUser,
   provisionTestSuperAdmin,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 const TEST_REASON = "GraphQL integration test impersonation";
 

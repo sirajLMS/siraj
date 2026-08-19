@@ -1,8 +1,8 @@
 import { beforeAll } from "bun:test";
-import { ensureDemoUsersForTests } from "@/frontend/common/graphql/test/helpers";
-import { getTestPort, getTestServerMode } from "@/frontend/common/graphql/test/testPort";
-import { isTestServerRunning, startTestServer } from "@/frontend/common/graphql/test/testServer";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+import { ensureDemoUsersForTests } from "./graphql-test-helpers";
+import { getTestPort, getTestServerMode } from "./test-port";
+import { isTestServerRunning, startTestServer } from "./test-server";
 
 let serverStartPromise: Promise<void> | null = null;
 
@@ -13,8 +13,8 @@ let serverStartPromise: Promise<void> | null = null;
  *   (no separate test server is spawned). This avoids the Next.js 16 dist-dir
  *   conflict that prevents a second dev server from starting.
  * - In dev mode with no dev server running: a separate test dev server is
- *   spawned on port 3066 using .next-dev.
- * - In production mode: a `next start` server is spawned on port 3066 using
+ *   spawned on port 3099 using .next-dev.
+ * - In production mode: a `next start` server is spawned on port 3099 using
  *   .next-test-prod (requires `bun run build:test` beforehand).
  * - Sequential tests reuse the already-running server instantly.
  * - The server persists across test files during multi-test runs (e.g. test:graphql,

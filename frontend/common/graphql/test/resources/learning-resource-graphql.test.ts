@@ -10,10 +10,10 @@ import {
   cleanupTestSuperAdmin,
   loginDemoUser,
   provisionTestSuperAdmin,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { uploadFileToStorage } from "@/frontend/common/graphql/test/storageUploadHarness";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+  setupTestServerLifecycle,
+  testClient,
+  uploadFileToStorage,
+} from "@/test/helpers";
 
 async function uploadDummyFile(token: string): Promise<{ id: string; path: string }> {
   const result = await uploadFileToStorage({

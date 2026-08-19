@@ -16,8 +16,8 @@ import {
   cleanupTestSuperAdmin,
   loginAndProvision,
   provisionTestSuperAdmin,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+  setupTestServerLifecycle,
+} from "@/test/helpers";
 
 describe("GraphQL Query: generateAttendanceReport Integration Tests", () => {
   setupTestServerLifecycle();

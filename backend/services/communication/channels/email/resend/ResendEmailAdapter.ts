@@ -159,10 +159,17 @@ export class ResendEmailAdapter implements IEmailChannel {
     error: { name: string; message: string },
     locale: string
   ): Promise<EmailSendResult> {
-    logger.error("Resend API returned an error", {
-      errorName: error.name,
-      errorMessage: error.message,
-    });
+    if (process.env.NODE_ENV === "test" || process.env.TEST_SERVER === "1") {
+      logger.warn("Resend API returned an error in test mode", {
+        errorName: error.name,
+        errorMessage: error.message,
+      });
+    } else {
+      logger.error("Resend API returned an error", {
+        errorName: error.name,
+        errorMessage: error.message,
+      });
+    }
 
     await NotificationRepository.updateDeliveryStatus({
       deliveryId,
@@ -197,10 +204,17 @@ export class ResendEmailAdapter implements IEmailChannel {
   private async handleSendException(deliveryId: string, error: unknown, locale: string): Promise<EmailSendResult> {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    logger.error("Failed to send email via Resend", {
-      deliveryId,
-      error: errorMessage,
-    });
+    if (process.env.NODE_ENV === "test" || process.env.TEST_SERVER === "1") {
+      logger.warn("Failed to send email via Resend in test mode", {
+        deliveryId,
+        error: errorMessage,
+      });
+    } else {
+      logger.error("Failed to send email via Resend", {
+        deliveryId,
+        error: errorMessage,
+      });
+    }
 
     await NotificationRepository.updateDeliveryStatus({
       deliveryId,

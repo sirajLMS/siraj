@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { settingsAuditLogsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/settings/settings-audit.documents";
-import { authenticatedRequest, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+import { authenticatedRequest, loginAndProvision, setupTestServerLifecycle } from "@/test/helpers";
 
 describe("GraphQL Settings Audit Integration Tests", () => {
   setupTestServerLifecycle();

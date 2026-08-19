@@ -40,24 +40,24 @@ bun codegen                    # Generate TypeScript types from schema
 # Testing (layer-specific)
 bun run build:test             # Build production bundle for UI/E2E tests (.next-test-prod) — REQUIRED before test:ui:e2e
 bun run test                   # All tests
-bun run test:db                # Database repository tests (parallel via scripts/run-db-tests-parallel.ts)
+bun run test:db                # Database repository tests (parallel via test/scripts/run-db-tests-parallel.ts)
 bun run test:db:sequential     # Database tests (sequential, for debugging)
-bun run test:integration       # Provider integration smokes (parallel via scripts/run-integration-tests-parallel.ts)
+bun run test:integration       # Provider integration smokes (parallel via test/scripts/run-integration-tests-parallel.ts)
 bun run test:integration:sequential  # Integration tests (sequential, for debugging)
 bun run test:live-comm         # Communication provider integration subset
 bun run test:live-fx           # FX provider integration subset
-bun run test:services          # Backend services tests (parallel via scripts/run-services-tests-parallel.ts)
+bun run test:services          # Backend services tests (parallel via test/scripts/run-services-tests-parallel.ts)
 bun run test:services:sequential # Backend services tests (sequential, for debugging)
-bun run test:graphql           # GraphQL integration tests (dev server)
+bun run test:graphql           # GraphQL integration tests (dev server via test/scripts/run-server-tests.ts)
 bun run test:ui:components     # UI component tests (Happy DOM, no server)
-bun run test:ui:e2e            # End-to-end tests (production server — run build:test first)
+bun run test:ui:e2e            # End-to-end tests (dev/production server — test/scripts/run-server-tests.ts --e2e)
 bun run test:ui                # All UI tests (components + e2e + static)
-bun run test:ui:kill           # Kill test servers on port 3066 only (never dev:3000 or start:4000)
+bun run test:ui:kill           # Kill test servers on port 3099 only (never dev:3000 or start:4000)
 
 # Run database tests with log capture (AI agents MUST use this instead of raw `bun test`)
-bun run scripts/run-test/run-test.ts <test-path>        # Run with log capture
-bun run scripts/run-test/run-test.ts --last <path>      # View last result (AI-optimized)
-bun run scripts/run-test/run-test.ts --last --focus "<pattern>" <path>  # Filtered view
+bun run test/scripts/run-test.ts <test-path>        # Run with log capture
+bun run test/scripts/run-test.ts --last <path>      # View last result (AI-optimized)
+bun run test/scripts/run-test.ts --last --focus "<pattern>" <path>  # Filtered view
 
 # Quality Gates
 bun quality-gate               # Automated quality verification (tsgo → oxlint → biome → lint → duplicates → codescene → sonar)
@@ -279,9 +279,9 @@ This catches issues early at the file level before they propagate to the full qu
 When refactoring or fixing a **test file**, use the run-test script instead of raw `bun test`:
 
 ```bash
-bun run scripts/run-test/run-test.ts <test-path>                       # Run with log capture
-bun run scripts/run-test/run-test.ts --last <test-path>               # View last result (AI-optimized)
-bun run scripts/run-test/run-test.ts --last --focus "<pattern>" <test-path>  # Filtered view
+bun run test/scripts/run-test.ts <test-path>                       # Run with log capture
+bun run test/scripts/run-test.ts --last <test-path>               # View last result (AI-optimized)
+bun run test/scripts/run-test.ts --last --focus "<pattern>" <test-path>  # Filtered view
 ```
 
 The run-test script captures output to log files for easier debugging and is mandatory for database tests

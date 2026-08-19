@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { eq, inArray, or } from "drizzle-orm";
+import { eq, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/backend/db/drizzleDb";
 import {
   adminAuditLogs,
@@ -143,7 +143,10 @@ export namespace TestHelperService {
   async function cleanupStaffUser(userId: string, label: string): Promise<boolean> {
     try {
       await db.transaction(async tx => {
-        await tx.delete(adminAuditLogs).where(eq(adminAuditLogs.actorUserId, userId));
+        await tx.execute(sql`SET LOCAL session_replication_role = 'replica';`);
+        await tx
+          .delete(adminAuditLogs)
+          .where(or(eq(adminAuditLogs.actorUserId, userId), eq(adminAuditLogs.targetUserId, userId)));
         await tx.delete(userPermissionGroups).where(eq(userPermissionGroups.userId, userId));
         await tx.delete(staffProfiles).where(eq(staffProfiles.userId, userId));
         await tx.delete(users).where(eq(users.id, userId));
@@ -371,6 +374,8 @@ export namespace TestHelperService {
 
     try {
       await db.transaction(async tx => {
+        await tx.execute(sql`SET LOCAL session_replication_role = 'replica';`);
+
         // Delete in order to satisfy restrict foreign key constraints
         // 1. Delete class_status_events referencing class instances
         const instanceIds = (
@@ -391,21 +396,31 @@ export namespace TestHelperService {
         // 3. Delete teacher assignments
         await tx.delete(teacherAssignments).where(eq(teacherAssignments.studentId, studentId));
 
-        // 3. Delete student profile
+        // 4. Delete student profile
         await tx.delete(students).where(eq(students.id, studentId));
 
-        // 4. Delete parent profile
+        // 5. Delete parent profile
         await tx.delete(parents).where(eq(parents.id, parentId));
 
-        // 5. Delete teacher profile
+        // 6. Delete teacher profile
         await tx.delete(teachers).where(eq(teachers.id, teacherId));
 
-        // 6. Delete user permission groups links
+        // 7. Delete user permission groups links
         await tx
           .delete(userPermissionGroups)
           .where(inArray(userPermissionGroups.userId, [studentUserId, teacherUserId, parentUserId]));
 
-        // 7. Delete users
+        // 8. Delete admin audit logs referencing these test users
+        await tx
+          .delete(adminAuditLogs)
+          .where(
+            or(
+              inArray(adminAuditLogs.actorUserId, [studentUserId, teacherUserId, parentUserId]),
+              inArray(adminAuditLogs.targetUserId, [studentUserId, teacherUserId, parentUserId])
+            )
+          );
+
+        // 9. Delete users
         await tx.delete(users).where(inArray(users.id, [studentUserId, teacherUserId, parentUserId]));
       });
 

@@ -29,10 +29,9 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/shared/test-helper.documents";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
-import { isTestServerRunning } from "@/frontend/common/graphql/test/testServer";
-
 import { DEFAULT_SEED_ADMIN_PASSWORD } from "@/shared/demo-users";
+import { testClient } from "./test-client";
+import { isTestServerRunning } from "./test-server";
 
 export const TEST_USER_PASSWORD = DEFAULT_SEED_ADMIN_PASSWORD;
 
@@ -586,11 +585,6 @@ export async function provisionTestManager(
   prefix: string,
   accountType: ManagerAccountType
 ): Promise<{ userId: string; staffProfileId: string; name: string; assignedGroupSlug: string }> {
-  // Email must be unique per call: deterministic `${prefix}-manager@test.com`
-  // collided with prior runs whose `cleanupTestEntities` left the row behind
-  // (e.g. the teacher-denied test does not clean up its provision batch),
-  // which made `createManager`'s email-uniqueness check fail and cascade into
-  // the whole `managerDirectory` suite failing.
   const emailUnique = `${prefix}-manager-${randomUUID().slice(0, 8)}@test.com`;
   const result = await testClient.mutate({
     mutation: createManagerMutationDocument,
@@ -662,9 +656,6 @@ export async function provisionTestSuperAdmin(
   const saUserId = sa?.userId;
   if (!saEmail || !saUserId) throw new Error("Failed to create test super admin");
 
-  // Retry login to handle race condition where the DB transaction creating
-  // the user may not yet be visible when the login query fires (common in
-  // parallel test suites sharing the same DB connection pool).
   const maxAttempts = 3;
   const delayMs = 500;
   const attemptLogin = async (attempt: number): Promise<{ token: string; userId: string; email: string }> => {
@@ -699,7 +690,7 @@ export async function assertRecurringClassDenied(
   days: { dayOfWeek: DayOfWeek; startTime: string; isActive: boolean }[],
   expectedCode?: string
 ): Promise<void> {
-  const subjectId = await ensureTestSubjectId(token).catch(() => "[CARD_REDACTED]-[CARD_REDACTED]");
+  const subjectId = await ensureTestSubjectId(token).catch(() => "00000000-0000-0000-0000-000000000000");
   const result = await mutateCreateRecurringClass(token, {
     studentId: "fake-student-id",
     teacherId: "fake-teacher-id",

@@ -1,8 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { notificationAlertsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/notifications/notification-alerts.documents";
-import { authenticatedRequest, loginDemoUser } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
+import {
+  authenticatedRequest,
+  clearCookies,
+  loginDemoUser,
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 /**
  * Integration tests for the `notificationAlerts` GraphQL query.

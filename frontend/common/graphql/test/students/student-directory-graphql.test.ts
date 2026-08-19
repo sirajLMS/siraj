@@ -5,9 +5,9 @@ import {
   cleanupTestEntities,
   loginAndProvision,
   loginDemoUser,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 interface ProvisionedEntities {
   superAdminToken: string;

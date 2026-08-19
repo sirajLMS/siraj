@@ -4,9 +4,7 @@ import {
   teacherAssignedStudentsQueryDocument,
   teacherOwnProfileQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { assertOperationDenied, loginDemoUser } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+import { assertOperationDenied, loginDemoUser, setupTestServerLifecycle, testClient } from "@/test/helpers";
 
 describe("GraphQL Teacher Portal Integration Tests", () => {
   setupTestServerLifecycle();

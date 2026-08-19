@@ -9,9 +9,13 @@ import {
   teacherDashboardQueryDocument,
   teacherFutureScheduleQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { authenticatedRequest, ensureTestSubjectId, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+import {
+  authenticatedRequest,
+  ensureTestSubjectId,
+  loginAndProvision,
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 /**
  * Performs an authenticated GraphQL query with errorPolicy "all" and asserts

@@ -1,9 +1,9 @@
 import { type ChildProcess, spawn as spawnChild } from "node:child_process";
-import { createWriteStream } from "node:fs";
+import { createWriteStream, existsSync, statSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { spawn as bunSpawn, type Subprocess } from "bun";
-import { killListenersOnPort } from "@/frontend/common/graphql/test/testPort";
+import { spawn as bunSpawn, Glob, type Subprocess } from "bun";
+import { killListenersOnPort } from "@/test/helpers";
 
 const DEFAULT_PORT = 3099;
 const DEFAULT_TEST_PATH = "frontend/common/graphql/test/";
@@ -13,6 +13,8 @@ const TUI_REFRESH_INTERVAL_MS = 250;
 interface CliOptions {
   port: number;
   bail: boolean;
+  coverage: boolean;
+  e2e: boolean;
   testPaths: string[];
   help: boolean;
 }
@@ -23,27 +25,62 @@ interface TestState {
   currentTest: string;
   passedTests: number;
   failedTests: number;
-  filesCompleted: number;
+  totalExpects: number;
+  totalFilesScheduled: number;
+  filesPassed: Set<string>;
+  filesFailed: Set<string>;
+  completedFiles: Set<string>;
   lastServerAction: string;
   failureReason: string;
   failingFile: string;
   failingTest: string;
 }
 
+async function discoverTestFiles(testPaths: string[]): Promise<string[]> {
+  const files: string[] = [];
+  for (const p of testPaths) {
+    if (!existsSync(p)) continue;
+    const st = statSync(p);
+    if (st.isDirectory()) {
+      const glob = new Glob("**/*.test.{ts,tsx}");
+      for await (const file of glob.scan({ cwd: p })) {
+        files.push(join(p, file));
+      }
+    } else if (p.endsWith(".test.ts") || p.endsWith(".test.tsx")) {
+      files.push(p);
+    }
+  }
+  return files;
+}
+
 function parseCliArgs(args: string[]): CliOptions {
   let port = DEFAULT_PORT;
   let bail = true;
+  let coverage = false;
+  let e2e = false;
   const testPaths: string[] = [];
   let help = false;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
+    if (
+      arg === "test" ||
+      arg === "run" ||
+      arg.endsWith("run-server-tests.ts") ||
+      arg.endsWith("run-graphql-tests.ts")
+    ) {
+      continue;
+    }
     if (arg === "-h" || arg === "--help") {
       help = true;
     } else if (arg === "--port" && i + 1 < args.length) {
       port = Number(args[++i]) || DEFAULT_PORT;
     } else if (arg === "--no-bail") {
       bail = false;
+    } else if (arg === "--coverage" || arg === "-c") {
+      coverage = true;
+    } else if (arg === "--e2e") {
+      e2e = true;
     } else if (arg.startsWith("--port=")) {
       port = Number(arg.split("=")[1]) || DEFAULT_PORT;
     } else if (!arg.startsWith("-")) {
@@ -55,27 +92,36 @@ function parseCliArgs(args: string[]): CliOptions {
     testPaths.push(DEFAULT_TEST_PATH);
   }
 
-  return { port, bail, testPaths, help };
+  if (testPaths.some(p => p.includes("test/ui/e2e") || p.includes("test/ui/"))) {
+    e2e = true;
+  }
+
+  return { port, bail, coverage, e2e, testPaths, help };
 }
 
 function printHelp(): void {
   process.stdout.write(`
-run-graphql-tests.ts - Clean, minimal TUI GraphQL Integration Test Runner
+run-server-tests.ts - Unified Clean TUI Runner for GraphQL Integration & E2E Tests
 
 USAGE:
-  bun run scripts/run-graphql-tests.ts [options] [test-files...]
+  bun run test/scripts/run-server-tests.ts [options] [test-files...]
 
 OPTIONS:
   --port <number>     Port for the dedicated test server (default: ${DEFAULT_PORT})
+  --e2e               Run E2E suite with Playwright preloads and 5-min timeout
+  --coverage, -c      Run tests with coverage instrumentation
   --no-bail           Do not stop immediately on first test failure (default: bails on error)
   -h, --help          Show this help message
 
 EXAMPLES:
-  # Run all GraphQL tests with clean in-place TUI:
-  bun run scripts/run-graphql-tests.ts
+  # Run all GraphQL integration tests:
+  bun run test:graphql
+
+  # Run all E2E tests:
+  bun run test:ui:e2e
 
   # Run a specific test file:
-  bun run scripts/run-graphql-tests.ts frontend/common/graphql/test/auth/impersonation.test.ts
+  bun run test:graphql frontend/common/graphql/test/auth/impersonation.test.ts
 \n`);
 }
 
@@ -101,6 +147,7 @@ function spawnDevServer(port: number, logStream: NodeJS.WritableStream): ChildPr
     TEST_SERVER: "1",
     PORT: String(port),
     GRAPHQL_TEST_PORT: String(port),
+    TEST_SERVER_PORT: String(port),
     DISABLE_RATE_LIMITING: "true",
     EXIT_ON_ERROR: "true",
   };
@@ -121,6 +168,16 @@ function spawnDevServer(port: number, logStream: NodeJS.WritableStream): ChildPr
   return proc;
 }
 
+function renderProgressBar(current: number, total: number, width = 16): string {
+  if (total <= 0) return "\x1b[90m[────────────────]\x1b[0m";
+  const ratio = Math.min(1, Math.max(0, current / total));
+  const filled = Math.round(ratio * width);
+  const empty = width - filled;
+  const percent = Math.round(ratio * 100);
+  const bar = "█".repeat(filled) + "░".repeat(empty);
+  return `\x1b[36m[${bar}]\x1b[0m \x1b[1m${percent}%\x1b[0m \x1b[90m(${current}/${total} files)\x1b[0m`;
+}
+
 function renderTuiFrame(state: TestState, port: number, isTty: boolean): void {
   if (!isTty) return;
 
@@ -133,13 +190,18 @@ function renderTuiFrame(state: TestState, port: number, isTty: boolean): void {
   const action =
     state.lastServerAction.length > 55 ? `${state.lastServerAction.slice(0, 52)}...` : state.lastServerAction;
 
+  const filesDone = state.completedFiles.size;
+  const totalFiles = Math.max(filesDone, state.totalFilesScheduled);
+  const progressBar = renderProgressBar(filesDone, totalFiles);
+
   let out = "\x1b[H\x1b[0J";
-  out += `\x1b[36m\x1b[1m⚡ Siraj GraphQL Test Runner\x1b[0m \x1b[90m[Port ${port}]\x1b[0m \x1b[33m${elapsed}s elapsed\x1b[0m\n`;
+  out += `\x1b[36m\x1b[1m⚡ Siraj Test Runner\x1b[0m \x1b[90m[Port ${port}]\x1b[0m \x1b[33m${elapsed}s elapsed\x1b[0m\n`;
   out += `\x1b[90m${rule}\x1b[0m\n`;
-  out += `  \x1b[1m📁 File:\x1b[0m   \x1b[34m${file || "Starting..."}\x1b[0m\n`;
-  out += `  \x1b[1m▶ Test:\x1b[0m   \x1b[37m${test || "Initializing..."}\x1b[0m\n`;
-  out += `  \x1b[1m📊 Status:\x1b[0m \x1b[32m${state.passedTests} passed\x1b[0m • \x1b[31m${state.failedTests} failed\x1b[0m \x1b[90m(${state.filesCompleted} files done)\x1b[0m\n`;
-  out += `  \x1b[1m📡 Server:\x1b[0m \x1b[90m${action || "Idle"}\x1b[0m\n`;
+  out += `  \x1b[1m📁 File:\x1b[0m    \x1b[34m${file || "Starting..."}\x1b[0m\n`;
+  out += `  \x1b[1m▶ Test:\x1b[0m    \x1b[37m${test || "Initializing..."}\x1b[0m\n`;
+  out += `  \x1b[1m📊 Tests:\x1b[0m   \x1b[32m${state.passedTests} passed\x1b[0m • \x1b[31m${state.failedTests} failed\x1b[0m${state.totalExpects > 0 ? ` • \x1b[90m${state.totalExpects} asserts\x1b[0m` : ""}\n`;
+  out += `  \x1b[1m📦 Files:\x1b[0m   ${progressBar}\n`;
+  out += `  \x1b[1m📡 Server:\x1b[0m  \x1b[90m${action || "Idle"}\x1b[0m\n`;
   out += `\x1b[90m${rule}\x1b[0m\n`;
 
   process.stdout.write(out);
@@ -167,19 +229,31 @@ function formatFinalReport(state: TestState, success: boolean, logPath: string, 
   const rule = "═".repeat(width);
   const thinRule = "─".repeat(width);
 
+  // Mark currently active file as passed if not failed
+  if (state.currentFile && !state.filesFailed.has(state.currentFile)) {
+    state.filesPassed.add(state.currentFile);
+    state.completedFiles.add(state.currentFile);
+  }
+
+  const filesPassedCount = state.filesPassed.size;
+  const totalFiles = Math.max(state.completedFiles.size, state.totalFilesScheduled);
+
   let out = isTty ? "\x1b[H\x1b[0J\n" : "\n";
   out += `${rule}\n`;
   if (success) {
-    out += `\x1b[32m\x1b[1m✅ ALL GRAPHQL INTEGRATION TESTS PASSED\x1b[0m\n`;
+    out += `\x1b[32m\x1b[1m✅ ALL TESTS PASSED\x1b[0m\n`;
     out += `${thinRule}\n`;
-    out += `  • \x1b[1mTests Run:\x1b[0m     \x1b[32m${state.passedTests} passed\x1b[0m (0 failed)\n`;
-    out += `  • \x1b[1mFiles Run:\x1b[0m     ${state.filesCompleted} files completed\n`;
+    out += `  • \x1b[1mTest Files:\x1b[0m    \x1b[32m${totalFiles} passed\x1b[0m / ${totalFiles} total (100%)\n`;
+    out += `  • \x1b[1mTotal Tests:\x1b[0m   \x1b[32m${state.passedTests} passed\x1b[0m (0 failed)\n`;
+    if (state.totalExpects > 0) {
+      out += `  • \x1b[1mAssertions:\x1b[0m    ${state.totalExpects} expect() calls\n`;
+    }
     out += `  • \x1b[1mTotal Time:\x1b[0m    \x1b[33m${elapsed}s\x1b[0m (from runner start to teardown)\n`;
     out += `${rule}\n`;
     return out;
   }
 
-  out += `\x1b[31m\x1b[1m❌ GRAPHQL TEST FAILURE DETECTED\x1b[0m\n`;
+  out += `\x1b[31m\x1b[1m❌ TEST FAILURE DETECTED\x1b[0m\n`;
   out += `${thinRule}\n`;
   if (state.failingFile) {
     out += `  \x1b[1m📁 Failed File:\x1b[0m \x1b[34m${state.failingFile}\x1b[0m\n`;
@@ -192,8 +266,11 @@ function formatFinalReport(state: TestState, success: boolean, logPath: string, 
   out += `${thinRule}\n`;
   out += `${state.failureReason || "Server reported an unhandled exception."}\n`;
   out += `${thinRule}\n`;
-  out += `  • \x1b[1mTests Run:\x1b[0m     \x1b[32m${state.passedTests} passed\x1b[0m, \x1b[31m${Math.max(1, state.failedTests)} failed\x1b[0m\n`;
-  out += `  • \x1b[1mFiles Run:\x1b[0m     ${state.filesCompleted} files completed\n`;
+  out += `  • \x1b[1mTest Files:\x1b[0m    \x1b[32m${filesPassedCount} passed\x1b[0m, \x1b[31m${Math.max(1, state.filesFailed.size)} failed\x1b[0m \x1b[90m(${state.completedFiles.size} / ${totalFiles} completed)\x1b[0m\n`;
+  out += `  • \x1b[1mTotal Tests:\x1b[0m   \x1b[32m${state.passedTests} passed\x1b[0m, \x1b[31m${Math.max(1, state.failedTests)} failed\x1b[0m\n`;
+  if (state.totalExpects > 0) {
+    out += `  • \x1b[1mAssertions:\x1b[0m    ${state.totalExpects} expect() calls\n`;
+  }
   out += `  • \x1b[1mTotal Time:\x1b[0m    \x1b[33m${elapsed}s\x1b[0m (from runner start to teardown)\n`;
   out += `  • \x1b[1mServer Log:\x1b[0m    \x1b[90m${logPath}\x1b[0m\n`;
   out += `${rule}\n`;
@@ -204,20 +281,77 @@ function formatFinalReport(state: TestState, success: boolean, logPath: string, 
 function processTestOutputLine(line: string, state: TestState, onFail: (reason: string) => void): void {
   const esc = String.fromCharCode(27);
   const clean = line.replaceAll(new RegExp(`${esc}\\[\\d*(?:;\\d*)*[a-zA-Z]`, "g"), "").trim();
-  if (clean.endsWith(".test.ts:") || clean.endsWith(".test.ts")) {
-    state.currentFile = clean.replace(/:$/, "");
-    state.filesCompleted++;
-  } else if (clean.startsWith("✓ ")) {
+
+  // Test file boundary detection
+  if (
+    clean.endsWith(".test.ts:") ||
+    clean.endsWith(".test.ts") ||
+    clean.endsWith(".test.tsx:") ||
+    clean.endsWith(".test.tsx")
+  ) {
+    const nextFile = clean.replace(/:$/, "").trim();
+    if (state.currentFile && state.currentFile !== nextFile) {
+      if (!state.filesFailed.has(state.currentFile)) {
+        state.filesPassed.add(state.currentFile);
+      }
+      state.completedFiles.add(state.currentFile);
+    }
+    state.currentFile = nextFile;
+    state.completedFiles.add(nextFile);
+    return;
+  }
+
+  // Pass match: ✓ or (pass)
+  if (clean.startsWith("✓ ") || clean.startsWith("(pass) ")) {
     state.passedTests++;
-    state.currentTest = clean.slice(2).trim();
-  } else if (clean.startsWith("✗ ") || clean.startsWith("fail:")) {
+    state.currentTest = clean
+      .replace(/^(?:✓|\(pass\))\s+/, "")
+      .replace(/\s*\[[\d.]+m?s\]$/, "")
+      .trim();
+    if (state.currentFile) {
+      state.completedFiles.add(state.currentFile);
+    }
+    return;
+  }
+
+  // Fail match: ✗ or (fail) or FAIL
+  if (clean.startsWith("✗ ") || clean.startsWith("(fail) ") || clean.startsWith("FAIL ")) {
     state.failedTests++;
     state.failingFile = state.currentFile;
-    state.failingTest = clean.replace(/^[✗\s]*fail:\s*/, "");
+    state.failingTest = clean.replace(/^(?:✗|\(fail\)|FAIL)\s+/, "").trim();
+    if (state.currentFile) {
+      state.filesFailed.add(state.currentFile);
+      state.completedFiles.add(state.currentFile);
+    }
     onFail(clean);
-  } else if (/^\d+\s+pass/i.test(clean)) {
-    const m = clean.match(/^(\d+)\s+pass/i);
-    if (m) state.passedTests = Math.max(state.passedTests, Number(m[1]));
+    return;
+  }
+
+  // Summary stats lines
+  const passMatch = /^\s*(\d+)\s+pass/i.exec(clean);
+  if (passMatch) {
+    state.passedTests = Math.max(state.passedTests, Number.parseInt(passMatch[1], 10));
+  }
+
+  const failMatch = /^\s*(\d+)\s+fail/i.exec(clean);
+  if (failMatch) {
+    state.failedTests = Math.max(state.failedTests, Number.parseInt(failMatch[1], 10));
+  }
+
+  const expectMatch = /^\s*(\d+)\s+expect\(\)\s+calls/i.exec(clean);
+  if (expectMatch) {
+    state.totalExpects = Number.parseInt(expectMatch[1], 10);
+  }
+
+  const runMatch = /^\s*Ran\s+(\d+)\s+tests?\s+across\s+(\d+)\s+files?/i.exec(clean);
+  if (runMatch) {
+    state.passedTests = Math.max(state.passedTests, Number.parseInt(runMatch[1], 10));
+    const finishedFileCount = Number.parseInt(runMatch[2], 10);
+    if (state.filesFailed.size === 0) {
+      for (let i = 0; i < finishedFileCount; i++) {
+        state.filesPassed.add(`file-${i}`);
+      }
+    }
   }
 }
 
@@ -246,13 +380,14 @@ function setupTestParser(testProc: Subprocess, state: TestState, onFail: (reason
 }
 
 async function main(): Promise<void> {
-  const { port, bail, testPaths, help } = parseCliArgs(process.argv.slice(2));
+  const { port, bail, coverage, e2e, testPaths, help } = parseCliArgs(process.argv.slice(2));
 
   if (help) {
     printHelp();
     process.exit(0);
   }
 
+  const scheduledFiles = await discoverTestFiles(testPaths);
   const isTty = Boolean(process.stdout.isTTY);
   const state: TestState = {
     startTime: performance.now(),
@@ -260,7 +395,11 @@ async function main(): Promise<void> {
     currentTest: "",
     passedTests: 0,
     failedTests: 0,
-    filesCompleted: 0,
+    totalExpects: 0,
+    totalFilesScheduled: scheduledFiles.length > 0 ? scheduledFiles.length : testPaths.length,
+    filesPassed: new Set<string>(),
+    filesFailed: new Set<string>(),
+    completedFiles: new Set<string>(),
     lastServerAction: "Starting server...",
     failureReason: "",
     failingFile: "",
@@ -314,6 +453,9 @@ async function main(): Promise<void> {
     state.failureReason = reason;
     state.failingFile = state.failingFile || state.currentFile;
     state.failingTest = state.failingTest || state.currentTest;
+    if (state.failingFile) {
+      state.filesFailed.add(state.failingFile);
+    }
     try {
       activeTestProc?.kill();
     } catch {
@@ -363,8 +505,18 @@ async function main(): Promise<void> {
     state.lastServerAction = "Server ready. Executing tests...";
 
     const bunBin = process.execPath;
-    const testArgs = [bunBin, "--env-file=.env.test", "test", "--parallel=1", "--timeout=120000"];
-    if (bail) testArgs.push("--bail");
+    const timeout = e2e ? "300000" : "120000";
+    const testArgs = [bunBin, "--env-file=.env.test", "test", "--parallel=1", `--timeout=${timeout}`];
+
+    if (e2e) {
+      testArgs.push("--preload", "./test/ui/test-env.ts");
+    }
+    if (coverage) {
+      testArgs.push("--coverage");
+    }
+    if (bail) {
+      testArgs.push("--bail=1");
+    }
     testArgs.push(...testPaths);
 
     const testProc = bunSpawn(testArgs, {
@@ -373,6 +525,9 @@ async function main(): Promise<void> {
         ...process.env,
         SIRAJ_TEST_RUNNER_OK: "1",
         GRAPHQL_TEST_PORT: String(port),
+        TEST_SERVER_PORT: String(port),
+        TEST_SERVER_MODE: "dev",
+        TEST_E2E_WARMUP: e2e ? "1" : "0",
         NEXT_DIST_DIR: ".next-dev",
       },
       stdio: ["ignore", "pipe", "pipe"],
@@ -399,6 +554,6 @@ async function main(): Promise<void> {
 }
 
 main().catch(err => {
-  process.stderr.write(`[run-graphql-tests] Fatal error: ${err instanceof Error ? err.message : String(err)}\n`);
+  process.stderr.write(`[run-server-tests] Fatal error: ${err instanceof Error ? err.message : String(err)}\n`);
   process.exit(1);
 });

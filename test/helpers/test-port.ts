@@ -1,7 +1,7 @@
 import { createServer, type Server } from "node:net";
 import { spawnSync } from "bun";
 
-const FIXED_TEST_PORT = 3066;
+const FIXED_TEST_PORT = 3099;
 
 /** Ports used by GraphQL/UI test servers — never kill dev (3000) or prod start (4000). */
 export const TEST_SERVER_PREFERRED_PORT = FIXED_TEST_PORT;
@@ -143,7 +143,6 @@ export async function allocateTestPort(): Promise<number> {
     throw new Error(`Invalid test port number: ${envPort}`);
   }
 
-  // Check if we can bind or if it's already reserved
   await reservePort(targetPort);
   return targetPort;
 }
@@ -156,20 +155,10 @@ export async function releaseAllocatedTestPort(): Promise<void> {
   releasePortReservation();
 }
 
-/**
- * Detect whether a dev server is already responding on the given port.
- * Used to decide if E2E tests can reuse the existing dev server instead of
- * spawning a separate test server (which Next.js 16 refuses when the dist
- * directory is shared).
- *
- * Any HTTP response — even a 500 from a compilation error — means the server
- * is running and we should reuse it rather than spawning a conflicting one.
- */
 export async function isServerRunningOnPort(port: number): Promise<boolean> {
   try {
     const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
     const res = await fetchFn(`http://localhost:${port}/`, { method: "GET", redirect: "manual" });
-    // Any HTTP response (including errors) means the server is running
     return res.status > 0;
   } catch {
     return false;

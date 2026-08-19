@@ -6,8 +6,7 @@ import {
   siteContentEntryQueryDocument,
   upsertSiteContentMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/settings/site-content-settings.documents";
-import { authenticatedRequest, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+import { authenticatedRequest, loginAndProvision, setupTestServerLifecycle } from "@/test/helpers";
 
 describe("GraphQL Site Content Settings Integration Tests", () => {
   setupTestServerLifecycle();

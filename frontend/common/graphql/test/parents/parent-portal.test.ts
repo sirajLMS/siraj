@@ -5,9 +5,7 @@ import {
   parentHandbookUrlQueryDocument,
   parentOwnProfileQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { loginDemoUser } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+import { loginDemoUser, setupTestServerLifecycle, testClient } from "@/test/helpers";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

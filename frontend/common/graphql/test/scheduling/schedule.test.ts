@@ -19,6 +19,7 @@ import {
   teacherWeeklyScheduleGridQueryDocument,
   teacherWorkloadMetricsQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/scheduling/weekly-schedule.documents";
+import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import {
   assertRecurringClassDenied,
   authenticatedRequest,
@@ -31,12 +32,11 @@ import {
   mutateCreateRecurringClass,
   provisionTestEntities,
   provisionTestSuperAdmin,
+  setupTestServerLifecycle,
+  testClient,
   verifyWeeklyScheduleGrid,
   verifyWorkloadMetrics,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
-import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
+} from "@/test/helpers";
 
 async function assertDstBulkUpdateFails(token: string) {
   const result = await testClient.mutate({

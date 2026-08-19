@@ -21,9 +21,9 @@ import {
   createManualClassEntryWithAssertions,
   ensureTestSubjectId,
   loginAndProvision,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 const testDate = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 

@@ -1,6 +1,6 @@
 # UI Test Rules (`test/ui/`)
 
-E2E tests under `test/ui/` default to **dev mode** (`TEST_SERVER_MODE=dev`). When a dev server is already running on port 3000, E2E tests reuse it instead of spawning a separate test server — this avoids the Next.js 16 dist-dir conflict that prevents a second dev server from starting. If no dev server is running, a separate test dev server is spawned on port 3066. To run E2E against a production build instead, set `TEST_SERVER_MODE=production` and run `bun run build:test` first.
+E2E tests under `test/ui/` default to **dev mode** (`TEST_SERVER_MODE=dev`). When a dev server is already running on port 3000, E2E tests reuse it instead of spawning a separate test server — this avoids the Next.js 16 dist-dir conflict that prevents a second dev server from starting. If no dev server is running, a separate test dev server is spawned on port 3099. To run E2E against a production build instead, set `TEST_SERVER_MODE=production` and run `bun run build:test` first.
 
 ## Prerequisites
 
@@ -8,7 +8,7 @@ E2E tests under `test/ui/` default to **dev mode** (`TEST_SERVER_MODE=dev`). Whe
 - Start the dev server first: `bun run dev` (port 3000)
 - E2E tests will automatically detect and reuse the running dev server
 - No build step required — the dev server compiles routes on-demand
-- Route warmup is performed automatically (see `E2E_WARMUP_ROUTES` in `testServer.ts`)
+- Route warmup is performed automatically (see `E2E_WARMUP_ROUTES` in `@/test/helpers`)
 
 **Production mode (optional, set `TEST_SERVER_MODE=production`):**
 
@@ -43,7 +43,7 @@ bun run test:ui:components  # Happy DOM component tests
 bun run test:ui:e2e         # Playwright E2E (dev server by default, reuses port 3000 if running)
 bun run test:ui:static      # Mobile/desktop isolation checks
 bun run test:ui             # All of the above
-bun run test:ui:kill        # Kill test servers on port 3066 only (never dev:3000 or start:4000)
+bun run test:ui:kill        # Kill test servers on port 3099 only (never dev:3000 or start:4000)
 ```
 
 All `test:ui*` scripts preload `test/ui/test-env.ts`, which sets `TEST_SERVER_MODE=dev` by default. Override with `TEST_SERVER_MODE=production` for production-mode E2E.

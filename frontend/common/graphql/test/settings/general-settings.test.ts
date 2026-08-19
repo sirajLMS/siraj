@@ -5,8 +5,7 @@ import {
   systemSettingsQueryDocument,
   upsertSystemSettingMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments/settings/general-settings.documents";
-import { authenticatedRequest, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+import { authenticatedRequest, loginAndProvision, setupTestServerLifecycle } from "@/test/helpers";
 
 describe("GraphQL General Settings Integration Tests", () => {
   setupTestServerLifecycle();

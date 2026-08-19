@@ -1,16 +1,6 @@
 /**
  * Shared parallel test runner for all test suites.
- *
- * Extracts the common logic previously duplicated across:
- *   - scripts/run-db-tests-parallel.ts
- *   - scripts/run-services-tests-parallel.ts
- *   - scripts/run-integration-tests-parallel.ts
- *
- * Callers provide a `RunParallelTestsConfig` and receive a `TestRunResult`.
- * Side-effects (discovering files, spawning processes, printing output) are
- * identical to the original runners, only the configuration differs.
  */
-
 import { availableParallelism } from "node:os";
 import { Glob } from "bun";
 import { isTestCi } from "@/backend/lib/test-ci-env";
@@ -27,15 +17,10 @@ const GRAY = "\x1b[90m";
 const DEFAULT_TIMEOUT_MS = 60_000;
 
 export interface RunParallelTestsConfig {
-  // Glob pattern relative to cwd (e.g. "backend/db/test").
   pattern: string;
-  // Directory to scan for test files (e.g. "backend/db/test").
   cwd: string;
-  // Max parallel worker count (overrides default hardware-based limit).
   maxWorkers: number;
-  // Label shown in the header log line (e.g. "database", "backend service").
   label: string;
-  // Per-test timeout in milliseconds (passed to bun test --timeout=).
   timeoutMs?: number;
 }
 
@@ -61,8 +46,6 @@ interface FailureDetail {
   stdout: string;
   stderr: string;
 }
-
-/* —————————————— ANSI & output parsing helpers —————————————— */
 
 function stripAnsi(str: string): string {
   const ESC = String.fromCharCode(27);
@@ -135,9 +118,6 @@ function parseTestOutput(stdoutText: string, file: string): TestStats {
   return stats;
 }
 
-/* —————————————— Core runner —————————————— */
-
-// Shared accumulators passed through workers to avoid module-level mutable state.
 interface RunAccumulators {
   totalPasses: number;
   totalFails: number;
@@ -158,8 +138,6 @@ async function runSingleTestFile(file: string, timeoutMs: number, acc: RunAccumu
       SIRAJ_TEST_RUNNER_OK: "1",
     };
 
-    // Local: drop parent DATABASE_URL so env-file is authoritative.
-    // CI (TEST_CI=true): keep workflow DATABASE_URL (Postgres service) over .env.test.
     if (!isTestCi()) {
       workerEnv.DATABASE_URL = undefined;
     }
@@ -179,8 +157,6 @@ async function runSingleTestFile(file: string, timeoutMs: number, acc: RunAccumu
 
     globalThis.console.log(`\n${BOLD}${file}:${RESET}`);
 
-    // Bun test writes test progress, checkmarks, and summaries to stderr,
-    // while stdout receives console logs.
     const combinedOutput = stdoutText + "\n" + stderrText;
     const stats = parseTestOutput(combinedOutput, file);
     for (const line of stats.parsedLines) {

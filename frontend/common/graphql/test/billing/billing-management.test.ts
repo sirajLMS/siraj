@@ -19,9 +19,9 @@ import {
   expectMutationError,
   loginAndProvision,
   provisionTestSuperAdmin,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { uploadFileToStorage } from "@/frontend/common/graphql/test/storageUploadHarness";
+  setupTestServerLifecycle,
+  uploadFileToStorage,
+} from "@/test/helpers";
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 

@@ -4,9 +4,13 @@ import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { authenticatedRequest, loginDemoUser } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
+import {
+  authenticatedRequest,
+  clearCookies,
+  loginDemoUser,
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 /** Full matrix: every channel × every event type (teacher allowlist is ALL). */
 const EXPECTED_DEFAULT_PREF_COUNT =

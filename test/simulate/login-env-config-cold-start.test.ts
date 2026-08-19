@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { demoLoginMutationDocument, meQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
+import { clearCookies, testClient } from "@/test/helpers";
 import { setupColdStartTestLifecycle } from "@/test/simulate/lifecycle";
 
 describe("Cold-start: env-config fallback via GraphQL", () => {

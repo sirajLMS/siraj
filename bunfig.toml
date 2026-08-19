@@ -4,7 +4,7 @@ coverageSkipTestFiles = true
 # Bun only honors this single [test] section — named [test.*] profiles below are ignored.
 # test-runner-guard.ts must be FIRST so it exits before logger-mock/ensure-env if the
 # invocation bypassed the approved test runners (run-locked-cmd, run-test, run-parallel-tests).
-preload = ["./scripts/run-test/test-runner-guard.ts", "./backend/db/test/logger-mock.ts", "./backend/db/test/ensure-env.ts"]
+preload = ["./test/scripts/test-runner-guard.ts", "./backend/db/test/logger-mock.ts", "./backend/db/test/ensure-env.ts"]
 
 # Backend DB tests: logger mock + env, NO happydom (no DOM needed)
 # [test.backend]

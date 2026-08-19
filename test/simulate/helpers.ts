@@ -1,1 +1,1 @@
-export { setupTestServerLifecycle as setupColdStartTestLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+export { setupTestServerLifecycle as setupColdStartTestLifecycle } from "@/test/helpers";

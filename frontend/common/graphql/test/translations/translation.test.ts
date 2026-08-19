@@ -1,10 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { translatedMessageQueryDocument, welcomeMessageQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { loginDemoUser } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
 import { arMessages } from "@/shared/locale/ar/messages";
 import { enMessages } from "@/shared/locale/en/messages";
+import { loginDemoUser, setupTestServerLifecycle, testClient } from "@/test/helpers";
 
 const ar = arMessages;
 const en = enMessages;

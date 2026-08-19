@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Kill UI/GraphQL test infrastructure only.
+ * Kill test infrastructure servers only.
  *
  * NEVER use broad `pkill -f 'next dev|next start'` — that kills the main app servers
  * on ports 3000 (dev) and 4000 (production start).
@@ -11,7 +11,7 @@ import {
   killListenersOnPort,
   PROTECTED_APP_PORTS,
   TEST_SERVER_PORT,
-} from "@/frontend/common/graphql/test/testPort";
+} from "@/test/helpers";
 
 function killPlaywrightTestBrowsers(): void {
   const patterns = ["chrome-headless-shell", "chromium_headless", "ms-playwright.*headless"] as const;
@@ -37,7 +37,7 @@ function main(): void {
   killPlaywrightTestBrowsers();
 
   process.stderr.write(
-    `[kill-test-ui-servers] Checked test port ${TEST_SERVER_PORT}; terminated ${totalKilled} listener(s). Protected ports: ${PROTECTED_APP_PORTS.join(", ")}\n`
+    `[kill-test-servers] Checked test port ${TEST_SERVER_PORT}; terminated ${totalKilled} listener(s). Protected ports: ${PROTECTED_APP_PORTS.join(", ")}\n`
   );
 }
 

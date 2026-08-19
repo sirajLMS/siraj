@@ -1,7 +1,6 @@
 import { afterAll, beforeAll } from "bun:test";
 import { type Browser, type BrowserContext, chromium } from "playwright";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { getTestBaseUrl } from "@/frontend/common/graphql/test/testPort";
+import { getTestBaseUrl, setupTestServerLifecycle } from "@/test/helpers";
 
 let browser: Browser | null = null;
 

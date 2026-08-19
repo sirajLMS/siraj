@@ -8,9 +8,9 @@ import {
   ensureTestSubjectId,
   loginAndProvision,
   loginUser,
+  setupTestServerLifecycle,
   TEST_USER_PASSWORD,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+} from "@/test/helpers";
 
 async function loginWithRetry(email: string, attempts = 3): Promise<string> {
   try {

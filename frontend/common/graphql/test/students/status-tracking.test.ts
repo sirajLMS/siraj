@@ -5,14 +5,15 @@ import { changeStudentStatusMutationDocument } from "@/frontend/common/graphql/s
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
+  clearCookies,
   createManualClassEntry,
   ensureTestSubjectId,
   loginAndProvision,
   loginDemoUser,
   provisionTestSuperAdmin,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 /**
  * Helper to fetch status tracking schedule with a given token.

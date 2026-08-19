@@ -14,9 +14,9 @@ import {
   cleanupTestSuperAdmin,
   loginDemoUser,
   provisionTestSuperAdmin,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 const createMinimalParentInput = (
   overrides?: Partial<{

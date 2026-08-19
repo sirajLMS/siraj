@@ -3,6 +3,9 @@ import { openSync } from "node:fs";
 import { access, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { spawnSync } from "bun";
+import { restoreCanonicalNextEnvDts } from "@/scripts/lib/restore-next-env-dts";
+import { getTestProductionEnv } from "@/scripts/lib/test-build-env";
+import { testLogger } from "@/shared/lib/logger/testlogger";
 import {
   allocateTestPort,
   clearTestPort,
@@ -18,10 +21,7 @@ import {
   releaseTcpPortReservation,
   setTestPort,
   TEST_SERVER_PORT,
-} from "@/frontend/common/graphql/test/testPort";
-import { restoreCanonicalNextEnvDts } from "@/scripts/lib/restore-next-env-dts";
-import { getTestProductionEnv } from "@/scripts/lib/test-build-env";
-import { testLogger } from "@/shared/lib/logger/testlogger";
+} from "./test-port";
 
 const TEST_ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? ["Test", "Admin", "Pass1!"].join("");
 
@@ -325,7 +325,7 @@ export async function startTestServer() {
  */
 async function ensureDemoUsersForTestsSafe(): Promise<void> {
   try {
-    const { ensureDemoUsersForTests } = await import("@/frontend/common/graphql/test/helpers");
+    const { ensureDemoUsersForTests } = await import("./graphql-test-helpers");
     await ensureDemoUsersForTests();
   } catch (err) {
     testLogger.warn(`Could not ensure demo users for E2E tests: ${err instanceof Error ? err.message : String(err)}`);

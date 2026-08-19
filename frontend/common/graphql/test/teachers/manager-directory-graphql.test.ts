@@ -13,9 +13,9 @@ import {
   loginAndProvision,
   provisionTestManager,
   provisionTestSuperAdmin,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 async function getManagers(token: string) {
   const data = await authenticatedRequest(token, "query", managerDirectoryQueryDocument);

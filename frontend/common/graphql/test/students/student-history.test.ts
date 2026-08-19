@@ -1,9 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { cleanupTestEntitiesMutationDocument } from "@/frontend/common/graphql/sharedDocuments/shared/test-helper.documents";
 import { studentClassHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-history.documents";
-import { authenticatedRequest, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+import { authenticatedRequest, loginAndProvision, setupTestServerLifecycle, testClient } from "@/test/helpers";
 
 describe("GraphQL Student History Integration Tests", () => {
   setupTestServerLifecycle();

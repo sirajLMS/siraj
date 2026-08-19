@@ -8,9 +8,13 @@ import {
   userMeetingConfigQueryDocument,
   userMeetingConfigsQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { authenticatedRequest, cleanupTestEntities, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+import {
+  authenticatedRequest,
+  cleanupTestEntities,
+  loginAndProvision,
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 function buildProviderInput(slug: string) {
   return {

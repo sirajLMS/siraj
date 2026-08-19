@@ -1,10 +1,9 @@
 import { expect } from "bun:test";
 import type { BrowserContext, Cookie, Page } from "playwright";
 import { SystemPermissionGroupSlug } from "@/backend/enum";
-import { getTestBaseUrl } from "@/frontend/common/graphql/test/testPort";
-import { isTestServerRunning, startTestServer } from "@/frontend/common/graphql/test/testServer";
 import { academyAdmins, parents, staff, students, superAdmins, supervisors, teachers } from "@/shared/demo-users";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+import { getTestBaseUrl, isTestServerRunning, startTestServer } from "@/test/helpers";
 
 const PWD = "12345678";
 const REQUIRED_AUTH_COOKIES = ["session_id", "refresh_token", "access_token"] as const;

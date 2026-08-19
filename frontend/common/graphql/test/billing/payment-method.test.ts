@@ -6,8 +6,7 @@ import {
   userPaymentMethodQueryDocument,
   userPaymentMethodsQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
-import { authenticatedRequest, cleanupTestEntities, loginAndProvision } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+import { authenticatedRequest, cleanupTestEntities, loginAndProvision, setupTestServerLifecycle } from "@/test/helpers";
 
 describe("GraphQL Payment Method Integration Tests", () => {
   setupTestServerLifecycle();

@@ -1,10 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
-import { loginDemoUser } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { clearCookies, getTestCookie } from "@/frontend/common/graphql/test/testClient";
-import { getTestGraphqlUrl } from "@/frontend/common/graphql/test/testPort";
 import { testLogger } from "@/shared/lib/logger/testlogger";
+import {
+  clearCookies,
+  getTestCookie,
+  getTestGraphqlUrl,
+  loginDemoUser,
+  setupTestServerLifecycle,
+} from "@/test/helpers";
 
 /**
  * Integration tests for HTTP request batching (Phase E2).

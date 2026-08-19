@@ -6,7 +6,7 @@ import { withProcessLock } from "@/scripts/lib/process-lock";
 const BUN_BIN = join(homedir(), ".bun", "bin", "bun");
 const PROJECT_ROOT = process.cwd();
 const LOGS_DIR = join(PROJECT_ROOT, "logs");
-const FEEDBACK_DIR = join(PROJECT_ROOT, "scripts", "run-test", "feedback");
+const FEEDBACK_DIR = join(PROJECT_ROOT, "test", "scripts", "feedback");
 
 function logInfo(message: string): void {
   process.stderr.write(`[run-test] ${message}\n`);
@@ -39,10 +39,10 @@ function formatTimestampFile(date: Date = new Date()): string {
 
 function printHelp(): void {
   const help = `
-run-test.ts - Run bun database tests with log capture
+run-test.ts - Run bun tests with log capture
 
 USAGE
-  bun run scripts/run-test/run-test.ts [flags] <test-path>
+  bun run test/scripts/run-test.ts [flags] <test-path>
 
 DESCRIPTION
   Runs bun test for a given file or directory, captures the full output,
@@ -62,12 +62,12 @@ ARGUMENTS
   <test-path>         Path to a test file or directory, relative to project root
 
 EXAMPLES
-  bun run scripts/run-test/run-test.ts backend/db/test/repo/parent.repository.test.ts
-  bun run scripts/run-test/run-test.ts --last backend/db/test/repo/parent.repository.test.ts
-  bun run scripts/run-test/run-test.ts --last --focus "deactivateParent" backend/db/test/repo/parent.repository.test.ts
-  bun run scripts/run-test/run-test.ts --feedback "The --last output should include test duration" --context "When debugging slow tests, knowing duration helps prioritize"
-  bun run scripts/run-test/run-test.ts --list-feedback
-  bun run scripts/run-test/run-test.ts -h
+  bun run test/scripts/run-test.ts backend/db/test/repo/parent.repository.test.ts
+  bun run test/scripts/run-test.ts --last backend/db/test/repo/parent.repository.test.ts
+  bun run test/scripts/run-test.ts --last --focus "deactivateParent" backend/db/test/repo/parent.repository.test.ts
+  bun run test/scripts/run-test.ts --feedback "The --last output should include test duration" --context "When debugging slow tests, knowing duration helps prioritize"
+  bun run test/scripts/run-test.ts --list-feedback
+  bun run test/scripts/run-test.ts -h
 `;
   process.stdout.write(help);
 }
@@ -131,6 +131,16 @@ function parseArgs(args: string[]): ParsedArgs {
 }
 
 async function runTest(testPath: string): Promise<number> {
+  if (testPath.includes("frontend/common/graphql/test") || testPath.includes("test/ui/e2e")) {
+    const proc = Bun.spawn([BUN_BIN, "run", "test/scripts/run-server-tests.ts", testPath], {
+      stdout: "inherit",
+      stderr: "inherit",
+      env: { ...process.env, SIRAJ_TEST_RUNNER_OK: "1" },
+      cwd: PROJECT_ROOT,
+    });
+    return await proc.exited;
+  }
+
   const timestamp = formatTimestampDir();
   const logDir = join(LOGS_DIR, timestamp);
   const relativePath = relative(PROJECT_ROOT, testPath);

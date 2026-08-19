@@ -1,11 +1,6 @@
 import { afterAll, beforeAll, describe, expect, mock, test } from "bun:test";
 import { NextRequest } from "next/server";
-import {
-  allocateTestPort,
-  getTestApiUrl,
-  releaseAllocatedTestPort,
-  setTestPort,
-} from "@/frontend/common/graphql/test/testPort";
+import { allocateTestPort, getTestApiUrl, releaseAllocatedTestPort, setTestPort } from "@/test/helpers";
 
 // Mock dependencies
 await mock.module("@/backend/lib", () => ({

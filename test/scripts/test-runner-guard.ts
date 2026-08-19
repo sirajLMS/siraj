@@ -3,33 +3,11 @@
  *
  * ## Purpose
  * Prevents direct `bun test <file>` invocations from bypassing the project's
- * approved test runners (run-locked-cmd.ts, run-test.ts, run-parallel-tests.ts).
+ * approved test runners (run-locked-cmd.ts, run-test.ts, run-server-tests.ts, run-parallel-tests.ts).
  *
- * When an AI agent (or human) runs `bun test <file>` directly instead of
- * `bun run test:<suite> <file>` or `bun run scripts/run-test/run-test.ts <file>`,
- * Bun's built-in test runner is invoked and skips every safeguard the wrapper
- * scripts provide: log capture, process locking, env-file loading, and timeout
- * enforcement. This preload runs before any test code and exits the process
- * with a clear warning if the invocation did not come from an approved runner.
- *
- * ## How It Works
- * The approved runners set `SIRAJ_TEST_RUNNER_OK=1` in the child process
- * environment before spawning `bun test`. This preload checks for that env var.
- * If absent, it prints a warning to stderr and exits with code 1 before any
- * test runs. If present, the preload is a no-op and tests proceed normally.
- *
- * ## Configuration
- * Registered in `bunfig.toml` as the FIRST preload (so it runs before
- * logger-mock.ts and ensure-env.ts):
- * ```toml
- * [test]
- * preload = ["./scripts/run-test/test-runner-guard.ts", "./backend/db/test/logger-mock.ts", "./backend/db/test/ensure-env.ts"]
- * ```
- *
- * ## Bypass for debugging
- * Set `SIRAJ_TEST_RUNNER_OK=1` manually to bypass the guard when intentionally
- * running `bun test <file>` for quick debugging:
- *   SIRAJ_TEST_RUNNER_OK=1 bun test <file>
+ * When an AI agent (or human) runs `bun test <file>` directly, this preload
+ * intercepts GraphQL integration & E2E tests and transparently delegates
+ * to test/scripts/run-server-tests.ts, or enforces the approved runners for DB tests.
  */
 
 const RUNNER_ENV_VAR = "SIRAJ_TEST_RUNNER_OK";
@@ -53,13 +31,13 @@ function printWarning(): void {
     "",
     `${YELLOW}Running ${BOLD}bun test <file>${RESET}${YELLOW} directly bypasses the project's test runners.${RESET}`,
     `${YELLOW}The approved runners provide:${RESET}`,
-    `  • Log capture (scripts/run-test/run-test.ts)`,
+    `  • Log capture (test/scripts/run-test.ts)`,
     `  • Process locking (prevents concurrent DB test deadlocks)`,
     `  • Env-file loading (.env.test) and timeout enforcement`,
     "",
     `${CYAN}Use one of these instead:${RESET}`,
     `  ${BOLD}bun run test:<suite>${RESET}              # e.g. bun run test:db, test:services, test:graphql`,
-    `  ${BOLD}bun run scripts/run-test/run-test.ts <file>${RESET}  # single-file with log capture`,
+    `  ${BOLD}bun run test/scripts/run-test.ts <file>${RESET}  # single-file with log capture`,
     "",
     `${CYAN}To bypass for quick debugging:${RESET}`,
     `  ${BOLD}SIRAJ_TEST_RUNNER_OK=1 bun test <file>${RESET}`,
@@ -70,6 +48,27 @@ function printWarning(): void {
 }
 
 if (!isApprovedRunner()) {
+  const isGraphqlOrE2e = process.argv.some(
+    arg => arg.includes("frontend/common/graphql/test") || arg.includes("test/ui/e2e")
+  );
+
+  if (isGraphqlOrE2e) {
+    const rawArgs = process.argv.filter(
+      a =>
+        a !== process.execPath &&
+        a !== "bun" &&
+        a !== "test" &&
+        a !== "run" &&
+        !a.startsWith("--preload") &&
+        !a.endsWith("test-runner-guard.ts")
+    );
+    const proc = Bun.spawnSync(["bun", "run", "test/scripts/run-server-tests.ts", ...rawArgs], {
+      stdio: ["inherit", "inherit", "inherit"],
+      env: { ...process.env, SIRAJ_TEST_RUNNER_OK: "1" },
+    });
+    process.exit(proc.exitCode ?? 0);
+  }
+
   printWarning();
   process.exit(1);
 }

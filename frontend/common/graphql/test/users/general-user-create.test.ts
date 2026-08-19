@@ -11,13 +11,14 @@ import {
   assertOperationDenied,
   authenticatedRequest,
   cleanupTestSuperAdmin,
+  clearCookies,
   loginDemoUser,
   loginUser,
   provisionTestSuperAdmin,
+  setupTestServerLifecycle,
   TEST_USER_PASSWORD,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
+  testClient,
+} from "@/test/helpers";
 
 function buildGeneralUserInput(
   overrides: Partial<GeneralUserCreateInput> & {

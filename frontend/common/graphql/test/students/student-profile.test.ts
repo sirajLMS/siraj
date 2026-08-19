@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
-import { authenticatedRequest, loginAndProvision, loginDemoUser } from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+import { authenticatedRequest, loginAndProvision, loginDemoUser, setupTestServerLifecycle } from "@/test/helpers";
 
 describe("GraphQL Student Profile Integration Tests", () => {
   setupTestServerLifecycle();

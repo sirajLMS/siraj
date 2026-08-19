@@ -17,9 +17,9 @@ import {
   cleanupTestEntities,
   type LoginAndProvisionResult,
   loginAndProvision,
-} from "@/frontend/common/graphql/test/helpers";
-import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
-import { testClient } from "@/frontend/common/graphql/test/testClient";
+  setupTestServerLifecycle,
+  testClient,
+} from "@/test/helpers";
 
 describe("GraphQL Parent Directory Tests", () => {
   setupTestServerLifecycle();
