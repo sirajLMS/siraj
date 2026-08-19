@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Locator, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { DEMO_USERS, devWaitTimeout, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -46,7 +46,7 @@ type LocatorLike = ReturnType<Page["getByRole"]>;
 
 async function isVisible(locator: LocatorLike): Promise<boolean> {
   try {
-    await locator.first().waitFor({ state: "visible", timeout: 5000 });
+    await locator.first().waitFor({ state: "visible", timeout: devWaitTimeout });
     return true;
   } catch {
     return false;
@@ -55,7 +55,7 @@ async function isVisible(locator: LocatorLike): Promise<boolean> {
 
 async function waitForSuccessOrHidden(dialog: Locator, snackbar: Locator): Promise<void> {
   try {
-    await snackbar.waitFor({ state: "visible" });
+    await snackbar.waitFor({ state: "visible", timeout: devWaitTimeout });
   } catch {
     expect(await dialog.isVisible()).toBe(false);
   }
@@ -65,12 +65,12 @@ async function logout(appContext: BrowserContext, pageNumber: Page): Promise<voi
   const logoutButton = pageNumber.getByRole("button", { name: LOGOUT_BUTTON }).first();
   if (await isVisible(logoutButton)) {
     await logoutButton.click();
-    await pageNumber.waitForURL("**/login**");
+    await pageNumber.waitForURL("**/login**", { timeout: devWaitTimeout });
     return;
   }
   await appContext.clearCookies();
   await pageNumber.goto("/login");
-  await pageNumber.waitForURL("**/login**");
+  await pageNumber.waitForURL("**/login**", { timeout: devWaitTimeout });
 }
 
 async function loginDemo(role: "teacher" | "supervisor"): Promise<void> {
@@ -81,18 +81,18 @@ async function loginDemo(role: "teacher" | "supervisor"): Promise<void> {
 
 async function fillLessonReportDialog(pageNumber: Page): Promise<void> {
   const dialog = pageNumber.getByRole("dialog", { name: DIALOG_TITLE });
-  await dialog.waitFor({ state: "visible" });
+  await dialog.waitFor({ state: "visible", timeout: devWaitTimeout });
 
   const attendanceSelect = dialog.getByLabel(ATTENDANCE_EVALUATION);
-  await attendanceSelect.waitFor({ state: "visible" });
+  await attendanceSelect.waitFor({ state: "visible", timeout: devWaitTimeout });
   await attendanceSelect.selectOption({ label: lr.present });
 
   const durationInput = dialog.getByLabel(DURATION_MINUTES);
-  await durationInput.waitFor({ state: "visible" });
+  await durationInput.waitFor({ state: "visible", timeout: devWaitTimeout });
   await durationInput.fill("60");
 
   const completionSlider = dialog.getByRole("slider", { name: COMPLETION_PERCENTAGE });
-  await completionSlider.waitFor({ state: "visible" });
+  await completionSlider.waitFor({ state: "visible", timeout: devWaitTimeout });
   await completionSlider.evaluate((el: HTMLInputElement) => {
     el.value = "100";
     el.dispatchEvent(new Event("input", { bubbles: true }));
@@ -100,14 +100,14 @@ async function fillLessonReportDialog(pageNumber: Page): Promise<void> {
   });
 
   const notesInput = dialog.getByLabel(TEACHER_NOTES);
-  await notesInput.waitFor({ state: "visible" });
+  await notesInput.waitFor({ state: "visible", timeout: devWaitTimeout });
   await notesInput.fill("Test lesson report");
 
   const submitButton = dialog.getByRole("button", { name: SUBMIT_BUTTON }).first();
-  await submitButton.waitFor({ state: "visible" });
+  await submitButton.waitFor({ state: "visible", timeout: devWaitTimeout });
   await submitButton.click();
 
-  await dialog.waitFor({ state: "hidden" });
+  await dialog.waitFor({ state: "hidden", timeout: devWaitTimeout });
 }
 
 async function submitTeacherLessonReportIfAvailable(pageNumber: Page): Promise<void> {
@@ -116,7 +116,7 @@ async function submitTeacherLessonReportIfAvailable(pageNumber: Page): Promise<v
 
   if (!hasMarkCompletedButton) {
     const pageTitle = pageNumber.getByRole("heading", { level: 2 });
-    await pageTitle.first().waitFor({ state: "visible" });
+    await pageTitle.first().waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await pageTitle.first().isVisible()).toBe(true);
     return;
   }
@@ -129,7 +129,7 @@ async function approvePendingReportIfAvailable(pageNumber: Page): Promise<void> 
   const reviewsTitle = pageNumber.getByRole("heading", {
     name: new RegExp(`${PENDING_REVIEWS_TITLE.source}|${LESSON_REPORTS_TITLE.source}`, "i"),
   });
-  await reviewsTitle.first().waitFor({ state: "visible" });
+  await reviewsTitle.first().waitFor({ state: "visible", timeout: devWaitTimeout });
 
   const reportRow = pageNumber.locator('[role="row"]').filter({ hasText: "Test lesson report" }).first();
   const hasReport = await isVisible(reportRow);
@@ -140,7 +140,7 @@ async function approvePendingReportIfAvailable(pageNumber: Page): Promise<void> 
   }
 
   const approveButton = reportRow.getByRole("button", { name: APPROVE_BUTTON }).first();
-  await approveButton.waitFor({ state: "visible" });
+  await approveButton.waitFor({ state: "visible", timeout: devWaitTimeout });
   await approveButton.click();
 
   const successSnackbar = pageNumber.getByRole("status", { name: APPROVE_SUCCESS });
@@ -148,7 +148,7 @@ async function approvePendingReportIfAvailable(pageNumber: Page): Promise<void> 
 
   const approvedStatus = reportRow.getByText(APPROVED_STATUS);
   try {
-    await approvedStatus.waitFor({ state: "visible" });
+    await approvedStatus.waitFor({ state: "visible", timeout: devWaitTimeout });
   } catch {
     expect(await approveButton.isVisible()).toBe(false);
   }
@@ -161,11 +161,11 @@ describe("Teacher Lesson Report E2E Flow", () => {
     // ====================================================================
     await loginDemo("teacher");
 
-    await page.waitForURL("**/dashboard**");
+    await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
     expect(page.url()).toContain("/dashboard");
 
     const pageTitle = page.getByRole("heading", { level: 2 });
-    await pageTitle.first().waitFor({ state: "visible" });
+    await pageTitle.first().waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await pageTitle.first().isVisible()).toBe(true);
 
     await submitTeacherLessonReportIfAvailable(page);
@@ -178,7 +178,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
     await loginDemo("supervisor");
 
     await page.goto("/lesson-reports");
-    await page.waitForURL("**/lesson-reports**");
+    await page.waitForURL("**/lesson-reports**", { timeout: devWaitTimeout });
     expect(page.url()).toContain("/lesson-reports");
 
     await approvePendingReportIfAvailable(page);
@@ -194,7 +194,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
 
     // Verify teacher dashboard loads
     const dashboardTitle = page.getByRole("heading", { level: 2 });
-    await dashboardTitle.first().waitFor({ state: "visible" });
+    await dashboardTitle.first().waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await dashboardTitle.first().isVisible()).toBe(true);
 
     // Check for Mark Completed button (either enabled or disabled)
@@ -205,7 +205,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
     // Check for schedule grid or list view
     const scheduleGrid = page.locator('[role="rowgroup"], [class*="schedule"], [class*="Schedule"]').first();
     try {
-      await scheduleGrid.waitFor({ state: "visible" });
+      await scheduleGrid.waitFor({ state: "visible", timeout: devWaitTimeout });
     } catch {
       // Fallback: verify the dashboard heading is still visible
       expect(await dashboardTitle.first().isVisible()).toBe(true);
@@ -219,13 +219,13 @@ describe("Teacher Lesson Report E2E Flow", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
 
     await page.goto("/lesson-reports");
-    await page.waitForURL("**/lesson-reports**");
+    await page.waitForURL("**/lesson-reports**", { timeout: devWaitTimeout });
     expect(page.url()).toContain("/lesson-reports");
 
     // Verify page loads with pending reviews container
     const pageTitle = page.getByRole("heading", {
       name: new RegExp(`${PENDING_REVIEWS_TITLE.source}|${LESSON_REPORTS_TITLE.source}`, "i"),
     });
-    await pageTitle.first().waitFor({ state: "visible" });
+    await pageTitle.first().waitFor({ state: "visible", timeout: devWaitTimeout });
   });
 });

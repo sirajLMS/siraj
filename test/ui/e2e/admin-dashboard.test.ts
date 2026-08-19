@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { closeE2eSession, DEMO_USERS, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { closeE2eSession, DEMO_USERS, devWaitTimeout, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -38,7 +38,7 @@ describe.serial("Admin Dashboard E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
     const textbox = page.getByRole("textbox");
-    await textbox.first().waitFor({ state: "visible" });
+    await textbox.first().waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await textbox.first().isVisible()).toBe(true);
   });
 
@@ -49,18 +49,18 @@ describe.serial("Admin Dashboard E2E", () => {
 
     // Desktop admin dashboard renders schedule cards (not MuiDataGrid). Timezone fields
     // appear as labeled meta stats when ScheduleViewTimezones is granted.
-    await page.getByText(SCHEDULE_OVERVIEW).first().waitFor({ state: "visible" });
+    await page.getByText(SCHEDULE_OVERVIEW).first().waitFor({ state: "visible", timeout: devWaitTimeout });
 
     const yourTimeLabel = page.getByText(YOUR_TIME).first();
-    await yourTimeLabel.waitFor({ state: "visible" });
+    await yourTimeLabel.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await yourTimeLabel.isVisible()).toBe(true);
 
     const teacherTimeLabel = page.getByText(TEACHER_TIME).first();
-    await teacherTimeLabel.waitFor({ state: "visible" });
+    await teacherTimeLabel.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await teacherTimeLabel.isVisible()).toBe(true);
 
     const studentTimeLabel = page.getByText(STUDENT_TIME).first();
-    await studentTimeLabel.waitFor({ state: "visible" });
+    await studentTimeLabel.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await studentTimeLabel.isVisible()).toBe(true);
   });
 
@@ -70,15 +70,15 @@ describe.serial("Admin Dashboard E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
     const searchInput = page.getByPlaceholder(SEARCH_PLACEHOLDER).first();
-    await searchInput.waitFor({ state: "visible" });
+    await searchInput.waitFor({ state: "visible", timeout: devWaitTimeout });
 
     // Wait for seeded schedule cards before asserting the filter narrows results.
-    await page.getByText(TEACHER_TIME).first().waitFor({ state: "visible" });
+    await page.getByText(TEACHER_TIME).first().waitFor({ state: "visible", timeout: devWaitTimeout });
 
     await searchInput.fill("zzzz-e2e-no-match");
 
     const emptyState = page.getByText(NO_CLASSES).first();
-    await emptyState.waitFor({ state: "visible" });
+    await emptyState.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await emptyState.isVisible()).toBe(true);
   });
 
@@ -87,7 +87,7 @@ describe.serial("Admin Dashboard E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    await page.getByText(TEACHER_TIME).first().waitFor({ state: "visible" });
+    await page.getByText(TEACHER_TIME).first().waitFor({ state: "visible", timeout: devWaitTimeout });
 
     const detailsButton = page
       .locator(`[aria-label*="${escapeRegExp(admin.details)}"], [title*="${escapeRegExp(admin.details)}"]`)
@@ -112,12 +112,12 @@ describe.serial("Admin Dashboard E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.academyAdmin.groupSlug);
 
-    await page.getByText(SCHEDULE_OVERVIEW).first().waitFor({ state: "visible" });
+    await page.getByText(SCHEDULE_OVERVIEW).first().waitFor({ state: "visible", timeout: devWaitTimeout });
 
     expect(await page.locator(".MuiDataGrid-root").count()).toBe(0);
 
     const scheduleCardMarker = page.getByText(YOUR_TIME).first();
-    await scheduleCardMarker.waitFor({ state: "visible" });
+    await scheduleCardMarker.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await scheduleCardMarker.isVisible()).toBe(true);
   });
 
@@ -130,7 +130,7 @@ describe.serial("Admin Dashboard E2E", () => {
     const heading = page.getByText(SEARCH_SCHEDULE_TITLE).first();
     const searchButton = page.getByRole("button", { name: SEARCH_BUTTON }).first();
 
-    await searchButton.waitFor({ state: "visible" });
+    await searchButton.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await heading.isVisible()).toBe(true);
     expect(await searchButton.isVisible()).toBe(true);
   });

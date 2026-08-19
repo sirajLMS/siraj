@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { DEMO_USERS, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { DEMO_USERS, devWaitTimeout, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -97,7 +97,7 @@ async function setupMobileRouteTest(route: string): Promise<{ page: Page; contex
  */
 async function expectMetricCard(p: Page): Promise<void> {
   const metricCard = p.locator(".MuiPaper-root").first();
-  await metricCard.waitFor({ state: "attached" });
+  await metricCard.waitFor({ state: "attached", timeout: devWaitTimeout });
   expect(await metricCard.count()).toBeGreaterThan(0);
 }
 
@@ -106,7 +106,7 @@ async function expectMetricCard(p: Page): Promise<void> {
  */
 async function expectInsightsPageLoaded(p: Page): Promise<void> {
   const insightsTitle = p.getByText(QUOTA_INSIGHTS_TITLE).first();
-  await insightsTitle.waitFor({ state: "attached", timeout: 30_000 });
+  await insightsTitle.waitFor({ state: "attached", timeout: devWaitTimeout });
   expect(await insightsTitle.count()).toBeGreaterThan(0);
   await expectMetricCard(p);
 }
@@ -118,7 +118,7 @@ async function expectInsightsPageLoaded(p: Page): Promise<void> {
  */
 async function gotoQuotaList(p: Page): Promise<void> {
   await gotoAppRoute(p, "/quotas");
-  await p.getByText(QUOTA_TITLE).first().waitFor({ state: "attached" });
+  await p.getByText(QUOTA_TITLE).first().waitFor({ state: "attached", timeout: devWaitTimeout });
 }
 
 /**
@@ -132,19 +132,19 @@ async function waitForDesktopContent(p: Page): Promise<void> {
   const errorState = p.getByText(EMPTY_LIST_MSG).first();
 
   const gridReady = dataGrid
-    .waitFor({ state: "attached", timeout: 30_000 })
+    .waitFor({ state: "attached", timeout: devWaitTimeout })
     .then(() => true)
     .catch(() => false);
   const cardReady = cardList
-    .waitFor({ state: "attached", timeout: 30_000 })
+    .waitFor({ state: "attached", timeout: devWaitTimeout })
     .then(() => true)
     .catch(() => false);
   const emptyReady = emptyState
-    .waitFor({ state: "attached", timeout: 30_000 })
+    .waitFor({ state: "attached", timeout: devWaitTimeout })
     .then(() => true)
     .catch(() => false);
   const errorReady = errorState
-    .waitFor({ state: "attached", timeout: 30_000 })
+    .waitFor({ state: "attached", timeout: devWaitTimeout })
     .then(() => true)
     .catch(() => false);
 
@@ -174,19 +174,19 @@ describe.serial("Quota E2E", () => {
     const emptyError = page.getByText(EMPTY_LIST_MSG).first();
 
     const gridReady = dataGrid
-      .waitFor({ state: "attached", timeout: 30_000 })
+      .waitFor({ state: "attached", timeout: devWaitTimeout })
       .then(() => true)
       .catch(() => false);
     const cardReady = cardList
-      .waitFor({ state: "attached", timeout: 30_000 })
+      .waitFor({ state: "attached", timeout: devWaitTimeout })
       .then(() => true)
       .catch(() => false);
     const emptyReady = noData
-      .waitFor({ state: "attached", timeout: 30_000 })
+      .waitFor({ state: "attached", timeout: devWaitTimeout })
       .then(() => true)
       .catch(() => false);
     const errorReady = emptyError
-      .waitFor({ state: "attached", timeout: 30_000 })
+      .waitFor({ state: "attached", timeout: devWaitTimeout })
       .then(() => true)
       .catch(() => false);
 
@@ -194,7 +194,7 @@ describe.serial("Quota E2E", () => {
 
     if (hasGrid) {
       const pagination = page.locator(".MuiDataGrid-pagination, .MuiPagination-root").first();
-      await pagination.waitFor({ state: "attached" });
+      await pagination.waitFor({ state: "attached", timeout: devWaitTimeout });
       expect(await pagination.count()).toBeGreaterThan(0);
     } else if (hasCards) {
       // Card-based list pagination: look for "1–N of N" text or prev/next buttons
@@ -213,15 +213,15 @@ describe.serial("Quota E2E", () => {
     await waitForDesktopContent(page);
 
     const searchInput = page.getByPlaceholder(QUOTA_LIST_TITLE).first();
-    await searchInput.waitFor({ state: "attached" });
+    await searchInput.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await searchInput.count()).toBeGreaterThan(0);
 
     const statusLabel = page.getByText(STATUS_LABEL).first();
-    await statusLabel.waitFor({ state: "attached" });
+    await statusLabel.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await statusLabel.count()).toBeGreaterThan(0);
 
     const kindLabel = page.getByText(KIND_LABEL).first();
-    await kindLabel.waitFor({ state: "attached" });
+    await kindLabel.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await kindLabel.count()).toBeGreaterThan(0);
   });
 
@@ -231,7 +231,7 @@ describe.serial("Quota E2E", () => {
     // DesktopPageHeader renders MUI <Breadcrumbs> without explicit aria-label;
     // use the MUI class selector instead of [aria-label="breadcrumb"].
     const breadcrumb = page.locator(".MuiBreadcrumbs-root").first();
-    await breadcrumb.waitFor({ state: "attached" });
+    await breadcrumb.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await breadcrumb.count()).toBeGreaterThan(0);
   });
 
@@ -239,7 +239,7 @@ describe.serial("Quota E2E", () => {
     ({ page, context } = await setupDesktopQuotaListTest());
 
     const newQuotaLink = page.getByRole("link", { name: NEW_QUOTA_BUTTON }).first();
-    await newQuotaLink.waitFor({ state: "attached" });
+    await newQuotaLink.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await newQuotaLink.count()).toBeGreaterThan(0);
   });
 
@@ -247,7 +247,7 @@ describe.serial("Quota E2E", () => {
     ({ page, context } = await setupDesktopQuotaListTest());
 
     const insightsLink = page.getByRole("link", { name: QUOTA_INSIGHTS_LINK }).first();
-    await insightsLink.waitFor({ state: "attached" });
+    await insightsLink.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await insightsLink.count()).toBeGreaterThan(0);
   });
 
@@ -267,11 +267,11 @@ describe.serial("Quota E2E", () => {
     const newQuotaFab = page.getByRole("button", { name: NEW_QUOTA_BUTTON }).first();
 
     const linkReady = newQuotaLink
-      .waitFor({ state: "attached", timeout: 30_000 })
+      .waitFor({ state: "attached", timeout: devWaitTimeout })
       .then(() => true)
       .catch(() => false);
     const fabReady = newQuotaFab
-      .waitFor({ state: "attached", timeout: 30_000 })
+      .waitFor({ state: "attached", timeout: devWaitTimeout })
       .then(() => true)
       .catch(() => false);
 
@@ -283,20 +283,20 @@ describe.serial("Quota E2E", () => {
     ({ page, context } = await setupDesktopRouteTest("/quotas/new"));
 
     // Wait for form page — the page heading renders the title text
-    await page.getByText(NEW_QUOTA_BUTTON).first().waitFor({ state: "attached" });
+    await page.getByText(NEW_QUOTA_BUTTON).first().waitFor({ state: "attached", timeout: devWaitTimeout });
 
     // Form has 3 DesktopSectionPanels: Student, Kind, Valid From
     // Each panel title appears as text content in the panel header
     const studentPanel = page.getByText(STUDENT_LABEL).first();
-    await studentPanel.waitFor({ state: "attached", timeout: 30_000 });
+    await studentPanel.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await studentPanel.count()).toBeGreaterThan(0);
 
     const kindPanel = page.getByText(KIND_LABEL).first();
-    await kindPanel.waitFor({ state: "attached", timeout: 30_000 });
+    await kindPanel.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await kindPanel.count()).toBeGreaterThan(0);
 
     const validFromPanel = page.getByText(VALID_FROM_LABEL).first();
-    await validFromPanel.waitFor({ state: "attached", timeout: 30_000 });
+    await validFromPanel.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await validFromPanel.count()).toBeGreaterThan(0);
 
     // Submit button — "Create Quota" or "Save Changes"
@@ -304,7 +304,7 @@ describe.serial("Quota E2E", () => {
       .getByRole("button", { name: CREATE_QUOTA_BUTTON })
       .or(page.getByRole("button", { name: SAVE_BUTTON }))
       .first();
-    await submitButton.waitFor({ state: "attached", timeout: 30_000 });
+    await submitButton.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await submitButton.count()).toBeGreaterThan(0);
   });
 
@@ -314,10 +314,10 @@ describe.serial("Quota E2E", () => {
     // students depend on seed data which may not be consistent in the E2E env.
     ({ page, context } = await setupDesktopRouteTest("/quotas/new"));
 
-    await page.getByText(NEW_QUOTA_BUTTON).first().waitFor({ state: "attached" });
+    await page.getByText(NEW_QUOTA_BUTTON).first().waitFor({ state: "attached", timeout: devWaitTimeout });
     const quotaName = new RegExp(escapeRegExp(t.fields.name));
     const nameField = page.getByLabel(quotaName).first();
-    await nameField.waitFor({ state: "attached" });
+    await nameField.waitFor({ state: "attached", timeout: devWaitTimeout });
     await nameField.fill("E2E Test Quota");
 
     const studentField = page.getByLabel(STUDENT_LABEL).first();
@@ -331,11 +331,11 @@ describe.serial("Quota E2E", () => {
     const submitButton = page.getByRole("button", { name: CREATE_QUOTA_BUTTON }).first();
     await submitButton.click();
 
-    await page.waitForURL("**/quotas**", { timeout: 30_000 });
+    await page.waitForURL("**/quotas**", { timeout: devWaitTimeout });
     expect(page.url()).toContain("/quotas");
 
     const listTitle = page.getByText(QUOTA_LIST_TITLE).first();
-    await listTitle.waitFor({ state: "attached" });
+    await listTitle.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await listTitle.count()).toBeGreaterThan(0);
   });
 
@@ -348,7 +348,7 @@ describe.serial("Quota E2E", () => {
     ({ page, context } = await setupDesktopRouteTest("/quotas/insights"));
 
     const insightsTitle = page.getByText(QUOTA_INSIGHTS_TITLE).first();
-    await insightsTitle.waitFor({ state: "attached", timeout: 30_000 });
+    await insightsTitle.waitFor({ state: "attached", timeout: devWaitTimeout });
 
     // Wait for metric cards to confirm loading state has resolved
     await expectMetricCard(page);
@@ -364,7 +364,7 @@ describe.serial("Quota E2E", () => {
         ),
       })
       .first();
-    await anyFilter.waitFor({ state: "attached", timeout: 30_000 });
+    await anyFilter.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await anyFilter.count()).toBeGreaterThan(0);
 
     const hasDateRange = (await page.getByRole("button", { name: DATE_RANGE_LABEL }).count()) > 0;
@@ -381,20 +381,20 @@ describe.serial("Quota E2E", () => {
     ({ page, context } = await setupDesktopQuotaListTest());
 
     const dataGrid = page.locator(".MuiDataGrid-root").first();
-    await dataGrid.waitFor({ state: "attached" });
+    await dataGrid.waitFor({ state: "attached", timeout: devWaitTimeout });
 
     const deleteButton = page.locator(`button[aria-label*="${escapeRegExp(t.actions.delete)}"]`).first();
-    await deleteButton.waitFor({ state: "attached" });
+    await deleteButton.waitFor({ state: "attached", timeout: devWaitTimeout });
     await deleteButton.click();
 
     const dialogTitle = page.getByText(DELETE_QUOTA_BUTTON).first();
-    await dialogTitle.waitFor({ state: "attached" });
+    await dialogTitle.waitFor({ state: "attached", timeout: devWaitTimeout });
     expect(await dialogTitle.count()).toBeGreaterThan(0);
 
     const confirmButton = page.getByRole("button", { name: DELETE_CONFIRM }).first();
     await confirmButton.click();
 
-    await page.waitForURL("**/quotas**", { timeout: 30_000 });
+    await page.waitForURL("**/quotas**", { timeout: devWaitTimeout });
     expect(page.url()).toContain("/quotas");
   });
 
@@ -406,17 +406,17 @@ describe.serial("Quota E2E", () => {
     const hasDelete = (await deleteButton.count()) > 0;
 
     if (hasDelete) {
-      await deleteButton.waitFor({ state: "attached" });
+      await deleteButton.waitFor({ state: "attached", timeout: devWaitTimeout });
       await deleteButton.click();
 
       const dialogTitle = page.getByText(DELETE_QUOTA_BUTTON).first();
-      await dialogTitle.waitFor({ state: "attached" });
+      await dialogTitle.waitFor({ state: "attached", timeout: devWaitTimeout });
       expect(await dialogTitle.count()).toBeGreaterThan(0);
 
       const cancelButton = page.getByRole("button", { name: DELETE_CANCEL }).first();
       await cancelButton.click();
 
-      await dialogTitle.waitFor({ state: "detached" });
+      await dialogTitle.waitFor({ state: "detached", timeout: devWaitTimeout });
       expect(await dialogTitle.count()).toBe(0);
     } else {
       // No delete buttons visible (empty state) — verify no VISIBLE delete dialog.

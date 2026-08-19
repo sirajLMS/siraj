@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { DEMO_USERS, devWaitTimeout, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -70,13 +70,13 @@ afterEach(async () => {
 });
 
 async function expectVisible(locator: import("playwright").Locator): Promise<void> {
-  await locator.first().waitFor({ state: "visible" });
+  await locator.first().waitFor({ state: "visible", timeout: devWaitTimeout });
   expect(await locator.first().isVisible()).toBe(true);
 }
 
 async function isVisibleSafe(locator: import("playwright").Locator): Promise<boolean> {
   try {
-    await locator.first().waitFor({ state: "visible", timeout: 5000 });
+    await locator.first().waitFor({ state: "visible", timeout: devWaitTimeout });
     return true;
   } catch {
     return false;
@@ -145,7 +145,7 @@ describe("Supervisor Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     // Click go to reviews button
     await page.getByRole("button", { name: GO_TO_REVIEWS }).click();
-    await page.waitForURL("**/lesson-reports**");
+    await page.waitForURL("**/lesson-reports**", { timeout: devWaitTimeout });
     // Pending reviews page title
     await expectVisible(page.getByRole("heading", { name: PENDING_REVIEWS_TITLE }));
 
@@ -177,7 +177,7 @@ describe("Supervisor Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     // Click go to dues button
     await page.getByRole("button", { name: GO_TO_DUES }).click();
-    await page.waitForURL("**/teacher-dues**");
+    await page.waitForURL("**/teacher-dues**", { timeout: devWaitTimeout });
     // Teacher dues page title
     await expectVisible(page.getByRole("heading", { name: TEACHER_DUES_TITLE }));
 
@@ -200,7 +200,7 @@ describe("Supervisor Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
     // Click go to monthly reports button
     await page.getByRole("button", { name: GO_TO_MONTHLY_REPORTS }).click();
-    await page.waitForURL("**/monthly-reports**");
+    await page.waitForURL("**/monthly-reports**", { timeout: devWaitTimeout });
     // Monthly reports page title
     await expectVisible(page.getByRole("heading", { name: MONTHLY_REPORTS_TITLE }));
 

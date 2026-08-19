@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Locator, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { DEMO_USERS, devWaitTimeout, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -48,7 +48,7 @@ describe("Notifications & Billing E2E", () => {
   test("Admin sees notification bell icon", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     const bellButton = getBellButton(p);
-    await bellButton.waitFor({ state: "visible" });
+    await bellButton.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await bellButton.isVisible()).toBe(true);
   });
 
@@ -57,7 +57,7 @@ describe("Notifications & Billing E2E", () => {
     await getBellButton(p).click();
     // Drawer title: "Notifications" (en) / "الإشعارات" (ar)
     const drawerTitle = p.getByText(NOTIFICATIONS).first();
-    await drawerTitle.waitFor({ state: "visible" });
+    await drawerTitle.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await drawerTitle.isVisible()).toBe(true);
   });
 
@@ -68,7 +68,7 @@ describe("Notifications & Billing E2E", () => {
     await getBellButton(p).click();
     // Section title: "Unpaid Invoices" (en) / "الفواتير غير المدفوعة" (ar)
     const billingTitle = p.getByText(POSTPAID_INVOICES_TITLE).first();
-    await billingTitle.waitFor({ state: "visible" });
+    await billingTitle.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await billingTitle.isVisible()).toBe(true);
   });
 
@@ -78,12 +78,12 @@ describe("Notifications & Billing E2E", () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug);
     await getBellButton(p).click();
     const billingTitle = p.getByText(POSTPAID_INVOICES_TITLE).first();
-    await billingTitle.waitFor({ state: "visible" });
+    await billingTitle.waitFor({ state: "visible", timeout: devWaitTimeout });
 
     const userRow = p.locator('[role="button"]').filter({ hasText: /\w+/ }).last();
     if (await userRow.isVisible()) {
       await userRow.click();
-      await p.waitForURL("**/billing-profile**");
+      await p.waitForURL("**/billing-profile**", { timeout: devWaitTimeout });
       expect(p.url()).toContain("/billing-profile");
     }
   });
@@ -97,11 +97,11 @@ describe("Notifications & Billing E2E", () => {
   test("Mobile: bell icon visible and popover renders", async () => {
     const p = await setupLoggedInPage(DEMO_USERS.academyAdmin.groupSlug, createMobileContext);
     const bellButton = getBellButton(p);
-    await bellButton.waitFor({ state: "visible" });
+    await bellButton.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await bellButton.isVisible()).toBe(true);
     await bellButton.click();
     const drawerTitle = p.getByText(NOTIFICATIONS).first();
-    await drawerTitle.waitFor({ state: "visible" });
+    await drawerTitle.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await drawerTitle.isVisible()).toBe(true);
   });
 });

@@ -5,8 +5,10 @@ import {
   authenticateDemoUser,
   closeE2eSession,
   DEMO_USERS,
+  devWaitTimeout,
   gotoAppRoute,
   loginAsDemoUser,
+  waitForDashboardReady,
 } from "@/test/ui/e2e/helpers";
 import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
@@ -61,9 +63,10 @@ async function waitForSearchScheduleReady(page: Page): Promise<void> {
 }
 
 async function navigateToSearchSchedule(page: Page): Promise<void> {
+  const isDev = process.env.TEST_SERVER_MODE === "dev";
   try {
     const link = scheduleSearchNavLink(page);
-    await link.waitFor({ state: "visible", timeout: 10_000 });
+    await link.waitFor({ state: "visible", timeout: isDev ? 120_000 : 10_000 });
     await link.click({ timeout: 15_000 });
   } catch {
     await gotoAppRoute(page, "/search-schedule");
@@ -104,7 +107,7 @@ describe.serial("Availability Search E2E", () => {
     expect(adminPage.url()).toContain("/search-schedule");
 
     const heading = adminPage.getByText(SCHEDULE_SEARCH_TITLE).first();
-    await heading.waitFor({ state: "visible" });
+    await heading.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await heading.isVisible()).toBe(true);
   });
 
@@ -119,7 +122,7 @@ describe.serial("Availability Search E2E", () => {
     const filtersButton = adminPage.getByRole("button", { name: FILTERS_BUTTON }).first();
     const searchButton = adminPage.getByRole("button", { name: SEARCH_BUTTON }).first();
 
-    await dateRange.waitFor({ state: "visible" });
+    await dateRange.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await dateRange.isVisible()).toBe(true);
     expect(await timeRange.isVisible()).toBe(true);
     expect(await filtersButton.isVisible()).toBe(true);
@@ -136,7 +139,7 @@ describe.serial("Availability Search E2E", () => {
     await searchButton.click();
 
     const outcome = adminPage.getByText(SEARCH_OUTCOME).first();
-    await outcome.waitFor({ state: "visible" });
+    await outcome.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await outcome.isVisible()).toBe(true);
   });
 
@@ -145,7 +148,7 @@ describe.serial("Availability Search E2E", () => {
     isolatedPage = await isolatedContext.newPage();
     await authenticateDemoUser(isolatedContext, DEMO_USERS.teacher.groupSlug);
     await gotoAppRoute(isolatedPage, "/dashboard");
-    await isolatedPage.getByText(tr(nav.todayClasses)).first().waitFor({ state: "visible", timeout: 120_000 });
+    await waitForDashboardReady(isolatedPage);
 
     expect(await isolatedPage.getByRole("link", { name: SCHEDULE_SEARCH_NAV }).count()).toBe(0);
   });

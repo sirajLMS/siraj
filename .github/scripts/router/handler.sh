@@ -2,7 +2,7 @@
 # ==============================================================================
 # Robust HTTP Request Handler for NVIDIA Router (OpenAI Compatible)
 # ==============================================================================
-set -eo pipefail
+set -uo pipefail
 
 ROUTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${ROUTER_DIR}/cooldown.sh"
@@ -13,8 +13,10 @@ ROUTER_PORT="${1:-${ROUTER_PORT:-20128}}"
 STATE_DIR="${2:-${STATE_DIR:-/tmp/nvidia_router_state_${ROUTER_PORT}}}"
 UPSTREAM_URL="${UPSTREAM_URL:-https://integrate.api.nvidia.com/v1/chat/completions}"
 MAX_RETRIES="${MAX_RETRIES:-60}"
-CURL_TIMEOUT="${CURL_TIMEOUT:-120}"
-REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-270}"
+# 25s per attempt: fast-fail so we stay under undici's 30s headersTimeout
+CURL_TIMEOUT="${CURL_TIMEOUT:-25}"
+# Total budget: 90s (3 attempts × 25s + rotation overhead)
+REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-90}"
 
 # Send formatted OpenAI JSON response
 send_openai_json_response() {

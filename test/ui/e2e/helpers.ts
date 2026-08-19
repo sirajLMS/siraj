@@ -8,6 +8,9 @@ import { getTestBaseUrl, isTestServerRunning, startTestServer } from "@/test/hel
 const PWD = "12345678";
 const REQUIRED_AUTH_COOKIES = ["session_id", "refresh_token", "access_token"] as const;
 
+/** Dev-mode-aware timeout for element waits. Dev mode compilation can take 2+ minutes under load. */
+export const devWaitTimeout = process.env.TEST_SERVER_MODE === "dev" ? 120_000 : 30_000;
+
 export const DEMO_USERS = {
   superAdmin: {
     email: superAdmins[0].email,
@@ -328,7 +331,7 @@ async function retryWithBackoff<T>(
 async function gotoWithRetry(page: Page, path: string): Promise<void> {
   const maxAttempts = 3;
   const isDevMode = process.env.TEST_SERVER_MODE === "dev";
-  const gotoTimeout = isDevMode ? 180_000 : 30_000;
+  const gotoTimeout = isDevMode ? 240_000 : 30_000;
   await retryWithBackoff(
     () => page.goto(path, { waitUntil: "commit", timeout: gotoTimeout }),
     maxAttempts,

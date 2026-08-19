@@ -89,9 +89,9 @@ normalize_openai_payload() {
         end
       # 4. Strip custom client params
       | del(.snippy)
-      # 5. Clamp max_tokens for GLM-5.2 (16,000 output cap)
-      | if (.model // "" | test("glm-5\\.2"; "i")) and (.max_tokens != null) and (.max_tokens > 16000) then
-          .max_tokens = 16000
+      # 5. Clamp max_tokens for GLM-5.2 to 1000 (latency cap: keeps generation <25s within curl timeout)
+      | if (.model // "" | test("glm-5\\.2"; "i")) and (.max_tokens == null or .max_tokens > 1000) then
+          .max_tokens = 1000
         else
           .
         end

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { closeE2eSession, DEMO_USERS, loginAsDemoUserAtRoute } from "@/test/ui/e2e/helpers";
+import { closeE2eSession, DEMO_USERS, devWaitTimeout, loginAsDemoUserAtRoute } from "@/test/ui/e2e/helpers";
 import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -92,7 +92,7 @@ describe("Teacher Onboarding E2E", () => {
     // A valid phone should not show any phone validation error.
     // Wait for the prefix to settle (valid phone success indicator).
     const phoneDisplay = page.getByLabel(PHONE_LABEL);
-    await phoneDisplay.waitFor({ state: "visible", timeout: 5_000 });
+    await phoneDisplay.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(
       await page
         .getByText(PHONE_INVALID_ERROR)

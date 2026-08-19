@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Locator, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { DEMO_USERS, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { DEMO_USERS, devWaitTimeout, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -47,11 +47,11 @@ afterEach(async () => {
 });
 
 async function expectVisible(locator: Locator): Promise<void> {
-  // waitFor({ state: "visible" }) is auto-waiting and proves the element
+  // waitFor({ state: "visible", timeout: devWaitTimeout }) is auto-waiting and proves the element
   // is visible. The previous pattern of waitFor + isVisible() races because
   // isVisible() is not auto-waiting and can return false during hydration
   // re-renders that happen between the two calls.
-  await locator.first().waitFor({ state: "visible" });
+  await locator.first().waitFor({ state: "visible", timeout: devWaitTimeout });
 }
 
 describe("Student Portal E2E", () => {
@@ -60,12 +60,12 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/dashboard**");
+    await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
     // Hero: Next Class label, or empty-state copy when no upcoming lesson
     const hero = page
       .locator('[class*="MuiPaper-root"], [class*="MuiBox-root"]')
       .filter({ hasText: new RegExp(`${NEXT_CLASS.source}|${NO_UPCOMING.source}`, "i") });
-    await hero.first().waitFor({ state: "visible" });
+    await hero.first().waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await hero.first().isVisible()).toBe(true);
 
     // Join button when a joinable lesson is present
@@ -85,7 +85,7 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/dashboard**");
+    await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
     await expectVisible(page.getByText(CLASSES_REMAINING));
     await expectVisible(page.getByText(CLASSES_TOTAL));
   });
@@ -95,7 +95,7 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/dashboard**");
+    await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
     await expectVisible(page.getByText(RECENT_LESSON_REPORTS));
   });
 
@@ -104,15 +104,15 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/dashboard**");
+    await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
     // Wait for the credits link to be visible and clickable.
     // The sidebar is a lazy-loaded client component — in dev mode it may
-    // take a while to compile. Using waitFor({ state: "visible" }) ensures
+    // take a while to compile. Using waitFor({ state: "visible", timeout: devWaitTimeout }) ensures
     // the link is rendered and hydrated before clicking.
     const creditsLink = page.getByRole("link", { name: CREDITS_LINK });
     await creditsLink.first().waitFor({ state: "visible", timeout: 60_000 });
     await creditsLink.click();
-    await page.waitForURL("**/students/credits**");
+    await page.waitForURL("**/students/credits**", { timeout: devWaitTimeout });
     await expectVisible(page.getByRole("heading", { name: CREDITS_LINK }));
   });
 
@@ -122,7 +122,7 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.goto("/students/credits");
-    await page.waitForURL("**/students/credits**");
+    await page.waitForURL("**/students/credits**", { timeout: devWaitTimeout });
     await expectVisible(page.getByRole("heading", { name: TRANSACTION_HISTORY }));
     await expectVisible(page.getByRole("columnheader", { name: DATE_COLUMN }));
     await expectVisible(page.getByRole("columnheader", { name: TYPE_COLUMN }));
@@ -135,7 +135,7 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/dashboard**");
+    await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
     const hero = page
       .locator('[class*="MuiPaper-root"], [class*="MuiBox-root"]')
       .filter({ hasText: new RegExp(`${NEXT_CLASS.source}|${NO_UPCOMING.source}`, "i") });
@@ -147,7 +147,7 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.waitForURL("**/dashboard**");
+    await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
     await expectVisible(page.getByRole("link", { name: TODAY_CLASSES_LINK }));
     await expectVisible(page.getByRole("link", { name: LESSON_HISTORY_LINK }));
     await expectVisible(page.getByRole("link", { name: SESSIONS_LINK }));
