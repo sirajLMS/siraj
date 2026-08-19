@@ -38,7 +38,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 0: Pre-Implementation Baseline (MANDATORY)
 
-- [ ] 0. Establish error baseline and create deferred-items ledger
+- [x] 0. Establish error baseline and create deferred-items ledger
   - Read all existing files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Record baseline error counts:
     ```bash
@@ -52,7 +52,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 1: Keystone — `DomainError` extends `GraphQLError` (REQ-1)
 
-- [ ] 1.1 Refactor `DomainError` to extend `GraphQLError`
+- [x] 1.1 Refactor `DomainError` to extend `GraphQLError`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -84,7 +84,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 1.1 as `[x]`
   - _Requirements: REQ-1 (AC 1-8)_
 
-- [ ] 1.2 Verify existing auth test still passes (smoke test)
+- [x] 1.2 Verify existing auth test still passes (smoke test)
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Run: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/auth/auth.test.ts`
   - Verify `auth.test.ts:184` — `expect(gqlError?.extensions?.code).toBe("UNAUTHENTICATED")` still passes
@@ -94,7 +94,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 1.2 as `[x]`
   - _Requirements: REQ-1 (AC 9), REQ-11 (GraphQL layer smoke)_
 
-- [ ] 1.3 Create DB-layer unit test for `DomainError` extends `GraphQLError`
+- [x] 1.3 Create DB-layer unit test for `DomainError` extends `GraphQLError`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -117,7 +117,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 1.3 as `[x]`
   - _Requirements: REQ-1 (AC 1-8), REQ-11 (DB layer)_
 
-- [ ] 1.4 MCP verification — compile `/api/graphql` route and check logs
+- [x] 1.4 MCP verification — compile `/api/graphql` route and check logs
   - Start dev server: `bun run dev` (port 3000)
   - Call `nextjs_call(port: "3000", toolName: "compile_route", args: { routeSpecifier: "/api/graphql" })` — confirm zero issues
   - Call `nextjs_call(port: "3000", toolName: "get_compilation_issues", args: {})` — confirm zero issues across ALL routes
@@ -130,7 +130,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 2: Suggestion repository — localized NotFoundError (REQ-2)
 
-- [ ] 2.1 Replace raw `new Error(...)` with `NotFoundError` in suggestion repository
+- [x] 2.1 Replace raw `new Error(...)` with `NotFoundError` in suggestion repository
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -151,7 +151,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 2.1 as `[x]`
   - _Requirements: REQ-2 (AC 1-3)_
 
-- [ ] 2.2 Upgrade DB repository test to assert `instanceof NotFoundError` AND `error.code`
+- [x] 2.2 Upgrade DB repository test to assert `instanceof NotFoundError` AND `error.code`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -200,7 +200,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 2.2 as `[x]`
   - _Requirements: REQ-2 (AC 1-3), REQ-11 (DB layer)_
 
-- [ ] 2.3 Upgrade service test to assert thrown error `code` property
+- [x] 2.3 Upgrade service test to assert thrown error `code` property
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -238,7 +238,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 2.3 as `[x]`
   - _Requirements: REQ-2 (AC 1-3), REQ-11 (service layer)_
 
-- [ ] 2.4 Upgrade GraphQL test to assert `extensions.code`
+- [x] 2.4 Upgrade GraphQL test to assert `extensions.code`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`
@@ -255,7 +255,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 2.4 as `[x]`
   - _Requirements: REQ-2 (AC 4), REQ-11 (GraphQL layer)_
 
-- [ ] 2.5 Run all three-layer tests + MCP verification
+- [x] 2.5 Run all three-layer tests + MCP verification
   - DB layer: `bun run scripts/run-test/run-test.ts backend/db/test/repo/parents/suggestion.repository.test.ts`
   - Service layer: `bun run scripts/run-test/run-test.ts backend/services/communication/test/suggestion.service.test.ts`
   - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/suggestions/suggestion.test.ts`
@@ -270,7 +270,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 3: Schedule service — UnauthorizedError (REQ-3)
 
-- [ ] 3.1 Replace `new Error(tErrors.unauthorizedViewMetrics)` with `UnauthorizedError`
+- [x] 3.1 Replace `new Error(tErrors.unauthorizedViewMetrics)` with `UnauthorizedError`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -288,7 +288,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 3.1 as `[x]`
   - _Requirements: REQ-3 (AC 1-2)_
 
-- [ ] 3.2 Upgrade service test to assert thrown error `code === "UNAUTHORIZED"`
+- [x] 3.2 Upgrade service test to assert thrown error `code === "UNAUTHORIZED"`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -321,7 +321,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - _Requirements: REQ-3 (AC 1-2), REQ-11 (service layer)_
   - _Note_: DB-layer test is N/A for this issue — the `UnauthorizedError` is thrown at the service layer, not the repository layer.
 
-- [ ] 3.3 Upgrade GraphQL test to assert `extensions.code === "UNAUTHORIZED"`
+- [x] 3.3 Upgrade GraphQL test to assert `extensions.code === "UNAUTHORIZED"`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`
@@ -337,7 +337,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 3.3 as `[x]`
   - _Requirements: REQ-3 (AC 3), REQ-11 (GraphQL layer)_
 
-- [ ] 3.4 Run all applicable-layer tests + MCP verification
+- [x] 3.4 Run all applicable-layer tests + MCP verification
   - Service layer: `bun run scripts/run-test/run-test.ts backend/services/schedule/schedule.service.test.ts`
   - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
   - Run: `bun run scripts/run-test/run-test.ts --last --focus "UNAUTHORIZED" frontend/common/graphql/test/scheduling/schedule.test.ts`
@@ -351,7 +351,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 4: Recurring class validation — split into distinct error codes (REQ-4)
 
-- [ ] 4.1 Add 3 new i18n keys for scheduling validation
+- [x] 4.1 Add 3 new i18n keys for scheduling validation
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -377,7 +377,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 4.1 as `[x]`
   - _Requirements: REQ-4 (AC 4)_
 
-- [ ] 4.2 Split validation in `recurring-class.service.ts` into 3 distinct throws
+- [x] 4.2 Split validation in `recurring-class.service.ts` into 3 distinct throws
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -406,7 +406,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 4.2 as `[x]`
   - _Requirements: REQ-4 (AC 1-3)_
 
-- [ ] 4.3 Create service-layer test file for `recurring-class.service.ts` (NEW — no test file exists)
+- [x] 4.3 Create service-layer test file for `recurring-class.service.ts` (NEW — no test file exists)
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -442,7 +442,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - _Requirements: REQ-4 (AC 1-3), REQ-11 (service layer)_
   - _Note_: DB-layer test is N/A — `ValidationError` is thrown at the service layer.
 
-- [ ] 4.4 Upgrade GraphQL test to assert distinct error codes per failure mode
+- [x] 4.4 Upgrade GraphQL test to assert distinct error codes per failure mode
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`
@@ -459,7 +459,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 4.4 as `[x]`
   - _Requirements: REQ-4 (AC 5-6), REQ-11 (GraphQL layer)_
 
-- [ ] 4.5 Run all applicable-layer tests + MCP verification
+- [x] 4.5 Run all applicable-layer tests + MCP verification
   - Service layer: `bun run scripts/run-test/run-test.ts backend/services/schedule/test/recurring-class.service.test.ts`
   - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
   - Run: `bun run scripts/run-test/run-test.ts --last --focus "invalid" frontend/common/graphql/test/scheduling/schedule.test.ts`
@@ -474,7 +474,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 5: Test-helper FK-aware cleanup (REQ-5)
 
-- [ ] 5.1 Fix `cleanupTestSuperAdmin` — delete `admin_audit_logs` before user
+- [x] 5.1 Fix `cleanupTestSuperAdmin` — delete `admin_audit_logs` before user
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -495,7 +495,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 5.1 as `[x]`
   - _Requirements: REQ-5 (AC 1, 3)_
 
-- [ ] 5.2 Fix `cleanupTestEntities` — delete `class_status_events` before instances
+- [x] 5.2 Fix `cleanupTestEntities` — delete `class_status_events` before instances
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Modify `backend/services/system/test-helper.service.ts:367-375`:
     - Import `classStatusEvents` from `@/backend/db/schema` (and `inArray` from `drizzle-orm` if not already imported)
@@ -515,7 +515,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 5.2 as `[x]`
   - _Requirements: REQ-5 (AC 2, 4)_
 
-- [ ] 5.3 Create service-layer test for `test-helper.service.ts` (NEW — no test file exists)
+- [x] 5.3 Create service-layer test for `test-helper.service.ts` (NEW — no test file exists)
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -539,7 +539,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 5.3 as `[x]`
   - _Requirements: REQ-5 (AC 1-4), REQ-11 (service layer)_
 
-- [ ] 5.4 Upgrade GraphQL test to assert `cleanupTestSuperAdmin === true` AND `cleanupTestEntities === true`
+- [x] 5.4 Upgrade GraphQL test to assert `cleanupTestSuperAdmin === true` AND `cleanupTestEntities === true`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Add/update test assertion in the relevant GraphQL test file:
     - Assert `data.cleanupTestSuperAdmin === true`
@@ -549,7 +549,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 5.4 as `[x]`
   - _Requirements: REQ-5 (AC 5), REQ-11 (GraphQL layer)_
 
-- [ ] 5.5 Run all applicable-layer tests + MCP verification
+- [x] 5.5 Run all applicable-layer tests + MCP verification
   - Service layer: `bun run scripts/run-test/run-test.ts backend/services/system/test/test-helper.service.test.ts`
   - GraphQL layer: `bun run scripts/run-test/run-test.ts <graphql-test-path-for-cleanup-mutation>`
   - MCP verification (dev server on port 3000):
@@ -572,7 +572,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 6: Complaint — verify `COMPLAINTS_NOT_FOUND` code propagation across 3 layers (REQ-1 + REQ-2)
 
-- [ ] 6.1 Upgrade DB repository test to assert `instanceof NotFoundError` AND `error.code`
+- [x] 6.1 Upgrade DB repository test (N/A — repo returns null, service throws) to assert `instanceof NotFoundError` AND `error.code`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -590,7 +590,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 6.1 as `[x]`
   - _Requirements: REQ-2 (COMPLAINTS code), REQ-11 (DB layer)_
 
-- [ ] 6.2 Upgrade service test to assert thrown error `code === "COMPLAINTS_NOT_FOUND"`
+- [x] 6.2 Upgrade service test to assert thrown error `code === "COMPLAINTS_NOT_FOUND"`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -606,7 +606,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 6.2 as `[x]`
   - _Requirements: REQ-2 (COMPLAINTS code), REQ-11 (service layer)_
 
-- [ ] 6.3 Upgrade GraphQL test to assert `extensions.code === "COMPLAINTS_NOT_FOUND"`
+- [x] 6.3 Upgrade GraphQL test to assert `extensions.code === "COMPLAINTS_NOT_FOUND"`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`
@@ -619,7 +619,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 6.3 as `[x]`
   - _Requirements: REQ-2 (COMPLAINTS code), REQ-11 (GraphQL layer)_
 
-- [ ] 6.4 Run all three-layer tests + MCP verification
+()- [x] 6.4 Run all three-layer tests + MCP verification
   - DB layer: `bun run scripts/run-test/run-test.ts backend/db/test/repo/complaints/complaint.repository.test.ts`
   - Service layer: `bun run scripts/run-test/run-test.ts backend/services/communication/test/complaint.service.test.ts`
   - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/complaints/complaint.test.ts`
@@ -633,7 +633,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 7: Quota release skip — localized warning (REQ-6)
 
-- [ ] 7.1 Localize the quota-release-skip WARN message and add observability
+- [x] 7.1 Localize the quota-release-skip WARN message and add observability
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -649,7 +649,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 7.1 as `[x]`
   - _Requirements: REQ-6 (AC 1-2)_
 
-- [ ] 7.2 Create service-layer test for `class-session.service.ts` (NEW — no test file exists)
+- [x] 7.2 Create service-layer test for `class-session.service.ts` (NEW — no test file exists)
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -681,7 +681,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - _Requirements: REQ-6 (AC 1-2), REQ-11 (service layer)_
   - _Note_: DB-layer test is N/A — the skip is service-layer logic, not a repository throw.
 
-- [ ] 7.3 Upgrade GraphQL test to assert `warnings` field on delete mutation
+- [x] 7.3 Upgrade GraphQL test to assert `warnings` field on delete mutation
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Modify `frontend/common/graphql/test/scheduling/schedule.test.ts`:
     - Add test: "deleteClassInstance on quota-backed student returns warnings array"
@@ -691,7 +691,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 7.3 as `[x]`
   - _Requirements: REQ-6 (AC 3), REQ-11 (GraphQL layer)_
 
-- [ ] 7.4 Run all applicable-layer tests + MCP verification
+- [x] 7.4 Run all applicable-layer tests + MCP verification
   - Service layer: `bun run scripts/run-test/run-test.ts backend/services/session/test/class-session.service.test.ts`
   - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
   - MCP verification (dev server on port 3000):
@@ -702,7 +702,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 8: Meeting URL absence — observable in GraphQL result (REQ-7)
 
-- [ ] 8.1 Add nullable `meetingUrl` field to `CreateRecurringClassResult` GraphQL type
+- [x] 8.1 Add nullable `meetingUrl` field to `CreateRecurringClassResult` GraphQL type
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -722,7 +722,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 8.1 as `[x]`
   - _Requirements: REQ-7 (AC 1-4)_
 
-- [ ] 8.2 Upgrade service test to assert `logger.warn` (not `logger.info`) on no-provider path
+- [x] 8.2 Upgrade service test to assert `logger.warn` (not `logger.info`) on no-provider path
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -753,7 +753,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - _Requirements: REQ-7 (AC 4), REQ-11 (service layer)_
   - _Note_: DB-layer test is N/A — the no-provider path is service-layer logic.
 
-- [ ] 8.3 Upgrade GraphQL test to assert `meetingUrl === null` on non-provider path
+- [x] 8.3 Upgrade GraphQL test to assert `meetingUrl === null` on non-provider path
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Add test in `frontend/common/graphql/test/scheduling/schedule.test.ts`:
     - Assert `meetingUrl === null` when no provider is configured
@@ -762,7 +762,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 8.3 as `[x]`
   - _Requirements: REQ-7 (AC 5), REQ-11 (GraphQL layer)_
 
-- [ ] 8.4 Run all applicable-layer tests + MCP verification
+- [x] 8.4 Run all applicable-layer tests + MCP verification
   - Service layer: `bun run scripts/run-test/run-test.ts backend/services/meeting/meeting-config-snapshot.test.ts`
   - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
   - MCP verification (dev server on port 3000):
@@ -775,7 +775,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 9: Silent 400 responses investigation (REQ-8)
 
-- [ ] 9.1 Investigate the four mysterious 400 HTTP responses
+- [x] 9.1 Investigate the four mysterious 400 HTTP responses
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -791,7 +791,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 10: Notification dropped-payload structured warnings (REQ-9)
 
-- [ ] 10.1 Structurize the "dropped contactless payloads" WARN with channel type
+- [x] 10.1 Structurize the "dropped contactless payloads" WARN with channel type
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -806,7 +806,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 10.1 as `[x]`
   - _Requirements: REQ-9 (AC 1-2)_
 
-- [ ] 10.2 Upgrade service test to assert `skippedNotificationsByType` in return shape
+- [x] 10.2 Upgrade service test to assert `skippedNotificationsByType` in return shape
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -834,7 +834,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - _Note_: DB-layer test is N/A — the dispatch logic is service-layer.
   - _Note_: GraphQL-layer test is N/A — `skippedNotificationsByType` is surfaced only in test mode, not as a GraphQL field.
 
-- [ ] 10.3 Run service test + MCP verification
+- [x] 10.3 Run service test + MCP verification
   - Service layer: `bun run scripts/run-test/run-test.ts backend/services/notification/notification-dispatch.helpers.test.ts`
   - MCP verification (dev server on port 3000):
     - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm structured WARN with channel type
@@ -844,7 +844,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 11: Rate limit test-enforceable bypass (REQ-10)
 
-- [ ] 11.1 Add `TEST_ENFORCE_RATE_LIMIT` env flag handling
+- [x] 11.1 Add `TEST_ENFORCE_RATE_LIMIT` env flag handling
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -857,7 +857,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 11.1 as `[x]`
   - _Requirements: REQ-10 (AC 1-2)_
 
-- [ ] 11.2 Create service-layer test for rate limiter enforcement with env flag
+- [x] 11.2 Create service-layer test for rate limiter enforcement with env flag
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/AGENTS.md`
@@ -876,7 +876,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - _Requirements: REQ-10 (AC 1-2), REQ-11 (service layer)_
   - _Note_: DB-layer test is N/A — rate limiting is a middleware/lib concern, not a repository throw.
 
-- [ ] 11.3 Create GraphQL-layer test for 429 path with `TEST_ENFORCE_RATE_LIMIT=1`
+- [x] 11.3 Create GraphQL-layer test for 429 path with `TEST_ENFORCE_RATE_LIMIT=1`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Create new test file `frontend/common/graphql/test/rate-limit/rate-limit.test.ts` (or add to existing auth test):
     - Set `TEST_ENFORCE_RATE_LIMIT=1` in test env
@@ -887,7 +887,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 11.3 as `[x]`
   - _Requirements: REQ-10 (AC 3), REQ-11 (GraphQL layer)_
 
-- [ ] 11.4 Run all applicable-layer tests + MCP verification
+- [x] 11.4 Run all applicable-layer tests + MCP verification
   - Service layer: `bun run scripts/run-test/run-test.ts backend/lib/ratelimit.test.ts`
   - GraphQL layer: `bun run scripts/run-test/run-test.ts <rate-limit-test-path>`
   - MCP verification (dev server on port 3000):
@@ -898,14 +898,14 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 12: Full `bun test:graphql` run + Next.js devtools MCP final check
 
-- [ ] 12.1 Run full GraphQL test suite with log capture
+- [x] 12.1 Run full GraphQL test suite with log capture
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Ensure dev server is running on port 3000
   - Run: `bun run test:graphql 2>&1 | tee graphql_tests_logs/dev-post-fix.log`
   - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/12.1-full-test-run-outcome.md`
   - Update progress: Mark 12.1 as `[x]`
 
-- [ ] 12.2 MCP final verification of the full run
+- [x] 12.2 MCP final verification of the full run
   - Call `nextjs_call(port: "3000", toolName: "get_errors", args: {})` — confirm zero build/SSR/global errors after full suite
   - Call `nextjs_call(port: "3000", toolName: "get_compilation_issues", args: {})` — confirm zero compilation issues across ALL routes
   - Call `nextjs_call(port: "3000", toolName: "compile_route", args: { routeSpecifier: "/api/graphql" })` — warm-compile check, zero issues
@@ -914,7 +914,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/12.2-mcp-final-verify-outcome.md`
   - Update progress: Mark 12.2 as `[x]`
 
-- [ ] 12.3 Log diff analysis — compare original vs post-fix dev logs
+- [x] 12.3 Log diff analysis — compare original vs post-fix dev logs
   - Run:
     ```bash
     diff <(grep -E '\[ERROR\]|\[WARN\]' graphql_tests_logs/dev.log) \
@@ -932,7 +932,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/12.3-log-diff-outcome.md`
   - Update progress: Mark 12.3 as `[x]`
 
-- [ ] 12.4 Final quality gate
+- [x] 12.4 Final quality gate
   - Run:
     ```bash
     bun run generate:gqlSchema
@@ -945,7 +945,7 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
 
 ### Task 13: Knowledge Propagation & Documentation (MANDATORY Final Task)
 
-- [ ] 13. **Knowledge Propagation & Documentation**
+- [x] 13. **Knowledge Propagation & Documentation**
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/` to synthesize all learnings
   - Create canonical reference doc under `docs/graphql/domain-error-extensions-code.md` consolidating patterns, rules, and gotchas from all outcome files
     - Follow docs file structure: Why → Pattern → Rules → Anti-patterns → Rollout Summary → Related Documents

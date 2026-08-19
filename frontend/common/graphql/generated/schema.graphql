@@ -1161,6 +1161,7 @@ type CreateRecurringClassResult {
   classInstanceCount: Int
   classInstanceIds: [String!]
   id: String
+  meetingUrl: String
   recurringScheduleId: String
 }
 
@@ -1483,6 +1484,11 @@ type DeactivateParentResult {
   accountStatus: AccountStatus
   id: String
   userId: String
+}
+
+type DeleteClassInstanceResult {
+  success: Boolean
+  warnings: [String!]
 }
 
 type DeleteInvoiceResult {
@@ -2853,7 +2859,7 @@ type Mutation {
     id: ID!
   ): Boolean
   deleteClassCategory(id: ID!): Boolean
-  deleteClassInstance(classInstanceId: ID!): Boolean
+  deleteClassInstance(classInstanceId: ID!): DeleteClassInstanceResult
   deleteClassMeetingConfig(id: ID!): Boolean
   deleteClassSubject(id: ID!): Boolean
 

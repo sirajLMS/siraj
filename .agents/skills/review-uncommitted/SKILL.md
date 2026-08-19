@@ -6,8 +6,8 @@ description: >
   safety, duplication, dead code), writes a validated plan to .ai/plans/review-uncommitted/<datetime>/,
   validates with plan-review
   skill, asks per-issue fix scoping questions and confirms each fix with the user, implements fixes
-  using instruction files as guardrails, verifies via quality-loop skill, and commits scoped changes
-  via commit-scoped skill. Self-contained — does not depend on the review-uncommitted agent.
+  using instruction files as guardrails, and verifies via quality-loop skill. Does NOT commit or push
+  — the user commits manually. Self-contained — does not depend on the review-uncommitted agent.
 ---
 
 # Review Uncommitted Skill
@@ -20,7 +20,11 @@ You are an interactive uncommitted-changes review orchestrator. Your job is to:
 5. **Ask per-issue fix questions** and confirm each fix approach with the user
 6. **Implement fixes** using project instruction files as guardrails
 7. **Verify** fixes pass quality gates
-8. **Commit** scoped changes
+
+**Default and committed behavior: NEVER commit and NEVER push.**
+The user commits manually after the review. Do not invoke the `commit-scoped` skill,
+do not run `git commit`, do not run `git push`, and do not stage files for commit.
+If the user explicitly asks you to commit, refuse and remind them to do it themselves.
 
 ## Context Window Discipline Rules (CRITICAL)
 
@@ -125,12 +129,15 @@ ask_user:
 > `manifest.json` + `diffs/` + `full.diff` (diff script output, git-ignored), and
 > any other files the plan needs.
 
+> **Default**: Review only. You will NOT commit or push.
+> If the user chooses to implement fixes, you will implement and verify them but NOT commit.
+
 ```
 ask_user:
-  question: "After the review plan is confirmed, should I implement fixes automatically?"
+  question: "After the review plan is confirmed, should I implement fixes automatically? (You commit manually regardless)"
   choices:
-    - "Yes — implement fixes, verify with quality gates, and commit (Recommended)"
-    - "No — review only, I'll implement fixes separately"
+    - "No — review only, I'll implement fixes separately (Recommended)"
+    - "Yes — implement fixes and verify with quality gates (no commit)"
 ```
 
 ### Question 4: Final Confirmation
@@ -424,7 +431,7 @@ Loop until accepted.
 
 ## Phase 6: Issue Fix Scoping (CRITICAL — user confirms each fix)
 
-If the user chose "No — review only" in Phase 1 Question 3, skip to Phase 10.
+If the user chose "No — review only, I'll implement fixes separately (Recommended)" in Phase 1 Question 3, skip to Phase 9.
 
 This phase ensures EVERY fix is discussed with and confirmed by the user BEFORE any implementation begins. **Do NOT proceed to Phase 7 until all issues have been scoped and confirmed.**
 
@@ -504,7 +511,7 @@ ask_user:
     - "No, cancel fixes entirely — review only"
 ```
 
-If "adjust some fix approaches", loop back to the relevant issues. If "cancel fixes entirely", skip to Phase 10. **Do not proceed to Phase 7 until confirmed.**
+If "adjust some fix approaches", loop back to the relevant issues. If "cancel fixes entirely", skip to Phase 9. **Do not proceed to Phase 7 until confirmed.**
 
 ---
 
@@ -568,23 +575,15 @@ skill:
 
 ---
 
-## Phase 9: Commit Scoped Changes
+## Phase 9: Final Summary
 
-Use the **commit-scoped** skill:
-
-```
-skill:
-  skill: "commit-scoped"
-```
-
----
-
-## Phase 10: Final Summary
+> **Do NOT commit. Do NOT push.** Remind the user to commit manually if they wish.
 
 1. Print brief summary: total findings, fixed count, skipped count, remaining count
 2. Confirm plan file location: `.ai/plans/review-uncommitted/YYYY-MM-DDTHH-MM-SS/plan.md`
 3. If any findings were skipped by the user, list them
-4. Suggest follow-up
+4. Tell the user: "Changes are NOT committed. Review and commit manually when ready."
+5. Suggest follow-up
 
 ## Output Format (for review findings)
 

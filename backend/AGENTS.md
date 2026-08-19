@@ -132,3 +132,7 @@ The Quota System is an append-only ledger-based class credit tracking system. Se
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.
 
+## Error Handling
+
+- GraphQL error handling: DomainError → GraphQLError extensions.code propagation. See `docs/graphql/domain-error-extensions-code.md`.
+

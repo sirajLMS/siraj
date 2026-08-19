@@ -5011,7 +5011,9 @@ export type RescheduleClassMutationVariables = Exact<{
 
 export type RescheduleClassMutation = RescheduleClassMutation_Mutation;
 
-export type DeleteClassInstanceMutation_Mutation = { deleteClassInstance: boolean | null };
+export type DeleteClassInstanceMutation_deleteClassInstance_DeleteClassInstanceResult = { success: boolean | null, warnings: Array<string> | null };
+
+export type DeleteClassInstanceMutation_Mutation = { deleteClassInstance: DeleteClassInstanceMutation_deleteClassInstance_DeleteClassInstanceResult | null };
 
 
 export type DeleteClassInstanceMutationVariables = Exact<{
@@ -5056,7 +5058,7 @@ export type ExecuteDstBulkUpdateMutationVariables = Exact<{
 
 export type ExecuteDstBulkUpdateMutation = ExecuteDstBulkUpdateMutation_Mutation;
 
-export type CreateRecurringClassMutation_createRecurringClass_CreateRecurringClassResult = { id: string | null, recurringScheduleId: string | null, classInstanceIds: Array<string> | null, classInstanceCount: number | null };
+export type CreateRecurringClassMutation_createRecurringClass_CreateRecurringClassResult = { id: string | null, recurringScheduleId: string | null, classInstanceIds: Array<string> | null, classInstanceCount: number | null, meetingUrl: string | null };
 
 export type CreateRecurringClassMutation_Mutation = { createRecurringClass: CreateRecurringClassMutation_createRecurringClass_CreateRecurringClassResult | null };
 

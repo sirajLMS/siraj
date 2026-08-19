@@ -134,6 +134,10 @@ See `docs/auth/supervisor-permissions.md` for the supervisor permission model an
 - **Session deduplication**: `preloadSession` helper in `gqlContextFactory.ts` fetches session once and passes to both `resolveAuthIdentityFromToken` and `resolveGroupSimulationFromToken` via the `preloadedSession` optional parameter.
 - **Login resolver cold-start resilience**: Rate limiter operations in the login resolver (`checkRateLimit`, `isLocked`, `recordAttempt`, `resetAttempts`) MUST use fail-open `try/catch` — transient cold-start errors must NOT block login. Critical DB reads (`findByEmail`, `createAuthSession`) MUST use `retryTransient()` from `@/backend/lib`. On exhaustion, return `SERVICE_UNAVAILABLE` (NOT `INVALID_CREDENTIALS`). See `docs/backend/login-cold-start-resilience.md`.
 
+## DomainError → GraphQLError extensions.code
+
+- DomainError subclasses extend GraphQLError to propagate `extensions.code` to clients. All resolver errors MUST use DomainError subclasses (NotFoundError, UnauthorizedError, ForbiddenError, ValidationError, ConflictError). See `docs/graphql/domain-error-extensions-code.md`.
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.

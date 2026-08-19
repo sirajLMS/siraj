@@ -5,8 +5,8 @@ description: >
   delegates investigation to specialized subagents (review-frontend, review-backend, review-types,
   review-config, review-uncommitted), writes a validated plan to .ai/plans/, validates with plan-review
   skill, asks per-issue fix scoping questions and confirms each fix with the user, implements fixes
-  using project instruction files, verifies via quality-loop skill, and commits scoped changes via
-  commit-scoped skill. Keeps asking questions until everything in the plan is confirmed.
+  using project instruction files, and verifies via quality-loop skill. Does NOT commit or push
+  — the user commits manually. Keeps asking questions until everything in the plan is confirmed.
   Keeps main context window small by delegating all investigation/reading/commands to subagents.
 ---
 
@@ -20,7 +20,11 @@ You are an interactive code-review orchestrator. Your job is to:
 5. **Iterate** until the user confirms the final plan
 6. **Implement fixes** using project instruction files as guardrails
 7. **Verify** fixes pass quality gates
-8. **Commit** scoped changes
+
+**Default and committed behavior: NEVER commit and NEVER push.**
+The user commits manually after the review. Do not invoke the `commit-scoped` skill,
+do not run `git commit`, do not run `git push`, and do not stage files for commit.
+If the user explicitly asks you to commit, refuse and remind them to do it themselves.
 
 ## Context Window Discipline Rules (CRITICAL)
 
@@ -145,12 +149,14 @@ ask_user:
 
 ### Question 5: Auto-Fix After Review
 
+> **Default**: Review only. You will NOT commit or push.
+
 ```
 ask_user:
-  question: "After the review plan is confirmed, should I implement fixes automatically?"
+  question: "After the review plan is confirmed, should I implement fixes automatically? (You commit manually regardless)"
   choices:
-    - "Yes — implement fixes, verify with quality gates, and commit (Recommended)"
-    - "No — review only, I'll implement fixes separately"
+    - "No — review only, I'll implement fixes separately (Recommended)"
+    - "Yes — implement fixes and verify with quality gates (no commit)"
 ```
 
 ### Question 6: Final Confirmation
@@ -349,7 +355,7 @@ If the user wants revisions, make the changes and re-validate. Loop until accept
 
 ## Phase 6: Issue Fix Scoping (CRITICAL — user confirms each fix)
 
-If the user chose "No — review only" in Question 5, **skip to Phase 10** and output the review summary.
+If the user chose "No — review only, I'll implement fixes separately (Recommended)" in Question 5, **skip to Phase 9** and output the review summary.
 
 This phase ensures EVERY fix is discussed with and confirmed by the user BEFORE any implementation begins. **Do NOT proceed to Phase 7 until all issues have been scoped and confirmed.**
 
@@ -429,7 +435,7 @@ ask_user:
     - "No, cancel fixes entirely — review only"
 ```
 
-If "adjust some fix approaches", loop back to the relevant issues. If "cancel fixes entirely", skip to Phase 10. **Do not proceed to Phase 7 until confirmed.**
+If "adjust some fix approaches", loop back to the relevant issues. If "cancel fixes entirely", skip to Phase 9. **Do not proceed to Phase 7 until confirmed.**
 
 ---
 
@@ -529,23 +535,12 @@ Report the verification results to the user:
 
 ---
 
-## Phase 9: Commit Scoped Changes
+## Phase 9: Final Summary
 
-Use the **commit-scoped** skill to commit only the files related to this review:
+> **Do NOT commit. Do NOT push.** Remind the user to commit manually if they wish.
 
-```
-skill:
-  skill: "commit-scoped"
-```
-
-This ensures only plan-related files are staged and committed, with no unrelated changes leaking in.
-
----
-
-## Phase 10: Final Summary
-
-After commit succeeds:
 1. Print brief summary: total findings, fixed count, skipped count, remaining count
 2. Confirm plan file location: `.ai/plans/<filename>.md`
 3. If any findings were skipped by the user, list them as remaining items
-4. Suggest follow-up: "Address remaining findings in a future session"
+4. Tell the user: "Changes are NOT committed. Review and commit manually when ready."
+5. Suggest follow-up: "Address remaining findings in a future session"

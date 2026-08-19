@@ -1217,6 +1217,7 @@ export type CreateRecurringClassResult = {
   classInstanceCount: Maybe<Scalars['Int']['output']>;
   classInstanceIds: Maybe<Array<Scalars['String']['output']>>;
   id: Maybe<Scalars['String']['output']>;
+  meetingUrl: Maybe<Scalars['String']['output']>;
   recurringScheduleId: Maybe<Scalars['String']['output']>;
 };
 
@@ -1538,6 +1539,12 @@ export type DeactivateParentResult = {
   accountStatus: Maybe<AccountStatus>;
   id: Maybe<Scalars['String']['output']>;
   userId: Maybe<Scalars['String']['output']>;
+};
+
+export type DeleteClassInstanceResult = {
+  __typename?: 'DeleteClassInstanceResult';
+  success: Maybe<Scalars['Boolean']['output']>;
+  warnings: Maybe<Array<Scalars['String']['output']>>;
 };
 
 export type DeleteInvoiceResult = {
@@ -2927,7 +2934,7 @@ export type Mutation = {
   /** Soft-deletes a book by marking it as deleted. */
   deleteBook: Maybe<Scalars['Boolean']['output']>;
   deleteClassCategory: Maybe<Scalars['Boolean']['output']>;
-  deleteClassInstance: Maybe<Scalars['Boolean']['output']>;
+  deleteClassInstance: Maybe<DeleteClassInstanceResult>;
   deleteClassMeetingConfig: Maybe<Scalars['Boolean']['output']>;
   deleteClassSubject: Maybe<Scalars['Boolean']['output']>;
   /** Soft-deletes a complaint (admin only). Returns true on success. */

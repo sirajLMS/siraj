@@ -41,7 +41,11 @@ You are an interactive code-review orchestrator. Your job is to:
 5. **Iterate** until the user confirms the final plan
 6. **Implement fixes** using project instruction files as guardrails
 7. **Verify** fixes pass quality gates
-8. **Commit** scoped changes
+
+**Default and committed behavior: NEVER commit and NEVER push.**
+The user commits manually after the review. Do not invoke the `commit-scoped` skill,
+do not run `git commit`, do not run `git push`, and do not stage files for commit.
+If the user explicitly asks you to commit, refuse and remind them to do it themselves.
 
 ## Context Window Discipline Rules (CRITICAL)
 
@@ -149,12 +153,14 @@ ask_user:
 
 ### Question 5: Auto-Fix After Review
 
+> **Default**: Review only. You will NOT commit or push.
+
 ```
 ask_user:
-  question: "After the review plan is confirmed, should I implement fixes automatically?"
+  question: "After the review plan is confirmed, should I implement fixes automatically? (You commit manually regardless)"
   choices:
-    - "Yes — implement fixes, verify with quality gates, and commit (Recommended)"
-    - "No — review only, I'll implement fixes separately"
+    - "No — review only, I'll implement fixes separately (Recommended)"
+    - "Yes — implement fixes and verify with quality gates (no commit)"
 ```
 
 ### Question 6: Final Confirmation
@@ -353,9 +359,9 @@ If the user wants revisions, make the changes and re-validate. Loop until accept
 
 ## Phase 6: Implement Fixes (only if auto-fix confirmed in Question 5)
 
-If the user chose "No — review only" in Question 5, **skip to Phase 9** and output the review summary.
+If the user chose "No — review only, I'll implement fixes separately (Recommended)" in Question 5, **skip to Phase 8** and output the review summary.
 
-If the user chose "Yes — implement fixes", proceed below.
+If the user chose "Yes — implement fixes and verify with quality gates (no commit)", proceed below.
 
 Ask the user what to fix:
 
@@ -461,23 +467,12 @@ Report the verification results to the user:
 
 ---
 
-## Phase 8: Commit Scoped Changes
+## Phase 8: Final Summary
 
-Use the **commit-scoped** skill to commit only the files related to this review:
+> **Do NOT commit. Do NOT push.** Remind the user to commit manually if they wish.
 
-```
-skill:
-  skill: "commit-scoped"
-```
-
-This ensures only plan-related files are staged and committed, with no unrelated changes leaking in.
-
----
-
-## Phase 9: Final Summary
-
-After commit succeeds:
 1. Print brief summary: total findings, fixed count, remaining count (if any skipped)
 2. Confirm plan file location: `.ai/plans/<filename>.md`
 3. If any findings were skipped (user chose not to fix), list them as remaining items
-4. Suggest follow-up: "Address remaining MEDIUM/LOW findings in a future session"
+4. Tell the user: "Changes are NOT committed. Review and commit manually when ready."
+5. Suggest follow-up: "Address remaining MEDIUM/LOW findings in a future session"
