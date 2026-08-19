@@ -13,11 +13,11 @@ ROUTER_PORT="${1:-${ROUTER_PORT:-20128}}"
 STATE_DIR="${2:-${STATE_DIR:-/tmp/nvidia_router_state_${ROUTER_PORT}}}"
 UPSTREAM_URL="${UPSTREAM_URL:-https://integrate.api.nvidia.com/v1/chat/completions}"
 MAX_RETRIES="${MAX_RETRIES:-60}"
-# 180s per attempt: CI profiling shows NVIDIA NIM takes 60-120s per request
-# undici headersTimeout confirmed >240s so 180s response time is safe
-CURL_TIMEOUT="${CURL_TIMEOUT:-180}"
-# 200s total: room for one slow healthy attempt (≤180s) + fast 429 rotations (150ms each)
-REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-200}"
+# Max per-attempt curl timeout — the remaining-time cap ensures we never exceed REQUEST_DEADLINE_SEC
+CURL_TIMEOUT="${CURL_TIMEOUT:-200}"
+# Hard deadline: router ALWAYS responds within this many seconds (capped per-curl via effective_timeout)
+# Set below undici's confirmed headersTimeout (>241s) with safety margin
+REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-230}"
 
 # Send formatted OpenAI JSON response
 send_openai_json_response() {
@@ -121,7 +121,8 @@ handle_http_connection() {
         while [ "$attempts" -lt "$max_attempts" ]; do
             local current_sec
             current_sec=$(date +%s)
-            if [ $((current_sec - req_start_sec)) -ge "$REQUEST_DEADLINE_SEC" ]; then
+            local elapsed_sec=$(( current_sec - req_start_sec ))
+            if [ "$elapsed_sec" -ge "$REQUEST_DEADLINE_SEC" ]; then
                 echo "[Router] [REQ #${req_num}] ⏱️ Request reached ${REQUEST_DEADLINE_SEC}s safety deadline. Returning error to prevent client timeout." >&2
                 break
             fi
@@ -143,10 +144,16 @@ handle_http_connection() {
             local start_ms
             start_ms=$(date +%s%3N 2>/dev/null || date +%s000)
 
+            # Cap each curl to remaining budget so router ALWAYS responds within REQUEST_DEADLINE_SEC
+            # This prevents the last attempt from overshooting the deadline and triggering undici headersTimeout
+            local remaining_sec=$(( REQUEST_DEADLINE_SEC - elapsed_sec ))
+            local effective_timeout=$(( remaining_sec < CURL_TIMEOUT ? remaining_sec : CURL_TIMEOUT ))
+            [ "$effective_timeout" -le 0 ] && break
+
             # Execute upstream request with curl (clean separation of headers and body)
             curl -s --http1.1 \
                 --connect-timeout 10 \
-                --max-time "$CURL_TIMEOUT" \
+                --max-time "$effective_timeout" \
                 -X POST "$UPSTREAM_URL" \
                 -H "Content-Type: application/json" \
                 -H "Authorization: Bearer $key" \
@@ -257,6 +264,8 @@ handle_http_connection() {
                 return 0
             fi
 
+            # Curl timed out or returned unrecognized status — log and retry next key
+            echo "[Router] [REQ #${req_num}] [Attempt ${attempts}] ⏰ Upstream timeout/unknown | http_code=${http_code} | Key: ${masked_key} | Latency: ${duration_ms}ms | effective_timeout: ${effective_timeout}s" >&2
             rm -f "$header_dump" "$body_dump"
         done
 
