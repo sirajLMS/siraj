@@ -13,8 +13,8 @@ ROUTER_PORT="${1:-${ROUTER_PORT:-20128}}"
 STATE_DIR="${2:-${STATE_DIR:-/tmp/nvidia_router_state_${ROUTER_PORT}}}"
 UPSTREAM_URL="${UPSTREAM_URL:-https://integrate.api.nvidia.com/v1/chat/completions}"
 MAX_RETRIES="${MAX_RETRIES:-60}"
-CURL_TIMEOUT="${CURL_TIMEOUT:-40}"
-REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-220}"
+CURL_TIMEOUT="${CURL_TIMEOUT:-120}"
+REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-270}"
 
 # Send formatted OpenAI JSON response
 send_openai_json_response() {
