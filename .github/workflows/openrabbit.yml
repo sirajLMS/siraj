@@ -66,6 +66,11 @@ jobs:
         run: |
           echo ""
           echo "================================================================="
+          echo "               SHELL NVIDIA ROUTER EVENT TRACE LOG               "
+          echo "================================================================="
+          cat /tmp/nvidia-router-20128.log 2>/dev/null || true
+          echo ""
+          echo "================================================================="
           echo "               SHELL NVIDIA ROUTER RUNTIME METRICS               "
           echo "================================================================="
           curl -s http://127.0.0.1:20128/health | jq . 2>/dev/null || curl -s http://127.0.0.1:20128/health || true
