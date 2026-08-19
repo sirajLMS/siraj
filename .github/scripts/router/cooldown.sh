@@ -137,9 +137,35 @@ get_pool_stats_json() {
         done
     fi
 
+    local total_reqs=0
+    local successful_reqs=0
+    local failed_reqs=0
+    local avg_latency_ms=0
+
+    mkdir -p "${state_dir}/metrics"
+
+    if [ -f "${state_dir}/metrics/requests_total" ]; then
+        total_reqs=$(cat "${state_dir}/metrics/requests_total" 2>/dev/null || echo 0)
+    fi
+    if [ -f "${state_dir}/metrics/requests_success" ]; then
+        successful_reqs=$(cat "${state_dir}/metrics/requests_success" 2>/dev/null || echo 0)
+    fi
+    if [ -f "${state_dir}/metrics/requests_failed" ]; then
+        failed_reqs=$(cat "${state_dir}/metrics/requests_failed" 2>/dev/null || echo 0)
+    fi
+    if [ -f "${state_dir}/metrics/latencies" ]; then
+        local count
+        count=$(wc -l < "${state_dir}/metrics/latencies" 2>/dev/null || echo 0)
+        if [ "$count" -gt 0 ]; then
+            local sum
+            sum=$(awk '{s+=$1} END {print s}' "${state_dir}/metrics/latencies" 2>/dev/null || echo 0)
+            avg_latency_ms=$((sum / count))
+        fi
+    fi
+
     local active=$((total - cooling - dead))
     [ "$active" -lt 0 ] && active=0
 
-    printf '{"status":"ok","total_keys":%d,"active_keys":%d,"cooling_keys":%d,"invalid_keys":%d,"cooldown_429_sec":%d}' \
-        "$total" "$active" "$cooling" "$dead" "$COOLDOWN_429_SEC"
+    printf '{"status":"ok","total_keys":%d,"active_keys":%d,"cooling_keys":%d,"invalid_keys":%d,"total_requests":%d,"successful_requests":%d,"failed_requests":%d,"avg_response_time_ms":%d,"cooldown_429_sec":%d}' \
+        "$total" "$active" "$cooling" "$dead" "$total_reqs" "$successful_reqs" "$failed_reqs" "$avg_latency_ms" "$COOLDOWN_429_SEC"
 }

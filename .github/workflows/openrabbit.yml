@@ -23,6 +23,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-socat-${{ hashFiles('.github/workflows/openrabbit.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-socat-
+            ${{ runner.os }}-apt-
+
       - name: Install dependencies (socat)
         run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends socat
 
@@ -36,6 +45,8 @@ jobs:
         run: |
           chmod +x .github/scripts/router/*.sh .github/scripts/nvidia-router.sh
           .github/scripts/nvidia-router.sh start
+          # Stream real-time router events and latencies directly to GitHub Actions console
+          tail -n 0 -f /tmp/nvidia-router-20128.log &
 
       - name: OpenRabbit Review
         uses: aryanbrite/openrabbit@main
@@ -48,9 +59,16 @@ jobs:
           review_mode: both
           tone_mode: balanced
 
-      - name: Stop Shell NVIDIA Router
+      - name: Stop Shell NVIDIA Router & Print Metrics Summary
         if: always()
         env:
           ROUTER_PORT: 20128
         run: |
+          echo ""
+          echo "================================================================="
+          echo "               SHELL NVIDIA ROUTER RUNTIME METRICS               "
+          echo "================================================================="
+          curl -s http://127.0.0.1:20128/health | jq . 2>/dev/null || curl -s http://127.0.0.1:20128/health || true
+          echo ""
+          echo "================================================================="
           .github/scripts/nvidia-router.sh stop || true

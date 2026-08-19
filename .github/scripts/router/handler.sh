@@ -92,6 +92,12 @@ handle_http_connection() {
         fi
 
         # Multi-Key Failover Loop
+        mkdir -p "${STATE_DIR}/metrics"
+        local req_num
+        req_num=$(cat "${STATE_DIR}/metrics/requests_total" 2>/dev/null || echo 0)
+        req_num=$((req_num + 1))
+        echo "$req_num" > "${STATE_DIR}/metrics/requests_total"
+
         local attempts=0
         local strip_attempts=0
         local max_strip_attempts=3
@@ -103,23 +109,27 @@ handle_http_connection() {
         [ "$total_keys" -lt "$max_attempts" ] && max_attempts="$total_keys"
         [ "$max_attempts" -lt 1 ] && max_attempts=1
 
+        echo "[Router] 📥 [REQ #${req_num}] Incoming review request for model '${requested_model}' (${total_keys} active keys in pool)..." >&2
+
         while [ "$attempts" -lt "$max_attempts" ]; do
             attempts=$((attempts + 1))
             local key
             key=$(get_available_key "$STATE_DIR" || true)
             if [ -z "$key" ]; then
+                echo "[Router] [REQ #${req_num}] ⚠️ No available key found in active pool." >&2
                 break
             fi
 
+            local masked_key="${key:0:10}...${key: -4}"
             local header_dump
             header_dump=$(mktemp "${STATE_DIR}/tmp/hdr_XXXXXX")
-            local out_dump
-            out_dump=$(mktemp "${STATE_DIR}/tmp/out_XXXXXX")
-
-            # Execute upstream request with curl (clean separation of headers and body)
             local body_dump
             body_dump=$(mktemp "${STATE_DIR}/tmp/body_XXXXXX")
 
+            local start_ms
+            start_ms=$(date +%s%3N 2>/dev/null || date +%s000)
+
+            # Execute upstream request with curl (clean separation of headers and body)
             curl -s --http1.1 \
                 --max-time "$CURL_TIMEOUT" \
                 -X POST "$UPSTREAM_URL" \
@@ -128,6 +138,11 @@ handle_http_connection() {
                 --data-binary @"$body_file" \
                 -D "$header_dump" \
                 -o "$body_dump" || true
+
+            local end_ms
+            end_ms=$(date +%s%3N 2>/dev/null || date +%s000)
+            local duration_ms=$((end_ms - start_ms))
+            [ "$duration_ms" -lt 0 ] && duration_ms=0
 
             local http_code
             http_code=$(head -n 1 "$header_dump" 2>/dev/null | awk '{print $2}' || echo "000")
@@ -140,6 +155,7 @@ handle_http_connection() {
 
             # 1. Model Not Found / EOL -> Pass-through clean OpenAI 404 to OpenRabbit
             if [ "$error_cat" = "model_not_found" ]; then
+                echo "[Router] [REQ #${req_num}] [Attempt ${attempts}] ✗ 404 Model Not Found | Model: ${requested_model} | Latency: ${duration_ms}ms" >&2
                 local formatted_err
                 formatted_err=$(format_openai_error_json "The model '$requested_model' does not exist or has reached end of life." "invalid_request_error" "model_not_found" "model")
                 send_openai_json_response "HTTP/1.1 404 Not Found" "$formatted_err"
@@ -149,6 +165,7 @@ handle_http_connection() {
 
             # 2. Quota Exhausted / Insufficient Balance -> 24h lockout -> Immediate retry next key
             if [ "$error_cat" = "quota_exhausted" ]; then
+                echo "[Router] [REQ #${req_num}] [Attempt ${attempts}] ⛔ Quota Exhausted | Key: ${masked_key} | Latency: ${duration_ms}ms | Action: Locking key (24h) & retrying next" >&2
                 mark_key_failure "$STATE_DIR" "$key" auth
                 rm -f "$header_dump" "$body_dump"
                 continue
@@ -156,6 +173,7 @@ handle_http_connection() {
 
             # 3. Auth Failed / Invalid API key -> 24h lockout -> Immediate retry next key
             if [ "$error_cat" = "auth_failed" ]; then
+                echo "[Router] [REQ #${req_num}] [Attempt ${attempts}] ⛔ 401/403 Invalid Key | Key: ${masked_key} | Latency: ${duration_ms}ms | Action: Locking key (24h) & retrying next" >&2
                 mark_key_failure "$STATE_DIR" "$key" auth
                 rm -f "$header_dump" "$body_dump"
                 continue
@@ -163,6 +181,7 @@ handle_http_connection() {
 
             # 4. Rate Limit (429) -> 60s cooldown -> Immediate retry next key
             if [ "$error_cat" = "rate_limit" ]; then
+                echo "[Router] [REQ #${req_num}] [Attempt ${attempts}] ⚠️ 429 Rate Limit | Key: ${masked_key} | Latency: ${duration_ms}ms | Action: Rotating key (${COOLDOWN_429_SEC}s cooldown)" >&2
                 mark_key_failure "$STATE_DIR" "$key" 429
                 rm -f "$header_dump" "$body_dump"
                 continue
@@ -170,6 +189,7 @@ handle_http_connection() {
 
             # 5. Gateway / Server Hiccup (500/502/503/504) -> 10s cooldown -> Retry next key
             if [ "$error_cat" = "gateway_error" ]; then
+                echo "[Router] [REQ #${req_num}] [Attempt ${attempts}] ⚡ ${http_code} Upstream Hiccup | Key: ${masked_key} | Latency: ${duration_ms}ms | Action: Retrying next key" >&2
                 mark_key_failure "$STATE_DIR" "$key" gateway
                 rm -f "$header_dump" "$body_dump"
                 continue
@@ -179,6 +199,7 @@ handle_http_connection() {
             if [ "$error_cat" = "unsupported_param" ] || [ "$http_code" = "400" ]; then
                 # Check transient DEGRADED state
                 if grep -qi "DEGRADED" "$body_dump" 2>/dev/null; then
+                    echo "[Router] [REQ #${req_num}] [Attempt ${attempts}] ⚡ 400 DEGRADED state | Key: ${masked_key} | Action: Retrying next key" >&2
                     mark_key_failure "$STATE_DIR" "$key" gateway
                     rm -f "$header_dump" "$body_dump"
                     continue
@@ -188,6 +209,7 @@ handle_http_connection() {
                     local bad_params
                     bad_params=$(extract_unsupported_params "$error_text")
                     if [ -n "$bad_params" ]; then
+                        echo "[Router] [REQ #${req_num}] [Attempt ${attempts}] 🔧 400 Unsupported param '${bad_params}' | Action: Stripping & retrying" >&2
                         local stripped_any=0
                         for bp in $bad_params; do
                             if strip_param_from_json "$body_file" "$bp"; then
@@ -206,6 +228,12 @@ handle_http_connection() {
 
             # 7. Success / Valid 200 Response -> Deliver clean HTTP/1.1 response with accurate Content-Length
             if [ "$http_code" = "200" ] && [ -s "$body_dump" ]; then
+                echo "[Router] [REQ #${req_num}] [Attempt ${attempts}] ✔ 200 OK | Model: ${requested_model} | Key: ${masked_key} | Latency: ${duration_ms}ms" >&2
+                echo "$duration_ms" >> "${STATE_DIR}/metrics/latencies"
+                local succ_count
+                succ_count=$(cat "${STATE_DIR}/metrics/requests_success" 2>/dev/null || echo 0)
+                echo "$((succ_count + 1))" > "${STATE_DIR}/metrics/requests_success"
+
                 local body_len
                 body_len=$(wc -c < "$body_dump")
                 printf "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: %d\r\nConnection: close\r\n\r\n" "$body_len"
@@ -216,6 +244,11 @@ handle_http_connection() {
 
             rm -f "$header_dump" "$body_dump"
         done
+
+        echo "[Router] [REQ #${req_num}] ❌ FAILED: All candidate keys exhausted after ${attempts} attempts." >&2
+        local fail_count
+        fail_count=$(cat "${STATE_DIR}/metrics/requests_failed" 2>/dev/null || echo 0)
+        echo "$((fail_count + 1))" > "${STATE_DIR}/metrics/requests_failed"
 
         rm -f "$body_file"
         local exhausted_json
