@@ -31,7 +31,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuth = useCallback(async () => {
     const currentUrl = `${globalThis.location.pathname}${globalThis.location.search}`;
     try {
-      setIsLoading(true);
       const { data } = await dedupedRefreshToken(() =>
         client.mutate({
           mutation: Document.refreshTokenMutationDocument,
@@ -126,7 +125,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   useEffect(() => {
-    void checkAuth();
+    const timeoutId = setTimeout(() => {
+      void checkAuth();
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [checkAuth]);
 
   const contextValue = useMemo(

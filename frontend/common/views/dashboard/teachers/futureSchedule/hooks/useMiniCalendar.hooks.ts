@@ -10,35 +10,34 @@
 // `MINI_CALENDAR_WEEKDAYS` constant from here — no state, no `useX` decls,
 // and no lowercase pure-data helpers remain in either tier file.
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { MiniCalendarDate } from "@/frontend/common/views/dashboard/teachers/futureSchedule/types";
 
 export type ViewingMonth = { year: number; month: number };
 
-export function useViewingMonth(selectedDate: string): [ViewingMonth, (delta: number) => void] {
-  const [viewingMonth, setViewingMonth] = useState<ViewingMonth>(() => {
-    const d = new Date(selectedDate + "T00:00:00");
-    return { year: d.getFullYear(), month: d.getMonth() };
-  });
+function parseViewingMonth(selectedDate: string): ViewingMonth {
+  const d = new Date(selectedDate + "T00:00:00");
+  return { year: d.getFullYear(), month: d.getMonth() };
+}
 
-  useEffect(() => {
-    const d = new Date(selectedDate + "T00:00:00");
-    const newYear = d.getFullYear();
-    const newMonth = d.getMonth();
-    setViewingMonth(prev => {
-      if (prev.year === newYear && prev.month === newMonth) return prev;
-      return { year: newYear, month: newMonth };
-    });
-  }, [selectedDate]);
+export function useViewingMonth(selectedDate: string): [ViewingMonth, (delta: number) => void] {
+  const [state, setState] = useState<{ selectedDate: string; viewingMonth: ViewingMonth }>(() => ({
+    selectedDate,
+    viewingMonth: parseViewingMonth(selectedDate),
+  }));
+
+  if (state.selectedDate !== selectedDate) {
+    setState({ selectedDate, viewingMonth: parseViewingMonth(selectedDate) });
+  }
 
   const shiftMonth = (delta: number) => {
-    setViewingMonth(prev => {
-      const d = new Date(prev.year, prev.month + delta, 1);
-      return { year: d.getFullYear(), month: d.getMonth() };
+    setState(prev => {
+      const d = new Date(prev.viewingMonth.year, prev.viewingMonth.month + delta, 1);
+      return { ...prev, viewingMonth: { year: d.getFullYear(), month: d.getMonth() } };
     });
   };
 
-  return [viewingMonth, shiftMonth];
+  return [state.viewingMonth, shiftMonth];
 }
 
 // NEW FOR PLAN v5: getCalendarGrid — pure-data calendar-grid builder lifted

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import { useOverrideData } from "@/frontend/common/views/dashboard/permissions/components/useOverrideData";
@@ -38,9 +38,12 @@ export function useManageOverridesState({
     searchQuery,
   });
 
-  useEffect(() => {
+  const [prevInitialOverrides, setPrevInitialOverrides] = useState(initialOverrides);
+
+  if (initialOverrides !== prevInitialOverrides) {
+    setPrevInitialOverrides(initialOverrides);
     setLocalOverrides(initialOverrides);
-  }, [initialOverrides]);
+  }
 
   const handleOverrideChange = (permissionId: string, state: OverrideState) => {
     setLocalOverrides(prev => ({

@@ -21,7 +21,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useSyncExternalStore } from "react";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
@@ -667,15 +667,12 @@ function SidebarDesktop({
   readonly toggleGroupAriaLabel: (label: string) => string;
 }) {
   const collapsedWidth = "80px";
-  const storeSidebarOpen = useLayoutStore(state => state.sidebarOpen);
   const toggleSidebar = useLayoutStore(state => state.toggleSidebar);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const sidebarOpen = mounted ? storeSidebarOpen : initialSidebarOpen;
+  const sidebarOpen = useSyncExternalStore(
+    useLayoutStore.subscribe,
+    () => useLayoutStore.getState().sidebarOpen,
+    () => initialSidebarOpen
+  );
   const isCollapsed = !sidebarOpen;
 
   return (

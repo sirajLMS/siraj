@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, Dialog, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { DialogSaveCancelActions } from "@/frontend/common/views/dashboard/settings/whatsapp/dialogs";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
@@ -43,13 +43,15 @@ function useEditNameForm(
 ) {
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [displayNameError, setDisplayNameError] = useState<string | null>(null);
+  const [prevOpen, setPrevOpen] = useState(open);
 
-  useEffect(() => {
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       setDisplayName(initialDisplayName);
       setDisplayNameError(null);
     }
-  }, [open, initialDisplayName]);
+  }
 
   const handleChange = useCallback(
     (value: string) => {

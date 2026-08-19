@@ -2,7 +2,7 @@
 
 import { Box, CircularProgress, type SxProps, type Theme, Typography } from "@mui/material";
 import type { SystemStyleObject } from "@mui/system";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { MobilePaginationControls } from "@/frontend/mobile/components/ui/filter/paginationControls.mobile";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -108,28 +108,27 @@ export function MobileCardList<T>({
 
   const [clientPage, setClientPage] = useState(0);
 
-  useEffect(() => {
+  const pageCount = useMemo(() => {
     if (paginationOptions === false || paginationOptions.mode !== "client") {
-      return;
+      return 1;
     }
-    const pageCount = Math.max(1, Math.ceil(rows.length / clientPageSize) || 1);
-    if (clientPage >= pageCount) {
-      setClientPage(Math.max(0, pageCount - 1));
-    }
-  }, [clientPage, clientPageSize, paginationOptions, rows.length]);
+    return Math.max(1, Math.ceil(rows.length / clientPageSize) || 1);
+  }, [paginationOptions, rows.length, clientPageSize]);
+
+  const effectiveClientPage = Math.min(clientPage, Math.max(0, pageCount - 1));
 
   const visibleRows = useMemo(() => {
     if (paginationOptions === false || paginationOptions.mode === "server") {
       return rows;
     }
-    const start = clientPage * clientPageSize;
+    const start = effectiveClientPage * clientPageSize;
     return rows.slice(start, start + clientPageSize);
-  }, [clientPage, clientPageSize, paginationOptions, rows]);
+  }, [effectiveClientPage, clientPageSize, paginationOptions, rows]);
 
   const paginationControls = buildPaginationControls(
     paginationOptions,
     rows.length,
-    clientPage,
+    effectiveClientPage,
     clientPageSize,
     setClientPage
   );

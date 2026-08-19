@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { searchSuggestionsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { SearchResult } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
@@ -30,14 +30,6 @@ export function SuggestionMarkDuplicateDialog({
   const [searchInput, setSearchInput] = useState("");
   const [selectedOption, setSelectedOption] = useState<SearchResult | null>(null);
   const [activeSearchTerm, setActiveSearchTerm] = useState("");
-
-  useEffect(() => {
-    if (!open) {
-      setSearchInput("");
-      setSelectedOption(null);
-      setActiveSearchTerm("");
-    }
-  }, [open]);
 
   const shouldSearch = activeSearchTerm.trim().length >= MIN_SEARCH_LENGTH;
 
@@ -64,6 +56,7 @@ export function SuggestionMarkDuplicateDialog({
   const handleCancel = () => {
     setSearchInput("");
     setSelectedOption(null);
+    setActiveSearchTerm("");
     onCancel();
   };
 

@@ -208,42 +208,44 @@ export function ParentOnboardingShared({
   const tJoin = labelsBySection.meeting.join;
   const router = useRouter();
 
-  const meetingConfigAlert = MeetingConfigAlertShared({
-    meetingConfigWarning,
-    meetingSetupHref,
-    failureMessage: tMeeting.postCreateFailure,
-    setupLinkLabel: tJoin.setupLink,
-    onClearWarning: clearMeetingConfigWarning,
-    onVisitSetup: () => router.push(meetingSetupHref ?? ""),
-    alertSx: options.alertSx,
-  });
+  const meetingConfigAlert = (
+    <MeetingConfigAlertShared
+      meetingConfigWarning={meetingConfigWarning}
+      meetingSetupHref={meetingSetupHref}
+      failureMessage={tMeeting.postCreateFailure}
+      setupLinkLabel={tJoin.setupLink}
+      onClearWarning={clearMeetingConfigWarning}
+      onVisitSetup={() => router.push(meetingSetupHref ?? "")}
+      alertSx={options.alertSx}
+    />
+  );
 
-  const statusBadge = StatusBadgeShared({ bannerText: t.statusBanner, options });
+  const statusBadge = <StatusBadgeShared bannerText={t.statusBanner} options={options} />;
 
-  const formSections = OnboardingFormSectionsShared({
-    register,
-    control,
-    errors,
-    onUploadAvatar,
-    t,
-    options,
-  });
+  const formSections = (
+    <OnboardingFormSectionsShared
+      register={register}
+      control={control}
+      errors={errors}
+      onUploadAvatar={onUploadAvatar}
+      t={t}
+      options={options}
+    />
+  );
 
-  const meetingConfigSection = MeetingConfigSectionShared({
-    register,
-    control,
-    errors,
-    t,
-    options,
-  });
+  const meetingConfigSection = (
+    <MeetingConfigSectionShared register={register} control={control} errors={errors} t={t} options={options} />
+  );
 
-  const submitSection = SubmitActionSectionShared({
-    isSubmitting,
-    processingLabel: t.actions.processing,
-    signupLabel: t.actions.signup,
-    privacyNote: t.privacyNote,
-    options,
-  });
+  const submitSection = (
+    <SubmitActionSectionShared
+      isSubmitting={isSubmitting}
+      processingLabel={t.actions.processing}
+      signupLabel={t.actions.signup}
+      privacyNote={t.privacyNote}
+      options={options}
+    />
+  );
 
   return options.renderPageContainer(
     <>

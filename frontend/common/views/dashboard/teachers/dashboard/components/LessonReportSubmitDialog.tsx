@@ -19,7 +19,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { logger } from "@/frontend/common/utils/logger";
 import { lessonReportFormSchema } from "@/frontend/common/views/dashboard/teachers/dashboard/schemas/lessonReportFormSchema";
@@ -68,14 +68,15 @@ export function LessonReportSubmitDialog({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       setForm(buildInitialForm(defaultDurationMinutes));
       setErrors({});
       setError(null);
     }
-  }, [open, defaultDurationMinutes]);
+  }
 
   const schema = useMemo(() => lessonReportFormSchema(labels), [labels]);
 

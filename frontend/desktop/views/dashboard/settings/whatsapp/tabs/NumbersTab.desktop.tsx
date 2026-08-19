@@ -76,7 +76,7 @@ function CredentialEditDialog({
     onClose();
   }, [onClose]);
 
-  const handleConfirm = useCallback(async () => {
+  const handleConfirm = async () => {
     setSubmitting(true);
     try {
       await onConfirm(value);
@@ -84,7 +84,7 @@ function CredentialEditDialog({
     } finally {
       setSubmitting(false);
     }
-  }, [value, onConfirm]);
+  };
 
   const title = state.field === "accessToken" ? labels.editToken : labels.editPin;
   const fieldLabel = state.field === "accessToken" ? labels.accessToken : labels.twoStepPin;

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { Box, FormControl, InputLabel, MenuItem, Select, type SelectChangeEvent, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
@@ -40,9 +40,6 @@ function formatAuditDate(value: string | null | undefined, locale: string): stri
 
 export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = false }: ProviderSettingsSectionProps) {
   const locale = useAppLocale();
-  const [selectedProvider, setSelectedProvider] = useState<FxProvider>(FxProvider.Fixer);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingProvider, setPendingProvider] = useState<FxProvider | null>(null);
 
   const { data, loading, refetch } = useQuery(fxProviderConfigQueryDocument, {
     fetchPolicy: "cache-and-network",
@@ -67,9 +64,14 @@ export function ProviderSettingsSection({ labels, onFeedback, actionsDisabled = 
       ? labels.lastChangedBy(config.updatedByName, formatAuditDate(config.updatedAt, locale))
       : null;
 
-  useEffect(() => {
+  const [selectedProvider, setSelectedProvider] = useState<FxProvider>(FxProvider.Fixer);
+  const [prevActiveProvider, setPrevActiveProvider] = useState<FxProvider>(activeProvider);
+  if (activeProvider !== prevActiveProvider) {
+    setPrevActiveProvider(activeProvider);
     setSelectedProvider(activeProvider);
-  }, [activeProvider]);
+  }
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingProvider, setPendingProvider] = useState<FxProvider | null>(null);
 
   const handleSaveClick = () => {
     if (actionsDisabled || selectedProvider === activeProvider) {

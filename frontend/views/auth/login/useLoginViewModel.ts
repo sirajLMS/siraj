@@ -52,6 +52,7 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
   const [isRetrying, setIsRetrying] = useState(false);
   const redirectedRef = useRef(false);
   const retryCountRef = useRef(0);
+  const [prevAuthError, setPrevAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || redirectedRef.current) {
@@ -70,11 +71,12 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
     globalThis.location.replace(targetUrl);
   }, [isAuthenticated, searchParams]);
 
-  useEffect(() => {
+  if (authError !== prevAuthError) {
+    setPrevAuthError(authError);
     if (authError) {
       setLoginResult({ type: "error", message: authError });
     }
-  }, [authError]);
+  }
 
   const performLoginRef = useRef<(email: string, password: string) => Promise<boolean>>(async () => false);
 

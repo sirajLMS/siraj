@@ -15,7 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CurrencyCode, InvoicePaymentSubmissionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   InvoicePaymentSubmissionQuery,
@@ -113,10 +113,6 @@ function PaymentProofPreview({
 }): React.ReactNode {
   const [imageFailed, setImageFailed] = useState(false);
 
-  useEffect(() => {
-    setImageFailed(false);
-  }, []);
-
   if (!filePath) {
     return (
       <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
@@ -197,6 +193,7 @@ function SubmissionDetailsSection({
         {labels.submittedAt}: {formatPaymentDate(submission.submittedAt ?? null, locale)}
       </Typography>
       <PaymentProofPreview
+        key={submission.filePath}
         filePath={submission.filePath}
         mimeType={submission.mimeType}
         noProofLabel={labels.noProof}
@@ -532,14 +529,12 @@ function useInvoicePaymentReview({
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) {
-      setRejectionReason("");
-      setShowRejectForm(false);
-      setShowRejectConfirm(false);
-      setActionError(null);
-    }
-  }, [open]);
+  const resetReviewState = () => {
+    setRejectionReason("");
+    setShowRejectForm(false);
+    setShowRejectConfirm(false);
+    setActionError(null);
+  };
 
   const {
     data: submissionData,
@@ -585,6 +580,7 @@ function useInvoicePaymentReview({
       await refetchPayments();
       onSuccess?.(action);
       onClose();
+      resetReviewState();
     } catch (error) {
       setActionError(getErrorMessage(error));
     }
@@ -632,6 +628,7 @@ function useInvoicePaymentReview({
     setRejectionReason,
     setShowRejectForm,
     setShowRejectConfirm,
+    resetReviewState,
   };
 }
 
@@ -719,6 +716,7 @@ function useDialogHandlers(review: ReviewState, onClose: () => void): DialogHand
     if (review.reviewBusy) {
       return;
     }
+    review.resetReviewState();
     onClose();
   };
 

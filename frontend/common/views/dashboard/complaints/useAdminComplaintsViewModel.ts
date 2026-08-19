@@ -104,16 +104,17 @@ export function useAdminComplaintsViewModel(
   const [respondToComplaintMutation] = useMutation(respondToComplaintMutationDocument);
   const [deleteComplaintMutation] = useMutation(deleteComplaintMutationDocument);
 
+  const metrics = data?.adminComplaintQueue?.metrics;
   const summary: AdminComplaintsSummary = useMemo(
     () =>
-      data?.adminComplaintQueue?.metrics
+      metrics
         ? {
-            unanswered: data.adminComplaintQueue.metrics.unanswered ?? 0,
-            answered: data.adminComplaintQueue.metrics.answered ?? 0,
-            avgResolutionHours: data.adminComplaintQueue.metrics.avgResolutionTime ?? "0.0 Hours",
+            unanswered: metrics.unanswered ?? 0,
+            answered: metrics.answered ?? 0,
+            avgResolutionHours: metrics.avgResolutionTime ?? "0.0 Hours",
           }
         : { unanswered: 0, answered: 0, avgResolutionHours: "0.0 Hours" },
-    [data?.adminComplaintQueue?.metrics]
+    [metrics]
   );
   const rows: readonly AdminComplaintRow[] = useMemo(
     () => mapAdminComplaintRows(data?.adminComplaintQueue?.rows, labels),

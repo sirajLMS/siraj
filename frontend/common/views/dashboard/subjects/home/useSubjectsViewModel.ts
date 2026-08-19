@@ -134,7 +134,7 @@ function useSubjectsData(activeCategoryId: string | null): SubjectsDataResult {
 
   const subjects = useMemo<readonly SubjectItem[]>(
     () => (isSubjectItemList(subjectsData?.classSubjects) ? subjectsData.classSubjects : []),
-    [subjectsData?.classSubjects]
+    [subjectsData]
   );
 
   const filteredSubjects = useMemo<readonly SubjectItem[]>(

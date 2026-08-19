@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { parentHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-portal.documents";
 import { type ParentRulesLabels, Translation, useAppTranslation } from "@/shared/locale";
 
@@ -21,14 +21,20 @@ export function useParentRulesViewModel(_props: Readonly<UseParentRulesViewModel
     fetchPolicy: "cache-and-network",
   });
 
+  const dataRef = useRef(data);
+  const refetchRef = useRef(refetch);
+  useEffect(() => {
+    dataRef.current = data;
+    refetchRef.current = refetch;
+  });
+
   const onDownloadHandbook = useCallback(async () => {
     setHandbookLoading(true);
     try {
-      if (data?.parentHandbookUrl?.url) {
-        window.open(data.parentHandbookUrl.url, "_blank");
+      if (dataRef.current?.parentHandbookUrl?.url) {
+        window.open(dataRef.current.parentHandbookUrl.url, "_blank");
       } else {
-        await refetch();
-        const refetchedData = await refetch();
+        const refetchedData = await refetchRef.current();
         if (refetchedData.data?.parentHandbookUrl?.url) {
           window.open(refetchedData.data.parentHandbookUrl.url, "_blank");
         }
@@ -36,7 +42,7 @@ export function useParentRulesViewModel(_props: Readonly<UseParentRulesViewModel
     } finally {
       setHandbookLoading(false);
     }
-  }, [data?.parentHandbookUrl?.url, refetch]);
+  }, []);
 
   return {
     labels,

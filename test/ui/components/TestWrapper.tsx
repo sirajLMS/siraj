@@ -5,7 +5,7 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { type RenderResult, render } from "@testing-library/react";
-import { type ReactElement, type ReactNode, useMemo } from "react";
+import { type ReactElement, type ReactNode, useEffect, useMemo } from "react";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
@@ -83,7 +83,10 @@ export function TestWrapper({
     [mocks]
   );
 
-  useUserStore.setState({ permissions });
+  useUserStore(state => state.permissions);
+  useEffect(() => {
+    useUserStore.setState({ permissions });
+  }, [permissions]);
 
   return (
     <LocaleProvider locale={locale}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { classStatusEventsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { logger } from "@/frontend/common/utils/logger";
 import type { ActionFeedbackState } from "@/frontend/common/views/dashboard/classes/details/types";
@@ -17,6 +17,11 @@ export function useEventLogDownload(
   const { data: eventsData, error: eventsError } = useQuery(classStatusEventsQueryDocument, {
     variables: { classInstanceId: id },
     skip: !id || !shouldLoadEvents,
+  });
+
+  const setShouldLoadEventsRef = useRef(setShouldLoadEvents);
+  useEffect(() => {
+    setShouldLoadEventsRef.current = setShouldLoadEvents;
   });
 
   useEffect(() => {
@@ -38,16 +43,16 @@ export function useEventLogDownload(
         logger.error("Error generating log:", err);
         setFeedbackState({ message: t.actionFeedback.generateLogError, severity: "error" });
       } finally {
-        setShouldLoadEvents(false);
+        setShouldLoadEventsRef.current(false);
       }
     }
-  }, [eventsData, shouldLoadEvents, id, t, setFeedbackState, setShouldLoadEvents]);
+  }, [eventsData, shouldLoadEvents, id, t, setFeedbackState]);
 
   useEffect(() => {
     if (shouldLoadEvents && eventsError) {
       logger.error("Error fetching class status events:", eventsError);
       setFeedbackState({ message: t.loadError, severity: "error" });
-      setShouldLoadEvents(false);
+      setShouldLoadEventsRef.current(false);
     }
-  }, [eventsError, shouldLoadEvents, t, setFeedbackState, setShouldLoadEvents]);
+  }, [eventsError, shouldLoadEvents, t, setFeedbackState]);
 }

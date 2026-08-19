@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
@@ -34,31 +34,33 @@ function isAdminMetricKey(value: string): value is AdminMetricKey {
 
 /** Tracks when dashboard data first arrives and computes an elapsed-time label that updates every minute. */
 export function useLastUpdatedLabel(data: unknown, labels: AdminDashboardLastUpdatedLabels) {
-  const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
+  const dataArrivedAtRef = useRef<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState(labels.updatedJustNow);
 
   useEffect(() => {
-    if (data && dataArrivedAt === null) {
-      setDataArrivedAt(Date.now());
-    }
-  }, [data, dataArrivedAt]);
-
-  useEffect(() => {
-    if (dataArrivedAt === null) {
-      setLastUpdated(labels.updatedJustNow);
-      return undefined;
-    }
-    const computeLabel = () => {
-      const elapsedMin = Math.floor((Date.now() - dataArrivedAt) / 60000);
+    const computeLabel = (arrivedAt: number) => {
+      const elapsedMin = Math.floor((Date.now() - arrivedAt) / 60000);
       if (elapsedMin < 1) return labels.updatedJustNow;
       return labels.updatedMinutesAgo(elapsedMin);
     };
-    setLastUpdated(computeLabel());
-    const interval = setInterval(() => {
-      setLastUpdated(computeLabel());
-    }, 60000);
-    return () => clearInterval(interval);
-  }, [dataArrivedAt, labels]);
+
+    const update = () => {
+      const arrivedAt = dataArrivedAtRef.current;
+      if (arrivedAt === null && data) {
+        dataArrivedAtRef.current = Date.now();
+        setLastUpdated(labels.updatedJustNow);
+      } else if (arrivedAt !== null) {
+        setLastUpdated(computeLabel(arrivedAt));
+      }
+    };
+
+    const timeoutId = setTimeout(update, 0);
+    const interval = setInterval(update, 60000);
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(interval);
+    };
+  }, [data, labels]);
 
   return lastUpdated;
 }

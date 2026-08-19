@@ -66,11 +66,12 @@ export function TeacherDashboardDataIsland({ labels, lastUpdatedLabels }: Readon
   });
 
   const [dataArrivedAt, setDataArrivedAt] = useState<number | null>(null);
-  useEffect(() => {
-    if (dashboardData?.teacherDashboard) {
-      setDataArrivedAt(Date.now());
-    }
-  }, [dashboardData]);
+  const [prevHasData, setPrevHasData] = useState(false);
+  const hasData = Boolean(dashboardData?.teacherDashboard);
+  if (hasData && !prevHasData) {
+    setPrevHasData(true);
+    setDataArrivedAt(captureTimestamp());
+  }
 
   const lastUpdated = useTeacherDashboardLastUpdated(dataArrivedAt, lastUpdatedLabels);
 
@@ -120,6 +121,10 @@ export function TeacherDashboardDataIsland({ labels, lastUpdatedLabels }: Readon
   }, [dashboardData, loading, filterDate, labels, lastUpdated, lastUpdatedLabels, setData]);
 
   return null;
+}
+
+function captureTimestamp(): number {
+  return Date.now();
 }
 
 function mapRows(rows: readonly RawRow[] | null | undefined, todayDateStr: string): TeacherScheduleRow[] {

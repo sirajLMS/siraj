@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
@@ -20,8 +20,6 @@ interface UseOverrideDataParams {
 }
 
 export function useOverrideData({ userId, users, groups, permissions, open, searchQuery }: UseOverrideDataParams) {
-  const [initialOverrides, setInitialOverrides] = useState<Record<string, OverrideState>>({});
-
   const user = useMemo(() => users.find(u => u.id === userId) ?? null, [users, userId]);
 
   const { data: queryData, loading: queryLoading } = useQuery(userOverridesQueryDocument, {
@@ -34,18 +32,15 @@ export function useOverrideData({ userId, users, groups, permissions, open, sear
     return groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
   }, [groups, userId]);
 
-  useEffect(() => {
-    if (queryData?.userOverrides) {
-      const overridesMap: Record<string, OverrideState> = {};
-      for (const override of queryData.userOverrides) {
-        if (override.permissionId && isOverrideState(override.state)) {
-          overridesMap[override.permissionId] = override.state;
-        }
+  const initialOverrides = useMemo<Record<string, OverrideState>>(() => {
+    if (!queryData?.userOverrides) return {};
+    const overridesMap: Record<string, OverrideState> = {};
+    for (const override of queryData.userOverrides) {
+      if (override.permissionId && isOverrideState(override.state)) {
+        overridesMap[override.permissionId] = override.state;
       }
-      setInitialOverrides(overridesMap);
-    } else {
-      setInitialOverrides({});
     }
+    return overridesMap;
   }, [queryData]);
 
   const filteredPermissions = useMemo(() => {

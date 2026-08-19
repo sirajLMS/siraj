@@ -2,7 +2,7 @@
 
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { BaseCard } from "@/frontend/common/components/ui";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import {
@@ -70,11 +70,7 @@ const StyledEmptyState = styled(Typography)(({ theme }) => ({
 }));
 
 export function ActivityHeatmap({ data, labels }: ActivityHeatmapProps) {
-  const [bars, setBars] = useState<Bar[]>(() => data.map((h, i) => ({ id: `bar-${i}`, height: h })));
-
-  useEffect(() => {
-    setBars(data.map((h, i) => ({ id: `bar-${i}`, height: h })));
-  }, [data]);
+  const bars = useMemo<Bar[]>(() => data.map((h, i) => ({ id: `bar-${i}`, height: h })), [data]);
 
   const hasData = bars.length > 0;
 

@@ -479,7 +479,7 @@ function useCronScheduleSaveHandler(args: {
         );
       }
     },
-    [editingSchedule?.id, mutations, notifications, labels, refetch, args]
+    [editingSchedule, mutations, notifications, labels, refetch, args]
   );
 }
 

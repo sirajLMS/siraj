@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { teacherHandbookUrlQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { buildTeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/utils/buildTeacherDashboardLabels";
 import type { TeacherRulesLabelsBySection } from "@/frontend/common/views/dashboard/teachers/rules/types/teacherRules.types";
@@ -32,16 +32,17 @@ export function useTeacherRulesViewModel(_props: Readonly<UseTeacherRulesViewMod
   const labels = buildTeacherDashboardLabels(t, dashboardT, tJoin.emptyTeacher);
 
   const [handbookRequested, setHandbookRequested] = useState(false);
+  const handledRef = useRef(false);
   const { data: handbookData, loading: handbookLoading } = useQuery(teacherHandbookUrlQueryDocument, {
     skip: !handbookRequested,
   });
 
   useEffect(() => {
-    if (handbookRequested && !handbookLoading) {
-      if (handbookData?.teacherHandbookUrl?.url) {
-        globalThis.open(handbookData.teacherHandbookUrl.url, "_blank");
-      }
-      setHandbookRequested(false);
+    if (!handbookRequested || handbookLoading || handledRef.current) return;
+    handledRef.current = true;
+    const url = handbookData?.teacherHandbookUrl?.url;
+    if (url) {
+      globalThis.open(url, "_blank");
     }
   }, [handbookRequested, handbookLoading, handbookData]);
 
@@ -56,6 +57,7 @@ export function useTeacherRulesViewModel(_props: Readonly<UseTeacherRulesViewMod
       actions: labels.actions,
     },
     onDownloadHandbook: () => {
+      handledRef.current = false;
       setHandbookRequested(true);
     },
     onContactCoordinator: () => {

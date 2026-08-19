@@ -14,7 +14,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { logger } from "@/frontend/common/utils/logger";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { ManualClassEntryStudentFieldContext } from "@/frontend/common/views/dashboard/teachers/dashboard/components/manualClassEntryStudentFieldContext";
@@ -46,39 +46,70 @@ export function ManualClassEntryDialog({
   studentSelect,
   labels,
 }: Readonly<ManualClassEntryDialogProps>) {
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <ManualClassEntryForm
+        key={open ? "open" : "closed"}
+        onClose={onClose}
+        onSubmit={onSubmit}
+        defaultActive={defaultActive}
+        studentSelect={studentSelect}
+        labels={labels}
+      />
+    </Dialog>
+  );
+}
+
+interface ManualClassEntryFormProps {
+  readonly onClose: () => void;
+  readonly onSubmit: (data: {
+    studentId: string;
+    subjectId: string;
+    scheduledStartAt: string;
+    scheduledEndAt: string;
+    durationMinutes: number;
+    classType: string;
+  }) => Promise<void>;
+  readonly defaultActive: boolean;
+  readonly studentSelect: ReactNode;
+  readonly labels: ManualClassEntryLabels;
+}
+
+function getInitialDate(): string {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function getInitialStartTime(defaultActive: boolean): string {
+  const now = new Date();
+  if (defaultActive) {
+    const hh = String(now.getHours()).padStart(2, "0");
+    const min = String(now.getMinutes()).padStart(2, "0");
+    return `${hh}:${min}`;
+  }
+  const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
+  const hh = String(nextHour.getHours()).padStart(2, "0");
+  return `${hh}:00`;
+}
+
+function ManualClassEntryForm({
+  onClose,
+  onSubmit,
+  defaultActive,
+  studentSelect,
+  labels,
+}: Readonly<ManualClassEntryFormProps>) {
   const [studentId, setStudentId] = useState("");
   const [subjectId, setSubjectId] = useState("");
-  const [date, setDate] = useState("");
-  const [startTime, setStartTime] = useState("");
+  const [date, setDate] = useState(getInitialDate);
+  const [startTime, setStartTime] = useState(() => getInitialStartTime(defaultActive));
   const [duration, setDuration] = useState(60);
   const [classType, setClassType] = useState("REGULAR");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (open) {
-      setError(null);
-      setStudentId("");
-      setSubjectId("");
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, "0");
-      const dd = String(now.getDate()).padStart(2, "0");
-      setDate(`${yyyy}-${mm}-${dd}`);
-
-      if (defaultActive) {
-        const hh = String(now.getHours()).padStart(2, "0");
-        const min = String(now.getMinutes()).padStart(2, "0");
-        setStartTime(`${hh}:${min}`);
-      } else {
-        const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
-        const hh = String(nextHour.getHours()).padStart(2, "0");
-        setStartTime(`${hh}:00`);
-      }
-      setDuration(60);
-      setClassType("REGULAR");
-    }
-  }, [open, defaultActive]);
 
   const handleFormSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -124,43 +155,41 @@ export function ManualClassEntryDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <form onSubmit={handleFormSubmit}>
-        <DialogTitle sx={{ typography: "titleLg" }}>
-          {defaultActive ? labels.titleCreateActive : labels.titleCreate}
-        </DialogTitle>
-        <DialogContent dividers>
-          <ManualClassEntryStudentFieldContext.Provider
-            value={useMemo(() => ({ studentId, setStudentId, disabled: submitting }), [studentId, submitting])}
-          >
-            <ManualClassEntryFormFields
-              error={error}
-              studentSelect={studentSelect}
-              subjectId={subjectId}
-              setSubjectId={setSubjectId}
-              date={date}
-              setDate={setDate}
-              startTime={startTime}
-              setStartTime={setStartTime}
-              duration={duration}
-              setDuration={setDuration}
-              classType={classType}
-              setClassType={setClassType}
-              submitting={submitting}
-              labels={labels}
-            />
-          </ManualClassEntryStudentFieldContext.Provider>
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={onClose} disabled={submitting}>
-            {labels.cancel}
-          </Button>
-          <Button type="submit" variant="contained" disabled={submitting}>
-            {submitting ? labels.creating : labels.create}
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+    <form onSubmit={handleFormSubmit}>
+      <DialogTitle sx={{ typography: "titleLg" }}>
+        {defaultActive ? labels.titleCreateActive : labels.titleCreate}
+      </DialogTitle>
+      <DialogContent dividers>
+        <ManualClassEntryStudentFieldContext.Provider
+          value={useMemo(() => ({ studentId, setStudentId, disabled: submitting }), [studentId, submitting])}
+        >
+          <ManualClassEntryFormFields
+            error={error}
+            studentSelect={studentSelect}
+            subjectId={subjectId}
+            setSubjectId={setSubjectId}
+            date={date}
+            setDate={setDate}
+            startTime={startTime}
+            setStartTime={setStartTime}
+            duration={duration}
+            setDuration={setDuration}
+            classType={classType}
+            setClassType={setClassType}
+            submitting={submitting}
+            labels={labels}
+          />
+        </ManualClassEntryStudentFieldContext.Provider>
+      </DialogContent>
+      <DialogActions sx={{ p: 2 }}>
+        <Button onClick={onClose} disabled={submitting}>
+          {labels.cancel}
+        </Button>
+        <Button type="submit" variant="contained" disabled={submitting}>
+          {submitting ? labels.creating : labels.create}
+        </Button>
+      </DialogActions>
+    </form>
   );
 }
 

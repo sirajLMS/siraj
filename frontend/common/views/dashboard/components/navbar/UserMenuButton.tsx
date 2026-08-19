@@ -358,13 +358,14 @@ export function UserMenuButton({
     fetchPolicy: "network-only",
   });
 
+  const simulatedGroupSlug = simulationStatus?.groupSlug;
   const simulatableGroups = useMemo(() => {
     const groups = groupsData?.simulatablePermissionGroups ?? [];
-    if (isSimulatingGroup && simulationStatus?.groupSlug) {
-      return groups.filter(group => group.slug !== simulationStatus.groupSlug);
+    if (isSimulatingGroup && simulatedGroupSlug) {
+      return groups.filter(group => group.slug !== simulatedGroupSlug);
     }
     return groups;
-  }, [groupsData?.simulatablePermissionGroups, isSimulatingGroup, simulationStatus?.groupSlug]);
+  }, [groupsData?.simulatablePermissionGroups, isSimulatingGroup, simulatedGroupSlug]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

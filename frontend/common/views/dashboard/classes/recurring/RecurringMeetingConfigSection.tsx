@@ -158,10 +158,11 @@ export function RecurringMeetingConfigSection({
 
   const mode = resolveMode(value);
 
+  const providerInstructions = value.newProvider?.instructions ?? null;
   const instructions = useMemo(() => {
-    if (!value.newProvider?.instructions) return null;
-    return resolveLocalizedString(value.newProvider.instructions, locale);
-  }, [locale, value.newProvider?.instructions]);
+    if (!providerInstructions) return null;
+    return resolveLocalizedString(providerInstructions, locale);
+  }, [locale, providerInstructions]);
 
   const validateNewModeFields = (): boolean => {
     const errorKey = getRecurringMeetingConfigErrorKey(value);

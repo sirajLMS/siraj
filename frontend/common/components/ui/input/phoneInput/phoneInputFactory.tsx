@@ -19,6 +19,13 @@ import {
  * jscpd-detected duplication across the three tier variants.
  */
 export function createPhoneInputVariant(slots: Readonly<PhoneInputSlotProps>): React.FC<PhoneInputSharedProps> {
+  const {
+    LocaleEmojiComponent,
+    PhoneCountryPickerComponent,
+    PrefixInputElement,
+    resolveHelperText,
+    useOnNationalInput: shouldUseOnNationalInput,
+  } = slots;
   const PhoneInputVariant: React.FC<PhoneInputSharedProps> = ({
     value,
     onChangeAction,
@@ -46,11 +53,11 @@ export function createPhoneInputVariant(slots: Readonly<PhoneInputSlotProps>): R
       error={error}
       helperText={helperText}
       hideLabel={hideLabel}
-      LocaleEmojiComponent={slots.LocaleEmojiComponent}
-      PhoneCountryPickerComponent={slots.PhoneCountryPickerComponent}
-      PrefixInputElement={slots.PrefixInputElement}
-      resolveHelperText={slots.resolveHelperText}
-      useOnNationalInput={slots.useOnNationalInput}
+      LocaleEmojiComponent={LocaleEmojiComponent}
+      PhoneCountryPickerComponent={PhoneCountryPickerComponent}
+      PrefixInputElement={PrefixInputElement}
+      resolveHelperText={resolveHelperText}
+      useOnNationalInput={shouldUseOnNationalInput}
     />
   );
   return PhoneInputVariant;

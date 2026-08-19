@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   latestExchangeRatesQueryDocument,
@@ -127,12 +127,6 @@ export function useExchangeRatesViewModel(_props: Readonly<UseExchangeRatesViewM
     setSnackbarOpen(true);
   };
 
-  useEffect(() => {
-    if (billingActionsDisabled) {
-      setManualOverrideOpen(false);
-    }
-  }, [billingActionsDisabled]);
-
   const onOpenManualOverride = () => {
     if (!billingActionsDisabled) {
       setManualOverrideOpen(true);
@@ -209,7 +203,7 @@ export function useExchangeRatesViewModel(_props: Readonly<UseExchangeRatesViewM
     canOverride: hasPermission(AppPermission.BillingOverrideExchangeRates),
     onRefresh: () => void refreshMutation({ variables: { force: false } }),
     onOpenManualOverride,
-    manualOverrideOpen,
+    manualOverrideOpen: manualOverrideOpen && !billingActionsDisabled,
     onCloseManualOverride: () => setManualOverrideOpen(false),
     onSuccessManualOverride: () => {
       showFeedback(labels.manualOverride.success, "success");

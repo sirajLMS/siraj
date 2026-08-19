@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { buildParentStudentCardLabels } from "@/frontend/common/views/dashboard/parent/students/types/parentStudentCard.types";
 import type { ParentStudentsViewModel } from "@/frontend/common/views/dashboard/parent/students/useParentStudentsViewModel";
 import {
@@ -18,19 +18,13 @@ export function ParentStudentsDesktopView({ labels, loading, error, rows }: Read
   const cardLabels = buildParentStudentCardLabels(labels);
   const [clientPage, setClientPage] = useState(0);
 
-  useEffect(() => {
-    const pageCount = Math.max(1, Math.ceil(rows.length / CLIENT_PAGE_SIZE) || 1);
-    if (clientPage >= pageCount) {
-      setClientPage(Math.max(0, pageCount - 1));
-    }
-  }, [clientPage, rows.length]);
+  const pageCount = Math.max(1, Math.ceil(rows.length / CLIENT_PAGE_SIZE) || 1);
+  const effectivePage = Math.min(clientPage, Math.max(0, pageCount - 1));
 
   const visibleRows = useMemo(() => {
-    const start = clientPage * CLIENT_PAGE_SIZE;
+    const start = effectivePage * CLIENT_PAGE_SIZE;
     return rows.slice(start, start + CLIENT_PAGE_SIZE);
-  }, [clientPage, rows]);
-
-  const pageCount = Math.max(1, Math.ceil(rows.length / CLIENT_PAGE_SIZE) || 1);
+  }, [effectivePage, rows]);
 
   return (
     <DesktopPageContainer>
@@ -56,7 +50,7 @@ export function ParentStudentsDesktopView({ labels, loading, error, rows }: Read
             </Box>
           )}
           <DesktopPaginationControls
-            page={clientPage}
+            page={effectivePage}
             pageCount={pageCount}
             rowCount={rows.length}
             pageSize={CLIENT_PAGE_SIZE}

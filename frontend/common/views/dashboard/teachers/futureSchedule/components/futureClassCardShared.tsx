@@ -68,11 +68,12 @@ interface ClassInfoProps {
 function ClassInfo({ item, labels, slots, style }: Readonly<ClassInfoProps>) {
   const isRescheduled = item.isRescheduled === true;
   const { StatusBadge, MeetingJoinAction } = slots;
+  const classProfileLink = slots.ClassProfileLink;
 
   return (
     <Box sx={{ flex: 1 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-        {slots.ClassProfileLink({
+        {classProfileLink({
           href: item.id ? classHref(item.id) : undefined,
           name: item.courseName?.trim() ?? item.subjectName?.trim() ?? "—",
           avatarUrl: item.avatarUrl,

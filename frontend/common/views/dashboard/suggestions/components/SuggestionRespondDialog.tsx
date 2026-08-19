@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import type { SuggestionRespondDialogProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
 
@@ -15,15 +15,10 @@ export function SuggestionRespondDialog({
 }: Readonly<SuggestionRespondDialogProps>) {
   const [response, setResponse] = useState("");
 
-  useEffect(() => {
-    if (!open) {
-      setResponse("");
-    }
-  }, [open]);
-
   const handleSubmit = () => {
     if (response.trim().length === 0) return;
     onConfirm(suggestionId, response.trim());
+    setResponse("");
   };
 
   const handleCancel = () => {

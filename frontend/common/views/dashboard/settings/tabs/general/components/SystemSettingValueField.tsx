@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Switch, TextField } from "@mui/material";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useState } from "react";
 import type { SystemSettingRow } from "@/frontend/common/views/dashboard/settings/types/generalSettings.types";
 import { SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
@@ -19,10 +19,11 @@ export function SystemSettingValueField({
   onValueChange,
 }: Readonly<SystemSettingValueFieldProps>): ReactNode {
   const [draftValue, setDraftValue] = useState(row.value);
-
-  useEffect(() => {
+  const [prevRowValue, setPrevRowValue] = useState(row.value);
+  if (row.value !== prevRowValue) {
+    setPrevRowValue(row.value);
     setDraftValue(row.value);
-  }, [row.value]);
+  }
 
   const commitValue = (nextValue: string): Promise<void> | void | undefined => {
     if (nextValue === row.value) {

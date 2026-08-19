@@ -26,7 +26,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
@@ -71,18 +71,10 @@ function resolveCredValidationError(key: string | null, labels: WhatsappLabels):
 
 // ── Credential form hook ──
 
-function useCredentialForm(open: boolean) {
+function useCredentialForm() {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setValue("");
-      setError(null);
-      setSubmitting(false);
-    }
-  }, [open]);
 
   return { value, setValue, error, setError, submitting, setSubmitting };
 }
@@ -106,7 +98,12 @@ function CredentialEditDialogMobile({
   readonly loading: boolean;
   readonly validate: (value: string) => string | null;
 }>) {
-  const form = useCredentialForm(open);
+  const form = useCredentialForm();
+  const onConfirmRef = useRef(onConfirm);
+
+  useEffect(() => {
+    onConfirmRef.current = onConfirm;
+  }, [onConfirm]);
 
   const handleClose = useCallback(() => {
     form.setValue("");
@@ -120,12 +117,12 @@ function CredentialEditDialogMobile({
     if (err !== null) return;
     form.setSubmitting(true);
     try {
-      await onConfirm(form.value);
+      await onConfirmRef.current(form.value);
       form.setValue("");
     } finally {
       form.setSubmitting(false);
     }
-  }, [form, validate, labels, onConfirm]);
+  }, [form, validate, labels]);
 
   const handleFieldChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -578,6 +575,7 @@ export function NumbersTabMobile({
       />
 
       <CredentialEditDialogMobile
+        key={`${credMenu.credDialogState.accountId}-${credMenu.credDialogState.field}`}
         open={credMenu.credDialogOpen}
         state={credMenu.credDialogState}
         labels={t}

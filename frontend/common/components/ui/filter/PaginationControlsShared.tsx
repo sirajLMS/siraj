@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { rtlFlipIconSx } from "@/frontend/common/utils/rtlFlipIconSx";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -73,11 +73,16 @@ export function PaginationControlsScaffold({
   navButtonColor,
 }: Readonly<PaginationControlsScaffoldProps>) {
   const t = useAppTranslation(Translation.Dashboard.Admin);
-  const [pageInput, setPageInput] = useState(String(page + 1));
+  const [pageInputState, setPageInputState] = useState(String(page + 1));
+  const [lastPage, setLastPage] = useState(page);
 
-  useEffect(() => {
-    setPageInput(String(page + 1));
-  }, [page]);
+  if (page !== lastPage) {
+    setLastPage(page);
+    setPageInputState(String(page + 1));
+  }
+
+  const pageInput = pageInputState;
+  const setPageInput = setPageInputState;
 
   const safePageCount = Math.max(pageCount, rowCount > 0 ? 1 : 0);
   const from = rowCount === 0 ? 0 : page * pageSize + 1;

@@ -104,10 +104,24 @@ const fetchCountryCode = (
   void detectCountry(setCountryCode, setError, setLoading, defaultCountryCode, errorMessages);
 };
 
+function getCachedCountryCode(): string | null {
+  if (!hasClientWindow()) {
+    return null;
+  }
+  const storedCountryCode = getLocalStorageItem(STORAGE_KEYS.countryCode);
+  const storedFetchDate = getLocalStorageItem(STORAGE_KEYS.fetchDate);
+  const fetchDate = storedFetchDate ? new Date(storedFetchDate) : null;
+  const now = new Date();
+  if (storedCountryCode && now.getDate() === fetchDate?.getDate()) {
+    return storedCountryCode;
+  }
+  return null;
+}
+
 export function useCountryDetection(timeout: number = 2000, defaultCountryCode: string = "SA"): CountryDetectionResult {
   const t = useAppTranslation(Translation.Ui.CountrySelect);
-  const [countryCode, setCountryCode] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [countryCode, setCountryCode] = useState<string | null>(getCachedCountryCode);
+  const [loading, setLoading] = useState<boolean>(() => getCachedCountryCode() === null);
   const [error, setError] = useState<string | null>(null);
 
   const errorMessages = useMemo(
@@ -116,31 +130,19 @@ export function useCountryDetection(timeout: number = 2000, defaultCountryCode: 
   );
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (loading) {
-        setCountryCode(defaultCountryCode);
-        setLoading(false);
-      }
-    }, timeout);
-
-    if (hasClientWindow()) {
-      const storedCountryCode = getLocalStorageItem(STORAGE_KEYS.countryCode);
-      const storedFetchDate = getLocalStorageItem(STORAGE_KEYS.fetchDate);
-      const fetchDate = storedFetchDate ? new Date(storedFetchDate) : null;
-      const now = new Date();
-
-      if (storedCountryCode && now.getDate() === fetchDate?.getDate()) {
-        setCountryCode(storedCountryCode);
-        setLoading(false);
-      } else {
-        fetchCountryCode(setCountryCode, setError, setLoading, defaultCountryCode, errorMessages);
-      }
-    } else {
-      fetchCountryCode(setCountryCode, setError, setLoading, defaultCountryCode, errorMessages);
+    if (countryCode !== null) {
+      return undefined;
     }
 
+    const timeoutId = setTimeout(() => {
+      setCountryCode(defaultCountryCode);
+      setLoading(false);
+    }, timeout);
+
+    fetchCountryCode(setCountryCode, setError, setLoading, defaultCountryCode, errorMessages);
+
     return () => clearTimeout(timeoutId);
-  }, [loading, timeout, defaultCountryCode, errorMessages]);
+  }, [countryCode, timeout, defaultCountryCode, errorMessages]);
 
   return {
     countryCode: countryCode ?? defaultCountryCode,

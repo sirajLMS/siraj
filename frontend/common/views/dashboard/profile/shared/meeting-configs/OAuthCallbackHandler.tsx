@@ -1,7 +1,7 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { logger } from "@/frontend/common/utils/logger";
 import { srOnlySx } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/useCopyFeedback";
 import type { MeetingConfigEnhancementLabels } from "@/shared/locale/types/ui";
@@ -56,23 +56,28 @@ function readOAuthParams(): { status: string | null; provider: string | null; er
 /** Polite live region style — visually hidden but announced by screen readers. */
 const liveRegionSx = srOnlySx;
 
-export function OAuthCallbackHandler({ labels, onCallbackDetected }: Readonly<OAuthCallbackHandlerProps>) {
-  const [announcement, setAnnouncement] = useState("");
+/** Derives the screen-reader announcement from OAuth callback params. */
+function deriveAnnouncement(
+  status: string | null,
+  provider: string | null,
+  labels: OAuthCallbackHandlerLabels
+): string {
+  if (!status || !provider) return "";
+  if (status === "success") return labels.oauthCallbackSuccess;
+  if (status === "error") return labels.oauthCallbackError;
+  return "";
+}
 
-  const announce = useCallback((message: string) => {
-    setAnnouncement(message);
-  }, []);
+export function OAuthCallbackHandler({ labels, onCallbackDetected }: Readonly<OAuthCallbackHandlerProps>) {
+  const { status, provider, error } = readOAuthParams();
+  const announcement = deriveAnnouncement(status, provider, labels);
 
   useEffect(() => {
-    const { status, provider, error } = readOAuthParams();
-
     if (status && provider) {
       if (status === "success") {
         onCallbackDetected("success", provider, error ?? undefined);
-        announce(labels.oauthCallbackSuccess);
       } else if (status === "error") {
         onCallbackDetected("error", provider, error ?? undefined);
-        announce(labels.oauthCallbackError);
         logger.error("OAuth callback error", { provider, error });
       }
       cleanOAuthParams();
@@ -85,7 +90,7 @@ export function OAuthCallbackHandler({ labels, onCallbackDetected }: Readonly<OA
     return () => {
       window.removeEventListener("focus", handleFocus);
     };
-  }, [labels, onCallbackDetected, announce]);
+  }, [status, provider, error, onCallbackDetected]);
 
   return (
     <Box component="output" aria-live="polite" sx={liveRegionSx}>

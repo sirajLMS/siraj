@@ -183,7 +183,7 @@ export function useAdminSuggestionsViewModel(): AdminSuggestionsViewModel & Admi
       duplicateOfSubmitterName: row.duplicateOfSubmitterName ?? null,
       responseCount: row.responseCount ?? null,
     }));
-  }, [data?.adminSuggestions?.rows]);
+  }, [data]);
 
   const filteredRows = useMemo(
     () => filterSuggestionsByTab(rows, activeTab, searchQuery),

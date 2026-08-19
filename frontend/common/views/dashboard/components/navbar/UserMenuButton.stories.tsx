@@ -1,7 +1,7 @@
 import type { MockLink } from "@apollo/client/testing";
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   impersonationStatusQueryDocument,
@@ -100,8 +100,10 @@ function StoryShell({
   mocks,
   children,
 }: Readonly<{ mocks: ReadonlyArray<MockLink.MockedResponse>; children: ReactNode }>) {
-  useUserStore.setState({
-    user: {
+  const { setUser, setActorIsSuperAdmin } = useUserStore();
+
+  useEffect(() => {
+    setUser({
       id: "actor-id",
       name: "Super Admin",
       email: "admin@example.com",
@@ -118,14 +120,9 @@ function StoryShell({
       status: AccountStatus.Activated,
       displayCurrency: null,
       __typename: "User" as const,
-    },
-    name: "Super Admin",
-    avatarUrl: "",
-    permissions: [],
-    notificationCount: 0,
-    displayCurrency: null,
-    actorIsSuperAdmin: true,
-  });
+    });
+    setActorIsSuperAdmin(true);
+  }, [setUser, setActorIsSuperAdmin]);
 
   return <MockedProvider mocks={mocks}>{children}</MockedProvider>;
 }

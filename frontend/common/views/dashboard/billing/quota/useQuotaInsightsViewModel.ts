@@ -139,7 +139,7 @@ export function useQuotaInsightsViewModel(): QuotaInsightsViewModel {
     [allQuotas, dateRange, kind, status, studentId]
   );
 
-  const monthFormatter = useMemo(() => Intl.DateTimeFormat(locale, { month: "short" }), [locale]);
+  const monthFormatter = useMemo(() => new Intl.DateTimeFormat(locale, { month: "short" }), [locale]);
 
   const metrics = useMemo(() => computeInsightsMetrics(filteredQuotas), [filteredQuotas]);
 

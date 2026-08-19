@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, Dialog, DialogContent, DialogTitle, Stack, TextField } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { DialogSaveCancelActions } from "@/frontend/common/views/dashboard/settings/whatsapp/dialogs";
 import type { WhatsappCreateInput } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
@@ -71,8 +71,10 @@ function useCreateAccountForm(
   const [displayNameError, setDisplayNameError] = useState<string | null>(null);
   const [phoneNumberIdError, setPhoneNumberIdError] = useState<string | null>(null);
   const [wabaIdError, setWabaIdError] = useState<string | null>(null);
+  const [prevOpen, setPrevOpen] = useState(open);
 
-  useEffect(() => {
+  if (prevOpen !== open) {
+    setPrevOpen(open);
     if (open) {
       setDisplayName("");
       setPhoneNumberId("");
@@ -81,7 +83,7 @@ function useCreateAccountForm(
       setPhoneNumberIdError(null);
       setWabaIdError(null);
     }
-  }, [open]);
+  }
 
   const handleDisplayNameChange = useCallback(
     (value: string) => {

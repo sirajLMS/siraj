@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const DISMISS_KEY = "fxDisplayCurrencyHintDismissed";
 
@@ -17,10 +17,6 @@ export function useDisplayCurrencyHintDismissed(): {
   dismiss: () => void;
 } {
   const [dismissed, setDismissed] = useState<boolean>(() => readDismissedFromStorage());
-
-  useEffect(() => {
-    setDismissed(readDismissedFromStorage());
-  }, []);
 
   const dismiss = () => {
     try {

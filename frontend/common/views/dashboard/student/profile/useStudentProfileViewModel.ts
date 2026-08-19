@@ -173,14 +173,15 @@ export function useStudentProfileViewModel({
   const storageOwnerKey = profile?.id ?? _targetUserId;
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey });
 
+  const dateOfBirth = profile?.dateOfBirth ?? null;
   const formattedDateOfBirth = useMemo(() => {
-    if (!profile?.dateOfBirth) return "—";
+    if (!dateOfBirth) return "—";
     try {
-      return formatDate(profile.dateOfBirth, locale);
+      return formatDate(dateOfBirth, locale);
     } catch {
-      return profile.dateOfBirth;
+      return dateOfBirth;
     }
-  }, [profile?.dateOfBirth, locale]);
+  }, [dateOfBirth, locale]);
 
   const profileSyncKey = profile ? `${profile.id}:${profile.updatedAt ?? ""}:${profile.version}` : null;
   const syncedProfileKeyRef = useRef<string | null>(null);

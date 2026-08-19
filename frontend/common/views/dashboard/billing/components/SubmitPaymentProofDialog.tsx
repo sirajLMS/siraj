@@ -284,6 +284,7 @@ export function SubmitPaymentProofDialog({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [prevOpen, setPrevOpen] = useState(open);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const invoiceId = invoice?.id ?? null;
@@ -293,14 +294,18 @@ export function SubmitPaymentProofDialog({
   const [submitProof] = useMutation(submitPaymentProofMutationDocument);
   const [markPaid] = useMutation(markInvoicePaidMutationDocument);
 
-  useEffect(() => {
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (!open) {
       setSelectedFile(null);
       setMutationError(null);
       setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+    }
+  }
+
+  useEffect(() => {
+    if (!open && fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   }, [open]);
 

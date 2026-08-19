@@ -98,16 +98,18 @@ export function EditableTypographyShared({
   const [error, setError] = useState<string | undefined | null>();
   const inputRef = useRef<HTMLInputElement>(null);
   const touchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [prevStartEditing, setPrevStartEditing] = useState(startEditing);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
+  if (prevStartEditing !== startEditing) {
+    setPrevStartEditing(startEditing);
     setIsEditing(startEditing);
-  }, [startEditing]);
+  }
 
-  useEffect(() => {
-    if (!isEditing) {
-      setInputValue(value);
-    }
-  }, [value, isEditing]);
+  if (prevValue !== value && !isEditing) {
+    setPrevValue(value);
+    setInputValue(value);
+  }
 
   const handleClick = useCallback(() => {
     if (!doubleClickToEdit) {

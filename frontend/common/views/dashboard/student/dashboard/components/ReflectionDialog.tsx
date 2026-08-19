@@ -2,7 +2,7 @@
 
 import { useMutation } from "@apollo/client/react";
 import { Alert, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui";
 import { submitStudentReflectionMutationDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import { useStudentDashboardStore } from "@/frontend/common/stores/studentDashboardStore";
@@ -24,19 +24,21 @@ export function ReflectionDialog({ labels, commonLabels }: Readonly<ReflectionDi
 
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [wasOpen, setWasOpen] = useState(false);
+
+  if (open && !wasOpen) {
+    setWasOpen(true);
+    setNotes("");
+    setError(null);
+  } else if (!open && wasOpen) {
+    setWasOpen(false);
+  }
 
   const [submitReflection, { loading }] = useMutation(submitStudentReflectionMutationDocument, {
     onError: err => {
       logger.error("Submit student reflection failed:", { err });
     },
   });
-
-  useEffect(() => {
-    if (open) {
-      setNotes("");
-      setError(null);
-    }
-  }, [open]);
 
   const handleClose = () => {
     if (loading) return;

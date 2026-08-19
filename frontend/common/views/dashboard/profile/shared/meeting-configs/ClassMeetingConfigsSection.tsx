@@ -291,7 +291,7 @@ function useScopeQueries(scopeId: string, isClassScope: boolean) {
       }
     }
     return map;
-  }, [isClassScope, statusData?.classMeetingConfigs]);
+  }, [isClassScope, statusData]);
 
   return { loading, error, refetch, configs, statusMap };
 }

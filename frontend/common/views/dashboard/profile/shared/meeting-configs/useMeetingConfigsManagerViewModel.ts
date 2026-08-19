@@ -4,7 +4,7 @@ import { CombinedGraphQLErrors } from "@apollo/client";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
 import { AppPermission, MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
@@ -109,22 +109,6 @@ function configLabel(config: UserMeetingConfigFieldsFragment, locale: string): s
 export type UseMeetingConfigsManagerViewModelProps = {
   readonly targetUserId: string;
 };
-
-/** Returns a new bookings-instances map with all configs for the given
- *  provider slug removed. Used as a state updater for `setBookingsInstances`. */
-function clearProviderBookingsInstances(
-  configs: readonly UserMeetingConfigFieldsFragment[],
-  providerSlug: string,
-  prev: ReadonlyMap<string, readonly LinkedClassInstance[]>
-): Map<string, readonly LinkedClassInstance[]> {
-  const next = new Map(prev);
-  for (const config of configs) {
-    if (config.provider?.slug === providerSlug && config.id) {
-      next.delete(config.id);
-    }
-  }
-  return next;
-}
 
 /** Returns `null` if the currently expanded config belongs to the given
  *  provider slug (so we collapse it), otherwise returns the previous value
@@ -278,20 +262,23 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>("idle");
   const [lastGeneratedUrl, setLastGeneratedUrl] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
-  const [reauthProviderSlugs, setReauthProviderSlugs] = useState<Set<string>>(() => new Set());
-  const [reauthExpiryStates, setReauthExpiryStates] = useState<Map<string, ExpiryState>>(() => new Map());
+  // Reactive reauth state — slugs added/removed by event handlers (mutation
+  // failures, successful reconnects, disconnects). Proactive detection is
+  // derived from configs via useMemo below, so no useEffect is needed.
+  const [reactiveReauthSlugs, setReactiveReauthSlugs] = useState<Set<string>>(() => new Set());
   const [generating, setGenerating] = useState(false);
   const [connectingSlugs, setConnectingSlugs] = useState<Set<string>>(() => new Set());
 
-  // Proactive token-expiry detection (REQ-14 AC3): check each config's
-  // oauthTokenExpiresAt and add providers whose tokens expire within 7 days
-  // to the reauthProviderSlugs set. This complements the reactive detection
-  // that fires after a mutation failure. Only adds slugs — never removes
-  // reactively-detected slugs.
-  useEffect(() => {
-    const now = Date.now();
-    const expiringSlugs = new Set<string>();
-    const expiryStates = new Map<string, ExpiryState>();
+  // Capture "now" once per mount via a lazy state initializer. This avoids
+  // calling Date.now() during render (react/purity) while still providing a
+  // stable timestamp for proactive expiry calculations.
+  const [nowTimestamp] = useState(() => Date.now());
+
+  // Shared helper: maps each config to its provider slug and ms-until-expiry
+  // (only for configs whose tokens expire within 7 days). Used by both
+  // proactiveReauthSlugs and proactiveExpiryStates to avoid duplication.
+  const expiringConfigs = useMemo<ReadonlyArray<{ slug: string; msUntilExpiry: number }>>(() => {
+    const result: { slug: string; msUntilExpiry: number }[] = [];
     for (const config of configs) {
       const expiresAtRaw = config.oauthTokenExpiresAt;
       if (!expiresAtRaw) continue;
@@ -299,38 +286,48 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       if (Number.isNaN(expiresAt)) continue;
       const slug = config.provider?.slug;
       if (!slug) continue;
-      const msUntilExpiry = expiresAt - now;
+      const msUntilExpiry = expiresAt - nowTimestamp;
       if (msUntilExpiry <= SEVEN_DAYS_MS) {
-        expiringSlugs.add(slug);
-        // Distinguish expired vs expiring soon at the individual slug level.
-        const state: ExpiryState = msUntilExpiry <= 0 ? "expired" : "expiring_soon";
-        expiryStates.set(slug, state);
+        result.push({ slug, msUntilExpiry });
       }
     }
-    if (expiringSlugs.size === 0) return;
-    setReauthExpiryStates(prev => {
-      let changed = false;
-      const next = new Map(prev);
-      for (const [s, state] of expiryStates) {
-        if (next.get(s) !== state) {
-          next.set(s, state);
-          changed = true;
-        }
-      }
-      return changed ? next : prev;
-    });
-    setReauthProviderSlugs(prev => {
-      let changed = false;
-      const next = new Set(prev);
-      for (const s of expiringSlugs) {
-        if (!next.has(s)) {
-          next.add(s);
-          changed = true;
-        }
-      }
-      return changed ? next : prev;
-    });
-  }, [configs]);
+    return result;
+  }, [configs, nowTimestamp]);
+
+  // Proactive token-expiry detection (REQ-14 AC3): derive slugs whose tokens
+  // expire within 7 days directly from configs during render. This
+  // complements the reactive detection that fires after a mutation failure.
+  // Only adds slugs — never removes reactively-detected slugs.
+  const proactiveReauthSlugs = useMemo<ReadonlySet<string>>(() => {
+    const slugs = new Set<string>();
+    for (const { slug } of expiringConfigs) {
+      slugs.add(slug);
+    }
+    return slugs;
+  }, [expiringConfigs]);
+
+  const proactiveExpiryStates = useMemo<ReadonlyMap<string, ExpiryState>>(() => {
+    const states = new Map<string, ExpiryState>();
+    for (const { slug, msUntilExpiry } of expiringConfigs) {
+      const state: ExpiryState = msUntilExpiry <= 0 ? "expired" : "expiring_soon";
+      states.set(slug, state);
+    }
+    return states;
+  }, [expiringConfigs]);
+
+  // Merge proactive (derived) and reactive (event-driven) reauth slugs.
+  const reauthProviderSlugs = useMemo<ReadonlySet<string>>(() => {
+    const merged = new Set(reactiveReauthSlugs);
+    for (const slug of proactiveReauthSlugs) {
+      merged.add(slug);
+    }
+    return merged;
+  }, [reactiveReauthSlugs, proactiveReauthSlugs]);
+
+  // Expiry states are purely proactive (derived from config token expiry
+  // timestamps). Reactive additions (from mutation failures) don't carry
+  // an expiry state — they just add the slug to reauthProviderSlugs.
+  const reauthExpiryStates = proactiveExpiryStates;
 
   const [generateMeetingUrl] = useMutation(generateMeetingUrlMutationDocument);
 
@@ -354,7 +351,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
         setGenerationStatus("success");
         const slug = configs.find(c => c.provider?.id === args.providerId)?.provider?.slug;
         if (slug)
-          setReauthProviderSlugs(prev => {
+          setReactiveReauthSlugs(prev => {
             const next = new Set(prev);
             next.delete(slug);
             return next;
@@ -371,7 +368,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
         if (reauthError) {
           const slug = configs.find(c => c.provider?.id === args.providerId)?.provider?.slug;
           if (slug) {
-            setReauthProviderSlugs(prev => new Set(prev).add(slug));
+            setReactiveReauthSlugs(prev => new Set(prev).add(slug));
           }
         }
       }
@@ -422,7 +419,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
         if (reauthError) {
           const slug = config.provider?.slug;
           if (slug) {
-            setReauthProviderSlugs(prev => new Set(prev).add(slug));
+            setReactiveReauthSlugs(prev => new Set(prev).add(slug));
           }
         }
       }
@@ -550,28 +547,36 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
     locale,
     reauthExpiryStates,
   ]);
-  const [bookingsInstances, setBookingsInstances] = useState<Map<string, readonly LinkedClassInstance[]>>(
-    () => new Map()
-  );
+  const [clearedBookingsIds, setClearedBookingsIds] = useState<Set<string>>(() => new Set());
   const [expandedBookingsId, setExpandedBookingsId] = useState<string | null>(null);
 
-  // Fetch the teacher's weekly schedule only when a bookings list is expanded.
-  // The stateful useQuery pattern (no useLazyQuery) is the project convention.
+  // Track which config IDs have already been fetched so we can skip re-fetching.
+  // This is state (not a ref) so it can be read during render without violating
+  // react/refs. IDs are added when a bookings list is expanded and removed when
+  // a provider is reconnected or disconnected.
+  const [fetchedBookingsIds, setFetchedBookingsIds] = useState<Set<string>>(() => new Set());
+
+  // Fetch the teacher's weekly schedule only when a bookings list is expanded
+  // and hasn't been fetched yet. The stateful useQuery pattern (no useLazyQuery)
+  // is the project convention.
   const weeklyScheduleQuery = useQuery(teacherWeeklyScheduleGridQueryDocument, {
     variables: { teacherId: targetUserId, weekDate: currentWeekStart() },
-    skip: expandedBookingsId === null || bookingsInstances.has(expandedBookingsId),
+    skip: expandedBookingsId === null || fetchedBookingsIds.has(expandedBookingsId),
     fetchPolicy: "network-only",
   });
 
-  // When the query returns data, filter class instances whose effective meeting
-  // uses the expanded config and cache them.
-  useEffect(() => {
-    if (expandedBookingsId == null) return;
-    if (weeklyScheduleQuery.loading) return;
-    if (weeklyScheduleQuery.data == null) return;
+  // Derive bookings instances from the query data during render (not via
+  // useEffect) to avoid cascading renders from setState-in-effect. When the
+  // query returns data for the expanded config, filter class instances whose
+  // effective meeting uses that config.
+  const queryBookingsInstances = useMemo<ReadonlyMap<string, readonly LinkedClassInstance[]>>(() => {
+    if (expandedBookingsId == null) return new Map();
+    if (weeklyScheduleQuery.loading) return new Map();
+    const queryData = weeklyScheduleQuery.data;
+    if (queryData == null) return new Map();
 
-    const grid = weeklyScheduleQuery.data.teacherWeeklyScheduleGrid;
-    if (grid == null) return;
+    const grid = queryData.teacherWeeklyScheduleGrid;
+    if (grid == null) return new Map();
 
     const instances: LinkedClassInstance[] = [];
     for (const cls of grid.classes ?? []) {
@@ -585,12 +590,20 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       });
     }
 
-    setBookingsInstances(prev => {
-      const next = new Map(prev);
-      next.set(expandedBookingsId, instances);
-      return next;
-    });
+    return new Map([[expandedBookingsId, instances]]);
   }, [expandedBookingsId, weeklyScheduleQuery.data, weeklyScheduleQuery.loading]);
+
+  // Merge query-derived instances with the cleared set. Configs in the cleared
+  // set (cleared by reconnect/disconnect handlers) are excluded.
+  const bookingsInstances = useMemo<ReadonlyMap<string, readonly LinkedClassInstance[]>>(() => {
+    const merged = new Map<string, readonly LinkedClassInstance[]>();
+    for (const [id, instances] of queryBookingsInstances) {
+      if (!clearedBookingsIds.has(id)) {
+        merged.set(id, instances);
+      }
+    }
+    return merged;
+  }, [queryBookingsInstances, clearedBookingsIds]);
 
   const handleViewBookings = (meetingConfigId: string) => {
     // Toggle: if already expanded for this config, collapse.
@@ -599,6 +612,12 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       return;
     }
     setExpandedBookingsId(meetingConfigId);
+    setFetchedBookingsIds(prev => {
+      if (prev.has(meetingConfigId)) return prev;
+      const next = new Set(prev);
+      next.add(meetingConfigId);
+      return next;
+    });
   };
 
   const requestOAuthAuthorizeUrl = useCallback(
@@ -617,7 +636,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
         });
         const authorizeUrl = result.data?.connectMeetingProviderOAuth?.authorizeUrl ?? null;
         if (authorizeUrl) {
-          setReauthProviderSlugs(prev => {
+          setReactiveReauthSlugs(prev => {
             const next = new Set(prev);
             next.delete(providerSlug);
             return next;
@@ -645,6 +664,32 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
     [connectMeetingProviderOAuth]
   );
 
+  // Clear cached bookings instances and fetched-status for all configs
+  // belonging to the given provider slug. Called by reconnect and disconnect
+  // handlers to ensure stale data is removed and can be re-fetched.
+  const clearProviderBookingsCache = useCallback(
+    (providerSlug: string) => {
+      const configIds = configs
+        .filter(
+          (c): c is UserMeetingConfigFieldsFragment & { id: string } =>
+            c.provider?.slug === providerSlug && typeof c.id === "string"
+        )
+        .map(c => c.id);
+      if (configIds.length === 0) return;
+      setClearedBookingsIds(prev => {
+        const next = new Set(prev);
+        for (const id of configIds) next.add(id);
+        return next;
+      });
+      setFetchedBookingsIds(prev => {
+        const next = new Set(prev);
+        for (const id of configIds) next.delete(id);
+        return next;
+      });
+    },
+    [configs]
+  );
+
   const handleReconnect = async (providerSlug: string) => {
     const authorizeUrl = await requestOAuthAuthorizeUrl(providerSlug);
     if (authorizeUrl) {
@@ -654,8 +699,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       return;
     }
     setErrorMessage(t.saveError);
-    // Clear cached instances for configs using this provider.
-    setBookingsInstances(prev => clearProviderBookingsInstances(configs, providerSlug, prev));
+    clearProviderBookingsCache(providerSlug);
     // Collapse any expanded view for configs using this provider.
     setExpandedBookingsId(prev => collapseProviderExpandedId(configById, providerSlug, prev));
   };
@@ -671,7 +715,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
           },
         },
       });
-      setReauthProviderSlugs(prev => {
+      setReactiveReauthSlugs(prev => {
         const next = new Set(prev);
         next.delete(providerSlug);
         return next;
@@ -682,8 +726,7 @@ export function useMeetingConfigsManagerViewModel(props: Readonly<UseMeetingConf
       logger.error("disconnectProvider OAuth failed", caughtError);
       setErrorMessage(t.saveError);
     }
-    // Clear cached instances for configs using this provider.
-    setBookingsInstances(prev => clearProviderBookingsInstances(configs, providerSlug, prev));
+    clearProviderBookingsCache(providerSlug);
     // Collapse any expanded view for configs using this provider.
     setExpandedBookingsId(prev => collapseProviderExpandedId(configById, providerSlug, prev));
   };

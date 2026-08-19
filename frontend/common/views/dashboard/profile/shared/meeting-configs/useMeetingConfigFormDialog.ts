@@ -144,10 +144,11 @@ function initializeFromConfig(
 }
 
 function useProviderInstructions(provider: MeetingProviderFieldsFragment | null, locale: string) {
+  const instructions = provider?.instructions ?? null;
   return useMemo(() => {
-    if (!provider?.instructions) return null;
-    return resolveLocalizedString(provider.instructions, locale);
-  }, [locale, provider?.instructions]);
+    if (!instructions) return null;
+    return resolveLocalizedString(instructions, locale);
+  }, [locale, instructions]);
 }
 
 function createValidateUrl(

@@ -69,11 +69,45 @@ export interface CreateRecurringClassDialogFormState {
   readonly setCreatedClassInstanceId: Dispatch<SetStateAction<string | null>>;
 }
 
-// NEW FOR PLAN v5: useDialogFormState — lifts the previously inline `useState`
-// cluster + the `useEffect` reset-on-open out of the tier files. The hook
-// body lives here (common), so the tier files do not themselves call
-// `useState` or `useEffect` (per specs.md §3 N7 + N6).
-export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void): CreateRecurringClassDialogFormState {
+// NEW FOR PLAN v5: resetFormState — module-scope helper that resets all form
+// setters to their initial values. Extracted from useDialogFormState to keep
+// the hook body under CodeScene's Large Method threshold.
+function resetFormState(setters: {
+  setStudentId: Dispatch<SetStateAction<string>>;
+  setSubjectId: Dispatch<SetStateAction<string>>;
+  setDuration: Dispatch<SetStateAction<number>>;
+  setDefaultStartTime: Dispatch<SetStateAction<string>>;
+  setTimezone: Dispatch<SetStateAction<string>>;
+  setClassType: Dispatch<SetStateAction<ClassType>>;
+  setMeetingConfig: Dispatch<SetStateAction<RecurringMeetingConfigFormState>>;
+  setSchedulingMode: Dispatch<SetStateAction<SchedulingMode | null>>;
+  setQuotaId: Dispatch<SetStateAction<string | null>>;
+  setEarmarkedClasses: Dispatch<SetStateAction<number | null>>;
+  setGenerationHorizonWeeks: Dispatch<SetStateAction<number | null>>;
+  setOndemandNoCreditsOutcome: Dispatch<SetStateAction<OnDemandNoCreditsOutcome | null>>;
+  setMeetingConfigWarning: Dispatch<SetStateAction<boolean>>;
+  setCreatedClassInstanceId: Dispatch<SetStateAction<string | null>>;
+}): void {
+  setters.setStudentId("");
+  setters.setSubjectId("");
+  setters.setDuration(60);
+  setters.setDefaultStartTime("09:00");
+  setters.setTimezone("Africa/Cairo");
+  setters.setClassType(ClassType.Regular);
+  setters.setMeetingConfig(emptyRecurringMeetingConfigState());
+  setters.setSchedulingMode(null);
+  setters.setQuotaId(null);
+  setters.setEarmarkedClasses(null);
+  setters.setGenerationHorizonWeeks(null);
+  setters.setOndemandNoCreditsOutcome(null);
+  setters.setMeetingConfigWarning(false);
+  setters.setCreatedClassInstanceId(null);
+}
+
+// NEW FOR PLAN v5: useFormStateValues — internal hook that declares all 14
+// useState pairs. Extracted from useDialogFormState to keep each function
+// under CodeScene's Large Method threshold.
+function useFormStateValues() {
   const [studentId, setStudentId] = useState("");
   const [subjectId, setSubjectId] = useState("");
   const [duration, setDuration] = useState(60);
@@ -88,26 +122,6 @@ export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void)
   const [ondemandNoCreditsOutcome, setOndemandNoCreditsOutcome] = useState<OnDemandNoCreditsOutcome | null>(null);
   const [meetingConfigWarning, setMeetingConfigWarning] = useState(false);
   const [createdClassInstanceId, setCreatedClassInstanceId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isDialogOpen) {
-      setStudentId("");
-      setSubjectId("");
-      setDuration(60);
-      setDefaultStartTime("09:00");
-      setTimezone("Africa/Cairo");
-      setClassType(ClassType.Regular);
-      setMeetingConfig(emptyRecurringMeetingConfigState());
-      setSchedulingMode(null);
-      setQuotaId(null);
-      setEarmarkedClasses(null);
-      setGenerationHorizonWeeks(null);
-      setOndemandNoCreditsOutcome(null);
-      setMeetingConfigWarning(false);
-      setCreatedClassInstanceId(null);
-      resetDays();
-    }
-  }, [isDialogOpen, resetDays]);
 
   return {
     studentId,
@@ -139,6 +153,34 @@ export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void)
     createdClassInstanceId,
     setCreatedClassInstanceId,
   };
+}
+
+// NEW FOR PLAN v5: useDialogFormState — lifts the previously inline `useState`
+// cluster + the `useEffect` reset-on-open out of the tier files. The hook
+// body lives here (common), so the tier files do not themselves call
+// `useState` or `useEffect` (per specs.md §3 N7 + N6).
+export function useDialogFormState(isDialogOpen: boolean, resetDays: () => void): CreateRecurringClassDialogFormState {
+  const s = useFormStateValues();
+
+  // Reset all form state when the dialog transitions from closed to open.
+  // Uses the "adjust state during render" pattern (React docs) instead of
+  // setState-in-effect to avoid cascading renders.
+  const [prevIsDialogOpen, setPrevIsDialogOpen] = useState(isDialogOpen);
+  if (isDialogOpen !== prevIsDialogOpen) {
+    setPrevIsDialogOpen(isDialogOpen);
+    if (isDialogOpen) {
+      resetFormState(s);
+    }
+  }
+
+  // resetDays is an external-system sync (parent day state) — keep in effect.
+  useEffect(() => {
+    if (isDialogOpen) {
+      resetDays();
+    }
+  }, [isDialogOpen, resetDays]);
+
+  return s;
 }
 
 // NEW FOR PLAN v5: useValidation — lifts the previously inline

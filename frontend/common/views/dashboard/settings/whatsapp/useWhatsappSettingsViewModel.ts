@@ -388,54 +388,96 @@ function useWhatsappUpdateDeleteHandlers({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const handleEditName = useCallback(
-    async (accountId: string, displayName: string) => {
-      const displayNameError = validateDisplayName(displayName);
-      if (displayNameError !== null) {
-        setMutationError(displayNameError);
-        return;
-      }
-      setUpdatingId(accountId);
-      setMutationError(null);
-      try {
-        await updateAccountAction(
-          accountId,
-          displayName,
-          mutations.updateAccount,
-          queries.accountsQuery.refetch,
-          labels.notifications,
-          showSnackbar
-        );
-        closeDialog();
-      } catch {
-        setMutationError(labels.notifications.saveError);
-      } finally {
-        setUpdatingId(null);
-      }
-    },
-    [mutations, queries, labels, showSnackbar, closeDialog, setMutationError]
-  );
+  const handleEditName = useWhatsappEditNameHandler({
+    updateAccount: mutations.updateAccount,
+    refetchAccounts: queries.accountsQuery.refetch,
+    notifications: labels.notifications,
+    showSnackbar,
+    closeDialog,
+    setMutationError,
+    setUpdatingId,
+  });
 
-  const handleDelete = useCallback(
-    async (accountId: string) => {
-      setDeletingId(accountId);
-      try {
-        await deleteAccountAction(
-          accountId,
-          mutations.deleteAccount,
-          queries.accountsQuery.refetch,
-          labels.notifications,
-          showSnackbar
-        );
-        closeDialog();
-      } finally {
-        setDeletingId(null);
-      }
-    },
-    [mutations, queries, labels, showSnackbar, closeDialog]
-  );
+  const handleDelete = useWhatsappDeleteHandler({
+    deleteAccount: mutations.deleteAccount,
+    refetchAccounts: queries.accountsQuery.refetch,
+    notifications: labels.notifications,
+    showSnackbar,
+    closeDialog,
+    setDeletingId,
+  });
 
   return { deletingId, updatingId, handleEditName, handleDelete };
+}
+
+interface UseWhatsappEditNameHandlerArgs {
+  updateAccount: (opts: { variables: { id: string; input: ReturnType<typeof buildUpdateInput> } }) => Promise<unknown>;
+  refetchAccounts: () => Promise<unknown>;
+  notifications: WhatsappSettingsLabels["notifications"];
+  showSnackbar: SnackbarShow;
+  closeDialog: () => void;
+  setMutationError: (value: string | null) => void;
+  setUpdatingId: (value: string | null) => void;
+}
+
+function useWhatsappEditNameHandler({
+  updateAccount,
+  refetchAccounts,
+  notifications,
+  showSnackbar,
+  closeDialog,
+  setMutationError,
+  setUpdatingId,
+}: UseWhatsappEditNameHandlerArgs) {
+  const handleEditName = async (accountId: string, displayName: string) => {
+    const displayNameError = validateDisplayName(displayName);
+    if (displayNameError !== null) {
+      setMutationError(displayNameError);
+      return;
+    }
+    setUpdatingId(accountId);
+    setMutationError(null);
+    try {
+      await updateAccountAction(accountId, displayName, updateAccount, refetchAccounts, notifications, showSnackbar);
+      closeDialog();
+    } catch {
+      setMutationError(notifications.saveError);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  return handleEditName;
+}
+
+interface UseWhatsappDeleteHandlerArgs {
+  deleteAccount: (opts: { variables: { id: string } }) => Promise<unknown>;
+  refetchAccounts: () => Promise<unknown>;
+  notifications: WhatsappSettingsLabels["notifications"];
+  showSnackbar: SnackbarShow;
+  closeDialog: () => void;
+  setDeletingId: (value: string | null) => void;
+}
+
+function useWhatsappDeleteHandler({
+  deleteAccount,
+  refetchAccounts,
+  notifications,
+  showSnackbar,
+  closeDialog,
+  setDeletingId,
+}: UseWhatsappDeleteHandlerArgs) {
+  const handleDelete = async (accountId: string) => {
+    setDeletingId(accountId);
+    try {
+      await deleteAccountAction(accountId, deleteAccount, refetchAccounts, notifications, showSnackbar);
+      closeDialog();
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  return handleDelete;
 }
 
 function useWhatsappUtilityHandlers({

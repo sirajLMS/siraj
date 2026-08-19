@@ -15,7 +15,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CronConcurrencyPolicy, CronJobKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { CronScheduleFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
 import { type CronScheduleFormData, EMPTY_FORM } from "@/frontend/common/views/dashboard/cron/types";
@@ -226,13 +226,17 @@ export function CronScheduleCreateEditDialog({
   onSave,
 }: Readonly<CronScheduleCreateEditDialogProps>) {
   const [form, setForm] = useState<CronScheduleFormData>(EMPTY_FORM);
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevEditingSchedule, setPrevEditingSchedule] = useState(editingSchedule);
   const isEdit = editingSchedule != null;
 
-  useEffect(() => {
+  if (open !== prevOpen || editingSchedule !== prevEditingSchedule) {
+    setPrevOpen(open);
+    setPrevEditingSchedule(editingSchedule);
     if (open) {
       setForm(editingSchedule ? toFormData(editingSchedule) : EMPTY_FORM);
     }
-  }, [open, editingSchedule]);
+  }
 
   const preview = useMemo(
     () => previewNextRuns(form.cronExpression, form.timezone),

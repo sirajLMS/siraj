@@ -5,7 +5,7 @@
 "use client";
 
 import type { SxProps, Theme } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useLocaleSwitchSuccess } from "@/frontend/common/hooks/useLocaleSwitchSuccess";
 import { useNarrowContainer } from "@/frontend/common/hooks/useNarrowContainer";
 import { getLanguageDisplayName } from "@/frontend/common/lib/locale";
@@ -262,17 +262,21 @@ export const useLocalizedStringInputState = (props: LocalizedStringInputStatePro
   const requiredSet = useMemo(() => new Set<AppLocale>(resolvedRequiredLocales), [resolvedRequiredLocales]);
 
   const [activeLocale, setActiveLocale] = useState<AppLocale>(() => pickInitialActiveLocale(uiLocale));
-  const [draft, setDraft] = useState<LocalizedString>(value);
+  const [draftState, setDraftState] = useState<{ prevValue: LocalizedString; draft: LocalizedString }>({
+    prevValue: value,
+    draft: value,
+  });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { successSwitch, triggerSuccess } = useLocaleSwitchSuccess();
 
-  useEffect(() => {
-    setDraft(value);
-  }, [value]);
+  if (draftState.prevValue !== value) {
+    setDraftState({ prevValue: value, draft: value });
+  }
+  const draft = draftState.draft;
 
   const emitChange = useCallback(
     (next: LocalizedString) => {
-      setDraft(next);
+      setDraftState(prev => ({ ...prev, draft: next }));
       onChangeAction(next);
     },
     [onChangeAction]

@@ -111,19 +111,24 @@ function useStudentProfileTabState(
     [visibleTabs]
   );
 
-  const [activeTab, setActiveTab] = useState<StudentProfileTab | null>(() => resolveTab(tabParam));
+  const [userSelectedTab, setUserSelectedTab] = useState<StudentProfileTab | null>(null);
+
+  const activeTab = useMemo<StudentProfileTab | null>(() => {
+    if (userSelectedTab !== null) {
+      return userSelectedTab;
+    }
+    return resolveTab(tabParam);
+  }, [userSelectedTab, resolveTab, tabParam]);
 
   useEffect(() => {
-    const nextResolved = resolveTab(tabParam);
-    setActiveTab(prev => (prev === nextResolved ? prev : nextResolved));
-    if (nextResolved && tabParam !== nextResolved) {
-      router.replace(`/students/${studentId}/profile?tab=${nextResolved}`);
+    if (activeTab && tabParam !== activeTab) {
+      router.replace(`/students/${studentId}/profile?tab=${activeTab}`);
     }
-  }, [tabParam, resolveTab, studentId, router]);
+  }, [activeTab, tabParam, studentId, router]);
 
   const handleTabChange = useCallback(
     (_event: React.SyntheticEvent, nextTab: StudentProfileTab) => {
-      setActiveTab(nextTab);
+      setUserSelectedTab(nextTab);
       router.replace(`/students/${studentId}/profile?tab=${nextTab}`);
     },
     [router, studentId]

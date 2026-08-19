@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   BookingStatus,
   ClassExecutionState,
@@ -219,7 +219,7 @@ function useParentDashboardHandlers(
 }
 
 function useScheduleTotalCountSync(totalCount: number, setScheduleTotalCount: (count: number) => void) {
-  useMemo(() => {
+  useEffect(() => {
     if (totalCount !== useParentDashboardStore.getState().scheduleTotalCount) {
       setScheduleTotalCount(totalCount);
     }
