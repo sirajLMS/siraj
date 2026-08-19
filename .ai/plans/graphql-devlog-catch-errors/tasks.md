@@ -62,10 +62,21 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Modify `backend/lib/errors.ts`:
     - Import `GraphQLError` from `graphql`
     - Change `DomainError` to `extends GraphQLError`
-    - Constructor: `super(message, { extensions: { code } })`
-    - Set `this.name = new.target.name`
-    - Call `Object.setPrototypeOf(this, new.target.prototype)` for ES5 prototype chain
-    - Verify all subclasses (`NotFoundError`, `UnauthorizedError`, `ForbiddenError`, `ValidationError`, `ConflictError`, `QuotaNotFoundError`, `QuotaAlreadyDeletedError`, `QuotaLedgerError`) still compile — only extends-chain changes, no constructor surface changes
+    - Constructor preserves current arg order `(code, message, options)`:
+      ```typescript
+      constructor(
+        public readonly code: string,
+        message: string,
+        options?: ErrorOptions
+      ) {
+        super(message, { ...options, extensions: { code } });
+        this.name = new.target.name;
+        Object.setPrototypeOf(this, new.target.prototype);
+      }
+      ```
+    - **CRITICAL**: All subclasses (`NotFoundError`, `UnauthorizedError`, `ForbiddenError`, `ValidationError`, `ConflictError`, `QuotaNotFoundError`, `QuotaAlreadyDeletedError`, `QuotaLedgerError`) still compile — only the extends-chain changes from `Error` to `GraphQLError`, NO constructor surface changes
+    - **Apollo Server v5.5.1 docs confirm**: Non-`GraphQLError` throws default to `extensions.code: "INTERNAL_SERVER_ERROR"`. By extending `GraphQLError`, our custom codes bypass this default.
+    - **Apollo Client v4.2.12 docs confirm**: `CombinedGraphQLErrors.is(error)` is the recommended type check (not `instanceof`). `error.errors?.[0]?.extensions?.code` is the v4 access path.
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/lib/errors.ts --lifecycle codescene`
   - **Semantic Review**: Verify `instanceof Error` still holds; `err.code` still accessible; no cross-layer imports introduced
   - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable rule files; validate against them
@@ -74,23 +85,47 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - _Requirements: REQ-1 (AC 1-8)_
 
 - [ ] 1.2 Verify existing auth test still passes (smoke test)
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Run: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/auth/auth.test.ts`
   - Verify `auth.test.ts:184` — `expect(gqlError?.extensions?.code).toBe("UNAUTHENTICATED")` still passes
   - Run: `bun run scripts/run-test/run-test.ts --last --focus "UNAUTHENTICATED" frontend/common/graphql/test/auth/auth.test.ts`
   - If it fails: investigate whether the scopeAuth `GraphQLError` throw path at `gqlSchemaBuilder.ts:156` was affected (it should NOT be — it already throws `GraphQLError` directly, not `DomainError`)
   - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/1.2-auth-smoke-test-outcome.md`
   - Update progress: Mark 1.2 as `[x]`
-  - _Requirements: REQ-1 (AC 9)_
+  - _Requirements: REQ-1 (AC 9), REQ-11 (GraphQL layer smoke)_
 
-- [ ] 1.3 MCP verification — compile `/api/graphql` route and check logs
+- [ ] 1.3 Create DB-layer unit test for `DomainError` extends `GraphQLError`
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Create test file `backend/lib/domain-error.test.ts`:
+    - Test: `DomainError` extends `GraphQLError` — `expect(new NotFoundError("CODE", "msg")).toBeInstanceOf(GraphQLError)`
+    - Test: `DomainError` extends `Error` — `expect(new NotFoundError("CODE", "msg")).toBeInstanceOf(Error)` (backward compat)
+    - Test: `extensions.code` is set — `expect((new NotFoundError("CODE", "msg")).extensions?.code).toBe("CODE")`
+    - Test: `err.message` is preserved — `expect(new NotFoundError("CODE", "hello").message).toBe("hello")`
+    - Test: `err.code` is accessible — `expect(new NotFoundError("CODE", "msg").code).toBe("CODE")`
+    - Test: All subclasses (`NotFoundError`, `UnauthorizedError`, `ForbiddenError`, `ValidationError`, `ConflictError`) inherit `GraphQLError`
+    - Test: `instanceof` checks across the subclass chain — `expect(new NotFoundError("CODE", "msg")).toBeInstanceOf(DomainError)` AND `expect(new NotFoundError("CODE", "msg")).toBeInstanceOf(NotFoundError)`
+  - Run: `bun run scripts/run-test/run-test.ts backend/lib/domain-error.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/lib/domain-error.test.ts --lifecycle codescene`
+  - **Semantic Review**: No cross-layer imports; test imports `GraphQLError` from `graphql` and `DomainError` subclasses from `@/backend/lib/errors`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/1.3-domain-error-test-outcome.md`
+  - Update progress: Mark 1.3 as `[x]`
+  - _Requirements: REQ-1 (AC 1-8), REQ-11 (DB layer)_
+
+- [ ] 1.4 MCP verification — compile `/api/graphql` route and check logs
   - Start dev server: `bun run dev` (port 3000)
   - Call `nextjs_call(port: "3000", toolName: "compile_route", args: { routeSpecifier: "/api/graphql" })` — confirm zero issues
   - Call `nextjs_call(port: "3000", toolName: "get_compilation_issues", args: {})` — confirm zero issues across ALL routes
   - Call `nextjs_call(port: "3000", toolName: "get_errors", args: {})` — confirm no build/SSR errors
   - Call `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — read dev log tail, confirm no new `[ERROR]` entries from the refactor
   - Call `nextjs_call(port: "3000", toolName: "get_routes", args: { routerType: "app" })` — confirm `/api/graphql` still registered
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/1.3-mcp-verification-outcome.md`
-  - Update progress: Mark 1.3 as `[x]`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/1.4-mcp-verification-outcome.md`
+  - Update progress: Mark 1.4 as `[x]`
   - _Requirements: REQ-1_
 
 ### Task 2: Suggestion repository — localized NotFoundError (REQ-2)
@@ -116,7 +151,94 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 2.1 as `[x]`
   - _Requirements: REQ-2 (AC 1-3)_
 
-- [ ] 2.2 Upgrade suggestion test to assert `extensions.code`
+- [ ] 2.2 Upgrade DB repository test to assert `instanceof NotFoundError` AND `error.code`
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/db/test/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Modify `backend/db/test/repo/parents/suggestion.repository.test.ts`:
+    - Upgrade `expectNonExistentError` helper (line ~135) to optionally accept an `expectedCode` and `expectedErrorType`:
+      ```typescript
+      async function expectNonExistentError(
+        name: string,
+        operation: (tx: DBTransaction) => Promise<unknown>,
+        expectedCode?: string,
+        expectedErrorType?: new (...args: unknown[]) => Error,
+      ) {
+        suggestionTest(name, async tx => {
+          await setupParentForSuggestion(tx, "NFSetup");
+          const error = await expectRepoError(() => operation(tx));
+          expect(error.message.length).toBeGreaterThan(0);
+          if (expectedErrorType) {
+            expect(error).toBeInstanceOf(expectedErrorType);
+          }
+          if (expectedCode) {
+            expect((error as { code: string }).code).toBe(expectedCode);
+          }
+        });
+      }
+      ```
+    - Update the `markSuggestionReviewed` non-existent test at line ~435 to pass `"SUGGESTION_NOT_FOUND"` and `NotFoundError`:
+      ```typescript
+      void expectNonExistentError(
+        "throws for non-existent suggestion ID",
+        tx => SuggestionRepository.markSuggestionReviewed({ suggestionId: NIL_UUID, reviewedByUserId: NIL_UUID }, tx),
+        "SUGGESTION_NOT_FOUND",
+        NotFoundError,
+      );
+      ```
+    - Import `NotFoundError` from `@/backend/lib/errors` at the top of the test file
+  - Run: `bun run scripts/run-test/run-test.ts backend/db/test/repo/parents/suggestion.repository.test.ts`
+  - Run: `bun run scripts/run-test/run-test.ts --last --focus "SUGGESTION_NOT_FOUND" backend/db/test/repo/parents/suggestion.repository.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/db/test/repo/parents/suggestion.repository.test.ts --lifecycle codescene`
+  - **Semantic Review**: `NotFoundError` imported as value; `runInRollback` wrapper used; no `rejects.toThrow()` inside rollback
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/2.2-db-suggestion-test-outcome.md`
+  - Update progress: Mark 2.2 as `[x]`
+  - _Requirements: REQ-2 (AC 1-3), REQ-11 (DB layer)_
+
+- [ ] 2.3 Upgrade service test to assert thrown error `code` property
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Modify `backend/services/communication/test/suggestion.service.test.ts`:
+    - Add new test case: "throw NotFoundError with SUGGESTION_NOT_FOUND code for non-existent suggestion"
+    - Use `expectErrorMatching` helper or create `expectErrorCode` helper:
+      ```typescript
+      test("throws NotFoundError with SUGGESTION_NOT_FOUND for non-existent suggestion", async () => {
+        getSuggestionByIdSpy.mockResolvedValue(null);
+        await expectErrorMatching(
+          SuggestionService.markSuggestionReviewed({ suggestionId: "nonexistent", reviewedByUserId: "admin-id" }, tErrors),
+          () => true, // message predicate still runs
+        );
+        // Also assert the error code:
+        let errorCaught: Error | null = null;
+        try {
+          await SuggestionService.markSuggestionReviewed({ suggestionId: "nonexistent", reviewedByUserId: "admin-id" }, tErrors);
+        } catch (e) {
+          errorCaught = e as Error;
+        }
+        expect(errorCaught).toBeInstanceOf(NotFoundError);
+        expect((errorCaught as { code: string }).code).toBe("SUGGESTION_NOT_FOUND");
+      });
+      ```
+    - Import `NotFoundError` from `@/backend/lib/errors`
+  - Run: `bun run scripts/run-test/run-test.ts backend/services/communication/test/suggestion.service.test.ts`
+  - Run: `bun run scripts/run-test/run-test.ts --last --focus "SUGGESTION_NOT_FOUND" backend/services/communication/test/suggestion.service.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/services/communication/test/suggestion.service.test.ts --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/2.3-service-suggestion-test-outcome.md`
+  - Update progress: Mark 2.3 as `[x]`
+  - _Requirements: REQ-2 (AC 1-3), REQ-11 (service layer)_
+
+- [ ] 2.4 Upgrade GraphQL test to assert `extensions.code`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`
@@ -129,20 +251,22 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
     - Add assertion: `expect(result.error).toBeInstanceOf(CombinedGraphQLErrors)` then `expect(error.errors?.[0]?.extensions?.code).toBe("SUGGESTION_NOT_FOUND")`
     - Use the pattern from `auth.test.ts:184` as reference
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts frontend/common/graphql/test/suggestions/suggestion.test.ts --lifecycle codescene`
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/2.2-suggestion-test-outcome.md`
-  - Update progress: Mark 2.2 as `[x]`
-  - _Requirements: REQ-2 (AC 4)_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/2.4-graphql-suggestion-test-outcome.md`
+  - Update progress: Mark 2.4 as `[x]`
+  - _Requirements: REQ-2 (AC 4), REQ-11 (GraphQL layer)_
 
-- [ ] 2.3 Run individual test + MCP verification
-  - Run: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/suggestions/suggestion.test.ts`
-  - Run: `bun run scripts/run-test/run-test.ts --last --focus "not found" frontend/common/graphql/test/suggestions/suggestion.test.ts`
+- [ ] 2.5 Run all three-layer tests + MCP verification
+  - DB layer: `bun run scripts/run-test/run-test.ts backend/db/test/repo/parents/suggestion.repository.test.ts`
+  - Service layer: `bun run scripts/run-test/run-test.ts backend/services/communication/test/suggestion.service.test.ts`
+  - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/suggestions/suggestion.test.ts`
+  - Run: `bun run scripts/run-test/run-test.ts --last --focus "SUGGESTION_NOT_FOUND" frontend/common/graphql/test/suggestions/suggestion.test.ts`
   - MCP verification (dev server on port 3000):
     - `nextjs_call(port: "3000", toolName: "compile_route", args: { routeSpecifier: "/api/graphql" })` — zero issues
     - `nextjs_call(port: "3000", toolName: "get_errors", args: {})` — no new errors
     - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm localized "suggestion not found" message in dev log
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/2.3-suggestion-verify-outcome.md`
-  - Update progress: Mark 2.3 as `[x]`
-  - _Requirements: REQ-2_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/2.5-suggestion-verify-outcome.md`
+  - Update progress: Mark 2.5 as `[x]`
+  - _Requirements: REQ-2, REQ-11_
 
 ### Task 3: Schedule service — UnauthorizedError (REQ-3)
 
@@ -164,7 +288,40 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 3.1 as `[x]`
   - _Requirements: REQ-3 (AC 1-2)_
 
-- [ ] 3.2 Upgrade schedule test to assert `extensions.code === "UNAUTHORIZED"`
+- [ ] 3.2 Upgrade service test to assert thrown error `code === "UNAUTHORIZED"`
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Modify `backend/services/schedule/schedule.service.test.ts`:
+    - Add new test: "getAdminDashboardSchedule throws UnauthorizedError with UNAUTHORIZED code":
+      ```typescript
+      test("rejects unauthorized user with UnauthorizedError and UNAUTHORIZED code", async () => {
+        spyOn(PermissionsService, "hasAnyPermission").mockResolvedValue(false);
+        let errorCaught: Error | null = null;
+        try {
+          await ScheduleService.getAdminDashboardSchedule("restricted-user", new Date("2026-07-29"), tErrors);
+        } catch (e) {
+          errorCaught = e as Error;
+        }
+        expect(errorCaught).toBeInstanceOf(UnauthorizedError);
+        expect((errorCaught as { code: string }).code).toBe("UNAUTHORIZED");
+      });
+      ```
+    - Import `UnauthorizedError` from `@/backend/lib/errors`
+  - Run: `bun run scripts/run-test/run-test.ts backend/services/schedule/schedule.service.test.ts`
+  - Run: `bun run scripts/run-test/run-test.ts --last --focus "UNAUTHORIZED" backend/services/schedule/schedule.service.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/services/schedule/schedule.service.test.ts --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/3.2-service-schedule-test-outcome.md`
+  - Update progress: Mark 3.2 as `[x]`
+  - _Requirements: REQ-3 (AC 1-2), REQ-11 (service layer)_
+  - _Note_: DB-layer test is N/A for this issue — the `UnauthorizedError` is thrown at the service layer, not the repository layer.
+
+- [ ] 3.3 Upgrade GraphQL test to assert `extensions.code === "UNAUTHORIZED"`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`
@@ -173,23 +330,24 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
     - `/home/ahmed/Projects/siraj/.agents/instructions/frontend.instructions.md`
     - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
   - Modify `frontend/common/graphql/test/scheduling/schedule.test.ts`:
-    - Find the unauthorized-role test case(s)
+    - Find the unauthorized-role test case(s) for `adminDashboardSchedule`
     - Add assertion: `expect(error.errors?.[0]?.extensions?.code).toBe("UNAUTHORIZED")`
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts frontend/common/graphql/test/scheduling/schedule.test.ts --lifecycle codescene`
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/3.2-schedule-test-outcome.md`
-  - Update progress: Mark 3.2 as `[x]`
-  - _Requirements: REQ-3 (AC 3)_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/3.3-graphql-schedule-test-outcome.md`
+  - Update progress: Mark 3.3 as `[x]`
+  - _Requirements: REQ-3 (AC 3), REQ-11 (GraphQL layer)_
 
-- [ ] 3.3 Run individual test + MCP verification
-  - Run: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
+- [ ] 3.4 Run all applicable-layer tests + MCP verification
+  - Service layer: `bun run scripts/run-test/run-test.ts backend/services/schedule/schedule.service.test.ts`
+  - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
   - Run: `bun run scripts/run-test/run-test.ts --last --focus "UNAUTHORIZED" frontend/common/graphql/test/scheduling/schedule.test.ts`
   - MCP verification (dev server on port 3000):
     - `nextjs_call(port: "3000", toolName: "compile_route", args: { routeSpecifier: "/api/graphql" })` — zero issues
     - `nextjs_call(port: "3000", toolName: "get_errors", args: {})` — no new errors
     - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm localized "unauthorized" message
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/3.3-schedule-verify-outcome.md`
-  - Update progress: Mark 3.3 as `[x]`
-  - _Requirements: REQ-3_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/3.4-schedule-verify-outcome.md`
+  - Update progress: Mark 3.4 as `[x]`
+  - _Requirements: REQ-3, REQ-11_
 
 ### Task 4: Recurring class validation — split into distinct error codes (REQ-4)
 
@@ -248,7 +406,43 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 4.2 as `[x]`
   - _Requirements: REQ-4 (AC 1-3)_
 
-- [ ] 4.3 Upgrade schedule test to assert distinct error codes per failure mode
+- [ ] 4.3 Create service-layer test file for `recurring-class.service.ts` (NEW — no test file exists)
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Create test file `backend/services/schedule/test/recurring-class.service.test.ts`:
+    - Pattern: `bun:test` with `spyOn` mocks (same as `schedule.service.test.ts`)
+    - Test: "throws ValidationError(RECURRING_CLASS_DAYS_REQUIRED) when days is empty":
+      ```typescript
+      test("throws ValidationError RECURRING_CLASS_DAYS_REQUIRED when days is empty", async () => {
+        let errorCaught: Error | null = null;
+        try {
+          await RecurringClassService.createRecurringClass({ ...validInput, days: [] }, tErrors);
+        } catch (e) {
+          errorCaught = e as Error;
+        }
+        expect(errorCaught).toBeInstanceOf(ValidationError);
+        expect((errorCaught as { code: string }).code).toBe("RECURRING_CLASS_DAYS_REQUIRED");
+      });
+      ```
+    - Test: "throws ValidationError(INVALID_DURATION) when durationMinutes <= 0" — same pattern, assert `code === "INVALID_DURATION"`
+    - Test: "throws ValidationError(SUBJECT_REQUIRED) when subjectId is empty" — same pattern, assert `code === "SUBJECT_REQUIRED"`
+    - Mock downstream dependencies (repository, meeting-config-snapshot, etc.) with `spyOn`
+    - Import `ValidationError` from `@/backend/lib/errors`
+  - Run: `bun run scripts/run-test/run-test.ts backend/services/schedule/test/recurring-class.service.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/services/schedule/test/recurring-class.service.test.ts --lifecycle codescene`
+  - **Semantic Review**: All three branches tested independently; `ValidationError` imported as value; mocks do not leak (use `afterEach` mock restore)
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/4.3-service-recurring-class-test-outcome.md`
+  - Update progress: Mark 4.3 as `[x]`
+  - _Requirements: REQ-4 (AC 1-3), REQ-11 (service layer)_
+  - _Note_: DB-layer test is N/A — `ValidationError` is thrown at the service layer.
+
+- [ ] 4.4 Upgrade GraphQL test to assert distinct error codes per failure mode
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`
@@ -261,21 +455,22 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
     - Test "rejected when subjectId is omitted" → assert `error.errors?.[0]?.extensions?.code === "SUBJECT_REQUIRED"`
     - (Optional) Add a test for `durationMinutes <= 0` → assert code `"INVALID_DURATION"`
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts frontend/common/graphql/test/scheduling/schedule.test.ts --lifecycle codescene`
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/4.3-schedule-validation-test-outcome.md`
-  - Update progress: Mark 4.3 as `[x]`
-  - _Requirements: REQ-4 (AC 5-6)_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/4.4-graphql-schedule-validation-test-outcome.md`
+  - Update progress: Mark 4.4 as `[x]`
+  - _Requirements: REQ-4 (AC 5-6), REQ-11 (GraphQL layer)_
 
-- [ ] 4.4 Run individual test + MCP verification
-  - Run: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
+- [ ] 4.5 Run all applicable-layer tests + MCP verification
+  - Service layer: `bun run scripts/run-test/run-test.ts backend/services/schedule/test/recurring-class.service.test.ts`
+  - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
   - Run: `bun run scripts/run-test/run-test.ts --last --focus "invalid" frontend/common/graphql/test/scheduling/schedule.test.ts`
   - Run: `bun run scripts/run-test/run-test.ts --last --focus "DAYS_REQUIRED" frontend/common/graphql/test/scheduling/schedule.test.ts`
   - MCP verification (dev server on port 3000):
     - `nextjs_call(port: "3000", toolName: "compile_route", args: { routeSpecifier: "/api/graphql" })` — zero issues
     - `nextjs_call(port: "3000", toolName: "get_errors", args: {})` — no new errors
     - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm distinct error codes in dev log
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/4.4-validate-verify-outcome.md`
-  - Update progress: Mark 4.4 as `[x]`
-  - _Requirements: REQ-4_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/4.5-validate-verify-outcome.md`
+  - Update progress: Mark 4.5 as `[x]`
+  - _Requirements: REQ-4, REQ-11_
 
 ### Task 5: Test-helper FK-aware cleanup (REQ-5)
 
@@ -320,27 +515,52 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 5.2 as `[x]`
   - _Requirements: REQ-5 (AC 2, 4)_
 
-- [ ] 5.3 Add test assertion for `cleanupTestSuperAdmin === true` and `cleanupTestEntities === true`
+- [ ] 5.3 Create service-layer test for `test-helper.service.ts` (NEW — no test file exists)
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Create test file `backend/services/system/test/test-helper.service.test.ts`:
+    - Pattern: `bun:test` with `spyOn` mocks OR live DB test with `runInRollback`
+    - Since FK cleanup involves live FK constraints, use `runInRollback` with real DB:
+      - Create test user + audit log row, then call `cleanupTestSuperAdmin`, assert it returns `true`
+      - Create test class instance + status event, then call `cleanupTestEntities`, assert it returns `true`
+    - Assert: `cleanupTestSuperAdmin` does NOT throw FK RESTRICT error
+    - Assert: `cleanupTestEntities` does NOT throw FK RESTRICT error
+    - Assert: Both return `true` (not `false`)
+  - Run: `bun run scripts/run-test/run-test.ts backend/services/system/test/test-helper.service.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/services/system/test/test-helper.service.test.ts --lifecycle codescene`
+  - **Semantic Review**: `runInRollback` used; `entity-setup.ts` helpers used for test data; no `rejects.toThrow()` inside rollback; FK delete ordering is sequential (child before parent)
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/5.3-service-test-helper-test-outcome.md`
+  - Update progress: Mark 5.3 as `[x]`
+  - _Requirements: REQ-5 (AC 1-4), REQ-11 (service layer)_
+
+- [ ] 5.4 Upgrade GraphQL test to assert `cleanupTestSuperAdmin === true` AND `cleanupTestEntities === true`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Add/update test assertion in the relevant GraphQL test file:
     - Assert `data.cleanupTestSuperAdmin === true`
     - Assert `data.cleanupTestEntities === true`
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts <test-file> --lifecycle codescene`
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/5.3-cleanup-test-outcome.md`
-  - Update progress: Mark 5.3 as `[x]`
-  - _Requirements: REQ-5 (AC 5)_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/5.4-graphql-cleanup-test-outcome.md`
+  - Update progress: Mark 5.4 as `[x]`
+  - _Requirements: REQ-5 (AC 5), REQ-11 (GraphQL layer)_
 
-- [ ] 5.4 Run individual test + MCP verification
-  - Run: `bun run scripts/run-test/run-test.ts <test-helper-test-path>` (idently the test file that exercises cleanupTestSuperAdmin/cleanupTestEntities)
+- [ ] 5.5 Run all applicable-layer tests + MCP verification
+  - Service layer: `bun run scripts/run-test/run-test.ts backend/services/system/test/test-helper.service.test.ts`
+  - GraphQL layer: `bun run scripts/run-test/run-test.ts <graphql-test-path-for-cleanup-mutation>`
   - MCP verification (dev server on port 3000):
     - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm no FK RESTRICT errors in dev log
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/5.4-cleanup-verify-outcome.md`
-  - Update progress: Mark 5.4 as `[x]`
-  - _Requirements: REQ-5_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/5.5-cleanup-verify-outcome.md`
+  - Update progress: Mark 5.5 as `[x]`
+  - _Requirements: REQ-5, REQ-11_
 
 ### Task 5.5: Plan Review Gate (MANDATORY)
 
-- [ ] 5.5 Review complete plan using @plan-review skill
+- [x] 5.5 Review complete plan using @plan-review skill
   - **Input files**: `specs.md`, `design.md`, `tasks.md`
   - **Invoke**: `@plan-review` skill on complete plan
   - **Expected output**: "Plan passes all AGENTS.md rules" OR structured violation list
@@ -350,9 +570,43 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Mark complete ONLY when plan passes all checks
   - _Requirements: REQ-0 (Execution Protocol)_
 
-### Task 6: Complaint test — verify `COMPLAINTS_NOT_FOUND` code propagation (REQ-1 + REQ-2)
+### Task 6: Complaint — verify `COMPLAINTS_NOT_FOUND` code propagation across 3 layers (REQ-1 + REQ-2)
 
-- [ ] 6.1 Upgrade complaint test to assert `extensions.code === "COMPLAINTS_NOT_FOUND"`
+- [ ] 6.1 Upgrade DB repository test to assert `instanceof NotFoundError` AND `error.code`
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/db/test/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Modify `backend/db/test/repo/complaints/complaint.repository.test.ts` (if it has a not-found test) or add one:
+    - Upgrade the `expectNonExistentError` pattern (same as suggestion) to assert `error instanceof NotFoundError` AND `error.code === "COMPLAINTS_NOT_FOUND"`
+    - Import `NotFoundError` from `@/backend/lib/errors`
+  - Run: `bun run scripts/run-test/run-test.ts backend/db/test/repo/complaints/complaint.repository.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/db/test/repo/complaints/complaint.repository.test.ts --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/6.1-db-complaint-test-outcome.md`
+  - Update progress: Mark 6.1 as `[x]`
+  - _Requirements: REQ-2 (COMPLAINTS code), REQ-11 (DB layer)_
+
+- [ ] 6.2 Upgrade service test to assert thrown error `code === "COMPLAINTS_NOT_FOUND"`
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`
+  - Modify `backend/services/communication/test/complaint.service.test.ts`:
+    - Add test: "throws NotFoundError with COMPLAINTS_NOT_FOUND code for non-existent complaint"
+    - Assert `error instanceof NotFoundError` AND `error.code === "COMPLAINTS_NOT_FOUND"`
+    - Import `NotFoundError` from `@/backend/lib/errors`
+  - Run: `bun run scripts/run-test/run-test.ts backend/services/communication/test/complaint.service.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/services/communication/test/complaint.service.test.ts --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/6.2-service-complaint-test-outcome.md`
+  - Update progress: Mark 6.2 as `[x]`
+  - _Requirements: REQ-2 (COMPLAINTS code), REQ-11 (service layer)_
+
+- [ ] 6.3 Upgrade GraphQL test to assert `extensions.code === "COMPLAINTS_NOT_FOUND"`
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Read applicable AGENTS.md:
     - `/home/ahmed/Projects/siraj/frontend/common/graphql/AGENTS.md`
@@ -361,19 +615,21 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
     - "already-deleted" test → add `expect(error.errors?.[0]?.extensions?.code).toBe("COMPLAINTS_NOT_FOUND")`
     - "non-existent" test → add same assertion
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts frontend/common/graphql/test/complaints/complaint.test.ts --lifecycle codescene`
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/6.1-complaint-test-outcome.md`
-  - Update progress: Mark 6.1 as `[x]`
-  - _Requirements: REQ-1 (verification), REQ-2 (COMPLAINTS code)_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/6.3-graphql-complaint-test-outcome.md`
+  - Update progress: Mark 6.3 as `[x]`
+  - _Requirements: REQ-2 (COMPLAINTS code), REQ-11 (GraphQL layer)_
 
-- [ ] 6.2 Run individual test + MCP verification
-  - Run: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/complaints/complaint.test.ts`
+- [ ] 6.4 Run all three-layer tests + MCP verification
+  - DB layer: `bun run scripts/run-test/run-test.ts backend/db/test/repo/complaints/complaint.repository.test.ts`
+  - Service layer: `bun run scripts/run-test/run-test.ts backend/services/communication/test/complaint.service.test.ts`
+  - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/complaints/complaint.test.ts`
   - Run: `bun run scripts/run-test/run-test.ts --last --focus "COMPLAINTS_NOT_FOUND" frontend/common/graphql/test/complaints/complaint.test.ts`
   - MCP verification (dev server on port 3000):
     - `nextjs_call(port: "3000", toolName: "compile_route", args: { routeSpecifier: "/api/graphql" })` — zero issues
     - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm `COMPLAINTS_NOT_FOUND` code in dev log
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/6.2-complaint-verify-outcome.md`
-  - Update progress: Mark 6.2 as `[x]`
-  - _Requirements: REQ-1, REQ-2_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/6.4-complaint-verify-outcome.md`
+  - Update progress: Mark 6.4 as `[x]`
+  - _Requirements: REQ-1, REQ-2, REQ-11_
 
 ### Task 7: Quota release skip — localized warning (REQ-6)
 
@@ -393,13 +649,56 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 7.1 as `[x]`
   - _Requirements: REQ-6 (AC 1-2)_
 
-- [ ] 7.2 Run individual test + MCP verification
-  - Run: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
+- [ ] 7.2 Create service-layer test for `class-session.service.ts` (NEW — no test file exists)
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Create test file `backend/services/session/test/class-session.service.test.ts`:
+    - Pattern: `bun:test` with `spyOn` mocks (mock scheduling repo, quota repo)
+    - Test: "releaseQuotaIfDeducted logs localized WARN and sets warnings field for quota-deducted instance with null recurringScheduleId":
+      ```typescript
+      test("logs localized WARN and returns warnings for quota-deducted skip", async () => {
+        spyOn(SchedulingRepository, "getInstance").mockResolvedValue({
+          quotaDeducted: true, recurringScheduleId: null, /* ...required fields */
+        });
+        const warnSpy = spyOn(logger, "warn");
+        const result = await ClassSessionService.deleteClassInstance({ classInstanceId: "...", studentId: "...", tErrors });
+        expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("quota"), expect.any(Object));
+        expect(result.warnings).toBeDefined();
+        expect(result.warnings?.length).toBeGreaterThan(0);
+      });
+      ```
+    - Import `logger` from `@/backend/lib/logger`
+  - Run: `bun run scripts/run-test/run-test.ts backend/services/session/test/class-session.service.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/services/session/test/class-session.service.test.ts --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/7.2-service-class-session-test-outcome.md`
+  - Update progress: Mark 7.2 as `[x]`
+  - _Requirements: REQ-6 (AC 1-2), REQ-11 (service layer)_
+  - _Note_: DB-layer test is N/A — the skip is service-layer logic, not a repository throw.
+
+- [ ] 7.3 Upgrade GraphQL test to assert `warnings` field on delete mutation
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Modify `frontend/common/graphql/test/scheduling/schedule.test.ts`:
+    - Add test: "deleteClassInstance on quota-backed student returns warnings array"
+    - Assert `data.deleteClassInstance?.warnings` is a non-empty array
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts frontend/common/graphql/test/scheduling/schedule.test.ts --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/7.3-graphql-quota-test-outcome.md`
+  - Update progress: Mark 7.3 as `[x]`
+  - _Requirements: REQ-6 (AC 3), REQ-11 (GraphQL layer)_
+
+- [ ] 7.4 Run all applicable-layer tests + MCP verification
+  - Service layer: `bun run scripts/run-test/run-test.ts backend/services/session/test/class-session.service.test.ts`
+  - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
   - MCP verification (dev server on port 3000):
     - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm localized warning, not raw English
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/7.2-quota-verify-outcome.md`
-  - Update progress: Mark 7.2 as `[x]`
-  - _Requirements: REQ-6 (AC 3)_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/7.4-quota-verify-outcome.md`
+  - Update progress: Mark 7.4 as `[x]`
+  - _Requirements: REQ-6, REQ-11_
 
 ### Task 8: Meeting URL absence — observable in GraphQL result (REQ-7)
 
@@ -423,24 +722,56 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 8.1 as `[x]`
   - _Requirements: REQ-7 (AC 1-4)_
 
-- [ ] 8.2 Add test assertion for `meetingUrl === null` on non-provider path
+- [ ] 8.2 Upgrade service test to assert `logger.warn` (not `logger.info`) on no-provider path
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Modify `backend/services/meeting/meeting-config-snapshot.test.ts` (if exists) or create new test:
+    - Add test: "generateAndAttachForClassInstance logs logger.warn with providerLookupReason when no provider resolved":
+      ```typescript
+      test("logs logger.warn with providerLookupReason when no provider resolved", async () => {
+        // Mock provider resolution to return null/no-provider
+        const warnSpy = spyOn(logger, "warn");
+        // ... setup mocks ...
+        await MeetingConfigSnapshotService.generateAndAttachForClassInstance({ classInstanceId: "..." });
+        expect(warnSpy).toHaveBeenCalledWith(
+          expect.stringContaining("no provider"),
+          expect.objectContaining({ providerLookupReason: expect.any(String) }),
+        );
+      });
+      ```
+    - Import `logger` from `@/backend/lib/logger`
+  - Run: `bun run scripts/run-test/run-test.ts backend/services/meeting/meeting-config-snapshot.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/services/meeting/meeting-config-snapshot.test.ts --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/8.2-service-meeting-test-outcome.md`
+  - Update progress: Mark 8.2 as `[x]`
+  - _Requirements: REQ-7 (AC 4), REQ-11 (service layer)_
+  - _Note_: DB-layer test is N/A — the no-provider path is service-layer logic.
+
+- [ ] 8.3 Upgrade GraphQL test to assert `meetingUrl === null` on non-provider path
   - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
   - Add test in `frontend/common/graphql/test/scheduling/schedule.test.ts`:
     - Assert `meetingUrl === null` when no provider is configured
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts frontend/common/graphql/test/scheduling/schedule.test.ts --lifecycle codescene`
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/8.2-meeting-url-test-outcome.md`
-  - Update progress: Mark 8.2 as `[x]`
-  - _Requirements: REQ-7 (AC 5)_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/8.3-graphql-meeting-url-test-outcome.md`
+  - Update progress: Mark 8.3 as `[x]`
+  - _Requirements: REQ-7 (AC 5), REQ-11 (GraphQL layer)_
 
-- [ ] 8.3 Run individual test + MCP verification
-  - Run: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
+- [ ] 8.4 Run all applicable-layer tests + MCP verification
+  - Service layer: `bun run scripts/run-test/run-test.ts backend/services/meeting/meeting-config-snapshot.test.ts`
+  - GraphQL layer: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/scheduling/schedule.test.ts`
   - MCP verification (dev server on port 3000):
     - `nextjs_call(port: "3000", toolName: "compile_route", args: { routeSpecifier: "/api/graphql" })` — zero issues after schema change
     - `nextjs_call(port: "3000", toolName: "get_compilation_issues", args: {})` — zero issues
     - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm `logger.warn` with `providerLookupReason` in dev log (not `logger.info`)
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/8.3-meeting-url-verify-outcome.md`
-  - Update progress: Mark 8.3 as `[x]`
-  - _Requirements: REQ-7_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/8.4-meeting-url-verify-outcome.md`
+  - Update progress: Mark 8.4 as `[x]`
+  - _Requirements: REQ-7, REQ-11_
 
 ### Task 9: Silent 400 responses investigation (REQ-8)
 
@@ -475,13 +806,41 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Update progress: Mark 10.1 as `[x]`
   - _Requirements: REQ-9 (AC 1-2)_
 
-- [ ] 10.2 Run individual test + MCP verification
-  - Run: `bun run scripts/run-test/run-test.ts frontend/common/graphql/test/notifications/notifications.test.ts` (or relevant notification test)
+- [ ] 10.2 Upgrade service test to assert `skippedNotificationsByType` in return shape
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/services/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Modify `backend/services/notification/notification-dispatch.helpers.test.ts`:
+    - Add test: "dispatchWithPreferences returns skippedNotificationsByType when contactless payload dropped":
+      ```typescript
+      test("returns skippedNotificationsByType when contactless payload dropped", async () => {
+        // ... setup mocks where user has no email/phone ...
+        const result = await dispatchWithPreferences({ /* ... */ });
+        expect(result.skippedNotificationsByType).toBeDefined();
+        expect(result.skippedNotificationsByType?.email).toBeGreaterThan(0);
+      });
+      ```
+    - Verify the WARN log includes channel type: `expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("email"))`
+  - Run: `bun run scripts/run-test/run-test.ts backend/services/notification/notification-dispatch.helpers.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/services/notification/notification-dispatch.helpers.test.ts --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/10.2-service-notification-test-outcome.md`
+  - Update progress: Mark 10.2 as `[x]`
+  - _Requirements: REQ-9 (AC 1-2), REQ-11 (service layer)_
+  - _Note_: DB-layer test is N/A — the dispatch logic is service-layer.
+  - _Note_: GraphQL-layer test is N/A — `skippedNotificationsByType` is surfaced only in test mode, not as a GraphQL field.
+
+- [ ] 10.3 Run service test + MCP verification
+  - Service layer: `bun run scripts/run-test/run-test.ts backend/services/notification/notification-dispatch.helpers.test.ts`
   - MCP verification (dev server on port 3000):
     - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm structured WARN with channel type
-  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/10.2-notification-verify-outcome.md`
-  - Update progress: Mark 10.2 as `[x]`
-  - _Requirements: REQ-9 (AC 3)_
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/10.3-notification-verify-outcome.md`
+  - Update progress: Mark 10.3 as `[x]`
+  - _Requirements: REQ-9 (AC 3), REQ-11_
 
 ### Task 11: Rate limit test-enforceable bypass (REQ-10)
 
@@ -493,11 +852,49 @@ The implementation follows a foundation-first strategy: the keystone `DomainErro
   - Modify `backend/lib/ratelimit.ts` (or wherever the dev-mode bypass lives):
     - Add `TEST_ENFORCE_RATE_LIMIT=1` env flag check
     - When flag is set, enforce rate limits even in test mode (no dev bypass)
-  - Add a new GraphQL test that fires enough requests to trip the 429 path and asserts `extensions.code: "RATE_LIMIT_EXCEEDED"`
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/lib/ratelimit.ts --lifecycle codescene`
   - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/11.1-rate-limit-outcome.md`
   - Update progress: Mark 11.1 as `[x]`
-  - _Requirements: REQ-10 (AC 1-3)_
+  - _Requirements: REQ-10 (AC 1-2)_
+
+- [ ] 11.2 Create service-layer test for rate limiter enforcement with env flag
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Read applicable AGENTS.md:
+    - `/home/ahmed/Projects/siraj/AGENTS.md`
+    - `/home/ahmed/Projects/siraj/backend/AGENTS.md`
+  - Read applicable instructions:
+    - `/home/ahmed/Projects/siraj/.agents/instructions/backend.instructions.md`
+    - `/home/ahmed/Projects/siraj/.agents/instructions/tests.instructions.md`
+  - Create or modify `backend/lib/ratelimit.test.ts` (or `backend/lib/__tests__/ratelimit.test.ts`):
+    - Test: "rate limiter bypasses in test mode when TEST_ENFORCE_RATE_LIMIT is not set" — assert bypass behavior
+    - Test: "rate limiter enforces when TEST_ENFORCE_RATE_LIMIT=1" — assert enforcement (returns 429 status)
+    - Test: "rate limiter returns RATE_LIMIT_EXCEEDED code when exceeded with flag on" — assert `error.code === "RATE_LIMIT_EXCEEDED"` or `extensions.code`
+  - Run: `bun run scripts/run-test/run-test.ts backend/lib/ratelimit.test.ts`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts backend/lib/ratelimit.test.ts --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/11.2-service-ratelimit-test-outcome.md`
+  - Update progress: Mark 11.2 as `[x]`
+  - _Requirements: REQ-10 (AC 1-2), REQ-11 (service layer)_
+  - _Note_: DB-layer test is N/A — rate limiting is a middleware/lib concern, not a repository throw.
+
+- [ ] 11.3 Create GraphQL-layer test for 429 path with `TEST_ENFORCE_RATE_LIMIT=1`
+  - Read all outcome files in `.ai/plans/graphql-devlog-catch-errors/outcome/`
+  - Create new test file `frontend/common/graphql/test/rate-limit/rate-limit.test.ts` (or add to existing auth test):
+    - Set `TEST_ENFORCE_RATE_LIMIT=1` in test env
+    - Fire enough requests to trip the 429 path
+    - Assert `result.error` is defined AND `error.errors?.[0]?.extensions?.code === "RATE_LIMIT_EXCEEDED"`
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <new-test-file> --lifecycle codescene`
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/11.3-graphql-ratelimit-test-outcome.md`
+  - Update progress: Mark 11.3 as `[x]`
+  - _Requirements: REQ-10 (AC 3), REQ-11 (GraphQL layer)_
+
+- [ ] 11.4 Run all applicable-layer tests + MCP verification
+  - Service layer: `bun run scripts/run-test/run-test.ts backend/lib/ratelimit.test.ts`
+  - GraphQL layer: `bun run scripts/run-test/run-test.ts <rate-limit-test-path>`
+  - MCP verification (dev server on port 3000):
+    - `nextjs_call(port: "3000", toolName: "get_logs", args: {})` — confirm rate-limit enforced (no dev-bypass WARN when flag is set)
+  - Write outcome: `.ai/plans/graphql-devlog-catch-errors/outcome/11.4-ratelimit-verify-outcome.md`
+  - Update progress: Mark 11.4 as `[x]`
+  - _Requirements: REQ-10, REQ-11_
 
 ### Task 12: Full `bun test:graphql` run + Next.js devtools MCP final check
 

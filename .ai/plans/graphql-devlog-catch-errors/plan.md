@@ -81,6 +81,18 @@ sites identified below to throw `DomainError` subclasses with translated message
   confirming: "`defaultTypes`: An array of Error classes to include in every field **with error
   handling**."  (i.e., only fields that opt in via `errors: {...}`).
 
+### Docs MCP Server Library Confirmation (Round 2)
+
+Ran `docs-list_libraries` → 35 indexed libraries. Searched `apollo-server`, `pothos`, `apollo-client`, `graphql-codegen`.
+
+| Library | Installed Version | Key Finding |
+|---------|-------------------|-------------|
+| `apollo-server` | v5.5.1 | Custom errors use `new GraphQLError(msg, { extensions: { code } })`. Non-`GraphQLError` throws default to `INTERNAL_SERVER_ERROR`. `status400ForVariableCoercionErrors` defaults to true in v5. |
+| `pothos` (errors plugin) | v4.9.1 | `errorUnionField` wraps fields in union types; `defaultTypes` only affects opted-in fields; type resolution uses `instanceof` for class-based error types. |
+| `apollo-client` | v4.2.12 | `CombinedGraphQLErrors.is(error)` preferred over `instanceof` (avoids cross-realm false negatives). `error.errors?.[0]?.extensions?.code` is the v4 access path (not `error.graphQLErrors` — that's v3). `ApolloError` class removed in v4. |
+| `graphql` | v17.0.2 | `GraphQLError` constructor accepts `{ extensions }` options object. |
+| `graphql-codegen` | — | No error-type-specific config needed; `bun codegen` output unchanged. |
+
 ---
 
 ## Issues found

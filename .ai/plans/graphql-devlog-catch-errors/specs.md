@@ -355,6 +355,41 @@ log single issue here
 (… dozens more …)
 ```
 
+### Requirement 11: Multi-Layer Test Verification (DB, Services, GraphQL)
+
+**User Story:** As a developer, I want each backend fix verified across three test layers (DB repository, service, and GraphQL integration), so that regressions are caught at the right layer — not only at the GraphQL boundary where errors are already collapsed.
+
+#### Acceptance Criteria
+
+1. WHEN a repository method is modified to throw `DomainError` subclasses THEN the corresponding DB repository test (`backend/db/test/repo/`) SHALL assert `error instanceof NotFoundError` (or the correct subclass) AND `error.code === "EXPECTED_CODE"`.
+2. WHEN a service method is modified to throw `DomainError` subclasses THEN the corresponding service test (`backend/services/**/test/`) SHALL assert the thrown error's `code` property matches the expected string.
+3. WHEN a GraphQL mutation surfaces the error THEN the GraphQL integration test (`frontend/common/graphql/test/`) SHALL assert `CombinedGraphQLErrors.is(result.error)` AND `result.error.errors?.[0]?.extensions?.code === "EXPECTED_CODE"` (per Apollo Client v4 docs, `.is()` is preferred over `instanceof`).
+4. WHEN a DB repository test does not exist for a modified repository THEN a new test file SHALL be created under `backend/db/test/repo/<domain>/` following the `runInRollback` + `entity-setup` pattern.
+5. WHEN a service test does not exist for a modified service THEN a new test file SHALL be created under `backend/services/<domain>/test/` following the `spyOn` mock pattern.
+6. WHEN the DB test runs THEN it SHALL use `bun run scripts/run-test/run-test.ts <path>` (or `bun run test:db` for the full DB suite) for log capture.
+7. WHEN the service test runs THEN it SHALL use `bun run scripts/run-test/run-test.ts <path>` (or `bun run test:services` for the full services suite) for log capture.
+
+#### Three-Layer Test Matrix
+
+| Issue | DB Repository Test | Service Test | GraphQL Integration Test |
+|-------|-------------------|--------------|--------------------------|
+| REQ-1 (DomainError) | `backend/lib/__tests__/domain-error.test.ts` (NEW) | N/A (class refactor, smoke) | Existing `auth.test.ts:184` (smoke) |
+| REQ-2 (Suggestion NotFound) | `suggestion.repository.test.ts` (upgrade `expectNonExistentError`) | `suggestion.service.test.ts` (upgrade `expectErrorMatching`) | `suggestion.test.ts` (upgrade to `extensions.code`) |
+| REQ-3 (Schedule Unauthorized) | N/A (service-layer throw) | `schedule.service.test.ts` (add `getAdminDashboardSchedule` unauthorized test) | `schedule.test.ts` (upgrade to `extensions.code`) |
+| REQ-4 (Recurring class validation) | N/A (service-layer throw) | `recurring-class.service.test.ts` (NEW — no test file exists) | `schedule.test.ts` (upgrade to distinct codes) |
+| REQ-5 (FK cleanup ordering) | `backend/db/test/repo/system/test-helper.repository.test.ts` (NEW — DB-level FK delete test) | `backend/services/system/test/test-helper.service.test.ts` (NEW — no test file exists) | Existing cleanup mutation test (upgrade to `=== true`) |
+| REQ-6 (Quota release skip) | N/A (service-layer skip + warn) | `class-session.service.test.ts` (NEW — no test file exists) | `schedule.test.ts` (add warnings assertion) |
+| REQ-7 (Meeting URL absence) | N/A (service-layer nullable field) | `meeting-config-snapshot.test.ts` (upgrade — assert `logger.warn` call, not `logger.info`) | `schedule.test.ts` (add `meetingUrl === null` assertion) |
+| REQ-8 (Silent 400) | N/A (investigation) | N/A (investigation) | `complaint.test.ts` or `schedule.test.ts` (add error-array assertion) |
+| REQ-9 (Notification drops) | N/A (service-layer structured warning) | `notification-dispatch.helpers.test.ts` (upgrade — assert `skippedNotificationsByType` in return) | N/A (test-mode field, no GraphQL assertion needed) |
+| REQ-10 (Rate limit test) | N/A (env flag + GraphQL boundary) | `backend/lib/ratelimit.test.ts` (NEW or upgrade) | `auth.test.ts` or `rate-limit.test.ts` (NEW — 429 path test) |
+
+#### Additional Details
+- **Priority**: High
+- **Complexity**: Medium
+- **Dependencies**: REQ-1 (DB/service tests depend on DomainError refactor for `instanceof` + `code` assertions)
+- **Assumptions**: Existing DB test files (`suggestion.repository.test.ts`, `complaint.repository.test.ts`) are upgraded in-place; missing test files are created new
+
 ## UX/Navigation Requirements
 
 This feature is backend-only (error handling, test infrastructure). No new routes, sidebar items, or UI components are introduced.
@@ -396,7 +431,9 @@ N/A — backend error handling changes are invisible to the UI. Existing UI comp
 
 ### Assumptions
 
-- Apollo Server 4 preserves `extensions` on `GraphQLError` instances (confirmed by existing `auth.test.ts:184`).
+- Apollo Server v5.5.1 preserves `extensions` on `GraphQLError` instances — confirmed by `docs-search_docs` on `apollo-server` library AND existing `auth.test.ts:184`.
+- Apollo Client v4.2.12 uses `CombinedGraphQLErrors.is(error)` as the recommended type check — confirmed by `docs-search_docs` on `apollo-client` library.
+- Pothos errors plugin v4.9.1 `errorUnionField`/`errorUnion` wraps fields in union types only when opted in — confirmed by `docs-search_docs` on `pothos` library AND `node_modules/@pothos/plugin-errors/` source inspection.
 - The `recordNotFound`, `unauthorizedViewMetrics`, and `invalidInput` translation keys already exist.
 - Test helpers `runInRollback` and `entity-setup.ts` patterns are followed for any new test data.
 
@@ -408,14 +445,19 @@ N/A — backend error handling changes are invisible to the UI. Existing UI comp
 - [ ] `bun run generate:gqlSchema` succeeds with no schema-shape change
 - [ ] `bun codegen` succeeds
 - [ ] `bun quality-gate` passes clean
-- [ ] `bun test:graphql` passes with new `extensions.code` assertions
+- [ ] `bun run test:db` passes with new `DomainError` instanceof + `code` assertions in repository tests
+- [ ] `bun run test:services` passes with new error-code assertions in service tests
+- [ ] `bun run test:graphql` passes with new `extensions.code` assertions
 - [ ] Dev server log diff shows issues 1-9 resolved, issue 11 unchanged (expected), issues 10 & 12 structured
 
 ### Acceptance Metrics
 
 - Zero new `[ERROR]` patterns in dev log compared to baseline (excluding provider errors)
 - All affected GraphQL tests assert `extensions.code` on error paths
+- All affected DB repository tests assert `error instanceof NotFoundError` (or correct subclass) AND `error.code`
+- All affected service tests assert thrown error `code` property
 - `cleanupTestSuperAdmin` and `cleanupTestEntities` return `true` consistently
+- New test files created (where none exist): `domain-error.test.ts`, `recurring-class.service.test.ts`, `class-session.service.test.ts`, `test-helper.service.test.ts`
 
 ## Glossary
 
@@ -426,3 +468,5 @@ N/A — backend error handling changes are invisible to the UI. Existing UI comp
 | Pothos errors plugin | `@pothos/plugin-errors` v4.9.1 — wraps fields in union types when opted in via `errors: { types: [...] }` |
 | Keystone fix | The foundational architecture change (REQ-1) that all other requirements depend on |
 | FK RESTRICT | PostgreSQL foreign key constraint that prevents deletion of a parent row while child rows reference it |
+| `CombinedGraphQLErrors.is()` | Apollo Client v4 recommended static type check for GraphQL errors — preferred over `instanceof` (avoids cross-realm false negatives) |
+| `INTERNAL_SERVER_ERROR` | Apollo Server v5 default `extensions.code` when a non-`GraphQLError` is thrown — bypassed when `DomainError extends GraphQLError` |

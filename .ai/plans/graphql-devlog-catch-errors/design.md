@@ -5,7 +5,7 @@
 - **Feature Name**: graphql-devlog-catch-errors
 - **Target Directory**: `.ai/plans/graphql-devlog-catch-errors`
 - **Outcome Directory**: `.ai/plans/graphql-devlog-catch-errors/outcome`
-- **Version**: 1.0
+- **Version**: 1.1 (refined via docs MCP server)
 - **Date**: 2026-08-19
 - **Related Documents**: [Requirements](specs.md), [Research](plan.md)
 
@@ -48,12 +48,12 @@ This design makes `DomainError` subclasses propagate `extensions.code` through G
 
 ### Pothos Errors Plugin Investigation (CRITICAL)
 
-Confirmed against installed `node_modules/@pothos/plugin-errors/` v4.9.1:
+Confirmed against installed `node_modules/@pothos/plugin-errors/` v4.9.1 AND docs MCP server (`docs-search_docs` on `pothos` library):
 
 - **`src/types.ts`** — `ErrorsPluginOptions` interface: `defaultTypes`, `directResult`, `onResolvedError`, `unsafelyHandleInputErrors`, `defaultResultOptions`, `defaultUnionOptions`.
 - **`src/schema-builder.ts`** — `errorUnion` implementation: merges field `types` with `defaultTypes`, builds a `union` type, attaches `pothosErrorTypes` extension.
 - **`esm/index.js`** — `PothosErrorsPlugin.wrapIsTypeOf` & `onOutputFieldConfig` confirm the plugin only engages on fields with `errors: { types: [...] }` or `errorUnionField`.
-- **Indexed Pothos docs** (via `docs-search_docs`): "`defaultTypes`: An array of Error classes to include in every field **with error handling**." — NOT every field globally.
+- **Docs MCP** (pothos `errors.mdx`): `errorUnionField` wraps a field's return type in a union: `<FieldName>Result = Error | FieldSuccess`. Error types must be registered via `builder.objectType(ValidationError, { name: 'ValidationError', ... })`. Type resolution uses `instanceof` for class-based error types.
 - **Siraj grep**: `grep -rn "errorUnion" backend/graphql/` → zero matches. Siraj has zero fields opted into the union-wrapping path.
 
 ### UX/Navigation Specification
@@ -146,7 +146,7 @@ graph LR
 - Ensure subclass prototype chain is restored (ES5 `Object.setPrototypeOf`)
 
 **Interfaces**:
-- **Input**: `message: string`, `code: string`
+- **Input**: `code: string`, `message: string`, `options?: ErrorOptions`
 - **Output**: `GraphQLError` instance with `extensions.code`
 - **Dependencies**: `graphql` package (`GraphQLError`)
 
@@ -157,15 +157,22 @@ import { GraphQLError } from "graphql";
 
 export class DomainError extends GraphQLError {
   constructor(
-    message: string,
     public readonly code: string,
+    message: string,
+    options?: ErrorOptions
   ) {
-    super(message, { extensions: { code } });
+    super(message, { ...options, extensions: { code } });
     this.name = new.target.name;
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 ```
+
+**CRITICAL — Constructor arg order preserved**: The current `DomainError` uses `(code, message, options)`. The refactor preserves this exact order to minimize blast radius — all existing subclass constructors (`NotFoundError`, `UnauthorizedError`, `ValidationError`, etc.) continue to work without modification. Only the base class changes: `extends Error` → `extends GraphQLError`, and `super(message, options)` → `super(message, { ...options, extensions: { code } })`.
+
+**Apollo Server v5.5.1 docs confirm**: "If a resolver throws a generic error that is _not_ a `GraphQLError` instance, that error is thrown with `extensions` that includes `code: INTERNAL_SERVER_ERROR`." — By extending `GraphQLError`, our `DomainError` subclasses bypass this default and surface their own `extensions.code`.
+
+**Apollo Client v4.2.12 docs confirm**: `CombinedGraphQLErrors.is(error)` is the recommended type check. `error.errors?.[0]?.extensions?.code` is the correct access path (not `error.graphQLErrors` — that's v3).
 
 ### Component 2: Repository layer — suggestion not found (modified)
 
@@ -328,16 +335,135 @@ No new endpoints. The change affects the shape of error responses on existing Gr
 
 ## Testing Strategy
 
+### Three-Layer Test Architecture
+
+Every backend fix must be verified across three test layers — DB repository, service, and GraphQL integration — so regressions are caught at the right layer, not only at the already-collapsed GraphQL boundary.
+
+```mermaid
+graph TD
+    subgraph "DB Layer Tests (bun run test:db)"
+        DB1["suggestion.repository.test.ts\nassert error instanceof NotFoundError\nassert error.code === 'SUGGESTION_NOT_FOUND'"]
+        DB2["complaint.repository.test.ts\nassert error instanceof NotFoundError\nassert error.code === 'COMPLAINTS_NOT_FOUND'"]
+        DB3["domain-error.test.ts (NEW)\nassert DomainError extends GraphQLError\nassert extensions.code propagation"]
+        DB4["test-helper.repository.test.ts (NEW)\nassert FK cleanup ordering\nassert true return"]
+    end
+    subgraph "Service Layer Tests (bun run test:services)"
+        SV1["suggestion.service.test.ts\nassert thrown error.code === 'SUGGESTION_NOT_FOUND'"]
+        SV2["schedule.service.test.ts\nassert thrown error.code === 'UNAUTHORIZED'"]
+        SV3["recurring-class.service.test.ts (NEW)\nassert 3 distinct error codes"]
+        SV4["class-session.service.test.ts (NEW)\nassert quota-skip warning observability"]
+        SV5["meeting-config-snapshot.test.ts\nassert logger.warn not logger.info"]
+        SV6["notification-dispatch.helpers.test.ts\nassert skippedNotificationsByType in return"]
+        SV7["test-helper.service.test.ts (NEW)\nassert cleanup deletes FK children first"]
+    end
+    subgraph "GraphQL Layer Tests (bun run test:graphql)"
+        GQL1["suggestion.test.ts\nassert extensions.code === 'SUGGESTION_NOT_FOUND'"]
+        GQL2["schedule.test.ts\nassert extensions.code === 'UNAUTHORIZED'"]
+        GQL3["schedule.test.ts\nassert 3 distinct codes for validation"]
+        GQL4["complaint.test.ts\nassert extensions.code === 'COMPLAINTS_NOT_FOUND'"]
+        GQL5["schedule.test.ts\nassert meetingUrl === null on non-provider path"]
+        GQL6["rate-limit.test.ts (NEW)\nassert extensions.code === 'RATE_LIMIT_EXCEEDED'"]
+    end
+```
+
 ### Unit Testing
 
-- **Coverage Target**: All affected service/repository methods
-- **Testing Framework**: Bun test runner
-- **Key Test Areas**: Error code propagation, translated message content, FK cleanup ordering
+#### DB Repository Layer (`backend/db/test/repo/`)
+
+- **Framework**: Bun test runner + `runInRollback` wrapper + `entity-setup.ts` helpers
+- **Pattern**: `expectRepoError(() => Repo.method(...))` → assert `error instanceof NotFoundError` AND `error.code`
+- **Test Runner**: `bun run scripts/run-test/run-test.ts <test-path>` (log capture mandatory)
+- **Full Suite**: `bun run test:db` (parallel via `scripts/run-db-tests-parallel.ts`)
+- **Key Constraint**: `runInRollback` — never use `expect(...).rejects.toThrow()` inside (causes deadlocks)
+
+**Example upgrade pattern (suggestion.repository.test.ts):**
+```typescript
+// BEFORE (current): only checks message length
+async function expectNonExistentError(name, operation) {
+  suggestionTest(name, async tx => {
+    const error = await expectRepoError(() => operation(tx));
+    expect(error.message.length).toBeGreaterThan(0);
+  });
+}
+
+// AFTER (with DomainError assertions):
+async function expectNonExistentError(name, operation, expectedCode?: string) {
+  suggestionTest(name, async tx => {
+    const error = await expectRepoError(() => operation(tx));
+    expect(error.message.length).toBeGreaterThan(0);
+    if (expectedCode) {
+      expect(error).toBeInstanceOf(NotFoundError);
+      expect((error as NotFoundError).code).toBe(expectedCode);
+    }
+  });
+}
+```
+
+#### Service Layer (`backend/services/**/test/`)
+
+- **Framework**: Bun test runner with `spyOn` mocks (no live DB)
+- **Pattern**: `expectErrorMatching(promise, predicate)` → upgrade to `expect((error as DomainError).code).toBe(expectedCode)`
+- **Test Runner**: `bun run scripts/run-test/run-test.ts <test-path>` (log capture)
+- **Full Suite**: `bun run test:services` (parallel via `scripts/run-services-tests-parallel.ts`)
+
+**Example upgrade pattern (suggestion.service.test.ts):**
+```typescript
+// BEFORE: predicate on message string
+async function expectErrorMatching(promise, predicate: (message: string) => boolean) {
+  // ... catches error, asserts predicate(error.message.toLowerCase())
+}
+
+// AFTER: also assert error.code
+async function expectErrorCode(promise, expectedCode: string) {
+  let errorCaught: Error | null = null;
+  try { await promise; } catch (e) { errorCaught = e as Error; }
+  expect(errorCaught).not.toBeNull();
+  expect((errorCaught as DomainError).code).toBe(expectedCode);
+}
+```
 
 ### Integration Testing
 
+#### GraphQL Layer (`frontend/common/graphql/test/`)
+
 - **API Testing**: GraphQL integration tests (dev server, `testClient`)
-- **Test Pattern**: `expect(result.error).toBeInstanceOf(CombinedGraphQLErrors)` then `error.errors?.[0]?.extensions?.code`
+- **Test Pattern**: ` CombinedGraphQLErrors` from Apollo → `error.errors?.[0]?.extensions?.code`
+- **Runner**: `bun run test:graphql` (dev server)
+- **Upgrade**: New `expectMutationErrorCode(token, document, variables, expectedCode)` helper in `helpers.ts`
+
+```typescript
+export async function expectMutationErrorCode<TData, TVars>(
+  token: string,
+  document: TypedDocumentNode<TData, TVars>,
+  variables: TVars,
+  expectedCode: string
+): Promise<void> {
+  const result = await testClient.mutate({
+    mutation: document,
+    variables,
+    context: { headers: { Authorization: `Bearer ${token}` } },
+  });
+  expect(result.error).toBeDefined();
+  expect(CombinedGraphQLErrors.is(result.error)).toBe(true);
+  if (CombinedGraphQLErrors.is(result.error)) {
+    expect(result.error.errors?.[0]?.extensions?.code).toBe(expectedCode);
+  }
+}
+```
+
+**Apollo Client v4 docs note**: `CombinedGraphQLErrors.is(error)` is preferred over `instanceof` because it avoids false positives/negatives across realms. The existing `auth.test.ts:184` uses `instanceof` — it works, but `.is()` is the recommended pattern for all new helpers.
+
+### Docs MCP Server Library Confirmation
+
+The following installed library versions were confirmed via `docs-list_libraries` + `docs-search_docs` and validated against `node_modules/`:
+
+| Library | Installed Version | Docs MCP Key Finding | Plan Impact |
+|---------|-------------------|---------------------|-------------|
+| `apollo-server` | v5.5.1 | Custom errors use `new GraphQLError(msg, { extensions: { code } })`. Non-`GraphQLError` throws get `INTERNAL_SERVER_ERROR`. | Confirms Strategy B — `DomainError extends GraphQLError` surfaces custom codes |
+| `pothos` | v4.9.1 (plugin-errors) | `errorUnionField` wraps fields in union types; `defaultTypes` only affects opted-in fields. | Confirms Strategy A rejection — no schema-shape change needed |
+| `apollo-client` | v4.2.12 | `CombinedGraphQLErrors.is(error)` preferred over `instanceof`; `error.errors?.[0]?.extensions?.code` is the v4 access path. | Upgrades test helper to use `.is()` instead of `instanceof` |
+| `graphql` | v17.0.2 | `GraphQLError` constructor accepts `{ extensions }` options. | Confirms `DomainError` constructor refactor is safe |
+| `graphql-codegen` | — | No error-type-specific config needed. | `bun codegen` output unchanged — no new schema types |
 
 ### Verification via Next.js Devtools MCP Server
 
@@ -392,9 +518,9 @@ After each phase, use the Next.js devtools MCP server (port 3000) to confirm:
 - [x] Component responsibilities are well-defined (6 components)
 - [x] Interfaces between components are specified
 - [x] Technology choices are justified (Strategy B over A, with rationale)
-- [x] Design addresses all functional requirements (REQ-1 through REQ-10)
+- [x] Design addresses all functional requirements (REQ-1 through REQ-11)
 - [x] Error handling is comprehensive (error categories table, response format before/after)
 - [x] Data models complete (ErrorCode enum, data flow sequence diagram)
-- [x] Testing strategy is comprehensive (unit, integration, MCP verification, E2E log diff)
+- [x] Testing strategy is comprehensive (three-layer: DB repository, service, GraphQL integration, MCP verification, E2E log diff)
 - [x] Backward compatibility addressed (additive, no breaking changes)
 - [x] UX/Navigation: N/A (backend-only feature) — documented
