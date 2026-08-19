@@ -132,6 +132,7 @@ See `docs/auth/supervisor-permissions.md` for the supervisor permission model an
 - **Lazy scopeAuth**: `superAdmin` scope is a lazy scope-loader function, not an eager boolean — only evaluates when a field with `authScopes: { superAdmin: true }` is actually queried. The `permission` scope uses `ctx.isSuperAdmin` and `ctx.permissions` directly (no `getUserContext` call).
 - **`safeUser` on `BaseContext`**: `ctx.safeUser` contains the full sanitized user object (password/rememberTokenHash stripped). Resolvers needing user data (e.g., `Query.me`) should use `ctx.safeUser` instead of calling `UserService.findById`.
 - **Session deduplication**: `preloadSession` helper in `gqlContextFactory.ts` fetches session once and passes to both `resolveAuthIdentityFromToken` and `resolveGroupSimulationFromToken` via the `preloadedSession` optional parameter.
+- **Login resolver cold-start resilience**: Rate limiter operations in the login resolver (`checkRateLimit`, `isLocked`, `recordAttempt`, `resetAttempts`) MUST use fail-open `try/catch` — transient cold-start errors must NOT block login. Critical DB reads (`findByEmail`, `createAuthSession`) MUST use `retryTransient()` from `@/backend/lib`. On exhaustion, return `SERVICE_UNAVAILABLE` (NOT `INVALID_CREDENTIALS`). See `docs/backend/login-cold-start-resilience.md`.
 
 ## Linting Rules
 

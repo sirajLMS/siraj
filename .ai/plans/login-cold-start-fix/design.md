@@ -14,13 +14,92 @@
 
 The login flow currently fails during Vercel serverless cold starts because three sequential DB/cache-dependent operations (rate limit check, lock check, user lookup) can all throw transient errors before the database connection pool is ready. The `authRateLimiter` with `failOpen=false` causes false "too many login attempts" rejections when the cache is cold. The `RateLimitService.isLocked` call is not wrapped in try/catch, so DB timeouts propagate as generic GraphQL errors that the frontend maps to "invalid credentials".
 
-This design introduces a layered approach: (1) fail-open for rate limiter transient errors in the login resolver, (2) a retry-with-backoff utility for transient DB errors, (3) routing login reads through the Neon HTTP driver (zero-pool, ~15-30ms cold start), (4) frontend auto-retry on `SERVICE_UNAVAILABLE`, and (5) enabling Vercel Fluid Compute pre-warming.
+This design introduces a layered approach: (1) fail-open for rate limiter transient errors in the login resolver, (2) a retry-with-backoff utility for transient DB errors, (3) routing login reads through the Neon HTTP driver (zero-pool, ~15-30ms cold start), (4) frontend auto-retry on `SERVICE_UNAVAILABLE` (last resort only), and (5) enabling Vercel Fluid Compute pre-warming.
 
 ### Design Goals
 - Eliminate false "invalid credentials" / "too many attempts" errors during cold start
 - Preserve brute-force rate limiting when infrastructure is warm
 - Use the fastest available DB path (Neon HTTP) for login reads
-- Provide transparent retry for users when `SERVICE_UNAVAILABLE` is returned
+- **Backend-first cold-start recovery**: handle transient errors internally to minimize Vercel function invocations and frontend round trips
+- Provide transparent retry for users when `SERVICE_UNAVAILABLE` is returned (last resort)
+
+### Cold-Start Resolution Strategy (Backend-First)
+
+The design follows a strict **backend-first** principle: the backend should handle as much cold-start recovery as possible within a single Vercel function invocation. Frontend retry is a last resort that only fires when the entire function couldn't recover (meaning a new Vercel instance must be spawned).
+
+#### Resolution Flow During Cold Start
+
+```
+User clicks "Login" with valid credentials
+  │
+  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Vercel Function Invocation #1 (single serverless function)       │
+│                                                                     │
+│  1. checkRateLimit (cache cold)                                    │
+│     → cache service fails                                           │
+│     → FAIL-OPEN: catch error, log warn, proceed                     │
+│     → ❌ NO error to user                                            │
+│                                                                     │
+│  2. isLocked (DB cold, uses Neon HTTP → ~15-30ms)                   │
+│     → HTTP query fails (transient)                                  │
+│     → FAIL-OPEN: catch error, log warn, proceed                     │
+│     → ❌ NO error to user                                            │
+│                                                                     │
+│  3. findByEmail (DB cold, uses Neon HTTP → ~15-30ms)                │
+│     → retryTransient: 3 retries (200ms → 500ms → 1000ms)            │
+│     → DB warms up during retries → SUCCEEDS on retry 2              │
+│     → ✅ User found                                                 │
+│                                                                     │
+│  4. comparePassword                                                 │
+│     → ✅ Password valid                                             │
+│                                                                     │
+│  5. resetAttempts (DB pool cold, uses db.execute → slow)            │
+│     → FAIL-OPEN: catch error, log warn, proceed to session          │
+│     → ❌ NO error to user                                            │
+│                                                                     │
+│  6. createAuthSession (DB pool cold)                                │
+│     → retryTransient: 3 retries (200ms → 500ms → 1000ms)            │
+│     → DB pool warms up during retries → SUCCEEDS on retry 1         │
+│     → ✅ Session created, token generated                          │
+│                                                                     │
+│  7. Set cookies, return token + user                                │
+│     → ✅ Login complete — 1 Vercel invocation, 0 frontend retries   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+#### Worst Case: Full DB Cold Start
+
+If the DB pool never warms up within the single invocation (~1.7s of internal retries):
+
+```
+Invoc #1: findByEmail retry exhausted → SERVICE_UNAVAILABLE
+  │
+  ▼ (frontend auto-retry after 1.5s)
+Invoc #2: New Vercel function instance → DB pool warmed by now → login succeeds
+  │
+  ▼
+✅ Login complete — 2 Vercel invocations, 1 frontend retry
+```
+
+#### What the User Sees
+
+| Scenario | User Experience | Vercel Invocations |
+|----------|----------------|-------------------|
+| Cache cold, DB warm | ✅ Instant login | 1 |
+| Cache cold, DB cold (wartime within 1.7s) | ✅ Instant login (slight delay) | 1 |
+| Cache cold, DB cold (doesn't warm within 1.7s) | ⏳ "Retrying..." → login after ~1.5s | 2 |
+| Warm infrastructure | ✅ Instant login | 1 |
+| Wrong credentials (cold or warm) | ❌ "Invalid credentials" | 1 |
+
+**Key**: The user NEVER sees "invalid credentials" during a cold start. They only see "Retrying..." if the backend truly couldn't recover within a single invocation.
+
+### Why Backend-First?
+
+1. **Vercel function invocations cost money**: Each frontend retry triggers a new serverless function. If the backend handles recovery internally (3 retries, ~1.7s), only 1 invocation is needed.
+2. **Latency**: A frontend retry adds the latency of: error response + network round trip + frontend delay + new function cold start. Backend retry adds only: retry delay (200ms-1000ms). Backend is ~10x faster.
+3. **Consistency**: If the backend recovers mid-retry, the user's credentials are already verified. A frontend retry must re-verify credentials from scratch in a new invocation.
+4. **Simplicity**: The frontend doesn't need to know about cold-start transient errors. It only handles `SERVICE_UNAVAILABLE` — a clean, single error code.
 
 ### Key Design Decisions
 

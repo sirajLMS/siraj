@@ -11,7 +11,14 @@ import {
   RefreshTokenResponsePothosObject,
 } from "@/backend/graphql/pothos";
 import { requireAuthWithRateLimit } from "@/backend/graphql/shared";
-import { extractTokenFromHeader, generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
+import {
+  extractTokenFromHeader,
+  generateAccessToken,
+  generateRefreshToken,
+  isTransientError,
+  retryTransient,
+  verifyToken,
+} from "@/backend/lib";
 import { setAuthCookies as applyAuthCookies, clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { createAuthSession } from "@/backend/lib/auth/createAuthSession";
 import { comparePassword } from "@/backend/lib/auth/password";
@@ -33,6 +40,23 @@ import { AuthUtils } from "@/backend/utils";
 
 function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: string, accessToken?: string) {
   applyAuthCookies(ctx.cookies, sessionId, refreshToken, accessToken);
+}
+
+/**
+ * Execute a rate-limit operation with fail-open behavior for transient errors.
+ * Non-transient errors are re-thrown (fail-closed) to prevent silently disabling
+ * brute-force protection on persistent failures.
+ */
+async function failOpen<T>(operation: string, fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (isTransientError(error)) {
+      logger.warn(`${operation} failed (cold-start transient), failing open`);
+      return fallback;
+    }
+    throw error;
+  }
 }
 
 async function resolveUserFromSession(
@@ -205,26 +229,32 @@ gqlSchemaBuilder.mutationFields(t => ({
       const tErrors = ctx.t().errorsTranslations;
 
       // 0. Enforce auth rate limit before any credential checks
-      const rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
+      // Fail-open: if cache service is cold-starting, proceed with login rather than
+      // falsely rejecting with "too many attempts"
+      const rateLimitResult = await failOpen("Rate limit check", () => checkRateLimit(ipAddress, authRateLimiter), {
+        success: true,
+        limit: 0,
+        remaining: 0,
+        reset: 0,
+      });
       if (!rateLimitResult.success) {
         throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
-          // ← compile-time ✅
           extensions: { code: "TOO_MANY_ATTEMPTS" },
         });
       }
 
       // 1. Check if already locked
-      const isLocked = await RateLimitService.isLocked(ipAddress, email.value);
+      // Fail-open: if DB is cold-starting, proceed with credential verification
+      const isLocked = await failOpen("isLocked check", () => RateLimitService.isLocked(ipAddress, email.value), false);
       if (isLocked) {
         throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
-          // ← compile-time ✅
           extensions: { code: "TOO_MANY_ATTEMPTS" },
         });
       }
 
       let user: UserSelectType | null;
       try {
-        user = (await UserService.findByEmail(email.value)) ?? null;
+        user = (await retryTransient(() => UserService.findByEmail(email.value))) ?? null;
       } catch (err) {
         logger.error(err);
         throw new GraphQLError(tErrors.auth.serviceUnavailable, {
@@ -235,9 +265,12 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       if (!user) {
         // Still record attempt even if user doesn't exist to prevent enumeration
-        await RateLimitService.recordAttempt(ipAddress, email.value);
+        await failOpen("recordAttempt (user not found)", () => RateLimitService.recordAttempt(ipAddress, email.value), {
+          attempts: 0,
+          lockedUntil: null,
+          isLocked: false,
+        });
         throw new GraphQLError(tErrors.auth.invalidCredentials, {
-          // ← compile-time ✅
           extensions: { code: "INVALID_CREDENTIALS" },
         });
       }
@@ -247,15 +280,18 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       if (!isPasswordValid) {
         // Record failed attempt
-        const result = await RateLimitService.recordAttempt(ipAddress, email.value);
+        // Fail-open: cold-start recordAttempt failure should not block login flow
+        const result = await failOpen(
+          "recordAttempt (invalid password)",
+          () => RateLimitService.recordAttempt(ipAddress, email.value),
+          { attempts: 0, lockedUntil: null, isLocked: false }
+        );
         if (result.isLocked) {
           throw new GraphQLError(tErrors.auth.accountLocked, {
-            // ← compile-time ✅
             extensions: { code: "TOO_MANY_ATTEMPTS" },
           });
         }
         throw new GraphQLError(tErrors.auth.invalidCredentials, {
-          // ← compile-time ✅
           extensions: { code: "INVALID_CREDENTIALS" },
         });
       }
@@ -268,19 +304,32 @@ gqlSchemaBuilder.mutationFields(t => ({
       }
 
       // 3. Successful login - reset attempts
-      await RateLimitService.resetAttempts(ipAddress, email.value);
+      // Fail-open: cold-start resetAttempts failure should not block successful login
+      await failOpen("resetAttempts", () => RateLimitService.resetAttempts(ipAddress, email.value), undefined);
 
       // Generate tokens and create session in database.
       // Store session metadata only, not sensitive tokens.
-      const { accessToken, refreshToken, sessionId } = await createAuthSession(user.id, user.email);
+      // createAuthSession is NOT retried — it's a non-idempotent write (generates a
+      // fresh randomUUID sessionId on each call). If it throws transient, the
+      // resolver catches and returns SERVICE_UNAVAILABLE so the frontend can retry
+      // the entire login flow.
+      try {
+        const { accessToken, refreshToken, sessionId } = await createAuthSession(user.id, user.email);
 
-      // Set httpOnly cookies for session and refresh token
-      setAuthCookies(ctx, sessionId, refreshToken, accessToken);
+        // Set httpOnly cookies for session and refresh token
+        setAuthCookies(ctx, sessionId, refreshToken, accessToken);
 
-      return {
-        token: accessToken,
-        user: AuthUtils.toSafeUser(user),
-      };
+        return {
+          token: accessToken,
+          user: AuthUtils.toSafeUser(user),
+        };
+      } catch (err) {
+        logger.error(err);
+        throw new GraphQLError(tErrors.auth.serviceUnavailable, {
+          // ← compile-time ✅
+          extensions: { code: "SERVICE_UNAVAILABLE" },
+        });
+      }
     },
   }),
 

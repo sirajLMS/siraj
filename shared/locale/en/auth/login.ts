@@ -28,4 +28,5 @@ export const authLoginEn: AuthLoginLabels = {
   staff: "Staff",
   showPassword: "Show password",
   hidePassword: "Hide password",
+  retrying: "Retrying...",
 };

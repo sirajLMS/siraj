@@ -28,4 +28,5 @@ export const authLoginAr: AuthLoginLabels = {
   staff: "موظف",
   showPassword: "إظهار كلمة المرور",
   hidePassword: "إخفاء كلمة المرور",
+  retrying: "إعادة المحاولة...",
 };

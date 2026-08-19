@@ -27,6 +27,7 @@ export interface AuthLoginLabels {
   readonly staff: string;
   readonly showPassword: string;
   readonly hidePassword: string;
+  readonly retrying: string;
 }
 
 // AuthImpersonationLabels: fields with {name}/{email} are now typed functions

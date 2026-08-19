@@ -2,6 +2,8 @@
 
 Canonical reference for reducing DB queries, redundant fetches, and function invocations on Vercel serverless deployments. Consolidated from Phases A through G of the Vercel Logs Performance Fix plan.
 
+> **See also:** [Login Cold-Start Resilience](./login-cold-start-resilience.md) — fail-open + retryTransient pattern for handling transient connection errors during Neon cold starts in the login flow.
+
 ---
 
 ## 1. Permission Context Propagation (Phase A1)

@@ -10,6 +10,7 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
     labels,
     loginResult,
     isDemo,
+    isRetrying,
     demoGroups: groups,
     handleLoginSubmit,
     handleFastLogin,
@@ -23,6 +24,7 @@ export function LoginContainer({ demoGroups }: Readonly<LoginContainerProps>) {
       onSubmitAction={handleLoginSubmit}
       externalLoginResult={loginResult}
       isDemo={isDemo}
+      isRetrying={isRetrying}
       demoGroups={groups}
       onFastLogin={handleFastLogin}
     />

@@ -36,7 +36,7 @@
 
 ## Phase 0: Baseline
 
-- [ ] 0.1 **Record baseline error counts**
+- [x] 0.1 **Record baseline error counts**
   - Run `bun tsgo 2>&1 | grep "error TS" | wc -l` and record count
   - Run `bun biome:check 2>&1 | grep -c "warn"` and record count
   - Create `.ai/plans/login-cold-start-fix/deferred-items.md` from template (or empty if no template exists)
@@ -47,20 +47,21 @@
 
 ## Phase 1: Retry Utility
 
-- [ ] 1.1 **Create `retryTransient` utility**
+- [x] 1.1 **Create `retryTransient` utility**
   - Create file: `backend/lib/retry.ts`
   - Implement `retryTransient<T>(fn: () => Promise<T>, options?: { maxRetries?: number; baseDelayMs?: number }): Promise<T>`
-  - Default: 2 retries, 300ms base delay (300ms → 700ms exponential)
+  - Default: 3 retries, 200ms base delay (200ms → 500ms → 1000ms exponential, ~1.7s total)
   - Transient error detection: check `err.code` for `ECONNRESET`, `ETIMEDOUT`, `ENOTFOUND`, `EAI_AGAIN`, or error message containing `timeout`, `connection`, `WebSocket`, `pool`
   - Non-transient errors re-throw immediately (no retry)
   - Log each retry at `warn` level with attempt number and delay
+  - Log recovery at `info` level: "Operation succeeded after N retries"
   - Export `isTransientError(error: unknown): boolean` as a separate helper for reuse
   - Quality Loop: `bun run scripts/health/sub-loop.ts backend/lib/retry.ts --lifecycle codescene`
   - Read applicable AGENTS.md: `backend/AGENTS.md`
   - Read applicable instructions: `backend.instructions.md`
   - _Requirements: REQ-2_
 
-- [ ] 1.2 **Write unit tests for `retryTransient`**
+- [x] 1.2 **Write unit tests for `retryTransient`**
   - Create file: `backend/lib/test/retry.test.ts`
   - Test cases:
     - Transient error retried then succeeds → returns result, retried expected number of times
@@ -74,7 +75,7 @@
   - Read applicable instructions: `tests.instructions.md`, `backend.instructions.md`
   - _Requirements: REQ-2_
 
-- [ ] 1.3 **Run test suite and verify all pass**
+- [x] 1.3 **Run test suite and verify all pass**
   - Run: `bun test backend/lib/test/retry.test.ts`
   - Write outcome: `.ai/plans/login-cold-start-fix/outcome/1.1-retry-utility.md`
   - _Requirements: REQ-2_
@@ -83,7 +84,7 @@
 
 ## Phase 2: Login Resolver Error Handling
 
-- [ ] 2.1 **Add fail-open try/catch for rate limiter in login resolver**
+- [x] 2.1 **Add fail-open try/catch for rate limiter in login resolver**
   - File: `backend/graphql/mutation/auth/auth.mutation.ts`
   - Wrap `checkRateLimit(ipAddress, authRateLimiter)` (line 208) in try/catch
   - On catch: log warn "Rate limit check bypassed (cold start)" with error, proceed to next step
@@ -93,7 +94,7 @@
   - Read applicable instructions: `backend.instructions.md`
   - _Requirements: REQ-1_
 
-- [ ] 2.2 **Add fail-open try/catch for `RateLimitService.isLocked`**
+- [x] 2.2 **Add fail-open try/catch for `RateLimitService.isLocked`**
   - File: `backend/graphql/mutation/auth/auth.mutation.ts`
   - Wrap `RateLimitService.isLocked(ipAddress, email.value)` (line 217) in try/catch
   - On catch: log warn "Lock check bypassed (cold start)" with error, proceed to credential check
@@ -102,7 +103,7 @@
   - Quality Loop: `bun run scripts/health/sub-loop.ts backend/graphql/mutation/auth/auth.mutation.ts --lifecycle codescene`
   - _Requirements: REQ-1_
 
-- [ ] 2.3 **Apply `retryTransient` to `UserService.findByEmail` call**
+- [x] 2.3 **Apply `retryTransient` to `UserService.findByEmail` call**
   - File: `backend/graphql/mutation/auth/auth.mutation.ts`
   - Import `retryTransient` from `@/backend/lib/retry`
   - Wrap `UserService.findByEmail(email.value)` (line 227) in `retryTransient(async () => UserService.findByEmail(email.value))`
@@ -111,7 +112,7 @@
   - Semantic review: verify that the `retryTransient` doesn't retry on `INVALID_CREDENTIALS` (user not found is null, not an error — retry only fires on throws)
   - _Requirements: REQ-1, REQ-2_
 
-- [ ] 2.4 **Add fail-open try/catch for `recordAttempt` calls**
+- [x] 2.4 **Add fail-open try/catch for `recordAttempt` calls**
   - File: `backend/graphql/mutation/auth/auth.mutation.ts`
   - Wrap `RateLimitService.recordAttempt(ipAddress, email.value)` at line 238 (user not found path) in try/catch
   - Wrap `RateLimitService.recordAttempt(ipAddress, email.value)` at line 250 (invalid password path) in try/catch
@@ -121,7 +122,7 @@
   - Quality Loop: `bun run scripts/health/sub-loop.ts backend/graphql/mutation/auth/auth.mutation.ts --lifecycle codescene`
   - _Requirements: REQ-1_
 
-- [ ] 2.5 **Add fail-open try/catch for `resetAttempts` call**
+- [x] 2.5 **Add fail-open try/catch for `resetAttempts` call**
   - File: `backend/graphql/mutation/auth/auth.mutation.ts`
   - Wrap `RateLimitService.resetAttempts(ipAddress, email.value)` at line 271 (successful login path) in try/catch
   - On catch: log warn "resetAttempts bypassed (cold start)" with error, proceed to session creation
@@ -130,10 +131,22 @@
   - Quality Loop: `bun run scripts/health/sub-loop.ts backend/graphql/mutation/auth/auth.mutation.ts --lifecycle codescene`
   - _Requirements: REQ-1_
 
-- [ ] 2.6 **Quality verification for login resolver**
+- [x] 2.5.5 **Apply `retryTransient` to `createAuthSession` call**
+  - File: `backend/graphql/mutation/auth/auth.mutation.ts`
+  - Wrap `createAuthSession(user.id, user.email)` at line 275 in `retryTransient`
+  - On retry success: proceed normally (transparent recovery — user gets token within the same Vercel invocation)
+  - On exhausted retries: throw `GraphQLError` with `code: "SERVICE_UNAVAILABLE"` (same pattern as `findByEmail` catch at line 228)
+  - **Critical**: `createAuthSession` performs a DB insert (session record). Without retry, a cold-start DB failure during this final step would force a frontend retry — costing a **second Vercel function invocation** and making the user wait again. With 3 retries (~1.7s), the DB pool likely warms up within the same invocation.
+  - This is the most important retry: the user's credentials are already verified, and failing here means forcing a second invocation that must re-verify credentials from scratch.
+  - Quality Loop: `bun run scripts/health/sub-loop.ts backend/graphql/mutation/auth/auth.mutation.ts --lifecycle codescene`
+  - Read applicable AGENTS.md: `backend/graphql/AGENTS.md`, `backend/AGENTS.md`
+  - Read applicable instructions: `backend.instructions.md`
+  - _Requirements: REQ-4.5_
+
+- [x] 2.6 **Quality verification for login resolver**
   - Re-run: `bun run scripts/health/sub-loop.ts backend/graphql/mutation/auth/auth.mutation.ts --lifecycle codescene`
   - Write outcome: `.ai/plans/login-cold-start-fix/outcome/2.1-login-resolver.md`
-  - _Requirements: REQ-1, REQ-2_
+  - _Requirements: REQ-1, REQ-2, REQ-4.5_
 
 ---
 
@@ -148,7 +161,7 @@
   - No code changes needed
   - _Requirements: REQ-3_
 
-- [ ] 3.2 **Run existing repository tests to verify no regression**
+- [x] 3.2 **Run existing repository tests to verify no regression**
   - Run: `bun run scripts/run-test/run-test.ts backend/db/test/repo/users/user.repository.test.ts` (or equivalent test path)
   - If no test exists for `findByEmail`, verify via existing login integration tests
   - Write outcome: `.ai/plans/login-cold-start-fix/outcome/3.1-neon-http-routing.md`
@@ -162,7 +175,7 @@
 > 1. **Incorrect `source: "db"` on DB failure** (line 292): When DB lookup fails and we fall back to `process.env`, the cache entry is tagged `source: "db"` (authoritative). This blocks DB override re-lookup for 5 minutes — a DB override set during the cold-start window is invisible until the cache expires.
 > 2. **No transient error detection**: The DB error catch (line 277) treats all DB failures identically — cold-start timeouts and real database errors are both swallowed. A transient cold-start error should use a **shorter TTL** so the DB is re-queried sooner, while a real DB error should use the full 5-minute TTL.
 
-- [ ] 3.5.1 **Fix cache `source` tag when DB lookup fails**
+- [x] 3.5.1 **Fix cache `source` tag when DB lookup fails**
   - File: `backend/services/system/environment-config.service.ts`
   - In `resolveEnvConfig()` (line 247-294):
     - When DB lookup succeeds (line 274-276): keep `source: "db"` (authoritative — DB override confirmed)
@@ -174,7 +187,7 @@
   - Read applicable instructions: `backend.instructions.md`
   - _Requirements: REQ-3_
 
-- [ ] 3.5.2 **Add short-TTL retry for transient DB failures in `resolveEnvConfig`**
+- [x] 3.5.2 **Add short-TTL retry for transient DB failures in `resolveEnvConfig`**
   - File: `backend/services/system/environment-config.service.ts`
   - When the DB lookup catch block (line 277) fires AND the error looks transient (connection timeout, ECONNRESET, WebSocket — reuse `isTransientError` from `@/backend/lib/retry`):
     - Set a **shorter cache TTL** (e.g. 30 seconds instead of 5 minutes) so the DB is re-queried sooner
@@ -188,7 +201,7 @@
   - Quality Loop: `bun run scripts/health/sub-loop.ts backend/services/system/environment-config.service.ts --lifecycle codescene`
   - _Requirements: REQ-3_
 
-- [ ] 3.5.3 **Verify `CACHE_PROVIDER` resolution handles cold start correctly**
+- [x] 3.5.3 **Verify `CACHE_PROVIDER` resolution handles cold start correctly**
   - Trace the full chain: `getCacheProvider()` → `resolveEnvConfig("CACHE_PROVIDER")` → `SystemSettingsRepository.getByKey("env::CACHE_PROVIDER")` → `queryDb()` (Neon HTTP)
   - Verify the fallback chain works when DB is cold:
     1. DB lookup fails (transient) → catch block fires → `process.env.CACHE_PROVIDER` checked
@@ -203,7 +216,7 @@
 
 ## Phase 4: Frontend Auto-Retry
 
-- [ ] 4.1 **Use Apollo `useMutation` directly in `useLoginViewModel` for error code access**
+- [x] 4.1 **Use Apollo `useMutation` directly in `useLoginViewModel` for error code access**
   - File: `frontend/views/auth/login/useLoginViewModel.ts`
   - **Context**: `useAuth().login()` catches the mutation error in `AuthProvider.tsx` (line 119), extracts only the message string via `getGraphQLErrorMessage()` (line 121), and discards `extensions.code`. The ViewModel cannot access `SERVICE_UNAVAILABLE` through the current `useAuth()` interface.
   - **Approach**: Import `loginMutationDocument` from `@/frontend/common/graphql/sharedDocuments` and `useMutation` from `@apollo/client/react` directly in `useLoginViewModel.ts` (the file already uses `useMutation` for `demoLoginMutation` — follow the same pattern)
@@ -215,7 +228,7 @@
   - Read applicable instructions: `frontend.instructions.md`
   - _Requirements: REQ-4_
 
-- [ ] 4.2 **Add `isRetrying` state and retry logic to `useLoginViewModel`**
+- [x] 4.2 **Add `isRetrying` state and retry logic to `useLoginViewModel` (last resort)**
   - File: `frontend/views/auth/login/useLoginViewModel.ts`
   - Add `const [isRetrying, setIsRetrying] = useState(false)`
   - Add `const retryCountRef = useRef(0)`
@@ -225,19 +238,20 @@
     - On error: check `CombinedGraphQLErrors.is(error)` and extract `extensions.code` from `error.errors[0]?.extensions?.code`
     - If `code === "SERVICE_UNAVAILABLE"` and `retryCountRef.current < 2`:
       - Set `isRetrying(true)`, increment `retryCountRef.current`
-      - `setTimeout` with 1000ms (1st retry) / 2000ms (2nd retry) delays
-      - Retry the mutation call
+      - `setTimeout` with 1500ms (1st retry) / 3000ms (2nd retry) delays (gives Vercel time to spawn a new function instance)
+      - Retry the mutation call **with the same email/password** (no user re-entry needed)
     - If retries exhausted or error is not `SERVICE_UNAVAILABLE`:
       - Set `isRetrying(false)`, reset `retryCountRef.current = 0`
       - Show error message (using `getGraphQLErrorMessage` or the raw error message)
     - On successful login: reset `retryCountRef.current = 0`, `setIsRetrying(false)`
   - Return `isRetrying` from the `LoginViewModel` interface (add to interface type)
+  - **Note**: Frontend retry is a **last resort** — the backend's `retryTransient` (3 retries, ~1.7s) handles most cold-start recovery within a single invocation. Frontend retry only fires when the entire Vercel function couldn't recover, meaning a new function instance must be spawned. The 1.5s/3s delays give the new instance time to warm up.
   - Quality Loop: `bun run scripts/health/sub-loop.ts frontend/views/auth/login/useLoginViewModel.ts --lifecycle codescene`
   - Read applicable AGENTS.md: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`
   - Read applicable instructions: `frontend.instructions.md`
   - _Requirements: REQ-4_
 
-- [ ] 4.3 **Add "Retrying..." indicator and disable submit during retry**
+- [x] 4.3 **Add "Retrying..." indicator and disable submit during retry**
   - File: `frontend/views/auth/login/components/LoginForm.tsx`
   - Destructure `isRetrying` from the ViewModel return value
   - When `isRetrying` is true:
@@ -247,7 +261,7 @@
   - Quality Loop: `bun run scripts/health/sub-loop.ts frontend/views/auth/login/components/LoginForm.tsx --lifecycle codescene`
   - _Requirements: REQ-4_
 
-- [ ] 4.4 **Add i18n key for "retrying"**
+- [x] 4.4 **Add i18n key for "retrying"**
   - Add `retrying: string` to `AuthLoginLabels` interface in `shared/locale/types/auth/index.ts`
   - Add `retrying: "Retrying..."` to `shared/locale/en/auth/login.ts`
   - Add `retrying: "إعادة المحاولة..."` to `shared/locale/ar/auth/login.ts`
@@ -255,7 +269,7 @@
   - Quality Loop per modified file: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`
   - _Requirements: REQ-4_
 
-- [ ] 4.5 **Quality verification for frontend changes**
+- [x] 4.5 **Quality verification for frontend changes**
   - Re-run sub-loop on all modified frontend files:
     - `frontend/views/auth/login/useLoginViewModel.ts`
     - `frontend/views/auth/login/components/LoginForm.tsx`
@@ -269,7 +283,7 @@
 
 ## Phase 5: Vercel Fluid Compute Configuration
 
-- [ ] 5.1 **Verify or enable Fluid Compute**
+- [x] 5.1 **Verify or enable Fluid Compute**
   - Check if `vercel.json` exists at repo root
   - Check if Fluid Compute is already enabled (Vercel default on newer plans)
   - If not configured, add minimal config to enable pre-warming for the GraphQL route
@@ -294,7 +308,7 @@
 
 ### Tier 1: Unit/Mocked Tests (no dev server)
 
-- [ ] 5.5.1 **Retry utility unit tests (`retryTransient`)**
+- [x] 5.5.1 **Retry utility unit tests (`retryTransient`)**
   - File: `backend/lib/test/retry.test.ts`
   - Already planned in Phase 1.2 — verify it covers:
     - Mock function throws `ECONNRESET` → retried 2 times → succeeds on 3rd call → returns result
@@ -308,7 +322,7 @@
   - Read applicable instructions: `tests.instructions.md`, `backend.instructions.md`
   - _Requirements: REQ-2_
 
-- [ ] 5.5.2 **Environment-config cold-start simulation tests**
+- [x] 5.5.2 **Environment-config cold-start simulation tests**
   - File: `backend/services/system/test/environment-config-cold-start.test.ts`
   - Test pattern: `spyOn(SystemSettingsRepository, "getByKey").mockRejectedValueOnce(transientError).mockResolvedValueOnce(dbOverride)` to simulate cold-start DB failure followed by success
   - Test cases:
@@ -326,7 +340,7 @@
   - Read applicable instructions: `tests.instructions.md`, `backend.instructions.md`
   - _Requirements: REQ-3_
 
-- [ ] 5.5.3 **Login resolver cold-start fail-open tests (mocked services)**
+- [x] 5.5.3 **Login resolver cold-start fail-open tests (mocked services)**
   - File: `backend/graphql/mutation/auth/test/auth-mutation-cold-start.test.ts`
   - Test pattern: Mock individual service/repository methods to throw transient errors, verify the resolver proceeds (fail-open) instead of rejecting
   - Setup: Create a test user in `runInRollback`, then simulate cold-start failures on specific operations
@@ -351,7 +365,7 @@
 >
 > **Key infrastructure**: These tests reuse the existing `testClient` (Apollo Client) and `setupTestServerLifecycle()` pattern from `frontend/common/graphql/test/`, but run from `test/simulate/` with cold-start-specific server configuration. The key difference from standard GraphQL integration tests: the server is started with `DISABLE_RATE_LIMITING: "false"` so the rate limiter cold-start path is exercised, and transient DB failures are injected via module-level `spyOn` on repository methods.
 
-- [ ] 5.5.4 **Create `test/simulate/` directory and helpers**
+- [x] 5.5.4 **Create `test/simulate/` directory and helpers**
   - Create directory: `test/simulate/`
   - File: `test/simulate/helpers.ts`
   - Helpers:
@@ -367,7 +381,7 @@
   - Read applicable instructions: `tests.instructions.md`
   - _Requirements: REQ-1, REQ-2, REQ-4_
 
-- [ ] 5.5.5 **Full GraphQL login cold-start simulation — rate limiter**
+- [x] 5.5.5 **Full GraphQL login cold-start simulation — rate limiter**
   - File: `test/simulate/login-rate-limit-cold-start.test.ts`
   - Test infrastructure: Uses `setupColdStartTestLifecycle()`, `testClient` from `frontend/common/graphql/test/testClient.ts`, `loginMutationDocument` from `frontend/common/graphql/sharedDocuments/auth/auth.documents.ts`
   - **Mocking strategy**: Since the test server runs in a separate process, module-level `spyOn` won't cross process boundaries. Instead, use one of:
@@ -387,7 +401,7 @@
   - Read applicable instructions: `tests.instructions.md`
   - _Requirements: REQ-1, REQ-2, REQ-3_
 
-- [ ] 5.5.6 **Full GraphQL login cold-start simulation — env-config**
+- [x] 5.5.6 **Full GraphQL login cold-start simulation — env-config**
   - File: `test/simulate/login-env-config-cold-start.test.ts`
   - Test infrastructure: Same as 5.5.5
   - Test cases:
@@ -400,28 +414,30 @@
   - Read applicable instructions: `tests.instructions.md`
   - _Requirements: REQ-3_
 
-- [ ] 5.5.7 **Full GraphQL login cold-start simulation — complete login flow**
+- [x] 5.5.7 **Full GraphQL login cold-start simulation — complete login flow**
   - File: `test/simulate/login-full-flow-cold-start.test.ts`
   - Test infrastructure: Same as 5.5.5
   - Test cases:
-    1. **Complete cold-start login → SUCCESS**: Start server with Neon HTTP enabled, DB pool cold (dead `DATABASE_URL` for pool, working `NEON_DATABASE_URL` for HTTP) → send `login` mutation with valid demo credentials → verify `data.login.token` + `data.login.user.id` are defined → verify `me` query works with returned token
+    1. **Complete cold-start login → SUCCESS (Neon HTTP, dead pool)**: Start server with Neon HTTP enabled, DB pool cold (dead `DATABASE_URL` for pool, working `NEON_DATABASE_URL` for HTTP) → send `login` mutation with valid demo credentials → verify `data.login.token` + `data.login.user.id` are defined → verify `me` query works with returned token
     2. **Complete cold-start login → SERVICE_UNAVAILABLE (not INVALID_CREDENTIALS)**: Start server with dead DB (no Neon HTTP fallback) → send `login` mutation → verify `errors[0].extensions.code === "SERVICE_UNAVAILABLE"` (NOT `"INVALID_CREDENTIALS"`) → verify `errors[0].message` does NOT contain "invalid credentials" or "password"
     3. **Login with wrong credentials during cold-start → still INVALID_CREDENTIALS (not SERVICE_UNAVAILABLE)**: Start server with working DB → send `login` mutation with wrong password → verify `errors[0].extensions.code === "INVALID_CREDENTIALS"`. This is a baseline confirming that genuine auth failures are not masked by cold-start handling.
-    4. **Login during cold-start → retry then succeed**: Start server with intermittently-failing DB → first `login` mutation returns `SERVICE_UNAVAILABLE` → wait 1s → second `login` mutation (same credentials) succeeds. This verifies the frontend auto-retry would succeed if the backend recovers.
-    5. **Token after cold-start login is valid**: After test case 1 succeeds, use the returned token to call `me` query → verify `data.me` returns the same user. This verifies the session was properly created despite cold-start.
-    6. **Logout after cold-start login**: After test case 1, call `logout` mutation → verify success. This verifies the full auth lifecycle works after cold-start login.
+    4. **Login during cold-start → backend retry then succeed within 1 invocation**: Start server with intermittently-failing DB → first `login` mutation succeeds via internal retries (verify response time is > 200ms but < 1.7s, indicating retries occurred). This verifies the backend-first strategy works.
+    5. **Login during cold-start → backend exhausted retries → frontend retry succeeds**: Start server with dead DB (no HTTP fallback) → first `login` mutation returns `SERVICE_UNAVAILABLE` → frontend auto-retry after 1.5s → second `login` mutation (simulating a new Vercel instance) succeeds. Verify total round trips = 2 (not 3+).
+    6. **Token after cold-start login → valid (me query returns same user)**: After test case 1 succeeds, use the returned token to call `me` query → verify `data.me` returns the same user. This verifies the session was properly created despite cold-start.
+    7. **Logout after cold-start login → success**: After test case 1, call `logout` mutation → verify success. This verifies the full auth lifecycle works after cold-start login.
+    8. **createAuthSession cold-start → retried within same invocation**: Start server with DB pool that delays initial connections (or mock via env) → send `login` mutation → verify login succeeds (createAuthSession was retried) → verify response time > 200ms (indicates internal retry). This verifies the new task 2.5.5 (createAuthSession retry).
   - Quality Loop: `bun run scripts/health/sub-loop.ts test/simulate/login-full-flow-cold-start.test.ts --lifecycle codescene`
   - Read applicable AGENTS.md: Root `AGENTS.md`
   - Read applicable instructions: `tests.instructions.md`
   - _Requirements: REQ-1, REQ-2, REQ-4_
 
-- [ ] 5.5.8 **Add `test:simulate` script to `package.json`**
+- [x] 5.5.8 **Add `test:simulate` script to `package.json`**
   - Add script: `"test:simulate": "bun test test/simulate/"`
   - Add script: `"test:simulate:sequential": "bun test test/simulate/ --sequential"` (for debugging)
   - Verify: `bun run test:simulate` runs all `test/simulate/` tests
   - _Requirements: All_
 
-- [ ] 5.5.9 **Run all cold-start tests and verify**
+- [x] 5.5.9 **Run all cold-start tests and verify**
   - Run Tier 1: `bun test backend/lib/test/retry.test.ts`
   - Run Tier 1: `bun test backend/services/system/test/environment-config-cold-start.test.ts`
   - Run Tier 1: `bun test backend/graphql/mutation/auth/test/auth-mutation-cold-start.test.ts`
@@ -434,14 +450,14 @@
 
 ## Phase 6: Integration Verification
 
-- [ ] 6.1 **Run full quality gate**
+- [x] 6.1 **Run full quality gate**
   - Run: `bun tsgo` to verify no type errors across the codebase
   - Run: `bun run lint` to verify no lint errors
   - Fix any issues introduced by the changes
   - Write outcome: `.ai/plans/login-cold-start-fix/outcome/6.1-integration-verification.md`
   - _Requirements: All_
 
-- [ ] 6.2 **Post-Implementation Review**
+- [x] 6.2 **Post-Implementation Review**
   - Dispatch review subagents:
     - `review-backend` on all modified `backend/` files
     - `review-frontend` on all modified `frontend/` files
@@ -456,7 +472,7 @@
 
 ## Phase 7: Knowledge Propagation
 
-- [ ] 7.1 **Create canonical doc and update AGENTS.md**
+- [x] 7.1 **Create canonical doc and update AGENTS.md**
   - Read all outcome files in `.ai/plans/login-cold-start-fix/outcome/`
   - Create: `docs/backend/login-cold-start-resilience.md` — consolidate patterns for cold-start error handling, retry utility, Neon HTTP routing for auth reads
   - Update `docs/backend/serverless-cold-start-optimization.md` — add cross-reference to the new doc
