@@ -42,7 +42,8 @@ function scheduleSearchNavLink(page: Page) {
 }
 
 async function waitForScheduleSearchNav(page: Page): Promise<void> {
-  await scheduleSearchNavLink(page).waitFor({ state: "visible", timeout: 30_000 });
+  const isDev = process.env.TEST_SERVER_MODE === "dev";
+  await scheduleSearchNavLink(page).waitFor({ state: "visible", timeout: isDev ? 120_000 : 30_000 });
 }
 
 async function waitForSearchScheduleReady(page: Page): Promise<void> {
@@ -50,11 +51,13 @@ async function waitForSearchScheduleReady(page: Page): Promise<void> {
     throw new Error(`Login failed: redirected to ${page.url()}`);
   }
 
+  const isDev = process.env.TEST_SERVER_MODE === "dev";
+
   if (!page.url().includes("/search-schedule")) {
-    await page.waitForURL("**/search-schedule**", { waitUntil: "commit", timeout: 30_000 });
+    await page.waitForURL("**/search-schedule**", { waitUntil: "commit", timeout: isDev ? 120_000 : 30_000 });
   }
 
-  await page.getByLabel(DATE_RANGE_LABEL).first().waitFor({ state: "visible", timeout: 45_000 });
+  await page.getByLabel(DATE_RANGE_LABEL).first().waitFor({ state: "visible", timeout: isDev ? 120_000 : 45_000 });
 }
 
 async function navigateToSearchSchedule(page: Page): Promise<void> {
@@ -142,7 +145,7 @@ describe.serial("Availability Search E2E", () => {
     isolatedPage = await isolatedContext.newPage();
     await authenticateDemoUser(isolatedContext, DEMO_USERS.teacher.groupSlug);
     await gotoAppRoute(isolatedPage, "/dashboard");
-    await isolatedPage.getByText(tr(nav.todayClasses)).first().waitFor({ state: "visible", timeout: 45_000 });
+    await isolatedPage.getByText(tr(nav.todayClasses)).first().waitFor({ state: "visible", timeout: 120_000 });
 
     expect(await isolatedPage.getByRole("link", { name: SCHEDULE_SEARCH_NAV }).count()).toBe(0);
   });

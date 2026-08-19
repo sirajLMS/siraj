@@ -103,27 +103,36 @@
 
 ## Phase 4: Pothos GraphQL Tracing Integration
 
-- [ ] 6. Modify `backend/graphql/gqlSchemaBuilder.ts` — integrate `@pothos/tracing-newrelic`
-  - Import `createNewrelicWrapper` from `@pothos/tracing-newrelic` — NOTE: `@pothos/tracing-newrelic` imports `newrelic` at its top level. To prevent `newrelic` from loading in dev/test, use a **conditional dynamic import** pattern:
+- [ ] 6. Modify `backend/graphql/gqlSchemaBuilder.ts` — integrate `@pothos/tracing-newrelic` via conditional `require()`
+  - **LOCKED APPROACH**: Use conditional `require()` gated by `process.env.NODE_ENV === "production"` — NOT dynamic `import()` (builder is synchronous) and NOT static import (would load `newrelic` in dev/test)
+  - `@pothos/tracing-newrelic` does `import newrelic from 'newrelic'` at its top level. A static import would load `newrelic` in dev/test, violating AC-6. Conditional `require()` is synchronous and only executes in production.
+  - Implementation (replace the existing `tracing.wrap` function):
     ```typescript
-    // At module init:
-    const isProduction = process.env.NODE_ENV === "production";
-    let tracingWrap = wrapResolver(resolver, (_err, duration) => {
-      logger.log(`Executed resolver ${config.parentType}.${config.name} in ${duration}ms`);
-    });
-    if (isProduction) {
-      // Dynamic import ensures newreic module is NOT loaded in dev/test
-      const { createNewrelicWrapper } = await import("@pothos/tracing-newrelic");
-      tracingWrap = createNewrelicWrapper({ includeArgs: true, includeSource: true });
-    }
+    tracing: {
+      // Enable tracing for rootFields by default, other fields need to opt in
+      default: config => isRootField(config),
+      wrap: (resolver, _options, config) => {
+        if (process.env.NODE_ENV === "production") {
+          // Conditional require: newrelic module is NEVER loaded in dev/test.
+          // @pothos/tracing-newrelic imports newrelic at module top level.
+          // The NODE_ENV gate guarantees newrelic is never evaluated in dev.
+          // eslint-disable-next-line @typescript-eslint/no-require-imports -- gated by NODE_ENV; CommonJS require is the only synchronous way to conditionally load @pothos/tracing-newrelic
+          const { createNewrelicWrapper } = require("@pothos/tracing-newrelic");
+          return createNewrelicWrapper({ includeArgs: true, includeSource: true })(
+            resolver, _options, config
+          );
+        }
+        // Dev/test fallback: existing wrapResolver duration logging
+        return wrapResolver(resolver, (_error, duration) => {
+          logger.log(`Executed resolver ${config.parentType}.${config.name} in ${duration}ms`);
+        });
+      },
+    },
     ```
-    **IMPORTANT**: Since `gqlSchemaBuilder.ts` is currently a synchronous module (no top-level await), you need to either:
-    - (a) Refactor the builder initialization to be async (wrap in an async factory function), OR
-    - (b) Use a conditional `require()` gated by `NODE_ENV` (since `newrelic` is CommonJS), OR
-    - (c) Statically import `@pothos/tracing-newrelic` but ensure `newrelic` package is only installed as a production dependency (not devDependencies) so it's absent in dev — the import will fail gracefully
-    Research and choose the approach that works best with the Bun + Next.js 16 + Turbopack bundler. Document the choice in the outcome file.
-  - `createNewrelicWrapper()` RETURNS a wrap function — assign it to `tracing.wrap` config (same position as current `wrapResolver`)
-  - Add `includeArgs: true` but document that sensitive fields (passwords, PINs) should be excluded via Pothos field-level tracing config
+  - `createNewrelicWrapper()` RETURNS a wrap function — call it with options, then immediately invoke the returned function with `(resolver, _options, config)` to produce the wrapped resolver
+  - `includeArgs: true` — resolver arguments attached as span attributes. Document that sensitive fields (passwords, PINs) should be excluded via Pothos field-level tracing config (set `tracing: false` on sensitive input fields)
+  - `includeSource: true` — GraphQL field source AST attached as span attribute
+  - The `wrapResolver` import from `@pothos/plugin-tracing` stays (used in dev/test fallback path)
   - _Requirements: AC-5, AC-14, AC-15, AC-16, AC-17_
   - Applicable AGENTS.md: `backend/graphql/AGENTS.md`, `backend/AGENTS.md`, root `AGENTS.md`
   - Applicable instructions: `backend.instructions.md`

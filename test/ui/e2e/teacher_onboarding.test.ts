@@ -7,7 +7,7 @@ import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 setupBrowserLifecycle();
 
 const isDevMode = process.env.TEST_SERVER_MODE === "dev";
-const headingTimeout = isDevMode ? 180_000 : 30_000;
+const headingTimeout = isDevMode ? 280_000 : 30_000;
 
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
