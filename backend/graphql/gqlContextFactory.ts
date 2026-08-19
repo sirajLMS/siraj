@@ -1,8 +1,27 @@
 import { cookies, headers } from "next/headers";
+import { SessionRepository } from "@/backend/db/repo/shared";
 import { type BaseContext, createContext } from "@/backend/graphql/gqlContext";
 import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
 import { logger } from "@/backend/lib/logger";
 import { ImpersonationService, PermissionGroupSimulationService } from "@/backend/services";
+import type { SessionSelectType } from "@/backend/types";
+
+/**
+ * R3-6: Fetch the session once and pass it to both resolver services so
+ * `SessionRepository.findSessionById` is not called twice for the same
+ * `rawSessionId` during a single context-creation pass.
+ *
+ * Immutability contract: the returned `SessionSelectType | null | undefined`
+ * snapshot is shared read-only between `ImpersonationService.resolveAuthIdentityFromToken`
+ * and `PermissionGroupSimulationService.resolveGroupSimulationFromToken`. Neither
+ * service mutates the session object — they only read fields from it. If a future
+ * service needs to modify the session (e.g. update payload), it must perform its
+ * own `SessionRepository` write and must NOT mutate the preloaded snapshot in place.
+ */
+async function preloadSession(sessionId: string | undefined): Promise<SessionSelectType | null | undefined> {
+  if (!sessionId) return undefined;
+  return SessionRepository.findSessionById(sessionId);
+}
 
 async function resolveAuthFromRequest(
   headersList: Headers,
@@ -27,7 +46,15 @@ async function resolveAuthFromRequest(
     return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };
   }
 
-  const impersonationIdentity = await ImpersonationService.resolveAuthIdentityFromToken(payload, sessionId);
+  // R3-6: Fetch the session once and share it with both resolvers to avoid
+  // a redundant second `findSessionById` Redis/DB read.
+  const preloadedSession = await preloadSession(sessionId);
+
+  const impersonationIdentity = await ImpersonationService.resolveAuthIdentityFromToken(
+    payload,
+    sessionId,
+    preloadedSession
+  );
   if (!impersonationIdentity) {
     return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };
   }
@@ -44,7 +71,8 @@ async function resolveAuthFromRequest(
 
   const groupSimulationIdentity = await PermissionGroupSimulationService.resolveGroupSimulationFromToken(
     payload,
-    sessionId
+    sessionId,
+    preloadedSession
   );
   if (!groupSimulationIdentity) {
     return { effectiveUserId: null, isImpersonating: false, isSimulatingGroup: false };

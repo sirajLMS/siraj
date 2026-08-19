@@ -18,6 +18,7 @@ import type {
   NotificationMetadata,
   RecentNotificationRow,
   UnansweredComplaintRow,
+  UserPermissionContext,
 } from "@/backend/types";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -204,36 +205,90 @@ function buildAlertsFeed(
   };
 }
 
+async function buildAlertsResult(
+  userId: string,
+  canListComplaints: boolean,
+  tNotifications: { newUnansweredComplaint: string; defaultSystemNotification: string }
+): Promise<NotificationAlertsPaginatedReturnType> {
+  const unansweredComplaints = canListComplaints ? await fetchUnansweredComplaintRows() : [];
+
+  const recentNotifications = await fetchRecentNotificationRows(userId);
+
+  const alerts: NotificationAlertReturnType[] = [];
+  for (const complaint of unansweredComplaints) {
+    alerts.push(buildComplaintAlert(complaint, tNotifications.newUnansweredComplaint));
+  }
+  for (const notification of recentNotifications) {
+    alerts.push(buildNotificationAlert(notification, tNotifications.defaultSystemNotification));
+  }
+
+  alerts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+  const unreadCount = recentNotifications.filter(n => n.status !== NotificationDeliveryStatus.OPENED).length;
+
+  return buildAlertsFeed(userId, alerts, unreadCount);
+}
+
+/**
+ * Runtime discriminator: returns `true` when the second argument is a
+ * `UserPermissionContext` (not `undefined` / not a `string`). This lets the
+ * overloaded methods branch between the context-aware fast path and the
+ * legacy `PermissionsService.hasPermission(userId, ...)` path without changing
+ * the original call sites.
+ */
+function isPermissionContext(value: unknown): value is UserPermissionContext {
+  return typeof value === "object" && value !== null && "permissions" in value && "isSuperAdmin" in value;
+}
+
+/**
+ * Extracts the permission context from a discriminated `contextOrLocale` /
+ * `contextOrDeliveryId` argument. When the argument is a `UserPermissionContext`,
+ * returns it directly (fast path — no DB round-trip). When absent, fetches the
+ * context via `PermissionsService.getUserContext(userId)` (legacy path).
+ *
+ * Collapses the triplicated `WithCtx` / `Legacy` / discriminator boilerplate
+ * that was previously repeated across `getAlerts`, `markAlertsRead`, and
+ * `markOneAlertRead`.
+ */
+async function resolvePermissionContext(userId: string, contextOrLocale: unknown): Promise<UserPermissionContext> {
+  if (isPermissionContext(contextOrLocale)) {
+    return contextOrLocale;
+  }
+  return await PermissionsService.getUserContext(userId);
+}
+
 export namespace NotificationAlertsService {
-  export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsPaginatedReturnType> {
+  export async function getAlerts(
+    userId: string,
+    context: UserPermissionContext,
+    locale?: string
+  ): Promise<NotificationAlertsPaginatedReturnType>;
+  export async function getAlerts(userId: string, locale?: string): Promise<NotificationAlertsPaginatedReturnType>;
+  export async function getAlerts(
+    userId: string,
+    contextOrLocale?: UserPermissionContext | string,
+    locale?: string
+  ): Promise<NotificationAlertsPaginatedReturnType> {
     try {
-      const canViewAlerts = await PermissionsService.hasPermission(userId, AppPermission.NOTIFICATION_VIEW_ALERTS);
+      const actualLocale = typeof contextOrLocale === "string" ? contextOrLocale : locale;
+      const context = await resolvePermissionContext(userId, contextOrLocale);
+
+      const canViewAlerts = await PermissionsService.hasPermission(context, AppPermission.NOTIFICATION_VIEW_ALERTS);
       if (!canViewAlerts) {
         return emptyAlertsResult(userId);
       }
 
-      const tNotifications = getServerTranslations(locale ?? "en").dashboardTranslations.coreNotifications;
-
-      const canListComplaints = await PermissionsService.hasPermission(userId, AppPermission.COMPLAINTS_LIST);
-      const unansweredComplaints = canListComplaints ? await fetchUnansweredComplaintRows() : [];
-
-      const recentNotifications = await fetchRecentNotificationRows(userId);
-
-      const alerts: NotificationAlertReturnType[] = [];
-      for (const complaint of unansweredComplaints) {
-        alerts.push(buildComplaintAlert(complaint, tNotifications.newUnansweredComplaint));
-      }
-      for (const notification of recentNotifications) {
-        alerts.push(buildNotificationAlert(notification, tNotifications.defaultSystemNotification));
-      }
-
-      alerts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-      const unreadCount = recentNotifications.filter(n => n.status !== NotificationDeliveryStatus.OPENED).length;
-
-      return buildAlertsFeed(userId, alerts, unreadCount);
+      const canListComplaints = await PermissionsService.hasPermission(context, AppPermission.COMPLAINTS_LIST);
+      return await buildAlertsResult(
+        userId,
+        canListComplaints,
+        getServerTranslations(actualLocale ?? "en").dashboardTranslations.coreNotifications
+      );
     } catch (error) {
-      logger.error("Error fetching notification alerts", { userId, error });
+      logger.error("Error fetching notification alerts", {
+        userId,
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -253,13 +308,28 @@ export namespace NotificationAlertsService {
    * this to a single batch helper (which S8 doesn't own either) — see
    * specs.md ownership matrix: the repo is out-of-scope to edit here.
    */
-  export async function markAlertsRead(actorUserId: string, locale?: string): Promise<{ updatedCount: number }> {
-    try {
-      const canViewAlerts = await PermissionsService.hasPermission(actorUserId, AppPermission.NOTIFICATION_VIEW_ALERTS);
-      if (!canViewAlerts) {
-        raiseUnauthorizedAction(locale);
-      }
+  export async function markAlertsRead(
+    actorUserId: string,
+    context: UserPermissionContext,
+    locale?: string
+  ): Promise<{ updatedCount: number }>;
+  export async function markAlertsRead(actorUserId: string, locale?: string): Promise<{ updatedCount: number }>;
+  export async function markAlertsRead(
+    actorUserId: string,
+    contextOrLocale?: UserPermissionContext | string,
+    locale?: string
+  ): Promise<{ updatedCount: number }> {
+    const actualLocale = typeof contextOrLocale === "string" ? contextOrLocale : locale;
+    const context = await resolvePermissionContext(actorUserId, contextOrLocale);
 
+    if (!(await PermissionsService.hasPermission(context, AppPermission.NOTIFICATION_VIEW_ALERTS))) {
+      raiseUnauthorizedAction(actualLocale);
+    }
+    return await markAlertsReadExecute(actorUserId, actualLocale);
+  }
+
+  async function markAlertsReadExecute(actorUserId: string, locale?: string): Promise<{ updatedCount: number }> {
+    try {
       const recentNotifications = await fetchMarkableDeliveryRows(actorUserId);
       const candidates = recentNotifications.filter(n => n.status !== NotificationDeliveryStatus.OPENED);
 
@@ -288,18 +358,42 @@ export namespace NotificationAlertsService {
 
       return { updatedCount };
     } catch (error) {
-      logger.error("Error marking notification alerts as read", { userId: actorUserId, error });
+      logger.error("Error marking notification alerts as read", {
+        userId: actorUserId,
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
 
-  export async function markOneAlertRead(actorUserId: string, deliveryId: string, locale?: string): Promise<void> {
-    try {
-      const canViewAlerts = await PermissionsService.hasPermission(actorUserId, AppPermission.NOTIFICATION_VIEW_ALERTS);
-      if (!canViewAlerts) {
-        raiseUnauthorizedAction(locale);
-      }
+  export async function markOneAlertRead(
+    actorUserId: string,
+    context: UserPermissionContext,
+    deliveryId: string,
+    locale?: string
+  ): Promise<void>;
+  export async function markOneAlertRead(actorUserId: string, deliveryId: string, locale?: string): Promise<void>;
+  export async function markOneAlertRead(
+    actorUserId: string,
+    contextOrDeliveryId: UserPermissionContext | string,
+    deliveryIdOrLocale?: string,
+    locale?: string
+  ): Promise<void> {
+    const hasContext = isPermissionContext(contextOrDeliveryId);
+    const deliveryId = hasContext ? (deliveryIdOrLocale ?? "") : contextOrDeliveryId;
+    const actualLocale = hasContext ? locale : deliveryIdOrLocale;
+    if (!deliveryId) {
+      raiseUnauthorizedAction(actualLocale);
+    }
+    const context = await resolvePermissionContext(actorUserId, hasContext ? contextOrDeliveryId : undefined);
+    if (!(await PermissionsService.hasPermission(context, AppPermission.NOTIFICATION_VIEW_ALERTS))) {
+      raiseUnauthorizedAction(actualLocale);
+    }
+    return await markOneAlertReadExecute(actorUserId, deliveryId, actualLocale);
+  }
 
+  async function markOneAlertReadExecute(actorUserId: string, deliveryId: string, locale?: string): Promise<void> {
+    try {
       const [delivery] = await db
         .select({ id: notificationDeliveries.id })
         .from(notificationDeliveries)
@@ -313,7 +407,11 @@ export namespace NotificationAlertsService {
 
       await NotificationRepository.recordDeliveryOpened(deliveryId, undefined, undefined, locale);
     } catch (error) {
-      logger.error("Error marking notification alert as read", { userId: actorUserId, deliveryId, error });
+      logger.error("Error marking notification alert as read", {
+        userId: actorUserId,
+        deliveryId,
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }

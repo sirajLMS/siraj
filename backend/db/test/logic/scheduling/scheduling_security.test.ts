@@ -7,6 +7,7 @@ import { ensureTestSubjectId, setupTestEntities } from "@/backend/db/test/entity
 import { runInRollback, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService, ScheduleDeletionService } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
 import { getErrorMessage } from "@/shared/utils/error";
@@ -189,8 +190,9 @@ describe("ScheduleDeletionService Permission Gating", () => {
   const mockPermissions = new Map<string, boolean>();
 
   beforeAll(() => {
-    PermissionsService.hasPermission = async (userId: string, permissionKey: AppPermission) => {
-      const key = `${userId}:${permissionKey}`;
+    PermissionsService.hasPermission = async (userId: UserPermissionContext | string, permissionKey: AppPermission) => {
+      const userIdStr = typeof userId === "string" ? userId : "";
+      const key = `${userIdStr}:${permissionKey}`;
       return mockPermissions.get(key) ?? false;
     };
   });

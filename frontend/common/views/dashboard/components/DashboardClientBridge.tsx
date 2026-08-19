@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { NotificationsProvider } from "@toolpad/core/useNotifications";
-import type { ReactNode } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppPermission, type User } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import { UserStoreInitializer } from "@/frontend/common/views/dashboard/components/client/UserStoreInitializer";
@@ -11,6 +11,11 @@ import { NotificationDrawer } from "@/frontend/common/views/dashboard/components
 import { useNotificationsDrawerViewModel } from "@/frontend/common/views/dashboard/components/navbar/notifications/useNotificationsDrawerViewModel";
 import { TeacherProfileCompletionRedirect } from "@/frontend/common/views/dashboard/components/TeacherProfileCompletionRedirect";
 import { getDashboardLayoutData } from "@/frontend/common/views/dashboard/lib/getDashboardLayoutData";
+
+export const NOTIFICATION_COUNT_POLL_INTERVAL_MS = 120_000;
+
+const IDLE_TIMEOUT_MS = 300_000;
+const IDLE_EVENTS: readonly (keyof WindowEventMap)[] = ["mousemove", "keydown", "mousedown", "touchstart", "focus"];
 
 interface DashboardClientBridgeProps {
   readonly children: ReactNode;
@@ -25,12 +30,54 @@ interface DashboardClientBridgeProps {
 }
 
 /**
- * Poll interval for the active `me` query that feeds the dashboard bell badge.
- * Kept at 60s to avoid flooding the server. Using `useQuery` (not
- * `client.refetchQueries({ include })`) keeps `me` registered as an active
- * observable so Apollo can refetch it without "Unknown query named me".
+ * Tracks user activity (mouse, keyboard, touch, focus) and visibility changes.
+ * After {@link IDLE_TIMEOUT_MS} of inactivity, `isIdle` becomes `true`.
+ * Any activity event resets `isIdle` to `false`.
  */
-const NOTIFICATION_COUNT_POLL_INTERVAL_MS = 60_000;
+function useIdleDetection(): boolean {
+  const [isIdle, setIsIdle] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetIdleTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => {
+      setIsIdle(true);
+    }, IDLE_TIMEOUT_MS);
+  }, []);
+
+  const handleActivity = useCallback(() => {
+    // When the tab becomes hidden, mark idle immediately instead of
+    // waiting for the idle timeout — polling pauses right away.
+    if (document.hidden) {
+      setIsIdle(true);
+      return;
+    }
+    setIsIdle(false);
+    resetIdleTimer();
+  }, [resetIdleTimer]);
+
+  useEffect(() => {
+    for (const event of IDLE_EVENTS) {
+      window.addEventListener(event, handleActivity, { passive: true });
+    }
+    document.addEventListener("visibilitychange", handleActivity);
+    resetIdleTimer();
+
+    return () => {
+      for (const event of IDLE_EVENTS) {
+        window.removeEventListener(event, handleActivity);
+      }
+      document.removeEventListener("visibilitychange", handleActivity);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [handleActivity, resetIdleTimer]);
+
+  return isIdle;
+}
 
 function isValidPermission(value: string): value is AppPermission {
   return (Object.values(AppPermission) as readonly string[]).includes(value);
@@ -39,12 +86,20 @@ function isValidPermission(value: string): value is AppPermission {
 /**
  * Keeps `me` (and its `notificationCount`) as an active Apollo query for the
  * lifetime of the dashboard shell. Falls back to the SSR profile count until
- * the first client response arrives.
+ * the first client response arrives. Polling pauses when the user is idle.
  */
 function useLiveNotificationCount(fallbackCount: number): number {
-  const { data } = useQuery(meQueryDocument, {
-    pollInterval: NOTIFICATION_COUNT_POLL_INTERVAL_MS,
-  });
+  const isIdle = useIdleDetection();
+  // Polling auto-pauses when isIdle (pollInterval=0) and auto-resumes when active.
+  // No manual refetch needed — Apollo restarts polling when pollInterval flips
+  // back to a positive value, avoiding a double-fetch on idle→active transition.
+  const queryOptions = useMemo(
+    () => ({
+      pollInterval: isIdle ? 0 : NOTIFICATION_COUNT_POLL_INTERVAL_MS,
+    }),
+    [isIdle]
+  );
+  const { data } = useQuery(meQueryDocument, queryOptions);
 
   return data?.me?.notificationCount ?? fallbackCount;
 }

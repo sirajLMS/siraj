@@ -14,6 +14,14 @@ export type UserStatus = AccountStatus;
 export type UserSelectType = typeof users.$inferSelect;
 export type UserInsertType = typeof users.$inferInsert;
 
+/**
+ * A full `UserSelectType` with `password` and `rememberTokenHash` optional
+ * (set to `undefined` when stripped for security — see `BaseContext.safeUser`, R4-34).
+ * Used by `gqlContext.ts`, `auth.utils.ts`, and related tests.
+ */
+export type SanitizedUserSelectType = Omit<UserSelectType, "password" | "rememberTokenHash"> &
+  Partial<Pick<UserSelectType, "password" | "rememberTokenHash">>;
+
 // Return type
 // Canonical: {Entity}ReturnType must omit forbidden fields, re-apply enums, and add resolved optionals
 //--------------------------------------------------------------------------------

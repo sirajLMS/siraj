@@ -155,6 +155,11 @@ Completed extractions:
 - `resolveTeacherId` accepts `TEACHERS_MANAGE_SCHEDULE` as an admin-level permission (in addition to `STAFF_VIEW_DIRECTORY` and `SCHEDULE_VIEW_ALL`), allowing supervisors to view any teacher's schedule.
 - **Manager Onboarding Role Mapping**: `ManagerOnboardingService.createManager` maps `ManagerAccountType.manager` to `SystemPermissionGroupSlug.ACADEMY_ADMIN` and `ManagerAccountType.supervisor` to `SystemPermissionGroupSlug.SUPERVISOR_DEFAULT`. The `admin` account type is removed from onboarding and enum definitions. See `docs/auth/manager-role-mapping.md`.
 
+## Serverless Cold-Start Optimization
+
+- **Permission Context Propagation**: Services accepting permission checks MUST accept `UserPermissionContext` parameter from GraphQL context instead of re-querying via `PermissionsService.hasPermission(userId, ...)`. The `UserPermissionContext` type in `@/backend/types/permissions/permission.types.ts` already contains `permissions`, `permissionGroups`, `isSuperAdmin`, and `role` — passing it as the first argument to `hasPermission` eliminates 3 DB queries per call. See `docs/backend/serverless-cold-start-optimization.md`.
+- `buildAuthScopes()` in `@/backend/graphql/gqlSchemaBuilder.ts` is dependency-injectable for testability — the `getUserContext` parameter defaults to `PermissionsService.getUserContext` but can be overridden in tests.
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.

@@ -17,12 +17,16 @@ type LogOptions = {
   force?: boolean;
 };
 
-class ClientLogger {
+export class ClientLogger {
   private readonly config: LoggerConfig;
   private readonly sessionId: string;
   private sequenceNumber: number;
   private logQueue: LogEntry[];
   private batchTimer: NodeJS.Timeout | null;
+  private hasPriorityLog: boolean;
+  private readonly beforeunloadHandler: () => void;
+
+  private static readonly MIN_BATCH_SIZE = 5;
 
   constructor() {
     // Enable in development, or when NEXT_PUBLIC_ENABLE_LOGGING is explicitly set to true
@@ -32,12 +36,35 @@ class ClientLogger {
     this.sequenceNumber = 0;
     this.logQueue = [];
     this.batchTimer = null;
+    this.hasPriorityLog = false;
     this.config = {
       enabled,
       apiEndpoint: "/api/logs",
       sessionId: this.sessionId,
-      batchInterval: 2000, // 2s
+      batchInterval: 30000, // 30s
     };
+
+    this.beforeunloadHandler = () => {
+      void this.flushLogs(true, true);
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", this.beforeunloadHandler);
+    }
+  }
+
+  /**
+   * Remove the beforeunload listener and clear any pending timer.
+   * Call this when the logger instance is no longer needed (e.g. in tests).
+   */
+  public destroy(): void {
+    if (typeof window !== "undefined") {
+      window.removeEventListener("beforeunload", this.beforeunloadHandler);
+    }
+    if (this.batchTimer !== null) {
+      clearTimeout(this.batchTimer);
+      this.batchTimer = null;
+    }
   }
 
   private generateSessionId(): string {
@@ -144,6 +171,9 @@ class ClientLogger {
     };
 
     this.logQueue.push(logEntry);
+    if (force || options.level === "error" || options.level === "warn") {
+      this.hasPriorityLog = true;
+    }
     this.scheduleBatchSend();
   }
 
@@ -151,15 +181,44 @@ class ClientLogger {
     if (this.batchTimer !== null) return;
 
     this.batchTimer = setTimeout(() => {
-      void this.flushLogs();
+      // Timer elapsed — attempt flush (minimum batch size guard still applies).
+      void this.flushLogs(false, false);
     }, this.config.batchInterval);
   }
 
-  private async flushLogs(): Promise<void> {
+  /**
+   * Flush queued logs to the server.
+   *
+   * @param keepalive - When true, use `keepalive: true` in the fetch options.
+   *   This is used by the `beforeunload` handler to ensure logs are sent even
+   *   as the page is being destroyed. Do NOT use `navigator.sendBeacon` because
+   *   it defaults to `text/plain` content-type, which would break the JSON
+   *   parser in `/api/logs`.
+   * @param force - When true, bypass the minimum batch size guard. This is
+   *   used when the batch timer has elapsed (enough time has passed) or when
+   *   the page is being unloaded (beforeunload). Error/warn level logs and
+   *   forced logs also bypass the guard via the `hasPriorityLog` flag.
+   */
+  private async flushLogs(keepalive = false, force = false): Promise<void> {
     if (this.logQueue.length === 0) return;
+
+    // Minimum batch size guard: if queue has fewer than MIN_BATCH_SIZE entries
+    // and we're not forcing (beforeunload) and no priority log is queued,
+    // skip the POST and re-schedule the timer for the next interval.
+    // Priority logs are error/warn level entries or logs sent with force: true.
+    if (!force && !this.hasPriorityLog && this.logQueue.length < ClientLogger.MIN_BATCH_SIZE) {
+      // Clear the elapsed timer reference so scheduleBatchSend can start a new one
+      this.batchTimer = null;
+      this.scheduleBatchSend();
+      return;
+    }
 
     const logsToSend = [...this.logQueue];
     this.logQueue = [];
+    this.hasPriorityLog = false;
+    if (this.batchTimer !== null) {
+      clearTimeout(this.batchTimer);
+    }
     this.batchTimer = null;
 
     try {
@@ -169,6 +228,7 @@ class ClientLogger {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ logs: logsToSend }),
+        keepalive,
       });
     } catch {
       // Silently fail - don't log errors to avoid infinite loops

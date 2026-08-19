@@ -1,4 +1,17 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
+
+const loggerDebug = mock(() => {});
+
+await mock.module("@/frontend/common/lib/logger", () => ({
+  logger: {
+    info: () => {},
+    warn: () => {},
+    debug: loggerDebug,
+    error: () => {},
+    log: () => {},
+  },
+}));
+
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, screen } from "@testing-library/react";
 
@@ -65,5 +78,17 @@ describe("RequirePermission", () => {
 
     expect(screen.getByText("Protected Content")).toBeVisible();
     expect(screen.queryByText("Access Denied")).toBeNull();
+  });
+
+  test("does not call logger.debug on access denied by default", () => {
+    loggerDebug.mockClear();
+
+    renderWithWrapper(
+      <RequirePermission permissions={[AppPermission.DashboardSearch]}>Protected Content</RequirePermission>,
+      { permissions: [] }
+    );
+
+    expect(screen.queryByText("Protected Content")).toBeNull();
+    expect(loggerDebug).not.toHaveBeenCalled();
   });
 });

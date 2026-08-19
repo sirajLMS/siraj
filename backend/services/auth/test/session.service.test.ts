@@ -153,13 +153,19 @@ describe("SessionService.validateSession orphan session handling", () => {
     restoreSessionMocks();
   });
 
-  test("purges and returns null when session references non-existent user", async () => {
+  function setupValidSessionMocks() {
     const fakeSessionId = "fake-raw-session-id";
     const fakeUserId = "1bba9ec0-1e51-46f9-be75-9941dcb7fd76";
     const fakeSession = mockSession(fakeUserId);
 
     spyOn(SessionRepository, "findByHmacHash").mockResolvedValue(fakeSession);
     spyOn(SessionRepository, "validate").mockResolvedValue(fakeSession);
+
+    return { fakeSessionId, fakeUserId, fakeSession };
+  }
+
+  test("purges and returns null when session references non-existent user", async () => {
+    const { fakeSessionId, fakeUserId } = setupValidSessionMocks();
     const deleteSpy = spyOn(SessionRepository, "deleteSessionById").mockResolvedValue(null);
     spyOn(UserRepository, "findSafeById").mockResolvedValue(null);
 
@@ -167,5 +173,26 @@ describe("SessionService.validateSession orphan session handling", () => {
 
     expect(result).toBeNull();
     expect(deleteSpy).toHaveBeenCalledWith(fakeSessionId);
+    expect(UserRepository.findSafeById).toHaveBeenCalledWith(fakeUserId);
+  });
+
+  test("skips findSafeById when skipUserCheck is true", async () => {
+    const { fakeSessionId, fakeUserId, fakeSession } = setupValidSessionMocks();
+    const findSafeSpy = spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser(fakeUserId));
+
+    const result = await SessionService.validateSession(fakeSessionId, { skipUserCheck: true });
+
+    expect(result).toEqual(fakeSession);
+    expect(findSafeSpy).not.toHaveBeenCalled();
+  });
+
+  test("calls findSafeById and returns session when skipUserCheck is false (default)", async () => {
+    const { fakeSessionId, fakeUserId, fakeSession } = setupValidSessionMocks();
+    spyOn(UserRepository, "findSafeById").mockResolvedValue(mockSafeUser(fakeUserId));
+
+    const result = await SessionService.validateSession(fakeSessionId);
+
+    expect(result).toEqual(fakeSession);
+    expect(UserRepository.findSafeById).toHaveBeenCalledWith(fakeUserId);
   });
 });

@@ -14,8 +14,12 @@ gqlSchemaBuilder.queryFields(t => ({
     resolve: async (_parent, _args, ctx) => {
       if (!ctx.user) return null;
 
-      const user = await UserService.findById(ctx.user.id);
-      return user ? AuthUtils.toUserReturnType(user) : null;
+      // R3-8: Reuse the user already loaded by createContext (ctx.safeUser)
+      // instead of calling UserService.findById — eliminates 1 DB query per poll.
+      // Preserve pre-optimization behavior: `me.role` defaults to USER (not ctx.role)
+      // to avoid surfacing effective-role changes during impersonation/group-simulation.
+      if (!ctx.safeUser) return null;
+      return AuthUtils.toUserReturnType(ctx.safeUser);
     },
   }),
 

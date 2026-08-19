@@ -1,6 +1,7 @@
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
 import { type AppPermission, UserRole } from "@/backend/enum";
 import { PermissionsService, UserService } from "@/backend/services";
+import type { SanitizedUserSelectType } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 import { getServerTranslations, type Translations } from "@/shared/locale";
 
@@ -11,6 +12,13 @@ export type BaseContext = {
         displayCurrency: CurrencyCode | null;
       }
     | undefined;
+  /**
+   * The full user record from `findSafeById`, with `password` and
+   * `rememberTokenHash` stripped (R4-34). Populated in `createContext` so the
+   * `Query.me` resolver can avoid a redundant `UserService.findById` call (R3-8).
+   * `null` when the user was not found; `undefined` when no `userId` was provided.
+   */
+  safeUser: SanitizedUserSelectType | null | undefined;
   permissions: AppPermission[];
   permissionGroups: string[];
   isSuperAdmin: boolean;
@@ -55,6 +63,7 @@ export async function createContext({
   if (!userId) {
     return {
       user: undefined,
+      safeUser: undefined,
       permissions: [],
       permissionGroups: [],
       isSuperAdmin: false,
@@ -79,8 +88,12 @@ export async function createContext({
 
   const safeUser = await UserService.findSafeById(userId);
 
+  // R4-34: Strip password and rememberTokenHash before storing on the context.
+  const safeUserForContext = safeUser ? { ...safeUser, password: undefined, rememberTokenHash: undefined } : null;
+
   return {
     user: { id: userId, displayCurrency: safeUser?.displayCurrency ?? null },
+    safeUser: safeUserForContext,
     permissions: permissionContext.permissions,
     permissionGroups: permissionContext.permissionGroups,
     isSuperAdmin: permissionContext.isSuperAdmin,

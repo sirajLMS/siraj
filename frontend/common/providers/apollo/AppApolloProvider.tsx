@@ -1,6 +1,7 @@
 "use client";
 
-import { ApolloClient, ApolloLink, HttpLink } from "@apollo/client";
+import { ApolloClient, ApolloLink } from "@apollo/client";
+import { BatchHttpLink } from "@apollo/client/link/batch-http";
 import { PersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { ApolloProvider } from "@apollo/client/react";
 import type React from "react";
@@ -55,7 +56,12 @@ const apolloClient = new ApolloClient({
     ),
     createAuthLink(() => apolloLinkState.authToken),
     new PersistedQueryLink({ sha256 }),
-    new HttpLink({ uri: "/api/graphql", credentials: "include" }),
+    // BatchHttpLink groups multiple concurrent operations into a single HTTP
+    // POST (JSON array body). The server must opt in via
+    // `allowBatchedHttpRequests: true` on the ApolloServer constructor.
+    // APQ link must chain BEFORE BatchHttpLink so persisted-query hashes are
+    // resolved before the batch is assembled.
+    new BatchHttpLink({ uri: "/api/graphql", credentials: "include" }),
   ]),
   cache: createApolloCache(),
   defaultOptions: {

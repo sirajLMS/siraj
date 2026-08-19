@@ -36,7 +36,9 @@ export function RequirePermission({ children, permissions, fallback = null }: Re
   const isAuthorized = permissionsArray.some(permission => hasPermission(permission));
 
   if (!isAuthorized) {
-    logger.debug({ caller: "RequirePermission" }, `Access denied for ${String(permissions)}`);
+    if (process.env.NEXT_PUBLIC_DEBUG_PERMISSIONS === "true") {
+      logger.debug({ caller: "RequirePermission" }, `Access denied for ${String(permissions)}`);
+    }
     return <>{fallback}</>;
   }
 

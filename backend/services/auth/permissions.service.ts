@@ -57,14 +57,35 @@ export namespace PermissionsService {
     }
   }
 
-  export async function hasPermission(userId: string, permissionKey: AppPermission): Promise<boolean> {
-    const context = await PermissionsService.getUserContext(userId);
+  export async function hasPermission(context: UserPermissionContext, permissionKey: AppPermission): Promise<boolean>;
+  export async function hasPermission(userId: string, permissionKey: AppPermission): Promise<boolean>;
+  export async function hasPermission(
+    userIdOrContext: string | UserPermissionContext,
+    permissionKey: AppPermission
+  ): Promise<boolean> {
+    if (typeof userIdOrContext !== "string") {
+      if (userIdOrContext.isSuperAdmin) return true;
+      return userIdOrContext.permissions.includes(permissionKey);
+    }
+    const context = await PermissionsService.getUserContext(userIdOrContext);
     return context.isSuperAdmin || context.permissions.includes(permissionKey);
   }
 
-  export async function hasAnyPermission(userId: string, permissionKeys: AppPermission[]): Promise<boolean> {
+  export async function hasAnyPermission(
+    context: UserPermissionContext,
+    permissionKeys: AppPermission[]
+  ): Promise<boolean>;
+  export async function hasAnyPermission(userId: string, permissionKeys: AppPermission[]): Promise<boolean>;
+  export async function hasAnyPermission(
+    userIdOrContext: string | UserPermissionContext,
+    permissionKeys: AppPermission[]
+  ): Promise<boolean> {
     if (permissionKeys.length === 0) return false;
-    const context = await PermissionsService.getUserContext(userId);
+    if (typeof userIdOrContext !== "string") {
+      if (userIdOrContext.isSuperAdmin) return true;
+      return permissionKeys.some(key => userIdOrContext.permissions.includes(key));
+    }
+    const context = await PermissionsService.getUserContext(userIdOrContext);
     if (context.isSuperAdmin) return true;
     return permissionKeys.some(key => context.permissions.includes(key));
   }

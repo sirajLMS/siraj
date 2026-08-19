@@ -1,0 +1,68 @@
+import { describe, expect, test } from "bun:test";
+import { notificationAlertsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/notifications/notification-alerts.documents";
+import { authenticatedRequest, loginDemoUser } from "@/frontend/common/graphql/test/helpers";
+import { setupTestServerLifecycle } from "@/frontend/common/graphql/test/lifecycle";
+import { clearCookies, testClient } from "@/frontend/common/graphql/test/testClient";
+
+/**
+ * Integration tests for the `notificationAlerts` GraphQL query.
+ *
+ * Phase A3: The resolver now constructs a `UserPermissionContext` from `ctx`
+ * fields and passes it to `NotificationAlertsService.getAlerts`, bypassing the
+ * 3-DB-query `PermissionsService.getUserContext(userId)` call. The unit test
+ * in `backend/services/notification/test/notification-alerts.service.test.ts`
+ * verifies that `getUserContext` is not called; this integration test verifies
+ * the end-to-end query works correctly through the GraphQL API.
+ */
+describe("GraphQL notificationAlerts Integration Tests", () => {
+  setupTestServerLifecycle();
+
+  test("returns alert feed for authenticated user with permissions", async () => {
+    const token = await loginDemoUser("super_admin");
+
+    const data = await authenticatedRequest(token, "query", notificationAlertsQueryDocument);
+    const alerts = data.notificationAlerts;
+
+    if (!alerts) throw new Error("Expected notificationAlerts to be defined");
+    expect(alerts.id).toBeDefined();
+    expect(typeof alerts.totalCount).toBe("number");
+    expect(typeof alerts.unreadCount).toBe("number");
+    expect(Array.isArray(alerts.alerts)).toBe(true);
+  });
+
+  test("returns alert feed for teacher role", async () => {
+    const token = await loginDemoUser("teacher_default");
+
+    const data = await authenticatedRequest(token, "query", notificationAlertsQueryDocument);
+    const alerts = data.notificationAlerts;
+
+    if (!alerts) throw new Error("Expected notificationAlerts to be defined");
+    expect(alerts.id).toBeDefined();
+    expect(typeof alerts.totalCount).toBe("number");
+    expect(typeof alerts.unreadCount).toBe("number");
+    expect(Array.isArray(alerts.alerts)).toBe(true);
+  });
+
+  test("denied when unauthenticated", async () => {
+    clearCookies();
+    const result = await testClient.query({
+      query: notificationAlertsQueryDocument,
+    });
+
+    expect(result.error).toBeDefined();
+    expect(result.data?.notificationAlerts).toBeFalsy();
+  });
+
+  test("returns empty alert feed for parent role", async () => {
+    const token = await loginDemoUser("parent_default");
+
+    const data = await authenticatedRequest(token, "query", notificationAlertsQueryDocument);
+    const alerts = data.notificationAlerts;
+
+    if (!alerts) throw new Error("Expected notificationAlerts to be defined");
+    expect(alerts.id).toBeDefined();
+    // Parents may lack NOTIFICATION_VIEW_ALERTS — the service returns empty alerts
+    expect(alerts.alerts).toEqual([]);
+    expect(alerts.totalCount).toBe(0);
+  });
+});

@@ -10,7 +10,7 @@ import { ensureTestSubjectId, setupStudent, setupTeacher } from "@/backend/db/te
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
 import { DstMigrationService, PermissionsService } from "@/backend/services";
-import type { ClassInstanceInsertType, UserSelectType } from "@/backend/types";
+import type { ClassInstanceInsertType, UserPermissionContext, UserSelectType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 import { type ErrorsLabels, getServerTranslations } from "@/shared/locale";
@@ -177,7 +177,11 @@ describe("Timezone Handling & DST Adjustment", () => {
     const mockPermissions = new Map<string, boolean>();
 
     beforeAll(() => {
-      PermissionsService.hasPermission = async (userId: string, permissionKey: AppPermission) => {
+      PermissionsService.hasPermission = async (
+        userIdOrContext: UserPermissionContext | string,
+        permissionKey: AppPermission
+      ) => {
+        const userId = typeof userIdOrContext === "string" ? userIdOrContext : "";
         const key = `${userId}:${permissionKey}`;
         return mockPermissions.get(key) ?? false;
       };

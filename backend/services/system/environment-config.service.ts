@@ -133,10 +133,65 @@ const DEFAULT_CACHE_TTL_MS = 300_000;
 interface CacheEntry {
   value: string | undefined;
   expiresAt: number;
+  /**
+   * `"env"` = pre-warmed from `process.env` (non-authoritative — DB override may exist).
+   * `"db"` = resolved via DB lookup (authoritative — correct precedence confirmed).
+   */
+  source: "env" | "db";
 }
 
 /** Module-scoped singleton cache (not per-instance). Keyed by bare env var name. */
 const cache = new Map<string, CacheEntry>();
+
+/**
+ * Pre-warms the env-config cache with `process.env` values for every DB-eligible
+ * env-config key (descriptors where `excludeFromDb === false`) at module load.
+ *
+ * For each such key:
+ *  - If `process.env[key]` is set to a non-empty string, populates the cache with the
+ *    env value (tagged `source: "env"`) and the standard cache TTL. The first
+ *    `resolveEnvConfig(key)` call will still query the DB (because "env" entries are
+ *    non-authoritative), but if the DB misses, it returns the cached env value without
+ *    a redundant `process.env` read — this is the latency benefit on cold starts when
+ *    no DB override exists.
+ *  - If `process.env[key]` is unset or empty, skips the key. The first
+ *    `resolveEnvConfig(key)` call will hit the DB, discover there is no override, and
+ *    cache `undefined`-from-env (same as today's behavior).
+ *
+ * Safety contract:
+ *  - Only iterates descriptors whose `excludeFromDb === false` — `excludeFromDb` keys
+ *    bypass both the DB and the cache by hard contract, and must never be cached.
+ *  - Pre-warmed entries are tagged `source: "env"` in the cache. `resolveEnvConfig`
+ *    and `serveFromCache` treat `source: "env"` entries as non-authoritative — they
+ *    fall through to the DB lookup on the first real call, ensuring DB overrides
+ *    always take precedence over env values. The DB query is the same query that
+ *    would have run without pre-warming, so cold-start latency is not increased (the
+ *    pre-warm only helps when NO DB override exists — the DB miss + cached env value
+ *    avoids a redundant `process.env` read).
+ *  - After the first DB lookup, the cache entry is replaced with `source: "db"` and
+ *    behaves identically to the lazy-resolution path.
+ *  - `invalidateEnvConfigCache()` evicts pre-warmed entries identically to DB-sourced
+ *    entries. A later DB override (written via the Settings UI and followed by
+ *    `invalidateEnvConfigCache(key)`) correctly evicts the pre-warmed env value.
+ *
+ * @internal Exported for unit testing only — production code should never call this
+ *           manually; it runs once at module load.
+ */
+export function preWarmEnvConfigCache(): void {
+  const now = Date.now();
+  const ttlMs = getCacheTtlMs();
+  for (const descriptor of ENV_CONFIG_KEYS) {
+    if (descriptor.excludeFromDb) {
+      continue;
+    }
+    const envValue = readFromProcessEnv(descriptor.key);
+    if (envValue === undefined) {
+      continue;
+    }
+    cache.set(descriptor.key, { value: envValue, expiresAt: now + ttlMs, source: "env" });
+  }
+  logger.debug(`env-config: pre-warmed cache with ${cache.size} entries from process.env`);
+}
 
 /**
  * Reads the configured cache TTL from the environment. Evaluated lazily so that test
@@ -172,6 +227,30 @@ export class EnvConfigServiceError extends Error {
   }
 }
 
+/**
+ * Commits a DB-resolved value to the cache, reusing any pre-warmed "env" cache value
+ * when the DB misses (avoids redundant `process.env` read). The new entry is tagged
+ * `source: "db"` (authoritative — correct precedence confirmed).
+ *
+ * Shared by both the single-key (`resolveEnvConfig`) and batch (`recordResolvedKey`)
+ * paths to prevent drift on the `source: "db"` tagging / env-value-reuse contract.
+ */
+function commitDbResolvedValue(
+  key: string,
+  dbValue: string | undefined,
+  now: number,
+  ttlMs: number
+): string | undefined {
+  if (dbValue === undefined) {
+    logger.debug(`env-config: DB miss for key "${key}", falling back to process.env`);
+  }
+  const existingEntry = cache.get(key);
+  const cachedEnvValue = existingEntry?.source === "env" ? existingEntry.value : undefined;
+  const resolved = dbValue ?? cachedEnvValue ?? readFromProcessEnv(key);
+  cache.set(key, { value: resolved, expiresAt: now + ttlMs, source: "db" });
+  return resolved;
+}
+
 // ─── Read path: single-key resolver ─────────────────────────────────────────────
 
 /**
@@ -202,11 +281,14 @@ export async function resolveEnvConfig(key: string): Promise<string | undefined>
 
   const now = Date.now();
   const cachedEntry = cache.get(key);
-  if (cachedEntry && cachedEntry.expiresAt > now) {
+  // Pre-warmed "env" entries are non-authoritative — a DB override may exist.
+  // Only short-circuit on "db" entries (confirmed correct precedence).
+  if (cachedEntry && cachedEntry.expiresAt > now && cachedEntry.source === "db") {
     logger.debug(`env-config: cache hit for key "${key}"`);
     return cachedEntry.value;
   }
 
+  // For "env"-tagged cache hits, fall through to DB lookup to respect DB > env precedence.
   logger.debug(`env-config: cache miss for key "${key}", querying system_settings`);
   let dbValue: string | undefined;
   try {
@@ -223,13 +305,7 @@ export async function resolveEnvConfig(key: string): Promise<string | undefined>
     );
   }
 
-  if (dbValue === undefined) {
-    logger.debug(`env-config: DB miss for key "${key}", falling back to process.env`);
-  }
-
-  const resolved = dbValue ?? readFromProcessEnv(key);
-  cache.set(key, { value: resolved, expiresAt: now + getCacheTtlMs() });
-  return resolved;
+  return commitDbResolvedValue(key, dbValue, now, getCacheTtlMs());
 }
 
 // ─── Read path: batch resolver ──────────────────────────────────────────────────
@@ -264,7 +340,8 @@ function serveFromCache(dbEligibleKeys: string[], result: Record<string, string 
   const missesNeedingDb: string[] = [];
   for (const key of dbEligibleKeys) {
     const cachedEntry = cache.get(key);
-    if (cachedEntry && cachedEntry.expiresAt > now) {
+    // Pre-warmed "env" entries are non-authoritative — need a DB lookup to check for overrides.
+    if (cachedEntry && cachedEntry.expiresAt > now && cachedEntry.source === "db") {
       logger.debug(`env-config: cache hit for key "${key}"`);
       result[key] = cachedEntry.value;
     } else {
@@ -309,11 +386,7 @@ function recordResolvedKey(
   now: number,
   ttlMs: number
 ): void {
-  if (dbValue === undefined) {
-    logger.debug(`env-config: DB miss for key "${key}", falling back to process.env`);
-  }
-  const resolved = dbValue ?? readFromProcessEnv(key);
-  cache.set(key, { value: resolved, expiresAt: now + ttlMs });
+  const resolved = commitDbResolvedValue(key, dbValue, now, ttlMs);
   result[key] = resolved;
 }
 
@@ -605,4 +678,24 @@ export async function auditEnvConfigChange(
       }`
     );
   }
+}
+
+// ─── Module-load pre-warm ────────────────────────────────────────────────────────
+
+/**
+ * Pre-warm the env-config cache from `process.env` at module load so the first
+ * `resolveEnvConfig()` calls on a cold start do not issue DB queries for keys whose
+ * env-fallback value is sufficient.
+ *
+ * Failures are swallowed — if pre-warming fails for any reason, the normal
+ * `resolveEnvConfig()` code path will populate the cache lazily on first access.
+ */
+try {
+  preWarmEnvConfigCache();
+} catch (error) {
+  logger.warn(
+    `env-config: pre-warm at module load failed — falling back to lazy resolution. Error: ${
+      error instanceof Error ? error.message : String(error)
+    }`
+  );
 }

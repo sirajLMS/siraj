@@ -42,6 +42,48 @@ const hasLoggedInFailure = (failure: unknown): boolean => {
   return false;
 };
 
+/**
+ * Builds the Pothos scope-auth scope map for a given request context.
+ *
+ * The `superAdmin` scope is a lazy function (scope loader) — it only evaluates
+ * when a field with `authScopes: { superAdmin: true }` is actually queried.
+ * When the actor is the same as the logged-in user (no impersonation/group-sim),
+ * it returns `ctx.isSuperAdmin` directly, avoiding a redundant `getUserContext`
+ * DB call (3 queries). When the actor differs (impersonation/group-sim), it
+ * fetches the real actor's super-admin status.
+ *
+ * Invariant: `ctx.isSuperAdmin` and `ctx.permissions` are populated by
+ * `createContext` from `PermissionsService.getUserContext(userId)` (or
+ * `getPermissionGroupContext` for group simulation). They are guaranteed to be
+ * in sync with the logged-in user's *current* permissions at context-creation
+ * time. The `superAdmin` scope's fast path (`actorUserId === ctx.user?.id`)
+ * relies on this invariant — if `ctx.isSuperAdmin` is `true`, the logged-in
+ * user IS a super admin. The defensive fallback (`return false` if
+ * `actorContext` lacks `isSuperAdmin`) guards against a malformed context
+ * from a future auth flow that doesn't go through `createContext`.
+ */
+export function buildAuthScopes(
+  ctx: BaseContext,
+  getUserContext: (userId: string) => Promise<{ isSuperAdmin: boolean }> = PermissionsService.getUserContext
+) {
+  return {
+    loggedIn: !!ctx.user,
+    permission: (key: AppPermission) => ctx.isSuperAdmin || ctx.permissions.includes(key),
+    superAdmin: async () => {
+      const actorUserId = ctx.realUserId ?? ctx.actorUserId ?? ctx.user?.id;
+      if (!actorUserId || actorUserId === ctx.user?.id) {
+        return ctx.isSuperAdmin;
+      }
+      const actorContext = await getUserContext(actorUserId);
+      // Defensive fallback: if the returned context is malformed (missing
+      // isSuperAdmin), default to `false` — never grant super admin inadvertently.
+      return actorContext?.isSuperAdmin ?? false;
+    },
+    notImpersonating: !ctx.isImpersonating,
+    notSimulatingGroup: !ctx.isSimulatingGroup,
+  };
+}
+
 export interface PothosTypes {
   DrizzleRelations: DrizzleRelations;
   Context: BaseContext;
@@ -107,25 +149,7 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
     relations,
   },
   scopeAuth: {
-    authScopes: async ctx => {
-      const realUserId = ctx.realUserId ?? ctx.actorUserId ?? ctx.user?.id;
-      let actorIsSuperAdmin = ctx.isSuperAdmin;
-      if (realUserId) {
-        const actorContext = await PermissionsService.getUserContext(realUserId);
-        actorIsSuperAdmin = actorContext.isSuperAdmin;
-      } else if (ctx.actorUserId) {
-        const actorContext = await PermissionsService.getUserContext(ctx.actorUserId);
-        actorIsSuperAdmin = actorContext.isSuperAdmin;
-      }
-
-      return {
-        loggedIn: !!ctx.user,
-        permission: (key: AppPermission) => ctx.isSuperAdmin || ctx.permissions.includes(key),
-        superAdmin: actorIsSuperAdmin,
-        notImpersonating: !ctx.isImpersonating,
-        notSimulatingGroup: !ctx.isSimulatingGroup,
-      };
-    },
+    authScopes: async ctx => buildAuthScopes(ctx),
     unauthorizedError: (_parent, _context, _info, result) => {
       const isUnauthenticated = hasLoggedInFailure(result.failure);
 

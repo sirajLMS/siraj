@@ -13,8 +13,9 @@ import {
   writeSimulationAuditLog,
 } from "@/backend/services/auth/__shared__/simulationBase";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { resolvePreloadedSession } from "@/backend/services/auth/session.service";
 import type * as Types from "@/backend/types";
-import type { RedisGroupSimulationSessionData } from "@/backend/types";
+import type { RedisGroupSimulationSessionData, SessionSelectType } from "@/backend/types";
 import { localeJsonKey, resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 import { DEFAULT_CONTENT_LOCALE } from "@/shared/types";
@@ -272,7 +273,8 @@ export namespace PermissionGroupSimulationService {
 
   export async function resolveGroupSimulationFromToken(
     payload: CustomJWTPayload,
-    rawSessionId: string | undefined
+    rawSessionId: string | undefined,
+    preloadedSession?: SessionSelectType | null
   ): Promise<ResolvedGroupSimulation | null> {
     if (payload.impersonation) {
       return null;
@@ -313,7 +315,7 @@ export namespace PermissionGroupSimulationService {
       return rejectSimWithGroupSession();
     }
 
-    const session = await SessionRepository.findSessionById(rawSessionId);
+    const session = await resolvePreloadedSession(rawSessionId, preloadedSession);
     if (!session?.userId) {
       return rejectSimWithGroupSession();
     }

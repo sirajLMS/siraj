@@ -18,6 +18,33 @@ import { getServerTranslations } from "@/shared/locale";
 // obtain a Redis-backed session service without importing @/backend/services.
 setSessionRedisServiceFactory(async () => new SessionRedisService(await getRedisService()));
 
+/**
+ * Purge an orphan session (one whose user no longer exists) and log a warning.
+ * Shared by `validateSession` (user-check path) and `resolveUserFromSession` in
+ * auth.mutation.ts to avoid divergent purge logic.
+ */
+export async function purgeOrphanSession(sessionId: string, userId: string): Promise<void> {
+  logger.warn("[SessionService] Session references non-existent user, purging orphan session", {
+    // R4-36: Log truncated sessionId for correlation, not raw (bearer credential).
+    sessionIdPrefix: sessionId.slice(0, 8),
+    userId,
+  });
+  await SessionRepository.deleteSessionById(sessionId).catch(() => {});
+}
+
+/**
+ * Return the preloaded session if available, otherwise fetch it from the repository.
+ * Shared by `ImpersonationService.resolveAuthIdentityFromToken` and
+ * `PermissionGroupSimulationService.resolveGroupSimulationFromToken` to avoid
+ * divergent conditional-fetch logic.
+ */
+export async function resolvePreloadedSession(
+  rawSessionId: string,
+  preloadedSession?: SessionSelectType | null
+): Promise<SessionSelectType | null> {
+  return preloadedSession !== undefined ? preloadedSession : await SessionRepository.findSessionById(rawSessionId);
+}
+
 export namespace SessionService {
   /**
    * Validate a session, transparently migrating legacy SHA-256 hashes to HMAC.
@@ -29,7 +56,10 @@ export namespace SessionService {
    *     so subsequent lookups hit the fast path.
    *  4. Delegate TTL / activity validation to the repo.
    */
-  export async function validateSession(rawSessionId: string): Promise<SessionSelectType | null> {
+  export async function validateSession(
+    rawSessionId: string,
+    options?: { skipUserCheck?: boolean }
+  ): Promise<SessionSelectType | null> {
     const { hmacHash, legacyHash } = computeSessionHashes(rawSessionId);
 
     // 1. Fast path — session was already stored with HMAC hash
@@ -64,15 +94,15 @@ export namespace SessionService {
       return null;
     }
 
-    // 5. Verify the user actually exists in the database (handles orphan sessions from deleted/purged users)
-    const safeUser = await UserRepository.findSafeById(session.userId);
-    if (!safeUser) {
-      logger.warn("[SessionService] Session references non-existent user, purging orphan session", {
-        sessionId: rawSessionId,
-        userId: session.userId,
-      });
-      await SessionRepository.deleteSessionById(rawSessionId).catch(() => {});
-      return null;
+    // 5. Verify the user actually exists in the database (handles orphan sessions from deleted/purged users).
+    //    Skipped when the caller already loads the user (e.g. refreshToken → findById,
+    //    createContext → findSafeById) to avoid a redundant uncached DB query.
+    if (!options?.skipUserCheck) {
+      const safeUser = await UserRepository.findSafeById(session.userId);
+      if (!safeUser) {
+        await purgeOrphanSession(rawSessionId, session.userId);
+        return null;
+      }
     }
 
     return session;

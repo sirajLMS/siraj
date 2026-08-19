@@ -5,7 +5,7 @@ import { StaffProfileRepository, TeacherRepository } from "@/backend/db/repo/tea
 import { AccountStatus, AppPermission, ProfileAudience, ProfileMode, ProfileScope, UserRole } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { isRedirect, ProfileService, toParentRepoInput } from "@/backend/services/profile/profile.service";
-import type { ProfilePageContext } from "@/backend/types";
+import type { ProfilePageContext, UserPermissionContext } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
@@ -60,7 +60,10 @@ function setupProfileReposSpies(
 
 function setupPermissionSpies(
   overrides: {
-    hasAnyPermission?: (userId: string, permissionKeys: AppPermission[]) => Promise<boolean>;
+    hasAnyPermission?: (
+      userIdOrContext: UserPermissionContext | string,
+      permissionKeys: AppPermission[]
+    ) => Promise<boolean>;
     getUserContext?: Awaited<ReturnType<typeof PermissionsService.getUserContext>>;
   } = {}
 ) {
@@ -92,7 +95,7 @@ async function runStudentProfileTest(
   });
   let permissionChecks = 0;
   setupPermissionSpies({
-    hasAnyPermission: async (_userId: string, keys: AppPermission[]) => {
+    hasAnyPermission: async (_userId: UserPermissionContext | string, keys: AppPermission[]) => {
       permissionChecks += 1;
       return expectedPermissionKeys.some(key => keys.includes(key));
     },
@@ -143,7 +146,7 @@ async function runStaffProfileTest(
     },
   });
   setupPermissionSpies({
-    hasAnyPermission: async (_userId: string, keys: AppPermission[]) => {
+    hasAnyPermission: async (_userId: UserPermissionContext | string, keys: AppPermission[]) => {
       if (!hasEditPermissions) return false;
       return (
         keys.includes(AppPermission.PROFILE_CORE_IDENTITY_EDIT_OWN) ||
@@ -183,7 +186,7 @@ describe("ProfileService.resolvePageContext", () => {
   test("allows pure admin own profile when granted profile view_other only", async () => {
     setupProfileReposSpies();
     setupPermissionSpies({
-      hasAnyPermission: async (_userId: string, keys: AppPermission[]) =>
+      hasAnyPermission: async (_userId: UserPermissionContext | string, keys: AppPermission[]) =>
         keys.includes(AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER),
       getUserContext: {
         permissions: [AppPermission.PROFILE_CORE_IDENTITY_VIEW_OTHER],

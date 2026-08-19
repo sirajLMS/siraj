@@ -11,13 +11,14 @@ import {
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { type AppPermission, QuotaKind } from "@/backend/enum";
 import { PermissionsService, QuotaService } from "@/backend/services";
-import type { QuotaReturnType, QuotaSubmitInput } from "@/backend/types";
+import type { QuotaReturnType, QuotaSubmitInput, UserPermissionContext } from "@/backend/types";
 
 describe("QuotaService", () => {
   const originalHasPermission = PermissionsService.hasPermission;
 
   beforeAll(() => {
-    PermissionsService.hasPermission = async (_userId: string, _permissionKey: AppPermission) => true;
+    PermissionsService.hasPermission = async (_userId: UserPermissionContext | string, _permissionKey: AppPermission) =>
+      true;
   });
 
   afterAll(() => {

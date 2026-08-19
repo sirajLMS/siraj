@@ -27,6 +27,7 @@ import {
   SessionService,
   UserService,
 } from "@/backend/services";
+import { purgeOrphanSession } from "@/backend/services/auth/session.service";
 import type { SessionSelectType, UserReturnType, UserSelectType } from "@/backend/types";
 import { AuthUtils } from "@/backend/utils";
 
@@ -37,14 +38,19 @@ function setAuthCookies(ctx: BaseContext, sessionId: string, refreshToken: strin
 async function resolveUserFromSession(
   sessionId: string
 ): Promise<{ session: SessionSelectType | null; user: UserSelectType | null }> {
-  const session = await SessionService.validateSession(sessionId);
+  // skipUserCheck: the caller immediately fetches the user via findById below,
+  // so the findSafeById verification inside validateSession would be redundant.
+  const session = await SessionService.validateSession(sessionId, { skipUserCheck: true });
   if (!session?.userId) return { session: session ?? null, user: null };
 
   const user = (await UserService.findById(session.userId)) ?? null;
   if (!user) {
-    logger.warn("[RefreshToken] Session found but user not found", {
+    logger.warn("[RefreshToken] Session found but user not found, purging orphan session", {
       userId: session.userId,
+      sessionId,
     });
+    await purgeOrphanSession(sessionId, session.userId);
+    return { session: null, user: null };
   }
   return { session, user };
 }
@@ -134,7 +140,7 @@ async function validateRefreshTokenJti(
   return jtiMatchesSession(refreshPayload, session);
 }
 
-async function rotateTokensAndSession(
+export async function rotateTokensAndSession(
   user: UserSelectType,
   session: SessionSelectType,
   ctx: BaseContext,
@@ -168,8 +174,21 @@ async function rotateTokensAndSession(
     setAuthCookies(ctx, rawSessionId, newRefreshToken, newAccessToken);
   }
 
+  // Reuse the already-loaded `user` when not impersonating (effectiveUserId === user.id).
+  // Only fetch from DB when impersonating (effectiveUserId !== user.id).
   const effectiveUserId = ctx.isImpersonating && ctx.user ? ctx.user.id : user.id;
-  const effectiveUser = (await UserService.findById(effectiveUserId)) ?? user;
+  let effectiveUser: UserSelectType;
+  if (effectiveUserId === user.id) {
+    effectiveUser = user;
+  } else {
+    const impersonatedUser = await UserService.findById(effectiveUserId);
+    if (!impersonatedUser) {
+      throw new GraphQLError("Impersonation target user not found", {
+        extensions: { code: "FORBIDDEN" },
+      });
+    }
+    effectiveUser = impersonatedUser;
+  }
 
   return { token: newAccessToken, user: AuthUtils.toSafeUser(AuthUtils.toUserReturnType(effectiveUser)) };
 }
@@ -271,7 +290,7 @@ gqlSchemaBuilder.mutationFields(t => ({
    * It is intended strictly for demonstration purposes and is secured by environment variables.
    *
    * @see `DemoAuthService.loginWithGroupSlug` (which uses `db.query.permissionGroups`, `db.query.userPermissionGroups`, `db.query.users`)
-   * @see `SessionRepository.create` (which uses `db.insert(sessions)`)
+   * @see `SessionService.createSession` (which uses `db.insert(sessions)`)
    */
   demoLogin: t.field({
     type: LoginResponsePothosObject,

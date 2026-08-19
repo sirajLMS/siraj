@@ -11,7 +11,9 @@ import {
 } from "@/backend/services/auth/__shared__/simulationBase";
 import { clearOptionalRedisGroupSimulation } from "@/backend/services/auth/permission-group-simulation.service";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { resolvePreloadedSession } from "@/backend/services/auth/session.service";
 import type * as Types from "@/backend/types";
+import type { SessionSelectType } from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export const IMPERSONATION_TTL_MS = 30 * 60 * 1000;
@@ -247,13 +249,14 @@ export namespace ImpersonationService {
 
   export async function resolveAuthIdentityFromToken(
     payload: CustomJWTPayload,
-    rawSessionId: string | undefined
+    rawSessionId: string | undefined,
+    preloadedSession?: SessionSelectType | null
   ): Promise<ResolvedAuthIdentity | null> {
     if (!rawSessionId) {
       return { effectiveUserId: payload.userId, isImpersonating: false };
     }
 
-    const session = await SessionRepository.findSessionById(rawSessionId);
+    const session = await resolvePreloadedSession(rawSessionId, preloadedSession);
     if (!session?.userId) {
       if (!payload.impersonation) {
         return { effectiveUserId: payload.userId, isImpersonating: false };
@@ -262,9 +265,8 @@ export namespace ImpersonationService {
     }
 
     if (!payload.impersonation || !payload.actorUserId) {
-      if (payload.userId !== session.userId) {
-        return { effectiveUserId: payload.userId, isImpersonating: false };
-      }
+      // Non-impersonation path: access tokens are session-agnostic,
+      // so a session.userId / payload.userId mismatch is not a rejection.
       return { effectiveUserId: payload.userId, isImpersonating: false };
     }
 

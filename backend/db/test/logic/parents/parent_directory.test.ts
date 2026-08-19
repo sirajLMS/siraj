@@ -4,6 +4,7 @@ import { ParentRepository } from "@/backend/db/repo/parents";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
 import { ParentDirectoryService, PermissionsService } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 import { getErrorMessage } from "@/shared/utils/error";
 
 describe("ParentDirectoryService Permission Gating", () => {
@@ -11,8 +12,12 @@ describe("ParentDirectoryService Permission Gating", () => {
   const mockPermissions = new Map<string, boolean>();
 
   beforeAll(() => {
-    PermissionsService.hasAnyPermission = async (userId: string, permissionKeys: AppPermission[]) => {
-      return permissionKeys.some(permissionKey => mockPermissions.get(`${userId}:${permissionKey}`) ?? false);
+    PermissionsService.hasAnyPermission = async (
+      userId: UserPermissionContext | string,
+      permissionKeys: AppPermission[]
+    ) => {
+      const userIdStr = typeof userId === "string" ? userId : "";
+      return permissionKeys.some(permissionKey => mockPermissions.get(`${userIdStr}:${permissionKey}`) ?? false);
     };
   });
 

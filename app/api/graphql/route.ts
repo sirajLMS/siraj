@@ -56,6 +56,10 @@ function createApolloServer(schema: typeof graphQLSchema) {
       ttl: null, // Store indefinitely
     },
     cache: new ApolloCacheAdapter(),
+    // Enable HTTP batching — Apollo Server 4 disables this by default.
+    // With BatchHttpLink on the client, multiple operations are POSTed as a
+    // single JSON array body, reducing Vercel function invocations (8→1 POSTs).
+    allowBatchedHttpRequests: true,
   });
 }
 

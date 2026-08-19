@@ -15,6 +15,7 @@ import { expectRepositoryError } from "@/backend/db/test/repo/scheduling/schedul
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { type AppPermission, TeacherProgressFeedEventKind } from "@/backend/enum";
 import { checkStateChangeAuth, PermissionsService, validateStateTransition } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { getServerTranslations } from "@/shared/locale";
 
@@ -133,7 +134,11 @@ describe("Scheduling Repository — State Changes & Leave Quota", () => {
         });
 
         const originalHasAnyPermission = PermissionsService.hasAnyPermission;
-        PermissionsService.hasAnyPermission = async (userId: string, permissionKeys: AppPermission[]) => {
+        PermissionsService.hasAnyPermission = async (
+          userIdOrContext: UserPermissionContext | string,
+          permissionKeys: AppPermission[]
+        ) => {
+          const userId = typeof userIdOrContext === "string" ? userIdOrContext : "";
           if (userId === adminUser.id) return true;
           return originalHasAnyPermission(userId, permissionKeys);
         };

@@ -2,6 +2,7 @@ import { GraphQLError } from "graphql";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { NotificationAlertsResultPothosObject } from "@/backend/graphql/pothos/notifications/notification-alerts.pothos";
 import { NotificationAlertsService } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 
 gqlSchemaBuilder.queryFields(t => ({
   notificationAlerts: t.field({
@@ -12,7 +13,13 @@ gqlSchemaBuilder.queryFields(t => ({
         const tErrors = ctx.t().errorsTranslations;
         throw new GraphQLError(tErrors.unauthorized, { extensions: { code: "UNAUTHENTICATED" } });
       }
-      return NotificationAlertsService.getAlerts(ctx.user.id, ctx.locale);
+      const userPermissionContext: UserPermissionContext = {
+        permissions: ctx.permissions,
+        permissionGroups: ctx.permissionGroups,
+        isSuperAdmin: ctx.isSuperAdmin,
+        role: ctx.role,
+      };
+      return NotificationAlertsService.getAlerts(ctx.user.id, userPermissionContext, ctx.locale);
     },
   }),
 }));

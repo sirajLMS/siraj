@@ -7,6 +7,7 @@ import { setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService, StaffProfileService } from "@/backend/services";
+import type { UserPermissionContext } from "@/backend/types";
 import { getErrorMessage } from "@/shared/utils/error";
 
 describe("StaffProfileService Permission Gating", () => {
@@ -14,8 +15,9 @@ describe("StaffProfileService Permission Gating", () => {
   const mockPermissions = new Map<string, boolean>();
 
   beforeAll(() => {
-    PermissionsService.hasPermission = async (userId: string, permissionKey: AppPermission) => {
-      const key = `${userId}:${permissionKey}`;
+    PermissionsService.hasPermission = async (userId: UserPermissionContext | string, permissionKey: AppPermission) => {
+      const userIdStr = typeof userId === "string" ? userId : "";
+      const key = `${userIdStr}:${permissionKey}`;
       return mockPermissions.get(key) ?? false;
     };
   });

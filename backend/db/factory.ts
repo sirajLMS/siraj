@@ -22,8 +22,12 @@ function attachVercelPoolLifecycle(pool: PgPool): void {
   attachDatabasePool(pool);
 }
 
+let neonWsConfigured = false;
+
 function configureNeonWebSocket(): void {
+  if (neonWsConfigured) return;
   neonConfig.webSocketConstructor = ws;
+  neonWsConfigured = true;
 }
 
 function createPgPool(): PgPool {
