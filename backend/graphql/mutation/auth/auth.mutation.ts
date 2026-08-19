@@ -11,7 +11,13 @@ import {
   RefreshTokenResponsePothosObject,
 } from "@/backend/graphql/pothos";
 import { requireAuthWithRateLimit } from "@/backend/graphql/shared";
-import { extractTokenFromHeader, generateAccessToken, generateRefreshToken, verifyToken } from "@/backend/lib";
+import {
+  extractTokenFromHeader,
+  generateAccessToken,
+  generateRefreshToken,
+  retryTransient,
+  verifyToken,
+} from "@/backend/lib";
 import { setAuthCookies as applyAuthCookies, clearAuthCookies } from "@/backend/lib/auth/cookies";
 import { createAuthSession } from "@/backend/lib/auth/createAuthSession";
 import { comparePassword } from "@/backend/lib/auth/password";
@@ -205,7 +211,14 @@ gqlSchemaBuilder.mutationFields(t => ({
       const tErrors = ctx.t().errorsTranslations;
 
       // 0. Enforce auth rate limit before any credential checks
-      const rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
+      // Fail-open: if cache service is cold-starting, proceed with login rather than
+      // falsely rejecting with "too many attempts"
+      let rateLimitResult: { success: boolean } = { success: true };
+      try {
+        rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
+      } catch {
+        logger.warn("Rate limit check failed (cold-start), failing open");
+      }
       if (!rateLimitResult.success) {
         throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
           // ← compile-time ✅
@@ -214,7 +227,13 @@ gqlSchemaBuilder.mutationFields(t => ({
       }
 
       // 1. Check if already locked
-      const isLocked = await RateLimitService.isLocked(ipAddress, email.value);
+      // Fail-open: if DB is cold-starting, proceed with credential verification
+      let isLocked = false;
+      try {
+        isLocked = await RateLimitService.isLocked(ipAddress, email.value);
+      } catch {
+        logger.warn("isLocked check failed (cold-start), failing open");
+      }
       if (isLocked) {
         throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
           // ← compile-time ✅
@@ -224,7 +243,7 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       let user: UserSelectType | null;
       try {
-        user = (await UserService.findByEmail(email.value)) ?? null;
+        user = (await retryTransient(() => UserService.findByEmail(email.value))) ?? null;
       } catch (err) {
         logger.error(err);
         throw new GraphQLError(tErrors.auth.serviceUnavailable, {
@@ -235,7 +254,12 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       if (!user) {
         // Still record attempt even if user doesn't exist to prevent enumeration
-        await RateLimitService.recordAttempt(ipAddress, email.value);
+        // Fail-open: cold-start recordAttempt failure should not block enumeration prevention
+        try {
+          await RateLimitService.recordAttempt(ipAddress, email.value);
+        } catch {
+          logger.warn("recordAttempt failed (cold-start), continuing");
+        }
         throw new GraphQLError(tErrors.auth.invalidCredentials, {
           // ← compile-time ✅
           extensions: { code: "INVALID_CREDENTIALS" },
@@ -247,7 +271,13 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       if (!isPasswordValid) {
         // Record failed attempt
-        const result = await RateLimitService.recordAttempt(ipAddress, email.value);
+        // Fail-open: cold-start recordAttempt failure should not block login flow
+        let result = { isLocked: false };
+        try {
+          result = await RateLimitService.recordAttempt(ipAddress, email.value);
+        } catch {
+          logger.warn("recordAttempt failed (cold-start), continuing");
+        }
         if (result.isLocked) {
           throw new GraphQLError(tErrors.auth.accountLocked, {
             // ← compile-time ✅
@@ -268,11 +298,19 @@ gqlSchemaBuilder.mutationFields(t => ({
       }
 
       // 3. Successful login - reset attempts
-      await RateLimitService.resetAttempts(ipAddress, email.value);
+      // Fail-open: cold-start resetAttempts failure should not block successful login
+      try {
+        await RateLimitService.resetAttempts(ipAddress, email.value);
+      } catch {
+        logger.warn("resetAttempts failed (cold-start), continuing");
+      }
 
       // Generate tokens and create session in database.
       // Store session metadata only, not sensitive tokens.
-      const { accessToken, refreshToken, sessionId } = await createAuthSession(user.id, user.email);
+      // Retry transient errors: if DB pool is cold, retry up to 3 times before failing
+      const { accessToken, refreshToken, sessionId } = await retryTransient(() =>
+        createAuthSession(user.id, user.email)
+      );
 
       // Set httpOnly cookies for session and refresh token
       setAuthCookies(ctx, sessionId, refreshToken, accessToken);

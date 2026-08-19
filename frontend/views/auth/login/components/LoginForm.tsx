@@ -133,9 +133,10 @@ export interface LoginFormProps {
   readonly labels: AuthLoginLabels;
   readonly onSubmitAction?: (data: LoginFormData) => Promise<void>;
   readonly externalLoginResult?: { type: "success" | "error"; message: string } | null;
+  readonly isRetrying?: boolean;
 }
 
-export function LoginForm({ labels, onSubmitAction, externalLoginResult }: Readonly<LoginFormProps>) {
+export function LoginForm({ labels, onSubmitAction, externalLoginResult, isRetrying }: Readonly<LoginFormProps>) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginResult, setLoginResult] = useState<{
@@ -220,7 +221,12 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult }: Reado
         gap: 2.5,
       }}
     >
-      {finalLoginResult && (
+      {isRetrying && (
+        <Alert severity="info" sx={{ mb: 1 }}>
+          {labels.retrying}
+        </Alert>
+      )}
+      {!isRetrying && finalLoginResult != null && (
         <Alert severity={finalLoginResult.type} sx={{ mb: 1 }}>
           {finalLoginResult.message}
         </Alert>
@@ -241,11 +247,11 @@ export function LoginForm({ labels, onSubmitAction, externalLoginResult }: Reado
         type="submit"
         variant="contained"
         size="large"
-        disabled={isSubmitting}
+        disabled={isSubmitting || isRetrying}
         fullWidth
         sx={{ mt: 1 }}
       >
-        {isSubmitting ? <CircularProgress size={24} color="inherit" /> : labels.signIn}
+        {isSubmitting || isRetrying ? <CircularProgress size={24} color="inherit" /> : labels.signIn}
       </StyledSubmitButton>
     </Box>
   );

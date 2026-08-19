@@ -73,21 +73,22 @@ Make the login flow resilient to transient cold-start failures by treating infra
 
 ### Requirement 2: Retry-with-Backoff Utility for Transient DB Errors
 
-**User Story:** As a developer, I want a reusable retry utility that retries transient DB/infrastructure errors with exponential backoff, so that cold-start connection timeouts are transparently retried before surfacing as errors.
+**User Story:** As a developer, I want a reusable retry utility that retries transient DB/infrastructure errors with exponential backoff, so that cold-start connection timeouts are transparently retried before surfacing as errors — minimizing Vercel function invocations and frontend round trips.
 
 #### Acceptance Criteria
 
-1. WHEN a DB query throws a connection timeout or transient error THEN the retry utility SHALL retry the operation up to 2 times with exponential backoff (initial 300ms, then 700ms).
+1. WHEN a DB query throws a connection timeout or transient error THEN the retry utility SHALL retry the operation up to 3 times with exponential backoff (initial 200ms, then 500ms, then 1000ms), totaling ~1.7s of retry delay within a single serverless invocation.
 2. WHEN the retry utility exhausts all retries THEN it SHALL re-throw the original error for the caller to handle.
 3. WHEN a non-transient error occurs (e.g., invalid query, permission denied) THEN the retry utility SHALL NOT retry and shall re-throw immediately.
 4. WHEN the retry utility is invoked THEN it SHALL accept a generic async function and return the same type as the function's return.
 5. WHEN the retry utility retries THEN it SHALL log each retry attempt at `warn` level with attempt number and delay.
+6. WHEN the retry utility succeeds on a retry attempt THEN it SHALL log at `info` level that recovery occurred after N retries, so cold-start recovery is observable in logs.
 
 #### Additional Details
 - **Priority**: High
 - **Complexity**: Low
 - **Dependencies**: None
-- **Assumptions**: Transient errors include connection timeouts, `ECONNRESET`, `ENOTFOUND`, and Neon WebSocket connection failures
+- **Assumptions**: Transient errors include connection timeouts, `ECONNRESET`, `ENOTFOUND`, and Neon WebSocket connection failures. 3 retries (not 2) gives the Vercel function ~1.7s to recover within a single invocation, reducing the need for frontend retries and extra Vercel function invocations.
 
 ### Requirement 3: Neon HTTP Driver for Login Read Queries
 
@@ -108,23 +109,41 @@ Make the login flow resilient to transient cold-start failures by treating infra
 - **Dependencies**: Existing `queryDb()` and `getNeonHttpDb()` infrastructure in `backend/db/drizzleDb.ts` and `backend/db/http-client.ts`. `retryTransient` utility from Phase 1 (for `isTransientError` in Phase 3.5).
 - **Assumptions**: The `UserRepository.findByEmail` method is a read-only query eligible for HTTP driver (no transactions needed). The `SystemSettingsRepository.getByKey` method already uses `queryDb()` (Neon HTTP).
 
-### Requirement 4: Frontend Auto-Retry on SERVICE_UNAVAILABLE
+### Requirement 4: Frontend Auto-Retry on SERVICE_UNAVAILABLE (Last Resort)
 
-**User Story:** As a user logging in during a cold start, I want the frontend to automatically retry when the server returns `SERVICE_UNAVAILABLE`, so that I don't have to manually click "Login" again after the cold start completes.
+**User Story:** As a user logging in during a cold start, I want the frontend to automatically retry when the server returns `SERVICE_UNAVAILABLE`, so that I don't have to manually click "Login" again — but this should be a last resort, as the backend should handle most cold-start recovery internally to minimize Vercel function invocations.
 
 #### Acceptance Criteria
 
-1. WHEN the login mutation returns a GraphQL error with `code: "SERVICE_UNAVAILABLE"` THEN the frontend SHALL automatically retry the login up to 2 times with 1s and 2s delays.
+1. WHEN the login mutation returns a GraphQL error with `code: "SERVICE_UNAVAILABLE"` THEN the frontend SHALL automatically retry the login up to 2 times with 1.5s and 3s delays (giving the serverless platform time to warm a new function instance).
 2. WHEN the frontend retries a login THEN it SHALL show a transient "Retrying..." indicator to the user.
 3. IF all retries are exhausted AND the error persists THEN the frontend SHALL show the `SERVICE_UNAVAILABLE` error message to the user.
 4. WHEN the login mutation returns any other error code THEN the frontend SHALL NOT retry and shall show the error immediately.
 5. WHEN the frontend is retrying THEN it SHALL disable the submit button to prevent duplicate submissions.
+6. WHEN the frontend retries THEN it SHALL reuse the same email/password input (no requirement for user to retype), reducing friction during cold-start recovery.
 
 #### Additional Details
 - **Priority**: Medium
 - **Complexity**: Medium
 - **Dependencies**: The `SERVICE_UNAVAILABLE` error code must already be emitted by the backend (it is — line 230 of `auth.mutation.ts`)
-- **Assumptions**: The `useLoginViewModel` hook is the single entry point for login form submission
+- **Assumptions**: The `useLoginViewModel` hook is the single entry point for login form submission. Frontend retry is a **last resort** — the backend's internal `retryTransient` (3 retries, ~1.7s) should handle most cold-start recovery within a single Vercel invocation. Frontend retry only fires when the entire Vercel function couldn't recover, meaning a new function instance is needed.
+
+### Requirement 4.5: Full Login Flow Cold-Start Resilience (Backend-First)
+
+**User Story:** As a user logging in during a cold start, I want the entire login flow — credential verification, session creation, cookie setting — to handle transient DB errors internally, so that a single login mutation succeeds without requiring frontend retries or extra Vercel function invocations.
+
+#### Acceptance Criteria
+
+1. WHEN `createAuthSession` (session creation DB write) throws a transient error THEN the login resolver SHALL retry via `retryTransient` before surfacing `SERVICE_UNAVAILABLE`.
+2. WHEN `createAuthSession` transient error is retried and succeeds THEN the user SHALL receive a valid token and session (transparent recovery within the same invocation).
+3. WHEN any DB write in the login flow (`recordAttempt`, `resetAttempts`, `createAuthSession`) throws a transient error THEN the resolver SHALL catch it and proceed (fail-open for non-critical writes) or retry (for critical writes like session creation).
+4. WHEN the login flow succeeds despite transient errors in non-critical operations THEN the response SHALL be indistinguishable from a warm-path success (same token, same user object, same cookies).
+
+#### Additional Details
+- **Priority**: High
+- **Complexity**: Medium
+- **Dependencies**: `retryTransient` from Phase 1
+- **Assumptions**: `createAuthSession` performs a DB insert (session record) and is currently not wrapped in retry. If the DB pool is cold-starting during the final step of login, the user would see `SERVICE_UNAVAILABLE` even though their credentials were already verified — this MUST be retried to avoid forcing a frontend retry (which costs another Vercel invocation).
 
 ### Requirement 5: Vercel Fluid Compute Pre-Warming
 

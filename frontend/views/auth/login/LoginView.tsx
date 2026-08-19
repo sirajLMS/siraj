@@ -30,6 +30,7 @@ export function LoginView({
   onFastLogin,
   onSubmitAction,
   externalLoginResult,
+  isRetrying,
 }: Readonly<LoginViewProps>) {
   return (
     <StyledPageContainer sx={{ px: 2 }}>
@@ -48,7 +49,12 @@ export function LoginView({
           })}
         >
           <LoginHeader labels={labels} />
-          <LoginForm labels={labels} onSubmitAction={onSubmitAction} externalLoginResult={externalLoginResult} />
+          <LoginForm
+            labels={labels}
+            onSubmitAction={onSubmitAction}
+            externalLoginResult={externalLoginResult}
+            isRetrying={isRetrying}
+          />
           {isDemo && onFastLogin && (
             <DemoFastLogin labels={labels} onFastLogin={onFastLogin} groups={demoGroups ?? []} />
           )}

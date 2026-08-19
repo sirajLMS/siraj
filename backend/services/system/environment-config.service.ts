@@ -48,7 +48,7 @@
  */
 
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
-import { maskSecretValue } from "@/backend/lib";
+import { isTransientError, maskSecretValue } from "@/backend/lib";
 import {
   ENV_CONFIG_KEYS,
   type EnvConfigKeyDescriptor,
@@ -126,6 +126,9 @@ function getSettingsExposedDescriptor(key: string): EnvConfigKeyDescriptor | und
 /** Default cache TTL: 5 minutes. Overridable via `ENV_CONFIG_CACHE_TTL_MS` env var. */
 const DEFAULT_CACHE_TTL_MS = 300_000;
 
+/** Short cache TTL for transient DB failures — re-query DB sooner. */
+const SHORT_CACHE_TTL_MS = 30_000;
+
 /**
  * Module-scoped singleton cache entry. Shared across all callers in the module (not
  * per-instance) so that invalidation via `invalidateEnvConfigCache` is globally observable.
@@ -138,6 +141,13 @@ interface CacheEntry {
    * `"db"` = resolved via DB lookup (authoritative — correct precedence confirmed).
    */
   source: "env" | "db";
+  /**
+   * `true` when the DB lookup failed with a transient error (e.g. cold-start).
+   * Transient `"env"` entries short-circuit during the short TTL window to
+   * throttle re-queries against a failing DB. Non-transient `"env"` entries
+   * (pre-warmed or permanent DB failure) always fall through to re-query DB.
+   */
+  transientError: boolean;
 }
 
 /** Module-scoped singleton cache (not per-instance). Keyed by bare env var name. */
@@ -188,7 +198,7 @@ export function preWarmEnvConfigCache(): void {
     if (envValue === undefined) {
       continue;
     }
-    cache.set(descriptor.key, { value: envValue, expiresAt: now + ttlMs, source: "env" });
+    cache.set(descriptor.key, { value: envValue, expiresAt: now + ttlMs, source: "env", transientError: false });
   }
   logger.debug(`env-config: pre-warmed cache with ${cache.size} entries from process.env`);
 }
@@ -229,26 +239,75 @@ export class EnvConfigServiceError extends Error {
 
 /**
  * Commits a DB-resolved value to the cache, reusing any pre-warmed "env" cache value
- * when the DB misses (avoids redundant `process.env` read). The new entry is tagged
- * `source: "db"` (authoritative — correct precedence confirmed).
+ * when the DB misses (avoids redundant `process.env` read).
+ *
+ * The `source` parameter controls authoritative tagging:
+ * - `"db"` — DB lookup succeeded (hit or miss). Authoritative: correct precedence confirmed.
+ * - `"env"` — DB lookup failed (error). Non-authoritative: next call will re-query DB.
  *
  * Shared by both the single-key (`resolveEnvConfig`) and batch (`recordResolvedKey`)
- * paths to prevent drift on the `source: "db"` tagging / env-value-reuse contract.
+ * paths to prevent drift on the `source` tagging / env-value-reuse contract.
  */
 function commitDbResolvedValue(
   key: string,
   dbValue: string | undefined,
   now: number,
-  ttlMs: number
+  ttlMs: number,
+  source: "db" | "env",
+  transientError: boolean = false
 ): string | undefined {
-  if (dbValue === undefined) {
+  if (dbValue === undefined && source === "db") {
     logger.debug(`env-config: DB miss for key "${key}", falling back to process.env`);
   }
   const existingEntry = cache.get(key);
   const cachedEnvValue = existingEntry?.source === "env" ? existingEntry.value : undefined;
   const resolved = dbValue ?? cachedEnvValue ?? readFromProcessEnv(key);
-  cache.set(key, { value: resolved, expiresAt: now + ttlMs, source: "db" });
+  cache.set(key, { value: resolved, expiresAt: now + ttlMs, source, transientError });
   return resolved;
+}
+
+/**
+ * Performs a single-key DB lookup for env config, swallowing errors and returning
+ * `undefined` on failure. Factored out to keep `resolveEnvConfig` cognitive complexity
+ * under the SonarJS limit.
+ */
+async function performDbLookup(
+  key: string
+): Promise<{ dbValue: string | undefined; dbError: boolean; wasTransient: boolean }> {
+  try {
+    const setting = await SystemSettingsRepository.getByKey(toDbKey(key));
+    if (setting?.value != null && setting.value !== "") {
+      return { dbValue: setting.value, dbError: false, wasTransient: false };
+    }
+    return { dbValue: undefined, dbError: false, wasTransient: false };
+  } catch (error) {
+    const transient = isTransientError(error);
+    if (transient) {
+      logger.warn(
+        `env-config: DB lookup failed (transient) for key "${key}", using short cache TTL (${SHORT_CACHE_TTL_MS}ms) to retry sooner. Error: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    } else {
+      logger.error(
+        `env-config: DB lookup failed (non-transient) for key "${key}". Error: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+    return { dbValue: undefined, dbError: true, wasTransient: transient };
+  }
+}
+
+/**
+ * Resolves the cache TTL based on DB lookup outcome. Transient errors get a shorter
+ * TTL so the DB is re-queried sooner.
+ */
+function resolveTtl(dbError: boolean, wasTransient: boolean): number {
+  if (dbError && wasTransient) {
+    return SHORT_CACHE_TTL_MS;
+  }
+  return getCacheTtlMs();
 }
 
 // ─── Read path: single-key resolver ─────────────────────────────────────────────
@@ -282,30 +341,20 @@ export async function resolveEnvConfig(key: string): Promise<string | undefined>
   const now = Date.now();
   const cachedEntry = cache.get(key);
   // Pre-warmed "env" entries are non-authoritative — a DB override may exist.
-  // Only short-circuit on "db" entries (confirmed correct precedence).
-  if (cachedEntry && cachedEntry.expiresAt > now && cachedEntry.source === "db") {
-    logger.debug(`env-config: cache hit for key "${key}"`);
-    return cachedEntry.value;
+  // Only short-circuit on "db" entries (confirmed correct precedence),
+  // OR on transient-"env" entries within their short TTL (throttle re-queries).
+  if (cachedEntry && cachedEntry.expiresAt > now) {
+    if (cachedEntry.source === "db" || (cachedEntry.source === "env" && cachedEntry.transientError)) {
+      logger.debug(`env-config: cache hit for key "${key}"`);
+      return cachedEntry.value;
+    }
   }
 
   // For "env"-tagged cache hits, fall through to DB lookup to respect DB > env precedence.
   logger.debug(`env-config: cache miss for key "${key}", querying system_settings`);
-  let dbValue: string | undefined;
-  try {
-    const setting = await SystemSettingsRepository.getByKey(toDbKey(key));
-    if (setting?.value != null && setting.value !== "") {
-      dbValue = setting.value;
-    }
-  } catch (error) {
-    // Never let a DB error take down env resolution — fall back to process.env.
-    logger.warn(
-      `env-config: DB lookup failed for key "${key}", falling back to process.env. Error: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
-
-  return commitDbResolvedValue(key, dbValue, now, getCacheTtlMs());
+  const { dbValue, dbError, wasTransient } = await performDbLookup(key);
+  const ttlMs = resolveTtl(dbError, wasTransient);
+  return commitDbResolvedValue(key, dbValue, now, ttlMs, dbError ? "env" : "db", dbError ? wasTransient : false);
 }
 
 // ─── Read path: batch resolver ──────────────────────────────────────────────────
@@ -340,8 +389,14 @@ function serveFromCache(dbEligibleKeys: string[], result: Record<string, string 
   const missesNeedingDb: string[] = [];
   for (const key of dbEligibleKeys) {
     const cachedEntry = cache.get(key);
-    // Pre-warmed "env" entries are non-authoritative — need a DB lookup to check for overrides.
-    if (cachedEntry && cachedEntry.expiresAt > now && cachedEntry.source === "db") {
+    // Short-circuit on "db" entries (authoritative) or transient-"env" entries
+    // (throttled re-query within short TTL). Pre-warmed non-transient "env" entries
+    // always fall through to DB lookup (non-authoritative).
+    if (
+      cachedEntry &&
+      cachedEntry.expiresAt > now &&
+      (cachedEntry.source === "db" || (cachedEntry.source === "env" && cachedEntry.transientError))
+    ) {
       logger.debug(`env-config: cache hit for key "${key}"`);
       result[key] = cachedEntry.value;
     } else {
@@ -356,23 +411,34 @@ function serveFromCache(dbEligibleKeys: string[], result: Record<string, string 
  * returning `undefined` so callers can fall back to `process.env`. Factored out to keep
  * the batch function's cognitive complexity under the SonarJS limit.
  *
- * @returns `[key, dbValue]` where `dbValue` is the non-empty DB override, or `undefined`
- *          on miss / error.
+ * @returns `[key, dbValue, dbError, wasTransient]` where `dbValue` is the non-empty DB
+ *          override, or `undefined` on miss / error. `dbError` is true when the lookup
+ *          threw. `wasTransient` indicates if the error was a transient cold-start error.
  */
-async function lookupDbValueFor(key: string): Promise<readonly [string, string | undefined]> {
+async function lookupDbValueFor(key: string): Promise<readonly [string, string | undefined, boolean, boolean]> {
   try {
     const setting = await SystemSettingsRepository.getByKey(toDbKey(key));
     if (setting?.value != null && setting.value !== "") {
-      return [key, setting.value] as const;
+      return [key, setting.value, false, false] as const;
     }
   } catch (error) {
-    logger.warn(
-      `env-config: DB lookup failed for key "${key}", falling back to process.env. Error: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+    const transient = isTransientError(error);
+    if (transient) {
+      logger.warn(
+        `env-config: DB lookup failed (transient) for key "${key}", using short cache TTL. Error: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    } else {
+      logger.error(
+        `env-config: DB lookup failed (non-transient) for key "${key}". Error: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+    return [key, undefined, true, transient] as const;
   }
-  return [key, undefined] as const;
+  return [key, undefined, false, false] as const;
 }
 
 /**
@@ -384,9 +450,11 @@ function recordResolvedKey(
   dbValue: string | undefined,
   result: Record<string, string | undefined>,
   now: number,
-  ttlMs: number
+  ttlMs: number,
+  source: "db" | "env",
+  transientError: boolean = false
 ): void {
-  const resolved = commitDbResolvedValue(key, dbValue, now, ttlMs);
+  const resolved = commitDbResolvedValue(key, dbValue, now, ttlMs, source, transientError);
   result[key] = resolved;
 }
 
@@ -413,15 +481,15 @@ export async function resolveEnvConfigMany(keys: string[]): Promise<Record<strin
   }
 
   const now = Date.now();
-  const ttlMs = getCacheTtlMs();
   const missesNeedingDb = serveFromCache(dbEligibleKeys, result, now);
   if (missesNeedingDb.length === 0) {
     return result;
   }
 
   const lookupResults = await Promise.all(missesNeedingDb.map(key => lookupDbValueFor(key)));
-  for (const [key, dbValue] of lookupResults) {
-    recordResolvedKey(key, dbValue, result, now, ttlMs);
+  for (const [key, dbValue, dbError, wasTransient] of lookupResults) {
+    const entryTtl = resolveTtl(dbError, wasTransient);
+    recordResolvedKey(key, dbValue, result, now, entryTtl, dbError ? "env" : "db", dbError ? wasTransient : false);
   }
 
   return result;
