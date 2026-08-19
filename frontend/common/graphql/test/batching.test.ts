@@ -135,7 +135,10 @@ describe("GraphQL HTTP Batching Integration Tests", () => {
     await loginDemoUser("super_admin");
     const cookieHeader = buildAuthCookieHeader();
 
-    const queryText = "{ me { id } }";
+    // Use a unique query alias per test run so the APQ cache (which persists
+    // across test runs on the shared dev server) doesn't already have the hash.
+    const uniqueAlias = `me${Date.now()}`;
+    const queryText = `{ ${uniqueAlias}: me { id } }`;
     let hashHex: string;
     try {
       hashHex = await sha256Hex(queryText);

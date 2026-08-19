@@ -216,7 +216,8 @@ function hasAnyProfileViewOwnPermission(ctx: PermissionCheckContext): boolean {
 function checkOwnScopePermission(
   ctx: PermissionCheckContext,
   audience: ProfileAudience,
-  permissionSet: OwnScopePermissionSet
+  permissionSet: OwnScopePermissionSet,
+  isView: boolean
 ): boolean {
   if (contextHasPermission(ctx, permissionSet.authPermission)) {
     return true;
@@ -227,7 +228,7 @@ function checkOwnScopePermission(
   if (hasAudiencePermission(ctx, audience, permissionSet.audiencePermissions)) {
     return true;
   }
-  return hasAnyProfileViewOwnPermission(ctx);
+  return isView && hasAnyProfileViewOwnPermission(ctx);
 }
 
 function checkOtherScopePermission(
@@ -263,9 +264,10 @@ async function assertOwnScopeOrThrow(
   ctx: PermissionCheckContext,
   audience: ProfileAudience,
   permissionSet: OwnScopePermissionSet,
+  isView: boolean,
   locale?: string
 ): Promise<boolean> {
-  if (!checkOwnScopePermission(ctx, audience, permissionSet)) {
+  if (!checkOwnScopePermission(ctx, audience, permissionSet, isView)) {
     throwInsufficientPermissions(locale);
   }
   return true;
@@ -277,10 +279,11 @@ async function assertProfilePermission(
   audience: ProfileAudience,
   ownPermissionSet: OwnScopePermissionSet,
   otherPermissionSet: OtherScopePermissionSet,
+  isView: boolean,
   locale?: string
 ): Promise<void> {
   if (scope === ProfileScope.OWN) {
-    await assertOwnScopeOrThrow(ctx, audience, ownPermissionSet, locale);
+    await assertOwnScopeOrThrow(ctx, audience, ownPermissionSet, isView, locale);
     return;
   }
 
@@ -304,7 +307,7 @@ function resolveEffectiveScope(
   if (scope !== ProfileScope.OWN) {
     return scope;
   }
-  if (checkOwnScopePermission(ctx, audience, ownPermissionSet)) {
+  if (checkOwnScopePermission(ctx, audience, ownPermissionSet, isView)) {
     return ProfileScope.OWN;
   }
   if (checkOtherScopePermission(ctx, audience, otherPermissionSet)) {
@@ -342,7 +345,7 @@ async function assertCanViewProfile(
     return;
   }
 
-  await assertProfilePermission(ctx, scope, audience, VIEW_OWN_PERMISSIONS, VIEW_OTHER_PERMISSIONS, locale);
+  await assertProfilePermission(ctx, scope, audience, VIEW_OWN_PERMISSIONS, VIEW_OTHER_PERMISSIONS, true, locale);
 }
 
 async function assertCanEditProfile(
@@ -352,7 +355,7 @@ async function assertCanEditProfile(
   audience: ProfileAudience,
   locale?: string
 ): Promise<void> {
-  await assertProfilePermission(ctx, scope, audience, EDIT_OWN_PERMISSIONS, EDIT_OTHER_PERMISSIONS, locale);
+  await assertProfilePermission(ctx, scope, audience, EDIT_OWN_PERMISSIONS, EDIT_OTHER_PERMISSIONS, false, locale);
 }
 
 export namespace ProfileService {

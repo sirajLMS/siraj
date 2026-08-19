@@ -25,5 +25,6 @@
   "parent": "Parent",
   "staff": "Staff",
   "showPassword": "Show password",
-  "hidePassword": "Hide password"
+  "hidePassword": "Hide password",
+  "retrying": "Retrying..."
 }

@@ -25,5 +25,6 @@
   "parent": "ولي أمر",
   "staff": "موظف",
   "showPassword": "إظهار كلمة المرور",
-  "hidePassword": "إخفاء كلمة المرور"
+  "hidePassword": "إخفاء كلمة المرور",
+  "retrying": "إعادة المحاولة..."
 }

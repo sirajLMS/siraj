@@ -30,6 +30,25 @@ function unsetEnv(key: string): void {
   Reflect.deleteProperty(process.env, key);
 }
 
+function setupEnvAndPreWarm(key: string, envValue: string): void {
+  process.env[key] = envValue;
+  preWarmEnvConfigCache();
+}
+
+function mockRepoNull() {
+  return spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(null);
+}
+
+const DB_OVERRIDE_MOCK = {
+  key: "env::STORAGE_PROVIDER",
+  value: "gcs",
+  dataType: SystemSettingDataType.String,
+  description: "Storage provider override",
+  category: SystemSettingCategory.Storage,
+  updatedByUserId: null,
+  updatedAt: new Date(),
+};
+
 describe("environment-config.service — pre-warm cache", () => {
   beforeEach(() => {
     saveEnv(TEST_KEY);
@@ -42,11 +61,9 @@ describe("environment-config.service — pre-warm cache", () => {
   });
 
   test("preWarmEnvConfigCache populates cache for env-fallback keys, DB miss reuses cached value", async () => {
-    process.env[TEST_KEY] = "s3";
+    setupEnvAndPreWarm(TEST_KEY, "s3");
 
-    preWarmEnvConfigCache();
-
-    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(null);
+    const spy = mockRepoNull();
 
     const result = await resolveEnvConfig(TEST_KEY);
 
@@ -63,7 +80,7 @@ describe("environment-config.service — pre-warm cache", () => {
 
     preWarmEnvConfigCache();
 
-    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(null);
+    const spy = mockRepoNull();
 
     const result = await resolveEnvConfig(TEST_KEY);
 
@@ -74,11 +91,9 @@ describe("environment-config.service — pre-warm cache", () => {
   });
 
   test("resolveEnvConfig returns pre-warmed value on DB miss (cached env reuse)", async () => {
-    process.env[TEST_KEY_2] = "fixer";
+    setupEnvAndPreWarm(TEST_KEY_2, "fixer");
 
-    preWarmEnvConfigCache();
-
-    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(null);
+    const spy = mockRepoNull();
 
     const result = await resolveEnvConfig(TEST_KEY_2);
 
@@ -90,19 +105,9 @@ describe("environment-config.service — pre-warm cache", () => {
   });
 
   test("DB override takes precedence over pre-warmed env value", async () => {
-    process.env[TEST_KEY] = "s3";
+    setupEnvAndPreWarm(TEST_KEY, "s3");
 
-    preWarmEnvConfigCache();
-
-    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue({
-      key: "env::STORAGE_PROVIDER",
-      value: "gcs",
-      dataType: SystemSettingDataType.String,
-      description: "Storage provider override",
-      category: SystemSettingCategory.Storage,
-      updatedByUserId: null,
-      updatedAt: new Date(),
-    });
+    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(DB_OVERRIDE_MOCK);
 
     const result = await resolveEnvConfig(TEST_KEY);
 
@@ -114,11 +119,9 @@ describe("environment-config.service — pre-warm cache", () => {
   });
 
   test("second resolveEnvConfig call uses db-sourced cache hit (no DB query)", async () => {
-    process.env[TEST_KEY] = "s3";
+    setupEnvAndPreWarm(TEST_KEY, "s3");
 
-    preWarmEnvConfigCache();
-
-    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(null);
+    const spy = mockRepoNull();
 
     // First call: DB lookup runs (env-tagged entry is non-authoritative).
     await resolveEnvConfig(TEST_KEY);
@@ -131,21 +134,11 @@ describe("environment-config.service — pre-warm cache", () => {
   });
 
   test("DB override works after cache invalidation", async () => {
-    process.env[TEST_KEY] = "s3";
-
-    preWarmEnvConfigCache();
+    setupEnvAndPreWarm(TEST_KEY, "s3");
 
     invalidateEnvConfigCache(TEST_KEY);
 
-    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue({
-      key: "env::STORAGE_PROVIDER",
-      value: "gcs",
-      dataType: SystemSettingDataType.String,
-      description: "Storage provider override",
-      category: SystemSettingCategory.Storage,
-      updatedByUserId: null,
-      updatedAt: new Date(),
-    });
+    const spy = spyOn(SystemSettingsRepository, "getByKey").mockResolvedValue(DB_OVERRIDE_MOCK);
 
     const result = await resolveEnvConfig(TEST_KEY);
 
