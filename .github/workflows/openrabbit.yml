@@ -3,6 +3,9 @@ name: OpenRabbit Reviewer
 on:
   pull_request_target:
     types: [opened, reopened, edited, synchronize]
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,6 +22,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install dependencies (socat & jq)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y socat jq
 
       - name: Start Shell NVIDIA Router
         env:

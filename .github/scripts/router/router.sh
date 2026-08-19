@@ -24,6 +24,12 @@ run_server() {
     local port="$ROUTER_PORT"
     export ROUTER_PORT STATE_DIR
 
+    if ! command -v socat >/dev/null 2>&1; then
+        if command -v sudo >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update -y >/dev/null 2>&1 && sudo apt-get install -y socat >/dev/null 2>&1 || true
+        fi
+    fi
+
     if command -v socat >/dev/null 2>&1; then
         echo "[NvidiaRouter] Starting with socat on port ${port}..."
         exec socat TCP-LISTEN:"${port}",fork,reuseaddr SYSTEM:"${ROUTER_DIR}/handler.sh ${port} ${STATE_DIR}"
