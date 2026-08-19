@@ -129,6 +129,12 @@ When eliminating desktop↔mobile code duplication, use the `*Shared.tsx` / `__s
 - **`no-unsafe-enum-comparison` (oxlint)**: Use `Record<string, string>` lookup tables, not switch statements on enum values.
 - **`no-unsafe-type-assertion` (oxlint)**: Use type guards (`value is Type`) instead of `as` casts.
 
+## Performance & Serverless Optimization
+
+- **Client logger `batchInterval`** MUST be at least 30s in production; `beforeunload` flush is required (uses `fetch` with `keepalive: true`, NOT `navigator.sendBeacon`); error/warn logs MUST bypass min-batch-size guard via `hasPriorityLog` flag
+- **`RequirePermission`** MUST NOT log DEBUG messages by default — gate behind `process.env.NEXT_PUBLIC_DEBUG_PERMISSIONS === "true"`
+- **Poll interval optimization**: `NOTIFICATION_COUNT_POLL_INTERVAL_MS` is 120s (not 60s); `useIdleDetection` pauses polling after 5 min idle; `visibilitychange` pauses when tab hidden
+
 ## Linting Rules
 
 - See `docs/quality/linting-rules.md` for Oxlint & ESLint/sonarjs fix recipes. NEVER use `oxlint-disable` comments.

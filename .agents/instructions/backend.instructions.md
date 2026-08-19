@@ -117,6 +117,7 @@ applyTo: "backend/**/*.ts"
 - Never call other services outside your domain boundary - each domain owns its own service
 - SSR-compatible: must not rely on GraphQL-specific contexts unless passed explicitly
 - Treat `locale` as optional parameter - pass from GraphQL context or Server Component as needed
+- **Permission Context Propagation**: Services that check permissions MUST accept `UserPermissionContext` from GraphQL context instead of re-querying via `PermissionsService.hasPermission(userId, ...)`. The `UserPermissionContext` type in `@/backend/types/permissions/permission.types.ts` has `permissions`, `permissionGroups`, `isSuperAdmin`, `role`. See `docs/backend/serverless-cold-start-optimization.md`.
 - **Batch Service Methods**: Services called from GraphQL resolvers MUST expose batch versions (e.g., `resolveTeacherIdsForUsers(userIds: string[])`) returning `Map<string, T | null>`. Delegate to batch repository methods. See `docs/graphql/dataloader-batching.md`.
 
 ### Seeds (CRITICAL)

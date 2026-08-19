@@ -70,14 +70,14 @@ Phase H (knowledge propagation)
 
 ### Task A1: Add `UserPermissionContext` Overloads to PermissionsService
 
-- [ ] A1.1 Verify `UserPermissionContext` type shape
+- [x] A1.1 Verify `UserPermissionContext` type shape
   - Read `backend/types/` for existing `UserPermissionContext` type definition
   - Verify it matches `BaseContext` permission fields: `permissions: AppPermission[]`, `permissionGroups: string[]`, `isSuperAdmin: boolean`, `role: UserRole`
   - If type doesn't exist, create in `backend/types/permission.types.ts` (follow `backend/types/AGENTS.md` rules)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1_
 
-- [ ] A1.2 Add `hasPermission` overload accepting `UserPermissionContext`
+- [x] A1.2 Add `hasPermission` overload accepting `UserPermissionContext`
   - File: `backend/services/auth/permissions.service.ts`
   - Add method overload: `hasPermission(context: UserPermissionContext, permissionKey: AppPermission): boolean`
   - Logic: `if (context.isSuperAdmin) return true; return context.permissions.includes(permissionKey)`
@@ -85,7 +85,7 @@ Phase H (knowledge propagation)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1_
 
-- [ ] A1.3 Add `hasAnyPermission` overload accepting `UserPermissionContext`
+- [x] A1.3 Add `hasAnyPermission` overload accepting `UserPermissionContext`
   - File: `backend/services/auth/permissions.service.ts`
   - Add method overload: `hasAnyPermission(context: UserPermissionContext, permissionKeys: AppPermission[]): boolean`
   - Logic: `if (context.isSuperAdmin) return true; return permissionKeys.some((p) => context.permissions.includes(p))`
@@ -93,19 +93,19 @@ Phase H (knowledge propagation)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1_
 
-- [ ] A1.4 Write paired unit test for new overloads
+- [x] A1.4 Write paired unit test for new overloads
   - Test file: `backend/services/auth/test/permissions.service.test.ts` (or existing test file location)
   - Cover: superadmin fast-path, permission present in array, permission absent, empty permissions array, multiple permissions check
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 1_
 
-- [ ] A1.5 Run test suite and verify all pass
+- [x] A1.5 Run test suite and verify all pass
   - Run: `bun run scripts/run-test/run-test.ts <test-path>`
   - _Requirements: REQ 1_
 
 ### Task A2: Add Context-Aware Methods to NotificationAlertsService
 
-- [ ] A2.1 Add `getAlerts` overload accepting `UserPermissionContext`
+- [x] A2.1 Add `getAlerts` overload accepting `UserPermissionContext`
   - File: `backend/services/notification/notification-alerts.service.ts`
   - Existing signature: `getAlerts(userId: string, locale: string)` — preserved unchanged
   - New overload: `getAlerts(userId: string, context: UserPermissionContext, locale: string): Promise<NotificationAlert[]>`
@@ -116,55 +116,55 @@ Phase H (knowledge propagation)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1_
 
-- [ ] A2.2 Add `markAlertsRead` overload accepting `UserPermissionContext`
+- [x] A2.2 Add `markAlertsRead` overload accepting `UserPermissionContext`
   - File: `backend/services/notification/notification-alerts.service.ts`
   - Existing signature preserved — new overload adds `context: UserPermissionContext` parameter
   - Replace `PermissionsService.hasPermission(userId, NOTIFICATION_VIEW_ALERTS)` (line 258) with context check
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1_
 
-- [ ] A2.3 Add `markOneAlertRead` overload accepting `UserPermissionContext`
+- [x] A2.3 Add `markOneAlertRead` overload accepting `UserPermissionContext`
   - File: `backend/services/notification/notification-alerts.service.ts`
   - Existing signature preserved — new overload adds `context: UserPermissionContext` parameter
   - Replace `PermissionsService.hasPermission(userId, NOTIFICATION_VIEW_ALERTS)` (line 298) with context check
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1_
 
-- [ ] A2.4 Write paired unit test for context-aware `getAlerts`
+- [x] A2.4 Write paired unit test for context-aware `getAlerts`
   - Test file: `backend/services/notification/test/notification-alerts.service.test.ts` (or existing test file)
   - Cover: context with NOTIFICATION_VIEW_ALERTS permission, context without permission, context with isSuperAdmin, context with COMPLAINTS_LIST permission affecting filter
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 1_
 
-- [ ] A2.5 Run test suite and verify all pass
+- [x] A2.5 Run test suite and verify all pass
   - Run: `bun run scripts/run-test/run-test.ts <test-path>`
   - _Requirements: REQ 1_
 
 ### Task A3: Wire Permission Context in GraphQL Resolver
 
-- [ ] A3.1 Verify the `notificationAlerts` resolver file
+- [x] A3.1 Verify the `notificationAlerts` resolver file
   - File: `backend/graphql/query/notifications/notification-alerts.query.ts` (confirmed — line 7 defines the resolver)
   - Current call: `NotificationAlertsService.getAlerts(ctx.user.id, ctx.locale)` (line 15)
   - _Requirements: REQ 1_
 
-- [ ] A3.2 Update resolver to pass `UserPermissionContext` from `ctx`
+- [x] A3.2 Update resolver to pass `UserPermissionContext` from `ctx`
   - Construct `UserPermissionContext` from `ctx` fields: `{ permissions: ctx.permissions, permissionGroups: ctx.permissionGroups, isSuperAdmin: ctx.isSuperAdmin, role: ctx.role }`
   - Call `NotificationAlertsService.getAlerts(ctx.user.id, userPermissionContext, ctx.locale)` — note: `ctx.locale` is the existing second parameter, preserved as third param in the new overload
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1_
 
-- [ ] A3.3 Write GraphQL integration test for `notificationAlerts` with context
+- [x] A3.3 Write GraphQL integration test for `notificationAlerts` with context
   - Test file: `frontend/common/graphql/test/notification-alerts.test.ts` (or existing location)
   - Use `testClient` — verify only 1 DB query for notification rows
   - Mock/verify `PermissionsService.getUserContext` is NOT called by NotificationAlertsService
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 1_
 
-- [ ] A3.4 Run GraphQL integration test and verify pass
+- [x] A3.4 Run GraphQL integration test and verify pass
   - Run: `bun run scripts/run-test/run-test.ts <test-path>`
   - _Requirements: REQ 1_
 
-- [ ] A3.5 Write outcome file for Phase A
+- [x] A3.5 Write outcome file for Phase A
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-a-outcome.md`
   - Document: files modified, approach taken, test results, any cross-file dependencies discovered
   - _Requirements: REQ 0_
@@ -177,20 +177,20 @@ Phase H (knowledge propagation)
 
 ### Task A2.1: Short-Circuit scopeAuth getUserContext When ctx Already Has Permission Data
 
-- [ ] A2.1.1 Add early return in scopeAuth evaluator
+- [x] A2.1.1 Add early return in scopeAuth evaluator
   - File: `backend/graphql/gqlSchemaBuilder.ts`
   - In the `scopeAuth` evaluator (around line 104-118), add an early return: if `ctx.permissions` and `ctx.isSuperAdmin` are already populated (non-undefined), skip the `getUserContext` call and use the existing `ctx` values
   - **R3-2 dead-code note:** The `else if (ctx.actorUserId)` branch at lines 116-118 is unreachable — `realUserId` is already backfilled from `actorUserId` at line 111. Clean up this dead code while editing.
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1.5_
 
-- [ ] A2.1.2 Write unit test for scopeAuth early return
+- [x] A2.1.2 Write unit test for scopeAuth early return
   - Test file: `backend/graphql/test/gqlSchemaBuilder.scopeAuth.test.ts` (or existing location)
   - Cover: permission scope with ctx already populated (no getUserContext call), permission scope with ctx NOT populated (falls back to getUserContext), loggedIn scope (no getUserContext call regardless)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 1.5_
 
-- [ ] A2.1.3 Write outcome file for Phase A2
+- [x] A2.1.3 Write outcome file for Phase A2
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-a2-outcome.md`
   - _Requirements: REQ 0_
 
@@ -202,7 +202,7 @@ Phase H (knowledge propagation)
 
 ### Task A3.1: Return ctx.user Directly in Query.me Resolver
 
-- [ ] A3.1.1 Eliminate redundant UserService.findById in Query.me resolver
+- [x] A3.1.1 Eliminate redundant UserService.findById in Query.me resolver
   - File: `backend/graphql/query/auth/auth.query.ts`
   - Line 17: Replace `const user = await UserService.findById(ctx.user.id)` with one of:
     - **Option (a) — preferred (0 DB):** Add `safeUser: UserSelectType | null` field to `BaseContext` in `gqlContext.ts`, populate it at line 80 (already calls `findSafeById` — just store the result: `safeUser`), then use `AuthUtils.toUserReturnType(ctx.safeUser, { role: ctx.role })` in the resolver. Adds zero DB queries.
@@ -211,13 +211,13 @@ Phase H (knowledge propagation)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 1.6_
 
-- [ ] A3.1.2 Write paired unit test
+- [x] A3.1.2 Write paired unit test
   - Test file: `backend/graphql/query/auth/test/auth.query.test.ts` (or existing location)
   - Cover: `Query.me` returns user from `ctx.safeUser` (option a) or `findSafeById` (option b) without calling `UserService.findById`, `AuthUtils.toUserReturnType` transformation works correctly on `UserSelectType`
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 1.6_
 
-- [ ] A3.1.3 Write outcome file for Phase A3
+- [x] A3.1.3 Write outcome file for Phase A3
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-a3-outcome.md`
   - _Requirements: REQ 0_
 
@@ -225,7 +225,7 @@ Phase H (knowledge propagation)
 
 ### Task B1: Add Cache Pre-Warm Function
 
-- [ ] B1.1 Add `preWarmEnvConfigCache()` function
+- [x] B1.1 Add `preWarmEnvConfigCache()` function
   - File: `backend/services/system/environment-config.service.ts`
   - After cache Map declaration (line 139), add function that iterates `envConfigKeys` registry
   - For each key with `excludeFromDb: false`, check `process.env[<envVarName>]`
@@ -235,29 +235,29 @@ Phase H (knowledge propagation)
   - Checklist: Verify all `resolveEnvConfig("<KEY>")` calls have matching entry in `env-config-keys.ts`
   - _Requirements: REQ 2_
 
-- [ ] B1.2 Call pre-warm at module load
+- [x] B1.2 Call pre-warm at module load
   - At the bottom of `environment-config.service.ts` (after all functions defined), call `preWarmEnvConfigCache()`
   - Wrap in try/catch — if pre-warm fails, continue (normal `resolveEnvConfig()` path will handle it)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 2_
 
-- [ ] B1.3 Verify `resetEnvConfigCache()` invalidates pre-warmed entries
+- [x] B1.3 Verify `resetEnvConfigCache()` invalidates pre-warmed entries
   - Read `resetEnvConfigCache()` function — verify it clears the entire cache Map
   - If it only clears specific keys, ensure pre-warmed keys are included
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 2_
 
-- [ ] B1.4 Write paired unit test for pre-warm
+- [x] B1.4 Write paired unit test for pre-warm
   - Test file: `backend/services/system/test/environment-config.service.test.ts` (or existing location)
   - Cover: pre-warm populates cache for env-fallback keys, pre-warm skips keys without env value, `resolveEnvConfig` returns pre-warmed value without DB query, DB override still works after cache invalidation
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 2_
 
-- [ ] B1.5 Run test suite and verify all pass
+- [x] B1.5 Run test suite and verify all pass
   - Run: `bun run scripts/run-test/run-test.ts <test-path>`
   - _Requirements: REQ 2_
 
-- [ ] B1.6 Write outcome file for Phase B
+- [x] B1.6 Write outcome file for Phase B
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-b-outcome.md`
   - _Requirements: REQ 0_
 
@@ -267,7 +267,7 @@ Phase H (knowledge propagation)
 
 ### Task C1: Reuse User Object in `rotateTokensAndSession`
 
-- [ ] C1.1 Replace redundant `UserService.findById` call
+- [x] C1.1 Replace redundant `UserService.findById` call
   - File: `backend/graphql/mutation/auth/auth.mutation.ts`
   - Line 172: Replace `const effectiveUser = await UserService.findById(effectiveUserId)` with:
     ```typescript
@@ -280,17 +280,17 @@ Phase H (knowledge propagation)
   - Checklist: Verify `effectiveUserId` is derived from impersonation/simulation context — if not active, it equals `user.id`
   - _Requirements: REQ 3_
 
-- [ ] C1.2 Write paired unit test for user reuse path
+- [x] C1.2 Write paired unit test for user reuse path
   - Test file: `backend/graphql/mutation/auth/test/auth.mutation.test.ts` (or existing location)
   - Cover: normal refresh (effectiveUserId === user.id) — verify `UserService.findById` called only once (not twice), impersonation refresh (effectiveUserId !== user.id) — verify `UserService.findById` called twice
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 3_
 
-- [ ] C1.3 Run test suite and verify all pass
+- [x] C1.3 Run test suite and verify all pass
   - Run: `bun run scripts/run-test/run-test.ts <test-path>`
   - _Requirements: REQ 3_
 
-- [ ] C1.4 Write outcome file for Phase C
+- [x] C1.4 Write outcome file for Phase C
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-c-outcome.md`
   - _Requirements: REQ 0_
 
@@ -302,20 +302,20 @@ Phase H (knowledge propagation)
 
 ### Task C2.1: Remove Redundant findSafeById in validateSession
 
-- [ ] C2.1.1 Remove or skip findSafeById call in validateSession
+- [x] C2.1.1 Remove or skip findSafeById call in validateSession
   - File: `backend/services/session/session.service.ts`
   - Line 68: Remove or skip the `findSafeById` call — `createContext` already provides the user object
   - Adjust the return shape to not include the user (or accept the user as a parameter from the caller)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 3_
 
-- [ ] C2.1.2 Write paired unit test
+- [x] C2.1.2 Write paired unit test
   - Test file: `backend/services/session/test/session.service.test.ts` (or existing location)
   - Cover: `validateSession` returns session data without calling `findSafeById`, downstream callers still receive user via `createContext`
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 3_
 
-- [ ] C2.1.3 Write outcome file for Phase C2
+- [x] C2.1.3 Write outcome file for Phase C2
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-c2-outcome.md`
   - _Requirements: REQ 0_
 
@@ -323,13 +323,13 @@ Phase H (knowledge propagation)
 
 ### Task D1: Update DashboardClientBridge Poll Configuration
 
-- [ ] D1.1 Increase poll interval to 120s
+- [x] D1.1 Increase poll interval to 120s
   - File: `frontend/common/views/dashboard/components/DashboardClientBridge.tsx`
   - Line 33: Change `NOTIFICATION_COUNT_POLL_INTERVAL_MS = 60_000` to `NOTIFICATION_COUNT_POLL_INTERVAL_MS = 120_000`
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 4_
 
-- [ ] D1.2 Add idle detection hook
+- [x] D1.2 Add idle detection hook
   - File: `frontend/common/views/dashboard/components/DashboardClientBridge.tsx` (or new utility file)
   - Add `useIdleDetection` hook: track mouse/keyboard/visibility events
   - After 5 minutes (300_000ms) of inactivity, set `isIdle` to true
@@ -339,23 +339,23 @@ Phase H (knowledge propagation)
   - Checklist: No hardcoded colors; use theme callback for any sx props
   - _Requirements: REQ 4_
 
-- [ ] D1.3 Trigger `me` refetch on `markAlertsRead` completion
+- [x] D1.3 Trigger `me` refetch on `markAlertsRead` completion
   - File: `frontend/common/views/dashboard/components/DashboardClientBridge.tsx`
   - In the `markAlertsRead` mutation's `onCompleted` callback, call `refetch()` for the `me` query
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 4_
 
-- [ ] D1.4 Write component test for poll + idle behavior
+- [x] D1.4 Write component test for poll + idle behavior
   - Test file: `test/ui/components/DashboardClientBridge.test.tsx` (or existing location)
   - Cover: poll interval is 120s, idle pause sets poll to 0, activity resumes polling and refetches, markAlertsRead triggers refetch
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 4_
 
-- [ ] D1.5 Run component test suite and verify pass
+- [x] D1.5 Run component test suite and verify pass
   - Run: `bun run test:ui:components` (or `bun run scripts/run-test/run-test.ts <test-path>`)
   - _Requirements: REQ 4_
 
-- [ ] D1.6 Write outcome file for Phase D
+- [x] D1.6 Write outcome file for Phase D
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-d-outcome.md`
   - _Requirements: REQ 0_
 
@@ -365,32 +365,32 @@ Phase H (knowledge propagation)
 
 ### Task E1: Suppress RequirePermission DEBUG Log
 
-- [ ] E1.1 Remove default DEBUG log from RequirePermission
+- [x] E1.1 Remove default DEBUG log from RequirePermission
   - File: `frontend/common/components/auth/RequirePermission.tsx`
   - Line 39: Remove `logger.debug({ caller: "RequirePermission" }, "Access denied for ${String(permissions)}")`
   - Optionally gate behind `NEXT_PUBLIC_DEBUG_PERMISSIONS === "true"` if verbose mode is needed
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 5_
 
-- [ ] E1.2 Write component test verifying no log output on access denied
+- [x] E1.2 Write component test verifying no log output on access denied
   - Test file: `test/ui/components/RequirePermission.test.tsx` (or existing location)
   - Cover: access denied → no `logger.debug` call (mock the logger and assert not called)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 5_
 
-- [ ] E1.3 Run component test suite and verify pass
+- [x] E1.3 Run component test suite and verify pass
   - Run: `bun run test:ui:components` (or `bun run scripts/run-test/run-test.ts <test-path>`)
   - _Requirements: REQ 5_
 
 ### Task E2: Increase Client Logger Batch Interval
 
-- [ ] E2.1 Increase batchInterval from 2s to 30s
+- [x] E2.1 Increase batchInterval from 2s to 30s
   - File: `frontend/common/lib/logger/index.ts`
   - Line 39: Change `batchInterval: 2000` to `batchInterval: 30000`
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 6_
 
-- [ ] E2.2 Add `beforeunload` flush listener
+- [x] E2.2 Add `beforeunload` flush listener
   - File: `frontend/common/lib/logger/index.ts`
   - In the ClientLogger constructor or init function, add `window.addEventListener("beforeunload", () => this.flushLogs())`
   - Ensure cleanup removes the listener
@@ -398,24 +398,24 @@ Phase H (knowledge propagation)
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 6_
 
-- [ ] E2.3 Add minimum batch size guard (optional)
+- [x] E2.3 Add minimum batch size guard (optional)
   - File: `frontend/common/lib/logger/index.ts`
   - In `flushLogs()`: if log queue has fewer than 5 entries AND the batch timer hasn't elapsed, skip the POST
   - Error-level logs (`force: true`) should bypass this guard
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 6_
 
-- [ ] E2.4 Write unit test for batch interval and flush
+- [x] E2.4 Write unit test for batch interval and flush
   - Test file: `frontend/common/lib/logger/test/logger.test.ts` (or existing location)
   - Cover: logs batch at 30s interval, `beforeunload` triggers immediate flush, minimum batch size guard works, error log bypasses guard
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 6_
 
-- [ ] E2.5 Run test suite and verify pass
+- [x] E2.5 Run test suite and verify pass
   - Run: `bun run test:ui:components` (or `bun run scripts/run-test/run-test.ts <test-path>`)
   - _Requirements: REQ 6_
 
-- [ ] E2.6 Write outcome file for Phase E
+- [x] E2.6 Write outcome file for Phase E
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-e-outcome.md`
   - _Requirements: REQ 0_
 
@@ -427,27 +427,27 @@ Phase H (knowledge propagation)
 
 ### Task E2.1: Enable allowBatchedHttpRequests on Apollo Server
 
-- [ ] E2.1.1 Add allowBatchedHttpRequests: true to ApolloServer constructor
+- [x] E2.1.1 Add allowBatchedHttpRequests: true to ApolloServer constructor
   - File: `app/api/graphql/route.ts`
   - Add `allowBatchedHttpRequests: true` to the `ApolloServer` constructor options (around line 44)
   - Verify persisted queries (APQ) continue to work with batching enabled
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 3.5_
 
-- [ ] E2.1.2 Adopt BatchHttpLink on the client side (Option A) OR verify source-level aggregation (Option B)
+- [x] E2.1.2 Adopt BatchHttpLink on the client side (Option A) OR verify source-level aggregation (Option B)
   - File: `frontend/common/providers/apollo/AppApolloProvider.tsx`
   - **Option A (full batching)**: Replace `HttpLink` (line 58) with `BatchHttpLink` from `@apollo/client/link/batch`. Verify `PersistedQueryLink` chains correctly before `BatchHttpLink`.
   - **Option B (safer, source-level only)**: Keep `HttpLink` but reduce concurrent POSTs by consolidating the 3 permissions-page queries into 1 (8 → 6 POSTs). The `allowBatchedHttpRequests: true` server flag still helps future-proof.
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 3.5_
 
-- [ ] E2.1.3 Write integration test for batched HTTP requests
+- [x] E2.1.3 Write integration test for batched HTTP requests
   - Test file: `frontend/common/graphql/test/batching.test.ts` (or existing location)
   - Cover: server accepts array of operations, returns array of responses, APQ works with batched requests
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 3.5_
 
-- [ ] E2.1.4 Write outcome file for Phase E2
+- [x] E2.1.4 Write outcome file for Phase E2
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-e2-outcome.md`
   - _Requirements: REQ 0_
 
@@ -459,27 +459,27 @@ Phase H (knowledge propagation)
 
 ### Task E3.1: Deduplicate findSessionById in Context Creation
 
-- [ ] E3.1.1 Eliminate duplicate findSessionById in gqlContext
+- [x] E3.1.1 Eliminate duplicate findSessionById in gqlContext
   - File: `backend/graphql/gqlContext.ts`
   - Identify the two `findSessionById` calls in the context creation path
   - Share the result: call `findSessionById` once, pass the result to both consumers
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
   - _Requirements: REQ 3.6_
 
-- [ ] E3.1.2 Deduplicate getSessionGroupSimulation if also redundant
+- [x] E3.1.2 Deduplicate getSessionGroupSimulation if also redundant
   - File: `backend/db/repo/session.repository.ts`
   - Check if `getSessionGroupSimulation` is also called twice in the context path
   - If so, share the result similarly
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 3.6_
 
-- [ ] E3.1.3 Write paired unit test
+- [x] E3.1.3 Write paired unit test
   - Test file: `backend/graphql/test/gqlContext.dedup.test.ts` (or existing location)
   - Cover: `findSessionById` called once per request (not twice), session data shared correctly between consumers
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 3.6_
 
-- [ ] E3.1.4 Write outcome file for Phase E3
+- [x] E3.1.4 Write outcome file for Phase E3
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-e3-outcome.md`
   - _Requirements: REQ 0_
 
@@ -491,32 +491,32 @@ Phase H (knowledge propagation)
 
 ### Task F1: Verify Existing Singleton Patterns (Audit Only)
 
-- [ ] F1.1 Audit env validation singleton (ALREADY IN PLACE — verify only)
+- [x] F1.1 Audit env validation singleton (ALREADY IN PLACE — verify only)
   - File: `backend/lib/env.ts`
   - Verify `ensureEnvironmentValidated` uses `getGlobalSingleton(ENV_KEY, ...)` at line 484
   - **No code change expected** — document confirmation in outcome file
   - _Requirements: REQ 8_
 
-- [ ] F1.2 Audit DB client singleton (ALREADY IN PLACE — verify only)
+- [x] F1.2 Audit DB client singleton (ALREADY IN PLACE — verify only)
   - File: `backend/db/drizzleDb.ts`
   - Verify `db = getGlobalSingleton(DB_KEY, initDatabase)` at line 38
   - Verify DB pool: `getGlobalSingleton(DB_POOL_KEY, () => createPool())` at line 68
   - **No code change expected** — document confirmation in outcome file
   - _Requirements: REQ 8_
 
-- [ ] F1.3 Audit cache service singleton (ALREADY IN PLACE — verify only)
+- [x] F1.3 Audit cache service singleton (ALREADY IN PLACE — verify only)
   - File: `backend/services/cache/CacheServiceFactory.ts`
   - Verify `getCacheService()` uses `getGlobalSingleton(CACHE_STATE_KEY, ...)` at line 16
   - **No code change expected** — document confirmation in outcome file
   - _Requirements: REQ 8_
 
-- [ ] F1.4 Verify `configureNeonWebSocket()` idempotency
+- [x] F1.4 Verify `configureNeonWebSocket()` idempotency
   - File: `backend/db/drizzleDb.ts` (or wherever `configureNeonWebSocket` lives)
   - Ensure it's only called once per container lifetime (check for existing guard)
   - If guard exists: document it. If not: add a boolean flag (minor fix).
   - _Requirements: REQ 8_
 
-- [ ] F1.5 Write outcome file for Phase F
+- [x] F1.5 Write outcome file for Phase F
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-f-outcome.md`
   - Document: singleton audit results (all confirmed in place), irreducible cold-start acknowledgment, any minor idempotency fixes
   - _Requirements: REQ 0, REQ 8_
@@ -527,18 +527,18 @@ Phase H (knowledge propagation)
 
 ### Task G1: Identify Source of `url.parse()` Warning
 
-- [ ] G1.1 Run Node.js trace-deprecation to identify source package
+- [x] G1.1 Run Node.js trace-deprecation to identify source package
   - Run: `node --trace-deprecation -e "require('@neondatabase/serverless')"` or similar
   - Alternatively run: `node --trace-deprecation -e "require('ws')"` 
   - Document the exact package and version producing the warning
   - _Requirements: REQ 7_
 
-- [ ] G1.2 Check if newer versions of the package fix the warning
+- [x] G1.2 Check if newer versions of the package fix the warning
   - Run: `npm outdated @neondatabase/serverless` (and `ws`, `pg` if involved)
   - Check changelog/release notes for `url.parse()` removal
   - _Requirements: REQ 7_
 
-- [ ] G1.3 Write outcome file with investigation findings
+- [x] G1.3 Write outcome file with investigation findings
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/phase-g-outcome.md`
   - Document: package name, version, whether upgrade is safe, and recommendation
   - If upgrade is NOT safe: add to `deferred-items.md` with rationale
@@ -550,7 +550,7 @@ Phase H (knowledge propagation)
 
 ### Task H1: Create Canonical Reference Doc
 
-- [ ] H1.1 Create `docs/backend/serverless-cold-start-optimization.md`
+- [x] H1.1 Create `docs/backend/serverless-cold-start-optimization.md`
   - Consolidate learnings from Phases A-F
   - Topics: permission context propagation, env-config pre-warm, redundant query elimination, singleton persistence, client traffic reduction
   - Include: pattern examples, rules, anti-patterns, what NOT to do
@@ -559,19 +559,19 @@ Phase H (knowledge propagation)
 
 ### Task H2: Update Layer AGENTS.md Files
 
-- [ ] H2.1 Update `backend/services/AGENTS.md`
+- [x] H2.1 Update `backend/services/AGENTS.md`
   - Add rule: "Services accepting permission checks MUST accept `UserPermissionContext` parameter from GraphQL context instead of re-querying via `PermissionsService.hasPermission(userId, ...)`"
   - Add one-line reference to new doc
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 0_
 
-- [ ] H2.2 Update `backend/graphql/AGENTS.md`
+- [x] H2.2 Update `backend/graphql/AGENTS.md`
   - Add rule: "Resolvers calling services with permission checks MUST pass `UserPermissionContext` from `ctx` instead of passing only `ctx.user.id`"
   - Add one-line reference to new doc
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 0_
 
-- [ ] H2.3 Update `frontend/AGENTS.md`
+- [x] H2.3 Update `frontend/AGENTS.md`
   - Add rule: "Client logger `batchInterval` MUST be at least 30s in production; `beforeunload` flush is required"
   - Add rule: "`RequirePermission` MUST NOT log DEBUG messages by default"
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
@@ -579,7 +579,7 @@ Phase H (knowledge propagation)
 
 ### Task H3: Update Root AGENTS.md
 
-- [ ] H3.1 Add reference to new doc
+- [x] H3.1 Add reference to new doc
   - File: `AGENTS.md` (root)
   - Add to "Important References" section: `- docs/backend/serverless-cold-start-optimization.md - Serverless cold-start optimization patterns (permission context, env-config pre-warm, singleton persistence)`
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
@@ -587,24 +587,24 @@ Phase H (knowledge propagation)
 
 ### Task H4: Update Instructions
 
-- [ ] H4.1 Update `backend.instructions.md`
+- [x] H4.1 Update `backend.instructions.md`
   - Add rule: "Services that check permissions MUST accept `UserPermissionContext` from GraphQL context"
   - Add one-line reference to new doc
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 0_
 
-- [ ] H4.2 Update `frontend.instructions.md`
+- [x] H4.2 Update `frontend.instructions.md`
   - Add rule: "Client logger batchInterval MUST be >= 30s; beforeunload flush required"
   - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
   - _Requirements: REQ 0_
 
 ### Task H5: Write Final Outcome Synthesis
 
-- [ ] H5.1 Read ALL outcome files in `.ai/plans/vercel-logs-performance-fix/outcome/`
+- [x] H5.1 Read ALL outcome files in `.ai/plans/vercel-logs-performance-fix/outcome/`
   - Extract recurring patterns, cross-file dependencies, gotchas
   - _Requirements: REQ 0_
 
-- [ ] H5.2 Write final synthesis outcome
+- [x] H5.2 Write final synthesis outcome
   - File: `.ai/plans/vercel-logs-performance-fix/outcome/final-synthesis-outcome.md`
   - Summarize: all changes made, test results, performance improvements observed, carry-over points
   - _Requirements: REQ 0_

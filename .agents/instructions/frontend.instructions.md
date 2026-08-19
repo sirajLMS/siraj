@@ -156,6 +156,8 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - `import { logger } from '@/frontend/utils/logger'`
 - Methods: `logger.info`, `logger.warn`, `logger.error`, `logger.debug`
 - Production: info/warn/debug suppressed, error always logs
+- **Client logger `batchInterval`** MUST be at least 30s in production; `beforeunload` flush required (uses `fetch` with `keepalive: true`, NOT `navigator.sendBeacon`); error/warn logs MUST bypass min-batch-size guard. See `docs/backend/serverless-cold-start-optimization.md`.
+- **`RequirePermission`** MUST NOT log DEBUG messages by default — gate behind `process.env.NEXT_PUBLIC_DEBUG_PERMISSIONS === "true"`
 
 ### Storybook
 
