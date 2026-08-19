@@ -13,10 +13,11 @@ ROUTER_PORT="${1:-${ROUTER_PORT:-20128}}"
 STATE_DIR="${2:-${STATE_DIR:-/tmp/nvidia_router_state_${ROUTER_PORT}}}"
 UPSTREAM_URL="${UPSTREAM_URL:-https://integrate.api.nvidia.com/v1/chat/completions}"
 MAX_RETRIES="${MAX_RETRIES:-60}"
-# 60s per attempt: GLM-5.2 needs 25-45s; undici headersTimeout confirmed >90s so this is safe
-CURL_TIMEOUT="${CURL_TIMEOUT:-60}"
-# Total budget: 240s (3-4 healthy attempts + fast 429 rotations)
-REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-240}"
+# 180s per attempt: CI profiling shows NVIDIA NIM takes 60-120s per request
+# undici headersTimeout confirmed >240s so 180s response time is safe
+CURL_TIMEOUT="${CURL_TIMEOUT:-180}"
+# 200s total: room for one slow healthy attempt (≤180s) + fast 429 rotations (150ms each)
+REQUEST_DEADLINE_SEC="${REQUEST_DEADLINE_SEC:-200}"
 
 # Send formatted OpenAI JSON response
 send_openai_json_response() {
