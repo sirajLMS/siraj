@@ -1,12 +1,16 @@
+import { randomInt } from "node:crypto";
 import { logger } from "@/backend/lib/logger";
 
 const TRANSIENT_ERROR_CODES = new Set(["ECONNRESET", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN", "ECONNREFUSED"]);
 
 const TRANSIENT_ERROR_PATTERNS = [
   "timeout",
-  "connection",
+  "connection reset",
+  "connection terminated",
+  "connection refused",
   "websocket",
-  "pool",
+  "the pool is full",
+  "pool exhausted",
   "connect etimedout",
   "connect econnreset",
   "termination",
@@ -57,8 +61,9 @@ async function attemptWithRetry<T>(
       `Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms: ${error instanceof Error ? error.message : String(error)}`
     );
 
+    const jitter = randomInt(0, 50);
     return new Promise<T>(resolve => {
-      setTimeout(resolve, delay);
+      setTimeout(resolve, delay + jitter);
     }).then(() => attemptWithRetry(fn, maxRetries, attempt + 1, Math.round(delay * MULTIPLIER)));
   }
 }

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { SystemSettingsRepository } from "@/backend/db/repo/shared";
+import { makeTransientError } from "@/backend/lib/test/helpers";
 import { invalidateEnvConfigCache, resolveEnvConfig } from "@/backend/services/system/environment-config.service";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
@@ -21,12 +22,6 @@ function restoreEnv(): void {
   }
 }
 
-function makeTransientError(message: string): Error {
-  const err = new Error(message);
-  Object.defineProperty(err, "code", { value: "ETIMEDOUT", enumerable: true });
-  return err;
-}
-
 describe("environment-config cold-start resilience", () => {
   beforeEach(() => {
     saveEnv(TEST_KEY);
@@ -41,7 +36,7 @@ describe("environment-config cold-start resilience", () => {
     process.env[TEST_KEY] = "s3";
 
     const spy = spyOn(SystemSettingsRepository, "getByKey").mockRejectedValueOnce(
-      makeTransientError("connect ETIMEDOUT")
+      makeTransientError("ETIMEDOUT", "connect ETIMEDOUT")
     );
 
     const result = await resolveEnvConfig(TEST_KEY);
@@ -55,7 +50,9 @@ describe("environment-config cold-start resilience", () => {
   test("DB transient failure caches with short TTL — second call within 30s does NOT re-query DB (throttle)", async () => {
     process.env[TEST_KEY] = "s3";
 
-    const spy = spyOn(SystemSettingsRepository, "getByKey").mockRejectedValue(makeTransientError("connect ETIMEDOUT"));
+    const spy = spyOn(SystemSettingsRepository, "getByKey").mockRejectedValue(
+      makeTransientError("ETIMEDOUT", "connect ETIMEDOUT")
+    );
 
     await resolveEnvConfig(TEST_KEY);
     await resolveEnvConfig(TEST_KEY);
@@ -103,7 +100,7 @@ describe("environment-config cold-start resilience", () => {
 
     const spy = spyOn(SystemSettingsRepository, "getByKey");
 
-    spy.mockRejectedValueOnce(makeTransientError("connect ETIMEDOUT"));
+    spy.mockRejectedValueOnce(makeTransientError("ETIMEDOUT", "connect ETIMEDOUT"));
     spy.mockResolvedValueOnce({
       key: "env::STORAGE_PROVIDER",
       value: "gcs",

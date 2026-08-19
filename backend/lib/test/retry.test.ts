@@ -1,16 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { logger } from "@/backend/lib/logger";
 import { isTransientError, retryTransient } from "@/backend/lib/retry";
-
-function makeTransientError(code: string): Error {
-  const err = new Error(`Connection failed (${code})`);
-  Object.defineProperty(err, "code", { value: code, enumerable: true });
-  return err;
-}
-
-function makeMessageError(message: string): Error {
-  return new Error(message);
-}
+import { makeTransientError } from "@/backend/lib/test/helpers";
 
 describe("isTransientError", () => {
   it("returns true for ECONNRESET", () => {
@@ -22,19 +13,31 @@ describe("isTransientError", () => {
   });
 
   it("returns true for error messages containing 'timeout'", () => {
-    expect(isTransientError(makeMessageError("Request timeout exceeded"))).toBe(true);
+    expect(isTransientError(new Error("Request timeout exceeded"))).toBe(true);
   });
 
-  it("returns true for error messages containing 'connection'", () => {
-    expect(isTransientError(makeMessageError("connection refused"))).toBe(true);
+  it("returns true for error messages containing 'connection refused'", () => {
+    expect(isTransientError(new Error("connection refused"))).toBe(true);
+  });
+
+  it("returns true for error messages containing 'connection reset'", () => {
+    expect(isTransientError(new Error("connection reset by peer"))).toBe(true);
+  });
+
+  it("returns true for error messages containing 'connection terminated'", () => {
+    expect(isTransientError(new Error("connection terminated"))).toBe(true);
+  });
+
+  it("returns false for error messages containing bare 'connection' without transient pattern", () => {
+    expect(isTransientError(new Error("invalid connection string"))).toBe(false);
   });
 
   it("returns true for error messages containing 'WebSocket'", () => {
-    expect(isTransientError(makeMessageError("WebSocket is not open"))).toBe(true);
+    expect(isTransientError(new Error("WebSocket is not open"))).toBe(true);
   });
 
   it("returns false for non-transient errors", () => {
-    expect(isTransientError(makeMessageError("Invalid credentials"))).toBe(false);
+    expect(isTransientError(new Error("Invalid credentials"))).toBe(false);
   });
 
   it("returns false for null", () => {
@@ -89,7 +92,7 @@ describe("retryTransient", () => {
   });
 
   it("does NOT retry non-transient errors", async () => {
-    const fn = mock(() => Promise.reject(makeMessageError("Invalid credentials")));
+    const fn = mock(() => Promise.reject(new Error("Invalid credentials")));
     const error = await retryTransient(fn, { baseDelayMs: 1 }).catch(e => e);
     expect(error).toBeInstanceOf(Error);
     expect(error.message).toBe("Invalid credentials");

@@ -1,15 +1,10 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
 import { GraphQLError } from "graphql";
+import { makeTransientError } from "@/backend/lib/test/helpers";
 import type { UserSelectType } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 const TEST_IP = "[IP_REDACTED]";
-
-function makeTransientError(message: string): Error {
-  const err = new Error(message);
-  Object.defineProperty(err, "code", { value: "ECONNRESET", enumerable: true });
-  return err;
-}
 
 function isGraphQLError(error: unknown): error is GraphQLError {
   return error instanceof GraphQLError;
@@ -172,7 +167,7 @@ describe("login resolver cold-start fail-open behavior", () => {
 
   test("isLocked transient failure → fail-open (proceeds to credential check)", async () => {
     spyOn(UserService, "findByEmail").mockResolvedValue(mockUser());
-    spyOn(RateLimitService, "isLocked").mockRejectedValue(makeTransientError("connect ETIMEDOUT"));
+    spyOn(RateLimitService, "isLocked").mockRejectedValue(makeTransientError("ETIMEDOUT", "connect ETIMEDOUT"));
     spyOn(RateLimitService, "resetAttempts").mockResolvedValue(undefined);
 
     const ctx = mockCtx();
@@ -187,7 +182,7 @@ describe("login resolver cold-start fail-open behavior", () => {
   });
 
   test("findByEmail transient failure → retried then SERVICE_UNAVAILABLE after exhaustion", async () => {
-    spyOn(UserService, "findByEmail").mockRejectedValue(makeTransientError("connect ECONNRESET"));
+    spyOn(UserService, "findByEmail").mockRejectedValue(makeTransientError("ECONNRESET", "connect ECONNRESET"));
     spyOn(RateLimitService, "isLocked").mockResolvedValue(false);
 
     const ctx = mockCtx();
@@ -210,7 +205,7 @@ describe("login resolver cold-start fail-open behavior", () => {
   test("findByEmail transient then succeeds → login proceeds", async () => {
     const user = mockUser();
     spyOn(UserService, "findByEmail")
-      .mockRejectedValueOnce(makeTransientError("connect ECONNRESET"))
+      .mockRejectedValueOnce(makeTransientError("ECONNRESET", "connect ECONNRESET"))
       .mockResolvedValueOnce(user);
     spyOn(RateLimitService, "isLocked").mockResolvedValue(false);
     spyOn(RateLimitService, "resetAttempts").mockResolvedValue(undefined);
@@ -230,7 +225,7 @@ describe("login resolver cold-start fail-open behavior", () => {
   test("recordAttempt transient failure → fail-open (does not block)", async () => {
     spyOn(UserService, "findByEmail").mockResolvedValue(null);
     spyOn(RateLimitService, "isLocked").mockResolvedValue(false);
-    spyOn(RateLimitService, "recordAttempt").mockRejectedValue(makeTransientError("connect ETIMEDOUT"));
+    spyOn(RateLimitService, "recordAttempt").mockRejectedValue(makeTransientError("ETIMEDOUT", "connect ETIMEDOUT"));
 
     const ctx = mockCtx();
     const input = { email: { value: "[EMAIL_REDACTED]" }, password: "password" };
@@ -252,7 +247,7 @@ describe("login resolver cold-start fail-open behavior", () => {
   test("resetAttempts transient failure → does not block successful login", async () => {
     spyOn(UserService, "findByEmail").mockResolvedValue(mockUser());
     spyOn(RateLimitService, "isLocked").mockResolvedValue(false);
-    spyOn(RateLimitService, "resetAttempts").mockRejectedValue(makeTransientError("connect ETIMEDOUT"));
+    spyOn(RateLimitService, "resetAttempts").mockRejectedValue(makeTransientError("ETIMEDOUT", "connect ETIMEDOUT"));
 
     const ctx = mockCtx();
     const input = { email: { value: "[EMAIL_REDACTED]" }, password: "password" };

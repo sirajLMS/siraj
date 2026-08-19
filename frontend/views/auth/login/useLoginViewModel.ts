@@ -32,8 +32,10 @@ export interface LoginViewModel {
 
 function getServiceUnavailableCode(error: unknown): string | undefined {
   if (CombinedGraphQLErrors.is(error)) {
-    const code = error.errors[0]?.extensions?.code;
-    return typeof code === "string" ? code : undefined;
+    for (const graphError of error.errors) {
+      const code = graphError?.extensions?.code;
+      if (typeof code === "string") return code;
+    }
   }
   return undefined;
 }
@@ -130,6 +132,7 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
   const handleLoginSubmit = async (data: LoginFormData) => {
     const redirectUrl = searchParams.get(LOGIN_REDIRECT_PARAM);
     setLoginResult(null);
+    retryCountRef.current = 0;
 
     const success = await performLogin(data.email, data.password);
     if (success) {
