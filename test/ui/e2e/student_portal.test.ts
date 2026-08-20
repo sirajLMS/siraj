@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Locator, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { DEMO_USERS, devWaitTimeout, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { closeE2eSession, DEMO_USERS, devWaitTimeout, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -38,13 +38,8 @@ let context: BrowserContext;
 let page: Page;
 
 afterEach(async () => {
-  if (page) {
-    await page.close();
-  }
-  if (context) {
-    await context.close();
-  }
-});
+  await closeE2eSession(page, context);
+}, 30_000);
 
 async function expectVisible(locator: Locator): Promise<void> {
   // waitFor({ state: "visible", timeout: devWaitTimeout }) is auto-waiting and proves the element
@@ -77,6 +72,7 @@ describe("Student Portal E2E", () => {
         .catch(() => false)
     ) {
       await expectVisible(joinButton);
+      expect(await joinButton.first().isVisible()).toBe(true);
     }
   });
 
@@ -86,8 +82,12 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
-    await expectVisible(page.getByText(CLASSES_REMAINING));
-    await expectVisible(page.getByText(CLASSES_TOTAL));
+    const remaining = page.getByText(CLASSES_REMAINING);
+    await expectVisible(remaining);
+    expect(await remaining.first().isVisible()).toBe(true);
+    const total = page.getByText(CLASSES_TOTAL);
+    await expectVisible(total);
+    expect(await total.first().isVisible()).toBe(true);
   });
 
   test("Student dashboard shows recent lesson reports section", async () => {
@@ -96,7 +96,9 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
-    await expectVisible(page.getByText(RECENT_LESSON_REPORTS));
+    const reports = page.getByText(RECENT_LESSON_REPORTS);
+    await expectVisible(reports);
+    expect(await reports.first().isVisible()).toBe(true);
   });
 
   test("Student can navigate to credits page via sidebar", async () => {
@@ -111,9 +113,12 @@ describe("Student Portal E2E", () => {
     // the link is rendered and hydrated before clicking.
     const creditsLink = page.getByRole("link", { name: CREDITS_LINK });
     await creditsLink.first().waitFor({ state: "visible", timeout: 60_000 });
+    expect(await creditsLink.first().isVisible()).toBe(true);
     await creditsLink.click();
     await page.waitForURL("**/students/credits**", { timeout: devWaitTimeout });
-    await expectVisible(page.getByRole("heading", { name: CREDITS_LINK }));
+    const creditsHeading = page.getByRole("heading", { name: CREDITS_LINK });
+    await expectVisible(creditsHeading);
+    expect(await creditsHeading.first().isVisible()).toBe(true);
   });
 
   test("Student credits page shows transaction history", async () => {
@@ -121,13 +126,23 @@ describe("Student Portal E2E", () => {
     page = await context.newPage();
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
-    await page.goto("/students/credits");
+    await gotoAppRoute(page, "/students/credits");
     await page.waitForURL("**/students/credits**", { timeout: devWaitTimeout });
-    await expectVisible(page.getByRole("heading", { name: TRANSACTION_HISTORY }));
-    await expectVisible(page.getByRole("columnheader", { name: DATE_COLUMN }));
-    await expectVisible(page.getByRole("columnheader", { name: TYPE_COLUMN }));
-    await expectVisible(page.getByRole("columnheader", { name: AMOUNT_COLUMN }));
-    await expectVisible(page.getByRole("columnheader", { name: NOTES_COLUMN }));
+    const historyHeading = page.getByRole("heading", { name: TRANSACTION_HISTORY });
+    await expectVisible(historyHeading);
+    expect(await historyHeading.first().isVisible()).toBe(true);
+    const dateCol = page.getByRole("columnheader", { name: DATE_COLUMN });
+    await expectVisible(dateCol);
+    expect(await dateCol.first().isVisible()).toBe(true);
+    const typeCol = page.getByRole("columnheader", { name: TYPE_COLUMN });
+    await expectVisible(typeCol);
+    expect(await typeCol.first().isVisible()).toBe(true);
+    const amountCol = page.getByRole("columnheader", { name: AMOUNT_COLUMN });
+    await expectVisible(amountCol);
+    expect(await amountCol.first().isVisible()).toBe(true);
+    const notesCol = page.getByRole("columnheader", { name: NOTES_COLUMN });
+    await expectVisible(notesCol);
+    expect(await notesCol.first().isVisible()).toBe(true);
   });
 
   test("Mobile viewport: student dashboard renders mobile view (card list)", async () => {
@@ -140,6 +155,7 @@ describe("Student Portal E2E", () => {
       .locator('[class*="MuiPaper-root"], [class*="MuiBox-root"]')
       .filter({ hasText: new RegExp(`${NEXT_CLASS.source}|${NO_UPCOMING.source}`, "i") });
     await expectVisible(hero.first());
+    expect(await hero.first().isVisible()).toBe(true);
   });
 
   test("Student sidebar shows all expected navigation items", async () => {
@@ -148,10 +164,20 @@ describe("Student Portal E2E", () => {
     await loginAsDemoUser(page, context, DEMO_USERS.student.groupSlug);
 
     await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
-    await expectVisible(page.getByRole("link", { name: TODAY_CLASSES_LINK }));
-    await expectVisible(page.getByRole("link", { name: LESSON_HISTORY_LINK }));
-    await expectVisible(page.getByRole("link", { name: SESSIONS_LINK }));
-    await expectVisible(page.getByRole("link", { name: CREDITS_LINK }));
-    await expectVisible(page.getByRole("button", { name: LOGOUT_BUTTON }));
+    const todayLink = page.getByRole("link", { name: TODAY_CLASSES_LINK });
+    await expectVisible(todayLink);
+    expect(await todayLink.first().isVisible()).toBe(true);
+    const historyLink = page.getByRole("link", { name: LESSON_HISTORY_LINK });
+    await expectVisible(historyLink);
+    expect(await historyLink.first().isVisible()).toBe(true);
+    const sessionsLink = page.getByRole("link", { name: SESSIONS_LINK });
+    await expectVisible(sessionsLink);
+    expect(await sessionsLink.first().isVisible()).toBe(true);
+    const creditsLink = page.getByRole("link", { name: CREDITS_LINK });
+    await expectVisible(creditsLink);
+    expect(await creditsLink.first().isVisible()).toBe(true);
+    const logoutBtn = page.getByRole("button", { name: LOGOUT_BUTTON });
+    await expectVisible(logoutBtn);
+    expect(await logoutBtn.first().isVisible()).toBe(true);
   });
 });

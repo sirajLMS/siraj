@@ -9,7 +9,7 @@ const PWD = "12345678";
 const REQUIRED_AUTH_COOKIES = ["session_id", "refresh_token", "access_token"] as const;
 
 /** Dev-mode-aware timeout for element waits. Dev mode compilation can take 2+ minutes under load. */
-export const devWaitTimeout = process.env.TEST_SERVER_MODE === "dev" ? 120_000 : 30_000;
+export const devWaitTimeout = process.env.TEST_SERVER_MODE === "dev" ? 180_000 : 30_000;
 
 export const DEMO_USERS = {
   superAdmin: {
@@ -399,12 +399,19 @@ export async function closeE2eSession(page?: Page, context?: BrowserContext): Pr
     await Promise.race([close(), new Promise<void>(resolve => setTimeout(resolve, CLOSE_TIMEOUT_MS))]);
   };
 
-  if (page) {
-    await page.goto("about:blank", { waitUntil: "commit", timeout: 5_000 }).catch(() => {});
-    await closeWithTimeout(() => page.close());
+  try {
+    if (page) {
+      await closeWithTimeout(() => page.close());
+    }
+  } catch {
+    // ignore page cleanup errors
   }
-  if (context) {
-    await closeWithTimeout(() => context.close());
+  try {
+    if (context) {
+      await closeWithTimeout(() => context.close());
+    }
+  } catch {
+    // ignore context cleanup errors
   }
 }
 

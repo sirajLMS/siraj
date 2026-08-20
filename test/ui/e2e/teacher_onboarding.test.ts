@@ -7,7 +7,7 @@ import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 setupBrowserLifecycle();
 
 const isDevMode = process.env.TEST_SERVER_MODE === "dev";
-const headingTimeout = isDevMode ? 280_000 : 30_000;
+const headingTimeout = isDevMode ? 240_000 : 30_000;
 
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -29,7 +29,7 @@ let page: Page;
 
 afterEach(async () => {
   await closeE2eSession(page, context);
-});
+}, 30_000);
 
 describe("Teacher Onboarding E2E", () => {
   test("super admin can load onboarding page", async () => {

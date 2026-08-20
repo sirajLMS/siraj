@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Locator, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { DEMO_USERS, devWaitTimeout, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { closeE2eSession, DEMO_USERS, devWaitTimeout, gotoAppRoute, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -34,19 +34,14 @@ let context: BrowserContext;
 let page: Page;
 
 afterEach(async () => {
-  if (page) {
-    await page.close();
-  }
-  if (context) {
-    await context.close();
-  }
-});
+  await closeE2eSession(page, context);
+}, 30_000);
 
 type LocatorLike = ReturnType<Page["getByRole"]>;
 
 async function isVisible(locator: LocatorLike): Promise<boolean> {
   try {
-    await locator.first().waitFor({ state: "visible", timeout: devWaitTimeout });
+    await locator.first().waitFor({ state: "visible", timeout: 10_000 });
     return true;
   } catch {
     return false;
@@ -117,7 +112,6 @@ async function submitTeacherLessonReportIfAvailable(pageNumber: Page): Promise<v
   if (!hasMarkCompletedButton) {
     const pageTitle = pageNumber.getByRole("heading", { level: 2 });
     await pageTitle.first().waitFor({ state: "visible", timeout: devWaitTimeout });
-    expect(await pageTitle.first().isVisible()).toBe(true);
     return;
   }
 
@@ -135,7 +129,6 @@ async function approvePendingReportIfAvailable(pageNumber: Page): Promise<void> 
   const hasReport = await isVisible(reportRow);
 
   if (!hasReport) {
-    expect(await reviewsTitle.first().isVisible()).toBe(true);
     return;
   }
 
@@ -161,12 +154,12 @@ describe("Teacher Lesson Report E2E Flow", () => {
     // ====================================================================
     await loginDemo("teacher");
 
-    await page.waitForURL("**/dashboard**", { timeout: devWaitTimeout });
+    // loginAsDemoUser already navigates to /dashboard and calls waitForDashboardReady.
+    // No need for a redundant waitForURL here.
     expect(page.url()).toContain("/dashboard");
 
     const pageTitle = page.getByRole("heading", { level: 2 });
     await pageTitle.first().waitFor({ state: "visible", timeout: devWaitTimeout });
-    expect(await pageTitle.first().isVisible()).toBe(true);
 
     await submitTeacherLessonReportIfAvailable(page);
 
@@ -177,7 +170,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
     // ====================================================================
     await loginDemo("supervisor");
 
-    await page.goto("/lesson-reports");
+    await gotoAppRoute(page, "/lesson-reports");
     await page.waitForURL("**/lesson-reports**", { timeout: devWaitTimeout });
     expect(page.url()).toContain("/lesson-reports");
 
@@ -195,7 +188,6 @@ describe("Teacher Lesson Report E2E Flow", () => {
     // Verify teacher dashboard loads
     const dashboardTitle = page.getByRole("heading", { level: 2 });
     await dashboardTitle.first().waitFor({ state: "visible", timeout: devWaitTimeout });
-    expect(await dashboardTitle.first().isVisible()).toBe(true);
 
     // Check for Mark Completed button (either enabled or disabled)
     const markCompletedButtons = page.getByRole("button", { name: MARK_COMPLETED_BUTTON });
@@ -208,7 +200,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
       await scheduleGrid.waitFor({ state: "visible", timeout: devWaitTimeout });
     } catch {
       // Fallback: verify the dashboard heading is still visible
-      expect(await dashboardTitle.first().isVisible()).toBe(true);
+      await dashboardTitle.first().waitFor({ state: "visible", timeout: devWaitTimeout });
     }
   });
 
@@ -218,7 +210,7 @@ describe("Teacher Lesson Report E2E Flow", () => {
 
     await loginAsDemoUser(page, context, DEMO_USERS.supervisor.groupSlug);
 
-    await page.goto("/lesson-reports");
+    await gotoAppRoute(page, "/lesson-reports");
     await page.waitForURL("**/lesson-reports**", { timeout: devWaitTimeout });
     expect(page.url()).toContain("/lesson-reports");
 

@@ -576,6 +576,31 @@ async function setupTestParser(
   await Promise.all([handleTestOutput(testProc.stdout), handleTestOutput(testProc.stderr), testProc.exited]);
 }
 
+function buildTestArgs(bunBin: string, e2e: boolean, coverage: boolean, bail: boolean, testPaths: string[]): string[] {
+  const timeout = e2e ? "300000" : "120000";
+  const args = [bunBin, "--env-file=.env.test", "test", "--parallel=1", `--timeout=${timeout}`];
+  if (e2e) {
+    args.push("--preload", "./test/ui/test-env.ts");
+  }
+  if (coverage) {
+    args.push("--coverage");
+  }
+  if (bail) {
+    args.push("--bail=1");
+  }
+  args.push(...testPaths);
+  return args;
+}
+
+function handleServerReadyFailure(port: number, ticker: ReturnType<typeof setInterval>, cleanup: () => void): never {
+  clearInterval(ticker);
+  cleanup();
+  process.stderr.write(
+    `\n❌ Dev server failed to respond within ${SERVER_READY_TIMEOUT_MS / 1000}s on port ${port}.\n`
+  );
+  process.exit(1);
+}
+
 async function main(): Promise<void> {
   const { port, bail, coverage, e2e, testPaths, help } = parseCliArgs(process.argv.slice(2));
 
@@ -697,30 +722,12 @@ async function main(): Promise<void> {
     const isReady = await pollServerReady(`http://localhost:${port}/api/graphql`, Date.now() + SERVER_READY_TIMEOUT_MS);
 
     if (!isReady) {
-      clearInterval(ticker);
-      cleanup();
-      process.stderr.write(
-        `\n❌ Dev server failed to respond within ${SERVER_READY_TIMEOUT_MS / 1000}s on port ${port}.\n`
-      );
-      process.exit(1);
+      handleServerReadyFailure(port, ticker, cleanup);
     }
 
     state.lastServerAction = "Server ready. Executing tests...";
 
-    const bunBin = process.execPath;
-    const timeout = e2e ? "300000" : "120000";
-    const testArgs = [bunBin, "--env-file=.env.test", "test", "--parallel=1", `--timeout=${timeout}`];
-
-    if (e2e) {
-      testArgs.push("--preload", "./test/ui/test-env.ts");
-    }
-    if (coverage) {
-      testArgs.push("--coverage");
-    }
-    if (bail) {
-      testArgs.push("--bail=1");
-    }
-    testArgs.push(...testPaths);
+    const testArgs = buildTestArgs(process.execPath, e2e, coverage, bail, testPaths);
 
     const isProductionMode = process.env.TEST_SERVER_MODE === "production";
     const distDir = isProductionMode ? ".next-test-prod" : ".next-test-dev";

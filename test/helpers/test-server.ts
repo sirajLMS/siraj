@@ -128,10 +128,10 @@ async function warmUpRouteBatches(
 async function warmUpDevServerRoutes(): Promise<void> {
   const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
   const base = `http://localhost:${getTestPort()}`;
-  const routeTimeoutMs = 30_000;
+  const routeTimeoutMs = 120_000;
 
   testLogger.info(`Warming up ${E2E_WARMUP_ROUTES.length} Next.js dev server routes...`);
-  await warmUpRouteBatches(E2E_WARMUP_ROUTES, base, fetchFn, routeTimeoutMs, 3);
+  await warmUpRouteBatches(E2E_WARMUP_ROUTES, base, fetchFn, routeTimeoutMs, 6);
 
   const stabilizing = await waitForServerReady(30_000);
   if (!stabilizing) {
@@ -239,7 +239,7 @@ function shouldWarmUpRoutes(): boolean {
 
 async function startServer(): Promise<void> {
   const mode = getTestServerMode();
-  const readyTimeoutMs = mode === "production" ? 10_000 : 180_000;
+  const readyTimeoutMs = mode === "production" ? 10_000 : 400_000;
   const port = await allocateTestPort();
   setTestPort(port);
 

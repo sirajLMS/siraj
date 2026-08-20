@@ -411,7 +411,7 @@ export async function runParallelTests(config: RunParallelTestsConfig): Promise<
       }
     }
 
-    discoveredFiles.sort();
+    discoveredFiles.sort((a, b) => a.localeCompare(b));
     const totalFiles = discoveredFiles.length;
 
     if (totalFiles === 0) {

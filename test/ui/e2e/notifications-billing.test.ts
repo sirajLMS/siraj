@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import type { BrowserContext, Locator, Page } from "playwright";
 import { getDefaultTranslations } from "@/shared/locale/server";
-import { DEMO_USERS, devWaitTimeout, loginAsDemoUser } from "@/test/ui/e2e/helpers";
+import { closeE2eSession, DEMO_USERS, devWaitTimeout, loginAsDemoUser } from "@/test/ui/e2e/helpers";
 import { createContext, createMobileContext, setupBrowserLifecycle } from "@/test/ui/e2e/lifecycle";
 
 setupBrowserLifecycle();
@@ -22,13 +22,8 @@ let context: BrowserContext;
 let page: Page;
 
 afterEach(async () => {
-  if (page) {
-    await page.close();
-  }
-  if (context) {
-    await context.close();
-  }
-});
+  await closeE2eSession(page, context);
+}, 30_000);
 
 async function setupLoggedInPage(groupSlug: string, contextFactory = createContext) {
   context = await contextFactory();
@@ -79,6 +74,7 @@ describe("Notifications & Billing E2E", () => {
     await getBellButton(p).click();
     const billingTitle = p.getByText(POSTPAID_INVOICES_TITLE).first();
     await billingTitle.waitFor({ state: "visible", timeout: devWaitTimeout });
+    expect(await billingTitle.isVisible()).toBe(true);
 
     const userRow = p.locator('[role="button"]').filter({ hasText: /\w+/ }).last();
     if (await userRow.isVisible()) {

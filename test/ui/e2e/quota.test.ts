@@ -40,7 +40,7 @@ afterEach(async () => {
   await closeE2eSession(page, context);
   page = undefined;
   context = undefined;
-});
+}, 30_000);
 
 /**
  * Common setup for desktop tests: create desktop context, new page, login, navigate.

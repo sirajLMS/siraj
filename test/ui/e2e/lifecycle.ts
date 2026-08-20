@@ -14,14 +14,14 @@ export function setupBrowserLifecycle() {
         ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH }
         : {}),
     });
-  });
+  }, 400_000);
 
   afterAll(async () => {
     if (browser) {
       await browser.close();
       browser = null;
     }
-  });
+  }, 30_000);
 }
 
 const DEFAULT_VIEWPORT = { width: 1280, height: 720 } as const;

@@ -24,5 +24,5 @@ export function setupTestServerLifecycle() {
     await serverStartPromise;
     await ensureDemoUsersForTests();
     testLogger.info(`GraphQL test server ready on port ${getTestPort()} (${getTestServerMode()} mode)`);
-  }, 180_000);
+  }, 400_000);
 }

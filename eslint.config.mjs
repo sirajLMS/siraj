@@ -71,6 +71,17 @@ const eslintConfig = defineConfig([
     files: ["**/*.{ts,tsx}"],
   })),
 
+  // CommonJS configuration for .cjs files
+  {
+    files: ["**/*.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+
   {
     files: ["**/*.{ts,tsx}"],
     plugins: {

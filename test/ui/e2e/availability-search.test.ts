@@ -59,7 +59,10 @@ async function waitForSearchScheduleReady(page: Page): Promise<void> {
     await page.waitForURL("**/search-schedule**", { waitUntil: "commit", timeout: isDev ? 120_000 : 30_000 });
   }
 
-  await page.getByLabel(DATE_RANGE_LABEL).first().waitFor({ state: "visible", timeout: isDev ? 120_000 : 45_000 });
+  await page
+    .getByLabel(DATE_RANGE_LABEL)
+    .first()
+    .waitFor({ state: "visible", timeout: isDev ? 120_000 : 45_000 });
 }
 
 async function navigateToSearchSchedule(page: Page): Promise<void> {
@@ -83,17 +86,17 @@ describe.serial("Availability Search E2E", () => {
     adminPage = await adminContext.newPage();
     await loginAsDemoUser(adminPage, adminContext, DEMO_USERS.academyAdmin.groupSlug);
     await waitForScheduleSearchNav(adminPage);
-  });
+  }, 400_000);
 
   afterAll(async () => {
     await closeE2eSession(adminPage, adminContext);
-  });
+  }, 30_000);
 
   afterEach(async () => {
     await closeE2eSession(isolatedPage, isolatedContext);
     isolatedPage = undefined;
     isolatedContext = undefined;
-  });
+  }, 30_000);
 
   test("Admin sees Schedule Search nav item in sidebar", async () => {
     if (!adminPage) throw new Error("adminPage not initialised in beforeAll");
@@ -123,6 +126,9 @@ describe.serial("Availability Search E2E", () => {
     const searchButton = adminPage.getByRole("button", { name: SEARCH_BUTTON }).first();
 
     await dateRange.waitFor({ state: "visible", timeout: devWaitTimeout });
+    await timeRange.waitFor({ state: "visible", timeout: devWaitTimeout });
+    await filtersButton.waitFor({ state: "visible", timeout: devWaitTimeout });
+    await searchButton.waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await dateRange.isVisible()).toBe(true);
     expect(await timeRange.isVisible()).toBe(true);
     expect(await filtersButton.isVisible()).toBe(true);
