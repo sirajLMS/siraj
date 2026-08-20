@@ -24,8 +24,8 @@ export const RespondToComplaintInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for responding to a complaint.",
     fields: t => ({
-      complaintId: t.string({ required: true }),
-      body: t.string({ required: true }),
+      complaintId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      body: t.string({ required: true, directives: { constraint: { maxLength: 5000 } } }),
     }),
   });
 

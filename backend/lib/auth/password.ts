@@ -5,7 +5,7 @@ const SALT_ROUNDS = 12;
 
 /**
  * Validate password strength/complexity.
- * Enforces: min 8 chars, uppercase, lowercase, digit, special character.
+ * Enforces: minimum 8 characters.
  * Returns i18n-friendly error messages for each failed rule.
  */
 export async function validatePasswordStrength(password: string, locale?: string): Promise<void> {

@@ -98,9 +98,9 @@ export const CreateManualClassEntryInputPothosObject = gqlSchemaBuilder
       studentId: t.id({ required: true }),
       teacherId: t.id({ required: true }),
       subjectId: t.id({ required: true }),
-      scheduledStartAt: t.string({ required: true }),
-      scheduledEndAt: t.string({ required: true }),
-      durationMinutes: t.int({ required: true }),
+      scheduledStartAt: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
+      scheduledEndAt: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
+      durationMinutes: t.int({ required: true, directives: { constraint: { min: 1, max: 1440 } } }),
       classType: t.field({ type: ClassTypePothosObject, required: false }),
     }),
   });
@@ -109,7 +109,7 @@ export const LogSupportRequestInputPothosObject = gqlSchemaBuilder
   .inputRef<LogSupportRequestInput>("LogSupportRequestInput")
   .implement({
     fields: t => ({
-      reason: t.string({ required: true }),
+      reason: t.string({ required: true, directives: { constraint: { maxLength: 500 } } }),
     }),
   });
 

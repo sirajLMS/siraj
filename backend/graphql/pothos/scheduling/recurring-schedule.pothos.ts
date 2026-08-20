@@ -56,8 +56,8 @@ export const RecurringSchedulesPaginatedResultPothosObject = RecurringSchedulesP
 
 export const UpdateRecurringClassRateInputPothos = gqlSchemaBuilder.inputType("UpdateRecurringClassRateInput", {
   fields: t => ({
-    recurringScheduleId: t.string({ required: true }),
-    hourlyRate: t.string({ required: false }),
+    recurringScheduleId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+    hourlyRate: t.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
     rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
   }),
 });

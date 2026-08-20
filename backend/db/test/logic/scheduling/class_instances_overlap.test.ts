@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { createTestParent, createTestUser, ensureTestSubjectId } from "@/backend/db/test/entity-setup";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type { DBTransaction, StudentSelectType, TeacherSelectType } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
@@ -29,7 +29,7 @@ async function createTestTeachers(tx: DBTransaction, now: Date): Promise<Teacher
         .values({
           name: data.name,
           email: data.email,
-          password: "password",
+          password: generateTestPassword(),
           createdAt: now,
           updatedAt: now,
         })

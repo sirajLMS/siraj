@@ -4,7 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { BillingRepository } from "@/backend/db/repo/billing";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { invoices, parents, students, users } from "@/backend/db/schema";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import type { DBTransaction } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { testLogger } from "@/shared/lib/logger/testlogger";
@@ -23,7 +23,7 @@ async function setupBaseTest(tx: DBTransaction, suffix: string) {
     .values({
       name: `${suffix} User`,
       email: `${suffix.toLowerCase().replace(/\s+/g, "-")}-test@example.com`,
-      password: "hash",
+      password: generateTestPassword(),
       ...getCommonDates(),
     })
     .returning();
@@ -47,7 +47,7 @@ async function setupStudentTest(tx: DBTransaction, suffix: string, classesTotal 
     .values({
       name: `${suffix} Student User`,
       email: `${suffix.toLowerCase().replace(/\s+/g, "-")}-student@example.com`,
-      password: "hash",
+      password: generateTestPassword(),
       ...getCommonDates(),
     })
     .returning();

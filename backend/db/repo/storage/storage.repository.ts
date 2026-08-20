@@ -373,7 +373,9 @@ export namespace StorageDbRepository {
 
       return { success: true, message: "File usage registered successfully" };
     } catch (error) {
-      return { success: false, message: `Failed to register file usage: ${String(error)}` };
+      logger.error("Failed to register file usage", { error: error instanceof Error ? error.message : String(error) });
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
+      return { success: false, message: tErrors.fileUsageRegisterFailedGeneric };
     }
   };
 
@@ -580,7 +582,8 @@ export namespace StorageDbRepository {
   };
 
   export const updateDirectoryPermissions = async (
-    input: StorageTypes.DirectoryPermissionsUpdateInput
+    input: StorageTypes.DirectoryPermissionsUpdateInput,
+    locale?: string
   ): Promise<StorageTypes.FileOperationResult> => {
     try {
       const directory = await directoryByPath(input.path);
@@ -601,15 +604,20 @@ export namespace StorageDbRepository {
         message: updated ? "Directory permissions updated successfully" : "Failed to update directory permissions",
       };
     } catch (error) {
+      logger.error("Failed to update directory permissions", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
       return {
         success: false,
-        message: `Failed to update permissions: ${String(error)}`,
+        message: tErrors.permissionsUpdateFailedGeneric,
       };
     }
   };
 
   export const setProtection = async (
-    input: StorageTypes.StorageItemProtectionUpdateInput
+    input: StorageTypes.StorageItemProtectionUpdateInput,
+    locale?: string
   ): Promise<StorageTypes.FileOperationResult> => {
     try {
       const file = await fileByPath(input.path);
@@ -636,7 +644,9 @@ export namespace StorageDbRepository {
 
       return { success: false, message: "File or directory not found" };
     } catch (error) {
-      return { success: false, message: `Failed to set protection: ${String(error)}` };
+      logger.error("Failed to set protection", { error: error instanceof Error ? error.message : String(error) });
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
+      return { success: false, message: tErrors.protectionUpdateFailedGeneric };
     }
   };
 

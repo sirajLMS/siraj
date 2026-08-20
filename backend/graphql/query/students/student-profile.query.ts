@@ -7,7 +7,7 @@ gqlSchemaBuilder.queryField("studentProfile", t =>
   t.field({
     type: StudentProfilePothosObject,
     args: {
-      studentId: t.arg.string({ required: false }),
+      studentId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
       year: t.arg.int({ required: false }),
       month: t.arg.int({ required: false }),
       includeUpcomingClasses: t.arg.boolean({ required: false }),

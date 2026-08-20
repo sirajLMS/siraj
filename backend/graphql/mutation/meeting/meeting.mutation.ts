@@ -437,7 +437,7 @@ gqlSchemaBuilder.mutationField("generateMeetingUrl", t =>
         };
         return response;
       } catch (err) {
-        handleMeetingChannelError(err);
+        handleMeetingChannelError(err, tErrors);
       }
       return undefined;
     },

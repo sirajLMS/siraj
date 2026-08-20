@@ -18,10 +18,10 @@ gqlSchemaBuilder.mutationField("recordPayment", t =>
     authScopes: { loggedIn: true },
     args: {
       invoiceId: t.arg.id({ required: true }),
-      amount: t.arg.string({ required: true }),
+      amount: t.arg.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
       currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
       userPaymentMethodId: t.arg.id({ required: true }),
-      transactionId: t.arg.string({ required: false }),
+      transactionId: t.arg.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
@@ -67,10 +67,10 @@ gqlSchemaBuilder.mutationField("createTeacherPayment", t =>
     authScopes: { superAdmin: true, notImpersonating: true },
     args: {
       teacherId: t.arg.id({ required: true }),
-      amount: t.arg.string({ required: true }),
+      amount: t.arg.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
       currency: t.arg({ type: CurrencyCodePothosObject, required: true }),
       userPaymentMethodId: t.arg.id({ required: true }),
-      paymentDate: t.arg.string({ required: false }),
+      paymentDate: t.arg.string({ required: false, directives: { constraint: { maxLength: 10 } } }),
       isTestPayment: t.arg.boolean({ required: false }),
     },
     resolve: async (_root, args, ctx) => {

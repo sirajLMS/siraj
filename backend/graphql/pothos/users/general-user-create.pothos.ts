@@ -9,7 +9,7 @@ export const GeneralUserCreateInputPothosObject = gqlSchemaBuilder
     description: "Input for creating a general user with permission group assignment",
     fields: t => ({
       name: t.string({ required: true, directives: { constraint: { maxLength: 512 } } }),
-      email: t.string({ required: true }),
+      email: t.string({ required: true, directives: { constraint: { maxLength: 254 } } }),
       password: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
       phone: t.string({ directives: { constraint: { maxLength: 50 } } }),
       groupSlug: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),

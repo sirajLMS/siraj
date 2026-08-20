@@ -146,8 +146,8 @@ export const SuggestionFilterPothosObject = gqlSchemaBuilder
     fields: t => ({
       search: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       status: t.field({ type: SuggestionStatusPothosEnum, required: false }),
-      limit: t.int({ required: true }),
-      offset: t.int({ required: true }),
+      limit: t.int({ required: true, directives: { constraint: { max: 100 } } }),
+      offset: t.int({ required: true, directives: { constraint: { min: 0, max: 1000000 } } }),
     }),
   });
 
@@ -156,8 +156,8 @@ export const ParentSuggestionOptionsPothosObject = gqlSchemaBuilder
   .implement({
     description: "Pagination options for the parent suggestions history query.",
     fields: t => ({
-      limit: t.int({ required: true }),
-      offset: t.int({ required: true }),
+      limit: t.int({ required: true, directives: { constraint: { max: 100 } } }),
+      offset: t.int({ required: true, directives: { constraint: { min: 0, max: 1000000 } } }),
     }),
   });
 

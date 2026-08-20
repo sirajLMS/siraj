@@ -131,8 +131,8 @@ export const ListFileInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       path: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
-      limit: t.int({ required: false }),
-      offset: t.int({ required: false }),
+      limit: t.int({ required: false, directives: { constraint: { min: 0, max: 500 } } }),
+      offset: t.int({ required: false, directives: { constraint: { min: 0, max: 1000000 } } }),
       searchTerm: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       includeDirectories: t.boolean({ required: false, defaultValue: true }),
       fileType: t.string({ required: false, directives: { constraint: { maxLength: 128 } } }), // Deprecated: Use fileTypes instead

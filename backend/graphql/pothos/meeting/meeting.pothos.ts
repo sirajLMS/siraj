@@ -238,8 +238,8 @@ export const GenerateMeetingUrlInputPothos = gqlSchemaBuilder.inputType("Generat
   fields: t => ({
     providerId: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     topic: t.string({ required: true, directives: { constraint: { maxLength: 200 } } }),
-    startDateTime: t.string({ required: false }),
-    durationMinutes: t.int({ required: false }),
+    startDateTime: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+    durationMinutes: t.int({ required: false, directives: { constraint: { min: 1, max: 1440 } } }),
   }),
 });
 

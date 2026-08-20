@@ -176,7 +176,7 @@ export const AdminRevokeTokenInputPothosObject = gqlSchemaBuilder
   .inputRef<AdminRevokeTokenSubmitInput>("AdminRevokeTokenInput")
   .implement({
     fields: t => ({
-      userId: t.string({ required: true }),
+      userId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       providerSlug: t.field({ type: MeetingIntegrationProviderSlugPothosEnum, required: true }),
     }),
   });
@@ -186,7 +186,7 @@ export const ConnectMeetingProviderOAuthInputPothosObject = gqlSchemaBuilder
   .implement({
     fields: t => ({
       providerSlug: t.field({ type: MeetingIntegrationProviderSlugPothosEnum, required: true }),
-      returnPath: t.string({ required: true }),
+      returnPath: t.string({ required: true, directives: { constraint: { maxLength: 2048 } } }),
     }),
   });
 
@@ -299,7 +299,7 @@ gqlSchemaBuilder.mutationField("testMeetingProviderConnection", t =>
       try {
         return await MeetingIntegrationService.testConnection(actorUserId, args.input, tErrors);
       } catch (err) {
-        handleMeetingChannelError(err);
+        handleMeetingChannelError(err, tErrors);
       }
       return undefined;
     },
@@ -333,7 +333,7 @@ gqlSchemaBuilder.mutationField("connectMeetingProviderOAuth", t =>
       try {
         return await MeetingOAuthService.connectProviderOAuth(args.input, actorUserId, tErrors);
       } catch (err) {
-        handleMeetingChannelError(err);
+        handleMeetingChannelError(err, tErrors);
       }
       return undefined;
     },

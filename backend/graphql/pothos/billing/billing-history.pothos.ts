@@ -208,8 +208,8 @@ export const BillingMonthInputRef = gqlSchemaBuilder.inputRef<BillingMonthInput>
 
 BillingMonthInputRef.implement({
   fields: t => ({
-    year: t.int({ required: true }),
-    month: t.int({ required: true }),
+    year: t.int({ required: true, directives: { constraint: { min: 1900, max: 2100 } } }),
+    month: t.int({ required: true, directives: { constraint: { min: 1, max: 12 } } }),
   }),
 });
 

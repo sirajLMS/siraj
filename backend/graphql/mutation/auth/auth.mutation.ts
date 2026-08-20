@@ -171,6 +171,7 @@ export async function rotateTokensAndSession(
   rawSessionId?: string
 ): Promise<{ token: string; user: UserReturnType } | null> {
   const sessionIdForUpdate = rawSessionId ?? session.hashedId;
+  const tErrors = ctx.t().errorsTranslations;
   const newAccessToken =
     (rawSessionId ? await ImpersonationService.issueAccessTokenForSession(user.id, rawSessionId) : null) ??
     (rawSessionId ? await PermissionGroupSimulationService.issueAccessTokenForSession(user.id, rawSessionId) : null) ??
@@ -207,7 +208,7 @@ export async function rotateTokensAndSession(
   } else {
     const impersonatedUser = await UserService.findById(effectiveUserId);
     if (!impersonatedUser) {
-      throw new GraphQLError("Impersonation target user not found", {
+      throw new GraphQLError(tErrors.auth.impersonationTargetNotFound, {
         extensions: { code: "FORBIDDEN" },
       });
     }
@@ -352,8 +353,17 @@ gqlSchemaBuilder.mutationFields(t => ({
       const tErrors = ctx.t().errorsTranslations;
       const ipAddress = ctx.ipAddress ?? "127.0.0.1";
 
-      // 0. Enforce auth rate limit before any checks
-      const rateLimitResult = await checkRateLimit(ipAddress, authRateLimiter);
+      // 0. Enforce auth rate limit before any checks (fail-open for cold-start resilience, mirroring login)
+      const rateLimitResult = await failOpen(
+        "Demo rate limit check",
+        () => checkRateLimit(ipAddress, authRateLimiter),
+        {
+          success: true,
+          limit: 0,
+          remaining: 0,
+          reset: 0,
+        }
+      );
       if (!rateLimitResult.success) {
         throw new GraphQLError(tErrors.auth.tooManyLoginAttempts, {
           // ← compile-time ✅
@@ -365,6 +375,15 @@ gqlSchemaBuilder.mutationFields(t => ({
       if (!isDemo) {
         throw new GraphQLError(tErrors.auth.demoLoginNotEnabled, {
           // ← compile-time ✅
+          extensions: { code: "UNAUTHENTICATED" },
+        });
+      }
+
+      // Defense-in-depth: hard-block demoLogin in real production deployments
+      // even if IS_DEMO is accidentally set to a truthy value.
+      const isProductionDeployment = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
+      if (isProductionDeployment) {
+        throw new GraphQLError(tErrors.auth.demoLoginNotEnabled, {
           extensions: { code: "UNAUTHENTICATED" },
         });
       }

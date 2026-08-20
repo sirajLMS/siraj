@@ -76,8 +76,8 @@ export const EnvConfigUpsertInputPothosObject = gqlSchemaBuilder
   .inputRef<EnvConfigUpsertInput>("EnvConfigUpsertInput")
   .implement({
     fields: t => ({
-      key: t.string({ required: true }),
-      value: t.string({ required: true }),
+      key: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
+      value: t.string({ required: true, directives: { constraint: { maxLength: 2000 } } }),
     }),
   });
 

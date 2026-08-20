@@ -61,10 +61,10 @@ export const SystemSettingUpsertInputPothos = gqlSchemaBuilder
   .inputRef<SystemSettingUpsertInput>("SystemSettingUpsertInput")
   .implement({
     fields: t => ({
-      key: t.string({ required: true }),
-      value: t.string({ required: true }),
+      key: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
+      value: t.string({ required: true, directives: { constraint: { maxLength: 2000 } } }),
       dataType: t.field({ type: SystemSettingDataTypePothos, required: false }),
-      description: t.string({ required: false }),
+      description: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
       category: t.field({ type: SystemSettingCategoryPothos, required: false }),
     }),
   });

@@ -61,9 +61,9 @@ gqlSchemaBuilder.mutationFields(t => ({
 
   deleteStudent: t.field({
     type: StudentPothosObject,
-    authScopes: { loggedIn: true },
+    authScopes: { permission: AppPermission.STUDENT_MANAGE_STATUS },
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_query, args, ctx) => {
       const userId = await requireAuth(ctx);

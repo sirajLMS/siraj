@@ -2,7 +2,13 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { parents, students, users } from "@/backend/db/schema";
-import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import {
+  generateTestPassword,
+  runInRollback,
+  setupRlsPolicies,
+  setupRlsRole,
+  teardownRlsRole,
+} from "@/backend/db/test/test-utils";
 import type { DBTransaction } from "@/backend/types";
 import { testLogger } from "@/shared/lib/logger/testlogger";
 
@@ -17,7 +23,10 @@ function setLocalUserId(tx: DBTransaction, userId: string) {
 async function createNamedUser(tx: DBTransaction, name: string, now: Date) {
   const email = `${name.toLowerCase().replace(/\s+/g, "-")}-${randomUUID()}@example.com`;
   const user = (
-    await tx.insert(users).values({ name, email, password: "password", createdAt: now, updatedAt: now }).returning()
+    await tx
+      .insert(users)
+      .values({ name, email, password: generateTestPassword(), createdAt: now, updatedAt: now })
+      .returning()
   )[0];
   return user;
 }

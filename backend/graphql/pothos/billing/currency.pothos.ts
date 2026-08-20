@@ -30,10 +30,10 @@ export const SupportedCurrencyPothosObject = SupportedCurrencyRef.implement({
 export const SupportedCurrencyUpsertInputPothos = gqlSchemaBuilder.inputType("SupportedCurrencyUpsertInput", {
   fields: t => ({
     code: t.field({ type: CurrencyCodePothosObject, required: true }),
-    symbol: t.string({ required: true }),
+    symbol: t.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
     countryCode: t.field({ type: CountryCodePothosObject, required: false }),
-    decimals: t.int({ required: false }),
-    sortOrder: t.int({ required: false }),
+    decimals: t.int({ required: false, directives: { constraint: { min: 0, max: 8 } } }),
+    sortOrder: t.int({ required: false, directives: { constraint: { min: 0, max: 999 } } }),
   }),
 });
 

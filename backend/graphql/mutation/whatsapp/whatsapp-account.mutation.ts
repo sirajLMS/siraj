@@ -35,7 +35,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     description: "Update an existing WhatsApp account. Calls resetWhatsappChannel() on success (S4).",
     authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       input: t.arg({ type: WhatsappAccountUpdateInputPothosObject, required: true }),
     },
     resolve: withAuthResult((actorUserId, args, tErrors) => {
@@ -59,7 +59,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     description: "Deactivate a WhatsApp account. Calls resetWhatsappChannel() on success (S4).",
     authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: withAuthResult((actorUserId, args, tErrors) =>
       WhatsappAccountService.deleteAccount(actorUserId, tErrors, args.id)
@@ -71,8 +71,8 @@ gqlSchemaBuilder.mutationFields(t => ({
     description: "Set the access token for a WhatsApp account. Calls resetWhatsappChannel() on success (S4).",
     authScopes: { superAdmin: true },
     args: {
-      id: t.arg.string({ required: true }),
-      accessToken: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      accessToken: t.arg.string({ required: true, directives: { constraint: { maxLength: 512 } } }),
     },
     resolve: withAuthResult((actorUserId, args, tErrors) =>
       WhatsappAccountService.setAccessToken(actorUserId, tErrors, args.id, args.accessToken)
@@ -85,8 +85,8 @@ gqlSchemaBuilder.mutationFields(t => ({
       "Set the two-step verification PIN for a WhatsApp account. Calls resetWhatsappChannel() on success (S4).",
     authScopes: { superAdmin: true },
     args: {
-      id: t.arg.string({ required: true }),
-      twoStepPin: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      twoStepPin: t.arg.string({ required: true, directives: { constraint: { maxLength: 6 } } }),
     },
     resolve: withAuthResult((actorUserId, args, tErrors) =>
       WhatsappAccountService.setTwoStepPin(actorUserId, tErrors, args.id, args.twoStepPin)
@@ -114,9 +114,9 @@ gqlSchemaBuilder.mutationFields(t => ({
     description: "Enable or disable WhatsApp notification opt-in for a user (REQ-10/BL1).",
     authScopes: { permission: AppPermission.WHATSAPP_CONFIG_MANAGE },
     args: {
-      userId: t.arg.string({ required: true }),
+      userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       enabled: t.arg.boolean({ required: true }),
-      source: t.arg.string({ required: false }),
+      source: t.arg.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
     },
     resolve: withAuthResult((actorUserId, args, tErrors) => {
       const targetUserId = args.userId === "me" ? actorUserId : args.userId;

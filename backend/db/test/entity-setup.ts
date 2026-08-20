@@ -17,6 +17,7 @@ import {
   userMeetingConfigs,
   users,
 } from "@/backend/db/schema";
+import { generateTestPassword } from "@/backend/db/test/test-utils";
 import {
   AccountStatus,
   type AppPermission,
@@ -101,7 +102,7 @@ export async function createTestUser(
     .values({
       name: "Test User",
       email: `test-${randomUUID()}@example.com`,
-      password: "password",
+      password: generateTestPassword(),
       timezone: IanaTimezone.UTC,
       createdAt: now,
       updatedAt: now,

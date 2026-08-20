@@ -119,8 +119,8 @@ const CronScheduleListInput = gqlSchemaBuilder.inputType("CronScheduleListInput"
     status: t.field({ type: CronScheduleStatusPothosEnum, required: false }),
     jobKind: t.field({ type: CronJobKindPothosEnum, required: false }),
     name: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-    limit: t.int({ required: false }),
-    offset: t.int({ required: false }),
+    limit: t.int({ required: false, directives: { constraint: { min: 1, max: 200 } } }),
+    offset: t.int({ required: false, directives: { constraint: { min: 0, max: 10000 } } }),
   }),
 });
 
@@ -131,8 +131,8 @@ const CronRunListInputRef = gqlSchemaBuilder.inputType("CronRunListInput", {
     statuses: t.field({ type: [CronRunStatusPothosEnum], required: false }),
     from: t.field({ type: "DateTime", required: false }),
     to: t.field({ type: "DateTime", required: false }),
-    limit: t.int({ required: false }),
-    offset: t.int({ required: false }),
+    limit: t.int({ required: false, directives: { constraint: { min: 1, max: 200 } } }),
+    offset: t.int({ required: false, directives: { constraint: { min: 0, max: 10000 } } }),
   }),
 });
 
@@ -143,9 +143,9 @@ function commonScheduleOptionalFields(t: Parameters<Parameters<typeof gqlSchemaB
     payload: t.field({ type: "JSON", required: false }),
     timezone: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
     concurrencyPolicy: t.field({ type: CronConcurrencyPolicyPothosEnum, required: false }),
-    maxRetries: t.int({ required: false }),
-    retryBackoffSeconds: t.int({ required: false }),
-    timeoutSeconds: t.int({ required: false }),
+    maxRetries: t.int({ required: false, directives: { constraint: { min: 1, max: 10 } } }),
+    retryBackoffSeconds: t.int({ required: false, directives: { constraint: { min: 1, max: 3600 } } }),
+    timeoutSeconds: t.int({ required: false, directives: { constraint: { min: 1, max: 600 } } }),
   };
 }
 

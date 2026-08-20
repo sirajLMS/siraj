@@ -37,9 +37,9 @@ export const RecordPurchaseInput = gqlSchemaBuilder
   .implement({
     description: "Input for recording a credit purchase for a student",
     fields: t => ({
-      studentId: t.string({ required: true }),
-      hours: t.int({ required: true }),
-      notes: t.string({ required: false }),
+      studentId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      hours: t.int({ required: true, directives: { constraint: { min: 0, max: 100000 } } }),
+      notes: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
       sourcePaymentId: t.id({ required: false }),
     }),
   });

@@ -14,11 +14,15 @@ type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
  */
 export function whatsappAccountSharedInputFields(t: PothosInputFieldBuilder) {
   return {
-    displayPhoneNumber: t.string({ required: false, description: "Display phone number (max 32 chars)" }),
+    displayPhoneNumber: t.string({
+      required: false,
+      description: "Display phone number (max 32 chars)",
+      directives: { constraint: { maxLength: 32 } },
+    }),
     displayName: t.field({ type: "LocalizedString", required: false }),
     qualityRating: t.field({ type: WhatsappQualityRatingPothosEnum, required: false }),
     portfolioMessagingLimitTier: t.field({ type: WhatsappLimitTierPothosEnum, required: false }),
-    throughputLevel: t.string({ required: false }),
+    throughputLevel: t.string({ required: false, directives: { constraint: { maxLength: 32 } } }),
     isActive: t.boolean({ required: false }),
   };
 }

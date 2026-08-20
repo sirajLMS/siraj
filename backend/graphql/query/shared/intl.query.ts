@@ -11,6 +11,7 @@ function isString(value: unknown): value is string {
 gqlSchemaBuilder.queryFields(t => ({
   welcomeMessage: t.field({
     type: "String",
+    authScopes: { loggedIn: true },
     resolve: (_parent, _args, ctx) => {
       return ctx.t().commonTranslations.welcome;
     },
@@ -20,8 +21,8 @@ gqlSchemaBuilder.queryFields(t => ({
     type: "String",
     authScopes: { loggedIn: true },
     args: {
-      key: t.arg.string({ required: true }),
-      namespace: t.arg.string({ required: true }),
+      key: t.arg.string({ required: true, directives: { constraint: { maxLength: 256 } } }),
+      namespace: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     },
     resolve: (_parent, { key, namespace }, ctx) => {
       const translations: unknown = ctx.t();

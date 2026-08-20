@@ -5,6 +5,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { userNotificationPreferences, users } from "@/backend/db/schema";
 import {
   createTestUserWithDefaults,
+  generateTestPassword,
   runInRollback,
   setupRlsPolicies,
   setupRlsRole,
@@ -71,7 +72,7 @@ describe("User Notification Preferences", () => {
         .values({
           name: "Test User",
           email: `user-dup-${randomUUID()}@example.com`,
-          password: "password",
+          password: generateTestPassword(),
           createdAt: now,
           updatedAt: now,
         })

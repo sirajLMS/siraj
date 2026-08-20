@@ -148,9 +148,9 @@ export const RescheduleClassInputPothosObject = gqlSchemaBuilder
   .inputRef<RescheduleClassInput>("RescheduleClassInput")
   .implement({
     fields: t => ({
-      scheduledStartAt: t.string({ required: true }),
-      scheduledEndAt: t.string({ required: true }),
-      durationMinutes: t.int({ required: true }),
+      scheduledStartAt: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
+      scheduledEndAt: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
+      durationMinutes: t.int({ required: true, directives: { constraint: { min: 1, max: 1440 } } }),
     }),
   });
 

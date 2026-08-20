@@ -27,7 +27,7 @@ gqlSchemaBuilder.queryFields(t => ({
     authScopes: { loggedIn: true },
     type: Pothos.FileInfoPothosObject,
     args: {
-      path: t.arg.string({ required: true }),
+      path: t.arg.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
     },
     nullable: true,
     resolve: async (_parent, { path }) => {
@@ -40,7 +40,7 @@ gqlSchemaBuilder.queryFields(t => ({
     authScopes: { loggedIn: true },
     type: Pothos.DirectoryInfoPothosObject,
     args: {
-      path: t.arg.string({ required: true }),
+      path: t.arg.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
     },
     resolve: async (_parent, { path }) => {
       const storageService = await getStorageService();
@@ -52,26 +52,29 @@ gqlSchemaBuilder.queryFields(t => ({
     authScopes: { loggedIn: true },
     type: Pothos.StorageObjectListPothosObject,
     args: {
-      searchTerm: t.arg.string({ required: true }),
+      searchTerm: t.arg.string({ required: true, directives: { constraint: { maxLength: 256 } } }),
       fileType: t.arg.string({
         required: false,
         description: "File type filter (optional)",
+        directives: { constraint: { maxLength: 50 } },
       }),
       folder: t.arg.string({
         required: false,
         description: "Folder to search in (optional, searches entire bucket if not specified)",
+        directives: { constraint: { maxLength: 1024 } },
       }),
       limit: t.arg.int({
         required: false,
         defaultValue: 50,
         description: "Maximum number of results",
+        directives: { constraint: { min: 1, max: 200 } },
       }),
     },
     resolve: async (_parent, { searchTerm, fileType, folder, limit }) => {
       const storageService = await getStorageService();
       const input = {
         path: folder ?? "",
-        limit: limit ?? 50,
+        limit: Math.min(limit ?? 50, 200),
         searchTerm,
         fileType,
       };
@@ -86,6 +89,7 @@ gqlSchemaBuilder.queryFields(t => ({
       path: t.arg.string({
         required: false,
         description: "Folder path to get stats for (optional, gets stats for entire bucket if not specified)",
+        directives: { constraint: { maxLength: 1024 } },
       }),
     },
     resolve: async (_parent, { path }) => {
@@ -101,6 +105,7 @@ gqlSchemaBuilder.queryFields(t => ({
       path: t.arg.string({
         required: false,
         description: "Parent directory path (empty or null for root level)",
+        directives: { constraint: { maxLength: 1024 } },
       }),
     },
     resolve: async (_parent, { path }) => {

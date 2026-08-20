@@ -104,13 +104,13 @@ export const SettingsAuditLogsResultPothosObject = SettingsAuditLogsResultRef.im
 export const SettingsAuditLogFilterPothosObject = gqlSchemaBuilder.inputRef("SettingsAuditLogFilter").implement({
   description: "Filter and pagination options for the settings audit log query.",
   fields: t => ({
-    entityType: t.string({ required: false }),
-    action: t.string({ required: false }),
-    actorUserId: t.string({ required: false }),
+    entityType: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+    action: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+    actorUserId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     startDate: t.field({ type: "DateTime", required: false }),
     endDate: t.field({ type: "DateTime", required: false }),
-    limit: t.int({ required: false, defaultValue: 50 }),
-    offset: t.int({ required: false, defaultValue: 0 }),
+    limit: t.int({ required: false, defaultValue: 50, directives: { constraint: { min: 0, max: 500 } } }),
+    offset: t.int({ required: false, defaultValue: 0, directives: { constraint: { min: 0, max: 1000000 } } }),
   }),
 });
 

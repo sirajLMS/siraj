@@ -45,9 +45,9 @@ function mapUserOverridesSafely(
   });
 }
 
-function resolveActorId(ctx: PermissionCtx): string {
+function resolveActorId(ctx: PermissionCtx & ErrorsTranslationsHolder): string {
   if (!ctx.user) {
-    throw new GraphQLError("Unauthorized", {
+    throw new GraphQLError(ctx.t().errorsTranslations.permissionManagement.unauthorized, {
       extensions: { code: "UNAUTHENTICATED" },
     });
   }

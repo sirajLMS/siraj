@@ -16,7 +16,7 @@ gqlSchemaBuilder.queryField("parentDirectory", t =>
   t.field({
     type: ParentDirectoryPothosObject,
     args: {
-      search: t.arg.string(),
+      search: t.arg.string({ directives: { constraint: { maxLength: 256 } } }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
       lifecycleStatusFilter: t.arg({ type: ParentStatusPothosEnum, required: false }),
     },

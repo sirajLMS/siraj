@@ -9,7 +9,7 @@ gqlSchemaBuilder.queryField("profileByUserId", t =>
     type: UnifiedProfilePothosObject,
     authScopes: { loggedIn: true },
     args: {
-      userId: t.arg.string({ required: true }),
+      userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_parent, args, ctx) => {
       const actorUserId = await requireAuth(ctx);

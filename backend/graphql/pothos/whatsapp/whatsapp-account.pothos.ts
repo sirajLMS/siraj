@@ -42,12 +42,18 @@ export const WhatsappAccountPothosObject = WhatsappAccountRef.implement({
 // Note: `encryptedAccessToken` and `encryptedTwoStepPin` are intentionally
 // excluded from create/update inputs — credential updates go through the
 // dedicated `setWhatsappAccessToken` / `setWhatsappTwoStepPin` mutations.
-// String lengths are not enforced at the GraphQL layer (Pothos does not
-// support maxLength natively); see service-layer validation for bounds.
 export const WhatsappAccountCreateInputPothosObject = gqlSchemaBuilder.inputType("WhatsappAccountCreateInput", {
   fields: t => ({
-    wabaId: t.string({ required: true, description: "WhatsApp Business Account ID (max 64 chars)" }),
-    phoneNumberId: t.string({ required: true, description: "Phone number ID (max 64 chars)" }),
+    wabaId: t.string({
+      required: true,
+      description: "WhatsApp Business Account ID (max 64 chars)",
+      directives: { constraint: { maxLength: 64 } },
+    }),
+    phoneNumberId: t.string({
+      required: true,
+      description: "Phone number ID (max 64 chars)",
+      directives: { constraint: { maxLength: 64 } },
+    }),
     ...whatsappAccountSharedInputFields(t),
   }),
 });

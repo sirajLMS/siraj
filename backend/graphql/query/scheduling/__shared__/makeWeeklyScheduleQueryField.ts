@@ -11,8 +11,8 @@ type ErrorsTranslations = ReturnType<BaseContext["t"]>["errorsTranslations"];
 /** Shared args for teacher-weekly query fields (`teacherId?`, `weekDate`). */
 function teacherWeeklyArgs(t: QueryFieldBuilder) {
   return {
-    teacherId: t.arg.string({ required: false }),
-    weekDate: t.arg.string({ required: true }),
+    teacherId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
+    weekDate: t.arg.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
   };
 }
 

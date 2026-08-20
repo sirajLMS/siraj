@@ -123,7 +123,7 @@ export const ComplaintFileMetadataInputPothosObject = ComplaintFileMetadataInput
   fields: t => ({
     path: t.string({ required: true, directives: { constraint: { maxLength: 512 } } }),
     mimeType: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
-    sizeBytes: t.int({ required: true }),
+    sizeBytes: t.int({ required: true, directives: { constraint: { max: 104857600 } } }),
   }),
 });
 

@@ -57,9 +57,9 @@ export const ClassSubjectUpdateInputPothos = gqlSchemaBuilder.inputType("ClassSu
 
 export const AttachSubjectResourceInputPothos = gqlSchemaBuilder.inputType("AttachSubjectResourceInput", {
   fields: t => ({
-    subjectId: t.string({ required: true }),
-    learningResourceId: t.string({ required: true }),
-    resourceType: t.string({ required: false }),
-    sortOrder: t.int({ required: false }),
+    subjectId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+    learningResourceId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+    resourceType: t.string({ required: false, directives: { constraint: { maxLength: 50 } } }),
+    sortOrder: t.int({ required: false, directives: { constraint: { min: 0, max: 999 } } }),
   }),
 });

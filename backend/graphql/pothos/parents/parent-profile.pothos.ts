@@ -186,7 +186,7 @@ gqlSchemaBuilder.mutationField("updateStudentQuota", t =>
     authScopes: { permission: AppPermission.STUDENT_QUOTA_EDIT_EDIT_OTHER },
     args: {
       studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
-      newClassesRemaining: t.arg.int({ required: true }),
+      newClassesRemaining: t.arg.int({ required: true, directives: { constraint: { min: 0, max: 1000000 } } }),
       expectedVersion: t.arg.int({ required: false }),
     },
     resolve: async (_root, args, ctx) => {

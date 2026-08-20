@@ -129,7 +129,7 @@ gqlSchemaBuilder.queryFields(t => ({
     nullable: true,
     authScopes: { permission: AppPermission.STUDENTS_LIST },
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_query, args) =>
       await StudentManagementService.getStudentById(args.id).then(s => StudentUtils.mapEntityToDto(s)),

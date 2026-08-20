@@ -3,7 +3,13 @@ import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { SoftDeleteRepository } from "@/backend/db/repo/shared";
 import { users } from "@/backend/db/schema";
-import { runInRollback, setupRlsPolicies, setupRlsRole, teardownRlsRole } from "@/backend/db/test/test-utils";
+import {
+  generateTestPassword,
+  runInRollback,
+  setupRlsPolicies,
+  setupRlsRole,
+  teardownRlsRole,
+} from "@/backend/db/test/test-utils";
 
 describe("Row Level Security and Soft Delete", () => {
   beforeAll(async () => {
@@ -30,7 +36,7 @@ describe("Row Level Security and Soft Delete", () => {
       const emailValid = `rls-test-${randomUUID()}@example.com`;
       const emailInvalid = `rls-test-${randomUUID()}@example.com`;
       const now = new Date();
-      const passwordHash = randomUUID();
+      const passwordHash = generateTestPassword();
 
       await tx.execute(sql`SET LOCAL ROLE test_rls_user`);
       await tx.execute(sql`SET LOCAL app.current_user_id = '00000000-0000-0000-0000-000000000000'`);
@@ -78,7 +84,7 @@ describe("Row Level Security and Soft Delete", () => {
         .values({
           name: "RLS Update User",
           email,
-          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          password: generateTestPassword(),
           createdAt: now,
           updatedAt: now,
         })
@@ -113,7 +119,7 @@ describe("Row Level Security and Soft Delete", () => {
         .values({
           name: "RLS Delete User",
           email,
-          password: `TestPass-${randomUUID().slice(0, 8)}!`,
+          password: generateTestPassword(),
           createdAt: now,
           updatedAt: now,
         })

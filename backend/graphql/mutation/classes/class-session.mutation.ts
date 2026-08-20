@@ -72,7 +72,7 @@ gqlSchemaBuilder.mutationField("updateSessionStatusLeave", t =>
     type: LeaveProcessResultPothosObject,
     args: {
       classInstanceId: t.arg.id({ required: true }),
-      leaveReason: t.arg.string({ required: true }),
+      leaveReason: t.arg.string({ required: true, directives: { constraint: { maxLength: 2000 } } }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -166,7 +166,7 @@ gqlSchemaBuilder.mutationField("overrideClassInstanceRate", t =>
     type: ClassInstanceDetailPothosObject,
     args: {
       classInstanceId: t.arg.id({ required: true }),
-      rateAmount: t.arg.string({ required: false }),
+      rateAmount: t.arg.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
       rateCurrency: t.arg({ type: CurrencyCodePothosObject, required: false }),
     },
     authScopes: { superAdmin: true },

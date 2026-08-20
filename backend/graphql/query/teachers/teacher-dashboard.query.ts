@@ -49,7 +49,7 @@ gqlSchemaBuilder.queryField("teacherDashboard", t =>
   t.field({
     type: TeacherDashboardPothosObject,
     args: {
-      date: t.arg.string({ required: true }),
+      date: t.arg.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
       pagination: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },

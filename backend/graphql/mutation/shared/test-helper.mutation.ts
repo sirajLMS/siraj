@@ -61,7 +61,7 @@ if (isTestHelperEnabled()) {
       type: TestEntitiesType,
       authScopes: { loggedIn: true },
       args: {
-        prefix: t.arg.string({ required: true }),
+        prefix: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
         classesRemaining: t.arg.int({ required: false }),
       },
       resolve: async (_query, args) => {
@@ -76,12 +76,12 @@ if (isTestHelperEnabled()) {
       type: "Boolean",
       authScopes: { loggedIn: true },
       args: {
-        studentUserId: t.arg.string({ required: true }),
-        teacherUserId: t.arg.string({ required: true }),
-        parentUserId: t.arg.string({ required: true }),
-        studentId: t.arg.string({ required: true }),
-        teacherId: t.arg.string({ required: true }),
-        parentId: t.arg.string({ required: true }),
+        studentUserId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+        teacherUserId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+        parentUserId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+        studentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+        teacherId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+        parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       },
       resolve: async (_query, args) => {
         assertTestHelperAllowed();
@@ -95,8 +95,8 @@ if (isTestHelperEnabled()) {
       type: TestGroupClassType,
       authScopes: { loggedIn: true },
       args: {
-        classInstanceId: t.arg.string({ required: true }),
-        teacherName: t.arg.string({ required: true }),
+        classInstanceId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+        teacherName: t.arg.string({ required: true, directives: { constraint: { maxLength: 200 } } }),
       },
       resolve: async (_query, args) => {
         assertTestHelperAllowed();
@@ -110,7 +110,7 @@ if (isTestHelperEnabled()) {
       type: "Boolean",
       authScopes: { loggedIn: true },
       args: {
-        groupClassId: t.arg.string({ required: true }),
+        groupClassId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       },
       resolve: async (_query, args) => {
         assertTestHelperAllowed();
@@ -134,9 +134,9 @@ if (isTestHelperEnabled()) {
   gqlSchemaBuilder.mutationField("createTestSuperAdmin", t =>
     t.field({
       type: TestSuperAdminType,
-      authScopes: { loggedIn: true },
+      authScopes: { superAdmin: true, notImpersonating: true },
       args: {
-        prefix: t.arg.string({ required: true }),
+        prefix: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       },
       resolve: async (_query, args) => {
         assertTestHelperAllowed();
@@ -150,7 +150,7 @@ if (isTestHelperEnabled()) {
       type: "Boolean",
       authScopes: { loggedIn: true },
       args: {
-        userId: t.arg.string({ required: true }),
+        userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       },
       resolve: async (_query, args) => {
         assertTestHelperAllowed();
@@ -164,7 +164,7 @@ if (isTestHelperEnabled()) {
       type: "Boolean",
       authScopes: { loggedIn: true },
       args: {
-        userId: t.arg.string({ required: true }),
+        userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       },
       resolve: async (_query, args) => {
         assertTestHelperAllowed();

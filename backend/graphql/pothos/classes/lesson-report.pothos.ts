@@ -53,9 +53,9 @@ export const LessonReportSubmitInput = gqlSchemaBuilder
     fields: t => ({
       classInstanceId: t.id({ required: true }),
       attendanceEvaluation: t.field({ type: AttendanceEvaluationPothosEnum, required: true }),
-      durationMinutes: t.int({ required: true }),
-      teacherNotes: t.string({ required: false }),
-      completionPercentage: t.int({ required: true }),
+      durationMinutes: t.int({ required: true, directives: { constraint: { min: 1, max: 1440 } } }),
+      teacherNotes: t.string({ required: false, directives: { constraint: { maxLength: 5000 } } }),
+      completionPercentage: t.int({ required: true, directives: { constraint: { min: 0, max: 100 } } }),
     }),
   });
 
@@ -63,7 +63,7 @@ export const LessonReviewInput = gqlSchemaBuilder.inputRef<LessonReviewInputType
   description: "Input for reviewing (approving/rejecting) a lesson report",
   fields: t => ({
     reportId: t.id({ required: true }),
-    rejectionReason: t.string({ required: false }),
+    rejectionReason: t.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
   }),
 });
 

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { SupportedCurrencyRepository } from "@/backend/db/repo/billing";
 import { supportedCurrencies, users } from "@/backend/db/schema";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import type { DBTransaction, SupportedCurrencyReturnType } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
@@ -85,7 +85,7 @@ describe("SupportedCurrencyRepository — isCurrencyInUse", () => {
       await tx.insert(users).values({
         name: "Currency User",
         email: `currency-${now.getTime()}@example.com`,
-        password: "password",
+        password: generateTestPassword(),
         timezone: IanaTimezone.UTC,
         displayCurrency: TEST_CURRENCY,
         createdAt: now,

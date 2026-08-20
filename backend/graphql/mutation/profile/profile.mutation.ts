@@ -48,7 +48,7 @@ gqlSchemaBuilder.mutationField("updateUserProfile", t =>
     type: UnifiedProfilePothosObject,
     authScopes: { loggedIn: true },
     args: {
-      userId: t.arg.string({ required: true }),
+      userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       input: t.arg({ type: UpdateUserProfileInputPothosObject, required: true }),
     },
     resolve: async (_parent, args, ctx) => {

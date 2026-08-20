@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { isIP } from "node:net";
 import { cookies, headers } from "next/headers";
 import { SessionRepository } from "@/backend/db/repo/shared";
 import { type BaseContext, createContext } from "@/backend/graphql/gqlContext";
@@ -93,14 +95,12 @@ async function resolveAuthFromRequest(
   };
 }
 
-const IPV4_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-const IPV6_REGEX = /^[0-9a-fA-F:]+$/;
-
 /**
  * Extracts the client IP from request headers. Only trusts platform-trusted
  * headers (x-vercel-forwarded-for on Vercel, cf-connecting-ip behind Cloudflare)
  * when the deployment is on that platform. Falls back to x-forwarded-for (first
- * entry) and x-real-ip. Defaults to 127.0.0.1 if no valid IP is found.
+ * entry) and x-real-ip. Uses a UA+Accept-Language fingerprint if no valid IP is
+ * found so clients with different fingerprints are rate-limited separately.
  */
 function getIpAddress(headersList: Headers): string {
   const isOnVercel = process.env.VERCEL === "1";
@@ -128,7 +128,7 @@ function getIpAddress(headersList: Headers): string {
       .filter(Boolean);
     if (ips.length > 0) {
       const ip = ips[0];
-      if (IPV4_REGEX.test(ip) || IPV6_REGEX.test(ip)) {
+      if (isIP(ip) > 0) {
         return ip;
       }
     }
@@ -137,12 +137,19 @@ function getIpAddress(headersList: Headers): string {
   const realIp = headersList.get("x-real-ip");
   if (realIp) {
     const ip = realIp.trim();
-    if (IPV4_REGEX.test(ip) || IPV6_REGEX.test(ip)) {
+    if (isIP(ip) > 0) {
       return ip;
     }
   }
 
-  return "127.0.0.1";
+  // No valid IP header found — generate a fallback identifier from request
+  // headers so clients with different fingerprints are rate-limited separately
+  // rather than sharing a single bucket.
+  const userAgent = headersList.get("user-agent") ?? "";
+  const acceptLanguage = headersList.get("accept-language") ?? "";
+  const fingerprint = createHash("sha256").update(`${userAgent}:${acceptLanguage}`).digest("hex").slice(0, 32);
+
+  return `anon:${fingerprint}`;
 }
 
 /**

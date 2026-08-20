@@ -1,3 +1,4 @@
+import { GraphQLError } from "graphql";
 import { AppPermission, FxProvider, FxSyncStatus, FxSyncTrigger } from "@/backend/enum";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
@@ -178,7 +179,7 @@ gqlSchemaBuilder.queryField("exchangeRateHistory", t =>
       from: t.arg({ type: CurrencyCodePothosObject, required: true }),
       to: t.arg({ type: CurrencyCodePothosObject, required: true }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
-      maxDays: t.arg.int({ required: false, defaultValue: 90 }),
+      maxDays: t.arg.int({ required: false, defaultValue: 90, directives: { constraint: { min: 1, max: 3650 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
@@ -247,7 +248,17 @@ gqlSchemaBuilder.mutationField("refreshExchangeRates", t =>
     },
     resolve: async (_root, args, ctx) => {
       const userId = await requireAuth(ctx);
-      await FxRateLimitService.checkManualRefreshRateLimit(userId);
+      try {
+        await FxRateLimitService.checkManualRefreshRateLimit(userId);
+      } catch (err) {
+        if (err instanceof Error && err.message === "fxRefreshRateLimitExceeded") {
+          const tErrors = ctx.t().errorsTranslations;
+          throw new GraphQLError(tErrors.billing.fxRefreshRateLimitExceeded, {
+            extensions: { code: "FX_REFRESH_RATE_LIMIT_EXCEEDED" },
+          });
+        }
+        throw err;
+      }
       return FxIngestionService.refreshRates({
         triggeredByUserId: userId,
         trigger: FxSyncTrigger.Manual,

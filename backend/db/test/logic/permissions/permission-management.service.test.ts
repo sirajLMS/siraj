@@ -4,7 +4,7 @@ import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
 import { groupPermissions, permissionGroups, permissions, users } from "@/backend/db/schema";
 import { createTestUser } from "@/backend/db/test/entity-setup";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { AppPermission, OverrideState, UserRole } from "@/backend/enum";
 import { PermissionManagementService, PermissionsService } from "@/backend/services";
 import type { UserPermissionContext } from "@/backend/types";
@@ -126,7 +126,7 @@ describe("PermissionManagementService Business Logic", () => {
       createTestUser(tx, {
         name: "Service Admin User",
         email: `svc-adm-${randomUUID().slice(0, 8)}@example.com`,
-        password: "password",
+        password: generateTestPassword(),
       })
     );
 
@@ -134,7 +134,7 @@ describe("PermissionManagementService Business Logic", () => {
       createTestUser(tx, {
         name: "Service Regular user",
         email: `svc-reg-${randomUUID().slice(0, 8)}@example.com`,
-        password: "password",
+        password: generateTestPassword(),
       })
     );
 
@@ -142,7 +142,7 @@ describe("PermissionManagementService Business Logic", () => {
       createTestUser(tx, {
         name: "Service SuperAdmin User",
         email: `svc-sa-${randomUUID().slice(0, 8)}@example.com`,
-        password: "password",
+        password: generateTestPassword(),
         isSuperAdmin: true,
       })
     );

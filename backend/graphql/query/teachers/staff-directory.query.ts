@@ -18,7 +18,7 @@ gqlSchemaBuilder.queryField("staffDirectory", t =>
         required: false,
         directives: { constraint: { min: 1, max: STAFF_DIRECTORY_MAX_LIMIT } },
       }),
-      permissionGroupFilter: t.arg.string({ required: false }),
+      permissionGroupFilter: t.arg.string({ required: false, directives: { constraint: { maxLength: 256 } } }),
     },
     resolve: async (_parent, args, ctx) => {
       const userId = await requireAuth(ctx);

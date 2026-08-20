@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
 import { classInstances, parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { ensureTestSubjectId } from "@/backend/db/test/entity-setup";
-import { runInRollback } from "@/backend/db/test/test-utils";
+import { generateTestPassword, runInRollback } from "@/backend/db/test/test-utils";
 import { Gender } from "@/backend/enum";
 import type { ClassInstanceInsertType, DBTransaction } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -13,7 +13,7 @@ import { testLogger } from "@/shared/lib/logger/testlogger";
 async function createTestUser(tx: DBTransaction, name: string, email: string, now: Date) {
   const [user] = await tx
     .insert(users)
-    .values({ name, email, password: "password", createdAt: now, updatedAt: now })
+    .values({ name, email, password: generateTestPassword(), createdAt: now, updatedAt: now })
     .returning();
   return user;
 }

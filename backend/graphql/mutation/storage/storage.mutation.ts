@@ -127,7 +127,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     authScopes: { loggedIn: true },
     type: StoragePothos.FileOperationResultPothosObject,
     args: {
-      path: t.arg.string({ required: true }),
+      path: t.arg.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
     },
     resolve: async (_parent, { path }, ctx) => {
       const userId = await requireAuth(ctx);
@@ -231,7 +231,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const { sanitizedPath } = await authAndSanitizeSinglePath(ctx, input.path);
-      return await StorageManageService.updateDirectoryPermissions({ ...input, path: sanitizedPath });
+      return await StorageManageService.updateDirectoryPermissions({ ...input, path: sanitizedPath }, ctx.locale);
     },
   }),
 
@@ -246,7 +246,7 @@ gqlSchemaBuilder.mutationFields(t => ({
     },
     resolve: async (_parent, { input }, ctx) => {
       const { sanitizedPath } = await authAndSanitizeSinglePath(ctx, input.path);
-      return await StorageManageService.setStorageItemProtection({ ...input, path: sanitizedPath });
+      return await StorageManageService.setStorageItemProtection({ ...input, path: sanitizedPath }, ctx.locale);
     },
   }),
 }));

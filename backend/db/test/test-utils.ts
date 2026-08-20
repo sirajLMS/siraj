@@ -8,6 +8,15 @@ import type { DBTransaction, UserReturnType } from "@/backend/types";
 import { parseIanaTimezone } from "@/shared/lib/enum";
 
 /**
+ * Generates a deterministic test password with mixed case, digit, and special char
+ * to satisfy `validatePasswordStrength` and avoid bare-UUID weaknesses.
+ * Format: `TestPass-<8 hex chars>!`
+ */
+export function generateTestPassword(): string {
+  return `TestPass-${randomUUID().slice(0, 8)}!`;
+}
+
+/**
  * Runs a function within a database transaction that is always rolled back.
  * This is useful for tests to ensure no data is persisted to the database.
  *
@@ -63,7 +72,7 @@ export async function createTestUserWithDefaults(
     .values({
       name: overrides.name ?? "Test User",
       email: overrides.email ?? `user-${randomUUID()}@example.com`,
-      password: overrides.password ?? randomUUID(),
+      password: overrides.password ?? generateTestPassword(),
       rememberTokenHash: overrides.rememberTokenHash ?? null,
       avatarFilePath: overrides.avatarFilePath ?? null,
       avatarUrl: overrides.avatarUrl ?? null,

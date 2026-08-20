@@ -25,20 +25,20 @@ export const ClassCategoryPothosObject = gqlSchemaBuilder
 
 export const ClassCategoryCreateInputPothos = gqlSchemaBuilder.inputType("ClassCategoryCreateInput", {
   fields: t => ({
-    name: t.string({ required: true }),
-    slug: t.string({ required: true }),
-    description: t.string({ required: false }),
+    name: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
+    slug: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
+    description: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
     isActive: t.boolean({ required: false }),
-    sortOrder: t.int({ required: false }),
+    sortOrder: t.int({ required: false, directives: { constraint: { min: 0, max: 999 } } }),
   }),
 });
 
 export const ClassCategoryUpdateInputPothos = gqlSchemaBuilder.inputType("ClassCategoryUpdateInput", {
   fields: t => ({
-    name: t.string({ required: false }),
-    slug: t.string({ required: false }),
-    description: t.string({ required: false }),
+    name: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
+    slug: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
+    description: t.string({ required: false, directives: { constraint: { maxLength: 500 } } }),
     isActive: t.boolean({ required: false }),
-    sortOrder: t.int({ required: false }),
+    sortOrder: t.int({ required: false, directives: { constraint: { min: 0, max: 999 } } }),
   }),
 });

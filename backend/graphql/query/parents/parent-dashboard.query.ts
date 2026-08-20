@@ -12,8 +12,8 @@ gqlSchemaBuilder.queryField("parentDashboardSchedule", t =>
   t.field({
     type: ParentDashboardScheduleResultPothosObject,
     args: {
-      date: t.arg.string({ required: false }),
-      search: t.arg.string({ required: false }),
+      date: t.arg.string({ required: false, directives: { constraint: { maxLength: 10 } } }),
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 256 } } }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },
     authScopes: { loggedIn: true },

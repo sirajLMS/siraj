@@ -41,7 +41,7 @@ gqlSchemaBuilder.queryField("teacherFutureSchedule", t =>
   t.field({
     type: TeacherFutureSchedulePothosObject,
     args: {
-      teacherId: t.arg.string({ required: false }),
+      teacherId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {

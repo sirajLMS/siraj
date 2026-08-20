@@ -8,7 +8,7 @@ gqlSchemaBuilder.mutationField("executeDstBulkUpdate", t =>
     type: DstMigrationReportPothosObject,
     args: {
       offsetMinutes: t.arg.int({ required: true }),
-      description: t.arg.string({ required: true }),
+      description: t.arg.string({ required: true, directives: { constraint: { maxLength: 2000 } } }),
     },
     authScopes: { superAdmin: true },
     resolve: async (_parent, args, ctx) => {

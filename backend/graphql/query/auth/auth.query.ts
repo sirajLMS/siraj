@@ -30,7 +30,7 @@ gqlSchemaBuilder.queryFields(t => ({
       permission: AppPermission.STAFF_EDIT,
     },
     args: {
-      id: t.arg.string({ required: true }),
+      id: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_parent, args) => {
       const user = await UserService.findById(args.id);
@@ -43,7 +43,12 @@ gqlSchemaBuilder.queryFields(t => ({
     type: [UserPothosObject],
     args: {
       search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-      limit: t.arg.int({ required: false, defaultValue: 50, description: "Max results (max 200)" }),
+      limit: t.arg.int({
+        required: false,
+        defaultValue: 50,
+        description: "Max results (max 200)",
+        directives: { constraint: { min: 1, max: 200 } },
+      }),
       offset: t.arg.int({ required: false, defaultValue: 0 }),
     },
     resolve: async (_parent, args) => {

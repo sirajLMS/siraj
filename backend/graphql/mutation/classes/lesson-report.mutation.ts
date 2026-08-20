@@ -67,7 +67,7 @@ gqlSchemaBuilder.mutationField("rejectLessonReport", t =>
     authScopes: { loggedIn: true },
     args: {
       reportId: t.arg.id({ required: true }),
-      rejectionReason: t.arg.string({ required: true }),
+      rejectionReason: t.arg.string({ required: true, directives: { constraint: { maxLength: 2000 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);

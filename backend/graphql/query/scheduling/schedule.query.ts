@@ -75,8 +75,8 @@ gqlSchemaBuilder.queryField("dailyScheduleMetrics", t =>
   t.field({
     type: DailyScheduleMetricsPothosObject,
     args: {
-      date: t.arg.string({ required: true }),
-      teacherId: t.arg.string({ required: false }),
+      date: t.arg.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
+      teacherId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -95,10 +95,10 @@ gqlSchemaBuilder.queryField("dailyScheduleList", t =>
   t.field({
     type: [DailyScheduleListPothosObject],
     args: {
-      date: t.arg.string({ required: true }),
-      teacherId: t.arg.string({ required: false }),
-      search: t.arg.string({ required: false }),
-      metricFilter: t.arg.string({ required: false }),
+      date: t.arg.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
+      teacherId: t.arg.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 256 } } }),
+      metricFilter: t.arg.string({ required: false, directives: { constraint: { maxLength: 256 } } }),
     },
     authScopes: { loggedIn: true },
     resolve: async (_parent, args, ctx) => {
@@ -122,7 +122,7 @@ gqlSchemaBuilder.queryField("rescheduleTrackingRows", t =>
   t.field({
     type: RescheduleTrackingResultPothosObject,
     args: {
-      search: t.arg.string({ required: false }),
+      search: t.arg.string({ required: false, directives: { constraint: { maxLength: 256 } } }),
       status: t.arg({ type: LeaveRequestStatusPothosObject, required: false }),
       paginationArgs: t.arg({ type: PaginationArgsObject, required: false }),
     },

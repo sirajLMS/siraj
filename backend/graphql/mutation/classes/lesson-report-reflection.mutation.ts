@@ -11,7 +11,7 @@ gqlSchemaBuilder.mutationField("submitStudentLessonReportReflection", t =>
     authScopes: { loggedIn: true },
     args: {
       classInstanceId: t.arg.id({ required: true }),
-      studentNotes: t.arg.string({ required: true }),
+      studentNotes: t.arg.string({ required: true, directives: { constraint: { maxLength: 2000 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);

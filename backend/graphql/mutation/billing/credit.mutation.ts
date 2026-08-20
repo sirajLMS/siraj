@@ -12,7 +12,7 @@ gqlSchemaBuilder.mutationField("recordCreditPurchase", t =>
     args: {
       studentId: t.arg.id({ required: true }),
       hours: t.arg.int({ required: true }),
-      notes: t.arg.string({ required: false }),
+      notes: t.arg.string({ required: false, directives: { constraint: { maxLength: 2000 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);

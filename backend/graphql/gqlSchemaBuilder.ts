@@ -149,10 +149,11 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
   },
   scopeAuth: {
     authScopes: async ctx => buildAuthScopes(ctx),
-    unauthorizedError: (_parent, _context, _info, result) => {
+    unauthorizedError: (_parent, context, _info, result) => {
       const isUnauthenticated = hasLoggedInFailure(result.failure);
 
-      return new GraphQLError(result.message, {
+      const tErrors = context.t().errorsTranslations;
+      return new GraphQLError(isUnauthenticated ? tErrors.unauthorized : tErrors.insufficientPermissions, {
         extensions: {
           code: isUnauthenticated ? "UNAUTHENTICATED" : "FORBIDDEN",
         },

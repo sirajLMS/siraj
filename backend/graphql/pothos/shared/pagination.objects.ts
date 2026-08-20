@@ -24,12 +24,12 @@ const PaginationArgsRef = gqlSchemaBuilder.inputRef<PaginationInput>("Pagination
 
 export const PaginationArgsObject = PaginationArgsRef.implement({
   fields: t => ({
-    first: t.int({ defaultValue: PaginationArgsDefault.first }),
-    skip: t.int(),
+    first: t.int({ defaultValue: PaginationArgsDefault.first, directives: { constraint: { min: 1, max: 200 } } }),
+    skip: t.int({ directives: { constraint: { min: 0 } } }),
     after: t.string(),
     before: t.string(),
-    last: t.int(),
-    page: t.int(),
-    maxCount: t.int({ defaultValue: PaginationArgsDefault.maxCount }),
+    last: t.int({ directives: { constraint: { min: 1, max: 200 } } }),
+    page: t.int({ directives: { constraint: { min: 1 } } }),
+    maxCount: t.int({ defaultValue: PaginationArgsDefault.maxCount, directives: { constraint: { min: 1, max: 500 } } }),
   }),
 });

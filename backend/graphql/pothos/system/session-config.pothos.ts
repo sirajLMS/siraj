@@ -82,9 +82,9 @@ export const SessionConfigUpsertInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for creating or updating a per-role session configuration.",
     fields: t => ({
-      roleName: t.string({ required: true }),
-      ttlSeconds: t.int({ required: true }),
-      maxConcurrentSessions: t.int({ required: true }),
+      roleName: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
+      ttlSeconds: t.int({ required: true, directives: { constraint: { min: 1, max: 604800 } } }),
+      maxConcurrentSessions: t.int({ required: true, directives: { constraint: { min: 0, max: 1000 } } }),
     }),
   });
 

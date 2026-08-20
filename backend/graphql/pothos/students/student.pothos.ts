@@ -34,12 +34,12 @@ type InputFieldBuilder = Parameters<
 
 function optionalStudentInputFields(t: InputFieldBuilder) {
   return {
-    primaryTeacherId: t.string({ required: false }),
+    primaryTeacherId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
     dateOfBirth: t.field({ type: "DateTime", required: false }),
     gender: t.field({ type: GenderPothosObject, required: false }),
     language: t.field({ type: AppLanguagePothosObject, required: false }),
-    classesTotal: t.int({ required: false }),
-    classesRemaining: t.int({ required: false }),
+    classesTotal: t.int({ required: false, directives: { constraint: { min: 0, max: 100000 } } }),
+    classesRemaining: t.int({ required: false, directives: { constraint: { min: 0, max: 100000 } } }),
   };
 }
 
@@ -99,15 +99,15 @@ export const StudentCreateInputPothosObject = gqlSchemaBuilder
   .inputRef<StudentCreateInput>("StudentCreateInput")
   .implement({
     fields: t => ({
-      parentId: t.string({ required: true }),
-      userId: t.string({ required: true }),
-      name: t.string({ required: true }),
+      parentId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      userId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      name: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
       ...optionalStudentInputFields(t),
       status: t.field({
         type: StudentStatusPothosObject,
         required: true,
       }),
-      idempotencyKey: t.string({ required: true }),
+      idempotencyKey: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
     }),
   });
 
@@ -115,10 +115,10 @@ export const PartialStudentUpdateInputPothosObject = gqlSchemaBuilder
   .inputRef<PartialStudentUpdateInput>("PartialStudentUpdateInput")
   .implement({
     fields: t => ({
-      id: t.string({ required: true }),
-      parentId: t.string({ required: false }),
-      userId: t.string({ required: false }),
-      name: t.string({ required: false }),
+      id: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
+      parentId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
+      userId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
+      name: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
       ...optionalStudentInputFields(t),
       status: t.field({
         type: StudentStatusPothosObject,

@@ -13,12 +13,12 @@ export const StudentOnboardingInputPothosObject = gqlSchemaBuilder
   .implement({
     description: "Input for creating a new student profile under a parent",
     fields: t => ({
-      parentId: t.string({ required: false }),
+      parentId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
       name: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
       dateOfBirth: t.field({ type: "DateTime" }),
       gender: t.field({ type: GenderPothosObject }),
       language: t.field({ type: AppLanguagePothosObject }),
-      primaryTeacherId: t.string(),
+      primaryTeacherId: t.string({ directives: { constraint: { maxLength: 36 } } }),
       status: t.field({ type: StudentStatusPothosObject }),
       classesTotal: t.int(),
       classesRemaining: t.int(),
@@ -39,7 +39,7 @@ export const StudentOnboardingInputPothosObject = gqlSchemaBuilder
       phone: t.string({
         required: false,
         description: "Student phone (stored on users row)",
-        directives: { constraint: { maxLength: 512 } },
+        directives: { constraint: { maxLength: 50 } },
       }),
       displayCurrency: t.field({
         type: CurrencyCodePothosObject,

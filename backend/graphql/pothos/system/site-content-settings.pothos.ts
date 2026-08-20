@@ -37,10 +37,10 @@ const SiteContentUpsertInputRef = gqlSchemaBuilder.inputRef<SiteContentUpsertGra
 
 export const SiteContentUpsertInputPothosObject = SiteContentUpsertInputRef.implement({
   fields: t => ({
-    slug: t.string({ required: true }),
-    title: t.string({ required: true }),
-    body: t.string({ required: true }),
-    contentType: t.string({ required: true }),
+    slug: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
+    title: t.string({ required: true, directives: { constraint: { maxLength: 200 } } }),
+    body: t.string({ required: true, directives: { constraint: { maxLength: 5000 } } }),
+    contentType: t.string({ required: true, directives: { constraint: { maxLength: 50 } } }),
     isPublished: t.boolean({ required: true }),
   }),
 });

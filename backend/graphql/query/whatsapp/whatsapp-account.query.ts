@@ -18,7 +18,7 @@ gqlSchemaBuilder.queryFields(t => ({
     description: "Check if a user has opted in to WhatsApp notifications (REQ-10/BL1).",
     authScopes: { loggedIn: true },
     args: {
-      userId: t.arg.string({ required: true }),
+      userId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: withAuthResult((actorUserId, args, tErrors) => {
       const userId = args.userId === "me" ? actorUserId : args.userId;

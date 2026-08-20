@@ -102,9 +102,9 @@ export const QuotaRolloverPolicyInputPothosObject = QuotaRolloverPolicyInputPoth
 export const QuotaSubmitInputPothosRef = gqlSchemaBuilder.inputRef<QuotaSubmitInput>("QuotaSubmitInput").implement({
   description: "Input for creating a new student quota",
   fields: t => ({
-    studentId: t.string({ required: true }),
+    studentId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     kind: t.field({ type: QuotaKindPothosEnum, required: true }),
-    name: t.string({ required: true }),
+    name: t.string({ required: true, directives: { constraint: { maxLength: 100 } } }),
     // V3-073: GraphQL-level validation on totalClasses (min 1, max 10000).
     totalClasses: t.int({ required: true, directives: { constraint: { min: 1, max: 10000 } } }),
     validFrom: t.field({ type: "DateTime", required: false }),
@@ -114,14 +114,14 @@ export const QuotaSubmitInputPothosRef = gqlSchemaBuilder.inputRef<QuotaSubmitIn
     // V3-073: GraphQL-level validation on priority (min 0, max 100).
     priority: t.int({ required: false, directives: { constraint: { min: 0, max: 100 } } }),
     rolloverPolicy: t.field({ type: QuotaRolloverPolicyInputPothosRef, required: false }),
-    idempotencyKey: t.string({ required: false }),
+    idempotencyKey: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
   }),
 });
 
 export const QuotaUpdateInputPothosRef = gqlSchemaBuilder.inputRef<QuotaUpdateInput>("QuotaUpdateInput").implement({
   description: "Input for updating an existing quota",
   fields: t => ({
-    name: t.string({ required: false }),
+    name: t.string({ required: false, directives: { constraint: { maxLength: 100 } } }),
     validUntil: t.field({ type: "DateTime", required: false }),
     status: t.field({ type: QuotaStatusPothosEnum, required: false }),
     // V3-073: GraphQL-level validation on priority (min 0, max 100).
@@ -134,10 +134,10 @@ export const QuotaPaginatedFilterPothosRef = gqlSchemaBuilder
   .implement({
     description: "Filter options for querying quotas",
     fields: t => ({
-      studentId: t.string({ required: false }),
+      studentId: t.string({ required: false, directives: { constraint: { maxLength: 36 } } }),
       kind: t.field({ type: QuotaKindPothosEnum, required: false }),
       status: t.field({ type: QuotaStatusPothosEnum, required: false }),
-      search: t.string({ required: false }),
+      search: t.string({ required: false, directives: { constraint: { maxLength: 256 } } }),
     }),
   });
 

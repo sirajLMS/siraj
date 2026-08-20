@@ -725,11 +725,11 @@ export namespace QuotaService {
     locale: string = "en"
   ): Promise<QuotaReturnType> => {
     // --- Lock the quota row (data access) ---
+    const tErrors = getServerTranslations(locale).errorsTranslations;
     const target = await lockQuotaForRefresh(tx, quotaId);
-    if (!target) throw new QuotaNotFoundError("Quota not found");
+    if (!target) throw new QuotaNotFoundError(tErrors.quotaNotFound);
 
     // --- Business rules: validation ---
-    const tErrors = getServerTranslations(locale).errorsTranslations;
     if (target.kind !== "PERIODIC") {
       throw new ValidationError(tErrors.quota.cannotRefreshNonPeriodic);
     }

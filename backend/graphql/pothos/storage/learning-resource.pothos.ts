@@ -7,8 +7,8 @@ import type { LearningResourceReturnType } from "@/backend/types";
 
 const ResourceUploadInput = gqlSchemaBuilder.inputType("ResourceUploadInput", {
   fields: t => ({
-    displayName: t.string({ required: true }),
-    filePath: t.string({ required: true }),
+    displayName: t.string({ required: true, directives: { constraint: { maxLength: 255 } } }),
+    filePath: t.string({ required: true, directives: { constraint: { maxLength: 1024 } } }),
     fileId: t.id({ required: true }),
   }),
 });
