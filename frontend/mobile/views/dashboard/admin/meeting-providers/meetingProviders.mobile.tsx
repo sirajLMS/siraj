@@ -102,13 +102,13 @@ function MobileProviderRow({ row, labels, onEdit, onDelete }: MobileProviderRowP
           {/* Capability Flags */}
           <Stack direction="row" spacing={0.5} sx={{ flexWrap: "wrap", gap: 0.5 }}>
             {row.fieldSchema?.supportsUsername ? (
-              <MobileStatusBadge category="session" status="confirmed" label={labels.supportsUsername ?? ""} />
+              <Chip size="small" variant="outlined" label={labels.supportsUsername ?? ""} />
             ) : null}
             {row.fieldSchema?.supportsPassword ? (
-              <MobileStatusBadge category="session" status="confirmed" label={labels.supportsPassword ?? ""} />
+              <Chip size="small" variant="outlined" label={labels.supportsPassword ?? ""} />
             ) : null}
             {row.fieldSchema?.supportsTenantId ? (
-              <MobileStatusBadge category="session" status="confirmed" label={labels.supportsTenantId ?? ""} />
+              <Chip size="small" variant="outlined" label={labels.supportsTenantId ?? ""} />
             ) : null}
           </Stack>
         </Stack>

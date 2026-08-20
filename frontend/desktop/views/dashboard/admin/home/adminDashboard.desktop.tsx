@@ -1,8 +1,8 @@
 "use client";
 
 import { SearchOutlined } from "@mui/icons-material";
-import { Box, InputAdornment, TextField } from "@mui/material";
-import { PaginationControls, StatusBadge } from "@/frontend/common/components/ui";
+import { Box, Chip, InputAdornment, TextField } from "@mui/material";
+import { PaginationControls } from "@/frontend/common/components/ui";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
 import { ScheduleOverviewEmptyState } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewCardList";
 import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleOverviewListShell";
@@ -232,7 +232,7 @@ export function AdminDashboardDesktopView({
         ) : null}
         {selectedMetricLabel ? (
           <Box sx={{ ...desktopSectionContentInsetSx, py: 0, mb: 1 }}>
-            <StatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
+            <Chip size="small" variant="outlined" label={selectedMetricLabel} />
           </Box>
         ) : null}
 

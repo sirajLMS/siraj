@@ -90,7 +90,8 @@
     "paymentMethodNotFound": {
       "__fn": "(id) => `Payment method not found (ID: ${id}).`"
     },
-    "currencyHedgeCreateFailed": "Failed to create currency hedge."
+    "currencyHedgeCreateFailed": "Failed to create currency hedge.",
+    "fxRefreshRateLimitExceeded": "FX rate refresh rate limit exceeded. Please try again later."
   },
   "credit": {
     "duplicatePurchase": "This credit purchase has already been processed.",
@@ -119,6 +120,7 @@
     "permissionsUpdateFailed": {
       "__fn": "(error) => `Failed to update permissions: ${error}`"
     },
+    "permissionsUpdateFailedGeneric": "Failed to update permissions.",
     "fileProtectionUpdated": "File protection updated successfully",
     "fileProtectionUpdateFailed": "Failed to update file protection",
     "directoryProtectionUpdated": "Directory protection updated successfully",
@@ -127,6 +129,7 @@
     "protectionUpdateFailed": {
       "__fn": "(error) => `Failed to set protection: ${error}`"
     },
+    "protectionUpdateFailedGeneric": "Failed to set protection.",
     "sha256HashMismatch": "SHA-256 hash mismatch",
     "invalidUploadRequestBody": "Invalid upload request body",
     "forbidden": "Forbidden",
@@ -225,7 +228,18 @@
     "fieldSchemaIsRequired": "fieldSchema is required",
     "providerIdIsRequired": "providerId is required",
     "isDefaultIsRequired": "isDefault is required",
-    "detailsIsRequired": "details is required"
+    "detailsIsRequired": "details is required",
+    "channelRateLimited": "Rate limited by meeting provider. Please try again later.",
+    "channelPermissionDenied": "Permission denied by meeting provider.",
+    "channelProviderUnavailable": "Meeting provider is currently unavailable.",
+    "channelProviderReauthRequired": "Re-authentication required for meeting provider.",
+    "channelUnsupportedProviderKind": "This provider does not support automatic meeting URL generation.",
+    "channelInsufficientScopes": "Insufficient permissions for meeting provider.",
+    "channelInvalidServiceAccountJson": "Invalid service account configuration.",
+    "channelMissingImpersonationSubject": "Meeting provider impersonation subject is not configured.",
+    "channelNoOrgCredentialsNoUserToken": "No meeting provider credentials configured.",
+    "channelNoAppAccessPolicy": "No application access policy found for meeting provider.",
+    "channelProviderErrorOccurred": "Meeting provider error occurred."
   },
   "parent": {
     "alreadyExists": "Parent profile for this user already exists.",

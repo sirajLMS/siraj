@@ -1,6 +1,6 @@
 "use client";
 
-import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlineOutlined, SendOutlined } from "@mui/icons-material";
+import { AlternateEmailOutlined, CheckCircleOutlined, DeleteOutlined, SendOutlined } from "@mui/icons-material";
 import { Avatar, Box, type ButtonProps, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { ReactNode } from "react";
@@ -248,7 +248,7 @@ function ComplaintResponseSectionShared({
         </EmailActionButton>
         {canDelete ? (
           <DeleteActionButton
-            startIcon={<DeleteOutlineOutlined />}
+            startIcon={<DeleteOutlined />}
             onClick={() => {
               onDelete();
             }}

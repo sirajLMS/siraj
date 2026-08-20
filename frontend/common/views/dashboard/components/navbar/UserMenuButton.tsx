@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { GroupsOutlined, LoginOutlined, LogoutOutlined, PersonOutlineOutlined } from "@mui/icons-material";
+import { GroupsOutlined, LoginOutlined, LogoutOutlined, PersonOutlined } from "@mui/icons-material";
 import { Box, ButtonBase, Divider, Menu, MenuItem, Typography } from "@mui/material";
 import type React from "react";
 import { useMemo, useState } from "react";
@@ -459,7 +459,7 @@ export function UserMenuButton({
 
         {canViewOwnProfile ? (
           <MenuItem onClick={handleProfileClick} sx={{ gap: 1.5, mx: 1.5, borderRadius: 1 }}>
-            <PersonOutlineOutlined fontSize="small" />
+            <PersonOutlined fontSize="small" />
             <Typography variant="bodyMd" sx={{ fontWeight: 500 }}>
               {tProfile.pageTitle}
             </Typography>

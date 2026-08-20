@@ -38,13 +38,14 @@ function renderMobileHeader(props: Readonly<ProfileShellProps>, t: ProfileLabels
 
 export function ProfileShellMobileView({ labels, ...shellProps }: Readonly<ProfileShellMobileViewProps>) {
   return (
-    <MobilePageContainer sx={{ px: { xs: 2 } }}>
+    <MobilePageContainer>
       <Box
         sx={theme => ({
           display: "flex",
           flexDirection: "column",
           gap: theme.layout.sectionGap,
           width: "100%",
+          px: { xs: 2 },
         })}
       >
         <ProfileShellShared shellProps={shellProps} labels={labels} options={{ renderHeader: renderMobileHeader }} />

@@ -90,7 +90,8 @@
     "paymentMethodNotFound": {
       "__fn": "(id) => `\\u0637\\u0631\\u064A\\u0642\\u0629 \\u0627\\u0644\\u062F\\u0641\\u0639 \\u063A\\u064A\\u0631 \\u0645\\u0648\\u062C\\u0648\\u062F\\u0629 (\\u0627\\u0644\\u0645\\u0639\\u0631\\u0641: ${id}).`"
     },
-    "currencyHedgeCreateFailed": "فشل إنشاء تغطية العملة."
+    "currencyHedgeCreateFailed": "فشل إنشاء تغطية العملة.",
+    "fxRefreshRateLimitExceeded": "تم تجاوز حد تحديث أسعار صرف العملات. يرجى المحاولة مرة أخرى لاحقاً."
   },
   "credit": {
     "duplicatePurchase": "تمت معالجة عملية شراء الرصيد هذه بالفعل.",
@@ -119,6 +120,7 @@
     "permissionsUpdateFailed": {
       "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u062A\\u062D\\u062F\\u064A\\u062B \\u0627\\u0644\\u0623\\u0630\\u0648\\u0646\\u0627\\u062A: ${error}`"
     },
+    "permissionsUpdateFailedGeneric": "فشل تحديث الأذونات.",
     "fileProtectionUpdated": "تم تحديث حماية الملف بنجاح",
     "fileProtectionUpdateFailed": "فشل تحديث حماية الملف",
     "directoryProtectionUpdated": "تم تحديث حماية الدليل بنجاح",
@@ -127,6 +129,7 @@
     "protectionUpdateFailed": {
       "__fn": "(error) => `\\u0641\\u0634\\u0644 \\u062A\\u0639\\u064A\\u064A\\u0646 \\u0627\\u0644\\u062D\\u0645\\u0627\\u064A\\u0629: ${error}`"
     },
+    "protectionUpdateFailedGeneric": "فشل تعيين الحماية.",
     "sha256HashMismatch": "عدم تطابق في بصمة SHA-256",
     "invalidUploadRequestBody": "نص طلب الرفع غير صالح",
     "forbidden": "ممنوع",
@@ -225,7 +228,18 @@
     "fieldSchemaIsRequired": "مخطط الحقل (fieldSchema) مطلوب",
     "providerIdIsRequired": "معرّف المزوّد (providerId) مطلوب",
     "isDefaultIsRequired": "القيمة الافتراضية (isDefault) مطلوبة",
-    "detailsIsRequired": "التفاصيل (details) مطلوبة"
+    "detailsIsRequired": "التفاصيل (details) مطلوبة",
+    "channelRateLimited": "تم تجاوز حد الطلبات لمزوّد الاجتماعات. يرجى المحاولة مرة أخرى لاحقاً.",
+    "channelPermissionDenied": "تم رفض الإذن من قبل مزوّد الاجتماعات.",
+    "channelProviderUnavailable": "مزوّد الاجتماعات غير متاح حالياً.",
+    "channelProviderReauthRequired": "مطلوب إعادة المصادقة لمزوّد الاجتماعات.",
+    "channelUnsupportedProviderKind": "هذا المزوّد لا يدعم إنشاء روابط الاجتماعات تلقائياً.",
+    "channelInsufficientScopes": "صلاحيات غير كافية لمزوّد الاجتماعات.",
+    "channelInvalidServiceAccountJson": "تكوين حساب الخدمة غير صالح.",
+    "channelMissingImpersonationSubject": "موضوع التمثيل (impersonation) لمزوّد الاجتماعات غير مُعدّ.",
+    "channelNoOrgCredentialsNoUserToken": "لا توجد بيانات اعتماد لمزوّد الاجتماعات.",
+    "channelNoAppAccessPolicy": "لا توجد سياسة وصول للتطبيق لمزوّد الاجتماعات.",
+    "channelProviderErrorOccurred": "حدث خطأ في مزوّد الاجتماعات."
   },
   "parent": {
     "alreadyExists": "ملف ولي الأمر لهذا المستخدم موجود بالفعل.",

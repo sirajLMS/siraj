@@ -127,7 +127,7 @@ function makeStudentRow(id: string, name: string) {
   };
 }
 
-function makeAutocompleteMock<TData, TVariables extends { search?: string | null; limit?: number }>(
+function makeAutocompleteMock<TData, TVariables extends { search?: string | null; limit?: number | null }>(
   queryDoc: TypedDocumentNode<TData, TVariables>,
   dataKey: string,
   rowFactory: (id: string, name: string) => { id: string; name: string },

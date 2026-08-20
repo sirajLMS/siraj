@@ -1,10 +1,4 @@
-import {
-  CloudSyncOutlined,
-  ErrorOutlineOutlined,
-  LockOutlined,
-  RefreshOutlined,
-  SyncOutlined,
-} from "@mui/icons-material";
+import { CloudSyncOutlined, ErrorOutlined, LockOutlined, RefreshOutlined, SyncOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -25,7 +19,7 @@ export function TemplatesErrorState({
 }: Readonly<TemplatesSharedBlockProps & { readonly onRetry: () => void | Promise<void> }>) {
   return (
     <Box sx={{ textAlign: "center", py: 4 }} role="alert">
-      <ErrorOutlineOutlined sx={{ fontSize: 40, color: theme => theme.palette.error.main, mb: 1 }} />
+      <ErrorOutlined sx={{ fontSize: 40, color: theme => theme.palette.error.main, mb: 1 }} />
       <Typography variant="titleLg" sx={{ mb: 0.5 }}>
         {labels.errorGenericTitle}
       </Typography>

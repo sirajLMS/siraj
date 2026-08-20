@@ -23,10 +23,10 @@ export function useCurrencyCatalog(): {
       ?.filter((row): row is typeof row & { code: NonNullable<typeof row.code> } => row.code != null)
       .map(row => ({
         code: row.code,
-        symbol: row.symbol ?? row.code,
+        symbol: row.symbol ?? null,
         countryCode: row.countryCode,
         decimals: row.decimals,
-        sortOrder: row.sortOrder ?? undefined,
+        sortOrder: row.sortOrder,
         isActive: row.isActive,
       }));
     if (rows && rows.length > 0) {

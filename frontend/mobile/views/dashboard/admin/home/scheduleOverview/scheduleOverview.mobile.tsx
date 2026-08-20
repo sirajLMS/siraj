@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Stack, useTheme } from "@mui/material";
+import { Box, Chip, Stack, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
 import {
   ScheduleOverviewFilterSection,
@@ -13,7 +13,7 @@ import {
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
-import { MobileCardListItem, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { ScheduleOverviewMobileCardList } from "@/frontend/mobile/views/dashboard/admin/home/__shared__/scheduleOverviewMobileCardList";
 import {
@@ -54,9 +54,7 @@ function ScheduleOverviewMobileHeader({
   return (
     <StyledSectionTitleRow>
       <StyledSectionTitle variant="titleLg">{title}</StyledSectionTitle>
-      {selectedMetricLabel ? (
-        <MobileStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
-      ) : null}
+      {selectedMetricLabel ? <Chip size="small" variant="outlined" label={selectedMetricLabel} /> : null}
     </StyledSectionTitleRow>
   );
 }

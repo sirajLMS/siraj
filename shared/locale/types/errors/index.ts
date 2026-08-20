@@ -83,6 +83,7 @@ export interface BillingErrors {
   readonly paymentMethodCreateFailed: string;
   readonly paymentMethodNotFound: (id: string) => string;
   readonly currencyHedgeCreateFailed: string;
+  readonly fxRefreshRateLimitExceeded: string;
 }
 
 /**
@@ -111,12 +112,14 @@ export interface FileErrors {
   readonly directoryPermissionsUpdated: string;
   readonly directoryPermissionsUpdateFailed: string;
   readonly permissionsUpdateFailed: (error: string) => string;
+  readonly permissionsUpdateFailedGeneric: string;
   readonly fileProtectionUpdated: string;
   readonly fileProtectionUpdateFailed: string;
   readonly directoryProtectionUpdated: string;
   readonly directoryProtectionUpdateFailed: string;
   readonly fileOrDirectoryNotFound: string;
   readonly protectionUpdateFailed: (error: string) => string;
+  readonly protectionUpdateFailedGeneric: string;
   readonly sha256HashMismatch: string;
   readonly invalidUploadRequestBody: string;
   readonly invalidUploadSession: string;
@@ -192,6 +195,17 @@ export interface MeetingProviderErrors {
   readonly providerIdIsRequired: string;
   readonly isDefaultIsRequired: string;
   readonly detailsIsRequired: string;
+  readonly channelRateLimited: string;
+  readonly channelPermissionDenied: string;
+  readonly channelProviderUnavailable: string;
+  readonly channelProviderReauthRequired: string;
+  readonly channelUnsupportedProviderKind: string;
+  readonly channelInsufficientScopes: string;
+  readonly channelInvalidServiceAccountJson: string;
+  readonly channelMissingImpersonationSubject: string;
+  readonly channelNoOrgCredentialsNoUserToken: string;
+  readonly channelNoAppAccessPolicy: string;
+  readonly channelProviderErrorOccurred: string;
 }
 
 /**

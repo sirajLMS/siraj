@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Paper, Stack, Typography } from "@mui/material";
+import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { PaginationControls } from "@/frontend/common/components/ui";
 import {
@@ -16,7 +16,7 @@ import { ScheduleOverviewListShell } from "@/frontend/common/views/dashboard/adm
 import { scheduleOverviewListCanvasSx } from "@/frontend/common/views/dashboard/admin/home/components/scheduleOverviewSurfaces";
 import type { ScheduleOverviewViewModel } from "@/frontend/common/views/dashboard/admin/home/scheduleOverview/useScheduleOverviewViewModel";
 import type { ScheduleOverviewLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/scheduleOverview.types";
-import { DesktopSectionPanel, DesktopStatusBadge } from "@/frontend/desktop/components/ui";
+import { DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { TeacherAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/userSelect";
 import { ScheduleOverviewDesktopCard } from "@/frontend/desktop/views/dashboard/admin/home/scheduleOverview/components/scheduleOverviewCard.desktop";
 
@@ -56,9 +56,7 @@ function ScheduleOverviewTitle({
   return (
     <>
       <StyledSectionTitle variant="titleLg">{title}</StyledSectionTitle>
-      {selectedMetricLabel ? (
-        <DesktopStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
-      ) : null}
+      {selectedMetricLabel ? <Chip size="small" variant="outlined" label={selectedMetricLabel} /> : null}
     </>
   );
 }

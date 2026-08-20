@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTitle, Stack, Tooltip, Typography } from "@mui/material";
+import { CircularProgress, Dialog, DialogContent, DialogTitle, Stack, Tooltip, Typography } from "@mui/material";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useCallback, useMemo } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
@@ -141,14 +141,16 @@ export function CronRunsDialog({ open, scheduleName, labels, runs, loading, onCl
     if (loading) {
       return (
         <Stack sx={{ py: 4, alignItems: "center" }}>
-          <StatusBadge category="cronRunStatus" status="RUNNING" label={labels.runsTitle} />
+          <CircularProgress aria-label={labels.runsTitle} />
         </Stack>
       );
     }
     if (runs.length === 0) {
       return (
         <Stack sx={{ py: 4, alignItems: "center" }}>
-          <StatusBadge category="cronRunStatus" status="PENDING" label={labels.emptyMessage} />
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
+            {labels.emptyMessage}
+          </Typography>
         </Stack>
       );
     }

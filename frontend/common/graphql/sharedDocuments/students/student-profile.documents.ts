@@ -133,42 +133,9 @@ export const studentProfileQueryDocument: TypedDocumentNode<
   }
 `;
 
-interface RecordStudentProfileEditMutationShape {
-  recordStudentProfileEdit: {
-    id: string | null;
-    name: string | null;
-    status: string | null;
-    avatarUrl: string | null;
-    dateOfBirth: string | null;
-    gender: string | null;
-    language: string | null;
-    timezoneOverride: string | null;
-    email: string | null;
-    phone: string | null;
-    parentPhone: string | null;
-    version: number | null;
-    updatedAt: string | null;
-  } | null;
-}
-
-interface RecordStudentProfileEditMutationArgs {
-  input: {
-    studentId?: string | null;
-    phone?: string | null;
-    timezone?: string | null;
-    displayCurrency?: string | null;
-    dateOfBirth?: string | null;
-    gender?: string | null;
-    language?: string | null;
-    timezoneOverride?: string | null;
-    parentPhone?: string | null;
-    avatarUrl?: string | null;
-  };
-}
-
 export const recordStudentProfileEditMutationDocument: TypedDocumentNode<
-  RecordStudentProfileEditMutationShape,
-  RecordStudentProfileEditMutationArgs
+  Operations.RecordStudentProfileEditMutation,
+  Types.MutationRecordStudentProfileEditArgs
 > = gql`
   mutation RecordStudentProfileEdit($input: StudentProfileEditInput!) {
     recordStudentProfileEdit(input: $input) {

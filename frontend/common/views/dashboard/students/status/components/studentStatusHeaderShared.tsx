@@ -1,6 +1,6 @@
 "use client";
 
-import { HistoryOutlined, MailOutlineOutlined } from "@mui/icons-material";
+import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useCallback } from "react";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -167,7 +167,7 @@ function HeaderActions({
         <Button
           fullWidth={buttonFullWidth}
           variant="outlined"
-          startIcon={<MailOutlineOutlined />}
+          startIcon={<MailOutlined />}
           onClick={handleContactParent}
           sx={theme => ({
             borderRadius: "button",

@@ -1,14 +1,14 @@
 import {
   AccessTimeOutlined,
   CalendarToday,
-  CheckCircleOutlineOutlined,
+  CheckCircleOutlined,
   EditNoteOutlined,
   ExitToAppOutlined,
   FaceOutlined,
   FastRewindOutlined,
   HeadphonesOutlined,
   PersonRemoveOutlined,
-  PlayCircleOutlineOutlined,
+  PlayCircleOutlined,
   PowerSettingsNewOutlined,
   type SvgIconComponent,
   ThumbDownOutlined,
@@ -56,7 +56,7 @@ export const ADMIN_METRIC_DEFINITIONS: readonly AdminMetricDefinition[] = [
   {
     key: "taken",
     labelKey: "taken",
-    icon: CheckCircleOutlineOutlined,
+    icon: CheckCircleOutlined,
     count: m => m?.taken ?? 0,
   },
   {
@@ -74,7 +74,7 @@ export const ADMIN_METRIC_DEFINITIONS: readonly AdminMetricDefinition[] = [
   {
     key: "running",
     labelKey: "running",
-    icon: PlayCircleOutlineOutlined,
+    icon: PlayCircleOutlined,
     count: m => m?.running ?? 0,
   },
   {

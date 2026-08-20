@@ -10,7 +10,7 @@ import {
   PauseOutlined,
   PlayArrowOutlined,
 } from "@mui/icons-material";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { Chip, IconButton, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { CronExpressionParser } from "cron-parser";
 import { useCallback, useMemo, useState } from "react";
@@ -187,19 +187,15 @@ function buildColumns(
       renderCell: ({ value }) => {
         const policy = safeEnum(value, Object.values(CronConcurrencyPolicy));
         if (!policy) return <Typography variant="bodyMd">—</Typography>;
-        let status: string;
         let label: string;
         if (policy === CronConcurrencyPolicy.Allow) {
-          status = "COMPLETED";
           label = labels.concurrencyAllow;
         } else if (policy === CronConcurrencyPolicy.Skip) {
-          status = "CANCELLED";
           label = labels.concurrencySkip;
         } else {
-          status = "RUNNING";
           label = labels.concurrencyReplace;
         }
-        return <StatusBadge category="cronRunStatus" status={status} label={label} size="small" />;
+        return <Chip size="small" variant="outlined" label={label} />;
       },
     },
   ];

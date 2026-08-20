@@ -1,4 +1,4 @@
-import { BadgeOutlined, Diversity1Outlined, PersonOutlineOutlined, SchoolOutlined } from "@mui/icons-material";
+import { BadgeOutlined, Diversity1Outlined, PersonOutlined, SchoolOutlined } from "@mui/icons-material";
 import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import { getVisibleTabs, type TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";
@@ -10,7 +10,7 @@ import type {
 export const USERS_DIRECTORY_TABS: readonly TabDefinition<UsersDirectoryTabId, UsersDirectoryTabLabelKey>[] = [
   { id: "teachers", labelKey: "teachers", permissions: PAGE_PERMISSIONS.usersTeachers, icon: SchoolOutlined },
   { id: "parents", labelKey: "parents", permissions: PAGE_PERMISSIONS.usersParents, icon: Diversity1Outlined },
-  { id: "students", labelKey: "students", permissions: PAGE_PERMISSIONS.usersStudents, icon: PersonOutlineOutlined },
+  { id: "students", labelKey: "students", permissions: PAGE_PERMISSIONS.usersStudents, icon: PersonOutlined },
   { id: "staff", labelKey: "staff", permissions: PAGE_PERMISSIONS.usersStaff, icon: BadgeOutlined },
 ] as const;
 

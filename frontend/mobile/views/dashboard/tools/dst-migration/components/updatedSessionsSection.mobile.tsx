@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircleOutlined } from "@mui/icons-material";
+import { Chip } from "@mui/material";
 import { DstMigrationPanelShared } from "@/frontend/common/views/dashboard/tools/dst-migration/components/__shared__/dstMigrationPanelShared";
 import {
   getOnSuccessColor,
@@ -9,7 +10,6 @@ import {
   getSuccessTitleColor,
 } from "@/frontend/common/views/dashboard/tools/dst-migration/components/__shared__/dstMigrationPanelShared.options";
 import type { UpdatedSession } from "@/frontend/common/views/dashboard/tools/dst-migration/dst-migration.types";
-import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { UpdatedSessionsCardListMobile } from "@/frontend/mobile/views/dashboard/tools/dst-migration/components/updatedSessionsCardList.mobile";
 import type { DstMigrationLabels } from "@/shared/locale/types/dashboard/admin/dstMigration";
 
@@ -29,9 +29,7 @@ export function UpdatedSessionsSectionMobile({ labels, sessions, successfulCount
       getTitleColor={getSuccessTitleColor}
       icon={<CheckCircleOutlined sx={{ fontSize: 18 }} />}
       title={labels.sections.updated}
-      headerActions={
-        <MobileStatusBadge category="session" status="completed" label={labels.table.sessionsCount(successfulCount)} />
-      }
+      headerActions={<Chip size="small" variant="outlined" label={labels.table.sessionsCount(successfulCount)} />}
       contentPadding={2}
     >
       <UpdatedSessionsCardListMobile sessions={sessions} successfulCount={successfulCount} />

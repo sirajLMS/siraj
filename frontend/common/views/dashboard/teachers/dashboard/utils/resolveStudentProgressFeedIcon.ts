@@ -1,10 +1,10 @@
 import {
-  CheckCircleOutlineOutlined,
+  CheckCircleOutlined,
   DescriptionOutlined,
   EventAvailableOutlined,
   EventBusyOutlined,
   PersonOffOutlined,
-  PlayCircleOutlineOutlined,
+  PlayCircleOutlined,
   SensorsOutlined,
   type SvgIconComponent,
 } from "@mui/icons-material";
@@ -19,11 +19,11 @@ export function resolveStudentProgressFeedIcon(eventKind: TeacherProgressFeedEve
     case TeacherProgressFeedEventKind.MarkedAbsent:
       return PersonOffOutlined;
     case TeacherProgressFeedEventKind.Activated:
-      return PlayCircleOutlineOutlined;
+      return PlayCircleOutlined;
     case TeacherProgressFeedEventKind.Started:
       return SensorsOutlined;
     case TeacherProgressFeedEventKind.Completed:
-      return CheckCircleOutlineOutlined;
+      return CheckCircleOutlined;
     case TeacherProgressFeedEventKind.Leave:
       return EventAvailableOutlined;
     default:

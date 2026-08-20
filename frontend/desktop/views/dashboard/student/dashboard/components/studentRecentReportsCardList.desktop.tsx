@@ -32,13 +32,18 @@ interface RecentLessonReportCardDesktopProps {
 
 function MetaSeparator() {
   return (
-    <Typography
+    <Box
       component="span"
-      variant="labelMd"
-      sx={theme => ({ color: theme.palette.onSurfaceVariant, flexShrink: 0, lineHeight: 1 })}
+      sx={theme => ({
+        fontSize: theme.typography.labelMd.fontSize,
+        fontWeight: theme.typography.labelMd.fontWeight,
+        color: theme.palette.onSurfaceVariant,
+        flexShrink: 0,
+        lineHeight: 1,
+      })}
     >
       •
-    </Typography>
+    </Box>
   );
 }
 

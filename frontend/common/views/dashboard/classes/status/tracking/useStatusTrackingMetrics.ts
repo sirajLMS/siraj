@@ -2,7 +2,7 @@
 
 import {
   BlockOutlined,
-  CheckCircleOutlineOutlined,
+  CheckCircleOutlined,
   EventAvailableOutlined,
   PendingActionsOutlined,
 } from "@mui/icons-material";
@@ -17,7 +17,7 @@ import {
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 const METRIC_DEFINITIONS: readonly (Omit<RawMetric, "count"> & { readonly key: keyof MetricCounts })[] = [
-  { key: "regular", labelKey: "metrics.regular", icon: CheckCircleOutlineOutlined },
+  { key: "regular", labelKey: "metrics.regular", icon: CheckCircleOutlined },
   { key: "pending", labelKey: "metrics.pending", icon: PendingActionsOutlined },
   {
     key: "suspended",

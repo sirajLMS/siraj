@@ -33,7 +33,7 @@ const ICON_LOADERS: Record<NavIconKey, () => Promise<IconModule>> = {
   notificationsActive: () => import("@mui/icons-material/NotificationsActiveOutlined"),
   payments: () => import("@mui/icons-material/PaymentsOutlined"),
   personAddAlt: () => import("@mui/icons-material/PersonAddAltOutlined"),
-  personOutline: () => import("@mui/icons-material/PersonOutlineOutlined"),
+  personOutline: () => import("@mui/icons-material/PersonOutlined"),
   rateReview: () => import("@mui/icons-material/RateReviewOutlined"),
   receiptLong: () => import("@mui/icons-material/ReceiptLongOutlined"),
   reportProblem: () => import("@mui/icons-material/ReportProblemOutlined"),

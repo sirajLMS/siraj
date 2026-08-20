@@ -1,9 +1,14 @@
 "use client";
 
 import { create } from "zustand";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { SupportedCurrency } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { type CurrencyOption, currencies } from "@/frontend/common/lib/currency";
 import { countryCodeToEmoji } from "@/frontend/common/lib/locale";
+
+export type SupportedCurrencyRow = Pick<
+  SupportedCurrency,
+  "code" | "symbol" | "countryCode" | "decimals" | "sortOrder" | "isActive"
+> & { readonly code: NonNullable<SupportedCurrency["code"]> };
 
 export interface CurrencyCatalogState {
   options: readonly CurrencyOption[];
@@ -13,20 +18,11 @@ export interface CurrencyCatalogState {
   resetToStatic: () => void;
 }
 
-export type SupportedCurrencyRow = {
-  readonly code: CurrencyCode;
-  readonly symbol: string;
-  readonly countryCode?: string | null;
-  readonly decimals?: number | null;
-  readonly sortOrder?: number;
-  readonly isActive?: boolean | null;
-};
-
 function toCurrencyOption(row: SupportedCurrencyRow): CurrencyOption {
   const countryCode = row.countryCode ?? "US";
   return {
     code: row.code,
-    symbol: row.symbol,
+    symbol: row.symbol ?? row.code,
     countryCode,
     flagEmoji: countryCodeToEmoji(countryCode),
   };

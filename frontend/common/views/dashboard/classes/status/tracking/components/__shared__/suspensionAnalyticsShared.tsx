@@ -181,9 +181,8 @@ function CtaUrgentBadge({ label, mb }: { readonly label: string; readonly mb: nu
       />
       <Typography
         component="span"
+        variant="labelUppercase"
         sx={theme => ({
-          fontSize: theme.typography.labelUppercase.fontSize,
-          fontWeight: 600,
           color: theme.palette.onPrimary,
         })}
       >

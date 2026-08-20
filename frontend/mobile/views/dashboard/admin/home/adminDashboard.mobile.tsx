@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, InputAdornment, Stack, TextField, useTheme } from "@mui/material";
+import { Box, Chip, InputAdornment, Stack, TextField, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ScheduleFilters } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleFilters";
@@ -11,7 +11,7 @@ import {
 import type { AdminDashboardLabelsBySection } from "@/frontend/common/views/dashboard/admin/home/types/adminDashboard.types";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { AdminDashboardViewModel } from "@/frontend/common/views/dashboard/admin/home/useAdminDashboardViewModel";
-import { MobileCardListItem, MobileMetricCardGrid, MobileStatusBadge } from "@/frontend/mobile/components/ui";
+import { MobileCardListItem, MobileMetricCardGrid } from "@/frontend/mobile/components/ui";
 import { TeacherAutocompleteMobile } from "@/frontend/mobile/components/ui/input/userSelect";
 import { ScheduleOverviewMobileCardList } from "@/frontend/mobile/views/dashboard/admin/home/__shared__/scheduleOverviewMobileCardList";
 import {
@@ -34,9 +34,7 @@ function AdminDashboardMobileHeader({
   return (
     <StyledSectionTitleRow>
       <StyledSectionTitle variant="titleLg">{scheduleTitle}</StyledSectionTitle>
-      {selectedMetricLabel ? (
-        <MobileStatusBadge category="classStatus" status="confirmed" label={selectedMetricLabel} />
-      ) : null}
+      {selectedMetricLabel ? <Chip size="small" variant="outlined" label={selectedMetricLabel} /> : null}
     </StyledSectionTitleRow>
   );
 }

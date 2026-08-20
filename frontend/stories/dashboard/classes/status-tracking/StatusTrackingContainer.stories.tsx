@@ -1,6 +1,6 @@
 import {
   BlockOutlined,
-  CheckCircleOutlineOutlined,
+  CheckCircleOutlined,
   EventAvailableOutlined,
   PendingActionsOutlined,
 } from "@mui/icons-material";
@@ -34,7 +34,7 @@ const STORY_METRICS: RawMetric[] = [
     key: "regular",
     count: 1248,
     labelKey: "dashboard.statusTracking.metrics.regular",
-    icon: CheckCircleOutlineOutlined,
+    icon: CheckCircleOutlined,
   },
   { key: "pending", count: 84, labelKey: "dashboard.statusTracking.metrics.pending", icon: PendingActionsOutlined },
   {

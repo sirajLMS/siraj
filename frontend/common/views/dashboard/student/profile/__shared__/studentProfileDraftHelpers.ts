@@ -61,7 +61,7 @@ export function buildStudentProfileEditVariables(
 ) {
   return {
     input: {
-      studentId: studentId ?? undefined,
+      studentId: studentId ?? null,
       phone: draft.phone.trim() || null,
       timezone: draft.timezone.trim() || null,
       displayCurrency: draft.displayCurrency || null,

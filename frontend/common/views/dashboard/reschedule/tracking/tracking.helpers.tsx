@@ -1,6 +1,6 @@
 import {
   CancelOutlined,
-  CheckCircleOutlineOutlined,
+  CheckCircleOutlined,
   EventBusyOutlined,
   EventRepeatOutlined,
   HistoryOutlined,
@@ -44,7 +44,7 @@ export function getTrackingStatusIcon(status: LeaveRequestStatus, sx?: object): 
     case LeaveRequestStatus.Rescheduled:
       return <HistoryOutlined sx={sx} />;
     case LeaveRequestStatus.Approved:
-      return <CheckCircleOutlineOutlined sx={sx} />;
+      return <CheckCircleOutlined sx={sx} />;
     case LeaveRequestStatus.Cancelled:
       return <CancelOutlined sx={sx} />;
     default:
@@ -57,7 +57,7 @@ export const TRACKING_METRIC_DEFINITIONS: readonly MetricDefinition[] = [
   {
     key: "approved",
     labelKey: "dashboard.rescheduleTracking.metrics.approvedClasses",
-    icon: CheckCircleOutlineOutlined,
+    icon: CheckCircleOutlined,
   },
   { key: "leave", labelKey: "dashboard.rescheduleTracking.metrics.leaveRequests", icon: EventBusyOutlined },
   {

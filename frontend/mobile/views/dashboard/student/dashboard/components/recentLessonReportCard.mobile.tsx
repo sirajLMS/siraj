@@ -75,13 +75,18 @@ const reflectionButtonSx = {
 
 function MetaSeparator() {
   return (
-    <Typography
+    <Box
       component="span"
-      variant="labelSm"
-      sx={theme => ({ color: theme.palette.onSurfaceVariant, flexShrink: 0, lineHeight: 1 })}
+      sx={theme => ({
+        fontSize: theme.typography.labelSm.fontSize,
+        fontWeight: theme.typography.labelSm.fontWeight,
+        color: theme.palette.onSurfaceVariant,
+        flexShrink: 0,
+        lineHeight: 1,
+      })}
     >
       •
-    </Typography>
+    </Box>
   );
 }
 
