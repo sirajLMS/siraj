@@ -13,6 +13,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import type { Theme } from "@mui/material/styles";
 import { useId } from "react";
 import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getProviderLabel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/connectedAccounts.helpers";
@@ -33,11 +34,11 @@ function formatDate(date: Date | null | undefined, locale: "en" | "ar"): string 
   }).format(date);
 }
 
-const labelUppercaseSx = {
+const labelUppercaseSx = (theme: Theme) => ({
   typography: "labelUppercase",
-  color: "text.secondary",
+  color: theme.palette.text.secondary,
   mb: 0.5,
-} as const;
+});
 
 type MetadataFieldProps = {
   readonly label: string;

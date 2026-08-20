@@ -13,29 +13,58 @@ const colorProps = new Set([
   "outlineColor",
 ]);
 
-const allowedLiteralValues = new Set(["transparent", "inherit", "currentcolor", "none", "initial"]);
+const allowedLiteralValues = new Set(["transparent", "inherit", "currentcolor", "none", "initial", "unset", "revert"]);
 
-function checkValue(node, context) {
+const muiComponentColors = new Set([
+  "primary",
+  "secondary",
+  "error",
+  "warning",
+  "info",
+  "success",
+  "default",
+  "inherit",
+  "action",
+  "disabled",
+]);
+
+function isAllowedCssFunction(str) {
+  const trimmed = str.trim().toLowerCase();
+  return (
+    allowedLiteralValues.has(trimmed) ||
+    trimmed.startsWith("var(") ||
+    trimmed.startsWith("color-mix(") ||
+    trimmed.startsWith("env(") ||
+    trimmed.startsWith("rgba(var(") ||
+    trimmed.startsWith("rgb(var(")
+  );
+}
+
+function checkValue(node, context, allowMuiColors = false) {
   if (!node) return;
 
   if (node.type === "Literal" && typeof node.value === "string") {
-    if (!allowedLiteralValues.has(node.value.toLowerCase())) {
+    const val = node.value.trim().toLowerCase();
+    if (!isAllowedCssFunction(val) && (!allowMuiColors || !muiComponentColors.has(val))) {
       context.report({
         node,
         messageId: "noHardcodedColor",
       });
     }
   } else if (node.type === "TemplateLiteral") {
-    context.report({
-      node,
-      messageId: "noHardcodedColor",
-    });
+    const rawText = node.quasis.map(q => q.value.raw).join("");
+    if (!isAllowedCssFunction(rawText) && !rawText.includes("var(") && !rawText.includes("color-mix(")) {
+      context.report({
+        node,
+        messageId: "noHardcodedColor",
+      });
+    }
   } else if (node.type === "ConditionalExpression") {
-    checkValue(node.consequent, context);
-    checkValue(node.alternate, context);
+    checkValue(node.consequent, context, allowMuiColors);
+    checkValue(node.alternate, context, allowMuiColors);
   } else if (node.type === "LogicalExpression") {
-    checkValue(node.left, context);
-    checkValue(node.right, context);
+    checkValue(node.left, context, allowMuiColors);
+    checkValue(node.right, context, allowMuiColors);
   }
 }
 
@@ -57,10 +86,11 @@ const noHardcodedColorsRule = {
       JSXAttribute(node) {
         if (node.name?.type === "JSXIdentifier" && colorProps.has(node.name.name)) {
           if (node.value) {
+            const isColorProp = node.name.name === "color";
             if (node.value.type === "Literal") {
-              checkValue(node.value, context);
+              checkValue(node.value, context, isColorProp);
             } else if (node.value.type === "JSXExpressionContainer") {
-              checkValue(node.value.expression, context);
+              checkValue(node.value.expression, context, isColorProp);
             }
           }
         }
@@ -75,7 +105,8 @@ const noHardcodedColorsRule = {
         }
 
         if (keyName && colorProps.has(keyName)) {
-          checkValue(node.value, context);
+          const isColorKey = keyName === "color";
+          checkValue(node.value, context, isColorKey);
         }
       },
     };

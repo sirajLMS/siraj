@@ -12,6 +12,7 @@ import { configs as sonarjsConfigs } from "eslint-plugin-sonarjs";
 import { configs as storybookConfigs } from "eslint-plugin-storybook";
 import globals from "globals";
 import { configs as tseslintConfigs } from "typescript-eslint";
+import { localRulesPlugin } from "./scripts/eslint-rules/index.mjs";
 
 /** Drizzle query executors used across repos (`db`, `tx`, `t`, `q`, `queryDb`, `client`). */
 const drizzleObjectName = ["db", "tx", "t", "q", "queryDb", "client"];
@@ -321,6 +322,18 @@ const eslintConfig = defineConfig([
           ],
         },
       ],
+    },
+  },
+
+  // Enforce theme token colors (no hardcoded colors) in frontend code
+  {
+    files: ["frontend/**/*.{ts,tsx}"],
+    ignores: ["frontend/common/providers/theme/**"],
+    plugins: {
+      local: localRulesPlugin,
+    },
+    rules: {
+      "local/no-hardcoded-colors": "error",
     },
   },
 

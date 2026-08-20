@@ -32,10 +32,10 @@ function MobileRateRow({ row }: Readonly<{ readonly row: ExchangeRatesRateRow }>
           </Typography>
           <Typography sx={{ fontWeight: 700 }}>{row.rate}</Typography>
         </Box>
-        <Typography variant="bodyMd" color="textSecondary">
+        <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
           {row.source ?? "—"}
         </Typography>
-        <Typography variant="caption" color="textSecondary">
+        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
           {formatExchangeRateTimestamp(row.effectiveDate)}
         </Typography>
       </Box>

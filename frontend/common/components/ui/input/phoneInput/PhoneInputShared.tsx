@@ -137,14 +137,14 @@ const CountryAdornment: React.FC<CountryAdornmentProps> = ({
       onKeyDown={onPrefixKeyDown}
       onInput={onPrefixInput}
       aria-label={countryCallingCodeLabel}
-      sx={{
+      sx={theme => ({
         ...slotInputSx,
         width: `${Math.max(prefixDigits.length + 1, 2)}ch`,
         flexShrink: 0,
         paddingInlineEnd: 0.25,
-        color: prefixInvalid ? "error.main" : "inherit",
+        color: prefixInvalid ? theme.palette.error.main : "inherit",
         fontWeight: activeSlot === "prefix" ? 600 : 400,
-      }}
+      })}
     />
   </InputAdornment>
 );

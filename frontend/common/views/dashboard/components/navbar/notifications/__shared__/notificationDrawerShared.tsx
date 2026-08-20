@@ -27,16 +27,15 @@ function DrawerHeader({
 }) {
   return (
     <Box
-      sx={{
+      sx={theme => ({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         gap: 1,
         px: 2,
         py: 1.5,
-        borderBottom: 1,
-        borderColor: "divider",
-      }}
+        borderBottom: `1px solid ${theme.palette.divider}`,
+      })}
     >
       <Box sx={{ minWidth: 0, flex: 1 }}>
         <Typography variant="titleLg" sx={{ color: (theme: Theme) => theme.palette.primary.main }}>

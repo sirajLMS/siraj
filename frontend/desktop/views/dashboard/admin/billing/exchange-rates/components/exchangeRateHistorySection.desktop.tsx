@@ -18,10 +18,10 @@ export function ExchangeRateHistorySectionDesktop({ labels, historyViewModel }: 
     <Box sx={{ display: "flex", flexDirection: "column" }}>
       <Box sx={{ ...desktopSectionContentInsetSx, display: "flex", flexDirection: "column", gap: 2, pb: 0 }}>
         <Box>
-          <Typography variant="bodyMd" color="textSecondary">
+          <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
             {labels.history.subtitle}
           </Typography>
-          <Typography variant="caption" color="textSecondary">
+          <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
             {labels.history.maxDays(maxDays)}
           </Typography>
         </Box>

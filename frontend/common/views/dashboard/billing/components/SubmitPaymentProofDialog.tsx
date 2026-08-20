@@ -237,7 +237,7 @@ function SubmitPaymentProofDialogBody({
   return (
     <Stack spacing={2} sx={{ py: 1 }}>
       {invoice ? (
-        <Stack spacing={1} sx={{ p: 2, borderRadius: 1, bgcolor: "surfaceContainerLow" }}>
+        <Stack spacing={1} sx={theme => ({ p: 2, borderRadius: 1, bgcolor: theme.palette.surfaceContainerLow })}>
           {invoice.invoiceNumber ? (
             <InvoiceSummaryRow label={labels.invoiceNumber} value={invoice.invoiceNumber} />
           ) : null}

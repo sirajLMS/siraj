@@ -322,17 +322,16 @@ function DayScheduleItem({
   return (
     <Box
       key={d.day}
-      sx={{
+      sx={theme => ({
         display: "flex",
         flexDirection: direction,
         alignItems: direction === "row" ? "center" : undefined,
         justifyContent: direction === "row" ? "space-between" : undefined,
         gap: direction === "column" ? 1 : undefined,
         p: 1,
-        border: "1px solid",
-        borderColor: "divider",
+        border: `1px solid ${theme.palette.divider}`,
         borderRadius: 1,
-      }}
+      })}
     >
       <FormControlLabel
         control={<Checkbox checked={d.enabled} onChange={() => toggleDay(d.day)} disabled={mutationLoading} />}

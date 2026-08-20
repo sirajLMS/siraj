@@ -65,7 +65,7 @@ export function SingleGroupViewShared({
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <SingleGroupHeader labels={labels} group={group} onBack={onBack} onEditGroup={onEditGroup} />
 
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Box sx={theme => ({ borderBottom: `1px solid ${theme.palette.divider}` })}>
         <Tabs
           value={activeSubTab}
           onChange={(_, val: SubTabKey) => handleSubTabChange(val)}

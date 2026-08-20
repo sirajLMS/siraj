@@ -170,13 +170,12 @@ interface DrawerActionsProps {
 function DrawerActions({ labels, onClear, onApply }: Readonly<DrawerActionsProps>) {
   return (
     <Box
-      sx={{
+      sx={theme => ({
         display: "flex",
         gap: 1,
         p: 2,
-        borderTop: 1,
-        borderColor: "divider",
-      }}
+        borderTop: `1px solid ${theme.palette.divider}`,
+      })}
     >
       <Button variant="outlined" fullWidth onClick={onClear}>
         {labels.clearFilters}

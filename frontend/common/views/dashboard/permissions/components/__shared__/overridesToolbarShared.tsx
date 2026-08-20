@@ -2,12 +2,12 @@
 
 import { SearchOutlined } from "@mui/icons-material";
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { type SxProps, styled, type Theme } from "@mui/material/styles";
 import type { OverridesToolbarProps } from "@/frontend/common/views/dashboard/permissions/types";
 
 export interface OverridesToolbarSharedOptions {
-  readonly toolbarContainerSx: object;
-  readonly textFieldSx: object;
+  readonly toolbarContainerSx: SxProps<Theme>;
+  readonly textFieldSx: SxProps<Theme>;
 }
 
 const StyledModeToggleContainer = styled(Box)(({ theme }) => ({

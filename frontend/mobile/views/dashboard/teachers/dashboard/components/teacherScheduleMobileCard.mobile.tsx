@@ -394,11 +394,10 @@ export function TeacherScheduleMobileCardItem({
     <StyledScheduleCard
       elevation={0}
       isLive={isLive}
-      sx={{
+      sx={theme => ({
         opacity: isCompleted ? 0.7 : 1,
-        borderInlineStart: isFrozen ? `4px solid` : undefined,
-        borderColor: isFrozen ? "info.main" : undefined,
-      }}
+        borderInlineStart: isFrozen ? `4px solid ${theme.palette.info.main}` : undefined,
+      })}
     >
       <CardHeader row={row} labels={labels} canActivate={canActivate} isLive={isLive} studentHref={studentHrefValue} />
       <TimeHighlight row={row} labels={labels} />

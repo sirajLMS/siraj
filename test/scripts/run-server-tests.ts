@@ -4,6 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { spawn as bunSpawn, Glob, type Subprocess } from "bun";
 import { killListenersOnPort } from "@/test/helpers";
+import { deduplicateLines, renderProgressBar, stripAnsiCodes } from "@/test/scripts/runner-helpers";
 
 const DEFAULT_PORT = 3099;
 const DEFAULT_TEST_PATH = "frontend/common/graphql/test/";
@@ -174,16 +175,6 @@ function spawnTestServer(port: number, logStream: NodeJS.WritableStream): ChildP
   return proc;
 }
 
-function renderProgressBar(current: number, total: number, width = 16): string {
-  if (total <= 0) return "\x1b[90m[────────────────]\x1b[0m";
-  const ratio = Math.min(1, Math.max(0, current / total));
-  const filled = Math.round(ratio * width);
-  const empty = width - filled;
-  const percent = Math.round(ratio * 100);
-  const bar = "█".repeat(filled) + "░".repeat(empty);
-  return `\x1b[36m[${bar}]\x1b[0m \x1b[1m${percent}%\x1b[0m \x1b[90m(${current}/${total} files)\x1b[0m`;
-}
-
 function renderTuiFrame(state: TestState, port: number, isTty: boolean): void {
   if (!isTty) return;
 
@@ -228,34 +219,6 @@ function parseServerChunk(chunk: Buffer | string): string {
     }
   }
   return lines[lines.length - 1].slice(0, 60);
-}
-
-function deduplicateLines(text: string): string {
-  if (!text) return "";
-  const lines = text.split("\n");
-  const result: string[] = [];
-  let currentLine = "";
-  let currentCount = 0;
-
-  for (const rawLine of lines) {
-    const line = rawLine.trimEnd();
-    if (line === currentLine && line.length > 0) {
-      currentCount++;
-    } else {
-      if (currentCount > 1) {
-        result.push(`  \x1b[90m⤷ (repeated ${currentCount - 1} more times)\x1b[0m`);
-      }
-      currentLine = line;
-      currentCount = 1;
-      result.push(line);
-    }
-  }
-
-  if (currentCount > 1) {
-    result.push(`  \x1b[90m⤷ (repeated ${currentCount - 1} more times)\x1b[0m`);
-  }
-
-  return result.join("\n");
 }
 
 function formatLogMap(map: Map<string, number>, label: string, colorCode: string): string {
@@ -379,31 +342,6 @@ function formatFinalReport(state: TestState, success: boolean, logPath: string, 
   out += `${rule}\n`;
 
   return out;
-}
-
-function stripAnsiCodes(line: string): string {
-  const esc = String.fromCharCode(27);
-  const result: string[] = [];
-  let i = 0;
-  while (i < line.length) {
-    if (line[i] === esc && i + 1 < line.length && line[i + 1] === "[") {
-      i += 2;
-      while (
-        i < line.length &&
-        !(
-          (line.charCodeAt(i) >= 65 && line.charCodeAt(i) <= 90) ||
-          (line.charCodeAt(i) >= 97 && line.charCodeAt(i) <= 122)
-        )
-      ) {
-        i++;
-      }
-      i++;
-    } else {
-      result.push(line[i]);
-      i++;
-    }
-  }
-  return result.join("");
 }
 
 function isTestFileBoundary(clean: string): boolean {

@@ -7,6 +7,7 @@ import { Glob, type Subprocess } from "bun";
 import { isTestCi } from "@/backend/lib/test-ci-env";
 import { withProcessLock } from "@/scripts/lib/process-lock";
 import { TEST_ENV_FILE } from "@/scripts/lib/test-build-env";
+import { deduplicateLines, renderProgressBar, stripAnsiCodes } from "@/test/scripts/runner-helpers";
 
 const DEFAULT_TIMEOUT_MS = 60_000;
 const TUI_REFRESH_INTERVAL_MS = 200;
@@ -88,42 +89,6 @@ function parseCliArgs(args: string[]): CliOptions {
   return { bail, coverage, timeoutMs, filterPaths };
 }
 
-function stripAnsiCodes(str: string): string {
-  const ESC = String.fromCharCode(27);
-  return str
-    .split(ESC)
-    .map(part => part.replace(/^\[[0-9;]*m/, ""))
-    .join("");
-}
-
-function deduplicateLines(text: string): string {
-  if (!text) return "";
-  const lines = text.split("\n");
-  const result: string[] = [];
-  let currentLine = "";
-  let currentCount = 0;
-
-  for (const rawLine of lines) {
-    const line = rawLine.trimEnd();
-    if (line === currentLine && line.length > 0) {
-      currentCount++;
-    } else {
-      if (currentCount > 1) {
-        result.push(`  \x1b[90m⤷ (repeated ${currentCount - 1} more times)\x1b[0m`);
-      }
-      currentLine = line;
-      currentCount = 1;
-      result.push(line);
-    }
-  }
-
-  if (currentCount > 1) {
-    result.push(`  \x1b[90m⤷ (repeated ${currentCount - 1} more times)\x1b[0m`);
-  }
-
-  return result.join("\n");
-}
-
 function extractSummaryStats(line: string, stats: TestStats): boolean {
   const clean = stripAnsiCodes(line).trim();
 
@@ -190,16 +155,6 @@ function parseTestOutput(combinedOutput: string): { stats: TestStats; failureTra
     failureTrace: traceLines.join("\n"),
     failingTestName,
   };
-}
-
-function renderProgressBar(current: number, total: number, width = 16): string {
-  if (total <= 0) return "\x1b[90m[────────────────]\x1b[0m";
-  const ratio = Math.min(1, Math.max(0, current / total));
-  const filled = Math.round(ratio * width);
-  const empty = width - filled;
-  const percent = Math.round(ratio * 100);
-  const bar = "█".repeat(filled) + "░".repeat(empty);
-  return `\x1b[36m[${bar}]\x1b[0m \x1b[1m${percent}%\x1b[0m \x1b[90m(${current}/${total} files)\x1b[0m`;
 }
 
 function renderTuiFrame(state: RunState, isTty: boolean): void {

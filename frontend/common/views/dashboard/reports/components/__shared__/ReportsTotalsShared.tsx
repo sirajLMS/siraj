@@ -39,8 +39,8 @@ export function TotalsAmount({
       <Tooltip title={display.breakdown} arrow>
         <Typography
           variant="caption"
-          sx={{
-            color: "text.secondary",
+          sx={theme => ({
+            color: theme.palette.text.secondary,
             textAlign: "end",
             maxWidth: breakdownMaxWidth,
             overflow: "hidden",
@@ -48,7 +48,7 @@ export function TotalsAmount({
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
-          }}
+          })}
         >
           {display.breakdown}
         </Typography>

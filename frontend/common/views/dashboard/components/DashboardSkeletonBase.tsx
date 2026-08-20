@@ -11,14 +11,13 @@ export function DashboardSkeletonBase({ navItemCount = 6, contentVariant = "comp
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", width: "100%" }}>
       <Box
-        sx={{
+        sx={theme => ({
           display: { xs: "none", md: "block" },
           width: 280,
           flexShrink: 0,
-          borderRight: 1,
-          borderColor: "divider",
+          borderRight: `1px solid ${theme.palette.divider}`,
           p: 2,
-        }}
+        })}
       >
         <Skeleton variant="rounded" width="70%" height={32} sx={{ mb: 2 }} />
         {navIds.map(id => (

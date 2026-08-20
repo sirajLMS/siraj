@@ -112,16 +112,15 @@ export function SingleGroupHeaderShared({
 
       <Box
         sx={[
-          {
+          theme => ({
             padding: 3,
             borderRadius: 4,
-            border: 1,
-            borderColor: "divider",
-            backgroundColor: "surfaceContainerLow",
+            border: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.surfaceContainerLow,
             display: "flex",
             justifyContent: "space-between",
             gap: 2.5,
-          },
+          }),
           ...(Array.isArray(options.headerPanelSx) ? options.headerPanelSx : [options.headerPanelSx]),
         ]}
       >

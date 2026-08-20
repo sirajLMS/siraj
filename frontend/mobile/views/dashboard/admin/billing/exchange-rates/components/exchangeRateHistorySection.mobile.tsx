@@ -16,7 +16,7 @@ export function ExchangeRateHistorySectionMobile({ labels, historyViewModel }: R
         <Typography sx={theme => ({ color: theme.palette.text.secondary })} variant="bodyMd">
           {labels.history.subtitle}
         </Typography>
-        <Typography variant="caption" color="textSecondary">
+        <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
           {labels.history.maxDays(maxDays)}
         </Typography>
       </Box>
@@ -97,10 +97,10 @@ export function ExchangeRateHistorySectionMobile({ labels, historyViewModel }: R
                 </Typography>
                 <Typography sx={{ fontWeight: 700 }}>{row.rate}</Typography>
               </Box>
-              <Typography variant="bodyMd" color="textSecondary">
+              <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary })}>
                 {row.source ?? "—"}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" sx={theme => ({ color: theme.palette.text.secondary })}>
                 {formatExchangeRateTimestamp(row.effectiveDate)}
               </Typography>
             </Box>
