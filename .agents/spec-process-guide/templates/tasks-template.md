@@ -49,9 +49,9 @@ Use this template to create actionable implementation plans that break down your
 
 ## MANDATORY Subtasks for Every Implementation Task
 
-**EVERY implementation task (X.Y) MUST include these subtasks in strict order:**
+**EVERY implementation task (X.Y) MUST include these 5 subtasks in strict order:**
 
-### Quality Loop Subtask (X.Y.QL)
+### 1. Quality Loop Subtask (X.Y.QL)
 ```markdown
 - [ ] X.Y.QL **Quality Loop**: Per-file verification on `<file-path>`
   - Run: `bun run scripts/health/sub-loop.ts <file-path> --lifecycle codescene`
@@ -62,9 +62,36 @@ Use this template to create actionable implementation plans that break down your
   - Fix all errors and re-run until exit code 0 before proceeding
 ```
 
-### Semantic Review Subtask (X.Y.SR) — NEW
+### 2. Test Engineering Subtask (X.Y.TE) — [.agents/skills/write-tests/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/write-tests/SKILL.md) & [.agents/skills/test-expert/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/test-expert/SKILL.md)
+```markdown
+- [ ] X.Y.TE **Test Engineering**: Author / expand tests using 4-Tier Framework
+  - **Tier 1 (Branch & Statement Coverage)**: 100% method and branch coverage for new logic/methods.
+  - **Tier 2 (Boundary Value Analysis)**: Test empty strings, nullability fallbacks, unicode/RTL, numeric limits, timezone/date boundaries.
+  - **Tier 3 (Monkey & Chaos Testing)**: Execute randomized fuzz payloads, concurrent execution races (`Promise.allSettled`), and out-of-order state transitions.
+  - **Tier 4 (Security & Abuse Testing)**: Probe SQL/LIKE wildcards (`%`, `_`, `\`), unauthenticated rejections, and invalid role handling.
+  - **Layer Rules Enforced**:
+    • Database tests: Wrapped in `runInRollback` + `tx` propagation to every repository method (`expectRepoError` try/catch).
+    • Service tests: Mock all external channels (WhatsApp, Resend, Twilio, Fixer, Upstash Redis).
+    • GraphQL tests: Setup via `setupTestServerLifecycle()` + execute via `testClient`.
+```
+
+### 3. Security & Tenancy Audit Subtask (X.Y.SEC) — [.agents/skills/idor-testing/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/idor-testing/SKILL.md) & [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md)
+```markdown
+- [ ] X.Y.SEC **Security & Tenancy Audit**: Probe for authorization and boundary vulnerabilities
+  - **BOLA / IDOR Defense**: Verify identity is derived from `ctx.user.id` / session context; confirm caller cannot read/mutate sibling tenant records.
+  - **BOPLA Mass Assignment Defense**: Verify strict DTO mapping; ensure no `{ ...input }` spread into Drizzle `update()` / `set()` calls.
+  - **BFLA Function Access**: Verify low-privilege tokens (e.g. students/parents/guests) cannot call admin/supervisor mutations or internal triggers.
+  - **Composite Relations**: Verify child resources belong to the verified parent resource (`child.parentId === callerParentId`).
+  - **Input Sanitization**: Ensure LIKE/ILIKE search queries escape wildcard characters (`escapeLikeWildcards`).
+```
+
+### 4. Semantic Review Subtask (X.Y.SR) — MANDATORY
 ```markdown
 - [ ] X.Y.SR **Semantic Review**: Agent self-review before marking complete
+  - [ ] No client-supplied ID used without caller ownership or role permission assertion (IDOR/BOLA defense)
+  - [ ] Multi-tenant Drizzle queries include explicit tenancy filter (`eq(table.parentId/tenantId, callerId)`)
+  - [ ] No unvalidated `...input` spreading into Drizzle update methods (BOPLA mass assignment defense)
+  - [ ] DataLoaders filter batch results against caller authorized tenancy
   - [ ] No read-then-write without atomicity (SELECT FOR UPDATE / tx / advisory lock)
   - [ ] No module-level mutable state without bounds
   - [ ] All `resolveEnvConfig` calls registered in `env-config-keys.ts`
@@ -77,7 +104,7 @@ Use this template to create actionable implementation plans that break down your
   - [ ] All deferred items logged in `deferred-items.md`
 ```
 
-### Instruction Verification Subtask (X.Y.IV)
+### 5. Instruction Verification Subtask (X.Y.IV)
 ```markdown
 - [ ] X.Y.IV **Instruction Verification**: Read & validate `<file-path>` against rule files
   - The `sub-loop.ts` script (run in X.Y.QL) auto-discovers & prints applicable rule files
@@ -86,7 +113,7 @@ Use this template to create actionable implementation plans that break down your
   - Validate the file against the rules in those files
 ```
 
-**Sequence:** QL (Quality Loop — runs sub-loop.ts which prints applicable rule files) → SR (Semantic Review) → IV (Instruction Verification — reads the printed rule files) → Mark `[x]`
+**Sequence:** QL (Quality Loop) → TE (Test Engineering) → SEC (Security Audit) → SR (Semantic Review) → IV (Instruction Verification) → Mark `[x]`
 
 ### Layer-to-Instructions Mapping (Reference for ALL Plans)
 
@@ -317,10 +344,22 @@ Use this template to create actionable implementation plans that break down your
   - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
 
-- [ ] 7.3 Implement comprehensive testing suite
-  - Create end-to-end test scenarios
-  - Add performance and load testing
-  - Write security and penetration tests
+- [ ] 7.3 Implement comprehensive testing suite via [.agents/skills/test-expert/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/test-expert/SKILL.md) & [.agents/skills/write-tests/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/write-tests/SKILL.md)
+  - Apply 4-Tier Testing Framework:
+    - **Tier 1: 100% Branch & Core Coverage**: Exercise all conditional branches, fallbacks, and error paths.
+    - **Tier 2: Boundary & Edge Cases**: Test empty/whitespace strings, max integers, boundary dates/timezones, and optimistic version races.
+    - **Tier 3: Monkey & Chaos Testing**: Execute randomized fuzz payloads and concurrent balance/quota deduction races (`Promise.allSettled`).
+    - **Tier 4: Security & Abuse Testing**: SQL/LIKE wildcard injection tests and unauthenticated access rejections.
+  - Enforce layer rules: Database tests wrapped in `runInRollback` + `tx` propagation; Services external integrations mocked.
+  - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
+  - _Requirements: [Reference specific requirements]_
+
+- [ ] 7.4 Execute penetration testing & vulnerability assessment via [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md)
+  - Probe GraphQL endpoints for query depth/circular complexity and batching abuse
+  - Execute BOLA / IDOR tenant isolation tests across Parent, Student, and Teacher roles
+  - Test for vertical privilege escalation on administrative mutations and cron triggers
+  - Verify webhook HMAC signature verification (`crypto.timingSafeEqual`)
   - **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
   - **Instruction Verification**: sub-loop.ts auto-discovers & prints applicable AGENTS.md + .agents/instructions; read & validate against them
   - _Requirements: [Reference specific requirements]_
@@ -400,11 +439,11 @@ Use this table to determine which docs subdir, AGENTS.md files, skills, and inst
 | Frontend mobile/desktop | `docs/frontend/` | `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md` | `.agents/skills/refactor-mobile-desktop/SKILL.md` | `.agents/instructions/mobile-desktop.instructions.md` |
 | Frontend stores / state | `docs/frontend/` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `.agents/instructions/frontend.instructions.md` |
 | Frontend GraphQL / Apollo | `docs/frontend/` | `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
-| Testing (DB) | `docs/testing/` | `backend/db/test/AGENTS.md`, `backend/db/test/logic/AGENTS.md` | `.agents/skills/fix-db-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| Testing (UI / E2E) | `docs/testing/` | `test/ui/AGENTS.md` | `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| Testing (general) | `docs/testing/` | `scripts/run-test/AGENTS.md` | `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
+| Testing (DB) | `docs/testing/` | `backend/db/test/AGENTS.md`, `backend/db/test/logic/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-db-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
+| Testing (UI / E2E) | `docs/testing/` | `test/ui/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
+| Testing (general) | `docs/testing/` | `scripts/run-test/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
 | i18n / locale | `docs/i18n/` | `shared/AGENTS.md` | — | — |
-| Auth / security | `docs/auth/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/security-review/SKILL.md` | `.agents/instructions/backend.instructions.md` |
+| Auth / security | `docs/auth/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/idor-testing/SKILL.md`, `.agents/skills/pentester/SKILL.md`, `.agents/skills/backend-security-review/SKILL.md`, `.agents/skills/security-and-hardening/SKILL.md` | `.agents/instructions/backend.instructions.md` |
 | App Router / Next.js | `docs/app/` | `app/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
 | Quality gates / CI | `docs/quality/` | `AGENTS.md` (root) | `.agents/skills/quality-gate/SKILL.md`, `.agents/skills/quality-loop/SKILL.md` | — |
 | Idempotency | `docs/` (top-level) | `backend/services/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |

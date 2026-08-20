@@ -24,12 +24,12 @@ You are an **implementation orchestrator** for plans created by the `spec-driven
 
 **Use when:**
 - A feature plan exists under `.ai/plans/<feature-name>/` with `trackable-tasks.md` (or `tasks.md`)
-- The plan has passed `@plan-review` (Phase 1.5 gate)
+- The plan has passed `plan-review` ([.agents/skills/plan-review/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/plan-review/SKILL.md)) (Phase 1.5 gate)
 - Implementation work needs to begin
 
 **Do NOT use when:**
-- No plan exists yet — use `@spec-driven-development` to create one first
-- The plan has NOT passed `@plan-review` — invoke `@plan-review` first
+- No plan exists yet — use [.agents/skills/spec-driven-development/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/spec-driven-development/SKILL.md) to create one first
+- The plan has NOT passed `plan-review` — invoke [.agents/skills/plan-review/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/plan-review/SKILL.md) first
 - Only a simple bug fix is needed — fix directly
 
 ## Orchestrator Discipline (CRITICAL)
@@ -148,19 +148,20 @@ Every task — without exception — follows these three rules:
 For each task in the execution queue:
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  1. READ all existing outcome/ files                │
-│  2. READ the task definition from trackable-tasks  │
-│  3. READ applicable AGENTS.md + instructions files  │
-│  4. EXECUTE the task (create/modify files)          │
-│  5. QUALITY LOOP (sub-loop.ts per file)             │
-│  6. SEMANTIC REVIEW (agent self-review checklist)   │
-│  7. INSTRUCTION VERIFICATION (against AGENTS.md)   │
-│  8. INTERLEAVED TESTS (if builder/adapter/service)  │
-│  9. WRITE outcome file                              │
-│ 10. UPDATE checkbox [ ] → [x]                       │
-│ 11. CHECK deferred-items for new entries           │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│  1. READ all existing outcome/ files                        │
+│  2. READ the task definition from trackable-tasks          │
+│  3. READ applicable AGENTS.md + instructions files          │
+│  4. EXECUTE the implementation (create/modify source files) │
+│  5. QUALITY LOOP (X.Y.QL via sub-loop.ts per file)          │
+│  6. TEST ENGINEERING (X.Y.TE via write-tests/test-expert)   │
+│  7. SECURITY AUDIT (X.Y.SEC via idor-testing/pentester)     │
+│  8. SEMANTIC REVIEW (X.Y.SR agent self-review checklist)    │
+│  9. INSTRUCTION VERIFICATION (X.Y.IV against rule files)    │
+│ 10. WRITE outcome file (<task-id>-outcome.md)               │
+│ 11. UPDATE checkboxes [ ] → [x]                             │
+│ 12. CHECK deferred-items for new entries                    │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ### Dispatch Model
@@ -297,32 +298,36 @@ The task-to-instructions mapping:
 
 ## Interleaved Test Execution
 
-Each builder/adapter/service task should include paired tests as subtasks:
+Each builder/adapter/service task should include paired tests as subtasks using [.agents/skills/write-tests/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/write-tests/SKILL.md) and [.agents/skills/test-expert/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/test-expert/SKILL.md):
 
 ```
 - [ ] 5. Implement MetaCloudApiAdapter
   - [ ] 5.1 Implement adapter interface methods
     - Core logic, error handling, retries
     - Quality Loop (sub-loop.ts --lifecycle codescene) + Semantic Review
-  - [ ] 5.2 Write paired integration test
+  - [ ] 5.2 Write paired tests via write-tests & test-expert
     - Test file: backend/services/.../test/meta-cloud-api.adapter.test.ts
-    - Tag: @live-comm or @live-integration (if external API calls)
-    - Cover: All interface methods, error paths, retry logic
+    - Apply 4-Tier Test Framework (test-expert):
+      • Tier 1: 100% branch and statement coverage
+      • Tier 2: Boundary & edge cases (empty strings, nullability, unicode/emoji, limits)
+      • Tier 3: Monkey & chaos cases (randomized fuzz payloads, concurrent replay bursts)
+      • Tier 4: Security & abuse tests (payload injection, secret header leaks, forged signatures)
+    - Enforce layer rules (write-tests): Mock outbound integrations, no live network calls
     - Quality Loop (sub-loop.ts --lifecycle codescene)
-  - [ ] 5.3 Run test suite and verify all pass
+  - [ ] 5.3 Run test suite via `bun run test/scripts/run-test.ts <test-path>` and verify all pass
   - [ ] 5.4 Quality loop on both implementation + test files
 ```
 
 **When to interleave tests:**
 - Builder/adapter tasks — always
 - Service layer tasks — recommended
-- Repository layer tasks — recommended
+- Repository layer tasks — recommended (100% coverage target, `runInRollback` + `tx` propagation)
 - Complex business logic tasks — recommended
 
 **When to defer tests:**
 - Simple utility functions — batch at phase end
 - UI component tests — batch at phase end
-- E2E tests — requires complete feature
+- E2E & Penetration tests — requires complete feature (executed in Phase 5 / review wave via [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md))
 
 **Evidence:** whatsapp Task 4 builders shipped without tests; integration issues discovered late. Interleaved tests provide immediate feedback.
 
@@ -404,6 +409,13 @@ Dispatch these review subagents via the `task` tool in a **single response** (pa
 - Zustand store patterns
 - Theme compliance
 - Component patterns
+
+**pentester & backend-security** (scope: all new/modified endpoints, resolvers, mutations, webhooks)
+- Probing for BOLA / IDOR cross-tenant data leaks
+- Vertical privilege escalation on admin/supervisor mutations
+- GraphQL query depth/complexity and batching abuse
+- Webhook signature forgery (timingSafeEqual verification)
+- SQL/LIKE injection wildcard tests
 
 ### Step 3: Findings Aggregation
 

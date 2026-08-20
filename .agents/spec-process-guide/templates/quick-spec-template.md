@@ -84,10 +84,17 @@ Ready-to-use template for 1-3 day features that need requirements and tasks but 
 
 **Note:** Quick specs skip Phase 1.5 (Plan Review) and Phase 4 (Parallel Review Waves) for speed. Use full spec process for features >3 days.
 
-### Testing Tasks
-- [ ] **Unit Tests:** [What needs unit test coverage]
-- [ ] **Integration Tests:** [What needs integration testing]
-- [ ] **Manual Testing:** [What needs manual verification]
+### Testing & Security Tasks
+- [ ] **4-Tier Testing via [.agents/skills/write-tests/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/write-tests/SKILL.md) & [.agents/skills/test-expert/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/test-expert/SKILL.md):**
+  - **Tier 1 (Branch Coverage):** 100% method and branch coverage on new logic/repos (`runInRollback` + `tx` propagation)
+  - **Tier 2 (Boundary & Edge Cases):** Empty strings, unicode/RTL, numeric bounds, nullability fallbacks
+  - **Tier 3 (Monkey & Chaos):** Randomized fuzz payloads, concurrent execution races
+  - **Tier 4 (Security):** Injection strings, authorization checks, unauthenticated rejection
+- [ ] **Penetration & Security Testing via [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md):**
+  - Verify BOLA / IDOR cross-tenant data isolation
+  - Probe GraphQL operations for complexity / batching abuse
+  - Verify webhook HMAC signature verification (`timingSafeEqual`)
+- [ ] **Manual & Verification:** [What needs manual verification]
 
 ### Documentation Tasks
 - [ ] **Code Comments:** [Areas needing documentation]

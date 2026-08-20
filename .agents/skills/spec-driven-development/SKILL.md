@@ -238,39 +238,39 @@ Every feature plan MUST include a UX/Navigation section defining:
 - **Risk-First:** Tackle uncertain areas early
 - **Hybrid:** Combine approaches based on project needs
 
-**Interleaved Test Structure (RECOMMENDED):**
+**Standard Subtask Pipeline per Implementation Task (MANDATORY):**
 
-Each builder/adapter/service task should include paired tests:
+Every implementation task (X.Y) in `trackable-tasks.md` must follow the 5-stage subtask pipeline:
 
 ```markdown
-- [ ] 5. Implement MetaCloudApiAdapter
-  - [ ] 5.1 Implement adapter interface methods
-    - Core send/fetch/complete/fail/retry logic
-    - Error handling, retries, logging
-    - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) + Semantic Review
-    - _Requirements: REQ-4, REQ-5_
-    
-  - [ ] 5.2 Write paired integration test
-    - Test file: `backend/services/.../test/meta-cloud-api.adapter.test.ts`
-    - Tag: `@live-comm` or `@live-integration` (if external API calls)
-    - Cover: All interface methods, error paths, retry logic
-    - Quality Loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`)
-    - _Requirements: REQ-4, REQ-5_
-    
-  - [ ] 5.3 Run test suite and verify all pass
-  - [ ] 5.4 Quality loop (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene`) on both implementation + test files
+- [ ] X.Y [Implement Target Component / Service / Resolver]
+  - [ ] X.Y.QL **Quality Loop**: Run `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit code 0)
+  - [ ] X.Y.TE **Test Engineering** ([.agents/skills/write-tests/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/write-tests/SKILL.md) & [.agents/skills/test-expert/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/test-expert/SKILL.md)):
+    • Tier 1: 100% branch and statement coverage
+    • Tier 2: Boundary & edge cases (empty strings, nullability, unicode/RTL, numeric/date bounds)
+    • Tier 3: Monkey & chaos cases (randomized fuzz payloads, concurrency races via Promise.allSettled)
+    • Tier 4: Security & abuse tests (payload injection, invalid roles, error handling)
+    • Layer constraints: DB tests wrapped in `runInRollback` + `tx`; Service tests mock all external adapters
+  - [ ] X.Y.SEC **Security & Tenancy Audit** ([.agents/skills/idor-testing/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/idor-testing/SKILL.md) & [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md)):
+    • BOLA / IDOR Defense: Assert caller ownership (`ctx.user.id`), verify tenant isolation
+    • BOPLA Defense: Strict DTO mapping; ensure no `{ ...input }` spread into DB updates
+    • BFLA Defense: Verify low-privilege tokens cannot execute administrative functions
+    • Input Sanitization: Ensure search queries escape wildcards (`%`, `_`, `\`)
+  - [ ] X.Y.SR **Semantic Review**: Verify atomicity, env-config registration, zero dead code, zero cross-layer imports
+  - [ ] X.Y.IV **Instruction Verification**: Read and validate against auto-discovered AGENTS.md and instruction files
 ```
 
 **When to interleave:**
 - Builder/adapter tasks (always)
-- Service layer tasks (recommended)
-- Repository layer tasks (recommended)
-- Complex business logic tasks (recommended)
+- Service layer tasks (always)
+- Repository layer tasks (always — 100% coverage via `runInRollback` + `tx` propagation)
+- GraphQL resolvers & mutation tasks (always — test via `setupTestServerLifecycle` + `testClient`)
+- Complex business logic tasks (always)
 
 **When to defer tests:**
 - Simple utility functions (test in batch)
 - UI component tests (can batch at phase end)
-- E2E tests (requires complete feature)
+- E2E & Penetration tests (requires complete feature — executed in Phase 5 via [.agents/skills/pentester/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/pentester/SKILL.md))
 
 **Evidence:** whatsapp "Task 4 builders shipped without @live-comm tests; Task 5 adapter shipped without integration tests" — integration issues discovered late. Interleaved tests provide immediate feedback.
 
@@ -366,6 +366,15 @@ Dispatch these review subagents via Task tool:
 - Zustand store patterns
 - Theme compliance
 - Component patterns
+
+**4. idor-testing, pentester & backend-security** (scope: all endpoints, resolvers, mutations, webhooks)
+- Probing for BOLA / IDOR cross-tenant data leaks across Parent, Student, and Teacher roles
+- Testing Parent-Child tenancy integrity and composite ID mismatches
+- Verifying Broken Object Property-Level Authorization (BOPLA / mass assignment defense)
+- Probing Broken Function-Level Authorization (BFLA) on admin/supervisor mutations
+- GraphQL query depth/complexity and batching abuse probes
+- Webhook signature forgery testing (constant-time `timingSafeEqual` verification)
+- SQL/LIKE injection wildcard tests (`%`, `_`, `\`)
 
 ### Findings Aggregation
 
@@ -568,11 +577,11 @@ Use this table to determine which docs subdir, AGENTS.md files, skills, and inst
 | Frontend mobile/desktop | `docs/frontend/` | `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md` | `.agents/skills/refactor-mobile-desktop/SKILL.md` | `.agents/instructions/mobile-desktop.instructions.md` |
 | Frontend stores / state | `docs/frontend/` | `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md` | `.agents/skills/frontend-patterns/SKILL.md` | `.agents/instructions/frontend.instructions.md` |
 | Frontend GraphQL / Apollo | `docs/frontend/` | `frontend/common/graphql/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
-| Testing (DB) | `docs/testing/` | `backend/db/test/AGENTS.md`, `backend/db/test/logic/AGENTS.md` | `.agents/skills/fix-db-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| Testing (UI / E2E) | `docs/testing/` | `test/ui/AGENTS.md` | `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
-| Testing (general) | `docs/testing/` | `scripts/run-test/AGENTS.md` | `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
+| Testing (DB) | `docs/testing/` | `backend/db/test/AGENTS.md`, `backend/db/test/logic/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-db-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
+| Testing (UI / E2E) | `docs/testing/` | `test/ui/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
+| Testing (general) | `docs/testing/` | `scripts/run-test/AGENTS.md` | `.agents/skills/write-tests/SKILL.md`, `.agents/skills/test-expert/SKILL.md`, `.agents/skills/fix-tests/SKILL.md` | `.agents/instructions/tests.instructions.md` |
 | i18n / locale | `docs/i18n/` | `shared/AGENTS.md` | — | — |
-| Auth / security | `docs/auth/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/security-review/SKILL.md` | `.agents/instructions/backend.instructions.md` |
+| Auth / security | `docs/auth/` | `backend/services/AGENTS.md`, `backend/AGENTS.md` | `.agents/skills/idor-testing/SKILL.md`, `.agents/skills/pentester/SKILL.md`, `.agents/skills/backend-security-review/SKILL.md`, `.agents/skills/security-and-hardening/SKILL.md` | `.agents/instructions/backend.instructions.md` |
 | App Router / Next.js | `docs/app/` | `app/AGENTS.md` | — | `.agents/instructions/frontend.instructions.md` |
 | Quality gates / CI | `docs/quality/` | `AGENTS.md` (root) | `.agents/skills/quality-gate/SKILL.md`, `.agents/skills/quality-loop/SKILL.md` | — |
 | Idempotency | `docs/` (top-level) | `backend/services/AGENTS.md` | — | `.agents/instructions/backend.instructions.md` |
@@ -635,6 +644,13 @@ Fix all errors reported by the script and re-run until it exits `0` before proce
 **Semantic Review Checklist (Agent Self-Review):**
 
 Before marking ANY subtask `[x]`, verify (the sub-loop script handles mechanical checks; this checklist covers semantic bugs the script cannot detect):
+
+**Authorization & Tenancy:**
+- [ ] No client-supplied ID is used without verifying caller ownership or supervisor/admin permission
+- [ ] Multi-tenant WHERE clauses include explicit tenancy scoping (`eq(table.parentId/tenantId, callerId)`)
+- [ ] No unbounded input spread into Drizzle update methods (BOPLA / mass assignment defense)
+- [ ] DataLoaders filter batch results against caller authorized tenancy
+- [ ] Low-privilege tokens (student/parent) cannot invoke supervisor/admin mutations or internal cron triggers
 
 **Race Conditions & Concurrency:**
 - [ ] No read-then-write sequences without atomicity (SELECT FOR UPDATE / transaction / advisory lock)

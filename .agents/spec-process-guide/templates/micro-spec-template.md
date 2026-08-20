@@ -36,8 +36,8 @@ Ultra-lightweight template for changes under 1 day of effort - bug fixes, copy c
 ## How
 - **Baseline:** Record error count before starting (`bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` exit code)
 - [Implementation step 1]
-- [Implementation step 2]  
 - [Implementation step 3]
+- **Testing ([.agents/skills/write-tests/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/write-tests/SKILL.md) / [.agents/skills/test-expert/SKILL.md](file:///home/ahmed/Projects/siraj/.agents/skills/test-expert/SKILL.md)):** Write a paired test for the change (test edge cases/boundaries, verify regression is prevented)
 - **Quality Loop:** `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` after each change (exit code 0 = pass)
 
 ## Acceptance
