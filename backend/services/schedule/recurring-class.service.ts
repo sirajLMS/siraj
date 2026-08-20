@@ -350,11 +350,10 @@ export namespace RecurringClassService {
       };
     } catch (error) {
       if (error instanceof DomainError) {
-        const isTestMode = (process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1";
-        const logFn = isTestMode
-          ? (msg: string, ctx: Record<string, unknown>) => logger.debug(msg, ctx)
-          : (msg: string, ctx: Record<string, unknown>) => logger.warn(msg, ctx);
-        logFn("Validation or business rule error creating recurring class", { userId, error: error.message });
+        logger.logDomainError("Validation or business rule error creating recurring class", {
+          userId,
+          error: error.message,
+        });
       } else {
         logger.error("Error creating recurring class", { userId, input, error });
       }

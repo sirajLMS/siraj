@@ -305,17 +305,10 @@ export namespace CommunicationService {
     );
 
     if (failureCount > 0) {
-      if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
-        logger.debug("Multi-channel dispatch had failures in test mode", {
-          failureCount,
-          totalChannels: payloads.length,
-        });
-      } else {
-        logger.error("Multi-channel dispatch had failures", {
-          failureCount,
-          totalChannels: payloads.length,
-        });
-      }
+      logger.logDomainError("Multi-channel dispatch had failures", {
+        failureCount,
+        totalChannels: payloads.length,
+      });
     }
 
     if (whatsappBudgetConsumed > 0) {

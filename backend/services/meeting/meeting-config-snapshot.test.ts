@@ -92,6 +92,8 @@ await mock.module("@/backend/lib/logger", () => ({
     warn: () => {},
     error: () => {},
     debug: () => {},
+    logDomainError: () => {},
+    logDomainIssue: () => {},
   },
 }));
 

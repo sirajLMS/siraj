@@ -1,13 +1,28 @@
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 
 const loggerWarn = mock((_msg: string, _ctx?: unknown) => {});
+const loggerDebug = mock((_msg: string, _ctx?: unknown) => {});
 
 await mock.module("@/backend/lib/logger", () => ({
   logger: {
     info: mock((_msg: string, _ctx?: unknown) => {}),
     warn: loggerWarn,
     error: mock((_msg: string, _ctx?: unknown) => {}),
-    debug: mock((_msg: string, _ctx?: unknown) => {}),
+    debug: loggerDebug,
+    logDomainError: (msg: string, ctx?: unknown) => {
+      if (process.env.TEST_SERVER === "1") {
+        loggerDebug(msg, ctx);
+      } else {
+        loggerWarn(msg, ctx);
+      }
+    },
+    logDomainIssue: (msg: string, ctx?: unknown) => {
+      if (process.env.TEST_SERVER === "1") {
+        loggerDebug(msg, ctx);
+      } else {
+        loggerWarn(msg, ctx);
+      }
+    },
   },
 }));
 

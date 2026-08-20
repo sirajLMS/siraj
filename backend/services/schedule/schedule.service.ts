@@ -32,15 +32,6 @@ function formatTime(date: Date): string {
   });
 }
 
-function logDomainIssue(message: string, context: Record<string, unknown>): void {
-  const isTestMode = (process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1";
-  if (isTestMode) {
-    logger.debug(message, context);
-  } else {
-    logger.warn(message, context);
-  }
-}
-
 export namespace ScheduleService {
   async function mapDailyScheduleListItem(item: DailyScheduleResult, tErrors: ErrorsLabels) {
     const unknownName = tErrors.unknownName;
@@ -125,7 +116,7 @@ export namespace ScheduleService {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
-        logDomainIssue("Unauthorized access to daily metrics", { userId });
+        logger.logDomainError("Unauthorized access to daily metrics", { userId });
         throw new UnauthorizedError(tErrors.unauthorizedViewMetrics);
       }
 
@@ -183,7 +174,7 @@ export namespace ScheduleService {
       };
     } catch (error) {
       if (error instanceof DomainError) {
-        logDomainIssue("Admin dashboard schedule access issue", { userId, error: error.message });
+        logger.logDomainError("Admin dashboard schedule access issue", { userId, error: error.message });
       } else {
         logger.error("Error fetching admin dashboard schedule", { userId, error });
       }
@@ -195,7 +186,7 @@ export namespace ScheduleService {
     try {
       const isAuthorized = await PermissionsService.hasPermission(userId, AppPermission.DASHBOARD_VIEW_METRICS);
       if (!isAuthorized) {
-        logDomainIssue("Unauthorized access to daily metrics", { userId });
+        logger.logDomainError("Unauthorized access to daily metrics", { userId });
         throw new UnauthorizedError(tErrors.unauthorizedViewMetrics);
       }
 
@@ -208,7 +199,7 @@ export namespace ScheduleService {
       };
     } catch (error) {
       if (error instanceof DomainError) {
-        logDomainIssue("Daily metrics access issue", { userId, error: error.message });
+        logger.logDomainError("Daily metrics access issue", { userId, error: error.message });
       } else {
         logger.error("Error fetching daily metrics", { userId, error });
       }

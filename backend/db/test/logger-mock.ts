@@ -36,21 +36,27 @@
 
 import { mock } from "bun:test";
 
-const noop = () => {};
+const noop = (..._args: unknown[]) => {};
+
+const mockLogger = {
+  log: noop,
+  info: noop,
+  warn: noop,
+  error: noop,
+  debug: noop,
+  logDomainError: (message: string, ...args: unknown[]) => {
+    if (process.env.TEST_SERVER === "1") {
+      mockLogger.debug(message, ...args);
+    } else {
+      mockLogger.warn(message, ...args);
+    }
+  },
+  logDomainIssue: (message: string, ...args: unknown[]) => {
+    mockLogger.logDomainError(message, ...args);
+  },
+};
 
 void mock.module("@/backend/lib/logger", () => ({
-  logger: {
-    log: noop,
-    info: noop,
-    warn: noop,
-    error: noop,
-    debug: noop,
-  },
-  default: {
-    log: noop,
-    info: noop,
-    warn: noop,
-    error: noop,
-    debug: noop,
-  },
+  logger: mockLogger,
+  default: mockLogger,
 }));

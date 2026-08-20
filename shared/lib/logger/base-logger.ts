@@ -87,4 +87,28 @@ export abstract class BaseLogger {
   public debug(...args: unknown[]): void {
     this.logToConsole("debug", ...args);
   }
+
+  /**
+   * Logs a domain/business rejection or expected client error (such as NotFoundError,
+   * ValidationError, unauthorized access, rate limits, or duplicate entries).
+   *
+   * In test server mode (`TEST_SERVER === "1"`), downgrades to `debug` level to
+   * avoid polluting test runner summaries during negative assertion tests.
+   * In standard runtime, logs at `warn` level to capture domain events without
+   * triggering high-severity 500-level error alerts.
+   */
+  public logDomainError(...args: unknown[]): void {
+    if (process.env.TEST_SERVER === "1") {
+      this.debug(...args);
+    } else {
+      this.warn(...args);
+    }
+  }
+
+  /**
+   * Alias for {@link logDomainError}.
+   */
+  public logDomainIssue(...args: unknown[]): void {
+    this.logDomainError(...args);
+  }
 }

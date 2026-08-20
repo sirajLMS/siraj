@@ -172,16 +172,8 @@ export class ResendEmailAdapter implements IEmailChannel {
       error.message?.toLowerCase().includes("rate limit") ||
       error.message?.includes("429");
 
-    if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
-      logger.debug(
-        isRateLimit ? "Resend API rate limit reached in test mode" : "Resend API returned an error in test mode",
-        {
-          errorName: error.name,
-          errorMessage: error.message,
-        }
-      );
-    } else if (isRateLimit) {
-      logger.warn("Resend API rate limit exceeded", {
+    if (isRateLimit) {
+      logger.logDomainError("Resend API rate limit exceeded", {
         errorName: error.name,
         errorMessage: error.message,
       });
@@ -227,13 +219,8 @@ export class ResendEmailAdapter implements IEmailChannel {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const isRateLimit = errorMessage.toLowerCase().includes("rate limit") || errorMessage.includes("429");
 
-    if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
-      logger.debug("Failed to send email via Resend in test mode", {
-        deliveryId,
-        error: errorMessage,
-      });
-    } else if (isRateLimit) {
-      logger.warn("Resend email send rate limited", {
+    if (isRateLimit) {
+      logger.logDomainError("Resend email send rate limited", {
         deliveryId,
         error: errorMessage,
       });

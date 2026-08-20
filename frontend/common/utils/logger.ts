@@ -16,6 +16,16 @@ export const logger = {
       globalThis.console.debug("[DEBUG]", ...args);
     }
   },
+  logDomainError: (...args: unknown[]) => {
+    if (isDev) {
+      globalThis.console.warn("[WARN]", ...args);
+    }
+  },
+  logDomainIssue: (...args: unknown[]) => {
+    if (isDev) {
+      globalThis.console.warn("[WARN]", ...args);
+    }
+  },
   error: (...args: unknown[]) => {
     if (isDev) {
       // In development, log full error details for debugging

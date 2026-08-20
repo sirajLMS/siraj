@@ -163,11 +163,11 @@ export namespace SuggestionService {
       return updated;
     } catch (error) {
       if (error instanceof NotFoundError) {
-        const isTestServer = process.env.TEST_SERVER === "1";
-        const logFn = isTestServer
-          ? (msg: string, ctx?: Record<string, unknown>) => logger.debug(msg, ctx)
-          : (msg: string, ctx?: Record<string, unknown>) => logger.warn(msg, ctx);
-        logFn("Failed to mark suggestion as reviewed (not found)", { actorUserId, suggestionId, error });
+        logger.logDomainError("Failed to mark suggestion as reviewed (not found)", {
+          actorUserId,
+          suggestionId,
+          error,
+        });
       } else {
         logger.error("Failed to mark suggestion as reviewed", { actorUserId, suggestionId, error });
       }

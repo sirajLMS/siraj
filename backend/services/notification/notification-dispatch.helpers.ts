@@ -241,22 +241,12 @@ function stampRecipientAddress(
 
   const totalDropped = Object.values(droppedByChannel).reduce((a, b) => a + b, 0);
   if (totalDropped > 0) {
-    const isTestServer = process.env.TEST_SERVER === "1";
-    if (isTestServer) {
-      logger.debug("dispatchWithPreferences: dropped contactless payloads for user", {
-        userId,
-        droppedCount: totalDropped,
-        droppedByChannel,
-        userFound: user !== null,
-      });
-    } else {
-      logger.warn("dispatchWithPreferences: dropped contactless payloads for user", {
-        userId,
-        droppedCount: totalDropped,
-        droppedByChannel,
-        userFound: user !== null,
-      });
-    }
+    logger.logDomainError("dispatchWithPreferences: dropped contactless payloads for user", {
+      userId,
+      droppedCount: totalDropped,
+      droppedByChannel,
+      userFound: user !== null,
+    });
   }
 
   return { stamped, droppedByChannel };

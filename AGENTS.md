@@ -104,7 +104,8 @@ This is NOT standard Next.js. APIs and conventions differ from training data. **
 ### Logging
 - **NEVER use `console.*` directly** - ESLint will error
 - Always use: `import { logger } from '@/frontend/utils/logger'` (frontend) or `@/backend/lib/logger` (backend)
-- Methods: `logger.info`, `logger.warn`, `logger.error`, `logger.debug`
+- Methods: `logger.info`, `logger.warn`, `logger.error`, `logger.debug`, `logger.logDomainError`
+- **Domain / Expected Rejections**: Use `logger.logDomainError(msg, ctx)` when handling business rejections, 4xx equivalents, `NotFoundError`, or `ValidationError`. It automatically logs as `debug` in test mode (`TEST_SERVER=1`) to keep test logs compact and as `warn` in production.
 
 ### MUI v9 Breaking Changes
 - Style props (`fontWeight`, `textAlign`, `mb`, `mt`, `p`, `display`, etc.) are NOT valid direct props on Typography, Stack, Box, Grid

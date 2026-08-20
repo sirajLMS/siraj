@@ -164,17 +164,10 @@ export class TwilioSmsAdapter implements ISmsChannel {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
-      if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
-        logger.warn("Failed to send SMS via Twilio in test mode", {
-          deliveryId,
-          error: errorMessage,
-        });
-      } else {
-        logger.error("Failed to send SMS via Twilio", {
-          deliveryId,
-          error: errorMessage,
-        });
-      }
+      logger.logDomainError("Failed to send SMS via Twilio", {
+        deliveryId,
+        error: errorMessage,
+      });
 
       await NotificationRepository.updateDeliveryStatus({
         deliveryId,
@@ -194,19 +187,11 @@ export class TwilioSmsAdapter implements ISmsChannel {
     message: { sid: string; errorCode: number | null; errorMessage: string | null },
     locale: string
   ): Promise<SmsSendResult> {
-    if ((process.env.NODE_ENV as string) === "test" || process.env.TEST_SERVER === "1") {
-      logger.warn("Twilio API returned an error in test mode", {
-        deliveryId,
-        errorCode: message.errorCode,
-        errorMessage: message.errorMessage,
-      });
-    } else {
-      logger.error("Twilio API returned an error", {
-        deliveryId,
-        errorCode: message.errorCode,
-        errorMessage: message.errorMessage,
-      });
-    }
+    logger.logDomainError("Twilio API returned an error", {
+      deliveryId,
+      errorCode: message.errorCode,
+      errorMessage: message.errorMessage,
+    });
 
     const failureReason = message.errorMessage ?? `Twilio error code: ${message.errorCode}`;
 
