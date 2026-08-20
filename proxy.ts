@@ -68,7 +68,7 @@ export default function proxy(request: NextRequest) {
     `; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ` +
     `font-src 'self' https://fonts.gstatic.com; ` +
     `img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com https://*.blob.vercel-storage.com http://localhost http://127.0.0.1 https://localhost https://127.0.0.1; ` +
-    `connect-src 'self' https://*.upstash.com https://vercel.live https://*.blob.vercel-storage.com${devConnectSrc}; ` +
+    `connect-src 'self' https://*.nr-data.net https://*.newrelic.com https://*.upstash.com https://vercel.live https://*.blob.vercel-storage.com${devConnectSrc}; ` +
     `frame-ancestors 'none';`;
 
   response.headers.set("x-pathname", pathname);

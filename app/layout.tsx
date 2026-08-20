@@ -8,6 +8,7 @@ import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
 import { buildServerThemeCss } from "@/frontend/common/lib/server-theme-css";
 import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/common/lib/theme-detection";
 import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
+import { NewRelicBrowserAgent } from "@/frontend/common/providers/NewRelicBrowserAgent";
 import MuiProvider from "@/frontend/common/providers/theme/MuiProvider";
 import { VercelObservability } from "@/frontend/common/providers/VercelObservability";
 import "@/app/index.css";
@@ -151,6 +152,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           </MuiProvider>
         </LocaleProvider>
         <VercelObservability />
+        <NewRelicBrowserAgent />
       </body>
     </html>
   );

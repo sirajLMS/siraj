@@ -391,6 +391,15 @@
     },
     "vacationRequestAlreadyCancelled": {
       "__fn": "(id) => `Vacation request ${id} is already cancelled`"
+    },
+    "recurringClassDaysRequired": {
+      "__fn": "() => \"At least one day is required.\""
+    },
+    "invalidDuration": {
+      "__fn": "() => \"Duration must be greater than zero.\""
+    },
+    "subjectRequired": {
+      "__fn": "() => \"Subject is required.\""
     }
   },
   "permissionGroup": {
@@ -520,6 +529,15 @@
   },
   "vacationRequestAlreadyCancelled": {
     "__fn": "(id) => `Vacation request ${id} is already cancelled`"
+  },
+  "recurringClassDaysRequired": {
+    "__fn": "() => \"At least one day is required.\""
+  },
+  "invalidDuration": {
+    "__fn": "() => \"Duration must be greater than zero.\""
+  },
+  "subjectRequired": {
+    "__fn": "() => \"Subject is required.\""
   },
   "permissionGroupNotFound": "Permission group not found.",
   "alreadyExists": "Teacher profile for this user already exists.",

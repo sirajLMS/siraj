@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   ClassOutcome,
   ClassType,
+  type CreateRecurringClassInput,
   DayOfWeek,
   IanaTimezone,
 } from "@/frontend/common/graphql/generated/gql/graphql-types";
@@ -53,6 +54,31 @@ async function assertDstBulkUpdateFails(token: string) {
     },
   });
   expect(result.error).toBeDefined();
+}
+
+function buildRecurringClassInput(
+  overrides: Pick<CreateRecurringClassInput, "studentId" | "teacherId" | "subjectId">
+): CreateRecurringClassInput {
+  return {
+    studentId: overrides.studentId,
+    teacherId: overrides.teacherId,
+    subjectId: overrides.subjectId,
+    durationMinutes: 60,
+    defaultStartTime: "10:00:00",
+    timezone: IanaTimezone.Utc,
+    days: [{ dayOfWeek: DayOfWeek.Monday, startTime: "10:00:00", isActive: true }],
+    classType: ClassType.Regular,
+    generateInstancesForWeeks: 1,
+    effectiveFrom: null,
+    effectiveUntil: null,
+    hourlyRate: null,
+    rateCurrency: null,
+    quotaId: null,
+    earmarkedClasses: null,
+    schedulingMode: null,
+    generationHorizonWeeks: null,
+    ondemandNoCreditsOutcome: null,
+  };
 }
 
 describe("GraphQL Schedule Integration Tests", () => {
@@ -218,11 +244,7 @@ describe("GraphQL Schedule Integration Tests", () => {
         },
       },
       errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
+      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
     });
 
     expect(result.error).toBeDefined();
@@ -239,11 +261,7 @@ describe("GraphQL Schedule Integration Tests", () => {
         metricFilter: null,
       },
       errorPolicy: "all",
-      context: {
-        headers: {
-          Authorization: `Bearer ${teacherToken}`,
-        },
-      },
+      context: { headers: { Authorization: `Bearer ${teacherToken}` } },
     });
 
     expect(result.error).toBeDefined();
@@ -320,26 +338,10 @@ describe("GraphQL Schedule Integration Tests", () => {
   });
 
   test("createRecurringClass rejected when subjectId is omitted", async () => {
-    const result = await mutateCreateRecurringClass(superAdminToken, {
-      studentId,
-      teacherId,
-      subjectId: "",
-      durationMinutes: 60,
-      defaultStartTime: "10:00:00",
-      timezone: IanaTimezone.Utc,
-      days: [{ dayOfWeek: DayOfWeek.Monday, startTime: "10:00:00", isActive: true }],
-      classType: ClassType.Regular,
-      generateInstancesForWeeks: 1,
-      effectiveFrom: null,
-      effectiveUntil: null,
-      hourlyRate: null,
-      rateCurrency: null,
-      quotaId: null,
-      earmarkedClasses: null,
-      schedulingMode: null,
-      generationHorizonWeeks: null,
-      ondemandNoCreditsOutcome: null,
-    });
+    const result = await mutateCreateRecurringClass(
+      superAdminToken,
+      buildRecurringClassInput({ studentId, teacherId, subjectId: "" })
+    );
     expect(result.error).toBeDefined();
     expect(extractGqlErrorCode(result.error)).toBe("SUBJECT_REQUIRED");
   });
@@ -424,26 +426,10 @@ describe("GraphQL Schedule Integration Tests", () => {
 
   test("createRecurringClass returns meetingUrl null when no meeting provider configured", async () => {
     const subjectId = await ensureTestSubjectId(superAdminToken);
-    const result = await mutateCreateRecurringClass(superAdminToken, {
-      studentId,
-      teacherId,
-      subjectId,
-      durationMinutes: 60,
-      defaultStartTime: "10:00:00",
-      timezone: IanaTimezone.Utc,
-      days: [{ dayOfWeek: DayOfWeek.Monday, startTime: "10:00:00", isActive: true }],
-      classType: ClassType.Regular,
-      generateInstancesForWeeks: 1,
-      effectiveFrom: null,
-      effectiveUntil: null,
-      hourlyRate: null,
-      rateCurrency: null,
-      quotaId: null,
-      earmarkedClasses: null,
-      schedulingMode: null,
-      generationHorizonWeeks: null,
-      ondemandNoCreditsOutcome: null,
-    });
+    const result = await mutateCreateRecurringClass(
+      superAdminToken,
+      buildRecurringClassInput({ studentId, teacherId, subjectId })
+    );
     expect(result.error).toBeUndefined();
     expect(result.data?.createRecurringClass?.meetingUrl).toBeNull();
   });

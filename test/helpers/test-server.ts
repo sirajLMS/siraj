@@ -128,10 +128,10 @@ async function warmUpRouteBatches(
 async function warmUpDevServerRoutes(): Promise<void> {
   const fetchFn = typeof Bun === "undefined" ? fetch : Bun.fetch;
   const base = `http://localhost:${getTestPort()}`;
-  const routeTimeoutMs = 120_000;
+  const routeTimeoutMs = 240_000;
 
   testLogger.info(`Warming up ${E2E_WARMUP_ROUTES.length} Next.js dev server routes...`);
-  await warmUpRouteBatches(E2E_WARMUP_ROUTES, base, fetchFn, routeTimeoutMs, 6);
+  await warmUpRouteBatches(E2E_WARMUP_ROUTES, base, fetchFn, routeTimeoutMs, 12);
 
   const stabilizing = await waitForServerReady(30_000);
   if (!stabilizing) {

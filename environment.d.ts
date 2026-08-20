@@ -201,6 +201,18 @@ declare global {
       // client diagnostics in both the browser console AND server log files.
       ENABLE_LOGGING?: string;
       NEXT_PUBLIC_ENABLE_LOGGING?: string;
+
+      // New Relic Browser Agent (client-side; NEXT_PUBLIC_ required for browser access)
+      /** New Relic Browser license key (JS ingest key, distinct from the APM license key) */
+      NEXT_PUBLIC_NEW_RELIC_BROWSER_LICENSE_KEY?: string;
+      /** New Relic account ID */
+      NEXT_PUBLIC_NEW_RELIC_ACCOUNT_ID?: string;
+      /** New Relic application / agent ID for browser monitoring */
+      NEXT_PUBLIC_NEW_RELIC_APPLICATION_ID?: string;
+      /** New Relic trust key (usually the same as account ID) */
+      NEXT_PUBLIC_NEW_RELIC_TRUST_KEY?: string;
+      /** New Relic beacon hostname (default: bam.eu01.nr-data.net for EU region) */
+      NEXT_PUBLIC_NEW_RELIC_BEACON?: string;
     }
   }
 }

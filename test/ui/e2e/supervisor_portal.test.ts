@@ -129,7 +129,13 @@ describe("Supervisor Portal E2E", () => {
     await expectVisible(duesHeading);
     expect(await duesHeading.isVisible()).toBe(true);
 
-    const pendingDues = page.getByText(TOTAL_PENDING_DUES);
+    // The totalPendingDues text appears twice in the card (subtitle + label in Stack).
+    // Use the subtitle Typography (variant="bodyMd") which is the first occurrence.
+    const pendingDues = page
+      .getByRole("heading", { name: TEACHER_DUES_SUMMARY })
+      .locator("..")
+      .getByText(TOTAL_PENDING_DUES)
+      .first();
     await expectVisible(pendingDues);
     expect(await pendingDues.isVisible()).toBe(true);
 
