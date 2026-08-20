@@ -9,6 +9,10 @@
     }
   },
   "chat.utilitySmallModel": "customendpoint/nvidia/z-ai/glm-5.2",
+  "chat.defaultModel": "customendpoint/nvidia/z-ai/glm-5.2",
+  "chat.newSession.defaultMode": "customendpoint/nvidia/z-ai/glm-5.2",
+  "chat.planAgent.defaultModel": "Glm-5.2 (customendpoint)",
+  "chat.utilityModel": "customendpoint/nvidia/z-ai/glm-5.2",
   "chat.permissions.default": "autopilot",
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "always"
