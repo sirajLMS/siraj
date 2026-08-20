@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Card, CardContent } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { DemoFastLogin } from "@/frontend/views/auth/login/components/DemoFastLogin";

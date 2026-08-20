@@ -1,3 +1,5 @@
+"use client";
+
 import { VideocamOffOutlined } from "@mui/icons-material";
 import { Box, Paper, Tooltip, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";

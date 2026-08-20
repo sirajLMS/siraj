@@ -1,3 +1,5 @@
+"use client";
+
 import { Box } from "@mui/material";
 import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
 import { QuickAdjustSectionShared } from "@/frontend/common/views/dashboard/reschedule/home/components/__shared__/quickAdjustSectionShared";

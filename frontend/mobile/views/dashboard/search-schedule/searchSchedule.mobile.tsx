@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Typography } from "@mui/material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import { pickSearchScheduleFormProps } from "@/frontend/common/views/dashboard/search-schedule/components/searchScheduleFormPropsPicker";

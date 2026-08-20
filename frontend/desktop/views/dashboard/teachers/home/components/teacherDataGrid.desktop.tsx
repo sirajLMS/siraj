@@ -1,3 +1,5 @@
+"use client";
+
 import { CalendarMonthOutlined, SettingsOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";

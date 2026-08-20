@@ -1,3 +1,5 @@
+"use client";
+
 import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
 import { QuickAdjustSectionShared } from "@/frontend/common/views/dashboard/reschedule/home/components/__shared__/quickAdjustSectionShared";
 import type { RescheduleFormData } from "@/frontend/common/views/dashboard/reschedule/home/schemas/rescheduleSchema";

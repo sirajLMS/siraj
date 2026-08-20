@@ -1,3 +1,5 @@
+"use client";
+
 import { Box } from "@mui/material";
 import type { DashboardLayoutProps } from "@/frontend/common/views/dashboard/components/dashboardLayoutTypes";
 import { NavbarStaticShell } from "@/frontend/common/views/dashboard/components/navbar/NavbarStaticShell";

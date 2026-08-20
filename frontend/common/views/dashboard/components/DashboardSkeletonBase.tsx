@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Skeleton } from "@mui/material";
 
 export interface DashboardSkeletonBaseProps {

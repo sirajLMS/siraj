@@ -1,5 +1,5 @@
-// cspell:ignore Financials
 "use client";
+// cspell:ignore Financials
 
 import { ArrowBackOutlined } from "@mui/icons-material";
 import { Box, Button } from "@mui/material";

@@ -1,3 +1,5 @@
+"use client";
+
 import { CalendarTodayOutlined, MoreVertOutlined, SearchOutlined, VideoChatOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";

@@ -1,3 +1,5 @@
+"use client";
+
 import { SchoolOutlined } from "@mui/icons-material";
 import { AppBar, Box, Toolbar, Typography } from "@mui/material";
 import type { ReactNode } from "react";

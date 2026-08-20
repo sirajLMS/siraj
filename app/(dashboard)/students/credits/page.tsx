@@ -1,6 +1,4 @@
-import { Box, CircularProgress } from "@mui/material";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { AppPermission } from "@/backend/enum";
 import { withPageAuth } from "@/backend/lib/auth/withPageAuth";
 import { StudentCreditsContainer } from "@/frontend/common/views/dashboard/student/credits/StudentCreditsContainer";
@@ -14,15 +12,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default withPageAuth([AppPermission.STUDENT_VIEW_OWN_DASHBOARD], async () => {
-  return (
-    <Suspense
-      fallback={
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-          <CircularProgress />
-        </Box>
-      }
-    >
-      <StudentCreditsContainer />
-    </Suspense>
-  );
+  return <StudentCreditsContainer />;
 });

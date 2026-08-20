@@ -1,3 +1,5 @@
+"use client";
+
 import { DashboardSkeletonBase } from "@/frontend/common/views/dashboard/components/DashboardSkeletonBase";
 
 /**
