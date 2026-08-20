@@ -16,7 +16,7 @@
 
 ### Component Flow
 
-```
+```text
 instrumentation.ts (entry point)
   └── if NODE_ENV === 'production' && NEXT_RUNTIME === 'nodejs'
       └── ensureEnvironmentValidated()  (env validation runs first)

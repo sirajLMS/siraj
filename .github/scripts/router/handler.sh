@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Robust HTTP Request Handler for NVIDIA Router (OpenAI Compatible)
-# ==============================================================================
+# Use -u (unset var error) + pipefail, but NOT -e because arithmetic comparisons
+# (e.g. ((remaining < 0))) return non-zero on false and would trigger unexpected exits
 set -uo pipefail
 
 ROUTER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

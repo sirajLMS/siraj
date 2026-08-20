@@ -2,7 +2,7 @@
 # secrets.DATABASE_URL (production Neon). All other workflows — especially ci.yml —
 # must use the local Postgres service or other non-production URLs.
 
-name: Production Database Migration
+name: 📦 Production Database Migration
 
 on:
   push:
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   migrate:
-    name: Migrate Neon production database
+    name: 🗃️ Migrate Neon production database
     runs-on: ubuntu-latest
     timeout-minutes: 10
 

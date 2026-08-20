@@ -118,7 +118,7 @@
 #
 # ============================================================
 
-name: Sync Forks & Deploy
+name: 🚀 Sync Forks & Deploy
 
 on:
   # Auto-trigger: fires on every commit pushed to prod ONLY.
@@ -130,7 +130,7 @@ on:
 
 jobs:
   sync-to-fork:
-    name: "Sync prod -> ${{ matrix.fork_owner }}/siraj"
+    name: "🔄 Sync prod -> ${{ matrix.fork_owner }}/siraj"
     runs-on: ubuntu-latest
 
     strategy:

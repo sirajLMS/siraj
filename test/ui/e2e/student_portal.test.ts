@@ -112,7 +112,7 @@ describe("Student Portal E2E", () => {
     // take a while to compile. Using waitFor({ state: "visible", timeout: devWaitTimeout }) ensures
     // the link is rendered and hydrated before clicking.
     const creditsLink = page.getByRole("link", { name: CREDITS_LINK });
-    await creditsLink.first().waitFor({ state: "visible", timeout: 60_000 });
+    await creditsLink.first().waitFor({ state: "visible", timeout: devWaitTimeout });
     expect(await creditsLink.first().isVisible()).toBe(true);
     await creditsLink.click();
     await page.waitForURL("**/students/credits**", { timeout: devWaitTimeout });

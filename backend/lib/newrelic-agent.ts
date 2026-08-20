@@ -22,8 +22,16 @@ function hasAgent(value: unknown): value is NewRelicModule {
     typeof value === "object" &&
     value !== null &&
     "agent" in value &&
-    typeof (value as Record<string, unknown>).agent === "object"
+    typeof (value as Record<string, unknown>).agent === "object" &&
+    (value as Record<string, unknown>).agent !== null
   );
+}
+
+function unwrapModule(mod: unknown): unknown {
+  if (typeof mod === "object" && mod !== null && "default" in mod) {
+    return mod.default;
+  }
+  return mod;
 }
 
 let loadedNewRelic: typeof import("newrelic") | undefined;
@@ -51,16 +59,16 @@ export async function loadNewRelicAgent(): Promise<typeof import("newrelic") | u
   }
 
   try {
-    const newrelic = await import("newrelic");
-    loadedNewRelic = newrelic;
+    const rawImport = await import("newrelic");
+    const newrelicModule = unwrapModule(rawImport);
+    loadedNewRelic = rawImport;
 
-    const moduleRef: unknown = newrelic;
-    if (!hasAgent(moduleRef)) {
+    if (!hasAgent(newrelicModule)) {
       logger.error("New Relic module loaded but agent property is missing");
       return undefined;
     }
 
-    const { agent } = moduleRef;
+    const { agent } = newrelicModule;
 
     await new Promise<void>(resolve => {
       let settled = false;
@@ -92,7 +100,7 @@ export async function loadNewRelicAgent(): Promise<typeof import("newrelic") | u
       });
     });
 
-    return newrelic;
+    return rawImport;
   } catch (error) {
     logger.error("Failed to load New Relic agent", error);
     return undefined;

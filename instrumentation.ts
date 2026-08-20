@@ -3,7 +3,7 @@ export async function register() {
   // Next.js still analyzes instrumentation for Edge — gate the import.
   // https://nextjs.org/docs/app/guides/instrumentation#importing-runtime-specific-code
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    const { ensureEnvironmentValidated } = await import("./backend/lib/env");
+    const { ensureEnvironmentValidated } = await import("@/backend/lib");
     ensureEnvironmentValidated();
 
     // Load New Relic agent in production only (AC-1, AC-6).
@@ -11,11 +11,11 @@ export async function register() {
     // gates on NODE_ENV === 'production' and uses dynamic import('newrelic').
     if (process.env.NODE_ENV === "production") {
       try {
-        const { loadNewRelicAgent } = await import("./backend/lib/newrelic-agent");
+        const { loadNewRelicAgent } = await import("@/backend/lib");
         await loadNewRelicAgent();
       } catch (error) {
         // Agent failure must NOT block server startup.
-        const { logger } = await import("./backend/lib/logger");
+        const { logger } = await import("@/backend/lib");
         logger.error("Failed to load New Relic agent during instrumentation", error);
       }
     }

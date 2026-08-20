@@ -58,6 +58,10 @@ export function NewRelicBrowserAgent() {
       return;
     }
 
+    if (!options.info.applicationID || !options.info.licenseKey) {
+      return;
+    }
+
     // The BrowserAgent constructor immediately executes the loader code.
     agentRef.current = new BrowserAgent(options);
   }, []);

@@ -20,7 +20,7 @@
 # Seed policy: CI must NEVER run database seeds (drizzleSeed.ts, `bun db seed`).
 # Migrations supply schema + migration-bundled reference data only.
 
-name: GraphQL Tests
+name: 🔷 GraphQL Tests
 
 on:
   pull_request:
@@ -32,7 +32,7 @@ concurrency:
 
 jobs:
   graphql-tests:
-    name: GraphQL Integration Tests
+    name: 🌐 GraphQL Integration Tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

@@ -23,7 +23,7 @@
 # or equivalent). Migrations supply schema + migration-bundled reference data only; tests
 # create their own fixtures. Do not add seed steps to this workflow without team approval.
 
-name: CI
+name: 🧪 CI
 
 on:
   pull_request:
@@ -35,7 +35,7 @@ concurrency:
 
 jobs:
   quality-checks:
-    name: Type check & Lint
+    name: 🔍 Type Check & Lint
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -70,7 +70,7 @@ jobs:
         run: bun run biome:check
 
   tests:
-    name: Database & Services Tests
+    name: 🗄️ Database & Services Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
