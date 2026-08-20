@@ -23,8 +23,6 @@
 name: GraphQL Tests
 
 on:
-  push:
-    branches: [master, prod]
   pull_request:
     branches: [master, prod]
 

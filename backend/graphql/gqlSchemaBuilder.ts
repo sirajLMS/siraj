@@ -6,7 +6,7 @@ import DrizzlePlugin from "@pothos/plugin-drizzle";
 import ErrorsPlugin from "@pothos/plugin-errors";
 import ScopeAuthPlugin from "@pothos/plugin-scope-auth";
 import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
-import TracingPlugin, { isRootField, wrapResolver } from "@pothos/plugin-tracing";
+import TracingPlugin, { isRootField, pathToString, wrapResolver } from "@pothos/plugin-tracing";
 import WithInputPlugin from "@pothos/plugin-with-input";
 import { getTableConfig } from "drizzle-orm/pg-core";
 import { GraphQLError } from "graphql";
@@ -15,8 +15,7 @@ import { relations } from "@/backend/db/drizzleRelations";
 import type { AppPermission } from "@/backend/enum";
 import type { AuthContexts, BaseContext } from "@/backend/graphql/gqlContext";
 import { enablePothosDevHmr } from "@/backend/graphql/pothos-hmr";
-import type { Email } from "@/backend/lib";
-import { logger } from "@/backend/lib/logger";
+import { type Email, getNewRelicAgent, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
 import type { PhoneNumber } from "@/shared/lib/phone";
 import type { LocalizedString } from "@/shared/types/localized-string";
@@ -170,13 +169,23 @@ export const gqlSchemaBuilder = new SchemaBuilder<PothosTypes>({
     // Enable tracing for rootFields by default, other fields need to opt in
     default: config => isRootField(config),
     wrap: (resolver, _options, config) => {
-      if (process.env.NODE_ENV === "production" && process.env.NEXT_RUNTIME === "nodejs") {
-        // Conditional require: newrelic module is NEVER loaded in dev/test.
-        // @pothos/tracing-newrelic imports newrelic at module top level.
-        // The NODE_ENV gate guarantees newrelic is never evaluated in dev.
-        // eslint-disable-next-line @typescript-eslint/no-require-imports -- gated by NODE_ENV + NEXT_RUNTIME; CommonJS require is the only synchronous way to conditionally load @pothos/tracing-newrelic
-        const { createNewrelicWrapper } = require("@pothos/tracing-newrelic");
-        return createNewrelicWrapper({ includeArgs: true, includeSource: true })(resolver, _options, config);
+      // Inlined implementation of @pothos/tracing-newrelic's `createNewrelicWrapper`.
+      // We read from `getNewRelicAgent()` rather than importing `@pothos/tracing-newrelic` directly
+      // because that package statically imports `newrelic` at module top level, which attempts
+      // to load native C++ bindings (@newrelic/native-metrics) and crashes in Bun during dev/test/build.
+      // This inlined approach provides identical telemetry (segment "graphql.resolve" with field
+      // name, path, and return type attributes) while remaining 100% ESM and safe for Bun runtime.
+      const nr = getNewRelicAgent();
+      if (nr) {
+        return (source, args, ctx, info) =>
+          nr.startSegment("graphql.resolve", true, () => {
+            nr.addCustomSpanAttributes({
+              "graphql.field.name": info.fieldName,
+              "graphql.field.path": pathToString(info),
+              "graphql.field.type": info.returnType.toString(),
+            });
+            return resolver(source, args, ctx, info);
+          });
       }
       // Dev/test fallback: existing wrapResolver duration logging
       return wrapResolver(resolver, (_error, duration) => {

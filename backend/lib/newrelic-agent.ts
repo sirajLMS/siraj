@@ -26,6 +26,15 @@ function hasAgent(value: unknown): value is NewRelicModule {
   );
 }
 
+let loadedNewRelic: typeof import("newrelic") | undefined;
+
+/**
+ * Returns the loaded New Relic module instance if active, or `undefined` in dev/test/non-Node environments.
+ */
+export function getNewRelicAgent(): typeof import("newrelic") | undefined {
+  return loadedNewRelic;
+}
+
 /**
  * Dynamically loads the New Relic agent in production Node.js runtime.
  *
@@ -43,6 +52,7 @@ export async function loadNewRelicAgent(): Promise<typeof import("newrelic") | u
 
   try {
     const newrelic = await import("newrelic");
+    loadedNewRelic = newrelic;
 
     const moduleRef: unknown = newrelic;
     if (!hasAgent(moduleRef)) {
