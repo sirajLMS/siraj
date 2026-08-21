@@ -11,7 +11,6 @@ import {
   FormControl,
   IconButton,
   InputAdornment,
-  InputLabel,
   Stack,
   TextField,
   Typography,
@@ -93,7 +92,7 @@ export function ResetPasswordDialog({
         >
           <KeyOutlined sx={{ fontSize: 32 }} />
         </Box>
-        <Typography variant="headlineMd">{t.adminResetPassword.title}</Typography>
+        <Typography variant="headlineMd" component="span">{t.adminResetPassword.title}</Typography>
       </DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ pt: 1 }}>
@@ -102,10 +101,10 @@ export function ResetPasswordDialog({
           </Typography>
 
           <FormControl fullWidth error={!!errors.password}>
-            <InputLabel shrink>{t.adminResetPassword.newPassword}</InputLabel>
             <TextField
               type={showPassword ? "text" : "password"}
               value={password}
+              label={t.adminResetPassword.newPassword}
               onChange={e => handlePasswordChange(e.target.value)}
               error={!!errors.password}
               helperText={errors.password}
@@ -134,10 +133,10 @@ export function ResetPasswordDialog({
           </FormControl>
 
           <FormControl fullWidth error={!!errors.confirmPassword}>
-            <InputLabel shrink>{t.adminResetPassword.confirmPassword}</InputLabel>
             <TextField
               type={showPassword ? "text" : "password"}
               value={confirmPassword}
+              label={t.adminResetPassword.confirmPassword}
               onChange={e => handleConfirmPasswordChange(e.target.value)}
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword}
