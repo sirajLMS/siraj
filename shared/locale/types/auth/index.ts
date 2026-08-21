@@ -17,6 +17,10 @@ export interface AuthLoginLabels {
   readonly loginSuccess: string;
   readonly loginError: string;
   readonly invalidCredentials: string;
+  readonly tooManyLoginAttempts: string;
+  readonly tooManyRequests: string;
+  readonly serviceUnavailable: string;
+  readonly accountDeactivated: string;
   readonly tryAgain: string;
   readonly signinFailed: string;
   readonly invalidLoginResponse: string;

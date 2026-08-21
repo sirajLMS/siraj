@@ -85,9 +85,11 @@ await mock.module("pg-boss", () => ({
   },
 }));
 
-// ── Mock @/backend/db/factory so createPool doesn't touch the DB ──
-await mock.module("@/backend/db/factory", () => ({
-  createPool: () => ({ dummy: true }),
+// ── Mock @/backend/lib/env so it provides a test databaseUrl ──
+await mock.module("@/backend/lib/env", () => ({
+  getEnvironmentConfig: () => ({
+    databaseUrl: "postgres://mock_user:mock_pass@localhost:5432/mock_db",
+  }),
 }));
 
 // The adapter has module-level state (boss, started, knownQueues, maps).

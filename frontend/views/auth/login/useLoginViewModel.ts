@@ -1,6 +1,6 @@
 "use client";
 
-import { CombinedGraphQLErrors } from "@apollo/client";
+import { CombinedGraphQLErrors, ServerError } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -30,14 +30,62 @@ export interface LoginViewModel {
   readonly handleFastLogin: (groupSlug: string) => Promise<void>;
 }
 
-function getServiceUnavailableCode(error: unknown): string | undefined {
-  if (CombinedGraphQLErrors.is(error)) {
-    for (const graphError of error.errors) {
-      const code = graphError?.extensions?.code;
-      if (typeof code === "string") return code;
+function readExtensionCode(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  if (!("extensions" in value)) return undefined;
+  const extensions = value.extensions;
+  if (typeof extensions !== "object" || extensions === null) return undefined;
+  if (!("code" in extensions)) return undefined;
+  return typeof extensions.code === "string" ? extensions.code : undefined;
+}
+
+function getCodeFromServerErrorBody(bodyText: string): string | undefined {
+  try {
+    const parsed: unknown = JSON.parse(bodyText);
+    if (typeof parsed !== "object" || parsed === null || !("errors" in parsed)) return undefined;
+    const { errors } = parsed;
+    if (!Array.isArray(errors)) return undefined;
+    for (const graphError of errors) {
+      const code = readExtensionCode(graphError);
+      if (code) return code;
     }
+  } catch {
+    return undefined;
   }
   return undefined;
+}
+
+function getGraphQLErrorCode(error: unknown): string | undefined {
+  if (CombinedGraphQLErrors.is(error)) {
+    for (const graphError of error.errors) {
+      const code = readExtensionCode(graphError);
+      if (code) return code;
+    }
+  }
+  if (ServerError.is(error)) {
+    const bodyCode = getCodeFromServerErrorBody(error.bodyText);
+    if (bodyCode) return bodyCode;
+    if (error.statusCode === 429) return "RATE_LIMIT_EXCEEDED";
+  }
+  return undefined;
+}
+
+/** Map known auth extension codes to safe, localized login copy (never raw server text). */
+function resolveLoginErrorMessage(error: unknown, labels: AuthLoginLabels): string {
+  switch (getGraphQLErrorCode(error)) {
+    case "TOO_MANY_ATTEMPTS":
+      return labels.tooManyLoginAttempts;
+    case "RATE_LIMIT_EXCEEDED":
+      return labels.tooManyRequests;
+    case "INVALID_CREDENTIALS":
+      return labels.invalidCredentials;
+    case "ACCOUNT_DEACTIVATED":
+      return labels.accountDeactivated;
+    case "SERVICE_UNAVAILABLE":
+      return labels.serviceUnavailable;
+    default:
+      return labels.loginError;
+  }
 }
 
 export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions = {}): LoginViewModel {
@@ -99,7 +147,7 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
         setLoginResult({ type: "error", message: labels.invalidLoginResponse });
         return false;
       } catch (error) {
-        const code = getServiceUnavailableCode(error);
+        const code = getGraphQLErrorCode(error);
         if (code === "SERVICE_UNAVAILABLE" && retryCountRef.current < MAX_FRONTEND_RETRIES) {
           const delayMs = RETRY_DELAYS_MS[retryCountRef.current] ?? 3000;
           retryCountRef.current += 1;
@@ -117,14 +165,11 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
         }
         setIsRetrying(false);
         retryCountRef.current = 0;
-        const message = CombinedGraphQLErrors.is(error)
-          ? (error.errors[0]?.message ?? labels.signinFailed)
-          : labels.signinFailed;
-        setLoginResult({ type: "error", message });
+        setLoginResult({ type: "error", message: resolveLoginErrorMessage(error, labels) });
         return false;
       }
     },
-    [loginMutation, updateAuthToken, labels.signinFailed, labels.invalidLoginResponse]
+    [loginMutation, updateAuthToken, labels]
   );
 
   useEffect(() => {
@@ -162,10 +207,10 @@ export function useLoginViewModel({ demoGroups = [] }: UseLoginViewModelOptions 
         });
         globalThis.location.href = targetUrl;
       } else {
-        setLoginResult({ type: "error", message: labels.invalidCredentials });
+        setLoginResult({ type: "error", message: labels.loginError });
       }
-    } catch {
-      setLoginResult({ type: "error", message: labels.loginError });
+    } catch (error) {
+      setLoginResult({ type: "error", message: resolveLoginErrorMessage(error, labels) });
     }
   };
 

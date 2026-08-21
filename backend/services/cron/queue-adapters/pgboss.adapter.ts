@@ -12,8 +12,9 @@
  * `resetQueueAdapterFactory()` can produce a fresh, independent adapter instance.
  */
 
-import { type Job, PgBoss, type SendOptions } from "pg-boss";
-import { createPool } from "@/backend/db/factory";
+import { type ConstructorOptions, type Job, PgBoss, type SendOptions } from "pg-boss";
+import { poolMax } from "@/backend/db/connection-strategy";
+import { getEnvironmentConfig } from "@/backend/lib/env";
 import { DomainError } from "@/backend/lib/errors";
 import { logger } from "@/backend/lib/logger";
 import { CronQueueBackendNotAvailable, safeCronJobKind } from "@/backend/services/cron/cron.helpers";
@@ -86,8 +87,10 @@ interface PgBossState {
 async function ensureStarted(state: PgBossState): Promise<PgBoss> {
   if (state.boss && state.started) return state.boss;
 
-  const pool = createPool();
-  const bossOptions: Record<string, unknown> = { db: pool };
+  const bossOptions: ConstructorOptions = {
+    connectionString: getEnvironmentConfig().databaseUrl,
+    max: poolMax(),
+  };
   if (shouldDisableListenNotify()) {
     bossOptions.useListenNotify = false;
   }

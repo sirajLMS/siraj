@@ -41,7 +41,7 @@ export function BaseDeleteDialogScaffold({
         >
           <WarningAmberOutlined sx={{ fontSize: 32 }} />
         </Box>
-        <Typography variant="headlineMd">{title}</Typography>
+        <Typography variant="headlineMd" component="span">{title}</Typography>
       </DialogTitle>
       <DialogContent>
         <Typography variant="bodyMd" sx={theme => ({ color: theme.palette.text.secondary, textAlign: "center" })}>
