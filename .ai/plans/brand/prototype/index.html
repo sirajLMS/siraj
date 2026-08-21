@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" data-mui-color-scheme="dark" data-theme="dark" data-dark>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prototype — Settings → Appearance Tab</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; font-family:'Inter','Hanken Grotesk',system-ui,sans-serif; }
+  a { text-decoration:none; color:inherit; }
+  button { font-family:inherit; cursor:pointer; border:none; background:none; }
+
+  :root {
+    --primary-main: #2DD4BF;
+    --primary-light: #5EEAD4;
+    --primary-dark: #0D9488;
+    --primary-contrast: #042F2E;
+    --secondary-main: #818CF8;
+    --secondary-light: #A5B4FC;
+    --bg-default: #121212;
+    --bg-paper: #1E1E1E;
+    --surface: #1E1E1E;
+    --surface-variant: #27272A;
+    --surface-container-low: #141414;
+    --surface-container: #1E1E1E;
+    --surface-container-high: #27272A;
+    --outline: #52525B;
+    --outline-variant: #3F3F46;
+    --text-primary: #FAFAFA;
+    --text-secondary: #CBD5E1;
+    --text-disabled: #71717A;
+    --header-bg: #18181B;
+    --sidebar-bg: #18181B;
+    --radius: 16px;
+    --shadow-card: 0 4px 6px -1px rgba(0,0,0,0.5);
+  }
+
+  .shell {
+    display:grid;
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: 56px 1fr;
+    grid-template-areas:
+      "header header"
+      "sidebar content";
+    height:100vh; width:100vw;
+  }
+
+  /* App header */
+  .app-header {
+    grid-area:header; background:var(--header-bg);
+    border-bottom:1px solid var(--outline-variant);
+    display:flex; align-items:center; gap:16px; padding:0 20px;
+  }
+  .app-header .brand { display:flex; align-items:center; gap:10px; }
+  .app-header .brand img { height:28px; border-radius:4px; }
+  .app-header .brand .name { font-size:18px; font-weight:700; color:var(--text-primary); }
+  .app-header .spacer { flex:1; }
+  .app-header .header-customize-btn {
+    display:flex; align-items:center; gap:6px;
+    padding:8px 14px; border-radius:10px; font-size:13px; font-weight:600;
+    border:1px solid #F59E0B; color:#F59E0B;
+    transition:background .15s;
+  }
+  .app-header .header-customize-btn:hover { background:rgba(245,158,11,0.12); }
+  .app-header .icon-btn { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); }
+  .app-header .icon-btn:hover { background:var(--surface-variant); }
+
+  /* App sidebar */
+  .app-sidebar {
+    grid-area:sidebar; background:var(--sidebar-bg);
+    border-right:1px solid var(--outline-variant);
+    padding:12px 8px; display:flex; flex-direction:column; gap:4px;
+  }
+  .app-sidebar .nav-item {
+    display:flex; align-items:center; gap:12px;
+    padding:10px 14px; border-radius:12px; font-size:14px; color:var(--text-secondary);
+  }
+  .app-sidebar .nav-item:hover { background:var(--surface-variant); color:var(--text-primary); }
+  .app-sidebar .nav-item.active { background:var(--primary-main); color:var(--primary-contrast); font-weight:600; }
+  .app-sidebar .nav-item .icon { width:20px; text-align:center; }
+
+  /* Content */
+  .app-content {
+    grid-area:content; background:var(--bg-default); overflow-y:auto; padding:24px;
+  }
+  .app-content .page-title { font-size:24px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+  .app-content .page-subtitle { font-size:14px; color:var(--text-secondary); margin-bottom:24px; }
+
+  /* Settings tabs */
+  .settings-tabs {
+    display:flex; gap:4px; background:var(--bg-paper);
+    border:1px solid var(--outline-variant); border-radius:12px 12px 0 0;
+    padding:4px; overflow-x:auto;
+  }
+  .settings-tabs .tab {
+    padding:10px 20px; border-radius:10px; font-size:13px; font-weight:500;
+    color:var(--text-secondary); display:flex; align-items:center; gap:8px;
+    white-space:nowrap; transition:background .2s, color .2s;
+  }
+  .settings-tabs .tab:hover { background:var(--surface-variant); color:var(--text-primary); }
+  .settings-tabs .tab.active { background:var(--primary-main); color:var(--primary-contrast); font-weight:600; }
+
+  /* Settings tab body */
+  .settings-body {
+    background:var(--bg-paper); border:1px solid var(--outline-variant); border-top:none;
+    border-radius:0 0 12px 12px; padding:32px;
+  }
+
+
+
+  /* Published status row */
+  .status-row {
+    display:flex; align-items:center; gap:16px;
+    padding:16px 20px; background:var(--surface-container-low);
+    border:1px solid var(--outline-variant); border-radius:12px; margin-bottom:24px;
+  }
+  .status-row .badge {
+    display:flex; align-items:center; gap:6px;
+    padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600;
+  }
+  .status-row .badge.published { background:rgba(74,222,128,0.15); color:#4ADE80; }
+  .status-row .badge.draft { background:rgba(245,158,11,0.15); color:#FBBF24; }
+  .status-row .label { font-size:13px; color:var(--text-secondary); }
+  .status-row .spacer { flex:1; }
+  .status-row .meta { font-size:12px; color:var(--text-disabled); }
+
+  /* Form sections */
+  .form-section { margin-bottom:32px; }
+  .form-section .section-title {
+    font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:4px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .form-section .section-title .icon { font-size:18px; }
+  .form-section .section-desc { font-size:12px; color:var(--text-secondary); margin-bottom:20px; }
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .form-field { display:flex; flex-direction:column; gap:6px; }
+  .form-field.full { grid-column: 1 / -1; }
+  .form-field label { font-size:13px; color:var(--text-secondary); font-weight:500; }
+  .form-field input[type="text"], .form-field textarea {
+    background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:10px;
+    padding:10px 14px; color:var(--text-primary); font-size:14px; transition:border-color .2s;
+  }
+  .form-field input[type="text"]:focus, .form-field textarea:focus {
+    outline:none; border-color:var(--primary-main);
+  }
+  .form-field .hint { font-size:11px; color:var(--text-disabled); }
+
+  /* Color field */
+  .color-field {
+    display:flex; align-items:center; gap:12px;
+    background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:10px;
+    padding:10px 14px;
+  }
+  .color-field .swatch {
+    width:36px; height:36px; border-radius:8px; border:2px solid var(--outline-variant);
+    position:relative; overflow:hidden; cursor:pointer;
+  }
+  .color-field .swatch input[type="color"] { opacity:0; width:100%; height:100%; cursor:pointer; }
+  .color-field .hex { flex:1; font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--text-primary); }
+  .color-field .derived {
+    display:flex; gap:3px;
+  }
+  .color-field .derived > div {
+    width:24px; height:24px; border-radius:4px; border:1px solid var(--outline-variant);
+  }
+
+  .action-bar {
+    display:flex; gap:12px; margin-top:32px; padding-top:24px;
+    border-top:1px solid var(--outline-variant);
+  }
+  .action-bar .btn { padding:10px 24px; border-radius:10px; font-size:14px; font-weight:600; }
+  .action-bar .btn-accent { background:#F59E0B; color:#1A1A1A; }
+  .action-bar .btn-accent:hover { filter:brightness(1.1); }
+  .action-bar .btn-primary { background:var(--primary-main); color:var(--primary-contrast); }
+  .action-bar .btn-primary:hover { filter:brightness(1.1); }
+  .action-bar .btn-ghost { border:1px solid var(--outline); color:var(--text-secondary); }
+  .action-bar .btn-ghost:hover { border-color:var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- App Header -->
+  <div class="app-header">
+    <div class="brand">
+      <img src="https://placehold.co/28x28/2DD4BF/042F2E?text=S" alt="logo">
+      <span class="name">Siraj</span>
+    </div>
+    <div class="spacer"></div>
+    <a class="header-customize-btn" href="customize-overlay.html" title="Customize site appearance">
+      🎨 <span>Customize</span>
+    </a>
+    <button class="icon-btn">🔔</button>
+    <button class="icon-btn">🌙</button>
+    <button class="icon-btn">👤</button>
+  </div>
+
+  <!-- App Sidebar -->
+  <div class="app-sidebar">
+    <a class="nav-item" href="#"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-item" href="#"><span class="icon">👥</span> Students</a>
+    <a class="nav-item" href="#"><span class="icon">🎓</span> Teachers</a>
+    <a class="nav-item" href="#"><span class="icon">📚</span> Classes</a>
+    <a class="nav-item active" href="#"><span class="icon">⚙️</span> Settings</a>
+  </div>
+
+  <!-- Content -->
+  <div class="app-content">
+    <div class="page-title">Settings</div>
+    <div class="page-subtitle">Manage your site configuration and branding</div>
+
+    <!-- Settings Tabs -->
+    <div class="settings-tabs">
+      <a class="tab" href="#">⚙️ General</a>
+      <a class="tab" href="#">🌍 Environment</a>
+      <a class="tab" href="#">⏱️ Session</a>
+      <a class="tab" href="#">📜 Audit</a>
+      <a class="tab" href="#">📄 Site Content</a>
+      <a class="tab active" href="#">🎨 Appearance</a>
+      <a class="tab" href="#">🌐 Timezones</a>
+      <a class="tab" href="#">📹 Meeting Integrations</a>
+    </div>
+
+    <!-- Appearance Tab Body -->
+    <div class="settings-body">
+
+      <!-- Hero with CTA -->
+      <!-- Published / Draft status -->
+      <div class="status-row">
+        <div class="badge published">✓ Published</div>
+        <span class="label">Last published 2 days ago by administrator</span>
+        <div class="spacer"></div>
+        <div class="badge draft">✎ Draft has changes</div>
+        <span class="meta">Draft updated just now</span>
+        <a class="btn btn-primary" href="customize-overlay.html" style="margin-left:16px;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:600;background:var(--primary-main);color:var(--primary-contrast);text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">🎨 Enter Customize Mode</a>
+      </div>
+
+      <!-- Brand Identity -->
+      <div class="form-section">
+        <div class="section-title"><span class="icon">🏷️</span> Brand Identity</div>
+        <div class="section-desc">These values power the site name, browser tab title, and social media previews.</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Site Name</label>
+            <input type="text" value="Siraj">
+            <span class="hint">Short brand name shown in the app header and navbar</span>
+          </div>
+          <div class="form-field">
+            <label>Site Title</label>
+            <input type="text" value="Siraj — Learning Management System">
+            <span class="hint">Used in the browser <code><title></code> template: "%s | Siraj"</span>
+          </div>
+          <div class="form-field full">
+            <label>Site Description</label>
+            <textarea>A comprehensive learning management system for academies and educational institutions.</textarea>
+            <span class="hint">SEO meta description and Open Graph / Twitter card description</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logo -->
+      <div class="form-section">
+        <div class="section-title"><span class="icon">🖼️</span> Logo</div>
+        <div class="section-desc">Upload a logo image. Recommended: 256×256px, PNG or SVG, max 2MB.</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Logo URL</label>
+            <input type="text" value="https://cdn.siraj.app/logos/siraj-logo.svg">
+            <span class="hint">Auto-populated after upload. Or paste a URL directly.</span>
+          </div>
+          <div class="form-field">
+            <label>Current Logo Preview</label>
+            <div style="display:flex;align-items:center;gap:12px;background:var(--surface-container-low);border:1px solid var(--outline-variant);border-radius:10px;padding:10px 14px;">
+              <img src="https://placehold.co/40x40/2DD4BF/042F2E?text=S" alt="logo" style="height:40px;border-radius:6px;">
+              <span style="font-size:13px;color:var(--text-secondary);">siraj-logo.svg — 256×256 — 4.2KB</span>
+              <div class="spacer" style="flex:1"></div>
+              <button style="color:#F87171;font-size:14px;font-weight:600;">Remove</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Colors — per-mode tabs -->
+      <div class="form-section">
+        <div class="section-title"><span class="icon">🎨</span> Theme Colors</div>
+        <div class="section-desc">Customize colors separately for light and dark modes. Switching tabs previews that mode live.</div>
+        <div style="display:flex;gap:4px;background:#0A0A0A;border:1px solid var(--outline-variant);border-radius:10px;padding:4px;width:fit-content;margin-bottom:16px;">
+          <button style="padding:8px 24px;border-radius:8px;font-size:14px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px;background:var(--primary-main);color:var(--primary-contrast)">☀ Light</button>
+          <button style="padding:8px 24px;border-radius:8px;font-size:14px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">🌙 Dark</button>
+        </div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Primary Color (Light)</label>
+            <div class="color-field">
+              <div class="swatch" style="background:#0D9488">
+                <input type="color" value="#0D9488">
+              </div>
+              <span class="hex">#0D9488</span>
+              <div class="derived">
+                <div style="background:#0D9488" title="main"></div>
+                <div style="background:#14B8A6" title="light"></div>
+                <div style="background:#5EEAD4" title="lighter"></div>
+                <div style="background:#CCFBF1" title="lightest"></div>
+              </div>
+            </div>
+            <span class="hint">Light mode: primary buttons, links, active states</span>
+          </div>
+          <div class="form-field">
+            <label>Secondary Color (Light)</label>
+            <div class="color-field">
+              <div class="swatch" style="background:#4F46E5">
+                <input type="color" value="#4F46E5">
+              </div>
+              <span class="hex">#4F46E5</span>
+              <div class="derived">
+                <div style="background:#4F46E5" title="main"></div>
+                <div style="background:#6366F1" title="light"></div>
+                <div style="background:#A5B4FC" title="lighter"></div>
+                <div style="background:#E0E7FF" title="lightest"></div>
+              </div>
+            </div>
+            <span class="hint">Light mode: secondary buttons, highlights</span>
+          </div>
+          <div class="form-field">
+            <label>Primary Color (Dark)</label>
+            <div class="color-field">
+              <div class="swatch" style="background:#2DD4BF">
+                <input type="color" value="#2DD4BF">
+              </div>
+              <span class="hex">#2DD4BF</span>
+              <div class="derived">
+                <div style="background:#2DD4BF" title="main"></div>
+                <div style="background:#5EEAD4" title="light"></div>
+                <div style="background:#0D9488" title="dark"></div>
+                <div style="background:#042F2E" title="contrastText"></div>
+              </div>
+            </div>
+            <span class="hint">Dark mode: primary buttons, links, active states</span>
+          </div>
+          <div class="form-field">
+            <label>Secondary Color (Dark)</label>
+            <div class="color-field">
+              <div class="swatch" style="background:#818CF8">
+                <input type="color" value="#818CF8">
+              </div>
+              <span class="hex">#818CF8</span>
+              <div class="derived">
+                <div style="background:#818CF8" title="main"></div>
+                <div style="background:#A5B4FC" title="light"></div>
+                <div style="background:#4F46E5" title="dark"></div>
+                <div style="background:#312E81" title="contrastText"></div>
+              </div>
+            </div>
+            <span class="hint">Dark mode: secondary buttons, highlights</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="action-bar">
+        <button class="btn btn-accent" onclick="alert('Draft saved')">💾 Save Draft</button>
+        <button class="btn btn-primary" onclick="alert('Published to all users')">✦ Publish Now</button>
+        <button class="btn btn-ghost" onclick="alert('Reset to defaults')">↺ Reset to Defaults</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
