@@ -15,7 +15,7 @@ import {
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
 import { resolveFieldName } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/utils";
-import { type PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { usePaymentMethodCatalogs } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodCatalogs";
 

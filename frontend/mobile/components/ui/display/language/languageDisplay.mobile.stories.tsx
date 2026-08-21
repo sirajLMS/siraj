@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { MobileLanguageDisplay } from "@/frontend/mobile/components/ui/display/language/languageDisplay.mobile";
 
@@ -26,22 +27,22 @@ export default meta;
 type Story = StoryObj<typeof MobileLanguageDisplay>;
 
 export const Default: Story = {
-  args: { code: "ar" },
+  args: { code: AppLanguage.Ar },
 };
 
 export const EmojiOnly: Story = {
-  args: { code: "ar", showLabel: false },
+  args: { code: AppLanguage.Ar, showLabel: false },
 };
 
 export const LabelOnly: Story = {
-  args: { code: "ar", showEmoji: false },
+  args: { code: AppLanguage.Ar, showEmoji: false },
 };
 
 export const UnknownCode: Story = {
-  args: { code: "xx", fallback: "Unknown language" },
+  args: { code: null, fallback: "Unknown language" },
 };
 
 export const Arabic: Story = {
   globals: { locale: "ar" },
-  args: { code: "ar" },
+  args: { code: AppLanguage.Ar },
 };

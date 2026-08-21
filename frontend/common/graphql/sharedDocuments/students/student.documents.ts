@@ -1,8 +1,12 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  StudentByIdQuery,
+  StudentByIdQueryVariables,
+  StudentsQuery,
+  StudentsQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const studentsQueryDocument: TypedDocumentNode<Operations.StudentsQuery, Types.QueryStudentsArgs> = gql`
+export const studentsQueryDocument: TypedDocumentNode<StudentsQuery, StudentsQueryVariables> = gql`
   query students(
     $paginationArgs: PaginationArgs
     $orderBy: [StudentsOrderByClause!]
@@ -25,7 +29,7 @@ export const studentsQueryDocument: TypedDocumentNode<Operations.StudentsQuery, 
   }
 `;
 
-export const studentByIdQueryDocument: TypedDocumentNode<Operations.StudentByIdQuery, Types.QueryStudentByIdArgs> = gql`
+export const studentByIdQueryDocument: TypedDocumentNode<StudentByIdQuery, StudentByIdQueryVariables> = gql`
   query StudentById($studentId: String!) {
     studentById(studentId: $studentId) {
       id

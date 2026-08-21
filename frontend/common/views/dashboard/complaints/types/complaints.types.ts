@@ -1,13 +1,6 @@
-import { ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export type {
-  Complaint,
-  ComplaintMetrics,
-  ComplaintQueueFilter,
-  ComplaintQueueResult,
-  ComplaintResponse,
-  ComplaintSubmitInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+export type { ComplaintQueueFilter, ComplaintSubmitInput } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export { ComplaintStatus };
 

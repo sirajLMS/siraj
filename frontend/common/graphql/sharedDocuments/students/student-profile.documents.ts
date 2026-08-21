@@ -1,6 +1,10 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  RecordStudentProfileEditMutation,
+  RecordStudentProfileEditMutationVariables,
+  StudentProfileQuery,
+  StudentProfileQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 
 /**
@@ -68,10 +72,7 @@ const STUDENT_HISTORY_SESSION_FIELDS = gql`
   }
 `;
 
-export const studentProfileQueryDocument: TypedDocumentNode<
-  Operations.StudentProfileQuery,
-  Types.QueryStudentProfileArgs
-> = gql`
+export const studentProfileQueryDocument: TypedDocumentNode<StudentProfileQuery, StudentProfileQueryVariables> = gql`
   ${STUDENT_UPCOMING_CLASS_FIELDS}
   ${STUDENT_HISTORY_METRICS_FIELDS}
   ${STUDENT_HISTORY_SESSION_FIELDS}
@@ -134,8 +135,8 @@ export const studentProfileQueryDocument: TypedDocumentNode<
 `;
 
 export const recordStudentProfileEditMutationDocument: TypedDocumentNode<
-  Operations.RecordStudentProfileEditMutation,
-  Types.MutationRecordStudentProfileEditArgs
+  RecordStudentProfileEditMutation,
+  RecordStudentProfileEditMutationVariables
 > = gql`
   mutation RecordStudentProfileEdit($input: StudentProfileEditInput!) {
     recordStudentProfileEdit(input: $input) {

@@ -68,6 +68,10 @@ export const resolveStatusPaletteKey: ResolveStatusPaletteKeyFn = (
         regular: "active",
         suspended_pending: "blocked",
         pending_verification: "pending",
+        PRESENT: "active",
+        ABSENT: "blocked",
+        PENDING: "pending",
+        LATE: "pending",
       };
       return map[status] ?? "pending";
     }

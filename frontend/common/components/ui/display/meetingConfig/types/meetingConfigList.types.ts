@@ -2,7 +2,7 @@
 import type {
   ClassMeetingConfigFieldsFragment,
   UserMeetingConfigFieldsFragment,
-} from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type MeetingConfigListItem = UserMeetingConfigFieldsFragment | ClassMeetingConfigFieldsFragment;
 

@@ -3,7 +3,7 @@
 import { Grid, Stack, TextField, Typography } from "@mui/material";
 import type { FieldError } from "react-hook-form";
 import { MeetingProviderSelect } from "@/frontend/common/components/ui/input/meetingProviderSelect/MeetingProviderSelect";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface MeetingConfigFieldsLabels {
   readonly sectionTitle?: string;

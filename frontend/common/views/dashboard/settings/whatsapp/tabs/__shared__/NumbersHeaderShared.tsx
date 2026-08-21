@@ -4,7 +4,7 @@ import { AddOutlined, CloudSyncOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 export function NumbersHeaderShared({

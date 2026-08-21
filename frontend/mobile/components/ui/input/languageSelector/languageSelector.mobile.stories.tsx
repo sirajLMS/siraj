@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import type { LanguageSelectorProps } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
-import { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type LanguageType, languages } from "@/frontend/common/lib/locale";
 import { LanguageSelectorMobile } from "@/frontend/mobile/components/ui/input/languageSelector/languageSelector.mobile";
 

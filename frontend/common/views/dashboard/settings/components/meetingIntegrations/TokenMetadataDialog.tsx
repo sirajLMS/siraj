@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { useId } from "react";
-import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getProviderLabel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/connectedAccounts.helpers";
 import {
   srOnlySx,

@@ -1,6 +1,9 @@
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionsQuery_permissions } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export function matchesPermissionSearch(permission: Readonly<Permission>, searchQuery: string): boolean {
+export function matchesPermissionSearch(
+  permission: Readonly<PermissionsQuery_permissions>,
+  searchQuery: string
+): boolean {
   if (!searchQuery.trim()) return true;
   const q = searchQuery.toLowerCase();
   return (

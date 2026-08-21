@@ -1,9 +1,6 @@
 "use client";
 
-import type {
-  ClassSubjectCreateInput,
-  ClassSubjectUpdateInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassSubjectCreateInput, ClassSubjectUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   makeDesktopSubjectSlots,
   makeMobileSubjectSlots,

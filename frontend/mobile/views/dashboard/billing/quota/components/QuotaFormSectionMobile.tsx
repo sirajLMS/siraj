@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 import type { Control, FieldErrors } from "react-hook-form";
-import type { QuotaKind, QuotaPeriodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { QuotaKind, QuotaPeriodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   type DatePickerSlotProps,
   QuotaFormSectionShared,

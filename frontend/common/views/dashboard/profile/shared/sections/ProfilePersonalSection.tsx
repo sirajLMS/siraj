@@ -12,7 +12,7 @@ import { CountryDisplay } from "@/frontend/common/components/ui/display";
 import { DateOfBirthControllerField } from "@/frontend/common/components/ui/form/field";
 import { CountrySelect } from "@/frontend/common/components/ui/input/countrySelect/CountrySelect";
 import { GenderSelector } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
-import { Gender, type ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CountryCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import type {
@@ -22,8 +22,14 @@ import type {
 } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 
+const VALID_COUNTRY_CODES = new Set(Object.values(CountryCode) as readonly string[]);
+
+function isCountryCode(value: string): value is CountryCode {
+  return VALID_COUNTRY_CODES.has(value);
+}
 type ProfilePersonalFormFields = {
   nationality?: string;
   address?: string;
@@ -254,7 +260,10 @@ function ProfilePersonalSectionView({
             label={labels.nationality}
             value={
               props.nationality ? (
-                <CountryDisplay code={props.nationality} fallback={baseLabels.notSet} />
+                <CountryDisplay
+                  code={isCountryCode(props.nationality) ? props.nationality : null}
+                  fallback={baseLabels.notSet}
+                />
               ) : (
                 baseLabels.notSet
               )

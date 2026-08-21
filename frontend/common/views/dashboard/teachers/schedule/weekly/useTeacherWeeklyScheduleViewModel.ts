@@ -7,11 +7,9 @@ import {
   AppPermission,
   type CreateRecurringClassInput,
   type DayOfWeek,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass,
-  TeacherWorkloadMetricsQuery_teacherWorkloadMetrics_WeeklyWorkloadMetrics,
-} from "@/frontend/common/graphql/generated/gql/operations";
+  type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_classes,
+  type TeacherWorkloadMetricsQuery_teacherWorkloadMetrics,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   clearWeeklyScheduleMutationDocument,
   deleteRecurringClassMutationDocument,
@@ -93,12 +91,11 @@ type CreateClassFn = (opts: { variables: { input: CreateRecurringClassInput } })
   data?: { createRecurringClass?: CreateRecurringClassResult | null };
 }>;
 
-type ScheduleClass =
-  TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass;
+type ScheduleClass = TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_classes;
 
 type ScheduleGrid = { teacherId: string | null; weekEnd: string | null; classes: ReadonlyArray<ScheduleClass> | null };
 
-type Workload = TeacherWorkloadMetricsQuery_teacherWorkloadMetrics_WeeklyWorkloadMetrics | null | undefined;
+type Workload = TeacherWorkloadMetricsQuery_teacherWorkloadMetrics | null | undefined;
 
 function useScheduleTranslations(): {
   readonly t: TeacherWeeklyScheduleLabels;

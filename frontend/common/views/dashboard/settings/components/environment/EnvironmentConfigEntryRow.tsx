@@ -2,7 +2,7 @@
 
 import { DeleteOutlined, SaveOutlined } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
-import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { EnvSecretField } from "@/frontend/common/views/dashboard/settings/components/environment/EnvSecretField";
 import type { EnvironmentConfigViewModel } from "@/frontend/common/views/dashboard/settings/types/environmentConfig.types";
 import {

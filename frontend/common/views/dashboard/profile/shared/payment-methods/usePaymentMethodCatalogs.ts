@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import type { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   supportedMobileWalletsQueryDocument,
   supportedOnlineAccountsQueryDocument,

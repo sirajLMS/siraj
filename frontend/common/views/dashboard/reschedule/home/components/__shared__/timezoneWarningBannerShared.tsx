@@ -2,7 +2,7 @@
 
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import { fromGraphqlIanaTimezone, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
+import { getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { RescheduleFormLabels } from "@/shared/locale/types/dashboard/classes/rescheduleForm";
 
@@ -13,8 +13,7 @@ interface Props {
 
 export function TimezoneWarningBannerShared({ labels, timezone }: Readonly<Props>) {
   const locale = useAppLocale();
-  const normalized = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
-  const timezoneLabel = getTimezoneSelectLabel(normalized, locale);
+  const timezoneLabel = getTimezoneSelectLabel(timezone, locale);
 
   return (
     <Box

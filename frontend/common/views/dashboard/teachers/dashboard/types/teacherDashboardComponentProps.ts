@@ -6,7 +6,7 @@
 // collapses them into ONE shared `XxxProps` (no tier suffix) imported by BOTH
 // tiers.
 
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MissedClassAlert, TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import type { StudentProgressFeedItem } from "@/frontend/common/types/shared.types";
 import type {

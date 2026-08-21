@@ -11,7 +11,7 @@ import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySe
 import { PhoneInput } from "@/frontend/common/components/ui/input/phoneInput/PhoneInput";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone, toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import type {
   StudentProfileEditableSectionProps,
@@ -58,9 +58,9 @@ export function StudentUserDetailsProfileSection({
             fullWidth
           />
           <TimezoneSelect
-            value={draft.timezone ? toGraphqlIanaTimezone(draft.timezone) : null}
+            value={draft.timezone ? toIanaTimezone(draft.timezone) : null}
             onChangeAction={value => {
-              onDraftChange({ timezone: value ? fromGraphqlIanaTimezone(value) : "" });
+              onDraftChange({ timezone: value ?? "" });
             }}
             label={timezoneLabel}
             fullWidth
@@ -90,7 +90,7 @@ export function StudentUserDetailsProfileSection({
           <ProfileFieldRow
             icon={ScheduleOutlined}
             label={timezoneLabel}
-            value={<TimezoneDisplay timezone={profile.timezone} fallback={notSetLabel} />}
+            value={<TimezoneDisplay timezone={toIanaTimezoneOrNull(profile.timezone)} fallback={notSetLabel} />}
           />
         ) : null}
         {showCurrency ? (

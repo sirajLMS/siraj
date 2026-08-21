@@ -1,11 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import {
-  QuotaKind,
-  type QuotaStatus,
-  type QuotaSubmitInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaKind, type QuotaStatus, type QuotaSubmitInput } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type QuotaFormState = Pick<
   QuotaSubmitInput,

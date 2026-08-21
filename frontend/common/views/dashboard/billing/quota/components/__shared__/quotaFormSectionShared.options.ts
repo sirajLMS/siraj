@@ -1,4 +1,4 @@
-import { QuotaKind, QuotaPeriodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaKind, QuotaPeriodType } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export function isQuotaKind(value: string): value is QuotaKind {
   return (Object.values(QuotaKind) as readonly string[]).includes(value);

@@ -13,7 +13,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SearchScheduleDraftFilters } from "@/frontend/common/stores/searchScheduleStore";
 import type { SearchScheduleFilterDrawerProps } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterDrawer.types";
 import { getClearDrawerFiltersPatch } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";

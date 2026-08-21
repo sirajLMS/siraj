@@ -1,13 +1,14 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  LinkDocumentToParentMutation,
+  LinkDocumentToParentMutationVariables,
+  ParentDocumentsQuery,
+  ParentDocumentsQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 // ─── Query: parentDocuments ──────────────────────────────────────────────────
 
-export const parentDocumentsQueryDocument: TypedDocumentNode<
-  Operations.ParentDocumentsQuery,
-  Types.QueryParentDocumentsArgs
-> = gql`
+export const parentDocumentsQueryDocument: TypedDocumentNode<ParentDocumentsQuery, ParentDocumentsQueryVariables> = gql`
   query ParentDocuments($parentId: String!) {
     parentDocuments(parentId: $parentId) {
       id
@@ -23,8 +24,8 @@ export const parentDocumentsQueryDocument: TypedDocumentNode<
 // ─── Mutation: linkDocumentToParent ──────────────────────────────────────────
 
 export const linkDocumentToParentMutationDocument: TypedDocumentNode<
-  Operations.LinkDocumentToParentMutation,
-  Types.MutationLinkDocumentToParentArgs
+  LinkDocumentToParentMutation,
+  LinkDocumentToParentMutationVariables
 > = gql`
   mutation LinkDocumentToParent(
     $parentId: String!

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { MeetingConfigDetailsForm } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialog";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";

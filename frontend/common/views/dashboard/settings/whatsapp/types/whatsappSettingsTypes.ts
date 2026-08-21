@@ -1,8 +1,9 @@
-import type { WhatsappLimitTier, WhatsappQualityRating } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   WhatsappAccountFieldsFragment,
+  WhatsappLimitTier,
+  WhatsappQualityRating,
   WhatsappTemplateSnapshotFieldsFragment,
-} from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 /** Row model for a WhatsApp account in the settings UI. */

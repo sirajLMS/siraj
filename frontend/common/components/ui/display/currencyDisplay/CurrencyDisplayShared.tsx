@@ -12,7 +12,7 @@ import {
   resolveCurrencyDisplayParts,
 } from "@/frontend/common/components/ui/display/currencyDisplay/constants";
 import type { CurrencyDisplayProps } from "@/frontend/common/components/ui/display/currencyDisplay/types/currencyDisplay.types";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getCurrencyDisplayName, getCurrencyFlag, getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
@@ -102,7 +102,7 @@ export function CurrencyDisplayShared({
   const flag = getCurrencyFlag(code);
   const longLabel = getCurrencyDisplayName(code, locale);
   const symbol = getCurrencySymbol(code);
-  const shortCode: CurrencyCode | string = code;
+  const shortCode: CurrencyCode = code;
   const values: CurrencyPartValues = { flag, longLabel, symbol, shortCode, typographyVariant: resolvedVariant };
 
   return (

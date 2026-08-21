@@ -28,7 +28,7 @@ import {
 } from "@mui/icons-material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
-import { NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { NotificationDrawerAlert } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
 import type { NotificationMetadata } from "@/shared/types/notification-alerts.types";
 

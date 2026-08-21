@@ -1,5 +1,5 @@
 "use client";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { useClassMutations } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassMutations";
 import type { ActionFeedbackState, ClassActionHandlers } from "@/frontend/common/views/dashboard/classes/details/types";
 import type { useRouter } from "@/shared/i18n/navigation";

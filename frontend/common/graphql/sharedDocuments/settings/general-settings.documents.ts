@@ -1,6 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  DeleteSystemSettingMutation,
+  DeleteSystemSettingMutationVariables,
+  SystemSettingQuery,
+  SystemSettingQueryVariables,
+  SystemSettingsQuery,
+  UpsertSystemSettingMutation,
+  UpsertSystemSettingMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const SYSTEM_SETTING_FIELDS = gql`
   fragment SystemSettingFields on SystemSetting {
@@ -15,7 +22,7 @@ const SYSTEM_SETTING_FIELDS = gql`
   }
 `;
 
-export const systemSettingsQueryDocument: TypedDocumentNode<Operations.SystemSettingsQuery> = gql`
+export const systemSettingsQueryDocument: TypedDocumentNode<SystemSettingsQuery> = gql`
   ${SYSTEM_SETTING_FIELDS}
   query systemSettings {
     systemSettings {
@@ -24,10 +31,7 @@ export const systemSettingsQueryDocument: TypedDocumentNode<Operations.SystemSet
   }
 `;
 
-export const systemSettingQueryDocument: TypedDocumentNode<
-  Operations.SystemSettingQuery,
-  Types.QuerySystemSettingArgs
-> = gql`
+export const systemSettingQueryDocument: TypedDocumentNode<SystemSettingQuery, SystemSettingQueryVariables> = gql`
   ${SYSTEM_SETTING_FIELDS}
   query systemSetting($key: String!) {
     systemSetting(key: $key) {
@@ -37,8 +41,8 @@ export const systemSettingQueryDocument: TypedDocumentNode<
 `;
 
 export const upsertSystemSettingMutationDocument: TypedDocumentNode<
-  Operations.UpsertSystemSettingMutation,
-  Types.MutationUpsertSystemSettingArgs
+  UpsertSystemSettingMutation,
+  UpsertSystemSettingMutationVariables
 > = gql`
   ${SYSTEM_SETTING_FIELDS}
   mutation upsertSystemSetting($input: SystemSettingUpsertInput!) {
@@ -49,8 +53,8 @@ export const upsertSystemSettingMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteSystemSettingMutationDocument: TypedDocumentNode<
-  Operations.DeleteSystemSettingMutation,
-  Types.MutationDeleteSystemSettingArgs
+  DeleteSystemSettingMutation,
+  DeleteSystemSettingMutationVariables
 > = gql`
   mutation deleteSystemSetting($key: String!) {
     deleteSystemSetting(key: $key)

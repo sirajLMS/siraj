@@ -5,7 +5,6 @@ import {
   ClassOutcomePothosObject,
   ClassTypePothosObject,
   CurrencyCodePothosObject,
-  IanaTimezonePothosObject,
   RateSourcePothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import {
@@ -95,8 +94,8 @@ export const ClassInstanceDetailPothosObject = ClassInstanceDetailRef.implement(
     status: t.expose("status", { type: ClassExecutionStatePothosObject }),
     remarks: t.exposeString("remarks", { nullable: true }),
     hasTimezoneMismatch: t.exposeBoolean("hasTimezoneMismatch"),
-    studentTimezone: t.expose("studentTimezone", { type: IanaTimezonePothosObject, nullable: true }),
-    teacherTimezone: t.expose("teacherTimezone", { type: IanaTimezonePothosObject, nullable: true }),
+    studentTimezone: t.expose("studentTimezone", { type: "IanaTimezone", nullable: true }),
+    teacherTimezone: t.expose("teacherTimezone", { type: "IanaTimezone", nullable: true }),
     meetingJoinUrl: t.exposeString("meetingJoinUrl", {
       nullable: true,
       deprecationReason: "Use effectiveMeeting.joinUrl",

@@ -1,10 +1,14 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  TeacherProfileForEditQuery,
+  TeacherProfileForEditQueryVariables,
+  UpdateTeacherProfileMutation,
+  UpdateTeacherProfileMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const teacherProfileForEditQueryDocument: TypedDocumentNode<
-  Operations.TeacherProfileForEditQuery,
-  Types.QueryTeacherProfileForEditArgs
+  TeacherProfileForEditQuery,
+  TeacherProfileForEditQueryVariables
 > = gql`
   query teacherProfileForEdit($teacherId: ID!) {
     teacherProfileForEdit(teacherId: $teacherId) {
@@ -29,8 +33,8 @@ export const teacherProfileForEditQueryDocument: TypedDocumentNode<
 `;
 
 export const updateTeacherProfileMutationDocument: TypedDocumentNode<
-  Operations.UpdateTeacherProfileMutation,
-  Types.MutationUpdateTeacherProfileArgs
+  UpdateTeacherProfileMutation,
+  UpdateTeacherProfileMutationVariables
 > = gql`
   mutation updateTeacherProfile($teacherId: ID!, $input: TeacherProfileUpdateInput!) {
     updateTeacherProfile(teacherId: $teacherId, input: $input) {

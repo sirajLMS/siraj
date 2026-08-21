@@ -1,6 +1,6 @@
 "use client";
 
-import { type CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   isTeacherAdminData,
   type TeacherProfileViewLabels,
@@ -13,6 +13,7 @@ import type {
   TeacherAdminSubmitData,
   TeacherOwnSubmitData,
 } from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileViewModel";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 
 function toTeacherEditData(
   teacherData: TeacherViewData,
@@ -64,7 +65,7 @@ export function TeacherProfileEditBody({
 }>) {
   const editData = toTeacherEditData(teacherData, avatarUrl, displayCurrency);
 
-  if (scope === ProfileScope.Own) {
+  if (scope === ProfileScope.OWN) {
     return (
       <TeacherProfileEditForm
         labels={labels}

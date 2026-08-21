@@ -1,12 +1,12 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import {
+  type CreateTeacherMutation_createTeacher,
   PaymentDirection,
-  type TeacherOnboarding,
   type TeacherOnboardingInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { createTeacherMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { usePersistMeetingConfig } from "@/frontend/common/hooks/usePersistMeetingConfig";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useTeacherOnboardingStore } from "@/frontend/common/stores/teacherOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";
 import { formDetailsToInput } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormMappers";
@@ -26,7 +26,7 @@ function buildTeacherInput(formData: TeacherOnboardingFormData): TeacherOnboardi
     address: formData.address ?? null,
     qualifications: formData.qualifications ?? null,
     countryCode: formData.countryCode,
-    timezone: toGraphqlIanaTimezone(formData.timezone),
+    timezone: toIanaTimezone(formData.timezone),
     displayCurrency: formData.displayCurrency ?? null,
     hourlyRate: formData.hourlyRate,
     rateCurrency: formData.rateCurrency,
@@ -48,13 +48,13 @@ export function useCreateTeacherOnboarding() {
   const { cache } = client;
   const { persistMeetingConfig, meetingConfigWarning, clearMeetingConfigWarning } = usePersistMeetingConfig();
 
-  const handleTeacherCreated = (created: TeacherOnboarding): void => {
+  const handleTeacherCreated = (created: CreateTeacherMutation_createTeacher): void => {
     cache.evict({ id: "ROOT_QUERY", fieldName: "teacherDirectory" });
     cache.gc();
     useTeacherOnboardingStore.setState({ result: created, isSubmitting: false });
   };
 
-  const execute = async (formData: TeacherOnboardingFormData): Promise<TeacherOnboarding> => {
+  const execute = async (formData: TeacherOnboardingFormData): Promise<CreateTeacherMutation_createTeacher> => {
     useTeacherOnboardingStore.getState().reset();
     useTeacherOnboardingStore.setState({ isSubmitting: true });
 

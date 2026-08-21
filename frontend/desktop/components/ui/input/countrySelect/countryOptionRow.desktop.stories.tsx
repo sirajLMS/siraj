@@ -4,7 +4,7 @@ import { countries } from "@/frontend/common/lib/locale";
 import { CountryOptionRowDesktop } from "@/frontend/desktop/components/ui/input/countrySelect/countryOptionRow.desktop";
 
 const sampleCountries = ["SA", "EG", "AE", "US"].flatMap(code => {
-  const country = countries.find(entry => entry.code === code);
+  const country = countries.find(entry => entry.code.toString() === code);
   return country ? [country] : [];
 });
 

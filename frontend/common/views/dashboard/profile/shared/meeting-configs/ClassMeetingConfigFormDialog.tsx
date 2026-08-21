@@ -10,7 +10,7 @@ import type {
   CreateClassMeetingConfigMutationVariables,
   UpdateClassMeetingConfigMutation,
   UpdateClassMeetingConfigMutationVariables,
-} from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { MeetingConfigFormDialogContent } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/MeetingConfigFormDialogContent";
 import { useMeetingConfigFormState } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/useMeetingConfigFormDialog";
 import type { MeetingConfigManagerLabels } from "@/shared/locale/types/ui";

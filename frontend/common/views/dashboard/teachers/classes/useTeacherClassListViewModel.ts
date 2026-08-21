@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import type { TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult_rows_TeacherAssignedClass } from "@/frontend/common/graphql/generated/gql/operations";
+import type { TeacherAssignedClassesQuery_teacherAssignedClasses_rows } from "@/frontend/common/graphql/generated/gql/graphql";
 import { teacherAssignedClassesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useRouter } from "@/shared/i18n/navigation";
@@ -19,8 +19,7 @@ import { Translation, useAppTranslation } from "@/shared/locale";
  * error union; tier views only treat it as a truthy failure flag.
  */
 
-type TeacherClassRow =
-  TeacherAssignedClassesQuery_teacherAssignedClasses_TeacherAssignedClassesResult_rows_TeacherAssignedClass;
+type TeacherClassRow = TeacherAssignedClassesQuery_teacherAssignedClasses_rows;
 
 export interface TeacherClassListViewModel {
   readonly rows: readonly TeacherClassRow[];

@@ -3,7 +3,7 @@
 import { LinkOutlined } from "@mui/icons-material";
 import { Alert, AlertTitle, Box, CircularProgress } from "@mui/material";
 import { FilterButton, PrimaryPageAction } from "@/frontend/common/components/ui/button";
-import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
 export type ConnectProviderActionLabels = Pick<

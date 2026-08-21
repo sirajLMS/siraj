@@ -4,7 +4,7 @@ import EmailOutlined from "@mui/icons-material/EmailOutlined";
 import NotificationsActiveOutlined from "@mui/icons-material/NotificationsActiveOutlined";
 import PhoneIphoneOutlined from "@mui/icons-material/PhoneIphoneOutlined";
 import SmsOutlined from "@mui/icons-material/SmsOutlined";
-import { NotificationChannel } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type NotificationChannelAccent = "primary" | "info" | "warning" | "secondary";
 

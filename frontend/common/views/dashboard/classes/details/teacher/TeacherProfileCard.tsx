@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import { BaseCard } from "@/frontend/common/components/ui";
-import type { ClassInstanceTeacherInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassInstanceQuery_classInstance_teacher } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { TeacherEntityLink } from "@/frontend/common/views/dashboard/classes/details/components/EntityLinks";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/frontend/common/views/dashboard/classes/details/teacher/profileCardShared";
 
 interface TeacherProfileCardProps {
-  readonly teacher: ClassInstanceTeacherInfo;
+  readonly teacher: ClassInstanceQuery_classInstance_teacher;
   readonly labels: {
     readonly viewFullProfile: string;
   };

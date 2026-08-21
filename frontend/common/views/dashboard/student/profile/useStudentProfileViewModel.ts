@@ -3,8 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect, useMemo, useRef } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { StudentProfileQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   recordStudentProfileEditMutationDocument,
   studentProfileQueryDocument,
@@ -22,6 +21,7 @@ import {
   profileToDraft,
 } from "@/frontend/common/views/dashboard/student/profile/__shared__/studentProfileDraftHelpers";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
+import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { useRouter } from "@/shared/i18n/navigation";
 import { type StudentPortalProfileLabels, Translation, useAppTranslation } from "@/shared/locale";
 
@@ -93,7 +93,7 @@ export interface UseStudentProfileViewModelProps {
   readonly activeTab?: string;
 }
 
-function mapStudentProfileFromQuery(profileData: Operations.StudentProfileQuery | undefined): StudentProfileRow | null {
+function mapStudentProfileFromQuery(profileData: StudentProfileQuery | undefined): StudentProfileRow | null {
   if (!profileData?.studentProfile) return null;
   const p = profileData.studentProfile;
   return {
@@ -139,7 +139,7 @@ export function useStudentProfileViewModel({
   const router = useRouter();
   const locale = useAppLocale();
   const labels = useStudentProfileLabels(t, tProfileBase.editAvatarTitle);
-  const isOtherScope = scope === ProfileScope.Other;
+  const isOtherScope = scope === ProfileScope.OTHER;
 
   const isEditing = useStudentPortalProfileStore(s => s.isEditing);
   const draft = useStudentPortalProfileStore(s => s.draft);
@@ -187,7 +187,7 @@ export function useStudentProfileViewModel({
   const syncedProfileKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (mode !== ProfileMode.Edit || isOtherScope || !profileSyncKey || !profile) {
+    if (mode !== ProfileMode.EDIT || isOtherScope || !profileSyncKey || !profile) {
       return;
     }
     if (syncedProfileKeyRef.current === profileSyncKey) {
@@ -214,7 +214,7 @@ export function useStudentProfileViewModel({
         variables: buildStudentProfileEditVariables(null, draft),
       });
       await refetch();
-      if (mode === ProfileMode.Edit) {
+      if (mode === ProfileMode.EDIT) {
         router.push("/profile");
         return;
       }

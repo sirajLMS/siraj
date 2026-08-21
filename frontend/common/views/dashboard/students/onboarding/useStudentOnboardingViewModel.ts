@@ -12,13 +12,14 @@ import {
 } from "react-hook-form";
 import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
-import { CurrencyCode, IanaTimezone, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useCreateStudentOnboarding } from "@/frontend/common/hooks/useCreateStudentOnboarding";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import {
   type StudentOnboardingFormData,
   studentOnboardingSchema,
 } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { StudentOnboardingLabels as StudentOnboardingLocaleLabels } from "@/shared/locale/types/dashboard/students/onboarding";
 
@@ -99,7 +100,7 @@ function useStudentOnboardingForm(initialParentId: string): StudentOnboardingFor
       password: "",
       avatarUrl: undefined,
       phone: "",
-      timezone: IanaTimezone.AfricaCairo,
+      timezone: IanaTimezone.Africa_Cairo,
       displayCurrency: CurrencyCode.Usd,
       dateOfBirth: "",
       gender: null,
@@ -118,7 +119,7 @@ function buildResetPayload(initialParentId: string, formData: StudentOnboardingF
     password: "",
     avatarUrl: undefined,
     phone: "",
-    timezone: IanaTimezone.AfricaCairo,
+    timezone: IanaTimezone.Africa_Cairo,
     displayCurrency: CurrencyCode.Usd,
     dateOfBirth: "",
     gender: null,

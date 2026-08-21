@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { Alert, Button } from "@mui/material";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { Link } from "@/shared/i18n";

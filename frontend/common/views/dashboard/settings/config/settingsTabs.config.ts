@@ -7,7 +7,7 @@ import {
   SettingsOutlined,
   VideocamOutlined,
 } from "@mui/icons-material";
-import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import type { SettingsTabDefinition } from "@/frontend/common/views/dashboard/settings/types/settings.types";
 

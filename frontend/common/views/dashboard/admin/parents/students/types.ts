@@ -1,4 +1,4 @@
-import { type StudentDirectoryRow, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type StudentDirectoryRowFragment, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export enum StudentEnrollmentStatus {
   REGULAR = "regular",
@@ -16,7 +16,7 @@ export const STUDENT_STATUS_TO_ACCOUNT_STATUS: Record<StudentStatus, StudentAcco
 
 export type StudentAccountStatus = "deactivated" | "regular" | "on_leave" | "suspended" | "on_trial";
 
-export type StudentDirectoryRowExtended = Readonly<Omit<StudentDirectoryRow, "parentName">> & {
+export type StudentDirectoryRowExtended = Readonly<StudentDirectoryRowFragment> & {
   readonly index: number;
   readonly accountStatus: StudentAccountStatus;
   readonly enrollmentStatus: StudentEnrollmentStatus;

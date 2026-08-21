@@ -1,10 +1,17 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  MarkTeacherDuesPaidMutation,
+  MarkTeacherDuesPaidMutationVariables,
+  TeacherMonthlyReportQuery,
+  TeacherMonthlyReportQueryVariables,
+  TeacherPendingDuesQuery,
+  TeacherPendingDuesQueryVariables,
+  TeacherPendingDuesSummaryQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const teacherPendingDuesQueryDocument: TypedDocumentNode<
-  Operations.TeacherPendingDuesQuery,
-  Types.QueryTeacherPendingDuesArgs
+  TeacherPendingDuesQuery,
+  TeacherPendingDuesQueryVariables
 > = gql`
   query TeacherPendingDues($teacherId: ID) {
     teacherPendingDues(teacherId: $teacherId) {
@@ -32,7 +39,7 @@ export const teacherPendingDuesQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const teacherPendingDuesSummaryQueryDocument: TypedDocumentNode<Operations.TeacherPendingDuesSummaryQuery> = gql`
+export const teacherPendingDuesSummaryQueryDocument: TypedDocumentNode<TeacherPendingDuesSummaryQuery> = gql`
   query TeacherPendingDuesSummary {
     teacherPendingDuesSummary {
       totalCount
@@ -43,8 +50,8 @@ export const teacherPendingDuesSummaryQueryDocument: TypedDocumentNode<Operation
 `;
 
 export const teacherMonthlyReportQueryDocument: TypedDocumentNode<
-  Operations.TeacherMonthlyReportQuery,
-  Types.QueryTeacherMonthlyReportArgs
+  TeacherMonthlyReportQuery,
+  TeacherMonthlyReportQueryVariables
 > = gql`
   query TeacherMonthlyReport($teacherId: ID!, $year: Int!, $month: Int!) {
     teacherMonthlyReport(teacherId: $teacherId, year: $year, month: $month) {
@@ -65,8 +72,8 @@ export const teacherMonthlyReportQueryDocument: TypedDocumentNode<
 `;
 
 export const markTeacherDuesPaidMutationDocument: TypedDocumentNode<
-  Operations.MarkTeacherDuesPaidMutation,
-  Types.MutationMarkTeacherDuesPaidArgs
+  MarkTeacherDuesPaidMutation,
+  MarkTeacherDuesPaidMutationVariables
 > = gql`
   mutation MarkTeacherDuesPaid($dueIds: [ID!]!, $teacherPaymentId: ID!) {
     markTeacherDuesPaid(dueIds: $dueIds, teacherPaymentId: $teacherPaymentId) {

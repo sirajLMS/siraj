@@ -1,5 +1,5 @@
 import { addDays, addMonths, differenceInCalendarDays, format, parse, subMonths } from "date-fns";
-import { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { TeacherAvailabilityGapItem } from "@/frontend/common/views/dashboard/search-schedule/types";
 
 const ISO_DATE_FORMAT = "yyyy-MM-dd";

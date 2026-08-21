@@ -1,7 +1,11 @@
 "use client";
 
 import { create } from "zustand";
-import type { Permission, PermissionGroup, UserOverride } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionsQuery_permissions as Permission,
+  PermissionGroupDetailFieldsFragment as PermissionGroup,
+  UserOverridesQuery_userOverrides as UserOverride,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type PermissionManagementTab = "groups" | "catalog" | "overrides";
 

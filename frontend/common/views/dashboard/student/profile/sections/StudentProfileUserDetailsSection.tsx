@@ -1,9 +1,11 @@
 "use client";
 
-import { CurrencyCode, type ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
+import { toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 
 const VALID_CURRENCY_CODES = new Set<string>(Object.values(CurrencyCode));
 
@@ -45,7 +47,7 @@ export function StudentProfileUserDetailsSection({
       timezoneLabel={timezoneLabel}
       currencyLabel={currencyLabel}
       phone={profile.phone}
-      timezone={profile.timezone}
+      timezone={toIanaTimezoneOrNull(profile.timezone)}
       displayCurrency={toCurrencyCode(profile.displayCurrency)}
       baseLabels={baseLabels}
     />

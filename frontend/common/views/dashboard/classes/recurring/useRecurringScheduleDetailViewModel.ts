@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   recurringScheduleQueryDocument,
   updateRecurringClassRateMutationDocument,

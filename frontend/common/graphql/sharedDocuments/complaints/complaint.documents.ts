@@ -1,13 +1,21 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AdminComplaintQueueQuery,
+  AdminComplaintQueueQueryVariables,
+  DeleteComplaintMutation,
+  DeleteComplaintMutationVariables,
+  ParentComplaintsQuery,
+  ParentComplaintsQueryVariables,
+  RespondToComplaintMutation,
+  RespondToComplaintMutationVariables,
+  SubmitComplaintMutation,
+  SubmitComplaintMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 // ─── Query: parentComplaints ────────────────────────────────────────────────
 
-export const parentComplaintsQueryDocument: TypedDocumentNode<
-  Operations.ParentComplaintsQuery,
-  Types.QueryParentComplaintsArgs
-> = gql`
+export const parentComplaintsQueryDocument: TypedDocumentNode<ParentComplaintsQuery, ParentComplaintsQueryVariables> =
+  gql`
   query ParentComplaints($paginationArgs: PaginationArgs) {
     parentComplaints(paginationArgs: $paginationArgs) {
       id
@@ -44,8 +52,8 @@ export const parentComplaintsQueryDocument: TypedDocumentNode<
 // ─── Query: adminComplaintQueue ─────────────────────────────────────────────
 
 export const adminComplaintQueueQueryDocument: TypedDocumentNode<
-  Operations.AdminComplaintQueueQuery,
-  Types.QueryAdminComplaintQueueArgs
+  AdminComplaintQueueQuery,
+  AdminComplaintQueueQueryVariables
 > = gql`
   query AdminComplaintQueue($filter: ComplaintQueueFilter!, $paginationArgs: PaginationArgs) {
     adminComplaintQueue(filter: $filter, paginationArgs: $paginationArgs) {
@@ -91,8 +99,8 @@ export const adminComplaintQueueQueryDocument: TypedDocumentNode<
 // ─── Mutation: submitComplaint ──────────────────────────────────────────────
 
 export const submitComplaintMutationDocument: TypedDocumentNode<
-  Operations.SubmitComplaintMutation,
-  Types.MutationSubmitComplaintArgs
+  SubmitComplaintMutation,
+  SubmitComplaintMutationVariables
 > = gql`
   mutation SubmitComplaint($input: ComplaintSubmitInput!) {
     submitComplaint(input: $input) {
@@ -108,8 +116,8 @@ export const submitComplaintMutationDocument: TypedDocumentNode<
 // ─── Mutation: respondToComplaint ───────────────────────────────────────────
 
 export const respondToComplaintMutationDocument: TypedDocumentNode<
-  Operations.RespondToComplaintMutation,
-  Types.MutationRespondToComplaintArgs
+  RespondToComplaintMutation,
+  RespondToComplaintMutationVariables
 > = gql`
   mutation RespondToComplaint($input: RespondToComplaintInput!) {
     respondToComplaint(input: $input) {
@@ -125,8 +133,8 @@ export const respondToComplaintMutationDocument: TypedDocumentNode<
 // ─── Mutation: deleteComplaint ──────────────────────────────────────────────
 
 export const deleteComplaintMutationDocument: TypedDocumentNode<
-  Operations.DeleteComplaintMutation,
-  Types.MutationDeleteComplaintArgs
+  DeleteComplaintMutation,
+  DeleteComplaintMutationVariables
 > = gql`
   mutation DeleteComplaint($complaintId: String!) {
     deleteComplaint(complaintId: $complaintId)

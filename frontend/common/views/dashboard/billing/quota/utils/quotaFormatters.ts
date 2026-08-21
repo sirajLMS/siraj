@@ -1,4 +1,4 @@
-import type { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { QuotaKind, QuotaPeriodType, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
 export function formatQuotaStatus(

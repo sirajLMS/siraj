@@ -1,11 +1,11 @@
 import type {
-  MeetingConfigDetails,
-  MeetingProviderFieldSchema,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+  MeetingProviderFieldsFragment,
+  MeetingProviderFieldsFragment_fieldSchema,
+  UserMeetingConfigFieldsFragment_details,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 type MeetingProviderFieldVisibility = {
-  readonly fieldSchema: MeetingProviderFieldSchema | MeetingProviderFieldsFragment["fieldSchema"];
+  readonly fieldSchema: MeetingProviderFieldsFragment_fieldSchema | MeetingProviderFieldsFragment["fieldSchema"];
 };
 
 export function getVisibleMeetingConfigFields(provider: MeetingProviderFieldVisibility): {
@@ -20,6 +20,6 @@ export function getVisibleMeetingConfigFields(provider: MeetingProviderFieldVisi
   };
 }
 
-export function getMeetingJoinUrlFromDetails(details: MeetingConfigDetails): string {
+export function getMeetingJoinUrlFromDetails(details: UserMeetingConfigFieldsFragment_details): string {
   return details.meetingUrl ?? "";
 }

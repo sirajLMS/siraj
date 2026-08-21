@@ -1,6 +1,23 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CronQueueStatsQuery,
+  CronRunsQuery,
+  CronRunsQueryVariables,
+  CronRunTriggerMutation,
+  CronRunTriggerMutationVariables,
+  CronScheduleCreateMutation,
+  CronScheduleCreateMutationVariables,
+  CronScheduleDeleteMutation,
+  CronScheduleDeleteMutationVariables,
+  CronSchedulePauseMutation,
+  CronSchedulePauseMutationVariables,
+  CronScheduleResumeMutation,
+  CronScheduleResumeMutationVariables,
+  CronSchedulesQuery,
+  CronSchedulesQueryVariables,
+  CronScheduleUpdateMutation,
+  CronScheduleUpdateMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 // ─── Fragments ───────────────────────────────────────────────────────────────
 
@@ -57,10 +74,7 @@ const CRON_QUEUE_STATS_FIELDS = gql`
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
-export const cronSchedulesQueryDocument: TypedDocumentNode<
-  Operations.CronSchedulesQuery,
-  Types.QueryCronSchedulesArgs
-> = gql`
+export const cronSchedulesQueryDocument: TypedDocumentNode<CronSchedulesQuery, CronSchedulesQueryVariables> = gql`
   ${CRON_SCHEDULE_FIELDS}
   query cronSchedules($input: CronScheduleListInput) {
     cronSchedules(input: $input) {
@@ -72,7 +86,7 @@ export const cronSchedulesQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const cronRunsQueryDocument: TypedDocumentNode<Operations.CronRunsQuery, Types.QueryCronRunsArgs> = gql`
+export const cronRunsQueryDocument: TypedDocumentNode<CronRunsQuery, CronRunsQueryVariables> = gql`
   ${CRON_RUN_FIELDS}
   query cronRuns($input: CronRunListInput) {
     cronRuns(input: $input) {
@@ -84,7 +98,7 @@ export const cronRunsQueryDocument: TypedDocumentNode<Operations.CronRunsQuery, 
   }
 `;
 
-export const cronQueueStatsQueryDocument: TypedDocumentNode<Operations.CronQueueStatsQuery> = gql`
+export const cronQueueStatsQueryDocument: TypedDocumentNode<CronQueueStatsQuery> = gql`
   ${CRON_QUEUE_STATS_FIELDS}
   query cronQueueStats {
     cronQueueStats {
@@ -96,8 +110,8 @@ export const cronQueueStatsQueryDocument: TypedDocumentNode<Operations.CronQueue
 // ─── Mutations ───────────────────────────────────────────────────────────────
 
 export const cronScheduleCreateMutationDocument: TypedDocumentNode<
-  Operations.CronScheduleCreateMutation,
-  Types.MutationCronScheduleCreateArgs
+  CronScheduleCreateMutation,
+  CronScheduleCreateMutationVariables
 > = gql`
   ${CRON_SCHEDULE_FIELDS}
   mutation cronScheduleCreate($input: CronScheduleSubmitInput!) {
@@ -108,8 +122,8 @@ export const cronScheduleCreateMutationDocument: TypedDocumentNode<
 `;
 
 export const cronScheduleUpdateMutationDocument: TypedDocumentNode<
-  Operations.CronScheduleUpdateMutation,
-  Types.MutationCronScheduleUpdateArgs
+  CronScheduleUpdateMutation,
+  CronScheduleUpdateMutationVariables
 > = gql`
   ${CRON_SCHEDULE_FIELDS}
   mutation cronScheduleUpdate($id: String!, $input: CronScheduleUpdateInput!) {
@@ -120,8 +134,8 @@ export const cronScheduleUpdateMutationDocument: TypedDocumentNode<
 `;
 
 export const cronSchedulePauseMutationDocument: TypedDocumentNode<
-  Operations.CronSchedulePauseMutation,
-  Types.MutationCronSchedulePauseArgs
+  CronSchedulePauseMutation,
+  CronSchedulePauseMutationVariables
 > = gql`
   ${CRON_SCHEDULE_FIELDS}
   mutation cronSchedulePause($id: String!) {
@@ -132,8 +146,8 @@ export const cronSchedulePauseMutationDocument: TypedDocumentNode<
 `;
 
 export const cronScheduleResumeMutationDocument: TypedDocumentNode<
-  Operations.CronScheduleResumeMutation,
-  Types.MutationCronScheduleResumeArgs
+  CronScheduleResumeMutation,
+  CronScheduleResumeMutationVariables
 > = gql`
   ${CRON_SCHEDULE_FIELDS}
   mutation cronScheduleResume($id: String!) {
@@ -144,8 +158,8 @@ export const cronScheduleResumeMutationDocument: TypedDocumentNode<
 `;
 
 export const cronScheduleDeleteMutationDocument: TypedDocumentNode<
-  Operations.CronScheduleDeleteMutation,
-  Types.MutationCronScheduleDeleteArgs
+  CronScheduleDeleteMutation,
+  CronScheduleDeleteMutationVariables
 > = gql`
   mutation cronScheduleDelete($input: CronScheduleDeleteInput!) {
     cronScheduleDelete(input: $input)
@@ -153,8 +167,8 @@ export const cronScheduleDeleteMutationDocument: TypedDocumentNode<
 `;
 
 export const cronRunTriggerMutationDocument: TypedDocumentNode<
-  Operations.CronRunTriggerMutation,
-  Types.MutationCronRunTriggerArgs
+  CronRunTriggerMutation,
+  CronRunTriggerMutationVariables
 > = gql`
   ${CRON_RUN_FIELDS}
   mutation cronRunTrigger($input: CronRunTriggerInput!) {

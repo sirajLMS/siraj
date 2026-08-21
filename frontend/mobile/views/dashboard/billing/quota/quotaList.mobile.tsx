@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaListViewModel } from "@/frontend/common/views/dashboard/billing/quota/useQuotaViewModel";
 import { buildQuotaListMetrics } from "@/frontend/common/views/dashboard/billing/quota/utils";

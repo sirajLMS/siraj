@@ -3,7 +3,7 @@
 import { InputAdornment, Stack, TextField } from "@mui/material";
 import { type Control, type FieldPath, type FieldValues, type UseFormRegister, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";

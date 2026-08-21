@@ -1,4 +1,4 @@
-import type { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   SearchScheduleDraftFilters,
   SearchScheduleTeacherOption,

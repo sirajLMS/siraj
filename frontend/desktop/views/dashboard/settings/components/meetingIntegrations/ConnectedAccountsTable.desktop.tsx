@@ -4,7 +4,7 @@ import { Box, Button, TextField } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   getStatusLabel,
   isMeetingIntegrationConnectedAccount,

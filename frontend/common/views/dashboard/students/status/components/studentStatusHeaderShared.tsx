@@ -3,7 +3,7 @@
 import { HistoryOutlined, MailOutlined } from "@mui/icons-material";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useCallback } from "react";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForUser, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import { useStudentFieldAccess } from "@/frontend/common/views/dashboard/students/profile/useStudentFieldAccess";
 import type { StudentStatusPageData } from "@/frontend/common/views/dashboard/students/status/types";

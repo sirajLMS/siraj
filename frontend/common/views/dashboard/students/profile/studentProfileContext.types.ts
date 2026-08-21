@@ -1,6 +1,6 @@
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { StudentProfileQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export type StudentProfileQueryData = NonNullable<Operations.StudentProfileQuery["studentProfile"]>;
+export type StudentProfileQueryData = NonNullable<StudentProfileQuery["studentProfile"]>;
 
 export type StudentProfileClassHistorySession = NonNullable<
   NonNullable<StudentProfileQueryData["classHistory"]>["sessions"]

@@ -7,7 +7,10 @@ import type {
   MeetingConfigDisplayData,
   MeetingConfigDisplayProps,
 } from "@/frontend/common/components/ui/display/meetingConfig/types";
-import type { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  type EffectiveMeetingSource,
+  EffectiveMeetingSource as MeetingSource,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant, UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
@@ -70,15 +73,14 @@ function withOptions(options?: MeetingConfigDisplaySharedOptions): Required<Meet
 
 // ── Internal helpers (module scope) ──────────────────────────────────────────
 
-function resolveSourceLabel(
-  source: EffectiveMeetingSource | string | null | undefined,
-  t: MeetingConfigDisplayLabels
-): string {
-  const normalized = (source ?? "").toLowerCase();
-  if (normalized === "class") return t.sourceClass;
-  if (normalized === "recurring") return t.sourceRecurring;
-  if (normalized === "teacher") return t.sourceTeacher;
-  return t.sourceNone;
+function resolveSourceLabel(source: EffectiveMeetingSource | null | undefined, t: MeetingConfigDisplayLabels): string {
+  const labelsBySource: Record<EffectiveMeetingSource, string> = {
+    [MeetingSource.Class]: t.sourceClass,
+    [MeetingSource.Recurring]: t.sourceRecurring,
+    [MeetingSource.Teacher]: t.sourceTeacher,
+    [MeetingSource.None]: t.sourceNone,
+  };
+  return source ? (labelsBySource[source] ?? t.sourceNone) : t.sourceNone;
 }
 
 function DetailRow({

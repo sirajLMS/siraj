@@ -2,9 +2,9 @@
 
 import { Box, Typography } from "@mui/material";
 import { useMemo } from "react";
-import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ClassSession, MobileWeeklyScrollerProps } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
+import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 
 type CalendarDayKey = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
 
@@ -134,9 +134,9 @@ export function MobileWeeklyScroller({
           let dotColor: (theme: import("@mui/material/styles").Theme) => string = defaultDotColor;
           if (isSelected) {
             dotColor = selectedDotColor;
-          } else if (d.status === AttendanceStatus.Absent) {
+          } else if (d.status === AttendanceStatus.ABSENT) {
             dotColor = absentDotColor;
-          } else if (d.status === AttendanceStatus.Late) {
+          } else if (d.status === AttendanceStatus.LATE) {
             dotColor = lateDotColor;
           }
 

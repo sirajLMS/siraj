@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
-import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 const meta: Meta<typeof TimezoneDisplay> = {
   title: "UI/Display/TimezoneDisplay",
@@ -13,13 +13,13 @@ type Story = StoryObj<typeof TimezoneDisplay>;
 
 export const Default: Story = {
   args: {
-    timezone: "Africa/Cairo",
+    timezone: IanaTimezone.Africa_Cairo,
   },
 };
 
 export const WithoutOffset: Story = {
   args: {
-    timezone: IanaTimezone.AsiaRiyadh,
+    timezone: IanaTimezone.Asia_Riyadh,
     showOffset: false,
   },
 };
@@ -36,6 +36,6 @@ export const Arabic: Story = {
     locale: "ar",
   },
   args: {
-    timezone: "Asia/Dubai",
+    timezone: IanaTimezone.Asia_Dubai,
   },
 };

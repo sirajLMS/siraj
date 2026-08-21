@@ -8,7 +8,7 @@ import { FilterButton } from "@/frontend/common/components/ui/button";
 import {
   MeetingConnectionTestMode,
   MeetingIntegrationProviderSlug,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { useCopyFeedback } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/useCopyFeedback";
 import type { TestConnectionState } from "@/frontend/common/views/dashboard/settings/types/meeting-ui.types";
 import type { TestMeetingConnectionResult } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";

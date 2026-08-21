@@ -3,7 +3,7 @@
 import { Box } from "@mui/material";
 import { FormProvider } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import {
   ReadOnlyStatusCardShared,

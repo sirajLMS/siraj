@@ -1,4 +1,4 @@
-import { AccountStatus, type AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, type AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 
 /**
@@ -28,7 +28,6 @@ export function seedPermissions(perms: AppPermission[]): void {
       phone: null,
       status: AccountStatus.Activated,
       displayCurrency: CurrencyCode.Usd,
-      __typename: "User",
     },
   });
 }

@@ -8,8 +8,10 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  type EnvConfigEntryFieldsFragment,
+  MeetingIntegrationProviderSlug,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deleteEnvConfigEntryMutationDocument,
   envConfigEntriesQueryDocument,

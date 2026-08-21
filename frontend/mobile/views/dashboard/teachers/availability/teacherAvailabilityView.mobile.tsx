@@ -2,7 +2,7 @@
 
 import { Box, CircularProgress } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
-import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useTeacherAvailabilityStore } from "@/frontend/common/stores/teacherAvailabilityStore";
 import { availabilitySearchResolverFactory } from "@/frontend/common/views/dashboard/teachers/availability/schemas/availabilitySearchSchema";
 import type {

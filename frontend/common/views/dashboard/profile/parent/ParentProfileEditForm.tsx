@@ -8,7 +8,7 @@ import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
-import { ParentStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type UseAvatarUploadResult, useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
@@ -37,6 +37,7 @@ import {
 } from "@/frontend/common/views/dashboard/profile/shared/AdminResetPasswordSection";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 
 type ParentEditFormSubmit = (values: ParentAdminEditFormData) => Promise<void>;
@@ -224,7 +225,7 @@ export function ParentProfileEditForm({
 }) {
   const { labels } = useParentProfileEditFormViewModel();
   const { base: t, parent: pt } = labels;
-  const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
+  const scope = isAdminScope ? ProfileScope.OTHER : ProfileScope.OWN;
   const { canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar }: AvatarUploader = useAvatarUpload({ storageOwnerKey: targetUserId });
   const form = useParentEditForm(parentData, isAdminScope, pt.validation.invalidTimezone);

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import {
   type RecentApprovalCardLabels,

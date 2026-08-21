@@ -25,7 +25,7 @@ import { ClassExecutionState, ClassOutcome } from "@/shared/constants/class-inst
 ```typescript
 import { isSafeUrl } from "@/frontend/common/lib/safeRedirect";
 import { ClassOutcome } from "@/backend/enum";
-import type { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 ```
 
 ## Import Convention

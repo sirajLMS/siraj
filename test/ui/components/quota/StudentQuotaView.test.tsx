@@ -4,7 +4,7 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth";
 import {
   quotaLedgerQueryDocument,

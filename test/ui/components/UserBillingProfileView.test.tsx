@@ -138,7 +138,7 @@ import { cleanup, fireEvent, screen } from "@testing-library/react";
 expect.extend(matchers);
 
 import type { SvgIconComponent } from "@mui/icons-material";
-import { AppPermission, InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { BillingMetricItem } from "@/frontend/common/views/dashboard/billing/types/billingMetrics.types";
 import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";

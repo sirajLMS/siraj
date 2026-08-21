@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   ConnectProviderAction,
   type ConnectProviderActionLabels,

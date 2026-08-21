@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CreateUserLabels } from "@/shared/locale/types/dashboard/users/createUser";
 
 export type GeneralUserCreateValidationLabels = Pick<

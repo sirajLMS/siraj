@@ -1,4 +1,4 @@
-import type { CurrencyCode, Gender, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode, Gender, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
 
 export type ParentStudentStatus = Lowercase<StudentStatus>;

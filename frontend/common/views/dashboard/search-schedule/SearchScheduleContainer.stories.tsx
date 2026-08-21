@@ -2,13 +2,14 @@ import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { addDays, format } from "date-fns";
 import { StoryBookPageContainer } from "@/frontend/common/components/ui/story/StoryBookPageContainer";
-import { DayOfWeek, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   searchTeacherAvailabilityQueryDocument,
   teachersQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { useSearchScheduleStore } from "@/frontend/common/stores/searchScheduleStore";
 import { SearchScheduleContainer } from "@/frontend/common/views/dashboard/search-schedule/SearchScheduleContainer";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 const fromDate = format(new Date(), "yyyy-MM-dd");
 const toDate = format(addDays(new Date(), 7), "yyyy-MM-dd");
@@ -33,7 +34,7 @@ const MOCK_RESULT = {
       id: "teacher-1",
       name: "Ahmed Hassan",
       gender: "MALE",
-      timezone: IanaTimezone.AfricaCairo,
+      timezone: IanaTimezone.Africa_Cairo,
       availableDaysCount: 2,
       gaps: [
         {
@@ -46,7 +47,7 @@ const MOCK_RESULT = {
           calendarDate: fromDate,
           gapStartTime: "09:00",
           gapEndTime: "11:00",
-          timezone: IanaTimezone.AfricaCairo,
+          timezone: IanaTimezone.Africa_Cairo,
         },
       ],
     },

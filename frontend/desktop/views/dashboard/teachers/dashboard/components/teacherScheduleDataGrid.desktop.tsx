@@ -11,7 +11,7 @@ import {
   AppPermission,
   type ClassExecutionState,
   type ClassOutcome,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { TeacherScheduleRow } from "@/frontend/common/stores/teacherDashboardTypes";
 import { ScheduleInstanceStatusBadge } from "@/frontend/common/views/dashboard/admin/home/components/ScheduleInstanceStatusBadge";
 import type { TeacherScheduleDataGridProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";

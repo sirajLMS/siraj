@@ -1,5 +1,4 @@
-import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { EffectiveMeetingFieldsFragment, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface UpcomingClassDisplay {
   readonly id: string;

@@ -1,11 +1,14 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  GroupClassAuditQuery,
+  GroupClassAuditQueryVariables,
+  ResendClassNotificationsMutation,
+  ResendClassNotificationsMutationVariables,
+  UpdateClassAdminNoteMutation,
+  UpdateClassAdminNoteMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const groupClassAuditQueryDocument: TypedDocumentNode<
-  Operations.GroupClassAuditQuery,
-  Types.QueryGroupClassAuditArgs
-> = gql`
+export const groupClassAuditQueryDocument: TypedDocumentNode<GroupClassAuditQuery, GroupClassAuditQueryVariables> = gql`
   query groupClassAudit($classInstanceId: String!) {
     groupClassAudit(classInstanceId: $classInstanceId) {
       id
@@ -57,8 +60,8 @@ export const groupClassAuditQueryDocument: TypedDocumentNode<
 `;
 
 export const updateClassAdminNoteMutationDocument: TypedDocumentNode<
-  Operations.UpdateClassAdminNoteMutation,
-  Types.MutationUpdateClassAdminNoteArgs
+  UpdateClassAdminNoteMutation,
+  UpdateClassAdminNoteMutationVariables
 > = gql`
   mutation updateClassAdminNote($classInstanceId: String!, $content: String!) {
     updateClassAdminNote(classInstanceId: $classInstanceId, content: $content) {
@@ -111,8 +114,8 @@ export const updateClassAdminNoteMutationDocument: TypedDocumentNode<
 `;
 
 export const resendClassNotificationsMutationDocument: TypedDocumentNode<
-  Operations.ResendClassNotificationsMutation,
-  Types.MutationResendClassNotificationsArgs
+  ResendClassNotificationsMutation,
+  ResendClassNotificationsMutationVariables
 > = gql`
   mutation resendClassNotifications($classInstanceId: String!) {
     resendClassNotifications(classInstanceId: $classInstanceId) {

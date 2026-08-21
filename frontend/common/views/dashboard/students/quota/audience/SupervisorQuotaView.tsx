@@ -8,8 +8,7 @@ import Link from "next/link";
 import type { ReactElement } from "react";
 import { PrimaryPageAction, SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota } from "@/frontend/common/graphql/generated/gql/operations";
+import { AppPermission, type QuotasQuery_quotas_rows } from "@/frontend/common/graphql/generated/gql/graphql";
 import { quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -27,7 +26,7 @@ interface SupervisorQuotaViewProps {
   readonly t: StudentQuotaLabels;
 }
 
-type QuotaRow = QuotasQuery_quotas_QuotaPaginatedResult_rows_Quota;
+type QuotaRow = QuotasQuery_quotas_rows;
 
 function formatDate(dateStr: string | null | undefined): string {
   if (dateStr == null || dateStr.length === 0) return "";

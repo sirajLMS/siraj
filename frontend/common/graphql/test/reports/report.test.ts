@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ReportGroupingMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ReportGroupingMode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import {
   assignPermissionGroupToUserMutationDocument,

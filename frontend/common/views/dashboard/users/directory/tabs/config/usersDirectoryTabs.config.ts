@@ -1,5 +1,5 @@
 import { BadgeOutlined, Diversity1Outlined, PersonOutlined, SchoolOutlined } from "@mui/icons-material";
-import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import { getVisibleTabs, type TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";
 import type {

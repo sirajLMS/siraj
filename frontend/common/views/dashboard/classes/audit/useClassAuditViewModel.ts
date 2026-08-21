@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import type { GroupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { GroupClassAuditQuery_groupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   groupClassAuditQueryDocument,
   resendClassNotificationsMutationDocument,
@@ -20,7 +20,7 @@ import type { ClassAuditLabels as ClassAuditLocaleLabels } from "@/shared/locale
 
 export interface ClassAuditViewModel extends Omit<ClassAuditViewProps, "audit" | "labels"> {
   readonly status: "loading" | "invalidId" | "error" | "ready";
-  readonly audit: NonNullable<GroupClassAudit> | null;
+  readonly audit: NonNullable<GroupClassAuditQuery_groupClassAudit> | null;
   readonly labels: ClassAuditLabels | Record<string, never>;
 }
 

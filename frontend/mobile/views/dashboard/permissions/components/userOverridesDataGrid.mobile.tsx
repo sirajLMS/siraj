@@ -1,7 +1,10 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionGroupDetailFieldsFragment,
+  UsersQuery_users,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import {
   EditOverridesButton,
@@ -18,8 +21,8 @@ import { Link } from "@/shared/i18n";
 
 interface UserOverridesCardProps {
   readonly labels: UserOverridesDataGridProps["labels"];
-  readonly user: User;
-  readonly groups: readonly PermissionGroup[];
+  readonly user: UsersQuery_users;
+  readonly groups: readonly PermissionGroupDetailFieldsFragment[];
   readonly onManageOverrides: (userId: string) => void;
 }
 

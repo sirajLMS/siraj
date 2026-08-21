@@ -1,4 +1,6 @@
+export * from "./attendance-status.enum";
 export * from "./auth.enum";
+export * from "./availability-status.enum";
 export * from "./billing.enum";
 export * from "./class-instance-detail.enum";
 export * from "./credit.enum";
@@ -10,4 +12,5 @@ export * from "./iana-timezone.enum";
 export * from "./override-state.enum";
 export * from "./parent.enum";
 export * from "./permission-group.enum";
+export * from "./profile.enum";
 export * from "./student-lifecycle.enum";

@@ -1,9 +1,33 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AdminResetPasswordMutation,
+  AdminResetPasswordMutationVariables,
+  ChangePasswordMutation,
+  ChangePasswordMutationVariables,
+  DemoLoginMutation,
+  DemoLoginMutationVariables,
+  EndImpersonationMutation,
+  EndPermissionGroupSimulationMutation,
+  ImpersonationStatusQuery,
+  LoginMutation,
+  LoginMutationVariables,
+  LogoutMutation,
+  MeQuery,
+  PermissionGroupSimulationStatusQuery,
+  RefreshTokenMutation,
+  SimulatablePermissionGroupsQuery,
+  StartImpersonationMutation,
+  StartImpersonationMutationVariables,
+  StartPermissionGroupSimulationMutation,
+  StartPermissionGroupSimulationMutationVariables,
+  UserQuery,
+  UserQueryVariables,
+  UsersQuery,
+  UsersQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { UserFieldsFragmentDoc } from "@/frontend/common/graphql/sharedDocuments/users/userFields.documents";
 
-export const meQueryDocument: TypedDocumentNode<Operations.MeQuery> = gql`
+export const meQueryDocument: TypedDocumentNode<MeQuery> = gql`
   ${UserFieldsFragmentDoc}
   query me {
     me {
@@ -12,7 +36,7 @@ export const meQueryDocument: TypedDocumentNode<Operations.MeQuery> = gql`
   }
 `;
 
-export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.QueryUserArgs> = gql`
+export const userQueryDocument: TypedDocumentNode<UserQuery, UserQueryVariables> = gql`
   ${UserFieldsFragmentDoc}
   query user($id: String!) {
     user(id: $id) {
@@ -21,7 +45,7 @@ export const userQueryDocument: TypedDocumentNode<Operations.UserQuery, Types.Qu
   }
 `;
 
-export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery, Types.QueryUsersArgs> = gql`
+export const usersQueryDocument: TypedDocumentNode<UsersQuery, UsersQueryVariables> = gql`
   ${UserFieldsFragmentDoc}
   query users($search: String, $limit: Int, $offset: Int) {
     users(search: $search, limit: $limit, offset: $offset) {
@@ -30,7 +54,7 @@ export const usersQueryDocument: TypedDocumentNode<Operations.UsersQuery, Types.
   }
 `;
 
-export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, Types.MutationLoginArgs> = gql`
+export const loginMutationDocument: TypedDocumentNode<LoginMutation, LoginMutationVariables> = gql`
   ${UserFieldsFragmentDoc}
   mutation login($input: LoginInput!) {
     login(input: $input) {
@@ -42,8 +66,7 @@ export const loginMutationDocument: TypedDocumentNode<Operations.LoginMutation, 
   }
 `;
 
-export const demoLoginMutationDocument: TypedDocumentNode<Operations.DemoLoginMutation, Types.MutationDemoLoginArgs> =
-  gql`
+export const demoLoginMutationDocument: TypedDocumentNode<DemoLoginMutation, DemoLoginMutationVariables> = gql`
     ${UserFieldsFragmentDoc}
     mutation demoLogin($input: DemoLoginInput!) {
       demoLogin(input: $input) {
@@ -55,13 +78,13 @@ export const demoLoginMutationDocument: TypedDocumentNode<Operations.DemoLoginMu
     }
   `;
 
-export const logoutMutationDocument: TypedDocumentNode<Operations.LogoutMutation> = gql`
+export const logoutMutationDocument: TypedDocumentNode<LogoutMutation> = gql`
   mutation logout {
     logout
   }
 `;
 
-export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshTokenMutation> = gql`
+export const refreshTokenMutationDocument: TypedDocumentNode<RefreshTokenMutation> = gql`
   ${UserFieldsFragmentDoc}
   mutation refreshToken {
     refreshToken {
@@ -73,7 +96,7 @@ export const refreshTokenMutationDocument: TypedDocumentNode<Operations.RefreshT
   }
 `;
 
-export const impersonationStatusQueryDocument: TypedDocumentNode<Operations.ImpersonationStatusQuery> = gql`
+export const impersonationStatusQueryDocument: TypedDocumentNode<ImpersonationStatusQuery> = gql`
   query impersonationStatus {
     impersonationStatus {
       id
@@ -96,8 +119,8 @@ export const impersonationStatusQueryDocument: TypedDocumentNode<Operations.Impe
 `;
 
 export const startImpersonationMutationDocument: TypedDocumentNode<
-  Operations.StartImpersonationMutation,
-  Types.MutationStartImpersonationArgs
+  StartImpersonationMutation,
+  StartImpersonationMutationVariables
 > = gql`
   mutation startImpersonation($targetUserId: String!, $reason: String) {
     startImpersonation(targetUserId: $targetUserId, reason: $reason) {
@@ -123,7 +146,7 @@ export const startImpersonationMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const endImpersonationMutationDocument: TypedDocumentNode<Operations.EndImpersonationMutation> = gql`
+export const endImpersonationMutationDocument: TypedDocumentNode<EndImpersonationMutation> = gql`
   mutation endImpersonation {
     endImpersonation {
       token
@@ -131,7 +154,7 @@ export const endImpersonationMutationDocument: TypedDocumentNode<Operations.EndI
   }
 `;
 
-export const permissionGroupSimulationStatusQueryDocument: TypedDocumentNode<Operations.PermissionGroupSimulationStatusQuery> = gql`
+export const permissionGroupSimulationStatusQueryDocument: TypedDocumentNode<PermissionGroupSimulationStatusQuery> = gql`
   query permissionGroupSimulationStatus {
     permissionGroupSimulationStatus {
       isActive
@@ -143,7 +166,7 @@ export const permissionGroupSimulationStatusQueryDocument: TypedDocumentNode<Ope
   }
 `;
 
-export const simulatablePermissionGroupsQueryDocument: TypedDocumentNode<Operations.SimulatablePermissionGroupsQuery> = gql`
+export const simulatablePermissionGroupsQueryDocument: TypedDocumentNode<SimulatablePermissionGroupsQuery> = gql`
   query simulatablePermissionGroups {
     simulatablePermissionGroups {
       id
@@ -155,8 +178,8 @@ export const simulatablePermissionGroupsQueryDocument: TypedDocumentNode<Operati
 `;
 
 export const startPermissionGroupSimulationMutationDocument: TypedDocumentNode<
-  Operations.StartPermissionGroupSimulationMutation,
-  Types.MutationStartPermissionGroupSimulationArgs
+  StartPermissionGroupSimulationMutation,
+  StartPermissionGroupSimulationMutationVariables
 > = gql`
   mutation startPermissionGroupSimulation($groupSlug: String!) {
     startPermissionGroupSimulation(groupSlug: $groupSlug) {
@@ -167,7 +190,7 @@ export const startPermissionGroupSimulationMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const endPermissionGroupSimulationMutationDocument: TypedDocumentNode<Operations.EndPermissionGroupSimulationMutation> = gql`
+export const endPermissionGroupSimulationMutationDocument: TypedDocumentNode<EndPermissionGroupSimulationMutation> = gql`
   mutation endPermissionGroupSimulation {
     endPermissionGroupSimulation {
       token
@@ -176,8 +199,8 @@ export const endPermissionGroupSimulationMutationDocument: TypedDocumentNode<Ope
 `;
 
 export const changePasswordMutationDocument: TypedDocumentNode<
-  Operations.ChangePasswordMutation,
-  Types.MutationChangePasswordArgs
+  ChangePasswordMutation,
+  ChangePasswordMutationVariables
 > = gql`
   mutation changePassword($input: ChangePasswordInput!) {
     changePassword(input: $input)
@@ -185,8 +208,8 @@ export const changePasswordMutationDocument: TypedDocumentNode<
 `;
 
 export const adminResetPasswordMutationDocument: TypedDocumentNode<
-  Operations.AdminResetPasswordMutation,
-  Types.MutationAdminResetPasswordArgs
+  AdminResetPasswordMutation,
+  AdminResetPasswordMutationVariables
 > = gql`
   mutation adminResetPassword($input: AdminResetPasswordInput!) {
     adminResetPassword(input: $input) {

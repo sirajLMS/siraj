@@ -1,10 +1,14 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ParentBillingSummaryQueryVariables,
+  ParentInvoiceHistoryQueryVariables,
+  UserBillingProfileInvoiceHistoryQuery,
+  UserBillingProfileSummaryQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const userBillingProfileSummaryQueryDocument: TypedDocumentNode<
-  Operations.UserBillingProfileSummaryQuery,
-  Types.QueryParentBillingSummaryArgs
+  UserBillingProfileSummaryQuery,
+  ParentBillingSummaryQueryVariables
 > = gql`
   query UserBillingProfileSummary($userId: String, $parentId: String) {
     parentBillingSummary(userId: $userId, parentId: $parentId) {
@@ -48,8 +52,8 @@ export const userBillingProfileSummaryQueryDocument: TypedDocumentNode<
 `;
 
 export const userBillingProfileInvoiceHistoryQueryDocument: TypedDocumentNode<
-  Operations.UserBillingProfileInvoiceHistoryQuery,
-  Types.QueryParentInvoiceHistoryArgs
+  UserBillingProfileInvoiceHistoryQuery,
+  ParentInvoiceHistoryQueryVariables
 > = gql`
   query UserBillingProfileInvoiceHistory($userId: String, $parentId: String, $paginationArgs: PaginationArgs, $search: String) {
     parentInvoiceHistory(userId: $userId, parentId: $parentId, paginationArgs: $paginationArgs, search: $search) {

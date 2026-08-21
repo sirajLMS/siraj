@@ -90,26 +90,18 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 
   | Operation | Const name | TypedDocumentNode type |
   |---|---|---|
-  | query | `{entityName}QueryDocument` | `TypedDocumentNode<Operations.{EntityName}Query, Types.Query{EntityName}Args>` |
-  | mutation | `{entityName}MutationDocument` | `TypedDocumentNode<Operations.{EntityName}Mutation, Types.Mutation{EntityName}Args>` |
-  | no-arg query | `{entityName}QueryDocument` | `TypedDocumentNode<Operations.{EntityName}Query>` (omit second type param) |
+  | query | `{entityName}QueryDocument` | `TypedDocumentNode<{EntityName}Query, {EntityName}QueryVariables>` |
+  | mutation | `{entityName}MutationDocument` | `TypedDocumentNode<{EntityName}Mutation, {EntityName}MutationVariables>` |
+  | no-arg query | `{entityName}QueryDocument` | `TypedDocumentNode<{EntityName}Query>` (omit second type param) |
 
 - Import pattern for documents:
   ```ts
   import { gql, type TypedDocumentNode } from "@apollo/client";
-  import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-  import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+  import type { EntityNameQuery, EntityNameQueryVariables } from "@/frontend/common/graphql/generated/gql/graphql";
   ```
-- Import generated TYPES from `graphql-types.ts`, NOT `operations.ts`:
-  ```ts
-  import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";  // ✅ CORRECT — has all type definitions
-  import type * as Operations from "@/frontend/common/graphql/generated/gql/operations"; // ✅ CORRECT — only for operation result/variable types
-  // ❌ WRONG — do NOT import entity types from operations.ts; it has poorer type definitions
-  ```
-- `graphql-types.ts` has the complete and canonical type definitions (enums, interfaces, input types, etc.)
-- `operations.ts` is only for operation-specific result/variable types (e.g., `DeleteBookMutationMutation`)
-- Zustand stores and other type consumers: always prefer `graphql-types.ts` for entity types
-- NEVER inline type literals - always use generated types from `frontend/common/graphql/generated/gql/`
+- All generated types (operation results, variables, enums, extracted field types, inputs) live in the single `graphql.ts` file. The old `graphql-types.ts` and `operations.ts` files no longer exist.
+- For nested field types, use compact extracted names: `{OperationName}_{field}` (e.g., `MeQuery_me`, `QuotaQuery_quota`)
+- NEVER inline type literals - always use generated types from `frontend/common/graphql/generated/gql/graphql`
 - Codegen after schema/document changes (both steps required):
   ```bash
   ~/.bun/bin/bun run generate:gqlSchema
@@ -118,8 +110,10 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 
 ### Zustand Stores
 
-- Strictly typed using GraphQL generated types (import from `graphql-types.ts`)
-- No complex intermediate mapping functions
+- Strictly typed using GraphQL generated types (import from `graphql.ts`)
+- **NO MAPPING (CRITICAL)**: No type mapping functions, no intermediate conversion layers, no indexed-access workarounds (e.g., `NonNullable<MeQuery["me"]>`). Use the exact codegen-generated extracted type name directly (e.g., `MeQuery_me`).
+- **NO SCHEMA TYPES**: No schema-level object types (e.g., `User`, `Quota`). Only operation-derived types from `graphql.ts`.
+- **NO HARDCODED TYPES**: Never redefine types that should come from codegen. If codegen doesn't emit a needed type, fix the codegen config or the document — don't create a local type.
 - Resolve type issues by adjusting GraphQL schema/queries - do NOT manually map or redefine types
 - If schema and frontend types misalign, fix the schema or query - never create mapping workarounds
 
@@ -255,7 +249,7 @@ applyTo: "frontend/**/*.ts,frontend/**/*.tsx,frontend/**/*.css,app/**/*.ts,app/*
 - **`renderHook` unavailable in `bun:test`**: Use consumer-component pattern (render a component calling the hook, capture state via `useEffect`)
 - **Missing backend resolvers**: `whatsappTemplates` and `whatsappOptInAudit` queries don't exist — documents are commented-out stubs with placeholder data
 - **Missing enum values**: `TIER_250K`, `TIER_1M`, `qualityOrange` DON'T EXIST — use actual values from `whatsapp-templates.enum.ts`
-- **Permission enum names**: `WhatsappConfigManage` (not `WHATSAPP_MANAGE`), `WhatsappTemplatesManage`, `WhatsappView` — from `graphql-types.ts`
+- **Permission enum names**: `WhatsappConfigManage` (not `WHATSAPP_MANAGE`), `WhatsappTemplatesManage`, `WhatsappView` — from `graphql.ts`
 
 ### Linting Rules
 

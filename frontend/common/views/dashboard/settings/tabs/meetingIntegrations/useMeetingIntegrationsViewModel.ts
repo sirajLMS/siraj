@@ -7,10 +7,12 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   AppPermission,
   MeetingConnectionTestMode,
+  type MeetingIntegrationConnectedAccountFieldsFragment,
   MeetingIntegrationConnectedAccountStatus,
+  type MeetingIntegrationProviderFieldsFragment,
   MeetingIntegrationProviderSlug,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+  type TestMeetingConnectionResultFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { connectMeetingProviderOAuthMutationDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import {
   adminRevokeMeetingProviderTokenMutationDocument,
@@ -46,9 +48,7 @@ function isStringRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function mapProviderSummary(
-  provider: Operations.MeetingIntegrationProviderFieldsFragment
-): MeetingIntegrationProviderSummary {
+function mapProviderSummary(provider: MeetingIntegrationProviderFieldsFragment): MeetingIntegrationProviderSummary {
   return {
     id: provider.id ?? "",
     slug: isMeetingIntegrationProviderSlug(provider.slug) ? provider.slug : MeetingIntegrationProviderSlug.Zoom,
@@ -62,7 +62,7 @@ function mapProviderSummary(
 }
 
 function mapTestResult(
-  result: Operations.TestMeetingConnectionResultFieldsFragment | null | undefined
+  result: TestMeetingConnectionResultFieldsFragment | null | undefined
 ): TestMeetingConnectionResult | null {
   if (!result) {
     return null;
@@ -84,7 +84,7 @@ function mapTestResult(
 }
 
 function mapConnectedAccount(
-  account: Operations.MeetingIntegrationConnectedAccountFieldsFragment
+  account: MeetingIntegrationConnectedAccountFieldsFragment
 ): MeetingIntegrationConnectedAccount {
   return {
     id: account.id ?? "",
@@ -336,7 +336,7 @@ function useConnectedAccountsSync(
   const accounts = useMemo(
     () =>
       (connectedAccountsData?.meetingIntegrationConnectedAccounts ?? [])
-        .filter((account): account is Operations.MeetingIntegrationConnectedAccountFieldsFragment => account != null)
+        .filter((account): account is MeetingIntegrationConnectedAccountFieldsFragment => account != null)
         .map(mapConnectedAccount),
     [connectedAccountsData?.meetingIntegrationConnectedAccounts]
   );

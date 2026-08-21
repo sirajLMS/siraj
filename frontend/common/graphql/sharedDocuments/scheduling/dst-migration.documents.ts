@@ -1,10 +1,12 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ExecuteDstBulkUpdateMutation,
+  ExecuteDstBulkUpdateMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const executeDstBulkUpdateMutationDocument: TypedDocumentNode<
-  Operations.ExecuteDstBulkUpdateMutation,
-  Types.MutationExecuteDstBulkUpdateArgs
+  ExecuteDstBulkUpdateMutation,
+  ExecuteDstBulkUpdateMutationVariables
 > = gql`
   mutation executeDstBulkUpdate($offsetMinutes: Int!, $description: String!) {
     executeDstBulkUpdate(offsetMinutes: $offsetMinutes, description: $description) {

@@ -30,8 +30,7 @@ import {
   type DayOfWeek,
   OnDemandNoCreditsOutcome,
   SchedulingMode,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { SubjectSelect } from "@/frontend/common/views/dashboard/classes/recurring/components/SubjectSelectField";
 import { RecurringMeetingConfigSection } from "@/frontend/common/views/dashboard/classes/recurring/RecurringMeetingConfigSection";
 import { CLASS_TYPE_OPTIONS, type DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
@@ -40,6 +39,7 @@ import {
   buildDayLabels,
 } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/constants";
 import type { CreateRecurringClassDialogFormState } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type {
   MeetingConfigManagerLabels,
   MeetingConfigRecurringScheduleLabels,
@@ -144,8 +144,8 @@ function TimezoneClassTypeFields({
   direction,
   timezoneWrapInBox,
 }: {
-  readonly timezone: string;
-  readonly setTimezone: (value: string) => void;
+  readonly timezone: IanaTimezone;
+  readonly setTimezone: (value: IanaTimezone) => void;
   readonly classType: string;
   readonly onClassTypeChange: (value: string) => void;
   readonly mutationLoading: boolean;
@@ -157,9 +157,11 @@ function TimezoneClassTypeFields({
   const classTypeLabels = buildClassTypeLabels(t);
   const timezoneSelect = (
     <TimezoneSelect
-      value={toGraphqlIanaTimezone(timezone)}
-      onChangeAction={(value: string) => {
-        setTimezone(value ? fromGraphqlIanaTimezone(value) : "");
+      value={timezone}
+      onChangeAction={value => {
+        if (value) {
+          setTimezone(value);
+        }
       }}
       label={t.fields.timezone}
       fullWidth

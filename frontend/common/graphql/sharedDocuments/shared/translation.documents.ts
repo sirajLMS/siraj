@@ -1,18 +1,20 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  TranslatedMessageQuery,
+  TranslatedMessageQueryVariables,
+  WelcomeMessageQuery,
+  WelcomeMessageQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const welcomeMessageQueryDocument: TypedDocumentNode<
-  Operations.WelcomeMessageQuery,
-  Operations.WelcomeMessageQueryVariables
-> = gql`
+export const welcomeMessageQueryDocument: TypedDocumentNode<WelcomeMessageQuery, WelcomeMessageQueryVariables> = gql`
   query welcomeMessage {
     welcomeMessage
   }
 `;
 
 export const translatedMessageQueryDocument: TypedDocumentNode<
-  Operations.TranslatedMessageQuery,
-  Operations.TranslatedMessageQueryVariables
+  TranslatedMessageQuery,
+  TranslatedMessageQueryVariables
 > = gql`
   query translatedMessage($key: String!, $namespace: String!) {
     translatedMessage(key: $key, namespace: $namespace)

@@ -1,4 +1,4 @@
-import type { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
 export function getQuotaStatusLabel(status: QuotaStatus | string | null | undefined, t: StudentQuotaLabels): string {

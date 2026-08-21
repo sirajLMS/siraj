@@ -1,6 +1,6 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
 import { useMemo } from "react";
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionsQuery_permissions } from "@/frontend/common/graphql/generated/gql/graphql";
 import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
 import { matchesPermissionSearch } from "@/frontend/common/views/dashboard/permissions/utils";
 
@@ -10,7 +10,7 @@ export interface PermissionCatalogFilterResult {
   readonly selectedCategory: string;
   readonly setSelectedCategory: (category: string) => void;
   readonly categories: string[];
-  readonly filteredPermissions: Permission[];
+  readonly filteredPermissions: PermissionsQuery_permissions[];
 }
 
 /**
@@ -25,7 +25,9 @@ export interface PermissionCatalogFilterResult {
  * Lifted out of `permissionCatalogSection.{mobile,desktop}.tsx` (Plan v5 NS-2
  * N7 + N11 lifts).
  */
-export function usePermissionCatalogFilter(permissions: readonly Permission[]): PermissionCatalogFilterResult {
+export function usePermissionCatalogFilter(
+  permissions: readonly PermissionsQuery_permissions[]
+): PermissionCatalogFilterResult {
   const searchQuery = usePermissionManagementStore(s => s.permissionCatalogSearchQuery);
   const selectedCategory = usePermissionManagementStore(s => s.permissionCatalogSelectedCategory);
   const setSearchQuery = usePermissionManagementStore(s => s.setPermissionCatalogSearchQuery);

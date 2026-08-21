@@ -16,11 +16,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { CurrencyCode, InvoicePaymentSubmissionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  InvoicePaymentSubmissionQuery,
-  InvoicePaymentsQuery,
-} from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  CurrencyCode,
+  type InvoicePaymentSubmissionQuery,
+  InvoicePaymentSubmissionStatus,
+  type InvoicePaymentsQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   approvePaymentProofMutationDocument,
   invoicePaymentSubmissionQueryDocument,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { QuotaKind, QuotaPeriodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaKind, QuotaPeriodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";
 
 export const createQuotaSchema = (messages: QuotaLabels) => {

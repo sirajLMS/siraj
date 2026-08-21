@@ -17,7 +17,7 @@ import {
   ClassType,
   type OnDemandNoCreditsOutcome,
   type SchedulingMode,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import {
   emptyRecurringMeetingConfigState,
@@ -28,6 +28,7 @@ import {
   isRecurringMeetingConfigValid,
   resolveRecurringMeetingConfigErrorMessage,
 } from "@/frontend/common/views/dashboard/classes/recurring/utils/recurringMeetingConfigValidation";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type {
   MeetingConfigClassScopeLabels,
   MeetingConfigManagerLabels,
@@ -47,8 +48,8 @@ export interface CreateRecurringClassDialogFormState {
   readonly setDuration: Dispatch<SetStateAction<number>>;
   readonly defaultStartTime: string;
   readonly setDefaultStartTime: Dispatch<SetStateAction<string>>;
-  readonly timezone: string;
-  readonly setTimezone: Dispatch<SetStateAction<string>>;
+  readonly timezone: IanaTimezone;
+  readonly setTimezone: Dispatch<SetStateAction<IanaTimezone>>;
   readonly classType: ClassType;
   readonly setClassType: Dispatch<SetStateAction<ClassType>>;
   readonly meetingConfig: RecurringMeetingConfigFormState;
@@ -77,7 +78,7 @@ function resetFormState(setters: {
   setSubjectId: Dispatch<SetStateAction<string>>;
   setDuration: Dispatch<SetStateAction<number>>;
   setDefaultStartTime: Dispatch<SetStateAction<string>>;
-  setTimezone: Dispatch<SetStateAction<string>>;
+  setTimezone: Dispatch<SetStateAction<IanaTimezone>>;
   setClassType: Dispatch<SetStateAction<ClassType>>;
   setMeetingConfig: Dispatch<SetStateAction<RecurringMeetingConfigFormState>>;
   setSchedulingMode: Dispatch<SetStateAction<SchedulingMode | null>>;
@@ -92,7 +93,7 @@ function resetFormState(setters: {
   setters.setSubjectId("");
   setters.setDuration(60);
   setters.setDefaultStartTime("09:00");
-  setters.setTimezone("Africa/Cairo");
+  setters.setTimezone(IanaTimezone.Africa_Cairo);
   setters.setClassType(ClassType.Regular);
   setters.setMeetingConfig(emptyRecurringMeetingConfigState());
   setters.setSchedulingMode(null);
@@ -112,7 +113,7 @@ function useFormStateValues() {
   const [subjectId, setSubjectId] = useState("");
   const [duration, setDuration] = useState(60);
   const [defaultStartTime, setDefaultStartTime] = useState("09:00");
-  const [timezone, setTimezone] = useState("Africa/Cairo");
+  const [timezone, setTimezone] = useState<IanaTimezone>(IanaTimezone.Africa_Cairo);
   const [classType, setClassType] = useState<ClassType>(ClassType.Regular);
   const [meetingConfig, setMeetingConfig] = useState<RecurringMeetingConfigFormState>(emptyRecurringMeetingConfigState);
   const [schedulingMode, setSchedulingMode] = useState<SchedulingMode | null>(null);

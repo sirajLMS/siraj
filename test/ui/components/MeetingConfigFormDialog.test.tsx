@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { MeetingProvidersQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { meetingProvidersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
@@ -37,7 +37,7 @@ const meetingProvidersMock = {
           },
         },
       ],
-    } satisfies Operations.MeetingProvidersQuery,
+    } satisfies MeetingProvidersQuery,
   },
 };
 

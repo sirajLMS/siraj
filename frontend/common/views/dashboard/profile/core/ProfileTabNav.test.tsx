@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import { AppPermission, ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ProfileTabNav } from "@/frontend/common/views/dashboard/profile/core/ProfileTabNav";
+import { ProfileAudience, ProfileScope } from "@/shared/constants/profile.enum";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 const mockRouterPush = mock(() => {});
@@ -66,8 +67,8 @@ afterEach(() => {
 describe("ProfileTabNav", () => {
   test("shows Meeting tab for teacher in own scope with view_own permission", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.ProfileMeetingConfigsViewOwn],
     });
 
@@ -76,8 +77,8 @@ describe("ProfileTabNav", () => {
 
   test("shows Meeting tab for teacher in own scope with manage_own permission", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.MeetingConfigsManageOwn],
     });
 
@@ -88,8 +89,8 @@ describe("ProfileTabNav", () => {
 
   test("hides Meeting tab for teacher in own scope without manage_own permission", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
@@ -98,8 +99,8 @@ describe("ProfileTabNav", () => {
 
   test("hides Students tab for teacher admin without edit permission", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Other,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OTHER,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
@@ -108,8 +109,8 @@ describe("ProfileTabNav", () => {
 
   test("shows Students tab for teacher admin with manage_other permission", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Other,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OTHER,
       permissions: [
         AppPermission.ProfileCoreIdentityViewOwn,
         AppPermission.ProfileStaffPermissionsEditOther,
@@ -123,8 +124,8 @@ describe("ProfileTabNav", () => {
 
   test("hides Permissions tab for teacher admin with legacy edit only", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Other,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OTHER,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.ProfileStaffPermissionsEditOther],
     });
 
@@ -133,8 +134,8 @@ describe("ProfileTabNav", () => {
 
   test("shows Payment Methods tab when view permission granted", () => {
     renderTabNav({
-      audience: ProfileAudience.Parent,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.PARENT,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.ProfilePaymentMethodsViewOwn],
     });
 
@@ -143,8 +144,8 @@ describe("ProfileTabNav", () => {
 
   test("hides Payment Methods tab without view permission", () => {
     renderTabNav({
-      audience: ProfileAudience.Parent,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.PARENT,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
@@ -153,8 +154,8 @@ describe("ProfileTabNav", () => {
 
   test("shows Permissions tab for staff admin in other scope", () => {
     renderTabNav({
-      audience: ProfileAudience.Staff,
-      scope: ProfileScope.Other,
+      audience: ProfileAudience.STAFF,
+      scope: ProfileScope.OTHER,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn, AppPermission.ProfileStaffPermissionsEditOther],
     });
 
@@ -163,8 +164,8 @@ describe("ProfileTabNav", () => {
 
   test("hides Permissions tab for non-admin staff in other scope", () => {
     renderTabNav({
-      audience: ProfileAudience.Staff,
-      scope: ProfileScope.Other,
+      audience: ProfileAudience.STAFF,
+      scope: ProfileScope.OTHER,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
@@ -174,8 +175,8 @@ describe("ProfileTabNav", () => {
   test("reads tab from query param on mount", () => {
     const onTabChange = mock(() => {});
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn],
       currentTab: "profile",
       onTabChange,
@@ -188,8 +189,8 @@ describe("ProfileTabNav", () => {
 
   test("does not rewrite URL when tab param already matches resolved tab", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn],
       currentTab: "notifications",
       moduleOverrides: { useSearchParams: () => new URLSearchParams("tab=notifications") },
@@ -200,8 +201,8 @@ describe("ProfileTabNav", () => {
 
   test("normalizes missing tab param to first visible tab", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn],
       currentTab: "profile",
       moduleOverrides: { useSearchParams: () => new URLSearchParams() },
@@ -212,8 +213,8 @@ describe("ProfileTabNav", () => {
 
   test("renders chip labels alongside desktop tabs", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 
@@ -222,8 +223,8 @@ describe("ProfileTabNav", () => {
 
   test("renders tablist for desktop layout", () => {
     renderTabNav({
-      audience: ProfileAudience.Teacher,
-      scope: ProfileScope.Own,
+      audience: ProfileAudience.TEACHER,
+      scope: ProfileScope.OWN,
       permissions: [AppPermission.ProfileCoreIdentityViewOwn],
     });
 

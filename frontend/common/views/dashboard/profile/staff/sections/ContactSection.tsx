@@ -1,10 +1,10 @@
 "use client";
 
 import type { Control } from "react-hook-form";
-import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { CoreContactSection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreContactSection";
 import type { StaffSectionLabelsBundle } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffAdminEditFormData } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 
 type ContactSectionProps = {
   readonly mode: "edit";

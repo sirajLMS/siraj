@@ -4,7 +4,7 @@ import { MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import { type Control, Controller, type UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
 import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
-import { CurrencyCode, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";

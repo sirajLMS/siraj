@@ -3,7 +3,7 @@
 import type * as React from "react";
 import { GenderSelectorShared } from "@/frontend/common/components/ui/input/genderSelector/ButtonGroupSelectorShared";
 import type { ButtonGroupSelectorOptions } from "@/frontend/common/components/ui/input/genderSelector/buttonGroupSelectorTypes";
-import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { GenderSelectorLabels } from "@/shared/locale";
 
 export type GenderSelectorProps = {

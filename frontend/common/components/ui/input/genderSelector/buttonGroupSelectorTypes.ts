@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type GenderSelectorLabels, Translation, useAppTranslation } from "@/shared/locale";
 
 export type ButtonGroupSelectorButton<TValue> = {

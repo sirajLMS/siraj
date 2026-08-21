@@ -1,6 +1,6 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
-import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type TimezoneSelectProps = {
   readonly value: IanaTimezone | null;

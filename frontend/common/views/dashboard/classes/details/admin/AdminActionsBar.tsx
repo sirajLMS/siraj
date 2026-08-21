@@ -10,7 +10,7 @@ import { Box, Button, IconButton, Stack, Tooltip, Typography } from "@mui/materi
 import { styled, type Theme } from "@mui/material/styles";
 import type { ReactElement } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { edgeToEdgeCardShellSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import {

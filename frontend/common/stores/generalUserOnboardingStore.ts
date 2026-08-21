@@ -1,11 +1,11 @@
 "use client";
 
 import { create } from "zustand";
-import type { GeneralUserCreateResult } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CreateGeneralUserMutation_createGeneralUser } from "@/frontend/common/graphql/generated/gql/graphql";
 
 interface GeneralUserOnboardingState {
-  readonly result: GeneralUserCreateResult | null;
-  readonly setResult: (result: GeneralUserCreateResult | null) => void;
+  readonly result: CreateGeneralUserMutation_createGeneralUser | null;
+  readonly setResult: (result: CreateGeneralUserMutation_createGeneralUser | null) => void;
   readonly reset: () => void;
 }
 

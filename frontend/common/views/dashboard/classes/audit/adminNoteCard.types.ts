@@ -1,5 +1,5 @@
 // NEW FOR PLAN v5: Lifted admin note card Props out of tier (specs.md §4.1 Class C).
-import type { AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { GroupClassAuditQuery_groupClassAudit_adminNote as AdminNoteInfo } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AdminNoteLabels } from "@/frontend/common/views/dashboard/classes/audit/classAuditView.types";
 
 export interface BaseAdminNoteCardProps {

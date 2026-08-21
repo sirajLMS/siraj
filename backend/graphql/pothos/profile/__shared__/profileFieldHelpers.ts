@@ -1,6 +1,5 @@
 import type { InputFieldBuilder } from "@pothos/core";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 
 type BuilderTypes = typeof gqlSchemaBuilder extends { $inferSchemaTypes: infer T } ? T : never;
 type PothosInputFieldBuilder = InputFieldBuilder<BuilderTypes, "InputObject">;
@@ -30,7 +29,7 @@ export function profileContactInputFields(t: PothosInputFieldBuilder) {
     phone: constrainedString(t, MAX_LENGTH.PHONE),
     nationality: constrainedString(t, MAX_LENGTH.NATIONALITY),
     address: constrainedString(t, MAX_LENGTH.ADDRESS),
-    timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
+    timezone: t.field({ type: "IanaTimezone", required: false }),
   };
 }
 

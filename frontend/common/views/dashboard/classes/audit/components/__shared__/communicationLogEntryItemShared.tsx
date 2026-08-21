@@ -3,7 +3,7 @@
 import { EmailOutlined } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import type { SystemStyleObject, Theme } from "@mui/system";
-import type { CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { GroupClassAuditQuery_groupClassAudit_communications as CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   StyledDeliveredIcon,
   StyledEntryDescription,

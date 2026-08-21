@@ -1,7 +1,7 @@
 "use client";
 
 import type { Control, UseFormRegister } from "react-hook-form";
-import type { Gender, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ProfilePersonalSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection";
 import type {
   ProfilePersonalFieldLabels,
@@ -12,6 +12,7 @@ import type {
   TeacherAdminEditFormData,
   TeacherOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 
 type TeacherExtensionFormFields = {
   nationality?: string;

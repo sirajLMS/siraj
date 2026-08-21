@@ -1,5 +1,8 @@
 import { useCallback, useState } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionFieldsFragment,
+  PermissionGroupDetailFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { useGroupMutationActions } from "@/frontend/common/views/dashboard/permissions/components/useGroupMutationActions";
 import { useGroupPermissionFilters } from "@/frontend/common/views/dashboard/permissions/components/useGroupPermissionFilters";
 import type { LocalizedString } from "@/shared/types";
@@ -10,8 +13,8 @@ interface UseSingleGroupStateProps {
   // NEW FOR PLAN v5: nullable so the ViewModel can call the hook unconditionally
   // (rules-of-hooks) when no group is active — the consumer only reads the
   // returned state when `group` is non-null.
-  readonly group: PermissionGroup | null;
-  readonly permissions: readonly Permission[];
+  readonly group: PermissionGroupDetailFieldsFragment | null;
+  readonly permissions: readonly PermissionFieldsFragment[];
   readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;
   readonly onBulkRevoke: (groupId: string, userIds: string[]) => Promise<void>;
   readonly onUpdateGroup: (
@@ -108,7 +111,7 @@ export function useSingleGroupState({
 
 // Sentinel empty group used to short-circuit derivation hooks when no group is
 // active — keeps the call unconditional (rules-of-hooks).
-const EMPTY_GROUP: PermissionGroup = {
+const EMPTY_GROUP: PermissionGroupDetailFieldsFragment = {
   id: "",
   slug: "",
   name: {},

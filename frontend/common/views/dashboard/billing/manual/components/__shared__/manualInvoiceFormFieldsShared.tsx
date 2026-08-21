@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
 import { type Control, Controller, useWatch } from "react-hook-form";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ManualInvoiceFormData } from "@/frontend/common/views/dashboard/billing/manual/schemas/manualInvoiceSchema";
 import type { BaseManualInvoiceDateFieldProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceDateField.types";
 import type { BaseManualInvoiceFeeFieldProps } from "@/frontend/common/views/dashboard/billing/manual/types/manualInvoiceFeeField.types";

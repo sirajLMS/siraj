@@ -2,10 +2,11 @@ import { Box, Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PaymentMethodDisplay } from "@/frontend/common/components/ui/display/paymentMethod/PaymentMethodDisplay";
 import {
+  CountryCode,
   CurrencyCode,
   PaymentDirection,
   PaymentMethodType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const meta: Meta<typeof PaymentMethodDisplay> = {
   title: "UI/Display/PaymentMethodDisplay",
@@ -26,7 +27,7 @@ export const MobileWallet: Story = {
           label: "My Vodafone",
           catalogName: { en: "Vodafone Cash", ar: "فودافون كاش" },
           catalogSlug: "vodafone-cash",
-          countryCode: "EG",
+          countryCode: CountryCode.Eg,
           currencyCode: CurrencyCode.Egp,
           isDefault: true,
           isActive: true,

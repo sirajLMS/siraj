@@ -3,7 +3,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { TeacherProgressFeedEventKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { TeacherProgressFeedEventKind } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StudentProgressFeedItem } from "@/frontend/common/types/shared.types";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 import type { StudentProgressFeedProps } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardComponentProps";

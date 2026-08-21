@@ -2,7 +2,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo } from "react";
 import { type Control, type UseFormHandleSubmit, type UseFormSetValue, useForm, useWatch } from "react-hook-form";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionsQuery_permissions as Permission,
+  PermissionGroupsQuery_permissionGroups as PermissionGroup,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { usePermissionManagementStore } from "@/frontend/common/stores/permissionManagementStore";
 import {
   type PermissionGroupFormData,

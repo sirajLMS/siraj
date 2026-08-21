@@ -1,6 +1,10 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ParentDirectoryQuery,
+  ParentDirectoryQueryVariables,
+  ParentsDirectoryQuery,
+  ParentsDirectoryQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const parentDirectoryAutocompleteRowFragment = gql`
   fragment ParentDirectoryAutocompleteRow on ParentDirectoryAutocompleteRow {
@@ -11,10 +15,7 @@ export const parentDirectoryAutocompleteRowFragment = gql`
   }
 `;
 
-export const parentDirectoryQueryDocument: TypedDocumentNode<
-  Operations.ParentDirectoryQuery,
-  Types.QueryParentDirectoryArgs
-> = gql`
+export const parentDirectoryQueryDocument: TypedDocumentNode<ParentDirectoryQuery, ParentDirectoryQueryVariables> = gql`
   query parentDirectory(
     $paginationArgs: PaginationArgs
     $search: String
@@ -61,10 +62,8 @@ export const parentDirectoryQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const parentsDirectoryQueryDocument: TypedDocumentNode<
-  Operations.ParentsDirectoryQuery,
-  Types.QueryParentsDirectoryArgs
-> = gql`
+export const parentsDirectoryQueryDocument: TypedDocumentNode<ParentsDirectoryQuery, ParentsDirectoryQueryVariables> =
+  gql`
   ${parentDirectoryAutocompleteRowFragment}
   query parentsDirectory($search: String, $limit: Int) {
     parentsDirectory(search: $search, limit: $limit) {

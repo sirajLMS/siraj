@@ -1,5 +1,9 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
-import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionsQuery_permissions as Permission,
+  PermissionGroupDetailFieldsFragment as PermissionGroup,
+  UsersQuery_users as User,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PermissionCatalogFilterResult } from "@/frontend/common/views/dashboard/permissions/components/usePermissionCatalogFilter";
 import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permissions/components/useRowMenuAnchor";
 import type { PermissionsLabels } from "@/shared/locale";

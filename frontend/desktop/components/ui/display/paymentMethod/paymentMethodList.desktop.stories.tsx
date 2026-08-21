@@ -2,10 +2,11 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import {
+  CountryCode,
   CurrencyCode,
   PaymentDirection,
   PaymentMethodType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { DesktopPaymentMethodList } from "@/frontend/desktop/components/ui/display/paymentMethod/paymentMethodList.desktop";
 
 const sampleMethods: readonly PaymentMethodRow[] = [
@@ -16,7 +17,7 @@ const sampleMethods: readonly PaymentMethodRow[] = [
     label: "My Vodafone",
     catalogName: { en: "Vodafone Cash", ar: "فودافون كاش" },
     catalogSlug: "vodafone-cash",
-    countryCode: "EG",
+    countryCode: CountryCode.Eg,
     currencyCode: CurrencyCode.Egp,
     isDefault: true,
     isActive: true,

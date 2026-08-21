@@ -2,8 +2,10 @@
 
 import { Alert, Stack } from "@mui/material";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  type EffectiveMeetingFieldsFragment,
+  EffectiveMeetingSource,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MeetingConfigClassScopeLabels, MeetingConfigDisplayLabels } from "@/shared/locale/types/ui";
 
 export type ClassMeetingContextBannerProps = {

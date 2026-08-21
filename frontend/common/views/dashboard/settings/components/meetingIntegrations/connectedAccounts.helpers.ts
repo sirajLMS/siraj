@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   ConnectedAccountsTableProps,
   MeetingIntegrationConnectedAccount,

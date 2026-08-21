@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 
 export interface StudentPortalProfileEditDraft {

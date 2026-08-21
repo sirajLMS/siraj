@@ -1,12 +1,12 @@
 "use client";
 
 import { create } from "zustand";
-import type { TeacherOnboarding } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CreateTeacherMutation_createTeacher } from "@/frontend/common/graphql/generated/gql/graphql";
 
 interface TeacherOnboardingState {
   readonly isSubmitting: boolean;
   readonly error: string | null;
-  readonly result: TeacherOnboarding | null;
+  readonly result: CreateTeacherMutation_createTeacher | null;
   readonly reset: () => void;
 }
 

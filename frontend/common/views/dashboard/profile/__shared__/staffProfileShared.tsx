@@ -2,7 +2,7 @@
 
 import { Alert, Box, Button, Typography } from "@mui/material";
 import type React from "react";
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { StaffExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/StaffExtensionProfileSection";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
@@ -16,6 +16,7 @@ import {
   toStaffSharedBaseLabels,
 } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffProfileViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileViewModel";
+import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 
 export interface StaffProfileSharedSlots {
   readonly ViewContentWrapper: React.ComponentType<{ readonly children: React.ReactNode }>;
@@ -75,7 +76,7 @@ export function StaffProfileSharedView({
       timezoneLabel={st.fields.timezone}
       currencyLabel={st.fields.displayCurrency}
       phone={profilePhone ?? staffData?.phone}
-      timezone={profileTimezone}
+      timezone={toIanaTimezoneOrNull(profileTimezone)}
       displayCurrency={displayCurrency}
       baseLabels={sectionLabels.baseLabels}
     />
@@ -116,7 +117,7 @@ export function StaffProfileSharedView({
     );
   };
 
-  if (mode === ProfileMode.View) {
+  if (mode === ProfileMode.VIEW) {
     return (
       <ViewContentWrapper>
         {isAdminScope ? (
@@ -137,7 +138,7 @@ export function StaffProfileSharedView({
     );
   }
 
-  if (scope === ProfileScope.Own) {
+  if (scope === ProfileScope.OWN) {
     return (
       <StaffProfileEditForm
         staffData={staffData}
@@ -194,7 +195,7 @@ function staffProfileGuard(props: Readonly<StaffProfileGuardProps>): React.JSX.E
   } = props;
   const t = translations.base;
 
-  if (activeTab === "notifications" && scope === ProfileScope.Own) {
+  if (activeTab === "notifications" && scope === ProfileScope.OWN) {
     return <NotificationPreferencesTab isActive />;
   }
 

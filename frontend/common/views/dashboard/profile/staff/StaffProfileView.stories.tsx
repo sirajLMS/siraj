@@ -2,8 +2,8 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StaffProfileView } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileView";
+import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 
 const meta: Meta<typeof StaffProfileView> = {
   title: "Views/profile/staff",
@@ -23,32 +23,32 @@ type Story = StoryObj<typeof StaffProfileView>;
 
 export const OwnView: Story = {
   args: {
-    scope: ProfileScope.Own,
-    mode: ProfileMode.View,
+    scope: ProfileScope.OWN,
+    mode: ProfileMode.VIEW,
     targetUserId: "user-staff-1",
   },
 };
 
 export const AdminView: Story = {
   args: {
-    scope: ProfileScope.Other,
-    mode: ProfileMode.View,
+    scope: ProfileScope.OTHER,
+    mode: ProfileMode.VIEW,
     targetUserId: "user-staff-1",
   },
 };
 
 export const EditOwnView: Story = {
   args: {
-    scope: ProfileScope.Own,
-    mode: ProfileMode.Edit,
+    scope: ProfileScope.OWN,
+    mode: ProfileMode.EDIT,
     targetUserId: "user-staff-1",
   },
 };
 
 export const EditAdminView: Story = {
   args: {
-    scope: ProfileScope.Other,
-    mode: ProfileMode.Edit,
+    scope: ProfileScope.OTHER,
+    mode: ProfileMode.EDIT,
     targetUserId: "user-staff-1",
   },
 };

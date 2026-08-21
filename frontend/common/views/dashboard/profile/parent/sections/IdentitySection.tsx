@@ -1,11 +1,11 @@
 "use client";
 
 import type { Control, UseFormRegister } from "react-hook-form";
-import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import type { ParentAdminData } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
 import { ProfilePersonalSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfilePersonalSection";
 import type { ProfilePersonalFieldLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 import type { ProfileParentLabels } from "@/shared/locale/types/profile";
 
 const PARENT_PERSONAL_FIELDS = {

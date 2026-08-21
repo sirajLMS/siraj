@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql";
 
 const DEFAULT_PAGE_SIZE = 10;
 

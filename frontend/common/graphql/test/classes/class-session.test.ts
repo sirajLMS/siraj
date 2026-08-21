@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { ClassExecutionState, ClassOutcome, ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome, ClassType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   activateClassMutationDocument,
   activateOverrideClassMutationDocument,

@@ -11,7 +11,7 @@ import {
   useForm,
   useWatch,
 } from "react-hook-form";
-import { AppPermission, CurrencyCode, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { createManualInvoiceMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useManualInvoiceUiStore } from "@/frontend/common/stores/manualInvoiceUiStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

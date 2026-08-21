@@ -1,7 +1,7 @@
 "use client";
 
 import type { Control, FieldErrors, FieldValues, UseFormRegister } from "react-hook-form";
-import type { CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 
 /**
  * Canonical user-entity fields collected at onboarding (users table columns).

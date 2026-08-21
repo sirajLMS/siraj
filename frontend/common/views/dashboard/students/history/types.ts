@@ -1,6 +1,6 @@
 import type { Theme } from "@mui/material";
-import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
+import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
 export function isJoinableClassSession(
@@ -64,8 +64,8 @@ export interface MobileMetricProps {
 
 export function mapStatusToAttendance(rawStatus: string): AttendanceStatus {
   const lower = rawStatus.toLowerCase();
-  if (lower === "absent") return AttendanceStatus.Absent;
-  if (lower === "late") return AttendanceStatus.Late;
-  if (lower === "taken" || lower === "completed" || lower === "present") return AttendanceStatus.Present;
-  return AttendanceStatus.Present;
+  if (lower === "absent") return AttendanceStatus.ABSENT;
+  if (lower === "late") return AttendanceStatus.LATE;
+  if (lower === "taken" || lower === "completed" || lower === "present") return AttendanceStatus.PRESENT;
+  return AttendanceStatus.PRESENT;
 }

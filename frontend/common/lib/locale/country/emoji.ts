@@ -17,6 +17,6 @@ export function getCountryEmoji(countryCode: string): string {
   if (!normalizedCode) {
     return "🌐";
   }
-  const match = countries.find(country => country.code === normalizedCode);
+  const match = countries.find(country => country.code.toString() === normalizedCode);
   return match?.emoji ?? (isExcludedUiCountryCode(countryCode) ? "🌐" : countryCodeToEmoji(normalizedCode));
 }

@@ -5,7 +5,7 @@ import {
   GenderSelector,
   type GenderSelectorProps,
 } from "@/frontend/common/components/ui/input/genderSelector/GenderSelector";
-import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 
 function GenderSelectorStory({
   initialGender = Gender.Male,

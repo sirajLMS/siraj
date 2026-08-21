@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import {
   matchesDailyScheduleMetricFilter,
@@ -15,7 +15,6 @@ const sampleRow = (overrides: Partial<DailyScheduleRow>): DailyScheduleRow => ({
   duration: 60,
   scheduledStartAt: "2028-01-01T10:00:00.000Z",
   scheduledEndAt: "2028-01-01T11:00:00.000Z",
-  status: null,
   outcome: ClassOutcome.Pending,
   executionState: ClassExecutionState.NotActivated,
   avatarUrl: null,

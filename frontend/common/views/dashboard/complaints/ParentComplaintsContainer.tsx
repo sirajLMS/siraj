@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { ComplaintCategory, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ComplaintCategory, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   parentComplaintsQueryDocument,
   submitComplaintMutationDocument,

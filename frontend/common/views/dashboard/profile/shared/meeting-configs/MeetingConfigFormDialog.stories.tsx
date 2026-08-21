@@ -1,7 +1,7 @@
 import type { MockLink } from "@apollo/client/testing";
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   createUserMeetingConfigMutationDocument,
   generateMeetingUrlMutationDocument,

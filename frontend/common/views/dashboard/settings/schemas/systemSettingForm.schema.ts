@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SystemSettingCategory, SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { SystemSettingCategory, SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SettingsGeneralTabLabels } from "@/shared/locale/types/dashboard/settings/general";
 
 export { SystemSettingCategory, SystemSettingDataType };

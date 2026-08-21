@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
-import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   cleanupTestEntitiesMutationDocument,
   createTeacherManualClassEntryMutationDocument,

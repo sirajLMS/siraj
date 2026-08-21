@@ -1,10 +1,11 @@
 import type { GridColDef } from "@mui/x-data-grid";
-import { CronConcurrencyPolicy, CronJobKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  CronQueueStatsFieldsFragment,
-  CronRunFieldsFragment,
-  CronScheduleFieldsFragment,
-} from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  CronConcurrencyPolicy,
+  CronJobKind,
+  type CronQueueStatsFieldsFragment,
+  type CronRunFieldsFragment,
+  type CronScheduleFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CronLabels } from "@/shared/locale/types/dashboard/cron";
 
 export interface CronNotificationState {

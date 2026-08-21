@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import {
-  AppPermission,
-  AvailabilitySearchSortBy,
-  IanaTimezone,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
@@ -89,7 +86,7 @@ const mockSearchResult = {
         id: "teacher-1",
         name: "Ahmed Hassan",
         gender: "MALE",
-        timezone: IanaTimezone.AfricaCairo,
+        timezone: IanaTimezone.Africa_Cairo,
         availableDaysCount: 2,
         gaps: [
           {
@@ -101,7 +98,7 @@ const mockSearchResult = {
             calendarDate: fromDate,
             gapStartTime: "09:00",
             gapEndTime: "11:00",
-            timezone: IanaTimezone.AfricaCairo,
+            timezone: IanaTimezone.Africa_Cairo,
           },
         ],
       },

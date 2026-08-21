@@ -1,4 +1,4 @@
-import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";
 
 const VALID_PARENT_LIFECYCLE_STATUSES = new Set(Object.values(ParentStatus).map(v => v.toLowerCase()));

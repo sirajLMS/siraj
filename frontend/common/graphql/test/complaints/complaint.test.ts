@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ComplaintCategory, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ComplaintCategory, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   adminComplaintQueueQueryDocument,
   deleteComplaintMutationDocument,

@@ -1,7 +1,7 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { SupervisorDashboardQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const supervisorDashboardQueryDocument: TypedDocumentNode<Operations.SupervisorDashboardQuery> = gql`
+export const supervisorDashboardQueryDocument: TypedDocumentNode<SupervisorDashboardQuery> = gql`
   query supervisorDashboard {
     supervisorDashboard {
       supervisorName

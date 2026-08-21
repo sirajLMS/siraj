@@ -1,8 +1,11 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  PaymentDirection,
+  PaymentMethodType,
+  type UserPaymentMethodFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   UserPaymentMethodAutocompleteDesktop,
   type UserPaymentMethodAutocompleteProps,

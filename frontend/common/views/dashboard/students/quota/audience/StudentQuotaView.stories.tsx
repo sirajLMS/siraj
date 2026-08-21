@@ -1,6 +1,6 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AccountStatus, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   quotaLedgerQueryDocument,
   studentQuotasQueryDocument,
@@ -273,7 +273,6 @@ function setStudentUser() {
       phone: null,
       status: AccountStatus.Activated,
       displayCurrency: CurrencyCode.Usd,
-      __typename: "User",
     },
   });
 }

@@ -1,6 +1,9 @@
 // NEW FOR PLAN v5: Lifted pure-data helper out of tier (specs.md §5 N9 violation).
-import { EffectiveMeetingSource, type OnlineMeetingInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  type EffectiveMeetingFieldsFragment,
+  EffectiveMeetingSource,
+  type GroupClassAuditQuery_groupClassAudit_meetingInfo,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 
 const EFFECTIVE_MEETING_SOURCE_VALUES = new Set(Object.values(EffectiveMeetingSource) as string[]);
@@ -9,7 +12,7 @@ export function isEffectiveMeetingSource(value: string | null | undefined): valu
 }
 
 export function resolveProviderDisplayName(
-  meetingInfo: OnlineMeetingInfo | null | undefined,
+  meetingInfo: GroupClassAuditQuery_groupClassAudit_meetingInfo | null | undefined,
   locale: string
 ): string | null {
   if (!meetingInfo) return null;
@@ -20,7 +23,7 @@ export function resolveProviderDisplayName(
 }
 
 export function toEffectiveMeeting(
-  meetingInfo: OnlineMeetingInfo | null | undefined
+  meetingInfo: GroupClassAuditQuery_groupClassAudit_meetingInfo | null | undefined
 ): EffectiveMeetingFieldsFragment | null {
   if (!meetingInfo) return null;
   return {

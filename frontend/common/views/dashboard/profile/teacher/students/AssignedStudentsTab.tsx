@@ -2,11 +2,11 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { ProfileByUserIdQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabTypes";
 import { useAssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/useAssignedStudentsTabViewModel";
 
-type AssignedStudentsResult = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"];
+type AssignedStudentsResult = NonNullable<ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"];
 
 type AssignedStudentsTabProps = {
   readonly assignedStudents: AssignedStudentsResult | null | undefined;

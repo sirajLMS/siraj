@@ -16,7 +16,7 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql";
 import { LessonReportSubmitDialog } from "@/frontend/common/views/dashboard/teachers/dashboard/components/LessonReportSubmitDialog";
 import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
 import type { AppLocale } from "@/shared/locale/AppLocale";

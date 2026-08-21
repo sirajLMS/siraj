@@ -1,13 +1,34 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ActivateClassMutation,
+  ActivateClassMutationVariables,
+  ActivateOverrideClassMutation,
+  ActivateOverrideClassMutationVariables,
+  ClassInstanceQuery,
+  ClassInstanceQueryVariables,
+  ClassStatusEventsQuery,
+  ClassStatusEventsQueryVariables,
+  DeleteClassInstanceMutation,
+  DeleteClassInstanceMutationVariables,
+  OverrideClassInstanceRateMutation,
+  OverrideClassInstanceRateMutationVariables,
+  RescheduleClassMutation,
+  RescheduleClassMutationVariables,
+  ResetClassMutation,
+  ResetClassMutationVariables,
+  StopClassMutation,
+  StopClassMutationVariables,
+  UpdateSessionStatusAbsentMutation,
+  UpdateSessionStatusAbsentMutationVariables,
+  UpdateSessionStatusLeaveMutation,
+  UpdateSessionStatusLeaveMutationVariables,
+  UpdateSessionStatusStartMutation,
+  UpdateSessionStatusStartMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 
-export const classInstanceQueryDocument: TypedDocumentNode<
-  Operations.ClassInstanceQuery,
-  Types.QueryClassInstanceArgs
-> = gql`
+export const classInstanceQueryDocument: TypedDocumentNode<ClassInstanceQuery, ClassInstanceQueryVariables> = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query classInstance($id: ID!) {
     classInstance(id: $id) {
@@ -73,8 +94,8 @@ export const classInstanceQueryDocument: TypedDocumentNode<
 `;
 
 export const classStatusEventsQueryDocument: TypedDocumentNode<
-  Operations.ClassStatusEventsQuery,
-  Types.QueryClassStatusEventsArgs
+  ClassStatusEventsQuery,
+  ClassStatusEventsQueryVariables
 > = gql`
   query classStatusEvents($classInstanceId: ID!) {
     classStatusEvents(classInstanceId: $classInstanceId) {
@@ -86,10 +107,8 @@ export const classStatusEventsQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const activateClassMutationDocument: TypedDocumentNode<
-  Operations.ActivateClassMutation,
-  Types.MutationActivateClassArgs
-> = gql`
+export const activateClassMutationDocument: TypedDocumentNode<ActivateClassMutation, ActivateClassMutationVariables> =
+  gql`
   mutation activateClass($classInstanceId: ID!) {
     activateClass(classInstanceId: $classInstanceId) {
       id
@@ -101,8 +120,8 @@ export const activateClassMutationDocument: TypedDocumentNode<
 `;
 
 export const activateOverrideClassMutationDocument: TypedDocumentNode<
-  Operations.ActivateOverrideClassMutation,
-  Types.MutationActivateOverrideClassArgs
+  ActivateOverrideClassMutation,
+  ActivateOverrideClassMutationVariables
 > = gql`
   mutation activateOverrideClass($classInstanceId: ID!) {
     activateOverrideClass(classInstanceId: $classInstanceId) {
@@ -115,18 +134,15 @@ export const activateOverrideClassMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const resetClassMutationDocument: TypedDocumentNode<
-  Operations.ResetClassMutation,
-  Types.MutationResetClassArgs
-> = gql`
+export const resetClassMutationDocument: TypedDocumentNode<ResetClassMutation, ResetClassMutationVariables> = gql`
   mutation resetClass($classInstanceId: ID!) {
     resetClass(classInstanceId: $classInstanceId)
   }
 `;
 
 export const updateSessionStatusStartMutationDocument: TypedDocumentNode<
-  Operations.UpdateSessionStatusStartMutation,
-  Types.MutationUpdateSessionStatusStartArgs
+  UpdateSessionStatusStartMutation,
+  UpdateSessionStatusStartMutationVariables
 > = gql`
   mutation updateSessionStatusStart($classInstanceId: ID!) {
     updateSessionStatusStart(classInstanceId: $classInstanceId) {
@@ -140,8 +156,8 @@ export const updateSessionStatusStartMutationDocument: TypedDocumentNode<
 `;
 
 export const updateSessionStatusAbsentMutationDocument: TypedDocumentNode<
-  Operations.UpdateSessionStatusAbsentMutation,
-  Types.MutationUpdateSessionStatusAbsentArgs
+  UpdateSessionStatusAbsentMutation,
+  UpdateSessionStatusAbsentMutationVariables
 > = gql`
   mutation updateSessionStatusAbsent($classInstanceId: ID!) {
     updateSessionStatusAbsent(classInstanceId: $classInstanceId) {
@@ -157,8 +173,8 @@ export const updateSessionStatusAbsentMutationDocument: TypedDocumentNode<
 `;
 
 export const updateSessionStatusLeaveMutationDocument: TypedDocumentNode<
-  Operations.UpdateSessionStatusLeaveMutation,
-  Types.MutationUpdateSessionStatusLeaveArgs
+  UpdateSessionStatusLeaveMutation,
+  UpdateSessionStatusLeaveMutationVariables
 > = gql`
   mutation updateSessionStatusLeave($classInstanceId: ID!, $leaveReason: String!) {
     updateSessionStatusLeave(classInstanceId: $classInstanceId, leaveReason: $leaveReason) {
@@ -180,8 +196,7 @@ export const updateSessionStatusLeaveMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const stopClassMutationDocument: TypedDocumentNode<Operations.StopClassMutation, Types.MutationStopClassArgs> =
-  gql`
+export const stopClassMutationDocument: TypedDocumentNode<StopClassMutation, StopClassMutationVariables> = gql`
   mutation stopClass($classInstanceId: ID!) {
     stopClass(classInstanceId: $classInstanceId) {
       id
@@ -193,8 +208,8 @@ export const stopClassMutationDocument: TypedDocumentNode<Operations.StopClassMu
 `;
 
 export const rescheduleClassMutationDocument: TypedDocumentNode<
-  Operations.RescheduleClassMutation,
-  Types.MutationRescheduleClassArgs
+  RescheduleClassMutation,
+  RescheduleClassMutationVariables
 > = gql`
   mutation rescheduleClass($classInstanceId: ID!, $input: RescheduleClassInput!) {
     rescheduleClass(classInstanceId: $classInstanceId, input: $input) {
@@ -209,8 +224,8 @@ export const rescheduleClassMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteClassInstanceMutationDocument: TypedDocumentNode<
-  Operations.DeleteClassInstanceMutation,
-  Types.MutationDeleteClassInstanceArgs
+  DeleteClassInstanceMutation,
+  DeleteClassInstanceMutationVariables
 > = gql`
   mutation deleteClassInstance($classInstanceId: ID!) {
     deleteClassInstance(classInstanceId: $classInstanceId) {
@@ -221,8 +236,8 @@ export const deleteClassInstanceMutationDocument: TypedDocumentNode<
 `;
 
 export const overrideClassInstanceRateMutationDocument: TypedDocumentNode<
-  Operations.OverrideClassInstanceRateMutation,
-  Types.MutationOverrideClassInstanceRateArgs
+  OverrideClassInstanceRateMutation,
+  OverrideClassInstanceRateMutationVariables
 > = gql`
   mutation overrideClassInstanceRate($classInstanceId: ID!, $rateAmount: String, $rateCurrency: CurrencyCode) {
     overrideClassInstanceRate(classInstanceId: $classInstanceId, rateAmount: $rateAmount, rateCurrency: $rateCurrency) {

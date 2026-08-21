@@ -1,5 +1,5 @@
 import { CheckCircleOutlined, ConfirmationNumberOutlined, ScheduleOutlined } from "@mui/icons-material";
-import { QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import type { QuotaLabels } from "@/shared/locale/types/dashboard/billing/quota";

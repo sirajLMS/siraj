@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface AvailabilitySearchFilters {
   readonly fromTime: Date | null;

@@ -2,9 +2,9 @@
 
 import { Stack, Typography } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import type { StaffSectionLabelsBundle } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 
 type StaffExtensionProfileSectionProps = {
   readonly scope?: ProfileScope;

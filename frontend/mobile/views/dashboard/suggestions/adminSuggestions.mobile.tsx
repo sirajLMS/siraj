@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Typography } from "@mui/material";
-import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AdminSuggestionRow } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import type { SuggestionsAdminLabels } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";
 import type { AdminSuggestionsViewModel } from "@/frontend/common/views/dashboard/suggestions/useAdminSuggestionsViewModel";

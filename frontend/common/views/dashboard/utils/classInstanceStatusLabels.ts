@@ -1,4 +1,4 @@
-import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AdminDashboardLabels } from "@/shared/locale";
 
 export function buildClassInstanceStatusLabels(

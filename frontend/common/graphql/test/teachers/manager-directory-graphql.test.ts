@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import crypto from "node:crypto";
-import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   managerDirectoryQueryDocument,
   updateManagerProfileMutationDocument,

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import {
   type LifecycleUpdateFormData,

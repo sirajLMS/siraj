@@ -1,4 +1,2 @@
-export enum AvailabilityStatus {
-  AVAILABLE = "AVAILABLE",
-  OUT_OF_STOCK = "OUT_OF_STOCK",
-}
+// Re-export from canonical shared location
+export * from "@/shared/constants/availability-status.enum";

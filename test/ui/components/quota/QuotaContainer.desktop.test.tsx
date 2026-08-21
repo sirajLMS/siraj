@@ -47,7 +47,7 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";
 import { QuotaListDesktop } from "@/frontend/desktop/views/dashboard/billing/quota/quotaList.desktop";
 import { mockNextNavigation } from "@/test/ui/components/helpers/mockNavigation";

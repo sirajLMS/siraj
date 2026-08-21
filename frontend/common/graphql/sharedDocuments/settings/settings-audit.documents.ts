@@ -1,6 +1,8 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  SettingsAuditLogsQuery,
+  SettingsAuditLogsQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const AUDIT_LOG_FIELDS = gql`
   fragment AuditLogFields on AuditLog {
@@ -22,8 +24,8 @@ const AUDIT_LOG_FIELDS = gql`
 `;
 
 export const settingsAuditLogsQueryDocument: TypedDocumentNode<
-  Operations.SettingsAuditLogsQuery,
-  Types.QuerySettingsAuditLogsArgs
+  SettingsAuditLogsQuery,
+  SettingsAuditLogsQueryVariables
 > = gql`
   ${AUDIT_LOG_FIELDS}
   query settingsAuditLogs($filter: SettingsAuditLogFilter) {

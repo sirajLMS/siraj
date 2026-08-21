@@ -1,6 +1,6 @@
 "use client";
 
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type FormatCurrencyMessages, formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import type { ReportPaidAmount } from "@/frontend/common/views/dashboard/reports/types/reportsTypes";
 

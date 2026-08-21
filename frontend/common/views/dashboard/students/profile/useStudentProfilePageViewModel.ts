@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { useStudentHistoryStore } from "@/frontend/common/stores/studentHistoryStore";

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { isUsersDirectoryEnabled } from "@/backend/lib/features/is-users-directory-enabled";
-import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { MeQuery_me as User } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AppClientProviders as DashboardClientProviders } from "@/frontend/common/providers/AppClientProviders";
 import { DashboardClientBridge } from "@/frontend/common/views/dashboard/components/DashboardClientBridge";
 import { getTranslations } from "@/shared/locale";

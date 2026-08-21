@@ -2,8 +2,9 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 const ownParentData = {
   name: "Noor Abdullah",
@@ -21,7 +22,7 @@ const adminParentData = {
   invoiceType: "Monthly",
   feeAmount: "500",
   currency: CurrencyCode.Sar,
-  timezone: "Asia/Riyadh" as const,
+  timezone: IanaTimezone.Asia_Riyadh as const,
 };
 
 const meta: Meta<typeof ParentProfileEditForm> = {

@@ -1,6 +1,6 @@
 import { Box, Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { CurrencyOptionRowMobile } from "@/frontend/mobile/components/ui/input/currencySelect/currencyOptionRow.mobile";

@@ -1,4 +1,4 @@
-import type { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface LanguageType {
   code: AppLanguage;

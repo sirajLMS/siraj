@@ -2,8 +2,8 @@ import {
   PaymentDirection,
   type PaymentMethodDetailsInput,
   PaymentMethodType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+  type UserPaymentMethodFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentMethodFormValues } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
 export function emptyPaymentMethodDetailsInput(): PaymentMethodDetailsInput {

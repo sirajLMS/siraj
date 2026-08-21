@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Resolver } from "react-hook-form";
 import { z } from "zod";
-import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AvailabilitySearchFormData } from "@/frontend/common/views/dashboard/teachers/availability/types";
 
 export type AvailabilitySearchValidationLabels = {

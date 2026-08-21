@@ -260,11 +260,11 @@ When a component uses `useQuery` internally (e.g., `MeetingConfigFormDialog` que
 
 ```typescript
 import { meetingProvidersQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
-import type { Operations } from "@/frontend/common/graphql/generated/gql/operations";
+import type { MeetingProvidersQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 
 const mock = {
   request: { query: meetingProvidersQueryDocument, variables: { activeOnly: true } },
-  result: { data: { meetingProviders: [/* ... */] } satisfies Operations.MeetingProvidersQuery },
+  result: { data: { meetingProviders: [/* ... */] } satisfies MeetingProvidersQuery },
 };
 
 renderWithWrapper(<Component />, { mocks: [mock] });

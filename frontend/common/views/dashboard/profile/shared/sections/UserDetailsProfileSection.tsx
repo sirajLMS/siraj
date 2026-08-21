@@ -8,11 +8,13 @@ import { SectionPanel } from "@/frontend/common/components/ui";
 import { CurrencyDisplay } from "@/frontend/common/components/ui/display/currencyDisplay";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDisplay/PhoneDisplay";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
-import type { CurrencyCode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 
 type UserDetailsProfileSectionProps = {
   readonly scope?: ProfileScope;
@@ -21,7 +23,7 @@ type UserDetailsProfileSectionProps = {
   readonly timezoneLabel: string;
   readonly currencyLabel: string;
   readonly phone: string | null | undefined;
-  readonly timezone: string | null | undefined;
+  readonly timezone: IanaTimezone | null | undefined;
   readonly displayCurrency: CurrencyCode | null | undefined;
   readonly baseLabels?: ProfileSharedBaseLabels;
 };

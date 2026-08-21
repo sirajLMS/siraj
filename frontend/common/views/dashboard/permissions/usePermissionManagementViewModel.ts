@@ -2,11 +2,11 @@
 
 import { useMemo } from "react";
 import type {
-  Permission,
-  PermissionGroup,
-  User,
-  UserOverride,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  PermissionsQuery_permissions as Permission,
+  PermissionGroupDetailFieldsFragment as PermissionGroup,
+  UsersQuery_users as User,
+  UserOverridesQuery_userOverrides as UserOverride,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   type PermissionManagementTab,
   usePermissionManagementStore,

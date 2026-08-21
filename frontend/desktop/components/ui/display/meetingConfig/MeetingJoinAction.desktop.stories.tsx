@@ -1,7 +1,9 @@
 import { Box, Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  type EffectiveMeetingFieldsFragment,
+  EffectiveMeetingSource,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { DesktopMeetingJoinAction } from "@/frontend/desktop/components/ui/display/meetingConfig/MeetingJoinAction.desktop";
 
 const mockMeeting: EffectiveMeetingFieldsFragment = {

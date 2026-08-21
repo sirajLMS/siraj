@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
-import type { DailyScheduleList } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   AdminMetricKey,
   DashboardFilters,
@@ -11,6 +10,7 @@ import type {
   TeacherFilterItem,
 } from "@/frontend/common/types/shared.types";
 import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
+import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 
 export interface DashboardState {
   readonly filters: DashboardFilters;
@@ -26,7 +26,7 @@ export interface DashboardState {
   // Mock properties (fully defined in both stores for clean type checking)
   readonly todayClasses: readonly MetricItem[];
   readonly lastUpdated: string;
-  readonly scheduleRows: readonly DailyScheduleList[];
+  readonly scheduleRows: readonly DailyScheduleRow[];
   readonly teachers: readonly TeacherFilterItem[];
   readonly pagination: Pagination;
   readonly setPage: (page: number) => void;

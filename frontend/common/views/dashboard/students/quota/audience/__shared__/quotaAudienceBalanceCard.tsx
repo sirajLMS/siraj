@@ -5,7 +5,7 @@ import { Alert, Box, Paper, Stack, Typography } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { ReactElement } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui/badge";
-import type { StudentQuotasQuery_studentQuotas_Quota } from "@/frontend/common/graphql/generated/gql/operations";
+import type { StudentQuotasQuery_studentQuotas } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   getExpiryWarningThreshold,
   isExpiringSoon,
@@ -14,7 +14,7 @@ import {
 import { getQuotaStatusLabel } from "@/frontend/common/views/dashboard/students/quota/audience/__shared__/quotaAudienceStatus.utils";
 import type { StudentQuotaLabels } from "@/shared/locale/types/dashboard/students/quota";
 
-type QuotaRow = StudentQuotasQuery_studentQuotas_Quota;
+type QuotaRow = StudentQuotasQuery_studentQuotas;
 
 export interface QuotaBalanceCardProps {
   readonly quota: QuotaRow;

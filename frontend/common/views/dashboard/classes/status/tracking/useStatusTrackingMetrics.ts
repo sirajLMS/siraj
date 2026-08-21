@@ -12,7 +12,7 @@ import {
   type MetricCounts,
   type RawMetric,
   SessionStatus,
-  type StatusTrackingRow,
+  type StatusTrackingScheduleRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -28,7 +28,7 @@ const METRIC_DEFINITIONS: readonly (Omit<RawMetric, "count"> & { readonly key: k
   { key: "on_leave", labelKey: "metrics.onLeave", icon: EventAvailableOutlined },
 ];
 
-function computeMetricCounts(rows: readonly StatusTrackingRow[]): MetricCounts {
+function computeMetricCounts(rows: readonly StatusTrackingScheduleRow[]): MetricCounts {
   const counts = { regular: 0, pending: 0, suspended: 0, on_leave: 0 };
   for (const row of rows) {
     const status = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
@@ -49,7 +49,7 @@ function buildMetrics(counts: MetricCounts, subLabelMap: Record<string, string>)
   );
 }
 
-export function useStatusTrackingMetrics(rows: readonly StatusTrackingRow[]) {
+export function useStatusTrackingMetrics(rows: readonly StatusTrackingScheduleRow[]) {
   const t = useAppTranslation(Translation.Dashboard.CoreStatusTracking);
 
   const suspendedCount = useMemo(

@@ -1,6 +1,10 @@
 import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionGroupDetailFieldsFragment,
+  PermissionsQuery_permissions,
+  UsersQuery_users,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 
@@ -12,9 +16,9 @@ function isOverrideState(value: unknown): value is OverrideState {
 
 interface UseOverrideDataParams {
   readonly userId: string | null;
-  readonly users: readonly User[];
-  readonly groups: readonly PermissionGroup[];
-  readonly permissions: readonly Permission[];
+  readonly users: readonly UsersQuery_users[];
+  readonly groups: readonly PermissionGroupDetailFieldsFragment[];
+  readonly permissions: readonly PermissionsQuery_permissions[];
   readonly open: boolean;
   readonly searchQuery: string;
 }

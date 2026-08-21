@@ -13,7 +13,7 @@ import {
   type AppPermission,
   AppPermission as AppPermissionEnum,
   CurrencyCode as CurrencyCodeEnum,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import { createAppCssVarsTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";

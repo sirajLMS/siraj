@@ -7,11 +7,14 @@ import { useParams } from "next/navigation";
 import { type RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 import { type UseFormReturn, useForm, useWatch } from "react-hook-form";
 import {
+  type EffectiveMeetingFieldsFragment,
   ClassExecutionState as GqlClassExecutionState,
+  type StudentByIdQuery,
+  type StudentByIdQuery_studentById,
   StudentStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as GqlOperations from "@/frontend/common/graphql/generated/gql/operations";
-import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+  type StudentUpcomingClassesQuery,
+  type StudentUpcomingClassesQuery_studentUpcomingClasses,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { studentByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student.documents";
 import { changeStudentStatusMutationDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-lifecycle.documents";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
@@ -69,8 +72,8 @@ function mapUpcomingClasses(classes: readonly UpcomingClassInput[] | null | unde
   }));
 }
 
-type StudentByIdType = NonNullable<GqlOperations.StudentByIdQuery["studentById"]>;
-type StudentUpcomingType = GqlOperations.StudentUpcomingClassesQuery["studentUpcomingClasses"] | undefined;
+type StudentByIdType = NonNullable<StudentByIdQuery_studentById>;
+type StudentUpcomingType = NonNullable<StudentUpcomingClassesQuery_studentUpcomingClasses> | undefined;
 
 function buildStudentFromProfile(profile: NonNullable<StudentProfileQueryData>): StudentStatusPageData | null {
   if (!profile.id || !profile.name) return null;
@@ -134,10 +137,10 @@ export interface StudentStatusViewModel {
 }
 
 type QueryResult = {
-  readonly studentData: GqlOperations.StudentByIdQuery | undefined;
+  readonly studentData: StudentByIdQuery | undefined;
   readonly studentLoading: boolean;
   readonly studentError: unknown;
-  readonly upcomingData: GqlOperations.StudentUpcomingClassesQuery | undefined;
+  readonly upcomingData: StudentUpcomingClassesQuery | undefined;
   readonly upcomingLoading: boolean;
   readonly upcomingError: unknown;
   readonly refetchUpcoming: (() => Promise<unknown> | undefined) | undefined;
@@ -206,7 +209,7 @@ function useStudentStatusData(env: Readonly<DataEnv>): DataResult {
     }
     const s = queries.studentData?.studentById;
     if (!s?.id || !s.name) return null;
-    return buildStudentFromQuery(s, queries.upcomingData?.studentUpcomingClasses);
+    return buildStudentFromQuery(s, queries.upcomingData?.studentUpcomingClasses ?? undefined);
   }, [useUnifiedProfile, profileContext?.profile, queries.studentData, queries.upcomingData]);
 
   const versionRef = useRef<number | null>(student?.version ?? null);

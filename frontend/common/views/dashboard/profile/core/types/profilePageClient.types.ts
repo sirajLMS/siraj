@@ -1,4 +1,4 @@
-import type { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ProfileAudience, ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import type { ProfileLabels, ProfileParentLabels, ProfileTeacherLabels } from "@/shared/locale/types/profile";
 
 export type ProfilePageClientProps = {

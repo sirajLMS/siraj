@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { OperationVariables, TypedDocumentNode } from "@apollo/client";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,

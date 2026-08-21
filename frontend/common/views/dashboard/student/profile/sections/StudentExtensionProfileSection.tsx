@@ -11,7 +11,7 @@ import { GenderSelector } from "@/frontend/common/components/ui/input/genderSele
 import { LanguageSelector } from "@/frontend/common/components/ui/input/languageSelector/LanguageSelector";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
 import { getLanguageByCode } from "@/frontend/common/lib/locale";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import type {
@@ -99,9 +99,9 @@ function StudentExtensionProfileEditSection({
         />
         {timezoneOverrideLabel ? (
           <TimezoneSelect
-            value={draft.timezoneOverride ? toGraphqlIanaTimezone(draft.timezoneOverride) : null}
+            value={draft.timezoneOverride ? toIanaTimezone(draft.timezoneOverride) : null}
             onChangeAction={value => {
-              onDraftChange({ timezoneOverride: value ? fromGraphqlIanaTimezone(value) : "" });
+              onDraftChange({ timezoneOverride: value ?? "" });
             }}
             label={timezoneOverrideLabel}
             fullWidth

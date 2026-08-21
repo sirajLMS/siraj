@@ -1,9 +1,10 @@
 // NEW FOR PLAN v5 (lifted from frontend/{mobile,desktop}/components/ui/display/paymentMethod/paymentMethodDisplay.types.ts)
 import type {
+  CountryCode,
   CurrencyCode,
   PaymentDirection,
   PaymentMethodType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { LocalizedString } from "@/shared/types";
 
 export type PaymentMethodDisplayData = {
@@ -23,8 +24,8 @@ export type PaymentMethodDisplayData = {
     readonly beneficiaryName?: string | null;
     readonly note?: string | null;
   } | null;
-  readonly countryCode?: string | null;
-  readonly currencyCode?: CurrencyCode | string | null;
+  readonly countryCode?: CountryCode | null;
+  readonly currencyCode?: CurrencyCode | null;
   readonly verifiedAt?: string | null;
   readonly isActive?: boolean | null;
   readonly isDefault?: boolean;

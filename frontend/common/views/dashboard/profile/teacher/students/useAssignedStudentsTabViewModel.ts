@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { ProfileByUserIdQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AssignedStudentsRow } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsRowTypes";
 import type { AssignedStudentsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/students/assignedStudentsTabTypes";
 import { type ProfileStudentsLabels, Translation, useAppTranslation } from "@/shared/locale";
 
-type AssignedStudentsResult = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"];
+type AssignedStudentsResult = NonNullable<ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"];
 type AssignedStudentsItem = NonNullable<NonNullable<AssignedStudentsResult>["rows"]>[number];
 
 export type UseAssignedStudentsTabViewModelProps = {

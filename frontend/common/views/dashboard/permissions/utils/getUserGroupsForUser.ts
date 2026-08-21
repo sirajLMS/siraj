@@ -1,5 +1,8 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
-import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionGroupDetailFieldsFragment,
+  PermissionGroupDetailFieldsFragment_assignedUsers,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 /**
  * Returns the subset of `groups` whose `assignedUsers` collection includes
@@ -9,8 +12,10 @@ import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/gr
  */
 export function getUserGroupsForUser(
   userId: string | undefined,
-  groups: readonly PermissionGroup[]
-): readonly PermissionGroup[] {
+  groups: readonly PermissionGroupDetailFieldsFragment[]
+): readonly PermissionGroupDetailFieldsFragment[] {
   if (!userId) return [];
-  return groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
+  return groups.filter(g =>
+    g.assignedUsers?.some((au: PermissionGroupDetailFieldsFragment_assignedUsers) => au.id === userId)
+  );
 }

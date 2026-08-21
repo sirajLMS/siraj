@@ -5,7 +5,7 @@ import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { CountryOptionRowMobile } from "@/frontend/mobile/components/ui/input/countrySelect/countryOptionRow.mobile";
 
 const sampleCountries = ["SA", "EG", "AE", "US"].flatMap(code => {
-  const country = countries.find(entry => entry.code === code);
+  const country = countries.find(entry => entry.code.toString() === code);
   return country ? [country] : [];
 });
 

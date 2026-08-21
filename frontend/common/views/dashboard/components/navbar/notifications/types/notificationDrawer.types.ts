@@ -1,4 +1,4 @@
-import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { NotificationsLabels } from "@/shared/locale/types/notifications";
 import type { NotificationMetadata } from "@/shared/types/notification-alerts.types";
 

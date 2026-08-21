@@ -2,11 +2,11 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import {
   CurrencyCode,
-  IanaTimezone,
   ManagerAccountType,
   type ManagerOnboardingInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import {
   assertOperationDenied,
   authenticatedRequest,
@@ -74,7 +74,7 @@ describe("Manager Onboarding GraphQL API", () => {
         avatarUrl: "https://example.com/avatar.png",
         displayCurrency: CurrencyCode.Usd,
         phone: "+201000000000",
-        timezone: IanaTimezone.AfricaCairo,
+        timezone: IanaTimezone.Africa_Cairo,
       }),
     });
 

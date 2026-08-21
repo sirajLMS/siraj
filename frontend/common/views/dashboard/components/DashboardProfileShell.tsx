@@ -11,8 +11,8 @@ import {
   AccountStatus,
   AppPermission,
   CurrencyCode,
-  type User,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  type MeQuery_me,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   isTeacherProfileCompletionPath,
   TEACHER_PROFILE_COMPLETION_EDIT_HREF,
@@ -98,7 +98,7 @@ export async function DashboardProfileShell({
     if (handled) return;
   }
 
-  const mappedUser: User = {
+  const mappedUser: MeQuery_me = {
     id: userProfile.id,
     name: userProfile.name,
     email: userProfile.email,

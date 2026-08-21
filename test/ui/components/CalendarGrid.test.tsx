@@ -4,10 +4,10 @@ import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentHistoryLabelsProvider } from "@/frontend/common/views/dashboard/students/history/studentHistoryLabelsContext";
 import type { ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { CalendarGridDesktop } from "@/frontend/desktop/views/dashboard/students/history/components/calendarGrid.desktop";
+import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
@@ -48,7 +48,7 @@ describe("CalendarGridDesktop", () => {
       title: "Math Class",
       time: "10:00",
       duration: 60,
-      status: AttendanceStatus.Present,
+      status: AttendanceStatus.PRESENT,
       instructor: "Teacher John",
       timeSlot: "morning",
       room: "Room A",
@@ -71,7 +71,7 @@ describe("CalendarGridDesktop", () => {
       title: "Math Class",
       time: "10:00",
       duration: 60,
-      status: AttendanceStatus.Present,
+      status: AttendanceStatus.PRESENT,
       instructor: "Teacher John",
       timeSlot: "morning",
       room: "Room A",

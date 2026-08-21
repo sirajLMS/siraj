@@ -1,7 +1,8 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { IanaTimezone, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { createParentMutationDocument, createStudentMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
@@ -23,7 +24,7 @@ const createMinimalParentInput = (overrides?: Partial<{ name: string; email: str
   feeAmount: null,
   initialPayinMethod: null,
   currency: null,
-  timezone: IanaTimezone.Utc,
+  timezone: IanaTimezone.UTC,
   address: null,
   facebook: null,
   nationality: null,

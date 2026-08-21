@@ -3,7 +3,7 @@
 import { Chip } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { SupportedOnlineAccountFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { SupportedOnlineAccountFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { resolveIdentifierKindLabel } from "@/frontend/common/views/dashboard/admin/payment-catalogs/utils/paymentCatalogLabels.utils";
 import { CatalogGridShared } from "@/frontend/desktop/views/dashboard/admin/payment-catalogs/components/__shared__/catalogGridShared";

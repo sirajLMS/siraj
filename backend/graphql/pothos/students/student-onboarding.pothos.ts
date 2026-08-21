@@ -3,7 +3,6 @@ import {
   AppLanguagePothosObject,
   CurrencyCodePothosObject,
   GenderPothosObject,
-  IanaTimezonePothosObject,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { StudentOnboardingInput, StudentOnboardingResult } from "@/backend/types";
@@ -33,7 +32,7 @@ export const StudentOnboardingInputPothosObject = gqlSchemaBuilder
         description: "Student login password (required when email is provided)",
       }),
       timezone: t.field({
-        type: IanaTimezonePothosObject,
+        type: "IanaTimezone",
         description: "Student timezone (applied to the created user record)",
       }),
       phone: t.string({

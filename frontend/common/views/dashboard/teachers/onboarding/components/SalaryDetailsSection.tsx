@@ -5,7 +5,7 @@ import { type Control, type FieldErrors, type UseFormRegister, useWatch } from "
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { CurrencySelectController } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySelectControllerShared";
 import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
 

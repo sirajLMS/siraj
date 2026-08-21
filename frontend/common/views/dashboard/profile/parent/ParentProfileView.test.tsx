@@ -3,12 +3,9 @@ import { cleanup, screen } from "@testing-library/react";
 import {
   AccountStatus,
   CurrencyCode,
-  IanaTimezone,
   ParentStatus,
-  ProfileMode,
-  ProfileScope,
   StudentStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { ParentProfileView } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileView";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import type {
@@ -16,6 +13,8 @@ import type {
   ParentAdminData,
   ParentOwnData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { profileBaseEn } from "@/shared/locale/en/profile/base";
 import { profileParentEn } from "@/shared/locale/en/profile/parent";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
@@ -55,7 +54,7 @@ const parentAdminProfile: ParentAdminData = {
   feeAmount: "500",
   currency: CurrencyCode.Sar,
   displayAmount: null,
-  timezone: IanaTimezone.AsiaRiyadh,
+  timezone: IanaTimezone.Asia_Riyadh,
   createdAt: "2024-01-15T00:00:00.000Z",
   updatedAt: "2024-06-01T00:00:00.000Z",
 };
@@ -93,7 +92,7 @@ const baseEditData: ParentAdminEditFormData = {
   invoiceType: "Monthly",
   feeAmount: "500",
   currency: CurrencyCode.Sar,
-  timezone: IanaTimezone.AsiaRiyadh,
+  timezone: IanaTimezone.Asia_Riyadh,
   lifecycleStatus: ParentStatus.Regular,
 };
 
@@ -110,8 +109,8 @@ describe("ParentProfileView admin sections", () => {
     renderWithWrapper(
       <ParentProfileView
         labels={mockParentProfileLabels}
-        scope={ProfileScope.Own}
-        mode={ProfileMode.View}
+        scope={ProfileScope.OWN}
+        mode={ProfileMode.VIEW}
         targetUserId="user-self-1"
         activeTab="profile"
         isAdminScope={false}
@@ -143,8 +142,8 @@ describe("ParentProfileView admin sections", () => {
     renderWithWrapper(
       <ParentProfileView
         labels={mockParentProfileLabels}
-        scope={ProfileScope.Other}
-        mode={ProfileMode.View}
+        scope={ProfileScope.OTHER}
+        mode={ProfileMode.VIEW}
         targetUserId="user-parent-1"
         activeTab="profile"
         isAdminScope={true}
@@ -157,7 +156,7 @@ describe("ParentProfileView admin sections", () => {
         editData={baseEditData}
         avatarUrl={null}
         displayCurrency={CurrencyCode.Sar}
-        profileTimezone={IanaTimezone.AsiaRiyadh}
+        profileTimezone={IanaTimezone.Asia_Riyadh}
         profilePhone="+966500000000"
         parentId="parent-admin-1"
         meetingTabHref="?tab=meeting"

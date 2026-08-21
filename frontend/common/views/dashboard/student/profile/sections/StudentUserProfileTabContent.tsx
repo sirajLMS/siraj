@@ -1,12 +1,12 @@
 "use client";
 
 import { Stack } from "@mui/material";
-import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/student/profile/sections/AdminOnlySection";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
 import { StudentProfileUserDetailsSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileUserDetailsSection";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 import type { StudentPortalProfileLabels } from "@/shared/locale/types/dashboard/studentPortal/studentProfile";
 import type { ProfileLabels, ProfileParentLabels, ProfileTeacherLabels } from "@/shared/locale/types/profile";
 
@@ -34,7 +34,7 @@ export function StudentUserProfileTabContent({
     labels,
     notSetLabel: baseLabels.notSet,
     timezoneLabel: parentLabels.fields.timezone,
-    enforceFieldAccess: scope !== ProfileScope.Own,
+    enforceFieldAccess: scope !== ProfileScope.OWN,
   };
 
   const adminOnlyLabels = {
@@ -62,7 +62,7 @@ export function StudentUserProfileTabContent({
         formattedDateOfBirth={formattedDateOfBirth}
       />
       <StudentParentAssignmentProfileSection {...sectionProps} sectionTitle={labels.parentInfo} />
-      {scope === ProfileScope.Other && <AdminOnlySection mode="view" labels={adminOnlyLabels} profile={profile} />}
+      {scope === ProfileScope.OTHER && <AdminOnlySection mode="view" labels={adminOnlyLabels} profile={profile} />}
     </Stack>
   );
 }

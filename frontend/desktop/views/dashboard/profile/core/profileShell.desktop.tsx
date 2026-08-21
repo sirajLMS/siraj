@@ -2,18 +2,18 @@
 
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
-import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileShellShared } from "@/frontend/common/views/dashboard/profile/core/__shared__/profileShellShared";
 import { ProfileHeader } from "@/frontend/common/views/dashboard/profile/core/ProfileHeader";
 import type { ProfileShellProps } from "@/frontend/common/views/dashboard/profile/core/profileShellTypes";
 import type { ProfileShellViewModel } from "@/frontend/common/views/dashboard/profile/core/types/profileShell.types";
 import { DesktopPageContainer } from "@/frontend/desktop/components/ui";
+import { ProfileMode } from "@/shared/constants/profile.enum";
 
 export type ProfileShellDesktopViewProps = ProfileShellViewModel;
 
 function renderDesktopHeader(props: Readonly<ProfileShellProps>): ReactNode {
   const { mode, actions, name, email, roleLabel, avatarUrl } = props;
-  if (mode === ProfileMode.Edit) {
+  if (mode === ProfileMode.EDIT) {
     if (actions) {
       return <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>{actions}</Box>;
     }

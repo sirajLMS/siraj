@@ -7,7 +7,7 @@ import {
   NotificationChannel,
   type NotificationEventType,
   type NotificationPreferenceInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,

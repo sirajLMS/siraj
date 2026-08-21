@@ -1,10 +1,12 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  StudentMonthlyReportQuery,
+  StudentMonthlyReportQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const studentMonthlyReportQueryDocument: TypedDocumentNode<
-  Operations.StudentMonthlyReportQuery,
-  Types.QueryStudentMonthlyReportArgs
+  StudentMonthlyReportQuery,
+  StudentMonthlyReportQueryVariables
 > = gql`
   query StudentMonthlyReport($studentId: ID!, $year: Int!, $month: Int!) {
     studentMonthlyReport(studentId: $studentId, year: $year, month: $month) {

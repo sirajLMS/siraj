@@ -2,7 +2,7 @@
 
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionsQuery_permissions } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   StyledBaselineTextShared,
   StyledPermissionDescriptionShared,
@@ -29,7 +29,7 @@ export function OverridesDataGridDesktop({
   const locale = useAppLocale();
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
-  const columns = useMemo<GridColDef<Permission>[]>(() => {
+  const columns = useMemo<GridColDef<PermissionsQuery_permissions>[]>(() => {
     return [
       {
         field: "key",
@@ -113,7 +113,7 @@ export function OverridesDataGridDesktop({
   }, [t, userGroups, localOverrides, mode, isDialogLoading, handleOverrideChange, labels, locale]);
 
   return (
-    <DesktopAppDataGrid<Permission>
+    <DesktopAppDataGrid<PermissionsQuery_permissions>
       rows={filteredPermissions}
       columns={columns}
       getRowId={row => row.id ?? row.key ?? ""}

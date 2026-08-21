@@ -2,9 +2,9 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { MeetingConfigsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/meeting/meetingConfigsTabTypes";
 import { useMeetingConfigsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/meeting/useMeetingConfigsTabViewModel";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 
 type MeetingConfigsTabProps = {
   readonly targetUserId: string;

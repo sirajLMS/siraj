@@ -10,7 +10,7 @@ function CountryAutocompleteStory({
   ...props
 }: Readonly<React.ComponentProps<typeof CountryAutocomplete> & { initialCountryCode?: string }>) {
   const [country, setCountry] = useState<CountryType | undefined>(() =>
-    initialCountryCode ? countries.find(entry => entry.code === initialCountryCode) : undefined
+    initialCountryCode ? countries.find(entry => entry.code.toString() === initialCountryCode) : undefined
   );
 
   return (

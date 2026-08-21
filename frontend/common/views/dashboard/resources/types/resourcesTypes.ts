@@ -2,9 +2,9 @@ import type { ResourceFileType, ResourceFilterType, ResourceSortBy } from "@/fro
 import type { ResourcesLabels } from "@/shared/locale";
 
 export type {
-  LearningResourceRow as GqlLearningResourceRow,
+  LearningResourceRowFragment as GqlLearningResourceRow,
   ResourceUploadInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 export type { ResourceFileType, ResourceFilterType, ResourceSortBy };
 
 /**

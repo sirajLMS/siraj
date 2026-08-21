@@ -1,4 +1,4 @@
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { BillingManualLabels } from "@/shared/locale";
 
 export interface InvoiceDraftSummaryCardProps {

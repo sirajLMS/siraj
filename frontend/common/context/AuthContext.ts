@@ -1,13 +1,13 @@
 import { createContext } from "react";
-import type { MutationLoginArgs, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { LoginMutationVariables, MeQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 
 // The shape of the authentication context
 export type AuthContextType = {
-  user: User | null;
+  user: MeQuery["me"] | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (credentials: MutationLoginArgs, redirectUrl?: string | null) => Promise<boolean>;
+  login: (credentials: LoginMutationVariables, redirectUrl?: string | null) => Promise<boolean>;
   logout: () => void;
 };
 

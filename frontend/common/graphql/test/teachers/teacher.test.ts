@@ -3,15 +3,15 @@ import {
   CountryCode,
   CurrencyCode,
   Gender,
-  IanaTimezone,
   type TeacherProfileUpdateInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   teacherDirectoryQueryDocument,
   teacherProfileForEditQueryDocument,
   teachersQueryDocument,
   updateTeacherProfileMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import {
   authenticatedRequest,
   cleanupTestEntities,
@@ -35,7 +35,7 @@ function makeUpdateInput(overrides: Partial<TeacherProfileUpdateInput>): Teacher
     qualifications: overrides.qualifications ?? null,
     rateCurrency: overrides.rateCurrency ?? null,
     status: overrides.status ?? null,
-    timezone: overrides.timezone ?? IanaTimezone.Utc,
+    timezone: overrides.timezone ?? IanaTimezone.UTC,
   };
 }
 
@@ -221,7 +221,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           qualifications: "None",
           rateCurrency: CurrencyCode.Usd,
           status: null,
-          timezone: IanaTimezone.Utc,
+          timezone: IanaTimezone.UTC,
         }),
       },
       context: {
@@ -252,7 +252,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           qualifications: null,
           rateCurrency: null,
           status: null,
-          timezone: IanaTimezone.AmericaNewYork,
+          timezone: IanaTimezone.America_New_York,
         }),
       }
     );
@@ -278,7 +278,7 @@ describe("GraphQL Teacher Integration Tests", () => {
           qualifications: "Certified Instructor",
           rateCurrency: CurrencyCode.Usd,
           status: null,
-          timezone: IanaTimezone.Utc,
+          timezone: IanaTimezone.UTC,
         }),
       }
     );
@@ -292,7 +292,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("updateTeacherProfile — can update phone to null", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ phone: null, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ phone: null, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.phone).toBeNull();
@@ -302,7 +302,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const specialPhone = "+44 (20) 7946-0958 ext. 123";
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ phone: specialPhone, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ phone: specialPhone, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.phone).toBe(specialPhone);
@@ -312,7 +312,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const maxPhone = "+12345678901234567890123456789012345678901234567";
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ phone: maxPhone, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ phone: maxPhone, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.phone).toBe(maxPhone);
@@ -324,7 +324,7 @@ describe("GraphQL Teacher Integration Tests", () => {
       mutation: updateTeacherProfileMutationDocument,
       variables: {
         teacherId,
-        input: makeUpdateInput({ phone: tooLongPhone, timezone: IanaTimezone.Utc }),
+        input: makeUpdateInput({ phone: tooLongPhone, timezone: IanaTimezone.UTC }),
       },
       context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
       errorPolicy: "all",
@@ -345,7 +345,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const newAddress = "789 Pine Street, Suite 100";
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ address: newAddress, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ address: newAddress, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.address).toBe(newAddress);
@@ -355,7 +355,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const newDob = "1992-08-25";
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ dateOfBirth: newDob, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ dateOfBirth: newDob, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.dateOfBirth).toContain(newDob);
@@ -364,7 +364,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("updateTeacherProfile — can update gender only", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ gender: Gender.Female, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ gender: Gender.Female, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.gender).toBe(Gender.Female);
@@ -374,7 +374,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const newRate = "65.00";
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ hourlyRate: newRate, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ hourlyRate: newRate, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.hourlyRate).toBe(newRate);
@@ -384,7 +384,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const newNationalId = "ID-UPD-998877";
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ nationalId: newNationalId, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ nationalId: newNationalId, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     // nationalId is masked by maskNationalId() in StaffProfileService
@@ -395,7 +395,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("updateTeacherProfile — can update nationality only", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ nationality: CountryCode.Ca, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ nationality: CountryCode.Ca, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.nationality).toBe(CountryCode.Ca);
@@ -404,7 +404,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("updateTeacherProfile — can update countryCode only", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ countryCode: CountryCode.Gb, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ countryCode: CountryCode.Gb, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.countryCode).toBe(CountryCode.Gb);
@@ -414,7 +414,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     const newQual = "Updated PhD";
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ qualifications: newQual, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ qualifications: newQual, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.qualifications).toBe(newQual);
@@ -423,7 +423,7 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("updateTeacherProfile — can update rateCurrency only", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ rateCurrency: CurrencyCode.Eur, timezone: IanaTimezone.Utc }),
+      input: makeUpdateInput({ rateCurrency: CurrencyCode.Eur, timezone: IanaTimezone.UTC }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
     expect(result.updateTeacherProfile?.rateCurrency).toBe(CurrencyCode.Eur);
@@ -432,10 +432,10 @@ describe("GraphQL Teacher Integration Tests", () => {
   test("updateTeacherProfile — can update timezone only", async () => {
     const result = await authenticatedRequest(superAdminToken, "mutate", updateTeacherProfileMutationDocument, {
       teacherId,
-      input: makeUpdateInput({ timezone: IanaTimezone.AmericaNewYork }),
+      input: makeUpdateInput({ timezone: IanaTimezone.America_New_York }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
-    expect(result.updateTeacherProfile?.timezone).toBe(IanaTimezone.AmericaNewYork);
+    expect(result.updateTeacherProfile?.timezone).toBe(IanaTimezone.America_New_York);
   });
 
   test("updateTeacherProfile — can update all fields at once", async () => {
@@ -453,7 +453,7 @@ describe("GraphQL Teacher Integration Tests", () => {
         qualifications: "Full Update Qualifications",
         rateCurrency: CurrencyCode.Gbp,
         status: null,
-        timezone: IanaTimezone.EuropeLondon,
+        timezone: IanaTimezone.Europe_London,
       }),
     });
     expect(result.updateTeacherProfile).toBeDefined();
@@ -468,7 +468,7 @@ describe("GraphQL Teacher Integration Tests", () => {
     expect(result.updateTeacherProfile?.phone).toBe("+44-20-7946-0958");
     expect(result.updateTeacherProfile?.qualifications).toBe("Full Update Qualifications");
     expect(result.updateTeacherProfile?.rateCurrency).toBe(CurrencyCode.Gbp);
-    expect(result.updateTeacherProfile?.timezone).toBe(IanaTimezone.EuropeLondon);
+    expect(result.updateTeacherProfile?.timezone).toBe(IanaTimezone.Europe_London);
   });
 
   test("cleanup provisioned entities", async () => {

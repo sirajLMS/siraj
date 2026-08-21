@@ -3,9 +3,9 @@
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
 import type {
-  TeacherDirectoryMetrics,
-  TeacherDirectoryRow,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  TeacherDirectoryQuery_teacherDirectory_metrics as TeacherDirectoryMetrics,
+  TeacherDirectoryQuery_teacherDirectory_rows as TeacherDirectoryRow,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   MobileContentStack,
   MobilePageContainer,

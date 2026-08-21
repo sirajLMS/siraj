@@ -2,9 +2,8 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import type { TimezoneSelectProps } from "@/frontend/common/components/ui/input/timezoneSelect/types/timezoneSelectShared.types";
-import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { TimezoneSelectDesktop } from "@/frontend/desktop/components/ui/input/timezoneSelect/timezoneSelect.desktop";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 function TimezoneSelectStory({
   initialTimezone,
@@ -30,7 +29,7 @@ type Story = StoryObj<typeof TimezoneSelectStory>;
 
 export const Default: Story = {
   args: {
-    initialTimezone: toGraphqlIanaTimezone("Africa/Cairo"),
+    initialTimezone: IanaTimezone.Africa_Cairo,
   },
 };
 
@@ -47,6 +46,6 @@ export const Arabic: Story = {
     locale: "ar",
   },
   args: {
-    initialTimezone: toGraphqlIanaTimezone("Asia/Riyadh"),
+    initialTimezone: IanaTimezone.Asia_Riyadh,
   },
 };

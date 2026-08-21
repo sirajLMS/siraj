@@ -1,7 +1,11 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ParentAssignedStudentsQuery,
+  ParentHandbookUrlQuery,
+  ParentOwnProfileQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const parentAssignedStudentsQueryDocument: TypedDocumentNode<Operations.ParentAssignedStudentsQuery> = gql`
+export const parentAssignedStudentsQueryDocument: TypedDocumentNode<ParentAssignedStudentsQuery> = gql`
   query parentAssignedStudents {
     parentAssignedStudents {
       id
@@ -20,7 +24,7 @@ export const parentAssignedStudentsQueryDocument: TypedDocumentNode<Operations.P
   }
 `;
 
-export const parentOwnProfileQueryDocument: TypedDocumentNode<Operations.ParentOwnProfileQuery> = gql`
+export const parentOwnProfileQueryDocument: TypedDocumentNode<ParentOwnProfileQuery> = gql`
   query parentOwnProfile {
     parentOwnProfile {
       id
@@ -34,7 +38,7 @@ export const parentOwnProfileQueryDocument: TypedDocumentNode<Operations.ParentO
   }
 `;
 
-export const parentHandbookUrlQueryDocument: TypedDocumentNode<Operations.ParentHandbookUrlQuery> = gql`
+export const parentHandbookUrlQueryDocument: TypedDocumentNode<ParentHandbookUrlQuery> = gql`
   query parentHandbookUrl {
     parentHandbookUrl {
       id

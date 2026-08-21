@@ -11,9 +11,9 @@ import type {
   CreateRecurringClassInput,
   OnDemandNoCreditsOutcome,
   SchedulingMode,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export interface BuildCreateRecurringClassInputParams {
   studentId: string;
@@ -21,7 +21,7 @@ export interface BuildCreateRecurringClassInputParams {
   subjectId: string;
   duration: number;
   defaultStartTime: string;
-  timezone: string;
+  timezone: IanaTimezone;
   classType: ClassType;
   days: readonly DayScheduleConfig[];
   schedulingMode: SchedulingMode | null;
@@ -59,7 +59,7 @@ export function buildCreateRecurringClassInput(
     subjectId,
     durationMinutes: duration,
     defaultStartTime,
-    timezone: toGraphqlIanaTimezone(timezone),
+    timezone,
     classType,
     days: activeDays.map(d => ({
       dayOfWeek: d.day,

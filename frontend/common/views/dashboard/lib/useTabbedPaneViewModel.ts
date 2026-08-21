@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import {
   buildTabHref,

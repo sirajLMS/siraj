@@ -1,9 +1,9 @@
 import type { SvgIconComponent } from "@mui/icons-material";
 import {
   ClassExecutionState,
-  type StatusTrackingScheduleRow,
+  type StatusTrackingScheduleQuery_statusTrackingSchedule,
   StudentStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StatusTrackingLabelsBySection } from "@/frontend/common/views/dashboard/classes/status/tracking/types/statusTrackingViewModel.types";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
@@ -14,9 +14,7 @@ export enum SessionStatus {
   PENDING_VERIFICATION = "pending_verification",
 }
 
-export type { StatusTrackingScheduleRow };
-export type StatusTrackingRow = StatusTrackingScheduleRow;
-
+export type StatusTrackingScheduleRow = StatusTrackingScheduleQuery_statusTrackingSchedule;
 export interface StatusTrackingLabels {
   readonly pageTitle: string;
   readonly pageSubtitle: string;
@@ -154,7 +152,7 @@ export interface RawMetric {
 
 export interface StatusTrackingViewProps {
   readonly metrics: readonly RawMetric[];
-  readonly rows: readonly StatusTrackingRow[];
+  readonly rows: readonly StatusTrackingScheduleRow[];
   readonly totalSessions: number;
   readonly suspendedCount: number;
   readonly labelsBySection: StatusTrackingLabelsBySection;
@@ -168,7 +166,7 @@ export interface StatusTrackingViewProps {
 }
 
 export interface StatusTrackingDataGridProps {
-  readonly rows: readonly StatusTrackingRow[];
+  readonly rows: readonly StatusTrackingScheduleRow[];
   readonly labels: StatusTrackingDataGridLabels;
   readonly onActivate: (id: string) => void;
   readonly onReschedule: (id: string) => void;
@@ -177,7 +175,7 @@ export interface StatusTrackingDataGridProps {
 }
 
 export interface StatusTrackingCardListProps {
-  readonly rows: readonly StatusTrackingRow[];
+  readonly rows: readonly StatusTrackingScheduleRow[];
   readonly totalSessions: number;
   readonly labels: CardListLabels;
   readonly onActivate: (id: string) => void;
@@ -192,7 +190,7 @@ export interface SuspensionAnalyticsProps {
 }
 
 export interface StatusActionProps {
-  readonly row: StatusTrackingRow;
+  readonly row: StatusTrackingScheduleRow;
   readonly labels: StatusActionLabels;
   readonly onActivate: (id: string) => void;
   readonly onReschedule: (id: string) => void;

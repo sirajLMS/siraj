@@ -6,8 +6,11 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigList";
-import { AppPermission, MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  AppPermission,
+  MeetingIntegrationProviderSlug,
+  type UserMeetingConfigFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   connectMeetingProviderOAuthMutationDocument,
   createUserMeetingConfigMutationDocument,

@@ -18,8 +18,10 @@ import { useEffect, useMemo, useState } from "react";
 import { type Control, Controller, type UseFormReturn, useForm, useWatch } from "react-hook-form";
 import { PaymentMethodTypeFields } from "@/frontend/common/components/ui/input/paymentMethodTypeFields";
 import { PaymentMethodTypeSelector } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/PaymentMethodTypeSelector";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  PaymentDirection,
+  type UserPaymentMethodFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   createUserPaymentMethodMutationDocument,
   updateUserPaymentMethodMutationDocument,

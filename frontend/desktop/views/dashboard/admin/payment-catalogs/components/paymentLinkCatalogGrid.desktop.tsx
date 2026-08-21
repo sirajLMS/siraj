@@ -3,7 +3,7 @@
 import { Box, Chip, Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { SupportedPaymentLinkFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { SupportedPaymentLinkFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { CatalogGridShared } from "@/frontend/desktop/views/dashboard/admin/payment-catalogs/components/__shared__/catalogGridShared";
 import type { PaymentCatalogsLabels } from "@/shared/locale";

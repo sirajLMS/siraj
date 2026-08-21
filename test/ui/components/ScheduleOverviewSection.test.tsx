@@ -70,11 +70,7 @@ import { createElement } from "react";
 
 expect.extend(matchers);
 
-import {
-  AppPermission,
-  ClassExecutionState,
-  ClassOutcome,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type {
   ScheduleOverviewViewModel,

@@ -1,6 +1,44 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateSupportedMobileWalletMutation,
+  CreateSupportedMobileWalletMutationVariables,
+  CreateSupportedOnlineAccountMutation,
+  CreateSupportedOnlineAccountMutationVariables,
+  CreateSupportedPaymentLinkMutation,
+  CreateSupportedPaymentLinkMutationVariables,
+  CreateUserPaymentMethodMutation,
+  CreateUserPaymentMethodMutationVariables,
+  DeactivateSupportedMobileWalletMutation,
+  DeactivateSupportedMobileWalletMutationVariables,
+  DeactivateSupportedOnlineAccountMutation,
+  DeactivateSupportedOnlineAccountMutationVariables,
+  DeactivateSupportedPaymentLinkMutation,
+  DeactivateSupportedPaymentLinkMutationVariables,
+  DeleteUserPaymentMethodMutation,
+  DeleteUserPaymentMethodMutationVariables,
+  SetDefaultUserPaymentMethodMutation,
+  SetDefaultUserPaymentMethodMutationVariables,
+  SupportedMobileWalletsQuery,
+  SupportedMobileWalletsQueryVariables,
+  SupportedOnlineAccountsQuery,
+  SupportedOnlineAccountsQueryVariables,
+  SupportedPaymentLinksQuery,
+  SupportedPaymentLinksQueryVariables,
+  UpdateSupportedMobileWalletMutation,
+  UpdateSupportedMobileWalletMutationVariables,
+  UpdateSupportedOnlineAccountMutation,
+  UpdateSupportedOnlineAccountMutationVariables,
+  UpdateSupportedPaymentLinkMutation,
+  UpdateSupportedPaymentLinkMutationVariables,
+  UpdateUserPaymentMethodMutation,
+  UpdateUserPaymentMethodMutationVariables,
+  UserPaymentMethodQuery,
+  UserPaymentMethodQueryVariables,
+  UserPaymentMethodsQuery,
+  UserPaymentMethodsQueryVariables,
+  VerifyBankTransferPaymentMethodMutation,
+  VerifyBankTransferPaymentMethodMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const PAYMENT_METHOD_DETAILS_FIELDS = gql`
   fragment PaymentMethodDetailsFields on PaymentMethodDetails {
@@ -124,8 +162,8 @@ const SUPPORTED_ONLINE_ACCOUNT_FIELDS = gql`
 `;
 
 export const userPaymentMethodsQueryDocument: TypedDocumentNode<
-  Operations.UserPaymentMethodsQuery,
-  Types.QueryUserPaymentMethodsArgs
+  UserPaymentMethodsQuery,
+  UserPaymentMethodsQueryVariables
 > = gql`
   ${USER_PAYMENT_METHOD_FIELDS}
   query userPaymentMethods($userId: ID!, $direction: PaymentDirection) {
@@ -136,8 +174,8 @@ export const userPaymentMethodsQueryDocument: TypedDocumentNode<
 `;
 
 export const userPaymentMethodQueryDocument: TypedDocumentNode<
-  Operations.UserPaymentMethodQuery,
-  Types.QueryUserPaymentMethodArgs
+  UserPaymentMethodQuery,
+  UserPaymentMethodQueryVariables
 > = gql`
   ${USER_PAYMENT_METHOD_FIELDS}
   query userPaymentMethod($id: ID!) {
@@ -148,8 +186,8 @@ export const userPaymentMethodQueryDocument: TypedDocumentNode<
 `;
 
 export const supportedMobileWalletsQueryDocument: TypedDocumentNode<
-  Operations.SupportedMobileWalletsQuery,
-  Types.QuerySupportedMobileWalletsArgs
+  SupportedMobileWalletsQuery,
+  SupportedMobileWalletsQueryVariables
 > = gql`
   ${SUPPORTED_MOBILE_WALLET_FIELDS}
   query supportedMobileWallets($countryCode: CountryCode, $direction: PaymentDirection, $activeOnly: Boolean) {
@@ -160,8 +198,8 @@ export const supportedMobileWalletsQueryDocument: TypedDocumentNode<
 `;
 
 export const supportedPaymentLinksQueryDocument: TypedDocumentNode<
-  Operations.SupportedPaymentLinksQuery,
-  Types.QuerySupportedPaymentLinksArgs
+  SupportedPaymentLinksQuery,
+  SupportedPaymentLinksQueryVariables
 > = gql`
   ${SUPPORTED_PAYMENT_LINK_FIELDS}
   query supportedPaymentLinks($direction: PaymentDirection, $activeOnly: Boolean) {
@@ -172,8 +210,8 @@ export const supportedPaymentLinksQueryDocument: TypedDocumentNode<
 `;
 
 export const supportedOnlineAccountsQueryDocument: TypedDocumentNode<
-  Operations.SupportedOnlineAccountsQuery,
-  Types.QuerySupportedOnlineAccountsArgs
+  SupportedOnlineAccountsQuery,
+  SupportedOnlineAccountsQueryVariables
 > = gql`
   ${SUPPORTED_ONLINE_ACCOUNT_FIELDS}
   query supportedOnlineAccounts($direction: PaymentDirection, $activeOnly: Boolean) {
@@ -184,8 +222,8 @@ export const supportedOnlineAccountsQueryDocument: TypedDocumentNode<
 `;
 
 export const createUserPaymentMethodMutationDocument: TypedDocumentNode<
-  Operations.CreateUserPaymentMethodMutation,
-  Types.MutationCreateUserPaymentMethodArgs
+  CreateUserPaymentMethodMutation,
+  CreateUserPaymentMethodMutationVariables
 > = gql`
   ${USER_PAYMENT_METHOD_FIELDS}
   mutation createUserPaymentMethod($input: UserPaymentMethodCreateInput!) {
@@ -196,8 +234,8 @@ export const createUserPaymentMethodMutationDocument: TypedDocumentNode<
 `;
 
 export const updateUserPaymentMethodMutationDocument: TypedDocumentNode<
-  Operations.UpdateUserPaymentMethodMutation,
-  Types.MutationUpdateUserPaymentMethodArgs
+  UpdateUserPaymentMethodMutation,
+  UpdateUserPaymentMethodMutationVariables
 > = gql`
   ${USER_PAYMENT_METHOD_FIELDS}
   mutation updateUserPaymentMethod($id: ID!, $input: UserPaymentMethodUpdateInput!) {
@@ -208,8 +246,8 @@ export const updateUserPaymentMethodMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteUserPaymentMethodMutationDocument: TypedDocumentNode<
-  Operations.DeleteUserPaymentMethodMutation,
-  Types.MutationDeleteUserPaymentMethodArgs
+  DeleteUserPaymentMethodMutation,
+  DeleteUserPaymentMethodMutationVariables
 > = gql`
   mutation deleteUserPaymentMethod($id: ID!) {
     deleteUserPaymentMethod(id: $id)
@@ -217,8 +255,8 @@ export const deleteUserPaymentMethodMutationDocument: TypedDocumentNode<
 `;
 
 export const setDefaultUserPaymentMethodMutationDocument: TypedDocumentNode<
-  Operations.SetDefaultUserPaymentMethodMutation,
-  Types.MutationSetDefaultUserPaymentMethodArgs
+  SetDefaultUserPaymentMethodMutation,
+  SetDefaultUserPaymentMethodMutationVariables
 > = gql`
   ${USER_PAYMENT_METHOD_FIELDS}
   mutation setDefaultUserPaymentMethod($id: ID!) {
@@ -229,8 +267,8 @@ export const setDefaultUserPaymentMethodMutationDocument: TypedDocumentNode<
 `;
 
 export const verifyBankTransferPaymentMethodMutationDocument: TypedDocumentNode<
-  Operations.VerifyBankTransferPaymentMethodMutation,
-  Types.MutationVerifyBankTransferPaymentMethodArgs
+  VerifyBankTransferPaymentMethodMutation,
+  VerifyBankTransferPaymentMethodMutationVariables
 > = gql`
   ${USER_PAYMENT_METHOD_FIELDS}
   mutation verifyBankTransferPaymentMethod($id: ID!) {
@@ -241,8 +279,8 @@ export const verifyBankTransferPaymentMethodMutationDocument: TypedDocumentNode<
 `;
 
 export const createSupportedMobileWalletMutationDocument: TypedDocumentNode<
-  Operations.CreateSupportedMobileWalletMutation,
-  Types.MutationCreateSupportedMobileWalletArgs
+  CreateSupportedMobileWalletMutation,
+  CreateSupportedMobileWalletMutationVariables
 > = gql`
   ${SUPPORTED_MOBILE_WALLET_FIELDS}
   mutation createSupportedMobileWallet($input: SupportedMobileWalletCreateInput!) {
@@ -253,8 +291,8 @@ export const createSupportedMobileWalletMutationDocument: TypedDocumentNode<
 `;
 
 export const updateSupportedMobileWalletMutationDocument: TypedDocumentNode<
-  Operations.UpdateSupportedMobileWalletMutation,
-  Types.MutationUpdateSupportedMobileWalletArgs
+  UpdateSupportedMobileWalletMutation,
+  UpdateSupportedMobileWalletMutationVariables
 > = gql`
   ${SUPPORTED_MOBILE_WALLET_FIELDS}
   mutation updateSupportedMobileWallet($id: ID!, $input: SupportedMobileWalletUpdateInput!) {
@@ -265,8 +303,8 @@ export const updateSupportedMobileWalletMutationDocument: TypedDocumentNode<
 `;
 
 export const deactivateSupportedMobileWalletMutationDocument: TypedDocumentNode<
-  Operations.DeactivateSupportedMobileWalletMutation,
-  Types.MutationDeactivateSupportedMobileWalletArgs
+  DeactivateSupportedMobileWalletMutation,
+  DeactivateSupportedMobileWalletMutationVariables
 > = gql`
   ${SUPPORTED_MOBILE_WALLET_FIELDS}
   mutation deactivateSupportedMobileWallet($id: ID!) {
@@ -277,8 +315,8 @@ export const deactivateSupportedMobileWalletMutationDocument: TypedDocumentNode<
 `;
 
 export const createSupportedPaymentLinkMutationDocument: TypedDocumentNode<
-  Operations.CreateSupportedPaymentLinkMutation,
-  Types.MutationCreateSupportedPaymentLinkArgs
+  CreateSupportedPaymentLinkMutation,
+  CreateSupportedPaymentLinkMutationVariables
 > = gql`
   ${SUPPORTED_PAYMENT_LINK_FIELDS}
   mutation createSupportedPaymentLink($input: SupportedPaymentLinkCreateInput!) {
@@ -289,8 +327,8 @@ export const createSupportedPaymentLinkMutationDocument: TypedDocumentNode<
 `;
 
 export const updateSupportedPaymentLinkMutationDocument: TypedDocumentNode<
-  Operations.UpdateSupportedPaymentLinkMutation,
-  Types.MutationUpdateSupportedPaymentLinkArgs
+  UpdateSupportedPaymentLinkMutation,
+  UpdateSupportedPaymentLinkMutationVariables
 > = gql`
   ${SUPPORTED_PAYMENT_LINK_FIELDS}
   mutation updateSupportedPaymentLink($id: ID!, $input: SupportedPaymentLinkUpdateInput!) {
@@ -301,8 +339,8 @@ export const updateSupportedPaymentLinkMutationDocument: TypedDocumentNode<
 `;
 
 export const deactivateSupportedPaymentLinkMutationDocument: TypedDocumentNode<
-  Operations.DeactivateSupportedPaymentLinkMutation,
-  Types.MutationDeactivateSupportedPaymentLinkArgs
+  DeactivateSupportedPaymentLinkMutation,
+  DeactivateSupportedPaymentLinkMutationVariables
 > = gql`
   ${SUPPORTED_PAYMENT_LINK_FIELDS}
   mutation deactivateSupportedPaymentLink($id: ID!) {
@@ -313,8 +351,8 @@ export const deactivateSupportedPaymentLinkMutationDocument: TypedDocumentNode<
 `;
 
 export const createSupportedOnlineAccountMutationDocument: TypedDocumentNode<
-  Operations.CreateSupportedOnlineAccountMutation,
-  Types.MutationCreateSupportedOnlineAccountArgs
+  CreateSupportedOnlineAccountMutation,
+  CreateSupportedOnlineAccountMutationVariables
 > = gql`
   ${SUPPORTED_ONLINE_ACCOUNT_FIELDS}
   mutation createSupportedOnlineAccount($input: SupportedOnlineAccountCreateInput!) {
@@ -325,8 +363,8 @@ export const createSupportedOnlineAccountMutationDocument: TypedDocumentNode<
 `;
 
 export const updateSupportedOnlineAccountMutationDocument: TypedDocumentNode<
-  Operations.UpdateSupportedOnlineAccountMutation,
-  Types.MutationUpdateSupportedOnlineAccountArgs
+  UpdateSupportedOnlineAccountMutation,
+  UpdateSupportedOnlineAccountMutationVariables
 > = gql`
   ${SUPPORTED_ONLINE_ACCOUNT_FIELDS}
   mutation updateSupportedOnlineAccount($id: ID!, $input: SupportedOnlineAccountUpdateInput!) {
@@ -337,8 +375,8 @@ export const updateSupportedOnlineAccountMutationDocument: TypedDocumentNode<
 `;
 
 export const deactivateSupportedOnlineAccountMutationDocument: TypedDocumentNode<
-  Operations.DeactivateSupportedOnlineAccountMutation,
-  Types.MutationDeactivateSupportedOnlineAccountArgs
+  DeactivateSupportedOnlineAccountMutation,
+  DeactivateSupportedOnlineAccountMutationVariables
 > = gql`
   ${SUPPORTED_ONLINE_ACCOUNT_FIELDS}
   mutation deactivateSupportedOnlineAccount($id: ID!) {

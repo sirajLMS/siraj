@@ -5,7 +5,7 @@ import type {
   DayOfWeek,
   OnDemandNoCreditsOutcome,
   SchedulingMode,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   type DayScheduleConfig,
   DEFAULT_DAY_SCHEDULE,

@@ -1,4 +1,4 @@
-import type { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql";
 
 /** Resolve a localized language display name via Intl.DisplayNames. */
 export function getLanguageDisplayName(languageCode: AppLanguage | string, locale: string): string {

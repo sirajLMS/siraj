@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import type { CountrySelectProps } from "@/frontend/common/components/ui/input/countrySelect/types";
-import { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
 import { CountrySelectDesktop } from "@/frontend/desktop/components/ui/input/countrySelect/countrySelect.desktop";
 

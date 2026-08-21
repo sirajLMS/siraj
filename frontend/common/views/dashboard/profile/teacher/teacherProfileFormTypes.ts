@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AccountStatus, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { isValidNationalIdForCountry } from "@/shared/lib/national-id";
 

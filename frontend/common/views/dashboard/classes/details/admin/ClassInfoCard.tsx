@@ -9,9 +9,9 @@ import type { ReactNode } from "react";
 import { BaseCard } from "@/frontend/common/components/ui";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
 import type {
-  ClassInstanceStudentInfo,
-  ClassInstanceTeacherInfo,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  ClassInstanceQuery_classInstance_student,
+  ClassInstanceQuery_classInstance_teacher,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   StudentEntityLink,
@@ -25,8 +25,8 @@ interface ClassInfoCardProps {
   readonly subjectId: string;
   readonly subjectName: string;
   readonly subjectAvatarUrl?: string | null;
-  readonly student: ClassInstanceStudentInfo;
-  readonly teacher: ClassInstanceTeacherInfo;
+  readonly student: NonNullable<ClassInstanceQuery_classInstance_student>;
+  readonly teacher: NonNullable<ClassInstanceQuery_classInstance_teacher>;
   readonly isActive: boolean;
   readonly rateAmount: string | null;
   readonly rateCurrency: string | null;

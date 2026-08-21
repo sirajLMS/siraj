@@ -4,7 +4,6 @@ import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-d
 import {
   AccountStatusPothosObject,
   CurrencyCodePothosObject,
-  IanaTimezonePothosObject,
   StudentStatusPothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { ParentProfileService, StudentManagementService } from "@/backend/services";
@@ -38,7 +37,7 @@ export const ParentProfilePothosObject = ParentProfileRef.implement({
     invoiceType: t.exposeString("invoiceType", { nullable: true }),
     feeAmount: t.exposeString("feeAmount", { nullable: true }),
     currency: t.expose("currency", { type: CurrencyCodePothosObject, nullable: true }),
-    timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
+    timezone: t.expose("timezone", { type: "IanaTimezone" }),
     displayAmount: t.expose("displayAmount", {
       type: DisplayAmountPothosObject,
       nullable: true,

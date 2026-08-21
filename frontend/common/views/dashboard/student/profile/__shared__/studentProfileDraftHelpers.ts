@@ -1,4 +1,4 @@
-import { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppLanguage, CurrencyCode, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import type { StudentPortalProfileEditDraft } from "@/frontend/common/stores/studentPortalProfileStore";
 import type { StudentProfileRow } from "@/frontend/common/views/dashboard/student/profile/types/studentProfileTypes";

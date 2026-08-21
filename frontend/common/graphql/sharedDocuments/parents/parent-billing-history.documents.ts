@@ -1,10 +1,18 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AdminBillingSummaryQuery,
+  AdminInvoicesQuery,
+  AdminInvoicesQueryVariables,
+  ParentBillingSummaryQuery,
+  ParentBillingSummaryQueryVariables,
+  ParentInvoiceHistoryQuery,
+  ParentInvoiceHistoryQueryVariables,
+  StudentCreditStatusQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
-  Operations.ParentInvoiceHistoryQuery,
-  Types.QueryParentInvoiceHistoryArgs
+  ParentInvoiceHistoryQuery,
+  ParentInvoiceHistoryQueryVariables
 > = gql`
   query ParentInvoiceHistory($parentId: String, $userId: String, $paginationArgs: PaginationArgs, $search: String) {
     parentInvoiceHistory(parentId: $parentId, userId: $userId, paginationArgs: $paginationArgs, search: $search) {
@@ -46,10 +54,7 @@ export const parentInvoiceHistoryQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const adminInvoicesQueryDocument: TypedDocumentNode<
-  Operations.AdminInvoicesQuery,
-  Types.QueryAdminInvoicesArgs
-> = gql`
+export const adminInvoicesQueryDocument: TypedDocumentNode<AdminInvoicesQuery, AdminInvoicesQueryVariables> = gql`
   query AdminInvoices($paginationArgs: PaginationArgs, $search: String) {
     adminInvoices(paginationArgs: $paginationArgs, search: $search) {
       id
@@ -90,7 +95,7 @@ export const adminInvoicesQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const adminBillingSummaryQueryDocument: TypedDocumentNode<Operations.AdminBillingSummaryQuery> = gql`
+export const adminBillingSummaryQueryDocument: TypedDocumentNode<AdminBillingSummaryQuery> = gql`
   query AdminBillingSummary {
     adminBillingSummary {
       id
@@ -124,7 +129,7 @@ export const adminBillingSummaryQueryDocument: TypedDocumentNode<Operations.Admi
   }
 `;
 
-export const studentCreditStatusQueryDocument: TypedDocumentNode<Operations.StudentCreditStatusQuery> = gql`
+export const studentCreditStatusQueryDocument: TypedDocumentNode<StudentCreditStatusQuery> = gql`
   query StudentCreditStatus {
     studentCreditStatus {
       id
@@ -139,8 +144,8 @@ export const studentCreditStatusQueryDocument: TypedDocumentNode<Operations.Stud
 `;
 
 export const parentBillingSummaryQueryDocument: TypedDocumentNode<
-  Operations.ParentBillingSummaryQuery,
-  Types.QueryParentBillingSummaryArgs
+  ParentBillingSummaryQuery,
+  ParentBillingSummaryQueryVariables
 > = gql`
   query ParentBillingSummary($parentId: String, $userId: String) {
     parentBillingSummary(parentId: $parentId, userId: $userId) {

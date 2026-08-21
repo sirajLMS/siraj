@@ -3,8 +3,11 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
-import { AppPermission, PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  AppPermission,
+  PaymentDirection,
+  type UserPaymentMethodFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deleteUserPaymentMethodMutationDocument,
   setDefaultUserPaymentMethodMutationDocument,

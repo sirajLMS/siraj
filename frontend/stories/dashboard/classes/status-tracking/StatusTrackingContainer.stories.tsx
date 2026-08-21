@@ -7,15 +7,14 @@ import {
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useRouter } from "next/navigation";
 import { create } from "zustand";
-import {
-  ClassExecutionState,
-  ClassOutcome,
-  StudentStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { getTodayScheduleFilterDate } from "@/frontend/common/utils/scheduleFilterDate";
 import { StatusTrackingView } from "@/frontend/common/views/dashboard/classes/status/tracking/StatusTrackingView";
-import type { RawMetric, StatusTrackingRow } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
+import type {
+  RawMetric,
+  StatusTrackingScheduleRow,
+} from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import {
   buildStatusTrackingLabelsBySection,
   useStatusTrackingLabels,
@@ -23,7 +22,7 @@ import {
 
 interface StoryStatusTrackingState {
   readonly metrics: readonly RawMetric[];
-  readonly rows: readonly StatusTrackingRow[];
+  readonly rows: readonly StatusTrackingScheduleRow[];
   readonly totalSessions: number;
   activateSession: (id: string) => void;
   verifySession: (id: string) => void;
@@ -47,9 +46,8 @@ const STORY_METRICS: RawMetric[] = [
   { key: "on_leave", count: 15, labelKey: "dashboard.statusTracking.metrics.onLeave", icon: EventAvailableOutlined },
 ];
 
-const STORY_ROWS: StatusTrackingRow[] = [
+const STORY_ROWS: StatusTrackingScheduleRow[] = [
   {
-    __typename: "StatusTrackingScheduleRow",
     id: "s1",
     studentId: "st1",
     studentName: "Zaid Al-Harbi",
@@ -71,7 +69,6 @@ const STORY_ROWS: StatusTrackingRow[] = [
     effectiveMeeting: null,
   },
   {
-    __typename: "StatusTrackingScheduleRow",
     id: "s2",
     studentId: "st2",
     studentName: "Maryam Khan",
@@ -93,7 +90,6 @@ const STORY_ROWS: StatusTrackingRow[] = [
     effectiveMeeting: null,
   },
   {
-    __typename: "StatusTrackingScheduleRow",
     id: "s3",
     studentId: "st3",
     studentName: "Sami Yusuf",
@@ -115,7 +111,6 @@ const STORY_ROWS: StatusTrackingRow[] = [
     effectiveMeeting: null,
   },
   {
-    __typename: "StatusTrackingScheduleRow",
     id: "s4",
     studentId: "st4",
     studentName: "Omar Saeed",
@@ -137,7 +132,6 @@ const STORY_ROWS: StatusTrackingRow[] = [
     effectiveMeeting: null,
   },
   {
-    __typename: "StatusTrackingScheduleRow",
     id: "s5",
     studentId: "st5",
     studentName: "Noor Ahmed",

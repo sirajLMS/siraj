@@ -5,7 +5,7 @@ import { IconButton, Stack, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";

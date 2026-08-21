@@ -107,7 +107,7 @@ await mock.module("next/navigation", () => ({
   redirect: () => {},
 }));
 
-import { AppPermission, type User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type MeQuery_me as User } from "@/frontend/common/graphql/generated/gql/graphql";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import {
   DashboardClientBridge,

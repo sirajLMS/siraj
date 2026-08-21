@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
 interface AdminSuggestionsState {
   readonly searchQuery: string;

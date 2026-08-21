@@ -2,7 +2,7 @@ import type { MockLink } from "@apollo/client/testing";
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { type ReactNode, useEffect } from "react";
-import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   impersonationStatusQueryDocument,
   permissionGroupSimulationStatusQueryDocument,
@@ -119,7 +119,6 @@ function StoryShell({
       phone: null,
       status: AccountStatus.Activated,
       displayCurrency: null,
-      __typename: "User" as const,
     });
     setActorIsSuperAdmin(true);
   }, [setUser, setActorIsSuperAdmin]);

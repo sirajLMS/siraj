@@ -1,11 +1,11 @@
 "use client";
 
 import { useLayoutEffect } from "react";
-import { AppPermission, type User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type MeQuery_me } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 
 interface UserStoreInitializerProps {
-  readonly userProfile: User;
+  readonly userProfile: MeQuery_me;
   readonly isSuperAdmin: boolean;
 }
 

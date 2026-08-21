@@ -3,7 +3,6 @@
 import { Box, type Theme, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { formatTime } from "@/frontend/common/components/intl/dateFormat";
-import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import {
   type ClassSession,
@@ -13,13 +12,14 @@ import {
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileMeetingJoinAction } from "@/frontend/mobile/components/ui/display/meetingConfig";
+import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 import { Link } from "@/shared/i18n";
 import type { StudentHistoryLabels } from "@/shared/locale/types/dashboard/students/history";
 
 const STATUS_LABEL_KEYS: Readonly<Record<AttendanceStatus, string>> = {
-  [AttendanceStatus.Absent]: "absent",
-  [AttendanceStatus.Late]: "late",
-  [AttendanceStatus.Present]: "present",
+  [AttendanceStatus.ABSENT]: "absent",
+  [AttendanceStatus.LATE]: "late",
+  [AttendanceStatus.PRESENT]: "present",
 };
 
 function getStatusLabel(status: AttendanceStatus, labels: Readonly<Record<string, string>>): string {
@@ -54,19 +54,19 @@ function SessionListHeader({ title, dateStr }: Readonly<{ title: string; dateStr
 }
 
 function getStatusColors(status: AttendanceStatus, theme: Theme): { backgroundColor: string; color: string } {
-  if (status === AttendanceStatus.Present) {
+  if (status === AttendanceStatus.PRESENT) {
     return {
       backgroundColor: theme.palette.status.activeContainer,
       color: theme.palette.status.onActiveContainer,
     };
   }
-  if (status === AttendanceStatus.Absent) {
+  if (status === AttendanceStatus.ABSENT) {
     return {
       backgroundColor: theme.palette.errorContainer,
       color: theme.palette.onErrorContainer,
     };
   }
-  if (status === AttendanceStatus.Late) {
+  if (status === AttendanceStatus.LATE) {
     return {
       backgroundColor: theme.palette.warningContainer ?? theme.palette.tertiaryContainer,
       color: theme.palette.onWarningContainer ?? theme.palette.onTertiaryContainer,

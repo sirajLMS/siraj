@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/useStudentProfileContext";
 import type { StudentFieldGroupKey } from "@/shared/constants/profile-field-groups";

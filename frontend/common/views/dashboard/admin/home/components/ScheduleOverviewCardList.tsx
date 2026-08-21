@@ -6,7 +6,7 @@ import type * as React from "react";
 import { ActionIconLink } from "@/frontend/common/components/ui";
 import { ClassProfileLink } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLink";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import { ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   classHref,
   profileHrefForTeacher,

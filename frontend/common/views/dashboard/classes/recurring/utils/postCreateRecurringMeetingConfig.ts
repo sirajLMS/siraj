@@ -2,7 +2,7 @@ import type { useApolloClient } from "@apollo/client/react";
 import type {
   MeetingProviderFieldsFragment,
   UserMeetingConfigFieldsFragment,
-} from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { createClassMeetingConfigMutationDocument } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 import { logger } from "@/frontend/common/utils/logger";
 

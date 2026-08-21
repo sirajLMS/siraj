@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getVisibleUsersDirectoryTabs } from "@/frontend/common/views/dashboard/users/directory/tabs/config/usersDirectoryTabs.config";
 
 const STAFF_PERMISSIONS: AppPermission[] = [

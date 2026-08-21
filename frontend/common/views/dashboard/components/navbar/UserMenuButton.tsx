@@ -6,7 +6,10 @@ import { Box, ButtonBase, Divider, Menu, MenuItem, Typography } from "@mui/mater
 import type React from "react";
 import { useMemo, useState } from "react";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
-import { AppPermission, type SimulatablePermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AppPermission,
+  type SimulatablePermissionGroupsQuery_simulatablePermissionGroups,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { simulatablePermissionGroupsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useAuth } from "@/frontend/common/hooks/useAuth";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
@@ -275,7 +278,7 @@ function GroupSimulationMenu({
   open: boolean;
   onClose: () => void;
   groupsLoading: boolean;
-  simulatableGroups: ReadonlyArray<SimulatablePermissionGroup>;
+  simulatableGroups: ReadonlyArray<SimulatablePermissionGroupsQuery_simulatablePermissionGroups>;
   simulationLoading: boolean;
   onSelectGroup: (slug: string) => void;
   tCommon: CommonLabels;

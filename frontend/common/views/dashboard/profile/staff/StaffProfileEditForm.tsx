@@ -8,7 +8,7 @@ import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
-import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
 import { PROFILE_SECTION_GRID_SX } from "@/frontend/common/views/dashboard/profile/components/__shared__/profileFormConstantsShared";
@@ -32,6 +32,7 @@ import {
   staffOwnEditSchemaFactory,
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
 import { useStaffProfileEditFormViewModel } from "@/frontend/common/views/dashboard/profile/staff/useStaffProfileEditFormViewModel";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 
 interface StaffProfileEditFormProps {
   readonly staffData: StaffProfileData;
@@ -153,7 +154,7 @@ export function StaffProfileEditForm({
   const { labels, errorLabels } = useStaffProfileEditFormViewModel();
   const sectionLabels = buildSectionLabels(labels);
   const compensationViewLabels = buildCompensationViewLabels(labels, errorLabels);
-  const scope = isAdminScope ? ProfileScope.Other : ProfileScope.Own;
+  const scope = isAdminScope ? ProfileScope.OTHER : ProfileScope.OWN;
   const { canView, canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
   const [successOpen, setSuccessOpen] = useState(false);

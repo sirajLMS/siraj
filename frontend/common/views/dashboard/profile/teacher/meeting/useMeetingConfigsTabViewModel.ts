@@ -1,8 +1,9 @@
 "use client";
 
-import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { MeetingConfigsTabViewModel } from "@/frontend/common/views/dashboard/profile/teacher/meeting/meetingConfigsTabTypes";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type UseMeetingConfigsTabViewModelProps = {
@@ -18,7 +19,7 @@ export function useMeetingConfigsTabViewModel(
   const { hasPermission } = useUserStore();
 
   const canManage =
-    scope === ProfileScope.Own
+    scope === ProfileScope.OWN
       ? hasPermission(AppPermission.MeetingConfigsManageOwn)
       : hasPermission(AppPermission.MeetingConfigsManageOther);
 

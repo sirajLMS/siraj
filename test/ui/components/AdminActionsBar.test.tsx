@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 
 expect.extend(matchers);
 
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { AdminActionsBar } from "@/frontend/common/views/dashboard/classes/details/admin/AdminActionsBar";
 import type { AppLocale } from "@/shared/locale/AppLocale";

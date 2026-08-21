@@ -2,7 +2,7 @@
 
 import type * as React from "react";
 import type { UserPaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/userPaymentMethodSelect/UserPaymentMethodAutocompleteShared";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type { UserPaymentMethodAutocompleteProps } from "@/frontend/common/components/ui/input/userPaymentMethodSelect/UserPaymentMethodAutocompleteShared";
 export type { PaymentMethodLabels } from "@/shared/locale";

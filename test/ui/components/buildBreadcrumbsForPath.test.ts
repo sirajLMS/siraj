@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   getNavItemsForPermissions,
   SIDEBAR_NAV_ITEMS,

@@ -12,7 +12,7 @@ import { alpha, styled } from "@mui/material/styles";
 import type * as React from "react";
 import { ActionIconLink, StatusBadge } from "@/frontend/common/components/ui";
 import { ClassProfileLink } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLink";
-import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   classHref,
   profileHrefForTeacher,

@@ -10,7 +10,7 @@ import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 import { ThemeContext } from "@/frontend/common/context/ThemeContext";
 import type { ViewportTier } from "@/frontend/common/context/ViewportContext";
-import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import { createAppTheme } from "@/frontend/common/providers/theme/theme";
 import { ViewportProvider } from "@/frontend/common/providers/theme/ViewportProvider";

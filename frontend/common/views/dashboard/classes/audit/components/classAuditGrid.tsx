@@ -2,10 +2,10 @@
 
 import { Box, Grid } from "@mui/material";
 import type {
-  AdminNoteInfo,
-  CommunicationLogEntry,
-  GroupClassStudent,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  GroupClassAuditQuery_groupClassAudit_adminNote as AdminNoteInfo,
+  GroupClassAuditQuery_groupClassAudit_communications as CommunicationLogEntry,
+  GroupClassAuditQuery_groupClassAudit_students as GroupClassStudent,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   AdminNoteLabels,
   CommunicationLogLabels,

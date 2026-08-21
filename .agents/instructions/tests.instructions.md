@@ -196,7 +196,7 @@ bun run test:ui:kill         # stop stale test servers (port 3066 only — never
 ### GraphQL Mutation Argument Coverage (CRITICAL)
 
 - Every mutation call in integration tests MUST pass ALL available input arguments (required AND optional) as `variables`
-- Look up mutation arg types in `frontend/common/graphql/generated/gql/graphql-types.ts` (search for `Mutation<Name>Args`)
+- Look up mutation variable types in `frontend/common/graphql/generated/gql/graphql.ts` (search for `{MutationName}MutationVariables`)
 - Required fields (no `InputMaybe`): always pass a value
 - Optional fields (`InputMaybe`): test BOTH a meaningful non-null value AND `null` in separate test cases
 - For `input` object mutations: include ALL fields of the input type, including nested input types

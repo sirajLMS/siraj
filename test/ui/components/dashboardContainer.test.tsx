@@ -24,7 +24,7 @@ import { cleanup, screen } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { AppPermission, type User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type MeQuery_me as User } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { DashboardContainer } from "@/frontend/common/views/dashboard/dashboard/DashboardContainer";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";

@@ -1,4 +1,4 @@
-import type { ManagerDirectoryMetrics as GeneratedManagerDirectoryMetrics } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ManagerDirectoryQuery_managerDirectory_metrics as GeneratedManagerDirectoryMetrics } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ManagerRoleFilter, ManagerStatusFilter } from "@/frontend/common/types/shared.types";
 import type { StaffDirectoryLabels } from "@/shared/locale";
 

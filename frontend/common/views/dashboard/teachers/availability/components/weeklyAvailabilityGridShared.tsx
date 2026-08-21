@@ -2,7 +2,7 @@
 "use client";
 
 import { alpha, Box, Paper, Typography } from "@mui/material";
-import { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   WeeklyAvailabilityGridSharedOptions,
   WeeklyAvailabilityGridSharedProps,

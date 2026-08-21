@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useMemo } from "react";
-import { AppPermission, SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   adminSuggestionsQueryDocument,
   deleteSuggestionMutationDocument,

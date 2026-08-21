@@ -1,12 +1,19 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateTeacherManualClassEntryMutation,
+  CreateTeacherManualClassEntryMutationVariables,
+  LogTeacherSupportRequestMutation,
+  LogTeacherSupportRequestMutationVariables,
+  TeacherDashboardQuery,
+  TeacherDashboardQueryVariables,
+  TeacherFutureScheduleQuery,
+  TeacherFutureScheduleQueryVariables,
+  TeacherHandbookUrlQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 
-export const teacherDashboardQueryDocument: TypedDocumentNode<
-  Operations.TeacherDashboardQuery,
-  Types.QueryTeacherDashboardArgs
-> = gql`
+export const teacherDashboardQueryDocument: TypedDocumentNode<TeacherDashboardQuery, TeacherDashboardQueryVariables> =
+  gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query teacherDashboard($date: String!, $pagination: PaginationArgs) {
     teacherDashboard(date: $date, pagination: $pagination) {
@@ -65,8 +72,8 @@ export const teacherDashboardQueryDocument: TypedDocumentNode<
 `;
 
 export const createTeacherManualClassEntryMutationDocument: TypedDocumentNode<
-  Operations.CreateTeacherManualClassEntryMutation,
-  Types.MutationCreateTeacherManualClassEntryArgs
+  CreateTeacherManualClassEntryMutation,
+  CreateTeacherManualClassEntryMutationVariables
 > = gql`
   mutation createTeacherManualClassEntry($input: CreateManualClassEntryInput!) {
     createTeacherManualClassEntry(input: $input) {
@@ -81,8 +88,8 @@ export const createTeacherManualClassEntryMutationDocument: TypedDocumentNode<
 `;
 
 export const logTeacherSupportRequestMutationDocument: TypedDocumentNode<
-  Operations.LogTeacherSupportRequestMutation,
-  Types.MutationLogTeacherSupportRequestArgs
+  LogTeacherSupportRequestMutation,
+  LogTeacherSupportRequestMutationVariables
 > = gql`
   mutation logTeacherSupportRequest($input: LogSupportRequestInput!) {
     logTeacherSupportRequest(input: $input) {
@@ -93,8 +100,8 @@ export const logTeacherSupportRequestMutationDocument: TypedDocumentNode<
 `;
 
 export const teacherFutureScheduleQueryDocument: TypedDocumentNode<
-  Operations.TeacherFutureScheduleQuery,
-  Types.QueryTeacherFutureScheduleArgs
+  TeacherFutureScheduleQuery,
+  TeacherFutureScheduleQueryVariables
 > = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query teacherFutureSchedule($teacherId: String) {
@@ -144,7 +151,7 @@ export const teacherFutureScheduleQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const teacherHandbookUrlQueryDocument: TypedDocumentNode<Operations.TeacherHandbookUrlQuery> = gql`
+export const teacherHandbookUrlQueryDocument: TypedDocumentNode<TeacherHandbookUrlQuery> = gql`
   query teacherHandbookUrl {
     teacherHandbookUrl {
       id

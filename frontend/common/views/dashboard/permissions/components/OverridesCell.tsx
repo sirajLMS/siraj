@@ -4,7 +4,7 @@
 import { CheckCircleOutlined, WarningOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionGroupDetailFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   type UserOverrideInfo,
   useUserOverridesData,
@@ -14,7 +14,7 @@ export type OverridesCellType = "grants" | "revokes" | "status";
 
 export interface OverridesCellProps {
   readonly userId: string;
-  readonly userGroups: readonly PermissionGroup[];
+  readonly userGroups: readonly PermissionGroupDetailFieldsFragment[];
   readonly type: OverridesCellType;
 }
 

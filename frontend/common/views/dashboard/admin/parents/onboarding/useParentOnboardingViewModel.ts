@@ -12,10 +12,10 @@ import {
 import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
 import {
+  type CreateParentMutation_createParent,
   CurrencyCode,
   InvoiceType,
-  type ParentOnboardingResult,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { useCreateParentOnboarding } from "@/frontend/common/hooks/useCreateParentOnboarding";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
 import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
@@ -74,7 +74,7 @@ export function useParentOnboardingViewModel(): ParentOnboardingViewModel {
   const { onUploadAvatar } = useOnboardingAvatar();
   const { showSuccess, onSubmit, onDismissSuccess, isSubmitting } = useOnboardingSubmit<
     ParentOnboardingFormData,
-    ParentOnboardingResult
+    CreateParentMutation_createParent
   >({
     execute,
     onSuccess: created =>

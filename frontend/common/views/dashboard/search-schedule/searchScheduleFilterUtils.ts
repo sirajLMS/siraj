@@ -2,7 +2,7 @@ import { endOfMonth, format, startOfMonth } from "date-fns";
 import {
   type AvailabilitySearchInput,
   AvailabilitySearchSortBy,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   SearchScheduleDraftFilters,
   SearchScheduleTeacherOption,

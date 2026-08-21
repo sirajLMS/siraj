@@ -13,9 +13,9 @@ import type { PaymentMethodDisplayData } from "@/frontend/common/components/ui/d
 import {
   IdentifierKind,
   PaymentDirection,
+  type PaymentMethodTransactionSnapshotFieldsFragment,
   PaymentMethodType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { PaymentMethodTransactionSnapshotFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { isAppLocale, type LocalizedString } from "@/shared/types/localized-string";
 
 export { IdentifierKind, PaymentDirection, PaymentMethodType };

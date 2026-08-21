@@ -1,7 +1,7 @@
 "use client";
 
 import { type Control, Controller, type FieldErrors, type UseFormRegister } from "react-hook-form";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MeetingConfigFieldsLabels } from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigFields";
 import { MeetingConfigOnboardingSection as SharedMeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/shared/onboarding/MeetingConfigOnboardingSection";
 import type { TeacherOnboardingFormData } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";

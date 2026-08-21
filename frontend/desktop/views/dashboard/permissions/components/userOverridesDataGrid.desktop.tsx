@@ -3,7 +3,7 @@
 import { Box } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { UsersQuery_users as User } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import {
   EditOverridesButton,

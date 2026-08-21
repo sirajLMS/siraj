@@ -1,5 +1,5 @@
 import type { ApolloClient } from "@apollo/client";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import { fxSyncHealthQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing/fx-ingestion.documents";
 import { broadcastSubjectCurrencyChanged } from "@/frontend/common/lib/sync-subject-profile";

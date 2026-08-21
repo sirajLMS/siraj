@@ -1,4 +1,4 @@
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type DashboardRole = "parent" | "teacher" | "student" | "supervisor" | "admin";
 

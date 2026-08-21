@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
-import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   latestExchangeRatesQueryDocument,
   latestFxSyncRunQueryDocument,

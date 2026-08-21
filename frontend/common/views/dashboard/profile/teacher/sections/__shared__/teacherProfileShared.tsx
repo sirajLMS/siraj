@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
 import { TeacherExtensionProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/extensions/TeacherExtensionProfileSection";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/teacher/sections/AdminOnlySection";
@@ -21,6 +21,7 @@ import { isTeacherAdminData } from "@/frontend/common/views/dashboard/profile/te
 import { TeacherNonProfileTabContent } from "@/frontend/common/views/dashboard/profile/teacher/TeacherNonProfileTabContent";
 import { TeacherProfileEditBody } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileEditBody";
 import type { TeacherProfileViewModel } from "@/frontend/common/views/dashboard/profile/teacher/useTeacherProfileViewModel";
+import { ProfileMode } from "@/shared/constants/profile.enum";
 
 export interface TeacherProfileSharedSections {
   readonly userDetails: ReactNode;
@@ -64,7 +65,7 @@ export function TeacherProfileShared({ vm, options }: Readonly<TeacherProfileSha
 
   if (activeTab !== "profile") {
     content = <TeacherNonProfileTabContent activeTab={activeTab} scope={scope} targetUserId={targetUserId} />;
-  } else if (teacherData && mode === ProfileMode.Edit) {
+  } else if (teacherData && mode === ProfileMode.EDIT) {
     content = (
       <TeacherProfileEditBody
         labels={labels}
@@ -139,7 +140,7 @@ function renderTeacherProfileViewSections(params: {
         timezoneLabel={labels.teacher.fields.timezone}
         currencyLabel={labels.teacher.fields.displayCurrency}
         phone={profilePhone ?? teacherData.phone}
-        timezone={profileTimezone ?? teacherData.timezone}
+        timezone={toIanaTimezoneOrNull(profileTimezone ?? teacherData.timezone)}
         displayCurrency={displayCurrency}
         baseLabels={sectionLabels.baseLabels}
       />

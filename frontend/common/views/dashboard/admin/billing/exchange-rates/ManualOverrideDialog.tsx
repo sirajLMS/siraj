@@ -5,7 +5,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, TextF
 import { useState } from "react";
 import { AppDatePicker } from "@/frontend/common/components/ui/form/date/AppDatePicker";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { upsertManualExchangeRateMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { serializeApolloError } from "@/frontend/common/utils/errorUtils";

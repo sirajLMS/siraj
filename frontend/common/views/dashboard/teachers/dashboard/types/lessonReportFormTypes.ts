@@ -1,7 +1,7 @@
 import type {
   AttendanceEvaluation as GraphqlAttendanceEvaluation,
   LessonReportStatus as GraphqlLessonReportStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
 
 export type AttendanceEvaluationValue = `${GraphqlAttendanceEvaluation}`;

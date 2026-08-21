@@ -18,7 +18,7 @@ import { useState } from "react";
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
 import { resolvePersonOption } from "@/frontend/common/components/ui/input/userSelect/userSelect.utils";
-import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ALLOWED_TARGET_STATUSES } from "@/frontend/common/utils/student-status-transitions";
 import { STUDENT_STATUS_TO_ACCOUNT_STATUS } from "@/frontend/common/views/dashboard/admin/parents/students/types";
 import type { ManagementControlsCardProps } from "@/frontend/common/views/dashboard/teachers/reassignment/types";

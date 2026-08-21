@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, MenuItem, Select, type SelectChangeEvent } from "@mui/material";
-import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { TrackingFilterSelectProps } from "@/frontend/common/views/dashboard/reschedule/tracking/__shared__/rescheduleTrackingShared";
 import { getTrackingStatusLabel } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
 import { STATUS_FILTER_OPTIONS } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";

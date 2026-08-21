@@ -1,4 +1,4 @@
-import type { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { DayOfWeek, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   TeacherAvailabilityLabels,
   TeacherAvailabilityTableLabels,

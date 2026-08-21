@@ -3,7 +3,7 @@
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useMemo } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deleteSiteContentMutationDocument,
   updateSiteContentPublishStateMutationDocument,

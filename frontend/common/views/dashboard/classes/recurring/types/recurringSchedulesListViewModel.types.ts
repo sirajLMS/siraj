@@ -1,4 +1,4 @@
-import type { RecurringSchedulesPaginatedResult } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { RecurringSchedulesQuery_recurringSchedules_rows } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   RecurringSchedulesListActionLabels,
   RecurringSchedulesListColumnLabels,
@@ -21,7 +21,7 @@ export interface RecurringSchedulesListLabelsBySection {
   readonly filters: RecurringSchedulesListFilterLabels;
 }
 
-export type RecurringScheduleListItem = NonNullable<RecurringSchedulesPaginatedResult["rows"]>[number];
+export type RecurringScheduleListItem = RecurringSchedulesQuery_recurringSchedules_rows;
 
 export interface RecurringSchedulesListViewModel {
   readonly labelsBySection: RecurringSchedulesListLabelsBySection;

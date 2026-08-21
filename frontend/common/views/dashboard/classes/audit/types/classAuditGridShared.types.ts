@@ -1,5 +1,8 @@
 import type { ComponentType } from "react";
-import type { AdminNoteInfo, CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  GroupClassAuditQuery_groupClassAudit_adminNote as AdminNoteInfo,
+  GroupClassAuditQuery_groupClassAudit_communications as CommunicationLogEntry,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   AdminNoteLabels,
   CommunicationLogLabels,

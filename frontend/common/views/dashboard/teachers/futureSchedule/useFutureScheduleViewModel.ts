@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useEffect } from "react";
-import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherFutureScheduleQuery_teacherFutureSchedule_classes as FutureClass } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   logTeacherSupportRequestMutationDocument,
   teacherFutureScheduleQueryDocument,

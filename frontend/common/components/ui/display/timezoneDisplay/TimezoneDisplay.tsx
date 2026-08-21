@@ -3,13 +3,14 @@
 import Box from "@mui/material/Box";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
-import { fromGraphqlIanaTimezone, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
+import { getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type TimezoneDisplayProps = {
-  readonly timezone?: string | null;
+  readonly timezone?: IanaTimezone | null;
   readonly showOffset?: boolean;
   readonly fallback?: string;
   readonly typographyVariant?: UiTypographyVariant;
@@ -34,10 +35,7 @@ export const TimezoneDisplay = ({
     return fallbackNode;
   }
 
-  const normalizedTimezone = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
-  const display = showOffset
-    ? getTimezoneSelectLabel(normalizedTimezone, locale)
-    : getTimezonePathLabel(normalizedTimezone, locale);
+  const display = showOffset ? getTimezoneSelectLabel(timezone, locale) : getTimezonePathLabel(timezone, locale);
 
   return (
     <Box component="span" sx={mergeSx({ typography: typographyVariant, whiteSpace: "nowrap" }, sx)}>

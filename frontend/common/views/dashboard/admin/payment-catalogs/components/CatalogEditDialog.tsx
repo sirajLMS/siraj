@@ -27,7 +27,7 @@ import {
   type CurrencyCode,
   IdentifierKind,
   PaymentDirection,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   createSupportedMobileWalletMutationDocument,
   createSupportedOnlineAccountMutationDocument,
@@ -83,7 +83,7 @@ const defaultValues = (): CatalogFormValues => ({
 
 function resolveCountry(code: string | null | undefined): CountryType | undefined {
   if (!code) return undefined;
-  return countries.find(country => country.code === code);
+  return countries.find(country => country.code.toString() === code);
 }
 
 function resolveCurrency(code: string | null | undefined): CurrencyOption | null {

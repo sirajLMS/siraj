@@ -1,9 +1,5 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import {
-  CurrencyCodePothosObject,
-  IanaTimezonePothosObject,
-  ManagerAccountTypePothosEnum,
-} from "@/backend/graphql/pothos/shared/enum.pothos";
+import { CurrencyCodePothosObject, ManagerAccountTypePothosEnum } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { ManagerOnboardingInput, ManagerOnboardingResult, ManagerOnboardingReturnType } from "@/backend/types";
 
 const ManagerOnboardingRef = gqlSchemaBuilder.objectRef<ManagerOnboardingReturnType>("ManagerOnboarding");
@@ -34,7 +30,7 @@ export const ManagerOnboardingInputPothosObject = gqlSchemaBuilder
       password: t.string({ required: true, directives: { constraint: { maxLength: 128 } } }),
       avatarUrl: t.string({ required: false, directives: { constraint: { maxLength: 1024 } } }),
       phone: t.string({ directives: { constraint: { maxLength: 512 } } }),
-      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
+      timezone: t.field({ type: "IanaTimezone", required: false }),
       displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
       accountType: t.field({ type: ManagerAccountTypePothosEnum, required: true }),
     }),

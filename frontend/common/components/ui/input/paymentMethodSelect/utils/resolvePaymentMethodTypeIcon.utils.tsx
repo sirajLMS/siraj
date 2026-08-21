@@ -11,7 +11,7 @@ import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
 import SmartphoneOutlinedIcon from "@mui/icons-material/SmartphoneOutlined";
 import type * as React from "react";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export function resolvePaymentMethodTypeIcon(type: PaymentMethodType | null | undefined): React.ReactNode {
   switch (type) {

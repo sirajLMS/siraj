@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 
 type TeacherNonProfileTabContentProps = {
   readonly activeTab: string;
@@ -17,7 +17,7 @@ export function TeacherNonProfileTabContent({
   scope,
   targetUserId,
 }: TeacherNonProfileTabContentProps): ReactElement | null {
-  if (activeTab === "notifications" && scope === ProfileScope.Own) {
+  if (activeTab === "notifications" && scope === ProfileScope.OWN) {
     return <NotificationPreferencesTab isActive />;
   }
   if (activeTab === "meeting") {

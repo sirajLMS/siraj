@@ -6,9 +6,11 @@ import { useNotifications } from "@toolpad/core/useNotifications";
 
 import { useCallback, useMemo } from "react";
 
-import { AppPermission, type NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  AppPermission,
+  type NotificationAlertsQuery,
+  type NotificationEventType,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 
@@ -59,9 +61,7 @@ function parseNotificationMetadata(value: unknown): NotificationMetadata | null 
   return isNotificationMetadata(value) ? value : null;
 }
 
-type RawNotificationAlert = NonNullable<
-  NonNullable<Operations.NotificationAlertsQuery["notificationAlerts"]>["alerts"]
->[number];
+type RawNotificationAlert = NonNullable<NonNullable<NotificationAlertsQuery["notificationAlerts"]>["alerts"]>[number];
 
 function mapAlerts(rawAlerts: RawNotificationAlert[] | null | undefined): readonly NotificationDrawerAlert[] {
   if (!rawAlerts) {

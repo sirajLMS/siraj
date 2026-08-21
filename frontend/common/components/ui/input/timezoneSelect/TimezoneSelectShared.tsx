@@ -11,12 +11,7 @@ import type {
   LocaleEmojiComponent,
   TimezoneSelectSharedProps,
 } from "@/frontend/common/components/ui/input/timezoneSelect/types/timezoneSelectShared.types";
-import {
-  fromGraphqlIanaTimezone,
-  getTimezoneOptions,
-  type TimezoneOption,
-  toGraphqlIanaTimezone,
-} from "@/frontend/common/lib/timezone";
+import { getTimezoneOptions, type TimezoneOption } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -132,8 +127,7 @@ export const TimezoneSelectShared: React.FC<TimezoneSelectSharedProps> = ({
     if (!value) {
       return null;
     }
-    const optionId = fromGraphqlIanaTimezone(value);
-    return options.find(option => option.id === optionId) ?? null;
+    return options.find(option => option.id === value) ?? null;
   }, [options, value]);
 
   const showRequiredError = Boolean(required) && !value;
@@ -150,7 +144,7 @@ export const TimezoneSelectShared: React.FC<TimezoneSelectSharedProps> = ({
       value={selectedOption}
       sx={{ ...style }}
       onChange={(_, newValue) => {
-        onChangeAction(newValue ? toGraphqlIanaTimezone(newValue.id) : null);
+        onChangeAction(newValue ? newValue.id : null);
       }}
       onBlur={onBlurAction}
       isOptionEqualToValue={(option, optionValue) => option.id === optionValue.id}

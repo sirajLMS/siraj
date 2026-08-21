@@ -1,9 +1,10 @@
 "use client";
 
-import { AccountStatus, type ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AdminSectionShared } from "@/frontend/common/views/dashboard/profile/components/__shared__/adminSectionShared";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/components/__shared__/infoFieldShared";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 type SupervisorAdminSectionProps = {

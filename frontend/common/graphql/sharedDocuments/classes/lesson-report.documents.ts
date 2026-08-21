@@ -1,9 +1,28 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ApproveLessonReportMutation,
+  ApproveLessonReportMutationVariables,
+  LessonReportByIdQuery,
+  LessonReportByIdQueryVariables,
+  LessonReportCountQuery,
+  LessonReportCountQueryVariables,
+  LessonReportQuery,
+  LessonReportQueryVariables,
+  PendingLessonReportsQuery,
+  PendingLessonReportsQueryVariables,
+  RecentApprovedLessonReportsQuery,
+  RecentApprovedLessonReportsQueryVariables,
+  RejectLessonReportMutation,
+  RejectLessonReportMutationVariables,
+  StudentRecentLessonReportsQuery,
+  StudentRecentLessonReportsQueryVariables,
+  SubmitLessonReportMutation,
+  SubmitLessonReportMutationVariables,
+  SubmitStudentLessonReportReflectionMutation,
+  SubmitStudentLessonReportReflectionMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const lessonReportQueryDocument: TypedDocumentNode<Operations.LessonReportQuery, Types.QueryLessonReportArgs> =
-  gql`
+export const lessonReportQueryDocument: TypedDocumentNode<LessonReportQuery, LessonReportQueryVariables> = gql`
   query LessonReport($classInstanceId: ID!) {
     lessonReport(classInstanceId: $classInstanceId) {
       id
@@ -37,10 +56,8 @@ export const lessonReportQueryDocument: TypedDocumentNode<Operations.LessonRepor
   }
 `;
 
-export const lessonReportByIdQueryDocument: TypedDocumentNode<
-  Operations.LessonReportByIdQuery,
-  Types.QueryLessonReportByIdArgs
-> = gql`
+export const lessonReportByIdQueryDocument: TypedDocumentNode<LessonReportByIdQuery, LessonReportByIdQueryVariables> =
+  gql`
   query LessonReportById($reportId: ID!) {
     lessonReportById(reportId: $reportId) {
       id
@@ -75,8 +92,8 @@ export const lessonReportByIdQueryDocument: TypedDocumentNode<
 `;
 
 export const pendingLessonReportsQueryDocument: TypedDocumentNode<
-  Operations.PendingLessonReportsQuery,
-  Types.QueryPendingLessonReportsArgs
+  PendingLessonReportsQuery,
+  PendingLessonReportsQueryVariables
 > = gql`
   query PendingLessonReports($teacherId: ID, $studentId: ID, $paginationArgs: PaginationArgs) {
     pendingLessonReports(teacherId: $teacherId, studentId: $studentId, paginationArgs: $paginationArgs) {
@@ -115,8 +132,8 @@ export const pendingLessonReportsQueryDocument: TypedDocumentNode<
 `;
 
 export const recentApprovedLessonReportsQueryDocument: TypedDocumentNode<
-  Operations.RecentApprovedLessonReportsQuery,
-  Types.QueryRecentApprovedLessonReportsArgs
+  RecentApprovedLessonReportsQuery,
+  RecentApprovedLessonReportsQueryVariables
 > = gql`
   query RecentApprovedLessonReports($paginationArgs: PaginationArgs) {
     recentApprovedLessonReports(paginationArgs: $paginationArgs) {
@@ -155,8 +172,8 @@ export const recentApprovedLessonReportsQueryDocument: TypedDocumentNode<
 `;
 
 export const studentRecentLessonReportsQueryDocument: TypedDocumentNode<
-  Operations.StudentRecentLessonReportsQuery,
-  Types.QueryStudentRecentLessonReportsArgs
+  StudentRecentLessonReportsQuery,
+  StudentRecentLessonReportsQueryVariables
 > = gql`
   query StudentRecentLessonReports($paginationArgs: PaginationArgs) {
     studentRecentLessonReports(paginationArgs: $paginationArgs) {
@@ -195,8 +212,8 @@ export const studentRecentLessonReportsQueryDocument: TypedDocumentNode<
 `;
 
 export const lessonReportCountQueryDocument: TypedDocumentNode<
-  Operations.LessonReportCountQuery,
-  Types.QueryLessonReportCountArgs
+  LessonReportCountQuery,
+  LessonReportCountQueryVariables
 > = gql`
   query LessonReportCount($teacherId: ID, $studentId: ID) {
     lessonReportCount(teacherId: $teacherId, studentId: $studentId) {
@@ -206,8 +223,8 @@ export const lessonReportCountQueryDocument: TypedDocumentNode<
 `;
 
 export const submitLessonReportMutationDocument: TypedDocumentNode<
-  Operations.SubmitLessonReportMutation,
-  Types.MutationSubmitLessonReportArgs
+  SubmitLessonReportMutation,
+  SubmitLessonReportMutationVariables
 > = gql`
   mutation SubmitLessonReport($classInstanceId: ID!, $input: LessonReportSubmitInput!) {
     submitLessonReport(classInstanceId: $classInstanceId, input: $input) {
@@ -243,8 +260,8 @@ export const submitLessonReportMutationDocument: TypedDocumentNode<
 `;
 
 export const approveLessonReportMutationDocument: TypedDocumentNode<
-  Operations.ApproveLessonReportMutation,
-  Types.MutationApproveLessonReportArgs
+  ApproveLessonReportMutation,
+  ApproveLessonReportMutationVariables
 > = gql`
   mutation ApproveLessonReport($reportId: ID!) {
     approveLessonReport(reportId: $reportId) {
@@ -280,8 +297,8 @@ export const approveLessonReportMutationDocument: TypedDocumentNode<
 `;
 
 export const rejectLessonReportMutationDocument: TypedDocumentNode<
-  Operations.RejectLessonReportMutation,
-  Types.MutationRejectLessonReportArgs
+  RejectLessonReportMutation,
+  RejectLessonReportMutationVariables
 > = gql`
   mutation RejectLessonReport($reportId: ID!, $rejectionReason: String!) {
     rejectLessonReport(reportId: $reportId, rejectionReason: $rejectionReason) {
@@ -317,8 +334,8 @@ export const rejectLessonReportMutationDocument: TypedDocumentNode<
 `;
 
 export const submitStudentReflectionMutationDocument: TypedDocumentNode<
-  Operations.SubmitStudentLessonReportReflectionMutation,
-  Types.MutationSubmitStudentLessonReportReflectionArgs
+  SubmitStudentLessonReportReflectionMutation,
+  SubmitStudentLessonReportReflectionMutationVariables
 > = gql`
   mutation SubmitStudentLessonReportReflection($classInstanceId: ID!, $studentNotes: String!) {
     submitStudentLessonReportReflection(classInstanceId: $classInstanceId, studentNotes: $studentNotes) {

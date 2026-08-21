@@ -1,6 +1,6 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { classSubjectByIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/class-subject.documents";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { SubjectDetailView } from "@/frontend/common/views/dashboard/subjects/detail/SubjectDetailContainer";
@@ -77,7 +77,6 @@ function applyMockPerms() {
       updatedAt: new Date().toISOString(),
       emailVerifiedAt: new Date().toISOString(),
       email: "mock@example.com",
-      __typename: "User",
       phone: null,
       status: AccountStatus.Activated,
       displayCurrency: CurrencyCode.Usd,

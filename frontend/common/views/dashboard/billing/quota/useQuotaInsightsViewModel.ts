@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
-import type { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { QuotaKind, QuotaStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { logger } from "@/frontend/common/utils/logger";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";

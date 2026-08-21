@@ -3,8 +3,10 @@
 import { useMutation } from "@apollo/client/react";
 import { Dialog, type Theme, useMediaQuery } from "@mui/material";
 import { useId, useState } from "react";
-import type { UserMeetingConfigUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  UserMeetingConfigFieldsFragment,
+  UserMeetingConfigUpdateInput,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   createUserMeetingConfigMutationDocument,
   generateMeetingUrlMutationDocument,

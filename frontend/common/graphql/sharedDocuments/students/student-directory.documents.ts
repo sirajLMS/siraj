@@ -1,6 +1,10 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  StudentDirectoryQuery,
+  StudentDirectoryQueryVariables,
+  StudentsDirectoryQuery,
+  StudentsDirectoryQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const studentDirectoryRowFragment = gql`
   fragment StudentDirectoryRow on StudentDirectoryRow {
@@ -18,10 +22,8 @@ export const studentDirectoryRowFragment = gql`
   }
 `;
 
-export const studentDirectoryQueryDocument: TypedDocumentNode<
-  Operations.StudentDirectoryQuery,
-  Types.QueryStudentDirectoryArgs
-> = gql`
+export const studentDirectoryQueryDocument: TypedDocumentNode<StudentDirectoryQuery, StudentDirectoryQueryVariables> =
+  gql`
   ${studentDirectoryRowFragment}
   query studentDirectory(
     $paginationArgs: PaginationArgs
@@ -51,8 +53,8 @@ export const studentDirectoryQueryDocument: TypedDocumentNode<
 `;
 
 export const studentsDirectoryQueryDocument: TypedDocumentNode<
-  Operations.StudentsDirectoryQuery,
-  Types.QueryStudentsDirectoryArgs
+  StudentsDirectoryQuery,
+  StudentsDirectoryQueryVariables
 > = gql`
   ${studentDirectoryRowFragment}
   query studentsDirectory($search: String, $limit: Int) {

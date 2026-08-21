@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { MobileTimezoneDisplay } from "@/frontend/mobile/components/ui/display/timezoneDisplay/timezoneDisplay.mobile";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 const meta: Meta<typeof MobileTimezoneDisplay> = {
   title: "UI/TimezoneDisplay/Mobile",
@@ -19,20 +20,20 @@ type Story = StoryObj<typeof MobileTimezoneDisplay>;
 
 export const Default: Story = {
   args: {
-    timezone: "Africa/Cairo",
+    timezone: IanaTimezone.Africa_Cairo,
   },
 };
 
 export const WithoutOffset: Story = {
   args: {
-    timezone: "Asia/Riyadh",
+    timezone: IanaTimezone.Asia_Riyadh,
     showOffset: false,
   },
 };
 
 export const IconOnly: Story = {
   args: {
-    timezone: "Africa/Cairo",
+    timezone: IanaTimezone.Africa_Cairo,
     displayType: "iconOnly",
   },
 };
@@ -49,6 +50,6 @@ export const Arabic: Story = {
     locale: "ar",
   },
   args: {
-    timezone: "Asia/Dubai",
+    timezone: IanaTimezone.Asia_Dubai,
   },
 };

@@ -1,5 +1,9 @@
-import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  EffectiveMeetingFieldsFragment,
+  StudentCreditBalanceQuery,
+  StudentProfileQuery,
+  StudentRecentLessonReportsQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   RecentLessonReportRow,
   StudentCreditBalanceRow,
@@ -7,10 +11,13 @@ import type {
 } from "@/frontend/common/views/dashboard/student/dashboard/types/studentDashboardTypes";
 
 type UpcomingClassItem = NonNullable<
-  NonNullable<NonNullable<Operations.StudentProfileQuery["studentProfile"]>["upcomingClasses"]>["classes"]
+  NonNullable<NonNullable<StudentProfileQuery["studentProfile"]>["upcomingClasses"]>["classes"]
 >[number];
 
-function resolveJoinUrl(meetingJoinUrl?: string | null, effectiveMeeting?: EffectiveMeeting | null): string | null {
+function resolveJoinUrl(
+  meetingJoinUrl?: string | null,
+  effectiveMeeting?: EffectiveMeetingFieldsFragment | null
+): string | null {
   const fromEffective = effectiveMeeting?.joinUrl?.trim();
   const fromLegacy = meetingJoinUrl?.trim();
   return fromEffective ?? fromLegacy ?? null;
@@ -32,16 +39,14 @@ export function mapUpcomingLesson(raw: UpcomingClassItem): UpcomingLessonRow {
   };
 }
 
-export function mapUpcomingLessons(
-  profile: Operations.StudentProfileQuery["studentProfile"] | undefined
-): UpcomingLessonRow[] {
+export function mapUpcomingLessons(profile: StudentProfileQuery["studentProfile"] | undefined): UpcomingLessonRow[] {
   const classes = profile?.upcomingClasses?.classes;
   if (!classes) return [];
   return classes.map(mapUpcomingLesson);
 }
 
 type RecentReportItem = NonNullable<
-  NonNullable<NonNullable<Operations.StudentRecentLessonReportsQuery["studentRecentLessonReports"]>["rows"]>[number]
+  NonNullable<NonNullable<StudentRecentLessonReportsQuery["studentRecentLessonReports"]>["rows"]>[number]
 >;
 
 export function mapRecentLessonReport(raw: RecentReportItem): RecentLessonReportRow {
@@ -64,14 +69,14 @@ export function mapRecentLessonReport(raw: RecentReportItem): RecentLessonReport
 }
 
 export function mapRecentLessonReports(
-  reports: NonNullable<Operations.StudentRecentLessonReportsQuery["studentRecentLessonReports"]>["rows"] | undefined
+  reports: NonNullable<StudentRecentLessonReportsQuery["studentRecentLessonReports"]>["rows"] | undefined
 ): RecentLessonReportRow[] {
   if (!reports) return [];
   return reports.map(mapRecentLessonReport);
 }
 
 export function mapCreditBalance(
-  balance: Operations.StudentCreditBalanceQuery["studentCreditBalance"] | undefined
+  balance: StudentCreditBalanceQuery["studentCreditBalance"] | undefined
 ): StudentCreditBalanceRow {
   return {
     classesRemaining: balance?.classesRemaining ?? 0,

@@ -1,6 +1,48 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ClassMeetingConfigsQuery,
+  ClassMeetingConfigsQueryVariables,
+  ClassMeetingConfigsWithStatusQuery,
+  ConnectMeetingProviderOAuthMutation,
+  ConnectMeetingProviderOAuthMutationVariables,
+  CreateClassMeetingConfigMutation,
+  CreateClassMeetingConfigMutationVariables,
+  CreateMeetingProviderMutation,
+  CreateMeetingProviderMutationVariables,
+  CreateUserMeetingConfigMutation,
+  CreateUserMeetingConfigMutationVariables,
+  DeleteClassMeetingConfigMutation,
+  DeleteClassMeetingConfigMutationVariables,
+  DeleteMeetingProviderMutation,
+  DeleteMeetingProviderMutationVariables,
+  DeleteUserMeetingConfigMutation,
+  DeleteUserMeetingConfigMutationVariables,
+  DisconnectMeetingProviderOAuthMutation,
+  DisconnectMeetingProviderOAuthMutationVariables,
+  GenerateMeetingUrlMutation,
+  GenerateMeetingUrlMutationVariables,
+  MeetingProviderQuery,
+  MeetingProviderQueryVariables,
+  MeetingProvidersQuery,
+  MeetingProvidersQueryVariables,
+  MyConnectedMeetingProvidersQuery,
+  RecurringMeetingConfigsQuery,
+  RecurringMeetingConfigsQueryVariables,
+  SetDefaultClassMeetingConfigMutation,
+  SetDefaultClassMeetingConfigMutationVariables,
+  SetDefaultMeetingConfigMutation,
+  SetDefaultMeetingConfigMutationVariables,
+  UpdateClassMeetingConfigMutation,
+  UpdateClassMeetingConfigMutationVariables,
+  UpdateMeetingProviderMutation,
+  UpdateMeetingProviderMutationVariables,
+  UpdateUserMeetingConfigMutation,
+  UpdateUserMeetingConfigMutationVariables,
+  UserMeetingConfigQuery,
+  UserMeetingConfigQueryVariables,
+  UserMeetingConfigsQuery,
+  UserMeetingConfigsQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const MEETING_PROVIDER_FIELDS = gql`
   fragment MeetingProviderFields on MeetingProvider {
@@ -51,10 +93,8 @@ const USER_MEETING_CONFIG_FIELDS = gql`
   ${MEETING_PROVIDER_FIELDS}
 `;
 
-export const meetingProvidersQueryDocument: TypedDocumentNode<
-  Operations.MeetingProvidersQuery,
-  Types.QueryMeetingProvidersArgs
-> = gql`
+export const meetingProvidersQueryDocument: TypedDocumentNode<MeetingProvidersQuery, MeetingProvidersQueryVariables> =
+  gql`
   ${MEETING_PROVIDER_FIELDS}
   query meetingProviders($activeOnly: Boolean) {
     meetingProviders(activeOnly: $activeOnly) {
@@ -63,10 +103,7 @@ export const meetingProvidersQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const meetingProviderQueryDocument: TypedDocumentNode<
-  Operations.MeetingProviderQuery,
-  Types.QueryMeetingProviderArgs
-> = gql`
+export const meetingProviderQueryDocument: TypedDocumentNode<MeetingProviderQuery, MeetingProviderQueryVariables> = gql`
   ${MEETING_PROVIDER_FIELDS}
   query meetingProvider($id: ID!) {
     meetingProvider(id: $id) {
@@ -76,8 +113,8 @@ export const meetingProviderQueryDocument: TypedDocumentNode<
 `;
 
 export const userMeetingConfigsQueryDocument: TypedDocumentNode<
-  Operations.UserMeetingConfigsQuery,
-  Types.QueryUserMeetingConfigsArgs
+  UserMeetingConfigsQuery,
+  UserMeetingConfigsQueryVariables
 > = gql`
   ${USER_MEETING_CONFIG_FIELDS}
   query userMeetingConfigs($userId: ID!) {
@@ -88,8 +125,8 @@ export const userMeetingConfigsQueryDocument: TypedDocumentNode<
 `;
 
 export const userMeetingConfigQueryDocument: TypedDocumentNode<
-  Operations.UserMeetingConfigQuery,
-  Types.QueryUserMeetingConfigArgs
+  UserMeetingConfigQuery,
+  UserMeetingConfigQueryVariables
 > = gql`
   ${USER_MEETING_CONFIG_FIELDS}
   query userMeetingConfig($id: ID!) {
@@ -100,8 +137,8 @@ export const userMeetingConfigQueryDocument: TypedDocumentNode<
 `;
 
 export const createMeetingProviderMutationDocument: TypedDocumentNode<
-  Operations.CreateMeetingProviderMutation,
-  Types.MutationCreateMeetingProviderArgs
+  CreateMeetingProviderMutation,
+  CreateMeetingProviderMutationVariables
 > = gql`
   ${MEETING_PROVIDER_FIELDS}
   mutation createMeetingProvider($input: MeetingProviderCreateInput!) {
@@ -112,8 +149,8 @@ export const createMeetingProviderMutationDocument: TypedDocumentNode<
 `;
 
 export const updateMeetingProviderMutationDocument: TypedDocumentNode<
-  Operations.UpdateMeetingProviderMutation,
-  Types.MutationUpdateMeetingProviderArgs
+  UpdateMeetingProviderMutation,
+  UpdateMeetingProviderMutationVariables
 > = gql`
   ${MEETING_PROVIDER_FIELDS}
   mutation updateMeetingProvider($id: ID!, $input: MeetingProviderUpdateInput!) {
@@ -124,8 +161,8 @@ export const updateMeetingProviderMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteMeetingProviderMutationDocument: TypedDocumentNode<
-  Operations.DeleteMeetingProviderMutation,
-  Types.MutationDeleteMeetingProviderArgs
+  DeleteMeetingProviderMutation,
+  DeleteMeetingProviderMutationVariables
 > = gql`
   mutation deleteMeetingProvider($id: ID!) {
     deleteMeetingProvider(id: $id)
@@ -133,8 +170,8 @@ export const deleteMeetingProviderMutationDocument: TypedDocumentNode<
 `;
 
 export const createUserMeetingConfigMutationDocument: TypedDocumentNode<
-  Operations.CreateUserMeetingConfigMutation,
-  Types.MutationCreateUserMeetingConfigArgs
+  CreateUserMeetingConfigMutation,
+  CreateUserMeetingConfigMutationVariables
 > = gql`
   ${USER_MEETING_CONFIG_FIELDS}
   mutation createUserMeetingConfig($input: UserMeetingConfigCreateInput!) {
@@ -145,8 +182,8 @@ export const createUserMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const updateUserMeetingConfigMutationDocument: TypedDocumentNode<
-  Operations.UpdateUserMeetingConfigMutation,
-  Types.MutationUpdateUserMeetingConfigArgs
+  UpdateUserMeetingConfigMutation,
+  UpdateUserMeetingConfigMutationVariables
 > = gql`
   ${USER_MEETING_CONFIG_FIELDS}
   mutation updateUserMeetingConfig($id: ID!, $input: UserMeetingConfigUpdateInput!) {
@@ -157,8 +194,8 @@ export const updateUserMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteUserMeetingConfigMutationDocument: TypedDocumentNode<
-  Operations.DeleteUserMeetingConfigMutation,
-  Types.MutationDeleteUserMeetingConfigArgs
+  DeleteUserMeetingConfigMutation,
+  DeleteUserMeetingConfigMutationVariables
 > = gql`
   mutation deleteUserMeetingConfig($id: ID!) {
     deleteUserMeetingConfig(id: $id)
@@ -166,8 +203,8 @@ export const deleteUserMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const setDefaultMeetingConfigMutationDocument: TypedDocumentNode<
-  Operations.SetDefaultMeetingConfigMutation,
-  Types.MutationSetDefaultMeetingConfigArgs
+  SetDefaultMeetingConfigMutation,
+  SetDefaultMeetingConfigMutationVariables
 > = gql`
   ${USER_MEETING_CONFIG_FIELDS}
   mutation setDefaultMeetingConfig($id: ID!) {
@@ -218,8 +255,8 @@ const EFFECTIVE_MEETING_FIELDS = gql`
 `;
 
 export const classMeetingConfigsQueryDocument: TypedDocumentNode<
-  Operations.ClassMeetingConfigsQuery,
-  Operations.ClassMeetingConfigsQueryVariables
+  ClassMeetingConfigsQuery,
+  ClassMeetingConfigsQueryVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   query classMeetingConfigs($classInstanceId: ID!) {
@@ -230,8 +267,8 @@ export const classMeetingConfigsQueryDocument: TypedDocumentNode<
 `;
 
 export const classMeetingConfigsWithStatusQueryDocument: TypedDocumentNode<
-  Operations.ClassMeetingConfigsWithStatusQuery,
-  Types.QueryClassMeetingConfigsArgs
+  ClassMeetingConfigsWithStatusQuery,
+  ClassMeetingConfigsQueryVariables
 > = gql`
   query classMeetingConfigsWithStatus($classInstanceId: ID!) {
     classMeetingConfigs(classInstanceId: $classInstanceId) {
@@ -273,8 +310,8 @@ export const classMeetingConfigsWithStatusQueryDocument: TypedDocumentNode<
 `;
 
 export const recurringMeetingConfigsQueryDocument: TypedDocumentNode<
-  Operations.RecurringMeetingConfigsQuery,
-  Operations.RecurringMeetingConfigsQueryVariables
+  RecurringMeetingConfigsQuery,
+  RecurringMeetingConfigsQueryVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   query recurringMeetingConfigs($recurringScheduleId: ID!) {
@@ -285,8 +322,8 @@ export const recurringMeetingConfigsQueryDocument: TypedDocumentNode<
 `;
 
 export const createClassMeetingConfigMutationDocument: TypedDocumentNode<
-  Operations.CreateClassMeetingConfigMutation,
-  Operations.CreateClassMeetingConfigMutationVariables
+  CreateClassMeetingConfigMutation,
+  CreateClassMeetingConfigMutationVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   mutation createClassMeetingConfig($input: ClassMeetingConfigCreateInput!) {
@@ -297,8 +334,8 @@ export const createClassMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const updateClassMeetingConfigMutationDocument: TypedDocumentNode<
-  Operations.UpdateClassMeetingConfigMutation,
-  Operations.UpdateClassMeetingConfigMutationVariables
+  UpdateClassMeetingConfigMutation,
+  UpdateClassMeetingConfigMutationVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   mutation updateClassMeetingConfig($id: ID!, $input: ClassMeetingConfigUpdateInput!) {
@@ -309,8 +346,8 @@ export const updateClassMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteClassMeetingConfigMutationDocument: TypedDocumentNode<
-  Operations.DeleteClassMeetingConfigMutation,
-  Operations.DeleteClassMeetingConfigMutationVariables
+  DeleteClassMeetingConfigMutation,
+  DeleteClassMeetingConfigMutationVariables
 > = gql`
   mutation deleteClassMeetingConfig($id: ID!) {
     deleteClassMeetingConfig(id: $id)
@@ -318,8 +355,8 @@ export const deleteClassMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const setDefaultClassMeetingConfigMutationDocument: TypedDocumentNode<
-  Operations.SetDefaultClassMeetingConfigMutation,
-  Operations.SetDefaultClassMeetingConfigMutationVariables
+  SetDefaultClassMeetingConfigMutation,
+  SetDefaultClassMeetingConfigMutationVariables
 > = gql`
   ${CLASS_MEETING_CONFIG_FIELDS}
   mutation setDefaultClassMeetingConfig($id: ID!) {
@@ -330,8 +367,8 @@ export const setDefaultClassMeetingConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const generateMeetingUrlMutationDocument: TypedDocumentNode<
-  Operations.GenerateMeetingUrlMutation,
-  Types.MutationGenerateMeetingUrlArgs
+  GenerateMeetingUrlMutation,
+  GenerateMeetingUrlMutationVariables
 > = gql`
   mutation generateMeetingUrl($input: GenerateMeetingUrlInput!) {
     generateMeetingUrl(input: $input) {
@@ -343,8 +380,8 @@ export const generateMeetingUrlMutationDocument: TypedDocumentNode<
 `;
 
 export const connectMeetingProviderOAuthMutationDocument: TypedDocumentNode<
-  Operations.ConnectMeetingProviderOAuthMutation,
-  Types.MutationConnectMeetingProviderOAuthArgs
+  ConnectMeetingProviderOAuthMutation,
+  ConnectMeetingProviderOAuthMutationVariables
 > = gql`
   mutation connectMeetingProviderOAuth($input: ConnectMeetingProviderOAuthInput!) {
     connectMeetingProviderOAuth(input: $input) {
@@ -356,8 +393,8 @@ export const connectMeetingProviderOAuthMutationDocument: TypedDocumentNode<
 `;
 
 export const disconnectMeetingProviderOAuthMutationDocument: TypedDocumentNode<
-  Operations.DisconnectMeetingProviderOAuthMutation,
-  Types.MutationDisconnectMeetingProviderOAuthArgs
+  DisconnectMeetingProviderOAuthMutation,
+  DisconnectMeetingProviderOAuthMutationVariables
 > = gql`
   mutation disconnectMeetingProviderOAuth($input: DisconnectMeetingProviderOAuthInput!) {
     disconnectMeetingProviderOAuth(input: $input) {
@@ -368,7 +405,7 @@ export const disconnectMeetingProviderOAuthMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const myConnectedMeetingProvidersQueryDocument: TypedDocumentNode<Operations.MyConnectedMeetingProvidersQuery> = gql`
+export const myConnectedMeetingProvidersQueryDocument: TypedDocumentNode<MyConnectedMeetingProvidersQuery> = gql`
   query myConnectedMeetingProviders {
     myConnectedMeetingProviders {
       id

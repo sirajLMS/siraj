@@ -1,19 +1,20 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { teacherOwnProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { buildFxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface TeacherOwnProfileContact {
   readonly name: string | null;
   readonly email: string | null;
   readonly phone: string | null;
-  readonly timezone: string | null;
+  readonly timezone: IanaTimezone | null;
 }
 
 export interface TeacherOwnProfileViewModel {

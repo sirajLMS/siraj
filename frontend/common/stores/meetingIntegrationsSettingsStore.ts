@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { AppPermission, MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   CredentialFormMode,
   TestConnectionResult,

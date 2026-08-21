@@ -1,11 +1,18 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ManagerDirectoryQuery,
+  ManagerDirectoryQueryVariables,
+  OnboardingMetricsQuery,
+  StaffDirectoryQuery,
+  StaffDirectoryQueryVariables,
+  TeacherDirectoryQuery,
+  TeacherDirectoryQueryVariables,
+  UpdateManagerProfileMutation,
+  UpdateManagerProfileMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const teacherDirectoryQueryDocument: TypedDocumentNode<
-  Operations.TeacherDirectoryQuery,
-  Types.QueryTeacherDirectoryArgs
-> = gql`
+export const teacherDirectoryQueryDocument: TypedDocumentNode<TeacherDirectoryQuery, TeacherDirectoryQueryVariables> =
+  gql`
   query teacherDirectory($search: String, $paginationArgs: PaginationArgs) {
     teacherDirectory(search: $search, paginationArgs: $paginationArgs) {
       id
@@ -38,10 +45,8 @@ export const teacherDirectoryQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const managerDirectoryQueryDocument: TypedDocumentNode<
-  Operations.ManagerDirectoryQuery,
-  Types.QueryManagerDirectoryArgs
-> = gql`
+export const managerDirectoryQueryDocument: TypedDocumentNode<ManagerDirectoryQuery, ManagerDirectoryQueryVariables> =
+  gql`
   query managerDirectory($paginationArgs: PaginationArgs, $roleFilter: String, $statusFilter: String) {
     managerDirectory(paginationArgs: $paginationArgs, roleFilter: $roleFilter, statusFilter: $statusFilter) {
       id
@@ -79,8 +84,8 @@ export const managerDirectoryQueryDocument: TypedDocumentNode<
 `;
 
 export const updateManagerProfileMutationDocument: TypedDocumentNode<
-  Operations.UpdateManagerProfileMutation,
-  Types.MutationUpdateManagerProfileArgs
+  UpdateManagerProfileMutation,
+  UpdateManagerProfileMutationVariables
 > = gql`
   mutation updateManagerProfile($staffProfileId: ID!, $input: UpdateManagerProfileInput!) {
     updateManagerProfile(staffProfileId: $staffProfileId, input: $input) {
@@ -97,7 +102,7 @@ export const updateManagerProfileMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const onboardingMetricsQueryDocument: TypedDocumentNode<Operations.OnboardingMetricsQuery> = gql`
+export const onboardingMetricsQueryDocument: TypedDocumentNode<OnboardingMetricsQuery> = gql`
   query onboardingMetrics {
     onboardingMetrics {
       id
@@ -117,10 +122,7 @@ export const staffDirectoryAutocompleteRowFragment = gql`
   }
 `;
 
-export const staffDirectoryQueryDocument: TypedDocumentNode<
-  Operations.StaffDirectoryQuery,
-  Types.QueryStaffDirectoryArgs
-> = gql`
+export const staffDirectoryQueryDocument: TypedDocumentNode<StaffDirectoryQuery, StaffDirectoryQueryVariables> = gql`
   ${staffDirectoryAutocompleteRowFragment}
   query staffDirectory($search: String, $limit: Int, $permissionGroupFilter: String) {
     staffDirectory(search: $search, limit: $limit, permissionGroupFilter: $permissionGroupFilter) {

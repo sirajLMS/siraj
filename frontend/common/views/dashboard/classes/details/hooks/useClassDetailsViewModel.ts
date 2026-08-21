@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { ClassInstanceQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { formatScheduleTimeOnly } from "@/frontend/common/views/dashboard/admin/home/utils/formatScheduleTime";
@@ -20,7 +20,7 @@ import { type ClassDetailsLabels, Translation, useAppTranslation } from "@/share
 
 const noopAsync = () => Promise.resolve();
 
-export type ClassInstance = NonNullable<Operations.ClassInstanceQuery["classInstance"]>;
+export type ClassInstance = NonNullable<ClassInstanceQuery["classInstance"]>;
 
 type SessionActionProps = {
   readonly onStart: () => Promise<void>;

@@ -13,11 +13,10 @@ import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hoo
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
 import {
   CountryCode,
+  type CreateTeacherMutation_createTeacher,
   CurrencyCode,
   Gender,
-  IanaTimezone,
-  type TeacherOnboarding,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { useCreateTeacherOnboarding } from "@/frontend/common/hooks/useCreateTeacherOnboarding";
 import { useTeacherOnboardingStore } from "@/frontend/common/stores/teacherOnboardingStore";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
@@ -25,6 +24,7 @@ import {
   type TeacherOnboardingFormData,
   teacherOnboardingSchema,
 } from "@/frontend/common/views/dashboard/teachers/onboarding/schemas/teacherOnboardingSchema";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { type TeacherOnboardingLabels, Translation, useAppTranslation } from "@/shared/locale";
 import type { MeetingConfigJoinLabels, MeetingConfigManagerLabels } from "@/shared/locale/types/ui";
 
@@ -96,7 +96,7 @@ function useOnboardingForm(labels: TeacherOnboardingLabels): OnboardingForm {
       password: "",
       gender: Gender.Male,
       countryCode: CountryCode.Eg,
-      timezone: IanaTimezone.AfricaCairo,
+      timezone: IanaTimezone.Africa_Cairo,
       displayCurrency: CurrencyCode.Usd,
       rateCurrency: CurrencyCode.Usd,
       avatarUrl: undefined,
@@ -126,7 +126,7 @@ export function useTeacherOnboardingViewModel(): TeacherOnboardingViewModel {
   const { form, register, control, errors, handleSubmit } = useOnboardingForm(labels);
   const { showSuccess, submitError, onSubmit, onDismissSuccess, onDismissError, isSubmitting } = useOnboardingSubmit<
     TeacherOnboardingFormData,
-    TeacherOnboarding
+    CreateTeacherMutation_createTeacher
   >({
     execute,
     onSuccess: created => profileHrefForTeacher({ userId: created.userId, teacherId: created.id }) ?? undefined,

@@ -4,11 +4,7 @@ import { MenuItem, Stack, TextField, Tooltip, Typography } from "@mui/material";
 import { useState } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
-import {
-  AccountStatus,
-  type CurrencyCode,
-  type ProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, type CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/components/__shared__/infoFieldShared";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/shared/sections/CoreIdentitySection";
@@ -18,6 +14,7 @@ import type {
   StaffSectionLabelsBundle,
 } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import type { StaffAdminEditFormData } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 
 type AccountSectionProps =
   | {

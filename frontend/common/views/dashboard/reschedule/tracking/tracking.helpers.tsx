@@ -11,8 +11,8 @@ import type { ReactNode } from "react";
 import {
   LeaveRequestStatus,
   RescheduleDateLabel,
-  type RescheduleTrackingRow,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  type RescheduleTrackingRowsQuery_rescheduleTrackingRows_rows,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   MetricDefinition,
   RawMetrics,
@@ -90,7 +90,10 @@ export function buildTrackingMetrics(rawMetrics: RawMetrics | null | undefined) 
   );
 }
 
-export function buildTrackingRows(rawRows: readonly RescheduleTrackingRow[], locale: string): TrackingRow[] {
+export function buildTrackingRows(
+  rawRows: readonly RescheduleTrackingRowsQuery_rescheduleTrackingRows_rows[],
+  locale: string
+): TrackingRow[] {
   return rawRows.map(r => {
     const start =
       r.scheduledStartAt && typeof r.scheduledStartAt === "string" ? new Date(r.scheduledStartAt) : undefined;

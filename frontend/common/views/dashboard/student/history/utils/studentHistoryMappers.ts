@@ -1,4 +1,4 @@
-import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   mapStudentHistoryMetricsShared,
   mapStudentHistorySessionsShared,
@@ -8,7 +8,7 @@ import type {
   StudentHistorySessionRow,
 } from "@/frontend/common/views/dashboard/student/history/types/studentHistoryTypes";
 
-function isEffectiveMeeting(value: unknown): value is EffectiveMeeting {
+function isEffectiveMeeting(value: unknown): value is EffectiveMeetingFieldsFragment {
   return typeof value === "object" && value !== null && "joinUrl" in value;
 }
 

@@ -1,6 +1,6 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { TeacherAvailabilityContainer } from "@/frontend/common/views/dashboard/teachers/availability/TeacherAvailabilityContainer";
 

@@ -20,7 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql";
 import { logger } from "@/frontend/common/utils/logger";
 import { lessonReportFormSchema } from "@/frontend/common/views/dashboard/teachers/dashboard/schemas/lessonReportFormSchema";
 import type {

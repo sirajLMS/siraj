@@ -2,13 +2,10 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import { type ProfileByUserIdQuery, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AssignedStudentsTab } from "@/frontend/common/views/dashboard/profile/teacher/students/AssignedStudentsTab";
 
-const assignedStudents: NonNullable<
-  NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"]
-> = {
+const assignedStudents: NonNullable<NonNullable<ProfileByUserIdQuery["profileByUserId"]>["assignedStudents"]> = {
   id: "assigned-students-1",
   totalCount: 3,
   rows: [

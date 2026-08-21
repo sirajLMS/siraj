@@ -1,10 +1,10 @@
-import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { UsersQuery_users } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export function getAvatarInitials(user: User): string {
+export function getAvatarInitials(user: UsersQuery_users): string {
   return (
     user.name
       ?.split(" ")
-      .map(w => w[0])
+      .map((w: string) => w[0])
       .join("")
       .slice(0, 2)
       .toUpperCase() ?? ""

@@ -3,9 +3,9 @@
 import { EditCalendarOutlined, PersonAddOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import type {
-  TeacherDirectoryMetrics,
-  TeacherDirectoryRow,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  TeacherDirectoryQuery_teacherDirectory_metrics as TeacherDirectoryMetrics,
+  TeacherDirectoryQuery_teacherDirectory_rows as TeacherDirectoryRow,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { DesktopPrimaryPageAction, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { DesktopPageContainer, DesktopPageHeader } from "@/frontend/desktop/components/ui/container/page";
 import { TeacherDataGrid } from "@/frontend/desktop/views/dashboard/teachers/home/components/teacherDataGrid.desktop";

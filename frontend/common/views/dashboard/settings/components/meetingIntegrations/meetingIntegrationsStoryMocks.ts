@@ -2,7 +2,7 @@ import {
   MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug as MeetingIntegrationProviderSlugEnum,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   MeetingIntegrationConnectedAccount,
   MeetingIntegrationProviderSlug,

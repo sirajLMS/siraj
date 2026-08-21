@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
 import type { CurrencySelectProps } from "@/frontend/common/components/ui/input/currencySelect/types";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 
 function CurrencySelectStory({

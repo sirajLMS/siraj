@@ -2,11 +2,11 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import type { ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { ProfileTabNavVariantProps } from "@/frontend/common/views/dashboard/profile/core/profileTabNavTypes";
 import { getVisibleProfileTabs, resolveProfileTab } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
 import type { ProfileTabNavLabels } from "@/frontend/common/views/dashboard/profile/core/types/profileShell.types";
+import type { ProfileAudience, ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type ProfileTabNavProps = {

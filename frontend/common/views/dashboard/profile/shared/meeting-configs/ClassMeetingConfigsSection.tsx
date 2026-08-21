@@ -12,12 +12,12 @@ import { MeetingConfigList } from "@/frontend/common/components/ui/display/meeti
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
-import type {
-  ClassMeetingConfigFieldsFragment,
-  EffectiveMeetingFieldsFragment,
-} from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  AppPermission,
+  type ClassMeetingConfigFieldsFragment,
+  type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs,
+  type EffectiveMeetingFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   classMeetingConfigsQueryDocument,
   classMeetingConfigsWithStatusQueryDocument,
@@ -41,7 +41,7 @@ import type {
   MeetingConfigManagerLabels,
 } from "@/shared/locale/types/ui";
 
-type StatusConfigEntry = Operations.ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_ClassMeetingConfig;
+type StatusConfigEntry = ClassMeetingConfigsWithStatusQuery_classMeetingConfigs;
 
 type StatusMap = ReadonlyMap<string, StatusConfigEntry>;
 

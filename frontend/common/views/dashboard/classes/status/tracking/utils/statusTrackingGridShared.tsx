@@ -5,7 +5,7 @@ import {
   computeSessionStatus,
   SessionStatus,
   type StatusTrackingDataGridProps,
-  type StatusTrackingRow,
+  type StatusTrackingScheduleRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecutionState";
 
@@ -23,7 +23,7 @@ export function createStatusActionLabels(labels: StatusTrackingDataGridProps["la
 export interface JoinCellComponentProps {
   readonly variant: "icon";
   readonly joinUrl: string | null | undefined;
-  readonly meeting: StatusTrackingRow["effectiveMeeting"];
+  readonly meeting: StatusTrackingScheduleRow["effectiveMeeting"];
   readonly emptyRole: "class";
   readonly label: string;
   readonly setupHref: string;
@@ -38,7 +38,7 @@ const JOIN_CELL_BOX_SX = {
 } as const;
 
 export function renderStatusTrackingJoinCell(
-  row: StatusTrackingRow,
+  row: StatusTrackingScheduleRow,
   labels: StatusTrackingDataGridProps["labels"],
   JoinComponent: ComponentType<JoinCellComponentProps>
 ): ReactNode {

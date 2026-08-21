@@ -3,11 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { BlockOutlined, EventBusyOutlined, TimerOutlined, VerifiedUserOutlined } from "@mui/icons-material";
 import { useCallback } from "react";
-import {
-  type AccountStatus,
-  AppPermission,
-  type ParentStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type AccountStatus, AppPermission, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { parentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/parents/parent-directory.documents";
 import { useParentsStore } from "@/frontend/common/stores/parentsStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

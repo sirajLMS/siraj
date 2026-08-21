@@ -4,7 +4,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Alert, Box, IconButton, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { fromGraphqlIanaTimezone, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
+import { getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { edgeToEdgeSx } from "@/frontend/common/utils/sx/edgeToEdgeSx";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
@@ -38,8 +38,7 @@ const StyledTimezoneWarningAlert = styled(Alert)(({ theme }) => ({
 }));
 
 function formatTimezoneLabel(timezone: string, locale: string): string {
-  const normalized = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
-  return getTimezoneSelectLabel(normalized, locale);
+  return getTimezoneSelectLabel(timezone, locale);
 }
 
 export function TimezoneWarningBanner({

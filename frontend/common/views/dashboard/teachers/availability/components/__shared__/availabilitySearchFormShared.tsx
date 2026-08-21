@@ -7,7 +7,7 @@ import type { PickerValue } from "@mui/x-date-pickers/internals";
 import type { ComponentType } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { outlinedInputSx, timeInputOutlinedSx } from "@/frontend/common/components/ui/form/field";
-import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   AvailabilitySearchFormData,
   AvailabilitySearchFormProps,

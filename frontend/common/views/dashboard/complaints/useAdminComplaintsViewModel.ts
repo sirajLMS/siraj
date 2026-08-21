@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
-import { AppPermission, type PaginationArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type PaginationArgs } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   adminComplaintQueueQueryDocument,
   deleteComplaintMutationDocument,

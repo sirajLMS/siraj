@@ -17,7 +17,7 @@ import {
   computeSessionStatus,
   formatScheduleRange,
   type StatusTrackingDataGridProps,
-  type StatusTrackingRow,
+  type StatusTrackingScheduleRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import {
   createStatusActionLabels,
@@ -49,7 +49,7 @@ export function StatusTrackingDataGridDesktop({
   );
 
   // RENDER OPT JUSTIFICATION: cache `useMemo` to maintain stable column array identity for the MUI AppDataGrid consumer (prevents column re-allocation across renders when labels/locale props are unchanged)
-  const columns = useMemo<GridColDef<StatusTrackingRow>[]>(() => {
+  const columns = useMemo<GridColDef<StatusTrackingScheduleRow>[]>(() => {
     const actionLabels = createStatusActionLabels(labels);
 
     return [
@@ -151,7 +151,7 @@ export function StatusTrackingDataGridDesktop({
   }, [labels, locale, onActivate, onReschedule, onVerify, renderProfileCell]);
 
   return (
-    <AppDataGrid<StatusTrackingRow>
+    <AppDataGrid<StatusTrackingScheduleRow>
       rows={rows}
       columns={columns}
       loading={loading}

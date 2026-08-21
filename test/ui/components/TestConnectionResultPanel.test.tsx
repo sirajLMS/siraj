@@ -7,7 +7,7 @@ expect.extend(matchers);
 import {
   MeetingConnectionTestMode,
   MeetingIntegrationProviderSlug,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { TestConnectionResultPanel } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/TestConnectionResultPanel";
 import type { TestMeetingConnectionResult } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";
 import type { AppLocale } from "@/shared/locale/AppLocale";

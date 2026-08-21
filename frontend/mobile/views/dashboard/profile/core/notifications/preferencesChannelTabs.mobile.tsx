@@ -2,7 +2,7 @@
 
 import { Box, FormControlLabel, Skeleton, Slide, Stack, Switch, Tab, Tabs, Typography } from "@mui/material";
 import type { SyntheticEvent } from "react";
-import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   NOTIFICATION_CHANNEL_ACCENTS,
   NOTIFICATION_CHANNEL_ICONS,

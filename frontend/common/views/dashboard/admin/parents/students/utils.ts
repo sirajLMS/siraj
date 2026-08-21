@@ -6,8 +6,7 @@ import {
   VerifiedUserOutlined,
   WarningAmberOutlined,
 } from "@mui/icons-material";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/gql/operations";
+import { type StudentDirectoryQuery, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {
   StudentEnrollmentStatus as EnrollmentEnum,

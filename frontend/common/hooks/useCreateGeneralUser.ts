@@ -1,5 +1,5 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import type { GeneralUserCreateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { GeneralUserCreateInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import { createGeneralUserMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useGeneralUserOnboardingStore } from "@/frontend/common/stores/generalUserOnboardingStore";
 import { logger } from "@/frontend/common/utils/logger";

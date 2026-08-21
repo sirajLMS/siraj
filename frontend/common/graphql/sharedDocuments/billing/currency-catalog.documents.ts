@@ -1,5 +1,11 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ActivateSupportedCurrencyMutation,
+  ActivateSupportedCurrencyMutationVariables,
+  DeactivateSupportedCurrencyMutation,
+  DeactivateSupportedCurrencyMutationVariables,
+  SupportedCurrenciesQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const SUPPORTED_CURRENCY_FIELDS = gql`
   fragment SupportedCurrencyFields on SupportedCurrency {
@@ -13,7 +19,7 @@ export const SUPPORTED_CURRENCY_FIELDS = gql`
   }
 `;
 
-export const supportedCurrenciesQueryDocument: TypedDocumentNode<Operations.SupportedCurrenciesQuery> = gql`
+export const supportedCurrenciesQueryDocument: TypedDocumentNode<SupportedCurrenciesQuery> = gql`
   ${SUPPORTED_CURRENCY_FIELDS}
   query SupportedCurrencies($activeOnly: Boolean) {
     supportedCurrencies(activeOnly: $activeOnly) {
@@ -23,8 +29,8 @@ export const supportedCurrenciesQueryDocument: TypedDocumentNode<Operations.Supp
 `;
 
 export const activateSupportedCurrencyMutationDocument: TypedDocumentNode<
-  Operations.ActivateSupportedCurrencyMutation,
-  Operations.ActivateSupportedCurrencyMutationVariables
+  ActivateSupportedCurrencyMutation,
+  ActivateSupportedCurrencyMutationVariables
 > = gql`
   ${SUPPORTED_CURRENCY_FIELDS}
   mutation ActivateSupportedCurrency($input: SupportedCurrencyUpsertInput!) {
@@ -35,8 +41,8 @@ export const activateSupportedCurrencyMutationDocument: TypedDocumentNode<
 `;
 
 export const deactivateSupportedCurrencyMutationDocument: TypedDocumentNode<
-  Operations.DeactivateSupportedCurrencyMutation,
-  Operations.DeactivateSupportedCurrencyMutationVariables
+  DeactivateSupportedCurrencyMutation,
+  DeactivateSupportedCurrencyMutationVariables
 > = gql`
   mutation DeactivateSupportedCurrency($code: CurrencyCode!) {
     deactivateSupportedCurrency(code: $code)

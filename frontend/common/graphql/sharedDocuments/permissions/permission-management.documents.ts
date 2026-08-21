@@ -1,6 +1,32 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AssignPermissionGroupToUserMutation,
+  AssignPermissionGroupToUserMutationVariables,
+  BulkAssignUsersToGroupMutation,
+  BulkAssignUsersToGroupMutationVariables,
+  BulkRevokeUsersFromGroupMutation,
+  BulkRevokeUsersFromGroupMutationVariables,
+  CreatePermissionGroupMutation,
+  CreatePermissionGroupMutationVariables,
+  DeletePermissionGroupMutation,
+  DeletePermissionGroupMutationVariables,
+  EffectiveUserPermissionsQuery,
+  EffectiveUserPermissionsQueryVariables,
+  PermissionGroupQuery,
+  PermissionGroupQueryVariables,
+  PermissionGroupsQuery,
+  PermissionsQuery,
+  RevokePermissionGroupFromUserMutation,
+  RevokePermissionGroupFromUserMutationVariables,
+  UpdatePermissionGroupMutation,
+  UpdatePermissionGroupMutationVariables,
+  UpdateUserOverridesMutation,
+  UpdateUserOverridesMutationVariables,
+  UserOverridesQuery,
+  UserOverridesQueryVariables,
+  UserPermissionGroupsQuery,
+  UserPermissionGroupsQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const PERMISSION_FIELDS = gql`
   fragment PermissionFields on Permission {
@@ -54,7 +80,7 @@ const USER_OVERRIDE_FIELDS = gql`
   }
 `;
 
-export const permissionsQueryDocument: TypedDocumentNode<Operations.PermissionsQuery> = gql`
+export const permissionsQueryDocument: TypedDocumentNode<PermissionsQuery> = gql`
   ${PERMISSION_FIELDS}
   query permissions {
     permissions {
@@ -63,7 +89,7 @@ export const permissionsQueryDocument: TypedDocumentNode<Operations.PermissionsQ
   }
 `;
 
-export const permissionGroupsQueryDocument: TypedDocumentNode<Operations.PermissionGroupsQuery> = gql`
+export const permissionGroupsQueryDocument: TypedDocumentNode<PermissionGroupsQuery> = gql`
   ${PERMISSION_GROUP_FIELDS}
   query permissionGroups {
     permissionGroups {
@@ -72,10 +98,7 @@ export const permissionGroupsQueryDocument: TypedDocumentNode<Operations.Permiss
   }
 `;
 
-export const permissionGroupQueryDocument: TypedDocumentNode<
-  Operations.PermissionGroupQuery,
-  Types.QueryPermissionGroupArgs
-> = gql`
+export const permissionGroupQueryDocument: TypedDocumentNode<PermissionGroupQuery, PermissionGroupQueryVariables> = gql`
   ${PERMISSION_GROUP_DETAIL_FIELDS}
   query permissionGroup($id: String!) {
     permissionGroup(id: $id) {
@@ -85,18 +108,15 @@ export const permissionGroupQueryDocument: TypedDocumentNode<
 `;
 
 export const userPermissionGroupsQueryDocument: TypedDocumentNode<
-  Operations.UserPermissionGroupsQuery,
-  Types.QueryUserPermissionGroupsArgs
+  UserPermissionGroupsQuery,
+  UserPermissionGroupsQueryVariables
 > = gql`
   query userPermissionGroups($userId: String!) {
     userPermissionGroups(userId: $userId)
   }
 `;
 
-export const userOverridesQueryDocument: TypedDocumentNode<
-  Operations.UserOverridesQuery,
-  Types.QueryUserOverridesArgs
-> = gql`
+export const userOverridesQueryDocument: TypedDocumentNode<UserOverridesQuery, UserOverridesQueryVariables> = gql`
   ${USER_OVERRIDE_FIELDS}
   query userOverrides($userId: String!) {
     userOverrides(userId: $userId) {
@@ -106,8 +126,8 @@ export const userOverridesQueryDocument: TypedDocumentNode<
 `;
 
 export const effectiveUserPermissionsQueryDocument: TypedDocumentNode<
-  Operations.EffectiveUserPermissionsQuery,
-  Types.QueryEffectiveUserPermissionsArgs
+  EffectiveUserPermissionsQuery,
+  EffectiveUserPermissionsQueryVariables
 > = gql`
   query effectiveUserPermissions($userId: String!) {
     effectiveUserPermissions(userId: $userId)
@@ -115,8 +135,8 @@ export const effectiveUserPermissionsQueryDocument: TypedDocumentNode<
 `;
 
 export const createPermissionGroupMutationDocument: TypedDocumentNode<
-  Operations.CreatePermissionGroupMutation,
-  Types.MutationCreatePermissionGroupArgs
+  CreatePermissionGroupMutation,
+  CreatePermissionGroupMutationVariables
 > = gql`
   ${PERMISSION_GROUP_DETAIL_FIELDS}
   mutation createPermissionGroup($input: CreatePermissionGroupInput!) {
@@ -127,8 +147,8 @@ export const createPermissionGroupMutationDocument: TypedDocumentNode<
 `;
 
 export const updatePermissionGroupMutationDocument: TypedDocumentNode<
-  Operations.UpdatePermissionGroupMutation,
-  Types.MutationUpdatePermissionGroupArgs
+  UpdatePermissionGroupMutation,
+  UpdatePermissionGroupMutationVariables
 > = gql`
   ${PERMISSION_GROUP_DETAIL_FIELDS}
   mutation updatePermissionGroup($input: UpdatePermissionGroupInput!) {
@@ -139,8 +159,8 @@ export const updatePermissionGroupMutationDocument: TypedDocumentNode<
 `;
 
 export const deletePermissionGroupMutationDocument: TypedDocumentNode<
-  Operations.DeletePermissionGroupMutation,
-  Types.MutationDeletePermissionGroupArgs
+  DeletePermissionGroupMutation,
+  DeletePermissionGroupMutationVariables
 > = gql`
   mutation deletePermissionGroup($groupId: String!) {
     deletePermissionGroup(groupId: $groupId)
@@ -148,8 +168,8 @@ export const deletePermissionGroupMutationDocument: TypedDocumentNode<
 `;
 
 export const assignPermissionGroupToUserMutationDocument: TypedDocumentNode<
-  Operations.AssignPermissionGroupToUserMutation,
-  Types.MutationAssignPermissionGroupToUserArgs
+  AssignPermissionGroupToUserMutation,
+  AssignPermissionGroupToUserMutationVariables
 > = gql`
   mutation assignPermissionGroupToUser($input: AssignPermissionGroupToUserInput!) {
     assignPermissionGroupToUser(input: $input)
@@ -157,8 +177,8 @@ export const assignPermissionGroupToUserMutationDocument: TypedDocumentNode<
 `;
 
 export const revokePermissionGroupFromUserMutationDocument: TypedDocumentNode<
-  Operations.RevokePermissionGroupFromUserMutation,
-  Types.MutationRevokePermissionGroupFromUserArgs
+  RevokePermissionGroupFromUserMutation,
+  RevokePermissionGroupFromUserMutationVariables
 > = gql`
   mutation revokePermissionGroupFromUser($input: RevokePermissionGroupFromUserInput!) {
     revokePermissionGroupFromUser(input: $input)
@@ -166,8 +186,8 @@ export const revokePermissionGroupFromUserMutationDocument: TypedDocumentNode<
 `;
 
 export const bulkAssignUsersToGroupMutationDocument: TypedDocumentNode<
-  Operations.BulkAssignUsersToGroupMutation,
-  Types.MutationBulkAssignUsersToGroupArgs
+  BulkAssignUsersToGroupMutation,
+  BulkAssignUsersToGroupMutationVariables
 > = gql`
   mutation bulkAssignUsersToGroup($groupId: String!, $userIds: [String!]!) {
     bulkAssignUsersToGroup(groupId: $groupId, userIds: $userIds)
@@ -175,8 +195,8 @@ export const bulkAssignUsersToGroupMutationDocument: TypedDocumentNode<
 `;
 
 export const bulkRevokeUsersFromGroupMutationDocument: TypedDocumentNode<
-  Operations.BulkRevokeUsersFromGroupMutation,
-  Types.MutationBulkRevokeUsersFromGroupArgs
+  BulkRevokeUsersFromGroupMutation,
+  BulkRevokeUsersFromGroupMutationVariables
 > = gql`
   mutation bulkRevokeUsersFromGroup($groupId: String!, $userIds: [String!]!) {
     bulkRevokeUsersFromGroup(groupId: $groupId, userIds: $userIds)
@@ -184,8 +204,8 @@ export const bulkRevokeUsersFromGroupMutationDocument: TypedDocumentNode<
 `;
 
 export const updateUserOverridesMutationDocument: TypedDocumentNode<
-  Operations.UpdateUserOverridesMutation,
-  Types.MutationUpdateUserOverridesArgs
+  UpdateUserOverridesMutation,
+  UpdateUserOverridesMutationVariables
 > = gql`
   mutation updateUserOverrides($userId: String!, $overrides: [UserOverrideInput!]!) {
     updateUserOverrides(userId: $userId, overrides: $overrides)

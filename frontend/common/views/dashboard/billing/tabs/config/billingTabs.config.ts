@@ -6,7 +6,7 @@ import {
   ReceiptLongOutlined,
   ShieldOutlined,
 } from "@mui/icons-material";
-import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import type { BillingTabId, BillingTabLabelKey } from "@/frontend/common/views/dashboard/billing/tabs/types";
 import { getVisibleTabs, type TabDefinition } from "@/frontend/common/views/dashboard/lib/tabbedPane";

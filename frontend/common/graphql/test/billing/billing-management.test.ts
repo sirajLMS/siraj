@@ -4,7 +4,7 @@ import {
   InvoiceStatus,
   InvoiceType as InvoiceTypeEnum,
   PaymentMethodType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   createManualInvoiceMutationDocument,
   deleteInvoiceMutationDocument,

@@ -1,7 +1,7 @@
 import type {
-  StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics,
-  StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession,
-} from "@/frontend/common/graphql/generated/gql/operations";
+  StudentClassHistoryQuery_studentClassHistory_metrics,
+  StudentClassHistoryQuery_studentClassHistory_sessions,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   StudentHistoryMetrics,
   StudentHistorySessionRow,
@@ -22,10 +22,7 @@ const EMPTY_METRICS: StudentHistoryMetricsShared = {
 };
 
 export function mapStudentHistoryMetricsShared(
-  metrics:
-    | StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_metrics_StudentHistoryMetrics
-    | null
-    | undefined
+  metrics: StudentClassHistoryQuery_studentClassHistory_metrics | null | undefined
 ): StudentHistoryMetricsShared {
   if (!metrics) return EMPTY_METRICS;
   return {
@@ -37,10 +34,7 @@ export function mapStudentHistoryMetricsShared(
 }
 
 export function mapStudentHistorySessionsShared(
-  sessions:
-    | readonly StudentClassHistoryQuery_studentClassHistory_StudentClassHistory_sessions_StudentHistorySession[]
-    | null
-    | undefined,
+  sessions: readonly StudentClassHistoryQuery_studentClassHistory_sessions[] | null | undefined,
   year: number,
   month: number
 ): readonly StudentHistorySessionRowShared[] {

@@ -116,7 +116,7 @@ frontend/common/views/dashboard/<domain>/components/
 
 ## General User Creation Form Pattern
 
-The general user creation form uses the ViewModel + Shared scaffold pattern with `react-hook-form` + `zodResolver`. The permission group autocomplete filters out specialized groups (student, teacher, parent) using `SPECIALIZED_GROUP_SLUG_SET.has(slug)` from `@/shared/constants/specialized-groups.constants`. Zod v4 patterns: `z.enum(AccountStatus)` (not `z.nativeEnum()`), `z.email()` via pipe (`z.string().min(1).pipe(z.email(...))`). The `AccountStatus` enum is imported from `@/frontend/common/graphql/generated/gql/graphql-types` (not `@/backend/enum`) for frontend schemas. See `docs/services/general-user-creation.md` for the complete pattern reference.
+The general user creation form uses the ViewModel + Shared scaffold pattern with `react-hook-form` + `zodResolver`. The permission group autocomplete filters out specialized groups (student, teacher, parent) using `SPECIALIZED_GROUP_SLUG_SET.has(slug)` from `@/shared/constants/specialized-groups.constants`. Zod v4 patterns: `z.enum(AccountStatus)` (not `z.nativeEnum()`), `z.email()` via pipe (`z.string().min(1).pipe(z.email(...))`). The `AccountStatus` enum is imported from `@/frontend/common/graphql/generated/gql/graphql` (not `@/backend/enum`) for frontend schemas. See `docs/services/general-user-creation.md` for the complete pattern reference.
 
 ## WhatsApp Settings UI
 

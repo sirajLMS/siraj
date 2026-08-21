@@ -2,7 +2,7 @@
 
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useState } from "react";
-import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   ReassignmentStudentData,

@@ -2,7 +2,7 @@
 
 import { Box, Checkbox, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AddPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileSectionPanel } from "@/frontend/mobile/components/ui/container";
@@ -16,7 +16,7 @@ const StyledTabContainer = styled(Box)({
 });
 
 interface PermissionCardProps {
-  readonly permission: Permission;
+  readonly permission: PermissionFieldsFragment;
   readonly checked: boolean;
   readonly onToggle: (id: string, checked: boolean) => void;
 }

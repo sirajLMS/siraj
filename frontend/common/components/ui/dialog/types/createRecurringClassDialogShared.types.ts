@@ -5,9 +5,10 @@ import type {
   DayOfWeek,
   OnDemandNoCreditsOutcome,
   SchedulingMode,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassDialogFormState } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type {
   MeetingConfigManagerLabels,
   MeetingConfigRecurringScheduleLabels,
@@ -44,9 +45,8 @@ export type CreateRecurringClassStudentSelectSlot = React.ComponentType<
 
 /** Slot props for the timezone select field. */
 export interface CreateRecurringClassTimezoneSelectSlotProps {
-  /** Raw timezone value (tier-specific conversions handled inside the slot). */
-  readonly value: string;
-  readonly onChangeAction: (value: string) => void;
+  readonly value: IanaTimezone | null;
+  readonly onChangeAction: (value: IanaTimezone | null) => void;
   readonly label: string;
   readonly fullWidth: boolean;
   readonly disabled: boolean;

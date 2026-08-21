@@ -1,4 +1,4 @@
-import type { EffectiveMeeting } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface StudentHistoryMetrics {
   readonly totalClasses: number;
@@ -22,5 +22,5 @@ export interface StudentHistorySessionRow {
   readonly notes: string;
   readonly dayOfMonth: number;
   readonly meetingJoinUrl: string | null;
-  readonly effectiveMeeting: EffectiveMeeting | null;
+  readonly effectiveMeeting: EffectiveMeetingFieldsFragment | null;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import type { TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent } from "@/frontend/common/graphql/generated/gql/operations";
+import type { TeacherAssignedStudentsQuery_teacherAssignedStudents_rows } from "@/frontend/common/graphql/generated/gql/graphql";
 import { teacherAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -15,8 +15,7 @@ import { Translation, useAppTranslation } from "@/shared/locale";
  * views only treat it as a truthy failure flag.
  */
 
-type TeacherStudentRow =
-  TeacherAssignedStudentsQuery_teacherAssignedStudents_TeacherAssignedStudentsResult_rows_TeacherAssignedStudent;
+type TeacherStudentRow = TeacherAssignedStudentsQuery_teacherAssignedStudents_rows;
 
 export interface TeacherStudentsViewModel {
   readonly rows: readonly TeacherStudentRow[];

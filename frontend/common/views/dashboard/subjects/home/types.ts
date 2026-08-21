@@ -1,12 +1,13 @@
 import type { Control, FieldErrors, UseFormHandleSubmit, UseFormReset } from "react-hook-form";
 import type {
-  ClassCategory,
+  ClassCategoriesQuery_classCategories,
   ClassCategoryCreateInput,
   ClassCategoryUpdateInput,
-  ClassSubject,
   ClassSubjectCreateInput,
+  ClassSubjectsQuery_classSubjects,
+  ClassSubjectsQuery_classSubjects_resources,
   ClassSubjectUpdateInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   CategoryFormValues,
   EditCategoryFormValues,
@@ -14,14 +15,11 @@ import type {
 import type { SubjectFormValues } from "@/frontend/common/views/dashboard/subjects/home/schemas/subject.schema";
 import type { SubjectsLabels } from "@/shared/locale";
 
-export type CategoryItem = NonNullable<ClassCategory>;
+export type CategoryItem = ClassCategoriesQuery_classCategories;
 
-export type SubjectItem = NonNullable<ClassSubject> & {
-  readonly resources: readonly SubjectResourceItem[];
-  readonly category: CategoryItem | null;
-};
+export type SubjectItem = ClassSubjectsQuery_classSubjects;
 
-export type SubjectResourceItem = NonNullable<ClassSubject["resources"]>[number];
+export type SubjectResourceItem = ClassSubjectsQuery_classSubjects_resources;
 
 // NEW FOR PLAN v5: subjects-related translation labels carried by the
 // ViewModel to the lifted dialogs so the tier files don't call useAppTranslation

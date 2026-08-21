@@ -1,8 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { UserPaymentMethodSelect } from "@/frontend/common/components/ui/input/userPaymentMethodSelect";
-import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  PaymentDirection,
+  PaymentMethodType,
+  type UserPaymentMethodFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const mockMethods: UserPaymentMethodFieldsFragment[] = [
   {

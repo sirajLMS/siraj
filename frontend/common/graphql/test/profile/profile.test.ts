@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments/profile/profile.documents";
 import { authenticatedRequest, loginDemoUser, setupTestServerLifecycle, testClient } from "@/test/helpers";

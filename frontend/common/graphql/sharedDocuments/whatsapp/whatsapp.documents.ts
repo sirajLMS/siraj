@@ -1,6 +1,23 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateWhatsappAccountMutation,
+  CreateWhatsappAccountMutationVariables,
+  DeleteWhatsappAccountMutation,
+  DeleteWhatsappAccountMutationVariables,
+  IsUserWhatsappOptInQuery,
+  IsUserWhatsappOptInQueryVariables,
+  IsWhatsappConfiguredQuery,
+  SetUserWhatsappOptInMutation,
+  SetUserWhatsappOptInMutationVariables,
+  SetWhatsappAccessTokenMutation,
+  SetWhatsappAccessTokenMutationVariables,
+  SetWhatsappTwoStepPinMutation,
+  SetWhatsappTwoStepPinMutationVariables,
+  SyncWhatsappAccountsFromMetaMutation,
+  UpdateWhatsappAccountMutation,
+  UpdateWhatsappAccountMutationVariables,
+  WhatsappAccountsQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const WHATSAPP_ACCOUNT_FIELDS = gql`
   fragment WhatsappAccountFields on WhatsappAccount {
@@ -33,7 +50,7 @@ const WHATSAPP_TEMPLATE_SNAPSHOT_FIELDS = gql`
 
 // ─── Queries ─────────────────────────────────────────────────────────
 
-export const whatsappAccountsQueryDocument: TypedDocumentNode<Operations.WhatsappAccountsQuery> = gql`
+export const whatsappAccountsQueryDocument: TypedDocumentNode<WhatsappAccountsQuery> = gql`
   ${WHATSAPP_ACCOUNT_FIELDS}
   query whatsappAccounts {
     whatsappAccounts {
@@ -43,8 +60,8 @@ export const whatsappAccountsQueryDocument: TypedDocumentNode<Operations.Whatsap
 `;
 
 export const isUserWhatsappOptInQueryDocument: TypedDocumentNode<
-  Operations.IsUserWhatsappOptInQuery,
-  Types.QueryIsUserWhatsappOptInArgs
+  IsUserWhatsappOptInQuery,
+  IsUserWhatsappOptInQueryVariables
 > = gql`
   query isUserWhatsappOptIn($userId: String!) {
     isUserWhatsappOptIn(userId: $userId)
@@ -54,8 +71,8 @@ export const isUserWhatsappOptInQueryDocument: TypedDocumentNode<
 // ─── Mutations ───────────────────────────────────────────────────────
 
 export const createWhatsappAccountMutationDocument: TypedDocumentNode<
-  Operations.CreateWhatsappAccountMutation,
-  Types.MutationCreateWhatsappAccountArgs
+  CreateWhatsappAccountMutation,
+  CreateWhatsappAccountMutationVariables
 > = gql`
   ${WHATSAPP_ACCOUNT_FIELDS}
   mutation createWhatsappAccount($input: WhatsappAccountCreateInput!) {
@@ -66,8 +83,8 @@ export const createWhatsappAccountMutationDocument: TypedDocumentNode<
 `;
 
 export const updateWhatsappAccountMutationDocument: TypedDocumentNode<
-  Operations.UpdateWhatsappAccountMutation,
-  Types.MutationUpdateWhatsappAccountArgs
+  UpdateWhatsappAccountMutation,
+  UpdateWhatsappAccountMutationVariables
 > = gql`
   mutation updateWhatsappAccount($id: String!, $input: WhatsappAccountUpdateInput!) {
     updateWhatsappAccount(id: $id, input: $input) {
@@ -77,8 +94,8 @@ export const updateWhatsappAccountMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteWhatsappAccountMutationDocument: TypedDocumentNode<
-  Operations.DeleteWhatsappAccountMutation,
-  Types.MutationDeleteWhatsappAccountArgs
+  DeleteWhatsappAccountMutation,
+  DeleteWhatsappAccountMutationVariables
 > = gql`
   mutation deleteWhatsappAccount($id: String!) {
     deleteWhatsappAccount(id: $id) {
@@ -88,8 +105,8 @@ export const deleteWhatsappAccountMutationDocument: TypedDocumentNode<
 `;
 
 export const setWhatsappAccessTokenMutationDocument: TypedDocumentNode<
-  Operations.SetWhatsappAccessTokenMutation,
-  Types.MutationSetWhatsappAccessTokenArgs
+  SetWhatsappAccessTokenMutation,
+  SetWhatsappAccessTokenMutationVariables
 > = gql`
   mutation setWhatsappAccessToken($id: String!, $accessToken: String!) {
     setWhatsappAccessToken(id: $id, accessToken: $accessToken) {
@@ -99,8 +116,8 @@ export const setWhatsappAccessTokenMutationDocument: TypedDocumentNode<
 `;
 
 export const setWhatsappTwoStepPinMutationDocument: TypedDocumentNode<
-  Operations.SetWhatsappTwoStepPinMutation,
-  Types.MutationSetWhatsappTwoStepPinArgs
+  SetWhatsappTwoStepPinMutation,
+  SetWhatsappTwoStepPinMutationVariables
 > = gql`
   mutation setWhatsappTwoStepPin($id: String!, $twoStepPin: String!) {
     setWhatsappTwoStepPin(id: $id, twoStepPin: $twoStepPin) {
@@ -110,8 +127,8 @@ export const setWhatsappTwoStepPinMutationDocument: TypedDocumentNode<
 `;
 
 export const setUserWhatsappOptInMutationDocument: TypedDocumentNode<
-  Operations.SetUserWhatsappOptInMutation,
-  Types.MutationSetUserWhatsappOptInArgs
+  SetUserWhatsappOptInMutation,
+  SetUserWhatsappOptInMutationVariables
 > = gql`
   mutation setUserWhatsappOptIn($userId: String!, $enabled: Boolean!, $source: String) {
     setUserWhatsappOptIn(userId: $userId, enabled: $enabled, source: $source) {
@@ -120,7 +137,7 @@ export const setUserWhatsappOptInMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const syncWhatsappAccountsFromMetaMutationDocument: TypedDocumentNode<Operations.SyncWhatsappAccountsFromMetaMutation> = gql`
+export const syncWhatsappAccountsFromMetaMutationDocument: TypedDocumentNode<SyncWhatsappAccountsFromMetaMutation> = gql`
   ${WHATSAPP_ACCOUNT_FIELDS}
   ${WHATSAPP_TEMPLATE_SNAPSHOT_FIELDS}
   mutation syncWhatsappAccountsFromMeta {
@@ -136,7 +153,7 @@ export const syncWhatsappAccountsFromMetaMutationDocument: TypedDocumentNode<Ope
   }
 `;
 
-export const isWhatsappConfiguredQueryDocument: TypedDocumentNode<Operations.IsWhatsappConfiguredQuery> = gql`
+export const isWhatsappConfiguredQueryDocument: TypedDocumentNode<IsWhatsappConfiguredQuery> = gql`
   query isWhatsappConfigured {
     isWhatsappConfigured
   }
@@ -160,7 +177,7 @@ export const isWhatsappConfiguredQueryDocument: TypedDocumentNode<Operations.IsW
 //   Run `bun run generate:gqlSchema && bun codegen` after backend resolvers
 //   are added, then replace the comments below with typed exports:
 //
-// export const whatsappTemplatesQueryDocument: TypedDocumentNode<Operations.WhatsappTemplatesQuery> = gql`
+// export const whatsappTemplatesQueryDocument: TypedDocumentNode<WhatsappTemplatesQuery> = gql`
 //   query WhatsappTemplatesQuery {
 //     whatsappTemplates {
 //       id
@@ -172,7 +189,7 @@ export const isWhatsappConfiguredQueryDocument: TypedDocumentNode<Operations.IsW
 //   }
 // `;
 //
-// export const whatsappOptInAuditQueryDocument: TypedDocumentNode<Operations.WhatsappOptInAuditQuery> = gql`
+// export const whatsappOptInAuditQueryDocument: TypedDocumentNode<WhatsappOptInAuditQuery> = gql`
 //   query WhatsappOptInAuditQuery {
 //     whatsappOptInAudit {
 //       id

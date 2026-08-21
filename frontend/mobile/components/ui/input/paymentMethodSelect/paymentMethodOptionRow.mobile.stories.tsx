@@ -1,6 +1,6 @@
 import { Box, Stack } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { PaymentMethodOptionRowMobile } from "@/frontend/mobile/components/ui/input/paymentMethodSelect/paymentMethodOptionRow.mobile";

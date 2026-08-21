@@ -1,11 +1,11 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo } from "react";
-import type { QuotasQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   QuotaKind,
   QuotaPaginatedFilterInput,
   QuotaStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  QuotasQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { deleteQuotaMutationDocument, quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useQuotaStore } from "@/frontend/common/stores/quotaStore";
 import type { QuotaItem } from "@/frontend/common/views/dashboard/billing/quota/types/quota.types";

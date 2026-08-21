@@ -1,6 +1,6 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AccountStatus, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { teacherAssignedStudentsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { TeacherQuotaView } from "@/frontend/common/views/dashboard/students/quota/audience/TeacherQuotaView";
@@ -184,7 +184,6 @@ function setTeacherUser() {
       phone: null,
       status: AccountStatus.Activated,
       displayCurrency: CurrencyCode.Usd,
-      __typename: "User",
     },
   });
 }

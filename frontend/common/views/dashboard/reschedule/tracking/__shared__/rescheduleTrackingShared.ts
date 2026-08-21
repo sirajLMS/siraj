@@ -1,4 +1,4 @@
-import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   RescheduleTrackingDataGridLabels,
   RescheduleTrackingViewLabels,

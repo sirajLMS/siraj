@@ -1,6 +1,6 @@
 import type { GridColDef } from "@mui/x-data-grid";
 import { CurrencyDisplay, CurrencyDisplayPart } from "@/frontend/common/components/ui/display/currencyDisplay";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type ExchangeRateRow = {
   readonly id: string;

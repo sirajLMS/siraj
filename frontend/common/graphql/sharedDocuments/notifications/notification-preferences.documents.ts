@@ -1,8 +1,11 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  NotificationPreferencesQuery,
+  UpdateNotificationPreferencesMutation,
+  UpdateNotificationPreferencesMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const notificationPreferencesQueryDocument: TypedDocumentNode<Operations.NotificationPreferencesQuery> = gql`
+export const notificationPreferencesQueryDocument: TypedDocumentNode<NotificationPreferencesQuery> = gql`
   query NotificationPreferences {
     notificationPreferences {
       id
@@ -14,8 +17,8 @@ export const notificationPreferencesQueryDocument: TypedDocumentNode<Operations.
 `;
 
 export const updateNotificationPreferencesMutationDocument: TypedDocumentNode<
-  Operations.UpdateNotificationPreferencesMutation,
-  Types.MutationUpdateNotificationPreferencesArgs
+  UpdateNotificationPreferencesMutation,
+  UpdateNotificationPreferencesMutationVariables
 > = gql`
   mutation UpdateNotificationPreferences($input: [NotificationPreferenceInput!]!) {
     updateNotificationPreferences(input: $input) {

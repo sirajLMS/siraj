@@ -3,7 +3,7 @@
 import { Box, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from "@mui/material";
 import type { ComponentType, ReactNode } from "react";
 import { LoadingState, StatusBadge } from "@/frontend/common/components/ui";
-import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { TeacherLessonReportsViewModel } from "@/frontend/common/views/dashboard/teachers/lesson-reports/useTeacherLessonReportsViewModel";
 
 type LessonReportRow = TeacherLessonReportsViewModel["rows"][number];

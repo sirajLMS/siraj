@@ -1,4 +1,4 @@
-import type { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface StudentCreditTransactionRow {
   readonly id: string;

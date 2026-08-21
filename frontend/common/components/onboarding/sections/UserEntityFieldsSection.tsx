@@ -14,7 +14,7 @@ import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { PhoneFormField } from "@/frontend/common/components/ui/input";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import { CurrencyControllerField } from "@/frontend/common/views/dashboard/profile/shared/CurrencyControllerField";
 import type { UserEntityOnboardingLabels } from "@/shared/locale/types/onboarding/userEntity";
 
@@ -213,9 +213,9 @@ function TimezoneField<T extends OnboardingFields>({ control, errors, labels }: 
         control={control}
         render={({ field }) => (
           <TimezoneSelect
-            value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+            value={field.value ? toIanaTimezone(field.value) : null}
             onChangeAction={value => {
-              field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+              field.onChange(value ?? "");
             }}
             onBlurAction={field.onBlur}
             label={labels.fields.timezone}

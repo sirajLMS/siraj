@@ -1,5 +1,5 @@
 // NEW FOR PLAN v5 (lifted from frontend/{mobile,desktop}/components/ui/display/meetingConfig/meetingConfigDisplay.types.ts)
-import type { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type MeetingConfigDisplayData = {
   readonly id?: string;
@@ -9,7 +9,7 @@ export type MeetingConfigDisplayData = {
   readonly providerName?: Partial<Record<"ar" | "en", string>> | null;
   readonly logoUrl?: string | null;
   readonly meetingId?: string | null;
-  readonly source?: EffectiveMeetingSource | string | null;
+  readonly source?: EffectiveMeetingSource | null;
   readonly details?: {
     readonly meetingUrl?: string | null;
     readonly username?: string | null;

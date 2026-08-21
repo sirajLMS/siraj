@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql";
 import { RescheduleTrackingView } from "@/frontend/common/views/dashboard/reschedule/tracking/RescheduleTrackingView";
 import { TRACKING_METRIC_DEFINITIONS } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.helpers";
 import type { TrackingRow } from "@/frontend/common/views/dashboard/reschedule/tracking/tracking.types";

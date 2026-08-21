@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
 import type { PaymentMethodDefaultsEditorProps } from "@/frontend/common/components/ui/input/paymentMethodDefaultsEditor/types";
-import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { PaymentMethodDefaultsEditorDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodDefaultsEditor/paymentMethodDefaultsEditor.desktop";
 
 const MOCK_METHODS: readonly PaymentMethodRow[] = [

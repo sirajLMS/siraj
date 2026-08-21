@@ -10,7 +10,7 @@ import { alpha, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { styled, type Theme } from "@mui/material/styles";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { BaseCard } from "@/frontend/common/components/ui";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { classDetailsContentPaddingSx } from "@/frontend/common/views/dashboard/classes/details/classDetailsMobileLayout";
 

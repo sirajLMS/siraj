@@ -1,10 +1,12 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  SearchTeacherAvailabilityQuery,
+  SearchTeacherAvailabilityQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const searchTeacherAvailabilityQueryDocument: TypedDocumentNode<
-  Operations.SearchTeacherAvailabilityQuery,
-  Types.QuerySearchTeacherAvailabilityArgs
+  SearchTeacherAvailabilityQuery,
+  SearchTeacherAvailabilityQueryVariables
 > = gql`
   query searchTeacherAvailability($input: AvailabilitySearchInput!) {
     searchTeacherAvailability(input: $input) {

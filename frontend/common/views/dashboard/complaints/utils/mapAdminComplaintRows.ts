@@ -1,12 +1,15 @@
-import { ComplaintCategory, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  type AdminComplaintQueueQuery_adminComplaintQueue_rows,
+  ComplaintCategory,
+  ComplaintStatus,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   AdminComplaintRow,
   ComplaintPriority,
 } from "@/frontend/common/views/dashboard/complaints/types/complaints.types";
 import type { ComplaintsAdminLabels } from "@/shared/locale";
 
-type ComplaintQueueRow = AdminComplaintQueueQuery_adminComplaintQueue_ComplaintQueueResult_rows_Complaint;
+type ComplaintQueueRow = AdminComplaintQueueQuery_adminComplaintQueue_rows;
 
 const DEFAULT_PRIORITY: ComplaintPriority = "general";
 

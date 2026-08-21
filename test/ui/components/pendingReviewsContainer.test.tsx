@@ -16,7 +16,7 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 expect.extend(matchers);
 
 import { USER_SELECT_LIMIT } from "@/frontend/common/components/ui/input/userSelect/userSelect.constants";
-import { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   approveLessonReportMutationDocument,
   pendingLessonReportsQueryDocument,

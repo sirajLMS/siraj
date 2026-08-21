@@ -7,7 +7,6 @@ import { useCallback, useEffect, useMemo } from "react";
 import { LoadingState } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { classInstanceQueryDocument, rescheduleClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { logger } from "@/frontend/common/utils/logger";
@@ -17,6 +16,7 @@ import {
   useRescheduleViewModel,
 } from "@/frontend/common/views/dashboard/reschedule/home/useRescheduleViewModel";
 import { combineDateTime } from "@/frontend/common/views/dashboard/reschedule/home/utils/rescheduleDateTime";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { useRouter } from "@/shared/i18n/navigation";
 
 const lazyViews = createLazyView<RescheduleViewModel>(
@@ -67,7 +67,7 @@ export function RescheduleContainer() {
             sessionId: classInstance.id ?? "",
             teacherName: classInstance.teacher?.name ?? "",
             studentName: classInstance.student?.name ?? "",
-            teacherTimezone: classInstance.teacherTimezone ?? IanaTimezone.Utc,
+            teacherTimezone: classInstance.teacherTimezone ?? IanaTimezone.UTC,
             effectiveMeeting: classInstance.effectiveMeeting ?? null,
           }
         : fallbackSession,

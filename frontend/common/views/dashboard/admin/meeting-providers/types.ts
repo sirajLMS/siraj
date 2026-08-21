@@ -1,5 +1,5 @@
 import type { GridColDef } from "@mui/x-data-grid";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface MeetingProvidersNotificationState {
   readonly errorOpen: boolean;

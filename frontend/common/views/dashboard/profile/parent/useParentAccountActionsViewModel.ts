@@ -2,7 +2,7 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useState } from "react";
-import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deactivateParentMutationDocument,
   profileByUserIdQueryDocument,

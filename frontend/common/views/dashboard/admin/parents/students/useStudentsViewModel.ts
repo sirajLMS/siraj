@@ -3,8 +3,11 @@
 import { useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useEffect, useMemo } from "react";
-import { AppPermission, type StudentFilterArgs } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { StudentDirectoryQuery } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  AppPermission,
+  type StudentDirectoryQuery,
+  type StudentFilterArgs,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { studentDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-directory.documents";
 import { useStudentDirectoryStore } from "@/frontend/common/stores/studentDirectoryStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

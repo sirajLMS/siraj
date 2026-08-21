@@ -1,6 +1,6 @@
 import type { ObjectFieldBuilder, ObjectRef } from "@pothos/core";
 import type { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
-import { CurrencyCodePothosObject, IanaTimezonePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
+import { CurrencyCodePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type {
   RecurringScheduleDayDetailReturnType,
   RecurringScheduleDetailReturnType,
@@ -36,7 +36,7 @@ export function recurringScheduleSharedFields(t: PothosObjectFieldBuilder<Recurr
 
 /**
  * Field definitions for RecurringScheduleDetailPothosObject.
- * Adds `timezone` (typed IanaTimezonePothosObject) and `days` (array of day detail objects).
+ * Adds `timezone` (IanaTimezone scalar) and `days` (array of day detail objects).
  * The `dayDetailTypeRef` is passed in to avoid a circular import.
  */
 export function recurringScheduleDetailFields(
@@ -45,7 +45,7 @@ export function recurringScheduleDetailFields(
 ) {
   return {
     ...recurringScheduleSharedFields(t),
-    timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
+    timezone: t.expose("timezone", { type: "IanaTimezone" }),
     days: t.expose("days", { type: [dayDetailTypeRef] }),
   };
 }

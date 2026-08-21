@@ -2,8 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import { CurrencyCode, type CurrencyHedgesQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { currencyHedgesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import type { CurrencyHedgesLabelsBySection } from "@/frontend/common/views/dashboard/admin/billing/currency-hedges/types/currencyHedges.types";
 import { Translation, useAppTranslation } from "@/shared/locale";
@@ -69,7 +68,7 @@ function openDeleteDialog(setters: DeleteSetters, row: HedgeRow) {
   setters.setDeleteOpen(true);
 }
 
-function toHedgeRows(data: Operations.CurrencyHedgesQuery_Query | undefined): readonly HedgeRow[] {
+function toHedgeRows(data: CurrencyHedgesQuery | undefined): readonly HedgeRow[] {
   const hedges = data?.currencyHedges ?? [];
   return hedges
     .filter((row): row is NonNullable<typeof row> => row?.id != null)

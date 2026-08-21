@@ -1,11 +1,14 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ParentDashboardMetricsQuery,
+  ParentDashboardScheduleQuery,
+  ParentDashboardScheduleQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 
 export const parentDashboardScheduleQueryDocument: TypedDocumentNode<
-  Operations.ParentDashboardScheduleQuery,
-  Types.QueryParentDashboardScheduleArgs
+  ParentDashboardScheduleQuery,
+  ParentDashboardScheduleQueryVariables
 > = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query parentDashboardSchedule($date: String, $search: String, $paginationArgs: PaginationArgs) {
@@ -47,7 +50,7 @@ export const parentDashboardScheduleQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const parentDashboardMetricsQueryDocument: TypedDocumentNode<Operations.ParentDashboardMetricsQuery> = gql`
+export const parentDashboardMetricsQueryDocument: TypedDocumentNode<ParentDashboardMetricsQuery> = gql`
   query parentDashboardMetrics {
     parentDashboardMetrics {
       id

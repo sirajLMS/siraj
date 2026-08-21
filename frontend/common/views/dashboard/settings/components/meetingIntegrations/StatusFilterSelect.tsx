@@ -1,6 +1,6 @@
 import { MenuItem, Select, type SelectChangeEvent } from "@mui/material";
 import type { ReactNode } from "react";
-import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
 export type StatusFilterSelectProps = {

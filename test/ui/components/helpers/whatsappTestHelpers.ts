@@ -3,7 +3,7 @@ import {
   WhatsappQualityRating,
   WhatsappTemplateCategory,
   WhatsappTemplateStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   WhatsappAccountRow,
   WhatsappOptInAuditEntry,

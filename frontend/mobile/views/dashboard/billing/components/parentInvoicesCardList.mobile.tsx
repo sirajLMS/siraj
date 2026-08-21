@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@mui/material";
 import type { ListPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   BaseParentInvoicesListProps,
   ParentInvoicesCardListMobileLabels,

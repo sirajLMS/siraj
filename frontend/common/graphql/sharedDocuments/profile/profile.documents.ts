@@ -1,11 +1,15 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ProfileByUserIdQuery,
+  UpdateOwnProfileMutation,
+  UpdateUserProfileMutation,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   PAYMENT_METHOD_DEFAULTS_FIELDS,
   USER_PAYMENT_METHOD_FIELDS,
 } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
 
-export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileByUserIdQuery> = gql`
+export const profileByUserIdQueryDocument: TypedDocumentNode<ProfileByUserIdQuery> = gql`
   ${USER_PAYMENT_METHOD_FIELDS}
   ${PAYMENT_METHOD_DEFAULTS_FIELDS}
   query ProfileByUserId($userId: String!) {
@@ -209,7 +213,7 @@ export const profileByUserIdQueryDocument: TypedDocumentNode<Operations.ProfileB
   }
 `;
 
-export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.UpdateOwnProfileMutation> = gql`
+export const updateOwnProfileMutationDocument: TypedDocumentNode<UpdateOwnProfileMutation> = gql`
   mutation UpdateOwnProfile($input: UpdateOwnProfileInput!) {
     updateOwnProfile(input: $input) {
       id
@@ -273,7 +277,7 @@ export const updateOwnProfileMutationDocument: TypedDocumentNode<Operations.Upda
   }
 `;
 
-export const updateUserProfileMutationDocument: TypedDocumentNode<Operations.UpdateUserProfileMutation> = gql`
+export const updateUserProfileMutationDocument: TypedDocumentNode<UpdateUserProfileMutation> = gql`
   ${USER_PAYMENT_METHOD_FIELDS}
   ${PAYMENT_METHOD_DEFAULTS_FIELDS}
   mutation UpdateUserProfile($userId: String!, $input: UpdateUserProfileInput!) {

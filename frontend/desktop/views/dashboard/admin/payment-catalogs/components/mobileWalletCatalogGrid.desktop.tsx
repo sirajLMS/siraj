@@ -2,11 +2,25 @@
 
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { SupportedMobileWalletFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { CountryCode, type SupportedMobileWalletFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
+import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import type { CatalogGridActionHandlers } from "@/frontend/common/views/dashboard/admin/payment-catalogs/types";
 import { DesktopCountryDisplay, DesktopCurrencyDisplay } from "@/frontend/desktop/components/ui/display";
 import { CatalogGridShared } from "@/frontend/desktop/views/dashboard/admin/payment-catalogs/components/__shared__/catalogGridShared";
 import type { PaymentCatalogsLabels } from "@/shared/locale";
+
+const VALID_COUNTRY_CODES = new Set(Object.values(CountryCode) as readonly string[]);
+
+function isCountryCode(value: string): value is CountryCode {
+  return VALID_COUNTRY_CODES.has(value);
+}
+
+function parseCountryCode(value: string | null): CountryCode | null {
+  if (value !== null && isCountryCode(value)) {
+    return value;
+  }
+  return null;
+}
 
 // VARIANT JUSTIFICATION: entity-specific middle columns (`countryCode`,
 // `currencyCode`) — the shared grid handles the 5 common columns. This file
@@ -34,13 +48,13 @@ export function MobileWalletCatalogGridDesktop({
         field: "countryCode",
         headerName: pc.columns.country,
         width: 140,
-        renderCell: ({ row }) => <DesktopCountryDisplay code={row.countryCode} />,
+        renderCell: ({ row }) => <DesktopCountryDisplay code={parseCountryCode(row.countryCode)} />,
       },
       {
         field: "currencyCode",
         headerName: pc.columns.currency,
         width: 140,
-        renderCell: ({ row }) => <DesktopCurrencyDisplay code={row.currencyCode} />,
+        renderCell: ({ row }) => <DesktopCurrencyDisplay code={parseCurrencyCode(row.currencyCode)} />,
       },
     ],
     [pc]

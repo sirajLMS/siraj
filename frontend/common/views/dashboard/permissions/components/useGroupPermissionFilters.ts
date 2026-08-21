@@ -1,10 +1,13 @@
 import { useMemo } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionFieldsFragment,
+  PermissionGroupDetailFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { matchesPermissionSearch } from "@/frontend/common/views/dashboard/permissions/utils";
 
 interface UseGroupPermissionFiltersProps {
-  readonly group: PermissionGroup;
-  readonly permissions: readonly Permission[];
+  readonly group: PermissionGroupDetailFieldsFragment;
+  readonly permissions: readonly PermissionFieldsFragment[];
   readonly searchQuery: string;
   readonly selectedCategory: string;
 }

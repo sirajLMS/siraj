@@ -1,9 +1,11 @@
 import type {
   MeetingConnectionTestMode as GqlMeetingConnectionTestMode,
+  MeetingIntegrationConnectedAccountFieldsFragment,
   MeetingIntegrationConnectedAccountStatus,
+  MeetingIntegrationProviderFieldsFragment,
   MeetingIntegrationProviderSlug,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+  TestMeetingConnectionResultFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
 export type { MeetingConnectionTestMode as GqlMeetingConnectionTestMode, MeetingIntegrationProviderSlug };
@@ -11,43 +13,39 @@ export type MeetingConnectionTestMode = GqlMeetingConnectionTestMode;
 export type MeetingIntegrationConnectedAccountStatusType = MeetingIntegrationConnectedAccountStatus;
 
 export type TestMeetingConnectionResult = {
-  readonly ok: NonNullable<Operations.TestMeetingConnectionResultFieldsFragment["ok"]>;
-  readonly latencyMs: NonNullable<Operations.TestMeetingConnectionResultFieldsFragment["latencyMs"]>;
-  readonly mode: NonNullable<Operations.TestMeetingConnectionResultFieldsFragment["mode"]>;
-  readonly testJoinUrl: Operations.TestMeetingConnectionResultFieldsFragment["testJoinUrl"];
-  readonly deleted: Operations.TestMeetingConnectionResultFieldsFragment["deleted"];
-  readonly upstreamResponseSummary: NonNullable<
-    Operations.TestMeetingConnectionResultFieldsFragment["upstreamResponseSummary"]
-  >;
-  readonly errorCode: Operations.TestMeetingConnectionResultFieldsFragment["errorCode"];
-  readonly errorMessage: Operations.TestMeetingConnectionResultFieldsFragment["errorMessage"];
+  readonly ok: NonNullable<TestMeetingConnectionResultFieldsFragment["ok"]>;
+  readonly latencyMs: NonNullable<TestMeetingConnectionResultFieldsFragment["latencyMs"]>;
+  readonly mode: NonNullable<TestMeetingConnectionResultFieldsFragment["mode"]>;
+  readonly testJoinUrl: TestMeetingConnectionResultFieldsFragment["testJoinUrl"];
+  readonly deleted: TestMeetingConnectionResultFieldsFragment["deleted"];
+  readonly upstreamResponseSummary: NonNullable<TestMeetingConnectionResultFieldsFragment["upstreamResponseSummary"]>;
+  readonly errorCode: TestMeetingConnectionResultFieldsFragment["errorCode"];
+  readonly errorMessage: TestMeetingConnectionResultFieldsFragment["errorMessage"];
   readonly rawUpstreamPayload: Record<string, unknown> | null;
   readonly requiredScopes: readonly string[] | null;
   readonly grantedScopes: readonly string[] | null;
 };
 
 export type MeetingIntegrationProviderSummary = {
-  readonly id: NonNullable<Operations.MeetingIntegrationProviderFieldsFragment["id"]>;
+  readonly id: NonNullable<MeetingIntegrationProviderFieldsFragment["id"]>;
   readonly slug: MeetingIntegrationProviderSlug;
-  readonly kind: NonNullable<Operations.MeetingIntegrationProviderFieldsFragment["kind"]>;
-  readonly credentialsHealthy: NonNullable<Operations.MeetingIntegrationProviderFieldsFragment["credentialsHealthy"]>;
+  readonly kind: NonNullable<MeetingIntegrationProviderFieldsFragment["kind"]>;
+  readonly credentialsHealthy: NonNullable<MeetingIntegrationProviderFieldsFragment["credentialsHealthy"]>;
   readonly lastTestedAt: Date | null;
-  readonly connectedTeacherCount: NonNullable<
-    Operations.MeetingIntegrationProviderFieldsFragment["connectedTeacherCount"]
-  >;
-  readonly reauthNeededCount: NonNullable<Operations.MeetingIntegrationProviderFieldsFragment["reauthNeededCount"]>;
-  readonly endpoints: NonNullable<Operations.MeetingIntegrationProviderFieldsFragment["endpoints"]>;
+  readonly connectedTeacherCount: NonNullable<MeetingIntegrationProviderFieldsFragment["connectedTeacherCount"]>;
+  readonly reauthNeededCount: NonNullable<MeetingIntegrationProviderFieldsFragment["reauthNeededCount"]>;
+  readonly endpoints: NonNullable<MeetingIntegrationProviderFieldsFragment["endpoints"]>;
 };
 
 export type MeetingIntegrationConnectedAccount = {
-  readonly id: NonNullable<Operations.MeetingIntegrationConnectedAccountFieldsFragment["id"]>;
-  readonly userId: NonNullable<Operations.MeetingIntegrationConnectedAccountFieldsFragment["userId"]>;
-  readonly name: Operations.MeetingIntegrationConnectedAccountFieldsFragment["name"];
-  readonly email: Operations.MeetingIntegrationConnectedAccountFieldsFragment["email"];
+  readonly id: NonNullable<MeetingIntegrationConnectedAccountFieldsFragment["id"]>;
+  readonly userId: NonNullable<MeetingIntegrationConnectedAccountFieldsFragment["userId"]>;
+  readonly name: MeetingIntegrationConnectedAccountFieldsFragment["name"];
+  readonly email: MeetingIntegrationConnectedAccountFieldsFragment["email"];
   readonly connectedAt: Date | null;
   readonly expiresAt: Date | null;
   readonly lastRefreshedAt: Date | null;
-  readonly status: NonNullable<Operations.MeetingIntegrationConnectedAccountFieldsFragment["status"]>;
+  readonly status: NonNullable<MeetingIntegrationConnectedAccountFieldsFragment["status"]>;
   readonly scopes?: readonly string[];
 };
 

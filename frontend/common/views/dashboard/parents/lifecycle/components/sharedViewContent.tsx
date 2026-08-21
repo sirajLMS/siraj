@@ -5,7 +5,7 @@ import { Box, MenuItem, Select, Stack, TextField, Typography } from "@mui/materi
 import type { ReactNode } from "react";
 import { Controller, FormProvider, useFormContext } from "react-hook-form";
 import { AdminControlPanel, PrimaryPageAction, StatusBadge } from "@/frontend/common/components/ui";
-import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useParentLifecycleForm } from "@/frontend/common/views/dashboard/parents/lifecycle/components/useParentLifecycleForm";
 import type { LifecycleUpdateFormData } from "@/frontend/common/views/dashboard/parents/lifecycle/schemas/lifecycleUpdateSchema";
 import type { ParentLifecycleViewProps } from "@/frontend/common/views/dashboard/parents/lifecycle/types";

@@ -33,8 +33,8 @@ All shared test infrastructure (Apollo client, port allocation, server lifecycle
 |---|---|---|
 | Test Helpers & Lifecycle | `import { setupTestServerLifecycle, loginAndProvision, testClient } from "@/test/helpers";` | **Preferred alias** — canonical shared test helpers. |
 | Documents | `import { fooQueryDocument } from "@/frontend/common/graphql/sharedDocuments/<subdir>/foo.documents";` | Always use the full deep alias, including the `sharedDocuments` sub-directory segment. See `frontend/common/graphql/sharedDocuments/AGENTS.md`. |
-| Generated types | `import { … } from "@/frontend/common/graphql/generated/gql/graphql-types";` or `Operations` | Unchanged. |
-| Generated enums | `import { CurrencyCode, AccountStatus, ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";` | Always import enum values from generated types — never hardcode string equivalents (see rule 11). |
+| Generated types | `import { … } from "@/frontend/common/graphql/generated/gql/graphql";` | Single file — all types. |
+| Generated enums | `import { CurrencyCode, AccountStatus, ClassType } from "@/frontend/common/graphql/generated/gql/graphql";` | Always import enum values from generated types — never hardcode string equivalents (see rule 11). |
 
 When adding a **new** test:
 1. Identify the matching sub-directory (or create a new one following the conventions above).
@@ -117,14 +117,14 @@ When adding a **new** test:
 
     **Core Rule**: Every mutation call site MUST pass ALL available input arguments (both required AND optional) as `variables` — no field may be silently omitted. Optional fields must explicitly appear as `null` even when you don't intend to test them in that call site.
 
-    **Discovering Arguments**: Look up the mutation's args type in `frontend/common/graphql/generated/gql/graphql-types.ts` (search for `Mutation<Name>Args`). For `input` object mutations, also look up the input type definition (e.g., `TeacherOnboardingInput`) and include **ALL** its fields:
+    **Discovering Arguments**: Look up the mutation's variables type in `frontend/common/graphql/generated/gql/graphql.ts` (search for `{MutationName}Variables`). For `input` object mutations, also look up the input type definition (e.g., `TeacherOnboardingInput`) and include **ALL** its fields:
 
     ```typescript
-    // MutationUpdateStudentQuotaArgs — from graphql-types.ts
-    type MutationUpdateStudentQuotaArgs = {
-      expectedVersion: InputMaybe<Scalars['Int']['input']>;  // OPTIONAL — has InputMaybe
-      newClassesRemaining: Scalars['Int']['input'];          // REQUIRED — no InputMaybe
-      studentId: Scalars['ID']['input'];                     // REQUIRED
+    // UpdateStudentQuotaMutationVariables — from graphql.ts
+    type UpdateStudentQuotaMutationVariables = {
+      expectedVersion?: number | null;  // OPTIONAL — has | null
+      newClassesRemaining: number;       // REQUIRED — no | null
+      studentId: string;                 // REQUIRED
     };
     ```
 
@@ -139,7 +139,7 @@ When adding a **new** test:
 
     ```typescript
     // ✅ Correct — generated enums
-    import { CurrencyCode, AccountStatus, ClassType, Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+    import { CurrencyCode, AccountStatus, ClassType, Gender } from "@/frontend/common/graphql/generated/gql/graphql";
     const input = { status: AccountStatus.Activated, currency: CurrencyCode.Usd };
 
     // ❌ Wrong — hardcoded strings

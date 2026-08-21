@@ -5,7 +5,6 @@ import {
   AccountStatusPothosObject,
   CurrencyCodePothosObject,
   GenderPothosObject,
-  IanaTimezonePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { TeacherProfileReturnType, TeacherProfileUpdateInputType } from "@/backend/types";
 
@@ -37,7 +36,7 @@ export const TeacherProfileResultPothosObject = TeacherProfileResultRef.implemen
         ctx.isSuperAdmin || ctx.permissions.includes(AppPermission.PROFILE_TEACHER_IDENTITY_VIEW_OTHER),
     }),
     qualifications: t.exposeString("qualifications", { nullable: true }),
-    timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
+    timezone: t.expose("timezone", { type: "IanaTimezone" }),
     hourlyRate: t.exposeString("hourlyRate", {
       nullable: true,
       authScopes: (_parent, _args, ctx) =>
@@ -73,7 +72,7 @@ export const TeacherProfileUpdateInputPothosObject = gqlSchemaBuilder
       gender: t.field({ type: GenderPothosObject, required: false }),
       address: t.string({ required: false, directives: { constraint: { maxLength: 5000 } } }),
       qualifications: t.string({ required: false, directives: { constraint: { maxLength: 5000 } } }),
-      timezone: t.field({ type: IanaTimezonePothosObject, required: false }),
+      timezone: t.field({ type: "IanaTimezone", required: false }),
       hourlyRate: t.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
       rateCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
       status: t.field({ type: AccountStatusPothosObject, required: false }),

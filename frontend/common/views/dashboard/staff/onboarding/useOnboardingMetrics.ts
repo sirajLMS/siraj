@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import type { OnboardingMetricsQuery } from "@/frontend/common/graphql/generated/gql/operations";
+import type { OnboardingMetricsQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { onboardingMetricsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-directory.documents";
 
 export type OnboardingMetricsData = NonNullable<OnboardingMetricsQuery["onboardingMetrics"]>;

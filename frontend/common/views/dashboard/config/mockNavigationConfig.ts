@@ -1,4 +1,4 @@
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { PAGE_PERMISSIONS } from "@/frontend/common/types/page-permissions.types";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";

@@ -4,12 +4,9 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
 import {
   type CurrencyCode,
-  IanaTimezone,
   ParentStatus,
-  type ProfileMode,
-  ProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+  type ProfileByUserIdQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
@@ -22,10 +19,12 @@ import type {
   ParentProfileViewLabels,
   ParentViewData,
 } from "@/frontend/common/views/dashboard/profile/parent/sections/parentProfileTypes";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+import { type ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
 
 const PARENT_STATUS_VALUES: readonly string[] = Object.values(ParentStatus);
 
@@ -43,7 +42,7 @@ function toIanaTimezoneOrNull(value: string | null | undefined): IanaTimezone | 
 
 function buildParentSource(scope: ProfileScope, profile: ProfileData | null | undefined): ParentViewData | null {
   if (!profile) return null;
-  return scope === ProfileScope.Own ? profile.parentOwnProfile : profile.parentAdminProfile;
+  return scope === ProfileScope.OWN ? profile.parentOwnProfile : profile.parentAdminProfile;
 }
 
 function toEditData(
@@ -112,7 +111,7 @@ export function useParentProfileViewModel(
   const base = useAppTranslation(Translation.Profile.Base);
   const parent = useAppTranslation(Translation.Profile.Parent);
   const labels: ParentProfileViewLabels = { base, parent };
-  const isAdminScope = scope === ProfileScope.Other;
+  const isAdminScope = scope === ProfileScope.OTHER;
   const [isSaving, setIsSaving] = useState(false);
 
   const { data, loading, error, refetch } = useQuery(profileByUserIdQueryDocument, {
@@ -151,7 +150,7 @@ export function useParentProfileViewModel(
         twitter: formData.twitter ?? null,
       };
 
-      if (scope === ProfileScope.Own) {
+      if (scope === ProfileScope.OWN) {
         await updateOwnProfile({
           variables: {
             input: {

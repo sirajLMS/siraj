@@ -1,6 +1,12 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateTeacherImportantNoteMutation,
+  CreateTeacherImportantNoteMutationVariables,
+  DeleteTeacherImportantNoteMutation,
+  DeleteTeacherImportantNoteMutationVariables,
+  UpdateTeacherImportantNoteMutation,
+  UpdateTeacherImportantNoteMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const TEACHER_IMPORTANT_NOTE_FIELDS = gql`
   fragment TeacherImportantNoteFields on TeacherImportantNote {
@@ -14,8 +20,8 @@ const TEACHER_IMPORTANT_NOTE_FIELDS = gql`
 `;
 
 export const createTeacherImportantNoteMutationDocument: TypedDocumentNode<
-  Operations.CreateTeacherImportantNoteMutation,
-  Types.MutationCreateTeacherImportantNoteArgs
+  CreateTeacherImportantNoteMutation,
+  CreateTeacherImportantNoteMutationVariables
 > = gql`
   ${TEACHER_IMPORTANT_NOTE_FIELDS}
   mutation createTeacherImportantNote($input: CreateTeacherNoteInput!) {
@@ -26,8 +32,8 @@ export const createTeacherImportantNoteMutationDocument: TypedDocumentNode<
 `;
 
 export const updateTeacherImportantNoteMutationDocument: TypedDocumentNode<
-  Operations.UpdateTeacherImportantNoteMutation,
-  Types.MutationUpdateTeacherImportantNoteArgs
+  UpdateTeacherImportantNoteMutation,
+  UpdateTeacherImportantNoteMutationVariables
 > = gql`
   ${TEACHER_IMPORTANT_NOTE_FIELDS}
   mutation updateTeacherImportantNote($id: ID!, $input: UpdateTeacherNoteInput!) {
@@ -38,8 +44,8 @@ export const updateTeacherImportantNoteMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteTeacherImportantNoteMutationDocument: TypedDocumentNode<
-  Operations.DeleteTeacherImportantNoteMutation,
-  Types.MutationDeleteTeacherImportantNoteArgs
+  DeleteTeacherImportantNoteMutation,
+  DeleteTeacherImportantNoteMutationVariables
 > = gql`
   mutation deleteTeacherImportantNote($id: ID!) {
     deleteTeacherImportantNote(id: $id)

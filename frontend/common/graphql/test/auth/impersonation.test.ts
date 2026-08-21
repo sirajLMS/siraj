@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { CombinedGraphQLErrors } from "@apollo/client";
-import { InvoiceType as InvoiceTypeEnum } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { InvoiceType as InvoiceTypeEnum } from "@/frontend/common/graphql/generated/gql/graphql";
 import { createManualInvoiceMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
   endImpersonationMutationDocument,

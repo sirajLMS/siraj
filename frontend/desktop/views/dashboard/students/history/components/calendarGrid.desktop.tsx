@@ -2,7 +2,6 @@
 
 import { ScheduleOutlined } from "@mui/icons-material";
 import { Box, styled, Typography } from "@mui/material";
-import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import {
   CalendarGridContainer,
   CalendarWeekdayHeader,
@@ -11,6 +10,7 @@ import { computeCalendarGridLayout } from "@/frontend/common/views/dashboard/sha
 import type { CalendarGridProps, ClassSession } from "@/frontend/common/views/dashboard/students/history/types";
 import { useStudentHistoryLabels } from "@/frontend/common/views/dashboard/students/history/useStudentHistoryLabels";
 import { DesktopStatusBadge } from "@/frontend/desktop/components/ui/badge";
+import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 import { Link } from "@/shared/i18n";
 
 const calendarCellBase = ({ theme }: { theme: import("@mui/material/styles").Theme }) => ({
@@ -48,11 +48,11 @@ const EmptyCell = styled(Box)(({ theme }) => ({
 
 function CalendarStatusBadge({ status, label }: Readonly<{ status: AttendanceStatus; label: string }>) {
   let badgeStatus: string;
-  if (status === AttendanceStatus.Present) {
+  if (status === AttendanceStatus.PRESENT) {
     badgeStatus = "active";
-  } else if (status === AttendanceStatus.Late) {
+  } else if (status === AttendanceStatus.LATE) {
     badgeStatus = "late";
-  } else if (status === AttendanceStatus.Absent) {
+  } else if (status === AttendanceStatus.ABSENT) {
     badgeStatus = "blocked";
   } else {
     badgeStatus = "pending";

@@ -3,7 +3,7 @@
 import { EditOutlined } from "@mui/icons-material";
 import { Avatar, Box, Button, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionGroupDetailFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   OverridesCell,
   type OverridesCellType,
@@ -20,7 +20,9 @@ const StyledUserAvatar = styled(Avatar)(({ theme }) => ({
   fontWeight: 600,
 }));
 
-export function UserGroupsChips({ userGroups }: Readonly<{ readonly userGroups: readonly PermissionGroup[] }>) {
+export function UserGroupsChips({
+  userGroups,
+}: Readonly<{ readonly userGroups: readonly PermissionGroupDetailFieldsFragment[] }>) {
   if (userGroups.length === 0) {
     return (
       <Typography variant="labelMd" sx={theme => ({ color: theme.palette.text.disabled, fontStyle: "italic" })}>
@@ -76,7 +78,7 @@ export function OverridesCellBox({
   type,
 }: Readonly<{
   readonly userId: string;
-  readonly userGroups: readonly PermissionGroup[];
+  readonly userGroups: readonly PermissionGroupDetailFieldsFragment[];
   readonly type: OverridesCellType;
 }>) {
   return <OverridesCell userId={userId} userGroups={userGroups} type={type} />;

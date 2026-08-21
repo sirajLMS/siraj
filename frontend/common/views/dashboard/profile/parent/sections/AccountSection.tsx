@@ -5,12 +5,7 @@ import { IconButton, MenuItem, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import {
-  AccountStatus,
-  type CurrencyCode,
-  type ParentStatus,
-  type ProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, type CurrencyCode, type ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   ParentAdminData,
   ParentSectionLabelsBundle,
@@ -21,6 +16,7 @@ import { CoreIdentitySection } from "@/frontend/common/views/dashboard/profile/s
 import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import { useAdminResetPassword } from "@/frontend/common/views/dashboard/profile/shared/useAdminResetPassword";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ProfileParentLabels } from "@/shared/locale/types/profile";
 

@@ -2,8 +2,8 @@ import type {
   ClassExecutionState,
   ClassOutcome,
   DayOfWeek,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass } from "@/frontend/common/graphql/generated/gql/operations";
+  TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_classes,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { DayScheduleConfig } from "@/frontend/common/views/dashboard/classes/recurring/types";
 import type { CreateRecurringClassDialogFormState } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/hooks";
 import type {
@@ -15,7 +15,7 @@ import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboar
 import type { MeetingConfigJoinLabels } from "@/shared/locale/types/ui";
 
 export type ScheduledClass = Omit<
-  TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_WeeklyScheduleGrid_classes_WeeklyScheduleClass,
+  TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_classes,
   "executionState" | "outcome"
 > & {
   readonly executionState?: ClassExecutionState | null;

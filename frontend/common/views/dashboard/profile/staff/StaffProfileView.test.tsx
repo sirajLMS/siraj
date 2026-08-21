@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StaffProfileView } from "@/frontend/common/views/dashboard/profile/staff/StaffProfileView";
+import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -11,7 +11,7 @@ afterEach(() => {
 describe("StaffProfileView lazy switcher", () => {
   test("renders with own scope view mode", () => {
     renderWithWrapper(
-      <StaffProfileView scope={ProfileScope.Own} mode={ProfileMode.View} targetUserId="user-staff-1" />,
+      <StaffProfileView scope={ProfileScope.OWN} mode={ProfileMode.VIEW} targetUserId="user-staff-1" />,
       { locale: "en" }
     );
 
@@ -20,7 +20,7 @@ describe("StaffProfileView lazy switcher", () => {
 
   test("renders with admin scope view mode", () => {
     renderWithWrapper(
-      <StaffProfileView scope={ProfileScope.Other} mode={ProfileMode.View} targetUserId="user-staff-1" />,
+      <StaffProfileView scope={ProfileScope.OTHER} mode={ProfileMode.VIEW} targetUserId="user-staff-1" />,
       { locale: "en" }
     );
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { PaymentMethodsTabVariantProps } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export type UsePaymentMethodsTabViewModelProps = {
@@ -19,7 +20,7 @@ export function usePaymentMethodsTabViewModel(
   const { user, hasPermission } = useUserStore();
 
   const canManage =
-    scope === ProfileScope.Own
+    scope === ProfileScope.OWN
       ? user?.id === targetUserId
       : hasPermission(AppPermission.ProfilePaymentMethodsEditOther);
 

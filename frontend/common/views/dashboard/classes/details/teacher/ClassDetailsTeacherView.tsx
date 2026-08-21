@@ -8,7 +8,7 @@
 // the tier-side consumer; here we render the tier-neutral composition with MUI Grid/Stack only.
 
 import { Grid, Stack } from "@mui/material";
-import type { ClassInstanceStudentInfo } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassInstanceQuery_classInstance_student } from "@/frontend/common/graphql/generated/gql/graphql";
 import { EXECUTION_STATE_TO_STATUS } from "@/frontend/common/views/dashboard/classes/details/__shared__/executionStateToStatusShared";
 import { ActionsPanel } from "@/frontend/common/views/dashboard/classes/details/teacher/ActionsPanel";
 import { ClassInstanceDetailsCard } from "@/frontend/common/views/dashboard/classes/details/teacher/ClassInstanceDetailsCard";
@@ -24,7 +24,7 @@ interface ClassDetailsTeacherViewProps extends TeacherViewProps {
   readonly labels: TeacherViewLabels;
 }
 
-const NULL_STUDENT: Omit<ClassInstanceStudentInfo, "__typename"> = {
+const NULL_STUDENT: ClassInstanceQuery_classInstance_student = {
   id: null,
   name: null,
   avatarUrl: null,

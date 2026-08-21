@@ -9,7 +9,7 @@ import {
   isPaymentMethodTypeLabelKey,
 } from "@/frontend/common/components/ui/display/paymentMethod/paymentMethodLabelHelpers";
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import { MobileStatusBadge } from "@/frontend/mobile/components/ui/badge";
 import { MobileBaseCard } from "@/frontend/mobile/components/ui/card";

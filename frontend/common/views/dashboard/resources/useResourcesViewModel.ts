@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deleteLearningResourceMutationDocument,
   learningResourcesQueryDocument,

@@ -16,7 +16,7 @@ import { useEffect, useMemo } from "react";
 import { type Control, Controller, type FieldErrors, useForm, useWatch } from "react-hook-form";
 import { CountryAutocomplete } from "@/frontend/common/components/ui/input/countrySelect/CountryAutocomplete";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
-import { CountryCode, type CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CountryCode, type CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { activateSupportedCurrencyMutationDocument } from "@/frontend/common/graphql/sharedDocuments/billing/currency-catalog.documents";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { type CountryType, countries } from "@/frontend/common/lib/locale";
@@ -71,7 +71,7 @@ export interface SupportedCurrencyActivateDialogProps {
 
 function resolveCountry(code: string | null | undefined): CountryType | undefined {
   if (!code) return undefined;
-  return countries.find(country => country.code === code);
+  return countries.find(country => country.code.toString() === code);
 }
 
 type ActivateCurrencyFormFieldsProps = {

@@ -4,7 +4,7 @@ import { Box, Checkbox } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AddPermissionsTabProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid, DesktopSectionPanel } from "@/frontend/desktop/components/ui";
 import { AddPermissionBulkBarDesktop } from "@/frontend/desktop/views/dashboard/permissions/components/addPermissionBulkBar.desktop";
@@ -47,7 +47,7 @@ export function AddPermissionsTabDesktop({
   const t = labels;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
-  const addPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
+  const addPermissionsColumns = useMemo<GridColDef<PermissionFieldsFragment>[]>(() => {
     return [
       {
         field: "checkbox",
@@ -105,7 +105,7 @@ export function AddPermissionsTabDesktop({
       )}
 
       <DesktopSectionPanel contentPadding={false} title={t.addPermissions}>
-        <DesktopAppDataGrid<Permission>
+        <DesktopAppDataGrid<PermissionFieldsFragment>
           rows={filteredAvailablePermissions}
           columns={addPermissionsColumns}
           getRowId={row => row.id ?? row.key ?? ""}

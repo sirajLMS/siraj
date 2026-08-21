@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
-import type { GroupUser } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionGroupDetailFieldsFragment_assignedUsers } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForUser } from "@/frontend/common/utils/profileHref";
 import {
   AssignedUsersBulkActionBar,
@@ -105,14 +105,14 @@ function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlot
   const { group, filteredAssignedUsers, selectedAssignedUserIds, onRevokeUser, onUserToggle, loading } = props;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
-  const assignedUsersColumns = useMemo<GridColDef<GroupUser>[]>(() => {
+  const assignedUsersColumns = useMemo<GridColDef<PermissionGroupDetailFieldsFragment_assignedUsers>[]>(() => {
     return [
       {
         field: "checkbox",
         headerName: "",
         width: 50,
         sortable: false,
-        renderCell: (params: { row: GroupUser }) => {
+        renderCell: (params: { row: PermissionGroupDetailFieldsFragment_assignedUsers }) => {
           const id = params.row.id ?? "";
           const checked = selectedAssignedUserIds.includes(id);
           return <input type="checkbox" checked={checked} onChange={e => onUserToggle(id, e.target.checked)} />;
@@ -123,7 +123,7 @@ function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlot
         headerName: labels.columnName,
         flex: 1.5,
         minWidth: 200,
-        renderCell: (params: { row: GroupUser }) => {
+        renderCell: (params: { row: PermissionGroupDetailFieldsFragment_assignedUsers }) => {
           const user = params.row;
           const profileHref = user.id ? profileHrefForUser(user.id) : undefined;
           return (
@@ -217,7 +217,7 @@ function AssignedUsersDataGrid({ props, labels }: Readonly<AssignedUsersListSlot
 
   return (
     <DesktopSectionPanel contentPadding={false} title={labels.assignedGroupMembers}>
-      <DesktopAppDataGrid<GroupUser>
+      <DesktopAppDataGrid<PermissionGroupDetailFieldsFragment_assignedUsers>
         rows={filteredAssignedUsers}
         columns={assignedUsersColumns}
         getRowId={row => row.id ?? row.email ?? ""}

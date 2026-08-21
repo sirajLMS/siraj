@@ -1,5 +1,5 @@
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect";
-import type { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AttendanceEvaluation, LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PendingReviewsLabels } from "@/shared/locale";
 
 export interface PendingReviewRow {

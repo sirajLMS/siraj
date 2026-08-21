@@ -8,7 +8,7 @@ import {
   SensorsOutlined,
   type SvgIconComponent,
 } from "@mui/icons-material";
-import { TeacherProgressFeedEventKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { TeacherProgressFeedEventKind } from "@/frontend/common/graphql/generated/gql/graphql";
 
 // NEW FOR PLAN v5: resolveStudentProgressFeedIcon — pure-data icon resolver
 // for the student-progress feed event-kind → Material icon mapping.

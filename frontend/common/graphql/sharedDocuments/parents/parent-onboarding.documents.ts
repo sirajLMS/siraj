@@ -1,11 +1,10 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateParentMutation,
+  CreateParentMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const createParentMutationDocument: TypedDocumentNode<
-  Operations.CreateParentMutation,
-  Types.MutationCreateParentArgs
-> = gql`
+export const createParentMutationDocument: TypedDocumentNode<CreateParentMutation, CreateParentMutationVariables> = gql`
   mutation createParent($input: ParentOnboardingInput!) {
     createParent(input: $input) {
       id

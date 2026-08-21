@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { NotificationChannel } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel } from "@/frontend/common/graphql/generated/gql/graphql";
 import { NotificationPreferencesTabShared } from "@/frontend/common/views/dashboard/profile/core/notifications/__shared__/notificationPreferencesTabShared";
 import type { NotificationPreferencesTabVariantProps } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
 import { PreferencesChannelTabsMobileView } from "@/frontend/mobile/views/dashboard/profile/core/notifications/preferencesChannelTabs.mobile";

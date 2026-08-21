@@ -1,11 +1,15 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  StudentClassHistoryQuery,
+  StudentClassHistoryQueryVariables,
+  StudentClassSessionDetailQuery,
+  StudentClassSessionDetailQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 
 export const studentClassHistoryQueryDocument: TypedDocumentNode<
-  Operations.StudentClassHistoryQuery,
-  Types.QueryStudentClassHistoryArgs
+  StudentClassHistoryQuery,
+  StudentClassHistoryQueryVariables
 > = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query studentClassHistory($studentId: ID!, $year: Int!, $month: Int!) {
@@ -42,8 +46,8 @@ export const studentClassHistoryQueryDocument: TypedDocumentNode<
 `;
 
 export const studentClassSessionDetailQueryDocument: TypedDocumentNode<
-  Operations.StudentClassSessionDetailQuery,
-  Types.QueryStudentClassSessionDetailArgs
+  StudentClassSessionDetailQuery,
+  StudentClassSessionDetailQueryVariables
 > = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query studentClassSessionDetail($classInstanceId: ID!) {

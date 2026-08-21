@@ -1,6 +1,24 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateQuotaMutation,
+  CreateQuotaMutationVariables,
+  DeleteQuotaMutation,
+  DeleteQuotaMutationVariables,
+  QuotaBalanceQuery,
+  QuotaBalanceQueryVariables,
+  QuotaLedgerQuery,
+  QuotaLedgerQueryVariables,
+  QuotaQuery,
+  QuotaQueryVariables,
+  QuotasQuery,
+  QuotasQueryVariables,
+  StudentOpenQuotasQuery,
+  StudentOpenQuotasQueryVariables,
+  StudentQuotasQuery,
+  StudentQuotasQueryVariables,
+  UpdateQuotaMutation,
+  UpdateQuotaMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const QuotaFieldsFragment = gql`
   fragment QuotaFields on Quota {
@@ -22,7 +40,7 @@ const QuotaFieldsFragment = gql`
   }
 `;
 
-export const quotaQueryDocument: TypedDocumentNode<Operations.QuotaQuery, Types.QueryQuotaArgs> = gql`
+export const quotaQueryDocument: TypedDocumentNode<QuotaQuery, QuotaQueryVariables> = gql`
   ${QuotaFieldsFragment}
   query Quota($id: ID!) {
     quota(id: $id) {
@@ -31,7 +49,7 @@ export const quotaQueryDocument: TypedDocumentNode<Operations.QuotaQuery, Types.
   }
 `;
 
-export const quotasQueryDocument: TypedDocumentNode<Operations.QuotasQuery, Types.QueryQuotasArgs> = gql`
+export const quotasQueryDocument: TypedDocumentNode<QuotasQuery, QuotasQueryVariables> = gql`
   ${QuotaFieldsFragment}
   query Quotas($filter: QuotaPaginatedFilterInput, $pagination: PaginationArgs) {
     quotas(filter: $filter, pagination: $pagination) {
@@ -43,7 +61,7 @@ export const quotasQueryDocument: TypedDocumentNode<Operations.QuotasQuery, Type
   }
 `;
 
-export const quotaLedgerQueryDocument: TypedDocumentNode<Operations.QuotaLedgerQuery, Types.QueryQuotaLedgerArgs> = gql`
+export const quotaLedgerQueryDocument: TypedDocumentNode<QuotaLedgerQuery, QuotaLedgerQueryVariables> = gql`
   query QuotaLedger($quotaId: ID!, $pagination: PaginationArgs) {
     quotaLedger(quotaId: $quotaId, pagination: $pagination) {
       rows {
@@ -63,10 +81,7 @@ export const quotaLedgerQueryDocument: TypedDocumentNode<Operations.QuotaLedgerQ
   }
 `;
 
-export const createQuotaMutationDocument: TypedDocumentNode<
-  Operations.CreateQuotaMutation,
-  Types.MutationCreateQuotaArgs
-> = gql`
+export const createQuotaMutationDocument: TypedDocumentNode<CreateQuotaMutation, CreateQuotaMutationVariables> = gql`
   ${QuotaFieldsFragment}
   mutation CreateQuota($input: QuotaSubmitInput!) {
     createQuota(input: $input) {
@@ -75,10 +90,7 @@ export const createQuotaMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const updateQuotaMutationDocument: TypedDocumentNode<
-  Operations.UpdateQuotaMutation,
-  Types.MutationUpdateQuotaArgs
-> = gql`
+export const updateQuotaMutationDocument: TypedDocumentNode<UpdateQuotaMutation, UpdateQuotaMutationVariables> = gql`
   ${QuotaFieldsFragment}
   mutation UpdateQuota($id: ID!, $input: QuotaUpdateInput!) {
     updateQuota(id: $id, input: $input) {
@@ -87,10 +99,7 @@ export const updateQuotaMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const deleteQuotaMutationDocument: TypedDocumentNode<
-  Operations.DeleteQuotaMutation,
-  Types.MutationDeleteQuotaArgs
-> = gql`
+export const deleteQuotaMutationDocument: TypedDocumentNode<DeleteQuotaMutation, DeleteQuotaMutationVariables> = gql`
   mutation DeleteQuota($id: ID!) {
     deleteQuota(id: $id) {
       id
@@ -102,10 +111,7 @@ export const deleteQuotaMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const studentQuotasQueryDocument: TypedDocumentNode<
-  Operations.StudentQuotasQuery,
-  Types.QueryStudentQuotasArgs
-> = gql`
+export const studentQuotasQueryDocument: TypedDocumentNode<StudentQuotasQuery, StudentQuotasQueryVariables> = gql`
   ${QuotaFieldsFragment}
   query StudentQuotas($studentId: ID!) {
     studentQuotas(studentId: $studentId) {
@@ -115,8 +121,8 @@ export const studentQuotasQueryDocument: TypedDocumentNode<
 `;
 
 export const studentOpenQuotasQueryDocument: TypedDocumentNode<
-  Operations.StudentOpenQuotasQuery,
-  Types.QueryStudentOpenQuotasArgs
+  StudentOpenQuotasQuery,
+  StudentOpenQuotasQueryVariables
 > = gql`
   ${QuotaFieldsFragment}
   query StudentOpenQuotas($studentId: ID!) {
@@ -126,8 +132,7 @@ export const studentOpenQuotasQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const quotaBalanceQueryDocument: TypedDocumentNode<Operations.QuotaBalanceQuery, Types.QueryQuotaBalanceArgs> =
-  gql`
+export const quotaBalanceQueryDocument: TypedDocumentNode<QuotaBalanceQuery, QuotaBalanceQueryVariables> = gql`
   query QuotaBalance($studentId: ID!) {
     quotaBalance(studentId: $studentId) {
       id

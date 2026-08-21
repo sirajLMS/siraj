@@ -7,7 +7,7 @@ import type {
   SupportedMobileWalletFieldsFragment,
   SupportedOnlineAccountFieldsFragment,
   SupportedPaymentLinkFieldsFragment,
-} from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deactivateSupportedMobileWalletMutationDocument,
   deactivateSupportedOnlineAccountMutationDocument,

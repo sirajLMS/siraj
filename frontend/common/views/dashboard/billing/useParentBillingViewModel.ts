@@ -3,8 +3,11 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useCallback, useMemo } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  CurrencyCode,
+  type ParentBillingSummaryQuery,
+  type ParentInvoiceHistoryQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   markInvoicePaidMutationDocument,
   parentBillingSummaryQueryDocument,
@@ -107,8 +110,8 @@ function useBillingSearchHandlers(store: BillingStoreState): BillingSearchHandle
 }
 
 interface BillingData {
-  invoicesData: Operations.ParentInvoiceHistoryQuery | undefined;
-  summaryData: Operations.ParentBillingSummaryQuery | undefined;
+  invoicesData: ParentInvoiceHistoryQuery | undefined;
+  summaryData: ParentBillingSummaryQuery | undefined;
   invoicesLoading: boolean;
   summaryLoading: boolean;
   refetchInvoices: () => Promise<unknown>;

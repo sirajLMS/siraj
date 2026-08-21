@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { AppPermission, ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getVisibleProfileTabs, resolveProfileTab } from "@/frontend/common/views/dashboard/profile/core/profileTabs";
+import { ProfileAudience, ProfileScope } from "@/shared/constants/profile.enum";
 
 function hasPermissions(permissions: readonly AppPermission[]) {
   const set = new Set(permissions);
@@ -21,7 +22,7 @@ function expectTab(tabs: ReturnType<typeof getVisibleProfileTabs>, tabId: string
 
 describe("getVisibleProfileTabs", () => {
   test("hides permissions tab for teacher other scope even with legacy edit", () => {
-    const tabs = createTabs(ProfileAudience.Teacher, ProfileScope.Other, [
+    const tabs = createTabs(ProfileAudience.TEACHER, ProfileScope.OTHER, [
       AppPermission.ProfileStaffPermissionsEditOther,
       AppPermission.ProfileCoreIdentityViewOwn,
     ]);
@@ -30,7 +31,7 @@ describe("getVisibleProfileTabs", () => {
   });
 
   test("shows permissions tab for staff other scope with staff permissions view", () => {
-    const tabs = createTabs(ProfileAudience.Staff, ProfileScope.Other, [
+    const tabs = createTabs(ProfileAudience.STAFF, ProfileScope.OTHER, [
       AppPermission.ProfileStaffPermissionsViewOther,
       AppPermission.ProfileCoreIdentityViewOwn,
     ]);
@@ -39,7 +40,7 @@ describe("getVisibleProfileTabs", () => {
   });
 
   test("shows payment methods tab when view permission is granted", () => {
-    const tabs = createTabs(ProfileAudience.Parent, ProfileScope.Own, [
+    const tabs = createTabs(ProfileAudience.PARENT, ProfileScope.OWN, [
       AppPermission.ProfilePaymentMethodsViewOwn,
       AppPermission.ProfileCoreIdentityViewOwn,
     ]);
@@ -48,7 +49,7 @@ describe("getVisibleProfileTabs", () => {
   });
 
   test("shows meeting tab with view permission without manage permission", () => {
-    const tabs = createTabs(ProfileAudience.Teacher, ProfileScope.Own, [
+    const tabs = createTabs(ProfileAudience.TEACHER, ProfileScope.OWN, [
       AppPermission.ProfileMeetingConfigsViewOwn,
       AppPermission.ProfileCoreIdentityViewOwn,
     ]);
@@ -57,7 +58,7 @@ describe("getVisibleProfileTabs", () => {
   });
 
   test("shows notifications tab for student own scope", () => {
-    const tabs = createTabs(ProfileAudience.Student, ProfileScope.Own, [AppPermission.ProfileCoreIdentityViewOwn]);
+    const tabs = createTabs(ProfileAudience.STUDENT, ProfileScope.OWN, [AppPermission.ProfileCoreIdentityViewOwn]);
 
     expectTab(tabs, "notifications", true);
     expectTab(tabs, "profile", true);
@@ -67,8 +68,8 @@ describe("getVisibleProfileTabs", () => {
 
 describe("resolveProfileTab", () => {
   const tabs = getVisibleProfileTabs({
-    audience: ProfileAudience.Teacher,
-    scope: ProfileScope.Own,
+    audience: ProfileAudience.TEACHER,
+    scope: ProfileScope.OWN,
     hasPermission: hasPermissions([AppPermission.ProfileCoreIdentityViewOwn]),
   });
 

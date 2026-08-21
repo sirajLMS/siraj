@@ -3,9 +3,9 @@
 import { Box, Button } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { type ComponentProps, type ReactNode, useState } from "react";
-import { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { ProfileShell } from "@/frontend/common/views/dashboard/profile/core/ProfileShell";
+import { ProfileAudience, ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 
 function StorybookPageFrame({ children }: { readonly children: ReactNode }) {
   return (
@@ -87,9 +87,9 @@ export const Default: Story = {
     name: "John Doe",
     email: "john.doe@example.com",
     roleLabel: "Teacher",
-    audience: ProfileAudience.Teacher,
-    scope: ProfileScope.Own,
-    mode: ProfileMode.View,
+    audience: ProfileAudience.TEACHER,
+    scope: ProfileScope.OWN,
+    mode: ProfileMode.VIEW,
     currentTab: "profile",
     actions: mockActions,
     children: mockChildren,
@@ -102,9 +102,9 @@ export const ParentProfile: Story = {
     name: "Jane Smith",
     email: "jane.smith@example.com",
     roleLabel: "Parent",
-    audience: ProfileAudience.Parent,
-    scope: ProfileScope.Own,
-    mode: ProfileMode.View,
+    audience: ProfileAudience.PARENT,
+    scope: ProfileScope.OWN,
+    mode: ProfileMode.VIEW,
     currentTab: "profile",
     actions: mockActions,
     children: mockChildren,
@@ -123,9 +123,9 @@ export const StaffProfile: Story = {
     name: "Admin User",
     email: "admin@example.com",
     roleLabel: "Academy Admin",
-    audience: ProfileAudience.Staff,
-    scope: ProfileScope.Own,
-    mode: ProfileMode.View,
+    audience: ProfileAudience.STAFF,
+    scope: ProfileScope.OWN,
+    mode: ProfileMode.VIEW,
     currentTab: "profile",
     actions: mockActions,
     children: mockChildren,
@@ -141,16 +141,16 @@ export const StaffProfile: Story = {
 export const LoadingState: Story = {
   args: {
     loading: true,
-    audience: ProfileAudience.Teacher,
-    scope: ProfileScope.Own,
+    audience: ProfileAudience.TEACHER,
+    scope: ProfileScope.OWN,
   },
 };
 
 export const ErrorState: Story = {
   args: {
     error: "Failed to load profile. Please try again later.",
-    audience: ProfileAudience.Teacher,
-    scope: ProfileScope.Own,
+    audience: ProfileAudience.TEACHER,
+    scope: ProfileScope.OWN,
     onRetry: () => {},
   },
 };
@@ -161,9 +161,9 @@ export const OtherUserProfile: Story = {
     name: "Alice Johnson",
     email: "alice.johnson@example.com",
     roleLabel: "Teacher",
-    audience: ProfileAudience.Teacher,
-    scope: ProfileScope.Other,
-    mode: ProfileMode.View,
+    audience: ProfileAudience.TEACHER,
+    scope: ProfileScope.OTHER,
+    mode: ProfileMode.VIEW,
     currentTab: "profile",
     actions: mockActions,
     children: mockChildren,

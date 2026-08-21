@@ -3,9 +3,9 @@
 import { useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useMemo } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/schedule.documents";
-import { resolveBrowserIanaTimezoneId, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { useRescheduleStore } from "@/frontend/common/stores/rescheduleStore";
 import { useStatusTrackingStore } from "@/frontend/common/stores/statusTrackingStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -13,7 +13,7 @@ import { studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type {
   DesktopLayoutProps,
   MobileLayoutProps,
-  StatusTrackingRow,
+  StatusTrackingScheduleRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import {
   buildStatusTrackingLabelsBySection,
@@ -43,7 +43,7 @@ export interface UseStatusTrackingViewModelProps {
 }
 
 function buildRescheduleHandler(
-  rows: readonly StatusTrackingRow[],
+  rows: readonly StatusTrackingScheduleRow[],
   setRescheduleSession: SetRescheduleSessionFn,
   router: RouterLike
 ) {
@@ -61,7 +61,11 @@ function buildRescheduleHandler(
   };
 }
 
-function buildActivateHandler(rows: readonly StatusTrackingRow[], hasPermission: HasPermissionFn, router: RouterLike) {
+function buildActivateHandler(
+  rows: readonly StatusTrackingScheduleRow[],
+  hasPermission: HasPermissionFn,
+  router: RouterLike
+) {
   return (id: string) => {
     if (!hasPermission(AppPermission.SessionActivateClass)) {
       return;
@@ -75,7 +79,7 @@ function buildActivateHandler(rows: readonly StatusTrackingRow[], hasPermission:
 }
 
 function buildVerifyHandler(
-  rows: readonly StatusTrackingRow[],
+  rows: readonly StatusTrackingScheduleRow[],
   router: RouterLike,
   notifications: NotificationsLike,
   errorNoStudentId: string
@@ -102,14 +106,14 @@ export function useStatusTrackingViewModel(props: Readonly<UseStatusTrackingView
   const labelsBySection = useMemo(() => buildStatusTrackingLabelsBySection(rawLabels), [rawLabels]);
   const notifications = useNotifications();
 
-  const viewerTimezone = useMemo(() => toGraphqlIanaTimezone(resolveBrowserIanaTimezoneId()), []);
+  const viewerTimezone = useMemo(() => resolveBrowserIanaTimezoneId(), []);
 
   const { data } = useQuery(statusTrackingScheduleQueryDocument, {
     variables: { date: selectedDate, search: null, viewerTimezone },
     fetchPolicy: "cache-and-network",
   });
 
-  const rows: readonly StatusTrackingRow[] = useMemo(
+  const rows: readonly StatusTrackingScheduleRow[] = useMemo(
     () => data?.statusTrackingSchedule ?? [],
     [data?.statusTrackingSchedule]
   );

@@ -1,7 +1,7 @@
 import { CloudSyncOutlined, ErrorOutlined, LockOutlined, RefreshOutlined, SyncOutlined } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { WhatsappLabels } from "@/shared/locale/types/whatsapp";
 
 /** Props shared by all three template shared sub-components. */

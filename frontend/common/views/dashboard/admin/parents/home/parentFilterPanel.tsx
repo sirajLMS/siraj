@@ -2,7 +2,7 @@
 
 import { Chip, Collapse, Stack, Typography } from "@mui/material";
 import { FilterButton } from "@/frontend/common/components/ui";
-import type { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { toParentLifecycleStatus } from "@/frontend/common/views/dashboard/admin/parents/home/directory";
 import { LIFECYCLE_STATUS_FILTER_OPTIONS } from "@/frontend/common/views/dashboard/admin/parents/home/parentFilterConstants";
 import type { ParentLifecycleStatus } from "@/frontend/common/views/dashboard/types/parent.types";

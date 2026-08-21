@@ -1,7 +1,7 @@
 "use client";
 
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AdminDashboardView } from "@/frontend/common/views/dashboard/admin/home/AdminDashboardView";
 import {
   type UseAdminDashboardViewModelProps,

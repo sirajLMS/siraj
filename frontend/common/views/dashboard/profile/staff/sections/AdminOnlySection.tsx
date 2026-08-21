@@ -4,7 +4,7 @@ import { MenuItem, Stack, TextField, Tooltip } from "@mui/material";
 import { useState } from "react";
 import type { Control, UseFormRegister } from "react-hook-form";
 import { SectionPanel, StatusBadge } from "@/frontend/common/components/ui";
-import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { ResetPasswordDialog } from "@/frontend/common/views/dashboard/profile/shared/ResetPasswordDialog";
 import { InfoField } from "@/frontend/common/views/dashboard/profile/shared/sections/InfoField";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";

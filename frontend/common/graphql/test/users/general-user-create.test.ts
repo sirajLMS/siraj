@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { AccountStatus, type GeneralUserCreateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, type GeneralUserCreateInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   endImpersonationMutationDocument,
   meQueryDocument,

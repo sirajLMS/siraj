@@ -2,7 +2,7 @@ import type {
   SupportedMobileWalletFieldsFragment,
   SupportedOnlineAccountFieldsFragment,
   SupportedPaymentLinkFieldsFragment,
-} from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentCatalogsLabels } from "@/shared/locale";
 
 export type PaymentCatalogKind = "mobileWallet" | "paymentLink" | "onlineAccount";

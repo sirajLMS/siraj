@@ -2,9 +2,10 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CurrencyCode, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { TeacherAdminEditForm } from "@/frontend/common/views/dashboard/profile/teacher/TeacherAdminEditForm";
 import { TeacherProfileEditForm } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileEditForm";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 const ownTeacherData = {
@@ -20,7 +21,7 @@ const adminTeacherData = {
   gender: null,
   address: "123 King Fahd Rd, Riyadh",
   qualifications: "Bachelor of Islamic Studies",
-  timezone: IanaTimezone.AsiaRiyadh,
+  timezone: IanaTimezone.Asia_Riyadh,
   hourlyRate: "45.00",
   rateCurrency: CurrencyCode.Usd,
   status: null,

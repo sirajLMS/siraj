@@ -2,7 +2,7 @@
 
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   buildPreferenceMap,
   buildPreferenceMatrixRows,

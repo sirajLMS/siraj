@@ -1,12 +1,15 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateTeacherPaymentMutation,
+  CreateTeacherPaymentMutationVariables,
+  InvoicePaymentsQuery,
+  InvoicePaymentsQueryVariables,
+  RecordPaymentMutation,
+  RecordPaymentMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { PAYMENT_METHOD_TRANSACTION_SNAPSHOT_FIELDS } from "@/frontend/common/graphql/sharedDocuments/billing/payment-method.documents";
 
-export const invoicePaymentsQueryDocument: TypedDocumentNode<
-  Operations.InvoicePaymentsQuery,
-  Types.QueryInvoicePaymentsArgs
-> = gql`
+export const invoicePaymentsQueryDocument: TypedDocumentNode<InvoicePaymentsQuery, InvoicePaymentsQueryVariables> = gql`
   query InvoicePayments($invoiceId: ID!) {
     invoicePayments(invoiceId: $invoiceId) {
       id
@@ -32,10 +35,8 @@ export const invoicePaymentsQueryDocument: TypedDocumentNode<
   ${PAYMENT_METHOD_TRANSACTION_SNAPSHOT_FIELDS}
 `;
 
-export const recordPaymentMutationDocument: TypedDocumentNode<
-  Operations.RecordPaymentMutation,
-  Types.MutationRecordPaymentArgs
-> = gql`
+export const recordPaymentMutationDocument: TypedDocumentNode<RecordPaymentMutation, RecordPaymentMutationVariables> =
+  gql`
   mutation RecordPayment(
     $invoiceId: ID!
     $amount: String!
@@ -72,8 +73,8 @@ export const recordPaymentMutationDocument: TypedDocumentNode<
 `;
 
 export const createTeacherPaymentMutationDocument: TypedDocumentNode<
-  Operations.CreateTeacherPaymentMutation,
-  Types.MutationCreateTeacherPaymentArgs
+  CreateTeacherPaymentMutation,
+  CreateTeacherPaymentMutationVariables
 > = gql`
   mutation CreateTeacherPayment(
     $teacherId: ID!

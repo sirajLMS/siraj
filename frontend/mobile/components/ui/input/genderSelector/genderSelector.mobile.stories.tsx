@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import {
   GenderSelectorMobile,

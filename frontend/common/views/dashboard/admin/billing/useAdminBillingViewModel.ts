@@ -8,7 +8,7 @@ import {
   CurrencyCode,
   type InvoiceType as GqlInvoiceType,
   type StudentStatus as GqlStudentStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   adminBillingSummaryQueryDocument,
   adminInvoicesQueryDocument,

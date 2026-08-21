@@ -1,6 +1,8 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AvailableClassSlotsQuery,
+  AvailableClassSlotsQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const availableClassSlotsQueryDocument = gql`
   query AvailableClassSlots($studentId: ID!, $date: DateTime!, $teacherId: ID, $durationMinutes: Int) {
@@ -12,4 +14,4 @@ export const availableClassSlotsQueryDocument = gql`
       available
     }
   }
-` as TypedDocumentNode<Operations.AvailableClassSlotsQuery, Types.QueryAvailableClassSlotsArgs>;
+` as TypedDocumentNode<AvailableClassSlotsQuery, AvailableClassSlotsQueryVariables>;

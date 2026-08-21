@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AttendanceEvaluation } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { LessonReportFormLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/lessonReportFormTypes";
 
 export const lessonReportFormSchema = (labels: LessonReportFormLabels) =>

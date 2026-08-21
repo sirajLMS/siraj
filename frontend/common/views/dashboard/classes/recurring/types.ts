@@ -1,10 +1,11 @@
 import type { Control, FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
-import { DayOfWeek, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { DayOfWeek } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { DayScheduleConfig as BaseDayScheduleConfig } from "@/frontend/common/stores/recurring-schedule-types";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import type { DaysScheduleLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildDaysScheduleLabels";
 import type { RecurringClassFormLabels } from "@/frontend/common/views/dashboard/classes/recurring/utils/buildRecurringClassFormLabels";
 import type { RecurringMeetingConfigFormState } from "@/frontend/common/views/dashboard/classes/recurring/utils/postCreateRecurringMeetingConfig";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type DayScheduleConfig = BaseDayScheduleConfig<DayOfWeek>;
 
@@ -23,7 +24,7 @@ export type ClassType = (typeof CLASS_TYPE_OPTIONS)[number];
 
 export const TIMEZONE_OPTIONS = [
   { value: "Africa/Cairo", label: "Africa/Cairo (Cairo)" },
-  { value: IanaTimezone.AsiaRiyadh, label: "Asia/Riyadh (Riyadh)" },
+  { value: IanaTimezone.Asia_Riyadh, label: "Asia/Riyadh (Riyadh)" },
   { value: "UTC", label: "UTC" },
 ] as const;
 

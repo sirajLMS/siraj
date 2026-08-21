@@ -1,6 +1,14 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  DeleteLearningResourceMutation,
+  DeleteLearningResourceMutationVariables,
+  LearningResourcesQuery,
+  LearningResourcesQueryVariables,
+  PrepareUploadMutation,
+  PrepareUploadMutationVariables,
+  UploadLearningResourceMutation,
+  UploadLearningResourceMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const learningResourceRowFragment = gql`
 fragment LearningResourceRow on LearningResourceRow {
@@ -16,8 +24,8 @@ fragment LearningResourceRow on LearningResourceRow {
 `;
 
 export const learningResourcesQueryDocument: TypedDocumentNode<
-  Operations.LearningResourcesQuery,
-  Types.QueryLearningResourcesArgs
+  LearningResourcesQuery,
+  LearningResourcesQueryVariables
 > = gql`
   ${learningResourceRowFragment}
   query learningResources($searchQuery: String) {
@@ -28,8 +36,8 @@ export const learningResourcesQueryDocument: TypedDocumentNode<
 `;
 
 export const uploadLearningResourceMutationDocument: TypedDocumentNode<
-  Operations.UploadLearningResourceMutation,
-  Types.MutationUploadLearningResourceArgs
+  UploadLearningResourceMutation,
+  UploadLearningResourceMutationVariables
 > = gql`
   ${learningResourceRowFragment}
   mutation uploadLearningResource($input: ResourceUploadInput!) {
@@ -39,10 +47,8 @@ export const uploadLearningResourceMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const prepareUploadMutationDocument: TypedDocumentNode<
-  Operations.PrepareUploadMutation,
-  Types.MutationPrepareUploadArgs
-> = gql`
+export const prepareUploadMutationDocument: TypedDocumentNode<PrepareUploadMutation, PrepareUploadMutationVariables> =
+  gql`
   mutation prepareUpload($input: UploadPreparationInput!) {
     prepareUpload(input: $input) {
       id
@@ -53,8 +59,8 @@ export const prepareUploadMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteLearningResourceMutationDocument: TypedDocumentNode<
-  Operations.DeleteLearningResourceMutation,
-  Types.MutationDeleteLearningResourceArgs
+  DeleteLearningResourceMutation,
+  DeleteLearningResourceMutationVariables
 > = gql`
   mutation DeleteLearningResource($id: ID!) {
     deleteLearningResource(id: $id)

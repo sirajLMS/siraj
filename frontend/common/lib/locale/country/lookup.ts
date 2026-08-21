@@ -8,5 +8,5 @@ export function getCountryByCode(countryCode: string): CountryType | undefined {
   if (!normalizedCode) {
     return undefined;
   }
-  return countries.find(country => country.code === normalizedCode);
+  return countries.find(country => country.code.toString() === normalizedCode);
 }

@@ -1,5 +1,8 @@
-import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  NotificationChannel,
+  NotificationEventType,
+  type NotificationPreferencesQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SnackbarSeverity } from "@/frontend/common/stores/__shared__";
 import { preferenceKey } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceUtils";
 import type { ProfileNotificationsLabels } from "@/shared/locale/types/profile";
@@ -101,9 +104,7 @@ export const NOTIFICATION_EVENT_TYPES_BY_CATEGORY: Record<NotificationEventCateg
     digest: NOTIFICATION_EVENT_TYPES.filter(et => NOTIFICATION_EVENT_CATEGORY[et] === "digest"),
   };
 
-export type NotificationPrefRow = NonNullable<
-  Operations.NotificationPreferencesQuery["notificationPreferences"]
->[number];
+export type NotificationPrefRow = NonNullable<NotificationPreferencesQuery["notificationPreferences"]>[number];
 
 /** A category row for the prefs UI — one per category with a master toggle. */
 export interface CategoryRow {

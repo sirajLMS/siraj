@@ -3,7 +3,7 @@
 import { LinearProgress, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { RateSource, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { RateSource, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherDueRow,

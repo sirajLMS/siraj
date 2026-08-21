@@ -4,7 +4,6 @@ import {
   CountryCodePothosObject,
   CurrencyCodePothosObject,
   GenderPothosObject,
-  IanaTimezonePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import type { TeacherOnboardingGqlInput, TeacherOnboardingReturnType } from "@/backend/types";
 
@@ -55,7 +54,7 @@ export const TeacherOnboardingInputPothosObject = gqlSchemaBuilder
         type: CountryCodePothosObject,
         description: "Teacher country code",
       }),
-      timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
+      timezone: t.field({ type: "IanaTimezone", required: true }),
       displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
       hourlyRate: t.string({ description: "Teacher hourly rate", directives: { constraint: { maxLength: 512 } } }),
       rateCurrency: t.field({

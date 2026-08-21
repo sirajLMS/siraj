@@ -1,10 +1,16 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  RecurringScheduleQuery,
+  RecurringScheduleQueryVariables,
+  RecurringSchedulesQuery,
+  RecurringSchedulesQueryVariables,
+  UpdateRecurringClassRateMutation,
+  UpdateRecurringClassRateMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const recurringScheduleQueryDocument: TypedDocumentNode<
-  Operations.RecurringScheduleQuery,
-  Types.QueryRecurringScheduleArgs
+  RecurringScheduleQuery,
+  RecurringScheduleQueryVariables
 > = gql`
   query recurringSchedule($id: ID!) {
     recurringSchedule(id: $id) {
@@ -29,8 +35,8 @@ export const recurringScheduleQueryDocument: TypedDocumentNode<
 `;
 
 export const recurringSchedulesQueryDocument: TypedDocumentNode<
-  Operations.RecurringSchedulesQuery,
-  Types.QueryRecurringSchedulesArgs
+  RecurringSchedulesQuery,
+  RecurringSchedulesQueryVariables
 > = gql`
   query recurringSchedules($pagination: PaginationArgs, $search: String) {
     recurringSchedules(pagination: $pagination, search: $search) {
@@ -65,8 +71,8 @@ export const recurringSchedulesQueryDocument: TypedDocumentNode<
 `;
 
 export const updateRecurringClassRateMutationDocument: TypedDocumentNode<
-  Operations.UpdateRecurringClassRateMutation,
-  Types.MutationUpdateRecurringClassRateArgs
+  UpdateRecurringClassRateMutation,
+  UpdateRecurringClassRateMutationVariables
 > = gql`
   mutation updateRecurringClassRate($input: UpdateRecurringClassRateInput!) {
     updateRecurringClassRate(input: $input) {

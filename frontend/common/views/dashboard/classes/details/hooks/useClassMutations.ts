@@ -1,7 +1,7 @@
 "use client";
 
 import { useApolloClient, useMutation } from "@apollo/client/react";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   activateClassMutationDocument,
   activateOverrideClassMutationDocument,

@@ -2,7 +2,7 @@
 
 import { Box, Switch, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
-import type { ClassCategoryUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassCategoryUpdateInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { DialogActionSlotProps } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogActionButtonsShared";
 import { DialogCommonTextFields } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogCommonTextFieldsShared";
 import { DialogShellShared } from "@/frontend/common/views/dashboard/subjects/home/components/__shared__/dialogShellShared";

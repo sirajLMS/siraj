@@ -1,8 +1,12 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  TeacherAssignedClassesQuery,
+  TeacherAssignedStudentsQuery,
+  TeacherOwnProfileQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 
-export const teacherAssignedStudentsQueryDocument: TypedDocumentNode<Operations.TeacherAssignedStudentsQuery> = gql`
+export const teacherAssignedStudentsQueryDocument: TypedDocumentNode<TeacherAssignedStudentsQuery> = gql`
   query teacherAssignedStudents {
     teacherAssignedStudents {
       id
@@ -19,7 +23,7 @@ export const teacherAssignedStudentsQueryDocument: TypedDocumentNode<Operations.
   }
 `;
 
-export const teacherOwnProfileQueryDocument: TypedDocumentNode<Operations.TeacherOwnProfileQuery> = gql`
+export const teacherOwnProfileQueryDocument: TypedDocumentNode<TeacherOwnProfileQuery> = gql`
   query teacherOwnProfile {
     teacherOwnProfile {
       id
@@ -39,7 +43,7 @@ export const teacherOwnProfileQueryDocument: TypedDocumentNode<Operations.Teache
   }
 `;
 
-export const teacherAssignedClassesQueryDocument: TypedDocumentNode<Operations.TeacherAssignedClassesQuery> = gql`
+export const teacherAssignedClassesQueryDocument: TypedDocumentNode<TeacherAssignedClassesQuery> = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query teacherAssignedClasses {
     teacherAssignedClasses {

@@ -1,9 +1,9 @@
 import { useCallback } from "react";
-import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionGroupDetailFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { LocalizedString } from "@/shared/types";
 
 interface UseGroupMutationActionsProps {
-  readonly group: PermissionGroup;
+  readonly group: PermissionGroupDetailFieldsFragment;
   readonly selectedAddPermissionIds: string[];
   readonly selectedAssignedUserIds: string[];
   readonly onRevokeGroup: (groupId: string, userId: string) => Promise<void>;

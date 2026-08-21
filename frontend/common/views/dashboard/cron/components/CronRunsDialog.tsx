@@ -4,8 +4,11 @@ import { CircularProgress, Dialog, DialogContent, DialogTitle, Stack, Tooltip, T
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useCallback, useMemo } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
-import { CronRunStatus, CronTriggerSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { CronRunFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  type CronRunFieldsFragment,
+  CronRunStatus,
+  CronTriggerSource,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { safeEnum, safeString } from "@/frontend/common/views/dashboard/cron/utils";
 import {
   getCronRunStatusLabel,

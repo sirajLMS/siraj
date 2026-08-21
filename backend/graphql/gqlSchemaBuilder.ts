@@ -17,6 +17,7 @@ import type { AuthContexts, BaseContext } from "@/backend/graphql/gqlContext";
 import { enablePothosDevHmr } from "@/backend/graphql/pothos-hmr";
 import { type Email, getNewRelicAgent, logger } from "@/backend/lib";
 import { PermissionsService } from "@/backend/services";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { PhoneNumber } from "@/shared/lib/phone";
 import type { LocalizedString } from "@/shared/types/localized-string";
 
@@ -109,6 +110,7 @@ export interface PothosTypes {
     // use following scalars for input types only for automatic validation
     PhoneNumber: { Input: PhoneNumber; Output: PhoneNumber };
     Email: { Input: Email; Output: Email };
+    IanaTimezone: { Input: IanaTimezone; Output: IanaTimezone };
   };
   Directives: {
     constraint: {

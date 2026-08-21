@@ -1,11 +1,11 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateManagerMutation,
+  CreateManagerMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const createManagerMutationDocument: TypedDocumentNode<
-  Operations.CreateManagerMutation,
-  Types.MutationCreateManagerArgs
-> = gql`
+export const createManagerMutationDocument: TypedDocumentNode<CreateManagerMutation, CreateManagerMutationVariables> =
+  gql`
   mutation createManager($input: ManagerOnboardingInput!) {
     createManager(input: $input) {
       id

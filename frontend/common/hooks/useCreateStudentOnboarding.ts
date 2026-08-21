@@ -1,9 +1,9 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import type { StudentOnboardingInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { StudentOnboardingInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import { createStudentMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
 import type { StudentOnboardingFormData } from "@/frontend/common/views/dashboard/students/onboarding/schemas/studentOnboardingSchema";
 
@@ -25,7 +25,7 @@ export function useCreateStudentOnboarding() {
       email: formData.email,
       password: formData.password,
       phone: formData.phone ?? null,
-      timezone: toGraphqlIanaTimezone(formData.timezone),
+      timezone: toIanaTimezone(formData.timezone),
       displayCurrency: formData.displayCurrency ?? null,
     };
 

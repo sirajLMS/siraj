@@ -4,7 +4,7 @@ import { LockOutlined } from "@mui/icons-material";
 import { Box, CircularProgress, FormControlLabel, Stack, Switch, Typography } from "@mui/material";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { OptInTabSharedProps } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/whatsappTabSharedProps";
 
 interface OptInTabContentProps extends OptInTabSharedProps {

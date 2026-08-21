@@ -3,7 +3,10 @@
 import { Box, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionGroupDetailFieldsFragment,
+  PermissionsQuery_permissions,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { BasePermissionCatalogListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui/dataGrid/DesktopAppDataGrid";
 import { DesktopLocalizedStringDisplay } from "@/frontend/desktop/components/ui/display/localizedStringDisplay";
@@ -42,8 +45,8 @@ function PermissionKeyCell({ value }: Readonly<PermissionKeyCellProps>) {
 }
 
 interface UsedInCellProps {
-  readonly permission: Permission;
-  readonly groups: readonly PermissionGroup[];
+  readonly permission: PermissionsQuery_permissions;
+  readonly groups: readonly PermissionGroupDetailFieldsFragment[];
 }
 
 function UsedInCell({ permission, groups }: Readonly<UsedInCellProps>) {
@@ -91,7 +94,7 @@ export function PermissionCatalogDataGridDesktop({
   const t = labels;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
-  const columns = useMemo<GridColDef<Permission>[]>(() => {
+  const columns = useMemo<GridColDef<PermissionsQuery_permissions>[]>(() => {
     return [
       {
         field: "key",
@@ -139,7 +142,7 @@ export function PermissionCatalogDataGridDesktop({
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
-      <DesktopAppDataGrid<Permission>
+      <DesktopAppDataGrid<PermissionsQuery_permissions>
         rows={permissions}
         columns={columns}
         getRowId={row => row.id ?? row.key ?? ""}

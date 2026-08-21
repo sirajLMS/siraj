@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { SystemSettingCategory, SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { SystemSettingCategory, SystemSettingDataType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   systemSettingQueryDocument,
   systemSettingsQueryDocument,

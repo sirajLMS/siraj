@@ -4,12 +4,11 @@ import { useQuery } from "@apollo/client/react";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import {
-  ProfileAudience,
-  ProfileMode,
-  ProfileScope,
-  type User,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+  ProfileAudience as GqlProfileAudience,
+  ProfileScope as GqlProfileScope,
+  type MeQuery_me,
+  type ProfileByUserIdQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileByUserIdQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { useUserStore } from "@/frontend/common/stores/userStore";
@@ -20,10 +19,22 @@ import type {
   ProfilePageClientLabels,
   ProfilePageClientProps,
 } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
+import { ProfileAudience, ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 import type { ProfileLabels, ProfileRoleLabels } from "@/shared/locale/types/profile";
 
-type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
+
+const GQL_PROFILE_AUDIENCES = new Set(Object.values(GqlProfileAudience) as readonly string[]);
+const GQL_PROFILE_SCOPES = new Set(Object.values(GqlProfileScope) as readonly string[]);
+
+function isGqlProfileAudience(value: string): value is GqlProfileAudience {
+  return GQL_PROFILE_AUDIENCES.has(value);
+}
+
+function isGqlProfileScope(value: string): value is GqlProfileScope {
+  return GQL_PROFILE_SCOPES.has(value);
+}
 
 function isProfileRoleKey(value: string): value is keyof ProfileRoleLabels {
   return value === "teacher" || value === "parent" || value === "staff" || value === "student";
@@ -33,7 +44,7 @@ function buildStudentProfile(
   audience: ProfileAudience,
   scope: ProfileScope,
   targetUserId: string,
-  user: User | null,
+  user: MeQuery_me | null,
   userName: string,
   userAvatarUrl: string,
   userEmail: string | null | undefined
@@ -41,7 +52,8 @@ function buildStudentProfile(
   return {
     assignedStudents: null,
     associatedStudents: null,
-    audience,
+    // Shared profile enums match GraphQL wire values; narrow at the query-type boundary.
+    audience: isGqlProfileAudience(audience) ? audience : null,
     avatarUrl: (userAvatarUrl || user?.avatarUrl) ?? null,
     displayCurrency: null,
     email: userEmail ?? user?.email ?? "",
@@ -54,7 +66,7 @@ function buildStudentProfile(
     paymentMethodDefaults: null,
     paymentMethods: null,
     phone: null,
-    scope,
+    scope: isGqlProfileScope(scope) ? scope : null,
     staffPermissionGroups: null,
     staffPermissionOverrides: null,
     staffProfile: null,
@@ -72,8 +84,8 @@ interface UseProfileDataParams {
   audience: ProfileAudience;
   scope: ProfileScope;
   targetUserId: string;
-  unifiedProfileData: Operations.ProfileByUserIdQuery | null | undefined;
-  user: User | null;
+  unifiedProfileData: ProfileByUserIdQuery | null | undefined;
+  user: MeQuery_me | null;
   userName: string;
   userAvatarUrl: string;
   userEmail: string | null | undefined;
@@ -136,8 +148,8 @@ function useProfileData(params: UseProfileDataParams): ProfileData | null | unde
  * Computes edit and cancel hrefs based on scope and target user.
  */
 function computeHrefs(scope: ProfileScope, targetUserId: string): { editHref: string; cancelHref: string } {
-  const editHref = scope === ProfileScope.Own ? `${ownProfileHref()}/edit` : `${profileHrefForUser(targetUserId)}/edit`;
-  const cancelHref = scope === ProfileScope.Own ? ownProfileHref() : profileHrefForUser(targetUserId);
+  const editHref = scope === ProfileScope.OWN ? `${ownProfileHref()}/edit` : `${profileHrefForUser(targetUserId)}/edit`;
+  const cancelHref = scope === ProfileScope.OWN ? ownProfileHref() : profileHrefForUser(targetUserId);
   return { editHref, cancelHref };
 }
 
@@ -145,7 +157,7 @@ function computeHrefs(scope: ProfileScope, targetUserId: string): { editHref: st
  * Creates retry handler and focus refetch callback for profile data.
  */
 function useProfileRetry(
-  refetchUnifiedProfile: () => Promise<{ data?: Operations.ProfileByUserIdQuery; error?: Error }>,
+  refetchUnifiedProfile: () => Promise<{ data?: ProfileByUserIdQuery; error?: Error }>,
   mode: ProfileMode
 ): { handleRetry: () => void; refetchProfileOnFocus: () => void } {
   const handleRetry = useCallback(() => {
@@ -153,7 +165,7 @@ function useProfileRetry(
   }, [refetchUnifiedProfile]);
 
   const refetchProfileOnFocus = useCallback(() => {
-    if (mode === ProfileMode.View) {
+    if (mode === ProfileMode.VIEW) {
       handleRetry();
     }
   }, [handleRetry, mode]);
@@ -169,7 +181,7 @@ function computeRoleLabel(
   profile: ProfileData | null | undefined,
   base: ProfileLabels
 ): string | undefined {
-  if (audience === ProfileAudience.Staff) {
+  if (audience === ProfileAudience.STAFF) {
     return profile?.staffProfile?.roleName ?? profile?.staffProfile?.roleSlug ?? undefined;
   }
   const roleKey = audience.toLowerCase();
@@ -180,7 +192,7 @@ function computeRoleLabel(
  * Determines if parent account actions should be shown.
  */
 function computeShowParentAccountActions(audience: ProfileAudience, scope: ProfileScope, mode: ProfileMode): boolean {
-  return audience === ProfileAudience.Parent && scope === ProfileScope.Other && mode === ProfileMode.View;
+  return audience === ProfileAudience.PARENT && scope === ProfileScope.OTHER && mode === ProfileMode.VIEW;
 }
 
 export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientProps>): ProfilePageClientViewModel {
@@ -222,7 +234,7 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
   const loading = isStudentAudience ? false : unifiedLoading;
   const error = isStudentAudience ? undefined : unifiedError;
 
-  useDocumentTitle(profile?.name, Translation.Profile.Base, mode === ProfileMode.Edit ? "editTitle" : "pageTitle");
+  useDocumentTitle(profile?.name, Translation.Profile.Base, mode === ProfileMode.EDIT ? "editTitle" : "pageTitle");
 
   const { editHref, cancelHref } = computeHrefs(scope, targetUserId);
 
@@ -234,7 +246,7 @@ export function useProfilePageClientViewModel(props: Readonly<ProfilePageClientP
   useRefetchOnWindowFocus(refetchProfileOnFocus);
 
   const activeTab = currentTab;
-  const isViewMode = mode === ProfileMode.View;
+  const isViewMode = mode === ProfileMode.VIEW;
 
   const roleLabel = computeRoleLabel(audience, profile, base);
 

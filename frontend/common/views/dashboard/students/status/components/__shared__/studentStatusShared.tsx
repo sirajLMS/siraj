@@ -1,7 +1,7 @@
 import { Box, Paper, Typography } from "@mui/material";
 import type { ComponentType } from "react";
 import { panelCardPaperSx } from "@/frontend/common/components/ui/container/__shared__/panelCardSxShared";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useStudentStatusLabels } from "@/frontend/common/views/dashboard/students/status/useStudentStatusLabels";
 
 const STATUS_BADGE_MAP: Record<string, string> = {

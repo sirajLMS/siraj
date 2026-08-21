@@ -2,7 +2,7 @@
 // for PaymentMethodAutocomplete across common + mobile + desktop tiers.
 
 import type { AutocompleteSharedProps } from "@/frontend/common/components/ui/input/autocompleteSharedProps.types";
-import type { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
 export type PaymentMethodAutocompleteProps = {

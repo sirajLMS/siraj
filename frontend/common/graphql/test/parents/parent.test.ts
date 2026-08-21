@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { AccountStatus, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   changeParentLifecycleStatusMutationDocument,
   deactivateParentMutationDocument,

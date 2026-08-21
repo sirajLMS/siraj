@@ -3,7 +3,11 @@
 import { useQuery } from "@apollo/client/react";
 import { useCallback, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  UserBillingProfileInvoiceHistoryQuery,
+  UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_rows,
+  UserBillingProfileSummaryQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   userBillingProfileInvoiceHistoryQueryDocument,
   userBillingProfileSummaryQueryDocument,
@@ -43,16 +47,14 @@ export type UseUserBillingProfileViewModelProps = Pick<UserBillingProfileViewMod
 
 type ProofMode = "submit" | "markPaid";
 
-type SummaryRow =
-  | Operations.UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_ParentInvoiceHistoryResult_rows_ParentInvoiceRow
-  | undefined;
+type SummaryRow = UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_rows | undefined;
 
 function mapInvoiceRow(inv: NonNullable<SummaryRow>, locale: string, fxMessages: FxDisplayMessages): ParentInvoiceRow {
   return buildInvoiceRow(inv, locale, fxMessages, { staleDefault: null, currencyDefault: null });
 }
 
 function buildSummary(
-  summaryData: Operations.UserBillingProfileSummaryQuery | undefined,
+  summaryData: UserBillingProfileSummaryQuery | undefined,
   locale: string,
   fxMessages: FxDisplayMessages
 ): ParentBillingSummary {
@@ -180,7 +182,7 @@ function useBillingProfileQueries(
 
 /** Memoized invoice rows derived from the history query. */
 function useBillingProfileInvoices(
-  data: Operations.UserBillingProfileInvoiceHistoryQuery | undefined,
+  data: UserBillingProfileInvoiceHistoryQuery | undefined,
   fxMessages: FxDisplayMessages,
   locale: string
 ): readonly ParentInvoiceRow[] {
@@ -195,7 +197,7 @@ function useBillingProfileInvoices(
 
 /** Memoized summary block derived from the summary query. */
 function useBillingProfileSummary(
-  summaryData: Operations.UserBillingProfileSummaryQuery | undefined,
+  summaryData: UserBillingProfileSummaryQuery | undefined,
   fxMessages: FxDisplayMessages,
   locale: string
 ): ParentBillingSummary {
@@ -218,7 +220,7 @@ function useBillingProfilePagination() {
 function runQuickPayFlow(args: {
   readonly billingActionsDisabled: boolean;
   readonly summaryLoading: boolean;
-  readonly summaryData: Operations.UserBillingProfileSummaryQuery | undefined;
+  readonly summaryData: UserBillingProfileSummaryQuery | undefined;
   readonly locale: string;
   readonly fxMessages: FxDisplayMessages;
   readonly labels: BillingLabels;
@@ -251,7 +253,7 @@ function useBillingProfileActions({
   readonly userId: string;
   readonly billingActionsDisabled: boolean;
   readonly summaryLoading: boolean;
-  readonly summaryData: Operations.UserBillingProfileSummaryQuery | undefined;
+  readonly summaryData: UserBillingProfileSummaryQuery | undefined;
   readonly locale: string;
   readonly fxMessages: FxDisplayMessages;
   readonly labels: BillingLabels;
@@ -464,7 +466,7 @@ function buildUserBillingProfileViewModel(args: {
   readonly handleQuickPay: () => void;
   readonly page: number;
   readonly pageSize: number;
-  readonly data: Operations.UserBillingProfileInvoiceHistoryQuery | undefined;
+  readonly data: UserBillingProfileInvoiceHistoryQuery | undefined;
   readonly loading: boolean;
   readonly setPage: (page: number) => void;
   readonly userId: string;

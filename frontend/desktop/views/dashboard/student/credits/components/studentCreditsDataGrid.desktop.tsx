@@ -5,7 +5,7 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { formatDate } from "@/frontend/common/components/intl/dateFormat";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import type { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StudentCreditTransactionRow } from "@/frontend/common/views/dashboard/student/credits/types/studentCreditsTypes";
 import type { StudentCreditsViewModel } from "@/frontend/common/views/dashboard/student/credits/useStudentCreditsViewModel";
 import { DesktopAppDataGrid } from "@/frontend/desktop/components/ui";

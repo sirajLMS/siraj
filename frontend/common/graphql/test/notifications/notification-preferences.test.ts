@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   notificationPreferencesQueryDocument,
   updateNotificationPreferencesMutationDocument,

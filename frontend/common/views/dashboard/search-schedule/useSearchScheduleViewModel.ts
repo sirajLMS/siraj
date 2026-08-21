@@ -7,7 +7,7 @@ import {
   AppPermission,
   type AvailabilitySearchInput,
   AvailabilitySearchSortBy,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import {
   type SearchScheduleDraftFilters,

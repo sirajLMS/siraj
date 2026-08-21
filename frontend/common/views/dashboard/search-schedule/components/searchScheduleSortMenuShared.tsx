@@ -2,7 +2,7 @@
 
 import { SortOutlined } from "@mui/icons-material";
 import { alpha, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
-import { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql";
 import { isSortApplied } from "@/frontend/common/views/dashboard/search-schedule/searchScheduleFilterUtils";
 import type { SearchScheduleSortMenuProps } from "@/frontend/common/views/dashboard/search-schedule/types";
 import { getSortLabelKey } from "@/frontend/common/views/dashboard/search-schedule/utils";

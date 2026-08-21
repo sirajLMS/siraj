@@ -1,4 +1,4 @@
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StudentStatusLabels } from "@/shared/locale/types/dashboard/students/status";
 
 export const STUDENT_STATUS_OPTIONS = [

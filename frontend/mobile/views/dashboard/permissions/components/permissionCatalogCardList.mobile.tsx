@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Typography } from "@mui/material";
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { BasePermissionCatalogListProps } from "@/frontend/common/views/dashboard/permissions/types";
 import { MobileCardList, MobileCardListItem } from "@/frontend/mobile/components/ui";
 import { MobileLocalizedStringDisplay } from "@/frontend/mobile/components/ui/display/localizedStringDisplay";
@@ -14,7 +13,7 @@ export function PermissionCatalogCardListMobile({
   const t = labels;
 
   return (
-    <MobileCardList<Permission>
+    <MobileCardList
       rows={permissions}
       getKey={permission => permission.id ?? permission.key ?? ""}
       emptyMessage={t.noPermissionsFound}

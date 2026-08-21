@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 expect.extend(matchers);
 
-import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
 import { MeetingIntegrationsHealthHeadersShared } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/__shared__/meetingIntegrationsHealthHeadersShared";
 import { createMeetingIntegrationLabelsMock } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/meetingIntegrationsStoryMocks";
 import type { MeetingIntegrationsViewModel } from "@/frontend/common/views/dashboard/settings/types/meetingIntegrations.types";

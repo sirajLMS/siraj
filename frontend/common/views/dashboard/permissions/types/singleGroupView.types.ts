@@ -1,5 +1,8 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
-import type { Permission, PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionsQuery_permissions as Permission,
+  PermissionGroupDetailFieldsFragment as PermissionGroup,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SingleGroupState } from "@/frontend/common/views/dashboard/permissions/components/useSingleGroupState";
 import type { PermissionsLabels } from "@/shared/locale";
 

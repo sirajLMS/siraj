@@ -1,9 +1,9 @@
 import type {
   ClassExecutionState,
   ClassOutcome,
-  EffectiveMeeting,
+  EffectiveMeetingFieldsFragment,
   LessonReportStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface UpcomingLessonRow {
   readonly id: string;
@@ -16,7 +16,7 @@ export interface UpcomingLessonRow {
   readonly outcome: ClassOutcome | null;
   readonly isFrozen: boolean;
   readonly meetingJoinUrl: string | null;
-  readonly effectiveMeeting: EffectiveMeeting | null;
+  readonly effectiveMeeting: EffectiveMeetingFieldsFragment | null;
 }
 
 export interface RecentLessonReportRow {

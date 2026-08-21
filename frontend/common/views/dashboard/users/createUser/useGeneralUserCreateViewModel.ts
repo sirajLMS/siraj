@@ -10,7 +10,7 @@ import {
   useForm,
 } from "react-hook-form";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
-import { AccountStatus, type GeneralUserCreateInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, type GeneralUserCreateInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useCreateGeneralUser } from "@/frontend/common/hooks/useCreateGeneralUser";
 import {
   type GeneralUserCreateFormData,

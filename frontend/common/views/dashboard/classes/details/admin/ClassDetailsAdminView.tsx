@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { ClassExecutionState, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { logger } from "@/frontend/common/utils/logger";
 import { ActivityHeatmap } from "@/frontend/common/views/dashboard/classes/details/admin/ActivityHeatmap";
 import { AdminActionsBar } from "@/frontend/common/views/dashboard/classes/details/admin/AdminActionsBar";

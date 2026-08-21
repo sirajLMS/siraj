@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
-import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
@@ -53,7 +54,7 @@ describe("UserDetailsProfileSection", () => {
         timezoneLabel="Timezone"
         currencyLabel="Currency"
         phone="+123"
-        timezone="Asia/Riyadh"
+        timezone={IanaTimezone.Asia_Riyadh}
         displayCurrency={CurrencyCode.Usd}
       />,
       { locale, permissions: [] }

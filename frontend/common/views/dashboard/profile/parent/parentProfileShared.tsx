@@ -2,7 +2,7 @@
 
 import { Alert, Box, Button, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { ParentProfileEditForm } from "@/frontend/common/views/dashboard/profile/parent/ParentProfileEditForm";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/profile/parent/sections/AdminOnlySection";
@@ -17,6 +17,7 @@ import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/p
 import { PaymentMethodsTab } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/PaymentMethodsTab";
 import { UserDetailsProfileSection } from "@/frontend/common/views/dashboard/profile/shared/sections/UserDetailsProfileSection";
 import { MeetingConfigsTab } from "@/frontend/common/views/dashboard/profile/teacher/meeting/MeetingConfigsTab";
+import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface ParentProfileSlotProps {
@@ -61,7 +62,7 @@ export function ParentProfileShared({
   const tErrors = useAppTranslation(Translation.Errors);
   const { ViewContentWrapper, SectionPanel } = slots;
 
-  if (activeTab === "notifications" && scope === ProfileScope.Own) {
+  if (activeTab === "notifications" && scope === ProfileScope.OWN) {
     return <NotificationPreferencesTab isActive />;
   }
 
@@ -119,7 +120,7 @@ export function ParentProfileShared({
       timezoneLabel={pt.fields.timezone}
       currencyLabel={pt.fields.displayCurrency}
       phone={profilePhone ?? parentData.phone}
-      timezone={profileTimezone ?? adminData?.timezone}
+      timezone={toIanaTimezoneOrNull(profileTimezone ?? adminData?.timezone)}
       displayCurrency={displayCurrency}
       baseLabels={sectionLabels.baseLabels}
     />
@@ -177,7 +178,7 @@ export function ParentProfileShared({
     );
   };
 
-  if (mode === ProfileMode.View) {
+  if (mode === ProfileMode.VIEW) {
     return (
       <ViewContentWrapper>
         {isAdminScope ? (

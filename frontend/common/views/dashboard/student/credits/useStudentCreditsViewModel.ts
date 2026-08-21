@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
-import { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CreditReason } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   studentCreditBalanceQueryDocument,
   studentCreditTransactionsQueryDocument,
@@ -55,7 +55,7 @@ function useStudentCreditsLabels(t: StudentPortalCreditsLabels): StudentPortalCr
 
 type TransactionItem = NonNullable<
   NonNullable<
-    import("@/frontend/common/graphql/generated/gql/operations").StudentCreditTransactionsQuery["studentCreditTransactions"]
+    import("@/frontend/common/graphql/generated/gql/graphql").StudentCreditTransactionsQuery["studentCreditTransactions"]
   >[number]
 >;
 

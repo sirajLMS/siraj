@@ -2,7 +2,7 @@ import { EventOutlined, InfoOutlined, ReceiptLongOutlined } from "@mui/icons-mat
 import { Box, Button, Stack } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { logger } from "@/frontend/common/utils/logger";
 import { NotificationRowBase } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows/NotificationRowBase";
 

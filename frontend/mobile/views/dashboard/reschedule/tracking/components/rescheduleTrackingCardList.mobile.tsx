@@ -10,7 +10,7 @@ import {
 import { Box, IconButton, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LeaveRequestStatus, RescheduleDateLabel } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import {
   getTrackingStatusIcon,

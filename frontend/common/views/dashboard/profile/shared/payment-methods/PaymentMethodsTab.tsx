@@ -2,8 +2,8 @@
 
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { usePaymentMethodsTabViewModel } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/usePaymentMethodsTabViewModel";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 
 export type PaymentMethodsTabProps = {
   readonly targetUserId: string;

@@ -1,6 +1,5 @@
 import {
   formatRelativeTimezoneOffset,
-  fromGraphqlIanaTimezone,
   getTimezoneOffsetLabel,
   getTimezonePathLabel,
 } from "@/frontend/common/lib/timezone";
@@ -29,10 +28,7 @@ export function buildScheduleTimezoneOffsetDetail(params: {
   readonly at?: string | null;
 }): ScheduleTimezoneOffsetDetail {
   const at = resolveScheduleInstant(params.at);
-  let normalizedTimezone: string | null = null;
-  if (params.timezone) {
-    normalizedTimezone = params.timezone.includes("/") ? params.timezone : fromGraphqlIanaTimezone(params.timezone);
-  }
+  const normalizedTimezone = params.timezone ?? null;
 
   return {
     relativeOffset: formatRelativeTimezoneOffset(normalizedTimezone, params.viewerTimezone, at),

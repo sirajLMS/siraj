@@ -2,10 +2,10 @@
 
 import { Box, Button, Skeleton, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileSkeleton } from "@/frontend/common/views/dashboard/profile/core/ProfileSkeleton";
 import { ProfileTabNav } from "@/frontend/common/views/dashboard/profile/core/ProfileTabNav";
 import type { ProfileShellProps } from "@/frontend/common/views/dashboard/profile/core/profileShellTypes";
+import { ProfileMode } from "@/shared/constants/profile.enum";
 import type { ProfileLabels } from "@/shared/locale/types/profile";
 
 export interface ProfileShellSharedOptions {
@@ -27,13 +27,13 @@ export function ProfileShellShared({
     children,
     audience,
     scope,
-    mode = ProfileMode.View,
+    mode = ProfileMode.VIEW,
     currentTab,
     onTabChange,
     onRetry,
   } = shellProps;
-  const showTabs = mode === ProfileMode.View && currentTab && onTabChange;
-  const isEditMode = mode === ProfileMode.Edit;
+  const showTabs = mode === ProfileMode.VIEW && currentTab && onTabChange;
+  const isEditMode = mode === ProfileMode.EDIT;
 
   if (loading) {
     return isEditMode ? (

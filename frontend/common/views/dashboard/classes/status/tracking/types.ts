@@ -13,7 +13,7 @@ export {
   type StatusTrackingDataGridLabels,
   type StatusTrackingDataGridProps,
   type StatusTrackingLabels,
-  type StatusTrackingRow,
+  type StatusTrackingScheduleRow,
   type StatusTrackingViewProps,
   type SuspensionAnalyticsLabels,
   type SuspensionAnalyticsProps,

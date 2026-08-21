@@ -1,7 +1,7 @@
 "use client";
 
 import { StatusBadge } from "@/frontend/common/components/ui/badge/StatusBadge";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import { resolveScheduleInstanceDisplayStatus } from "@/frontend/common/views/dashboard/admin/home/utils/scheduleInstanceStatus";
 
 interface ScheduleInstanceStatusBadgeProps {

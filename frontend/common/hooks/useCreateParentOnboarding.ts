@@ -1,12 +1,12 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import {
+  type CreateParentMutation_createParent,
   type ParentOnboardingInput,
-  type ParentOnboardingResult,
   PaymentDirection,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { createParentMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { usePersistMeetingConfig } from "@/frontend/common/hooks/usePersistMeetingConfig";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useParentOnboardingStore } from "@/frontend/common/stores/parentOnboardingStore";
 import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
@@ -35,7 +35,7 @@ function buildParentInput(formData: ParentOnboardingFormData): ParentOnboardingI
         }
       : null,
     currency: formData.currency,
-    timezone: toGraphqlIanaTimezone(formData.timezone || null),
+    timezone: toIanaTimezone(formData.timezone || null),
     displayCurrency: formData.displayCurrency ?? null,
     password: formData.password,
   };
@@ -47,14 +47,14 @@ export function useCreateParentOnboarding() {
   const { cache } = client;
   const { persistMeetingConfig, meetingConfigWarning, clearMeetingConfigWarning } = usePersistMeetingConfig();
 
-  const persistCreatedParent = (created: ParentOnboardingResult) => {
+  const persistCreatedParent = (created: CreateParentMutation_createParent) => {
     cache.evict({ id: "ROOT_QUERY", fieldName: "parentDirectory" });
     cache.gc();
     useParentOnboardingStore.setState({ result: created, isSubmitting: false });
     return created;
   };
 
-  const execute = async (formData: ParentOnboardingFormData): Promise<ParentOnboardingResult> => {
+  const execute = async (formData: ParentOnboardingFormData): Promise<CreateParentMutation_createParent> => {
     useParentOnboardingStore.getState().reset();
     useParentOnboardingStore.setState({ isSubmitting: true });
 

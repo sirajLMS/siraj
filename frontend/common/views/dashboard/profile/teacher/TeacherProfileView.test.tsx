@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { cleanup, screen } from "@testing-library/react";
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { TeacherProfileContainer } from "@/frontend/common/views/dashboard/profile/teacher/TeacherProfileContainer";
+import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { renderWithWrapper } from "@/test/ui/components/TestWrapper";
 
 afterEach(() => {
@@ -11,7 +11,7 @@ afterEach(() => {
 describe("TeacherProfileView lazy switcher", () => {
   test("renders with own scope view mode", () => {
     renderWithWrapper(
-      <TeacherProfileContainer scope={ProfileScope.Own} mode={ProfileMode.View} targetUserId="teacher-own-1" />,
+      <TeacherProfileContainer scope={ProfileScope.OWN} mode={ProfileMode.VIEW} targetUserId="teacher-own-1" />,
       { locale: "en" }
     );
 
@@ -21,7 +21,7 @@ describe("TeacherProfileView lazy switcher", () => {
 
   test("renders with admin scope view mode", () => {
     renderWithWrapper(
-      <TeacherProfileContainer scope={ProfileScope.Other} mode={ProfileMode.View} targetUserId="teacher-admin-1" />,
+      <TeacherProfileContainer scope={ProfileScope.OTHER} mode={ProfileMode.VIEW} targetUserId="teacher-admin-1" />,
       { locale: "en" }
     );
 
@@ -30,7 +30,7 @@ describe("TeacherProfileView lazy switcher", () => {
 
   test("renders with own scope edit mode", () => {
     renderWithWrapper(
-      <TeacherProfileContainer scope={ProfileScope.Own} mode={ProfileMode.Edit} targetUserId="teacher-own-1" />,
+      <TeacherProfileContainer scope={ProfileScope.OWN} mode={ProfileMode.EDIT} targetUserId="teacher-own-1" />,
       { locale: "en" }
     );
 
@@ -39,7 +39,7 @@ describe("TeacherProfileView lazy switcher", () => {
 
   test("renders with admin scope edit mode", () => {
     renderWithWrapper(
-      <TeacherProfileContainer scope={ProfileScope.Other} mode={ProfileMode.Edit} targetUserId="teacher-admin-1" />,
+      <TeacherProfileContainer scope={ProfileScope.OTHER} mode={ProfileMode.EDIT} targetUserId="teacher-admin-1" />,
       { locale: "en" }
     );
 

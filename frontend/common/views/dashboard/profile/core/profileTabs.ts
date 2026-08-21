@@ -1,4 +1,5 @@
-import { AppPermission, ProfileAudience, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
+import { ProfileAudience, ProfileScope } from "@/shared/constants/profile.enum";
 
 export type ProfileTabId = "profile" | "paymentMethods" | "meeting" | "students" | "notifications" | "permissions";
 
@@ -44,7 +45,7 @@ function isPermissionsTabVisible(
   hasPermission: (permission: AppPermission) => boolean
 ): boolean {
   const staffPermissions =
-    audience === ProfileAudience.Staff && scope === ProfileScope.Other
+    audience === ProfileAudience.STAFF && scope === ProfileScope.OTHER
       ? hasPermission(AppPermission.ProfileStaffPermissionsViewOther)
       : false;
   const canEditOther = hasPermission(AppPermission.ProfileStaffPermissionsEditOther);
@@ -60,7 +61,7 @@ function isPaymentMethodsTabVisible(
   hasPermission: (permission: AppPermission) => boolean
 ): boolean {
   const viewPermission =
-    scope === ProfileScope.Own
+    scope === ProfileScope.OWN
       ? AppPermission.ProfilePaymentMethodsViewOwn
       : AppPermission.ProfilePaymentMethodsViewOther;
   return hasPermission(viewPermission);
@@ -68,11 +69,11 @@ function isPaymentMethodsTabVisible(
 
 function isMeetingTabVisible(scope: ProfileScope, hasPermission: (permission: AppPermission) => boolean): boolean {
   const viewPermission =
-    scope === ProfileScope.Own
+    scope === ProfileScope.OWN
       ? AppPermission.ProfileMeetingConfigsViewOwn
       : AppPermission.ProfileMeetingConfigsViewOther;
   const managePermission =
-    scope === ProfileScope.Own ? AppPermission.MeetingConfigsManageOwn : AppPermission.MeetingConfigsManageOther;
+    scope === ProfileScope.OWN ? AppPermission.MeetingConfigsManageOwn : AppPermission.MeetingConfigsManageOther;
   return hasPermission(viewPermission) || hasPermission(managePermission);
 }
 

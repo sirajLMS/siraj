@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
 interface ParentsState {
   readonly searchQuery: string;

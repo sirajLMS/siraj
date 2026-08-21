@@ -5,7 +5,7 @@ import {
   PaymentMethodSelect,
   type PaymentMethodSelectProps,
 } from "@/frontend/common/components/ui/input/paymentMethodSelect/PaymentMethodSelect";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 
 const MOCK_OPTIONS: readonly PaymentMethodCatalogOption[] = [

@@ -1,4 +1,4 @@
-import type { ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SessionLabels } from "@/shared/locale/types/session";
 
 type ClassTypeKey = keyof SessionLabels["classTypes"];

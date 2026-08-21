@@ -9,8 +9,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { StatusBadge } from "@/frontend/common/components/ui";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display/localizedStringDisplay/LocalizedStringDisplay";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { AppPermission, type MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deleteMeetingProviderMutationDocument,
   meetingProvidersQueryDocument,

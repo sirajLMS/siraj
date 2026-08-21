@@ -6,7 +6,7 @@ import { IconButton, Stack, type Theme, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
-import { AccountStatus, type UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, type UpdateManagerProfileInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   managerDirectoryQueryDocument,
   updateManagerProfileMutationDocument,

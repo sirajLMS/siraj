@@ -1,4 +1,4 @@
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { FxDisplayMessages } from "@/frontend/common/lib/buildFxDisplayMessages";
 import { formatLockedAmount } from "@/frontend/common/lib/currency";
 import { formatCurrencyForDisplay } from "@/frontend/common/lib/fx-render";

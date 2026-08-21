@@ -13,7 +13,7 @@ import {
   computeSessionStatus,
   formatScheduleRange,
   type StatusTrackingDataGridProps,
-  type StatusTrackingRow,
+  type StatusTrackingScheduleRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import {
   createStatusActionLabels,
@@ -76,7 +76,7 @@ function createCourseColumn(labels: StatusTrackingDataGridProps["labels"]) {
     headerName: labels.class,
     flex: 1.2,
     minWidth: 180,
-    renderCell: ({ row }: { row: StatusTrackingRow }) =>
+    renderCell: ({ row }: { row: StatusTrackingScheduleRow }) =>
       renderProfileLinkCell({
         type: "class",
         name: row.courseName?.trim() ?? "—",
@@ -86,7 +86,7 @@ function createCourseColumn(labels: StatusTrackingDataGridProps["labels"]) {
         typographyVariant: "bodyMd",
         fontWeight: 700,
       }),
-  } satisfies GridColDef<StatusTrackingRow>;
+  } satisfies GridColDef<StatusTrackingScheduleRow>;
 }
 
 function createStudentColumn(labels: StatusTrackingDataGridProps["labels"]) {
@@ -95,7 +95,7 @@ function createStudentColumn(labels: StatusTrackingDataGridProps["labels"]) {
     headerName: labels.student,
     flex: 1.1,
     minWidth: 160,
-    renderCell: ({ row }: { row: StatusTrackingRow }) =>
+    renderCell: ({ row }: { row: StatusTrackingScheduleRow }) =>
       renderProfileLinkCell({
         type: "student",
         name: row.studentName ?? "",
@@ -105,7 +105,7 @@ function createStudentColumn(labels: StatusTrackingDataGridProps["labels"]) {
         typographyVariant: "bodyMd",
         fontWeight: 700,
       }),
-  } satisfies GridColDef<StatusTrackingRow>;
+  } satisfies GridColDef<StatusTrackingScheduleRow>;
 }
 
 function createTeacherColumn(labels: StatusTrackingDataGridProps["labels"]) {
@@ -114,7 +114,7 @@ function createTeacherColumn(labels: StatusTrackingDataGridProps["labels"]) {
     headerName: labels.teacher,
     flex: 1,
     minWidth: 140,
-    renderCell: ({ row }: { row: StatusTrackingRow }) =>
+    renderCell: ({ row }: { row: StatusTrackingScheduleRow }) =>
       renderProfileLinkCell({
         type: "teacher",
         name: row.teacherName ?? "",
@@ -124,7 +124,7 @@ function createTeacherColumn(labels: StatusTrackingDataGridProps["labels"]) {
         typographyVariant: "bodyMd",
         fontWeight: 600,
       }),
-  } satisfies GridColDef<StatusTrackingRow>;
+  } satisfies GridColDef<StatusTrackingScheduleRow>;
 }
 
 function createScheduleColumn(labels: StatusTrackingDataGridProps["labels"], locale: string) {
@@ -133,9 +133,9 @@ function createScheduleColumn(labels: StatusTrackingDataGridProps["labels"], loc
     headerName: labels.schedule,
     flex: 1,
     minWidth: 140,
-    valueGetter: (_value: unknown, row: StatusTrackingRow) =>
+    valueGetter: (_value: unknown, row: StatusTrackingScheduleRow) =>
       formatScheduleRange(row.scheduledStartAt, row.scheduledEndAt, locale),
-  } satisfies GridColDef<StatusTrackingRow>;
+  } satisfies GridColDef<StatusTrackingScheduleRow>;
 }
 
 function createStatusColumn(labels: StatusTrackingDataGridProps["labels"]) {
@@ -143,7 +143,7 @@ function createStatusColumn(labels: StatusTrackingDataGridProps["labels"]) {
     field: "status",
     headerName: labels.status,
     width: 180,
-    renderCell: ({ row }: { row: StatusTrackingRow }) => {
+    renderCell: ({ row }: { row: StatusTrackingScheduleRow }) => {
       const status = computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState);
       return (
         <MobileStatusBadge
@@ -154,7 +154,7 @@ function createStatusColumn(labels: StatusTrackingDataGridProps["labels"]) {
         />
       );
     },
-  } satisfies GridColDef<StatusTrackingRow>;
+  } satisfies GridColDef<StatusTrackingScheduleRow>;
 }
 
 function createJoinColumn(labels: StatusTrackingDataGridProps["labels"]) {
@@ -165,9 +165,9 @@ function createJoinColumn(labels: StatusTrackingDataGridProps["labels"]) {
     sortable: false,
     align: "center",
     headerAlign: "center",
-    renderCell: ({ row }: { row: StatusTrackingRow }) =>
+    renderCell: ({ row }: { row: StatusTrackingScheduleRow }) =>
       renderStatusTrackingJoinCell(row, labels, MobileMeetingJoinAction),
-  } satisfies GridColDef<StatusTrackingRow>;
+  } satisfies GridColDef<StatusTrackingScheduleRow>;
 }
 
 function createActionsColumn(
@@ -185,7 +185,7 @@ function createActionsColumn(
     sortable: false,
     align: "right",
     headerAlign: "center",
-    renderCell: ({ row }: { row: StatusTrackingRow }) => (
+    renderCell: ({ row }: { row: StatusTrackingScheduleRow }) => (
       <StatusAction
         row={row}
         labels={actionLabels}
@@ -194,7 +194,7 @@ function createActionsColumn(
         onVerify={onVerify}
       />
     ),
-  } satisfies GridColDef<StatusTrackingRow>;
+  } satisfies GridColDef<StatusTrackingScheduleRow>;
 }
 
 export function StatusTrackingDataGridMobile({
@@ -208,7 +208,7 @@ export function StatusTrackingDataGridMobile({
   const locale = useAppLocale();
 
   // RENDER OPT JUSTIFICATION: cache `useMemo` to maintain stable column array identity for the MUI MobileAppDataGrid consumer (prevents column re-allocation across renders when labels/locale props are unchanged)
-  const columns = useMemo<GridColDef<StatusTrackingRow>[]>(() => {
+  const columns = useMemo<GridColDef<StatusTrackingScheduleRow>[]>(() => {
     const actionLabels = createStatusActionLabels(labels);
 
     return [
@@ -223,7 +223,7 @@ export function StatusTrackingDataGridMobile({
   }, [labels, locale, onActivate, onReschedule, onVerify]);
 
   return (
-    <MobileAppDataGrid<StatusTrackingRow>
+    <MobileAppDataGrid<StatusTrackingScheduleRow>
       rows={rows}
       columns={columns}
       loading={loading}

@@ -1,5 +1,7 @@
-import { TeacherProgressFeedEventKind } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  type TeacherDashboardQuery_teacherDashboard_progressFeed,
+  TeacherProgressFeedEventKind,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StudentProgressFeedItem } from "@/frontend/common/types/shared.types";
 import type { TeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
@@ -46,7 +48,7 @@ function progressFeedEventLabelKey(eventKind: TeacherProgressFeedEventKind): Pro
 }
 
 function formatFeedSummary(
-  item: TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem,
+  item: TeacherDashboardQuery_teacherDashboard_progressFeed,
   labels: TeacherDashboardLabels["progressFeed"],
   durationTemplate: (minutes: number) => string
 ): string {
@@ -65,10 +67,7 @@ function formatFeedSummary(
 }
 
 export function buildStudentProgressFeedItems(
-  feed:
-    | readonly TeacherDashboardQuery_teacherDashboard_TeacherDashboard_progressFeed_TeacherProgressFeedItem[]
-    | null
-    | undefined,
+  feed: readonly TeacherDashboardQuery_teacherDashboard_progressFeed[] | null | undefined,
   labels: TeacherDashboardLabels["progressFeed"],
   durationTemplate: (minutes: number) => string,
   formatRelativeTime: (value: Date) => string

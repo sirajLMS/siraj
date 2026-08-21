@@ -3,7 +3,7 @@
 import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useMemo } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { deleteSessionConfigMutationDocument } from "@/frontend/common/graphql/sharedDocuments/settings/session-config.documents";
 import { useSessionConfigsQuery } from "@/frontend/common/hooks/settings";
 import { useSessionConfigSettingsStore } from "@/frontend/common/stores/sessionConfigSettingsStore";

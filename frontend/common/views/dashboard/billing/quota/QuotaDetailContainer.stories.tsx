@@ -6,7 +6,7 @@ import {
   CurrencyCode,
   QuotaKind,
   QuotaStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deleteQuotaMutationDocument,
   quotaLedgerQueryDocument,
@@ -172,7 +172,6 @@ function applyMockPerms(perms: AppPermission[]) {
       phone: null,
       status: AccountStatus.Activated,
       displayCurrency: CurrencyCode.Usd,
-      __typename: "User",
     },
   });
 }

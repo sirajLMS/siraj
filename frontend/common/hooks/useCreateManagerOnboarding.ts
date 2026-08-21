@@ -1,10 +1,10 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import type {
+  CreateManagerMutation_createManager,
   ManagerOnboardingInput,
-  ManagerOnboardingResult,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useStaffOnboardingStore } from "@/frontend/common/stores/staffOnboardingStore";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { logger } from "@/frontend/common/utils/logger";
@@ -13,7 +13,7 @@ export function useCreateManagerOnboarding() {
   const [mutate, { loading, error, data }] = useMutation(createManagerMutationDocument);
   const { cache } = useApolloClient();
 
-  const execute = async (formData: ManagerOnboardingFormData): Promise<ManagerOnboardingResult> => {
+  const execute = async (formData: ManagerOnboardingFormData): Promise<CreateManagerMutation_createManager> => {
     useStaffOnboardingStore.getState().reset();
     useStaffOnboardingStore.setState({ isSubmitting: true });
 
@@ -23,7 +23,7 @@ export function useCreateManagerOnboarding() {
         email: formData.email,
         avatarUrl: formData.avatarUrl ?? null,
         phone: formData.phone ?? null,
-        timezone: toGraphqlIanaTimezone(formData.timezone),
+        timezone: toIanaTimezone(formData.timezone),
         displayCurrency: formData.displayCurrency ?? null,
         accountType: formData.accountType,
         password: formData.password,

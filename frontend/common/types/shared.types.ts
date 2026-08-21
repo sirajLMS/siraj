@@ -14,15 +14,15 @@ import type {
   ClassOutcome,
   CountryCode,
   CurrencyCode,
-  EffectiveMeeting,
+  EffectiveMeetingFieldsFragment,
   Gender,
   InvoiceType,
   ManagerOnboardingInput,
+  MeetingProviderFieldsFragment,
   ParentOnboardingInput,
   TeacherOnboardingInput,
   TeacherProgressFeedEventKind,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { OnboardingPaymentMethodFormValues } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
 
 // --- Parent Complaints ---
@@ -107,7 +107,7 @@ export interface RescheduleSession {
   readonly studentName: string;
   readonly teacherTimezone: string;
   readonly effectiveMeeting?:
-    | import("@/frontend/common/graphql/generated/gql/operations").EffectiveMeetingFieldsFragment
+    | import("@/frontend/common/graphql/generated/gql/graphql").EffectiveMeetingFieldsFragment
     | null;
 }
 
@@ -147,7 +147,7 @@ export interface TeacherScheduleRow {
   readonly meetingJoinUrl?: string | null;
   readonly meetingUrlStatus?: string | null;
   readonly meetingUrlError?: string | null;
-  readonly effectiveMeeting?: EffectiveMeeting | null;
+  readonly effectiveMeeting?: EffectiveMeetingFieldsFragment | null;
   readonly isFrozen?: boolean | null;
 }
 

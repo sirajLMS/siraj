@@ -1,6 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ClassCategoriesQuery,
+  CreateClassCategoryMutation,
+  CreateClassCategoryMutationVariables,
+  DeleteClassCategoryMutation,
+  DeleteClassCategoryMutationVariables,
+  UpdateClassCategoryMutation,
+  UpdateClassCategoryMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const CLASS_CATEGORY_FIELDS = gql`
   fragment ClassCategoryFields on ClassCategory {
@@ -13,7 +20,7 @@ const CLASS_CATEGORY_FIELDS = gql`
   }
 `;
 
-export const classCategoriesQueryDocument: TypedDocumentNode<Operations.ClassCategoriesQuery> = gql`
+export const classCategoriesQueryDocument: TypedDocumentNode<ClassCategoriesQuery> = gql`
   ${CLASS_CATEGORY_FIELDS}
   query classCategories {
     classCategories {
@@ -23,8 +30,8 @@ export const classCategoriesQueryDocument: TypedDocumentNode<Operations.ClassCat
 `;
 
 export const createClassCategoryMutationDocument: TypedDocumentNode<
-  Operations.CreateClassCategoryMutation,
-  Types.MutationCreateClassCategoryArgs
+  CreateClassCategoryMutation,
+  CreateClassCategoryMutationVariables
 > = gql`
   ${CLASS_CATEGORY_FIELDS}
   mutation createClassCategory($input: ClassCategoryCreateInput!) {
@@ -35,8 +42,8 @@ export const createClassCategoryMutationDocument: TypedDocumentNode<
 `;
 
 export const updateClassCategoryMutationDocument: TypedDocumentNode<
-  Operations.UpdateClassCategoryMutation,
-  Types.MutationUpdateClassCategoryArgs
+  UpdateClassCategoryMutation,
+  UpdateClassCategoryMutationVariables
 > = gql`
   ${CLASS_CATEGORY_FIELDS}
   mutation updateClassCategory($id: ID!, $input: ClassCategoryUpdateInput!) {
@@ -47,8 +54,8 @@ export const updateClassCategoryMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteClassCategoryMutationDocument: TypedDocumentNode<
-  Operations.DeleteClassCategoryMutation,
-  Types.MutationDeleteClassCategoryArgs
+  DeleteClassCategoryMutation,
+  DeleteClassCategoryMutationVariables
 > = gql`
   mutation deleteClassCategory($id: ID!) {
     deleteClassCategory(id: $id)

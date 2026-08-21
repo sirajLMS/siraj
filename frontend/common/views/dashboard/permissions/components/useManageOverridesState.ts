@@ -1,5 +1,9 @@
 import { useState } from "react";
-import type { Permission, PermissionGroup, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  PermissionsQuery_permissions as Permission,
+  PermissionGroupDetailFieldsFragment as PermissionGroup,
+  UsersQuery_users as User,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { OverrideState } from "@/frontend/common/views/dashboard/permissions/components/overrideState.types";
 import { useOverrideData } from "@/frontend/common/views/dashboard/permissions/components/useOverrideData";
 

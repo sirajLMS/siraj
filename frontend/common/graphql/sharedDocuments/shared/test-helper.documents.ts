@@ -1,19 +1,31 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CleanupTestEntitiesMutation,
+  CleanupTestEntitiesMutationVariables,
+  CleanupTestGroupClassMutation,
+  CleanupTestGroupClassMutationVariables,
+  CleanupTestManagerMutation,
+  CleanupTestManagerMutationVariables,
+  CleanupTestSuperAdminMutation,
+  CleanupTestSuperAdminMutationVariables,
+  CreateTestEntitiesMutation,
+  CreateTestEntitiesMutationVariables,
+  CreateTestGroupClassMutation,
+  CreateTestGroupClassMutationVariables,
+  CreateTestSuperAdminMutation,
+  CreateTestSuperAdminMutationVariables,
+  EnsureDemoUsersMutation,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const ensureDemoUsersMutationDocument: TypedDocumentNode<
-  Operations.EnsureDemoUsersMutation,
-  Record<string, never>
-> = gql`
+export const ensureDemoUsersMutationDocument: TypedDocumentNode<EnsureDemoUsersMutation, Record<string, never>> = gql`
   mutation ensureDemoUsers {
     ensureDemoUsers
   }
 `;
 
 export const createTestEntitiesMutationDocument: TypedDocumentNode<
-  Operations.CreateTestEntitiesMutation,
-  Types.MutationCreateTestEntitiesArgs
+  CreateTestEntitiesMutation,
+  CreateTestEntitiesMutationVariables
 > = gql`
   mutation createTestEntities($prefix: String!, $classesRemaining: Int) {
     createTestEntities(prefix: $prefix, classesRemaining: $classesRemaining) {
@@ -34,8 +46,8 @@ export const createTestEntitiesMutationDocument: TypedDocumentNode<
 `;
 
 export const cleanupTestEntitiesMutationDocument: TypedDocumentNode<
-  Operations.CleanupTestEntitiesMutation,
-  Types.MutationCleanupTestEntitiesArgs
+  CleanupTestEntitiesMutation,
+  CleanupTestEntitiesMutationVariables
 > = gql`
   mutation cleanupTestEntities(
     $studentUserId: String!
@@ -57,8 +69,8 @@ export const cleanupTestEntitiesMutationDocument: TypedDocumentNode<
 `;
 
 export const createTestGroupClassMutationDocument: TypedDocumentNode<
-  Operations.CreateTestGroupClassMutation,
-  Types.MutationCreateTestGroupClassArgs
+  CreateTestGroupClassMutation,
+  CreateTestGroupClassMutationVariables
 > = gql`
   mutation createTestGroupClass($classInstanceId: String!, $teacherName: String!) {
     createTestGroupClass(classInstanceId: $classInstanceId, teacherName: $teacherName) {
@@ -68,8 +80,8 @@ export const createTestGroupClassMutationDocument: TypedDocumentNode<
 `;
 
 export const cleanupTestGroupClassMutationDocument: TypedDocumentNode<
-  Operations.CleanupTestGroupClassMutation,
-  Types.MutationCleanupTestGroupClassArgs
+  CleanupTestGroupClassMutation,
+  CleanupTestGroupClassMutationVariables
 > = gql`
   mutation cleanupTestGroupClass($groupClassId: String!) {
     cleanupTestGroupClass(groupClassId: $groupClassId)
@@ -77,8 +89,8 @@ export const cleanupTestGroupClassMutationDocument: TypedDocumentNode<
 `;
 
 export const cleanupTestManagerMutationDocument: TypedDocumentNode<
-  Operations.CleanupTestManagerMutation,
-  Types.MutationCleanupTestManagerArgs
+  CleanupTestManagerMutation,
+  CleanupTestManagerMutationVariables
 > = gql`
   mutation cleanupTestManager($userId: String!) {
     cleanupTestManager(userId: $userId)
@@ -86,8 +98,8 @@ export const cleanupTestManagerMutationDocument: TypedDocumentNode<
 `;
 
 export const createTestSuperAdminMutationDocument: TypedDocumentNode<
-  Operations.CreateTestSuperAdminMutation,
-  Types.MutationCreateTestSuperAdminArgs
+  CreateTestSuperAdminMutation,
+  CreateTestSuperAdminMutationVariables
 > = gql`
   mutation createTestSuperAdmin($prefix: String!) {
     createTestSuperAdmin(prefix: $prefix) {
@@ -98,8 +110,8 @@ export const createTestSuperAdminMutationDocument: TypedDocumentNode<
 `;
 
 export const cleanupTestSuperAdminMutationDocument: TypedDocumentNode<
-  Operations.CleanupTestSuperAdminMutation,
-  Types.MutationCleanupTestSuperAdminArgs
+  CleanupTestSuperAdminMutation,
+  CleanupTestSuperAdminMutationVariables
 > = gql`
   mutation cleanupTestSuperAdmin($userId: String!) {
     cleanupTestSuperAdmin(userId: $userId)

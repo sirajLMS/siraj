@@ -1,6 +1,6 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { SupervisorQuotaView } from "@/frontend/common/views/dashboard/students/quota/audience/SupervisorQuotaView";
@@ -245,7 +245,6 @@ function setSupervisorUser() {
       phone: null,
       status: AccountStatus.Activated,
       displayCurrency: CurrencyCode.Usd,
-      __typename: "User",
     },
   });
 }

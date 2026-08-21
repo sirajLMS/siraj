@@ -1,10 +1,30 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateCurrencyHedgeMutation,
+  CreateCurrencyHedgeMutationVariables,
+  CurrencyHedgesQuery,
+  DeleteCurrencyHedgeMutation,
+  DeleteCurrencyHedgeMutationVariables,
+  ExchangeRateHistoryQuery,
+  ExchangeRateHistoryQueryVariables,
+  FxProviderConfigQuery,
+  FxSyncHealthQuery,
+  LatestExchangeRatesQuery,
+  LatestExchangeRatesQueryVariables,
+  LatestFxSyncRunQuery,
+  RefreshExchangeRatesMutation,
+  RefreshExchangeRatesMutationVariables,
+  UpdateCurrencyHedgeMutation,
+  UpdateCurrencyHedgeMutationVariables,
+  UpdateFxProviderMutation,
+  UpdateFxProviderMutationVariables,
+  UpsertManualExchangeRateMutation,
+  UpsertManualExchangeRateMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const latestExchangeRatesQueryDocument: TypedDocumentNode<
-  Operations.LatestExchangeRatesQuery,
-  Types.QueryLatestExchangeRatesArgs
+  LatestExchangeRatesQuery,
+  LatestExchangeRatesQueryVariables
 > = gql`
   query LatestExchangeRates($paginationArgs: PaginationArgs) {
     latestExchangeRates(paginationArgs: $paginationArgs) {
@@ -19,8 +39,8 @@ export const latestExchangeRatesQueryDocument: TypedDocumentNode<
 `;
 
 export const exchangeRateHistoryQueryDocument: TypedDocumentNode<
-  Operations.ExchangeRateHistoryQuery,
-  Types.QueryExchangeRateHistoryArgs
+  ExchangeRateHistoryQuery,
+  ExchangeRateHistoryQueryVariables
 > = gql`
   query ExchangeRateHistory(
     $from: CurrencyCode!
@@ -58,7 +78,7 @@ export const exchangeRateHistoryQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const latestFxSyncRunQueryDocument: TypedDocumentNode<Operations.LatestFxSyncRunQuery> = gql`
+export const latestFxSyncRunQueryDocument: TypedDocumentNode<LatestFxSyncRunQuery> = gql`
   query LatestFxSyncRun {
     latestFxSyncRun {
       id
@@ -76,8 +96,8 @@ export const latestFxSyncRunQueryDocument: TypedDocumentNode<Operations.LatestFx
 `;
 
 export const refreshExchangeRatesMutationDocument: TypedDocumentNode<
-  Operations.RefreshExchangeRatesMutation,
-  Types.MutationRefreshExchangeRatesArgs
+  RefreshExchangeRatesMutation,
+  RefreshExchangeRatesMutationVariables
 > = gql`
   mutation RefreshExchangeRates($force: Boolean) {
     refreshExchangeRates(force: $force) {
@@ -91,7 +111,7 @@ export const refreshExchangeRatesMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const fxSyncHealthQueryDocument: TypedDocumentNode<Operations.FxSyncHealthQuery> = gql`
+export const fxSyncHealthQueryDocument: TypedDocumentNode<FxSyncHealthQuery> = gql`
   query FxSyncHealth {
     fxSyncHealth {
       id
@@ -102,7 +122,7 @@ export const fxSyncHealthQueryDocument: TypedDocumentNode<Operations.FxSyncHealt
   }
 `;
 
-export const fxProviderConfigQueryDocument: TypedDocumentNode<Operations.FxProviderConfigQuery> = gql`
+export const fxProviderConfigQueryDocument: TypedDocumentNode<FxProviderConfigQuery> = gql`
   query FxProviderConfig {
     fxProviderConfig {
       id
@@ -116,8 +136,8 @@ export const fxProviderConfigQueryDocument: TypedDocumentNode<Operations.FxProvi
 `;
 
 export const updateFxProviderMutationDocument: TypedDocumentNode<
-  Operations.UpdateFxProviderMutation,
-  Types.MutationUpdateFxProviderArgs
+  UpdateFxProviderMutation,
+  UpdateFxProviderMutationVariables
 > = gql`
   mutation UpdateFxProvider($provider: FxProvider!) {
     updateFxProvider(provider: $provider) {
@@ -132,8 +152,8 @@ export const updateFxProviderMutationDocument: TypedDocumentNode<
 `;
 
 export const upsertManualExchangeRateMutationDocument: TypedDocumentNode<
-  Operations.UpsertManualExchangeRateMutation,
-  Types.MutationUpsertManualExchangeRateArgs
+  UpsertManualExchangeRateMutation,
+  UpsertManualExchangeRateMutationVariables
 > = gql`
   mutation UpsertManualExchangeRate(
     $fromCurrency: CurrencyCode!
@@ -160,7 +180,7 @@ export const upsertManualExchangeRateMutationDocument: TypedDocumentNode<
   }
 `;
 
-export const currencyHedgesQueryDocument: TypedDocumentNode<Operations.CurrencyHedgesQuery> = gql`
+export const currencyHedgesQueryDocument: TypedDocumentNode<CurrencyHedgesQuery> = gql`
   query CurrencyHedges {
     currencyHedges {
       id
@@ -175,8 +195,8 @@ export const currencyHedgesQueryDocument: TypedDocumentNode<Operations.CurrencyH
 `;
 
 export const createCurrencyHedgeMutationDocument: TypedDocumentNode<
-  Operations.CreateCurrencyHedgeMutation,
-  Types.MutationCreateCurrencyHedgeArgs
+  CreateCurrencyHedgeMutation,
+  CreateCurrencyHedgeMutationVariables
 > = gql`
   mutation CreateCurrencyHedge(
     $currency: CurrencyCode!
@@ -197,8 +217,8 @@ export const createCurrencyHedgeMutationDocument: TypedDocumentNode<
 `;
 
 export const updateCurrencyHedgeMutationDocument: TypedDocumentNode<
-  Operations.UpdateCurrencyHedgeMutation,
-  Types.MutationUpdateCurrencyHedgeArgs
+  UpdateCurrencyHedgeMutation,
+  UpdateCurrencyHedgeMutationVariables
 > = gql`
   mutation UpdateCurrencyHedge(
     $id: String!
@@ -226,8 +246,8 @@ export const updateCurrencyHedgeMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteCurrencyHedgeMutationDocument: TypedDocumentNode<
-  Operations.DeleteCurrencyHedgeMutation,
-  Types.MutationDeleteCurrencyHedgeArgs
+  DeleteCurrencyHedgeMutation,
+  DeleteCurrencyHedgeMutationVariables
 > = gql`
   mutation DeleteCurrencyHedge($id: String!) {
     deleteCurrencyHedge(id: $id)

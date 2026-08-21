@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { NotificationPreferencesTab } from "@/frontend/common/views/dashboard/profile/core/notifications/NotificationPreferencesTab";
 import { AdminOnlySection } from "@/frontend/common/views/dashboard/student/profile/sections/AdminOnlySection";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
@@ -8,6 +7,7 @@ import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/studen
 import { StudentProfileUserDetailsSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileUserDetailsSection";
 import { StudentUserProfileTabContent } from "@/frontend/common/views/dashboard/student/profile/sections/StudentUserProfileTabContent";
 import type { StudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
+import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 type StudentProfile = NonNullable<StudentProfileViewModel["profile"]>;
@@ -64,7 +64,7 @@ export function StudentOwnProfileShared({
     userDetails: (
       <StudentProfileUserDetailsSection
         profile={profile}
-        scope={ProfileScope.Own}
+        scope={ProfileScope.OWN}
         sectionTitle={parentLabels.sections.contact}
         phoneLabel={labels.phone}
         timezoneLabel={parentLabels.fields.timezone}
@@ -97,7 +97,7 @@ export function StudentProfileSharedView({
   const teacherLabels = useAppTranslation(Translation.Profile.Teacher);
 
   let content: ReactNode;
-  if (activeTab === "notifications" && scope === ProfileScope.Own) {
+  if (activeTab === "notifications" && scope === ProfileScope.OWN) {
     content = <NotificationPreferencesTab isActive />;
   } else if (activeTab !== "profile") {
     content = null;
@@ -107,7 +107,7 @@ export function StudentProfileSharedView({
     content = (
       <StudentUserProfileTabContent
         profile={profile}
-        scope={ProfileScope.Other}
+        scope={ProfileScope.OTHER}
         labels={labels}
         parentLabels={parentLabels}
         teacherLabels={teacherLabels}
@@ -115,7 +115,7 @@ export function StudentProfileSharedView({
         formattedDateOfBirth={formattedDateOfBirth}
       />
     );
-  } else if (mode === ProfileMode.Edit) {
+  } else if (mode === ProfileMode.EDIT) {
     content = (
       <StudentProfileEditBody
         profile={profile}

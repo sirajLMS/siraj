@@ -1,5 +1,5 @@
 import type { Decorator } from "@storybook/nextjs-vite";
-import { AccountStatus, type AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus, type AppPermission, CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 
 export function createMockAdminDecorator(permissions: readonly AppPermission[]): Decorator[] {

@@ -3,7 +3,7 @@
 import { RemoveCircleOutlined } from "@mui/icons-material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import type { Permission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { CurrentPermissionsEmptyState } from "@/frontend/common/views/dashboard/permissions/components/__shared__/currentPermissionsTabShared";
 import {
   StyledPermissionKeyChipShared,
@@ -23,8 +23,8 @@ export function CurrentPermissionsTabDesktop({
   const t = labels;
 
   // RENDER OPT JUSTIFICATION: DesktopAppDataGrid — memoizing columns keeps the grid stable across re-renders.
-  const currentPermissionsColumns = useMemo<GridColDef<Permission>[]>(() => {
-    const cols: GridColDef<Permission>[] = [
+  const currentPermissionsColumns = useMemo<GridColDef<PermissionFieldsFragment>[]>(() => {
+    const cols: GridColDef<PermissionFieldsFragment>[] = [
       {
         field: "key",
         headerName: t.columnKey,
@@ -69,7 +69,7 @@ export function CurrentPermissionsTabDesktop({
       {permissionsCount === 0 && !loading ? (
         <CurrentPermissionsEmptyState t={t} onSwitchToAddTab={onSwitchToAddTab} />
       ) : (
-        <DesktopAppDataGrid<Permission>
+        <DesktopAppDataGrid<PermissionFieldsFragment>
           rows={groupPermissions}
           columns={currentPermissionsColumns}
           getRowId={row => row.id ?? row.key ?? ""}

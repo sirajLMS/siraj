@@ -1,13 +1,27 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AdminSuggestionsQuery,
+  AdminSuggestionsQueryVariables,
+  DeleteSuggestionMutation,
+  DeleteSuggestionMutationVariables,
+  MarkSuggestionDuplicateMutation,
+  MarkSuggestionDuplicateMutationVariables,
+  MarkSuggestionReviewedMutation,
+  MarkSuggestionReviewedMutationVariables,
+  RespondToSuggestionMutation,
+  RespondToSuggestionMutationVariables,
+  SearchSuggestionsQuery,
+  SearchSuggestionsQueryVariables,
+  SubmitSuggestionMutation,
+  SubmitSuggestionMutationVariables,
+  SuggestionContributorStatsQuery,
+  SuggestionContributorStatsQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 // ─── Query: adminSuggestions ────────────────────────────────────────────────
 
-export const adminSuggestionsQueryDocument: TypedDocumentNode<
-  Operations.AdminSuggestionsQuery,
-  Types.QueryAdminSuggestionsArgs
-> = gql`
+export const adminSuggestionsQueryDocument: TypedDocumentNode<AdminSuggestionsQuery, AdminSuggestionsQueryVariables> =
+  gql`
   query AdminSuggestions($filter: SuggestionFilter!) {
     adminSuggestions(filter: $filter) {
       id
@@ -42,8 +56,8 @@ export const adminSuggestionsQueryDocument: TypedDocumentNode<
 // ─── Query: searchSuggestions ──────────────────────────────────────────────
 
 export const searchSuggestionsQueryDocument: TypedDocumentNode<
-  Operations.SearchSuggestionsQuery,
-  Types.QuerySearchSuggestionsArgs
+  SearchSuggestionsQuery,
+  SearchSuggestionsQueryVariables
 > = gql`
   query SearchSuggestions($query: String!, $excludeId: String!) {
     searchSuggestions(query: $query, excludeId: $excludeId) {
@@ -60,8 +74,8 @@ export const searchSuggestionsQueryDocument: TypedDocumentNode<
 // ─── Mutation: submitSuggestion ─────────────────────────────────────────────
 
 export const submitSuggestionMutationDocument: TypedDocumentNode<
-  Operations.SubmitSuggestionMutation,
-  Types.MutationSubmitSuggestionArgs
+  SubmitSuggestionMutation,
+  SubmitSuggestionMutationVariables
 > = gql`
   mutation SubmitSuggestion($input: SubmitSuggestionInput!) {
     submitSuggestion(input: $input) {
@@ -76,8 +90,8 @@ export const submitSuggestionMutationDocument: TypedDocumentNode<
 // ─── Mutation: markSuggestionReviewed ───────────────────────────────────────
 
 export const markSuggestionReviewedMutationDocument: TypedDocumentNode<
-  Operations.MarkSuggestionReviewedMutation,
-  Types.MutationMarkSuggestionReviewedArgs
+  MarkSuggestionReviewedMutation,
+  MarkSuggestionReviewedMutationVariables
 > = gql`
   mutation MarkSuggestionReviewed($suggestionId: String!) {
     markSuggestionReviewed(suggestionId: $suggestionId) {
@@ -90,8 +104,8 @@ export const markSuggestionReviewedMutationDocument: TypedDocumentNode<
 // ─── Mutation: respondToSuggestion ──────────────────────────────────────────
 
 export const respondToSuggestionMutationDocument: TypedDocumentNode<
-  Operations.RespondToSuggestionMutation,
-  Types.MutationRespondToSuggestionArgs
+  RespondToSuggestionMutation,
+  RespondToSuggestionMutationVariables
 > = gql`
   mutation RespondToSuggestion($input: RespondToSuggestionInput!) {
     respondToSuggestion(input: $input) {
@@ -104,8 +118,8 @@ export const respondToSuggestionMutationDocument: TypedDocumentNode<
 // ─── Mutation: markSuggestionDuplicate ──────────────────────────────────────
 
 export const markSuggestionDuplicateMutationDocument: TypedDocumentNode<
-  Operations.MarkSuggestionDuplicateMutation,
-  Types.MutationMarkSuggestionDuplicateArgs
+  MarkSuggestionDuplicateMutation,
+  MarkSuggestionDuplicateMutationVariables
 > = gql`
   mutation MarkSuggestionDuplicate($input: MarkSuggestionDuplicateInput!) {
     markSuggestionDuplicate(input: $input) {
@@ -118,8 +132,8 @@ export const markSuggestionDuplicateMutationDocument: TypedDocumentNode<
 // ─── Mutation: deleteSuggestion ─────────────────────────────────────────────
 
 export const deleteSuggestionMutationDocument: TypedDocumentNode<
-  Operations.DeleteSuggestionMutation,
-  Types.MutationDeleteSuggestionArgs
+  DeleteSuggestionMutation,
+  DeleteSuggestionMutationVariables
 > = gql`
   mutation DeleteSuggestion($suggestionId: String!) {
     deleteSuggestion(suggestionId: $suggestionId)
@@ -129,8 +143,8 @@ export const deleteSuggestionMutationDocument: TypedDocumentNode<
 // ─── Query: suggestionContributorStats ────────────────────────────────────────
 
 export const suggestionContributorStatsQueryDocument: TypedDocumentNode<
-  Operations.SuggestionContributorStatsQuery,
-  Types.QuerySuggestionContributorStatsArgs
+  SuggestionContributorStatsQuery,
+  SuggestionContributorStatsQueryVariables
 > = gql`
   query SuggestionContributorStats($days: Int!) {
     suggestionContributorStats(days: $days) {

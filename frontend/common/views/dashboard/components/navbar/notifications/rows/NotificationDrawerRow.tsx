@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { NotificationRowBase } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows/NotificationRowBase";
 import {
   isClassMetadata,

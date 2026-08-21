@@ -1,12 +1,13 @@
-/* eslint-disable */
 /** Internal type. DO NOT USE DIRECTLY. */
 type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+import type { IanaTimezone } from '@/shared/constants/iana-timezone.enum';
 import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
-export type AccountStatus =
-  | 'ACTIVATED'
-  | 'DEACTIVATED';
+export enum AccountStatus {
+  Activated = 'ACTIVATED',
+  Deactivated = 'DEACTIVATED'
+}
 
 export type AdminDashboardScheduleInput = {
   date: string;
@@ -27,260 +28,262 @@ export type AdminRevokeTokenInput = {
   userId: string;
 };
 
-export type AppLanguage =
-  | 'ar'
-  | 'en';
+export enum AppLanguage {
+  Ar = 'ar',
+  En = 'en'
+}
 
-export type AppPermission =
-  | 'AUTH_EDIT_OWN_PROFILE'
-  | 'AUTH_LOGIN'
-  | 'AUTH_VIEW_OWN_PROFILE'
-  | 'BILLING_CREATE_INVOICE'
-  | 'BILLING_DELETE_INVOICE'
-  | 'BILLING_MANAGE_CURRENCIES'
-  | 'BILLING_MANAGE_CURRENCY_HEDGES'
-  | 'BILLING_MANAGE_FX_PROVIDER'
-  | 'BILLING_OVERRIDE_EXCHANGE_RATES'
-  | 'BILLING_REFRESH_EXCHANGE_RATES'
-  | 'BILLING_SUBMIT_PAYMENT_PROOF'
-  | 'BILLING_UPDATE_STATUS_PAID'
-  | 'BILLING_VIEW_EXCHANGE_RATES'
-  | 'BILLING_VIEW_HISTORY'
-  | 'BILLING_VIEW_UNPAID_INVOICES'
-  | 'CATEGORIES_CREATE'
-  | 'CATEGORIES_DELETE'
-  | 'CATEGORIES_LIST'
-  | 'CATEGORIES_UPDATE'
-  | 'COMMUNICATION_SUBMIT_SUGGESTION'
-  | 'COMPLAINTS_DELETE'
-  | 'COMPLAINTS_LIST'
-  | 'COMPLAINTS_RESPOND'
-  | 'CREDITS_MANAGE'
-  | 'CRON_MANAGE'
-  | 'DASHBOARD_FILTER_METRICS'
-  | 'DASHBOARD_METRICS_VIEW_ALL'
-  | 'DASHBOARD_SEARCH'
-  | 'DASHBOARD_VIEW'
-  | 'DASHBOARD_VIEW_METRICS'
-  | 'DOCUMENT_MANAGE_PARENT_DOCS'
-  | 'HISTORY_VIEW_CALENDAR'
-  | 'HISTORY_VIEW_DETAILS'
-  | 'INVOICES_CREATE'
-  | 'INVOICES_DELETE'
-  | 'INVOICES_EDIT'
-  | 'INVOICES_LIST'
-  | 'INVOICES_MARK_PAID'
-  | 'LESSON_REPORTS_APPROVE'
-  | 'LESSON_REPORTS_REJECT'
-  | 'LESSON_REPORTS_REVIEW'
-  | 'LESSON_REPORTS_SUBMIT'
-  | 'MEETING_CONFIGS_MANAGE_CLASS'
-  | 'MEETING_CONFIGS_MANAGE_OTHER'
-  | 'MEETING_CONFIGS_MANAGE_OWN'
-  | 'MEETING_PROVIDERS_MANAGE_CATALOG'
-  | 'MONTHLY_REPORTS_VIEW'
-  | 'NOTES_CREATE'
-  | 'NOTES_DELETE'
-  | 'NOTES_LIST'
-  | 'NOTES_UPDATE'
-  | 'NOTIFICATION_VIEW_ALERTS'
-  | 'PARENTS_CREATE'
-  | 'PARENTS_EDIT'
-  | 'PARENTS_LIST'
-  | 'PARENT_EDIT_OWN_PROFILE'
-  | 'PARENT_MANAGE_STATUS'
-  | 'PARENT_VIEW_DIRECTORY'
-  | 'PARENT_VIEW_OWN_PROFILE'
-  | 'PARENT_VIEW_PROFILE'
-  | 'PARENT_VIEW_STUDENTS'
-  | 'PAYMENT_METHODS_MANAGE_CATALOGS'
-  | 'PAYMENT_METHODS_VERIFY_BANK_TRANSFER'
-  | 'PERMISSION_GROUPS_ASSIGN'
-  | 'PERMISSION_GROUPS_MANAGE'
-  | 'PROFILE_CORE_CONTACT_EDIT_OTHER'
-  | 'PROFILE_CORE_CONTACT_EDIT_OWN'
-  | 'PROFILE_CORE_CONTACT_VIEW_OTHER'
-  | 'PROFILE_CORE_CONTACT_VIEW_OWN'
-  | 'PROFILE_CORE_IDENTITY_EDIT_OTHER'
-  | 'PROFILE_CORE_IDENTITY_EDIT_OWN'
-  | 'PROFILE_CORE_IDENTITY_VIEW_OTHER'
-  | 'PROFILE_CORE_IDENTITY_VIEW_OWN'
-  | 'PROFILE_CORE_STATUS_EDIT_OTHER'
-  | 'PROFILE_CORE_STATUS_EDIT_OWN'
-  | 'PROFILE_CORE_STATUS_VIEW_OTHER'
-  | 'PROFILE_CORE_STATUS_VIEW_OWN'
-  | 'PROFILE_MEETING_CONFIGS_EDIT_OTHER'
-  | 'PROFILE_MEETING_CONFIGS_EDIT_OWN'
-  | 'PROFILE_MEETING_CONFIGS_VIEW_OTHER'
-  | 'PROFILE_MEETING_CONFIGS_VIEW_OWN'
-  | 'PROFILE_PARENT_ACCOUNT_EDIT_OTHER'
-  | 'PROFILE_PARENT_ACCOUNT_EDIT_OWN'
-  | 'PROFILE_PARENT_ACCOUNT_VIEW_OTHER'
-  | 'PROFILE_PARENT_ACCOUNT_VIEW_OWN'
-  | 'PROFILE_PARENT_BILLING_EDIT_OTHER'
-  | 'PROFILE_PARENT_BILLING_EDIT_OWN'
-  | 'PROFILE_PARENT_BILLING_VIEW_OTHER'
-  | 'PROFILE_PARENT_BILLING_VIEW_OWN'
-  | 'PROFILE_PARENT_IDENTITY_EDIT_OTHER'
-  | 'PROFILE_PARENT_IDENTITY_EDIT_OWN'
-  | 'PROFILE_PARENT_IDENTITY_VIEW_OTHER'
-  | 'PROFILE_PARENT_IDENTITY_VIEW_OWN'
-  | 'PROFILE_PARENT_SOCIAL_EDIT_OTHER'
-  | 'PROFILE_PARENT_SOCIAL_EDIT_OWN'
-  | 'PROFILE_PARENT_SOCIAL_VIEW_OTHER'
-  | 'PROFILE_PARENT_SOCIAL_VIEW_OWN'
-  | 'PROFILE_PARENT_STUDENTS_EDIT_OTHER'
-  | 'PROFILE_PARENT_STUDENTS_EDIT_OWN'
-  | 'PROFILE_PARENT_STUDENTS_VIEW_OTHER'
-  | 'PROFILE_PARENT_STUDENTS_VIEW_OWN'
-  | 'PROFILE_PAYMENT_METHODS_EDIT_OTHER'
-  | 'PROFILE_PAYMENT_METHODS_EDIT_OWN'
-  | 'PROFILE_PAYMENT_METHODS_VIEW_OTHER'
-  | 'PROFILE_PAYMENT_METHODS_VIEW_OWN'
-  | 'PROFILE_STAFF_PERMISSIONS_EDIT_OTHER'
-  | 'PROFILE_STAFF_PERMISSIONS_EDIT_OWN'
-  | 'PROFILE_STAFF_PERMISSIONS_VIEW_OTHER'
-  | 'PROFILE_STAFF_PERMISSIONS_VIEW_OWN'
-  | 'PROFILE_STAFF_ROLE_EDIT_OTHER'
-  | 'PROFILE_STAFF_ROLE_EDIT_OWN'
-  | 'PROFILE_STAFF_ROLE_VIEW_OTHER'
-  | 'PROFILE_STAFF_ROLE_VIEW_OWN'
-  | 'PROFILE_TEACHER_IDENTITY_EDIT_OTHER'
-  | 'PROFILE_TEACHER_IDENTITY_EDIT_OWN'
-  | 'PROFILE_TEACHER_IDENTITY_VIEW_OTHER'
-  | 'PROFILE_TEACHER_IDENTITY_VIEW_OWN'
-  | 'PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER'
-  | 'PROFILE_TEACHER_PROFESSIONAL_EDIT_OWN'
-  | 'PROFILE_TEACHER_PROFESSIONAL_VIEW_OTHER'
-  | 'PROFILE_TEACHER_PROFESSIONAL_VIEW_OWN'
-  | 'PROFILE_TEACHER_STUDENTS_EDIT_OTHER'
-  | 'PROFILE_TEACHER_STUDENTS_EDIT_OWN'
-  | 'PROFILE_TEACHER_STUDENTS_VIEW_OTHER'
-  | 'PROFILE_TEACHER_STUDENTS_VIEW_OWN'
-  | 'QUOTAS_MANAGE'
-  | 'QUOTAS_VIEW'
-  | 'REPORTS_GENERATE'
-  | 'REPORT_GENERATE_CUSTOM'
-  | 'REPORT_VIEW_FINANCIALS'
-  | 'RESOURCES_DELETE'
-  | 'RESOURCES_LIST'
-  | 'RESOURCES_UPLOAD'
-  | 'SCHEDULE_CLEAR_WEEKLY'
-  | 'SCHEDULE_CREATE_CLASS'
-  | 'SCHEDULE_DELETE_CLASS'
-  | 'SCHEDULE_DST_MIGRATE'
-  | 'SCHEDULE_FILTER_ADVANCED'
-  | 'SCHEDULE_MANAGE_RECURRING'
-  | 'SCHEDULE_SEARCH_AVAILABILITY'
-  | 'SCHEDULE_VIEW_ALL'
-  | 'SCHEDULE_VIEW_ASSIGNED'
-  | 'SCHEDULE_VIEW_FAMILY'
-  | 'SCHEDULE_VIEW_LIST'
-  | 'SCHEDULE_VIEW_TIMEZONES'
-  | 'SCHEDULE_VIEW_WEEKLY'
-  | 'SCHEDULE_VIEW_WORKLOAD'
-  | 'SESSION_ACTIVATE_CLASS'
-  | 'SESSION_ACTIVATE_OVERRIDE'
-  | 'SESSION_OVERRIDE_ACTIONS'
-  | 'SESSION_RESCHEDULE'
-  | 'SESSION_RESET'
-  | 'SESSION_UPDATE_STATUS_ABSENT'
-  | 'SESSION_UPDATE_STATUS_LEAVE'
-  | 'SESSION_UPDATE_STATUS_START'
-  | 'SESSION_VIEW_DETAILS'
-  | 'SETTINGS_AUDIT_VIEW'
-  | 'SETTINGS_EDIT_ENV'
-  | 'SETTINGS_EDIT_GENERAL'
-  | 'SETTINGS_EDIT_MEETING_INTEGRATIONS'
-  | 'SETTINGS_EDIT_SESSION'
-  | 'SETTINGS_SITE_CONTENT_MANAGE'
-  | 'SETTINGS_TIMEZONES_VIEW'
-  | 'SETTINGS_VIEW'
-  | 'STAFF_CREATE'
-  | 'STAFF_EDIT'
-  | 'STAFF_EDIT_PROFILE'
-  | 'STAFF_LIST'
-  | 'STAFF_VIEW_DIRECTORY'
-  | 'STORAGE_MANAGE'
-  | 'STUDENTS_CHANGE_STATUS'
-  | 'STUDENTS_CHANGE_TEACHER'
-  | 'STUDENTS_CREATE'
-  | 'STUDENTS_EDIT'
-  | 'STUDENTS_LIST'
-  | 'STUDENTS_OVERRIDE_QUOTA'
-  | 'STUDENT_ACADEMIC_EDIT_OTHER'
-  | 'STUDENT_ACADEMIC_EDIT_OWN'
-  | 'STUDENT_ACADEMIC_VIEW_OTHER'
-  | 'STUDENT_ACADEMIC_VIEW_OWN'
-  | 'STUDENT_EDIT_QUOTA'
-  | 'STUDENT_HISTORY_EDIT_OTHER'
-  | 'STUDENT_HISTORY_EDIT_OWN'
-  | 'STUDENT_HISTORY_VIEW_OTHER'
-  | 'STUDENT_HISTORY_VIEW_OWN'
-  | 'STUDENT_IDENTITY_EDIT_OTHER'
-  | 'STUDENT_IDENTITY_EDIT_OWN'
-  | 'STUDENT_IDENTITY_VIEW_OTHER'
-  | 'STUDENT_IDENTITY_VIEW_OWN'
-  | 'STUDENT_MANAGE_STATUS'
-  | 'STUDENT_PARENT_EDIT_OTHER'
-  | 'STUDENT_PARENT_EDIT_OWN'
-  | 'STUDENT_PARENT_VIEW_OTHER'
-  | 'STUDENT_PARENT_VIEW_OWN'
-  | 'STUDENT_QUOTA_EDIT_EDIT_OTHER'
-  | 'STUDENT_QUOTA_EDIT_EDIT_OWN'
-  | 'STUDENT_QUOTA_EDIT_VIEW_OTHER'
-  | 'STUDENT_QUOTA_EDIT_VIEW_OWN'
-  | 'STUDENT_REASSIGN_TEACHER'
-  | 'STUDENT_SCHEDULE_EDIT_OTHER'
-  | 'STUDENT_SCHEDULE_EDIT_OWN'
-  | 'STUDENT_SCHEDULE_VIEW_OTHER'
-  | 'STUDENT_SCHEDULE_VIEW_OWN'
-  | 'STUDENT_TEACHER_EDIT_OTHER'
-  | 'STUDENT_TEACHER_EDIT_OWN'
-  | 'STUDENT_TEACHER_VIEW_OTHER'
-  | 'STUDENT_TEACHER_VIEW_OWN'
-  | 'STUDENT_VIEW_ASSOCIATED'
-  | 'STUDENT_VIEW_OWN_DASHBOARD'
-  | 'SUBJECTS_CREATE'
-  | 'SUBJECTS_DELETE'
-  | 'SUBJECTS_LIST'
-  | 'SUBJECTS_MANAGE_RESOURCES'
-  | 'SUBJECTS_UPDATE'
-  | 'SUBJECTS_VIEW_RESOURCES'
-  | 'SUGGESTIONS_DELETE'
-  | 'SUGGESTIONS_LIST'
-  | 'SUGGESTIONS_REVIEW'
-  | 'SUPERVISOR_VIEW_DASHBOARD'
-  | 'SUPPORT_SUBMIT_COMPLAINT'
-  | 'SUPPORT_VIEW_HISTORY'
-  | 'SYSTEM_BULK_UPDATE_DST'
-  | 'SYSTEM_DISPATCH_EMAIL'
-  | 'SYSTEM_ENFORCE_LEAVE_LIMIT'
-  | 'SYSTEM_ENFORCE_SUSPENDED_LOCK'
-  | 'SYSTEM_ENFORCE_TIME_WINDOW'
-  | 'SYSTEM_PROCESS_STUDENT_LEAVE'
-  | 'SYSTEM_RESTRICT_RESOURCE_ACCESS'
-  | 'SYSTEM_SYNC_NOTIFICATIONS'
-  | 'TEACHERS_CREATE'
-  | 'TEACHERS_EDIT'
-  | 'TEACHERS_LIST'
-  | 'TEACHERS_MANAGE_SCHEDULE'
-  | 'TEACHER_DUES_MARK_PAID'
-  | 'TEACHER_DUES_VIEW'
-  | 'TEACHER_EDIT_OWN_PROFILE'
-  | 'TEACHER_VIEW_DASHBOARD'
-  | 'TEACHER_VIEW_OWN_PROFILE'
-  | 'TEACHER_VIEW_PROFILE'
-  | 'TEACHER_VIEW_STUDENTS'
-  | 'TEST_CUSTOM_ALT'
-  | 'TEST_CUSTOM_ONLY'
-  | 'TEST_SYSTEM_ONLY'
-  | 'USER_ADMIN_RESET_PASSWORD'
-  | 'USER_EDIT_PROFILE'
-  | 'USER_VIEW_PROFILE'
-  | 'WHATSAPP_CONFIG_MANAGE'
-  | 'WHATSAPP_TEMPLATES_MANAGE'
-  | 'WHATSAPP_VIEW';
+export enum AppPermission {
+  AuthEditOwnProfile = 'AUTH_EDIT_OWN_PROFILE',
+  AuthLogin = 'AUTH_LOGIN',
+  AuthViewOwnProfile = 'AUTH_VIEW_OWN_PROFILE',
+  BillingCreateInvoice = 'BILLING_CREATE_INVOICE',
+  BillingDeleteInvoice = 'BILLING_DELETE_INVOICE',
+  BillingManageCurrencies = 'BILLING_MANAGE_CURRENCIES',
+  BillingManageCurrencyHedges = 'BILLING_MANAGE_CURRENCY_HEDGES',
+  BillingManageFxProvider = 'BILLING_MANAGE_FX_PROVIDER',
+  BillingOverrideExchangeRates = 'BILLING_OVERRIDE_EXCHANGE_RATES',
+  BillingRefreshExchangeRates = 'BILLING_REFRESH_EXCHANGE_RATES',
+  BillingSubmitPaymentProof = 'BILLING_SUBMIT_PAYMENT_PROOF',
+  BillingUpdateStatusPaid = 'BILLING_UPDATE_STATUS_PAID',
+  BillingViewExchangeRates = 'BILLING_VIEW_EXCHANGE_RATES',
+  BillingViewHistory = 'BILLING_VIEW_HISTORY',
+  BillingViewUnpaidInvoices = 'BILLING_VIEW_UNPAID_INVOICES',
+  CategoriesCreate = 'CATEGORIES_CREATE',
+  CategoriesDelete = 'CATEGORIES_DELETE',
+  CategoriesList = 'CATEGORIES_LIST',
+  CategoriesUpdate = 'CATEGORIES_UPDATE',
+  CommunicationSubmitSuggestion = 'COMMUNICATION_SUBMIT_SUGGESTION',
+  ComplaintsDelete = 'COMPLAINTS_DELETE',
+  ComplaintsList = 'COMPLAINTS_LIST',
+  ComplaintsRespond = 'COMPLAINTS_RESPOND',
+  CreditsManage = 'CREDITS_MANAGE',
+  CronManage = 'CRON_MANAGE',
+  DashboardFilterMetrics = 'DASHBOARD_FILTER_METRICS',
+  DashboardMetricsViewAll = 'DASHBOARD_METRICS_VIEW_ALL',
+  DashboardSearch = 'DASHBOARD_SEARCH',
+  DashboardView = 'DASHBOARD_VIEW',
+  DashboardViewMetrics = 'DASHBOARD_VIEW_METRICS',
+  DocumentManageParentDocs = 'DOCUMENT_MANAGE_PARENT_DOCS',
+  HistoryViewCalendar = 'HISTORY_VIEW_CALENDAR',
+  HistoryViewDetails = 'HISTORY_VIEW_DETAILS',
+  InvoicesCreate = 'INVOICES_CREATE',
+  InvoicesDelete = 'INVOICES_DELETE',
+  InvoicesEdit = 'INVOICES_EDIT',
+  InvoicesList = 'INVOICES_LIST',
+  InvoicesMarkPaid = 'INVOICES_MARK_PAID',
+  LessonReportsApprove = 'LESSON_REPORTS_APPROVE',
+  LessonReportsReject = 'LESSON_REPORTS_REJECT',
+  LessonReportsReview = 'LESSON_REPORTS_REVIEW',
+  LessonReportsSubmit = 'LESSON_REPORTS_SUBMIT',
+  MeetingConfigsManageClass = 'MEETING_CONFIGS_MANAGE_CLASS',
+  MeetingConfigsManageOther = 'MEETING_CONFIGS_MANAGE_OTHER',
+  MeetingConfigsManageOwn = 'MEETING_CONFIGS_MANAGE_OWN',
+  MeetingProvidersManageCatalog = 'MEETING_PROVIDERS_MANAGE_CATALOG',
+  MonthlyReportsView = 'MONTHLY_REPORTS_VIEW',
+  NotesCreate = 'NOTES_CREATE',
+  NotesDelete = 'NOTES_DELETE',
+  NotesList = 'NOTES_LIST',
+  NotesUpdate = 'NOTES_UPDATE',
+  NotificationViewAlerts = 'NOTIFICATION_VIEW_ALERTS',
+  ParentsCreate = 'PARENTS_CREATE',
+  ParentsEdit = 'PARENTS_EDIT',
+  ParentsList = 'PARENTS_LIST',
+  ParentEditOwnProfile = 'PARENT_EDIT_OWN_PROFILE',
+  ParentManageStatus = 'PARENT_MANAGE_STATUS',
+  ParentViewDirectory = 'PARENT_VIEW_DIRECTORY',
+  ParentViewOwnProfile = 'PARENT_VIEW_OWN_PROFILE',
+  ParentViewProfile = 'PARENT_VIEW_PROFILE',
+  ParentViewStudents = 'PARENT_VIEW_STUDENTS',
+  PaymentMethodsManageCatalogs = 'PAYMENT_METHODS_MANAGE_CATALOGS',
+  PaymentMethodsVerifyBankTransfer = 'PAYMENT_METHODS_VERIFY_BANK_TRANSFER',
+  PermissionGroupsAssign = 'PERMISSION_GROUPS_ASSIGN',
+  PermissionGroupsManage = 'PERMISSION_GROUPS_MANAGE',
+  ProfileCoreContactEditOther = 'PROFILE_CORE_CONTACT_EDIT_OTHER',
+  ProfileCoreContactEditOwn = 'PROFILE_CORE_CONTACT_EDIT_OWN',
+  ProfileCoreContactViewOther = 'PROFILE_CORE_CONTACT_VIEW_OTHER',
+  ProfileCoreContactViewOwn = 'PROFILE_CORE_CONTACT_VIEW_OWN',
+  ProfileCoreIdentityEditOther = 'PROFILE_CORE_IDENTITY_EDIT_OTHER',
+  ProfileCoreIdentityEditOwn = 'PROFILE_CORE_IDENTITY_EDIT_OWN',
+  ProfileCoreIdentityViewOther = 'PROFILE_CORE_IDENTITY_VIEW_OTHER',
+  ProfileCoreIdentityViewOwn = 'PROFILE_CORE_IDENTITY_VIEW_OWN',
+  ProfileCoreStatusEditOther = 'PROFILE_CORE_STATUS_EDIT_OTHER',
+  ProfileCoreStatusEditOwn = 'PROFILE_CORE_STATUS_EDIT_OWN',
+  ProfileCoreStatusViewOther = 'PROFILE_CORE_STATUS_VIEW_OTHER',
+  ProfileCoreStatusViewOwn = 'PROFILE_CORE_STATUS_VIEW_OWN',
+  ProfileMeetingConfigsEditOther = 'PROFILE_MEETING_CONFIGS_EDIT_OTHER',
+  ProfileMeetingConfigsEditOwn = 'PROFILE_MEETING_CONFIGS_EDIT_OWN',
+  ProfileMeetingConfigsViewOther = 'PROFILE_MEETING_CONFIGS_VIEW_OTHER',
+  ProfileMeetingConfigsViewOwn = 'PROFILE_MEETING_CONFIGS_VIEW_OWN',
+  ProfileParentAccountEditOther = 'PROFILE_PARENT_ACCOUNT_EDIT_OTHER',
+  ProfileParentAccountEditOwn = 'PROFILE_PARENT_ACCOUNT_EDIT_OWN',
+  ProfileParentAccountViewOther = 'PROFILE_PARENT_ACCOUNT_VIEW_OTHER',
+  ProfileParentAccountViewOwn = 'PROFILE_PARENT_ACCOUNT_VIEW_OWN',
+  ProfileParentBillingEditOther = 'PROFILE_PARENT_BILLING_EDIT_OTHER',
+  ProfileParentBillingEditOwn = 'PROFILE_PARENT_BILLING_EDIT_OWN',
+  ProfileParentBillingViewOther = 'PROFILE_PARENT_BILLING_VIEW_OTHER',
+  ProfileParentBillingViewOwn = 'PROFILE_PARENT_BILLING_VIEW_OWN',
+  ProfileParentIdentityEditOther = 'PROFILE_PARENT_IDENTITY_EDIT_OTHER',
+  ProfileParentIdentityEditOwn = 'PROFILE_PARENT_IDENTITY_EDIT_OWN',
+  ProfileParentIdentityViewOther = 'PROFILE_PARENT_IDENTITY_VIEW_OTHER',
+  ProfileParentIdentityViewOwn = 'PROFILE_PARENT_IDENTITY_VIEW_OWN',
+  ProfileParentSocialEditOther = 'PROFILE_PARENT_SOCIAL_EDIT_OTHER',
+  ProfileParentSocialEditOwn = 'PROFILE_PARENT_SOCIAL_EDIT_OWN',
+  ProfileParentSocialViewOther = 'PROFILE_PARENT_SOCIAL_VIEW_OTHER',
+  ProfileParentSocialViewOwn = 'PROFILE_PARENT_SOCIAL_VIEW_OWN',
+  ProfileParentStudentsEditOther = 'PROFILE_PARENT_STUDENTS_EDIT_OTHER',
+  ProfileParentStudentsEditOwn = 'PROFILE_PARENT_STUDENTS_EDIT_OWN',
+  ProfileParentStudentsViewOther = 'PROFILE_PARENT_STUDENTS_VIEW_OTHER',
+  ProfileParentStudentsViewOwn = 'PROFILE_PARENT_STUDENTS_VIEW_OWN',
+  ProfilePaymentMethodsEditOther = 'PROFILE_PAYMENT_METHODS_EDIT_OTHER',
+  ProfilePaymentMethodsEditOwn = 'PROFILE_PAYMENT_METHODS_EDIT_OWN',
+  ProfilePaymentMethodsViewOther = 'PROFILE_PAYMENT_METHODS_VIEW_OTHER',
+  ProfilePaymentMethodsViewOwn = 'PROFILE_PAYMENT_METHODS_VIEW_OWN',
+  ProfileStaffPermissionsEditOther = 'PROFILE_STAFF_PERMISSIONS_EDIT_OTHER',
+  ProfileStaffPermissionsEditOwn = 'PROFILE_STAFF_PERMISSIONS_EDIT_OWN',
+  ProfileStaffPermissionsViewOther = 'PROFILE_STAFF_PERMISSIONS_VIEW_OTHER',
+  ProfileStaffPermissionsViewOwn = 'PROFILE_STAFF_PERMISSIONS_VIEW_OWN',
+  ProfileStaffRoleEditOther = 'PROFILE_STAFF_ROLE_EDIT_OTHER',
+  ProfileStaffRoleEditOwn = 'PROFILE_STAFF_ROLE_EDIT_OWN',
+  ProfileStaffRoleViewOther = 'PROFILE_STAFF_ROLE_VIEW_OTHER',
+  ProfileStaffRoleViewOwn = 'PROFILE_STAFF_ROLE_VIEW_OWN',
+  ProfileTeacherIdentityEditOther = 'PROFILE_TEACHER_IDENTITY_EDIT_OTHER',
+  ProfileTeacherIdentityEditOwn = 'PROFILE_TEACHER_IDENTITY_EDIT_OWN',
+  ProfileTeacherIdentityViewOther = 'PROFILE_TEACHER_IDENTITY_VIEW_OTHER',
+  ProfileTeacherIdentityViewOwn = 'PROFILE_TEACHER_IDENTITY_VIEW_OWN',
+  ProfileTeacherProfessionalEditOther = 'PROFILE_TEACHER_PROFESSIONAL_EDIT_OTHER',
+  ProfileTeacherProfessionalEditOwn = 'PROFILE_TEACHER_PROFESSIONAL_EDIT_OWN',
+  ProfileTeacherProfessionalViewOther = 'PROFILE_TEACHER_PROFESSIONAL_VIEW_OTHER',
+  ProfileTeacherProfessionalViewOwn = 'PROFILE_TEACHER_PROFESSIONAL_VIEW_OWN',
+  ProfileTeacherStudentsEditOther = 'PROFILE_TEACHER_STUDENTS_EDIT_OTHER',
+  ProfileTeacherStudentsEditOwn = 'PROFILE_TEACHER_STUDENTS_EDIT_OWN',
+  ProfileTeacherStudentsViewOther = 'PROFILE_TEACHER_STUDENTS_VIEW_OTHER',
+  ProfileTeacherStudentsViewOwn = 'PROFILE_TEACHER_STUDENTS_VIEW_OWN',
+  QuotasManage = 'QUOTAS_MANAGE',
+  QuotasView = 'QUOTAS_VIEW',
+  ReportsGenerate = 'REPORTS_GENERATE',
+  ReportGenerateCustom = 'REPORT_GENERATE_CUSTOM',
+  ReportViewFinancials = 'REPORT_VIEW_FINANCIALS',
+  ResourcesDelete = 'RESOURCES_DELETE',
+  ResourcesList = 'RESOURCES_LIST',
+  ResourcesUpload = 'RESOURCES_UPLOAD',
+  ScheduleClearWeekly = 'SCHEDULE_CLEAR_WEEKLY',
+  ScheduleCreateClass = 'SCHEDULE_CREATE_CLASS',
+  ScheduleDeleteClass = 'SCHEDULE_DELETE_CLASS',
+  ScheduleDstMigrate = 'SCHEDULE_DST_MIGRATE',
+  ScheduleFilterAdvanced = 'SCHEDULE_FILTER_ADVANCED',
+  ScheduleManageRecurring = 'SCHEDULE_MANAGE_RECURRING',
+  ScheduleSearchAvailability = 'SCHEDULE_SEARCH_AVAILABILITY',
+  ScheduleViewAll = 'SCHEDULE_VIEW_ALL',
+  ScheduleViewAssigned = 'SCHEDULE_VIEW_ASSIGNED',
+  ScheduleViewFamily = 'SCHEDULE_VIEW_FAMILY',
+  ScheduleViewList = 'SCHEDULE_VIEW_LIST',
+  ScheduleViewTimezones = 'SCHEDULE_VIEW_TIMEZONES',
+  ScheduleViewWeekly = 'SCHEDULE_VIEW_WEEKLY',
+  ScheduleViewWorkload = 'SCHEDULE_VIEW_WORKLOAD',
+  SessionActivateClass = 'SESSION_ACTIVATE_CLASS',
+  SessionActivateOverride = 'SESSION_ACTIVATE_OVERRIDE',
+  SessionOverrideActions = 'SESSION_OVERRIDE_ACTIONS',
+  SessionReschedule = 'SESSION_RESCHEDULE',
+  SessionReset = 'SESSION_RESET',
+  SessionUpdateStatusAbsent = 'SESSION_UPDATE_STATUS_ABSENT',
+  SessionUpdateStatusLeave = 'SESSION_UPDATE_STATUS_LEAVE',
+  SessionUpdateStatusStart = 'SESSION_UPDATE_STATUS_START',
+  SessionViewDetails = 'SESSION_VIEW_DETAILS',
+  SettingsAuditView = 'SETTINGS_AUDIT_VIEW',
+  SettingsEditEnv = 'SETTINGS_EDIT_ENV',
+  SettingsEditGeneral = 'SETTINGS_EDIT_GENERAL',
+  SettingsEditMeetingIntegrations = 'SETTINGS_EDIT_MEETING_INTEGRATIONS',
+  SettingsEditSession = 'SETTINGS_EDIT_SESSION',
+  SettingsSiteContentManage = 'SETTINGS_SITE_CONTENT_MANAGE',
+  SettingsTimezonesView = 'SETTINGS_TIMEZONES_VIEW',
+  SettingsView = 'SETTINGS_VIEW',
+  StaffCreate = 'STAFF_CREATE',
+  StaffEdit = 'STAFF_EDIT',
+  StaffEditProfile = 'STAFF_EDIT_PROFILE',
+  StaffList = 'STAFF_LIST',
+  StaffViewDirectory = 'STAFF_VIEW_DIRECTORY',
+  StorageManage = 'STORAGE_MANAGE',
+  StudentsChangeStatus = 'STUDENTS_CHANGE_STATUS',
+  StudentsChangeTeacher = 'STUDENTS_CHANGE_TEACHER',
+  StudentsCreate = 'STUDENTS_CREATE',
+  StudentsEdit = 'STUDENTS_EDIT',
+  StudentsList = 'STUDENTS_LIST',
+  StudentsOverrideQuota = 'STUDENTS_OVERRIDE_QUOTA',
+  StudentAcademicEditOther = 'STUDENT_ACADEMIC_EDIT_OTHER',
+  StudentAcademicEditOwn = 'STUDENT_ACADEMIC_EDIT_OWN',
+  StudentAcademicViewOther = 'STUDENT_ACADEMIC_VIEW_OTHER',
+  StudentAcademicViewOwn = 'STUDENT_ACADEMIC_VIEW_OWN',
+  StudentEditQuota = 'STUDENT_EDIT_QUOTA',
+  StudentHistoryEditOther = 'STUDENT_HISTORY_EDIT_OTHER',
+  StudentHistoryEditOwn = 'STUDENT_HISTORY_EDIT_OWN',
+  StudentHistoryViewOther = 'STUDENT_HISTORY_VIEW_OTHER',
+  StudentHistoryViewOwn = 'STUDENT_HISTORY_VIEW_OWN',
+  StudentIdentityEditOther = 'STUDENT_IDENTITY_EDIT_OTHER',
+  StudentIdentityEditOwn = 'STUDENT_IDENTITY_EDIT_OWN',
+  StudentIdentityViewOther = 'STUDENT_IDENTITY_VIEW_OTHER',
+  StudentIdentityViewOwn = 'STUDENT_IDENTITY_VIEW_OWN',
+  StudentManageStatus = 'STUDENT_MANAGE_STATUS',
+  StudentParentEditOther = 'STUDENT_PARENT_EDIT_OTHER',
+  StudentParentEditOwn = 'STUDENT_PARENT_EDIT_OWN',
+  StudentParentViewOther = 'STUDENT_PARENT_VIEW_OTHER',
+  StudentParentViewOwn = 'STUDENT_PARENT_VIEW_OWN',
+  StudentQuotaEditEditOther = 'STUDENT_QUOTA_EDIT_EDIT_OTHER',
+  StudentQuotaEditEditOwn = 'STUDENT_QUOTA_EDIT_EDIT_OWN',
+  StudentQuotaEditViewOther = 'STUDENT_QUOTA_EDIT_VIEW_OTHER',
+  StudentQuotaEditViewOwn = 'STUDENT_QUOTA_EDIT_VIEW_OWN',
+  StudentReassignTeacher = 'STUDENT_REASSIGN_TEACHER',
+  StudentScheduleEditOther = 'STUDENT_SCHEDULE_EDIT_OTHER',
+  StudentScheduleEditOwn = 'STUDENT_SCHEDULE_EDIT_OWN',
+  StudentScheduleViewOther = 'STUDENT_SCHEDULE_VIEW_OTHER',
+  StudentScheduleViewOwn = 'STUDENT_SCHEDULE_VIEW_OWN',
+  StudentTeacherEditOther = 'STUDENT_TEACHER_EDIT_OTHER',
+  StudentTeacherEditOwn = 'STUDENT_TEACHER_EDIT_OWN',
+  StudentTeacherViewOther = 'STUDENT_TEACHER_VIEW_OTHER',
+  StudentTeacherViewOwn = 'STUDENT_TEACHER_VIEW_OWN',
+  StudentViewAssociated = 'STUDENT_VIEW_ASSOCIATED',
+  StudentViewOwnDashboard = 'STUDENT_VIEW_OWN_DASHBOARD',
+  SubjectsCreate = 'SUBJECTS_CREATE',
+  SubjectsDelete = 'SUBJECTS_DELETE',
+  SubjectsList = 'SUBJECTS_LIST',
+  SubjectsManageResources = 'SUBJECTS_MANAGE_RESOURCES',
+  SubjectsUpdate = 'SUBJECTS_UPDATE',
+  SubjectsViewResources = 'SUBJECTS_VIEW_RESOURCES',
+  SuggestionsDelete = 'SUGGESTIONS_DELETE',
+  SuggestionsList = 'SUGGESTIONS_LIST',
+  SuggestionsReview = 'SUGGESTIONS_REVIEW',
+  SupervisorViewDashboard = 'SUPERVISOR_VIEW_DASHBOARD',
+  SupportSubmitComplaint = 'SUPPORT_SUBMIT_COMPLAINT',
+  SupportViewHistory = 'SUPPORT_VIEW_HISTORY',
+  SystemBulkUpdateDst = 'SYSTEM_BULK_UPDATE_DST',
+  SystemDispatchEmail = 'SYSTEM_DISPATCH_EMAIL',
+  SystemEnforceLeaveLimit = 'SYSTEM_ENFORCE_LEAVE_LIMIT',
+  SystemEnforceSuspendedLock = 'SYSTEM_ENFORCE_SUSPENDED_LOCK',
+  SystemEnforceTimeWindow = 'SYSTEM_ENFORCE_TIME_WINDOW',
+  SystemProcessStudentLeave = 'SYSTEM_PROCESS_STUDENT_LEAVE',
+  SystemRestrictResourceAccess = 'SYSTEM_RESTRICT_RESOURCE_ACCESS',
+  SystemSyncNotifications = 'SYSTEM_SYNC_NOTIFICATIONS',
+  TeachersCreate = 'TEACHERS_CREATE',
+  TeachersEdit = 'TEACHERS_EDIT',
+  TeachersList = 'TEACHERS_LIST',
+  TeachersManageSchedule = 'TEACHERS_MANAGE_SCHEDULE',
+  TeacherDuesMarkPaid = 'TEACHER_DUES_MARK_PAID',
+  TeacherDuesView = 'TEACHER_DUES_VIEW',
+  TeacherEditOwnProfile = 'TEACHER_EDIT_OWN_PROFILE',
+  TeacherViewDashboard = 'TEACHER_VIEW_DASHBOARD',
+  TeacherViewOwnProfile = 'TEACHER_VIEW_OWN_PROFILE',
+  TeacherViewProfile = 'TEACHER_VIEW_PROFILE',
+  TeacherViewStudents = 'TEACHER_VIEW_STUDENTS',
+  TestCustomAlt = 'TEST_CUSTOM_ALT',
+  TestCustomOnly = 'TEST_CUSTOM_ONLY',
+  TestSystemOnly = 'TEST_SYSTEM_ONLY',
+  UserAdminResetPassword = 'USER_ADMIN_RESET_PASSWORD',
+  UserEditProfile = 'USER_EDIT_PROFILE',
+  UserViewProfile = 'USER_VIEW_PROFILE',
+  WhatsappConfigManage = 'WHATSAPP_CONFIG_MANAGE',
+  WhatsappTemplatesManage = 'WHATSAPP_TEMPLATES_MANAGE',
+  WhatsappView = 'WHATSAPP_VIEW'
+}
 
 export type AssignPermissionGroupToUserInput = {
   groupId: string;
@@ -294,10 +297,11 @@ export type AttachSubjectResourceInput = {
   subjectId: string;
 };
 
-export type AttendanceEvaluation =
-  | 'ABSENT'
-  | 'LATE'
-  | 'PRESENT';
+export enum AttendanceEvaluation {
+  Absent = 'ABSENT',
+  Late = 'LATE',
+  Present = 'PRESENT'
+}
 
 /** Filters applied to the dynamic attendance query engine. */
 export type AttendanceReportFiltersInput = {
@@ -324,21 +328,23 @@ export type AvailabilitySearchInput = {
   toTime: string;
 };
 
-export type AvailabilitySearchSortBy =
-  | 'MOST_AVAILABLE_DAYS'
-  | 'MOST_GAPS'
-  | 'NAME_ASC'
-  | 'NAME_DESC'
-  | 'TIMEZONE_ASC';
+export enum AvailabilitySearchSortBy {
+  MostAvailableDays = 'MOST_AVAILABLE_DAYS',
+  MostGaps = 'MOST_GAPS',
+  NameAsc = 'NAME_ASC',
+  NameDesc = 'NAME_DESC',
+  TimezoneAsc = 'TIMEZONE_ASC'
+}
 
 export type BillingMonthInput = {
   month: number;
   year: number;
 };
 
-export type BookingStatus =
-  | 'CONFIRMED'
-  | 'RESCHEDULED';
+export enum BookingStatus {
+  Confirmed = 'CONFIRMED',
+  Rescheduled = 'RESCHEDULED'
+}
 
 export type ChangePasswordInput = {
   confirmPassword: string;
@@ -362,15 +368,16 @@ export type ClassCategoryUpdateInput = {
   sortOrder: number | null | undefined;
 };
 
-export type ClassExecutionState =
-  | 'ACTIVATED'
-  | 'COMPLETED'
-  | 'NOT_ACTIVATED'
-  | 'ON_DEMAND_CONFLICT_HELD'
-  | 'ON_DEMAND_NO_CREDITS_ABSENT'
-  | 'ON_DEMAND_NO_CREDITS_CANCELLED'
-  | 'ON_DEMAND_PENDING_CREDITS'
-  | 'RUNNING';
+export enum ClassExecutionState {
+  Activated = 'ACTIVATED',
+  Completed = 'COMPLETED',
+  NotActivated = 'NOT_ACTIVATED',
+  OnDemandConflictHeld = 'ON_DEMAND_CONFLICT_HELD',
+  OnDemandNoCreditsAbsent = 'ON_DEMAND_NO_CREDITS_ABSENT',
+  OnDemandNoCreditsCancelled = 'ON_DEMAND_NO_CREDITS_CANCELLED',
+  OnDemandPendingCredits = 'ON_DEMAND_PENDING_CREDITS',
+  Running = 'RUNNING'
+}
 
 export type ClassMeetingConfigCreateInput = {
   classInstanceId: string | null | undefined;
@@ -390,11 +397,12 @@ export type ClassMeetingConfigUpdateInput = {
   providerId: string | null | undefined;
 };
 
-export type ClassOutcome =
-  | 'ABSENT'
-  | 'LEAVE'
-  | 'PENDING'
-  | 'TAKEN';
+export enum ClassOutcome {
+  Absent = 'ABSENT',
+  Leave = 'LEAVE',
+  Pending = 'PENDING',
+  Taken = 'TAKEN'
+}
 
 export type ClassSubjectCreateInput = {
   avatarUrl: string | null | undefined;
@@ -420,16 +428,18 @@ export type ClassSubjectUpdateInput = {
   sortOrder: number | null | undefined;
 };
 
-export type ClassType =
-  | 'ADVANCE'
-  | 'REGULAR'
-  | 'TRIAL';
+export enum ClassType {
+  Advance = 'ADVANCE',
+  Regular = 'REGULAR',
+  Trial = 'TRIAL'
+}
 
 /** Categories for parent complaints. */
-export type ComplaintCategory =
-  | 'OTHER'
-  | 'REGARDING_SYSTEM'
-  | 'REGARDING_TEACHER';
+export enum ComplaintCategory {
+  Other = 'OTHER',
+  RegardingSystem = 'REGARDING_SYSTEM',
+  RegardingTeacher = 'REGARDING_TEACHER'
+}
 
 /** Input metadata for a pre-uploaded complaint attachment. */
 export type ComplaintFileMetadataInput = {
@@ -445,9 +455,10 @@ export type ComplaintQueueFilter = {
 };
 
 /** Status of a complaint in the support queue. */
-export type ComplaintStatus =
-  | 'ANSWERED'
-  | 'UNANSWERED';
+export enum ComplaintStatus {
+  Answered = 'ANSWERED',
+  Unanswered = 'UNANSWERED'
+}
 
 /** Input for submitting a new complaint. */
 export type ComplaintSubmitInput = {
@@ -473,253 +484,254 @@ export type CoreUserProfileFieldsInput = {
   timezone: IanaTimezone | null | undefined;
 };
 
-export type CountryCode =
-  | 'AD'
-  | 'AE'
-  | 'AF'
-  | 'AG'
-  | 'AI'
-  | 'AL'
-  | 'AM'
-  | 'AO'
-  | 'AQ'
-  | 'AR'
-  | 'AS'
-  | 'AT'
-  | 'AU'
-  | 'AW'
-  | 'AX'
-  | 'AZ'
-  | 'BA'
-  | 'BB'
-  | 'BD'
-  | 'BE'
-  | 'BF'
-  | 'BG'
-  | 'BH'
-  | 'BI'
-  | 'BJ'
-  | 'BL'
-  | 'BM'
-  | 'BN'
-  | 'BO'
-  | 'BR'
-  | 'BS'
-  | 'BT'
-  | 'BV'
-  | 'BW'
-  | 'BY'
-  | 'BZ'
-  | 'CA'
-  | 'CC'
-  | 'CD'
-  | 'CF'
-  | 'CG'
-  | 'CH'
-  | 'CI'
-  | 'CK'
-  | 'CL'
-  | 'CM'
-  | 'CN'
-  | 'CO'
-  | 'CR'
-  | 'CU'
-  | 'CV'
-  | 'CW'
-  | 'CX'
-  | 'CY'
-  | 'CZ'
-  | 'DE'
-  | 'DJ'
-  | 'DK'
-  | 'DM'
-  | 'DO'
-  | 'DZ'
-  | 'EC'
-  | 'EE'
-  | 'EG'
-  | 'EH'
-  | 'ER'
-  | 'ES'
-  | 'ET'
-  | 'FI'
-  | 'FJ'
-  | 'FK'
-  | 'FM'
-  | 'FO'
-  | 'FR'
-  | 'GA'
-  | 'GB'
-  | 'GD'
-  | 'GE'
-  | 'GF'
-  | 'GG'
-  | 'GH'
-  | 'GI'
-  | 'GL'
-  | 'GM'
-  | 'GN'
-  | 'GP'
-  | 'GQ'
-  | 'GR'
-  | 'GS'
-  | 'GT'
-  | 'GU'
-  | 'GW'
-  | 'GY'
-  | 'HK'
-  | 'HM'
-  | 'HN'
-  | 'HR'
-  | 'HT'
-  | 'HU'
-  | 'ID'
-  | 'IE'
-  | 'IM'
-  | 'IN'
-  | 'IO'
-  | 'IQ'
-  | 'IR'
-  | 'IS'
-  | 'IT'
-  | 'JE'
-  | 'JM'
-  | 'JO'
-  | 'JP'
-  | 'KE'
-  | 'KG'
-  | 'KH'
-  | 'KI'
-  | 'KM'
-  | 'KN'
-  | 'KP'
-  | 'KR'
-  | 'KW'
-  | 'KY'
-  | 'KZ'
-  | 'LA'
-  | 'LB'
-  | 'LC'
-  | 'LI'
-  | 'LK'
-  | 'LR'
-  | 'LS'
-  | 'LT'
-  | 'LU'
-  | 'LV'
-  | 'LY'
-  | 'MA'
-  | 'MC'
-  | 'MD'
-  | 'ME'
-  | 'MF'
-  | 'MG'
-  | 'MH'
-  | 'MK'
-  | 'ML'
-  | 'MM'
-  | 'MN'
-  | 'MO'
-  | 'MP'
-  | 'MQ'
-  | 'MR'
-  | 'MS'
-  | 'MT'
-  | 'MU'
-  | 'MV'
-  | 'MW'
-  | 'MX'
-  | 'MY'
-  | 'MZ'
-  | 'NA'
-  | 'NC'
-  | 'NE'
-  | 'NF'
-  | 'NG'
-  | 'NI'
-  | 'NL'
-  | 'NO'
-  | 'NP'
-  | 'NR'
-  | 'NU'
-  | 'NZ'
-  | 'OM'
-  | 'PA'
-  | 'PE'
-  | 'PF'
-  | 'PG'
-  | 'PH'
-  | 'PK'
-  | 'PL'
-  | 'PM'
-  | 'PN'
-  | 'PR'
-  | 'PS'
-  | 'PT'
-  | 'PW'
-  | 'PY'
-  | 'QA'
-  | 'RE'
-  | 'RO'
-  | 'RS'
-  | 'RU'
-  | 'RW'
-  | 'SA'
-  | 'SB'
-  | 'SC'
-  | 'SD'
-  | 'SE'
-  | 'SG'
-  | 'SH'
-  | 'SI'
-  | 'SJ'
-  | 'SK'
-  | 'SL'
-  | 'SM'
-  | 'SN'
-  | 'SO'
-  | 'SR'
-  | 'SS'
-  | 'ST'
-  | 'SV'
-  | 'SX'
-  | 'SY'
-  | 'SZ'
-  | 'TC'
-  | 'TD'
-  | 'TF'
-  | 'TG'
-  | 'TH'
-  | 'TJ'
-  | 'TK'
-  | 'TL'
-  | 'TM'
-  | 'TN'
-  | 'TO'
-  | 'TR'
-  | 'TV'
-  | 'TW'
-  | 'TZ'
-  | 'UA'
-  | 'UG'
-  | 'US'
-  | 'UY'
-  | 'UZ'
-  | 'VA'
-  | 'VC'
-  | 'VE'
-  | 'VG'
-  | 'VI'
-  | 'VN'
-  | 'VU'
-  | 'WF'
-  | 'WS'
-  | 'XK'
-  | 'YE'
-  | 'YT'
-  | 'ZA'
-  | 'ZM'
-  | 'ZW';
+export enum CountryCode {
+  Ad = 'AD',
+  Ae = 'AE',
+  Af = 'AF',
+  Ag = 'AG',
+  Ai = 'AI',
+  Al = 'AL',
+  Am = 'AM',
+  Ao = 'AO',
+  Aq = 'AQ',
+  Ar = 'AR',
+  As = 'AS',
+  At = 'AT',
+  Au = 'AU',
+  Aw = 'AW',
+  Ax = 'AX',
+  Az = 'AZ',
+  Ba = 'BA',
+  Bb = 'BB',
+  Bd = 'BD',
+  Be = 'BE',
+  Bf = 'BF',
+  Bg = 'BG',
+  Bh = 'BH',
+  Bi = 'BI',
+  Bj = 'BJ',
+  Bl = 'BL',
+  Bm = 'BM',
+  Bn = 'BN',
+  Bo = 'BO',
+  Br = 'BR',
+  Bs = 'BS',
+  Bt = 'BT',
+  Bv = 'BV',
+  Bw = 'BW',
+  By = 'BY',
+  Bz = 'BZ',
+  Ca = 'CA',
+  Cc = 'CC',
+  Cd = 'CD',
+  Cf = 'CF',
+  Cg = 'CG',
+  Ch = 'CH',
+  Ci = 'CI',
+  Ck = 'CK',
+  Cl = 'CL',
+  Cm = 'CM',
+  Cn = 'CN',
+  Co = 'CO',
+  Cr = 'CR',
+  Cu = 'CU',
+  Cv = 'CV',
+  Cw = 'CW',
+  Cx = 'CX',
+  Cy = 'CY',
+  Cz = 'CZ',
+  De = 'DE',
+  Dj = 'DJ',
+  Dk = 'DK',
+  Dm = 'DM',
+  Do = 'DO',
+  Dz = 'DZ',
+  Ec = 'EC',
+  Ee = 'EE',
+  Eg = 'EG',
+  Eh = 'EH',
+  Er = 'ER',
+  Es = 'ES',
+  Et = 'ET',
+  Fi = 'FI',
+  Fj = 'FJ',
+  Fk = 'FK',
+  Fm = 'FM',
+  Fo = 'FO',
+  Fr = 'FR',
+  Ga = 'GA',
+  Gb = 'GB',
+  Gd = 'GD',
+  Ge = 'GE',
+  Gf = 'GF',
+  Gg = 'GG',
+  Gh = 'GH',
+  Gi = 'GI',
+  Gl = 'GL',
+  Gm = 'GM',
+  Gn = 'GN',
+  Gp = 'GP',
+  Gq = 'GQ',
+  Gr = 'GR',
+  Gs = 'GS',
+  Gt = 'GT',
+  Gu = 'GU',
+  Gw = 'GW',
+  Gy = 'GY',
+  Hk = 'HK',
+  Hm = 'HM',
+  Hn = 'HN',
+  Hr = 'HR',
+  Ht = 'HT',
+  Hu = 'HU',
+  Id = 'ID',
+  Ie = 'IE',
+  Im = 'IM',
+  In = 'IN',
+  Io = 'IO',
+  Iq = 'IQ',
+  Ir = 'IR',
+  Is = 'IS',
+  It = 'IT',
+  Je = 'JE',
+  Jm = 'JM',
+  Jo = 'JO',
+  Jp = 'JP',
+  Ke = 'KE',
+  Kg = 'KG',
+  Kh = 'KH',
+  Ki = 'KI',
+  Km = 'KM',
+  Kn = 'KN',
+  Kp = 'KP',
+  Kr = 'KR',
+  Kw = 'KW',
+  Ky = 'KY',
+  Kz = 'KZ',
+  La = 'LA',
+  Lb = 'LB',
+  Lc = 'LC',
+  Li = 'LI',
+  Lk = 'LK',
+  Lr = 'LR',
+  Ls = 'LS',
+  Lt = 'LT',
+  Lu = 'LU',
+  Lv = 'LV',
+  Ly = 'LY',
+  Ma = 'MA',
+  Mc = 'MC',
+  Md = 'MD',
+  Me = 'ME',
+  Mf = 'MF',
+  Mg = 'MG',
+  Mh = 'MH',
+  Mk = 'MK',
+  Ml = 'ML',
+  Mm = 'MM',
+  Mn = 'MN',
+  Mo = 'MO',
+  Mp = 'MP',
+  Mq = 'MQ',
+  Mr = 'MR',
+  Ms = 'MS',
+  Mt = 'MT',
+  Mu = 'MU',
+  Mv = 'MV',
+  Mw = 'MW',
+  Mx = 'MX',
+  My = 'MY',
+  Mz = 'MZ',
+  Na = 'NA',
+  Nc = 'NC',
+  Ne = 'NE',
+  Nf = 'NF',
+  Ng = 'NG',
+  Ni = 'NI',
+  Nl = 'NL',
+  No = 'NO',
+  Np = 'NP',
+  Nr = 'NR',
+  Nu = 'NU',
+  Nz = 'NZ',
+  Om = 'OM',
+  Pa = 'PA',
+  Pe = 'PE',
+  Pf = 'PF',
+  Pg = 'PG',
+  Ph = 'PH',
+  Pk = 'PK',
+  Pl = 'PL',
+  Pm = 'PM',
+  Pn = 'PN',
+  Pr = 'PR',
+  Ps = 'PS',
+  Pt = 'PT',
+  Pw = 'PW',
+  Py = 'PY',
+  Qa = 'QA',
+  Re = 'RE',
+  Ro = 'RO',
+  Rs = 'RS',
+  Ru = 'RU',
+  Rw = 'RW',
+  Sa = 'SA',
+  Sb = 'SB',
+  Sc = 'SC',
+  Sd = 'SD',
+  Se = 'SE',
+  Sg = 'SG',
+  Sh = 'SH',
+  Si = 'SI',
+  Sj = 'SJ',
+  Sk = 'SK',
+  Sl = 'SL',
+  Sm = 'SM',
+  Sn = 'SN',
+  So = 'SO',
+  Sr = 'SR',
+  Ss = 'SS',
+  St = 'ST',
+  Sv = 'SV',
+  Sx = 'SX',
+  Sy = 'SY',
+  Sz = 'SZ',
+  Tc = 'TC',
+  Td = 'TD',
+  Tf = 'TF',
+  Tg = 'TG',
+  Th = 'TH',
+  Tj = 'TJ',
+  Tk = 'TK',
+  Tl = 'TL',
+  Tm = 'TM',
+  Tn = 'TN',
+  To = 'TO',
+  Tr = 'TR',
+  Tv = 'TV',
+  Tw = 'TW',
+  Tz = 'TZ',
+  Ua = 'UA',
+  Ug = 'UG',
+  Us = 'US',
+  Uy = 'UY',
+  Uz = 'UZ',
+  Va = 'VA',
+  Vc = 'VC',
+  Ve = 'VE',
+  Vg = 'VG',
+  Vi = 'VI',
+  Vn = 'VN',
+  Vu = 'VU',
+  Wf = 'WF',
+  Ws = 'WS',
+  Xk = 'XK',
+  Ye = 'YE',
+  Yt = 'YT',
+  Za = 'ZA',
+  Zm = 'ZM',
+  Zw = 'ZW'
+}
 
 export type CreateManualClassEntryInput = {
   classType: ClassType | null | undefined;
@@ -767,19 +779,22 @@ export type CreateTeacherNoteInput = {
   title: string;
 };
 
-export type CreditReason =
-  | 'ADJUSTMENT'
-  | 'DEDUCTION'
-  | 'PURCHASE'
-  | 'REFUND';
+export enum CreditReason {
+  Adjustment = 'ADJUSTMENT',
+  Deduction = 'DEDUCTION',
+  Purchase = 'PURCHASE',
+  Refund = 'REFUND'
+}
 
-export type CronConcurrencyPolicy =
-  | 'ALLOW'
-  | 'REPLACE'
-  | 'SKIP';
+export enum CronConcurrencyPolicy {
+  Allow = 'ALLOW',
+  Replace = 'REPLACE',
+  Skip = 'SKIP'
+}
 
-export type CronJobKind =
-  | 'NOOP';
+export enum CronJobKind {
+  Noop = 'NOOP'
+}
 
 export type CronRunListInput = {
   from: string | null | undefined;
@@ -791,14 +806,15 @@ export type CronRunListInput = {
   to: string | null | undefined;
 };
 
-export type CronRunStatus =
-  | 'CANCELLED'
-  | 'COMPLETED'
-  | 'FAILED'
-  | 'PENDING'
-  | 'RETRYING'
-  | 'RUNNING'
-  | 'TIMEOUT';
+export enum CronRunStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Retrying = 'RETRYING',
+  Running = 'RUNNING',
+  Timeout = 'TIMEOUT'
+}
 
 export type CronRunTriggerInput = {
   id: string;
@@ -818,10 +834,11 @@ export type CronScheduleListInput = {
   status: CronScheduleStatus | null | undefined;
 };
 
-export type CronScheduleStatus =
-  | 'ACTIVE'
-  | 'DISABLED'
-  | 'PAUSED';
+export enum CronScheduleStatus {
+  Active = 'ACTIVE',
+  Disabled = 'DISABLED',
+  Paused = 'PAUSED'
+}
 
 export type CronScheduleSubmitInput = {
   concurrencyPolicy: CronConcurrencyPolicy | null | undefined;
@@ -849,55 +866,58 @@ export type CronScheduleUpdateInput = {
   timezone: string | null | undefined;
 };
 
-export type CronTriggerSource =
-  | 'EXTERNAL'
-  | 'MANUAL'
-  | 'VERCEL_EXPLICIT'
-  | 'VERCEL_TICKER'
-  | 'WORKER_RETRY';
+export enum CronTriggerSource {
+  External = 'EXTERNAL',
+  Manual = 'MANUAL',
+  VercelExplicit = 'VERCEL_EXPLICIT',
+  VercelTicker = 'VERCEL_TICKER',
+  WorkerRetry = 'WORKER_RETRY'
+}
 
-export type CurrencyCode =
-  | 'AED'
-  | 'AUD'
-  | 'BHD'
-  | 'CAD'
-  | 'CHF'
-  | 'CNY'
-  | 'DJF'
-  | 'DZD'
-  | 'EGP'
-  | 'EUR'
-  | 'GBP'
-  | 'ILS'
-  | 'INR'
-  | 'IQD'
-  | 'JOD'
-  | 'JPY'
-  | 'KMF'
-  | 'KWD'
-  | 'LBP'
-  | 'LYD'
-  | 'MAD'
-  | 'MRU'
-  | 'OMR'
-  | 'QAR'
-  | 'SAR'
-  | 'SDG'
-  | 'SOS'
-  | 'SYP'
-  | 'TND'
-  | 'TRY'
-  | 'USD'
-  | 'YER';
+export enum CurrencyCode {
+  Aed = 'AED',
+  Aud = 'AUD',
+  Bhd = 'BHD',
+  Cad = 'CAD',
+  Chf = 'CHF',
+  Cny = 'CNY',
+  Djf = 'DJF',
+  Dzd = 'DZD',
+  Egp = 'EGP',
+  Eur = 'EUR',
+  Gbp = 'GBP',
+  Ils = 'ILS',
+  Inr = 'INR',
+  Iqd = 'IQD',
+  Jod = 'JOD',
+  Jpy = 'JPY',
+  Kmf = 'KMF',
+  Kwd = 'KWD',
+  Lbp = 'LBP',
+  Lyd = 'LYD',
+  Mad = 'MAD',
+  Mru = 'MRU',
+  Omr = 'OMR',
+  Qar = 'QAR',
+  Sar = 'SAR',
+  Sdg = 'SDG',
+  Sos = 'SOS',
+  Syp = 'SYP',
+  Tnd = 'TND',
+  Try = 'TRY',
+  Usd = 'USD',
+  Yer = 'YER'
+}
 
-export type DayOfWeek =
-  | 'FRIDAY'
-  | 'MONDAY'
-  | 'SATURDAY'
-  | 'SUNDAY'
-  | 'THURSDAY'
-  | 'TUESDAY'
-  | 'WEDNESDAY';
+export enum DayOfWeek {
+  Friday = 'FRIDAY',
+  Monday = 'MONDAY',
+  Saturday = 'SATURDAY',
+  Sunday = 'SUNDAY',
+  Thursday = 'THURSDAY',
+  Tuesday = 'TUESDAY',
+  Wednesday = 'WEDNESDAY'
+}
 
 /** Input for the demo fast login mutation. */
 export type DemoLoginInput = {
@@ -909,34 +929,39 @@ export type DisconnectMeetingProviderOAuthInput = {
   providerSlug: MeetingIntegrationProviderSlug;
 };
 
-export type EffectiveMeetingSource =
-  | 'CLASS'
-  | 'NONE'
-  | 'RECURRING'
-  | 'TEACHER';
+export enum EffectiveMeetingSource {
+  Class = 'CLASS',
+  None = 'NONE',
+  Recurring = 'RECURRING',
+  Teacher = 'TEACHER'
+}
 
 export type EnvConfigUpsertInput = {
   key: string;
   value: string;
 };
 
-export type FxProvider =
-  | 'Fixer'
-  | 'OpenExchangeRates';
+export enum FxProvider {
+  Fixer = 'Fixer',
+  OpenExchangeRates = 'OpenExchangeRates'
+}
 
-export type FxProviderConfigSource =
-  | 'DATABASE'
-  | 'ENV';
+export enum FxProviderConfigSource {
+  Database = 'DATABASE',
+  Env = 'ENV'
+}
 
-export type FxSyncStatus =
-  | 'Failed'
-  | 'Partial'
-  | 'Running'
-  | 'Success';
+export enum FxSyncStatus {
+  Failed = 'Failed',
+  Partial = 'Partial',
+  Running = 'Running',
+  Success = 'Success'
+}
 
-export type Gender =
-  | 'FEMALE'
-  | 'MALE';
+export enum Gender {
+  Female = 'FEMALE',
+  Male = 'MALE'
+}
 
 /** Input for creating a general user with permission group assignment */
 export type GeneralUserCreateInput = {
@@ -955,490 +980,51 @@ export type GenerateMeetingUrlInput = {
   topic: string;
 };
 
-export type GroupClassAttendanceStatus =
-  | 'ABSENT'
-  | 'LATE'
-  | 'PENDING'
-  | 'PRESENT';
+export enum GroupClassAttendanceStatus {
+  Absent = 'ABSENT',
+  Late = 'LATE',
+  Pending = 'PENDING',
+  Present = 'PRESENT'
+}
 
-export type IanaTimezone =
-  | 'Africa_Abidjan'
-  | 'Africa_Accra'
-  | 'Africa_Addis_Ababa'
-  | 'Africa_Algiers'
-  | 'Africa_Asmara'
-  | 'Africa_Bamako'
-  | 'Africa_Bangui'
-  | 'Africa_Banjul'
-  | 'Africa_Bissau'
-  | 'Africa_Blantyre'
-  | 'Africa_Brazzaville'
-  | 'Africa_Bujumbura'
-  | 'Africa_Cairo'
-  | 'Africa_Casablanca'
-  | 'Africa_Ceuta'
-  | 'Africa_Conakry'
-  | 'Africa_Dakar'
-  | 'Africa_Dar_es_Salaam'
-  | 'Africa_Djibouti'
-  | 'Africa_Douala'
-  | 'Africa_El_Aaiun'
-  | 'Africa_Freetown'
-  | 'Africa_Gaborone'
-  | 'Africa_Harare'
-  | 'Africa_Johannesburg'
-  | 'Africa_Juba'
-  | 'Africa_Kampala'
-  | 'Africa_Khartoum'
-  | 'Africa_Kigali'
-  | 'Africa_Kinshasa'
-  | 'Africa_Lagos'
-  | 'Africa_Libreville'
-  | 'Africa_Lome'
-  | 'Africa_Luanda'
-  | 'Africa_Lubumbashi'
-  | 'Africa_Lusaka'
-  | 'Africa_Malabo'
-  | 'Africa_Maputo'
-  | 'Africa_Maseru'
-  | 'Africa_Mbabane'
-  | 'Africa_Mogadishu'
-  | 'Africa_Monrovia'
-  | 'Africa_Nairobi'
-  | 'Africa_Ndjamena'
-  | 'Africa_Niamey'
-  | 'Africa_Nouakchott'
-  | 'Africa_Ouagadougou'
-  | 'Africa_Porto_Novo'
-  | 'Africa_Sao_Tome'
-  | 'Africa_Tripoli'
-  | 'Africa_Tunis'
-  | 'Africa_Windhoek'
-  | 'America_Adak'
-  | 'America_Anchorage'
-  | 'America_Anguilla'
-  | 'America_Antigua'
-  | 'America_Araguaina'
-  | 'America_Argentina_Buenos_Aires'
-  | 'America_Argentina_Catamarca'
-  | 'America_Argentina_Cordoba'
-  | 'America_Argentina_Jujuy'
-  | 'America_Argentina_La_Rioja'
-  | 'America_Argentina_Mendoza'
-  | 'America_Argentina_Rio_Gallegos'
-  | 'America_Argentina_Salta'
-  | 'America_Argentina_San_Juan'
-  | 'America_Argentina_San_Luis'
-  | 'America_Argentina_Tucuman'
-  | 'America_Argentina_Ushuaia'
-  | 'America_Aruba'
-  | 'America_Asuncion'
-  | 'America_Atikokan'
-  | 'America_Bahia'
-  | 'America_Bahia_Banderas'
-  | 'America_Barbados'
-  | 'America_Belem'
-  | 'America_Belize'
-  | 'America_Blanc_Sablon'
-  | 'America_Boa_Vista'
-  | 'America_Bogota'
-  | 'America_Boise'
-  | 'America_Cambridge_Bay'
-  | 'America_Campo_Grande'
-  | 'America_Cancun'
-  | 'America_Caracas'
-  | 'America_Cayenne'
-  | 'America_Cayman'
-  | 'America_Chicago'
-  | 'America_Chihuahua'
-  | 'America_Ciudad_Juarez'
-  | 'America_Costa_Rica'
-  | 'America_Creston'
-  | 'America_Cuiaba'
-  | 'America_Curacao'
-  | 'America_Danmarkshavn'
-  | 'America_Dawson'
-  | 'America_Dawson_Creek'
-  | 'America_Denver'
-  | 'America_Detroit'
-  | 'America_Dominica'
-  | 'America_Edmonton'
-  | 'America_Eirunepe'
-  | 'America_El_Salvador'
-  | 'America_Fort_Nelson'
-  | 'America_Fortaleza'
-  | 'America_Glace_Bay'
-  | 'America_Goose_Bay'
-  | 'America_Grand_Turk'
-  | 'America_Grenada'
-  | 'America_Guadeloupe'
-  | 'America_Guatemala'
-  | 'America_Guayaquil'
-  | 'America_Guyana'
-  | 'America_Halifax'
-  | 'America_Havana'
-  | 'America_Hermosillo'
-  | 'America_Indiana_Indianapolis'
-  | 'America_Indiana_Knox'
-  | 'America_Indiana_Marengo'
-  | 'America_Indiana_Petersburg'
-  | 'America_Indiana_Tell_City'
-  | 'America_Indiana_Vevay'
-  | 'America_Indiana_Vincennes'
-  | 'America_Indiana_Winamac'
-  | 'America_Inuvik'
-  | 'America_Iqaluit'
-  | 'America_Jamaica'
-  | 'America_Juneau'
-  | 'America_Kentucky_Louisville'
-  | 'America_Kentucky_Monticello'
-  | 'America_Kralendijk'
-  | 'America_La_Paz'
-  | 'America_Lima'
-  | 'America_Los_Angeles'
-  | 'America_Lower_Princes'
-  | 'America_Maceio'
-  | 'America_Managua'
-  | 'America_Manaus'
-  | 'America_Marigot'
-  | 'America_Martinique'
-  | 'America_Matamoros'
-  | 'America_Mazatlan'
-  | 'America_Menominee'
-  | 'America_Merida'
-  | 'America_Metlakatla'
-  | 'America_Mexico_City'
-  | 'America_Miquelon'
-  | 'America_Moncton'
-  | 'America_Monterrey'
-  | 'America_Montevideo'
-  | 'America_Montserrat'
-  | 'America_Nassau'
-  | 'America_New_York'
-  | 'America_Nome'
-  | 'America_Noronha'
-  | 'America_North_Dakota_Beulah'
-  | 'America_North_Dakota_Center'
-  | 'America_North_Dakota_New_Salem'
-  | 'America_Nuuk'
-  | 'America_Ojinaga'
-  | 'America_Panama'
-  | 'America_Paramaribo'
-  | 'America_Phoenix'
-  | 'America_Port_au_Prince'
-  | 'America_Port_of_Spain'
-  | 'America_Porto_Velho'
-  | 'America_Puerto_Rico'
-  | 'America_Punta_Arenas'
-  | 'America_Rankin_Inlet'
-  | 'America_Recife'
-  | 'America_Regina'
-  | 'America_Resolute'
-  | 'America_Rio_Branco'
-  | 'America_Santarem'
-  | 'America_Santiago'
-  | 'America_Santo_Domingo'
-  | 'America_Sao_Paulo'
-  | 'America_Scoresbysund'
-  | 'America_Sitka'
-  | 'America_St_Barthelemy'
-  | 'America_St_Johns'
-  | 'America_St_Kitts'
-  | 'America_St_Lucia'
-  | 'America_St_Thomas'
-  | 'America_St_Vincent'
-  | 'America_Swift_Current'
-  | 'America_Tegucigalpa'
-  | 'America_Thule'
-  | 'America_Tijuana'
-  | 'America_Toronto'
-  | 'America_Tortola'
-  | 'America_Vancouver'
-  | 'America_Whitehorse'
-  | 'America_Winnipeg'
-  | 'America_Yakutat'
-  | 'Antarctica_Casey'
-  | 'Antarctica_Davis'
-  | 'Antarctica_DumontDUrville'
-  | 'Antarctica_Macquarie'
-  | 'Antarctica_Mawson'
-  | 'Antarctica_McMurdo'
-  | 'Antarctica_Palmer'
-  | 'Antarctica_Rothera'
-  | 'Antarctica_Syowa'
-  | 'Antarctica_Troll'
-  | 'Antarctica_Vostok'
-  | 'Arctic_Longyearbyen'
-  | 'Asia_Aden'
-  | 'Asia_Almaty'
-  | 'Asia_Amman'
-  | 'Asia_Anadyr'
-  | 'Asia_Aqtau'
-  | 'Asia_Aqtobe'
-  | 'Asia_Ashgabat'
-  | 'Asia_Atyrau'
-  | 'Asia_Baghdad'
-  | 'Asia_Bahrain'
-  | 'Asia_Baku'
-  | 'Asia_Bangkok'
-  | 'Asia_Barnaul'
-  | 'Asia_Beirut'
-  | 'Asia_Bishkek'
-  | 'Asia_Brunei'
-  | 'Asia_Chita'
-  | 'Asia_Choibalsan'
-  | 'Asia_Colombo'
-  | 'Asia_Damascus'
-  | 'Asia_Dhaka'
-  | 'Asia_Dili'
-  | 'Asia_Dubai'
-  | 'Asia_Dushanbe'
-  | 'Asia_Famagusta'
-  | 'Asia_Gaza'
-  | 'Asia_Hebron'
-  | 'Asia_Ho_Chi_Minh'
-  | 'Asia_Hong_Kong'
-  | 'Asia_Hovd'
-  | 'Asia_Irkutsk'
-  | 'Asia_Jakarta'
-  | 'Asia_Jayapura'
-  | 'Asia_Kabul'
-  | 'Asia_Kamchatka'
-  | 'Asia_Karachi'
-  | 'Asia_Kathmandu'
-  | 'Asia_Khandyga'
-  | 'Asia_Kolkata'
-  | 'Asia_Krasnoyarsk'
-  | 'Asia_Kuala_Lumpur'
-  | 'Asia_Kuching'
-  | 'Asia_Kuwait'
-  | 'Asia_Macau'
-  | 'Asia_Magadan'
-  | 'Asia_Makassar'
-  | 'Asia_Manila'
-  | 'Asia_Muscat'
-  | 'Asia_Nicosia'
-  | 'Asia_Novokuznetsk'
-  | 'Asia_Novosibirsk'
-  | 'Asia_Omsk'
-  | 'Asia_Oral'
-  | 'Asia_Phnom_Penh'
-  | 'Asia_Pontianak'
-  | 'Asia_Pyongyang'
-  | 'Asia_Qatar'
-  | 'Asia_Qostanay'
-  | 'Asia_Qyzylorda'
-  | 'Asia_Riyadh'
-  | 'Asia_Sakhalin'
-  | 'Asia_Samarkand'
-  | 'Asia_Seoul'
-  | 'Asia_Shanghai'
-  | 'Asia_Singapore'
-  | 'Asia_Srednekolymsk'
-  | 'Asia_Taipei'
-  | 'Asia_Tashkent'
-  | 'Asia_Tbilisi'
-  | 'Asia_Tehran'
-  | 'Asia_Thimphu'
-  | 'Asia_Tokyo'
-  | 'Asia_Tomsk'
-  | 'Asia_Ulaanbaatar'
-  | 'Asia_Urumqi'
-  | 'Asia_Ust_Nera'
-  | 'Asia_Vientiane'
-  | 'Asia_Vladivostok'
-  | 'Asia_Yakutsk'
-  | 'Asia_Yangon'
-  | 'Asia_Yekaterinburg'
-  | 'Asia_Yerevan'
-  | 'Atlantic_Azores'
-  | 'Atlantic_Bermuda'
-  | 'Atlantic_Canary'
-  | 'Atlantic_Cape_Verde'
-  | 'Atlantic_Faroe'
-  | 'Atlantic_Madeira'
-  | 'Atlantic_Reykjavik'
-  | 'Atlantic_South_Georgia'
-  | 'Atlantic_St_Helena'
-  | 'Atlantic_Stanley'
-  | 'Australia_Adelaide'
-  | 'Australia_Brisbane'
-  | 'Australia_Broken_Hill'
-  | 'Australia_Darwin'
-  | 'Australia_Eucla'
-  | 'Australia_Hobart'
-  | 'Australia_Lindeman'
-  | 'Australia_Lord_Howe'
-  | 'Australia_Melbourne'
-  | 'Australia_Perth'
-  | 'Australia_Sydney'
-  | 'Etc_GMT_1'
-  | 'Etc_GMT_2'
-  | 'Etc_GMT_3'
-  | 'Etc_GMT_4'
-  | 'Etc_GMT_5'
-  | 'Etc_GMT_6'
-  | 'Etc_GMT_7'
-  | 'Etc_GMT_8'
-  | 'Etc_GMT_9'
-  | 'Etc_GMT_10'
-  | 'Etc_GMT_11'
-  | 'Etc_GMT_12'
-  | 'Etc_GMT_13'
-  | 'Etc_GMT_14'
-  | 'Etc_GMT_plus_1'
-  | 'Etc_GMT_plus_2'
-  | 'Etc_GMT_plus_3'
-  | 'Etc_GMT_plus_4'
-  | 'Etc_GMT_plus_5'
-  | 'Etc_GMT_plus_6'
-  | 'Etc_GMT_plus_7'
-  | 'Etc_GMT_plus_8'
-  | 'Etc_GMT_plus_9'
-  | 'Etc_GMT_plus_10'
-  | 'Etc_GMT_plus_11'
-  | 'Etc_GMT_plus_12'
-  | 'Europe_Amsterdam'
-  | 'Europe_Andorra'
-  | 'Europe_Astrakhan'
-  | 'Europe_Athens'
-  | 'Europe_Belgrade'
-  | 'Europe_Berlin'
-  | 'Europe_Bratislava'
-  | 'Europe_Brussels'
-  | 'Europe_Bucharest'
-  | 'Europe_Budapest'
-  | 'Europe_Busingen'
-  | 'Europe_Chisinau'
-  | 'Europe_Copenhagen'
-  | 'Europe_Dublin'
-  | 'Europe_Gibraltar'
-  | 'Europe_Guernsey'
-  | 'Europe_Helsinki'
-  | 'Europe_Isle_of_Man'
-  | 'Europe_Istanbul'
-  | 'Europe_Jersey'
-  | 'Europe_Kaliningrad'
-  | 'Europe_Kirov'
-  | 'Europe_Kyiv'
-  | 'Europe_Lisbon'
-  | 'Europe_Ljubljana'
-  | 'Europe_London'
-  | 'Europe_Luxembourg'
-  | 'Europe_Madrid'
-  | 'Europe_Malta'
-  | 'Europe_Mariehamn'
-  | 'Europe_Minsk'
-  | 'Europe_Monaco'
-  | 'Europe_Moscow'
-  | 'Europe_Oslo'
-  | 'Europe_Paris'
-  | 'Europe_Podgorica'
-  | 'Europe_Prague'
-  | 'Europe_Riga'
-  | 'Europe_Rome'
-  | 'Europe_Samara'
-  | 'Europe_San_Marino'
-  | 'Europe_Sarajevo'
-  | 'Europe_Saratov'
-  | 'Europe_Simferopol'
-  | 'Europe_Skopje'
-  | 'Europe_Sofia'
-  | 'Europe_Stockholm'
-  | 'Europe_Tallinn'
-  | 'Europe_Tirane'
-  | 'Europe_Ulyanovsk'
-  | 'Europe_Vaduz'
-  | 'Europe_Vatican'
-  | 'Europe_Vienna'
-  | 'Europe_Vilnius'
-  | 'Europe_Volgograd'
-  | 'Europe_Warsaw'
-  | 'Europe_Zagreb'
-  | 'Europe_Zurich'
-  | 'Indian_Antananarivo'
-  | 'Indian_Chagos'
-  | 'Indian_Christmas'
-  | 'Indian_Cocos'
-  | 'Indian_Comoro'
-  | 'Indian_Kerguelen'
-  | 'Indian_Mahe'
-  | 'Indian_Maldives'
-  | 'Indian_Mauritius'
-  | 'Indian_Mayotte'
-  | 'Indian_Reunion'
-  | 'Pacific_Apia'
-  | 'Pacific_Auckland'
-  | 'Pacific_Bougainville'
-  | 'Pacific_Chatham'
-  | 'Pacific_Chuuk'
-  | 'Pacific_Easter'
-  | 'Pacific_Efate'
-  | 'Pacific_Fakaofo'
-  | 'Pacific_Fiji'
-  | 'Pacific_Funafuti'
-  | 'Pacific_Galapagos'
-  | 'Pacific_Gambier'
-  | 'Pacific_Guadalcanal'
-  | 'Pacific_Guam'
-  | 'Pacific_Honolulu'
-  | 'Pacific_Kanton'
-  | 'Pacific_Kiritimati'
-  | 'Pacific_Kosrae'
-  | 'Pacific_Kwajalein'
-  | 'Pacific_Majuro'
-  | 'Pacific_Marquesas'
-  | 'Pacific_Midway'
-  | 'Pacific_Nauru'
-  | 'Pacific_Niue'
-  | 'Pacific_Norfolk'
-  | 'Pacific_Noumea'
-  | 'Pacific_Pago_Pago'
-  | 'Pacific_Palau'
-  | 'Pacific_Pitcairn'
-  | 'Pacific_Pohnpei'
-  | 'Pacific_Port_Moresby'
-  | 'Pacific_Rarotonga'
-  | 'Pacific_Saipan'
-  | 'Pacific_Tahiti'
-  | 'Pacific_Tarawa'
-  | 'Pacific_Tongatapu'
-  | 'Pacific_Wake'
-  | 'Pacific_Wallis'
-  | 'UTC';
+export enum IdentifierKind {
+  Email = 'EMAIL',
+  EmailOrHandle = 'EMAIL_OR_HANDLE',
+  Handle = 'HANDLE'
+}
 
-export type IdentifierKind =
-  | 'EMAIL'
-  | 'EMAIL_OR_HANDLE'
-  | 'HANDLE';
+export enum InvoicePaymentSubmissionStatus {
+  Approved = 'APPROVED',
+  Pending = 'PENDING',
+  Rejected = 'REJECTED'
+}
 
-export type InvoicePaymentSubmissionStatus =
-  | 'APPROVED'
-  | 'PENDING'
-  | 'REJECTED';
+export enum InvoiceStatus {
+  Cancelled = 'CANCELLED',
+  Paid = 'PAID',
+  PaymentPending = 'PAYMENT_PENDING',
+  Unpaid = 'UNPAID'
+}
 
-export type InvoiceStatus =
-  | 'CANCELLED'
-  | 'PAID'
-  | 'PAYMENT_PENDING'
-  | 'UNPAID';
+export enum InvoiceType {
+  Manual = 'MANUAL',
+  Monthly = 'MONTHLY',
+  PerClasses = 'PER_CLASSES'
+}
 
-export type InvoiceType =
-  | 'MANUAL'
-  | 'MONTHLY'
-  | 'PER_CLASSES';
+export enum LeaveRequestStatus {
+  Approved = 'APPROVED',
+  Cancelled = 'CANCELLED',
+  Pending = 'PENDING',
+  Rescheduled = 'RESCHEDULED'
+}
 
-export type LeaveRequestStatus =
-  | 'APPROVED'
-  | 'CANCELLED'
-  | 'PENDING'
-  | 'RESCHEDULED';
-
-export type LessonReportStatus =
-  | 'APPROVED'
-  | 'DRAFT'
-  | 'PENDING_REVIEW'
-  | 'REJECTED';
+export enum LessonReportStatus {
+  Approved = 'APPROVED',
+  Draft = 'DRAFT',
+  PendingReview = 'PENDING_REVIEW',
+  Rejected = 'REJECTED'
+}
 
 /** Input for submitting a lesson report for a completed class instance */
 export type LessonReportSubmitInput = {
@@ -1458,9 +1044,10 @@ export type LoginInput = {
   password: string;
 };
 
-export type ManagerAccountType =
-  | 'manager'
-  | 'supervisor';
+export enum ManagerAccountType {
+  Manager = 'manager',
+  Supervisor = 'supervisor'
+}
 
 /** Input for creating a new manager/staff account with RBAC assignment */
 export type ManagerOnboardingInput = {
@@ -1486,20 +1073,23 @@ export type MeetingConfigDetailsInput = {
   username: string | null | undefined;
 };
 
-export type MeetingConnectionTestMode =
-  | 'GENERATE_AND_DELETE'
-  | 'VALIDATE_CONFIG';
+export enum MeetingConnectionTestMode {
+  GenerateAndDelete = 'GENERATE_AND_DELETE',
+  ValidateConfig = 'VALIDATE_CONFIG'
+}
 
-export type MeetingIntegrationConnectedAccountStatus =
-  | 'CONNECTED'
-  | 'EXPIRING_SOON'
-  | 'REAUTH_NEEDED'
-  | 'REVOKED';
+export enum MeetingIntegrationConnectedAccountStatus {
+  Connected = 'CONNECTED',
+  ExpiringSoon = 'EXPIRING_SOON',
+  ReauthNeeded = 'REAUTH_NEEDED',
+  Revoked = 'REVOKED'
+}
 
-export type MeetingIntegrationProviderSlug =
-  | 'GOOGLE_MEET'
-  | 'MICROSOFT_TEAMS'
-  | 'ZOOM';
+export enum MeetingIntegrationProviderSlug {
+  GoogleMeet = 'GOOGLE_MEET',
+  MicrosoftTeams = 'MICROSOFT_TEAMS',
+  Zoom = 'ZOOM'
+}
 
 export type MeetingProviderCreateInput = {
   description: Partial<Record<'ar' | 'en', string>> | null | undefined;
@@ -1535,47 +1125,49 @@ export type MeetingProviderUpdateInput = {
   urlExample: string | null | undefined;
 };
 
-export type NotificationChannel =
-  | 'EMAIL'
-  | 'ON_APP'
-  | 'PUSH'
-  | 'SMS'
-  | 'WHATSAPP';
+export enum NotificationChannel {
+  Email = 'EMAIL',
+  OnApp = 'ON_APP',
+  Push = 'PUSH',
+  Sms = 'SMS',
+  Whatsapp = 'WHATSAPP'
+}
 
-export type NotificationEventType =
-  | 'CLASS_ACTIVATED'
-  | 'CLASS_CANCELLED'
-  | 'CLASS_COMPLETED'
-  | 'CLASS_LEAVE_REQUESTED'
-  | 'CLASS_MARKED_ABSENT'
-  | 'CLASS_MARKED_MISSED'
-  | 'CLASS_REMINDER'
-  | 'CLASS_RESCHEDULED'
-  | 'CLASS_RESET'
-  | 'CLASS_SCHEDULED'
-  | 'CLASS_STARTED'
-  | 'COMPLAINT_RESPONSE'
-  | 'INVOICE_GENERATED'
-  | 'INVOICE_STATUS_CHANGED'
-  | 'LESSON_REPORT_REVIEWED'
-  | 'LESSON_REPORT_SUBMITTED'
-  | 'NEW_COMPLAINT'
-  | 'NEW_SUGGESTION'
-  | 'ON_DEMAND_INSTANCE_PENDING_CREDIT'
-  | 'ON_DEMAND_INSTANCE_REMINDER_T1'
-  | 'ON_DEMAND_INSTANCE_REMINDER_T3'
-  | 'ON_DEMAND_TEACHER_DAILY_DIGEST'
-  | 'PASSWORD_RESET_BY_ADMIN'
-  | 'PAYMENT_METHOD_CHANGED'
-  | 'QUOTA_EXPIRED'
-  | 'QUOTA_EXPIRING_SOON'
-  | 'QUOTA_LOW_BALANCE'
-  | 'STUDENT_QUOTA_OVERRIDDEN'
-  | 'STUDENT_STATUS_CHANGED'
-  | 'STUDENT_TEACHER_REASSIGNED'
-  | 'SUGGESTION_ACKNOWLEDGED'
-  | 'SUGGESTION_DUPLICATE_MARKED'
-  | 'USER_STATUS_CHANGED';
+export enum NotificationEventType {
+  ClassActivated = 'CLASS_ACTIVATED',
+  ClassCancelled = 'CLASS_CANCELLED',
+  ClassCompleted = 'CLASS_COMPLETED',
+  ClassLeaveRequested = 'CLASS_LEAVE_REQUESTED',
+  ClassMarkedAbsent = 'CLASS_MARKED_ABSENT',
+  ClassMarkedMissed = 'CLASS_MARKED_MISSED',
+  ClassReminder = 'CLASS_REMINDER',
+  ClassRescheduled = 'CLASS_RESCHEDULED',
+  ClassReset = 'CLASS_RESET',
+  ClassScheduled = 'CLASS_SCHEDULED',
+  ClassStarted = 'CLASS_STARTED',
+  ComplaintResponse = 'COMPLAINT_RESPONSE',
+  InvoiceGenerated = 'INVOICE_GENERATED',
+  InvoiceStatusChanged = 'INVOICE_STATUS_CHANGED',
+  LessonReportReviewed = 'LESSON_REPORT_REVIEWED',
+  LessonReportSubmitted = 'LESSON_REPORT_SUBMITTED',
+  NewComplaint = 'NEW_COMPLAINT',
+  NewSuggestion = 'NEW_SUGGESTION',
+  OnDemandInstancePendingCredit = 'ON_DEMAND_INSTANCE_PENDING_CREDIT',
+  OnDemandInstanceReminderT1 = 'ON_DEMAND_INSTANCE_REMINDER_T1',
+  OnDemandInstanceReminderT3 = 'ON_DEMAND_INSTANCE_REMINDER_T3',
+  OnDemandTeacherDailyDigest = 'ON_DEMAND_TEACHER_DAILY_DIGEST',
+  PasswordResetByAdmin = 'PASSWORD_RESET_BY_ADMIN',
+  PaymentMethodChanged = 'PAYMENT_METHOD_CHANGED',
+  QuotaExpired = 'QUOTA_EXPIRED',
+  QuotaExpiringSoon = 'QUOTA_EXPIRING_SOON',
+  QuotaLowBalance = 'QUOTA_LOW_BALANCE',
+  StudentQuotaOverridden = 'STUDENT_QUOTA_OVERRIDDEN',
+  StudentStatusChanged = 'STUDENT_STATUS_CHANGED',
+  StudentTeacherReassigned = 'STUDENT_TEACHER_REASSIGNED',
+  SuggestionAcknowledged = 'SUGGESTION_ACKNOWLEDGED',
+  SuggestionDuplicateMarked = 'SUGGESTION_DUPLICATE_MARKED',
+  UserStatusChanged = 'USER_STATUS_CHANGED'
+}
 
 export type NotificationPreferenceInput = {
   channel: NotificationChannel;
@@ -1583,18 +1175,21 @@ export type NotificationPreferenceInput = {
   eventType: NotificationEventType;
 };
 
-export type OnDemandNoCreditsOutcome =
-  | 'AUTO_ABSENT_NO_CREDITS'
-  | 'AUTO_CANCEL'
-  | 'REMIND_ONLY';
+export enum OnDemandNoCreditsOutcome {
+  AutoAbsentNoCredits = 'AUTO_ABSENT_NO_CREDITS',
+  AutoCancel = 'AUTO_CANCEL',
+  RemindOnly = 'REMIND_ONLY'
+}
 
-export type OrderSortDirection =
-  | 'ASC'
-  | 'DESC';
+export enum OrderSortDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
 
-export type OverrideState =
-  | 'DENIED'
-  | 'GRANTED';
+export enum OverrideState {
+  Denied = 'DENIED',
+  Granted = 'GRANTED'
+}
 
 export type PaginationArgs = {
   after: string | null | undefined;
@@ -1649,16 +1244,18 @@ export type ParentOwnProfileUpdateInput = {
   whatsapp: string | null | undefined;
 };
 
-export type ParentStatus =
-  | 'ON_LEAVE'
-  | 'ON_TRIAL'
-  | 'REGULAR'
-  | 'SUSPENDED';
+export enum ParentStatus {
+  OnLeave = 'ON_LEAVE',
+  OnTrial = 'ON_TRIAL',
+  Regular = 'REGULAR',
+  Suspended = 'SUSPENDED'
+}
 
-export type PaymentDirection =
-  | 'BOTH'
-  | 'PAYIN'
-  | 'PAYOUT';
+export enum PaymentDirection {
+  Both = 'BOTH',
+  Payin = 'PAYIN',
+  Payout = 'PAYOUT'
+}
 
 export type PaymentMethodDetailsInput = {
   accountNumber: string | null | undefined;
@@ -1676,35 +1273,40 @@ export type PaymentMethodDetailsInput = {
   walletId: string | null | undefined;
 };
 
-export type PaymentMethodType =
-  | 'BANK_TRANSFER'
-  | 'CASH'
-  | 'MOBILE_WALLET'
-  | 'ONLINE_ACCOUNT'
-  | 'PAYMENT_LINK'
-  | 'PROOF_UPLOAD';
+export enum PaymentMethodType {
+  BankTransfer = 'BANK_TRANSFER',
+  Cash = 'CASH',
+  MobileWallet = 'MOBILE_WALLET',
+  OnlineAccount = 'ONLINE_ACCOUNT',
+  PaymentLink = 'PAYMENT_LINK',
+  ProofUpload = 'PROOF_UPLOAD'
+}
 
-export type ProfileAudience =
-  | 'PARENT'
-  | 'STAFF'
-  | 'STUDENT'
-  | 'TEACHER';
+export enum ProfileAudience {
+  Parent = 'PARENT',
+  Staff = 'STAFF',
+  Student = 'STUDENT',
+  Teacher = 'TEACHER'
+}
 
-export type ProfileScope =
-  | 'OTHER'
-  | 'OWN';
+export enum ProfileScope {
+  Other = 'OTHER',
+  Own = 'OWN'
+}
 
-export type QuotaKind =
-  | 'PACKAGE'
-  | 'PERIODIC';
+export enum QuotaKind {
+  Package = 'PACKAGE',
+  Periodic = 'PERIODIC'
+}
 
-export type QuotaLedgerReason =
-  | 'ADJUST'
-  | 'EXPIRE'
-  | 'GRANT'
-  | 'REDEEM'
-  | 'RELEASE'
-  | 'RESERVE';
+export enum QuotaLedgerReason {
+  Adjust = 'ADJUST',
+  Expire = 'EXPIRE',
+  Grant = 'GRANT',
+  Redeem = 'REDEEM',
+  Release = 'RELEASE',
+  Reserve = 'RESERVE'
+}
 
 /** Filter options for querying quotas */
 export type QuotaPaginatedFilterInput = {
@@ -1714,10 +1316,11 @@ export type QuotaPaginatedFilterInput = {
   studentId: string | null | undefined;
 };
 
-export type QuotaPeriodType =
-  | 'CUSTOM'
-  | 'MONTHLY'
-  | 'WEEKLY';
+export enum QuotaPeriodType {
+  Custom = 'CUSTOM',
+  Monthly = 'MONTHLY',
+  Weekly = 'WEEKLY'
+}
 
 /** Rollover policy configuration for periodic quotas */
 export type QuotaRolloverPolicyInput = {
@@ -1725,10 +1328,11 @@ export type QuotaRolloverPolicyInput = {
   maxRolloverPercent: number | null | undefined;
 };
 
-export type QuotaStatus =
-  | 'ACTIVE'
-  | 'ARCHIVED'
-  | 'EXPIRED';
+export enum QuotaStatus {
+  Active = 'ACTIVE',
+  Archived = 'ARCHIVED',
+  Expired = 'EXPIRED'
+}
 
 /** Input for creating a new student quota */
 export type QuotaSubmitInput = {
@@ -1753,11 +1357,12 @@ export type QuotaUpdateInput = {
   validUntil: string | null | undefined;
 };
 
-export type RateSource =
-  | 'OVERRIDE'
-  | 'RECURRING'
-  | 'SUBJECT'
-  | 'TEACHER';
+export enum RateSource {
+  Override = 'OVERRIDE',
+  Recurring = 'RECURRING',
+  Subject = 'SUBJECT',
+  Teacher = 'TEACHER'
+}
 
 export type RecurringClassDayInput = {
   dayOfWeek: DayOfWeek;
@@ -1766,10 +1371,11 @@ export type RecurringClassDayInput = {
 };
 
 /** Determines how the attendance data is aggregated. */
-export type ReportGroupingMode =
-  | 'DATE'
-  | 'STUDENT'
-  | 'TEACHER';
+export enum ReportGroupingMode {
+  Date = 'DATE',
+  Student = 'STUDENT',
+  Teacher = 'TEACHER'
+}
 
 export type RescheduleClassInput = {
   durationMinutes: number;
@@ -1777,9 +1383,10 @@ export type RescheduleClassInput = {
   scheduledStartAt: string;
 };
 
-export type RescheduleDateLabel =
-  | 'LEAVE_REQUEST'
-  | 'NEW_DATE';
+export enum RescheduleDateLabel {
+  LeaveRequest = 'LEAVE_REQUEST',
+  NewDate = 'NEW_DATE'
+}
 
 export type ResourceUploadInput = {
   displayName: string;
@@ -1804,10 +1411,11 @@ export type RevokePermissionGroupFromUserInput = {
   userId: string;
 };
 
-export type SchedulingMode =
-  | 'NUMBER_OF_CLASSES'
-  | 'ON_DEMAND'
-  | 'QUOTA';
+export enum SchedulingMode {
+  NumberOfClasses = 'NUMBER_OF_CLASSES',
+  OnDemand = 'ON_DEMAND',
+  Quota = 'QUOTA'
+}
 
 /** Input for creating or updating a per-role session configuration. */
 export type SessionConfigUpsertInput = {
@@ -1918,29 +1526,31 @@ export type StudentProfileEditInput = {
   timezoneOverride: string | null | undefined;
 };
 
-export type StudentStatus =
-  | 'DEACTIVATED'
-  | 'ON_LEAVE'
-  | 'ON_TRIAL'
-  | 'REGULAR'
-  | 'SUSPENDED';
+export enum StudentStatus {
+  Deactivated = 'DEACTIVATED',
+  OnLeave = 'ON_LEAVE',
+  OnTrial = 'ON_TRIAL',
+  Regular = 'REGULAR',
+  Suspended = 'SUSPENDED'
+}
 
 export type StudentsOrderByClause = {
   column: StudentsOrderByColumn;
   order: OrderSortDirection | null | undefined;
 };
 
-export type StudentsOrderByColumn =
-  | 'CLASSES_REMAINING'
-  | 'CLASSES_TOTAL'
-  | 'CREATED_AT'
-  | 'DATE_OF_BIRTH'
-  | 'GENDER'
-  | 'ID'
-  | 'NAME'
-  | 'PARENT_ID'
-  | 'STATUS'
-  | 'UPDATED_AT';
+export enum StudentsOrderByColumn {
+  ClassesRemaining = 'CLASSES_REMAINING',
+  ClassesTotal = 'CLASSES_TOTAL',
+  CreatedAt = 'CREATED_AT',
+  DateOfBirth = 'DATE_OF_BIRTH',
+  Gender = 'GENDER',
+  Id = 'ID',
+  Name = 'NAME',
+  ParentId = 'PARENT_ID',
+  Status = 'STATUS',
+  UpdatedAt = 'UPDATED_AT'
+}
 
 /** Input for submitting a new suggestion. */
 export type SubmitSuggestionInput = {
@@ -1957,10 +1567,11 @@ export type SuggestionFilter = {
 };
 
 /** Status of a suggestion in the review pipeline. */
-export type SuggestionStatus =
-  | 'DUPLICATE'
-  | 'PENDING'
-  | 'REVIEWED';
+export enum SuggestionStatus {
+  Duplicate = 'DUPLICATE',
+  Pending = 'PENDING',
+  Reviewed = 'REVIEWED'
+}
 
 export type SupportedCurrencyUpsertInput = {
   code: CurrencyCode;
@@ -2044,29 +1655,31 @@ export type SupportedPaymentLinkUpdateInput = {
   urlExample: string | null | undefined;
 };
 
-export type SystemSettingCategory =
-  | 'App'
-  | 'Auth'
-  | 'Billing'
-  | 'Cache'
-  | 'Communication'
-  | 'Email'
-  | 'Fx'
-  | 'General'
-  | 'Meeting'
-  | 'Push'
-  | 'Redis'
-  | 'Scheduling'
-  | 'Security'
-  | 'Sms'
-  | 'Storage'
-  | 'System';
+export enum SystemSettingCategory {
+  App = 'App',
+  Auth = 'Auth',
+  Billing = 'Billing',
+  Cache = 'Cache',
+  Communication = 'Communication',
+  Email = 'Email',
+  Fx = 'Fx',
+  General = 'General',
+  Meeting = 'Meeting',
+  Push = 'Push',
+  Redis = 'Redis',
+  Scheduling = 'Scheduling',
+  Security = 'Security',
+  Sms = 'Sms',
+  Storage = 'Storage',
+  System = 'System'
+}
 
-export type SystemSettingDataType =
-  | 'Boolean'
-  | 'Integer'
-  | 'Json'
-  | 'String';
+export enum SystemSettingDataType {
+  Boolean = 'Boolean',
+  Integer = 'Integer',
+  Json = 'Json',
+  String = 'String'
+}
 
 export type SystemSettingUpsertInput = {
   category: SystemSettingCategory | null | undefined;
@@ -2076,9 +1689,10 @@ export type SystemSettingUpsertInput = {
   value: string;
 };
 
-export type TeacherDueStatus =
-  | 'PAID'
-  | 'PENDING';
+export enum TeacherDueStatus {
+  Paid = 'PAID',
+  Pending = 'PENDING'
+}
 
 /** Input for creating a new teacher account with comprehensive profile */
 export type TeacherOnboardingInput = {
@@ -2143,14 +1757,15 @@ export type TeacherProfileUpdateInput = {
   timezone: IanaTimezone | null | undefined;
 };
 
-export type TeacherProgressFeedEventKind =
-  | 'ACTIVATED'
-  | 'AUTO_MISSED'
-  | 'COMPLETED'
-  | 'LEAVE'
-  | 'MARKED_ABSENT'
-  | 'OTHER'
-  | 'STARTED';
+export enum TeacherProgressFeedEventKind {
+  Activated = 'ACTIVATED',
+  AutoMissed = 'AUTO_MISSED',
+  Completed = 'COMPLETED',
+  Leave = 'LEAVE',
+  MarkedAbsent = 'MARKED_ABSENT',
+  Other = 'OTHER',
+  Started = 'STARTED'
+}
 
 export type TestMeetingConnectionInput = {
   mode: MeetingConnectionTestMode;
@@ -2209,9 +1824,10 @@ export type UploadPreparationInput = {
   path: string;
 };
 
-export type UploadType =
-  | 'SIGNED_URL'
-  | 'VERCEL_BLOB_CLIENT';
+export enum UploadType {
+  SignedUrl = 'SIGNED_URL',
+  VercelBlobClient = 'VERCEL_BLOB_CLIENT'
+}
 
 export type UserMeetingConfigCreateInput = {
   details: MeetingConfigDetailsInput;
@@ -2284,46 +1900,59 @@ export type WhatsappAccountUpdateInput = {
   throughputLevel: string | null | undefined;
 };
 
-export type WhatsappLimitTier =
-  | 'TIER_1K'
-  | 'TIER_10K'
-  | 'TIER_50'
-  | 'TIER_100K'
-  | 'TIER_250'
-  | 'TIER_NOT_SET'
-  | 'TIER_UNLIMITED'
-  | 'UNTIERED';
+export enum WhatsappLimitTier {
+  Tier_1K = 'TIER_1K',
+  Tier_10K = 'TIER_10K',
+  Tier_50 = 'TIER_50',
+  Tier_100K = 'TIER_100K',
+  Tier_250 = 'TIER_250',
+  TierNotSet = 'TIER_NOT_SET',
+  TierUnlimited = 'TIER_UNLIMITED',
+  Untiered = 'UNTIERED'
+}
 
-export type WhatsappQualityRating =
-  | 'GREEN'
-  | 'RED'
-  | 'UNKNOWN'
-  | 'YELLOW';
+export enum WhatsappQualityRating {
+  Green = 'GREEN',
+  Red = 'RED',
+  Unknown = 'UNKNOWN',
+  Yellow = 'YELLOW'
+}
 
-export type WhatsappTemplateCategory =
-  | 'AUTHENTICATION'
-  | 'MARKETING'
-  | 'UTILITY';
+export enum WhatsappTemplateCategory {
+  Authentication = 'AUTHENTICATION',
+  Marketing = 'MARKETING',
+  Utility = 'UTILITY'
+}
 
-export type WhatsappTemplateStatus =
-  | 'APPROVED'
-  | 'DISABLED'
-  | 'PAUSED'
-  | 'PENDING'
-  | 'PENDING_DELETION'
-  | 'REJECTED';
+export enum WhatsappTemplateStatus {
+  Approved = 'APPROVED',
+  Disabled = 'DISABLED',
+  Paused = 'PAUSED',
+  Pending = 'PENDING',
+  PendingDeletion = 'PENDING_DELETION',
+  Rejected = 'REJECTED'
+}
+
+export type MeQuery_me = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null };
+
+export type MeQuery = { me: MeQuery_me | null };
+
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type UserQuery_user = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null };
 
-export type MeQuery = { me: { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null } | null };
+export type UserQuery = { user: UserQuery_user | null };
+
 
 export type UserQueryVariables = Exact<{
   id: string;
 }>;
 
+export type UsersQuery_users = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null };
 
-export type UserQuery = { user: { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null } | null };
+export type UsersQuery = { users: Array<UsersQuery_users> | null };
+
 
 export type UsersQueryVariables = Exact<{
   search: string | null | undefined;
@@ -2331,91 +1960,141 @@ export type UsersQueryVariables = Exact<{
   offset: number | null | undefined;
 }>;
 
+export type LoginMutation_login_user = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null };
 
-export type UsersQuery = { users: Array<{ id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null }> | null };
+export type LoginMutation_login = { token: string | null, user: LoginMutation_login_user | null };
+
+export type LoginMutation = { login: LoginMutation_login | null };
+
 
 export type LoginMutationVariables = Exact<{
   input: LoginInput;
 }>;
 
+export type DemoLoginMutation_demoLogin_user = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null };
 
-export type LoginMutation = { login: { token: string | null, user: { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null } | null } | null };
+export type DemoLoginMutation_demoLogin = { token: string | null, user: DemoLoginMutation_demoLogin_user | null };
+
+export type DemoLoginMutation = { demoLogin: DemoLoginMutation_demoLogin | null };
+
 
 export type DemoLoginMutationVariables = Exact<{
   input: DemoLoginInput;
 }>;
 
+export type LogoutMutation = { logout: boolean | null };
 
-export type DemoLoginMutation = { demoLogin: { token: string | null, user: { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null } | null } | null };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
+export type RefreshTokenMutation_refreshToken_user = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null };
 
-export type LogoutMutation = { logout: boolean | null };
+export type RefreshTokenMutation_refreshToken = { token: string | null, user: RefreshTokenMutation_refreshToken_user | null };
+
+export type RefreshTokenMutation = { refreshToken: RefreshTokenMutation_refreshToken | null };
+
 
 export type RefreshTokenMutationVariables = Exact<{ [key: string]: never; }>;
 
+export type ImpersonationStatusQuery_impersonationStatus_targetUser = { id: string | null, name: string | null, email: string | null };
 
-export type RefreshTokenMutation = { refreshToken: { token: string | null, user: { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null } | null } | null };
+export type ImpersonationStatusQuery_impersonationStatus_actorUser = { id: string | null, name: string | null, email: string | null };
+
+export type ImpersonationStatusQuery_impersonationStatus = { id: string | null, isActive: boolean | null, startedAt: string | null, expiresAt: string | null, reason: string | null, targetUser: ImpersonationStatusQuery_impersonationStatus_targetUser | null, actorUser: ImpersonationStatusQuery_impersonationStatus_actorUser | null };
+
+export type ImpersonationStatusQuery = { impersonationStatus: ImpersonationStatusQuery_impersonationStatus | null };
+
 
 export type ImpersonationStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type StartImpersonationMutation_startImpersonation_targetUser = { id: string | null, name: string | null, email: string | null, permissions: Array<AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: AccountStatus | null, displayCurrency: CurrencyCode | null };
 
-export type ImpersonationStatusQuery = { impersonationStatus: { id: string | null, isActive: boolean | null, startedAt: string | null, expiresAt: string | null, reason: string | null, targetUser: { id: string | null, name: string | null, email: string | null } | null, actorUser: { id: string | null, name: string | null, email: string | null } | null } | null };
+export type StartImpersonationMutation_startImpersonation = { id: string | null, token: string | null, expiresAt: string | null, impersonationSessionId: string | null, targetUser: StartImpersonationMutation_startImpersonation_targetUser | null };
+
+export type StartImpersonationMutation = { startImpersonation: StartImpersonationMutation_startImpersonation | null };
+
 
 export type StartImpersonationMutationVariables = Exact<{
   targetUserId: string;
   reason: string | null | undefined;
 }>;
 
+export type EndImpersonationMutation_endImpersonation = { token: string | null };
 
-export type StartImpersonationMutation = { startImpersonation: { id: string | null, token: string | null, expiresAt: string | null, impersonationSessionId: string | null, targetUser: { id: string | null, name: string | null, email: string | null, permissions: Array<AppPermission> | null, role: string | null, avatarUrl: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, phone: string | null, status: AccountStatus | null, displayCurrency: CurrencyCode | null } | null } | null };
+export type EndImpersonationMutation = { endImpersonation: EndImpersonationMutation_endImpersonation | null };
+
 
 export type EndImpersonationMutationVariables = Exact<{ [key: string]: never; }>;
 
+export type PermissionGroupSimulationStatusQuery_permissionGroupSimulationStatus = { isActive: boolean | null, groupSlug: string | null, groupName: string | null, startedAt: string | null, expiresAt: string | null };
 
-export type EndImpersonationMutation = { endImpersonation: { token: string | null } | null };
+export type PermissionGroupSimulationStatusQuery = { permissionGroupSimulationStatus: PermissionGroupSimulationStatusQuery_permissionGroupSimulationStatus | null };
+
 
 export type PermissionGroupSimulationStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type SimulatablePermissionGroupsQuery_simulatablePermissionGroups = { id: string | null, slug: string | null, name: string | null, description: string | null };
 
-export type PermissionGroupSimulationStatusQuery = { permissionGroupSimulationStatus: { isActive: boolean | null, groupSlug: string | null, groupName: string | null, startedAt: string | null, expiresAt: string | null } | null };
+export type SimulatablePermissionGroupsQuery = { simulatablePermissionGroups: Array<SimulatablePermissionGroupsQuery_simulatablePermissionGroups> | null };
+
 
 export type SimulatablePermissionGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type StartPermissionGroupSimulationMutation_startPermissionGroupSimulation = { token: string | null, expiresAt: string | null, groupSlug: string | null };
 
-export type SimulatablePermissionGroupsQuery = { simulatablePermissionGroups: Array<{ id: string | null, slug: string | null, name: string | null, description: string | null }> | null };
+export type StartPermissionGroupSimulationMutation = { startPermissionGroupSimulation: StartPermissionGroupSimulationMutation_startPermissionGroupSimulation | null };
+
 
 export type StartPermissionGroupSimulationMutationVariables = Exact<{
   groupSlug: string;
 }>;
 
+export type EndPermissionGroupSimulationMutation_endPermissionGroupSimulation = { token: string | null };
 
-export type StartPermissionGroupSimulationMutation = { startPermissionGroupSimulation: { token: string | null, expiresAt: string | null, groupSlug: string | null } | null };
+export type EndPermissionGroupSimulationMutation = { endPermissionGroupSimulation: EndPermissionGroupSimulationMutation_endPermissionGroupSimulation | null };
+
 
 export type EndPermissionGroupSimulationMutationVariables = Exact<{ [key: string]: never; }>;
 
+export type ChangePasswordMutation = { changePassword: boolean | null };
 
-export type EndPermissionGroupSimulationMutation = { endPermissionGroupSimulation: { token: string | null } | null };
 
 export type ChangePasswordMutationVariables = Exact<{
   input: ChangePasswordInput;
 }>;
 
+export type AdminResetPasswordMutation_adminResetPassword = { success: boolean | null, userId: string | null, message: string | null };
 
-export type ChangePasswordMutation = { changePassword: boolean | null };
+export type AdminResetPasswordMutation = { adminResetPassword: AdminResetPasswordMutation_adminResetPassword | null };
+
 
 export type AdminResetPasswordMutationVariables = Exact<{
   input: AdminResetPasswordInput;
 }>;
 
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_overdueAmountsByCurrency_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type AdminResetPasswordMutation = { adminResetPassword: { success: boolean | null, userId: string | null, message: string | null } | null };
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_overdueAmountsByCurrency = { id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_overdueAmountsByCurrency_displayAmount | null };
+
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_items_amountsByCurrency_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_items_amountsByCurrency = { id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_items_amountsByCurrency_displayAmount | null };
+
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_items = { id: string | null, userId: string | null, userName: string | null, userEmail: string | null, totalUnpaidAmount: string | null, currency: CurrencyCode | null, overdueCount: number | null, oldestDueDate: string | null, amountsByCurrency: Array<UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_items_amountsByCurrency> | null };
+
+export type UnpaidInvoicesAlertQuery_unpaidInvoicesAlert = { id: string | null, totalOverdueInvoices: number | null, totalOverdueAmount: string | null, overdueAmountsByCurrency: Array<UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_overdueAmountsByCurrency> | null, items: Array<UnpaidInvoicesAlertQuery_unpaidInvoicesAlert_items> | null };
+
+export type UnpaidInvoicesAlertQuery = { unpaidInvoicesAlert: UnpaidInvoicesAlertQuery_unpaidInvoicesAlert | null };
+
 
 export type UnpaidInvoicesAlertQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type CreateManualInvoiceMutation_createManualInvoice_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type UnpaidInvoicesAlertQuery = { unpaidInvoicesAlert: { id: string | null, totalOverdueInvoices: number | null, totalOverdueAmount: string | null, overdueAmountsByCurrency: Array<{ id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null, items: Array<{ id: string | null, userId: string | null, userName: string | null, userEmail: string | null, totalUnpaidAmount: string | null, currency: CurrencyCode | null, overdueCount: number | null, oldestDueDate: string | null, amountsByCurrency: Array<{ id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null }> | null } | null };
+export type CreateManualInvoiceMutation_createManualInvoice = { id: string | null, parentId: string | null, studentId: string | null, amount: string | null, currency: CurrencyCode | null, status: InvoiceStatus | null, invoiceType: InvoiceType | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, version: number | null, createdAt: string | null, displayAmount: CreateManualInvoiceMutation_createManualInvoice_displayAmount | null };
+
+export type CreateManualInvoiceMutation = { createManualInvoice: CreateManualInvoiceMutation_createManualInvoice | null };
+
 
 export type CreateManualInvoiceMutationVariables = Exact<{
   parentId: string;
@@ -2431,8 +2110,10 @@ export type CreateManualInvoiceMutationVariables = Exact<{
   sendEmail: boolean | null | undefined;
 }>;
 
+export type MarkInvoicePaidMutation_markInvoicePaid = { id: string | null, parentId: string | null, status: InvoiceStatus | null, paidDate: string | null, version: number | null, notificationSummaryUpdated: boolean | null };
 
-export type CreateManualInvoiceMutation = { createManualInvoice: { id: string | null, parentId: string | null, studentId: string | null, amount: string | null, currency: CurrencyCode | null, status: InvoiceStatus | null, invoiceType: InvoiceType | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, version: number | null, createdAt: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null };
+export type MarkInvoicePaidMutation = { markInvoicePaid: MarkInvoicePaidMutation_markInvoicePaid | null };
+
 
 export type MarkInvoicePaidMutationVariables = Exact<{
   invoiceId: string;
@@ -2440,8 +2121,10 @@ export type MarkInvoicePaidMutationVariables = Exact<{
   expectedVersion: number | null | undefined;
 }>;
 
+export type SubmitPaymentProofMutation_submitPaymentProof = { id: string | null, parentId: string | null, status: InvoiceStatus | null, paidDate: string | null, version: number | null, notificationSummaryUpdated: boolean | null };
 
-export type MarkInvoicePaidMutation = { markInvoicePaid: { id: string | null, parentId: string | null, status: InvoiceStatus | null, paidDate: string | null, version: number | null, notificationSummaryUpdated: boolean | null } | null };
+export type SubmitPaymentProofMutation = { submitPaymentProof: SubmitPaymentProofMutation_submitPaymentProof | null };
+
 
 export type SubmitPaymentProofMutationVariables = Exact<{
   invoiceId: string;
@@ -2449,16 +2132,20 @@ export type SubmitPaymentProofMutationVariables = Exact<{
   expectedVersion: number | null | undefined;
 }>;
 
+export type ApprovePaymentProofMutation_approvePaymentProof = { id: string | null, parentId: string | null, status: InvoiceStatus | null, paidDate: string | null, version: number | null, notificationSummaryUpdated: boolean | null };
 
-export type SubmitPaymentProofMutation = { submitPaymentProof: { id: string | null, parentId: string | null, status: InvoiceStatus | null, paidDate: string | null, version: number | null, notificationSummaryUpdated: boolean | null } | null };
+export type ApprovePaymentProofMutation = { approvePaymentProof: ApprovePaymentProofMutation_approvePaymentProof | null };
+
 
 export type ApprovePaymentProofMutationVariables = Exact<{
   invoiceId: string;
   expectedVersion: number | null | undefined;
 }>;
 
+export type RejectPaymentProofMutation_rejectPaymentProof = { id: string | null, parentId: string | null, status: InvoiceStatus | null, paidDate: string | null, version: number | null, notificationSummaryUpdated: boolean | null };
 
-export type ApprovePaymentProofMutation = { approvePaymentProof: { id: string | null, parentId: string | null, status: InvoiceStatus | null, paidDate: string | null, version: number | null, notificationSummaryUpdated: boolean | null } | null };
+export type RejectPaymentProofMutation = { rejectPaymentProof: RejectPaymentProofMutation_rejectPaymentProof | null };
+
 
 export type RejectPaymentProofMutationVariables = Exact<{
   invoiceId: string;
@@ -2466,36 +2153,58 @@ export type RejectPaymentProofMutationVariables = Exact<{
   expectedVersion: number | null | undefined;
 }>;
 
+export type InvoicePaymentSubmissionQuery_invoicePaymentSubmission = { id: string | null, invoiceId: string | null, fileId: string | null, filePath: string | null, mimeType: string | null, status: InvoicePaymentSubmissionStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null };
 
-export type RejectPaymentProofMutation = { rejectPaymentProof: { id: string | null, parentId: string | null, status: InvoiceStatus | null, paidDate: string | null, version: number | null, notificationSummaryUpdated: boolean | null } | null };
+export type InvoicePaymentSubmissionQuery = { invoicePaymentSubmission: InvoicePaymentSubmissionQuery_invoicePaymentSubmission | null };
+
 
 export type InvoicePaymentSubmissionQueryVariables = Exact<{
   invoiceId: string;
 }>;
 
+export type DeleteInvoiceMutation_deleteInvoice = { id: string | null, parentId: string | null, version: number | null, notificationSummaryUpdated: boolean | null };
 
-export type InvoicePaymentSubmissionQuery = { invoicePaymentSubmission: { id: string | null, invoiceId: string | null, fileId: string | null, filePath: string | null, mimeType: string | null, status: InvoicePaymentSubmissionStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null } | null };
+export type DeleteInvoiceMutation = { deleteInvoice: DeleteInvoiceMutation_deleteInvoice | null };
+
 
 export type DeleteInvoiceMutationVariables = Exact<{
   invoiceId: string;
 }>;
 
+export type SendPaymentReminderMutation_sendPaymentReminder = { id: string | null, success: boolean | null };
 
-export type DeleteInvoiceMutation = { deleteInvoice: { id: string | null, parentId: string | null, version: number | null, notificationSummaryUpdated: boolean | null } | null };
+export type SendPaymentReminderMutation = { sendPaymentReminder: SendPaymentReminderMutation_sendPaymentReminder | null };
+
 
 export type SendPaymentReminderMutationVariables = Exact<{
   studentId: string;
 }>;
 
+export type InvoicePaymentsQuery_invoicePayments_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type SendPaymentReminderMutation = { sendPaymentReminder: { id: string | null, success: boolean | null } | null };
+export type InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_details = { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null };
+
+export type InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_catalog = { id: string | null, catalogId: string | null, catalogSlug: string | null, catalogName: Partial<Record<'ar' | 'en', string>> | null };
+
+export type InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot = { userPaymentMethodId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_details | null, catalog: InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_catalog | null };
+
+export type InvoicePaymentsQuery_invoicePayments = { id: string | null, invoiceId: string | null, amount: string | null, currency: CurrencyCode | null, paymentDate: string | null, userPaymentMethodId: string | null, paymentMethodType: PaymentMethodType | null, transactionId: string | null, createdAt: string | null, displayAmount: InvoicePaymentsQuery_invoicePayments_displayAmount | null, paymentMethodSnapshot: InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot | null };
+
+export type InvoicePaymentsQuery = { invoicePayments: Array<InvoicePaymentsQuery_invoicePayments> | null };
+
 
 export type InvoicePaymentsQueryVariables = Exact<{
   invoiceId: string | number;
 }>;
 
+export type RecordPaymentMutation_recordPayment_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type InvoicePaymentsQuery = { invoicePayments: Array<{ id: string | null, invoiceId: string | null, amount: string | null, currency: CurrencyCode | null, paymentDate: string | null, userPaymentMethodId: string | null, paymentMethodType: PaymentMethodType | null, transactionId: string | null, createdAt: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null, paymentMethodSnapshot: { userPaymentMethodId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null, catalog: { id: string | null, catalogId: string | null, catalogSlug: string | null, catalogName: Partial<Record<'ar' | 'en', string>> | null } | null } | null }> | null };
+export type RecordPaymentMutation_recordPayment_paymentMethodSnapshot = { userPaymentMethodId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_details | null, catalog: InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_catalog | null };
+
+export type RecordPaymentMutation_recordPayment = { id: string | null, invoiceId: string | null, amount: string | null, currency: CurrencyCode | null, paymentDate: string | null, userPaymentMethodId: string | null, paymentMethodType: PaymentMethodType | null, displayAmount: RecordPaymentMutation_recordPayment_displayAmount | null, paymentMethodSnapshot: RecordPaymentMutation_recordPayment_paymentMethodSnapshot | null };
+
+export type RecordPaymentMutation = { recordPayment: RecordPaymentMutation_recordPayment | null };
+
 
 export type RecordPaymentMutationVariables = Exact<{
   invoiceId: string | number;
@@ -2505,8 +2214,12 @@ export type RecordPaymentMutationVariables = Exact<{
   transactionId: string | null | undefined;
 }>;
 
+export type CreateTeacherPaymentMutation_createTeacherPayment_paymentMethodSnapshot = { userPaymentMethodId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_details | null, catalog: InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_catalog | null };
 
-export type RecordPaymentMutation = { recordPayment: { id: string | null, invoiceId: string | null, amount: string | null, currency: CurrencyCode | null, paymentDate: string | null, userPaymentMethodId: string | null, paymentMethodType: PaymentMethodType | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null, paymentMethodSnapshot: { userPaymentMethodId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null, catalog: { id: string | null, catalogId: string | null, catalogSlug: string | null, catalogName: Partial<Record<'ar' | 'en', string>> | null } | null } | null } | null };
+export type CreateTeacherPaymentMutation_createTeacherPayment = { id: string | null, teacherId: string | null, amount: string | null, currency: CurrencyCode | null, paymentDate: string | null, userPaymentMethodId: string | null, paymentMethodType: PaymentMethodType | null, isTestPayment: boolean | null, paymentMethodSnapshot: CreateTeacherPaymentMutation_createTeacherPayment_paymentMethodSnapshot | null };
+
+export type CreateTeacherPaymentMutation = { createTeacherPayment: CreateTeacherPaymentMutation_createTeacherPayment | null };
+
 
 export type CreateTeacherPaymentMutationVariables = Exact<{
   teacherId: string | number;
@@ -2517,23 +2230,29 @@ export type CreateTeacherPaymentMutationVariables = Exact<{
   isTestPayment: boolean | null | undefined;
 }>;
 
+export type StudentCreditBalanceQuery_studentCreditBalance = { id: string | null, studentId: string | null, classesRemaining: number | null, classesTotal: number | null };
 
-export type CreateTeacherPaymentMutation = { createTeacherPayment: { id: string | null, teacherId: string | null, amount: string | null, currency: CurrencyCode | null, paymentDate: string | null, userPaymentMethodId: string | null, paymentMethodType: PaymentMethodType | null, isTestPayment: boolean | null, paymentMethodSnapshot: { userPaymentMethodId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null, catalog: { id: string | null, catalogId: string | null, catalogSlug: string | null, catalogName: Partial<Record<'ar' | 'en', string>> | null } | null } | null } | null };
+export type StudentCreditBalanceQuery = { studentCreditBalance: StudentCreditBalanceQuery_studentCreditBalance | null };
+
 
 export type StudentCreditBalanceQueryVariables = Exact<{
   studentId: string | number;
 }>;
 
+export type StudentCreditTransactionsQuery_studentCreditTransactions = { id: string | null, studentId: string | null, changeAmount: number | null, reason: CreditReason | null, sourcePaymentId: string | null, classInstanceId: string | null, notes: string | null, creditedByUserId: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type StudentCreditBalanceQuery = { studentCreditBalance: { id: string | null, studentId: string | null, classesRemaining: number | null, classesTotal: number | null } | null };
+export type StudentCreditTransactionsQuery = { studentCreditTransactions: Array<StudentCreditTransactionsQuery_studentCreditTransactions> | null };
+
 
 export type StudentCreditTransactionsQueryVariables = Exact<{
   studentId: string | number;
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type RecordCreditPurchaseMutation_recordCreditPurchase = { id: string | null, studentId: string | null, changeAmount: number | null, reason: CreditReason | null, sourcePaymentId: string | null, classInstanceId: string | null, notes: string | null, creditedByUserId: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type StudentCreditTransactionsQuery = { studentCreditTransactions: Array<{ id: string | null, studentId: string | null, changeAmount: number | null, reason: CreditReason | null, sourcePaymentId: string | null, classInstanceId: string | null, notes: string | null, creditedByUserId: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type RecordCreditPurchaseMutation = { recordCreditPurchase: RecordCreditPurchaseMutation_recordCreditPurchase | null };
+
 
 export type RecordCreditPurchaseMutationVariables = Exact<{
   studentId: string | number;
@@ -2541,38 +2260,50 @@ export type RecordCreditPurchaseMutationVariables = Exact<{
   notes: string | null | undefined;
 }>;
 
-
-export type RecordCreditPurchaseMutation = { recordCreditPurchase: { id: string | null, studentId: string | null, changeAmount: number | null, reason: CreditReason | null, sourcePaymentId: string | null, classInstanceId: string | null, notes: string | null, creditedByUserId: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null } | null };
-
 export type SupportedCurrencyFieldsFragment = { id: string | null, code: CurrencyCode | null, symbol: string | null, countryCode: CountryCode | null, decimals: number | null, sortOrder: number | null, isActive: boolean | null };
+
+export type SupportedCurrenciesQuery_supportedCurrencies = { id: string | null, code: CurrencyCode | null, symbol: string | null, countryCode: CountryCode | null, decimals: number | null, sortOrder: number | null, isActive: boolean | null };
+
+export type SupportedCurrenciesQuery = { supportedCurrencies: Array<SupportedCurrenciesQuery_supportedCurrencies> | null };
+
 
 export type SupportedCurrenciesQueryVariables = Exact<{
   activeOnly: boolean | null | undefined;
 }>;
 
+export type ActivateSupportedCurrencyMutation_activateSupportedCurrency = { id: string | null, code: CurrencyCode | null, symbol: string | null, countryCode: CountryCode | null, decimals: number | null, sortOrder: number | null, isActive: boolean | null };
 
-export type SupportedCurrenciesQuery = { supportedCurrencies: Array<{ id: string | null, code: CurrencyCode | null, symbol: string | null, countryCode: CountryCode | null, decimals: number | null, sortOrder: number | null, isActive: boolean | null }> | null };
+export type ActivateSupportedCurrencyMutation = { activateSupportedCurrency: ActivateSupportedCurrencyMutation_activateSupportedCurrency | null };
+
 
 export type ActivateSupportedCurrencyMutationVariables = Exact<{
   input: SupportedCurrencyUpsertInput;
 }>;
 
+export type DeactivateSupportedCurrencyMutation = { deactivateSupportedCurrency: boolean | null };
 
-export type ActivateSupportedCurrencyMutation = { activateSupportedCurrency: { id: string | null, code: CurrencyCode | null, symbol: string | null, countryCode: CountryCode | null, decimals: number | null, sortOrder: number | null, isActive: boolean | null } | null };
 
 export type DeactivateSupportedCurrencyMutationVariables = Exact<{
   code: CurrencyCode;
 }>;
 
+export type LatestExchangeRatesQuery_latestExchangeRates = { id: string | null, fromCurrency: string | null, toCurrency: string | null, rate: string | null, source: string | null, effectiveDate: string | null };
 
-export type DeactivateSupportedCurrencyMutation = { deactivateSupportedCurrency: boolean | null };
+export type LatestExchangeRatesQuery = { latestExchangeRates: Array<LatestExchangeRatesQuery_latestExchangeRates> | null };
+
 
 export type LatestExchangeRatesQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type ExchangeRateHistoryQuery_exchangeRateHistory_rows = { id: string | null, fromCurrency: CurrencyCode | null, toCurrency: CurrencyCode | null, rate: string | null, source: string | null, effectiveDate: string | null };
 
-export type LatestExchangeRatesQuery = { latestExchangeRates: Array<{ id: string | null, fromCurrency: string | null, toCurrency: string | null, rate: string | null, source: string | null, effectiveDate: string | null }> | null };
+export type ExchangeRateHistoryQuery_exchangeRateHistory_pageInfo = { count: number, currentPage: number, firstItem: number | null, lastItem: number | null, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
+
+export type ExchangeRateHistoryQuery_exchangeRateHistory = { id: string | null, totalCount: number | null, rows: Array<ExchangeRateHistoryQuery_exchangeRateHistory_rows> | null, pageInfo: ExchangeRateHistoryQuery_exchangeRateHistory_pageInfo | null };
+
+export type ExchangeRateHistoryQuery = { exchangeRateHistory: ExchangeRateHistoryQuery_exchangeRateHistory | null };
+
 
 export type ExchangeRateHistoryQueryVariables = Exact<{
   from: CurrencyCode;
@@ -2581,37 +2312,51 @@ export type ExchangeRateHistoryQueryVariables = Exact<{
   maxDays: number | null | undefined;
 }>;
 
+export type LatestFxSyncRunQuery_latestFxSyncRun = { id: string | null, provider: FxProvider | null, status: FxSyncStatus | null, pairsWritten: string | null, pairsFailed: string | null, errorMessage: string | null, triggerType: string | null, triggeredByUserId: string | null, startedAt: string | null, finishedAt: string | null };
 
-export type ExchangeRateHistoryQuery = { exchangeRateHistory: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, fromCurrency: CurrencyCode | null, toCurrency: CurrencyCode | null, rate: string | null, source: string | null, effectiveDate: string | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, lastItem: number | null, hasMorePages: boolean, lastPage: number, perPage: number, total: number } | null } | null };
+export type LatestFxSyncRunQuery = { latestFxSyncRun: LatestFxSyncRunQuery_latestFxSyncRun | null };
+
 
 export type LatestFxSyncRunQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type RefreshExchangeRatesMutation_refreshExchangeRates = { id: string | null, success: boolean | null, pairsWritten: number | null, pairsFailed: number | null, syncRunId: string | null, errorMessage: string | null };
 
-export type LatestFxSyncRunQuery = { latestFxSyncRun: { id: string | null, provider: FxProvider | null, status: FxSyncStatus | null, pairsWritten: string | null, pairsFailed: string | null, errorMessage: string | null, triggerType: string | null, triggeredByUserId: string | null, startedAt: string | null, finishedAt: string | null } | null };
+export type RefreshExchangeRatesMutation = { refreshExchangeRates: RefreshExchangeRatesMutation_refreshExchangeRates | null };
+
 
 export type RefreshExchangeRatesMutationVariables = Exact<{
   force: boolean | null | undefined;
 }>;
 
+export type FxSyncHealthQuery_fxSyncHealth = { id: string | null, isStale: boolean | null, status: FxSyncStatus | null, finishedAt: string | null };
 
-export type RefreshExchangeRatesMutation = { refreshExchangeRates: { id: string | null, success: boolean | null, pairsWritten: number | null, pairsFailed: number | null, syncRunId: string | null, errorMessage: string | null } | null };
+export type FxSyncHealthQuery = { fxSyncHealth: FxSyncHealthQuery_fxSyncHealth | null };
+
 
 export type FxSyncHealthQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type FxProviderConfigQuery_fxProviderConfig = { id: string | null, activeProvider: FxProvider | null, source: FxProviderConfigSource | null, updatedAt: string | null, updatedByUserId: string | null, updatedByName: string | null };
 
-export type FxSyncHealthQuery = { fxSyncHealth: { id: string | null, isStale: boolean | null, status: FxSyncStatus | null, finishedAt: string | null } | null };
+export type FxProviderConfigQuery = { fxProviderConfig: FxProviderConfigQuery_fxProviderConfig | null };
+
 
 export type FxProviderConfigQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type UpdateFxProviderMutation_updateFxProvider = { id: string | null, activeProvider: FxProvider | null, source: FxProviderConfigSource | null, updatedAt: string | null, updatedByUserId: string | null, updatedByName: string | null };
 
-export type FxProviderConfigQuery = { fxProviderConfig: { id: string | null, activeProvider: FxProvider | null, source: FxProviderConfigSource | null, updatedAt: string | null, updatedByUserId: string | null, updatedByName: string | null } | null };
+export type UpdateFxProviderMutation = { updateFxProvider: UpdateFxProviderMutation_updateFxProvider | null };
+
 
 export type UpdateFxProviderMutationVariables = Exact<{
   provider: FxProvider;
 }>;
 
+export type UpsertManualExchangeRateMutation_upsertManualExchangeRate_rate = { id: string | null, fromCurrency: string | null, toCurrency: string | null, rate: string | null, source: string | null, effectiveDate: string | null };
 
-export type UpdateFxProviderMutation = { updateFxProvider: { id: string | null, activeProvider: FxProvider | null, source: FxProviderConfigSource | null, updatedAt: string | null, updatedByUserId: string | null, updatedByName: string | null } | null };
+export type UpsertManualExchangeRateMutation_upsertManualExchangeRate = { id: string | null, rate: UpsertManualExchangeRateMutation_upsertManualExchangeRate_rate | null };
+
+export type UpsertManualExchangeRateMutation = { upsertManualExchangeRate: UpsertManualExchangeRateMutation_upsertManualExchangeRate | null };
+
 
 export type UpsertManualExchangeRateMutationVariables = Exact<{
   fromCurrency: CurrencyCode;
@@ -2620,13 +2365,17 @@ export type UpsertManualExchangeRateMutationVariables = Exact<{
   effectiveDate: string | null | undefined;
 }>;
 
+export type CurrencyHedgesQuery_currencyHedges = { id: string | null, currency: CurrencyCode | null, amount: string | null, hedgeType: string | null, notes: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type UpsertManualExchangeRateMutation = { upsertManualExchangeRate: { id: string | null, rate: { id: string | null, fromCurrency: string | null, toCurrency: string | null, rate: string | null, source: string | null, effectiveDate: string | null } | null } | null };
+export type CurrencyHedgesQuery = { currencyHedges: Array<CurrencyHedgesQuery_currencyHedges> | null };
+
 
 export type CurrencyHedgesQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type CreateCurrencyHedgeMutation_createCurrencyHedge = { id: string | null, currency: CurrencyCode | null, amount: string | null, hedgeType: string | null, notes: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type CurrencyHedgesQuery = { currencyHedges: Array<{ id: string | null, currency: CurrencyCode | null, amount: string | null, hedgeType: string | null, notes: string | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type CreateCurrencyHedgeMutation = { createCurrencyHedge: CreateCurrencyHedgeMutation_createCurrencyHedge | null };
+
 
 export type CreateCurrencyHedgeMutationVariables = Exact<{
   currency: CurrencyCode;
@@ -2635,8 +2384,10 @@ export type CreateCurrencyHedgeMutationVariables = Exact<{
   notes: string | null | undefined;
 }>;
 
+export type UpdateCurrencyHedgeMutation_updateCurrencyHedge = { id: string | null, currency: CurrencyCode | null, amount: string | null, hedgeType: string | null, notes: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type CreateCurrencyHedgeMutation = { createCurrencyHedge: { id: string | null, currency: CurrencyCode | null, amount: string | null, hedgeType: string | null, notes: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type UpdateCurrencyHedgeMutation = { updateCurrencyHedge: UpdateCurrencyHedgeMutation_updateCurrencyHedge | null };
+
 
 export type UpdateCurrencyHedgeMutationVariables = Exact<{
   id: string;
@@ -2646,23 +2397,26 @@ export type UpdateCurrencyHedgeMutationVariables = Exact<{
   notes: string | null | undefined;
 }>;
 
+export type DeleteCurrencyHedgeMutation = { deleteCurrencyHedge: boolean | null };
 
-export type UpdateCurrencyHedgeMutation = { updateCurrencyHedge: { id: string | null, currency: CurrencyCode | null, amount: string | null, hedgeType: string | null, notes: string | null, createdAt: string | null, updatedAt: string | null } | null };
 
 export type DeleteCurrencyHedgeMutationVariables = Exact<{
   id: string;
 }>;
 
-
-export type DeleteCurrencyHedgeMutation = { deleteCurrencyHedge: boolean | null };
-
 export type PaymentMethodDetailsFieldsFragment = { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null };
 
-export type PaymentMethodTransactionSnapshotFieldsFragment = { userPaymentMethodId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null, catalog: { id: string | null, catalogId: string | null, catalogSlug: string | null, catalogName: Partial<Record<'ar' | 'en', string>> | null } | null };
+export type PaymentMethodTransactionSnapshotFieldsFragment = { userPaymentMethodId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, label: string | null, snapshottedAt: string | null, details: InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_details | null, catalog: InvoicePaymentsQuery_invoicePayments_paymentMethodSnapshot_catalog | null };
 
-export type UserPaymentMethodFieldsFragment = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null };
+export type UserPaymentMethodFieldsFragment_details = { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null };
 
-export type PaymentMethodDefaultsFieldsFragment = { payinDefault: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null, payoutDefault: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null };
+export type UserPaymentMethodFieldsFragment = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
+
+export type PaymentMethodDefaultsFieldsFragment_payinDefault = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
+
+export type PaymentMethodDefaultsFieldsFragment_payoutDefault = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
+
+export type PaymentMethodDefaultsFieldsFragment = { payinDefault: PaymentMethodDefaultsFieldsFragment_payinDefault | null, payoutDefault: PaymentMethodDefaultsFieldsFragment_payoutDefault | null };
 
 export type SupportedMobileWalletFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
@@ -2670,20 +2424,29 @@ export type SupportedPaymentLinkFieldsFragment = { id: string | null, slug: stri
 
 export type SupportedOnlineAccountFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
+export type UserPaymentMethodsQuery_userPaymentMethods = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
+
+export type UserPaymentMethodsQuery = { userPaymentMethods: Array<UserPaymentMethodsQuery_userPaymentMethods> | null };
+
+
 export type UserPaymentMethodsQueryVariables = Exact<{
   userId: string | number;
   direction: PaymentDirection | null | undefined;
 }>;
 
+export type UserPaymentMethodQuery_userPaymentMethod = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
 
-export type UserPaymentMethodsQuery = { userPaymentMethods: Array<{ id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null }> | null };
+export type UserPaymentMethodQuery = { userPaymentMethod: UserPaymentMethodQuery_userPaymentMethod | null };
+
 
 export type UserPaymentMethodQueryVariables = Exact<{
   id: string | number;
 }>;
 
+export type SupportedMobileWalletsQuery_supportedMobileWallets = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type UserPaymentMethodQuery = { userPaymentMethod: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null };
+export type SupportedMobileWalletsQuery = { supportedMobileWallets: Array<SupportedMobileWalletsQuery_supportedMobileWallets> | null };
+
 
 export type SupportedMobileWalletsQueryVariables = Exact<{
   countryCode: CountryCode | null | undefined;
@@ -2691,202 +2454,276 @@ export type SupportedMobileWalletsQueryVariables = Exact<{
   activeOnly: boolean | null | undefined;
 }>;
 
+export type SupportedPaymentLinksQuery_supportedPaymentLinks = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type SupportedMobileWalletsQuery = { supportedMobileWallets: Array<{ id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type SupportedPaymentLinksQuery = { supportedPaymentLinks: Array<SupportedPaymentLinksQuery_supportedPaymentLinks> | null };
+
 
 export type SupportedPaymentLinksQueryVariables = Exact<{
   direction: PaymentDirection | null | undefined;
   activeOnly: boolean | null | undefined;
 }>;
 
+export type SupportedOnlineAccountsQuery_supportedOnlineAccounts = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type SupportedPaymentLinksQuery = { supportedPaymentLinks: Array<{ id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type SupportedOnlineAccountsQuery = { supportedOnlineAccounts: Array<SupportedOnlineAccountsQuery_supportedOnlineAccounts> | null };
+
 
 export type SupportedOnlineAccountsQueryVariables = Exact<{
   direction: PaymentDirection | null | undefined;
   activeOnly: boolean | null | undefined;
 }>;
 
+export type CreateUserPaymentMethodMutation_createUserPaymentMethod = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
 
-export type SupportedOnlineAccountsQuery = { supportedOnlineAccounts: Array<{ id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type CreateUserPaymentMethodMutation = { createUserPaymentMethod: CreateUserPaymentMethodMutation_createUserPaymentMethod | null };
+
 
 export type CreateUserPaymentMethodMutationVariables = Exact<{
   input: UserPaymentMethodCreateInput;
 }>;
 
+export type UpdateUserPaymentMethodMutation_updateUserPaymentMethod = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
 
-export type CreateUserPaymentMethodMutation = { createUserPaymentMethod: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null };
+export type UpdateUserPaymentMethodMutation = { updateUserPaymentMethod: UpdateUserPaymentMethodMutation_updateUserPaymentMethod | null };
+
 
 export type UpdateUserPaymentMethodMutationVariables = Exact<{
   id: string | number;
   input: UserPaymentMethodUpdateInput;
 }>;
 
+export type DeleteUserPaymentMethodMutation = { deleteUserPaymentMethod: boolean | null };
 
-export type UpdateUserPaymentMethodMutation = { updateUserPaymentMethod: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null };
 
 export type DeleteUserPaymentMethodMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type SetDefaultUserPaymentMethodMutation_setDefaultUserPaymentMethod = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
 
-export type DeleteUserPaymentMethodMutation = { deleteUserPaymentMethod: boolean | null };
+export type SetDefaultUserPaymentMethodMutation = { setDefaultUserPaymentMethod: SetDefaultUserPaymentMethodMutation_setDefaultUserPaymentMethod | null };
+
 
 export type SetDefaultUserPaymentMethodMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type VerifyBankTransferPaymentMethodMutation_verifyBankTransferPaymentMethod = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
 
-export type SetDefaultUserPaymentMethodMutation = { setDefaultUserPaymentMethod: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null };
+export type VerifyBankTransferPaymentMethodMutation = { verifyBankTransferPaymentMethod: VerifyBankTransferPaymentMethodMutation_verifyBankTransferPaymentMethod | null };
+
 
 export type VerifyBankTransferPaymentMethodMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type CreateSupportedMobileWalletMutation_createSupportedMobileWallet = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type VerifyBankTransferPaymentMethodMutation = { verifyBankTransferPaymentMethod: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null };
+export type CreateSupportedMobileWalletMutation = { createSupportedMobileWallet: CreateSupportedMobileWalletMutation_createSupportedMobileWallet | null };
+
 
 export type CreateSupportedMobileWalletMutationVariables = Exact<{
   input: SupportedMobileWalletCreateInput;
 }>;
 
+export type UpdateSupportedMobileWalletMutation_updateSupportedMobileWallet = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type CreateSupportedMobileWalletMutation = { createSupportedMobileWallet: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null } | null };
+export type UpdateSupportedMobileWalletMutation = { updateSupportedMobileWallet: UpdateSupportedMobileWalletMutation_updateSupportedMobileWallet | null };
+
 
 export type UpdateSupportedMobileWalletMutationVariables = Exact<{
   id: string | number;
   input: SupportedMobileWalletUpdateInput;
 }>;
 
+export type DeactivateSupportedMobileWalletMutation_deactivateSupportedMobileWallet = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type UpdateSupportedMobileWalletMutation = { updateSupportedMobileWallet: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null } | null };
+export type DeactivateSupportedMobileWalletMutation = { deactivateSupportedMobileWallet: DeactivateSupportedMobileWalletMutation_deactivateSupportedMobileWallet | null };
+
 
 export type DeactivateSupportedMobileWalletMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type CreateSupportedPaymentLinkMutation_createSupportedPaymentLink = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type DeactivateSupportedMobileWalletMutation = { deactivateSupportedMobileWallet: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, countryCode: string | null, currencyCode: string | null, phoneRegion: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null } | null };
+export type CreateSupportedPaymentLinkMutation = { createSupportedPaymentLink: CreateSupportedPaymentLinkMutation_createSupportedPaymentLink | null };
+
 
 export type CreateSupportedPaymentLinkMutationVariables = Exact<{
   input: SupportedPaymentLinkCreateInput;
 }>;
 
+export type UpdateSupportedPaymentLinkMutation_updateSupportedPaymentLink = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type CreateSupportedPaymentLinkMutation = { createSupportedPaymentLink: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null } | null };
+export type UpdateSupportedPaymentLinkMutation = { updateSupportedPaymentLink: UpdateSupportedPaymentLinkMutation_updateSupportedPaymentLink | null };
+
 
 export type UpdateSupportedPaymentLinkMutationVariables = Exact<{
   id: string | number;
   input: SupportedPaymentLinkUpdateInput;
 }>;
 
+export type DeactivateSupportedPaymentLinkMutation_deactivateSupportedPaymentLink = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type UpdateSupportedPaymentLinkMutation = { updateSupportedPaymentLink: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null } | null };
+export type DeactivateSupportedPaymentLinkMutation = { deactivateSupportedPaymentLink: DeactivateSupportedPaymentLinkMutation_deactivateSupportedPaymentLink | null };
+
 
 export type DeactivateSupportedPaymentLinkMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type CreateSupportedOnlineAccountMutation_createSupportedOnlineAccount = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type DeactivateSupportedPaymentLinkMutation = { deactivateSupportedPaymentLink: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null } | null };
+export type CreateSupportedOnlineAccountMutation = { createSupportedOnlineAccount: CreateSupportedOnlineAccountMutation_createSupportedOnlineAccount | null };
+
 
 export type CreateSupportedOnlineAccountMutationVariables = Exact<{
   input: SupportedOnlineAccountCreateInput;
 }>;
 
+export type UpdateSupportedOnlineAccountMutation_updateSupportedOnlineAccount = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type CreateSupportedOnlineAccountMutation = { createSupportedOnlineAccount: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null } | null };
+export type UpdateSupportedOnlineAccountMutation = { updateSupportedOnlineAccount: UpdateSupportedOnlineAccountMutation_updateSupportedOnlineAccount | null };
+
 
 export type UpdateSupportedOnlineAccountMutationVariables = Exact<{
   id: string | number;
   input: SupportedOnlineAccountUpdateInput;
 }>;
 
+export type DeactivateSupportedOnlineAccountMutation_deactivateSupportedOnlineAccount = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null };
 
-export type UpdateSupportedOnlineAccountMutation = { updateSupportedOnlineAccount: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null } | null };
+export type DeactivateSupportedOnlineAccountMutation = { deactivateSupportedOnlineAccount: DeactivateSupportedOnlineAccountMutation_deactivateSupportedOnlineAccount | null };
+
 
 export type DeactivateSupportedOnlineAccountMutationVariables = Exact<{
   id: string | number;
 }>;
 
-
-export type DeactivateSupportedOnlineAccountMutation = { deactivateSupportedOnlineAccount: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, identifierKind: IdentifierKind | null, identifierLabel: Partial<Record<'ar' | 'en', string>> | null, supportedDirections: PaymentDirection | null, logoUrl: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null } | null };
-
 export type QuotaFieldsFragment = { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotaQuery_quota = { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type QuotaQuery = { quota: QuotaQuery_quota | null };
+
 
 export type QuotaQueryVariables = Exact<{
   id: string | number;
 }>;
 
+export type QuotasQuery_quotas_rows = { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type QuotaQuery = { quota: { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null } | null };
+export type QuotasQuery_quotas = { totalCount: number | null, rows: Array<QuotasQuery_quotas_rows> | null };
+
+export type QuotasQuery = { quotas: QuotasQuery_quotas | null };
+
 
 export type QuotasQueryVariables = Exact<{
   filter: QuotaPaginatedFilterInput | null | undefined;
   pagination: PaginationArgs | null | undefined;
 }>;
 
+export type QuotaLedgerQuery_quotaLedger_rows = { id: string | null, quotaId: string | null, studentId: string | null, recurringScheduleId: string | null, classInstanceId: string | null, delta: number | null, reason: QuotaLedgerReason | null, reasonNote: string | null, actorUserId: string | null, createdAt: string | null };
 
-export type QuotasQuery = { quotas: { totalCount: number | null, rows: Array<{ id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null }> | null } | null };
+export type QuotaLedgerQuery_quotaLedger = { totalCount: number | null, rows: Array<QuotaLedgerQuery_quotaLedger_rows> | null };
+
+export type QuotaLedgerQuery = { quotaLedger: QuotaLedgerQuery_quotaLedger | null };
+
 
 export type QuotaLedgerQueryVariables = Exact<{
   quotaId: string | number;
   pagination: PaginationArgs | null | undefined;
 }>;
 
+export type CreateQuotaMutation_createQuota = { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type QuotaLedgerQuery = { quotaLedger: { totalCount: number | null, rows: Array<{ id: string | null, quotaId: string | null, studentId: string | null, recurringScheduleId: string | null, classInstanceId: string | null, delta: number | null, reason: QuotaLedgerReason | null, reasonNote: string | null, actorUserId: string | null, createdAt: string | null }> | null } | null };
+export type CreateQuotaMutation = { createQuota: CreateQuotaMutation_createQuota | null };
+
 
 export type CreateQuotaMutationVariables = Exact<{
   input: QuotaSubmitInput;
 }>;
 
+export type UpdateQuotaMutation_updateQuota = { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type CreateQuotaMutation = { createQuota: { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null } | null };
+export type UpdateQuotaMutation = { updateQuota: UpdateQuotaMutation_updateQuota | null };
+
 
 export type UpdateQuotaMutationVariables = Exact<{
   id: string | number;
   input: QuotaUpdateInput;
 }>;
 
+export type DeleteQuotaMutation_deleteQuota = { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, status: QuotaStatus | null };
 
-export type UpdateQuotaMutation = { updateQuota: { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null } | null };
+export type DeleteQuotaMutation = { deleteQuota: DeleteQuotaMutation_deleteQuota | null };
+
 
 export type DeleteQuotaMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type StudentQuotasQuery_studentQuotas = { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type DeleteQuotaMutation = { deleteQuota: { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, status: QuotaStatus | null } | null };
+export type StudentQuotasQuery = { studentQuotas: Array<StudentQuotasQuery_studentQuotas> | null };
+
 
 export type StudentQuotasQueryVariables = Exact<{
   studentId: string | number;
 }>;
 
+export type StudentOpenQuotasQuery_studentOpenQuotas = { id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type StudentQuotasQuery = { studentQuotas: Array<{ id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type StudentOpenQuotasQuery = { studentOpenQuotas: Array<StudentOpenQuotasQuery_studentOpenQuotas> | null };
+
 
 export type StudentOpenQuotasQueryVariables = Exact<{
   studentId: string | number;
 }>;
 
+export type QuotaBalanceQuery_quotaBalance_breakdownByExpiration = { id: string | null, quotaId: string | null, quotaName: string | null, remaining: number | null, validUntil: string | null };
 
-export type StudentOpenQuotasQuery = { studentOpenQuotas: Array<{ id: string | null, studentId: string | null, name: string | null, kind: QuotaKind | null, totalClasses: number | null, remaining: number | null, reservedClasses: number | null, validFrom: string | null, validUntil: string | null, status: QuotaStatus | null, periodType: QuotaPeriodType | null, periodDays: number | null, priority: number | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type QuotaBalanceQuery_quotaBalance = { id: string | null, studentId: string | null, totalActiveClasses: number | null, totalRemaining: number | null, totalReserved: number | null, breakdownByExpiration: Array<QuotaBalanceQuery_quotaBalance_breakdownByExpiration> | null };
+
+export type QuotaBalanceQuery = { quotaBalance: QuotaBalanceQuery_quotaBalance | null };
+
 
 export type QuotaBalanceQueryVariables = Exact<{
   studentId: string | number;
 }>;
 
+export type UserBillingProfileSummaryQuery_parentBillingSummary_nextUnpaidInvoice = { id: string | null, amount: string | null, currency: CurrencyCode | null, dueDate: string | null, studentName: string | null };
 
-export type QuotaBalanceQuery = { quotaBalance: { id: string | null, studentId: string | null, totalActiveClasses: number | null, totalRemaining: number | null, totalReserved: number | null, breakdownByExpiration: Array<{ id: string | null, quotaId: string | null, quotaName: string | null, remaining: number | null, validUntil: string | null }> | null } | null };
+export type UserBillingProfileSummaryQuery_parentBillingSummary_outstandingByCurrency_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type UserBillingProfileSummaryQuery_parentBillingSummary_outstandingByCurrency = { id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: UserBillingProfileSummaryQuery_parentBillingSummary_outstandingByCurrency_displayAmount | null };
+
+export type UserBillingProfileSummaryQuery_parentBillingSummary_paidThisTermByCurrency_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type UserBillingProfileSummaryQuery_parentBillingSummary_paidThisTermByCurrency = { id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: UserBillingProfileSummaryQuery_parentBillingSummary_paidThisTermByCurrency_displayAmount | null };
+
+export type UserBillingProfileSummaryQuery_parentBillingSummary = { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null, pendingPaymentCount: number | null, nextUnpaidInvoice: UserBillingProfileSummaryQuery_parentBillingSummary_nextUnpaidInvoice | null, outstandingByCurrency: Array<UserBillingProfileSummaryQuery_parentBillingSummary_outstandingByCurrency> | null, paidThisTermByCurrency: Array<UserBillingProfileSummaryQuery_parentBillingSummary_paidThisTermByCurrency> | null };
+
+export type UserBillingProfileSummaryQuery = { parentBillingSummary: UserBillingProfileSummaryQuery_parentBillingSummary | null };
+
 
 export type UserBillingProfileSummaryQueryVariables = Exact<{
   userId: string | null | undefined;
   parentId: string | null | undefined;
 }>;
 
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_rows_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type UserBillingProfileSummaryQuery = { parentBillingSummary: { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null, pendingPaymentCount: number | null, nextUnpaidInvoice: { id: string | null, amount: string | null, currency: CurrencyCode | null, dueDate: string | null, studentName: string | null } | null, outstandingByCurrency: Array<{ id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null, paidThisTermByCurrency: Array<{ id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null } | null };
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_rows = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: CurrencyCode | null, status: InvoiceStatus | null, invoiceType: InvoiceType | null, studentId: string | null, studentName: string | null, hasPaymentProof: boolean | null, hasRejectedSubmission: boolean | null, displayAmount: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_rows_displayAmount | null };
+
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory = { id: string | null, totalCount: number | null, rows: Array<UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_rows> | null, pageInfo: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory_pageInfo | null };
+
+export type UserBillingProfileInvoiceHistoryQuery = { parentInvoiceHistory: UserBillingProfileInvoiceHistoryQuery_parentInvoiceHistory | null };
+
 
 export type UserBillingProfileInvoiceHistoryQueryVariables = Exact<{
   userId: string | null | undefined;
@@ -2895,128 +2732,180 @@ export type UserBillingProfileInvoiceHistoryQueryVariables = Exact<{
   search: string | null | undefined;
 }>;
 
-
-export type UserBillingProfileInvoiceHistoryQuery = { parentInvoiceHistory: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: CurrencyCode | null, status: InvoiceStatus | null, invoiceType: InvoiceType | null, studentId: string | null, studentName: string | null, hasPaymentProof: boolean | null, hasRejectedSubmission: boolean | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
-
 export type ClassCategoryFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null };
+
+export type ClassCategoriesQuery_classCategories = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null };
+
+export type ClassCategoriesQuery = { classCategories: Array<ClassCategoriesQuery_classCategories> | null };
+
 
 export type ClassCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type CreateClassCategoryMutation_createClassCategory = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null };
 
-export type ClassCategoriesQuery = { classCategories: Array<{ id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null }> | null };
+export type CreateClassCategoryMutation = { createClassCategory: CreateClassCategoryMutation_createClassCategory | null };
+
 
 export type CreateClassCategoryMutationVariables = Exact<{
   input: ClassCategoryCreateInput;
 }>;
 
+export type UpdateClassCategoryMutation_updateClassCategory = { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null };
 
-export type CreateClassCategoryMutation = { createClassCategory: { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null } | null };
+export type UpdateClassCategoryMutation = { updateClassCategory: UpdateClassCategoryMutation_updateClassCategory | null };
+
 
 export type UpdateClassCategoryMutationVariables = Exact<{
   id: string | number;
   input: ClassCategoryUpdateInput;
 }>;
 
+export type DeleteClassCategoryMutation = { deleteClassCategory: boolean | null };
 
-export type UpdateClassCategoryMutation = { updateClassCategory: { id: string | null, name: string | null, slug: string | null, description: string | null, isActive: boolean | null, sortOrder: number | null } | null };
 
 export type DeleteClassCategoryMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type ClassSubjectFieldsFragment_category = { id: string | null, name: string | null, slug: string | null };
 
-export type DeleteClassCategoryMutation = { deleteClassCategory: boolean | null };
-
-export type ClassSubjectFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, category: { id: string | null, name: string | null, slug: string | null } | null };
+export type ClassSubjectFieldsFragment = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, category: ClassSubjectFieldsFragment_category | null };
 
 export type SubjectResourceFieldsFragment = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
+
+export type ClassSubjectsQuery_classSubjects_resources = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
+
+export type ClassSubjectsQuery_classSubjects = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, resources: Array<ClassSubjectsQuery_classSubjects_resources> | null, category: ClassSubjectFieldsFragment_category | null };
+
+export type ClassSubjectsQuery = { classSubjects: Array<ClassSubjectsQuery_classSubjects> | null };
+
 
 export type ClassSubjectsQueryVariables = Exact<{
   categoryId: string | null | undefined;
 }>;
 
+export type ClassSubjectByIdQuery_classSubject_resources = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
 
-export type ClassSubjectsQuery = { classSubjects: Array<{ id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, resources: Array<{ id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null }> | null, category: { id: string | null, name: string | null, slug: string | null } | null }> | null };
+export type ClassSubjectByIdQuery_classSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, resources: Array<ClassSubjectByIdQuery_classSubject_resources> | null, category: ClassSubjectFieldsFragment_category | null };
+
+export type ClassSubjectByIdQuery = { classSubject: ClassSubjectByIdQuery_classSubject | null };
+
 
 export type ClassSubjectByIdQueryVariables = Exact<{
   id: string | number;
 }>;
 
+export type CreateClassSubjectMutation_createClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, category: ClassSubjectFieldsFragment_category | null };
 
-export type ClassSubjectByIdQuery = { classSubject: { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, resources: Array<{ id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null }> | null, category: { id: string | null, name: string | null, slug: string | null } | null } | null };
+export type CreateClassSubjectMutation = { createClassSubject: CreateClassSubjectMutation_createClassSubject | null };
+
 
 export type CreateClassSubjectMutationVariables = Exact<{
   input: ClassSubjectCreateInput;
 }>;
 
+export type UpdateClassSubjectMutation_updateClassSubject = { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, category: ClassSubjectFieldsFragment_category | null };
 
-export type CreateClassSubjectMutation = { createClassSubject: { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, category: { id: string | null, name: string | null, slug: string | null } | null } | null };
+export type UpdateClassSubjectMutation = { updateClassSubject: UpdateClassSubjectMutation_updateClassSubject | null };
+
 
 export type UpdateClassSubjectMutationVariables = Exact<{
   id: string | number;
   input: ClassSubjectUpdateInput;
 }>;
 
+export type DeleteClassSubjectMutation = { deleteClassSubject: boolean | null };
 
-export type UpdateClassSubjectMutation = { updateClassSubject: { id: string | null, name: string | null, slug: string | null, description: string | null, avatarUrl: string | null, isActive: boolean | null, sortOrder: number | null, categoryId: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, category: { id: string | null, name: string | null, slug: string | null } | null } | null };
 
 export type DeleteClassSubjectMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type AttachSubjectResourceMutation_attachSubjectResource = { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null };
 
-export type DeleteClassSubjectMutation = { deleteClassSubject: boolean | null };
+export type AttachSubjectResourceMutation = { attachSubjectResource: AttachSubjectResourceMutation_attachSubjectResource | null };
+
 
 export type AttachSubjectResourceMutationVariables = Exact<{
   input: AttachSubjectResourceInput;
 }>;
 
+export type DetachSubjectResourceMutation = { detachSubjectResource: boolean | null };
 
-export type AttachSubjectResourceMutation = { attachSubjectResource: { id: string | null, subjectId: string | null, learningResourceId: string | null, resourceType: string | null, sortOrder: number | null, displayName: string | null, filePath: string | null } | null };
 
 export type DetachSubjectResourceMutationVariables = Exact<{
   subjectId: string | number;
   learningResourceId: string | number;
 }>;
 
+export type GroupClassAuditQuery_groupClassAudit_students = { id: string | null, name: string | null, studentId: string | null, initials: string | null, attendanceStatus: GroupClassAttendanceStatus | null, avatarUrl: string | null };
 
-export type DetachSubjectResourceMutation = { detachSubjectResource: boolean | null };
+export type GroupClassAuditQuery_groupClassAudit_meetingInfo = { platform: string | null, meetingId: string | null, joinUrl: string | null, logoUrl: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, source: string | null };
+
+export type GroupClassAuditQuery_groupClassAudit_communications = { id: string | null, type: string | null, title: string | null, description: string | null, isActive: boolean | null, isDelivered: boolean | null, timestamp: string | null };
+
+export type GroupClassAuditQuery_groupClassAudit_adminNote = { content: string | null, lastUpdated: string | null };
+
+export type GroupClassAuditQuery_groupClassAudit = { id: string | null, className: string | null, courseCode: string | null, teacherName: string | null, originalDate: string | null, rescheduledDate: string | null, timeSlot: string | null, venue: string | null, status: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, auditRemark: string | null, auditLoggedAt: string | null, registeredStudentCount: number | null, totalStudentCount: number | null, students: Array<GroupClassAuditQuery_groupClassAudit_students> | null, meetingInfo: GroupClassAuditQuery_groupClassAudit_meetingInfo | null, communications: Array<GroupClassAuditQuery_groupClassAudit_communications> | null, adminNote: GroupClassAuditQuery_groupClassAudit_adminNote | null };
+
+export type GroupClassAuditQuery = { groupClassAudit: GroupClassAuditQuery_groupClassAudit | null };
+
 
 export type GroupClassAuditQueryVariables = Exact<{
   classInstanceId: string;
 }>;
 
+export type UpdateClassAdminNoteMutation_updateClassAdminNote_students = { id: string | null, name: string | null, studentId: string | null, initials: string | null, attendanceStatus: GroupClassAttendanceStatus | null, avatarUrl: string | null };
 
-export type GroupClassAuditQuery = { groupClassAudit: { id: string | null, className: string | null, courseCode: string | null, teacherName: string | null, originalDate: string | null, rescheduledDate: string | null, timeSlot: string | null, venue: string | null, status: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, auditRemark: string | null, auditLoggedAt: string | null, registeredStudentCount: number | null, totalStudentCount: number | null, students: Array<{ id: string | null, name: string | null, studentId: string | null, initials: string | null, attendanceStatus: GroupClassAttendanceStatus | null, avatarUrl: string | null }> | null, meetingInfo: { platform: string | null, meetingId: string | null, joinUrl: string | null, logoUrl: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, source: string | null } | null, communications: Array<{ id: string | null, type: string | null, title: string | null, description: string | null, isActive: boolean | null, isDelivered: boolean | null, timestamp: string | null }> | null, adminNote: { content: string | null, lastUpdated: string | null } | null } | null };
+export type UpdateClassAdminNoteMutation_updateClassAdminNote_meetingInfo = { platform: string | null, meetingId: string | null, joinUrl: string | null, logoUrl: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, source: string | null };
+
+export type UpdateClassAdminNoteMutation_updateClassAdminNote_communications = { id: string | null, type: string | null, title: string | null, description: string | null, isActive: boolean | null, isDelivered: boolean | null, timestamp: string | null };
+
+export type UpdateClassAdminNoteMutation_updateClassAdminNote_adminNote = { content: string | null, lastUpdated: string | null };
+
+export type UpdateClassAdminNoteMutation_updateClassAdminNote = { id: string | null, className: string | null, courseCode: string | null, teacherName: string | null, originalDate: string | null, rescheduledDate: string | null, timeSlot: string | null, venue: string | null, status: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, auditRemark: string | null, auditLoggedAt: string | null, registeredStudentCount: number | null, totalStudentCount: number | null, students: Array<UpdateClassAdminNoteMutation_updateClassAdminNote_students> | null, meetingInfo: UpdateClassAdminNoteMutation_updateClassAdminNote_meetingInfo | null, communications: Array<UpdateClassAdminNoteMutation_updateClassAdminNote_communications> | null, adminNote: UpdateClassAdminNoteMutation_updateClassAdminNote_adminNote | null };
+
+export type UpdateClassAdminNoteMutation = { updateClassAdminNote: UpdateClassAdminNoteMutation_updateClassAdminNote | null };
+
 
 export type UpdateClassAdminNoteMutationVariables = Exact<{
   classInstanceId: string;
   content: string;
 }>;
 
+export type ResendClassNotificationsMutation_resendClassNotifications = { id: string | null, success: boolean | null };
 
-export type UpdateClassAdminNoteMutation = { updateClassAdminNote: { id: string | null, className: string | null, courseCode: string | null, teacherName: string | null, originalDate: string | null, rescheduledDate: string | null, timeSlot: string | null, venue: string | null, status: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, auditRemark: string | null, auditLoggedAt: string | null, registeredStudentCount: number | null, totalStudentCount: number | null, students: Array<{ id: string | null, name: string | null, studentId: string | null, initials: string | null, attendanceStatus: GroupClassAttendanceStatus | null, avatarUrl: string | null }> | null, meetingInfo: { platform: string | null, meetingId: string | null, joinUrl: string | null, logoUrl: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, source: string | null } | null, communications: Array<{ id: string | null, type: string | null, title: string | null, description: string | null, isActive: boolean | null, isDelivered: boolean | null, timestamp: string | null }> | null, adminNote: { content: string | null, lastUpdated: string | null } | null } | null };
+export type ResendClassNotificationsMutation = { resendClassNotifications: ResendClassNotificationsMutation_resendClassNotifications | null };
+
 
 export type ResendClassNotificationsMutationVariables = Exact<{
   classInstanceId: string;
 }>;
 
+export type LessonReportQuery_lessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type ResendClassNotificationsMutation = { resendClassNotifications: { id: string | null, success: boolean | null } | null };
+export type LessonReportQuery = { lessonReport: LessonReportQuery_lessonReport | null };
+
 
 export type LessonReportQueryVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type LessonReportByIdQuery_lessonReportById = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type LessonReportQuery = { lessonReport: { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type LessonReportByIdQuery = { lessonReportById: LessonReportByIdQuery_lessonReportById | null };
+
 
 export type LessonReportByIdQueryVariables = Exact<{
   reportId: string | number;
 }>;
 
+export type PendingLessonReportsQuery_pendingLessonReports_rows = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type LessonReportByIdQuery = { lessonReportById: { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type PendingLessonReportsQuery_pendingLessonReports = { totalCount: number | null, rows: Array<PendingLessonReportsQuery_pendingLessonReports_rows> | null };
+
+export type PendingLessonReportsQuery = { pendingLessonReports: PendingLessonReportsQuery_pendingLessonReports | null };
+
 
 export type PendingLessonReportsQueryVariables = Exact<{
   teacherId: string | number | null | undefined;
@@ -3024,97 +2913,134 @@ export type PendingLessonReportsQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type RecentApprovedLessonReportsQuery_recentApprovedLessonReports_rows = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type PendingLessonReportsQuery = { pendingLessonReports: { totalCount: number | null, rows: Array<{ id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null }> | null } | null };
+export type RecentApprovedLessonReportsQuery_recentApprovedLessonReports = { totalCount: number | null, rows: Array<RecentApprovedLessonReportsQuery_recentApprovedLessonReports_rows> | null };
+
+export type RecentApprovedLessonReportsQuery = { recentApprovedLessonReports: RecentApprovedLessonReportsQuery_recentApprovedLessonReports | null };
+
 
 export type RecentApprovedLessonReportsQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type StudentRecentLessonReportsQuery_studentRecentLessonReports_rows = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type RecentApprovedLessonReportsQuery = { recentApprovedLessonReports: { totalCount: number | null, rows: Array<{ id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null }> | null } | null };
+export type StudentRecentLessonReportsQuery_studentRecentLessonReports = { totalCount: number | null, rows: Array<StudentRecentLessonReportsQuery_studentRecentLessonReports_rows> | null };
+
+export type StudentRecentLessonReportsQuery = { studentRecentLessonReports: StudentRecentLessonReportsQuery_studentRecentLessonReports | null };
+
 
 export type StudentRecentLessonReportsQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type LessonReportCountQuery_lessonReportCount = { pendingCount: number | null };
 
-export type StudentRecentLessonReportsQuery = { studentRecentLessonReports: { totalCount: number | null, rows: Array<{ id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null }> | null } | null };
+export type LessonReportCountQuery = { lessonReportCount: LessonReportCountQuery_lessonReportCount | null };
+
 
 export type LessonReportCountQueryVariables = Exact<{
   teacherId: string | number | null | undefined;
   studentId: string | number | null | undefined;
 }>;
 
+export type SubmitLessonReportMutation_submitLessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type LessonReportCountQuery = { lessonReportCount: { pendingCount: number | null } | null };
+export type SubmitLessonReportMutation = { submitLessonReport: SubmitLessonReportMutation_submitLessonReport | null };
+
 
 export type SubmitLessonReportMutationVariables = Exact<{
   classInstanceId: string | number;
   input: LessonReportSubmitInput;
 }>;
 
+export type ApproveLessonReportMutation_approveLessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type SubmitLessonReportMutation = { submitLessonReport: { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type ApproveLessonReportMutation = { approveLessonReport: ApproveLessonReportMutation_approveLessonReport | null };
+
 
 export type ApproveLessonReportMutationVariables = Exact<{
   reportId: string | number;
 }>;
 
+export type RejectLessonReportMutation_rejectLessonReport = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type ApproveLessonReportMutation = { approveLessonReport: { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type RejectLessonReportMutation = { rejectLessonReport: RejectLessonReportMutation_rejectLessonReport | null };
+
 
 export type RejectLessonReportMutationVariables = Exact<{
   reportId: string | number;
   rejectionReason: string;
 }>;
 
+export type SubmitStudentLessonReportReflectionMutation_submitStudentLessonReportReflection = { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type RejectLessonReportMutation = { rejectLessonReport: { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type SubmitStudentLessonReportReflectionMutation = { submitStudentLessonReportReflection: SubmitStudentLessonReportReflectionMutation_submitStudentLessonReportReflection | null };
+
 
 export type SubmitStudentLessonReportReflectionMutationVariables = Exact<{
   classInstanceId: string | number;
   studentNotes: string;
 }>;
 
+export type ParentComplaintsQuery_parentComplaints_complaints_responses = { id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null };
 
-export type SubmitStudentLessonReportReflectionMutation = { submitStudentLessonReportReflection: { id: string | null, classInstanceId: string | null, studentId: string | null, teacherId: string | null, teacherName: string | null, studentName: string | null, subjectName: string | null, classAvatarUrl: string | null, teacherAvatarUrl: string | null, studentAvatarUrl: string | null, teacherUserId: string | null, studentUserId: string | null, lessonDate: string | null, durationMinutes: number | null, attendanceEvaluation: AttendanceEvaluation | null, teacherNotes: string | null, studentNotes: string | null, completionPercentage: number | null, status: LessonReportStatus | null, submittedByUserId: string | null, submittedAt: string | null, reviewedByUserId: string | null, reviewedAt: string | null, rejectionReason: string | null, idempotencyKey: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type ParentComplaintsQuery_parentComplaints_complaints = { id: string | null, category: ComplaintCategory | null, body: string | null, status: ComplaintStatus | null, createdAt: string | null, studentName: string | null, responses: Array<ParentComplaintsQuery_parentComplaints_complaints_responses> | null };
+
+export type ParentComplaintsQuery_parentComplaints_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ParentComplaintsQuery_parentComplaints = { id: string | null, totalCount: number | null, complaints: Array<ParentComplaintsQuery_parentComplaints_complaints> | null, pageInfo: ParentComplaintsQuery_parentComplaints_pageInfo | null };
+
+export type ParentComplaintsQuery = { parentComplaints: ParentComplaintsQuery_parentComplaints | null };
+
 
 export type ParentComplaintsQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type AdminComplaintQueueQuery_adminComplaintQueue_rows_responses = { id: string | null, body: string | null, createdAt: string | null, responderName: string | null, emailSent: boolean | null };
 
-export type ParentComplaintsQuery = { parentComplaints: { id: string | null, totalCount: number | null, complaints: Array<{ id: string | null, category: ComplaintCategory | null, body: string | null, status: ComplaintStatus | null, createdAt: string | null, studentName: string | null, responses: Array<{ id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null }> | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type AdminComplaintQueueQuery_adminComplaintQueue_rows = { id: string | null, category: ComplaintCategory | null, body: string | null, status: ComplaintStatus | null, createdAt: string | null, parentName: string | null, parentAvatarUrl: string | null, studentName: string | null, responses: Array<AdminComplaintQueueQuery_adminComplaintQueue_rows_responses> | null };
+
+export type AdminComplaintQueueQuery_adminComplaintQueue_metrics = { id: string | null, unanswered: number | null, answered: number | null, avgResolutionTime: string | null };
+
+export type AdminComplaintQueueQuery_adminComplaintQueue_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type AdminComplaintQueueQuery_adminComplaintQueue = { id: string | null, totalCount: number | null, rows: Array<AdminComplaintQueueQuery_adminComplaintQueue_rows> | null, metrics: AdminComplaintQueueQuery_adminComplaintQueue_metrics | null, pageInfo: AdminComplaintQueueQuery_adminComplaintQueue_pageInfo | null };
+
+export type AdminComplaintQueueQuery = { adminComplaintQueue: AdminComplaintQueueQuery_adminComplaintQueue | null };
+
 
 export type AdminComplaintQueueQueryVariables = Exact<{
   filter: ComplaintQueueFilter;
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type SubmitComplaintMutation_submitComplaint = { id: string | null, category: ComplaintCategory | null, body: string | null, status: ComplaintStatus | null, createdAt: string | null };
 
-export type AdminComplaintQueueQuery = { adminComplaintQueue: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, category: ComplaintCategory | null, body: string | null, status: ComplaintStatus | null, createdAt: string | null, parentName: string | null, parentAvatarUrl: string | null, studentName: string | null, responses: Array<{ id: string | null, body: string | null, createdAt: string | null, responderName: string | null, emailSent: boolean | null }> | null }> | null, metrics: { id: string | null, unanswered: number | null, answered: number | null, avgResolutionTime: string | null } | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type SubmitComplaintMutation = { submitComplaint: SubmitComplaintMutation_submitComplaint | null };
+
 
 export type SubmitComplaintMutationVariables = Exact<{
   input: ComplaintSubmitInput;
 }>;
 
+export type RespondToComplaintMutation_respondToComplaint = { id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null };
 
-export type SubmitComplaintMutation = { submitComplaint: { id: string | null, category: ComplaintCategory | null, body: string | null, status: ComplaintStatus | null, createdAt: string | null } | null };
+export type RespondToComplaintMutation = { respondToComplaint: RespondToComplaintMutation_respondToComplaint | null };
+
 
 export type RespondToComplaintMutationVariables = Exact<{
   input: RespondToComplaintInput;
 }>;
 
+export type DeleteComplaintMutation = { deleteComplaint: boolean | null };
 
-export type RespondToComplaintMutation = { respondToComplaint: { id: string | null, body: string | null, emailSent: boolean | null, createdAt: string | null, responderName: string | null } | null };
 
 export type DeleteComplaintMutationVariables = Exact<{
   complaintId: string;
 }>;
-
-
-export type DeleteComplaintMutation = { deleteComplaint: boolean | null };
 
 export type CronScheduleFieldsFragment = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
 
@@ -3122,259 +3048,352 @@ export type CronRunFieldsFragment = { id: string | null, scheduleId: string | nu
 
 export type CronQueueStatsFieldsFragment = { id: string | null, backend: string | null, pending: number | null, inFlight: number | null, failed: number | null, byJobKind: unknown };
 
+export type CronSchedulesQuery_cronSchedules_rows = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type CronSchedulesQuery_cronSchedules = { totalCount: number | null, rows: Array<CronSchedulesQuery_cronSchedules_rows> | null };
+
+export type CronSchedulesQuery = { cronSchedules: CronSchedulesQuery_cronSchedules | null };
+
+
 export type CronSchedulesQueryVariables = Exact<{
   input: CronScheduleListInput | null | undefined;
 }>;
 
+export type CronRunsQuery_cronRuns_rows = { id: string | null, scheduleId: string | null, jobKind: CronJobKind | null, status: CronRunStatus | null, triggerSource: CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type CronSchedulesQuery = { cronSchedules: { totalCount: number | null, rows: Array<{ id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null }> | null } | null };
+export type CronRunsQuery_cronRuns = { totalCount: number | null, rows: Array<CronRunsQuery_cronRuns_rows> | null };
+
+export type CronRunsQuery = { cronRuns: CronRunsQuery_cronRuns | null };
+
 
 export type CronRunsQueryVariables = Exact<{
   input: CronRunListInput | null | undefined;
 }>;
 
+export type CronQueueStatsQuery_cronQueueStats = { id: string | null, backend: string | null, pending: number | null, inFlight: number | null, failed: number | null, byJobKind: unknown };
 
-export type CronRunsQuery = { cronRuns: { totalCount: number | null, rows: Array<{ id: string | null, scheduleId: string | null, jobKind: CronJobKind | null, status: CronRunStatus | null, triggerSource: CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null }> | null } | null };
+export type CronQueueStatsQuery = { cronQueueStats: CronQueueStatsQuery_cronQueueStats | null };
+
 
 export type CronQueueStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type CronScheduleCreateMutation_cronScheduleCreate = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type CronQueueStatsQuery = { cronQueueStats: { id: string | null, backend: string | null, pending: number | null, inFlight: number | null, failed: number | null, byJobKind: unknown } | null };
+export type CronScheduleCreateMutation = { cronScheduleCreate: CronScheduleCreateMutation_cronScheduleCreate | null };
+
 
 export type CronScheduleCreateMutationVariables = Exact<{
   input: CronScheduleSubmitInput;
 }>;
 
+export type CronScheduleUpdateMutation_cronScheduleUpdate = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type CronScheduleCreateMutation = { cronScheduleCreate: { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null } | null };
+export type CronScheduleUpdateMutation = { cronScheduleUpdate: CronScheduleUpdateMutation_cronScheduleUpdate | null };
+
 
 export type CronScheduleUpdateMutationVariables = Exact<{
   id: string;
   input: CronScheduleUpdateInput;
 }>;
 
+export type CronSchedulePauseMutation_cronSchedulePause = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type CronScheduleUpdateMutation = { cronScheduleUpdate: { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null } | null };
+export type CronSchedulePauseMutation = { cronSchedulePause: CronSchedulePauseMutation_cronSchedulePause | null };
+
 
 export type CronSchedulePauseMutationVariables = Exact<{
   id: string;
 }>;
 
+export type CronScheduleResumeMutation_cronScheduleResume = { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type CronSchedulePauseMutation = { cronSchedulePause: { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null } | null };
+export type CronScheduleResumeMutation = { cronScheduleResume: CronScheduleResumeMutation_cronScheduleResume | null };
+
 
 export type CronScheduleResumeMutationVariables = Exact<{
   id: string;
 }>;
 
+export type CronScheduleDeleteMutation = { cronScheduleDelete: boolean | null };
 
-export type CronScheduleResumeMutation = { cronScheduleResume: { id: string | null, name: string | null, description: string | null, cronExpression: string | null, jobKind: CronJobKind | null, payload: unknown, status: CronScheduleStatus | null, timezone: string | null, nextRunAt: string | null, lastRunAt: string | null, concurrencyPolicy: CronConcurrencyPolicy | null, maxRetries: number | null, retryBackoffSeconds: number | null, timeoutSeconds: number | null, createdAt: string | null, updatedAt: string | null } | null };
 
 export type CronScheduleDeleteMutationVariables = Exact<{
   input: CronScheduleDeleteInput;
 }>;
 
+export type CronRunTriggerMutation_cronRunTrigger = { id: string | null, scheduleId: string | null, jobKind: CronJobKind | null, status: CronRunStatus | null, triggerSource: CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type CronScheduleDeleteMutation = { cronScheduleDelete: boolean | null };
+export type CronRunTriggerMutation = { cronRunTrigger: CronRunTriggerMutation_cronRunTrigger | null };
+
 
 export type CronRunTriggerMutationVariables = Exact<{
   input: CronRunTriggerInput;
 }>;
 
+export type MeetingProviderFieldsFragment_fieldSchema = { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null };
 
-export type CronRunTriggerMutation = { cronRunTrigger: { id: string | null, scheduleId: string | null, jobKind: CronJobKind | null, status: CronRunStatus | null, triggerSource: CronTriggerSource | null, payload: unknown, attempt: number | null, startedAt: string | null, completedAt: string | null, durationMs: number | null, errorMessage: string | null, workerId: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type MeetingProviderFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_fieldSchema | null };
 
-export type MeetingProviderFieldsFragment = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null };
+export type UserMeetingConfigFieldsFragment_details = { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null };
 
-export type UserMeetingConfigFieldsFragment = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null };
+export type UserMeetingConfigFieldsFragment_provider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_fieldSchema | null };
+
+export type UserMeetingConfigFieldsFragment = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_details | null, provider: UserMeetingConfigFieldsFragment_provider | null };
+
+export type MeetingProvidersQuery_meetingProviders = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_fieldSchema | null };
+
+export type MeetingProvidersQuery = { meetingProviders: Array<MeetingProvidersQuery_meetingProviders> | null };
+
 
 export type MeetingProvidersQueryVariables = Exact<{
   activeOnly: boolean | null | undefined;
 }>;
 
+export type MeetingProviderQuery_meetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_fieldSchema | null };
 
-export type MeetingProvidersQuery = { meetingProviders: Array<{ id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null }> | null };
+export type MeetingProviderQuery = { meetingProvider: MeetingProviderQuery_meetingProvider | null };
+
 
 export type MeetingProviderQueryVariables = Exact<{
   id: string | number;
 }>;
 
+export type UserMeetingConfigsQuery_userMeetingConfigs = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_details | null, provider: UserMeetingConfigFieldsFragment_provider | null };
 
-export type MeetingProviderQuery = { meetingProvider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null };
+export type UserMeetingConfigsQuery = { userMeetingConfigs: Array<UserMeetingConfigsQuery_userMeetingConfigs> | null };
+
 
 export type UserMeetingConfigsQueryVariables = Exact<{
   userId: string | number;
 }>;
 
+export type UserMeetingConfigQuery_userMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_details | null, provider: UserMeetingConfigFieldsFragment_provider | null };
 
-export type UserMeetingConfigsQuery = { userMeetingConfigs: Array<{ id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null }> | null };
+export type UserMeetingConfigQuery = { userMeetingConfig: UserMeetingConfigQuery_userMeetingConfig | null };
+
 
 export type UserMeetingConfigQueryVariables = Exact<{
   id: string | number;
 }>;
 
+export type CreateMeetingProviderMutation_createMeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_fieldSchema | null };
 
-export type UserMeetingConfigQuery = { userMeetingConfig: { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null } | null };
+export type CreateMeetingProviderMutation = { createMeetingProvider: CreateMeetingProviderMutation_createMeetingProvider | null };
+
 
 export type CreateMeetingProviderMutationVariables = Exact<{
   input: MeetingProviderCreateInput;
 }>;
 
+export type UpdateMeetingProviderMutation_updateMeetingProvider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_fieldSchema | null };
 
-export type CreateMeetingProviderMutation = { createMeetingProvider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null };
+export type UpdateMeetingProviderMutation = { updateMeetingProvider: UpdateMeetingProviderMutation_updateMeetingProvider | null };
+
 
 export type UpdateMeetingProviderMutationVariables = Exact<{
   id: string | number;
   input: MeetingProviderUpdateInput;
 }>;
 
+export type DeleteMeetingProviderMutation = { deleteMeetingProvider: boolean | null };
 
-export type UpdateMeetingProviderMutation = { updateMeetingProvider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null };
 
 export type DeleteMeetingProviderMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type CreateUserMeetingConfigMutation_createUserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_details | null, provider: UserMeetingConfigFieldsFragment_provider | null };
 
-export type DeleteMeetingProviderMutation = { deleteMeetingProvider: boolean | null };
+export type CreateUserMeetingConfigMutation = { createUserMeetingConfig: CreateUserMeetingConfigMutation_createUserMeetingConfig | null };
+
 
 export type CreateUserMeetingConfigMutationVariables = Exact<{
   input: UserMeetingConfigCreateInput;
 }>;
 
+export type UpdateUserMeetingConfigMutation_updateUserMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_details | null, provider: UserMeetingConfigFieldsFragment_provider | null };
 
-export type CreateUserMeetingConfigMutation = { createUserMeetingConfig: { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null } | null };
+export type UpdateUserMeetingConfigMutation = { updateUserMeetingConfig: UpdateUserMeetingConfigMutation_updateUserMeetingConfig | null };
+
 
 export type UpdateUserMeetingConfigMutationVariables = Exact<{
   id: string | number;
   input: UserMeetingConfigUpdateInput;
 }>;
 
+export type DeleteUserMeetingConfigMutation = { deleteUserMeetingConfig: boolean | null };
 
-export type UpdateUserMeetingConfigMutation = { updateUserMeetingConfig: { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null } | null };
 
 export type DeleteUserMeetingConfigMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type SetDefaultMeetingConfigMutation_setDefaultMeetingConfig = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: UserMeetingConfigFieldsFragment_details | null, provider: UserMeetingConfigFieldsFragment_provider | null };
 
-export type DeleteUserMeetingConfigMutation = { deleteUserMeetingConfig: boolean | null };
+export type SetDefaultMeetingConfigMutation = { setDefaultMeetingConfig: SetDefaultMeetingConfigMutation_setDefaultMeetingConfig | null };
+
 
 export type SetDefaultMeetingConfigMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type ClassMeetingConfigFieldsFragment_details = { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null };
 
-export type SetDefaultMeetingConfigMutation = { setDefaultMeetingConfig: { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, oauthTokenExpiresAt: string | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null } | null };
+export type ClassMeetingConfigFieldsFragment_provider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: MeetingProviderFieldsFragment_fieldSchema | null };
 
-export type ClassMeetingConfigFieldsFragment = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null };
+export type ClassMeetingConfigFieldsFragment = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_details | null, provider: ClassMeetingConfigFieldsFragment_provider | null };
 
 export type EffectiveMeetingFieldsFragment = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
+
+export type ClassMeetingConfigsQuery_classMeetingConfigs = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_details | null, provider: ClassMeetingConfigFieldsFragment_provider | null };
+
+export type ClassMeetingConfigsQuery = { classMeetingConfigs: Array<ClassMeetingConfigsQuery_classMeetingConfigs> | null };
+
 
 export type ClassMeetingConfigsQueryVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_details = { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null };
 
-export type ClassMeetingConfigsQuery = { classMeetingConfigs: Array<{ id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null }> | null };
+export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_provider_fieldSchema = { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null };
+
+export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_provider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, providerKind: string | null, isActive: boolean | null, fieldSchema: ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_provider_fieldSchema | null };
+
+export type ClassMeetingConfigsWithStatusQuery_classMeetingConfigs = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, meetingUrlStatus: string | null, meetingUrlExpiresAt: string | null, meetingUrlError: string | null, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_details | null, provider: ClassMeetingConfigsWithStatusQuery_classMeetingConfigs_provider | null };
+
+export type ClassMeetingConfigsWithStatusQuery = { classMeetingConfigs: Array<ClassMeetingConfigsWithStatusQuery_classMeetingConfigs> | null };
+
 
 export type ClassMeetingConfigsWithStatusQueryVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type RecurringMeetingConfigsQuery_recurringMeetingConfigs = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_details | null, provider: ClassMeetingConfigFieldsFragment_provider | null };
 
-export type ClassMeetingConfigsWithStatusQuery = { classMeetingConfigs: Array<{ id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, meetingUrlStatus: string | null, meetingUrlExpiresAt: string | null, meetingUrlError: string | null, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, providerKind: string | null, isActive: boolean | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null }> | null };
+export type RecurringMeetingConfigsQuery = { recurringMeetingConfigs: Array<RecurringMeetingConfigsQuery_recurringMeetingConfigs> | null };
+
 
 export type RecurringMeetingConfigsQueryVariables = Exact<{
   recurringScheduleId: string | number;
 }>;
 
+export type CreateClassMeetingConfigMutation_createClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_details | null, provider: ClassMeetingConfigFieldsFragment_provider | null };
 
-export type RecurringMeetingConfigsQuery = { recurringMeetingConfigs: Array<{ id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null }> | null };
+export type CreateClassMeetingConfigMutation = { createClassMeetingConfig: CreateClassMeetingConfigMutation_createClassMeetingConfig | null };
+
 
 export type CreateClassMeetingConfigMutationVariables = Exact<{
   input: ClassMeetingConfigCreateInput;
 }>;
 
+export type UpdateClassMeetingConfigMutation_updateClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_details | null, provider: ClassMeetingConfigFieldsFragment_provider | null };
 
-export type CreateClassMeetingConfigMutation = { createClassMeetingConfig: { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null } | null };
+export type UpdateClassMeetingConfigMutation = { updateClassMeetingConfig: UpdateClassMeetingConfigMutation_updateClassMeetingConfig | null };
+
 
 export type UpdateClassMeetingConfigMutationVariables = Exact<{
   id: string | number;
   input: ClassMeetingConfigUpdateInput;
 }>;
 
+export type DeleteClassMeetingConfigMutation = { deleteClassMeetingConfig: boolean | null };
 
-export type UpdateClassMeetingConfigMutation = { updateClassMeetingConfig: { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null } | null };
 
 export type DeleteClassMeetingConfigMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type SetDefaultClassMeetingConfigMutation_setDefaultClassMeetingConfig = { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: ClassMeetingConfigFieldsFragment_details | null, provider: ClassMeetingConfigFieldsFragment_provider | null };
 
-export type DeleteClassMeetingConfigMutation = { deleteClassMeetingConfig: boolean | null };
+export type SetDefaultClassMeetingConfigMutation = { setDefaultClassMeetingConfig: SetDefaultClassMeetingConfigMutation_setDefaultClassMeetingConfig | null };
+
 
 export type SetDefaultClassMeetingConfigMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type GenerateMeetingUrlMutation_generateMeetingUrl = { joinUrl: string | null, meetingId: string | null, expiresAt: string | null };
 
-export type SetDefaultClassMeetingConfigMutation = { setDefaultClassMeetingConfig: { id: string | null, classInstanceId: string | null, recurringScheduleId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, providerMetadata: unknown, createdAt: string | null, updatedAt: string | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null, description: Partial<Record<'ar' | 'en', string>> | null, instructions: Partial<Record<'ar' | 'en', string>> | null, urlAllowlist: Array<string> | null, urlExample: string | null, logoUrl: string | null, providerKind: string | null, isActive: boolean | null, createdAt: string | null, updatedAt: string | null, fieldSchema: { requiresMeetingUrl: boolean | null, supportsAutoGeneration: boolean | null, supportsUsername: boolean | null, supportsPassword: boolean | null, supportsTenantId: boolean | null } | null } | null } | null };
+export type GenerateMeetingUrlMutation = { generateMeetingUrl: GenerateMeetingUrlMutation_generateMeetingUrl | null };
+
 
 export type GenerateMeetingUrlMutationVariables = Exact<{
   input: GenerateMeetingUrlInput;
 }>;
 
+export type ConnectMeetingProviderOAuthMutation_connectMeetingProviderOAuth = { id: string | null, authorizeUrl: string | null, state: string | null };
 
-export type GenerateMeetingUrlMutation = { generateMeetingUrl: { joinUrl: string | null, meetingId: string | null, expiresAt: string | null } | null };
+export type ConnectMeetingProviderOAuthMutation = { connectMeetingProviderOAuth: ConnectMeetingProviderOAuthMutation_connectMeetingProviderOAuth | null };
+
 
 export type ConnectMeetingProviderOAuthMutationVariables = Exact<{
   input: ConnectMeetingProviderOAuthInput;
 }>;
 
+export type DisconnectMeetingProviderOAuthMutation_disconnectMeetingProviderOAuth = { id: string | null, ok: boolean | null, providerSlug: string | null };
 
-export type ConnectMeetingProviderOAuthMutation = { connectMeetingProviderOAuth: { id: string | null, authorizeUrl: string | null, state: string | null } | null };
+export type DisconnectMeetingProviderOAuthMutation = { disconnectMeetingProviderOAuth: DisconnectMeetingProviderOAuthMutation_disconnectMeetingProviderOAuth | null };
+
 
 export type DisconnectMeetingProviderOAuthMutationVariables = Exact<{
   input: DisconnectMeetingProviderOAuthInput;
 }>;
 
+export type MyConnectedMeetingProvidersQuery_myConnectedMeetingProviders = { id: string | null, providerSlug: string | null, email: string | null, connectedAt: string | null, expiresAt: string | null };
 
-export type DisconnectMeetingProviderOAuthMutation = { disconnectMeetingProviderOAuth: { id: string | null, ok: boolean | null, providerSlug: string | null } | null };
+export type MyConnectedMeetingProvidersQuery = { myConnectedMeetingProviders: Array<MyConnectedMeetingProvidersQuery_myConnectedMeetingProviders> | null };
+
 
 export type MyConnectedMeetingProvidersQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type NotificationAlertsQuery_notificationAlerts_alerts = { id: string | null, deliveryId: string | null, type: string | null, eventType: NotificationEventType | null, channel: NotificationChannel | null, metadata: unknown, title: string | null, body: string | null, createdAt: string | null, severity: string | null, readAt: string | null };
 
-export type MyConnectedMeetingProvidersQuery = { myConnectedMeetingProviders: Array<{ id: string | null, providerSlug: string | null, email: string | null, connectedAt: string | null, expiresAt: string | null }> | null };
+export type NotificationAlertsQuery_notificationAlerts = { id: string | null, totalCount: number | null, unreadCount: number | null, alerts: Array<NotificationAlertsQuery_notificationAlerts_alerts> | null };
+
+export type NotificationAlertsQuery = { notificationAlerts: NotificationAlertsQuery_notificationAlerts | null };
+
 
 export type NotificationAlertsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type MarkNotificationsReadMutation = { markNotificationsRead: number | null };
 
-export type NotificationAlertsQuery = { notificationAlerts: { id: string | null, totalCount: number | null, unreadCount: number | null, alerts: Array<{ id: string | null, deliveryId: string | null, type: string | null, eventType: NotificationEventType | null, channel: NotificationChannel | null, metadata: unknown, title: string | null, body: string | null, createdAt: string | null, severity: string | null, readAt: string | null }> | null } | null };
 
 export type MarkNotificationsReadMutationVariables = Exact<{ [key: string]: never; }>;
 
+export type MarkNotificationReadMutation = { markNotificationRead: boolean | null };
 
-export type MarkNotificationsReadMutation = { markNotificationsRead: number | null };
 
 export type MarkNotificationReadMutationVariables = Exact<{
   deliveryId: string | number;
 }>;
 
+export type NotificationPreferencesQuery_notificationPreferences = { id: string | null, channel: NotificationChannel | null, eventType: NotificationEventType | null, enabled: boolean | null };
 
-export type MarkNotificationReadMutation = { markNotificationRead: boolean | null };
+export type NotificationPreferencesQuery = { notificationPreferences: Array<NotificationPreferencesQuery_notificationPreferences> | null };
+
 
 export type NotificationPreferencesQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type UpdateNotificationPreferencesMutation_updateNotificationPreferences = { id: string | null, channel: NotificationChannel | null, eventType: NotificationEventType | null, enabled: boolean | null };
 
-export type NotificationPreferencesQuery = { notificationPreferences: Array<{ id: string | null, channel: NotificationChannel | null, eventType: NotificationEventType | null, enabled: boolean | null }> | null };
+export type UpdateNotificationPreferencesMutation = { updateNotificationPreferences: Array<UpdateNotificationPreferencesMutation_updateNotificationPreferences> | null };
+
 
 export type UpdateNotificationPreferencesMutationVariables = Exact<{
   input: Array<NotificationPreferenceInput> | NotificationPreferenceInput;
 }>;
 
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_rows_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type UpdateNotificationPreferencesMutation = { updateNotificationPreferences: Array<{ id: string | null, channel: NotificationChannel | null, eventType: NotificationEventType | null, enabled: boolean | null }> | null };
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_rows = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: CurrencyCode | null, status: InvoiceStatus | null, invoiceType: InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, hasPaymentProof: boolean | null, hasRejectedSubmission: boolean | null, displayAmount: ParentInvoiceHistoryQuery_parentInvoiceHistory_rows_displayAmount | null };
+
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ParentInvoiceHistoryQuery_parentInvoiceHistory = { id: string | null, totalCount: number | null, rows: Array<ParentInvoiceHistoryQuery_parentInvoiceHistory_rows> | null, pageInfo: ParentInvoiceHistoryQuery_parentInvoiceHistory_pageInfo | null };
+
+export type ParentInvoiceHistoryQuery = { parentInvoiceHistory: ParentInvoiceHistoryQuery_parentInvoiceHistory | null };
+
 
 export type ParentInvoiceHistoryQueryVariables = Exact<{
   parentId: string | null | undefined;
@@ -3383,34 +3402,74 @@ export type ParentInvoiceHistoryQueryVariables = Exact<{
   search: string | null | undefined;
 }>;
 
+export type AdminInvoicesQuery_adminInvoices_rows_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type ParentInvoiceHistoryQuery = { parentInvoiceHistory: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: CurrencyCode | null, status: InvoiceStatus | null, invoiceType: InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, hasPaymentProof: boolean | null, hasRejectedSubmission: boolean | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type AdminInvoicesQuery_adminInvoices_rows = { id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: CurrencyCode | null, status: InvoiceStatus | null, invoiceType: InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, hasPaymentProof: boolean | null, hasRejectedSubmission: boolean | null, displayAmount: AdminInvoicesQuery_adminInvoices_rows_displayAmount | null };
+
+export type AdminInvoicesQuery_adminInvoices_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type AdminInvoicesQuery_adminInvoices = { id: string | null, totalCount: number | null, rows: Array<AdminInvoicesQuery_adminInvoices_rows> | null, pageInfo: AdminInvoicesQuery_adminInvoices_pageInfo | null };
+
+export type AdminInvoicesQuery = { adminInvoices: AdminInvoicesQuery_adminInvoices | null };
+
 
 export type AdminInvoicesQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
   search: string | null | undefined;
 }>;
 
+export type AdminBillingSummaryQuery_adminBillingSummary_outstandingByCurrency_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type AdminInvoicesQuery = { adminInvoices: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, issueDate: string | null, dueDate: string | null, paidDate: string | null, amount: string | null, currency: CurrencyCode | null, status: InvoiceStatus | null, invoiceType: InvoiceType | null, studentId: string | null, studentName: string | null, parentId: string | null, parentUserId: string | null, hasPaymentProof: boolean | null, hasRejectedSubmission: boolean | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type AdminBillingSummaryQuery_adminBillingSummary_outstandingByCurrency = { id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: AdminBillingSummaryQuery_adminBillingSummary_outstandingByCurrency_displayAmount | null };
+
+export type AdminBillingSummaryQuery_adminBillingSummary_mtdRevenueByCurrency_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type AdminBillingSummaryQuery_adminBillingSummary_mtdRevenueByCurrency = { id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: AdminBillingSummaryQuery_adminBillingSummary_mtdRevenueByCurrency_displayAmount | null };
+
+export type AdminBillingSummaryQuery_adminBillingSummary = { id: string | null, totalOutstanding: string | null, pendingCount: number | null, mtdRevenue: string | null, negativeBalanceCount: number | null, outstandingByCurrency: Array<AdminBillingSummaryQuery_adminBillingSummary_outstandingByCurrency> | null, mtdRevenueByCurrency: Array<AdminBillingSummaryQuery_adminBillingSummary_mtdRevenueByCurrency> | null };
+
+export type AdminBillingSummaryQuery = { adminBillingSummary: AdminBillingSummaryQuery_adminBillingSummary | null };
+
 
 export type AdminBillingSummaryQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type StudentCreditStatusQuery_studentCreditStatus = { id: string | null, studentName: string | null, parentEmail: string | null, planType: InvoiceType | null, classesRemaining: number | null, classesTotal: number | null, status: StudentStatus | null };
 
-export type AdminBillingSummaryQuery = { adminBillingSummary: { id: string | null, totalOutstanding: string | null, pendingCount: number | null, mtdRevenue: string | null, negativeBalanceCount: number | null, outstandingByCurrency: Array<{ id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null, mtdRevenueByCurrency: Array<{ id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null } | null };
+export type StudentCreditStatusQuery = { studentCreditStatus: Array<StudentCreditStatusQuery_studentCreditStatus> | null };
+
 
 export type StudentCreditStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type ParentBillingSummaryQuery_parentBillingSummary_nextUnpaidInvoice = { id: string | null, amount: string | null, currency: CurrencyCode | null, dueDate: string | null, studentName: string | null };
 
-export type StudentCreditStatusQuery = { studentCreditStatus: Array<{ id: string | null, studentName: string | null, parentEmail: string | null, planType: InvoiceType | null, classesRemaining: number | null, classesTotal: number | null, status: StudentStatus | null }> | null };
+export type ParentBillingSummaryQuery_parentBillingSummary_outstandingByCurrency_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type ParentBillingSummaryQuery_parentBillingSummary_outstandingByCurrency = { id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: ParentBillingSummaryQuery_parentBillingSummary_outstandingByCurrency_displayAmount | null };
+
+export type ParentBillingSummaryQuery_parentBillingSummary_paidThisTermByCurrency_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type ParentBillingSummaryQuery_parentBillingSummary_paidThisTermByCurrency = { id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: ParentBillingSummaryQuery_parentBillingSummary_paidThisTermByCurrency_displayAmount | null };
+
+export type ParentBillingSummaryQuery_parentBillingSummary = { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null, pendingPaymentCount: number | null, nextUnpaidInvoice: ParentBillingSummaryQuery_parentBillingSummary_nextUnpaidInvoice | null, outstandingByCurrency: Array<ParentBillingSummaryQuery_parentBillingSummary_outstandingByCurrency> | null, paidThisTermByCurrency: Array<ParentBillingSummaryQuery_parentBillingSummary_paidThisTermByCurrency> | null };
+
+export type ParentBillingSummaryQuery = { parentBillingSummary: ParentBillingSummaryQuery_parentBillingSummary | null };
+
 
 export type ParentBillingSummaryQueryVariables = Exact<{
   parentId: string | null | undefined;
   userId: string | null | undefined;
 }>;
 
+export type ParentDashboardScheduleQuery_parentDashboardSchedule_rows_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type ParentBillingSummaryQuery = { parentBillingSummary: { id: string | null, outstandingBalance: string | null, paidThisTerm: string | null, nextDueDate: string | null, activeStudents: number | null, pendingPaymentCount: number | null, nextUnpaidInvoice: { id: string | null, amount: string | null, currency: CurrencyCode | null, dueDate: string | null, studentName: string | null } | null, outstandingByCurrency: Array<{ id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null, paidThisTermByCurrency: Array<{ id: string | null, currency: CurrencyCode | null, amount: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null } | null };
+export type ParentDashboardScheduleQuery_parentDashboardSchedule_rows = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, bookingStatus: BookingStatus | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, classTimeFormatted: string | null, effectiveMeeting: ParentDashboardScheduleQuery_parentDashboardSchedule_rows_effectiveMeeting | null };
+
+export type ParentDashboardScheduleQuery_parentDashboardSchedule_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ParentDashboardScheduleQuery_parentDashboardSchedule = { id: string | null, totalCount: number | null, rows: Array<ParentDashboardScheduleQuery_parentDashboardSchedule_rows> | null, pageInfo: ParentDashboardScheduleQuery_parentDashboardSchedule_pageInfo | null };
+
+export type ParentDashboardScheduleQuery = { parentDashboardSchedule: ParentDashboardScheduleQuery_parentDashboardSchedule | null };
+
 
 export type ParentDashboardScheduleQueryVariables = Exact<{
   date: string | null | undefined;
@@ -3418,15 +3477,31 @@ export type ParentDashboardScheduleQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type ParentDashboardMetricsQuery_parentDashboardMetrics_metrics = { id: string | null, totalStudents: number | null, todaysClasses: number | null, pendingInvoicesCount: number | null, pendingInvoicesAmount: string | null, performanceAvg: number | null, performanceAvgMobile: number | null, pendingMessages: number | null };
 
-export type ParentDashboardScheduleQuery = { parentDashboardSchedule: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, bookingStatus: BookingStatus | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, classTimeFormatted: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type ParentDashboardMetricsQuery_parentDashboardMetrics_studentProgress = { id: string | null, name: string | null, completionPercent: number | null };
+
+export type ParentDashboardMetricsQuery_parentDashboardMetrics_workshopPromo = { id: string | null, title: string | null, description: string | null, imageUrl: string | null };
+
+export type ParentDashboardMetricsQuery_parentDashboardMetrics = { id: string | null, metrics: ParentDashboardMetricsQuery_parentDashboardMetrics_metrics | null, studentProgress: Array<ParentDashboardMetricsQuery_parentDashboardMetrics_studentProgress> | null, workshopPromo: ParentDashboardMetricsQuery_parentDashboardMetrics_workshopPromo | null };
+
+export type ParentDashboardMetricsQuery = { parentDashboardMetrics: ParentDashboardMetricsQuery_parentDashboardMetrics | null };
+
 
 export type ParentDashboardMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
-
-export type ParentDashboardMetricsQuery = { parentDashboardMetrics: { id: string | null, metrics: { id: string | null, totalStudents: number | null, todaysClasses: number | null, pendingInvoicesCount: number | null, pendingInvoicesAmount: string | null, performanceAvg: number | null, performanceAvgMobile: number | null, pendingMessages: number | null } | null, studentProgress: Array<{ id: string | null, name: string | null, completionPercent: number | null }> | null, workshopPromo: { id: string | null, title: string | null, description: string | null, imageUrl: string | null } | null } | null };
-
 export type ParentDirectoryAutocompleteRowFragment = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
+
+export type ParentDirectoryQuery_parentDirectory_metrics = { id: string | null, regular: number | null, onLeave: number | null, onTrial: number | null, suspended: number | null };
+
+export type ParentDirectoryQuery_parentDirectory_rows = { id: string | null, userId: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, lifecycleStatus: ParentStatus | null, accountStatus: AccountStatus | null, unpaidInvoices: number | null };
+
+export type ParentDirectoryQuery_parentDirectory_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ParentDirectoryQuery_parentDirectory = { id: string | null, totalCount: number | null, metrics: ParentDirectoryQuery_parentDirectory_metrics | null, rows: Array<ParentDirectoryQuery_parentDirectory_rows> | null, pageInfo: ParentDirectoryQuery_parentDirectory_pageInfo | null };
+
+export type ParentDirectoryQuery = { parentDirectory: ParentDirectoryQuery_parentDirectory | null };
+
 
 export type ParentDirectoryQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
@@ -3434,23 +3509,29 @@ export type ParentDirectoryQueryVariables = Exact<{
   lifecycleStatusFilter: ParentStatus | null | undefined;
 }>;
 
+export type ParentsDirectoryQuery_parentsDirectory = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
 
-export type ParentDirectoryQuery = { parentDirectory: { id: string | null, totalCount: number | null, metrics: { id: string | null, regular: number | null, onLeave: number | null, onTrial: number | null, suspended: number | null } | null, rows: Array<{ id: string | null, userId: string | null, index: number | null, name: string | null, email: string | null, avatarUrl: string | null, guardianOf: string | null, time: string | null, lifecycleStatus: ParentStatus | null, accountStatus: AccountStatus | null, unpaidInvoices: number | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type ParentsDirectoryQuery = { parentsDirectory: Array<ParentsDirectoryQuery_parentsDirectory> };
+
 
 export type ParentsDirectoryQueryVariables = Exact<{
   search: string | null | undefined;
   limit: number | null | undefined;
 }>;
 
+export type ParentDocumentsQuery_parentDocuments = { id: string | null, fileId: string | null, filePath: string | null, isProtected: boolean | null, usageType: string | null, createdAt: string | null };
 
-export type ParentsDirectoryQuery = { parentsDirectory: Array<{ id: string | null, name: string | null, avatarUrl: string | null, email: string | null }> };
+export type ParentDocumentsQuery = { parentDocuments: Array<ParentDocumentsQuery_parentDocuments> | null };
+
 
 export type ParentDocumentsQueryVariables = Exact<{
   parentId: string;
 }>;
 
+export type LinkDocumentToParentMutation_linkDocumentToParent = { id: string | null, fileId: string | null, filePath: string | null, isProtected: boolean | null, usageType: string | null, createdAt: string | null };
 
-export type ParentDocumentsQuery = { parentDocuments: Array<{ id: string | null, fileId: string | null, filePath: string | null, isProtected: boolean | null, usageType: string | null, createdAt: string | null }> | null };
+export type LinkDocumentToParentMutation = { linkDocumentToParent: LinkDocumentToParentMutation_linkDocumentToParent | null };
+
 
 export type LinkDocumentToParentMutationVariables = Exact<{
   parentId: string;
@@ -3458,66 +3539,90 @@ export type LinkDocumentToParentMutationVariables = Exact<{
   usageType: string;
 }>;
 
+export type ChangeParentLifecycleStatusMutation_changeParentLifecycleStatus = { id: string | null, lifecycleStatus: ParentStatus | null };
 
-export type LinkDocumentToParentMutation = { linkDocumentToParent: { id: string | null, fileId: string | null, filePath: string | null, isProtected: boolean | null, usageType: string | null, createdAt: string | null } | null };
+export type ChangeParentLifecycleStatusMutation = { changeParentLifecycleStatus: ChangeParentLifecycleStatusMutation_changeParentLifecycleStatus | null };
+
 
 export type ChangeParentLifecycleStatusMutationVariables = Exact<{
   parentId: string;
   newStatus: ParentStatus;
 }>;
 
+export type CreateParentMutation_createParent = { id: string | null, userId: string | null, parentId: string | null, name: string | null, email: string | null, status: string | null, invoiceType: string | null, currency: CurrencyCode | null };
 
-export type ChangeParentLifecycleStatusMutation = { changeParentLifecycleStatus: { id: string | null, lifecycleStatus: ParentStatus | null } | null };
+export type CreateParentMutation = { createParent: CreateParentMutation_createParent | null };
+
 
 export type CreateParentMutationVariables = Exact<{
   input: ParentOnboardingInput;
 }>;
 
+export type ParentAssignedStudentsQuery_parentAssignedStudents_rows = { id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null };
 
-export type CreateParentMutation = { createParent: { id: string | null, userId: string | null, parentId: string | null, name: string | null, email: string | null, status: string | null, invoiceType: string | null, currency: CurrencyCode | null } | null };
+export type ParentAssignedStudentsQuery_parentAssignedStudents = { id: string | null, totalCount: number | null, rows: Array<ParentAssignedStudentsQuery_parentAssignedStudents_rows> | null };
+
+export type ParentAssignedStudentsQuery = { parentAssignedStudents: ParentAssignedStudentsQuery_parentAssignedStudents | null };
+
 
 export type ParentAssignedStudentsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type ParentOwnProfileQuery_parentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
 
-export type ParentAssignedStudentsQuery = { parentAssignedStudents: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null }> | null } | null };
+export type ParentOwnProfileQuery = { parentOwnProfile: ParentOwnProfileQuery_parentOwnProfile | null };
+
 
 export type ParentOwnProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type ParentHandbookUrlQuery_parentHandbookUrl = { id: string | null, url: string | null };
 
-export type ParentOwnProfileQuery = { parentOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null } | null };
+export type ParentHandbookUrlQuery = { parentHandbookUrl: ParentHandbookUrlQuery_parentHandbookUrl | null };
+
 
 export type ParentHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type ParentProfileQuery_parentProfile_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type ParentHandbookUrlQuery = { parentHandbookUrl: { id: string | null, url: string | null } | null };
+export type ParentProfileQuery_parentProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, lifecycleStatus: string | null, accountStatus: AccountStatus | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: CurrencyCode | null, timezone: IanaTimezone | null, createdAt: string | null, updatedAt: string | null, displayAmount: ParentProfileQuery_parentProfile_displayAmount | null };
+
+export type ParentProfileQuery = { parentProfile: ParentProfileQuery_parentProfile | null };
+
 
 export type ParentProfileQueryVariables = Exact<{
   parentId: string;
 }>;
 
+export type ParentAssociatedStudentsQuery_parentAssociatedStudents = { id: string | null, name: string | null, avatarUrl: string | null, status: StudentStatus | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null };
 
-export type ParentProfileQuery = { parentProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, lifecycleStatus: string | null, accountStatus: AccountStatus | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: CurrencyCode | null, timezone: IanaTimezone | null, createdAt: string | null, updatedAt: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null };
+export type ParentAssociatedStudentsQuery = { parentAssociatedStudents: Array<ParentAssociatedStudentsQuery_parentAssociatedStudents> | null };
+
 
 export type ParentAssociatedStudentsQueryVariables = Exact<{
   parentId: string;
 }>;
 
+export type DeactivateParentMutation_deactivateParent = { id: string | null, userId: string | null, accountStatus: AccountStatus | null };
 
-export type ParentAssociatedStudentsQuery = { parentAssociatedStudents: Array<{ id: string | null, name: string | null, avatarUrl: string | null, status: StudentStatus | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, updatedAt: string | null }> | null };
+export type DeactivateParentMutation = { deactivateParent: DeactivateParentMutation_deactivateParent | null };
+
 
 export type DeactivateParentMutationVariables = Exact<{
   parentId: string;
 }>;
 
+export type ReactivateParentMutation_reactivateParent = { id: string | null, userId: string | null, accountStatus: AccountStatus | null };
 
-export type DeactivateParentMutation = { deactivateParent: { id: string | null, userId: string | null, accountStatus: AccountStatus | null } | null };
+export type ReactivateParentMutation = { reactivateParent: ReactivateParentMutation_reactivateParent | null };
+
 
 export type ReactivateParentMutationVariables = Exact<{
   parentId: string;
 }>;
 
+export type UpdateStudentQuotaMutation_updateStudentQuota = { id: string | null, classesRemaining: number | null, classesTotal: number | null, version: number | null };
 
-export type ReactivateParentMutation = { reactivateParent: { id: string | null, userId: string | null, accountStatus: AccountStatus | null } | null };
+export type UpdateStudentQuotaMutation = { updateStudentQuota: UpdateStudentQuotaMutation_updateStudentQuota | null };
+
 
 export type UpdateStudentQuotaMutationVariables = Exact<{
   studentId: string;
@@ -3525,135 +3630,219 @@ export type UpdateStudentQuotaMutationVariables = Exact<{
   expectedVersion: number | null | undefined;
 }>;
 
-
-export type UpdateStudentQuotaMutation = { updateStudentQuota: { id: string | null, classesRemaining: number | null, classesTotal: number | null, version: number | null } | null };
-
 export type PermissionFieldsFragment = { id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null };
 
 export type PermissionGroupFieldsFragment = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null };
 
-export type PermissionGroupDetailFieldsFragment = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null };
+export type PermissionGroupDetailFieldsFragment_assignedUsers = { id: string | null, name: string | null, email: string | null };
+
+export type PermissionGroupDetailFieldsFragment = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<PermissionGroupDetailFieldsFragment_assignedUsers> | null };
 
 export type UserOverrideFieldsFragment = { id: string | null, permissionId: string | null, state: OverrideState | null, assignedBy: string | null };
 
+export type PermissionsQuery_permissions = { id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null };
+
+export type PermissionsQuery = { permissions: Array<PermissionsQuery_permissions> | null };
+
+
 export type PermissionsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type PermissionGroupsQuery_permissionGroups = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null };
 
-export type PermissionsQuery = { permissions: Array<{ id: string | null, key: string | null, resource: string | null, action: string | null, description: string | null, category: string | null, isSystem: boolean | null }> | null };
+export type PermissionGroupsQuery = { permissionGroups: Array<PermissionGroupsQuery_permissionGroups> | null };
+
 
 export type PermissionGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type PermissionGroupQuery_permissionGroup = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<PermissionGroupDetailFieldsFragment_assignedUsers> | null };
 
-export type PermissionGroupsQuery = { permissionGroups: Array<{ id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null }> | null };
+export type PermissionGroupQuery = { permissionGroup: PermissionGroupQuery_permissionGroup | null };
+
 
 export type PermissionGroupQueryVariables = Exact<{
   id: string;
 }>;
 
+export type UserPermissionGroupsQuery = { userPermissionGroups: Array<string> | null };
 
-export type PermissionGroupQuery = { permissionGroup: { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null } | null };
 
 export type UserPermissionGroupsQueryVariables = Exact<{
   userId: string;
 }>;
 
+export type UserOverridesQuery_userOverrides = { id: string | null, permissionId: string | null, state: OverrideState | null, assignedBy: string | null };
 
-export type UserPermissionGroupsQuery = { userPermissionGroups: Array<string> | null };
+export type UserOverridesQuery = { userOverrides: Array<UserOverridesQuery_userOverrides> | null };
+
 
 export type UserOverridesQueryVariables = Exact<{
   userId: string;
 }>;
 
+export type EffectiveUserPermissionsQuery = { effectiveUserPermissions: Array<string> | null };
 
-export type UserOverridesQuery = { userOverrides: Array<{ id: string | null, permissionId: string | null, state: OverrideState | null, assignedBy: string | null }> | null };
 
 export type EffectiveUserPermissionsQueryVariables = Exact<{
   userId: string;
 }>;
 
+export type CreatePermissionGroupMutation_createPermissionGroup = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<PermissionGroupDetailFieldsFragment_assignedUsers> | null };
 
-export type EffectiveUserPermissionsQuery = { effectiveUserPermissions: Array<string> | null };
+export type CreatePermissionGroupMutation = { createPermissionGroup: CreatePermissionGroupMutation_createPermissionGroup | null };
+
 
 export type CreatePermissionGroupMutationVariables = Exact<{
   input: CreatePermissionGroupInput;
 }>;
 
+export type UpdatePermissionGroupMutation_updatePermissionGroup = { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<PermissionGroupDetailFieldsFragment_assignedUsers> | null };
 
-export type CreatePermissionGroupMutation = { createPermissionGroup: { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null } | null };
+export type UpdatePermissionGroupMutation = { updatePermissionGroup: UpdatePermissionGroupMutation_updatePermissionGroup | null };
+
 
 export type UpdatePermissionGroupMutationVariables = Exact<{
   input: UpdatePermissionGroupInput;
 }>;
 
+export type DeletePermissionGroupMutation = { deletePermissionGroup: boolean | null };
 
-export type UpdatePermissionGroupMutation = { updatePermissionGroup: { id: string | null, name: Partial<Record<'ar' | 'en', string>> | null, slug: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSystem: boolean | null, createdAt: string | null, updatedAt: string | null, permissionIds: Array<string> | null, assignedUsers: Array<{ id: string | null, name: string | null, email: string | null }> | null } | null };
 
 export type DeletePermissionGroupMutationVariables = Exact<{
   groupId: string;
 }>;
 
+export type AssignPermissionGroupToUserMutation = { assignPermissionGroupToUser: boolean | null };
 
-export type DeletePermissionGroupMutation = { deletePermissionGroup: boolean | null };
 
 export type AssignPermissionGroupToUserMutationVariables = Exact<{
   input: AssignPermissionGroupToUserInput;
 }>;
 
+export type RevokePermissionGroupFromUserMutation = { revokePermissionGroupFromUser: boolean | null };
 
-export type AssignPermissionGroupToUserMutation = { assignPermissionGroupToUser: boolean | null };
 
 export type RevokePermissionGroupFromUserMutationVariables = Exact<{
   input: RevokePermissionGroupFromUserInput;
 }>;
 
+export type BulkAssignUsersToGroupMutation = { bulkAssignUsersToGroup: boolean | null };
 
-export type RevokePermissionGroupFromUserMutation = { revokePermissionGroupFromUser: boolean | null };
 
 export type BulkAssignUsersToGroupMutationVariables = Exact<{
   groupId: string;
   userIds: Array<string> | string;
 }>;
 
+export type BulkRevokeUsersFromGroupMutation = { bulkRevokeUsersFromGroup: boolean | null };
 
-export type BulkAssignUsersToGroupMutation = { bulkAssignUsersToGroup: boolean | null };
 
 export type BulkRevokeUsersFromGroupMutationVariables = Exact<{
   groupId: string;
   userIds: Array<string> | string;
 }>;
 
+export type UpdateUserOverridesMutation = { updateUserOverrides: boolean | null };
 
-export type BulkRevokeUsersFromGroupMutation = { bulkRevokeUsersFromGroup: boolean | null };
 
 export type UpdateUserOverridesMutationVariables = Exact<{
   userId: string;
   overrides: Array<UserOverrideInput> | UserOverrideInput;
 }>;
 
+export type ProfileByUserIdQuery_profileByUserId_teacherOwnProfile_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type UpdateUserOverridesMutation = { updateUserOverrides: boolean | null };
+export type ProfileByUserIdQuery_profileByUserId_teacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, totalClasses: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_teacherOwnProfile_displayAmount | null };
+
+export type ProfileByUserIdQuery_profileByUserId_teacherAdminProfile_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type ProfileByUserIdQuery_profileByUserId_teacherAdminProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null, displayAmount: ProfileByUserIdQuery_profileByUserId_teacherAdminProfile_displayAmount | null };
+
+export type ProfileByUserIdQuery_profileByUserId_parentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
+
+export type ProfileByUserIdQuery_profileByUserId_parentAdminProfile_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type ProfileByUserIdQuery_profileByUserId_parentAdminProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, lifecycleStatus: string | null, accountStatus: AccountStatus | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: CurrencyCode | null, timezone: IanaTimezone | null, createdAt: string | null, updatedAt: string | null, displayAmount: ProfileByUserIdQuery_profileByUserId_parentAdminProfile_displayAmount | null };
+
+export type ProfileByUserIdQuery_profileByUserId_paymentMethods = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
+
+export type ProfileByUserIdQuery_profileByUserId_paymentMethodDefaults = { payinDefault: PaymentMethodDefaultsFieldsFragment_payinDefault | null, payoutDefault: PaymentMethodDefaultsFieldsFragment_payoutDefault | null };
+
+export type ProfileByUserIdQuery_profileByUserId_associatedStudents_rows = { id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null };
+
+export type ProfileByUserIdQuery_profileByUserId_associatedStudents = { id: string | null, totalCount: number | null, rows: Array<ProfileByUserIdQuery_profileByUserId_associatedStudents_rows> | null };
+
+export type ProfileByUserIdQuery_profileByUserId_staffProfile_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type ProfileByUserIdQuery_profileByUserId_staffProfile = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, roleSlug: string | null, roleName: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, displayAmount: ProfileByUserIdQuery_profileByUserId_staffProfile_displayAmount | null };
+
+export type ProfileByUserIdQuery_profileByUserId_staffPermissionGroups = { id: string | null, name: string | null, slug: string | null, description: string | null };
+
+export type ProfileByUserIdQuery_profileByUserId_staffPermissionOverrides = { id: string | null, permissionId: string | null, permissionKey: string | null, resource: string | null, action: string | null, state: OverrideState | null };
+
+export type ProfileByUserIdQuery_profileByUserId_meetingConfigs_details = { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null };
+
+export type ProfileByUserIdQuery_profileByUserId_meetingConfigs_provider = { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null };
+
+export type ProfileByUserIdQuery_profileByUserId_meetingConfigs = { id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, details: ProfileByUserIdQuery_profileByUserId_meetingConfigs_details | null, provider: ProfileByUserIdQuery_profileByUserId_meetingConfigs_provider | null };
+
+export type ProfileByUserIdQuery_profileByUserId_assignedStudents_rows = { id: string | null, name: string | null, studentAvatarUrl: string | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentAvatarUrl: string | null, className: string | null, status: StudentStatus | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null };
+
+export type ProfileByUserIdQuery_profileByUserId_assignedStudents = { id: string | null, totalCount: number | null, rows: Array<ProfileByUserIdQuery_profileByUserId_assignedStudents_rows> | null };
+
+export type ProfileByUserIdQuery_profileByUserId = { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: CurrencyCode | null, timezone: IanaTimezone | null, phone: string | null, teacherOwnProfile: ProfileByUserIdQuery_profileByUserId_teacherOwnProfile | null, teacherAdminProfile: ProfileByUserIdQuery_profileByUserId_teacherAdminProfile | null, parentOwnProfile: ProfileByUserIdQuery_profileByUserId_parentOwnProfile | null, parentAdminProfile: ProfileByUserIdQuery_profileByUserId_parentAdminProfile | null, paymentMethods: Array<ProfileByUserIdQuery_profileByUserId_paymentMethods> | null, paymentMethodDefaults: ProfileByUserIdQuery_profileByUserId_paymentMethodDefaults | null, associatedStudents: ProfileByUserIdQuery_profileByUserId_associatedStudents | null, staffProfile: ProfileByUserIdQuery_profileByUserId_staffProfile | null, staffPermissionGroups: Array<ProfileByUserIdQuery_profileByUserId_staffPermissionGroups> | null, staffPermissionOverrides: Array<ProfileByUserIdQuery_profileByUserId_staffPermissionOverrides> | null, meetingConfigs: Array<ProfileByUserIdQuery_profileByUserId_meetingConfigs> | null, assignedStudents: ProfileByUserIdQuery_profileByUserId_assignedStudents | null };
+
+export type ProfileByUserIdQuery = { profileByUserId: ProfileByUserIdQuery_profileByUserId | null };
+
 
 export type ProfileByUserIdQueryVariables = Exact<{
   userId: string;
 }>;
 
+export type UpdateOwnProfileMutation_updateOwnProfile_teacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, totalClasses: number | null };
 
-export type ProfileByUserIdQuery = { profileByUserId: { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: CurrencyCode | null, timezone: IanaTimezone | null, phone: string | null, teacherOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, totalClasses: number | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null, teacherAdminProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null, parentOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null } | null, parentAdminProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, lifecycleStatus: string | null, accountStatus: AccountStatus | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: CurrencyCode | null, timezone: IanaTimezone | null, createdAt: string | null, updatedAt: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null, paymentMethods: Array<{ id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null }> | null, paymentMethodDefaults: { payinDefault: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null, payoutDefault: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null } | null, associatedStudents: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, name: string | null, studentAvatarUrl: string | null, status: string | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null }> | null } | null, staffProfile: { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, roleSlug: string | null, roleName: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null, staffPermissionGroups: Array<{ id: string | null, name: string | null, slug: string | null, description: string | null }> | null, staffPermissionOverrides: Array<{ id: string | null, permissionId: string | null, permissionKey: string | null, resource: string | null, action: string | null, state: OverrideState | null }> | null, meetingConfigs: Array<{ id: string | null, userId: string | null, providerId: string | null, label: string | null, isDefault: boolean | null, hasSecret: boolean | null, details: { id: string | null, meetingUrl: string | null, username: string | null, tenantId: string | null } | null, provider: { id: string | null, slug: string | null, name: Partial<Record<'ar' | 'en', string>> | null } | null }> | null, assignedStudents: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, name: string | null, studentAvatarUrl: string | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentAvatarUrl: string | null, className: string | null, status: StudentStatus | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null }> | null } | null } | null };
+export type UpdateOwnProfileMutation_updateOwnProfile_parentOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null };
+
+export type UpdateOwnProfileMutation_updateOwnProfile_staffProfile_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type UpdateOwnProfileMutation_updateOwnProfile_staffProfile = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: AccountStatus | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, displayAmount: UpdateOwnProfileMutation_updateOwnProfile_staffProfile_displayAmount | null };
+
+export type UpdateOwnProfileMutation_updateOwnProfile = { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: CurrencyCode | null, timezone: IanaTimezone | null, teacherOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_teacherOwnProfile | null, parentOwnProfile: UpdateOwnProfileMutation_updateOwnProfile_parentOwnProfile | null, staffProfile: UpdateOwnProfileMutation_updateOwnProfile_staffProfile | null };
+
+export type UpdateOwnProfileMutation = { updateOwnProfile: UpdateOwnProfileMutation_updateOwnProfile | null };
+
 
 export type UpdateOwnProfileMutationVariables = Exact<{
   input: UpdateOwnProfileInput;
 }>;
 
+export type UpdateUserProfileMutation_updateUserProfile_teacherAdminProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
-export type UpdateOwnProfileMutation = { updateOwnProfile: { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: CurrencyCode | null, timezone: IanaTimezone | null, teacherOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, countryCode: string | null, nationalId: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, totalClasses: number | null } | null, parentOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null } | null, staffProfile: { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: AccountStatus | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null } | null };
+export type UpdateUserProfileMutation_updateUserProfile_parentAdminProfile_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type UpdateUserProfileMutation_updateUserProfile_parentAdminProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, lifecycleStatus: string | null, accountStatus: AccountStatus | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: CurrencyCode | null, timezone: IanaTimezone | null, createdAt: string | null, updatedAt: string | null, displayAmount: UpdateUserProfileMutation_updateUserProfile_parentAdminProfile_displayAmount | null };
+
+export type UpdateUserProfileMutation_updateUserProfile_paymentMethods = { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: UserPaymentMethodFieldsFragment_details | null };
+
+export type UpdateUserProfileMutation_updateUserProfile_paymentMethodDefaults = { payinDefault: PaymentMethodDefaultsFieldsFragment_payinDefault | null, payoutDefault: PaymentMethodDefaultsFieldsFragment_payoutDefault | null };
+
+export type UpdateUserProfileMutation_updateUserProfile_staffProfile_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
+
+export type UpdateUserProfileMutation_updateUserProfile_staffProfile = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: AccountStatus | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, displayAmount: UpdateUserProfileMutation_updateUserProfile_staffProfile_displayAmount | null };
+
+export type UpdateUserProfileMutation_updateUserProfile = { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: CurrencyCode | null, teacherAdminProfile: UpdateUserProfileMutation_updateUserProfile_teacherAdminProfile | null, parentAdminProfile: UpdateUserProfileMutation_updateUserProfile_parentAdminProfile | null, paymentMethods: Array<UpdateUserProfileMutation_updateUserProfile_paymentMethods> | null, paymentMethodDefaults: UpdateUserProfileMutation_updateUserProfile_paymentMethodDefaults | null, staffProfile: UpdateUserProfileMutation_updateUserProfile_staffProfile | null };
+
+export type UpdateUserProfileMutation = { updateUserProfile: UpdateUserProfileMutation_updateUserProfile | null };
+
 
 export type UpdateUserProfileMutationVariables = Exact<{
   userId: string;
   input: UpdateUserProfileInput;
 }>;
 
+export type StudentMonthlyReportQuery_studentMonthlyReport = { id: string | null, studentId: string | null, studentName: string | null, year: number | null, month: number | null, totalLessons: number | null, completedLessons: number | null, cancelledLessons: number | null, presentCount: number | null, absentCount: number | null, lateCount: number | null, totalHours: number | null, creditsPurchased: number | null, creditsDeducted: number | null, creditsRefunded: number | null, creditsBalance: number | null };
 
-export type UpdateUserProfileMutation = { updateUserProfile: { id: string | null, userId: string | null, audience: ProfileAudience | null, scope: ProfileScope | null, name: string | null, email: string | null, avatarUrl: string | null, teacherId: string | null, parentId: string | null, staffProfileId: string | null, displayCurrency: CurrencyCode | null, teacherAdminProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null } | null, parentAdminProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, avatarUrl: string | null, lifecycleStatus: string | null, accountStatus: AccountStatus | null, phone: string | null, nationality: string | null, address: string | null, facebook: string | null, whatsapp: string | null, twitter: string | null, invoiceType: string | null, feeAmount: string | null, currency: CurrencyCode | null, timezone: IanaTimezone | null, createdAt: string | null, updatedAt: string | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null, paymentMethods: Array<{ id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null }> | null, paymentMethodDefaults: { payinDefault: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null, payoutDefault: { id: string | null, userId: string | null, type: PaymentMethodType | null, direction: PaymentDirection | null, isDefault: boolean | null, label: string | null, verifiedAt: string | null, verifiedByUserId: string | null, createdAt: string | null, updatedAt: string | null, details: { walletId: string | null, phone: string | null, paymentLinkId: string | null, url: string | null, onlineAccountId: string | null, identifier: string | null, iban: string | null, bankName: string | null, beneficiaryName: string | null, swiftBic: string | null, accountNumber: string | null, routingNumber: string | null, note: string | null } | null } | null } | null, staffProfile: { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, phone: string | null, status: AccountStatus | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null } | null };
+export type StudentMonthlyReportQuery = { studentMonthlyReport: StudentMonthlyReportQuery_studentMonthlyReport };
+
 
 export type StudentMonthlyReportQueryVariables = Exact<{
   studentId: string | number;
@@ -3661,59 +3850,83 @@ export type StudentMonthlyReportQueryVariables = Exact<{
   month: number;
 }>;
 
+export type GenerateAttendanceReportQuery_generateAttendanceReport_rows_paidAmounts_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type StudentMonthlyReportQuery = { studentMonthlyReport: { id: string | null, studentId: string | null, studentName: string | null, year: number | null, month: number | null, totalLessons: number | null, completedLessons: number | null, cancelledLessons: number | null, presentCount: number | null, absentCount: number | null, lateCount: number | null, totalHours: number | null, creditsPurchased: number | null, creditsDeducted: number | null, creditsRefunded: number | null, creditsBalance: number | null } };
+export type GenerateAttendanceReportQuery_generateAttendanceReport_rows_paidAmounts = { id: string | null, amount: string | null, currency: CurrencyCode | null, displayAmount: GenerateAttendanceReportQuery_generateAttendanceReport_rows_paidAmounts_displayAmount | null };
+
+export type GenerateAttendanceReportQuery_generateAttendanceReport_rows = { id: string | null, groupKey: string | null, groupLabel: string | null, takenClasses: number | null, absentClasses: number | null, leaveClasses: number | null, pendingClasses: number | null, totalHours: number | null, engagementGrowth: number | null, paidAmounts: Array<GenerateAttendanceReportQuery_generateAttendanceReport_rows_paidAmounts> | null };
+
+export type GenerateAttendanceReportQuery_generateAttendanceReport = { engagementGrowth: number | null, rows: Array<GenerateAttendanceReportQuery_generateAttendanceReport_rows> | null };
+
+export type GenerateAttendanceReportQuery = { generateAttendanceReport: GenerateAttendanceReportQuery_generateAttendanceReport | null };
+
 
 export type GenerateAttendanceReportQueryVariables = Exact<{
   filters: AttendanceReportFiltersInput;
 }>;
 
+export type DeleteBookMutation = { deleteBook: boolean | null };
 
-export type GenerateAttendanceReportQuery = { generateAttendanceReport: { engagementGrowth: number | null, rows: Array<{ id: string | null, groupKey: string | null, groupLabel: string | null, takenClasses: number | null, absentClasses: number | null, leaveClasses: number | null, pendingClasses: number | null, totalHours: number | null, engagementGrowth: number | null, paidAmounts: Array<{ id: string | null, amount: string | null, currency: CurrencyCode | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null }> | null }> | null } | null };
 
 export type DeleteBookMutationVariables = Exact<{
   id: string | number;
 }>;
 
-
-export type DeleteBookMutation = { deleteBook: boolean | null };
-
 export type LearningResourceRowFragment = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
+
+export type LearningResourcesQuery_learningResources = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
+
+export type LearningResourcesQuery = { learningResources: Array<LearningResourcesQuery_learningResources> | null };
+
 
 export type LearningResourcesQueryVariables = Exact<{
   searchQuery: string | null | undefined;
 }>;
 
+export type UploadLearningResourceMutation_uploadLearningResource = { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null };
 
-export type LearningResourcesQuery = { learningResources: Array<{ id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null }> | null };
+export type UploadLearningResourceMutation = { uploadLearningResource: UploadLearningResourceMutation_uploadLearningResource | null };
+
 
 export type UploadLearningResourceMutationVariables = Exact<{
   input: ResourceUploadInput;
 }>;
 
+export type PrepareUploadMutation_prepareUpload = { id: string, url: string, uploadType: UploadType };
 
-export type UploadLearningResourceMutation = { uploadLearningResource: { id: string | null, displayName: string | null, filePath: string | null, uploadedByUserId: string | null, uploadedByUserName: string | null, fileSize: number | null, contentType: string | null, createdAt: string | null } | null };
+export type PrepareUploadMutation = { prepareUpload: PrepareUploadMutation_prepareUpload | null };
+
 
 export type PrepareUploadMutationVariables = Exact<{
   input: UploadPreparationInput;
 }>;
 
+export type DeleteLearningResourceMutation = { deleteLearningResource: boolean | null };
 
-export type PrepareUploadMutation = { prepareUpload: { id: string, url: string, uploadType: UploadType } | null };
 
 export type DeleteLearningResourceMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_pageInfo = { count: number, currentPage: number, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
 
-export type DeleteLearningResourceMutation = { deleteLearningResource: boolean | null };
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers_gaps = { id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: DayOfWeek | null, calendarDate: string | null, gapStartTime: string | null, gapEndTime: string | null, timezone: IanaTimezone | null };
+
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers = { id: string | null, name: string | null, gender: Gender | null, timezone: IanaTimezone | null, availableDaysCount: number | null, gaps: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers_gaps> | null };
+
+export type SearchTeacherAvailabilityQuery_searchTeacherAvailability = { id: string | null, totalGaps: number | null, totalCount: number | null, pageInfo: SearchTeacherAvailabilityQuery_searchTeacherAvailability_pageInfo | null, teachers: Array<SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers> | null };
+
+export type SearchTeacherAvailabilityQuery = { searchTeacherAvailability: SearchTeacherAvailabilityQuery_searchTeacherAvailability | null };
+
 
 export type SearchTeacherAvailabilityQueryVariables = Exact<{
   input: AvailabilitySearchInput;
 }>;
 
+export type AvailableClassSlotsQuery_availableClassSlots = { id: string | null, teacherId: string | null, startAt: string | null, endAt: string | null, available: boolean | null };
 
-export type SearchTeacherAvailabilityQuery = { searchTeacherAvailability: { id: string | null, totalGaps: number | null, totalCount: number | null, pageInfo: { count: number, currentPage: number, hasMorePages: boolean, lastPage: number, perPage: number, total: number } | null, teachers: Array<{ id: string | null, name: string | null, gender: Gender | null, timezone: IanaTimezone | null, availableDaysCount: number | null, gaps: Array<{ id: string | null, teacherId: string | null, teacherName: string | null, teacherGender: string | null, dayOfWeek: DayOfWeek | null, calendarDate: string | null, gapStartTime: string | null, gapEndTime: string | null, timezone: IanaTimezone | null }> | null }> | null } | null };
+export type AvailableClassSlotsQuery = { availableClassSlots: Array<AvailableClassSlotsQuery_availableClassSlots> | null };
+
 
 export type AvailableClassSlotsQueryVariables = Exact<{
   studentId: string | number;
@@ -3722,87 +3935,121 @@ export type AvailableClassSlotsQueryVariables = Exact<{
   durationMinutes: number | null | undefined;
 }>;
 
+export type ClassInstanceQuery_classInstance_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type AvailableClassSlotsQuery = { availableClassSlots: Array<{ id: string | null, teacherId: string | null, startAt: string | null, endAt: string | null, available: boolean | null }> | null };
+export type ClassInstanceQuery_classInstance_student = { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null };
+
+export type ClassInstanceQuery_classInstance_teacher = { id: string | null, name: string | null, title: string | null, avatarUrl: string | null };
+
+export type ClassInstanceQuery_classInstance_performance = { id: string | null, engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, authorizationLabel: string | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null };
+
+export type ClassInstanceQuery_classInstance = { id: string | null, courseName: string | null, classType: ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: IanaTimezone | null, teacherTimezone: IanaTimezone | null, recurringScheduleId: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, isFrozen: boolean | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, avatarUrl: string | null, subjectId: string | null, subjectName: string | null, subjectAvatarUrl: string | null, rateAmount: string | null, rateCurrency: CurrencyCode | null, isRateOverridden: boolean | null, rateSource: RateSource | null, effectiveMeeting: ClassInstanceQuery_classInstance_effectiveMeeting | null, student: ClassInstanceQuery_classInstance_student | null, teacher: ClassInstanceQuery_classInstance_teacher | null, performance: ClassInstanceQuery_classInstance_performance | null };
+
+export type ClassInstanceQuery = { classInstance: ClassInstanceQuery_classInstance | null };
+
 
 export type ClassInstanceQueryVariables = Exact<{
   id: string | number;
 }>;
 
+export type ClassStatusEventsQuery_classStatusEvents = { id: string | null, eventType: string | null, description: string | null, createdAt: string | null };
 
-export type ClassInstanceQuery = { classInstance: { id: string | null, courseName: string | null, classType: ClassType | null, instanceId: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, status: ClassExecutionState | null, remarks: string | null, hasTimezoneMismatch: boolean | null, studentTimezone: IanaTimezone | null, teacherTimezone: IanaTimezone | null, recurringScheduleId: string | null, payrollCredited: boolean | null, isRescheduled: boolean | null, isFrozen: boolean | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, avatarUrl: string | null, subjectId: string | null, subjectName: string | null, subjectAvatarUrl: string | null, rateAmount: string | null, rateCurrency: CurrencyCode | null, isRateOverridden: boolean | null, rateSource: RateSource | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null, student: { id: string | null, name: string | null, grade: string | null, level: string | null, avatarUrl: string | null } | null, teacher: { id: string | null, name: string | null, title: string | null, avatarUrl: string | null } | null, performance: { id: string | null, engagementScore: number | null, assessmentProgress: number | null, assessmentTotal: number | null, focusLevel: string | null, sessionHealth: string | null, heatmapData: Array<unknown> | null, latencyMs: number | null, authorizationLabel: string | null, attendanceRate: number | null, avgGrade: string | null, lastClassDaysAgo: number | null } | null } | null };
+export type ClassStatusEventsQuery = { classStatusEvents: Array<ClassStatusEventsQuery_classStatusEvents> | null };
+
 
 export type ClassStatusEventsQueryVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type ActivateClassMutation_activateClass = { id: string | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null };
 
-export type ClassStatusEventsQuery = { classStatusEvents: Array<{ id: string | null, eventType: string | null, description: string | null, createdAt: string | null }> | null };
+export type ActivateClassMutation = { activateClass: ActivateClassMutation_activateClass | null };
+
 
 export type ActivateClassMutationVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type ActivateOverrideClassMutation_activateOverrideClass = { id: string | null, executionState: ClassExecutionState | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null };
 
-export type ActivateClassMutation = { activateClass: { id: string | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null } | null };
+export type ActivateOverrideClassMutation = { activateOverrideClass: ActivateOverrideClassMutation_activateOverrideClass | null };
+
 
 export type ActivateOverrideClassMutationVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type ResetClassMutation = { resetClass: boolean | null };
 
-export type ActivateOverrideClassMutation = { activateOverrideClass: { id: string | null, executionState: ClassExecutionState | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null } | null };
 
 export type ResetClassMutationVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type UpdateSessionStatusStartMutation_updateSessionStatusStart = { id: string | null, executionState: ClassExecutionState | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null };
 
-export type ResetClassMutation = { resetClass: boolean | null };
+export type UpdateSessionStatusStartMutation = { updateSessionStatusStart: UpdateSessionStatusStartMutation_updateSessionStatusStart | null };
+
 
 export type UpdateSessionStatusStartMutationVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type UpdateSessionStatusAbsentMutation_updateSessionStatusAbsent = { id: string | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, payrollCredited: boolean | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null };
 
-export type UpdateSessionStatusStartMutation = { updateSessionStatusStart: { id: string | null, executionState: ClassExecutionState | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null } | null };
+export type UpdateSessionStatusAbsentMutation = { updateSessionStatusAbsent: UpdateSessionStatusAbsentMutation_updateSessionStatusAbsent | null };
+
 
 export type UpdateSessionStatusAbsentMutationVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_completedInstance = { id: string | null, outcome: ClassOutcome | null, isRescheduled: boolean | null };
 
-export type UpdateSessionStatusAbsentMutation = { updateSessionStatusAbsent: { id: string | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, payrollCredited: boolean | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null } | null };
+export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_rescheduledInstance = { id: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null };
+
+export type UpdateSessionStatusLeaveMutation_updateSessionStatusLeave = { id: string | null, completedInstanceId: string | null, rescheduledInstanceId: string | null, completedInstance: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_completedInstance | null, rescheduledInstance: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave_rescheduledInstance | null };
+
+export type UpdateSessionStatusLeaveMutation = { updateSessionStatusLeave: UpdateSessionStatusLeaveMutation_updateSessionStatusLeave | null };
+
 
 export type UpdateSessionStatusLeaveMutationVariables = Exact<{
   classInstanceId: string | number;
   leaveReason: string;
 }>;
 
+export type StopClassMutation_stopClass = { id: string | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null };
 
-export type UpdateSessionStatusLeaveMutation = { updateSessionStatusLeave: { id: string | null, completedInstanceId: string | null, rescheduledInstanceId: string | null, completedInstance: { id: string | null, outcome: ClassOutcome | null, isRescheduled: boolean | null } | null, rescheduledInstance: { id: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null } | null } | null };
+export type StopClassMutation = { stopClass: StopClassMutation_stopClass | null };
+
 
 export type StopClassMutationVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type RescheduleClassMutation_rescheduleClass = { id: string | null, status: ClassExecutionState | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null };
 
-export type StopClassMutation = { stopClass: { id: string | null, status: ClassExecutionState | null, durationMinutes: number | null, remarks: string | null } | null };
+export type RescheduleClassMutation = { rescheduleClass: RescheduleClassMutation_rescheduleClass | null };
+
 
 export type RescheduleClassMutationVariables = Exact<{
   classInstanceId: string | number;
   input: RescheduleClassInput;
 }>;
 
+export type DeleteClassInstanceMutation_deleteClassInstance = { success: boolean | null, warnings: Array<string> | null };
 
-export type RescheduleClassMutation = { rescheduleClass: { id: string | null, status: ClassExecutionState | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null } | null };
+export type DeleteClassInstanceMutation = { deleteClassInstance: DeleteClassInstanceMutation_deleteClassInstance | null };
+
 
 export type DeleteClassInstanceMutationVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type OverrideClassInstanceRateMutation_overrideClassInstanceRate = { id: string | null, rateAmount: string | null, rateCurrency: CurrencyCode | null, isRateOverridden: boolean | null, rateSource: RateSource | null };
 
-export type DeleteClassInstanceMutation = { deleteClassInstance: { success: boolean | null, warnings: Array<string> | null } | null };
+export type OverrideClassInstanceRateMutation = { overrideClassInstanceRate: OverrideClassInstanceRateMutation_overrideClassInstanceRate | null };
+
 
 export type OverrideClassInstanceRateMutationVariables = Exact<{
   classInstanceId: string | number;
@@ -3810,74 +4057,122 @@ export type OverrideClassInstanceRateMutationVariables = Exact<{
   rateCurrency: CurrencyCode | null | undefined;
 }>;
 
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_updatedSessions = { id: string | null, studentId: string | null, teacherId: string | null, studentName: string | null, teacherName: string | null, fromTime: string | null, toTime: string | null };
 
-export type OverrideClassInstanceRateMutation = { overrideClassInstanceRate: { id: string | null, rateAmount: string | null, rateCurrency: CurrencyCode | null, isRateOverridden: boolean | null, rateSource: RateSource | null } | null };
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_conflictGroups_conflicts = { id: string | null, studentName: string | null, message: string | null };
+
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_conflictGroups = { id: string | null, teacherName: string | null, conflicts: Array<ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_conflictGroups_conflicts> | null };
+
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_checkedEmptyItems = { id: string | null, studentName: string | null, reason: string | null };
+
+export type ExecuteDstBulkUpdateMutation_executeDstBulkUpdate = { id: string | null, runId: string | null, updated: number | null, conflicts: number | null, unchanged: number | null, total: number | null, status: string | null, updatedSessions: Array<ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_updatedSessions> | null, conflictGroups: Array<ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_conflictGroups> | null, checkedEmptyItems: Array<ExecuteDstBulkUpdateMutation_executeDstBulkUpdate_checkedEmptyItems> | null };
+
+export type ExecuteDstBulkUpdateMutation = { executeDstBulkUpdate: ExecuteDstBulkUpdateMutation_executeDstBulkUpdate | null };
+
 
 export type ExecuteDstBulkUpdateMutationVariables = Exact<{
   offsetMinutes: number;
   description: string;
 }>;
 
+export type CreateRecurringClassMutation_createRecurringClass = { id: string | null, recurringScheduleId: string | null, classInstanceIds: Array<string> | null, classInstanceCount: number | null, meetingUrl: string | null };
 
-export type ExecuteDstBulkUpdateMutation = { executeDstBulkUpdate: { id: string | null, runId: string | null, updated: number | null, conflicts: number | null, unchanged: number | null, total: number | null, status: string | null, updatedSessions: Array<{ id: string | null, studentId: string | null, teacherId: string | null, studentName: string | null, teacherName: string | null, fromTime: string | null, toTime: string | null }> | null, conflictGroups: Array<{ id: string | null, teacherName: string | null, conflicts: Array<{ id: string | null, studentName: string | null, message: string | null }> | null }> | null, checkedEmptyItems: Array<{ id: string | null, studentName: string | null, reason: string | null }> | null } | null };
+export type CreateRecurringClassMutation = { createRecurringClass: CreateRecurringClassMutation_createRecurringClass | null };
+
 
 export type CreateRecurringClassMutationVariables = Exact<{
   input: CreateRecurringClassInput;
 }>;
 
+export type RecurringScheduleQuery_recurringSchedule_days = { id: string | null, dayOfWeek: string | null, startTime: string | null, isActive: boolean | null };
 
-export type CreateRecurringClassMutation = { createRecurringClass: { id: string | null, recurringScheduleId: string | null, classInstanceIds: Array<string> | null, classInstanceCount: number | null, meetingUrl: string | null } | null };
+export type RecurringScheduleQuery_recurringSchedule = { id: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, durationMinutes: number | null, defaultStartTime: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, days: Array<RecurringScheduleQuery_recurringSchedule_days> | null };
+
+export type RecurringScheduleQuery = { recurringSchedule: RecurringScheduleQuery_recurringSchedule | null };
+
 
 export type RecurringScheduleQueryVariables = Exact<{
   id: string | number;
 }>;
 
+export type RecurringSchedulesQuery_recurringSchedules_rows = { id: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, durationMinutes: number | null, defaultStartTime: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, createdAt: string | null, updatedAt: string | null };
 
-export type RecurringScheduleQuery = { recurringSchedule: { id: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, durationMinutes: number | null, defaultStartTime: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, days: Array<{ id: string | null, dayOfWeek: string | null, startTime: string | null, isActive: boolean | null }> | null } | null };
+export type RecurringSchedulesQuery_recurringSchedules_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type RecurringSchedulesQuery_recurringSchedules = { id: string | null, totalCount: number | null, rows: Array<RecurringSchedulesQuery_recurringSchedules_rows> | null, pageInfo: RecurringSchedulesQuery_recurringSchedules_pageInfo | null };
+
+export type RecurringSchedulesQuery = { recurringSchedules: RecurringSchedulesQuery_recurringSchedules | null };
+
 
 export type RecurringSchedulesQueryVariables = Exact<{
   pagination: PaginationArgs | null | undefined;
   search: string | null | undefined;
 }>;
 
+export type UpdateRecurringClassRateMutation_updateRecurringClassRate = { id: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null };
 
-export type RecurringSchedulesQuery = { recurringSchedules: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, studentId: string | null, studentName: string | null, teacherId: string | null, teacherName: string | null, durationMinutes: number | null, defaultStartTime: string | null, timezone: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, createdAt: string | null, updatedAt: string | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type UpdateRecurringClassRateMutation = { updateRecurringClassRate: UpdateRecurringClassRateMutation_updateRecurringClassRate | null };
+
 
 export type UpdateRecurringClassRateMutationVariables = Exact<{
   input: UpdateRecurringClassRateInput;
 }>;
 
+export type DeleteRecurringClassMutation = { deleteRecurringClass: boolean | null };
 
-export type UpdateRecurringClassRateMutation = { updateRecurringClassRate: { id: string | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null } | null };
 
 export type DeleteRecurringClassMutationVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type ClearWeeklyScheduleMutation = { clearWeeklySchedule: boolean | null };
 
-export type DeleteRecurringClassMutation = { deleteRecurringClass: boolean | null };
 
 export type ClearWeeklyScheduleMutationVariables = Exact<{
   teacherId: string | number;
 }>;
 
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_metrics = { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
-export type ClearWeeklyScheduleMutation = { clearWeeklySchedule: boolean | null };
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_rows_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
+
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_rows_student = { id: string | null, name: string | null, avatarUrl: string | null };
+
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_rows_teacher = { id: string | null, name: string | null, avatarUrl: string | null };
+
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_rows = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, teacherTimezone: IanaTimezone | null, studentTimezone: IanaTimezone | null, duration: number | null, scheduledStartAt: string | null, scheduledEndAt: string | null, outcome: ClassOutcome | null, executionState: ClassExecutionState | null, isFrozen: boolean | null, meetingJoinUrl: string | null, courseName: string | null, avatarUrl: string | null, effectiveMeeting: AdminDashboardScheduleQuery_adminDashboardSchedule_rows_effectiveMeeting | null, student: AdminDashboardScheduleQuery_adminDashboardSchedule_rows_student | null, teacher: AdminDashboardScheduleQuery_adminDashboardSchedule_rows_teacher | null };
+
+export type AdminDashboardScheduleQuery_adminDashboardSchedule_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type AdminDashboardScheduleQuery_adminDashboardSchedule = { id: string | null, totalCount: number | null, metrics: AdminDashboardScheduleQuery_adminDashboardSchedule_metrics | null, rows: Array<AdminDashboardScheduleQuery_adminDashboardSchedule_rows> | null, pageInfo: AdminDashboardScheduleQuery_adminDashboardSchedule_pageInfo | null };
+
+export type AdminDashboardScheduleQuery = { adminDashboardSchedule: AdminDashboardScheduleQuery_adminDashboardSchedule | null };
+
 
 export type AdminDashboardScheduleQueryVariables = Exact<{
   input: AdminDashboardScheduleInput;
 }>;
 
+export type DailyScheduleMetricsQuery_dailyScheduleMetrics = { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
-export type AdminDashboardScheduleQuery = { adminDashboardSchedule: { id: string | null, totalCount: number | null, metrics: { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null } | null, rows: Array<{ id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, teacherTimezone: IanaTimezone | null, studentTimezone: IanaTimezone | null, duration: number | null, scheduledStartAt: string | null, scheduledEndAt: string | null, outcome: ClassOutcome | null, executionState: ClassExecutionState | null, isFrozen: boolean | null, meetingJoinUrl: string | null, courseName: string | null, avatarUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null, student: { id: string | null, name: string | null, avatarUrl: string | null } | null, teacher: { id: string | null, name: string | null, avatarUrl: string | null } | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type DailyScheduleMetricsQuery = { dailyScheduleMetrics: DailyScheduleMetricsQuery_dailyScheduleMetrics | null };
+
 
 export type DailyScheduleMetricsQueryVariables = Exact<{
   date: string;
   teacherId: string | null | undefined;
 }>;
 
+export type DailyScheduleListQuery_dailyScheduleList_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type DailyScheduleMetricsQuery = { dailyScheduleMetrics: { id: string | null, total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null } | null };
+export type DailyScheduleListQuery_dailyScheduleList_student = { id: string | null, name: string | null, avatarUrl: string | null };
+
+export type DailyScheduleListQuery_dailyScheduleList_teacher = { id: string | null, name: string | null, avatarUrl: string | null };
+
+export type DailyScheduleListQuery_dailyScheduleList = { id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, teacherTimezone: IanaTimezone | null, studentTimezone: IanaTimezone | null, duration: number | null, outcome: ClassOutcome | null, executionState: ClassExecutionState | null, isFrozen: boolean | null, meetingJoinUrl: string | null, courseName: string | null, avatarUrl: string | null, effectiveMeeting: DailyScheduleListQuery_dailyScheduleList_effectiveMeeting | null, student: DailyScheduleListQuery_dailyScheduleList_student | null, teacher: DailyScheduleListQuery_dailyScheduleList_teacher | null };
+
+export type DailyScheduleListQuery = { dailyScheduleList: Array<DailyScheduleListQuery_dailyScheduleList> | null };
+
 
 export type DailyScheduleListQueryVariables = Exact<{
   date: string;
@@ -3886,8 +4181,14 @@ export type DailyScheduleListQueryVariables = Exact<{
   metricFilter: string | null | undefined;
 }>;
 
+export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_rows = { id: string | null, originalClassId: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, status: LeaveRequestStatus | null, dateLabel: RescheduleDateLabel | null, remarks: string | null };
 
-export type DailyScheduleListQuery = { dailyScheduleList: Array<{ id: string | null, yourTime: string | null, teacherTime: string | null, studentTime: string | null, teacherTimezone: IanaTimezone | null, studentTimezone: IanaTimezone | null, duration: number | null, outcome: ClassOutcome | null, executionState: ClassExecutionState | null, isFrozen: boolean | null, meetingJoinUrl: string | null, courseName: string | null, avatarUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null, student: { id: string | null, name: string | null, avatarUrl: string | null } | null, teacher: { id: string | null, name: string | null, avatarUrl: string | null } | null }> | null };
+export type RescheduleTrackingRowsQuery_rescheduleTrackingRows_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type RescheduleTrackingRowsQuery_rescheduleTrackingRows = { id: string | null, totalCount: number | null, rows: Array<RescheduleTrackingRowsQuery_rescheduleTrackingRows_rows> | null, pageInfo: RescheduleTrackingRowsQuery_rescheduleTrackingRows_pageInfo | null };
+
+export type RescheduleTrackingRowsQuery = { rescheduleTrackingRows: RescheduleTrackingRowsQuery_rescheduleTrackingRows | null };
+
 
 export type RescheduleTrackingRowsQueryVariables = Exact<{
   search: string | null | undefined;
@@ -3895,13 +4196,19 @@ export type RescheduleTrackingRowsQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type RescheduleTrackingMetricsQuery_rescheduleTrackingMetrics = { id: string | null, pending: number | null, approved: number | null, leave: number | null, rescheduled: number | null, cancelled: number | null };
 
-export type RescheduleTrackingRowsQuery = { rescheduleTrackingRows: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, originalClassId: string | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, status: LeaveRequestStatus | null, dateLabel: RescheduleDateLabel | null, remarks: string | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type RescheduleTrackingMetricsQuery = { rescheduleTrackingMetrics: RescheduleTrackingMetricsQuery_rescheduleTrackingMetrics | null };
+
 
 export type RescheduleTrackingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type StatusTrackingScheduleQuery_statusTrackingSchedule_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type RescheduleTrackingMetricsQuery = { rescheduleTrackingMetrics: { id: string | null, pending: number | null, approved: number | null, leave: number | null, rescheduled: number | null, cancelled: number | null } | null };
+export type StatusTrackingScheduleQuery_statusTrackingSchedule = { id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, studentStatus: StudentStatus | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, courseName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: StatusTrackingScheduleQuery_statusTrackingSchedule_effectiveMeeting | null };
+
+export type StatusTrackingScheduleQuery = { statusTrackingSchedule: Array<StatusTrackingScheduleQuery_statusTrackingSchedule> | null };
+
 
 export type StatusTrackingScheduleQueryVariables = Exact<{
   date: string;
@@ -3909,24 +4216,29 @@ export type StatusTrackingScheduleQueryVariables = Exact<{
   viewerTimezone: IanaTimezone | null | undefined;
 }>;
 
+export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_classes_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type StatusTrackingScheduleQuery = { statusTrackingSchedule: Array<{ id: string | null, studentId: string | null, studentName: string | null, studentInitials: string | null, studentAvatarUrl: string | null, studentStatus: StudentStatus | null, teacherId: string | null, teacherName: string | null, teacherAvatarUrl: string | null, courseName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null };
+export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_classes = { id: string | null, studentName: string | null, studentId: string | null, duration: number | null, startTime: string | null, day: string | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, subjectName: string | null, classType: ClassType | null, meetingJoinUrl: string | null, effectiveMeeting: TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_classes_effectiveMeeting | null };
+
+export type TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid = { id: string | null, teacherId: string | null, weekStart: string | null, weekEnd: string | null, classes: Array<TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid_classes> | null };
+
+export type TeacherWeeklyScheduleGridQuery = { teacherWeeklyScheduleGrid: TeacherWeeklyScheduleGridQuery_teacherWeeklyScheduleGrid | null };
+
 
 export type TeacherWeeklyScheduleGridQueryVariables = Exact<{
   teacherId: string | null | undefined;
   weekDate: string;
 }>;
 
+export type TeacherWorkloadMetricsQuery_teacherWorkloadMetrics = { id: string | null, weeklyHoursWorked: string | null, totalMinutes: number | null, classCount: number | null };
 
-export type TeacherWeeklyScheduleGridQuery = { teacherWeeklyScheduleGrid: { id: string | null, teacherId: string | null, weekStart: string | null, weekEnd: string | null, classes: Array<{ id: string | null, studentName: string | null, studentId: string | null, duration: number | null, startTime: string | null, day: string | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, subjectName: string | null, classType: ClassType | null, meetingJoinUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null } | null };
+export type TeacherWorkloadMetricsQuery = { teacherWorkloadMetrics: TeacherWorkloadMetricsQuery_teacherWorkloadMetrics | null };
+
 
 export type TeacherWorkloadMetricsQueryVariables = Exact<{
   teacherId: string | null | undefined;
   weekDate: string;
 }>;
-
-
-export type TeacherWorkloadMetricsQuery = { teacherWorkloadMetrics: { id: string | null, weeklyHoursWorked: string | null, totalMinutes: number | null, classCount: number | null } | null };
 
 export type EnvConfigEntryFieldsFragment = { id: string | null, key: string | null, category: string | null, displayStrategy: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSecret: boolean | null, excludeFromDb: boolean | null, value: string | null, source: string | null, hasDbOverride: boolean | null, editable: boolean | null };
 
@@ -3934,52 +4246,64 @@ export type EnvConfigUpsertResultFieldsFragment = { id: string | null, key: stri
 
 export type EnvConfigDeleteResultFieldsFragment = { id: string | null, key: string | null, deleted: boolean | null, source: string | null };
 
+export type EnvConfigEntriesQuery_envConfigEntries = { id: string | null, key: string | null, category: string | null, displayStrategy: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSecret: boolean | null, excludeFromDb: boolean | null, value: string | null, source: string | null, hasDbOverride: boolean | null, editable: boolean | null };
+
+export type EnvConfigEntriesQuery = { envConfigEntries: Array<EnvConfigEntriesQuery_envConfigEntries> | null };
+
+
 export type EnvConfigEntriesQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type UpsertEnvConfigEntryMutation_upsertEnvConfigEntry = { id: string | null, key: string | null, source: string | null, hasDbOverride: boolean | null, updatedAt: string | null };
 
-export type EnvConfigEntriesQuery = { envConfigEntries: Array<{ id: string | null, key: string | null, category: string | null, displayStrategy: string | null, description: Partial<Record<'ar' | 'en', string>> | null, isSecret: boolean | null, excludeFromDb: boolean | null, value: string | null, source: string | null, hasDbOverride: boolean | null, editable: boolean | null }> | null };
+export type UpsertEnvConfigEntryMutation = { upsertEnvConfigEntry: UpsertEnvConfigEntryMutation_upsertEnvConfigEntry | null };
+
 
 export type UpsertEnvConfigEntryMutationVariables = Exact<{
   input: EnvConfigUpsertInput;
 }>;
 
+export type DeleteEnvConfigEntryMutation_deleteEnvConfigEntry = { id: string | null, key: string | null, deleted: boolean | null, source: string | null };
 
-export type UpsertEnvConfigEntryMutation = { upsertEnvConfigEntry: { id: string | null, key: string | null, source: string | null, hasDbOverride: boolean | null, updatedAt: string | null } | null };
+export type DeleteEnvConfigEntryMutation = { deleteEnvConfigEntry: DeleteEnvConfigEntryMutation_deleteEnvConfigEntry | null };
+
 
 export type DeleteEnvConfigEntryMutationVariables = Exact<{
   key: string;
 }>;
 
-
-export type DeleteEnvConfigEntryMutation = { deleteEnvConfigEntry: { id: string | null, key: string | null, deleted: boolean | null, source: string | null } | null };
-
 export type SystemSettingFieldsFragment = { id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
+
+export type SystemSettingsQuery_systemSettings = { id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
+
+export type SystemSettingsQuery = { systemSettings: Array<SystemSettingsQuery_systemSettings> | null };
+
 
 export type SystemSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type SystemSettingQuery_systemSetting = { id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
 
-export type SystemSettingsQuery = { systemSettings: Array<{ id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null }> | null };
+export type SystemSettingQuery = { systemSetting: SystemSettingQuery_systemSetting | null };
+
 
 export type SystemSettingQueryVariables = Exact<{
   key: string;
 }>;
 
+export type UpsertSystemSettingMutation_upsertSystemSetting = { id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null };
 
-export type SystemSettingQuery = { systemSetting: { id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null } | null };
+export type UpsertSystemSettingMutation = { upsertSystemSetting: UpsertSystemSettingMutation_upsertSystemSetting | null };
+
 
 export type UpsertSystemSettingMutationVariables = Exact<{
   input: SystemSettingUpsertInput;
 }>;
 
+export type DeleteSystemSettingMutation = { deleteSystemSetting: boolean | null };
 
-export type UpsertSystemSettingMutation = { upsertSystemSetting: { id: string | null, key: string | null, value: string | null, dataType: SystemSettingDataType | null, description: string | null, category: SystemSettingCategory | null, updatedByUserId: string | null, updatedAt: string | null } | null };
 
 export type DeleteSystemSettingMutationVariables = Exact<{
   key: string;
 }>;
-
-
-export type DeleteSystemSettingMutation = { deleteSystemSetting: boolean | null };
 
 export type MeetingIntegrationProviderFieldsFragment = { id: string | null, slug: string | null, kind: string | null, credentialsHealthy: boolean | null, lastTestedAt: string | null, connectedTeacherCount: number | null, reauthNeededCount: number | null, endpoints: Array<string> | null };
 
@@ -3989,126 +4313,163 @@ export type TestMeetingConnectionResultFieldsFragment = { id: string | null, ok:
 
 export type AdminRevokeTokenResultFieldsFragment = { id: string | null, providerSlug: string | null, userId: string | null, revoked: boolean | null };
 
+export type MeetingIntegrationProvidersQuery_meetingIntegrationProviders = { id: string | null, slug: string | null, kind: string | null, credentialsHealthy: boolean | null, lastTestedAt: string | null, connectedTeacherCount: number | null, reauthNeededCount: number | null, endpoints: Array<string> | null };
+
+export type MeetingIntegrationProvidersQuery = { meetingIntegrationProviders: Array<MeetingIntegrationProvidersQuery_meetingIntegrationProviders> | null };
+
+
 export type MeetingIntegrationProvidersQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type MeetingIntegrationConnectedAccountsQuery_meetingIntegrationConnectedAccounts = { id: string | null, userId: string | null, name: string | null, email: string | null, connectedAt: string | null, expiresAt: string | null, lastRefreshedAt: string | null, status: MeetingIntegrationConnectedAccountStatus | null, scopes: Array<string> | null };
 
-export type MeetingIntegrationProvidersQuery = { meetingIntegrationProviders: Array<{ id: string | null, slug: string | null, kind: string | null, credentialsHealthy: boolean | null, lastTestedAt: string | null, connectedTeacherCount: number | null, reauthNeededCount: number | null, endpoints: Array<string> | null }> | null };
+export type MeetingIntegrationConnectedAccountsQuery = { meetingIntegrationConnectedAccounts: Array<MeetingIntegrationConnectedAccountsQuery_meetingIntegrationConnectedAccounts> | null };
+
 
 export type MeetingIntegrationConnectedAccountsQueryVariables = Exact<{
   providerSlug: string;
 }>;
 
+export type TestMeetingProviderConnectionMutation_testMeetingProviderConnection = { id: string | null, ok: boolean | null, latencyMs: number | null, mode: MeetingConnectionTestMode | null, testJoinUrl: string | null, deleted: boolean | null, upstreamResponseSummary: string | null, errorCode: string | null, errorMessage: string | null, rawUpstreamPayload: unknown, requiredScopes: Array<string> | null, grantedScopes: Array<string> | null };
 
-export type MeetingIntegrationConnectedAccountsQuery = { meetingIntegrationConnectedAccounts: Array<{ id: string | null, userId: string | null, name: string | null, email: string | null, connectedAt: string | null, expiresAt: string | null, lastRefreshedAt: string | null, status: MeetingIntegrationConnectedAccountStatus | null, scopes: Array<string> | null }> | null };
+export type TestMeetingProviderConnectionMutation = { testMeetingProviderConnection: TestMeetingProviderConnectionMutation_testMeetingProviderConnection | null };
+
 
 export type TestMeetingProviderConnectionMutationVariables = Exact<{
   input: TestMeetingConnectionInput;
 }>;
 
+export type AdminRevokeMeetingProviderTokenMutation_adminRevokeMeetingProviderToken = { id: string | null, providerSlug: string | null, userId: string | null, revoked: boolean | null };
 
-export type TestMeetingProviderConnectionMutation = { testMeetingProviderConnection: { id: string | null, ok: boolean | null, latencyMs: number | null, mode: MeetingConnectionTestMode | null, testJoinUrl: string | null, deleted: boolean | null, upstreamResponseSummary: string | null, errorCode: string | null, errorMessage: string | null, rawUpstreamPayload: unknown, requiredScopes: Array<string> | null, grantedScopes: Array<string> | null } | null };
+export type AdminRevokeMeetingProviderTokenMutation = { adminRevokeMeetingProviderToken: AdminRevokeMeetingProviderTokenMutation_adminRevokeMeetingProviderToken | null };
+
 
 export type AdminRevokeMeetingProviderTokenMutationVariables = Exact<{
   input: AdminRevokeTokenInput;
 }>;
 
-
-export type AdminRevokeMeetingProviderTokenMutation = { adminRevokeMeetingProviderToken: { id: string | null, providerSlug: string | null, userId: string | null, revoked: boolean | null } | null };
-
 export type SessionConfigFieldsFragment = { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type SessionConfigsQuery_sessionConfigs = { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null };
+
+export type SessionConfigsQuery = { sessionConfigs: Array<SessionConfigsQuery_sessionConfigs> | null };
+
 
 export type SessionConfigsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type SessionConfigQuery_sessionConfig = { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type SessionConfigsQuery = { sessionConfigs: Array<{ id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type SessionConfigQuery = { sessionConfig: SessionConfigQuery_sessionConfig | null };
+
 
 export type SessionConfigQueryVariables = Exact<{
   roleName: string;
 }>;
 
+export type UpsertSessionConfigMutation_upsertSessionConfig = { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null };
 
-export type SessionConfigQuery = { sessionConfig: { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null } | null };
+export type UpsertSessionConfigMutation = { upsertSessionConfig: UpsertSessionConfigMutation_upsertSessionConfig | null };
+
 
 export type UpsertSessionConfigMutationVariables = Exact<{
   input: SessionConfigUpsertInput;
 }>;
 
+export type DeleteSessionConfigMutation = { deleteSessionConfig: boolean | null };
 
-export type UpsertSessionConfigMutation = { upsertSessionConfig: { id: string | null, roleName: string | null, ttlSeconds: number | null, maxConcurrentSessions: number | null, createdAt: string | null, updatedAt: string | null } | null };
 
 export type DeleteSessionConfigMutationVariables = Exact<{
   roleName: string;
 }>;
 
-
-export type DeleteSessionConfigMutation = { deleteSessionConfig: boolean | null };
-
 export type AuditLogFieldsFragment = { id: string | null, actorUserId: string | null, actorType: string | null, entityType: string | null, entityId: string | null, action: string | null, description: string | null, previousState: unknown, newState: unknown, changes: unknown, ipAddress: string | null, userAgent: string | null, metadata: unknown, createdAt: string | null };
+
+export type SettingsAuditLogsQuery_settingsAuditLogs_logs = { id: string | null, actorUserId: string | null, actorType: string | null, entityType: string | null, entityId: string | null, action: string | null, description: string | null, previousState: unknown, newState: unknown, changes: unknown, ipAddress: string | null, userAgent: string | null, metadata: unknown, createdAt: string | null };
+
+export type SettingsAuditLogsQuery_settingsAuditLogs = { id: string | null, total: number | null, hasMore: boolean | null, logs: Array<SettingsAuditLogsQuery_settingsAuditLogs_logs> | null };
+
+export type SettingsAuditLogsQuery = { settingsAuditLogs: SettingsAuditLogsQuery_settingsAuditLogs | null };
+
 
 export type SettingsAuditLogsQueryVariables = Exact<{
   filter: SettingsAuditLogFilter | null | undefined;
 }>;
 
-
-export type SettingsAuditLogsQuery = { settingsAuditLogs: { id: string | null, total: number | null, hasMore: boolean | null, logs: Array<{ id: string | null, actorUserId: string | null, actorType: string | null, entityType: string | null, entityId: string | null, action: string | null, description: string | null, previousState: unknown, newState: unknown, changes: unknown, ipAddress: string | null, userAgent: string | null, metadata: unknown, createdAt: string | null }> | null } | null };
-
 export type SiteContentEntryFieldsFragment = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SiteContentEntriesQuery_siteContentEntries = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type SiteContentEntriesQuery = { siteContentEntries: Array<SiteContentEntriesQuery_siteContentEntries> | null };
+
 
 export type SiteContentEntriesQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type SiteContentEntryQuery_siteContentEntry = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type SiteContentEntriesQuery = { siteContentEntries: Array<{ id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null }> | null };
+export type SiteContentEntryQuery = { siteContentEntry: SiteContentEntryQuery_siteContentEntry | null };
+
 
 export type SiteContentEntryQueryVariables = Exact<{
   id: string | number;
 }>;
 
+export type UpsertSiteContentMutation_upsertSiteContent = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type SiteContentEntryQuery = { siteContentEntry: { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type UpsertSiteContentMutation = { upsertSiteContent: UpsertSiteContentMutation_upsertSiteContent | null };
+
 
 export type UpsertSiteContentMutationVariables = Exact<{
   input: SiteContentUpsertInput;
 }>;
 
+export type UpdateSiteContentPublishStateMutation_updateSiteContentPublishState = { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type UpsertSiteContentMutation = { upsertSiteContent: { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type UpdateSiteContentPublishStateMutation = { updateSiteContentPublishState: UpdateSiteContentPublishStateMutation_updateSiteContentPublishState | null };
+
 
 export type UpdateSiteContentPublishStateMutationVariables = Exact<{
   id: string | number;
   isPublished: boolean;
 }>;
 
+export type DeleteSiteContentMutation = { deleteSiteContent: boolean | null };
 
-export type UpdateSiteContentPublishStateMutation = { updateSiteContentPublishState: { id: string | null, slug: string | null, title: string | null, body: string | null, contentType: string | null, isPublished: boolean | null, updatedByUserId: string | null, createdAt: string | null, updatedAt: string | null } | null };
 
 export type DeleteSiteContentMutationVariables = Exact<{
   id: string | number;
 }>;
 
-
-export type DeleteSiteContentMutation = { deleteSiteContent: boolean | null };
-
 export type SettingsTimezoneFieldsFragment = { id: string | null, ianaId: string | null, name: string | null, baseOffsetMinutes: number | null, offsetMinutes: number | null, isDstSupported: boolean | null };
+
+export type SettingsTimezonesQuery_settingsTimezones_rows = { id: string | null, ianaId: string | null, name: string | null, baseOffsetMinutes: number | null, offsetMinutes: number | null, isDstSupported: boolean | null };
+
+export type SettingsTimezonesQuery_settingsTimezones_pageInfo = { count: number, currentPage: number, endCursor: string | null, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, startCursor: string | null, total: number };
+
+export type SettingsTimezonesQuery_settingsTimezones = { id: string | null, totalCount: number | null, rows: Array<SettingsTimezonesQuery_settingsTimezones_rows> | null, pageInfo: SettingsTimezonesQuery_settingsTimezones_pageInfo | null };
+
+export type SettingsTimezonesQuery = { settingsTimezones: SettingsTimezonesQuery_settingsTimezones | null };
+
 
 export type SettingsTimezonesQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type EnsureDemoUsersMutation = { ensureDemoUsers: boolean | null };
 
-export type SettingsTimezonesQuery = { settingsTimezones: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, ianaId: string | null, name: string | null, baseOffsetMinutes: number | null, offsetMinutes: number | null, isDstSupported: boolean | null }> | null, pageInfo: { count: number, currentPage: number, endCursor: string | null, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, startCursor: string | null, total: number } | null } | null };
 
 export type EnsureDemoUsersMutationVariables = Exact<{ [key: string]: never; }>;
 
+export type CreateTestEntitiesMutation_createTestEntities = { studentUserEmail: string | null, studentUserId: string | null, studentId: string | null, studentName: string | null, parentUserEmail: string | null, parentUserId: string | null, parentId: string | null, parentName: string | null, teacherUserEmail: string | null, teacherUserId: string | null, teacherId: string | null, teacherName: string | null };
 
-export type EnsureDemoUsersMutation = { ensureDemoUsers: boolean | null };
+export type CreateTestEntitiesMutation = { createTestEntities: CreateTestEntitiesMutation_createTestEntities | null };
+
 
 export type CreateTestEntitiesMutationVariables = Exact<{
   prefix: string;
   classesRemaining: number | null | undefined;
 }>;
 
+export type CleanupTestEntitiesMutation = { cleanupTestEntities: boolean | null };
 
-export type CreateTestEntitiesMutation = { createTestEntities: { studentUserEmail: string | null, studentUserId: string | null, studentId: string | null, studentName: string | null, parentUserEmail: string | null, parentUserId: string | null, parentId: string | null, parentName: string | null, teacherUserEmail: string | null, teacherUserId: string | null, teacherId: string | null, teacherName: string | null } | null };
 
 export type CleanupTestEntitiesMutationVariables = Exact<{
   studentUserId: string;
@@ -4119,59 +4480,69 @@ export type CleanupTestEntitiesMutationVariables = Exact<{
   parentId: string;
 }>;
 
+export type CreateTestGroupClassMutation_createTestGroupClass = { groupClassId: string | null };
 
-export type CleanupTestEntitiesMutation = { cleanupTestEntities: boolean | null };
+export type CreateTestGroupClassMutation = { createTestGroupClass: CreateTestGroupClassMutation_createTestGroupClass | null };
+
 
 export type CreateTestGroupClassMutationVariables = Exact<{
   classInstanceId: string;
   teacherName: string;
 }>;
 
+export type CleanupTestGroupClassMutation = { cleanupTestGroupClass: boolean | null };
 
-export type CreateTestGroupClassMutation = { createTestGroupClass: { groupClassId: string | null } | null };
 
 export type CleanupTestGroupClassMutationVariables = Exact<{
   groupClassId: string;
 }>;
 
+export type CleanupTestManagerMutation = { cleanupTestManager: boolean | null };
 
-export type CleanupTestGroupClassMutation = { cleanupTestGroupClass: boolean | null };
 
 export type CleanupTestManagerMutationVariables = Exact<{
   userId: string;
 }>;
 
+export type CreateTestSuperAdminMutation_createTestSuperAdmin = { userId: string | null, email: string | null };
 
-export type CleanupTestManagerMutation = { cleanupTestManager: boolean | null };
+export type CreateTestSuperAdminMutation = { createTestSuperAdmin: CreateTestSuperAdminMutation_createTestSuperAdmin | null };
+
 
 export type CreateTestSuperAdminMutationVariables = Exact<{
   prefix: string;
 }>;
 
+export type CleanupTestSuperAdminMutation = { cleanupTestSuperAdmin: boolean | null };
 
-export type CreateTestSuperAdminMutation = { createTestSuperAdmin: { userId: string | null, email: string | null } | null };
 
 export type CleanupTestSuperAdminMutationVariables = Exact<{
   userId: string;
 }>;
 
+export type WelcomeMessageQuery = { welcomeMessage: string | null };
 
-export type CleanupTestSuperAdminMutation = { cleanupTestSuperAdmin: boolean | null };
 
 export type WelcomeMessageQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type TranslatedMessageQuery = { translatedMessage: string | null };
 
-export type WelcomeMessageQuery = { welcomeMessage: string | null };
 
 export type TranslatedMessageQueryVariables = Exact<{
   key: string;
   namespace: string;
 }>;
 
-
-export type TranslatedMessageQuery = { translatedMessage: string | null };
-
 export type StudentDirectoryRowFragment = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentDirectoryQuery_studentDirectory_rows = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type StudentDirectoryQuery_studentDirectory_pageInfo = { count: number, currentPage: number, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
+
+export type StudentDirectoryQuery_studentDirectory = { id: string | null, totalCount: number | null, rows: Array<StudentDirectoryQuery_studentDirectory_rows> | null, pageInfo: StudentDirectoryQuery_studentDirectory_pageInfo | null };
+
+export type StudentDirectoryQuery = { studentDirectory: StudentDirectoryQuery_studentDirectory | null };
+
 
 export type StudentDirectoryQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
@@ -4179,16 +4550,26 @@ export type StudentDirectoryQueryVariables = Exact<{
   filterArgs: StudentFilterArgs | null | undefined;
 }>;
 
+export type StudentsDirectoryQuery_studentsDirectory = { id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type StudentDirectoryQuery = { studentDirectory: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null }> | null, pageInfo: { count: number, currentPage: number, hasMorePages: boolean, lastPage: number, perPage: number, total: number } | null } | null };
+export type StudentsDirectoryQuery = { studentsDirectory: Array<StudentsDirectoryQuery_studentsDirectory> };
+
 
 export type StudentsDirectoryQueryVariables = Exact<{
   search: string | null | undefined;
   limit: number | null | undefined;
 }>;
 
+export type StudentClassHistoryQuery_studentClassHistory_metrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 
-export type StudentsDirectoryQuery = { studentsDirectory: Array<{ id: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: string | null, classesRemaining: number | null, classesTotal: number | null, hoursPerWeek: number | null, teacherName: string | null, createdAt: string | null, updatedAt: string | null }> };
+export type StudentClassHistoryQuery_studentClassHistory_sessions_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
+
+export type StudentClassHistoryQuery_studentClassHistory_sessions = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentClassHistoryQuery_studentClassHistory_sessions_effectiveMeeting | null };
+
+export type StudentClassHistoryQuery_studentClassHistory = { id: string | null, studentName: string | null, metrics: StudentClassHistoryQuery_studentClassHistory_metrics | null, sessions: Array<StudentClassHistoryQuery_studentClassHistory_sessions> | null };
+
+export type StudentClassHistoryQuery = { studentClassHistory: StudentClassHistoryQuery_studentClassHistory | null };
+
 
 export type StudentClassHistoryQueryVariables = Exact<{
   studentId: string | number;
@@ -4196,15 +4577,21 @@ export type StudentClassHistoryQueryVariables = Exact<{
   month: number;
 }>;
 
+export type StudentClassSessionDetailQuery_studentClassSessionDetail_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type StudentClassHistoryQuery = { studentClassHistory: { id: string | null, studentName: string | null, metrics: { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null } | null, sessions: Array<{ id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null } | null };
+export type StudentClassSessionDetailQuery_studentClassSessionDetail = { id: string | null, durationMinutes: number | null, executionState: string | null, outcome: string | null, remarks: string | null, meetingJoinUrl: string | null, teacherName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, effectiveMeeting: StudentClassSessionDetailQuery_studentClassSessionDetail_effectiveMeeting | null };
+
+export type StudentClassSessionDetailQuery = { studentClassSessionDetail: StudentClassSessionDetailQuery_studentClassSessionDetail | null };
+
 
 export type StudentClassSessionDetailQueryVariables = Exact<{
   classInstanceId: string | number;
 }>;
 
+export type ReassignStudentTeacherMutation_reassignStudentTeacher = { id: string | null, primaryTeacherId: string | null, version: number | null };
 
-export type StudentClassSessionDetailQuery = { studentClassSessionDetail: { id: string | null, durationMinutes: number | null, executionState: string | null, outcome: string | null, remarks: string | null, meetingJoinUrl: string | null, teacherName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null } | null };
+export type ReassignStudentTeacherMutation = { reassignStudentTeacher: ReassignStudentTeacherMutation_reassignStudentTeacher | null };
+
 
 export type ReassignStudentTeacherMutationVariables = Exact<{
   studentId: string;
@@ -4212,8 +4599,10 @@ export type ReassignStudentTeacherMutationVariables = Exact<{
   expectedVersion: number | null | undefined;
 }>;
 
+export type ChangeStudentStatusMutation_changeStudentStatus = { id: string | null, status: StudentStatus | null, version: number | null };
 
-export type ReassignStudentTeacherMutation = { reassignStudentTeacher: { id: string | null, primaryTeacherId: string | null, version: number | null } | null };
+export type ChangeStudentStatusMutation = { changeStudentStatus: ChangeStudentStatusMutation_changeStudentStatus | null };
+
 
 export type ChangeStudentStatusMutationVariables = Exact<{
   studentId: string;
@@ -4221,21 +4610,39 @@ export type ChangeStudentStatusMutationVariables = Exact<{
   expectedVersion: number | null | undefined;
 }>;
 
+export type CreateStudentMutation_createStudent = { id: string | null, studentId: string | null, parentId: string | null, name: string | null, status: StudentStatus | null, primaryTeacherId: string | null };
 
-export type ChangeStudentStatusMutation = { changeStudentStatus: { id: string | null, status: StudentStatus | null, version: number | null } | null };
+export type CreateStudentMutation = { createStudent: CreateStudentMutation_createStudent | null };
+
 
 export type CreateStudentMutationVariables = Exact<{
   input: StudentOnboardingInput;
 }>;
 
+export type StudentUpcomingClassFieldsFragment_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type CreateStudentMutation = { createStudent: { id: string | null, studentId: string | null, parentId: string | null, name: string | null, status: StudentStatus | null, primaryTeacherId: string | null } | null };
-
-export type StudentUpcomingClassFieldsFragment = { id: string | null, instructor: string | null, teacherId: string | null, teacherAvatarUrl: string | null, subjectId: string | null, subjectName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null };
+export type StudentUpcomingClassFieldsFragment = { id: string | null, instructor: string | null, teacherId: string | null, teacherAvatarUrl: string | null, subjectId: string | null, subjectName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: StudentUpcomingClassFieldsFragment_effectiveMeeting | null };
 
 export type StudentHistoryMetricsFieldsFragment = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
 
-export type StudentHistorySessionFieldsFragment = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null };
+export type StudentHistorySessionFieldsFragment_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
+
+export type StudentHistorySessionFieldsFragment = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentHistorySessionFieldsFragment_effectiveMeeting | null };
+
+export type StudentProfileQuery_studentProfile_upcomingClasses_classes = { id: string | null, instructor: string | null, teacherId: string | null, teacherAvatarUrl: string | null, subjectId: string | null, subjectName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: StudentUpcomingClassFieldsFragment_effectiveMeeting | null };
+
+export type StudentProfileQuery_studentProfile_upcomingClasses = { id: string | null, studentId: string | null, studentName: string | null, status: StudentStatus | null, classes: Array<StudentProfileQuery_studentProfile_upcomingClasses_classes> | null };
+
+export type StudentProfileQuery_studentProfile_classHistory_metrics = { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null };
+
+export type StudentProfileQuery_studentProfile_classHistory_sessions = { id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: StudentHistorySessionFieldsFragment_effectiveMeeting | null };
+
+export type StudentProfileQuery_studentProfile_classHistory = { id: string | null, studentName: string | null, metrics: StudentProfileQuery_studentProfile_classHistory_metrics | null, sessions: Array<StudentProfileQuery_studentProfile_classHistory_sessions> | null };
+
+export type StudentProfileQuery_studentProfile = { id: string | null, name: string | null, status: StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Gender | null, language: AppLanguage | null, timezoneOverride: string | null, email: string | null, phone: string | null, timezone: IanaTimezone | null, displayCurrency: CurrencyCode | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentEmail: string | null, parentPhone: string | null, isAssociatedViewer: boolean | null, isOwnStudentProfile: boolean | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null, version: number | null, createdAt: string | null, updatedAt: string | null, upcomingClasses: StudentProfileQuery_studentProfile_upcomingClasses | null, classHistory: StudentProfileQuery_studentProfile_classHistory | null };
+
+export type StudentProfileQuery = { studentProfile: StudentProfileQuery_studentProfile | null };
+
 
 export type StudentProfileQueryVariables = Exact<{
   studentId: string | null | undefined;
@@ -4244,22 +4651,36 @@ export type StudentProfileQueryVariables = Exact<{
   includeUpcomingClasses: boolean | null | undefined;
 }>;
 
+export type RecordStudentProfileEditMutation_recordStudentProfileEdit = { id: string | null, name: string | null, status: StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Gender | null, language: AppLanguage | null, timezoneOverride: string | null, email: string | null, phone: string | null, parentPhone: string | null, version: number | null, updatedAt: string | null };
 
-export type StudentProfileQuery = { studentProfile: { id: string | null, name: string | null, status: StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Gender | null, language: AppLanguage | null, timezoneOverride: string | null, email: string | null, phone: string | null, timezone: IanaTimezone | null, displayCurrency: CurrencyCode | null, parentId: string | null, parentUserId: string | null, parentName: string | null, parentEmail: string | null, parentPhone: string | null, isAssociatedViewer: boolean | null, isOwnStudentProfile: boolean | null, primaryTeacherId: string | null, teacherUserId: string | null, teacherName: string | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null, version: number | null, createdAt: string | null, updatedAt: string | null, upcomingClasses: { id: string | null, studentId: string | null, studentName: string | null, status: StudentStatus | null, classes: Array<{ id: string | null, instructor: string | null, teacherId: string | null, teacherAvatarUrl: string | null, subjectId: string | null, subjectName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null } | null, classHistory: { id: string | null, studentName: string | null, metrics: { totalClasses: number | null, attendanceRate: number | null, hoursStudied: number | null, performance: number | null } | null, sessions: Array<{ id: string | null, title: string | null, time: string | null, duration: number | null, status: string | null, outcome: string | null, isFrozen: boolean | null, instructor: string | null, teacherId: string | null, timeSlot: string | null, room: string | null, notes: string | null, dayOfMonth: number | null, meetingJoinUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null } | null } | null };
+export type RecordStudentProfileEditMutation = { recordStudentProfileEdit: RecordStudentProfileEditMutation_recordStudentProfileEdit | null };
+
 
 export type RecordStudentProfileEditMutationVariables = Exact<{
   input: StudentProfileEditInput;
 }>;
 
+export type StudentUpcomingClassesQuery_studentUpcomingClasses_classes_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type RecordStudentProfileEditMutation = { recordStudentProfileEdit: { id: string | null, name: string | null, status: StudentStatus | null, avatarUrl: string | null, dateOfBirth: string | null, gender: Gender | null, language: AppLanguage | null, timezoneOverride: string | null, email: string | null, phone: string | null, parentPhone: string | null, version: number | null, updatedAt: string | null } | null };
+export type StudentUpcomingClassesQuery_studentUpcomingClasses_classes = { id: string | null, instructor: string | null, teacherId: string | null, teacherAvatarUrl: string | null, subjectId: string | null, subjectName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: StudentUpcomingClassesQuery_studentUpcomingClasses_classes_effectiveMeeting | null };
+
+export type StudentUpcomingClassesQuery_studentUpcomingClasses = { id: string | null, studentId: string | null, studentName: string | null, status: StudentStatus | null, classes: Array<StudentUpcomingClassesQuery_studentUpcomingClasses_classes> | null };
+
+export type StudentUpcomingClassesQuery = { studentUpcomingClasses: StudentUpcomingClassesQuery_studentUpcomingClasses | null };
+
 
 export type StudentUpcomingClassesQueryVariables = Exact<{
   studentId: string;
 }>;
 
+export type StudentsQuery_students_data = { id: string, name: string, avatarUrl: string | null };
 
-export type StudentUpcomingClassesQuery = { studentUpcomingClasses: { id: string | null, studentId: string | null, studentName: string | null, status: StudentStatus | null, classes: Array<{ id: string | null, instructor: string | null, teacherId: string | null, teacherAvatarUrl: string | null, subjectId: string | null, subjectName: string | null, avatarUrl: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null } | null };
+export type StudentsQuery_students_pageInfo = { total: number };
+
+export type StudentsQuery_students = { data: Array<StudentsQuery_students_data>, pageInfo: StudentsQuery_students_pageInfo };
+
+export type StudentsQuery = { students: StudentsQuery_students };
+
 
 export type StudentsQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
@@ -4267,85 +4688,129 @@ export type StudentsQueryVariables = Exact<{
   filterArgs: StudentFilterArgs | null | undefined;
 }>;
 
+export type StudentByIdQuery_studentById = { id: string | null, name: string | null, avatarUrl: string | null, status: StudentStatus | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, version: number | null, updatedAt: string | null };
 
-export type StudentsQuery = { students: { data: Array<{ id: string, name: string, avatarUrl: string | null }>, pageInfo: { total: number } } };
+export type StudentByIdQuery = { studentById: StudentByIdQuery_studentById | null };
+
 
 export type StudentByIdQueryVariables = Exact<{
   studentId: string;
 }>;
 
+export type AdminSuggestionsQuery_adminSuggestions_rows = { id: string | null, parentId: string | null, parentUserId: string | null, submitterName: string | null, body: string | null, status: SuggestionStatus | null, adminResponse: string | null, duplicateOfId: string | null, duplicateOfBody: string | null, duplicateOfSubmitterName: string | null, responseCount: number | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null };
 
-export type StudentByIdQuery = { studentById: { id: string | null, name: string | null, avatarUrl: string | null, status: StudentStatus | null, primaryTeacherId: string | null, teacherName: string | null, hoursPerWeek: string | null, classesRemaining: number | null, classesTotal: number | null, language: string | null, gender: string | null, version: number | null, updatedAt: string | null } | null };
+export type AdminSuggestionsQuery_adminSuggestions_metrics = { id: string | null, pending: number | null, reviewed: number | null, duplicate: number | null, avgResponseTime: string | null, totalCount: number | null };
+
+export type AdminSuggestionsQuery_adminSuggestions = { id: string | null, rows: Array<AdminSuggestionsQuery_adminSuggestions_rows> | null, metrics: AdminSuggestionsQuery_adminSuggestions_metrics | null };
+
+export type AdminSuggestionsQuery = { adminSuggestions: AdminSuggestionsQuery_adminSuggestions | null };
+
 
 export type AdminSuggestionsQueryVariables = Exact<{
   filter: SuggestionFilter;
 }>;
 
+export type SearchSuggestionsQuery_searchSuggestions = { id: string | null, submitterName: string | null, body: string | null, status: SuggestionStatus | null, parentName: string | null, createdAt: string | null };
 
-export type AdminSuggestionsQuery = { adminSuggestions: { id: string | null, rows: Array<{ id: string | null, parentId: string | null, parentUserId: string | null, submitterName: string | null, body: string | null, status: SuggestionStatus | null, adminResponse: string | null, duplicateOfId: string | null, duplicateOfBody: string | null, duplicateOfSubmitterName: string | null, responseCount: number | null, emailSentAt: string | null, createdAt: string | null, parentName: string | null }> | null, metrics: { id: string | null, pending: number | null, reviewed: number | null, duplicate: number | null, avgResponseTime: string | null, totalCount: number | null } | null } | null };
+export type SearchSuggestionsQuery = { searchSuggestions: Array<SearchSuggestionsQuery_searchSuggestions> | null };
+
 
 export type SearchSuggestionsQueryVariables = Exact<{
   query: string;
   excludeId: string;
 }>;
 
+export type SubmitSuggestionMutation_submitSuggestion = { id: string | null, submitterName: string | null, body: string | null, createdAt: string | null };
 
-export type SearchSuggestionsQuery = { searchSuggestions: Array<{ id: string | null, submitterName: string | null, body: string | null, status: SuggestionStatus | null, parentName: string | null, createdAt: string | null }> | null };
+export type SubmitSuggestionMutation = { submitSuggestion: SubmitSuggestionMutation_submitSuggestion | null };
+
 
 export type SubmitSuggestionMutationVariables = Exact<{
   input: SubmitSuggestionInput;
 }>;
 
+export type MarkSuggestionReviewedMutation_markSuggestionReviewed = { id: string | null, emailSentAt: string | null };
 
-export type SubmitSuggestionMutation = { submitSuggestion: { id: string | null, submitterName: string | null, body: string | null, createdAt: string | null } | null };
+export type MarkSuggestionReviewedMutation = { markSuggestionReviewed: MarkSuggestionReviewedMutation_markSuggestionReviewed | null };
+
 
 export type MarkSuggestionReviewedMutationVariables = Exact<{
   suggestionId: string;
 }>;
 
+export type RespondToSuggestionMutation_respondToSuggestion = { id: string | null, adminResponse: string | null };
 
-export type MarkSuggestionReviewedMutation = { markSuggestionReviewed: { id: string | null, emailSentAt: string | null } | null };
+export type RespondToSuggestionMutation = { respondToSuggestion: RespondToSuggestionMutation_respondToSuggestion | null };
+
 
 export type RespondToSuggestionMutationVariables = Exact<{
   input: RespondToSuggestionInput;
 }>;
 
+export type MarkSuggestionDuplicateMutation_markSuggestionDuplicate = { id: string | null, duplicateOfId: string | null };
 
-export type RespondToSuggestionMutation = { respondToSuggestion: { id: string | null, adminResponse: string | null } | null };
+export type MarkSuggestionDuplicateMutation = { markSuggestionDuplicate: MarkSuggestionDuplicateMutation_markSuggestionDuplicate | null };
+
 
 export type MarkSuggestionDuplicateMutationVariables = Exact<{
   input: MarkSuggestionDuplicateInput;
 }>;
 
+export type DeleteSuggestionMutation = { deleteSuggestion: boolean | null };
 
-export type MarkSuggestionDuplicateMutation = { markSuggestionDuplicate: { id: string | null, duplicateOfId: string | null } | null };
 
 export type DeleteSuggestionMutationVariables = Exact<{
   suggestionId: string;
 }>;
 
+export type SuggestionContributorStatsQuery_suggestionContributorStats_contributors = { id: string | null, name: string | null, suggestionCount: number | null };
 
-export type DeleteSuggestionMutation = { deleteSuggestion: boolean | null };
+export type SuggestionContributorStatsQuery_suggestionContributorStats = { id: string | null, uniqueContributorCount: number | null, contributors: Array<SuggestionContributorStatsQuery_suggestionContributorStats_contributors> | null };
+
+export type SuggestionContributorStatsQuery = { suggestionContributorStats: SuggestionContributorStatsQuery_suggestionContributorStats | null };
+
 
 export type SuggestionContributorStatsQueryVariables = Exact<{
   days: number;
 }>;
 
+export type SupervisorDashboardQuery_supervisorDashboard_pendingDuesSummary = { totalCount: number | null, totalAmount: number | null, currency: CurrencyCode | null };
 
-export type SuggestionContributorStatsQuery = { suggestionContributorStats: { id: string | null, uniqueContributorCount: number | null, contributors: Array<{ id: string | null, name: string | null, suggestionCount: number | null }> | null } | null };
+export type SupervisorDashboardQuery_supervisorDashboard_monthlySnapshot = { year: number | null, month: number | null, label: string | null };
+
+export type SupervisorDashboardQuery_supervisorDashboard = { supervisorName: string | null, pendingReviewCount: number | null, pendingDuesSummary: SupervisorDashboardQuery_supervisorDashboard_pendingDuesSummary | null, monthlySnapshot: SupervisorDashboardQuery_supervisorDashboard_monthlySnapshot | null };
+
+export type SupervisorDashboardQuery = { supervisorDashboard: SupervisorDashboardQuery_supervisorDashboard | null };
+
 
 export type SupervisorDashboardQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type TeacherDirectoryQuery_teacherDirectory_metrics = { id: string | null, activated: number | null, deactivated: number | null };
 
-export type SupervisorDashboardQuery = { supervisorDashboard: { supervisorName: string | null, pendingReviewCount: number | null, pendingDuesSummary: { totalCount: number | null, totalAmount: number | null, currency: CurrencyCode | null } | null, monthlySnapshot: { year: number | null, month: number | null, label: string | null } | null } | null };
+export type TeacherDirectoryQuery_teacherDirectory_rows = { id: string | null, userId: string | null, index: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: AccountStatus | null };
+
+export type TeacherDirectoryQuery_teacherDirectory_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type TeacherDirectoryQuery_teacherDirectory = { id: string | null, totalTeachers: number | null, metrics: TeacherDirectoryQuery_teacherDirectory_metrics | null, rows: Array<TeacherDirectoryQuery_teacherDirectory_rows> | null, pageInfo: TeacherDirectoryQuery_teacherDirectory_pageInfo | null };
+
+export type TeacherDirectoryQuery = { teacherDirectory: TeacherDirectoryQuery_teacherDirectory | null };
+
 
 export type TeacherDirectoryQueryVariables = Exact<{
   search: string | null | undefined;
   paginationArgs: PaginationArgs | null | undefined;
 }>;
 
+export type ManagerDirectoryQuery_managerDirectory_metrics = { id: string | null, totalAdmin: number | null, systemStaff: number | null, activeNow: number | null, alerts: number | null };
 
-export type TeacherDirectoryQuery = { teacherDirectory: { id: string | null, totalTeachers: number | null, metrics: { id: string | null, activated: number | null, deactivated: number | null } | null, rows: Array<{ id: string | null, userId: string | null, index: string | null, name: string | null, email: string | null, avatarUrl: string | null, status: AccountStatus | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type ManagerDirectoryQuery_managerDirectory_rows = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, roleSlug: string | null, roleName: string | null };
+
+export type ManagerDirectoryQuery_managerDirectory_pageInfo = { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number };
+
+export type ManagerDirectoryQuery_managerDirectory = { id: string | null, totalCount: number | null, metrics: ManagerDirectoryQuery_managerDirectory_metrics | null, rows: Array<ManagerDirectoryQuery_managerDirectory_rows> | null, pageInfo: ManagerDirectoryQuery_managerDirectory_pageInfo | null };
+
+export type ManagerDirectoryQuery = { managerDirectory: ManagerDirectoryQuery_managerDirectory | null };
+
 
 export type ManagerDirectoryQueryVariables = Exact<{
   paginationArgs: PaginationArgs | null | undefined;
@@ -4353,23 +4818,29 @@ export type ManagerDirectoryQueryVariables = Exact<{
   statusFilter: string | null | undefined;
 }>;
 
+export type UpdateManagerProfileMutation_updateManagerProfile = { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, roleSlug: string | null, roleName: string | null };
 
-export type ManagerDirectoryQuery = { managerDirectory: { id: string | null, totalCount: number | null, metrics: { id: string | null, totalAdmin: number | null, systemStaff: number | null, activeNow: number | null, alerts: number | null } | null, rows: Array<{ id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, roleSlug: string | null, roleName: string | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, hasMorePages: boolean, lastItem: number | null, lastPage: number, perPage: number, total: number } | null } | null };
+export type UpdateManagerProfileMutation = { updateManagerProfile: UpdateManagerProfileMutation_updateManagerProfile | null };
+
 
 export type UpdateManagerProfileMutationVariables = Exact<{
   staffProfileId: string | number;
   input: UpdateManagerProfileInput;
 }>;
 
+export type OnboardingMetricsQuery_onboardingMetrics = { id: string | null, activeStaff: number | null, pendingApproval: number | null, avgOnboardingDays: number | null };
 
-export type UpdateManagerProfileMutation = { updateManagerProfile: { id: string | null, staffProfileId: string | null, name: string | null, email: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, roleSlug: string | null, roleName: string | null } | null };
+export type OnboardingMetricsQuery = { onboardingMetrics: OnboardingMetricsQuery_onboardingMetrics | null };
+
 
 export type OnboardingMetricsQueryVariables = Exact<{ [key: string]: never; }>;
 
-
-export type OnboardingMetricsQuery = { onboardingMetrics: { id: string | null, activeStaff: number | null, pendingApproval: number | null, avgOnboardingDays: number | null } | null };
-
 export type StaffDirectoryAutocompleteRowFragment = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
+
+export type StaffDirectoryQuery_staffDirectory = { id: string | null, name: string | null, avatarUrl: string | null, email: string | null };
+
+export type StaffDirectoryQuery = { staffDirectory: Array<StaffDirectoryQuery_staffDirectory> };
+
 
 export type StaffDirectoryQueryVariables = Exact<{
   search: string | null | undefined;
@@ -4377,76 +4848,116 @@ export type StaffDirectoryQueryVariables = Exact<{
   permissionGroupFilter: string | null | undefined;
 }>;
 
+export type CreateManagerMutation_createManager = { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, status: string | null, assignedGroupSlug: string | null };
 
-export type StaffDirectoryQuery = { staffDirectory: Array<{ id: string | null, name: string | null, avatarUrl: string | null, email: string | null }> };
+export type CreateManagerMutation = { createManager: CreateManagerMutation_createManager | null };
+
 
 export type CreateManagerMutationVariables = Exact<{
   input: ManagerOnboardingInput;
 }>;
 
+export type TeacherProfileForEditQuery_teacherProfileForEdit = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
-export type CreateManagerMutation = { createManager: { id: string | null, userId: string | null, staffProfileId: string | null, name: string | null, email: string | null, status: string | null, assignedGroupSlug: string | null } | null };
+export type TeacherProfileForEditQuery = { teacherProfileForEdit: TeacherProfileForEditQuery_teacherProfileForEdit | null };
+
 
 export type TeacherProfileForEditQueryVariables = Exact<{
   teacherId: string | number;
 }>;
 
+export type UpdateTeacherProfileMutation_updateTeacherProfile = { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null };
 
-export type TeacherProfileForEditQuery = { teacherProfileForEdit: { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null } | null };
+export type UpdateTeacherProfileMutation = { updateTeacherProfile: UpdateTeacherProfileMutation_updateTeacherProfile | null };
+
 
 export type UpdateTeacherProfileMutationVariables = Exact<{
   teacherId: string | number;
   input: TeacherProfileUpdateInput;
 }>;
 
+export type TeacherDashboardQuery_teacherDashboard_metrics = { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null };
 
-export type UpdateTeacherProfileMutation = { updateTeacherProfile: { id: string | null, userId: string | null, name: string | null, email: string | null, phone: string | null, nationalId: string | null, nationality: string | null, countryCode: string | null, dateOfBirth: string | null, gender: Gender | null, address: string | null, qualifications: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, status: AccountStatus | null, updatedAt: string | null, totalClasses: number | null, avgEngagementScore: number | null } | null };
+export type TeacherDashboardQuery_teacherDashboard_scheduleRows_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
+
+export type TeacherDashboardQuery_teacherDashboard_scheduleRows = { id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, yourTimeFormatted: string | null, effectiveMeeting: TeacherDashboardQuery_teacherDashboard_scheduleRows_effectiveMeeting | null };
+
+export type TeacherDashboardQuery_teacherDashboard_progressFeed = { id: string | null, studentId: string | null, studentName: string | null, scheduledTimeFormatted: string | null, durationMinutes: number | null, eventKind: TeacherProgressFeedEventKind | null, occurredAt: string | null };
+
+export type TeacherDashboardQuery_teacherDashboard_pageInfo = { count: number, currentPage: number, firstItem: number | null, lastItem: number | null, hasMorePages: boolean, lastPage: number, perPage: number, total: number };
+
+export type TeacherDashboardQuery_teacherDashboard = { id: string | null, totalCount: number | null, metrics: TeacherDashboardQuery_teacherDashboard_metrics | null, scheduleRows: Array<TeacherDashboardQuery_teacherDashboard_scheduleRows> | null, progressFeed: Array<TeacherDashboardQuery_teacherDashboard_progressFeed> | null, pageInfo: TeacherDashboardQuery_teacherDashboard_pageInfo | null };
+
+export type TeacherDashboardQuery = { teacherDashboard: TeacherDashboardQuery_teacherDashboard | null };
+
 
 export type TeacherDashboardQueryVariables = Exact<{
   date: string;
   pagination: PaginationArgs | null | undefined;
 }>;
 
+export type CreateTeacherManualClassEntryMutation_createTeacherManualClassEntry = { id: string | null, status: ClassExecutionState | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null };
 
-export type TeacherDashboardQuery = { teacherDashboard: { id: string | null, totalCount: number | null, metrics: { total: number | null, regular: number | null, trial: number | null, advance: number | null, rescheduled: number | null, suspended: number | null, taken: number | null, pending: number | null, activated: number | null, running: number | null, absent: number | null, leave: number | null } | null, scheduleRows: Array<{ id: string | null, studentId: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, yourTimeFormatted: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null, progressFeed: Array<{ id: string | null, studentId: string | null, studentName: string | null, scheduledTimeFormatted: string | null, durationMinutes: number | null, eventKind: TeacherProgressFeedEventKind | null, occurredAt: string | null }> | null, pageInfo: { count: number, currentPage: number, firstItem: number | null, lastItem: number | null, hasMorePages: boolean, lastPage: number, perPage: number, total: number } | null } | null };
+export type CreateTeacherManualClassEntryMutation = { createTeacherManualClassEntry: CreateTeacherManualClassEntryMutation_createTeacherManualClassEntry | null };
+
 
 export type CreateTeacherManualClassEntryMutationVariables = Exact<{
   input: CreateManualClassEntryInput;
 }>;
 
+export type LogTeacherSupportRequestMutation_logTeacherSupportRequest = { id: string | null, success: boolean | null };
 
-export type CreateTeacherManualClassEntryMutation = { createTeacherManualClassEntry: { id: string | null, status: ClassExecutionState | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null } | null };
+export type LogTeacherSupportRequestMutation = { logTeacherSupportRequest: LogTeacherSupportRequestMutation_logTeacherSupportRequest | null };
+
 
 export type LogTeacherSupportRequestMutationVariables = Exact<{
   input: LogSupportRequestInput;
 }>;
 
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_classes_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type LogTeacherSupportRequestMutation = { logTeacherSupportRequest: { id: string | null, success: boolean | null } | null };
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_classes = { id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null, subjectId: string | null, subjectName: string | null, classType: ClassType | null, executionState: string | null, outcome: string | null, avatarUrl: string | null, effectiveMeeting: TeacherFutureScheduleQuery_teacherFutureSchedule_classes_effectiveMeeting | null };
+
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_importantNotes = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
+
+export type TeacherFutureScheduleQuery_teacherFutureSchedule_supportContact = { id: string | null, name: string | null, role: string | null, avatarUrl: string | null, phone: string | null };
+
+export type TeacherFutureScheduleQuery_teacherFutureSchedule = { id: string | null, leaveQuotaUsed: number | null, leaveQuotaTotal: number | null, totalClasses: number | null, classes: Array<TeacherFutureScheduleQuery_teacherFutureSchedule_classes> | null, importantNotes: Array<TeacherFutureScheduleQuery_teacherFutureSchedule_importantNotes> | null, supportContact: TeacherFutureScheduleQuery_teacherFutureSchedule_supportContact | null };
+
+export type TeacherFutureScheduleQuery = { teacherFutureSchedule: TeacherFutureScheduleQuery_teacherFutureSchedule | null };
+
 
 export type TeacherFutureScheduleQueryVariables = Exact<{
   teacherId: string | null | undefined;
 }>;
 
+export type TeacherHandbookUrlQuery_teacherHandbookUrl = { id: string | null, url: string | null };
 
-export type TeacherFutureScheduleQuery = { teacherFutureSchedule: { id: string | null, leaveQuotaUsed: number | null, leaveQuotaTotal: number | null, totalClasses: number | null, classes: Array<{ id: string | null, courseName: string | null, scheduledDate: string | null, startTime: string | null, endTime: string | null, durationMinutes: number | null, isRescheduled: boolean | null, leaveRequestDisabled: boolean | null, leaveRequestDisabledReason: string | null, studentCount: number | null, location: string | null, subjectId: string | null, subjectName: string | null, classType: ClassType | null, executionState: string | null, outcome: string | null, avatarUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null, importantNotes: Array<{ id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null }> | null, supportContact: { id: string | null, name: string | null, role: string | null, avatarUrl: string | null, phone: string | null } | null } | null };
+export type TeacherHandbookUrlQuery = { teacherHandbookUrl: TeacherHandbookUrlQuery_teacherHandbookUrl | null };
+
 
 export type TeacherHandbookUrlQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type TeacherPendingDuesQuery_teacherPendingDues = { id: string | null, teacherId: string | null, teacherName: string | null, teacherUserId: string | null, teacherAvatarUrl: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, studentAvatarUrl: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: CurrencyCode | null, status: TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null, rateSource: RateSource | null };
 
-export type TeacherHandbookUrlQuery = { teacherHandbookUrl: { id: string | null, url: string | null } | null };
+export type TeacherPendingDuesQuery = { teacherPendingDues: Array<TeacherPendingDuesQuery_teacherPendingDues> | null };
+
 
 export type TeacherPendingDuesQueryVariables = Exact<{
   teacherId: string | number | null | undefined;
 }>;
 
+export type TeacherPendingDuesSummaryQuery_teacherPendingDuesSummary = { totalCount: number | null, totalAmount: number | null, currency: CurrencyCode | null };
 
-export type TeacherPendingDuesQuery = { teacherPendingDues: Array<{ id: string | null, teacherId: string | null, teacherName: string | null, teacherUserId: string | null, teacherAvatarUrl: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, studentAvatarUrl: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: CurrencyCode | null, status: TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null, rateSource: RateSource | null }> | null };
+export type TeacherPendingDuesSummaryQuery = { teacherPendingDuesSummary: TeacherPendingDuesSummaryQuery_teacherPendingDuesSummary | null };
+
 
 export type TeacherPendingDuesSummaryQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type TeacherMonthlyReportQuery_teacherMonthlyReport = { id: string | null, teacherId: string | null, teacherName: string | null, year: number | null, month: number | null, lessonsTaught: number | null, approvedCount: number | null, cancelledCount: number | null, totalAccruedHours: number | null, totalDueAmount: number | null, totalPaidAmount: number | null, currency: CurrencyCode | null };
 
-export type TeacherPendingDuesSummaryQuery = { teacherPendingDuesSummary: { totalCount: number | null, totalAmount: number | null, currency: CurrencyCode | null } | null };
+export type TeacherMonthlyReportQuery = { teacherMonthlyReport: TeacherMonthlyReportQuery_teacherMonthlyReport };
+
 
 export type TeacherMonthlyReportQueryVariables = Exact<{
   teacherId: string | number;
@@ -4454,77 +4965,102 @@ export type TeacherMonthlyReportQueryVariables = Exact<{
   month: number;
 }>;
 
+export type MarkTeacherDuesPaidMutation_markTeacherDuesPaid = { id: string | null, teacherId: string | null, teacherName: string | null, teacherUserId: string | null, teacherAvatarUrl: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, studentAvatarUrl: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: CurrencyCode | null, status: TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type TeacherMonthlyReportQuery = { teacherMonthlyReport: { id: string | null, teacherId: string | null, teacherName: string | null, year: number | null, month: number | null, lessonsTaught: number | null, approvedCount: number | null, cancelledCount: number | null, totalAccruedHours: number | null, totalDueAmount: number | null, totalPaidAmount: number | null, currency: CurrencyCode | null } };
+export type MarkTeacherDuesPaidMutation = { markTeacherDuesPaid: Array<MarkTeacherDuesPaidMutation_markTeacherDuesPaid> | null };
+
 
 export type MarkTeacherDuesPaidMutationVariables = Exact<{
   dueIds: Array<string | number> | string | number;
   teacherPaymentId: string | number;
 }>;
 
-
-export type MarkTeacherDuesPaidMutation = { markTeacherDuesPaid: Array<{ id: string | null, teacherId: string | null, teacherName: string | null, teacherUserId: string | null, teacherAvatarUrl: string | null, classInstanceId: string | null, studentId: string | null, studentName: string | null, studentAvatarUrl: string | null, classDate: string | null, hours: string | null, amount: string | null, currency: CurrencyCode | null, status: TeacherDueStatus | null, approvedByUserId: string | null, approvedAt: string | null, teacherPaymentId: string | null, createdAt: string | null, updatedAt: string | null }> | null };
-
 export type TeacherImportantNoteFieldsFragment = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
+
+export type CreateTeacherImportantNoteMutation_createTeacherImportantNote = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
+
+export type CreateTeacherImportantNoteMutation = { createTeacherImportantNote: CreateTeacherImportantNoteMutation_createTeacherImportantNote | null };
+
 
 export type CreateTeacherImportantNoteMutationVariables = Exact<{
   input: CreateTeacherNoteInput;
 }>;
 
+export type UpdateTeacherImportantNoteMutation_updateTeacherImportantNote = { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null };
 
-export type CreateTeacherImportantNoteMutation = { createTeacherImportantNote: { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null } | null };
+export type UpdateTeacherImportantNoteMutation = { updateTeacherImportantNote: UpdateTeacherImportantNoteMutation_updateTeacherImportantNote | null };
+
 
 export type UpdateTeacherImportantNoteMutationVariables = Exact<{
   id: string | number;
   input: UpdateTeacherNoteInput;
 }>;
 
+export type DeleteTeacherImportantNoteMutation = { deleteTeacherImportantNote: boolean | null };
 
-export type UpdateTeacherImportantNoteMutation = { updateTeacherImportantNote: { id: string | null, title: string | null, body: string | null, priority: number | null, startsAt: string | null, expiresAt: string | null } | null };
 
 export type DeleteTeacherImportantNoteMutationVariables = Exact<{
   id: string | number;
 }>;
 
+export type CreateTeacherMutation_createTeacher = { userId: string | null, id: string | null, name: string | null, email: string | null, phone: string | null, status: string | null, gender: Gender | null, timezoneDisplay: string | null };
 
-export type DeleteTeacherImportantNoteMutation = { deleteTeacherImportantNote: boolean | null };
+export type CreateTeacherMutation = { createTeacher: CreateTeacherMutation_createTeacher | null };
+
 
 export type CreateTeacherMutationVariables = Exact<{
   input: TeacherOnboardingInput;
 }>;
 
+export type TeacherAssignedStudentsQuery_teacherAssignedStudents_rows = { id: string | null, name: string | null, status: StudentStatus | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null };
 
-export type CreateTeacherMutation = { createTeacher: { userId: string | null, id: string | null, name: string | null, email: string | null, phone: string | null, status: string | null, gender: Gender | null, timezoneDisplay: string | null } | null };
+export type TeacherAssignedStudentsQuery_teacherAssignedStudents = { id: string | null, totalCount: number | null, rows: Array<TeacherAssignedStudentsQuery_teacherAssignedStudents_rows> | null };
+
+export type TeacherAssignedStudentsQuery = { teacherAssignedStudents: TeacherAssignedStudentsQuery_teacherAssignedStudents | null };
+
 
 export type TeacherAssignedStudentsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type TeacherOwnProfileQuery_teacherOwnProfile_displayAmount = { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null };
 
-export type TeacherAssignedStudentsQuery = { teacherAssignedStudents: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, name: string | null, status: StudentStatus | null, hoursPerWeek: number | null, classesRemaining: number | null, classesTotal: number | null }> | null } | null };
+export type TeacherOwnProfileQuery_teacherOwnProfile = { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, displayAmount: TeacherOwnProfileQuery_teacherOwnProfile_displayAmount | null };
+
+export type TeacherOwnProfileQuery = { teacherOwnProfile: TeacherOwnProfileQuery_teacherOwnProfile | null };
+
 
 export type TeacherOwnProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type TeacherAssignedClassesQuery_teacherAssignedClasses_rows_effectiveMeeting = { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null };
 
-export type TeacherOwnProfileQuery = { teacherOwnProfile: { id: string | null, name: string | null, email: string | null, phone: string | null, timezone: IanaTimezone | null, hourlyRate: string | null, rateCurrency: CurrencyCode | null, displayAmount: { id: string | null, amount: string | null, currency: CurrencyCode | null, stale: boolean | null } | null } | null };
+export type TeacherAssignedClassesQuery_teacherAssignedClasses_rows = { id: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: TeacherAssignedClassesQuery_teacherAssignedClasses_rows_effectiveMeeting | null };
+
+export type TeacherAssignedClassesQuery_teacherAssignedClasses = { id: string | null, totalCount: number | null, rows: Array<TeacherAssignedClassesQuery_teacherAssignedClasses_rows> | null };
+
+export type TeacherAssignedClassesQuery = { teacherAssignedClasses: TeacherAssignedClassesQuery_teacherAssignedClasses | null };
+
 
 export type TeacherAssignedClassesQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type TeachersQuery_teachers = { id: string | null, name: string | null, avatarUrl: string | null };
 
-export type TeacherAssignedClassesQuery = { teacherAssignedClasses: { id: string | null, totalCount: number | null, rows: Array<{ id: string | null, studentName: string | null, scheduledStartAt: string | null, scheduledEndAt: string | null, durationMinutes: number | null, executionState: ClassExecutionState | null, outcome: ClassOutcome | null, isFrozen: boolean | null, meetingJoinUrl: string | null, effectiveMeeting: { id: string | null, joinUrl: string | null, providerSlug: string | null, providerName: Partial<Record<'ar' | 'en', string>> | null, logoUrl: string | null, meetingId: string | null, source: EffectiveMeetingSource | null, configId: string | null, providerId: string | null, supportsAutoGeneration: boolean | null } | null }> | null } | null };
+export type TeachersQuery = { teachers: Array<TeachersQuery_teachers> | null };
+
 
 export type TeachersQueryVariables = Exact<{
   search: string;
   limit: number;
 }>;
 
+export type CreateGeneralUserMutation_createGeneralUser_user = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null };
 
-export type TeachersQuery = { teachers: Array<{ id: string | null, name: string | null, avatarUrl: string | null }> | null };
+export type CreateGeneralUserMutation_createGeneralUser = { id: string | null, assignedGroupSlug: string | null, user: CreateGeneralUserMutation_createGeneralUser_user | null };
+
+export type CreateGeneralUserMutation = { createGeneralUser: CreateGeneralUserMutation_createGeneralUser | null };
+
 
 export type CreateGeneralUserMutationVariables = Exact<{
   input: GeneralUserCreateInput;
 }>;
-
-
-export type CreateGeneralUserMutation = { createGeneralUser: { id: string | null, assignedGroupSlug: string | null, user: { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null } | null } | null };
 
 export type UserFieldsFragment = { id: string | null, name: string | null, email: string | null, emailVerifiedAt: string | null, createdAt: string | null, updatedAt: string | null, avatarUrl: string | null, phone: string | null, status: AccountStatus | null, permissions: Array<AppPermission> | null, role: string | null, notificationCount: number | null, teacherId: string | null, parentId: string | null, displayCurrency: CurrencyCode | null };
 
@@ -4532,55 +5068,72 @@ export type WhatsappAccountFieldsFragment = { id: string | null, wabaId: string 
 
 export type WhatsappTemplateSnapshotFieldsFragment = { id: string | null, name: string | null, language: string | null, status: WhatsappTemplateStatus | null, category: WhatsappTemplateCategory | null, lastSyncedAt: string | null };
 
+export type WhatsappAccountsQuery_whatsappAccounts = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: WhatsappQualityRating | null, portfolioMessagingLimitTier: WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
+
+export type WhatsappAccountsQuery = { whatsappAccounts: Array<WhatsappAccountsQuery_whatsappAccounts> | null };
+
+
 export type WhatsappAccountsQueryVariables = Exact<{ [key: string]: never; }>;
 
+export type IsUserWhatsappOptInQuery = { isUserWhatsappOptIn: boolean };
 
-export type WhatsappAccountsQuery = { whatsappAccounts: Array<{ id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: WhatsappQualityRating | null, portfolioMessagingLimitTier: WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null }> | null };
 
 export type IsUserWhatsappOptInQueryVariables = Exact<{
   userId: string;
 }>;
 
+export type CreateWhatsappAccountMutation_createWhatsappAccount = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: WhatsappQualityRating | null, portfolioMessagingLimitTier: WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type IsUserWhatsappOptInQuery = { isUserWhatsappOptIn: boolean };
+export type CreateWhatsappAccountMutation = { createWhatsappAccount: CreateWhatsappAccountMutation_createWhatsappAccount | null };
+
 
 export type CreateWhatsappAccountMutationVariables = Exact<{
   input: WhatsappAccountCreateInput;
 }>;
 
+export type UpdateWhatsappAccountMutation_updateWhatsappAccount = { id: string | null };
 
-export type CreateWhatsappAccountMutation = { createWhatsappAccount: { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: WhatsappQualityRating | null, portfolioMessagingLimitTier: WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null } | null };
+export type UpdateWhatsappAccountMutation = { updateWhatsappAccount: UpdateWhatsappAccountMutation_updateWhatsappAccount | null };
+
 
 export type UpdateWhatsappAccountMutationVariables = Exact<{
   id: string;
   input: WhatsappAccountUpdateInput;
 }>;
 
+export type DeleteWhatsappAccountMutation_deleteWhatsappAccount = { id: string | null };
 
-export type UpdateWhatsappAccountMutation = { updateWhatsappAccount: { id: string | null } | null };
+export type DeleteWhatsappAccountMutation = { deleteWhatsappAccount: DeleteWhatsappAccountMutation_deleteWhatsappAccount | null };
+
 
 export type DeleteWhatsappAccountMutationVariables = Exact<{
   id: string;
 }>;
 
+export type SetWhatsappAccessTokenMutation_setWhatsappAccessToken = { id: string | null };
 
-export type DeleteWhatsappAccountMutation = { deleteWhatsappAccount: { id: string | null } | null };
+export type SetWhatsappAccessTokenMutation = { setWhatsappAccessToken: SetWhatsappAccessTokenMutation_setWhatsappAccessToken | null };
+
 
 export type SetWhatsappAccessTokenMutationVariables = Exact<{
   id: string;
   accessToken: string;
 }>;
 
+export type SetWhatsappTwoStepPinMutation_setWhatsappTwoStepPin = { id: string | null };
 
-export type SetWhatsappAccessTokenMutation = { setWhatsappAccessToken: { id: string | null } | null };
+export type SetWhatsappTwoStepPinMutation = { setWhatsappTwoStepPin: SetWhatsappTwoStepPinMutation_setWhatsappTwoStepPin | null };
+
 
 export type SetWhatsappTwoStepPinMutationVariables = Exact<{
   id: string;
   twoStepPin: string;
 }>;
 
+export type SetUserWhatsappOptInMutation_setUserWhatsappOptIn = { id: string | null };
 
-export type SetWhatsappTwoStepPinMutation = { setWhatsappTwoStepPin: { id: string | null } | null };
+export type SetUserWhatsappOptInMutation = { setUserWhatsappOptIn: SetUserWhatsappOptInMutation_setUserWhatsappOptIn | null };
+
 
 export type SetUserWhatsappOptInMutationVariables = Exact<{
   userId: string;
@@ -4588,18 +5141,21 @@ export type SetUserWhatsappOptInMutationVariables = Exact<{
   source: string | null | undefined;
 }>;
 
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_accounts = { id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: WhatsappQualityRating | null, portfolioMessagingLimitTier: WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null };
 
-export type SetUserWhatsappOptInMutation = { setUserWhatsappOptIn: { id: string | null } | null };
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_templates = { id: string | null, name: string | null, language: string | null, status: WhatsappTemplateStatus | null, category: WhatsappTemplateCategory | null, lastSyncedAt: string | null };
+
+export type SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta = { id: string | null, accounts: Array<SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_accounts> | null, templates: Array<SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta_templates> | null };
+
+export type SyncWhatsappAccountsFromMetaMutation = { syncWhatsappAccountsFromMeta: SyncWhatsappAccountsFromMetaMutation_syncWhatsappAccountsFromMeta | null };
+
 
 export type SyncWhatsappAccountsFromMetaMutationVariables = Exact<{ [key: string]: never; }>;
 
+export type IsWhatsappConfiguredQuery = { isWhatsappConfigured: boolean };
 
-export type SyncWhatsappAccountsFromMetaMutation = { syncWhatsappAccountsFromMeta: { id: string | null, accounts: Array<{ id: string | null, wabaId: string | null, phoneNumberId: string | null, displayPhoneNumber: string | null, displayName: Partial<Record<'ar' | 'en', string>> | null, isActive: boolean | null, qualityRating: WhatsappQualityRating | null, portfolioMessagingLimitTier: WhatsappLimitTier | null, throughputLevel: string | null, maxPhoneNumbersPerBusiness: string | null, lastWebhookAt: string | null, createdAt: string | null, updatedAt: string | null }> | null, templates: Array<{ id: string | null, name: string | null, language: string | null, status: WhatsappTemplateStatus | null, category: WhatsappTemplateCategory | null, lastSyncedAt: string | null }> | null } | null };
 
 export type IsWhatsappConfiguredQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type IsWhatsappConfiguredQuery = { isWhatsappConfigured: boolean };
 
 export const SupportedCurrencyFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SupportedCurrencyFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"SupportedCurrency"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"symbol"}},{"kind":"Field","name":{"kind":"Name","value":"countryCode"}},{"kind":"Field","name":{"kind":"Name","value":"decimals"}},{"kind":"Field","name":{"kind":"Name","value":"sortOrder"}},{"kind":"Field","name":{"kind":"Name","value":"isActive"}}]}}]} as unknown as DocumentNode<SupportedCurrencyFieldsFragment, unknown>;
 export const PaymentMethodDetailsFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PaymentMethodDetailsFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PaymentMethodDetails"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"walletId"}},{"kind":"Field","name":{"kind":"Name","value":"phone"}},{"kind":"Field","name":{"kind":"Name","value":"paymentLinkId"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"onlineAccountId"}},{"kind":"Field","name":{"kind":"Name","value":"identifier"}},{"kind":"Field","name":{"kind":"Name","value":"iban"}},{"kind":"Field","name":{"kind":"Name","value":"bankName"}},{"kind":"Field","name":{"kind":"Name","value":"beneficiaryName"}},{"kind":"Field","name":{"kind":"Name","value":"swiftBic"}},{"kind":"Field","name":{"kind":"Name","value":"accountNumber"}},{"kind":"Field","name":{"kind":"Name","value":"routingNumber"}},{"kind":"Field","name":{"kind":"Name","value":"note"}}]}}]} as unknown as DocumentNode<PaymentMethodDetailsFieldsFragment, unknown>;

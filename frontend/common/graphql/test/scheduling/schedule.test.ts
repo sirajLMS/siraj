@@ -4,8 +4,7 @@ import {
   ClassType,
   type CreateRecurringClassInput,
   DayOfWeek,
-  IanaTimezone,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { executeDstBulkUpdateMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/dst-migration.documents";
 import {
   adminDashboardScheduleQueryDocument,
@@ -20,6 +19,7 @@ import {
   teacherWeeklyScheduleGridQueryDocument,
   teacherWorkloadMetricsQueryDocument,
 } from "@/frontend/common/graphql/sharedDocuments/scheduling/weekly-schedule.documents";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { resolveClassInstanceDashboardStatus } from "@/shared/lib/schedule/schedule-instance-dashboard-status";
 import {
   assertRecurringClassDenied,
@@ -65,7 +65,7 @@ function buildRecurringClassInput(
     subjectId: overrides.subjectId,
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
-    timezone: IanaTimezone.Utc,
+    timezone: IanaTimezone.UTC,
     days: [{ dayOfWeek: DayOfWeek.Monday, startTime: "10:00:00", isActive: true }],
     classType: ClassType.Regular,
     generateInstancesForWeeks: 1,

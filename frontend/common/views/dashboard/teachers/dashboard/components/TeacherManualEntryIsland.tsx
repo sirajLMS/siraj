@@ -2,7 +2,7 @@
 
 import { useMutation } from "@apollo/client/react";
 import { useCallback, useEffect } from "react";
-import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import type { TeacherDashboardViewLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";

@@ -3,7 +3,7 @@
 import { BlockOutlined, EventBusyOutlined, PersonOutlined, ScheduleOutlined } from "@mui/icons-material";
 import { alpha, Box, Button, Stack, type Theme, Tooltip, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherFutureScheduleQuery_teacherFutureSchedule_classes as FutureClass } from "@/frontend/common/graphql/generated/gql/graphql";
 import { classHref } from "@/frontend/common/utils/profileHref";
 import type {
   FutureClassCardScaffoldProps,

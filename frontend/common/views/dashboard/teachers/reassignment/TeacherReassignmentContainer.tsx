@@ -8,8 +8,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { LoadingState } from "@/frontend/common/components/ui";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import { type StudentByIdQuery, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   changeStudentStatusMutationDocument,
   reassignStudentTeacherMutationDocument,
@@ -47,7 +46,7 @@ const EMPTY_STUDENT: ReassignmentStudentData = {
   updatedAt: null,
 };
 
-type StudentQueryData = Operations.StudentByIdQuery;
+type StudentQueryData = StudentByIdQuery;
 
 function mapStudentData(studentData: StudentQueryData | undefined): ReassignmentStudentData | null {
   const s = studentData?.studentById;

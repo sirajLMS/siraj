@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useEffect } from "react";
-import { OverrideState, type User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { OverrideState } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   assignPermissionGroupToUserMutationDocument,
   bulkAssignUsersToGroupMutationDocument,
@@ -240,7 +240,7 @@ export function usePermissionManagementData() {
 
   return {
     isLoading: permissionsLoading || groupsLoading || usersLoading || mutations.store.isLoading,
-    users: (usersData?.users ?? []) as User[],
+    users: usersData?.users ?? [],
     ...handlers,
   };
 }

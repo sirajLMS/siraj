@@ -8,7 +8,7 @@ import {
   OnboardingPaymentMethodSection,
   UserEntityFieldsSection,
 } from "@/frontend/common/components/onboarding/sections";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql";
 import { MeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/MeetingConfigOnboardingSection";
 import { OfficialDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/OfficialDetailsSection";
 import { SalaryDetailsSection } from "@/frontend/common/views/dashboard/teachers/onboarding/components/SalaryDetailsSection";

@@ -4,7 +4,7 @@ import { Box, Button, FormControl, FormLabel, Grid, Typography } from "@mui/mate
 import { styled } from "@mui/material/styles";
 import { type Control, Controller, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui/container/SectionPanel";
-import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import type { StaffOnboardingLabels } from "@/shared/locale";
 

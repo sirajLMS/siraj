@@ -4,8 +4,7 @@ import { useMutation } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { AppPermission, type EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   deleteEnvConfigEntryMutationDocument,
   upsertEnvConfigEntryMutationDocument,

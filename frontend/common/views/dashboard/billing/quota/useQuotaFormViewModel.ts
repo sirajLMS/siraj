@@ -3,14 +3,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { type Control, type FieldErrors, type UseFormHandleSubmit, type UseFormReturn, useForm } from "react-hook-form";
-import type { QuotasQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   QuotaKind,
+  type QuotaQuery,
   type QuotaStatus,
   type QuotaSubmitInput,
+  type QuotasQuery,
   type QuotaUpdateInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { QuotaQuery } from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   createQuotaMutationDocument,
   quotaQueryDocument,

@@ -1,11 +1,15 @@
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ClassMeetingConfigsWithStatusQuery_classMeetingConfigs,
+  GenerateMeetingUrlMutation_generateMeetingUrl,
+  TestMeetingConnectionResultFieldsFragment,
+  UserMeetingConfigFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 // ============================================================================
 // Gap-only extensions over codegen types
 // ============================================================================
 // Types below use Pick/Omit/intersection over the canonical codegen types
-// (`@/frontend/common/graphql/generated/gql/graphql-types` and `/operations`).
+// (`@/frontend/common/graphql/generated/gql/graphql` and `/operations`).
 // Only genuinely-UI-only unions with no codegen equivalent are declared here.
 // See plan-review finding C3 (FIXED): no local re-declaration of codegen types.
 // ============================================================================
@@ -47,12 +51,12 @@ export type CredentialFormMode = "create" | "edit";
 // ---------------------------------------------------------------------------
 
 /**
- * Subset of {@link Types.ClassMeetingConfig} fields relevant to the
+ * Subset of {@link ClassMeetingConfig} fields relevant to the
  * class-meeting-config status UI — combined with the new meeting-URL-status
  * fields added by the prerequisite Pothos schema update.
  */
 export type ClassMeetingConfigWithStatus = Pick<
-  Types.ClassMeetingConfig,
+  ClassMeetingConfigsWithStatusQuery_classMeetingConfigs,
   "id" | "classInstanceId" | "meetingUrlStatus" | "meetingUrlExpiresAt" | "meetingUrlError"
 > & {
   /** Nested provider slug, resolved via `provider { slug }` — nullable in codegen. */
@@ -63,22 +67,24 @@ export type ClassMeetingConfigWithStatus = Pick<
  * Non-null extraction of the codegen `meetingUrlStatus` field so downstream
  * tasks can narrow `string | null` to the known UI union when non-null.
  */
-export type MeetingUrlStatusValue = NonNullable<Types.ClassMeetingConfig["meetingUrlStatus"]>;
+export type MeetingUrlStatusValue = NonNullable<
+  ClassMeetingConfigsWithStatusQuery_classMeetingConfigs["meetingUrlStatus"]
+>;
 
 /**
  * Shape of an existing user-meeting-config row as displayed in the profile
  * configs table. Extends the codegen fragment with the new status fields.
  */
 export type UserMeetingConfigRow = Pick<
-  Operations.UserMeetingConfigFieldsFragment,
+  UserMeetingConfigFieldsFragment,
   "id" | "providerId" | "label" | "isDefault" | "hasSecret" | "oauthTokenExpiresAt"
 > & {
   /** URL generation status — nullable until backend populates it. */
-  readonly meetingUrlStatus: Types.UserMeetingConfig["meetingUrlStatus"];
+  readonly meetingUrlStatus: ClassMeetingConfigsWithStatusQuery_classMeetingConfigs["meetingUrlStatus"];
   /** URL expiration datetime — nullable until backend populates it. */
-  readonly meetingUrlExpiresAt: Types.UserMeetingConfig["meetingUrlExpiresAt"];
+  readonly meetingUrlExpiresAt: ClassMeetingConfigsWithStatusQuery_classMeetingConfigs["meetingUrlExpiresAt"];
   /** URL generation error message — nullable until backend populates it. */
-  readonly meetingUrlError: Types.UserMeetingConfig["meetingUrlError"];
+  readonly meetingUrlError: ClassMeetingConfigsWithStatusQuery_classMeetingConfigs["meetingUrlError"];
   /** Provider slug resolved via nested `provider { slug }` selection. */
   readonly providerSlug: string | null;
 };
@@ -101,7 +107,7 @@ export interface ProviderEndpoint {
 /**
  * UI-only token metadata for the settings token-metadata dialog.
  * Fields are derived from the codegen `MeetingIntegrationConnectedAccount`
- * fragment (See {@link Operations.MeetingIntegrationConnectedAccountFieldsFragment}).
+ * fragment (See {@link MeetingIntegrationConnectedAccountFieldsFragment}).
  */
 export interface TokenMetadata {
   readonly issuedAt: string;
@@ -115,7 +121,7 @@ export interface TokenMetadata {
  * Maps codegen fragment fields to display-friendly shapes.
  */
 export type TestConnectionResult = Pick<
-  Operations.TestMeetingConnectionResultFieldsFragment,
+  TestMeetingConnectionResultFieldsFragment,
   "ok" | "latencyMs" | "errorCode" | "errorMessage"
 > & {
   readonly endpoint: string | null;
@@ -131,6 +137,6 @@ export type TestConnectionResult = Pick<
  * Used by the "preview URL" callout in the profile meeting-configs view.
  */
 export type GenerateMeetingUrlPreview = Pick<
-  Operations.GenerateMeetingUrlMutation_generateMeetingUrl_GenerateMeetingUrlResult,
+  GenerateMeetingUrlMutation_generateMeetingUrl,
   "joinUrl" | "meetingId" | "expiresAt"
 >;

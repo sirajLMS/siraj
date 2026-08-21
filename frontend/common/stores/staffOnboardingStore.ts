@@ -1,12 +1,12 @@
 "use client";
 
 import { create } from "zustand";
-import type { ManagerOnboardingResult } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CreateManagerMutation_createManager } from "@/frontend/common/graphql/generated/gql/graphql";
 
 interface StaffOnboardingState {
   readonly isSubmitting: boolean;
   readonly error: string | null;
-  readonly result: ManagerOnboardingResult | null;
+  readonly result: CreateManagerMutation_createManager | null;
   readonly reset: () => void;
 }
 

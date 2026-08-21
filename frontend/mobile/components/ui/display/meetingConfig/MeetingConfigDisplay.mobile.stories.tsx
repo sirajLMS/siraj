@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { MeetingConfigDisplayData as MobileMeetingConfigDisplayData } from "@/frontend/common/components/ui/display/meetingConfig/types";
-import { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { EffectiveMeetingSource } from "@/frontend/common/graphql/generated/gql/graphql";
 import { MOBILE_VIEWPORTS } from "@/frontend/common/stories";
 import { MobileMeetingConfigDisplay } from "@/frontend/mobile/components/ui/display/meetingConfig/MeetingConfigDisplay.mobile";
 

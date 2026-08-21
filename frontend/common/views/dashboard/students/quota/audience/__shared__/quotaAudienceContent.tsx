@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { Box, Stack, Typography } from "@mui/material";
 import type { ReactElement } from "react";
-import type { StudentQuotasQuery_studentQuotas_Quota } from "@/frontend/common/graphql/generated/gql/operations";
+import type { StudentQuotasQuery_studentQuotas } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   quotaLedgerQueryDocument,
   studentQuotasQueryDocument,
@@ -32,7 +32,7 @@ export function QuotaAudienceContent({ studentId, t }: Readonly<QuotaContentProp
     skip: !studentId,
   });
 
-  const quotas: StudentQuotasQuery_studentQuotas_Quota[] = quotasData?.studentQuotas ?? [];
+  const quotas: StudentQuotasQuery_studentQuotas[] = quotasData?.studentQuotas ?? [];
   const firstQuota = quotas[0] ?? null;
 
   const { data: ledgerData } = useQuery(quotaLedgerQueryDocument, {

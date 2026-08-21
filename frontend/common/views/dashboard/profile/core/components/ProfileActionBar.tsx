@@ -2,8 +2,8 @@
 
 import { Button, Stack } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type { ProfileActionBarLabels } from "@/frontend/common/views/dashboard/profile/core/types/profilePageClient.types";
+import { ProfileMode } from "@/shared/constants/profile.enum";
 import { useRouter } from "@/shared/i18n/navigation";
 
 type ProfileActionBarProps = {
@@ -16,7 +16,7 @@ type ProfileActionBarProps = {
 };
 
 export function ProfileActionBar({
-  mode = ProfileMode.View,
+  mode = ProfileMode.VIEW,
   editHref,
   cancelHref,
   onSave,
@@ -26,7 +26,7 @@ export function ProfileActionBar({
   const router = useRouter();
   const t = labels;
 
-  if (mode === ProfileMode.Edit) {
+  if (mode === ProfileMode.EDIT) {
     return (
       <Stack direction="row" spacing={1}>
         {cancelHref ? (

@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { IanaTimezone, StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { statusTrackingScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/schedule.documents";
 import { changeStudentStatusMutationDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-lifecycle.documents";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
@@ -27,7 +28,7 @@ async function fetchStatusTracking(
   return await authenticatedRequest(token, "query", statusTrackingScheduleQueryDocument, {
     date,
     search: search ?? null,
-    viewerTimezone: viewerTimezone ?? IanaTimezone.Utc,
+    viewerTimezone: viewerTimezone ?? IanaTimezone.UTC,
   });
 }
 
@@ -40,7 +41,7 @@ async function expectRoleDenied(role: string, date: string) {
   const token = await loginDemoUser(role);
   const result = await testClient.query({
     query: statusTrackingScheduleQueryDocument,
-    variables: { date, search: null, viewerTimezone: IanaTimezone.Utc },
+    variables: { date, search: null, viewerTimezone: IanaTimezone.UTC },
     context: { headers: { Authorization: `Bearer ${token}` } },
   });
 
@@ -179,7 +180,7 @@ describe("GraphQL: statusTrackingSchedule query", () => {
   });
 
   test("viewerTimezone parameter is accepted without error", async () => {
-    const data = await fetchStatusTracking(adminToken, testDate, null, IanaTimezone.AsiaRiyadh);
+    const data = await fetchStatusTracking(adminToken, testDate, null, IanaTimezone.Asia_Riyadh);
 
     expect(data.statusTrackingSchedule).toBeDefined();
     expect(Array.isArray(data.statusTrackingSchedule)).toBeTrue();

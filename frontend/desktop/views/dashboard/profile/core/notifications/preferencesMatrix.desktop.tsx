@@ -3,7 +3,7 @@
 import { Box, Switch, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { NotificationChannel, type NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel, type NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   CategoryRow,
   NotificationEventCategory,

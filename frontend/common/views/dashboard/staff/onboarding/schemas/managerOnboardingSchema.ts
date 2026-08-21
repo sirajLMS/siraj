@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CurrencyCode, ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 
 const MANAGER_ACCOUNT_TYPES = new Set<string>(Object.values(ManagerAccountType) as readonly string[]);

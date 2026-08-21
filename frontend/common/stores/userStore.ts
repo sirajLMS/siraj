@@ -1,10 +1,10 @@
 "use client";
 
 import { create } from "zustand";
-import type { AppPermission, CurrencyCode, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppPermission, CurrencyCode, MeQuery_me } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface UserState {
-  user: User | null;
+  user: MeQuery_me | null;
   name: string;
   role: string;
   avatarUrl: string;
@@ -13,7 +13,7 @@ export interface UserState {
   displayCurrency: CurrencyCode | null;
   /** Real account flag — stays true while simulating another role. */
   actorIsSuperAdmin: boolean;
-  setUser: (user: User | null) => void;
+  setUser: (user: MeQuery_me | null) => void;
   setActorIsSuperAdmin: (actorIsSuperAdmin: boolean) => void;
   hasPermission: (permission: AppPermission) => boolean;
 }

@@ -1,7 +1,7 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { UnpaidInvoicesAlertQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const unpaidInvoicesAlertQueryDocument: TypedDocumentNode<Operations.UnpaidInvoicesAlertQuery> = gql`
+export const unpaidInvoicesAlertQueryDocument: TypedDocumentNode<UnpaidInvoicesAlertQuery> = gql`
   query unpaidInvoicesAlert {
     unpaidInvoicesAlert {
       id

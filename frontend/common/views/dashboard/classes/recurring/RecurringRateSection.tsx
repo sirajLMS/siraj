@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { CurrencySelect } from "@/frontend/common/components/ui/input/currencySelect/CurrencySelect";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getCurrencyByCode, getCurrencySymbol } from "@/frontend/common/lib/currency";
 
 export interface RecurringRateSectionLabels {

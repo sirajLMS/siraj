@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { classInstanceQueryDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/class-session.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
 import {

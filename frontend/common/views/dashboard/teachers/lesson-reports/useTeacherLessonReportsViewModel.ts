@@ -2,8 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
-import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { PendingLessonReportsQuery } from "@/frontend/common/graphql/generated/gql/operations";
+import { LessonReportStatus, type PendingLessonReportsQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import { pendingLessonReportsQueryDocument } from "@/frontend/common/graphql/sharedDocuments/classes/lesson-report.documents";
 import type { TeacherLessonReportsLabelsBySection } from "@/frontend/common/views/dashboard/teachers/lesson-reports/types/teacherLessonReports.types";
 import { type LessonReportLabels, Translation, useAppLocale, useAppTranslation } from "@/shared/locale";

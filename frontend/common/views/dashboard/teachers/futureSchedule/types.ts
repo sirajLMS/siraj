@@ -1,14 +1,12 @@
-import type { FutureClass } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
-  TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote,
-  TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_supportContact_SupportContact,
-} from "@/frontend/common/graphql/generated/gql/operations";
+  TeacherFutureScheduleQuery_teacherFutureSchedule_classes,
+  TeacherFutureScheduleQuery_teacherFutureSchedule_importantNotes,
+  TeacherFutureScheduleQuery_teacherFutureSchedule_supportContact,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { TeacherFutureScheduleLabels } from "@/shared/locale/types/dashboard/teachers/futureSchedule";
 
-export type ImportantNoteItem =
-  TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_importantNotes_TeacherImportantNote;
-export type SupportContactData =
-  TeacherFutureScheduleQuery_teacherFutureSchedule_TeacherFutureSchedule_supportContact_SupportContact;
+export type ImportantNoteItem = TeacherFutureScheduleQuery_teacherFutureSchedule_importantNotes;
+export type SupportContactData = TeacherFutureScheduleQuery_teacherFutureSchedule_supportContact;
 
 export interface MiniCalendarDate {
   readonly num: number;
@@ -38,7 +36,7 @@ export interface JumpToDateHeaderProps {
 }
 
 export interface FutureClassCardProps {
-  readonly item: FutureClass;
+  readonly item: TeacherFutureScheduleQuery_teacherFutureSchedule_classes;
   readonly onRequestLeave?: () => void;
   readonly labels: TeacherFutureScheduleLabels;
 }
@@ -60,7 +58,7 @@ export interface SupportContactProps {
 }
 
 export interface FutureScheduleViewProps {
-  readonly classes: readonly FutureClass[];
+  readonly classes: readonly TeacherFutureScheduleQuery_teacherFutureSchedule_classes[];
   readonly leaveQuotaUsed: number;
   readonly leaveQuotaTotal: number;
   readonly totalClasses: number;

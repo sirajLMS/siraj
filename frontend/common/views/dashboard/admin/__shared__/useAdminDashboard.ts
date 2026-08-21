@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { useEffect, useRef, useState } from "react";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDashboardStore } from "@/frontend/common/stores/dashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

@@ -1,13 +1,13 @@
 import type {
   AppPermission,
   ClassExecutionState,
-  ClassInstanceDetail,
-  ClassInstanceStudentInfo,
-  ClassInstanceTeacherInfo,
+  ClassInstanceQuery_classInstance,
+  ClassInstanceQuery_classInstance_student,
+  ClassInstanceQuery_classInstance_teacher,
   ClassOutcome,
-  DailyScheduleList,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import type { TeacherFilterItem } from "@/frontend/common/types/shared.types";
+import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
 import type { NavIconKey } from "@/frontend/common/views/dashboard/config/navIconKeys";
 import type { DashboardNavigationLabels } from "@/shared/locale";
 
@@ -51,9 +51,9 @@ export interface NavGroup {
 export type ClassInstanceStatus = "active" | "scheduled" | "pending" | "completed" | "cancelled";
 
 // Re-export generated GraphQL types to replace local duplicates
-export type StudentInfo = ClassInstanceStudentInfo;
-export type TeacherInfo = ClassInstanceTeacherInfo;
-export type ClassInstance = ClassInstanceDetail;
+export type StudentInfo = ClassInstanceQuery_classInstance_student;
+export type TeacherInfo = ClassInstanceQuery_classInstance_teacher;
+export type ClassInstance = ClassInstanceQuery_classInstance;
 
 export interface PerformanceMetric {
   readonly key: string;
@@ -87,7 +87,7 @@ export interface ScheduleOverviewData {
   readonly teacherValue: string;
   readonly submitLabel: string;
   readonly teachers: readonly TeacherFilterItem[];
-  readonly rows: readonly DailyScheduleList[];
+  readonly rows: readonly DailyScheduleRow[];
   readonly headers: ScheduleOverviewDataHeaders;
   readonly statusLabels: ScheduleOverviewDataStatusLabels;
   readonly detailsLabel: string;

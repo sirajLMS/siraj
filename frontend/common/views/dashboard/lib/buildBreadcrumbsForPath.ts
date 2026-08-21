@@ -1,4 +1,4 @@
-import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { stripLocaleFromPath } from "@/frontend/common/views/dashboard/lib/stripLocaleFromPath";
 import type { NavItem } from "@/frontend/common/views/dashboard/types/dashboard";
 

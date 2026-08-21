@@ -1,12 +1,12 @@
 "use client";
 
 import { create } from "zustand";
-import type { ParentOnboardingResult } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CreateParentMutation_createParent } from "@/frontend/common/graphql/generated/gql/graphql";
 
 interface ParentOnboardingState {
   readonly isSubmitting: boolean;
   readonly error: string | null;
-  readonly result: ParentOnboardingResult | null;
+  readonly result: CreateParentMutation_createParent | null;
   readonly reset: () => void;
 }
 

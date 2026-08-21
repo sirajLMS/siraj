@@ -4,7 +4,6 @@ import { classExecutionFields } from "@/backend/graphql/pothos/scheduling/__shar
 import { classSessionMetricsFields } from "@/backend/graphql/pothos/scheduling/__shared__/classSessionMetricsFields";
 import {
   ClassExecutionStatePothosObject,
-  IanaTimezonePothosObject,
   LeaveRequestStatusPothosObject,
   RescheduleDateLabelPothosObject,
   StudentStatusPothosObject,
@@ -67,8 +66,8 @@ export const DailyScheduleListPothosObject = DailyScheduleListObjectRef.implemen
     teacher: t.expose("teacher", { type: DailyScheduleListUserItemObject }),
     courseName: t.exposeString("courseName", { nullable: true }),
     avatarUrl: t.exposeString("avatarUrl", { nullable: true }),
-    teacherTimezone: t.expose("teacherTimezone", { type: IanaTimezonePothosObject, nullable: true }),
-    studentTimezone: t.expose("studentTimezone", { type: IanaTimezonePothosObject, nullable: true }),
+    teacherTimezone: t.expose("teacherTimezone", { type: "IanaTimezone", nullable: true }),
+    studentTimezone: t.expose("studentTimezone", { type: "IanaTimezone", nullable: true }),
   }),
 });
 
@@ -189,7 +188,7 @@ gqlSchemaBuilder.queryField("statusTrackingSchedule", t =>
     args: {
       date: t.arg.string({ required: true, directives: { constraint: { maxLength: 20 } } }),
       search: t.arg.string({ required: false, directives: { constraint: { maxLength: 255 } } }),
-      viewerTimezone: t.arg({ type: IanaTimezonePothosObject, required: false }),
+      viewerTimezone: t.arg({ type: "IanaTimezone", required: false }),
     },
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;

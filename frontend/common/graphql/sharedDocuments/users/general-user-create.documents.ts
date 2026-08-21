@@ -1,11 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  CreateGeneralUserMutation,
+  CreateGeneralUserMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { UserFieldsFragmentDoc } from "@/frontend/common/graphql/sharedDocuments/users/userFields.documents";
 
 export const createGeneralUserMutationDocument: TypedDocumentNode<
-  Operations.CreateGeneralUserMutation,
-  Types.MutationCreateGeneralUserArgs
+  CreateGeneralUserMutation,
+  CreateGeneralUserMutationVariables
 > = gql`
   ${UserFieldsFragmentDoc}
   mutation CreateGeneralUser($input: GeneralUserCreateInput!) {

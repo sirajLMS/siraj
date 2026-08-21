@@ -1,8 +1,12 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  MarkNotificationReadMutation,
+  MarkNotificationReadMutationVariables,
+  MarkNotificationsReadMutation,
+  NotificationAlertsQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export const notificationAlertsQueryDocument: TypedDocumentNode<Operations.NotificationAlertsQuery> = gql`
+export const notificationAlertsQueryDocument: TypedDocumentNode<NotificationAlertsQuery> = gql`
   query notificationAlerts {
     notificationAlerts {
       id
@@ -25,15 +29,15 @@ export const notificationAlertsQueryDocument: TypedDocumentNode<Operations.Notif
   }
 `;
 
-export const markNotificationsReadMutationDocument: TypedDocumentNode<Operations.MarkNotificationsReadMutation> = gql`
+export const markNotificationsReadMutationDocument: TypedDocumentNode<MarkNotificationsReadMutation> = gql`
   mutation MarkNotificationsRead {
     markNotificationsRead
   }
 `;
 
 export const markNotificationReadMutationDocument: TypedDocumentNode<
-  Operations.MarkNotificationReadMutation,
-  Types.MutationMarkNotificationReadArgs
+  MarkNotificationReadMutation,
+  MarkNotificationReadMutationVariables
 > = gql`
   mutation MarkNotificationRead($deliveryId: ID!) {
     markNotificationRead(deliveryId: $deliveryId)

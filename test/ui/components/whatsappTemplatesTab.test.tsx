@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react
 
 expect.extend(matchers);
 
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { TemplatesTabContent } from "@/frontend/common/views/dashboard/settings/whatsapp/tabs/shared/TemplatesTabContent";
 import type { WhatsappSettingsLabels } from "@/frontend/common/views/dashboard/settings/whatsapp/types/whatsappSettingsTypes";
 import type { AppLocale } from "@/shared/locale/AppLocale";

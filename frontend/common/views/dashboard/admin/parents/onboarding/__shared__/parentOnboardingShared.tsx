@@ -7,7 +7,7 @@ import {
   OnboardingPaymentMethodSection,
   UserEntityFieldsSection,
 } from "@/frontend/common/components/onboarding/sections";
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql";
 import { FeesContractSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/FeesContractSection";
 import { ParentExtensionSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentExtensionSection";
 import { ParentMeetingConfigOnboardingSection } from "@/frontend/common/views/dashboard/admin/parents/onboarding/ParentMeetingConfigOnboardingSection";

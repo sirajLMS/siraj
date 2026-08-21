@@ -5,14 +5,11 @@ import {
   type SvgIconComponent,
   VerifiedOutlined,
 } from "@mui/icons-material";
-import type { TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics } from "@/frontend/common/graphql/generated/gql/operations";
+import type { TeacherDashboardQuery_teacherDashboard_metrics } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MetricItem, MetricItemVariant } from "@/frontend/common/types/shared.types";
 import type { TeacherDashboardLabels } from "@/frontend/common/views/dashboard/teachers/dashboard/types/teacherDashboardLabels";
 
-type RawMetrics =
-  | TeacherDashboardQuery_teacherDashboard_TeacherDashboard_metrics_TeacherDashboardMetrics
-  | null
-  | undefined;
+type RawMetrics = TeacherDashboardQuery_teacherDashboard_metrics | null | undefined;
 
 interface TeacherMetricDefinition {
   readonly key: string;

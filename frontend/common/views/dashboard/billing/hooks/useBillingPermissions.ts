@@ -1,6 +1,6 @@
 "use client";
 
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useImpersonation } from "@/frontend/common/hooks/useImpersonation";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 

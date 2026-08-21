@@ -6,7 +6,7 @@ import {
   AppPermission,
   type ClassExecutionState,
   type ClassOutcome,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { useScheduleColumns } from "@/frontend/common/views/dashboard/admin/home/components/useScheduleColumns";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";

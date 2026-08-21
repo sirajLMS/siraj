@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
 interface TeacherReassignmentState {
   readonly selectedTeacherId: string;

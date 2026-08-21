@@ -6,11 +6,7 @@ import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { PrimaryPageAction, SectionPanel } from "@/frontend/common/components/ui";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog/BaseDeleteDialog";
-import {
-  AppPermission,
-  FxProvider,
-  FxProviderConfigSource,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, FxProvider, FxProviderConfigSource } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   fxProviderConfigQueryDocument,
   updateFxProviderMutationDocument,

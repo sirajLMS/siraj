@@ -2,22 +2,22 @@
 
 import { DeleteOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
-import { AvailabilityStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import type {
   BookItemCardProps,
   BooksAndBagsLabels,
 } from "@/frontend/common/views/dashboard/resources/books-and-bags/booksAndBags.types";
 import { BookItemStatusBadge } from "@/frontend/common/views/dashboard/resources/books-and-bags/components/bookItemBadge";
 import { MobileCardListItem } from "@/frontend/mobile/components/ui/card";
+import { AvailabilityStatus } from "@/shared/constants/availability-status.enum";
 
 const statusLabelMap: Record<AvailabilityStatus, keyof BooksAndBagsLabels> = {
-  [AvailabilityStatus.Available]: "statusAvailable",
-  [AvailabilityStatus.OutOfStock]: "statusOutOfStock",
+  [AvailabilityStatus.AVAILABLE]: "statusAvailable",
+  [AvailabilityStatus.OUT_OF_STOCK]: "statusOutOfStock",
 };
 
 const statusPaletteKey: Record<AvailabilityStatus, "active" | "blocked"> = {
-  [AvailabilityStatus.Available]: "active",
-  [AvailabilityStatus.OutOfStock]: "blocked",
+  [AvailabilityStatus.AVAILABLE]: "active",
+  [AvailabilityStatus.OUT_OF_STOCK]: "blocked",
 };
 
 export function BookItemCardMobile({ book, labels, onDelete }: Readonly<BookItemCardProps>) {

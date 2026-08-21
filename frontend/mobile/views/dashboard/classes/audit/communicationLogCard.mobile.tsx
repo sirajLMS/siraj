@@ -2,7 +2,7 @@
 
 import { alpha, Box, Button, CircularProgress } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import type { CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { GroupClassAuditQuery_groupClassAudit_communications as CommunicationLogEntry } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CommunicationLogCardProps } from "@/frontend/common/views/dashboard/classes/audit/communicationLogCard.types";
 import { StyledSectionTitle } from "@/frontend/common/views/dashboard/classes/audit/components";
 import {

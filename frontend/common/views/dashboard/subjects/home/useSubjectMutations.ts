@@ -5,7 +5,7 @@ import type {
   ClassCategoryUpdateInput,
   ClassSubjectCreateInput,
   ClassSubjectUpdateInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   classCategoriesQueryDocument,
   createClassCategoryMutationDocument,

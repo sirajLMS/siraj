@@ -1,7 +1,8 @@
 "use client";
 
-import { AppPermission, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 import type { ProfileFieldGroupKey } from "@/shared/constants/profile-field-groups";
 import { profileFieldGroupGraphqlPermission } from "@/shared/lib/field-group-permission-key";
 
@@ -23,17 +24,17 @@ const resolvePermission = (
 
 export function useProfileFieldAccess(options: UseProfileFieldAccessOptions = {}) {
   const hasPermission = useUserStore(state => state.hasPermission);
-  const scope = options.scope ?? ProfileScope.Own;
+  const scope = options.scope ?? ProfileScope.OWN;
 
   const canView = (groupKey: ProfileFieldGroupKey): boolean => {
     const permission =
-      scope === ProfileScope.Own ? resolvePermission(groupKey, "view_own") : resolvePermission(groupKey, "view_other");
+      scope === ProfileScope.OWN ? resolvePermission(groupKey, "view_own") : resolvePermission(groupKey, "view_other");
     return permission ? hasPermission(permission) : false;
   };
 
   const canEdit = (groupKey: ProfileFieldGroupKey): boolean => {
     const permission =
-      scope === ProfileScope.Own ? resolvePermission(groupKey, "edit_own") : resolvePermission(groupKey, "edit_other");
+      scope === ProfileScope.OWN ? resolvePermission(groupKey, "edit_own") : resolvePermission(groupKey, "edit_other");
     return permission ? hasPermission(permission) : false;
   };
 
@@ -43,7 +44,7 @@ export function useProfileFieldAccess(options: UseProfileFieldAccessOptions = {}
 
   const canEditStatus = (): boolean => {
     const permission =
-      scope === ProfileScope.Own
+      scope === ProfileScope.OWN
         ? resolvePermission("core_status", "edit_own")
         : resolvePermission("core_status", "edit_other");
     return permission ? hasPermission(permission) : false;

@@ -3,7 +3,7 @@ import { alpha } from "@mui/material/styles";
 import {
   computeSessionStatus,
   SessionStatus,
-  type StatusTrackingRow,
+  type StatusTrackingScheduleRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 
 export const STATUS_ROW_SX: SxProps<Theme> = {
@@ -15,7 +15,7 @@ export const STATUS_ROW_SX: SxProps<Theme> = {
   },
 };
 
-export function statusRowClassName(row: StatusTrackingRow): string {
+export function statusRowClassName(row: StatusTrackingScheduleRow): string {
   return computeSessionStatus(row.studentStatus, row.isFrozen, row.executionState) === SessionStatus.SUSPENDED_PENDING
     ? "status-row-suspended"
     : "";

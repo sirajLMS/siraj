@@ -1,13 +1,20 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  DeactivateParentMutation,
+  DeactivateParentMutationVariables,
+  ParentAssociatedStudentsQuery,
+  ParentAssociatedStudentsQueryVariables,
+  ParentProfileQuery,
+  ParentProfileQueryVariables,
+  ReactivateParentMutation,
+  ReactivateParentMutationVariables,
+  UpdateStudentQuotaMutation,
+  UpdateStudentQuotaMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 // ─── Query: parentProfile ────────────────────────────────────────────────────
 
-export const parentProfileQueryDocument: TypedDocumentNode<
-  Operations.ParentProfileQuery,
-  Types.QueryParentProfileArgs
-> = gql`
+export const parentProfileQueryDocument: TypedDocumentNode<ParentProfileQuery, ParentProfileQueryVariables> = gql`
   query ParentProfile($parentId: String!) {
     parentProfile(parentId: $parentId) {
       id
@@ -42,8 +49,8 @@ export const parentProfileQueryDocument: TypedDocumentNode<
 // ─── Query: parentAssociatedStudents ─────────────────────────────────────────
 
 export const parentAssociatedStudentsQueryDocument: TypedDocumentNode<
-  Operations.ParentAssociatedStudentsQuery,
-  Types.QueryParentAssociatedStudentsArgs
+  ParentAssociatedStudentsQuery,
+  ParentAssociatedStudentsQueryVariables
 > = gql`
   query ParentAssociatedStudents($parentId: String!) {
     parentAssociatedStudents(parentId: $parentId) {
@@ -67,8 +74,8 @@ export const parentAssociatedStudentsQueryDocument: TypedDocumentNode<
 // ─── Mutation: deactivateParent ──────────────────────────────────────────────
 
 export const deactivateParentMutationDocument: TypedDocumentNode<
-  Operations.DeactivateParentMutation,
-  Types.MutationDeactivateParentArgs
+  DeactivateParentMutation,
+  DeactivateParentMutationVariables
 > = gql`
   mutation DeactivateParent($parentId: String!) {
     deactivateParent(parentId: $parentId) {
@@ -80,8 +87,8 @@ export const deactivateParentMutationDocument: TypedDocumentNode<
 `;
 
 export const reactivateParentMutationDocument: TypedDocumentNode<
-  Operations.ReactivateParentMutation,
-  Types.MutationReactivateParentArgs
+  ReactivateParentMutation,
+  ReactivateParentMutationVariables
 > = gql`
   mutation ReactivateParent($parentId: String!) {
     reactivateParent(parentId: $parentId) {
@@ -95,8 +102,8 @@ export const reactivateParentMutationDocument: TypedDocumentNode<
 // ─── Mutation: updateStudentQuota ─────────────────────────────────────────────
 
 export const updateStudentQuotaMutationDocument: TypedDocumentNode<
-  Operations.UpdateStudentQuotaMutation,
-  Types.MutationUpdateStudentQuotaArgs
+  UpdateStudentQuotaMutation,
+  UpdateStudentQuotaMutationVariables
 > = gql`
   mutation UpdateStudentQuota(
     $studentId: String!

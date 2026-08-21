@@ -5,18 +5,14 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 
 import type * as React from "react";
-import {
-  fromGraphqlIanaTimezone,
-  getTimezoneEmoji,
-  getTimezonePathLabel,
-  getTimezoneSelectLabel,
-} from "@/frontend/common/lib/timezone";
+import { getTimezoneEmoji, getTimezonePathLabel, getTimezoneSelectLabel } from "@/frontend/common/lib/timezone";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { MobileLocaleEmoji } from "@/frontend/mobile/components/ui/display/localeEmoji/localeEmoji.mobile";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type MobileTimezoneDisplayProps = {
-  readonly timezone?: string | null;
+  readonly timezone?: IanaTimezone | null;
   readonly showOffset?: boolean;
   readonly fallback?: string;
   readonly typographyVariant?: NonNullable<TypographyProps["variant"]>;
@@ -48,20 +44,15 @@ export const MobileTimezoneDisplay: React.FC<MobileTimezoneDisplayProps> = ({
   let content: React.ReactNode;
   if (!timezone) {
     content = fallback ?? null;
+  } else if (displayType === "iconOnly") {
+    content = <MobileLocaleEmoji emoji={getTimezoneEmoji(timezone)} sx={sx} />;
   } else {
-    const normalizedTimezone = timezone.includes("/") ? timezone : fromGraphqlIanaTimezone(timezone);
-    if (displayType === "iconOnly") {
-      content = <MobileLocaleEmoji emoji={getTimezoneEmoji(normalizedTimezone)} sx={sx} />;
-    } else {
-      const display = showOffset
-        ? getTimezoneSelectLabel(normalizedTimezone, locale)
-        : getTimezonePathLabel(normalizedTimezone, locale);
-      content = (
-        <Box component="span" sx={mergeSx({ typography: typographyVariant, whiteSpace: "nowrap" }, sx)}>
-          {display}
-        </Box>
-      );
-    }
+    const display = showOffset ? getTimezoneSelectLabel(timezone, locale) : getTimezonePathLabel(timezone, locale);
+    content = (
+      <Box component="span" sx={mergeSx({ typography: typographyVariant, whiteSpace: "nowrap" }, sx)}>
+        {display}
+      </Box>
+    );
   }
   return content;
 };

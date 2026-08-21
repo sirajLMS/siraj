@@ -5,9 +5,8 @@ import {
   ClassType,
   type CreateRecurringClassInput,
   DayOfWeek,
-  IanaTimezone,
   type ManagerAccountType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   demoLoginMutationDocument,
   loginMutationDocument,
@@ -29,6 +28,7 @@ import {
 } from "@/frontend/common/graphql/sharedDocuments/shared/test-helper.documents";
 import { createManagerMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/staff-onboarding.documents";
 import { createTeacherManualClassEntryMutationDocument } from "@/frontend/common/graphql/sharedDocuments/teachers/teacher-dashboard.documents";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { DEFAULT_SEED_ADMIN_PASSWORD } from "@/shared/demo-users";
 import { testClient } from "@/test/helpers/test-client";
 import { isTestServerRunning } from "@/test/helpers/test-server";
@@ -403,7 +403,7 @@ export async function fetchFirstClassInstanceId(token: string, date: string): Pr
     subjectId,
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
-    timezone: IanaTimezone.Utc,
+    timezone: IanaTimezone.UTC,
     days: [{ dayOfWeek, startTime: "10:00:00", isActive: true }],
     classType: ClassType.Regular,
     generateInstancesForWeeks: 2,
@@ -687,7 +687,7 @@ export async function provisionTestManager(
         accountType,
         phone: null,
         displayCurrency: null,
-        timezone: IanaTimezone.Utc,
+        timezone: IanaTimezone.UTC,
       },
     },
     context: { headers: { Authorization: `Bearer ${superAdminToken}` } },
@@ -787,7 +787,7 @@ export async function assertRecurringClassDenied(
     subjectId,
     durationMinutes: 60,
     defaultStartTime: "10:00:00",
-    timezone: IanaTimezone.Utc,
+    timezone: IanaTimezone.UTC,
     days,
     classType: ClassType.Regular,
     generateInstancesForWeeks: 4,

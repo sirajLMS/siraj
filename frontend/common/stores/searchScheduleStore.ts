@@ -6,10 +6,10 @@ import { persist } from "zustand/middleware";
 import {
   type AvailabilitySearchInput,
   AvailabilitySearchSortBy,
-  type AvailabilitySearchTeacher,
   Gender,
-  type TeacherAvailabilityGap,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  type SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers,
+  type SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers_gaps,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const DATE_FILTER_FORMAT = "yyyy-MM-dd";
 const DEFAULT_PAGE_SIZE = 10;
@@ -26,7 +26,7 @@ export interface SearchScheduleTeacherOption {
 // gaps). Kept in the store so the drawer state survives tier switches. Nullable to structurally
 // satisfy SearchScheduleResultItem's optional-null field shapes from the GraphQL layer.
 export type SearchScheduleGapItem = Pick<
-  TeacherAvailabilityGap,
+  SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers_gaps,
   "id" | "teacherId" | "teacherName" | "teacherGender" | "calendarDate" | "gapStartTime" | "gapEndTime"
 > & {
   readonly dayOfWeek: string | null;
@@ -34,7 +34,10 @@ export type SearchScheduleGapItem = Pick<
 };
 
 export type SearchScheduleMonthDrawerTeacher = Omit<
-  Pick<AvailabilitySearchTeacher, "id" | "name" | "gender" | "timezone" | "availableDaysCount" | "gaps">,
+  Pick<
+    SearchTeacherAvailabilityQuery_searchTeacherAvailability_teachers,
+    "id" | "name" | "gender" | "timezone" | "availableDaysCount" | "gaps"
+  >,
   "gender" | "timezone" | "gaps"
 > & {
   readonly gender: string | null;

@@ -13,14 +13,11 @@ import {
   type SvgIconComponent,
   ThumbDownOutlined,
 } from "@mui/icons-material";
-import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics } from "@/frontend/common/graphql/generated/gql/operations";
+import type { AdminDashboardScheduleQuery_adminDashboardSchedule_metrics } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MetricItem, MetricItemVariant } from "@/frontend/common/types/shared.types";
 import type { AdminDashboardLabels } from "@/shared/locale";
 
-export type RawMetrics =
-  | AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_metrics_DailyScheduleMetrics
-  | null
-  | undefined;
+export type RawMetrics = AdminDashboardScheduleQuery_adminDashboardSchedule_metrics | null | undefined;
 
 interface AdminMetricDefinition {
   readonly key: string;

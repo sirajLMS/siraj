@@ -9,8 +9,6 @@ import type {
 } from "@/frontend/common/components/ui/dialog/types/createRecurringClassDialogShared.types";
 import { QuotaAutocomplete } from "@/frontend/common/components/ui/input/quotaSelect";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
 import { useCreateRecurringClassDialogProps } from "@/frontend/common/views/dashboard/teachers/schedule/weekly/components/__shared__/useCreateRecurringClassDialogProps";
 import type {
   CreateRecurringClassDialogProps,
@@ -58,10 +56,8 @@ function DesktopTimezoneSelect({
 }: Readonly<CreateRecurringClassTimezoneSelectSlotProps>) {
   return (
     <TimezoneSelect
-      value={value ? toGraphqlIanaTimezone(value) : null}
-      onChangeAction={(timezone: IanaTimezone | null) => {
-        onChangeAction(timezone ? fromGraphqlIanaTimezone(timezone) : "");
-      }}
+      value={value}
+      onChangeAction={onChangeAction}
       label={label}
       fullWidth={fullWidth}
       disabled={disabled}

@@ -5,12 +5,14 @@ import { AvatarGroup, Box, Tooltip, Typography } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { ComponentType, ReactNode } from "react";
 import type { BaseAvatarVariant } from "@/frontend/common/components/ui/avatar/BaseAvatar";
+import { toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { AvailabilityInsightsLayout } from "@/frontend/common/views/dashboard/teachers/availability/components/availabilityInsightsLayout";
 import type {
   AvailabilityInsightsProps,
   InsightCardProps,
 } from "@/frontend/common/views/dashboard/teachers/availability/types";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export interface AvailabilityInsightsSharedStyleOptions {
   readonly cardMinHeight: number;
@@ -34,7 +36,7 @@ export interface AvailabilityInsightsSharedOptions extends AvailabilityInsightsS
     readonly sx?: SxProps<Theme>;
     readonly children?: ReactNode;
   }>;
-  readonly TimezoneDisplayComponent: ComponentType<{ readonly timezone?: string | null }>;
+  readonly TimezoneDisplayComponent: ComponentType<{ readonly timezone?: IanaTimezone | null }>;
 }
 
 export interface AvailabilityInsightsSharedProps extends Readonly<AvailabilityInsightsProps> {
@@ -136,7 +138,12 @@ function TimezoneInsight({
         })}
       >
         {timezones.map((tz, index) => (
-          <Tooltip key={tz} title={<options.TimezoneDisplayComponent timezone={tz} />} arrow describeChild>
+          <Tooltip
+            key={tz}
+            title={<options.TimezoneDisplayComponent timezone={toIanaTimezoneOrNull(tz)} />}
+            arrow
+            describeChild
+          >
             <options.AvatarComponent
               size={options.avatarSize}
               sx={theme => ({

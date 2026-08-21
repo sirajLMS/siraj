@@ -1,10 +1,16 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  RecordCreditPurchaseMutation,
+  RecordCreditPurchaseMutationVariables,
+  StudentCreditBalanceQuery,
+  StudentCreditBalanceQueryVariables,
+  StudentCreditTransactionsQuery,
+  StudentCreditTransactionsQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const studentCreditBalanceQueryDocument: TypedDocumentNode<
-  Operations.StudentCreditBalanceQuery,
-  Types.QueryStudentCreditBalanceArgs
+  StudentCreditBalanceQuery,
+  StudentCreditBalanceQueryVariables
 > = gql`
   query StudentCreditBalance($studentId: ID!) {
     studentCreditBalance(studentId: $studentId) {
@@ -17,8 +23,8 @@ export const studentCreditBalanceQueryDocument: TypedDocumentNode<
 `;
 
 export const studentCreditTransactionsQueryDocument: TypedDocumentNode<
-  Operations.StudentCreditTransactionsQuery,
-  Types.QueryStudentCreditTransactionsArgs
+  StudentCreditTransactionsQuery,
+  StudentCreditTransactionsQueryVariables
 > = gql`
   query StudentCreditTransactions($studentId: ID!, $paginationArgs: PaginationArgs) {
     studentCreditTransactions(studentId: $studentId, paginationArgs: $paginationArgs) {
@@ -38,8 +44,8 @@ export const studentCreditTransactionsQueryDocument: TypedDocumentNode<
 `;
 
 export const recordCreditPurchaseMutationDocument: TypedDocumentNode<
-  Operations.RecordCreditPurchaseMutation,
-  Types.MutationRecordCreditPurchaseArgs
+  RecordCreditPurchaseMutation,
+  RecordCreditPurchaseMutationVariables
 > = gql`
   mutation RecordCreditPurchase($studentId: ID!, $hours: Int!, $notes: String) {
     recordCreditPurchase(studentId: $studentId, hours: $hours, notes: $notes) {

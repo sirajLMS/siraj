@@ -1,5 +1,7 @@
-import { PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { UserPaymentMethodFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  PaymentDirection,
+  type UserPaymentMethodFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { getPaymentMethodTypeLabel, type PaymentMethodLabelResolver } from "@/frontend/common/lib/payment-method";
 
 function isPayinCapable(direction: PaymentDirection | null | undefined): boolean {

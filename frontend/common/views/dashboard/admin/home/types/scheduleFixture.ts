@@ -1,9 +1,6 @@
-import type {
-  ClassExecutionState,
-  ClassOutcome,
-  IanaTimezone,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { DailyScheduleRow } from "@/frontend/common/views/dashboard/admin/home/types/schedule";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export interface DailyScheduleRowOverrides {
   readonly id: string;
@@ -17,7 +14,6 @@ export interface DailyScheduleRowOverrides {
   readonly executionState: ClassExecutionState;
   readonly student: { readonly id: string; readonly name: string; readonly avatarUrl: string | null };
   readonly teacher: { readonly id: string; readonly name: string; readonly avatarUrl: string | null };
-  readonly status?: ClassExecutionState | null;
   readonly avatarUrl?: string | null;
   readonly courseName?: string | null;
   readonly teacherTimezone?: IanaTimezone | null;
@@ -36,7 +32,6 @@ export function createDailyScheduleRow(overrides: DailyScheduleRowOverrides): Da
     duration: overrides.duration,
     scheduledStartAt: overrides.scheduledStartAt,
     scheduledEndAt: overrides.scheduledEndAt,
-    status: overrides.status ?? null,
     outcome: overrides.outcome,
     executionState: overrides.executionState,
     avatarUrl: overrides.avatarUrl ?? null,

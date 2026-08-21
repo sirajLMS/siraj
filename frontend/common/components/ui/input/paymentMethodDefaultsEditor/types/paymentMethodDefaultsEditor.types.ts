@@ -1,7 +1,7 @@
 // NEW FOR PLAN v5 (lifted from frontend/mobile/components/ui/input/paymentMethodDefaultsEditor/paymentMethodDefaultsEditor.types.ts)
 
 import type { PaymentMethodRow } from "@/frontend/common/components/ui/display/paymentMethod/types";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import type { LocalizedString } from "@/shared/types";
 

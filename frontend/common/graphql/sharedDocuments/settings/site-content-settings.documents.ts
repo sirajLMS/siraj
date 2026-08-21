@@ -1,6 +1,15 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  DeleteSiteContentMutation,
+  DeleteSiteContentMutationVariables,
+  SiteContentEntriesQuery,
+  SiteContentEntryQuery,
+  SiteContentEntryQueryVariables,
+  UpdateSiteContentPublishStateMutation,
+  UpdateSiteContentPublishStateMutationVariables,
+  UpsertSiteContentMutation,
+  UpsertSiteContentMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const SITE_CONTENT_ENTRY_FIELDS = gql`
   fragment SiteContentEntryFields on SiteContentEntry {
@@ -16,7 +25,7 @@ const SITE_CONTENT_ENTRY_FIELDS = gql`
   }
 `;
 
-export const siteContentEntriesQueryDocument: TypedDocumentNode<Operations.SiteContentEntriesQuery> = gql`
+export const siteContentEntriesQueryDocument: TypedDocumentNode<SiteContentEntriesQuery> = gql`
   ${SITE_CONTENT_ENTRY_FIELDS}
   query siteContentEntries {
     siteContentEntries {
@@ -25,10 +34,8 @@ export const siteContentEntriesQueryDocument: TypedDocumentNode<Operations.SiteC
   }
 `;
 
-export const siteContentEntryQueryDocument: TypedDocumentNode<
-  Operations.SiteContentEntryQuery,
-  Types.QuerySiteContentEntryArgs
-> = gql`
+export const siteContentEntryQueryDocument: TypedDocumentNode<SiteContentEntryQuery, SiteContentEntryQueryVariables> =
+  gql`
   ${SITE_CONTENT_ENTRY_FIELDS}
   query siteContentEntry($id: ID!) {
     siteContentEntry(id: $id) {
@@ -38,8 +45,8 @@ export const siteContentEntryQueryDocument: TypedDocumentNode<
 `;
 
 export const upsertSiteContentMutationDocument: TypedDocumentNode<
-  Operations.UpsertSiteContentMutation,
-  Types.MutationUpsertSiteContentArgs
+  UpsertSiteContentMutation,
+  UpsertSiteContentMutationVariables
 > = gql`
   ${SITE_CONTENT_ENTRY_FIELDS}
   mutation upsertSiteContent($input: SiteContentUpsertInput!) {
@@ -50,8 +57,8 @@ export const upsertSiteContentMutationDocument: TypedDocumentNode<
 `;
 
 export const updateSiteContentPublishStateMutationDocument: TypedDocumentNode<
-  Operations.UpdateSiteContentPublishStateMutation,
-  Types.MutationUpdateSiteContentPublishStateArgs
+  UpdateSiteContentPublishStateMutation,
+  UpdateSiteContentPublishStateMutationVariables
 > = gql`
   ${SITE_CONTENT_ENTRY_FIELDS}
   mutation updateSiteContentPublishState($id: ID!, $isPublished: Boolean!) {
@@ -62,8 +69,8 @@ export const updateSiteContentPublishStateMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteSiteContentMutationDocument: TypedDocumentNode<
-  Operations.DeleteSiteContentMutation,
-  Types.MutationDeleteSiteContentArgs
+  DeleteSiteContentMutation,
+  DeleteSiteContentMutationVariables
 > = gql`
   mutation deleteSiteContent($id: ID!) {
     deleteSiteContent(id: $id)

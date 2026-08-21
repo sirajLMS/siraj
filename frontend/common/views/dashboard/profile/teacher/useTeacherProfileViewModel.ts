@@ -2,36 +2,35 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useState } from "react";
-import {
-  type AccountStatus,
-  type CurrencyCode,
-  type Gender,
-  type ProfileMode,
-  ProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AccountStatus,
+  CurrencyCode,
+  Gender,
+  ProfileByUserIdQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
 import { isTeacherNationalIdComplete } from "@/frontend/common/lib/profileCompletion";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   TeacherProfileViewLabels,
   TeacherViewData,
 } from "@/frontend/common/views/dashboard/profile/teacher/sections/teacherProfileTypes";
+import { type ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { useRouter } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
 
 function buildEditSource(scope: ProfileScope, profile: ProfileData | null | undefined): TeacherViewData | null {
   if (!profile) {
     return null;
   }
-  return scope === ProfileScope.Own ? profile.teacherOwnProfile : profile.teacherAdminProfile;
+  return scope === ProfileScope.OWN ? profile.teacherOwnProfile : profile.teacherAdminProfile;
 }
 
 const onTabChange = (_tab: string) => {
@@ -105,7 +104,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
   const labels: TeacherProfileViewLabels = { base, teacher, dashboard, errors };
 
   const { scope, mode, targetUserId, activeTab: _activeTab = "profile", forceComplete = false } = props;
-  const isAdminScope = scope === ProfileScope.Other;
+  const isAdminScope = scope === ProfileScope.OTHER;
   const activeTab = _activeTab;
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
@@ -141,7 +140,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
               phone: formData.phone || null,
               nationalId: formData.nationalId || null,
               nationality: formData.nationality || null,
-              timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
+              timezone: formData.timezone ? toIanaTimezone(formData.timezone) : null,
             },
           },
         },
@@ -185,7 +184,7 @@ export function useTeacherProfileViewModel(props: Readonly<UseTeacherProfileView
               gender: formData.gender,
               address: formData.address || null,
               qualifications: formData.qualifications || null,
-              timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
+              timezone: formData.timezone ? toIanaTimezone(formData.timezone) : null,
               hourlyRate: formData.hourlyRate || null,
               rateCurrency: formData.rateCurrency ?? null,
               status: formData.status,

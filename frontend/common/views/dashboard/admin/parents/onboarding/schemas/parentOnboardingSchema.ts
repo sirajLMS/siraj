@@ -1,6 +1,9 @@
 import { z } from "zod";
-import { CurrencyCode, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  CurrencyCode,
+  InvoiceType,
+  type MeetingProviderFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { isValidIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { validateMeetingProviderFields } from "@/frontend/common/views/dashboard/profile/shared/meetingProviderValidation";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";

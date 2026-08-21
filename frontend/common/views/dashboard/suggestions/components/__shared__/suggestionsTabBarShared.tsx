@@ -1,6 +1,6 @@
 "use client";
 
-import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { AdminQueueTabBar } from "@/frontend/common/views/dashboard/shared/AdminQueueTabBar";
 import { formatAdminQueueTabLabel } from "@/frontend/common/views/dashboard/shared/utils";
 import type { SuggestionsTabBarProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";

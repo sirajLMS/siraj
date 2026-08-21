@@ -8,7 +8,7 @@ import { PrimaryPageAction } from "@/frontend/common/components/ui";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
 import { AvatarImageField } from "@/frontend/common/components/ui/input/avatarImageField";
-import { AccountStatus, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAvatarUpload } from "@/frontend/common/hooks/useAvatarUpload";
 import { DisplayCurrencyHint } from "@/frontend/common/views/dashboard/components/DisplayCurrencyHint";
 import { executeProfileSubmit } from "@/frontend/common/views/dashboard/profile/__shared__/profileSubmitHandlerShared";
@@ -34,6 +34,7 @@ import {
   type TeacherEditData,
   teacherAdminEditSchemaFactory,
 } from "@/frontend/common/views/dashboard/profile/teacher/teacherProfileFormTypes";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 
 type FieldScope = ReturnType<typeof useProfileFieldAccess>["canEdit"];
 
@@ -150,7 +151,7 @@ export function TeacherAdminEditForm({
 }) {
   const t = labels.teacher;
   const base = labels.base;
-  const scope = ProfileScope.Other;
+  const scope = ProfileScope.OTHER;
   const { canEdit, canAdminResetPassword } = useProfileFieldAccess({ scope });
   const { onUploadAvatar } = useAvatarUpload({ storageOwnerKey: targetUserId });
   const { successOpen, errorOpen, setSuccessOpen, setErrorOpen } = useSubmitFeedbackStates();

@@ -1,6 +1,11 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  DeleteEnvConfigEntryMutation,
+  DeleteEnvConfigEntryMutationVariables,
+  EnvConfigEntriesQuery,
+  UpsertEnvConfigEntryMutation,
+  UpsertEnvConfigEntryMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const ENV_CONFIG_ENTRY_FIELDS = gql`
   fragment EnvConfigEntryFields on EnvConfigEntry {
@@ -37,7 +42,7 @@ const ENV_CONFIG_DELETE_RESULT_FIELDS = gql`
   }
 `;
 
-export const envConfigEntriesQueryDocument: TypedDocumentNode<Operations.EnvConfigEntriesQuery> = gql`
+export const envConfigEntriesQueryDocument: TypedDocumentNode<EnvConfigEntriesQuery> = gql`
   ${ENV_CONFIG_ENTRY_FIELDS}
   query envConfigEntries {
     envConfigEntries {
@@ -47,8 +52,8 @@ export const envConfigEntriesQueryDocument: TypedDocumentNode<Operations.EnvConf
 `;
 
 export const upsertEnvConfigEntryMutationDocument: TypedDocumentNode<
-  Operations.UpsertEnvConfigEntryMutation,
-  Types.MutationUpsertEnvConfigEntryArgs
+  UpsertEnvConfigEntryMutation,
+  UpsertEnvConfigEntryMutationVariables
 > = gql`
   ${ENV_CONFIG_UPSERT_RESULT_FIELDS}
   mutation upsertEnvConfigEntry($input: EnvConfigUpsertInput!) {
@@ -59,8 +64,8 @@ export const upsertEnvConfigEntryMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteEnvConfigEntryMutationDocument: TypedDocumentNode<
-  Operations.DeleteEnvConfigEntryMutation,
-  Types.MutationDeleteEnvConfigEntryArgs
+  DeleteEnvConfigEntryMutation,
+  DeleteEnvConfigEntryMutationVariables
 > = gql`
   ${ENV_CONFIG_DELETE_RESULT_FIELDS}
   mutation deleteEnvConfigEntry($key: String!) {

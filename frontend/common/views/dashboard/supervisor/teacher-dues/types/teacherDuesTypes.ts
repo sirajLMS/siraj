@@ -1,4 +1,4 @@
-import type { CurrencyCode, RateSource, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode, RateSource, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SupervisorTeacherDuesLabels } from "@/shared/locale";
 
 export interface TeacherDueRow {

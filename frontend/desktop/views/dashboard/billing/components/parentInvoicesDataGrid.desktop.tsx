@@ -5,7 +5,7 @@ import { styled } from "@mui/material/styles";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ParentInvoiceRow } from "@/frontend/common/views/dashboard/billing/types/parentBillingTypes";
 import type {
   BaseParentInvoicesListProps,

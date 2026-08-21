@@ -4,7 +4,7 @@
 // entries must not be inline in tier).
 
 import type { PaymentMethodTypeSelectorLabels } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 
 const PROOF_UPLOAD_FALLBACK_LABEL = "Proof upload";
 

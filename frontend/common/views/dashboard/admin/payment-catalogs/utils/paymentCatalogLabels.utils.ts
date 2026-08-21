@@ -2,7 +2,7 @@
 // of tier (`frontend/{mobile,desktop}/views/dashboard/admin/payment-catalogs/**`)
 // per specs.md §3 N9 — no lowercase pure-data helpers in tier files.
 
-import { IdentifierKind, type PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { IdentifierKind, type PaymentDirection } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentCatalogsLabels } from "@/shared/locale";
 
 /**

@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
 import { MeetingIntegrationsHealthHeaders } from "@/frontend/common/views/dashboard/settings/components/meetingIntegrations/MeetingIntegrationsHealthHeaders";
 import {
   createMeetingIntegrationLabelsMock,

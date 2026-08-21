@@ -1,7 +1,8 @@
-import { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { getCountryByCode } from "@/frontend/common/lib/locale";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { IANA_TIMEZONE_LABELS } from "@/shared/constants/iana-timezone-labels";
 import { IANA_TIMEZONE_TERRITORY_CODES } from "@/shared/constants/iana-timezone-territories";
+import { parseIanaTimezone, parseIanaTimezoneOrNull } from "@/shared/lib/enum";
 import { resolveUiCountryCode } from "@/shared/lib/locale/excluded-ui-countries";
 import { isExcludedIanaTimezoneId, resolveExcludedIanaTimezoneId } from "@/shared/lib/timezone/excluded-iana-timezones";
 
@@ -11,8 +12,6 @@ const GLOBE_EMOJI = "🌐";
 const IANA_TIMEZONE_IDS_STRINGS: string[] = Object.keys(IANA_TIMEZONE_LABELS);
 
 // Widened copies of the imported constants to prevent massive union type inference
-
-// Also use runtime string coercion for the labels/territories
 const IANA_TIMEZONE_LABELS_MAP: Record<string, { readonly en: string; readonly ar: string }> = (() => {
   const result: Record<string, { readonly en: string; readonly ar: string }> = {};
   for (const [k, v] of Object.entries(IANA_TIMEZONE_LABELS)) {
@@ -28,19 +27,8 @@ const IANA_TIMEZONE_TERRITORY_CODES_MAP: Record<string, string | null> = (() => 
   return result;
 })();
 
-// Use string type to avoid massive union type inference from IanaTimezone enum
-const IANA_TIMEZONE_TO_GRAPHQL_ENUM: Readonly<Record<string, string>> = Object.fromEntries(
-  IANA_TIMEZONE_IDS_STRINGS.map(id => [id, id.replaceAll("/", "_")])
-);
-
-const IANA_TIMEZONE_ENUM_VALUES: ReadonlySet<string> = new Set(Object.values(IanaTimezone) as readonly string[]);
-
-function isIanaTimezone(value: string): value is IanaTimezone {
-  return IANA_TIMEZONE_ENUM_VALUES.has(value);
-}
-
 export type TimezoneOption = {
-  readonly id: string;
+  readonly id: IanaTimezone;
   readonly label: string;
   readonly pathLabel: string;
   readonly offsetLabel: string;
@@ -57,19 +45,24 @@ function resolveLocaleKey(locale?: string): "en" | "ar" {
   return locale === "ar" ? "ar" : "en";
 }
 
-export function fromGraphqlIanaTimezone(value: string): string {
-  return normalizeIanaTimezoneId(value);
+/** Narrow an untrusted string to shared `IanaTimezone` (slash IANA ID). */
+export function toIanaTimezone(
+  value: string | null | undefined,
+  fallback: IanaTimezone = IanaTimezone.Africa_Cairo
+): IanaTimezone {
+  return parseIanaTimezone(normalizeIanaTimezoneId(value ?? fallback), fallback);
 }
 
-export function toGraphqlIanaTimezone(value: string | null | undefined): IanaTimezone {
-  const normalized = normalizeIanaTimezoneId(value ?? "UTC");
-  const enumValue = IANA_TIMEZONE_TO_GRAPHQL_ENUM[normalized] ?? "Africa_Cairo";
-  return isIanaTimezone(enumValue) ? enumValue : IanaTimezone.AfricaCairo;
+export function toIanaTimezoneOrNull(value: string | null | undefined): IanaTimezone | null {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+  return parseIanaTimezoneOrNull(normalizeIanaTimezoneId(value));
 }
 
-export function resolveBrowserIanaTimezoneId(): string {
+export function resolveBrowserIanaTimezoneId(): IanaTimezone {
   const browserTimezone = normalizeIanaTimezoneId(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  return isValidIanaTimezoneId(browserTimezone) ? browserTimezone : "Africa/Cairo";
+  return isValidIanaTimezoneId(browserTimezone) ? browserTimezone : IanaTimezone.Africa_Cairo;
 }
 
 export function getTimezonePathLabel(ianaTimezone: string, locale?: string): string {
@@ -146,8 +139,9 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
   return IANA_TIMEZONE_IDS_STRINGS.map(id => {
     const pathLabel = getTimezonePathLabel(id, locale);
     const offsetLabel = getTimezoneOffsetLabel(id, locale, date);
+    const timezoneId = toIanaTimezone(id);
     return {
-      id,
+      id: timezoneId,
       label: `${pathLabel} (${offsetLabel})`,
       pathLabel,
       offsetLabel,
@@ -162,7 +156,7 @@ export function getTimezoneOptions(locale?: string, date = new Date()): Timezone
   });
 }
 
-export function isValidIanaTimezoneId(value: string): value is string {
+export function isValidIanaTimezoneId(value: string): value is IanaTimezone {
   const normalized = normalizeIanaTimezoneId(value);
   return !isExcludedIanaTimezoneId(normalized) && IANA_TIMEZONE_IDS_STRINGS.includes(normalized);
 }

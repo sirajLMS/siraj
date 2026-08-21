@@ -3,7 +3,6 @@ import {
   ClassTypePothosObject,
   CurrencyCodePothosObject,
   DayOfWeekPothosObject,
-  IanaTimezonePothosObject,
   OnDemandNoCreditsOutcomePothosEnum,
   SchedulingModePothosEnum,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
@@ -32,7 +31,7 @@ export const CreateRecurringClassInputPothosObject = gqlSchemaBuilder
       subjectId: t.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
       durationMinutes: t.int({ required: true, directives: { constraint: { min: 1, max: 1440 } } }),
       defaultStartTime: t.string({ required: true, directives: { constraint: { maxLength: 10 } } }),
-      timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
+      timezone: t.field({ type: "IanaTimezone", required: true }),
       effectiveFrom: t.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
       effectiveUntil: t.string({ required: false, directives: { constraint: { maxLength: 20 } } }),
       days: t.field({

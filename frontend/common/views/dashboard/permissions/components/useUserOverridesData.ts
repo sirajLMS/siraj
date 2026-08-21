@@ -3,9 +3,9 @@ import { useQuery } from "@apollo/client/react";
 import { useMemo } from "react";
 import {
   OverrideState,
-  type PermissionGroup,
-  type UserOverride,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  type PermissionGroupDetailFieldsFragment,
+  type UserOverridesQuery_userOverrides,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { userOverridesQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 
 export interface UserOverrideInfo {
@@ -23,11 +23,14 @@ export interface UserOverrideRowData {
 export interface UserOverridesDataResult {
   readonly loading: boolean;
   readonly error: Error | undefined;
-  readonly overrides: readonly UserOverride[];
+  readonly overrides: readonly UserOverridesQuery_userOverrides[];
   readonly info: UserOverrideInfo | null;
 }
 
-function buildConflictDetails(overrides: readonly UserOverride[], inheritedPermissionIds: Set<string>): string[] {
+function buildConflictDetails(
+  overrides: readonly UserOverridesQuery_userOverrides[],
+  inheritedPermissionIds: Set<string>
+): string[] {
   const details: string[] = [];
   for (const override of overrides) {
     if (!override.permissionId) continue;
@@ -41,7 +44,7 @@ function buildConflictDetails(overrides: readonly UserOverride[], inheritedPermi
   return details;
 }
 
-function computeInheritedPermissionIds(userGroups: readonly PermissionGroup[]): Set<string> {
+function computeInheritedPermissionIds(userGroups: readonly PermissionGroupDetailFieldsFragment[]): Set<string> {
   const ids = new Set<string>();
   for (const group of userGroups) {
     if (group.permissionIds) {
@@ -53,7 +56,10 @@ function computeInheritedPermissionIds(userGroups: readonly PermissionGroup[]): 
   return ids;
 }
 
-function getUserGroupsForUser(userId: string, groups: readonly PermissionGroup[]): readonly PermissionGroup[] {
+function getUserGroupsForUser(
+  userId: string,
+  groups: readonly PermissionGroupDetailFieldsFragment[]
+): readonly PermissionGroupDetailFieldsFragment[] {
   if (!userId) return [];
   return groups.filter(g => g.assignedUsers?.some(au => au.id === userId));
 }
@@ -66,17 +72,20 @@ function getUserGroupsForUser(userId: string, groups: readonly PermissionGroup[]
  * Lifted out of `userOverridesDataGrid.{mobile,desktop}.tsx` (NS-2 — N1 lift) so
  * the tier files receive already-computed `info` objects as props.
  */
-export function useUserOverridesData(userId: string, groups: readonly PermissionGroup[]): UserOverridesDataResult {
+export function useUserOverridesData(
+  userId: string,
+  groups: readonly PermissionGroupDetailFieldsFragment[]
+): UserOverridesDataResult {
   const { data, loading, error } = useQuery(userOverridesQueryDocument, {
     variables: { userId },
     skip: !userId,
   });
 
-  const overrides = useMemo<readonly UserOverride[]>(() => data?.userOverrides ?? [], [data]);
+  const overrides = useMemo<readonly UserOverridesQuery_userOverrides[]>(() => data?.userOverrides ?? [], [data]);
 
   const info = useMemo<UserOverrideInfo | null>(() => {
     if (!data?.userOverrides) return null;
-    const overridesList = data.userOverrides as readonly UserOverride[];
+    const overridesList = data.userOverrides as readonly UserOverridesQuery_userOverrides[];
     const grants = overridesList.filter(o => o.state === OverrideState.Granted).length;
     const revokes = overridesList.filter(o => o.state === OverrideState.Denied).length;
     const userGroups = getUserGroupsForUser(userId, groups);

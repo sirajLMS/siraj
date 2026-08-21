@@ -1,4 +1,4 @@
-import type { GroupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { GroupClassAuditQuery_groupClassAudit } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export interface MeetingInfoLabels {
   readonly title: string;
@@ -66,7 +66,7 @@ export interface ClassAuditLabels {
 }
 
 export interface ClassAuditViewProps {
-  readonly audit: NonNullable<GroupClassAudit>;
+  readonly audit: NonNullable<GroupClassAuditQuery_groupClassAudit>;
   readonly labels: ClassAuditLabels;
   readonly onGenerateReport: () => void;
   readonly onEditClass: () => void;

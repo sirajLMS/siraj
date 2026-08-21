@@ -1,41 +1,15 @@
-import type { Quota, QuotaLedger } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type {
+  QuotaFieldsFragment,
+  QuotaLedgerQuery_quotaLedger_rows,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
-export type QuotaItem = Pick<
-  Quota,
-  | "id"
-  | "studentId"
-  | "name"
-  | "kind"
-  | "totalClasses"
-  | "remaining"
-  | "reservedClasses"
-  | "validFrom"
-  | "validUntil"
-  | "status"
-  | "periodType"
-  | "periodDays"
-  | "priority"
-  | "createdAt"
-  | "updatedAt"
->;
+export type QuotaItem = QuotaFieldsFragment;
 
-export type QuotaLedgerItem = Pick<
-  QuotaLedger,
-  | "id"
-  | "quotaId"
-  | "studentId"
-  | "recurringScheduleId"
-  | "classInstanceId"
-  | "delta"
-  | "reason"
-  | "reasonNote"
-  | "actorUserId"
-  | "createdAt"
->;
+export type QuotaLedgerItem = QuotaLedgerQuery_quotaLedger_rows;
 
 export type {
   QuotaKind,
   QuotaLedgerReason,
   QuotaPeriodType,
   QuotaStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";

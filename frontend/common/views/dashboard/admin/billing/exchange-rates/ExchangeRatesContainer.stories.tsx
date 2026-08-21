@@ -1,11 +1,6 @@
 import { MockedProvider } from "@apollo/client/testing/react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import {
-  AppPermission,
-  CurrencyCode,
-  FxProvider,
-  FxSyncStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, CurrencyCode, FxProvider, FxSyncStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   exchangeRateHistoryQueryDocument,
   latestExchangeRatesQueryDocument,

@@ -2,7 +2,7 @@
 
 import { Box, type SxProps, type Theme, useTheme } from "@mui/material";
 import type { Theme as MuiTheme } from "@mui/material/styles";
-import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { StudentStatusHeaderShared } from "@/frontend/common/views/dashboard/students/status/components/studentStatusHeaderShared";
 import type {
   StudentStatusHeaderProps,

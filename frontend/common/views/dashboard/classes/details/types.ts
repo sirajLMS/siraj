@@ -10,7 +10,7 @@ export interface EntityLinkTargets {
   readonly teacherId: string;
 }
 
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ClassInstance } from "@/frontend/common/views/dashboard/classes/details/hooks/useClassDetailsViewModel";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 import type { ClassDetailsLabels, SessionLabels } from "@/shared/locale";

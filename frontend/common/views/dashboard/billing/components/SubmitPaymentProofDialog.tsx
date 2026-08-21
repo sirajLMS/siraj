@@ -14,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { UploadType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { UploadType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   markInvoicePaidMutationDocument,
   submitPaymentProofMutationDocument,

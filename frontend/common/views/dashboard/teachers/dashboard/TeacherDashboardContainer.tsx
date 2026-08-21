@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useTeacherDashboardStore } from "@/frontend/common/stores/teacherDashboardStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { TeacherDashboardDataIsland } from "@/frontend/common/views/dashboard/teachers/dashboard/components/TeacherDashboardDataIsland";

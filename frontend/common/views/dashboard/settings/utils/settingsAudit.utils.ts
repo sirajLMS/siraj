@@ -1,5 +1,5 @@
 import { formatDateTime } from "@/frontend/common/components/intl/dateFormat";
-import type { SettingsAuditLogsQuery_settingsAuditLogs_SettingsAuditLogsResult_logs_AuditLog } from "@/frontend/common/graphql/generated/gql/operations";
+import type { SettingsAuditLogsQuery_settingsAuditLogs_logs } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   SettingsAuditLabels,
   SettingsAuditRow,
@@ -21,7 +21,7 @@ export function buildSettingsAuditLabels(t: SettingsAuditTranslationLabels): Set
 }
 
 export function mapSettingsAuditRows(
-  logs: Array<SettingsAuditLogsQuery_settingsAuditLogs_SettingsAuditLogsResult_logs_AuditLog> | null | undefined,
+  logs: Array<SettingsAuditLogsQuery_settingsAuditLogs_logs> | null | undefined,
   locale: string,
   entityTypeLabels: Record<string, string>,
   actionLabels: Record<string, string>

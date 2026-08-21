@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentDirection, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   createUserPaymentMethodMutationDocument,
   deleteUserPaymentMethodMutationDocument,

@@ -3,12 +3,13 @@
 import type { SxProps, Theme } from "@mui/material/styles";
 import type * as React from "react";
 import { LanguageDisplay } from "@/frontend/common/components/ui/display/language/LanguageDisplay";
+import type { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { LanguageType } from "@/frontend/common/lib/locale";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import { DesktopLocaleEmoji } from "@/frontend/desktop/components/ui/display/localeEmoji/localeEmoji.desktop";
 
 export type DesktopLanguageDisplayProps = {
-  readonly code?: string | null;
+  readonly code?: AppLanguage | null;
   readonly language?: LanguageType;
   readonly showEmoji?: boolean;
   readonly showLabel?: boolean;

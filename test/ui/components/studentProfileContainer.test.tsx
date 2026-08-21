@@ -18,11 +18,11 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 
 expect.extend(matchers);
 
-import { ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { studentProfileQueryDocument } from "@/frontend/common/graphql/sharedDocuments/students/student-profile.documents";
 import { useStudentPortalProfileStore } from "@/frontend/common/stores/studentPortalProfileStore";
 import { useStudentProfileViewModel } from "@/frontend/common/views/dashboard/student/profile/useStudentProfileViewModel";
 import { StudentProfileDesktopView } from "@/frontend/desktop/views/dashboard/student/profile/studentProfile.desktop";
+import { ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";
@@ -36,8 +36,8 @@ const studentId = "student-profile-1";
 
 function StudentProfileContainerImpl() {
   const viewModel = useStudentProfileViewModel({
-    scope: ProfileScope.Own,
-    mode: ProfileMode.View,
+    scope: ProfileScope.OWN,
+    mode: ProfileMode.VIEW,
     targetUserId: "student-user-1",
     activeTab: "profile",
   });

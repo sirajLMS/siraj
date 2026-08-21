@@ -1,4 +1,4 @@
-import { UploadType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { UploadType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { logger } from "@/frontend/common/utils/logger";
 
 export type PrepareUploadFn = (options: {

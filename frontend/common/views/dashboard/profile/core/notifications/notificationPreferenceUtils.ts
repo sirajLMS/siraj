@@ -1,18 +1,15 @@
-import {
-  NotificationChannel,
-  NotificationEventType,
-  ProfileAudience,
-  UserRole,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { NotificationChannel, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   NotificationPrefRow,
   PreferenceMatrixRow,
 } from "@/frontend/common/views/dashboard/profile/core/notifications/notificationPreferenceTypes";
+import { UserRole } from "@/shared/constants/auth.enum";
 import {
   isEventAllowedForRole,
   type NotificationPreferenceRole,
   resolveNotificationEventAllowlist,
 } from "@/shared/constants/notification-event-allowlists";
+import { ProfileAudience } from "@/shared/constants/profile.enum";
 
 /**
  * Maps viewer `UserRole` / `ProfileAudience` to the shared prefs allowlist role.
@@ -25,31 +22,31 @@ export function resolveNotificationPreferenceRole(params: {
   const { role, audience } = params;
 
   switch (role) {
-    case UserRole.Student:
+    case UserRole.STUDENT:
       return "student";
-    case UserRole.Supervisor:
+    case UserRole.SUPERVISOR:
       return "supervisor";
-    case UserRole.Parent:
+    case UserRole.PARENT:
       return "parent";
-    case UserRole.Teacher:
+    case UserRole.TEACHER:
       return "teacher";
-    case UserRole.Staff:
+    case UserRole.STAFF:
       return "staff";
-    case UserRole.SuperAdmin:
-    case UserRole.AcademyAdmin:
+    case UserRole.SUPER_ADMIN:
+    case UserRole.ACADEMY_ADMIN:
       return "admin";
     default:
       break;
   }
 
   switch (audience) {
-    case ProfileAudience.Student:
+    case ProfileAudience.STUDENT:
       return "student";
-    case ProfileAudience.Parent:
+    case ProfileAudience.PARENT:
       return "parent";
-    case ProfileAudience.Teacher:
+    case ProfileAudience.TEACHER:
       return "teacher";
-    case ProfileAudience.Staff:
+    case ProfileAudience.STAFF:
       return "staff";
     default:
       return "staff";

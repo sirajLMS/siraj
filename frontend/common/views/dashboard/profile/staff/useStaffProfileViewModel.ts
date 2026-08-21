@@ -2,18 +2,13 @@
 
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
-import {
-  type CurrencyCode,
-  type ProfileMode,
-  ProfileScope,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { CurrencyCode, ProfileByUserIdQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   profileByUserIdQueryDocument,
   updateOwnProfileMutationDocument,
   updateUserProfileMutationDocument,
 } from "@/frontend/common/graphql/sharedDocuments";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   StaffProfileData,
@@ -23,9 +18,10 @@ import type {
   StaffAdminEditFormData,
   StaffOwnEditFormData,
 } from "@/frontend/common/views/dashboard/profile/staff/staffProfileFormTypes";
+import { type ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
-type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
 
 const EMPTY_STAFF_DATA: StaffProfileData = {
   id: null,
@@ -89,7 +85,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
   const labels: StaffProfileViewLabels = { base, staff };
 
   const { scope, mode, targetUserId, activeTab: _activeTab = "profile" } = props;
-  const isAdminScope = scope === ProfileScope.Other;
+  const isAdminScope = scope === ProfileScope.OTHER;
   const activeTab = _activeTab;
   const [isSaving, setIsSaving] = useState(false);
 
@@ -119,7 +115,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
               email: formData.email,
               avatarUrl: formData.avatarUrl,
               displayCurrency: formData.displayCurrency,
-              timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
+              timezone: formData.timezone ? toIanaTimezone(formData.timezone) : null,
             },
             staff: {
               phone: formData.phone ?? null,
@@ -148,7 +144,7 @@ export function useStaffProfileViewModel(props: Readonly<UseStaffProfileViewMode
               email: formData.email,
               avatarUrl: formData.avatarUrl,
               displayCurrency: formData.displayCurrency,
-              timezone: formData.timezone ? toGraphqlIanaTimezone(formData.timezone) : null,
+              timezone: formData.timezone ? toIanaTimezone(formData.timezone) : null,
             },
             staff: {
               phone: formData.phone ?? null,

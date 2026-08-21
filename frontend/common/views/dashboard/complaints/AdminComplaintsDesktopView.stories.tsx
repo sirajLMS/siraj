@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, ComplaintStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { logger } from "@/frontend/common/utils/logger";
 import type {
   AdminComplaintRow,

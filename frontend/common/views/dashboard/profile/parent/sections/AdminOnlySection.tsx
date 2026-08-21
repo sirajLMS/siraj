@@ -3,7 +3,7 @@
 import { MenuItem, Stack, TextField } from "@mui/material";
 import type { UseFormRegister } from "react-hook-form";
 import { SectionPanel } from "@/frontend/common/components/ui";
-import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ParentAdminEditFormData } from "@/frontend/common/views/dashboard/profile/parent/parentProfileFormTypes";
 import type {
   ParentAdminData,

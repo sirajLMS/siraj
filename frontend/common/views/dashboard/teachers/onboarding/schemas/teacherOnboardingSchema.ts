@@ -1,8 +1,13 @@
 import { z } from "zod";
-import { CountryCode, CurrencyCode, Gender, IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  CountryCode,
+  CurrencyCode,
+  Gender,
+  type MeetingProviderFieldsFragment,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { validateMeetingProviderFields } from "@/frontend/common/views/dashboard/profile/shared/meetingProviderValidation";
 import { onboardingPaymentMethodSchema } from "@/frontend/common/views/dashboard/profile/shared/payment-methods/paymentMethodFormSchema";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import type { TeacherOnboardingLabels } from "@/shared/locale";
 
 export const teacherOnboardingSchema = (validationLabels: TeacherOnboardingLabels["validation"]) =>

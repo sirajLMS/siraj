@@ -11,8 +11,7 @@ import { MeetingConfigListShared } from "@/frontend/common/components/ui/display
 import type { MeetingConfigListItem } from "@/frontend/common/components/ui/display/meetingConfig/types";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { AppPermission, type UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { AutoGenerationSupportCallout } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/AutoGenerationSupportCallout";
 import { ConnectProviderAccount } from "@/frontend/common/views/dashboard/profile/shared/meeting-configs/ConnectProviderAccount";

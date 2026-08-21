@@ -6,7 +6,7 @@ import {
   CurrencyCode,
   QuotaKind,
   QuotaStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { quotasQueryDocument } from "@/frontend/common/graphql/sharedDocuments/billing";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import { QuotaInsightsContainer } from "@/frontend/common/views/dashboard/billing/quota/QuotaInsightsContainer";
@@ -153,7 +153,6 @@ function applyMockPerms(perms: AppPermission[]) {
       phone: null,
       status: AccountStatus.Activated,
       displayCurrency: CurrencyCode.Usd,
-      __typename: "User",
     },
   });
 }

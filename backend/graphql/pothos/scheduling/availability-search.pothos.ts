@@ -3,7 +3,6 @@ import {
   AvailabilitySearchSortByPothosObject,
   DayOfWeekPothosObject,
   GenderPothosObject,
-  IanaTimezonePothosObject,
 } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { PageInfoObject, PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import type {
@@ -25,7 +24,7 @@ export const TeacherAvailabilityGapPothosObject = TeacherAvailabilityGapRef.impl
     calendarDate: t.exposeString("calendarDate"),
     gapStartTime: t.exposeString("gapStartTime"),
     gapEndTime: t.exposeString("gapEndTime"),
-    timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
+    timezone: t.expose("timezone", { type: "IanaTimezone" }),
   }),
 });
 
@@ -36,7 +35,7 @@ export const AvailabilitySearchTeacherPothosObject = AvailabilitySearchTeacherRe
     id: t.exposeString("id"),
     name: t.exposeString("name"),
     gender: t.expose("gender", { type: GenderPothosObject, nullable: true }),
-    timezone: t.expose("timezone", { type: IanaTimezonePothosObject }),
+    timezone: t.expose("timezone", { type: "IanaTimezone" }),
     availableDaysCount: t.exposeInt("availableDaysCount"),
     gaps: t.expose("gaps", { type: [TeacherAvailabilityGapPothosObject] }),
   }),

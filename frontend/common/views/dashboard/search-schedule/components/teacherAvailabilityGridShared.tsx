@@ -4,6 +4,7 @@ import { CalendarMonthOutlined } from "@mui/icons-material";
 import { Box, Chip, IconButton, Paper, type SxProps, type Theme, Tooltip, Typography } from "@mui/material";
 import { HorizontalScrollRow } from "@/frontend/common/components/ui/container/HorizontalScrollRow";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
+import { toIanaTimezoneOrNull } from "@/frontend/common/lib/timezone";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import type {
   TeacherAvailabilityDayPillProps,
@@ -96,7 +97,9 @@ export function TeacherAvailabilityGridShared({
           color="primary"
           variant="outlined"
         />
-        {teacher.timezone ? <TimezoneDisplay timezone={teacher.timezone} typographyVariant="bodyMd" /> : null}
+        {teacher.timezone ? (
+          <TimezoneDisplay timezone={toIanaTimezoneOrNull(teacher.timezone)} typographyVariant="bodyMd" />
+        ) : null}
         <Box sx={{ flexGrow: 1 }} />
         <Tooltip title={labels.viewMonthSchedule}>
           <IconButton

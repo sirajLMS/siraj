@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { NotificationsProvider } from "@toolpad/core/useNotifications";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AppPermission, type User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type MeQuery_me as User } from "@/frontend/common/graphql/generated/gql/graphql";
 import { meQueryDocument } from "@/frontend/common/graphql/sharedDocuments/auth/auth.documents";
 import { UserStoreInitializer } from "@/frontend/common/views/dashboard/components/client/UserStoreInitializer";
 import { DashboardLayout } from "@/frontend/common/views/dashboard/components/DashboardLayout";

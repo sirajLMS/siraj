@@ -6,7 +6,7 @@ import type * as React from "react";
 import { type Control, Controller, type FieldValues, type Path } from "react-hook-form";
 import type { PaymentMethodTypeFieldsProps } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
 import { resolveFieldName } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/utils";
-import { type CurrencyCode, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { type CurrencyCode, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import type { CountryType } from "@/frontend/common/lib/locale";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";

@@ -1,5 +1,5 @@
 import type { Theme } from "@mui/material/styles";
-import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { LessonReportLabels } from "@/shared/locale/types/dashboard/lms/lessonReports";
 
 export type LessonReportStatusLabelSlice = Pick<

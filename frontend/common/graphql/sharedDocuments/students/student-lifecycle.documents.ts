@@ -1,12 +1,16 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ChangeStudentStatusMutation,
+  ChangeStudentStatusMutationVariables,
+  ReassignStudentTeacherMutation,
+  ReassignStudentTeacherMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 // ─── Mutation: reassignStudentTeacher ───────────────────────────────────────
 
 export const reassignStudentTeacherMutationDocument: TypedDocumentNode<
-  Operations.ReassignStudentTeacherMutation,
-  Types.MutationReassignStudentTeacherArgs
+  ReassignStudentTeacherMutation,
+  ReassignStudentTeacherMutationVariables
 > = gql`
   mutation ReassignStudentTeacher(
     $studentId: String!
@@ -28,8 +32,8 @@ export const reassignStudentTeacherMutationDocument: TypedDocumentNode<
 // ─── Mutation: changeStudentStatus ──────────────────────────────────────────
 
 export const changeStudentStatusMutationDocument: TypedDocumentNode<
-  Operations.ChangeStudentStatusMutation,
-  Types.MutationChangeStudentStatusArgs
+  ChangeStudentStatusMutation,
+  ChangeStudentStatusMutationVariables
 > = gql`
   mutation ChangeStudentStatus(
     $studentId: String!

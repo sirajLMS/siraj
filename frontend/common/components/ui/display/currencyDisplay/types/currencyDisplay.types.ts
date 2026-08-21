@@ -1,11 +1,11 @@
 // NEW FOR PLAN v5 (lifted from frontend/{mobile,desktop}/components/ui/display/currencyDisplay/CurrencyDisplay.{mobile,desktop}.tsx)
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { CurrencyDisplayPartValue } from "@/frontend/common/components/ui/display/currencyDisplay/constants";
-import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { UiTypographyVariantLoose } from "@/frontend/common/types/shared.types";
 
 export type CurrencyDisplayProps = {
-  readonly code?: CurrencyCode | string | null;
+  readonly code?: CurrencyCode | null;
   /**
    * Which currency ingredients to render. Order in the array is ignored;
    * parts always render as flag → label → symbol → code.

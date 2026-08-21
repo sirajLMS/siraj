@@ -1,6 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  DeleteSessionConfigMutation,
+  DeleteSessionConfigMutationVariables,
+  SessionConfigQuery,
+  SessionConfigQueryVariables,
+  SessionConfigsQuery,
+  UpsertSessionConfigMutation,
+  UpsertSessionConfigMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const SESSION_CONFIG_FIELDS = gql`
   fragment SessionConfigFields on SessionConfig {
@@ -13,7 +20,7 @@ const SESSION_CONFIG_FIELDS = gql`
   }
 `;
 
-export const sessionConfigsQueryDocument: TypedDocumentNode<Operations.SessionConfigsQuery> = gql`
+export const sessionConfigsQueryDocument: TypedDocumentNode<SessionConfigsQuery> = gql`
   ${SESSION_CONFIG_FIELDS}
   query sessionConfigs {
     sessionConfigs {
@@ -22,10 +29,7 @@ export const sessionConfigsQueryDocument: TypedDocumentNode<Operations.SessionCo
   }
 `;
 
-export const sessionConfigQueryDocument: TypedDocumentNode<
-  Operations.SessionConfigQuery,
-  Types.QuerySessionConfigArgs
-> = gql`
+export const sessionConfigQueryDocument: TypedDocumentNode<SessionConfigQuery, SessionConfigQueryVariables> = gql`
   ${SESSION_CONFIG_FIELDS}
   query sessionConfig($roleName: String!) {
     sessionConfig(roleName: $roleName) {
@@ -35,8 +39,8 @@ export const sessionConfigQueryDocument: TypedDocumentNode<
 `;
 
 export const upsertSessionConfigMutationDocument: TypedDocumentNode<
-  Operations.UpsertSessionConfigMutation,
-  Types.MutationUpsertSessionConfigArgs
+  UpsertSessionConfigMutation,
+  UpsertSessionConfigMutationVariables
 > = gql`
   ${SESSION_CONFIG_FIELDS}
   mutation upsertSessionConfig($input: SessionConfigUpsertInput!) {
@@ -47,8 +51,8 @@ export const upsertSessionConfigMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteSessionConfigMutationDocument: TypedDocumentNode<
-  Operations.DeleteSessionConfigMutation,
-  Types.MutationDeleteSessionConfigArgs
+  DeleteSessionConfigMutation,
+  DeleteSessionConfigMutationVariables
 > = gql`
   mutation deleteSessionConfig($roleName: String!) {
     deleteSessionConfig(roleName: $roleName)

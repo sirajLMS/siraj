@@ -1,11 +1,9 @@
 export type {
-  AdminNoteInfo as AdminNoteData,
-  CommunicationLogEntry as CommunicationLogEntryData,
-  GroupClassAudit as ClassAuditData,
-  GroupClassStudent as RegisteredStudent,
-  OnlineMeetingInfo as MeetingInfo,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-
-export type AttendanceStatus = "pending" | "present" | "absent";
+  GroupClassAuditQuery_groupClassAudit as ClassAuditData,
+  GroupClassAuditQuery_groupClassAudit_adminNote as AdminNoteData,
+  GroupClassAuditQuery_groupClassAudit_communications as CommunicationLogEntryData,
+  GroupClassAuditQuery_groupClassAudit_meetingInfo as MeetingInfo,
+  GroupClassAuditQuery_groupClassAudit_students as RegisteredStudent,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type CommunicationType = "email" | "sms";

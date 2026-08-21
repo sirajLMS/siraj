@@ -5,8 +5,7 @@ import {
   TimezoneSelect,
   type TimezoneSelectProps,
 } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import type { IanaTimezone } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 function TimezoneSelectStory({
   initialTimezone,
@@ -32,7 +31,7 @@ type Story = StoryObj<typeof TimezoneSelectStory>;
 
 export const Default: Story = {
   args: {
-    initialTimezone: toGraphqlIanaTimezone("Africa/Cairo"),
+    initialTimezone: IanaTimezone.Africa_Cairo,
   },
 };
 
@@ -49,12 +48,12 @@ export const Arabic: Story = {
     locale: "ar",
   },
   args: {
-    initialTimezone: toGraphqlIanaTimezone("Asia/Riyadh"),
+    initialTimezone: IanaTimezone.Asia_Riyadh,
   },
 };
 
 export const OffsetSorted: Story = {
   args: {
-    initialTimezone: toGraphqlIanaTimezone("Etc/GMT+12"),
+    initialTimezone: IanaTimezone.Etc_GMT_plus_12,
   },
 };

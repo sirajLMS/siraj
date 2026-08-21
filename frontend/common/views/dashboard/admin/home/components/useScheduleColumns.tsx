@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { PersonProfileLinkCell, ActionIconLink as StyledHistoryIconLink } from "@/frontend/common/components/ui";
 import { ClassProfileLinkCell } from "@/frontend/common/components/ui/display/classProfileLink/ClassProfileLinkCell";
 import { MeetingJoinAction } from "@/frontend/common/components/ui/display/meetingConfig/MeetingJoinAction";
-import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   classHref,
   profileHrefForTeacher,

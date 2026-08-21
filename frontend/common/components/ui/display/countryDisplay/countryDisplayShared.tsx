@@ -5,6 +5,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import type { LocaleEmojiProps } from "@/frontend/common/components/ui/display/localeEmoji/types/localeEmoji.types";
+import type { CountryCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type CountryType, getCountryDisplayName, getCountryEmoji } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
@@ -18,7 +19,7 @@ export type CountryDisplaySlotProps = {
 };
 
 type CountryDisplaySharedProps = {
-  readonly code?: string | null;
+  readonly code?: CountryCode | null;
   readonly country?: CountryType;
   readonly showEmoji?: boolean;
   readonly showLabel?: boolean;

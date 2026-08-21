@@ -7,7 +7,7 @@ import {
   AppPermission,
   SystemSettingCategory as GraphQLSystemSettingCategory,
   SystemSettingDataType as GraphQLSystemSettingDataType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { upsertSystemSettingMutationDocument } from "@/frontend/common/graphql/sharedDocuments/settings/general-settings.documents";
 import { useSystemSettingsQuery } from "@/frontend/common/hooks/settings";
 import { useUserStore } from "@/frontend/common/stores/userStore";

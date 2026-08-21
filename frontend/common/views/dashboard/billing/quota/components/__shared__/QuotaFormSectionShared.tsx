@@ -6,7 +6,7 @@ import type { ComponentType, ReactElement } from "react";
 import { type Control, Controller, type FieldErrors } from "react-hook-form";
 import { StudentAutocomplete } from "@/frontend/common/components/ui/input/userSelect/StudentAutocomplete";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
-import { QuotaKind, QuotaPeriodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { QuotaKind, QuotaPeriodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   isQuotaKind,
   isQuotaPeriodType,

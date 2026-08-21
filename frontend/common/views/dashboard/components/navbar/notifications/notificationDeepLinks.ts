@@ -1,4 +1,4 @@
-import { AppPermission, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, NotificationEventType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { classHref, ownProfileHref, studentProfileTabHref } from "@/frontend/common/utils/profileHref";
 import type { NotificationMetadata } from "@/shared/types/notification-alerts.types";
 

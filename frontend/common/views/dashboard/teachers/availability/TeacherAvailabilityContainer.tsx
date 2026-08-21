@@ -7,8 +7,11 @@ import { addDays, format } from "date-fns";
 import { useCallback, useMemo, useState } from "react";
 import { createLazyView } from "@/frontend/common/components/ui/container/createLazyView";
 import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/ResponsiveViewSwitch";
-import type { DayOfWeek, SearchTeacherAvailabilityQuery } from "@/frontend/common/graphql/generated/gql/graphql";
-import { AvailabilitySearchSortBy } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  AvailabilitySearchSortBy,
+  type DayOfWeek,
+  type SearchTeacherAvailabilityQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { searchTeacherAvailabilityQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useDocumentTitle } from "@/frontend/common/hooks/useDocumentTitle";
 import { logger } from "@/frontend/common/utils/logger";

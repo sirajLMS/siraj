@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { BILLING_MONTH_IDS } from "@/shared/constants/billing-months";
 import type { BillingManualValidationLabels } from "@/shared/locale";
 

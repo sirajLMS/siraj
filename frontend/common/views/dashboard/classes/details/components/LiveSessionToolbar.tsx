@@ -18,7 +18,7 @@ import { styled } from "@mui/material/styles";
 import { useState } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 export interface LiveSessionToolbarProps {

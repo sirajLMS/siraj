@@ -5,6 +5,7 @@ import type { SxProps, Theme } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import type * as React from "react";
 import { LocaleEmoji } from "@/frontend/common/components/ui/display/localeEmoji/LocaleEmoji";
+import type { AppLanguage } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getLanguageDisplayName, getLanguageEmoji, type LanguageType } from "@/frontend/common/lib/locale";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
@@ -13,7 +14,7 @@ import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 type LocaleEmojiComponentType = typeof LocaleEmoji;
 
 export type LanguageDisplayProps = {
-  readonly code?: string | null;
+  readonly code?: AppLanguage | null;
   readonly language?: LanguageType;
   readonly showEmoji?: boolean;
   readonly showLabel?: boolean;

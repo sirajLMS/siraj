@@ -1,11 +1,22 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AdminDashboardScheduleQuery,
+  AdminDashboardScheduleQueryVariables,
+  DailyScheduleListQuery,
+  DailyScheduleListQueryVariables,
+  DailyScheduleMetricsQuery,
+  DailyScheduleMetricsQueryVariables,
+  RescheduleTrackingMetricsQuery,
+  RescheduleTrackingRowsQuery,
+  RescheduleTrackingRowsQueryVariables,
+  StatusTrackingScheduleQuery,
+  StatusTrackingScheduleQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { EFFECTIVE_MEETING_FIELDS } from "@/frontend/common/graphql/sharedDocuments/meeting/meeting.documents";
 
 export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
-  Operations.AdminDashboardScheduleQuery,
-  Types.QueryAdminDashboardScheduleArgs
+  AdminDashboardScheduleQuery,
+  AdminDashboardScheduleQueryVariables
 > = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query adminDashboardSchedule($input: AdminDashboardScheduleInput!) {
@@ -72,8 +83,8 @@ export const adminDashboardScheduleQueryDocument: TypedDocumentNode<
 `;
 
 export const dailyScheduleMetricsQueryDocument: TypedDocumentNode<
-  Operations.DailyScheduleMetricsQuery,
-  Types.QueryDailyScheduleMetricsArgs
+  DailyScheduleMetricsQuery,
+  DailyScheduleMetricsQueryVariables
 > = gql`
   query dailyScheduleMetrics($date: String!, $teacherId: String) {
     dailyScheduleMetrics(date: $date, teacherId: $teacherId) {
@@ -95,8 +106,8 @@ export const dailyScheduleMetricsQueryDocument: TypedDocumentNode<
 `;
 
 export const dailyScheduleListQueryDocument: TypedDocumentNode<
-  Operations.DailyScheduleListQuery,
-  Types.QueryDailyScheduleListArgs
+  DailyScheduleListQuery,
+  DailyScheduleListQueryVariables
 > = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query dailyScheduleList($date: String!, $teacherId: String, $search: String, $metricFilter: String) {
@@ -131,8 +142,8 @@ export const dailyScheduleListQueryDocument: TypedDocumentNode<
   }
 `;
 export const rescheduleTrackingRowsQueryDocument: TypedDocumentNode<
-  Operations.RescheduleTrackingRowsQuery,
-  Types.QueryRescheduleTrackingRowsArgs
+  RescheduleTrackingRowsQuery,
+  RescheduleTrackingRowsQueryVariables
 > = gql`
   query rescheduleTrackingRows($search: String, $status: LeaveRequestStatus, $paginationArgs: PaginationArgs) {
     rescheduleTrackingRows(search: $search, status: $status, paginationArgs: $paginationArgs) {
@@ -166,7 +177,7 @@ export const rescheduleTrackingRowsQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const rescheduleTrackingMetricsQueryDocument: TypedDocumentNode<Operations.RescheduleTrackingMetricsQuery> = gql`
+export const rescheduleTrackingMetricsQueryDocument: TypedDocumentNode<RescheduleTrackingMetricsQuery> = gql`
   query rescheduleTrackingMetrics {
     rescheduleTrackingMetrics {
       id
@@ -196,8 +207,8 @@ export const rescheduleTrackingMetricsQueryDocument: TypedDocumentNode<Operation
  * @param viewerTimezone - Optional IANA timezone for day boundary calculation
  */
 export const statusTrackingScheduleQueryDocument: TypedDocumentNode<
-  Operations.StatusTrackingScheduleQuery,
-  Types.QueryStatusTrackingScheduleArgs
+  StatusTrackingScheduleQuery,
+  StatusTrackingScheduleQueryVariables
 > = gql`
   ${EFFECTIVE_MEETING_FIELDS}
   query statusTrackingSchedule($date: String!, $search: String, $viewerTimezone: IanaTimezone) {

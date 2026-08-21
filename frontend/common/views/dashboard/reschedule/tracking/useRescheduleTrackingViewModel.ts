@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useCallback, useMemo } from "react";
-import { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { LeaveRequestStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   rescheduleTrackingMetricsQueryDocument,
   rescheduleTrackingRowsQueryDocument,

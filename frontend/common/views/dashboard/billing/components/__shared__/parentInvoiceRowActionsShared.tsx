@@ -3,7 +3,7 @@
 import { DownloadOutlined, VisibilityOutlined } from "@mui/icons-material";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import type { ComponentType } from "react";
-import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { InvoiceStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type {
   ParentInvoiceRowActionLabels,
   ParentInvoiceRowActionsProps,

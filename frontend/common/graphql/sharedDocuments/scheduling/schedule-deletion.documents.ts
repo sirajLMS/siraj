@@ -1,10 +1,14 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ClearWeeklyScheduleMutation,
+  ClearWeeklyScheduleMutationVariables,
+  DeleteRecurringClassMutation,
+  DeleteRecurringClassMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const deleteRecurringClassMutationDocument: TypedDocumentNode<
-  Operations.DeleteRecurringClassMutation,
-  Types.MutationDeleteRecurringClassArgs
+  DeleteRecurringClassMutation,
+  DeleteRecurringClassMutationVariables
 > = gql`
   mutation deleteRecurringClass($classInstanceId: ID!) {
     deleteRecurringClass(classInstanceId: $classInstanceId)
@@ -12,8 +16,8 @@ export const deleteRecurringClassMutationDocument: TypedDocumentNode<
 `;
 
 export const clearWeeklyScheduleMutationDocument: TypedDocumentNode<
-  Operations.ClearWeeklyScheduleMutation,
-  Types.MutationClearWeeklyScheduleArgs
+  ClearWeeklyScheduleMutation,
+  ClearWeeklyScheduleMutationVariables
 > = gql`
   mutation clearWeeklySchedule($teacherId: ID!) {
     clearWeeklySchedule(teacherId: $teacherId)

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ProfileAudience, ProfileMode, ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { ProfileAudience, ProfileMode, ProfileScope } from "@/shared/constants/profile.enum";
 
 export type ProfileShellProps = {
   readonly loading?: boolean;

@@ -4,12 +4,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useOnboardingAvatar } from "@/frontend/common/components/onboarding/hooks/useOnboardingAvatar";
 import { useOnboardingSubmit } from "@/frontend/common/components/onboarding/hooks/useOnboardingSubmit";
-import { CurrencyCode, IanaTimezone, ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, ManagerAccountType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useCreateManagerOnboarding } from "@/frontend/common/hooks/useCreateManagerOnboarding";
 import type { ManagerOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { managerOnboardingSchema } from "@/frontend/common/views/dashboard/staff/onboarding/schemas/managerOnboardingSchema";
 import type { ManagerOnboardingViewProps } from "@/frontend/common/views/dashboard/staff/onboarding/types";
 import { useOnboardingMetrics } from "@/frontend/common/views/dashboard/staff/onboarding/useOnboardingMetrics";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { useRouter } from "@/shared/i18n/navigation";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
@@ -18,7 +19,7 @@ const defaultValues: ManagerOnboardingFormData = {
   email: "",
   avatarUrl: undefined,
   phone: "",
-  timezone: IanaTimezone.AfricaCairo,
+  timezone: IanaTimezone.Africa_Cairo,
   displayCurrency: CurrencyCode.Usd,
   accountType: ManagerAccountType.Manager,
   password: "",

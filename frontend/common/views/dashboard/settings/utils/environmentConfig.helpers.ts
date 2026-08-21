@@ -1,4 +1,4 @@
-import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { isEnvConfigSecretEntry } from "@/frontend/common/views/dashboard/settings/utils/environmentConfig.utils";
 
 export function getEnvConfigDisplayValue(

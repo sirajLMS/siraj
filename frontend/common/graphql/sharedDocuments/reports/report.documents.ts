@@ -1,9 +1,12 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  GenerateAttendanceReportQuery,
+  GenerateAttendanceReportQueryVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const generateAttendanceReportQueryDocument: TypedDocumentNode<
-  Operations.GenerateAttendanceReportQuery,
-  Operations.GenerateAttendanceReportQueryVariables
+  GenerateAttendanceReportQuery,
+  GenerateAttendanceReportQueryVariables
 > = gql`
   query GenerateAttendanceReport($filters: AttendanceReportFiltersInput!) {
     generateAttendanceReport(filters: $filters) {

@@ -4,7 +4,7 @@ import { useApolloClient, useMutation } from "@apollo/client/react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthContext } from "@/frontend/common/context/AuthContext";
-import type { MutationLoginArgs, User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { LoginMutationVariables, MeQuery_me } from "@/frontend/common/graphql/generated/gql/graphql";
 import * as Document from "@/frontend/common/graphql/sharedDocuments";
 import { useAuthToken } from "@/frontend/common/hooks/useAuthToken";
 import { dedupedRefreshToken } from "@/frontend/common/lib/dedupedRefreshToken";
@@ -23,7 +23,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const client = useApolloClient();
   const [loginMutation] = useMutation(Document.loginMutationDocument);
 
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<MeQuery_me | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const login = useCallback(
-    async (credentials: MutationLoginArgs, redirectUrl: string | null = null): Promise<boolean> => {
+    async (credentials: LoginMutationVariables, redirectUrl: string | null = null): Promise<boolean> => {
       setError(null);
       try {
         const { data } = await loginMutation({

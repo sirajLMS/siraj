@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { CronRunStatus, CronScheduleStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CronRunStatus, CronScheduleStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { AppLocale } from "@/shared/locale/AppLocale";
 import { readTranslation } from "@/shared/locale/client/translation-cache-store";
 import { Translation } from "@/shared/locale/namespaces/translation";

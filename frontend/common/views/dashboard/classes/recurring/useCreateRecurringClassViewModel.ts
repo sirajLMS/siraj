@@ -4,7 +4,7 @@ import { useApolloClient, useMutation } from "@apollo/client/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CreateRecurringClassInput } from "@/frontend/common/graphql/generated/gql/graphql";
 import { createRecurringClassMutationDocument } from "@/frontend/common/graphql/sharedDocuments/scheduling/recurring-class.documents";
 import { resolveBrowserIanaTimezoneId } from "@/frontend/common/lib/timezone";
 import { useCreateRecurringClassStore } from "@/frontend/common/stores/createRecurringClassStore";

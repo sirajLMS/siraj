@@ -4,6 +4,7 @@ import { extendSchema, parse } from "graphql";
 import { DateResolver, DateTimeResolver } from "graphql-scalars";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { EmailScalar } from "@/backend/graphql/scalars/emailScalar";
+import { IanaTimezoneScalar } from "@/backend/graphql/scalars/ianaTimezoneScalar";
 import { JSONScalar } from "@/backend/graphql/scalars/jsonScalar";
 import { LocalizedStringScalar } from "@/backend/graphql/scalars/localizedStringScalar";
 import { PhoneNumberScalar } from "@/backend/graphql/scalars/phoneNumberScalar";
@@ -41,6 +42,7 @@ gqlSchemaBuilder.addScalarType("Email", EmailScalar);
 gqlSchemaBuilder.addScalarType("JSON", JSONScalar);
 gqlSchemaBuilder.addScalarType("StringMap", StringMapScalar);
 gqlSchemaBuilder.addScalarType("LocalizedString", LocalizedStringScalar);
+gqlSchemaBuilder.addScalarType("IanaTimezone", IanaTimezoneScalar);
 
 gqlSchemaBuilder.mutationType({});
 

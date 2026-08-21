@@ -3,7 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useNotifications } from "@toolpad/core/useNotifications";
 import { useMemo, useState } from "react";
-import { AppPermission, type CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission, type CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   activateSupportedCurrencyMutationDocument,
   deactivateSupportedCurrencyMutationDocument,

@@ -7,7 +7,7 @@ import {
   type GenderSelectorSharedProps,
   useGenderSelectorButtons,
 } from "@/frontend/common/components/ui/input/genderSelector/buttonGroupSelectorTypes";
-import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { Gender } from "@/frontend/common/graphql/generated/gql/graphql";
 
 const DEFAULT_OPTIONS: ButtonGroupSelectorOptions = {};
 

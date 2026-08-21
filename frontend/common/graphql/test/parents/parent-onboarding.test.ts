@@ -2,13 +2,13 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import {
   CurrencyCode,
-  IanaTimezone,
   InvoiceType,
   PaymentDirection,
   PaymentMethodType,
   type UserPaymentMethodInitialInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { createParentMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
@@ -34,7 +34,7 @@ const createMinimalParentInput = (
   feeAmount: null,
   initialPayinMethod: null,
   currency: null,
-  timezone: IanaTimezone.Utc,
+  timezone: IanaTimezone.UTC,
   address: null,
   facebook: null,
   nationality: null,
@@ -91,7 +91,7 @@ const createFullParentInput = (
     },
   },
   currency: overrides?.currency ?? CurrencyCode.Usd,
-  timezone: overrides?.timezone ?? IanaTimezone.AmericaChicago,
+  timezone: overrides?.timezone ?? IanaTimezone.America_Chicago,
   address: overrides?.address ?? "123 Main St",
   facebook: overrides?.facebook ?? "facebook.com/testparent",
   whatsapp: overrides?.whatsapp ?? "+1234567890",

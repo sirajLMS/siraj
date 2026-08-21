@@ -18,7 +18,7 @@ function PhoneCountryPickerStory({
   }
 >) {
   const [country, setCountry] = useState<CountryType | undefined>(() =>
-    countries.find(entry => entry.code === initialCountryCode)
+    countries.find(entry => entry.code.toString() === initialCountryCode)
   );
 
   return (

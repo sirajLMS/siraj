@@ -6,7 +6,7 @@ import { ParentLifecycleService } from "@/backend/services";
 import {
   AccountStatus as GraphQLAccountStatus,
   ParentStatus as GraphQLParentStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { ParentLifecycleContainer } from "@/frontend/common/views/dashboard/parents/lifecycle/ParentLifecycleContainer";
 
 export async function generateMetadata(): Promise<Metadata> {

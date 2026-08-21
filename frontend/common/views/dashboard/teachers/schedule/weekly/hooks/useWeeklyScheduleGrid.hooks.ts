@@ -13,7 +13,7 @@
 // Both tier files now import this single shared implementation.
 
 import { useCallback as _useCallback, useState } from "react";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { TeacherWeeklyScheduleLabels } from "@/shared/locale/types/dashboard/teachers/weeklySchedule";
 
 export type WeeklyScheduleSlotStatusLabels = TeacherWeeklyScheduleLabels["grid"]["status"];

@@ -3,7 +3,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
-import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { SuggestionStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForParent } from "@/frontend/common/utils/profileHref";
 import type { AdminSuggestionRow } from "@/frontend/common/views/dashboard/suggestions/types/suggestions.types";
 import type { SuggestionsDataGridProps } from "@/frontend/common/views/dashboard/suggestions/types/suggestionsView.types";

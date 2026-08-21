@@ -77,23 +77,27 @@ Always import from `"@apollo/client"` — **never** from `"@apollo/client/core"`
 
 ```ts
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { EntityNameQuery, EntityNameQueryVariables } from "@/frontend/common/graphql/generated/gql/graphql";
 ```
+
+All types (operation results, variables, enums, extracted field types, inputs) live in the single `graphql.ts` file. The old `graphql-types.ts` and `operations.ts` files no longer exist.
 
 ## TypedDocumentNode Convention
 The naming follows a strict, predictable pattern derived from the operation name:
 
 | Operation | Const name | TypedDocumentNode type |
 |---|---|---|
-| `query <entityName>` | `{entityName}QueryDocument` | `TypedDocumentNode<Operations.{EntityName}Query, Types.Query{EntityName}Args>` |
-| `mutation <entityName>` | `{entityName}MutationDocument` | `TypedDocumentNode<Operations.{EntityName}Mutation, Types.Mutation{EntityName}Args>` |
+| `query <entityName>` | `{entityName}QueryDocument` | `TypedDocumentNode<{EntityName}Query, {EntityName}QueryVariables>` |
+| `mutation <entityName>` | `{entityName}MutationDocument` | `TypedDocumentNode<{EntityName}Mutation, {EntityName}MutationVariables>` |
 
 **Rules:**
-- Query const: `<camelCaseName>QueryDocument` → `TypedDocumentNode<Operations.<PascalCaseName>Query, Types.Query<PascalCaseName>Args>`
-- Mutation const: `<camelCaseName>MutationDocument` → `TypedDocumentNode<Operations.<PascalCaseName>Mutation, Types.Mutation<PascalCaseName>Args>`
-- No-arg queries: omit the second type parameter → `TypedDocumentNode<Operations.{EntityName}Query>`
+- Query const: `<camelCaseName>QueryDocument` → `TypedDocumentNode<{PascalCaseName}Query, {PascalCaseName}QueryVariables>`
+- Mutation const: `<camelCaseName>MutationDocument` → `TypedDocumentNode<{PascalCaseName}Mutation, {PascalCaseName}MutationVariables>`
+- No-arg queries: omit the second type parameter → `TypedDocumentNode<{EntityName}Query>`
 - These types are **always** available after `bun run generate:gqlSchema && bun codegen` — **never** use inline type literals
+- For nested field types, use compact extracted names: `{OperationName}_{field}` (e.g., `MeQuery_me`, `QuotaQuery_quota`)
+- **NO MAPPING**: No type mapping functions, no intermediate conversion layers, no indexed-access workarounds (e.g., `NonNullable<MeQuery["me"]>`). Use the exact codegen-generated type name directly.
+- **NO SCHEMA TYPES**: No schema-level object types (e.g., `User`, `Quota`). Only operation-derived types from `graphql.ts`.
 
 ## Codegen
 After modifying any `.documents.ts` file or any backend schema/pothos file, always run:

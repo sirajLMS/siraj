@@ -1,10 +1,12 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ChangeParentLifecycleStatusMutation,
+  ChangeParentLifecycleStatusMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const changeParentLifecycleStatusMutationDocument: TypedDocumentNode<
-  Operations.ChangeParentLifecycleStatusMutation,
-  Types.MutationChangeParentLifecycleStatusArgs
+  ChangeParentLifecycleStatusMutation,
+  ChangeParentLifecycleStatusMutationVariables
 > = gql`
   mutation ChangeParentLifecycleStatus($parentId: String!, $newStatus: ParentStatus!) {
     changeParentLifecycleStatus(parentId: $parentId, newStatus: $newStatus) {

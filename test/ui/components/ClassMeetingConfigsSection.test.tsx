@@ -17,8 +17,7 @@ if (!("clipboard" in navigator)) {
   });
 }
 
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { ClassMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import { AppPermission, type ClassMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   classMeetingConfigsQueryDocument,
   classMeetingConfigsWithStatusQueryDocument,

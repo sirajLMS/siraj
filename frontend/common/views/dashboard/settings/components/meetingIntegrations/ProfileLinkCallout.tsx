@@ -3,7 +3,7 @@
 import { OpenInNewOutlined } from "@mui/icons-material";
 import { Box, Button, Fade, useMediaQuery } from "@mui/material";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
 
 const FADE_DURATION_MS = 200;

@@ -1,4 +1,4 @@
-import type { AccountStatus, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { AccountStatus, ParentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type { AccountStatus, ParentStatus };
 

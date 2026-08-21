@@ -4,7 +4,7 @@ import {
   CurrencyDisplayPart,
   DEFAULT_CURRENCY_DISPLAY_PARTS,
 } from "@/frontend/common/components/ui/display/currencyDisplay/constants";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { currencies } from "@/frontend/common/lib/currency";
 import { DesktopCurrencyDisplay } from "@/frontend/desktop/components/ui/display/currencyDisplay/CurrencyDisplay.desktop";
 
@@ -114,7 +114,7 @@ export const AllParts: Story = {
 
 export const UnknownCode: Story = {
   args: {
-    code: "ZZZ",
+    code: null,
     fallback: "Unknown currency",
     parts: [CurrencyDisplayPart.Flag, CurrencyDisplayPart.Label],
   },

@@ -5,7 +5,7 @@ import { RequirePermission } from "@/frontend/common/components/auth/RequirePerm
 import { BaseDeleteDialog } from "@/frontend/common/components/ui/dialog";
 import { FormErrorSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormErrorSnackbar";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   type ParentAccountActionsProps,
   useParentAccountActionsViewModel,

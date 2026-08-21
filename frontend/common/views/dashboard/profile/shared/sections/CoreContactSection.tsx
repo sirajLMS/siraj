@@ -8,12 +8,13 @@ import { PhoneFormField, SectionPanel } from "@/frontend/common/components/ui";
 import { PhoneDisplay } from "@/frontend/common/components/ui/display/phoneDisplay/PhoneDisplay";
 import { TimezoneDisplay } from "@/frontend/common/components/ui/display/timezoneDisplay/TimezoneDisplay";
 import { TimezoneSelect } from "@/frontend/common/components/ui/input/timezoneSelect/TimezoneSelect";
-import type { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { fromGraphqlIanaTimezone, toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import { ProfileFieldRow } from "@/frontend/common/views/dashboard/profile/shared/ProfileFieldRow";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import { useProfileFieldAccess } from "@/frontend/common/views/dashboard/profile/shared/useProfileFieldAccess";
 import { useProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/useProfileSharedBaseLabels";
+import type { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
+import type { ProfileScope } from "@/shared/constants/profile.enum";
 
 type CoreContactFormFields = {
   phone?: string;
@@ -24,7 +25,7 @@ type CoreContactViewProps = {
   readonly mode: "view";
   readonly scope?: ProfileScope;
   readonly phone: string | null | undefined;
-  readonly timezone?: string | null;
+  readonly timezone?: IanaTimezone | null;
   readonly sectionTitle: string;
   readonly phoneLabel: string;
   readonly timezoneLabel?: string;
@@ -103,9 +104,9 @@ function CoreContactEditSection<T extends CoreContactFormFields & FieldValues>({
             control={props.control}
             render={({ field, fieldState }) => (
               <TimezoneSelect
-                value={field.value ? toGraphqlIanaTimezone(field.value) : null}
+                value={field.value ? toIanaTimezone(field.value) : null}
                 onChangeAction={value => {
-                  field.onChange(value ? fromGraphqlIanaTimezone(value) : "");
+                  field.onChange(value ?? "");
                 }}
                 onBlurAction={field.onBlur}
                 label={props.timezoneLabel}

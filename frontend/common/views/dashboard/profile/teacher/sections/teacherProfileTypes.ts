@@ -1,4 +1,4 @@
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { ProfileByUserIdQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import type { TeacherProfileLabels } from "@/shared/locale/types/dashboard/teachers/profile";
 import type { ErrorsLabels } from "@/shared/locale/types/errors";
@@ -11,7 +11,7 @@ export type TeacherProfileViewLabels = {
   readonly errors: ErrorsLabels;
 };
 
-type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
 
 export type TeacherOwnData = NonNullable<ProfileData["teacherOwnProfile"]>;
 export type TeacherAdminData = NonNullable<ProfileData["teacherAdminProfile"]>;

@@ -3,7 +3,7 @@ import {
   MeetingConnectionTestMode,
   MeetingIntegrationConnectedAccountStatus,
   MeetingIntegrationProviderSlug,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   createConnectedAccountsMock,
   createMeetingIntegrationLabelsMock,

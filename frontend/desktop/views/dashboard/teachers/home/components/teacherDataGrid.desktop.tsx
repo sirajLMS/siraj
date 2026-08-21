@@ -5,7 +5,7 @@ import { Box, IconButton, Typography } from "@mui/material";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { ViewAsUserButton } from "@/frontend/common/components/auth/ViewAsUserButton";
 import { buildServerPaginationOptions } from "@/frontend/common/components/ui/filter/listPaginationOptions";
-import type { TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { TeacherDirectoryQuery_teacherDirectory_rows as TeacherDirectoryRow } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForTeacher } from "@/frontend/common/utils/profileHref";
 import { DesktopAppDataGrid, DesktopPersonProfileLinkCell } from "@/frontend/desktop/components/ui";
 import type { TeachersDirectoryLabels } from "@/shared/locale/types/dashboard/teachers/directory";

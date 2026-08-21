@@ -12,7 +12,6 @@ import {
 } from "@mui/icons-material";
 import { Box, IconButton, Typography } from "@mui/material";
 import { useMemo } from "react";
-import { AttendanceStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { useAppLocale } from "@/frontend/common/providers/localeContext";
 import { ProfileRestrictedSection } from "@/frontend/common/views/dashboard/profile/shared/sections/ProfileRestrictedSection";
 import { StudentHistoryLabelsProvider } from "@/frontend/common/views/dashboard/students/history/studentHistoryLabelsContext";
@@ -24,6 +23,7 @@ import { MobilePageContainer } from "@/frontend/mobile/components/ui/container/p
 import { ClassSessionListMobile } from "@/frontend/mobile/views/dashboard/students/history/components/classSessionList.mobile";
 import { MobileWeeklyScroller } from "@/frontend/mobile/views/dashboard/students/history/components/mobileWeeklyScroller.mobile";
 import { PerformanceStreakMobile } from "@/frontend/mobile/views/dashboard/students/history/components/performanceStreak.mobile";
+import { AttendanceStatus } from "@/shared/constants/attendance-status.enum";
 import { getLatnLocaleTag } from "@/shared/lib/locale-tag";
 
 function deriveStreakDays(
@@ -45,9 +45,9 @@ function deriveStreakDays(
     const session = classes[day];
     if (!session) {
       result.push(0);
-    } else if (session.status === AttendanceStatus.Absent) {
+    } else if (session.status === AttendanceStatus.ABSENT) {
       result.push(0);
-    } else if (session.status === AttendanceStatus.Late) {
+    } else if (session.status === AttendanceStatus.LATE) {
       result.push(24);
     } else {
       result.push(48);

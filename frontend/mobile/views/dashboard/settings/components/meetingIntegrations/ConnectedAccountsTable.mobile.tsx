@@ -2,7 +2,7 @@
 
 import { Box, Button, OutlinedInput, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MeetingIntegrationConnectedAccountStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   formatConnectedAccountDate,
   getStatusLabel,

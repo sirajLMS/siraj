@@ -2,7 +2,7 @@ import {
   ClassType,
   SchedulingMode,
   type SchedulingMode as SchedulingModeType,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const CLASS_TYPE_MAPPING: Record<string, ClassType> = {
   REGULAR: ClassType.Regular,

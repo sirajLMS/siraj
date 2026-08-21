@@ -3,8 +3,11 @@
 import { useQuery } from "@apollo/client/react";
 import { PeopleOutlined, SchoolOutlined } from "@mui/icons-material";
 import { useCallback, useMemo } from "react";
-import { ClassExecutionState, ClassOutcome } from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type { AdminDashboardScheduleQuery_adminDashboardSchedule_AdminDashboardScheduleResult_rows_DailyScheduleList as ScheduleRow } from "@/frontend/common/graphql/generated/gql/operations";
+import {
+  ClassExecutionState,
+  ClassOutcome,
+  type AdminDashboardScheduleQuery_adminDashboardSchedule_rows as ScheduleRow,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { adminDashboardScheduleQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useScheduleAlertsStore } from "@/frontend/common/stores/scheduleAlertsStore";
 import type {

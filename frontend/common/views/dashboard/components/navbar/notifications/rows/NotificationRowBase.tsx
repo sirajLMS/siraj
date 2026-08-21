@@ -4,7 +4,7 @@ import { Box, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/
 import type { Theme } from "@mui/material/styles";
 import type { ReactNode } from "react";
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { RowMarkReadAction } from "@/frontend/common/views/dashboard/components/navbar/notifications/rows/RowMarkReadAction";
 import type { NotificationDrawerAlert } from "@/frontend/common/views/dashboard/components/navbar/notifications/types/notificationDrawer.types";
 import type { NotificationMetadata } from "@/shared/types/notification-alerts.types";

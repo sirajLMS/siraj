@@ -60,7 +60,6 @@ import { IdentifierKind, PaymentDirection, PaymentMethodType } from "@/backend/e
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ClassExecutionState, ClassOutcome, ClassType } from "@/shared/constants/class-instance-detail.enum";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
-import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import { SystemSettingCategory, SystemSettingDataType } from "@/shared/constants/settings/system-settings.enum";
 
 export const AppPermissionPothosEnum = gqlSchemaBuilder.enumType(AppPermission, {
@@ -173,10 +172,6 @@ export const NotificationChannelPothosObject = gqlSchemaBuilder.enumType(Notific
 
 export const NotificationEventTypePothosObject = gqlSchemaBuilder.enumType(NotificationEventType, {
   name: "NotificationEventType",
-});
-
-export const IanaTimezonePothosObject = gqlSchemaBuilder.enumType(IanaTimezone, {
-  name: "IanaTimezone",
 });
 
 export const CurrencyCodePothosObject = gqlSchemaBuilder.enumType(CurrencyCode, {

@@ -6,7 +6,7 @@ import { Box, Chip, Stack, Typography } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import { AppDataGrid, SectionPanel } from "@/frontend/common/components/ui";
-import { OverrideState } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { OverrideState } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { StaffPermissionsSectionLabels } from "@/frontend/common/views/dashboard/profile/staff/sections/staffProfileTypes";
 import {
   type PermissionsSectionProps,

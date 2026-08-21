@@ -4,12 +4,12 @@ import {
   CountryCode,
   CurrencyCode,
   Gender,
-  IanaTimezone,
   PaymentDirection,
   PaymentMethodType,
   type TeacherOnboardingInput,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { createTeacherMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 import {
   authenticatedRequest,
   cleanupTestSuperAdmin,
@@ -29,7 +29,7 @@ const createMinimalTeacherInput = (
   email: overrides?.email ?? `test_teacher_${Date.now()}@test.com`,
   avatarUrl: null,
   password: `Pwd_${randomUUID()}`,
-  timezone: IanaTimezone.Utc,
+  timezone: IanaTimezone.UTC,
   nationality: CountryCode.Us,
   countryCode: CountryCode.Us,
   phone: "+1234567890",
@@ -229,7 +229,7 @@ describe("Teacher Onboarding GraphQL API", () => {
       name: "Minimal Teacher",
       email: `minimal_${Date.now()}@test.com`,
       password: `Pwd_${randomUUID()}`,
-      timezone: IanaTimezone.Utc,
+      timezone: IanaTimezone.UTC,
       avatarUrl: null,
       nationality: null,
       nationalId: null,
@@ -326,7 +326,7 @@ describe("Teacher Onboarding GraphQL API", () => {
   test("create teacher with different timezone succeeds", async () => {
     const teacher = await createTeacherAsAdmin(
       { name: "TZ Teacher", email: `tz_${Date.now()}@test.com` },
-      { timezone: IanaTimezone.AmericaNewYork }
+      { timezone: IanaTimezone.America_New_York }
     );
     expect(teacher.userId).toBeDefined();
   });
@@ -343,7 +343,7 @@ describe("Teacher Onboarding GraphQL API", () => {
       address: "789 Maple Street, Toronto, ON",
       qualifications: "PhD Physics, MSc Education, BSc Mathematics",
       countryCode: CountryCode.Ca,
-      timezone: IanaTimezone.AmericaNewYork,
+      timezone: IanaTimezone.America_New_York,
       hourlyRate: "120.00",
       rateCurrency: CurrencyCode.Cad,
       displayCurrency: CurrencyCode.Cad,

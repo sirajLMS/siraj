@@ -1,10 +1,6 @@
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { UserPaymentMethodInitialInputPothos } from "@/backend/graphql/pothos/billing/payment-method.pothos";
-import {
-  CurrencyCodePothosObject,
-  IanaTimezonePothosObject,
-  InvoiceTypePothosObject,
-} from "@/backend/graphql/pothos/shared/enum.pothos";
+import { CurrencyCodePothosObject, InvoiceTypePothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { safeParseCurrencyCode } from "@/backend/lib/currency.validation";
 import type { ParentOnboardingGqlInput, ParentOnboardingResult } from "@/backend/types";
 
@@ -27,7 +23,7 @@ export const ParentOnboardingInputPothosObject = gqlSchemaBuilder
       feeAmount: t.string({ directives: { constraint: { maxLength: 512 } } }),
       initialPayinMethod: t.field({ type: UserPaymentMethodInitialInputPothos, required: false }),
       currency: t.field({ type: CurrencyCodePothosObject }),
-      timezone: t.field({ type: IanaTimezonePothosObject, required: true }),
+      timezone: t.field({ type: "IanaTimezone", required: true }),
       displayCurrency: t.field({ type: CurrencyCodePothosObject, required: false }),
     }),
   });

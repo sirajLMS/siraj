@@ -1,10 +1,26 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  ApprovePaymentProofMutation,
+  ApprovePaymentProofMutationVariables,
+  CreateManualInvoiceMutation,
+  CreateManualInvoiceMutationVariables,
+  DeleteInvoiceMutation,
+  DeleteInvoiceMutationVariables,
+  InvoicePaymentSubmissionQuery,
+  InvoicePaymentSubmissionQueryVariables,
+  MarkInvoicePaidMutation,
+  MarkInvoicePaidMutationVariables,
+  RejectPaymentProofMutation,
+  RejectPaymentProofMutationVariables,
+  SendPaymentReminderMutation,
+  SendPaymentReminderMutationVariables,
+  SubmitPaymentProofMutation,
+  SubmitPaymentProofMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 export const createManualInvoiceMutationDocument: TypedDocumentNode<
-  Operations.CreateManualInvoiceMutation,
-  Types.MutationCreateManualInvoiceArgs
+  CreateManualInvoiceMutation,
+  CreateManualInvoiceMutationVariables
 > = gql`
   mutation CreateManualInvoice(
     $parentId: String!
@@ -55,8 +71,8 @@ export const createManualInvoiceMutationDocument: TypedDocumentNode<
 `;
 
 export const markInvoicePaidMutationDocument: TypedDocumentNode<
-  Operations.MarkInvoicePaidMutation,
-  Types.MutationMarkInvoicePaidArgs
+  MarkInvoicePaidMutation,
+  MarkInvoicePaidMutationVariables
 > = gql`
   mutation MarkInvoicePaid($invoiceId: String!, $proofFileId: ID!, $expectedVersion: Int) {
     markInvoicePaid(invoiceId: $invoiceId, proofFileId: $proofFileId, expectedVersion: $expectedVersion) {
@@ -71,8 +87,8 @@ export const markInvoicePaidMutationDocument: TypedDocumentNode<
 `;
 
 export const submitPaymentProofMutationDocument: TypedDocumentNode<
-  Operations.SubmitPaymentProofMutation,
-  Types.MutationSubmitPaymentProofArgs
+  SubmitPaymentProofMutation,
+  SubmitPaymentProofMutationVariables
 > = gql`
   mutation SubmitPaymentProof($invoiceId: String!, $proofFileId: ID!, $expectedVersion: Int) {
     submitPaymentProof(invoiceId: $invoiceId, proofFileId: $proofFileId, expectedVersion: $expectedVersion) {
@@ -87,8 +103,8 @@ export const submitPaymentProofMutationDocument: TypedDocumentNode<
 `;
 
 export const approvePaymentProofMutationDocument: TypedDocumentNode<
-  Operations.ApprovePaymentProofMutation,
-  Types.MutationApprovePaymentProofArgs
+  ApprovePaymentProofMutation,
+  ApprovePaymentProofMutationVariables
 > = gql`
   mutation ApprovePaymentProof($invoiceId: String!, $expectedVersion: Int) {
     approvePaymentProof(invoiceId: $invoiceId, expectedVersion: $expectedVersion) {
@@ -103,8 +119,8 @@ export const approvePaymentProofMutationDocument: TypedDocumentNode<
 `;
 
 export const rejectPaymentProofMutationDocument: TypedDocumentNode<
-  Operations.RejectPaymentProofMutation,
-  Types.MutationRejectPaymentProofArgs
+  RejectPaymentProofMutation,
+  RejectPaymentProofMutationVariables
 > = gql`
   mutation RejectPaymentProof($invoiceId: String!, $rejectionReason: String, $expectedVersion: Int) {
     rejectPaymentProof(
@@ -123,8 +139,8 @@ export const rejectPaymentProofMutationDocument: TypedDocumentNode<
 `;
 
 export const invoicePaymentSubmissionQueryDocument: TypedDocumentNode<
-  Operations.InvoicePaymentSubmissionQuery,
-  Types.QueryInvoicePaymentSubmissionArgs
+  InvoicePaymentSubmissionQuery,
+  InvoicePaymentSubmissionQueryVariables
 > = gql`
   query InvoicePaymentSubmission($invoiceId: String!) {
     invoicePaymentSubmission(invoiceId: $invoiceId) {
@@ -143,10 +159,8 @@ export const invoicePaymentSubmissionQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const deleteInvoiceMutationDocument: TypedDocumentNode<
-  Operations.DeleteInvoiceMutation,
-  Types.MutationDeleteInvoiceArgs
-> = gql`
+export const deleteInvoiceMutationDocument: TypedDocumentNode<DeleteInvoiceMutation, DeleteInvoiceMutationVariables> =
+  gql`
   mutation DeleteInvoice($invoiceId: String!) {
     deleteInvoice(invoiceId: $invoiceId) {
       id
@@ -158,8 +172,8 @@ export const deleteInvoiceMutationDocument: TypedDocumentNode<
 `;
 
 export const sendPaymentReminderMutationDocument: TypedDocumentNode<
-  Operations.SendPaymentReminderMutation,
-  Types.MutationSendPaymentReminderArgs
+  SendPaymentReminderMutation,
+  SendPaymentReminderMutationVariables
 > = gql`
   mutation SendPaymentReminder($studentId: String!) {
     sendPaymentReminder(studentId: $studentId) {

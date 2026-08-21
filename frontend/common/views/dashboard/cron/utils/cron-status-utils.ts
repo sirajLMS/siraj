@@ -1,8 +1,4 @@
-import {
-  CronRunStatus,
-  CronScheduleStatus,
-  CronTriggerSource,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CronRunStatus, CronScheduleStatus, CronTriggerSource } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CronLabels } from "@/shared/locale/types/dashboard/cron";
 
 /** Returns localized label for a schedule status. */

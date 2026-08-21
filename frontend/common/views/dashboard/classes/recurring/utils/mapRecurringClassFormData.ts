@@ -9,8 +9,8 @@ import type {
   CurrencyCode,
   OnDemandNoCreditsOutcome,
   SchedulingMode,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import { toGraphqlIanaTimezone } from "@/frontend/common/lib/timezone";
+} from "@/frontend/common/graphql/generated/gql/graphql";
+import { toIanaTimezone } from "@/frontend/common/lib/timezone";
 import type { RecurringClassFormData } from "@/frontend/common/views/dashboard/classes/recurring/recurringClassSchema";
 import type { ClassType as BackendClassType } from "@/shared/constants/class-instance-detail.enum";
 import type { CurrencyCode as BackendCurrencyCode } from "@/shared/constants/currency.enum";
@@ -93,7 +93,7 @@ export function mapFormDataToInput(data: RecurringClassFormData): CreateRecurrin
     subjectId: data.subjectId,
     durationMinutes: calculateDurationMinutes(data),
     defaultStartTime: data.defaultStartTime,
-    timezone: toGraphqlIanaTimezone(data.timezone),
+    timezone: toIanaTimezone(data.timezone),
     classType: CLASS_TYPE_VALUES.find((v): v is ClassType => v === data.classType) ?? null,
     days: activeDays,
     generateInstancesForWeeks: data.generateInstancesForWeeks ?? 4,

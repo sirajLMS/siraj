@@ -1,4 +1,4 @@
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 
 export type MeetingConfigSelectOption = {
   readonly id: string;

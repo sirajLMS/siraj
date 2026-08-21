@@ -1,4 +1,4 @@
-import type { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { LessonReportStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SupervisorDashboardLabels } from "@/shared/locale";
 
 export interface PendingDuesSummary {

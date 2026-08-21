@@ -6,9 +6,10 @@ import {
   BookingStatus,
   ClassExecutionState,
   ClassOutcome,
-  type EffectiveMeeting,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+  type ParentDashboardMetricsQuery_parentDashboardMetrics,
+  type ParentDashboardScheduleQuery,
+  type ParentDashboardScheduleQuery_parentDashboardSchedule_rows_effectiveMeeting,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   parentDashboardMetricsQueryDocument,
   parentDashboardScheduleQueryDocument,
@@ -62,12 +63,14 @@ function mapExecutionStateToLiveClassStatus(
   return "scheduled";
 }
 
-function resolveMeetingJoinUrl(effectiveMeeting?: EffectiveMeeting | null): string | null {
+function resolveMeetingJoinUrl(
+  effectiveMeeting?: ParentDashboardScheduleQuery_parentDashboardSchedule_rows_effectiveMeeting | null
+): string | null {
   const fromEffective = effectiveMeeting?.joinUrl?.trim();
   return fromEffective ?? null;
 }
 
-type ScheduleQueryData = Operations.ParentDashboardScheduleQuery;
+type ScheduleQueryData = ParentDashboardScheduleQuery;
 
 function useScheduleRows(data: ScheduleQueryData | undefined): readonly ParentScheduleRow[] {
   return useMemo(() => {
@@ -141,7 +144,7 @@ function useDashboardLabels(t: ParentDashboardLabels, _userName: string) {
   );
 }
 
-type MetricsResult = Operations.ParentDashboardMetricsQuery_parentDashboardMetrics_ParentDashboardMetricsResult;
+type MetricsResult = ParentDashboardMetricsQuery_parentDashboardMetrics;
 
 function useParentDashboardMetrics(metricsResult: MetricsResult | null | undefined): {
   readonly metrics: ParentDashboardMetrics;

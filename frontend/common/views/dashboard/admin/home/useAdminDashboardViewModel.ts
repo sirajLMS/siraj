@@ -1,7 +1,7 @@
 "use client";
 import { useMemo } from "react";
 import type { PersonOption } from "@/frontend/common/components/ui/input/userSelect/types";
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { MetricItem } from "@/frontend/common/types/shared.types";
 import {

@@ -18,12 +18,10 @@ import { StatusBadge } from "@/frontend/common/components/ui/badge";
 import {
   AppPermission,
   CronConcurrencyPolicy,
+  type CronRunsQuery_cronRuns_rows,
+  type CronScheduleFieldsFragment,
   CronScheduleStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type {
-  CronRunsQuery_cronRuns_CronPaginatedRuns_rows_CronRun,
-  CronScheduleFieldsFragment,
-} from "@/frontend/common/graphql/generated/gql/operations";
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   cronQueueStatsQueryDocument,
   cronRunsQueryDocument,
@@ -396,10 +394,7 @@ function useCronQueries(runsSchedule: CronScheduleFieldsFragment | null, runsOpe
 
   const rows = useMemo(() => data?.cronSchedules?.rows ?? [], [data?.cronSchedules?.rows]);
   const queueStats = useMemo(() => queueStatsData?.cronQueueStats ?? null, [queueStatsData?.cronQueueStats]);
-  const runs = useMemo<CronRunsQuery_cronRuns_CronPaginatedRuns_rows_CronRun[]>(
-    () => runsData?.cronRuns?.rows ?? [],
-    [runsData?.cronRuns?.rows]
-  );
+  const runs = useMemo<CronRunsQuery_cronRuns_rows[]>(() => runsData?.cronRuns?.rows ?? [], [runsData?.cronRuns?.rows]);
 
   return { rows, queueStats, runs, loading, queueStatsLoading, runsLoading, refetch };
 }

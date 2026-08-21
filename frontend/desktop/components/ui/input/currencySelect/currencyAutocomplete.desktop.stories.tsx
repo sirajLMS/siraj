@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import type { CurrencyAutocompleteProps } from "@/frontend/common/components/ui/input/currencySelect/types";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { type CurrencyOption, getCurrencyByCode } from "@/frontend/common/lib/currency";
 import { CurrencyAutocompleteDesktop } from "@/frontend/desktop/components/ui/input/currencySelect/currencyAutocomplete.desktop";
 

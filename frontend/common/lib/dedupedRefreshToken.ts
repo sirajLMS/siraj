@@ -1,12 +1,7 @@
-import type { User } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { RefreshTokenMutation } from "@/frontend/common/graphql/generated/gql/graphql";
 
 type RefreshTokenMutationResult = {
-  data?: {
-    refreshToken?: {
-      token?: string | null;
-      user?: User | null;
-    } | null;
-  } | null;
+  data?: RefreshTokenMutation | null;
 };
 
 let inFlightRefresh: Promise<RefreshTokenMutationResult> | null = null;

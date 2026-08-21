@@ -1,4 +1,4 @@
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type { ProfileByUserIdQuery } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { ProfileSharedBaseLabels } from "@/frontend/common/views/dashboard/profile/shared/types/profileSharedSection.types";
 import type { ProfileLabels, ProfileStaffLabels } from "@/shared/locale/types/profile";
 
@@ -27,7 +27,7 @@ export type StaffRoleSectionLabels = {
 
 export type StaffPermissionsSectionLabels = ProfileStaffLabels["permissions"];
 
-type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
 
 export type StaffProfileViewLabels = {
   readonly base: ProfileLabels;

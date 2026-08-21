@@ -1,4 +1,4 @@
-import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { EnvConfigEntryFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { SettingsEnvironmentCategoryKey } from "@/shared/locale/types/dashboard/settings/environment";
 
 export const ENV_CONFIG_CATEGORY_ORDER: readonly SettingsEnvironmentCategoryKey[] = [

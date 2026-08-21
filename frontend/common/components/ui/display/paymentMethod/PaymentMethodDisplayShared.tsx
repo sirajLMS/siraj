@@ -7,7 +7,11 @@ import type {
   PaymentMethodDisplayData,
   PaymentMethodDisplayProps,
 } from "@/frontend/common/components/ui/display/paymentMethod/types";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import {
+  type CountryCode,
+  type CurrencyCode,
+  PaymentMethodType,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { getPaymentMethodDirectionLabel, getPaymentMethodTypeLabel } from "@/frontend/common/lib/payment-method";
 import type { UiTypographyVariant } from "@/frontend/common/types/shared.types";
 import type {
@@ -28,8 +32,8 @@ type StatusBadgeSlot = React.ComponentType<{
   size: "small";
 }>;
 
-type CountryDisplaySlot = React.ComponentType<{ code: string }>;
-type CurrencyDisplaySlot = React.ComponentType<{ code: string }>;
+type CountryDisplaySlot = React.ComponentType<{ code?: CountryCode | null }>;
+type CurrencyDisplaySlot = React.ComponentType<{ code?: CurrencyCode | null }>;
 type LocalizedStringDisplaySlot = React.ComponentType<{
   value: LocalizedString;
   typographyVariant?: UiTypographyVariant;

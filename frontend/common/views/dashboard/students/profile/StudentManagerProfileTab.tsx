@@ -2,7 +2,6 @@
 
 import { Stack } from "@mui/material";
 import { PrimaryPageAction } from "@/frontend/common/components/ui";
-import { ProfileScope } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { StudentExtensionProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentExtensionProfileSection";
 import { StudentParentAssignmentProfileSection } from "@/frontend/common/views/dashboard/student/profile/sections/StudentParentAssignmentProfileSection";
 import { StudentProfileEditBody } from "@/frontend/common/views/dashboard/student/profile/sections/StudentProfileEditBody";
@@ -12,6 +11,7 @@ import { StudentAdminSection } from "@/frontend/common/views/dashboard/students/
 import type { StudentProfileQueryData } from "@/frontend/common/views/dashboard/students/profile/studentProfileContext.types";
 import { useStudentManagerProfileTabViewModel } from "@/frontend/common/views/dashboard/students/profile/useStudentManagerProfileTabViewModel";
 import { useStudentProfileContext } from "@/frontend/common/views/dashboard/students/profile/useStudentProfileContext";
+import { ProfileScope } from "@/shared/constants/profile.enum";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
 function toStudentProfileRow(profile: StudentProfileQueryData): StudentProfileRow {
@@ -105,7 +105,7 @@ export function StudentManagerProfileTab() {
 
       <StudentProfileUserDetailsSection
         profile={studentProfile}
-        scope={ProfileScope.Other}
+        scope={ProfileScope.OTHER}
         sectionTitle={parentLabels.sections.contact}
         phoneLabel={labels.phone}
         timezoneLabel={parentLabels.fields.timezone}

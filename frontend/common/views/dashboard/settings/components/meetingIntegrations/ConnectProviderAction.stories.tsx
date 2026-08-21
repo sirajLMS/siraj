@@ -1,6 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { MeetingIntegrationProviderSlug } from "@/frontend/common/graphql/generated/gql/graphql";
 import {
   ConnectProviderAction,
   type ConnectProviderActionLabels,

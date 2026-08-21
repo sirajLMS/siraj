@@ -6,7 +6,7 @@ import { Badge, type IconButtonProps } from "@mui/material";
 
 import { RequirePermission } from "@/frontend/common/components/auth/RequirePermission";
 
-import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { AppPermission } from "@/frontend/common/graphql/generated/gql/graphql";
 
 import { useNotificationsDrawerStore } from "@/frontend/common/stores/notificationsDrawerStore";
 

@@ -1,6 +1,13 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AdminRevokeMeetingProviderTokenMutation,
+  AdminRevokeMeetingProviderTokenMutationVariables,
+  MeetingIntegrationConnectedAccountsQuery,
+  MeetingIntegrationConnectedAccountsQueryVariables,
+  MeetingIntegrationProvidersQuery,
+  TestMeetingProviderConnectionMutation,
+  TestMeetingProviderConnectionMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const MEETING_INTEGRATION_PROVIDER_FIELDS = gql`
   fragment MeetingIntegrationProviderFields on MeetingIntegrationProvider {
@@ -62,7 +69,7 @@ export const meetingIntegrationProvidersQueryDocument = gql`
       ...MeetingIntegrationProviderFields
     }
   }
-` as TypedDocumentNode<Operations.MeetingIntegrationProvidersQuery>;
+` as TypedDocumentNode<MeetingIntegrationProvidersQuery>;
 
 export const meetingIntegrationConnectedAccountsQueryDocument = gql`
   ${MEETING_INTEGRATION_CONNECTED_ACCOUNT_FIELDS}
@@ -71,10 +78,7 @@ export const meetingIntegrationConnectedAccountsQueryDocument = gql`
       ...MeetingIntegrationConnectedAccountFields
     }
   }
-` as TypedDocumentNode<
-  Operations.MeetingIntegrationConnectedAccountsQuery,
-  Types.QueryMeetingIntegrationConnectedAccountsArgs
->;
+` as TypedDocumentNode<MeetingIntegrationConnectedAccountsQuery, MeetingIntegrationConnectedAccountsQueryVariables>;
 
 export const testMeetingProviderConnectionMutationDocument = gql`
   ${TEST_MEETING_CONNECTION_RESULT_FIELDS}
@@ -83,10 +87,7 @@ export const testMeetingProviderConnectionMutationDocument = gql`
       ...TestMeetingConnectionResultFields
     }
   }
-` as TypedDocumentNode<
-  Operations.TestMeetingProviderConnectionMutation,
-  Types.MutationTestMeetingProviderConnectionArgs
->;
+` as TypedDocumentNode<TestMeetingProviderConnectionMutation, TestMeetingProviderConnectionMutationVariables>;
 
 export const adminRevokeMeetingProviderTokenMutationDocument = gql`
   ${ADMIN_REVOKE_TOKEN_RESULT_FIELDS}
@@ -95,7 +96,4 @@ export const adminRevokeMeetingProviderTokenMutationDocument = gql`
       ...AdminRevokeTokenResultFields
     }
   }
-` as TypedDocumentNode<
-  Operations.AdminRevokeMeetingProviderTokenMutation,
-  Types.MutationAdminRevokeMeetingProviderTokenArgs
->;
+` as TypedDocumentNode<AdminRevokeMeetingProviderTokenMutation, AdminRevokeMeetingProviderTokenMutationVariables>;

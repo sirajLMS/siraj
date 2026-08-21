@@ -2,7 +2,7 @@
 
 import { Box, Checkbox, Stack, Typography } from "@mui/material";
 import type { ReactNode } from "react";
-import { RateSource, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { RateSource, TeacherDueStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { profileHrefForTeacher, studentHref } from "@/frontend/common/utils/profileHref";
 import type {
   TeacherDueRow,

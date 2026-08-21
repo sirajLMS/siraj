@@ -3,7 +3,7 @@
 import { Box, CircularProgress, Link, Stack, Typography } from "@mui/material";
 import { SectionPanel } from "@/frontend/common/components/ui";
 import { MeetingConfigDisplay } from "@/frontend/common/components/ui/display/meetingConfig/MeetingConfigDisplay";
-import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { UserMeetingConfigFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import { useMeetingSummarySectionViewModel } from "@/frontend/common/views/dashboard/profile/shared/useMeetingSummarySectionViewModel";
 
 export type MeetingSummarySectionProps = {

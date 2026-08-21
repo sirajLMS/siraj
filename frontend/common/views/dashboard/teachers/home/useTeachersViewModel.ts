@@ -4,9 +4,9 @@ import { useQuery } from "@apollo/client/react";
 import { useCallback } from "react";
 import {
   AppPermission,
-  type TeacherDirectoryMetrics,
-  type TeacherDirectoryRow,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  type TeacherDirectoryQuery_teacherDirectory_metrics as TeacherDirectoryMetrics,
+  type TeacherDirectoryQuery_teacherDirectory_rows as TeacherDirectoryRow,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { teacherDirectoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { useTeacherDirectoryStore } from "@/frontend/common/stores/teacherDirectoryStore";
 import { useUserStore } from "@/frontend/common/stores/userStore";

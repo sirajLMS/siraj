@@ -19,14 +19,14 @@ import { ResponsiveViewSwitch } from "@/frontend/common/components/ui/container/
 import {
   AccountStatus,
   CurrencyCode,
-  IanaTimezone,
   ParentStatus,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+  type ProfileByUserIdQuery,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { useUserStore } from "@/frontend/common/stores/userStore";
 import type { ParentProfileViewModel } from "@/frontend/common/views/dashboard/profile/parent/useParentProfileViewModel";
+import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
-type ProfileData = NonNullable<Operations.ProfileByUserIdQuery["profileByUserId"]>;
+type ProfileData = NonNullable<ProfileByUserIdQuery["profileByUserId"]>;
 type ParentOwnData = NonNullable<ProfileData["parentOwnProfile"]>;
 type ParentAdminData = NonNullable<ProfileData["parentAdminProfile"]>;
 type AssociatedStudents = ProfileData["associatedStudents"];
@@ -61,7 +61,7 @@ const parentAdminProfile: ParentAdminData = {
   feeAmount: "500",
   currency: CurrencyCode.Sar,
   displayAmount: null,
-  timezone: IanaTimezone.AsiaRiyadh,
+  timezone: IanaTimezone.Asia_Riyadh,
   createdAt: "2024-01-15T00:00:00.000Z",
   updatedAt: "2024-06-01T00:00:00.000Z",
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
-import type { CronScheduleFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { CronScheduleFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CronLabels } from "@/shared/locale/types/dashboard/cron";
 
 export interface CronManualTriggerDialogProps {

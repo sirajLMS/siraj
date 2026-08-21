@@ -9,8 +9,8 @@ import { ExportButton, PersonProfileLinkCell, SectionPanel, StatusBadge } from "
 import { AppDataGrid } from "@/frontend/common/components/ui/dataGrid/AppDataGrid";
 import {
   GroupClassAttendanceStatus,
-  type GroupClassStudent,
-} from "@/frontend/common/graphql/generated/gql/graphql-types";
+  type GroupClassAuditQuery_groupClassAudit_students as GroupClassStudent,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 import { studentHref } from "@/frontend/common/utils/profileHref";
 
 interface RegisteredStudentsSectionProps {
@@ -40,15 +40,6 @@ const StyledStudentIdText = styled(Typography)(({ theme }) => ({
 const StyledViewActionButton = styled(IconButton)(({ theme }) => ({
   color: theme.palette.primary.main,
 }));
-
-type AttendanceStatus = "pending" | "present" | "absent";
-
-const ATTENDANCE_STATUS_MAP: Record<GroupClassAttendanceStatus, AttendanceStatus> = {
-  [GroupClassAttendanceStatus.Pending]: "pending",
-  [GroupClassAttendanceStatus.Present]: "present",
-  [GroupClassAttendanceStatus.Absent]: "absent",
-  [GroupClassAttendanceStatus.Late]: "pending",
-};
 
 function getAttendanceChipProps(
   status: GroupClassAttendanceStatus | null | undefined,
@@ -107,9 +98,14 @@ export function RegisteredStudentsSection({
         flex: 1,
         minWidth: 160,
         renderCell: ({ row }) => {
-          const attendanceDisplay = row.attendanceStatus ? ATTENDANCE_STATUS_MAP[row.attendanceStatus] : "pending";
           const chip = getAttendanceChipProps(row.attendanceStatus, labels);
-          return <StatusBadge category="sessionTracking" status={attendanceDisplay} label={chip.label} />;
+          return (
+            <StatusBadge
+              category="sessionTracking"
+              status={row.attendanceStatus ?? GroupClassAttendanceStatus.Pending}
+              label={chip.label}
+            />
+          );
         },
       },
       {

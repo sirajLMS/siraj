@@ -7,10 +7,10 @@ const JSON_SCALAR_TYPE = "unknown"; // Or "JsonValue" if you define it elsewhere
 // `@/frontend/types/localized-string.types` for component consumers.
 const LOCALIZED_STRING_TYPE = "Partial<Record<'ar' | 'en', string>>";
 
-const sharedGqlConfig = {
+const sharedGqlConfig: CodegenConfig["config"] = {
   useTypeImports: true,
   avoidOptionals: true,
-  enumsAsTypes: false,
+  enumType: "native" as const,
   dedupeFragments: true,
   onlyOperationTypes: false,
   inlineFragmentTypes: false,
@@ -26,8 +26,9 @@ const sharedGqlConfig = {
     LocalizedString: LOCALIZED_STRING_TYPE,
     PhoneNumber: "string",
     StringMap: "Record<string, string>",
+    IanaTimezone: "@/shared/constants/iana-timezone.enum#IanaTimezone",
   },
-} as const;
+};
 
 const config: CodegenConfig = {
   overwrite: true,
@@ -36,32 +37,12 @@ const config: CodegenConfig = {
   ignoreNoDocuments: true,
   noSilentErrors: true,
   generates: {
-    "./frontend/common/graphql/generated/gql/": {
-      preset: "client",
-      presetConfig: {
-        fragmentMasking: false,
-      },
-      plugins: [],
+    "./frontend/common/graphql/generated/gql/graphql.ts": {
+      plugins: ["typescript-operations", "typed-document-node"],
       config: {
         ...sharedGqlConfig,
-        allowPartialOutputs: true,
-      },
-    },
-    "./frontend/common/graphql/generated/gql/graphql-types.ts": {
-      plugins: ["typescript"],
-      config: {
-        ...sharedGqlConfig,
-      },
-    },
-
-    "./frontend/common/graphql/generated/gql/operations.ts": {
-      plugins: ["typescript-operations"],
-      preset: "import-types",
-      presetConfig: {
-        typesPath: "./graphql-types.ts",
-      },
-      config: {
-        ...sharedGqlConfig,
+        extractAllFieldsToTypes: false,
+        extractAllFieldsToTypesCompact: true,
       },
     },
   },

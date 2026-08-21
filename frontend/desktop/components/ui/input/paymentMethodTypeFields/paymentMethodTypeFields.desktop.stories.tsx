@@ -7,7 +7,7 @@ import type {
   PaymentMethodDetailsFormValue,
   PaymentMethodTypeFieldsProps,
 } from "@/frontend/common/components/ui/input/paymentMethodTypeFields/types";
-import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
 import { PaymentMethodTypeFieldsDesktop } from "@/frontend/desktop/components/ui/input/paymentMethodTypeFields/paymentMethodTypeFields.desktop";
 

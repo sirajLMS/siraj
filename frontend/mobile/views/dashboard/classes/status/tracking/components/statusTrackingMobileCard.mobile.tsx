@@ -18,7 +18,7 @@ import {
   computeSessionStatus,
   formatScheduleRange,
   SessionStatus,
-  type StatusTrackingRow,
+  type StatusTrackingScheduleRow,
 } from "@/frontend/common/views/dashboard/classes/status/tracking/types";
 import { getStatusIcon } from "@/frontend/common/views/dashboard/classes/status/tracking/utils/statusTrackingIcons.utils";
 import {
@@ -43,7 +43,7 @@ import { isJoinableClassInstance } from "@/shared/lib/meeting/isJoinableByExecut
 import { useAppLocale } from "@/shared/locale";
 
 export interface StatusTrackingMobileCardProps {
-  readonly row: StatusTrackingRow;
+  readonly row: StatusTrackingScheduleRow;
   readonly labels: CardListLabels;
   readonly onActivate: (id: string) => void;
   readonly onReschedule: (id: string) => void;
@@ -58,7 +58,7 @@ function StatusTrackingCardActions({
   onReschedule,
   onVerify,
 }: {
-  readonly row: StatusTrackingRow;
+  readonly row: StatusTrackingScheduleRow;
   readonly labels: CardListLabels;
   readonly sessionStatus: SessionStatus;
   readonly onActivate: (id: string) => void;

@@ -6,7 +6,7 @@ import { SectionPanel } from "@/frontend/common/components/ui/container/SectionP
 import { outlinedInputSx } from "@/frontend/common/components/ui/form/field";
 import { CurrencySelectController } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySelectControllerShared";
 import { CurrencySymbolAdornment } from "@/frontend/common/components/ui/input/currencySelect/__shared__/currencySymbolAdornmentShared";
-import { CurrencyCode, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode, InvoiceType } from "@/frontend/common/graphql/generated/gql/graphql";
 import { getCurrencySymbol } from "@/frontend/common/lib/currency";
 import type { ParentOnboardingFormData } from "@/frontend/common/types/shared.types";
 import { Translation, useAppTranslation } from "@/shared/locale";

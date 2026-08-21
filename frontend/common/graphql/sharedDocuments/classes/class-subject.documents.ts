@@ -1,6 +1,20 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import type * as Types from "@/frontend/common/graphql/generated/gql/graphql-types";
-import type * as Operations from "@/frontend/common/graphql/generated/gql/operations";
+import type {
+  AttachSubjectResourceMutation,
+  AttachSubjectResourceMutationVariables,
+  ClassSubjectByIdQuery,
+  ClassSubjectByIdQueryVariables,
+  ClassSubjectsQuery,
+  ClassSubjectsQueryVariables,
+  CreateClassSubjectMutation,
+  CreateClassSubjectMutationVariables,
+  DeleteClassSubjectMutation,
+  DeleteClassSubjectMutationVariables,
+  DetachSubjectResourceMutation,
+  DetachSubjectResourceMutationVariables,
+  UpdateClassSubjectMutation,
+  UpdateClassSubjectMutationVariables,
+} from "@/frontend/common/graphql/generated/gql/graphql";
 
 const CLASS_SUBJECT_FIELDS = gql`
   fragment ClassSubjectFields on ClassSubject {
@@ -34,10 +48,7 @@ const SUBJECT_RESOURCE_FIELDS = gql`
   }
 `;
 
-export const classSubjectsQueryDocument: TypedDocumentNode<
-  Operations.ClassSubjectsQuery,
-  Types.QueryClassSubjectsArgs
-> = gql`
+export const classSubjectsQueryDocument: TypedDocumentNode<ClassSubjectsQuery, ClassSubjectsQueryVariables> = gql`
   ${CLASS_SUBJECT_FIELDS}
   ${SUBJECT_RESOURCE_FIELDS}
   query classSubjects($categoryId: String) {
@@ -50,10 +61,8 @@ export const classSubjectsQueryDocument: TypedDocumentNode<
   }
 `;
 
-export const classSubjectByIdQueryDocument: TypedDocumentNode<
-  Operations.ClassSubjectByIdQuery,
-  Types.QueryClassSubjectArgs
-> = gql`
+export const classSubjectByIdQueryDocument: TypedDocumentNode<ClassSubjectByIdQuery, ClassSubjectByIdQueryVariables> =
+  gql`
   ${CLASS_SUBJECT_FIELDS}
   ${SUBJECT_RESOURCE_FIELDS}
   query classSubjectById($id: ID!) {
@@ -67,8 +76,8 @@ export const classSubjectByIdQueryDocument: TypedDocumentNode<
 `;
 
 export const createClassSubjectMutationDocument: TypedDocumentNode<
-  Operations.CreateClassSubjectMutation,
-  Types.MutationCreateClassSubjectArgs
+  CreateClassSubjectMutation,
+  CreateClassSubjectMutationVariables
 > = gql`
   ${CLASS_SUBJECT_FIELDS}
   mutation createClassSubject($input: ClassSubjectCreateInput!) {
@@ -79,8 +88,8 @@ export const createClassSubjectMutationDocument: TypedDocumentNode<
 `;
 
 export const updateClassSubjectMutationDocument: TypedDocumentNode<
-  Operations.UpdateClassSubjectMutation,
-  Types.MutationUpdateClassSubjectArgs
+  UpdateClassSubjectMutation,
+  UpdateClassSubjectMutationVariables
 > = gql`
   ${CLASS_SUBJECT_FIELDS}
   mutation updateClassSubject($id: ID!, $input: ClassSubjectUpdateInput!) {
@@ -91,8 +100,8 @@ export const updateClassSubjectMutationDocument: TypedDocumentNode<
 `;
 
 export const deleteClassSubjectMutationDocument: TypedDocumentNode<
-  Operations.DeleteClassSubjectMutation,
-  Types.MutationDeleteClassSubjectArgs
+  DeleteClassSubjectMutation,
+  DeleteClassSubjectMutationVariables
 > = gql`
   mutation deleteClassSubject($id: ID!) {
     deleteClassSubject(id: $id)
@@ -100,8 +109,8 @@ export const deleteClassSubjectMutationDocument: TypedDocumentNode<
 `;
 
 export const attachSubjectResourceMutationDocument: TypedDocumentNode<
-  Operations.AttachSubjectResourceMutation,
-  Types.MutationAttachSubjectResourceArgs
+  AttachSubjectResourceMutation,
+  AttachSubjectResourceMutationVariables
 > = gql`
   ${SUBJECT_RESOURCE_FIELDS}
   mutation attachSubjectResource($input: AttachSubjectResourceInput!) {
@@ -112,8 +121,8 @@ export const attachSubjectResourceMutationDocument: TypedDocumentNode<
 `;
 
 export const detachSubjectResourceMutationDocument: TypedDocumentNode<
-  Operations.DetachSubjectResourceMutation,
-  Types.MutationDetachSubjectResourceArgs
+  DetachSubjectResourceMutation,
+  DetachSubjectResourceMutationVariables
 > = gql`
   mutation detachSubjectResource($subjectId: ID!, $learningResourceId: ID!) {
     detachSubjectResource(subjectId: $subjectId, learningResourceId: $learningResourceId)

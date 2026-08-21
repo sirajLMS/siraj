@@ -1,6 +1,6 @@
 // NEW FOR PLAN v5 (newly created for the migration wave)
 
-import type { PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { PermissionGroupsQuery_permissionGroups as PermissionGroup } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { RowMenuAnchor } from "@/frontend/common/views/dashboard/permissions/components/useRowMenuAnchor";
 import type { PermissionsLabels } from "@/shared/locale";
 

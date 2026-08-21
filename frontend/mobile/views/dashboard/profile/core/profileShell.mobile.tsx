@@ -3,19 +3,19 @@
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
 import { ProfileAvatarView } from "@/frontend/common/components/ui/input/avatarImageField";
-import { ProfileMode } from "@/frontend/common/graphql/generated/gql/graphql-types";
 import { ProfileShellShared } from "@/frontend/common/views/dashboard/profile/core/__shared__/profileShellShared";
 import { ProfileHeader } from "@/frontend/common/views/dashboard/profile/core/ProfileHeader";
 import type { ProfileShellProps } from "@/frontend/common/views/dashboard/profile/core/profileShellTypes";
 import type { ProfileShellViewModel } from "@/frontend/common/views/dashboard/profile/core/types/profileShell.types";
 import { MobilePageContainer } from "@/frontend/mobile/components/ui";
+import { ProfileMode } from "@/shared/constants/profile.enum";
 import type { ProfileLabels } from "@/shared/locale/types/profile";
 
 export type ProfileShellMobileViewProps = ProfileShellViewModel;
 
 function renderMobileHeader(props: Readonly<ProfileShellProps>, t: ProfileLabels): ReactNode {
   const { mode, actions, name, email, roleLabel, avatarUrl } = props;
-  if (mode === ProfileMode.Edit) {
+  if (mode === ProfileMode.EDIT) {
     if (actions) {
       return <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>{actions}</Box>;
     }

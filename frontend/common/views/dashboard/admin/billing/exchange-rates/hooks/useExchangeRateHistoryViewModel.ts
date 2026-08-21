@@ -7,7 +7,7 @@
 // (specs §3 N26 + §6.1 — tier views never call *ViewModel hooks directly).
 import { useQuery } from "@apollo/client/react";
 import { useMemo, useState } from "react";
-import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import { CurrencyCode } from "@/frontend/common/graphql/generated/gql/graphql";
 import { exchangeRateHistoryQueryDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { parseCurrencyCode } from "@/frontend/common/lib/currency";
 import type { ExchangeRateRow } from "@/frontend/common/views/dashboard/admin/billing/exchange-rates/exchangeRatesColumns";

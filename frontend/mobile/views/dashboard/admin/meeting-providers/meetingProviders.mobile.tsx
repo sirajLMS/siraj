@@ -5,7 +5,7 @@ import { Alert, Avatar, Box, Chip, IconButton, Stack } from "@mui/material";
 import type { ReactNode } from "react";
 import { LocalizedStringDisplay } from "@/frontend/common/components/ui/display";
 import { FormSuccessSnackbar } from "@/frontend/common/components/ui/form/snackbar/FormSuccessSnackbar";
-import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/operations";
+import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { MeetingProvidersViewProps } from "@/frontend/common/views/dashboard/admin/meeting-providers/types";
 import {
   MobileBaseDeleteDialog,

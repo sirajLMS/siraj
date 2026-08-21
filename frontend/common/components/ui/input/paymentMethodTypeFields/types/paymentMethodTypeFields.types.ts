@@ -3,7 +3,7 @@
 // BOTH mobile and desktop tier files import from this single location.
 
 import type { Control, FieldValues } from "react-hook-form";
-import type { CurrencyCode, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql-types";
+import type { CurrencyCode, PaymentMethodType } from "@/frontend/common/graphql/generated/gql/graphql";
 import type { CurrencyOption } from "@/frontend/common/lib/currency";
 import type { CountryType } from "@/frontend/common/lib/locale";
 import type { PaymentMethodCatalogOption } from "@/frontend/common/lib/payment-method";
