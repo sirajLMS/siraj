@@ -9,6 +9,8 @@ import type { MeetingProviderFieldsFragment } from "@/frontend/common/graphql/ge
 import { getVisibleMeetingConfigFields } from "@/frontend/common/lib/meeting-config";
 import { Translation, useAppTranslation } from "@/shared/locale";
 
+export type { MeetingProviderFieldsFragment };
+
 export type MeetingConfigDetailsFormValue = {
   meetingUrl: string;
   username?: string;
