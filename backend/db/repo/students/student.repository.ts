@@ -219,8 +219,11 @@ export namespace StudentRepository {
     const foundStudents = await q.select().from(students).where(inArray(students.id, ids));
     const { studentNotFound } = getServerTranslations(locale ?? "en").errorsTranslations.student;
 
+    // ⚡ Performance Optimization: Map lookup table reduces linear search O(N*M) to O(N+M)
+    const studentMap = new Map(foundStudents.map(s => [s.id, s]));
+
     return ids.map(id => {
-      const s = foundStudents.find(c => c.id === id);
+      const s = studentMap.get(id);
       if (!s) return new Error(studentNotFound(id));
       return StudentUtils.mapEntityToDto(s) ?? new Error(studentNotFound(id));
     });

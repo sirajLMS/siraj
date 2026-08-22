@@ -219,8 +219,11 @@ export namespace UserRepository {
     const filteredUsers = await db.select().from(users).where(inArray(users.id, ids));
     const { userNotFound } = getServerTranslations(locale ?? "en").errorsTranslations;
 
+    // ⚡ Performance Optimization: Map lookup table reduces linear search O(N*M) to O(N+M)
+    const userMap = new Map(filteredUsers.map(u => [u.id, u]));
+
     return ids.map(id => {
-      const matchingUser = filteredUsers.find(c => c.id === id);
+      const matchingUser = userMap.get(id);
       if (!matchingUser) return new Error(userNotFound(id));
       return AuthUtils.toUserReturnType(matchingUser);
     });
