@@ -9,8 +9,8 @@ import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 
-/** Internal machine roles — never exposed as demo quick-login options. */
-const EXCLUDED_DEMO_LOGIN_GROUP_SLUGS = new Set<string>(["system_automated"]);
+/** Internal machine roles & highly privileged roles — never exposed as demo quick-login options. */
+const EXCLUDED_DEMO_LOGIN_GROUP_SLUGS = new Set<string>(["system_automated", "super_admin"]);
 
 export namespace DemoAuthService {
   /**
