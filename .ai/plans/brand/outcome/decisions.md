@@ -7,6 +7,201 @@
 
 ---
 
+## 10. JSON Schema & IDE Validation
+
+**Decision: A — Canonical JSON Schema file with `$schema` binding & VS Code integration**
+
+To enable seamless IDE autocomplete and validation when authoring appearance configuration:
+- A standard JSON Schema file will be defined at `docs/schemas/appearance-settings.schema.json` (or `shared/schemas/appearance.schema.json`).
+- Any JSON file (e.g. `appearance.json` or `.brand.json`) can reference `"schema": "./docs/schemas/appearance-settings.schema.json"`.
+- `.vscode/settings.json` is updated with `json.schemas` mapping so any `*appearance*.json` or `.brand.json` file is validated automatically in VS Code / Cursor / Windsurf without needing explicit `$schema` tags.
+
+---
+
+## 11. Environment Variable Hydration & Cold-Start Optimization
+
+**Decision: A — JSON-valued ENV variable with tiered fallback**
+
+To eliminate cold start latency, prevent database bottlenecks, and allow zero-DB white-labeling:
+- **Environment Variable**: `NEXT_PUBLIC_APP_BRANDING` (or `SITE_APPEARANCE_JSON` on server) accepts a valid JSON string matching the appearance schema.
+- **Resolution Tier**:
+  1. In-Memory / Module Cache (0ms)
+  2. Database published row via `unstable_cache` (tag: `"appearance"`)
+  3. Environment variable `NEXT_PUBLIC_APP_BRANDING` (parsed & validated synchronously in <0.1ms)
+  4. Hardcoded `DEFAULT_APPEARANCE_FIELDS`
+- **Fallback safety**: If the database is unreachable or down, the server gracefully falls back to ENV or hardcoded defaults without throwing or degrading SSR performance.
+- **Example configuration**: Added to `.env.example` with a well-commented JSON snippet.
+
+---
+
+## 12. Settings Export / Import to JSON
+
+**Decision: A — "Export JSON" button on Settings Appearance tab + Customizer**
+
+Admins can export the currently published or drafted appearance configuration directly as a formatted JSON file:
+- Download filename: `appearance-settings.json` (with `$schema` included).
+- Allows operators to copy the JSON into their deployment environment variables (`NEXT_PUBLIC_APP_BRANDING='{...}'`), commit to git, or replicate across staging/production environments.
+
+---
+
+## 13. Built-in Preset Themes (Light & Dark Palettes)
+
+**Decision: A — Preset Theme Catalog with Light/Dark Palette Pairs**
+
+The app will ship a catalog of curated, high-contrast, beautiful built-in preset themes (each defined with paired light & dark palettes):
+- **Preset themes**:
+  1. `default` (Teal / Indigo - Siraj Default)
+  2. `ocean` (Deep Blue / Sky)
+  3. `emerald` (Emerald Green / Mint)
+  4. `violet` (Deep Purple / Lavender)
+  5. `crimson` (Rose / Amber)
+  6. `slate` (Slate / Monochrome Minimal)
+- **Selection mechanism**:
+  - In Customizer / Appearance Settings: admins can pick a preset theme with 1-click, which fills the draft colors for both light and dark modes.
+  - Via Environment Variable: `APP_THEME_PRESET="emerald"` or inside `NEXT_PUBLIC_APP_BRANDING={"preset":"emerald", ...}`.
+- **Extensible structure**: Palettes stored under `frontend/common/providers/theme/presets/{presetName}/(light|dark)Palette.ts`.
+
+---
+
+## 14. Alignment with Settings → Environment Config & System Settings Resolution
+
+**Decision: A — Unified Environment Config Resolver Pattern**
+
+To align with how `EnvironmentConfigService` and `resolveEnvConfig()` work throughout the codebase:
+- Branding settings keys (`NEXT_PUBLIC_APP_BRANDING`, `APP_THEME_PRESET`, `SITE_NAME`, etc.) are registered in `ENV_CONFIG_KEYS` (`backend/lib/env-config-keys.ts`).
+- When an admin views Settings → Environment, the branding keys appear under the `Branding & Appearance` category.
+- **Precedence Hierarchy**:
+  1. In-memory hot cache (0ms)
+  2. Database DB override / Published settings (`appearance_settings` table / `system_settings` `env::NEXT_PUBLIC_APP_BRANDING`)
+  3. Process environment variables (`process.env.NEXT_PUBLIC_APP_BRANDING`)
+  4. Built-in preset theme defaults / hardcoded defaults
+- Invalidation: Publishing appearance settings or updating environment config invalidates the in-memory cache and `unstable_cache` tags.
+
+---
+
+## 15. Zero-Latency Serverless Architecture (Vercel Edge/Serverless + Neon + Upstash)
+
+**Decision: A — Zero-Blocking SSR / Zero-Roundtrip Fast Path**
+
+On serverless platforms (Vercel lambdas / Edge) where Postgres (Neon) or Redis (Upstash) can suffer cold starts (100ms - 1500ms):
+1. **Critical Path Isolation (No DB on SSR Fast Path)**:
+   - Root SSR (`app/layout.tsx`, `server-theme-css.ts`, `generateMetadata()`) MUST NEVER synchronously await cold database connections or remote network roundtrips.
+   - Initial render critical path reads from **synchronous static memory & validated ENV cache** (`NEXT_PUBLIC_APP_BRANDING` / preset theme). Execution time is **< 0.05ms**, guaranteeing instant TTFB and zero Cumulative Layout Shift (CLS).
+2. **Asynchronous Background Revalidation (SWR)**:
+   - When a Next.js serverless instance boots, DB-published overrides from `appearance_settings` are resolved via `unstable_cache` (or background fetch) without blocking the initial HTML stream if the cache is cold.
+3. **Inline CSS Var Injection**:
+   - `buildServerThemeCss()` inlines the critical CSS variables into the `<head>` in the exact same render tick. Zero layout shift, zero flash of unstyled content (FOUC), and zero dependency on client JS hydration or emotion stylesheets mounting.
+
+---
+
+## 16. Accessibility & WCAG APCA / AA Color Contrast Guardrail
+
+**Decision: A — In-browser WCAG AA (4.5:1 / 3:1) Contrast Checker & Dynamic `onPrimary` Text Derivation**
+
+To prevent admins from accidentally publishing unreadable colors (e.g. bright yellow on white):
+- **Contrast calculation**: The customizer derives `primary.contrastText` and computes the contrast ratio against `bgDefault` and `surface`.
+- **UI Indicator**: A real-time WCAG AA badge (Pass / Fail indicator) alerts the admin if the selected brand color violates contrast minimums.
+- **Dynamic CSS Variable**: `document.documentElement` sets `--mui-palette-onPrimary` to `#000000` or `#FFFFFF` based on luminance calculation, ensuring buttons and chips always remain readable.
+
+---
+
+## 17. Multi-Admin Concurrency & Optimistic Lock Protection
+
+**Decision: A — `updatedAt` Version Stamp / Stale-Draft Guard**
+
+When multiple admins edit appearance settings concurrently:
+- `saveAppearanceDraft` and `publishAppearance` pass the client's current `updatedAt` snapshot.
+- If another admin published or modified the draft in the interim, the backend returns a `StaleAppearanceError` / conflict warning, prompting the admin to refresh or override rather than silently clobbering another admin's work.
+
+---
+
+## 18. Strict Input Sanitization, Hex Normalization & Storage Key Isolation
+
+**Decision: A — Defense-in-Depth Validation**
+
+- **Color Sanitization**: Hex strings are normalized (`#RGB` → `#RRGGBB`), trimmed, and validated against strict regex (`^#[0-9A-Fa-f]{6}$`) preventing CSS injection or invalid color formats.
+- **HTML / Metadata Sanitization**: `siteName`, `siteTitle`, and `siteDescription` are sanitized to strip any dangerous HTML/script tags before metadata insertion.
+- **Asset Key Isolation & CDN Caching**: Uploaded logos are stored under `public/appearance/logo-{hash}.{ext}` with `Cache-Control: public, max-age=31536000, immutable` to enable CDN edge caching.
+
+---
+
+## 19. Frontend UI Patterns: Compound Customizer, Focus Management & Reactive State
+
+**Decision: A — Modern Component & Hook Composition Architecture**
+
+Applying frontend best practices to the customizer & appearance settings:
+1. **Compound Customizer Component Architecture**:
+   - Split customizer into compound components (`Customizer.Toolbar`, `Customizer.Sidebar`, `Customizer.PresetPicker`, `Customizer.ColorSection`, `Customizer.ContrastBadge`).
+   - Clean component composition without prop drilling.
+2. **Accessible Overlay & Focus Trapping**:
+   - When entering `?customize=1`, save previous focus element; `Escape` key exits customizer mode with focus restored to the trigger button.
+   - Screen-reader announcements (`aria-live="polite"`) on autosave, preset selection, and publish events.
+3. **Referentially Stable Debounced Autosave**:
+   - Use `useRef` holding latest mutation handler and state to ensure debounced autosaves (3s) never trigger infinite re-renders or stale closures during rapid color picker adjustments.
+4. **Isolated Error Boundaries**:
+   - Wrap `CustomizeSidebar` and preview CSS injectors in dedicated `<AppearanceErrorBoundary>` to ensure a bad color state or client crash never takes down the main dashboard layout.
+
+---
+
+## 20. Security Hardening: Storage Validation, SSRF Defense & BOLA / IDOR Protection
+
+**Decision: A — Skills-Informed Security Armor (`pentester`, `idor-testing`, `security-and-hardening`)**
+
+Applying our security skills to appearance settings and file uploads:
+1. **Logo Storage Upload Security**:
+   - Verify magic bytes (`image/png`, `image/jpeg`, `image/svg+xml`, `image/webp`) on upload before writing to disk/S3.
+   - For SVG uploads, sanitize XML with DOMPurify / sanitize-svg to prevent stored XSS (stripping `<script>`, `onload`, `javascript:` URIs).
+   - Randomize storage keys using UUIDs (`appearance/logo-${uuid}.${ext}`) to prevent path traversal and object overwrite attacks.
+2. **Safe URL & SSRF Defense**:
+   - If external `logoUrl` strings are accepted, validate against `isSafeUrl()` from `@/shared/lib/safe-url` (only `https:`, blocking loopback/private IPs `127.0.0.1`, `169.254.169.254`, `10.0.0.0/8`).
+3. **IDOR & Mass Assignment (BOPLA) Defenses**:
+   - Resolvers strictly type input arguments via Pothos input refs; internal audit fields (`updatedByUserId`, `updatedAt`, `createdAt`) are derived exclusively from `ctx.userId` in the session, never accepted from user input.
+
+---
+
+## 21. Drizzle ORM & Database Driver Patterns
+
+**Decision: A — Skills-Informed Database Patterns (`drizzle-best-practices`, `write-tests`)**
+
+1. **Transaction Wrapping & Handle Propagation**:
+   - In all service mutations (`saveDraft`, `publish`, `resetDraft`), pass `tx` to all repository queries to guarantee atomic rollbacks and eliminate deadlock risks.
+2. **Stateless Reads over Neon HTTP**:
+   - Non-transactional reads (`getAppearance`, `getFirstAppearancePublished`) use `queryDb(tx)` from `@/backend/db` to take advantage of stateless Neon HTTP mode on serverless lambdas.
+3. **Dynamic Queries over Array Placeholders**:
+   - No `inArray(col, sql.placeholder(...))` usage; prepared statements only on scalar lookups.
+
+---
+
+## 22. End-to-End Type Safety & Zod Validation for ENV & Inputs
+
+**Decision: A — Single-Source Zod Validation & Schema Type Inference**
+
+To ensure 100% type-safety across environment variables, JSON configs, and GraphQL inputs:
+- **Zod Schema (`shared/schemas/appearance.zod.ts`)**:
+  - Validates `NEXT_PUBLIC_APP_BRANDING` env strings and user inputs synchronously.
+  - Strict hex color refinement (`/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/`).
+  - Text length limits (e.g. `siteName` max 100 chars, `siteTitle` max 200 chars, `siteDescription` max 500 chars).
+  - Nullable, valid URL `logoUrl` validation.
+- **Fail-Safe Parsing**: Invalid JSON in `NEXT_PUBLIC_APP_BRANDING` logs a domain error and gracefully falls back to `DEFAULT_APPEARANCE_FIELDS` without throwing or stalling server boot.
+
+---
+
+## 23. Test-Expert 4-Tier Test Engineering Framework
+
+**Decision: A — Exhaustive 4-Tier Testing Methodology (`test-expert`)**
+
+The test plan enforces tests across all four tiers:
+1. **Tier 1: Happy Path & 100% Branch Coverage**:
+   - Repo CRUD, Service permission gates, GraphQL query/mutation resolvers, CSS variable injection across all themes.
+2. **Tier 2: Edge Cases & Boundaries**:
+   - Empty strings, ultra-long strings (10k chars), RTL Arabic brand names, invalid hex colors, corrupt JSON env strings, missing fields in `draft_fields`.
+3. **Tier 3: Monkey & Chaos Testing**:
+   - Rapid concurrent save/publish races, simulated DB timeouts during SSR metadata fetch, corrupt storage keys.
+4. **Tier 4: Security & Abuse Testing**:
+   - Non-admin authorization bypass, XSS payloads in `siteTitle`/`siteDescription`, SSRF via `logoUrl`, SVG malicious scripts, BOLA/BOPLA tampering on `updatedByUserId`.
+
+---
+
 ## 1. Live-preview approach
 
 **Decision: C — `?customize=1` overlay on the real app (WYSIWYG)**

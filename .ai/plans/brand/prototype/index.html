@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prototype — Settings → Appearance Tab</title>
+<title>Siraj — Learning Management System</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { height:100%; overflow:hidden; font-family:'Inter','Hanken Grotesk',system-ui,sans-serif; }
   a { text-decoration:none; color:inherit; }
   button { font-family:inherit; cursor:pointer; border:none; background:none; }
+  input, textarea { font-family:inherit; }
 
   :root {
     --primary-main: #2DD4BF;
@@ -17,6 +18,8 @@
     --primary-contrast: #042F2E;
     --secondary-main: #818CF8;
     --secondary-light: #A5B4FC;
+    --secondary-dark: #4F46E5;
+    --secondary-contrast: #312E81;
     --bg-default: #121212;
     --bg-paper: #1E1E1E;
     --surface: #1E1E1E;
@@ -33,6 +36,26 @@
     --sidebar-bg: #18181B;
     --radius: 16px;
     --shadow-card: 0 4px 6px -1px rgba(0,0,0,0.5);
+    --danger: #F87171;
+  }
+
+  /* ---------- Light / Dark schemes ---------- */
+  html[data-scheme="light"] {
+    --bg-default: #F4F4F5;
+    --bg-paper: #FFFFFF;
+    --surface: #FFFFFF;
+    --surface-variant: #EDEDEE;
+    --surface-container-low: #FAFAFA;
+    --surface-container: #FFFFFF;
+    --surface-container-high: #E4E4E7;
+    --header-bg: #FFFFFF;
+    --sidebar-bg: #FFFFFF;
+    --outline: #A1A1AA;
+    --outline-variant: #D4D4D8;
+    --text-primary: #18181B;
+    --text-secondary: #3F3F46;
+    --text-disabled: #A1A1AA;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.1);
   }
 
   .shell {
@@ -62,7 +85,7 @@
     transition:background .15s;
   }
   .app-header .header-customize-btn:hover { background:rgba(245,158,11,0.12); }
-  .app-header .icon-btn { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); }
+  .app-header .icon-btn { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); background:none; }
   .app-header .icon-btn:hover { background:var(--surface-variant); }
 
   /* App sidebar */
@@ -80,9 +103,7 @@
   .app-sidebar .nav-item .icon { width:20px; text-align:center; }
 
   /* Content */
-  .app-content {
-    grid-area:content; background:var(--bg-default); overflow-y:auto; padding:24px;
-  }
+  .app-content { grid-area:content; background:var(--bg-default); overflow-y:auto; padding:24px; }
   .app-content .page-title { font-size:24px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
   .app-content .page-subtitle { font-size:14px; color:var(--text-secondary); margin-bottom:24px; }
 
@@ -106,13 +127,11 @@
     border-radius:0 0 12px 12px; padding:32px;
   }
 
-
-
   /* Published status row */
   .status-row {
     display:flex; align-items:center; gap:16px;
     padding:16px 20px; background:var(--surface-container-low);
-    border:1px solid var(--outline-variant); border-radius:12px; margin-bottom:24px;
+    border:1px solid var(--outline-variant); border-radius:12px; margin-bottom:28px;
   }
   .status-row .badge {
     display:flex; align-items:center; gap:6px;
@@ -133,17 +152,32 @@
   .form-section .section-title .icon { font-size:18px; }
   .form-section .section-desc { font-size:12px; color:var(--text-secondary); margin-bottom:20px; }
   .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-  .form-field { display:flex; flex-direction:column; gap:6px; }
+  .form-field { display:flex; flex-direction:column; gap:6px; min-width:0; }
   .form-field.full { grid-column: 1 / -1; }
   .form-field label { font-size:13px; color:var(--text-secondary); font-weight:500; }
-  .form-field input[type="text"], .form-field textarea {
+
+  .form-field input[type="text"],
+  .form-field input[type="email"],
+  .form-field input[type="url"],
+  .form-field textarea {
     background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:10px;
-    padding:10px 14px; color:var(--text-primary); font-size:14px; transition:border-color .2s;
+    padding:10px 14px; color:var(--text-primary); font-size:14px; transition:border-color .2s; width:100%;
   }
-  .form-field input[type="text"]:focus, .form-field textarea:focus {
+  .form-field input:focus, .form-field textarea:focus {
     outline:none; border-color:var(--primary-main);
   }
   .form-field .hint { font-size:11px; color:var(--text-disabled); }
+  .form-field textarea { resize:vertical; min-height:80px; }
+
+  /* Radio group */
+  .radio-group { display:flex; gap:8px; }
+  .radio-chip {
+    display:flex; align-items:center; gap:8px; padding:9px 16px;
+    border:1px solid var(--outline-variant); border-radius:10px; font-size:13px; color:var(--text-secondary);
+    cursor:pointer; background:var(--surface-container-low); transition:all .15s; user-select:none;
+  }
+  .radio-chip input { accent-color:var(--primary-main); }
+  .radio-chip.selected { border-color:var(--primary-main); color:var(--text-primary); background:rgba(45,212,191,0.08); }
 
   /* Color field */
   .color-field {
@@ -153,22 +187,55 @@
   }
   .color-field .swatch {
     width:36px; height:36px; border-radius:8px; border:2px solid var(--outline-variant);
-    position:relative; overflow:hidden; cursor:pointer;
+    position:relative; overflow:hidden; cursor:pointer; flex-shrink:0;
   }
   .color-field .swatch input[type="color"] { opacity:0; width:100%; height:100%; cursor:pointer; }
   .color-field .hex { flex:1; font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--text-primary); }
-  .color-field .derived {
-    display:flex; gap:3px;
-  }
+  .color-field .derived { display:flex; gap:3px; }
   .color-field .derived > div {
     width:24px; height:24px; border-radius:4px; border:1px solid var(--outline-variant);
   }
 
-  .action-bar {
-    display:flex; gap:12px; margin-top:32px; padding-top:24px;
-    border-top:1px solid var(--outline-variant);
+  /* Logo / favicon preview card */
+  .file-preview {
+    display:flex; align-items:center; gap:12px;
+    background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:10px;
+    padding:10px 14px;
   }
-  .action-bar .btn { padding:10px 24px; border-radius:10px; font-size:14px; font-weight:600; }
+  .file-preview .preview-img { height:40px; width:40px; border-radius:6px; object-fit:contain; flex-shrink:0; }
+  .file-preview .file-meta { font-size:13px; color:var(--text-secondary); flex:1; min-width:0; }
+  .file-preview .file-meta .fname { color:var(--text-primary); font-weight:500; }
+  .file-preview .remove-btn { background:none; color:var(--danger); font-size:14px; font-weight:600; padding:4px 8px; border-radius:8px; }
+  .file-preview .remove-btn:hover { background:rgba(248,113,113,0.12); }
+  .upload-btn {
+    display:inline-flex; align-items:center; gap:8px; margin-top:10px;
+    padding:9px 16px; border:1px dashed var(--outline); border-radius:10px; font-size:13px; font-weight:600;
+    color:var(--text-secondary); background:transparent; transition:all .15s;
+  }
+  .upload-btn:hover { border-color:var(--primary-main); color:var(--primary-main); }
+
+  /* Repeatable social links */
+  .rep-field { display:grid; grid-template-columns: 140px 1fr 40px; gap:10px; align-items:center; margin-bottom:10px; }
+  .rep-field .platform-select {
+    background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:10px;
+    padding:9px 12px; color:var(--text-primary); font-size:13px; cursor:pointer;
+  }
+  .rep-field .platform-select:focus { outline:none; border-color:var(--primary-main); }
+  .rep-field input { width:100%; }
+  .rep-field .remove-row {
+    width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    color:var(--text-disabled); background:none; font-size:18px;
+  }
+  .rep-field .remove-row:hover { background:rgba(248,113,113,0.12); color:var(--danger); }
+  .add-row-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:9px 16px; border-radius:10px; font-size:13px; font-weight:600; color:var(--primary-main);
+  }
+  .add-row-btn:hover { background:rgba(45,212,191,0.1); }
+
+  /* Action bar */
+  .action-bar { display:flex; gap:12px; margin-top:32px; padding-top:24px; border-top:1px solid var(--outline-variant); }
+  .action-bar .btn { padding:10px 24px; border-radius:10px; font-size:14px; font-weight:600; transition:filter .15s; }
   .action-bar .btn-accent { background:#F59E0B; color:#1A1A1A; }
   .action-bar .btn-accent:hover { filter:brightness(1.1); }
   .action-bar .btn-primary { background:var(--primary-main); color:var(--primary-contrast); }
@@ -181,18 +248,16 @@
 
 <div class="shell">
 
-  <!-- App Header -->
+  <!-- App Header (site name live-updates here) -->
   <div class="app-header">
     <div class="brand">
-      <img src="https://placehold.co/28x28/2DD4BF/042F2E?text=S" alt="logo">
-      <span class="name">Siraj</span>
+      <img id="header-logo" src="https://placehold.co/28x28/2DD4BF/042F2E?text=S" alt="logo">
+      <span class="name" id="header-brand-name">Siraj</span>
     </div>
     <div class="spacer"></div>
-    <a class="header-customize-btn" href="customize-overlay.html" title="Customize site appearance">
-      🎨 <span>Customize</span>
-    </a>
+    <button class="icon-btn" id="toggle-mode" title="Toggle light/dark mode">🌙</button>
+    <a class="header-customize-btn" href="customize-overlay.html" title="Customize site appearance">🎨 <span>Customize</span></a>
     <button class="icon-btn">🔔</button>
-    <button class="icon-btn">🌙</button>
     <button class="icon-btn">👤</button>
   </div>
 
@@ -225,7 +290,6 @@
     <!-- Appearance Tab Body -->
     <div class="settings-body">
 
-      <!-- Hero with CTA -->
       <!-- Published / Draft status -->
       <div class="status-row">
         <div class="badge published">✓ Published</div>
@@ -233,7 +297,7 @@
         <div class="spacer"></div>
         <div class="badge draft">✎ Draft has changes</div>
         <span class="meta">Draft updated just now</span>
-        <a class="btn btn-primary" href="customize-overlay.html" style="margin-left:16px;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:600;background:var(--primary-main);color:var(--primary-contrast);text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">🎨 Enter Customize Mode</a>
+        <a class="btn btn-primary" href="customize-overlay.html" style="margin-left:16px;padding:6px 16px;border-radius:8px;font-size:13px;font-weight:600;background:var(--primary-main);color:var(--primary-contrast);display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">🎨 Enter Customize Mode</a>
       </div>
 
       <!-- Brand Identity -->
@@ -242,19 +306,27 @@
         <div class="section-desc">These values power the site name, browser tab title, and social media previews.</div>
         <div class="form-grid">
           <div class="form-field">
-            <label>Site Name</label>
-            <input type="text" value="Siraj">
+            <label for="site-name">Site Name</label>
+            <input id="site-name" type="text" value="Siraj">
             <span class="hint">Short brand name shown in the app header and navbar</span>
           </div>
           <div class="form-field">
-            <label>Site Title</label>
-            <input type="text" value="Siraj — Learning Management System">
-            <span class="hint">Used in the browser <code><title></code> template: "%s | Siraj"</span>
+            <label for="site-title">Site Title</label>
+            <input id="site-title" type="text" value="Siraj — Learning Management System">
+            <span class="hint">Used in the browser <code>&lt;title&gt;</code> template: "%s | Siraj"</span>
           </div>
           <div class="form-field full">
-            <label>Site Description</label>
-            <textarea>A comprehensive learning management system for academies and educational institutions.</textarea>
+            <label for="site-description">Site Description</label>
+            <textarea id="site-description">A comprehensive learning management system for academies and educational institutions.</textarea>
             <span class="hint">SEO meta description and Open Graph / Twitter card description</span>
+          </div>
+          <div class="form-field full">
+            <label>Default Mode for New Visitors</label>
+            <div class="radio-group" id="default-mode-group">
+              <label class="radio-chip"><input type="radio" name="defaultMode" value="dark" checked> 🌙 Dark</label>
+              <label class="radio-chip"><input type="radio" name="defaultMode" value="light"> ☀ Light</label>
+            </div>
+            <span class="hint">Which color mode new (anonymous) visitors see first</span>
           </div>
         </div>
       </div>
@@ -265,94 +337,175 @@
         <div class="section-desc">Upload a logo image. Recommended: 256×256px, PNG or SVG, max 2MB.</div>
         <div class="form-grid">
           <div class="form-field">
-            <label>Logo URL</label>
-            <input type="text" value="https://cdn.siraj.app/logos/siraj-logo.svg">
+            <label for="logo-url">Logo URL</label>
+            <input id="logo-url" type="url" value="https://cdn.siraj.app/logos/siraj-logo.svg">
             <span class="hint">Auto-populated after upload. Or paste a URL directly.</span>
           </div>
           <div class="form-field">
             <label>Current Logo Preview</label>
-            <div style="display:flex;align-items:center;gap:12px;background:var(--surface-container-low);border:1px solid var(--outline-variant);border-radius:10px;padding:10px 14px;">
-              <img src="https://placehold.co/40x40/2DD4BF/042F2E?text=S" alt="logo" style="height:40px;border-radius:6px;">
-              <span style="font-size:13px;color:var(--text-secondary);">siraj-logo.svg — 256×256 — 4.2KB</span>
-              <div class="spacer" style="flex:1"></div>
-              <button style="color:#F87171;font-size:14px;font-weight:600;">Remove</button>
+            <div class="file-preview">
+              <img id="logo-preview-img" src="https://placehold.co/40x40/2DD4BF/042F2E?text=S" alt="logo" class="preview-img">
+              <span class="file-meta"><span class="fname">siraj-logo.svg</span> — 256×256 — 4.2KB</span>
+              <button class="remove-btn">Remove</button>
             </div>
+            <button class="upload-btn" onclick="alert('Upload dialog — in this prototype open the file picker')">⬆ Upload Logo</button>
+            <span class="hint" style="margin-top:6px;">Shown in the header, sidebar, and login page</span>
           </div>
         </div>
       </div>
 
-      <!-- Theme Colors — per-mode tabs -->
+      <!-- Favicon -->
+      <div class="form-section">
+        <div class="section-title"><span class="icon">🔖</span> Favicon</div>
+        <div class="section-desc">The small icon shown in the browser tab. Recommended: 32×32px, PNG, ICO, or SVG.</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="favicon-url">Favicon URL</label>
+            <input id="favicon-url" type="url" value="https://cdn.siraj.app/favicons/favicon.svg">
+            <span class="hint">Auto-populated after upload. Or paste a URL directly.</span>
+          </div>
+          <div class="form-field">
+            <label>Current Favicon Preview</label>
+            <div class="file-preview">
+              <img src="https://placehold.co/32x32/2DD4BF/042F2E?text=S" alt="favicon" class="preview-img" style="height:32px;width:32px;">
+              <span class="file-meta"><span class="fname">favicon.svg</span> — 32×32 — 1.1KB</span>
+              <button class="remove-btn">Remove</button>
+            </div>
+            <button class="upload-btn" onclick="alert('Upload dialog — in this prototype open the file picker')">⬆ Upload Favicon</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Colors — per-mode tabs (functional) -->
       <div class="form-section">
         <div class="section-title"><span class="icon">🎨</span> Theme Colors</div>
         <div class="section-desc">Customize colors separately for light and dark modes. Switching tabs previews that mode live.</div>
-        <div style="display:flex;gap:4px;background:#0A0A0A;border:1px solid var(--outline-variant);border-radius:10px;padding:4px;width:fit-content;margin-bottom:16px;">
-          <button style="padding:8px 24px;border-radius:8px;font-size:14px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px;background:var(--primary-main);color:var(--primary-contrast)">☀ Light</button>
-          <button style="padding:8px 24px;border-radius:8px;font-size:14px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">🌙 Dark</button>
+        <div id="mode-tabs" style="display:flex;gap:4px;background:var(--surface-container-low);border:1px solid var(--outline-variant);border-radius:10px;padding:4px;width:fit-content;margin-bottom:16px;">
+          <button class="mode-tab" data-mode="light" style="padding:8px 24px;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;background:transparent;color:var(--text-secondary);">☀ Light</button>
+          <button class="mode-tab active" data-mode="dark" style="padding:8px 24px;border-radius:8px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;background:var(--primary-main);color:var(--primary-contrast);">🌙 Dark</button>
         </div>
         <div class="form-grid">
           <div class="form-field">
-            <label>Primary Color (Light)</label>
+            <label>Primary Color (<span class="mode-label">Dark</span>)</label>
             <div class="color-field">
-              <div class="swatch" style="background:#0D9488">
-                <input type="color" value="#0D9488">
-              </div>
-              <span class="hex">#0D9488</span>
+              <div class="swatch" id="swatch-primary" style="background:var(--primary-main)"><input id="color-primary" type="color" value="#2DD4BF"></div>
+              <span class="hex" id="hex-primary">#2DD4BF</span>
               <div class="derived">
-                <div style="background:#0D9488" title="main"></div>
-                <div style="background:#14B8A6" title="light"></div>
-                <div style="background:#5EEAD4" title="lighter"></div>
-                <div style="background:#CCFBF1" title="lightest"></div>
+                <div data-tone="main" style="background:var(--primary-main)" title="main"></div>
+                <div data-tone="light" style="background:var(--primary-light)" title="light"></div>
+                <div data-tone="dark" style="background:var(--primary-dark)" title="dark"></div>
+                <div data-tone="contrast" style="background:var(--primary-contrast)" title="contrastText"></div>
               </div>
             </div>
-            <span class="hint">Light mode: primary buttons, links, active states</span>
+            <span class="hint">Primary: buttons, links, active states</span>
           </div>
           <div class="form-field">
-            <label>Secondary Color (Light)</label>
+            <label>Secondary Color (<span class="mode-label">Dark</span>)</label>
             <div class="color-field">
-              <div class="swatch" style="background:#4F46E5">
-                <input type="color" value="#4F46E5">
-              </div>
-              <span class="hex">#4F46E5</span>
+              <div class="swatch" id="swatch-secondary" style="background:var(--secondary-main)"><input id="color-secondary" type="color" value="#818CF8"></div>
+              <span class="hex" id="hex-secondary">#818CF8</span>
               <div class="derived">
-                <div style="background:#4F46E5" title="main"></div>
-                <div style="background:#6366F1" title="light"></div>
-                <div style="background:#A5B4FC" title="lighter"></div>
-                <div style="background:#E0E7FF" title="lightest"></div>
+                <div data-tone="main" style="background:var(--secondary-main)" title="main"></div>
+                <div data-tone="light" style="background:var(--secondary-light)" title="light"></div>
+                <div data-tone="dark" style="background:var(--secondary-dark)" title="dark"></div>
+                <div data-tone="contrast" style="background:var(--secondary-contrast)" title="contrastText"></div>
               </div>
             </div>
-            <span class="hint">Light mode: secondary buttons, highlights</span>
+            <span class="hint">Secondary: highlights, accents</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="form-section">
+        <div class="section-title"><span class="icon">✉️</span> Contact Info</div>
+        <div class="section-desc">Public contact details shown in the footer and help links.</div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="support-email">Support / Contact Email</label>
+            <input id="support-email" type="email" value="support@siraj.app">
+            <span class="hint">Shown in the footer and help/support areas</span>
           </div>
           <div class="form-field">
-            <label>Primary Color (Dark)</label>
-            <div class="color-field">
-              <div class="swatch" style="background:#2DD4BF">
-                <input type="color" value="#2DD4BF">
-              </div>
-              <span class="hex">#2DD4BF</span>
-              <div class="derived">
-                <div style="background:#2DD4BF" title="main"></div>
-                <div style="background:#5EEAD4" title="light"></div>
-                <div style="background:#0D9488" title="dark"></div>
-                <div style="background:#042F2E" title="contrastText"></div>
-              </div>
-            </div>
-            <span class="hint">Dark mode: primary buttons, links, active states</span>
+            <label for="support-phone">Support Phone (optional)</label>
+            <input id="support-phone" type="text" placeholder="+1 (555) 000-0000">
+            <span class="hint">Optional contact line for the support page</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="form-section">
+        <div class="section-title"><span class="icon">📄</span> Footer</div>
+        <div class="section-desc">Copyright notice and footer links displayed site-wide.</div>
+        <div class="form-grid">
+          <div class="form-field full">
+            <label for="footer-copyright">Copyright Text</label>
+            <input id="footer-copyright" type="text" value="© 2026 Siraj. All rights reserved.">
+            <span class="hint">Appended to the page footer, e.g. "© 2026 Siraj. All rights reserved."</span>
           </div>
           <div class="form-field">
-            <label>Secondary Color (Dark)</label>
-            <div class="color-field">
-              <div class="swatch" style="background:#818CF8">
-                <input type="color" value="#818CF8">
+            <label for="footer-brand-year">Active Since (year)</label>
+            <input id="footer-brand-year" type="text" value="2026">
+            <span class="hint">Used to render a date range in the footer</span>
+          </div>
+          <div class="form-field">
+            <label for="terms-url">Terms of Service URL (optional)</label>
+            <input id="terms-url" type="url" placeholder="https://siraj.app/terms">
+            <span class="hint">Footer link</span>
+          </div>
+          <div class="form-field">
+            <label for="privacy-url">Privacy Policy URL (optional)</label>
+            <input id="privacy-url" type="url" placeholder="https://siraj.app/privacy">
+            <span class="hint">Footer link</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social / SEO -->
+      <div class="form-section">
+        <div class="section-title"><span class="icon">🔗</span> Social / SEO</div>
+        <div class="section-desc">Social profiles used in the footer and Open Graph share previews, plus a custom share image.</div>
+        <div class="form-grid">
+          <div class="form-field full">
+            <label>Social Links</label>
+            <div id="social-list">
+              <div class="rep-field">
+                <select class="platform-select">
+                  <option>🌐 Website</option>
+                  <option selected>🐦 X / Twitter</option>
+                  <option>📘 Facebook</option>
+                  <option>📸 Instagram</option>
+                  <option>🧑‍💼 LinkedIn</option>
+                  <option>▶️ YouTube</option>
+                </select>
+                <input type="url" value="https://x.com/sirajapp" placeholder="https://...">
+                <button class="remove-row" title="Remove link">×</button>
               </div>
-              <span class="hex">#818CF8</span>
-              <div class="derived">
-                <div style="background:#818CF8" title="main"></div>
-                <div style="background:#A5B4FC" title="light"></div>
-                <div style="background:#4F46E5" title="dark"></div>
-                <div style="background:#312E81" title="contrastText"></div>
+              <div class="rep-field">
+                <select class="platform-select">
+                  <option>🌐 Website</option>
+                  <option>🐦 X / Twitter</option>
+                  <option>📘 Facebook</option>
+                  <option selected>📸 Instagram</option>
+                  <option>🧑‍💼 LinkedIn</option>
+                  <option>▶️ YouTube</option>
+                </select>
+                <input type="url" value="https://instagram.com/sirajapp" placeholder="https://...">
+                <button class="remove-row" title="Remove link">×</button>
               </div>
             </div>
-            <span class="hint">Dark mode: secondary buttons, highlights</span>
+            <button class="add-row-btn">＋ Add Social Link</button>
+          </div>
+          <div class="form-field full">
+            <label>Open Graph Share Image (custom)</label>
+            <div class="file-preview">
+              <img src="https://placehold.co/40x40/818CF8/FFFFFF?text=OG" alt="og" class="preview-img">
+              <span class="file-meta"><span class="fname">share-image.png</span> — 1200×630 — 96KB</span>
+              <button class="remove-btn">Remove</button>
+            </div>
+            <button class="upload-btn" onclick="alert('Upload dialog — in this prototype open the file picker')">⬆ Upload Share Image</button>
+            <span class="hint" style="margin-top:6px;">Used when your site is shared on Facebook, X, WhatsApp, etc. Recommended 1200×630px.</span>
           </div>
         </div>
       </div>
@@ -368,6 +521,143 @@
   </div>
 
 </div>
+
+<script>
+  // ---------- Color scheme (light/dark) switching ----------
+  // Two palettes per mode. Editing active mode updates live; switching re-paints.
+  const PALETTES = {
+    dark:  { primary:'#2DD4BF', secondary:'#818CF8' },
+    light: { primary:'#0D9488', secondary:'#4F46E5' }
+  };
+
+  let activeMode = 'dark';   // the color-tab currently being edited
+  let previewMode = 'dark';  // what the page currently renders
+
+  function derived(main, kind) {
+    const m = main.replace('#','');
+    const r = parseInt(m.substring(0,2),16), g = parseInt(m.substring(2,4),16), b = parseInt(m.substring(4,6),16);
+    // simple chroma-adjust lighten/darken
+    const mix = (c, p) => Math.round((p>0 ? c + (255-c)*p : c*(1+p)));
+    switch (kind) {
+      case 'light':  return hex(mix(r,0.35), mix(g,0.35), mix(b,0.35));
+      case 'lighter':return hex(mix(r,0.65), mix(g,0.65), mix(b,0.65));
+      case 'dark':   return hex(mix(r,-0.5), mix(g,-0.5), mix(b,-0.5));
+      case 'contrast': {
+        // naive luminance-based contrast
+        const lum = (0.299*r + 0.587*g + 0.114*b);
+        return lum > 140 ? '#0a0a0a' : '#FAFAFA';
+      }
+      default: return main;
+    }
+  }
+  function hex(r,g,b){ return '#' + [r,g,b].map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')).join('').toUpperCase(); }
+
+  function applyColorPalette(mode) {
+    const p = PALETTES[mode];
+    document.documentElement.style.setProperty('--primary-main', p.primary);
+    document.documentElement.style.setProperty('--primary-light', derived(p.primary,'light'));
+    document.documentElement.style.setProperty('--primary-dark', derived(p.primary,'dark'));
+    document.documentElement.style.setProperty('--primary-contrast', derived(p.primary,'contrast'));
+    document.documentElement.style.setProperty('--secondary-main', p.secondary);
+    document.documentElement.style.setProperty('--secondary-light', derived(p.secondary,'light'));
+    document.documentElement.style.setProperty('--secondary-dark', derived(p.secondary,'dark'));
+    document.documentElement.style.setProperty('--secondary-contrast', derived(p.secondary,'contrast'));
+    // update pickers + hex to reflect the active mode's stored values
+    document.getElementById('color-primary').value = p.primary;
+    document.getElementById('hex-primary').textContent = p.primary;
+    document.getElementById('swatch-primary').style.background = p.primary;
+    document.getElementById('color-secondary').value = p.secondary;
+    document.getElementById('hex-secondary').textContent = p.secondary;
+    document.getElementById('swatch-secondary').style.background = p.secondary;
+  }
+
+  function setPageScheme(mode) {
+    previewMode = mode;
+    document.documentElement.setAttribute('data-scheme', mode);
+    document.documentElement.setAttribute('data-mui-color-scheme', mode);
+    // update the header mode toggle icon
+    document.getElementById('toggle-mode').textContent = mode === 'dark' ? '🌙' : '☀️';
+  }
+
+  // toggle page scheme from header button
+  document.getElementById('toggle-mode').addEventListener('click', () => setPageScheme(previewMode === 'dark' ? 'light' : 'dark'));
+
+  // ---------- Light/Dark editor tabs ----------
+  const modeTabs = Array.from(document.querySelectorAll('.mode-tab'));
+  const modeLabel = () => document.querySelector('.mode-label') && Array.from(document.querySelectorAll('.mode-label')).forEach(el=>el.textContent = activeMode==='dark'?'Dark':'Light');
+
+  modeTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      activeMode = tab.dataset.mode;
+      modeTabs.forEach(t=>{ t.classList.remove('active'); t.style.background='transparent'; t.style.color='var(--text-secondary)'; });
+      tab.classList.add('active');
+      tab.style.background='var(--primary-main)'; tab.style.color='var(--primary-contrast)';
+      modeLabel();
+      // switching tabs previews that mode live
+      setPageScheme(activeMode);
+      applyColorPalette(activeMode);
+    });
+  });
+
+  // ---------- Color pickers -> live CSS vars ----------
+  const colorPrimary = document.getElementById('color-primary');
+  const colorSecondary = document.getElementById('color-secondary');
+
+  colorPrimary.addEventListener('input', () => {
+    PALETTES[activeMode].primary = colorPrimary.value;
+    applyColorPalette(activeMode);
+  });
+  colorSecondary.addEventListener('input', () => {
+    PALETTES[activeMode].secondary = colorSecondary.value;
+    applyColorPalette(activeMode);
+  });
+
+  // ---------- Default-mode radio ----------
+  document.querySelectorAll('input[name="defaultMode"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.radio-chip').forEach(c=>c.classList.remove('selected'));
+      radio.closest('.radio-chip').classList.add('selected');
+      // Optionally preview the chosen default — but do not force it (admin may be editing the other mode)
+    });
+  });
+
+  // ---------- Site name / title live-update header + tab ----------
+  document.getElementById('site-name').addEventListener('input', (e) => {
+    const v = e.target.value || 'Siraj';
+    document.getElementById('header-brand-name').textContent = v;
+  });
+  document.getElementById('site-title').addEventListener('input', (e) => {
+    document.title = e.target.value || 'Siraj — Learning Management System';
+  });
+  document.getElementById('logo-url').addEventListener('input', (e) => {
+    if (e.target.value) document.getElementById('header-logo').src = e.target.value;
+  });
+
+  // ---------- Repeatable social links ----------
+  const PLATFORMS = ['🌐 Website','🐦 X / Twitter','📘 Facebook','📸 Instagram','🧑‍💼 LinkedIn','▶️ YouTube'];
+  function addSocialRow(prefilled) {
+    const list = document.getElementById('social-list');
+    const row = document.createElement('div');
+    row.className = 'rep-field';
+    const sel = document.createElement('select');
+    sel.className = 'platform-select';
+    PLATFORMS.forEach(p => { const o=document.createElement('option'); o.textContent=p; sel.appendChild(o); });
+    if (prefilled) sel.value = prefilled;
+    const inp = document.createElement('input');
+    inp.type='url'; inp.placeholder='https://...';
+    const btn = document.createElement('button');
+    btn.className='remove-row'; btn.title='Remove link'; btn.innerHTML='×';
+    btn.addEventListener('click', () => row.remove());
+    row.append(sel, inp, btn);
+    list.appendChild(row);
+  }
+  document.querySelector('.add-row-btn').addEventListener('click', () => addSocialRow());
+  document.querySelectorAll('.rep-field .remove-row').forEach(b => b.addEventListener('click', () => b.closest('.rep-field').remove()));
+
+  // ---------- Init ----------
+  applyColorPalette('dark');
+  setPageScheme('dark');
+</script>
 
 </body>
 </html>
