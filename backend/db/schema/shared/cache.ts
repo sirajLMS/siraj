@@ -29,7 +29,7 @@ export const sessionCache = pgTable(
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   },
-  table => [index("session_cache_expires_at_idx").on(table.expiresAt), index("session_cache_value_idx").on(table.value)]
+  table => [index("session_cache_expires_at_idx").on(table.expiresAt)]
 );
 
 // Export types
