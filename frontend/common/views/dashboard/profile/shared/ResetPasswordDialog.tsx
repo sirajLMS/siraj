@@ -92,7 +92,9 @@ export function ResetPasswordDialog({
         >
           <KeyOutlined sx={{ fontSize: 32 }} />
         </Box>
-        <Typography variant="headlineMd" component="span">{t.adminResetPassword.title}</Typography>
+        <Typography variant="headlineMd" component="span">
+          {t.adminResetPassword.title}
+        </Typography>
       </DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ pt: 1 }}>

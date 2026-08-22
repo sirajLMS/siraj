@@ -14,7 +14,7 @@
 
 ## Phase 0: Pre-Implementation Baseline (DONE at execution start, not in plan)
 
-- [ ] 0.1 Record tsgo error count baseline
+- [x] 0.1 Record tsgo error count baseline
   - `bun tsgo 2>&1 | grep "error TS" | wc -l > /tmp/baseline-tsgo.txt`
   - Write: `.ai/plans/brand/outcome/0.1-baseline-outcome.md`
 - [ ] 0.2 Record biome + lint baselines
