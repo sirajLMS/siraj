@@ -11,16 +11,20 @@ import { extractGqlErrorCode, getTestPort, isTestServerRunning, startTestServer,
  * mode all test requests come from [IP_REDACTED], so we delete that key.
  */
 async function clearAuthRateLimitCache(): Promise<void> {
-  await Promise.all([
-    Bun.spawn(["redis-cli", "-u", "redis://localhost:6379", "DEL", "ratelimit:auth:[IP_REDACTED]"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    }).exited,
-    Bun.spawn(["redis-cli", "-n", "1", "FLUSHDB"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    }).exited,
-  ]);
+  try {
+    await Promise.all([
+      Bun.spawn(["redis-cli", "-u", "redis://localhost:6379", "DEL", "ratelimit:auth:[IP_REDACTED]"], {
+        stdout: "pipe",
+        stderr: "pipe",
+      }).exited,
+      Bun.spawn(["redis-cli", "-n", "1", "FLUSHDB"], {
+        stdout: "pipe",
+        stderr: "pipe",
+      }).exited,
+    ]);
+  } catch {
+    // redis-cli might not be installed or available in PATH in CI
+  }
 }
 
 /**
@@ -54,7 +58,9 @@ describe("Rate limit enforcement with TEST_ENFORCE_RATE_LIMIT", () => {
   }, 180_000);
 
   afterAll(async () => {
-    await clearAuthRateLimitCache();
+    if (isRateLimitEnforced) {
+      await clearAuthRateLimitCache();
+    }
   });
 
   if (isRateLimitEnforced) {
