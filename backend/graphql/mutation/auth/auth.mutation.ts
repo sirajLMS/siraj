@@ -381,8 +381,11 @@ gqlSchemaBuilder.mutationFields(t => ({
 
       // Defense-in-depth: hard-block demoLogin in real production deployments
       // even if IS_DEMO is accidentally set to a truthy value.
-      const isProductionDeployment = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
-      if (isProductionDeployment) {
+      // Note: allow test servers (TEST_SERVER=1 or TEST_CI=true) running in NODE_ENV=production mode
+      // to execute demo login for automated integration testing.
+      const isTestEnvironment = process.env.TEST_SERVER === "1" || process.env.TEST_CI === "true";
+      const isRealProduction = process.env.VERCEL_ENV === "production" || (process.env.NODE_ENV === "production" && !isTestEnvironment);
+      if (isRealProduction) {
         throw new GraphQLError(tErrors.auth.demoLoginNotEnabled, {
           extensions: { code: "UNAUTHENTICATED" },
         });
