@@ -4,57 +4,81 @@ import { ensureIdempotentMigrations } from "@/backend/db/scripts/ensureIdempoten
 import { runDrizzleMigrations } from "@/backend/db/scripts/runDrizzleMigrations";
 import { getEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
+import { type DbDialect, migrationsFolderForDialect } from "@/scripts/dbActions/dialect";
 
 /**
- * Run migrations programmatically
- * This is useful for running migrations in production or in CI/CD pipelines
+ * Run migrations programmatically.
+ * This is useful for running migrations in production or in CI/CD pipelines.
+ *
+ * Dialect-aware (Phase 4): picks `backend/drizzle` for PostgreSQL or
+ * `backend/drizzle-sqlite` for SQLite, and skips PG-only steps
+ * (`applyCustomMigrations`, `ensureIdempotentMigrations`, pool close) for SQLite.
+ *
+ * For SQLite, uses drizzle-orm/libsql/migrator `migrate()` directly (the PG
+ * `runDrizzleMigrations` is PG-specific: CREATE SCHEMA, SERIAL, enum pre-commit).
  */
 export async function runMigrations(closePool: boolean) {
   const provider = getEnv("DB_PROVIDER", "postgres");
+  const dialect: DbDialect = provider.toLowerCase() === "sqlite" ? "sqlite" : "postgres";
+  const migrationsFolder = migrationsFolderForDialect(dialect);
 
-  logger.log(`Running migrations with provider: ${provider}`);
+  logger.log(`Running migrations with provider: ${provider} (dialect: ${dialect}, folder: ${migrationsFolder})`);
 
   // Auto-bundle any new/changed custom SQL files from backend/db/migration/ into
   // incremental drizzle migration folders before invoking the drizzle migrator.
   // This makes `bun db migrate` apply custom SQL automatically without requiring
   // the (policy-disabled) `cleanGenerate`.
-  try {
-    const newFolders = applyCustomMigrations();
-    if (newFolders.length > 0) {
-      logger.log(`Auto-bundled ${newFolders.length} custom migration folder(s): ${newFolders.join(", ")}`);
+  //
+  // NOTE: the custom SQL in backend/db/migration/ is PostgreSQL-specific (RLS,
+  // triggers, pg_trgm, plpgsql). It is skipped for SQLite — SQLite gets only the
+  // schema migration (CREATE TABLE / indexes) from drizzle-kit generate.
+  if (dialect === "postgres") {
+    try {
+      const newFolders = applyCustomMigrations();
+      if (newFolders.length > 0) {
+        logger.log(`Auto-bundled ${newFolders.length} custom migration folder(s): ${newFolders.join(", ")}`);
+      }
+    } catch (err) {
+      logger.error("Custom migration auto-bundle failed:", err);
+      throw err;
     }
-  } catch (err) {
-    logger.error("Custom migration auto-bundle failed:", err);
-    throw err;
+
+    // Ensure all migration SQL files in backend/drizzle/ are fully idempotent for PostgreSQL
+    // before running Drizzle migration runner. Prevents failures on existing DBs
+    // when type/column/constraint already exists.
+    ensureIdempotentMigrations();
   }
 
-  // Ensure all migration SQL files in backend/drizzle/ are fully idempotent for PostgreSQL
-  // before running Drizzle's migration runner. This prevents failures on existing DBs
-  // when type/column/constraint already exists.
-  ensureIdempotentMigrations();
-
-  // Per-folder transactions + enum pre-commit (avoids PG 55P04 on fresh and cloud DBs).
-  if (provider === "postgres") {
-    logger.warn("⚠️  Pool will be closed after migrations complete");
+  if (dialect === "postgres") {
+    // Per-folder transactions + enum pre-commit (avoids PG 55P04 on fresh and cloud DBs).
+    logger.warn("Pool will be closed after migrations complete");
+    await runDrizzleMigrations(db, {
+      migrationsFolder,
+    });
+  } else {
+    // SQLite: use drizzle-orm/libsql/migrator directly (handles the journal table natively;
+    // the PG-specific runDrizzleMigrations uses CREATE SCHEMA + SERIAL which SQLite lacks).
+    const { migrate } = await import("drizzle-orm/libsql/migrator");
+    // The db singleton is type-erased to PostgresDbType; cast back to the libsql shape
+    // the migrator expects. At runtime this IS a LibSQLDatabase when DB_PROVIDER=sqlite.
+    await migrate(db as never, { migrationsFolder });
   }
-  await runDrizzleMigrations(db, {
-    migrationsFolder: "./backend/drizzle",
-  });
 
   logger.log("Migrations completed successfully!");
 
   if (!closePool) {
-    logger.warn("⚠️  Pool closure skipped as per argument");
+    logger.warn("Pool closure skipped as per argument");
     return;
   }
 
-  if (provider === "postgres") {
+  // SQLite manages connections internally (no pool to close).
+  if (dialect === "postgres") {
     const pool = getDrizzleDbPool();
     if (pool) {
-      logger.warn("🔴 Closing database pool now...");
+      logger.warn("Closing database pool now...");
       await pool.end();
-      logger.warn("🔴 Database pool has been closed!");
-      logger.warn("⚠️  Any subsequent database operations will fail with 'Cannot use a pool after calling end'");
+      logger.warn("Database pool has been closed!");
+      logger.warn("Any subsequent database operations will fail with Cannot use a pool after calling end");
     }
   }
 }

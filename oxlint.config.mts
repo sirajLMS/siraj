@@ -92,13 +92,14 @@ export default defineConfig({
       },
     },
     {
-      // Drizzle dialect-aware schema: the `as never` type-erasure casts on FK
-      // .references(() => otherTable.id as never, ...) are the documented
+      // Drizzle dialect-aware type-erasure: the `as never` casts on FK
+      // .references(() => otherTable.id as never, ...) in schema files, and the
+      // `db as never` cast in migrate.ts (libsql migrator branch) are the documented
       // multi-dialect (PG + SQLite) pattern (see __shared__/dialectAwareBuilder.ts
       // + docs/SQLITE_MIGRATION_PROGRESS.md). The casts are intentional and
       // runtime-safe (real sqlite/pg objects are returned; the cast only erases
       // the TS type so the service/repo layers see PG types unchanged).
-      files: ["backend/db/schema/**"],
+      files: ["backend/db/schema/**", "backend/db/scripts/migrate.ts"],
       rules: {
         "typescript/no-unsafe-type-assertion": "off",
       },

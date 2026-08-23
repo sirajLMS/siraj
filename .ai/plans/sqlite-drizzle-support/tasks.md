@@ -41,7 +41,7 @@
 
 ## Phase 4 (STRETCH — not in scope unless requested)
 
-- [ ] 4.1 Drizzle Studio SQLite config (bun db studio --sqlite)
-- [ ] 4.2 SQLite seed runner (DB_PROVIDER=sqlite bun db seed)
-- [ ] 4.3 SQLite test runner (DB_PROVIDER=sqlite bun test:db)
-- [ ] 4.4 README docs for SQLite local-dev setup
+- [x] 4.1 Drizzle Studio SQLite config (bun db studio --sqlite)
+- [x] 4.2 SQLite seed runner (DB_PROVIDER=sqlite bun db seed)
+- [x] 4.3 SQLite test runner (DB_PROVIDER=sqlite bun test:db)
+- [x] 4.4 README docs for SQLite local-dev setup

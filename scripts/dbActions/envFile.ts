@@ -204,9 +204,11 @@ export function applyEnvFile(fileName: string, rootDir = process.cwd()): void {
     throw new Error(`Env file not found: ${fileName}`);
   }
 
-  const databaseUrl = readDatabaseUrlFromEnvFile(fileName, rootDir);
+  // Dialect-aware: SQLite env files (DB_PROVIDER=sqlite) use DB_FILE_NAME
+  // (or a file:/libsql: DATABASE_URL) and do not need a Postgres DATABASE_URL.
+  const databaseUrl = resolveEffectiveDatabaseUrl(fileName, rootDir);
   if (!isValidDatabaseUrl(databaseUrl)) {
-    throw new Error(`Env file "${fileName}" does not contain a valid DATABASE_URL.`);
+    throw new Error(`Env file "${fileName}" does not contain a valid DATABASE_URL (or DB_FILE_NAME for SQLite).`);
   }
 
   const result = config({ path: filePath, processEnv: {}, ...DOTENV_QUIET });
