@@ -1,0 +1,4 @@
+## 2026-08-23 - Unauthenticated Path Traversal & Auth Bypass in File Serving Endpoint
+**Vulnerability:** The storage file serving route (`app/api/storage/files/[[...path]]/route.ts`) allowed path traversal tokens like `..` and `\` in request paths. When paths started with `avatars/` (e.g. `avatars/../invoices/123.pdf`), the handler treated the request as public and bypassed authentication checks while `resolveLocalStoragePath` resolved the relative path within `storage/`.
+**Learning:** Checking path prefixes like `startsWith("avatars/")` or `startsWith("public/")` before calling `StorageService.validatePath()` allows crafted relative paths with leading allowed directory prefixes to bypass authentication and access private directories.
+**Prevention:** Always invoke `StorageService.validatePath()` on incoming file paths before prefix checks or resolution to reject relative traversal tokens (`..`, leading `/`, backslashes).

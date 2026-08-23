@@ -258,7 +258,12 @@ export namespace StorageService {
    * Returns true if the path is safe, false otherwise.
    */
   export function validatePath(filePath: string): boolean {
-    return !(filePath.includes("..") || filePath.startsWith("/") || filePath.startsWith("~"));
+    return !(
+      filePath.includes("..") ||
+      filePath.startsWith("/") ||
+      filePath.startsWith("~") ||
+      filePath.includes("\\")
+    );
   }
 
   /**

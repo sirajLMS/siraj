@@ -199,6 +199,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: tErrors.file.filePathRequired }, { status: 400 });
     }
 
+    if (!StorageService.validatePath(relativePath)) {
+      logger.warn("Path traversal attempt detected in file request", { path: relativePath });
+      return NextResponse.json({ error: tErrors.file.invalidFilePath }, { status: 400 });
+    }
+
     // Allow unauthenticated access to public files (public/ or avatars/ directories)
     if (relativePath.startsWith("public/") || relativePath.startsWith("avatars/")) {
       let absolutePath: string;
