@@ -1,5 +1,13 @@
-import { boolean, index, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { encryptedText } from "@/backend/db/schema/custom-types";
+import {
+  booleanColumn,
+  createTable,
+  encryptedText,
+  index,
+  jsonbColumn,
+  timestampColumn,
+  uuidColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import type { LocalizedString } from "@/shared/types/localized-string";
 
 /**
@@ -21,24 +29,24 @@ import type { LocalizedString } from "@/shared/types/localized-string";
  * B4: `updatedAt` uses `.$onUpdate(() => new Date())` so the repository need not
  * set it manually on every update.
  */
-export const whatsappAccounts = pgTable(
+export const whatsappAccounts = createTable(
   "whatsapp_accounts",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    wabaId: varchar("waba_id", { length: 64 }).notNull(),
-    phoneNumberId: varchar("phone_number_id", { length: 64 }).notNull().unique(),
-    displayName: jsonb("display_name").$type<LocalizedString>(),
-    displayPhoneNumber: varchar("display_phone_number", { length: 32 }),
-    qualityRating: varchar("quality_rating", { length: 16 }),
-    portfolioMessagingLimitTier: varchar("portfolio_messaging_limit_tier", { length: 32 }),
-    throughputLevel: varchar("throughput_level", { length: 16 }),
-    maxPhoneNumbersPerBusiness: varchar("max_phone_numbers_per_business", { length: 50 }),
+    id: uuidColumn("id"),
+    wabaId: varcharColumn("waba_id", { length: 64 }).notNull(),
+    phoneNumberId: varcharColumn("phone_number_id", { length: 64 }).notNull().unique(),
+    displayName: jsonbColumn<LocalizedString>("display_name"),
+    displayPhoneNumber: varcharColumn("display_phone_number", { length: 32 }),
+    qualityRating: varcharColumn("quality_rating", { length: 16 }),
+    portfolioMessagingLimitTier: varcharColumn("portfolio_messaging_limit_tier", { length: 32 }),
+    throughputLevel: varcharColumn("throughput_level", { length: 16 }),
+    maxPhoneNumbersPerBusiness: varcharColumn("max_phone_numbers_per_business", { length: 50 }),
     encryptedAccessToken: encryptedText("encrypted_access_token").notNull(),
     encryptedTwoStepPin: encryptedText("encrypted_two_step_pin").notNull(),
-    isActive: boolean("is_active").notNull().default(true),
-    lastWebhookAt: timestamp("last_webhook_at", { withTimezone: true, precision: 3 }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 })
+    isActive: booleanColumn("is_active").notNull().default(true),
+    lastWebhookAt: timestampColumn("last_webhook_at"),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at")
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),

@@ -1,29 +1,39 @@
-import { index, integer, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  uuidColumn,
+  uuidDefaultColumn,
+  timestampColumn,
+  varcharColumn,
+  textColumn,
+  integerColumn,
+  index,
+  uniqueIndex,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { quotas } from "@/backend/db/schema/billing/quotas";
 import { classInstances, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
 import { quotaLedgerReasonEnum } from "@/backend/db/schema/enums";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
 
-export const quotaLedger = pgTable(
+export const quotaLedger = createTable(
   "quota_ledger",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    quotaId: uuid("quota_id")
+    id: uuidColumn("id"),
+    quotaId: uuidDefaultColumn("quota_id")
       .notNull()
-      .references(() => quotas.id, { onDelete: "restrict" }),
-    studentId: uuid("student_id")
+      .references(() => quotas.id as never, { onDelete: "restrict" }),
+    studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id, { onDelete: "restrict" }),
-    recurringScheduleId: uuid("recurring_schedule_id").references(() => recurringSchedules.id, {
+      .references(() => students.id as never, { onDelete: "restrict" }),
+    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id").references(() => recurringSchedules.id as never, {
       onDelete: "set null",
     }),
-    classInstanceId: uuid("class_instance_id").references(() => classInstances.id, {
+    classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id as never, {
       onDelete: "set null",
     }),
-    delta: integer("delta").notNull(),
+    delta: integerColumn("delta").notNull(),
     reason: quotaLedgerReasonEnum("reason").notNull(),
-    reasonNote: text("reason_note"),
+    reasonNote: textColumn("reason_note"),
     /**
      * Deterministic SHA-256 idempotency key.
      *
@@ -33,10 +43,10 @@ export const quotaLedger = pgTable(
      * guarantees that every ledger entry for the same quota + reason + context is
      * deduplicated via the unique index below.
      */
-    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
-    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
+    actorUserId: uuidDefaultColumn("actor_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     uniqueIndex("quota_ledger_idempotency_key_unique_idx").on(table.idempotencyKey),

@@ -8,6 +8,8 @@ import {
   inet as pgInet,
   integer as pgInteger,
   jsonb as pgJsonb,
+  numeric as pgNumeric,
+  primaryKey as pgPrimaryKey,
   serial as pgSerial,
   pgEnum,
   pgTable,
@@ -23,6 +25,7 @@ import {
   customType as sqliteCustomType,
   index as sqliteIndex,
   integer as sqliteInteger,
+  primaryKey as sqlitePrimaryKey,
   sqliteTable,
   text as sqliteText,
   uniqueIndex as sqliteUniqueIndex,
@@ -59,7 +62,7 @@ import { decryptField, encryptField } from "@/backend/lib/field-encryption";
  * - PostgreSQL: `pgTable(name, columns, extras)`
  * - SQLite: `sqliteTable(name, columns, extras)` (cast to PG type for inference)
  */
-export function createTable<TColumns extends Record<string, unknown>>(
+export function createTable<TColumns extends Record<string, any>>(
   name: string,
   columns: TColumns,
   extras?: Parameters<typeof pgTable>[2]
@@ -151,6 +154,19 @@ export function bigintColumn(name: string) {
   return pgBigint(name, { mode: "bigint" });
 }
 
+/**
+ * Numeric/decimal column.
+ * - PostgreSQL: `numeric(precision, scale)` -- exact decimal, returned as string.
+ * - SQLite: `text` -- stores the decimal as a string to preserve exact precision.
+ *   The app layer is responsible for parsing to number/Decimal where needed.
+ */
+export function numericColumn(name: string, options?: { precision?: number; scale?: number }) {
+  if (isSqlite()) {
+    return sqliteText(name) as never;
+  }
+  return options ? pgNumeric(name, options) : pgNumeric(name);
+}
+
 export function jsonbColumn<T = unknown>(name: string) {
   if (isSqlite()) {
     return sqliteText(name, { mode: "json" }).$type<T>() as never;
@@ -201,6 +217,22 @@ export function uniqueIndex(name: string) {
     return sqliteUniqueIndex(name) as never;
   }
   return pgUniqueIndex(name);
+}
+
+/**
+ * Composite (multi-column) primary key builder.
+ * - PostgreSQL: `primaryKey({ columns, name? })` from `drizzle-orm/pg-core`.
+ * - SQLite: `primaryKey({ columns, name? })` from `drizzle-orm/sqlite-core`.
+ *
+ * Usage: `primaryKey({ columns: [table.a, table.b] })` — same signature as the
+ * underlying Drizzle builders. Both dialects support composite PRIMARY KEY
+ * constraints, so the semantics are preserved on SQLite.
+ */
+export function primaryKey(config: { columns: unknown[]; name?: string }) {
+  if (isSqlite()) {
+    return sqlitePrimaryKey(config as never) as never;
+  }
+  return pgPrimaryKey(config as never);
 }
 
 // ---------------------------------------------------------------------------

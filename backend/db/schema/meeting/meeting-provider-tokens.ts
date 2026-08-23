@@ -1,21 +1,30 @@
-import { index, jsonb, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
-import { encryptedText } from "@/backend/db/schema/custom-types";
+import {
+  createTable,
+  encryptedText,
+  index,
+  jsonbColumn,
+  timestampColumn,
+  uniqueIndex,
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { users } from "@/backend/db/schema/users/users";
 
-export const meetingProviderTokens = pgTable(
+export const meetingProviderTokens = createTable(
   "meeting_provider_tokens",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id")
+    id: uuidColumn("id"),
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    providerSlug: varchar("provider_slug", { length: 50 }).notNull(),
+      .references(() => users.id as never, { onDelete: "cascade" }),
+    providerSlug: varcharColumn("provider_slug", { length: 50 }).notNull(),
     accessToken: encryptedText("access_token").notNull(),
     refreshToken: encryptedText("refresh_token"),
-    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }),
-    scopes: jsonb("scopes").$type<readonly string[]>().notNull().default([]),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    expiresAt: timestampColumn("expires_at"),
+    scopes: jsonbColumn<readonly string[]>("scopes").notNull().default([]),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
     uniqueIndex("meeting_provider_tokens_user_provider_idx").on(table.userId, table.providerSlug),

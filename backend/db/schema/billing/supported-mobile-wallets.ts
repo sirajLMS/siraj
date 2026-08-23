@@ -1,17 +1,21 @@
-import { index, pgTable, varchar } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  index,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import {
   supportedPaymentMethodBaseHead,
   supportedPaymentMethodBaseTail,
 } from "@/backend/db/schema/billing/__shared__/supportedPaymentMethodBase";
 import { countryCodeEnum, currencyCodeEnum } from "@/backend/db/schema/enums";
 
-export const supportedMobileWallets = pgTable(
+export const supportedMobileWallets = createTable(
   "supported_mobile_wallets",
   {
     ...supportedPaymentMethodBaseHead(),
     countryCode: countryCodeEnum("country_code"),
     currencyCode: currencyCodeEnum("currency_code"),
-    phoneRegion: varchar("phone_region", { length: 10 }),
+    phoneRegion: varcharColumn("phone_region", { length: 10 }),
     ...supportedPaymentMethodBaseTail(),
   },
   table => [

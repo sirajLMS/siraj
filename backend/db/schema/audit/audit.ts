@@ -1,4 +1,14 @@
-import { index, inet, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  index,
+  inetColumn,
+  jsonbColumn,
+  textColumn,
+  timestampColumn,
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { users } from "@/backend/db/schema/users/users";
 
 // NOTE: This table is truly append-only. The following SQL trigger has been deployed via migrations:
@@ -11,21 +21,25 @@ import { users } from "@/backend/db/schema/users/users";
 // CREATE TRIGGER prevent_audit_mod_trigger
 // BEFORE UPDATE OR DELETE ON admin_audit_logs
 // FOR EACH ROW EXECUTE FUNCTION prevent_audit_modification();
+//
+// PG-only: the immutability trigger above is a PostgreSQL plpgsql function. On
+// SQLite, audit-log immutability is enforced at the repository layer (no
+// update/delete methods are exposed on the audit repository).
 
-export const adminAuditLogs = pgTable(
+export const adminAuditLogs = createTable(
   "admin_audit_logs",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    actorUserId: uuid("actor_user_id")
+    id: uuidColumn("id"),
+    actorUserId: uuidDefaultColumn("actor_user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "restrict" }),
-    targetUserId: uuid("target_user_id").references(() => users.id, { onDelete: "restrict" }),
-    action: varchar("action", { length: 100 }).notNull(),
-    description: text("description"),
-    previousState: jsonb("previous_state"),
-    newState: jsonb("new_state"),
-    ipAddress: inet("ip_address"),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+      .references(() => users.id as never, { onDelete: "restrict" }),
+    targetUserId: uuidDefaultColumn("target_user_id").references(() => users.id as never, { onDelete: "restrict" }),
+    action: varcharColumn("action", { length: 100 }).notNull(),
+    description: textColumn("description"),
+    previousState: jsonbColumn("previous_state"),
+    newState: jsonbColumn("new_state"),
+    ipAddress: inetColumn("ip_address"),
+    createdAt: timestampColumn("created_at").notNull(),
   },
   table => [
     index("admin_audit_logs_actor_idx").on(table.actorUserId),
@@ -50,29 +64,30 @@ export const adminAuditLogs = pgTable(
  *
  * NOTE: This table is immutable. A database trigger prevents UPDATE and DELETE operations.
  * Trigger `prevent_audit_modification` will be deployed via migration.
+ * PG-only: on SQLite, immutability is enforced at the repository layer.
  */
-export const auditLogs = pgTable(
+export const auditLogs = createTable(
   "audit_logs",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: uuidColumn("id"),
     // Actor performing the action
-    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
-    actorType: varchar("actor_type", { length: 50 }).notNull(), // 'USER', 'SYSTEM', 'API', 'CRON'
+    actorUserId: uuidDefaultColumn("actor_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    actorType: varcharColumn("actor_type", { length: 50 }).notNull(), // 'USER', 'SYSTEM', 'API', 'CRON'
     // Entity being changed
-    entityType: varchar("entity_type", { length: 100 }).notNull(), // 'STUDENT', 'INVOICE', 'PAYMENT', 'PERMISSION', etc.
-    entityId: varchar("entity_id", { length: 255 }).notNull(), // Changed to varchar to support non-UUID entities
+    entityType: varcharColumn("entity_type", { length: 100 }).notNull(), // 'STUDENT', 'INVOICE', 'PAYMENT', 'PERMISSION', etc.
+    entityId: varcharColumn("entity_id", { length: 255 }).notNull(), // Changed to varchar to support non-UUID entities
     // Action details
-    action: varchar("action", { length: 100 }).notNull(), // 'CREATE', 'UPDATE', 'DELETE', 'STATUS_CHANGE', 'REFUND', etc.
-    description: text("description"),
+    action: varcharColumn("action", { length: 100 }).notNull(), // 'CREATE', 'UPDATE', 'DELETE', 'STATUS_CHANGE', 'REFUND', etc.
+    description: textColumn("description"),
     // State changes
-    previousState: jsonb("previous_state"), // Full or partial previous state
-    newState: jsonb("new_state"), // Full or partial new state
-    changes: jsonb("changes"), // Diff of what changed (optional, for convenience)
+    previousState: jsonbColumn("previous_state"), // Full or partial previous state
+    newState: jsonbColumn("new_state"), // Full or partial new state
+    changes: jsonbColumn("changes"), // Diff of what changed (optional, for convenience)
     // Context
-    ipAddress: inet("ip_address"),
-    userAgent: text("user_agent"),
-    metadata: jsonb("metadata"), // Additional context (e.g., refund reason, approval info)
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    ipAddress: inetColumn("ip_address"),
+    userAgent: textColumn("user_agent"),
+    metadata: jsonbColumn("metadata"), // Additional context (e.g., refund reason, approval info)
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
   },
   table => [
     index("audit_logs_actor_user_id_idx").on(table.actorUserId),

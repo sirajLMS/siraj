@@ -1,15 +1,20 @@
-import { index, jsonb, pgTable, varchar } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  index,
+  jsonbColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import {
   supportedPaymentMethodBaseHead,
   supportedPaymentMethodBaseTail,
 } from "@/backend/db/schema/billing/__shared__/supportedPaymentMethodBase";
 
-export const supportedPaymentLinks = pgTable(
+export const supportedPaymentLinks = createTable(
   "supported_payment_links",
   {
     ...supportedPaymentMethodBaseHead(),
-    urlAllowlist: jsonb("url_allowlist").$type<readonly string[]>().notNull(),
-    urlExample: varchar("url_example", { length: 1024 }),
+    urlAllowlist: jsonbColumn<readonly string[]>("url_allowlist").notNull(),
+    urlExample: varcharColumn("url_example", { length: 1024 }),
     ...supportedPaymentMethodBaseTail(),
   },
   table => [

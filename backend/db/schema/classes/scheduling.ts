@@ -1,22 +1,19 @@
 import { sql } from "drizzle-orm";
+import { type AnyPgColumn } from "drizzle-orm/pg-core";
 import {
-  type AnyPgColumn,
-  boolean,
-  check,
-  date,
+  booleanColumn,
+  checkConstraint,
+  createTable,
   index,
-  integer,
-  jsonb,
-  numeric,
-  pgTable,
-  smallint,
-  text,
-  time,
-  timestamp,
+  integerColumn,
+  jsonbColumn,
+  textColumn,
+  timestampColumn,
   uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { coreScheduleColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import { quotas } from "@/backend/db/schema/billing/quotas";
 import { classSubjects } from "@/backend/db/schema/classes/class-subject";
@@ -55,32 +52,43 @@ import type { CurrencyCode } from "@/shared/constants/currency.enum";
  * Row-Level Security (RLS) Policies:
  * - Enabled for soft deletes: filters out records where `deleted_at IS NOT NULL` for SELECT/UPDATE.
  */
-export const recurringSchedules = pgTable(
+export const recurringSchedules = createTable(
   "recurring_schedules",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    ...coreScheduleColumns({ students: () => students, teachers: () => teachers, classSubjects: () => classSubjects }),
-    avatarUrl: varchar("avatar_url", { length: 1024 }),
-    durationMinutes: integer("duration_minutes").notNull(),
-    defaultStartTime: time("default_start_time").notNull(),
-    timezoneId: integer("timezone_id").references(() => timezones.id),
-    timezone: varchar("timezone", { length: 100 }).notNull(),
-    utcOffsetSnapshot: integer("utc_offset_snapshot"), // Offset in minutes at time of schedule creation/update
+    id: uuidColumn("id"),
+    // Cast tables to `never` to satisfy `coreScheduleColumns`'s `{ id: unknown }`
+    // interface — the `TColumns extends Record<string, unknown>` constraint on
+    // `createTable` weakens column typing to an index signature, so the tables no
+    // longer expose an explicit `id` property for structural compatibility.
+    ...coreScheduleColumns({
+      students: () => students as never,
+      teachers: () => teachers as never,
+      classSubjects: () => classSubjects as never,
+    }),
+    avatarUrl: varcharColumn("avatar_url", { length: 1024 }),
+    durationMinutes: integerColumn("duration_minutes").notNull(),
+    // PG-only: time — stored as TEXT on SQLite (drizzle returns string for both).
+    defaultStartTime: textColumn("default_start_time").notNull(),
+    timezoneId: integerColumn("timezone_id").references(() => timezones.id as never),
+    timezone: varcharColumn("timezone", { length: 100 }).notNull(),
+    utcOffsetSnapshot: integerColumn("utc_offset_snapshot"), // Offset in minutes at time of schedule creation/update
     // Recurring-class-level hourly rate (highest non-override precedence tier).
     // Nullable: when NULL, the rate falls back to `class_subjects.hourly_rate`
     // then `teachers.hourly_rate`. See `rate-resolver.service.ts`.
-    hourlyRate: numeric("hourly_rate", { precision: 12, scale: 2 }),
+    // PG-only: numeric(12,2) — stored as TEXT on SQLite (drizzle returns string for both).
+    hourlyRate: textColumn("hourly_rate"),
     rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),
-    effectiveFrom: date("effective_from"),
-    effectiveUntil: date("effective_until"),
-    quotaId: uuid("quota_id").references(() => quotas.id, { onDelete: "set null" }),
-    earmarkedClasses: integer("earmarked_classes"),
+    // PG-only: date — stored as TEXT on SQLite (drizzle returns string for both).
+    effectiveFrom: textColumn("effective_from"),
+    effectiveUntil: textColumn("effective_until"),
+    quotaId: uuidDefaultColumn("quota_id").references(() => quotas.id as never, { onDelete: "set null" }),
+    earmarkedClasses: integerColumn("earmarked_classes"),
     schedulingMode: schedulingModeEnum("scheduling_mode").notNull().default("NUMBER_OF_CLASSES"),
-    generationHorizonWeeks: integer("generation_horizon_weeks"),
+    generationHorizonWeeks: integerColumn("generation_horizon_weeks"),
     ondemandNoCreditsOutcome: onDemandNoCreditsOutcomeEnum("ondemand_no_credits_outcome"),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
     index("recurring_schedules_student_id_idx").on(table.studentId),
@@ -95,7 +103,9 @@ export const recurringSchedules = pgTable(
     index("recurring_schedules_updated_at_idx").on(table.updatedAt),
     index("recurring_schedules_teacher_id_deleted_at_idx").on(table.teacherId, table.deletedAt),
     index("recurring_schedules_student_id_deleted_at_idx").on(table.studentId, table.deletedAt),
-    check("recurring_schedules_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
+    // PG-only CHECK: calls the is_valid_timezone() UDF. SQLite cannot register
+    // JS UDFs via libsql — timezone validation is handled at the app layer.
+    checkConstraint("recurring_schedules_timezone_chk", sql`is_valid_timezone(${table.timezone})`, null),
   ]
 );
 
@@ -105,16 +115,17 @@ export const recurringSchedules = pgTable(
  * Database-level Constraints & Triggers:
  * - Trigger `trg_recalc_hours_recurring_schedule_days`: Recalculates student `hours_per_week` on schedule day insertions, updates, or deletes.
  */
-export const recurringScheduleDays = pgTable(
+export const recurringScheduleDays = createTable(
   "recurring_schedule_days",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    recurringScheduleId: uuid("recurring_schedule_id")
+    id: uuidColumn("id"),
+    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id")
       .notNull()
-      .references(() => recurringSchedules.id, { onDelete: "restrict" }),
+      .references(() => recurringSchedules.id as never, { onDelete: "restrict" }),
     dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
-    startTime: time("start_time").notNull(),
-    isActive: boolean("is_active").notNull().default(true),
+    // PG-only: time — stored as TEXT on SQLite (drizzle returns string for both).
+    startTime: textColumn("start_time").notNull(),
+    isActive: booleanColumn("is_active").notNull().default(true),
   },
   table => [
     uniqueIndex("recurring_schedule_days_schedule_day_idx").on(table.recurringScheduleId, table.dayOfWeek),
@@ -138,60 +149,70 @@ export const recurringScheduleDays = pgTable(
  * Row-Level Security (RLS) Policies:
  * - Enabled for soft deletes: filters out records where `deleted_at IS NOT NULL` for SELECT/UPDATE.
  */
-export const classInstances = pgTable(
+export const classInstances = createTable(
   "class_instances",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    ...coreScheduleColumns({ students: () => students, teachers: () => teachers, classSubjects: () => classSubjects }),
-    recurringScheduleId: uuid("recurring_schedule_id").references(() => recurringSchedules.id, {
+    id: uuidColumn("id"),
+    // See `recurringSchedules` above for the rationale on the `as never` casts.
+    ...coreScheduleColumns({
+      students: () => students as never,
+      teachers: () => teachers as never,
+      classSubjects: () => classSubjects as never,
+    }),
+    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id").references(() => recurringSchedules.id as never, {
       onDelete: "set null",
     }),
-    originalClassId: uuid("original_class_id").references((): AnyPgColumn => classInstances.id, {
-      onDelete: "set null",
-    }),
-    scheduledStartAt: timestamp("scheduled_start_at", { withTimezone: true, precision: 3 }).notNull(),
-    scheduledEndAt: timestamp("scheduled_end_at", { withTimezone: true, precision: 3 }).notNull(),
-    bookingTimezoneId: integer("booking_timezone_id").references(() => timezones.id),
-    bookingTimezone: varchar("booking_timezone", { length: 100 }), // Snapshot of IANA ID at booking
-    bookingUtcOffset: integer("booking_utc_offset"), // Snapshot of UTC offset in minutes at booking
-    durationMinutes: integer("duration_minutes").notNull(),
+    // Self-reference — explicit `AnyPgColumn` return type annotation breaks the
+    // circular type inference (TS7022) that would otherwise make `classInstances`
+    // implicitly `any` because `originalClassId` references `classInstances.id`.
+    originalClassId: uuidDefaultColumn("original_class_id").references(
+      (): AnyPgColumn => classInstances.id as never,
+      { onDelete: "set null" }
+    ),
+    scheduledStartAt: timestampColumn("scheduled_start_at").notNull(),
+    scheduledEndAt: timestampColumn("scheduled_end_at").notNull(),
+    bookingTimezoneId: integerColumn("booking_timezone_id").references(() => timezones.id as never),
+    bookingTimezone: varcharColumn("booking_timezone", { length: 100 }), // Snapshot of IANA ID at booking
+    bookingUtcOffset: integerColumn("booking_utc_offset"), // Snapshot of UTC offset in minutes at booking
+    durationMinutes: integerColumn("duration_minutes").notNull(),
     classType: classTypeEnum("class_type").notNull(),
     outcome: classOutcomeEnum("outcome").notNull().default("PENDING"),
     executionState: classExecutionStateEnum("execution_state").notNull().default("NOT_ACTIVATED"),
-    isRescheduled: boolean("is_rescheduled").notNull().default(false),
-    isFrozen: boolean("is_frozen").notNull().default(false),
-    meetingJoinUrl: varchar("meeting_join_url", { length: 1024 }),
-    userMeetingConfigId: uuid("user_meeting_config_id").references(() => userMeetingConfigs.id, {
+    isRescheduled: booleanColumn("is_rescheduled").notNull().default(false),
+    isFrozen: booleanColumn("is_frozen").notNull().default(false),
+    meetingJoinUrl: varcharColumn("meeting_join_url", { length: 1024 }),
+    userMeetingConfigId: uuidDefaultColumn("user_meeting_config_id").references(() => userMeetingConfigs.id as never, {
       onDelete: "set null",
     }),
-    meetingProviderId: uuid("meeting_provider_id").references(() => meetingProviders.id, {
+    meetingProviderId: uuidDefaultColumn("meeting_provider_id").references(() => meetingProviders.id as never, {
       onDelete: "set null",
     }),
-    meetingConfigSnapshot: jsonb("meeting_config_snapshot").$type<MeetingConfigSnapshot>(),
-    activatedAt: timestamp("activated_at", { withTimezone: true, precision: 3 }),
-    activatedByUserId: uuid("activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    forceActivated: boolean("force_activated").notNull().default(false),
-    forceActivatedByUserId: uuid("force_activated_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    actualStartAt: timestamp("actual_start_at", { withTimezone: true, precision: 3 }),
-    actualEndAt: timestamp("actual_end_at", { withTimezone: true, precision: 3 }),
-    quotaDeducted: boolean("quota_deducted").notNull().default(false),
+    meetingConfigSnapshot: jsonbColumn<MeetingConfigSnapshot>("meeting_config_snapshot"),
+    activatedAt: timestampColumn("activated_at"),
+    activatedByUserId: uuidDefaultColumn("activated_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    forceActivated: booleanColumn("force_activated").notNull().default(false),
+    forceActivatedByUserId: uuidDefaultColumn("force_activated_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    actualStartAt: timestampColumn("actual_start_at"),
+    actualEndAt: timestampColumn("actual_end_at"),
+    quotaDeducted: booleanColumn("quota_deducted").notNull().default(false),
     schedulingMode: schedulingModeEnum("scheduling_mode").notNull().default("NUMBER_OF_CLASSES"),
     ondemandStatus: onDemandStatusEnum("ondemand_status"),
-    payrollCredited: boolean("payroll_credited").notNull().default(false),
+    payrollCredited: booleanColumn("payroll_credited").notNull().default(false),
     // Rate snapshot — captured at class completion, overridable by admin
-    rateAmount: numeric("rate_amount", { precision: 12, scale: 2 }),
+    // PG-only: numeric(12,2) — stored as TEXT on SQLite (drizzle returns string for both).
+    rateAmount: textColumn("rate_amount"),
     rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),
-    isRateOverridden: boolean("is_rate_overridden").notNull().default(false),
+    isRateOverridden: booleanColumn("is_rate_overridden").notNull().default(false),
     // Which precedence tier the snapshot was resolved from (TEACHER | SUBJECT |
     // RECURRING | OVERRIDE). Set when the snapshot is captured at booking time
     // and again at approval. See `rate-resolver.service.ts`.
     rateSource: rateSourceEnum("rate_source").$type<RateSource>(),
-    remarks: text("remarks"),
-    adminNotes: text("admin_notes"),
-    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+    remarks: textColumn("remarks"),
+    adminNotes: textColumn("admin_notes"),
+    idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
     index("class_instances_scheduled_start_at_idx").on(table.scheduledStartAt),
@@ -229,8 +250,16 @@ export const classInstances = pgTable(
     uniqueIndex("class_instances_original_class_uniq_idx")
       .on(table.originalClassId)
       .where(sql`${table.originalClassId} IS NOT NULL AND ${table.deletedAt} IS NULL`),
-    check(
+    checkConstraint(
       "class_instances_state_machine_chk",
+      sql`
+        (${table.executionState} != 'COMPLETED' OR ${table.outcome} != 'PENDING') AND
+        (${table.executionState} != 'NOT_ACTIVATED' OR ${table.actualStartAt} IS NULL) AND
+        (${table.forceActivated} = false OR ${table.forceActivatedByUserId} IS NOT NULL) AND
+        (${table.outcome} != 'TAKEN' OR ${table.actualStartAt} IS NOT NULL) AND
+        (${table.isRateOverridden} = false OR ${table.rateAmount} IS NOT NULL) AND
+        (${table.executionState} NOT IN ('ON_DEMAND_PENDING_CREDITS', 'ON_DEMAND_CONFLICT_HELD', 'ON_DEMAND_NO_CREDITS_CANCELLED', 'ON_DEMAND_NO_CREDITS_ABSENT') OR ${table.schedulingMode} = 'ON_DEMAND')
+      `,
       sql`
         (${table.executionState} != 'COMPLETED' OR ${table.outcome} != 'PENDING') AND
         (${table.executionState} != 'NOT_ACTIVATED' OR ${table.actualStartAt} IS NULL) AND
@@ -240,41 +269,48 @@ export const classInstances = pgTable(
         (${table.executionState} NOT IN ('ON_DEMAND_PENDING_CREDITS', 'ON_DEMAND_CONFLICT_HELD', 'ON_DEMAND_NO_CREDITS_CANCELLED', 'ON_DEMAND_NO_CREDITS_ABSENT') OR ${table.schedulingMode} = 'ON_DEMAND')
       `
     ),
-    check(
+    checkConstraint(
       "class_instances_ondemand_status_scheduling_mode_chk",
+      sql`
+        (${table.ondemandStatus} IS NULL AND ${table.schedulingMode} != 'ON_DEMAND') OR
+        (${table.ondemandStatus} IS NOT NULL AND ${table.schedulingMode} = 'ON_DEMAND')
+      `,
       sql`
         (${table.ondemandStatus} IS NULL AND ${table.schedulingMode} != 'ON_DEMAND') OR
         (${table.ondemandStatus} IS NOT NULL AND ${table.schedulingMode} = 'ON_DEMAND')
       `
     ),
-    check(
+    checkConstraint(
       "class_instances_reschedule_not_self_chk",
+      sql`${table.originalClassId} IS NULL OR ${table.originalClassId} != ${table.id}`,
       sql`${table.originalClassId} IS NULL OR ${table.originalClassId} != ${table.id}`
     ),
-    check(
+    checkConstraint(
       "class_instances_rescheduled_no_quota_chk",
+      sql`${table.isRescheduled} = false OR ${table.quotaDeducted} = false`,
       sql`${table.isRescheduled} = false OR ${table.quotaDeducted} = false`
     ),
-    check(
+    checkConstraint(
       "class_instances_rescheduled_no_complete_chk",
+      sql`${table.isRescheduled} = false OR (${table.executionState} != 'COMPLETED' OR ${table.outcome} != 'TAKEN')`,
       sql`${table.isRescheduled} = false OR (${table.executionState} != 'COMPLETED' OR ${table.outcome} != 'TAKEN')`
     ),
   ]
 );
 
-export const classStatusEvents = pgTable(
+export const classStatusEvents = createTable(
   "class_status_events",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    classInstanceId: uuid("class_instance_id")
+    id: uuidColumn("id"),
+    classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id, { onDelete: "restrict" }),
-    eventType: varchar("event_type", { length: 50 }).notNull(),
-    fromState: jsonb("from_state"),
-    toState: jsonb("to_state"),
-    description: text("description"),
-    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+      .references(() => classInstances.id as never, { onDelete: "restrict" }),
+    eventType: varcharColumn("event_type", { length: 50 }).notNull(),
+    fromState: jsonbColumn("from_state"),
+    toState: jsonbColumn("to_state"),
+    description: textColumn("description"),
+    actorUserId: uuidDefaultColumn("actor_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    createdAt: timestampColumn("created_at").notNull(),
   },
   table => [
     index("class_status_events_class_instance_id_idx").on(table.classInstanceId),
@@ -284,22 +320,22 @@ export const classStatusEvents = pgTable(
   ]
 );
 
-export const leaveRequests = pgTable(
+export const leaveRequests = createTable(
   "leave_requests",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    classInstanceId: uuid("class_instance_id")
+    id: uuidColumn("id"),
+    classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id, { onDelete: "restrict" }),
-    requestedByUserId: uuid("requested_by_user_id")
+      .references(() => classInstances.id as never, { onDelete: "restrict" }),
+    requestedByUserId: uuidDefaultColumn("requested_by_user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => users.id as never, { onDelete: "cascade" }),
     requesterType: leaveRequesterTypeEnum("requester_type").notNull(),
-    reason: text("reason"),
+    reason: textColumn("reason"),
     status: leaveRequestStatusEnum("status").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    processedAt: timestamp("processed_at", { withTimezone: true, precision: 3 }),
-    processedByUserId: uuid("processed_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestampColumn("created_at").notNull(),
+    processedAt: timestampColumn("processed_at"),
+    processedByUserId: uuidDefaultColumn("processed_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
   },
   table => [
     index("leave_requests_class_instance_id_idx").on(table.classInstanceId),
@@ -322,15 +358,17 @@ export const leaveRequests = pgTable(
  *   - Dynamically resolves maximum allowed monthly leaves from `system_settings` (via keys `teacher_max_leaves` or `student_max_leaves`, defaulting to 2 if not found).
  *   - Blocks inserts/updates if the `used_count` exceeds the allowed limit.
  */
-export const leaveQuotaUsage = pgTable(
+export const leaveQuotaUsage = createTable(
   "leave_quota_usage",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    teacherId: uuid("teacher_id").references(() => teachers.id, { onDelete: "restrict" }),
-    studentId: uuid("student_id").references(() => students.id, { onDelete: "restrict" }),
-    periodYear: smallint("period_year").notNull(),
-    periodMonth: smallint("period_month").notNull(),
-    usedCount: integer("used_count").notNull().default(0),
+    id: uuidColumn("id"),
+    teacherId: uuidDefaultColumn("teacher_id").references(() => teachers.id as never, { onDelete: "restrict" }),
+    studentId: uuidDefaultColumn("student_id").references(() => students.id as never, { onDelete: "restrict" }),
+    // PG-only: smallint — stored as INTEGER on SQLite (drizzle returns number for both).
+    periodYear: integerColumn("period_year").notNull(),
+    // PG-only: smallint — stored as INTEGER on SQLite (drizzle returns number for both).
+    periodMonth: integerColumn("period_month").notNull(),
+    usedCount: integerColumn("used_count").notNull().default(0),
   },
   table => [
     uniqueIndex("leave_quota_teacher_period_idx")
@@ -340,39 +378,40 @@ export const leaveQuotaUsage = pgTable(
       .on(table.studentId, table.periodYear, table.periodMonth)
       .where(sql`${table.studentId} IS NOT NULL`),
     index("leave_quota_usage_period_year_period_month_idx").on(table.periodYear, table.periodMonth),
-    check(
+    checkConstraint(
       "leave_quota_usage_teacher_student_xor_chk",
+      sql`(${table.teacherId} IS NOT NULL AND ${table.studentId} IS NULL) OR (${table.teacherId} IS NULL AND ${table.studentId} IS NOT NULL)`,
       sql`(${table.teacherId} IS NOT NULL AND ${table.studentId} IS NULL) OR (${table.teacherId} IS NULL AND ${table.studentId} IS NOT NULL)`
     ),
   ]
 );
 
-export const dstMigrationRuns = pgTable(
+export const dstMigrationRuns = createTable(
   "dst_migration_runs",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    runByUserId: uuid("run_by_user_id")
+    id: uuidColumn("id"),
+    runByUserId: uuidDefaultColumn("run_by_user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    offsetMinutes: integer("offset_minutes").notNull(),
-    description: varchar("description", { length: 255 }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+      .references(() => users.id as never, { onDelete: "cascade" }),
+    offsetMinutes: integerColumn("offset_minutes").notNull(),
+    description: varcharColumn("description", { length: 255 }),
+    createdAt: timestampColumn("created_at").notNull(),
   },
   table => [index("dst_migration_runs_created_at_idx").on(table.createdAt)]
 );
 
-export const dstMigrationEntries = pgTable(
+export const dstMigrationEntries = createTable(
   "dst_migration_entries",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    runId: uuid("run_id")
+    id: uuidColumn("id"),
+    runId: uuidDefaultColumn("run_id")
       .notNull()
-      .references(() => dstMigrationRuns.id, { onDelete: "cascade" }),
-    recurringScheduleId: uuid("recurring_schedule_id")
+      .references(() => dstMigrationRuns.id as never, { onDelete: "cascade" }),
+    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id")
       .notNull()
-      .references(() => recurringSchedules.id, { onDelete: "restrict" }),
+      .references(() => recurringSchedules.id as never, { onDelete: "restrict" }),
     result: dstMigrationResultEnum("result").notNull(),
-    conflictDetail: text("conflict_detail"),
+    conflictDetail: textColumn("conflict_detail"),
   },
   table => [
     index("dst_migration_entries_run_id_idx").on(table.runId),
@@ -381,27 +420,27 @@ export const dstMigrationEntries = pgTable(
   ]
 );
 
-export const classInstancePerformance = pgTable(
+export const classInstancePerformance = createTable(
   "class_instance_performance",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    classInstanceId: uuid("class_instance_id")
+    id: uuidColumn("id"),
+    classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
       .unique()
-      .references(() => classInstances.id, { onDelete: "cascade" }),
-    engagementScore: integer("engagement_score"),
-    assessmentProgress: integer("assessment_progress"),
-    assessmentTotal: integer("assessment_total"),
-    focusLevel: varchar("focus_level", { length: 50 }),
-    sessionHealth: varchar("session_health", { length: 50 }),
-    heatmapData: jsonb("heatmap_data").$type<number[]>(),
-    latencyMs: integer("latency_ms"),
-    authorizationLabel: varchar("authorization_label", { length: 100 }),
-    attendanceRate: integer("attendance_rate"),
-    avgGrade: varchar("avg_grade", { length: 10 }),
-    lastClassDaysAgo: integer("last_class_days_ago"),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+      .references(() => classInstances.id as never, { onDelete: "cascade" }),
+    engagementScore: integerColumn("engagement_score"),
+    assessmentProgress: integerColumn("assessment_progress"),
+    assessmentTotal: integerColumn("assessment_total"),
+    focusLevel: varcharColumn("focus_level", { length: 50 }),
+    sessionHealth: varcharColumn("session_health", { length: 50 }),
+    heatmapData: jsonbColumn<number[]>("heatmap_data"),
+    latencyMs: integerColumn("latency_ms"),
+    authorizationLabel: varcharColumn("authorization_label", { length: 100 }),
+    attendanceRate: integerColumn("attendance_rate"),
+    avgGrade: varcharColumn("avg_grade", { length: 10 }),
+    lastClassDaysAgo: integerColumn("last_class_days_ago"),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     index("class_instance_performance_created_at_idx").on(table.createdAt),

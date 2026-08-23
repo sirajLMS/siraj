@@ -1,4 +1,10 @@
-import { boolean, jsonb, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  booleanColumn,
+  jsonbColumn,
+  timestampColumn,
+  uuidColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { paymentDirectionEnum } from "@/backend/db/schema/enums";
 import type { LocalizedString } from "@/shared/types";
 
@@ -15,7 +21,7 @@ import type { LocalizedString } from "@/shared/types";
  *
  * Usage:
  * ```ts
- * pgTable("my_table", {
+ * createTable("my_table", {
  *   ...supportedPaymentMethodBaseHead(),
  *   // domain-specific columns go here
  *   ...supportedPaymentMethodBaseTail(),
@@ -26,8 +32,6 @@ import type { LocalizedString } from "@/shared/types";
  * `$inferSelect` / `$inferInsert` types — so the generated migration is unchanged.
  */
 
-const timestampColumnConfig = { withTimezone: true, precision: 3 } as const;
-
 /**
  * Returns the head columns of the supported-payment-method base.
  *
@@ -36,11 +40,11 @@ const timestampColumnConfig = { withTimezone: true, precision: 3 } as const;
  */
 export function supportedPaymentMethodBaseHead() {
   return {
-    id: uuid("id").defaultRandom().primaryKey(),
-    slug: varchar("slug", { length: 100 }).notNull().unique(),
-    name: jsonb("name").$type<LocalizedString>().notNull(),
-    description: jsonb("description").$type<LocalizedString>(),
-    instructions: jsonb("instructions").$type<LocalizedString>(),
+    id: uuidColumn("id"),
+    slug: varcharColumn("slug", { length: 100 }).notNull().unique(),
+    name: jsonbColumn<LocalizedString>("name").notNull(),
+    description: jsonbColumn<LocalizedString>("description"),
+    instructions: jsonbColumn<LocalizedString>("instructions"),
   };
 }
 
@@ -53,9 +57,9 @@ export function supportedPaymentMethodBaseHead() {
 export function supportedPaymentMethodBaseTail() {
   return {
     supportedDirections: paymentDirectionEnum("supported_directions").notNull().default("BOTH"),
-    logoUrl: varchar("logo_url", { length: 1024 }),
-    isActive: boolean("is_active").notNull().default(true),
-    createdAt: timestamp("created_at", timestampColumnConfig).notNull(),
-    updatedAt: timestamp("updated_at", timestampColumnConfig).notNull(),
+    logoUrl: varcharColumn("logo_url", { length: 1024 }),
+    isActive: booleanColumn("is_active").notNull().default(true),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   };
 }

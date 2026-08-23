@@ -1,5 +1,11 @@
-import { boolean, jsonb, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
-import { encryptedText } from "@/backend/db/schema/custom-types";
+import {
+  booleanColumn,
+  encryptedText,
+  jsonbColumn,
+  timestampColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { meetingProviders } from "@/backend/db/schema/meeting/meeting-providers";
 import type { MeetingConfigDetails } from "@/backend/types";
 
@@ -9,15 +15,15 @@ import type { MeetingConfigDetails } from "@/backend/types";
  */
 export function meetingConfigSharedColumns() {
   return {
-    providerId: uuid("provider_id")
+    providerId: uuidDefaultColumn("provider_id")
       .notNull()
-      .references(() => meetingProviders.id, { onDelete: "restrict" }),
-    label: varchar("label", { length: 100 }),
-    isDefault: boolean("is_default").notNull().default(false),
-    details: jsonb("details").$type<MeetingConfigDetails>().notNull(),
+      .references(() => meetingProviders.id as never, { onDelete: "restrict" }),
+    label: varcharColumn("label", { length: 100 }),
+    isDefault: booleanColumn("is_default").notNull().default(false),
+    details: jsonbColumn<MeetingConfigDetails>("details").notNull(),
     encryptedSecret: encryptedText("encrypted_secret"),
-    providerMetadata: jsonb("provider_metadata").$type<Record<string, unknown>>(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    providerMetadata: jsonbColumn<Record<string, unknown>>("provider_metadata"),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   };
 }

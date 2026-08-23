@@ -1,16 +1,16 @@
-import { sql } from "drizzle-orm";
+import { sql, type AnyPgColumn } from "drizzle-orm";
 import {
-  boolean,
-  foreignKey,
+  booleanColumn,
+  createTable,
   index,
-  jsonb,
-  pgTable,
-  text,
-  timestamp,
+  jsonbColumn,
+  textColumn,
+  timestampColumn,
   uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import {
   complaintCategoryEnum,
   complaintStatusEnum,
@@ -34,18 +34,18 @@ import type { NotificationMetadata } from "@/backend/types";
  * - Policies:
  *   - `notification_preferences_access_policy`: Ensures users can only view, insert, update, or delete their own preferences.
  */
-export const userNotificationPreferences = pgTable(
+export const userNotificationPreferences = createTable(
   "user_notification_preferences",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id")
+    id: uuidColumn("id"),
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => users.id as never, { onDelete: "cascade" }),
     channel: notificationChannelEnum("channel").notNull(),
     eventType: notificationEventTypeEnum("event_type").notNull(),
-    enabled: boolean("enabled").notNull().default(true),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    enabled: booleanColumn("enabled").notNull().default(true),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     index("user_notification_preferences_user_id_idx").on(table.userId),
@@ -65,20 +65,20 @@ export const userNotificationPreferences = pgTable(
  * - Policies:
  *   - `user_device_tokens_access_policy`: Ensures users can only manage their own tokens.
  */
-export const userDeviceTokens = pgTable(
+export const userDeviceTokens = createTable(
   "user_device_tokens",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id")
+    id: uuidColumn("id"),
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    token: varchar("token", { length: 512 }).notNull(),
+      .references(() => users.id as never, { onDelete: "cascade" }),
+    token: varcharColumn("token", { length: 512 }).notNull(),
     platform: devicePlatformEnum("platform").notNull(),
-    deviceName: varchar("device_name", { length: 255 }),
-    isActive: boolean("is_active").notNull().default(true),
-    lastUsedAt: timestamp("last_used_at", { withTimezone: true, precision: 3 }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    deviceName: varcharColumn("device_name", { length: 255 }),
+    isActive: booleanColumn("is_active").notNull().default(true),
+    lastUsedAt: timestampColumn("last_used_at"),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     index("user_device_tokens_user_id_idx").on(table.userId),
@@ -98,29 +98,31 @@ export const userDeviceTokens = pgTable(
  * - Policies:
  *   - `notification_deliveries_access_policy`: Ensures users can only view their own deliveries.
  */
-export const notificationDeliveries = pgTable(
+export const notificationDeliveries = createTable(
   "notification_deliveries",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id")
+    id: uuidColumn("id"),
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    deviceTokenId: uuid("device_token_id").references(() => userDeviceTokens.id, { onDelete: "set null" }),
+      .references(() => users.id as never, { onDelete: "cascade" }),
+    deviceTokenId: uuidDefaultColumn("device_token_id").references(() => userDeviceTokens.id as never, {
+      onDelete: "set null",
+    }),
     channel: notificationChannelEnum("channel").notNull(),
     eventType: notificationEventTypeEnum("event_type").notNull(),
     status: notificationDeliveryStatusEnum("status").notNull().default("PENDING"),
-    title: varchar("title", { length: 255 }),
-    body: text("body"),
-    providerMessageId: varchar("provider_message_id", { length: 255 }),
-    failureReason: text("failure_reason"),
-    webhookPayload: jsonb("webhook_payload"),
-    metadata: jsonb("metadata").$type<NotificationMetadata | null>(),
-    sentAt: timestamp("sent_at", { withTimezone: true, precision: 3 }),
-    deliveredAt: timestamp("delivered_at", { withTimezone: true, precision: 3 }),
-    openedAt: timestamp("opened_at", { withTimezone: true, precision: 3 }),
-    failedAt: timestamp("failed_at", { withTimezone: true, precision: 3 }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    title: varcharColumn("title", { length: 255 }),
+    body: textColumn("body"),
+    providerMessageId: varcharColumn("provider_message_id", { length: 255 }),
+    failureReason: textColumn("failure_reason"),
+    webhookPayload: jsonbColumn("webhook_payload"),
+    metadata: jsonbColumn<NotificationMetadata | null>("metadata"),
+    sentAt: timestampColumn("sent_at"),
+    deliveredAt: timestampColumn("delivered_at"),
+    openedAt: timestampColumn("opened_at"),
+    failedAt: timestampColumn("failed_at"),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     index("notification_deliveries_user_id_idx").on(table.userId),
@@ -143,21 +145,22 @@ export const notificationDeliveries = pgTable(
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
-export const complaints = pgTable(
+// On SQLite, RLS is not available — soft-delete filtering is handled at the repo layer.
+export const complaints = createTable(
   "complaints",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    parentId: uuid("parent_id")
+    id: uuidColumn("id"),
+    parentId: uuidDefaultColumn("parent_id")
       .notNull()
-      .references(() => parents.id, { onDelete: "restrict" }),
-    studentId: uuid("student_id").references(() => students.id, { onDelete: "set null" }),
+      .references(() => parents.id as never, { onDelete: "restrict" }),
+    studentId: uuidDefaultColumn("student_id").references(() => students.id as never, { onDelete: "set null" }),
     category: complaintCategoryEnum("category").notNull(),
-    submitterEmail: varchar("submitter_email", { length: 255 }).notNull(),
-    body: text("body").notNull(),
+    submitterEmail: varcharColumn("submitter_email", { length: 255 }).notNull(),
+    body: textColumn("body").notNull(),
     status: complaintStatusEnum("status").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
     index("complaints_status_idx").on(table.status),
@@ -169,17 +172,19 @@ export const complaints = pgTable(
   ]
 );
 
-export const complaintResponses = pgTable(
+export const complaintResponses = createTable(
   "complaint_responses",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    complaintId: uuid("complaint_id")
+    id: uuidColumn("id"),
+    complaintId: uuidDefaultColumn("complaint_id")
       .notNull()
-      .references(() => complaints.id, { onDelete: "cascade" }),
-    responderUserId: uuid("responder_user_id").references(() => users.id, { onDelete: "set null" }),
-    body: text("body").notNull(),
-    emailSent: boolean("email_sent").notNull().default(false),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+      .references(() => complaints.id as never, { onDelete: "cascade" }),
+    responderUserId: uuidDefaultColumn("responder_user_id").references(() => users.id as never, {
+      onDelete: "set null",
+    }),
+    body: textColumn("body").notNull(),
+    emailSent: booleanColumn("email_sent").notNull().default(false),
+    createdAt: timestampColumn("created_at").notNull(),
   },
   table => [
     index("complaint_responses_complaint_id_idx").on(table.complaintId),
@@ -191,36 +196,41 @@ export const complaintResponses = pgTable(
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
-export const suggestions = pgTable(
+// On SQLite, RLS is not available — soft-delete filtering is handled at the repo layer.
+export const suggestions = createTable(
   "suggestions",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    parentId: uuid("parent_id")
+    id: uuidColumn("id"),
+    parentId: uuidDefaultColumn("parent_id")
       .notNull()
-      .references(() => parents.id, { onDelete: "restrict" }),
-    submitterName: varchar("submitter_name", { length: 255 }).notNull(),
-    body: text("body").notNull(),
+      .references(() => parents.id as never, { onDelete: "restrict" }),
+    submitterName: varcharColumn("submitter_name", { length: 255 }).notNull(),
+    body: textColumn("body").notNull(),
     status: suggestionStatusEnum("status").notNull().default("PENDING"),
-    duplicateOfId: uuid("duplicate_of_id"),
-    adminResponse: text("admin_response"),
-    reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    reviewedAt: timestamp("reviewed_at", { withTimezone: true, precision: 3 }),
-    emailSentAt: timestamp("email_sent_at", { withTimezone: true, precision: 3 }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+    // Self-referential FK: duplicateOfId → suggestions.id (ON DELETE SET NULL).
+    // Originally declared as a standalone foreignKey() in extras; converted to inline
+    // .references() for cross-dialect compatibility (standalone foreignKey() is PG-only).
+    duplicateOfId: uuidDefaultColumn("duplicate_of_id").references((): AnyPgColumn => suggestions.id as never, {
+      onDelete: "set null",
+    }),
+    adminResponse: textColumn("admin_response"),
+    reviewedByUserId: uuidDefaultColumn("reviewed_by_user_id").references(() => users.id as never, {
+      onDelete: "set null",
+    }),
+    reviewedAt: timestampColumn("reviewed_at"),
+    emailSentAt: timestampColumn("email_sent_at"),
+    createdAt: timestampColumn("created_at").notNull(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
-    foreignKey({
-      columns: [table.duplicateOfId],
-      foreignColumns: [table.id],
-      name: "suggestions_duplicate_of_id_fkey",
-    }).onDelete("set null"),
     index("suggestions_parent_id_idx").on(table.parentId),
     index("suggestions_status_idx").on(table.status),
     index("suggestions_duplicate_of_id_idx").on(table.duplicateOfId),
     index("suggestions_reviewed_by_user_id_idx").on(table.reviewedByUserId),
     index("suggestions_deleted_at_idx").on(table.deletedAt),
-    index("suggestions_active_created_at_idx").on(table.createdAt).where(sql`${table.deletedAt} IS NULL`),
+    index("suggestions_active_created_at_idx")
+      .on(table.createdAt)
+      .where(sql`${table.deletedAt} IS NULL`),
     index("suggestions_created_at_idx").on(table.createdAt),
     index("suggestions_reviewed_at_idx").on(table.reviewedAt),
     index("suggestions_email_sent_at_idx").on(table.emailSentAt),
@@ -229,18 +239,19 @@ export const suggestions = pgTable(
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
-export const learningResources = pgTable(
+// On SQLite, RLS is not available — soft-delete filtering is handled at the repo layer.
+export const learningResources = createTable(
   "learning_resources",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    displayName: varchar("display_name", { length: 255 }).notNull(),
+    id: uuidColumn("id"),
+    displayName: varcharColumn("display_name", { length: 255 }).notNull(),
     // NOTE: Tech debt: filePath doesn't have a strict FK to storage_files.path. It relies on application-level integrity and file_usage polymorphic refs.
-    filePath: varchar("file_path", { length: 1024 }).notNull(),
-    uploadedByUserId: uuid("uploaded_by_user_id")
+    filePath: varcharColumn("file_path", { length: 1024 }).notNull(),
+    uploadedByUserId: uuidDefaultColumn("uploaded_by_user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+      .references(() => users.id as never, { onDelete: "cascade" }),
+    createdAt: timestampColumn("created_at").notNull(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
     index("learning_resources_deleted_at_idx").on(table.deletedAt),

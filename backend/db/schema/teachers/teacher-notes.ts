@@ -1,24 +1,34 @@
-import { boolean, index, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  booleanColumn,
+  createTable,
+  index,
+  integerColumn,
+  textColumn,
+  timestampColumn,
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
 
-export const teacherImportantNotes = pgTable(
+export const teacherImportantNotes = createTable(
   "teacher_important_notes",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    teacherId: uuid("teacher_id").references(() => teachers.id, { onDelete: "restrict" }),
-    title: varchar("title", { length: 300 }).notNull(),
-    body: text("body"),
-    isPublished: boolean("is_published").notNull().default(false),
-    priority: integer("priority").notNull().default(0),
-    startsAt: timestamp("starts_at", { withTimezone: true, precision: 3 }),
-    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }),
-    createdByUserId: uuid("created_by_user_id")
+    id: uuidColumn("id"),
+    teacherId: uuidDefaultColumn("teacher_id").references(() => teachers.id as never, { onDelete: "restrict" }),
+    title: varcharColumn("title", { length: 300 }).notNull(),
+    body: textColumn("body"),
+    isPublished: booleanColumn("is_published").notNull().default(false),
+    priority: integerColumn("priority").notNull().default(0),
+    startsAt: timestampColumn("starts_at"),
+    expiresAt: timestampColumn("expires_at"),
+    createdByUserId: uuidDefaultColumn("created_by_user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "restrict" }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+      .references(() => users.id as never, { onDelete: "restrict" }),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
     index("teacher_important_notes_teacher_id_idx").on(table.teacherId),

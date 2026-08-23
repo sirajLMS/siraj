@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, pgTable, uuid } from "drizzle-orm/pg-core";
+import { checkConstraint, createTable, index, uuidColumn, uuidDefaultColumn } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { classInstances, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
 import { meetingConfigSharedColumns } from "@/backend/db/schema/meeting/__shared__/meeting-config-columns";
 import {
@@ -9,12 +9,12 @@ import {
 
 const TABLE_NAME = "class_meeting_configs";
 
-export const classMeetingConfigs = pgTable(
+export const classMeetingConfigs = createTable(
   TABLE_NAME,
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    classInstanceId: uuid("class_instance_id").references(() => classInstances.id, { onDelete: "cascade" }),
-    recurringScheduleId: uuid("recurring_schedule_id").references(() => recurringSchedules.id, { onDelete: "cascade" }),
+    id: uuidColumn("id"),
+    classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id as never, { onDelete: "cascade" }),
+    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id").references(() => recurringSchedules.id as never, { onDelete: "cascade" }),
     ...meetingConfigSharedColumns(),
   },
   table => [
@@ -29,8 +29,12 @@ export const classMeetingConfigs = pgTable(
       table.recurringScheduleId,
       table.isDefault
     ),
-    check(
+    checkConstraint(
       `${TABLE_NAME}_scope_chk`,
+      sql`(
+        (${table.classInstanceId} IS NOT NULL AND ${table.recurringScheduleId} IS NULL)
+        OR (${table.classInstanceId} IS NULL AND ${table.recurringScheduleId} IS NOT NULL)
+      )`,
       sql`(
         (${table.classInstanceId} IS NOT NULL AND ${table.recurringScheduleId} IS NULL)
         OR (${table.classInstanceId} IS NULL AND ${table.recurringScheduleId} IS NOT NULL)

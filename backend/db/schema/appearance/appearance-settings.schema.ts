@@ -1,5 +1,13 @@
 import type { PaletteMode } from "@mui/material/styles";
-import { index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  index,
+  jsonbColumn,
+  textColumn,
+  timestampColumn,
+  uuidColumn,
+  uuidDefaultColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { users } from "@/backend/db/schema/users/users";
 import type { AppearanceFields } from "@/backend/types";
 
@@ -17,21 +25,21 @@ import type { AppearanceFields } from "@/backend/types";
  * See `.ai/plans/brand/implementation.md` §1 and `outcome/decisions.md` for
  * the locked decisions (#2, #7, #12).
  */
-export const appearanceSettings = pgTable(
+export const appearanceSettings = createTable(
   "appearance_settings",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    primaryMain: text("primary_main").notNull(),
-    secondaryMain: text("secondary_main").notNull(),
-    logoUrl: text("logo_url"),
-    siteName: text("site_name").notNull(),
-    siteTitle: text("site_title").notNull(),
-    siteDescription: text("site_description").notNull(),
-    defaultColorScheme: text("default_color_scheme").$type<PaletteMode>().notNull(),
-    draftFields: jsonb("draft_fields").$type<AppearanceFields>().notNull(),
-    updatedByUserId: uuid("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).defaultNow().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).defaultNow().notNull(),
+    id: uuidColumn("id"),
+    primaryMain: textColumn("primary_main").notNull(),
+    secondaryMain: textColumn("secondary_main").notNull(),
+    logoUrl: textColumn("logo_url"),
+    siteName: textColumn("site_name").notNull(),
+    siteTitle: textColumn("site_title").notNull(),
+    siteDescription: textColumn("site_description").notNull(),
+    defaultColorScheme: textColumn("default_color_scheme").$type<PaletteMode>().notNull(),
+    draftFields: jsonbColumn<AppearanceFields>("draft_fields").notNull(),
+    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    updatedAt: timestampColumn("updated_at").defaultNow().notNull(),
+    createdAt: timestampColumn("created_at").defaultNow().notNull(),
   },
   table => [
     index("appearance_settings_updated_by_user_id_idx").on(table.updatedByUserId),

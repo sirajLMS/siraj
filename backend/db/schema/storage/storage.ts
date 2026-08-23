@@ -1,4 +1,13 @@
-import { bigint, boolean, index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  bigintColumn,
+  booleanColumn,
+  createTable,
+  index,
+  textColumn,
+  timestampColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { createdAtColumn, primaryKeyColumn } from "@/backend/db/schema/__shared__/columnHelpers";
 import { invoices } from "@/backend/db/schema/billing/billing";
 import { classInstances, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
@@ -9,12 +18,12 @@ import { staffProfiles } from "@/backend/db/schema/teachers/staff";
 import { teachers } from "@/backend/db/schema/teachers/teachers";
 import { users } from "@/backend/db/schema/users/users";
 
-export const storageFiles = pgTable(
+export const storageFiles = createTable(
   "storage_file",
   {
     ...primaryKeyColumn(),
-    path: text("path").notNull().unique(),
-    isProtected: boolean("is_protected").notNull().default(false),
+    path: textColumn("path").notNull().unique(),
+    isProtected: booleanColumn("is_protected").notNull().default(false),
   },
   table => [index("storage_files_is_protected_idx").on(table.isProtected)]
 );
@@ -25,33 +34,33 @@ export const storageFiles = pgTable(
  * This ensures database-level referential integrity and automatic cascading deletes.
  */
 
-export const userFiles = pgTable(
+export const userFiles = createTable(
   "user_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => users.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [index("user_files_file_id_idx").on(table.fileId), index("user_files_user_id_idx").on(table.userId)]
 );
 
-export const teacherFiles = pgTable(
+export const teacherFiles = createTable(
   "teacher_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    teacherId: uuid("teacher_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
-      .references(() => teachers.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => teachers.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
@@ -60,17 +69,17 @@ export const teacherFiles = pgTable(
   ]
 );
 
-export const studentFiles = pgTable(
+export const studentFiles = createTable(
   "student_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    studentId: uuid("student_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => students.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
@@ -79,33 +88,33 @@ export const studentFiles = pgTable(
   ]
 );
 
-export const parentFiles = pgTable(
+export const parentFiles = createTable(
   "parent_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    parentId: uuid("parent_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    parentId: uuidDefaultColumn("parent_id")
       .notNull()
-      .references(() => parents.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => parents.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [index("parent_files_file_id_idx").on(table.fileId), index("parent_files_parent_id_idx").on(table.parentId)]
 );
 
-export const invoiceFiles = pgTable(
+export const invoiceFiles = createTable(
   "invoice_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    invoiceId: uuid("invoice_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    invoiceId: uuidDefaultColumn("invoice_id")
       .notNull()
-      .references(() => invoices.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => invoices.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
@@ -114,17 +123,17 @@ export const invoiceFiles = pgTable(
   ]
 );
 
-export const complaintFiles = pgTable(
+export const complaintFiles = createTable(
   "complaint_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    complaintId: uuid("complaint_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    complaintId: uuidDefaultColumn("complaint_id")
       .notNull()
-      .references(() => complaints.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => complaints.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
@@ -133,17 +142,17 @@ export const complaintFiles = pgTable(
   ]
 );
 
-export const learningResourceFiles = pgTable(
+export const learningResourceFiles = createTable(
   "learning_resource_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    learningResourceId: uuid("learning_resource_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    learningResourceId: uuidDefaultColumn("learning_resource_id")
       .notNull()
-      .references(() => learningResources.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => learningResources.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
@@ -152,17 +161,17 @@ export const learningResourceFiles = pgTable(
   ]
 );
 
-export const staffProfileFiles = pgTable(
+export const staffProfileFiles = createTable(
   "staff_profile_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    staffProfileId: uuid("staff_profile_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    staffProfileId: uuidDefaultColumn("staff_profile_id")
       .notNull()
-      .references(() => staffProfiles.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => staffProfiles.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
@@ -171,17 +180,17 @@ export const staffProfileFiles = pgTable(
   ]
 );
 
-export const recurringScheduleFiles = pgTable(
+export const recurringScheduleFiles = createTable(
   "recurring_schedule_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    recurringScheduleId: uuid("recurring_schedule_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id")
       .notNull()
-      .references(() => recurringSchedules.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => recurringSchedules.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
@@ -190,17 +199,17 @@ export const recurringScheduleFiles = pgTable(
   ]
 );
 
-export const classInstanceFiles = pgTable(
+export const classInstanceFiles = createTable(
   "class_instance_files",
   {
     ...primaryKeyColumn(),
-    fileId: uuid("file_id")
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "cascade" }),
-    classInstanceId: uuid("class_instance_id")
+      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+    classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id, { onDelete: "cascade" }),
-    usageType: varchar("usage_type", { length: 100 }).notNull(),
+      .references(() => classInstances.id as never, { onDelete: "cascade" }),
+    usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
   table => [
@@ -209,19 +218,19 @@ export const classInstanceFiles = pgTable(
   ]
 );
 
-export const storageDirectories = pgTable(
+export const storageDirectories = createTable(
   "storage_directory",
   {
     ...primaryKeyColumn(),
-    path: varchar("path", { length: 1024 }).notNull().unique(),
-    allowUploads: boolean("allow_uploads").notNull().default(true),
-    allowDelete: boolean("allow_delete").notNull().default(true),
-    allowMove: boolean("allow_move").notNull().default(true),
-    allowCreateSubDirs: boolean("allow_create_sub_dirs").notNull().default(true),
-    allowDeleteFiles: boolean("allow_delete_files").notNull().default(true),
-    allowMoveFiles: boolean("allow_move_files").notNull().default(true),
-    isProtected: boolean("is_protected").notNull().default(false),
-    protectChildren: boolean("protect_children").notNull().default(false),
+    path: varcharColumn("path", { length: 1024 }).notNull().unique(),
+    allowUploads: booleanColumn("allow_uploads").notNull().default(true),
+    allowDelete: booleanColumn("allow_delete").notNull().default(true),
+    allowMove: booleanColumn("allow_move").notNull().default(true),
+    allowCreateSubDirs: booleanColumn("allow_create_sub_dirs").notNull().default(true),
+    allowDeleteFiles: booleanColumn("allow_delete_files").notNull().default(true),
+    allowMoveFiles: booleanColumn("allow_move_files").notNull().default(true),
+    isProtected: booleanColumn("is_protected").notNull().default(false),
+    protectChildren: booleanColumn("protect_children").notNull().default(false),
   },
   table => [
     index("storage_directories_is_protected_idx").on(table.isProtected),
@@ -229,17 +238,17 @@ export const storageDirectories = pgTable(
   ]
 );
 
-export const signedUrls = pgTable(
+export const signedUrls = createTable(
   "signed_url",
   {
-    id: varchar("id", { length: 64 }).primaryKey(), // UUID token
-    filePath: varchar("file_path", { length: 1024 }).notNull(),
-    contentType: varchar("content_type", { length: 255 }).notNull(),
-    fileSize: bigint("file_size", { mode: "bigint" }).notNull(), // File size in bytes
-    contentHash: varchar("content_hash", { length: 128 }).notNull(), // base64 or hex encoded hash
-    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
+    id: varcharColumn("id", { length: 64 }).primaryKey(), // UUID token
+    filePath: varcharColumn("file_path", { length: 1024 }).notNull(),
+    contentType: varcharColumn("content_type", { length: 255 }).notNull(),
+    fileSize: bigintColumn("file_size").notNull(), // File size in bytes
+    contentHash: varcharColumn("content_hash", { length: 128 }).notNull(), // base64 or hex encoded hash
+    expiresAt: timestampColumn("expires_at").notNull(),
     ...createdAtColumn(),
-    used: boolean("used").notNull().default(false),
+    used: booleanColumn("used").notNull().default(false),
   },
   table => [
     index("signed_url_expires_at_idx").on(table.expiresAt),

@@ -1,5 +1,15 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, jsonb, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  booleanColumn,
+  createTable,
+  index,
+  jsonbColumn,
+  timestampColumn,
+  uniqueIndex,
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { paymentDirectionEnum, paymentMethodTypeEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
 import type { PaymentMethodDetails } from "@/backend/types";
@@ -12,22 +22,22 @@ import type { PaymentMethodDetails } from "@/backend/types";
  * - PAYIN slot: direction IN ('PAYIN', 'BOTH') + is_default = true
  * - PAYOUT slot: direction IN ('PAYOUT', 'BOTH') + is_default = true
  */
-export const userPaymentMethods = pgTable(
+export const userPaymentMethods = createTable(
   "user_payment_methods",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id")
+    id: uuidColumn("id"),
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "restrict" }),
+      .references(() => users.id as never, { onDelete: "restrict" }),
     type: paymentMethodTypeEnum("type").notNull(),
     direction: paymentDirectionEnum("direction").notNull(),
-    isDefault: boolean("is_default").notNull().default(false),
-    label: varchar("label", { length: 100 }),
-    details: jsonb("details").$type<PaymentMethodDetails>().notNull(),
-    verifiedAt: timestamp("verified_at", { withTimezone: true, precision: 3 }),
-    verifiedByUserId: uuid("verified_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    isDefault: booleanColumn("is_default").notNull().default(false),
+    label: varcharColumn("label", { length: 100 }),
+    details: jsonbColumn<PaymentMethodDetails>("details").notNull(),
+    verifiedAt: timestampColumn("verified_at"),
+    verifiedByUserId: uuidDefaultColumn("verified_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
     index("user_payment_methods_user_id_idx").on(table.userId),

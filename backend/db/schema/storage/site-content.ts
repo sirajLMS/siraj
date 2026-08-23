@@ -1,18 +1,29 @@
-import { boolean, index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  booleanColumn,
+  createTable,
+  index,
+  textColumn,
+  timestampColumn,
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { users } from "@/backend/db/schema/users/users";
 
-export const siteContent = pgTable(
+export const siteContent = createTable(
   "site_content",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    slug: varchar("slug", { length: 100 }).notNull().unique(),
-    title: varchar("title", { length: 255 }).notNull(),
-    body: text("body").notNull(),
-    contentType: varchar("content_type", { length: 50 }).notNull().default("page"),
-    isPublished: boolean("is_published").notNull().default(true),
-    updatedByUserId: uuid("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    id: uuidColumn("id"),
+    slug: varcharColumn("slug", { length: 100 }).notNull().unique(),
+    title: varcharColumn("title", { length: 255 }).notNull(),
+    body: textColumn("body").notNull(),
+    contentType: varcharColumn("content_type", { length: 50 }).notNull().default("page"),
+    isPublished: booleanColumn("is_published").notNull().default(true),
+    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id as never, {
+      onDelete: "set null",
+    }),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
     index("site_content_slug_idx").on(table.slug),

@@ -15,21 +15,21 @@ Each schema file replaces pgTable/pg-* with createTable/*Column helpers. The hel
 | enums | 1 | done (createPgEnumFromEnum -> createEnum) |
 | users | 1 | done (Phase 1a reference) |
 | shared (cache/settings/timezones) | 3 | done (Phase 1b) |
-| permissions | 1 | pending |
-| audit | 1 | pending |
-| auth (impersonation) | 1 | pending |
-| appearance | 1 | pending |
-| parents | 1 | pending |
-| students | 1 | pending |
-| books | 1 | pending |
-| communications | 1 | pending |
-| cron | 1 | pending |
-| whatsapp | 1 | pending |
-| teachers | 6 | pending |
-| classes | 6 | pending |
-| meeting | 5 (+2 __shared__) | pending |
-| storage | 3 (+1 __shared__) | pending |
-| billing | 10 | pending |
+| permissions | 1 | done |
+| audit | 1 | done |
+| auth (impersonation) | 1 | done |
+| appearance | 1 | done |
+| parents | 1 | done |
+| students | 1 | done |
+| books | 1 | done |
+| communications | 1 | done |
+| cron | 1 | done |
+| whatsapp | 1 | done |
+| teachers | 6 | done |
+| classes | 6 | done |
+| meeting | 5 (+2 __shared__) | done |
+| storage | 3 (+1 __shared__) | done |
+| billing | 10 | done |
 
 ## Verification gates
 

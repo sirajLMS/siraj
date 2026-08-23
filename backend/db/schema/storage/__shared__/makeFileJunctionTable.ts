@@ -1,4 +1,11 @@
-import { type AnyPgColumnBuilder, index, pgTable, uuid, varchar } from "drizzle-orm/pg-core";
+import { type AnyPgColumnBuilder } from "drizzle-orm/pg-core";
+
+import {
+  createTable,
+  index,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 
 import { createdAtColumn, primaryKeyColumn } from "@/backend/db/schema/__shared__/columnHelpers";
 import { storageFiles } from "@/backend/db/schema/storage/storage";
@@ -43,20 +50,20 @@ export interface FileJunctionConfig<TColumns extends FileJunctionColumns = FileJ
  * - `createdAt` (timestamp with timezone, default now)
  * - Two indexes: one on fileId, one on the entity FK column
  *
- * The helper returns a fully typed `pgTable` — Drizzle infers the column types
+ * The helper returns a fully typed table — Drizzle infers the column types
  * from the merged columns object. Callers provide the entity column as a typed
  * object literal so the TS property name is a static string literal.
  */
 export function makeFileJunctionTable<TColumns extends FileJunctionColumns>(config: FileJunctionConfig<TColumns>) {
-  return pgTable(
+  return createTable(
     config.dbTableName,
     {
       ...primaryKeyColumn(),
-      fileId: uuid("file_id")
+      fileId: uuidDefaultColumn("file_id")
         .notNull()
-        .references(() => storageFiles.id, { onDelete: "cascade" }),
+        .references(() => storageFiles.id as never, { onDelete: "cascade" }),
       ...config.columns,
-      usageType: varchar("usage_type", { length: 100 }).notNull(),
+      usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
       ...createdAtColumn({ withDefaultNow: true }),
     },
     table => [

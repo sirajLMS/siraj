@@ -1,18 +1,16 @@
 import {
-  date,
+  createTable,
+  uuidColumn,
+  uuidDefaultColumn,
+  timestampColumn,
+  varcharColumn,
+  textColumn,
+  integerColumn,
+  jsonbColumn,
   index,
-  integer,
-  jsonb,
-  numeric,
-  pgTable,
-  primaryKey,
-  smallint,
-  text,
-  timestamp,
   uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+  primaryKey,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { userPaymentMethods } from "@/backend/db/schema/billing/user-payment-methods";
 import { currencyCodeEnum, invoiceStatusEnum, invoiceTypeEnum, paymentMethodTypeEnum } from "@/backend/db/schema/enums";
 import { parents } from "@/backend/db/schema/parents/parents";
@@ -24,30 +22,32 @@ import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
-export const invoices = pgTable(
+export const invoices = createTable(
   "invoices",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    parentId: uuid("parent_id")
+    id: uuidColumn("id"),
+    parentId: uuidDefaultColumn("parent_id")
       .notNull()
-      .references(() => parents.id, { onDelete: "restrict" }),
-    studentId: uuid("student_id").references(() => students.id, { onDelete: "restrict" }),
-    issueDate: date("issue_date").notNull(),
-    dueDate: date("due_date").notNull(),
-    paidDate: date("paid_date"),
-    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+      .references(() => parents.id as never, { onDelete: "restrict" }),
+    studentId: uuidDefaultColumn("student_id").references(() => students.id as never, { onDelete: "restrict" }),
+    issueDate: textColumn("issue_date").notNull(), // date -> text (ISO string)
+    dueDate: textColumn("due_date").notNull(), // date -> text (ISO string)
+    paidDate: textColumn("paid_date"), // date -> text (ISO string)
+    amount: textColumn("amount").notNull(), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     status: invoiceStatusEnum("status").notNull(),
     invoiceType: invoiceTypeEnum("invoice_type").notNull(),
-    version: integer("version").notNull().default(0),
-    exchangeRateSnapshot: numeric("exchange_rate_snapshot", { precision: 12, scale: 6 }),
-    exchangeRateSource: varchar("exchange_rate_source", { length: 50 }),
-    createdByUserId: uuid("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    emailSentAt: timestamp("email_sent_at", { withTimezone: true, precision: 3 }),
-    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+    version: integerColumn("version").notNull().default(0),
+    exchangeRateSnapshot: textColumn("exchange_rate_snapshot"), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
+    exchangeRateSource: varcharColumn("exchange_rate_source", { length: 50 }),
+    createdByUserId: uuidDefaultColumn("created_by_user_id").references(() => users.id as never, {
+      onDelete: "set null",
+    }),
+    emailSentAt: timestampColumn("email_sent_at"),
+    idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
     index("invoices_parent_id_idx").on(table.parentId),
@@ -61,43 +61,43 @@ export const invoices = pgTable(
   ]
 );
 
-export const invoiceCoverageMonths = pgTable(
+export const invoiceCoverageMonths = createTable(
   "invoice_coverage_months",
   {
-    invoiceId: uuid("invoice_id")
+    invoiceId: uuidDefaultColumn("invoice_id")
       .notNull()
-      .references(() => invoices.id, { onDelete: "restrict" }),
-    year: smallint("year").notNull(),
-    month: smallint("month").notNull(),
+      .references(() => invoices.id as never, { onDelete: "restrict" }),
+    year: integerColumn("year").notNull(), // smallint -> integer (both return number)
+    month: integerColumn("month").notNull(), // smallint -> integer (both return number)
   },
   table => [primaryKey({ columns: [table.invoiceId, table.year, table.month] })]
 );
 
-export const payments = pgTable(
+export const payments = createTable(
   "payments",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    invoiceId: uuid("invoice_id")
+    id: uuidColumn("id"),
+    invoiceId: uuidDefaultColumn("invoice_id")
       .notNull()
-      .references(() => invoices.id, { onDelete: "restrict" }),
-    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+      .references(() => invoices.id as never, { onDelete: "restrict" }),
+    amount: textColumn("amount").notNull(), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
-    paymentDate: timestamp("payment_date", { withTimezone: true, precision: 3 }).notNull(),
-    userPaymentMethodId: uuid("user_payment_method_id").references(() => userPaymentMethods.id, {
+    paymentDate: timestampColumn("payment_date").notNull(),
+    userPaymentMethodId: uuidDefaultColumn("user_payment_method_id").references(() => userPaymentMethods.id as never, {
       onDelete: "set null",
     }),
     paymentMethodType: paymentMethodTypeEnum("payment_method_type").notNull().$type<PaymentMethodType>(),
-    paymentMethodSnapshot: jsonb("payment_method_snapshot")
-      .$type<PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot>()
-      .notNull(),
-    transactionId: varchar("transaction_id", { length: 255 }),
-    gatewayResponse: text("gateway_response"),
-    refundedAmount: numeric("refunded_amount", { precision: 12, scale: 2 }).notNull().default("0.00"),
-    exchangeRateSnapshot: numeric("exchange_rate_snapshot", { precision: 12, scale: 6 }),
-    exchangeRateSource: varchar("exchange_rate_source", { length: 50 }),
-    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    paymentMethodSnapshot: jsonbColumn<PaymentMethodTransactionSnapshot | PaymentProofTransactionSnapshot>(
+      "payment_method_snapshot"
+    ).notNull(),
+    transactionId: varcharColumn("transaction_id", { length: 255 }),
+    gatewayResponse: textColumn("gateway_response"),
+    refundedAmount: textColumn("refunded_amount").notNull().default("0.00"), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
+    exchangeRateSnapshot: textColumn("exchange_rate_snapshot"), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
+    exchangeRateSource: varcharColumn("exchange_rate_source", { length: 50 }),
+    idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
     index("payments_invoice_id_idx").on(table.invoiceId),
@@ -110,18 +110,18 @@ export const payments = pgTable(
   ]
 );
 
-export const currencyExchangeRates = pgTable(
+export const currencyExchangeRates = createTable(
   "currency_exchange_rates",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: uuidColumn("id"),
     fromCurrency: currencyCodeEnum("from_currency").notNull().$type<CurrencyCode>(),
     toCurrency: currencyCodeEnum("to_currency").notNull().$type<CurrencyCode>(),
-    rate: numeric("rate", { precision: 12, scale: 6 }).notNull(),
-    source: varchar("source", { length: 50 }),
-    providerResponse: jsonb("provider_response"),
-    effectiveDate: timestamp("effective_date", { withTimezone: true, precision: 3 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    rate: textColumn("rate").notNull(), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
+    source: varcharColumn("source", { length: 50 }),
+    providerResponse: jsonbColumn("provider_response"),
+    effectiveDate: timestampColumn("effective_date").notNull(),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
     index("currency_exchange_rates_from_to_idx").on(table.fromCurrency, table.toCurrency),
@@ -139,17 +139,19 @@ export const currencyExchangeRates = pgTable(
  * Currency Exchange Audit Logs table.
  * Records all changes to exchange rates for financial auditing.
  */
-export const currencyExchangeAuditLogs = pgTable(
+export const currencyExchangeAuditLogs = createTable(
   "currency_exchange_audit_logs",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: uuidColumn("id"),
     fromCurrency: currencyCodeEnum("from_currency").notNull().$type<CurrencyCode>(),
     toCurrency: currencyCodeEnum("to_currency").notNull().$type<CurrencyCode>(),
-    oldRate: numeric("old_rate", { precision: 12, scale: 6 }),
-    newRate: numeric("new_rate", { precision: 12, scale: 6 }).notNull(),
-    source: varchar("source", { length: 50 }).notNull(),
-    changedByUserId: uuid("changed_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
+    oldRate: textColumn("old_rate"), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
+    newRate: textColumn("new_rate").notNull(), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
+    source: varcharColumn("source", { length: 50 }).notNull(),
+    changedByUserId: uuidDefaultColumn("changed_by_user_id").references(() => users.id as never, {
+      onDelete: "set null",
+    }),
+    createdAt: timestampColumn("created_at").notNull(),
   },
   table => [
     index("currency_exchange_audit_from_to_idx").on(table.fromCurrency, table.toCurrency),
@@ -162,16 +164,16 @@ export const currencyExchangeAuditLogs = pgTable(
  * Currency Hedges table.
  * Tracks platform exposure to different currencies for risk management.
  */
-export const currencyHedges = pgTable(
+export const currencyHedges = createTable(
   "currency_hedges",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: uuidColumn("id"),
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
-    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
-    hedgeType: varchar("hedge_type", { length: 20 }).notNull(), // e.g., 'LONG', 'SHORT'
-    notes: text("notes"),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    amount: textColumn("amount").notNull(), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
+    hedgeType: varcharColumn("hedge_type", { length: 20 }).notNull(), // e.g., 'LONG', 'SHORT'
+    notes: textColumn("notes"),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
     index("currency_hedges_currency_idx").on(table.currency),

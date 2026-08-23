@@ -1,23 +1,33 @@
-import { index, jsonb, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  uuidColumn,
+  uuidDefaultColumn,
+  timestampColumn,
+  varcharColumn,
+  jsonbColumn,
+  index,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { fxProviderEnum, fxSyncStatusEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
 
-export const fxSyncRuns = pgTable(
+export const fxSyncRuns = createTable(
   "fx_sync_runs",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: uuidColumn("id"),
     provider: fxProviderEnum("provider").notNull(),
     status: fxSyncStatusEnum("status").notNull(),
-    pairsWritten: varchar("pairs_written", { length: 10 }).notNull().default("0"),
-    pairsFailed: varchar("pairs_failed", { length: 10 }).notNull().default("0"),
-    errorMessage: varchar("error_message", { length: 500 }),
-    providerResponse: jsonb("provider_response"),
-    triggerType: varchar("trigger_type", { length: 20 }).notNull(),
-    triggeredByUserId: uuid("triggered_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    startedAt: timestamp("started_at", { withTimezone: true, precision: 3 }).notNull(),
-    finishedAt: timestamp("finished_at", { withTimezone: true, precision: 3 }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    pairsWritten: varcharColumn("pairs_written", { length: 10 }).notNull().default("0"),
+    pairsFailed: varcharColumn("pairs_failed", { length: 10 }).notNull().default("0"),
+    errorMessage: varcharColumn("error_message", { length: 500 }),
+    providerResponse: jsonbColumn("provider_response"),
+    triggerType: varcharColumn("trigger_type", { length: 20 }).notNull(),
+    triggeredByUserId: uuidDefaultColumn("triggered_by_user_id").references(() => users.id as never, {
+      onDelete: "set null",
+    }),
+    startedAt: timestampColumn("started_at").notNull(),
+    finishedAt: timestampColumn("finished_at"),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     index("fx_sync_runs_status_idx").on(table.status),

@@ -1,34 +1,44 @@
-import { index, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  createEnum,
+  uuidColumn,
+  uuidDefaultColumn,
+  timestampColumn,
+  textColumn,
+  index,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { invoices } from "@/backend/db/schema/billing/billing";
 import { storageFiles } from "@/backend/db/schema/storage/storage";
 import { users } from "@/backend/db/schema/users/users";
 
-export const invoicePaymentSubmissionStatusEnum = pgEnum("invoice_payment_submission_status", [
+export const invoicePaymentSubmissionStatusEnum = createEnum("invoice_payment_submission_status", [
   "pending",
   "approved",
   "rejected",
 ]);
 
-export const invoicePaymentSubmissions = pgTable(
+export const invoicePaymentSubmissions = createTable(
   "invoice_payment_submissions",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    invoiceId: uuid("invoice_id")
+    id: uuidColumn("id"),
+    invoiceId: uuidDefaultColumn("invoice_id")
       .notNull()
-      .references(() => invoices.id, { onDelete: "restrict" }),
-    fileId: uuid("file_id")
+      .references(() => invoices.id as never, { onDelete: "restrict" }),
+    fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id, { onDelete: "restrict" }),
-    submittedByUserId: uuid("submitted_by_user_id")
+      .references(() => storageFiles.id as never, { onDelete: "restrict" }),
+    submittedByUserId: uuidDefaultColumn("submitted_by_user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "restrict" }),
-    submittedAt: timestamp("submitted_at", { withTimezone: true, precision: 3 }).notNull(),
-    reviewedByUserId: uuid("reviewed_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    reviewedAt: timestamp("reviewed_at", { withTimezone: true, precision: 3 }),
+      .references(() => users.id as never, { onDelete: "restrict" }),
+    submittedAt: timestampColumn("submitted_at").notNull(),
+    reviewedByUserId: uuidDefaultColumn("reviewed_by_user_id").references(() => users.id as never, {
+      onDelete: "set null",
+    }),
+    reviewedAt: timestampColumn("reviewed_at"),
     status: invoicePaymentSubmissionStatusEnum("status").notNull(),
-    rejectionReason: text("rejection_reason"),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    rejectionReason: textColumn("rejection_reason"),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     index("invoice_payment_submissions_invoice_id_idx").on(table.invoiceId),

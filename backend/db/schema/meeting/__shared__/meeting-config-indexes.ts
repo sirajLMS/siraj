@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
-import { index, type PgColumn, uniqueIndex } from "drizzle-orm/pg-core";
+import { type PgColumn } from "drizzle-orm/pg-core";
+import { index, uniqueIndex } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 
 /**
  * Builder helpers for the index/unique-index clauses shared by

@@ -1,30 +1,42 @@
-import { index, integer, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  uuidColumn,
+  uuidDefaultColumn,
+  timestampColumn,
+  varcharColumn,
+  textColumn,
+  integerColumn,
+  index,
+  uniqueIndex,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { payments } from "@/backend/db/schema/billing/billing";
 import { classInstances } from "@/backend/db/schema/classes/scheduling";
 import { creditReasonEnum } from "@/backend/db/schema/enums";
 import { students } from "@/backend/db/schema/students/students";
 import { users } from "@/backend/db/schema/users/users";
 
-export const creditTransactions = pgTable(
+export const creditTransactions = createTable(
   "credit_transactions",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    studentId: uuid("student_id")
+    id: uuidColumn("id"),
+    studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id, { onDelete: "cascade" }),
-    changeAmount: integer("change_amount").notNull(),
+      .references(() => students.id as never, { onDelete: "cascade" }),
+    changeAmount: integerColumn("change_amount").notNull(),
     reason: creditReasonEnum("reason").notNull(),
-    sourcePaymentId: uuid("source_payment_id").references(() => payments.id, { onDelete: "set null" }),
-    classInstanceId: uuid("class_instance_id").references(() => classInstances.id, {
+    sourcePaymentId: uuidDefaultColumn("source_payment_id").references(() => payments.id as never, {
       onDelete: "set null",
     }),
-    notes: text("notes"),
-    creditedByUserId: uuid("credited_by_user_id")
+    classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id as never, {
+      onDelete: "set null",
+    }),
+    notes: textColumn("notes"),
+    creditedByUserId: uuidDefaultColumn("credited_by_user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
-    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+      .references(() => users.id as never, { onDelete: "set null" }),
+    idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     uniqueIndex("credit_transactions_idempotency_key_unique_idx").on(table.idempotencyKey),

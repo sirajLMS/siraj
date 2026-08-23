@@ -1,4 +1,8 @@
-import { index, jsonb, pgTable } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  index,
+  jsonbColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import {
   supportedPaymentMethodBaseHead,
   supportedPaymentMethodBaseTail,
@@ -6,12 +10,12 @@ import {
 import { identifierKindEnum } from "@/backend/db/schema/enums";
 import type { LocalizedString } from "@/shared/types";
 
-export const supportedOnlineAccounts = pgTable(
+export const supportedOnlineAccounts = createTable(
   "supported_online_accounts",
   {
     ...supportedPaymentMethodBaseHead(),
     identifierKind: identifierKindEnum("identifier_kind").notNull(),
-    identifierLabel: jsonb("identifier_label").$type<LocalizedString>().notNull(),
+    identifierLabel: jsonbColumn<LocalizedString>("identifier_label").notNull(),
     ...supportedPaymentMethodBaseTail(),
   },
   table => [

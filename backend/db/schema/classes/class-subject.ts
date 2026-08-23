@@ -1,39 +1,40 @@
 import {
-  boolean,
+  booleanColumn,
+  createTable,
   index,
-  integer,
-  numeric,
-  pgTable,
-  text,
-  timestamp,
+  integerColumn,
+  textColumn,
+  timestampColumn,
   uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { classCategories } from "@/backend/db/schema/classes/class-category";
 import { currencyCodeEnum } from "@/backend/db/schema/enums";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
 
-export const classSubjects = pgTable(
+export const classSubjects = createTable(
   "class_subjects",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    categoryId: uuid("category_id")
+    id: uuidColumn("id"),
+    categoryId: uuidDefaultColumn("category_id")
       .notNull()
-      .references(() => classCategories.id, { onDelete: "restrict" }),
-    name: varchar("name", { length: 200 }).notNull(),
-    slug: varchar("slug", { length: 100 }).notNull().unique(),
-    description: text("description"),
-    avatarUrl: varchar("avatar_url", { length: 1024 }),
+      .references(() => classCategories.id as never, { onDelete: "restrict" }),
+    name: varcharColumn("name", { length: 200 }).notNull(),
+    slug: varcharColumn("slug", { length: 100 }).notNull().unique(),
+    description: textColumn("description"),
+    avatarUrl: varcharColumn("avatar_url", { length: 1024 }),
     // Subject-level hourly rate (middle precedence tier). Nullable: when NULL,
     // the rate falls back to `teachers.hourly_rate`. See `rate-resolver.service.ts`.
-    hourlyRate: numeric("hourly_rate", { precision: 12, scale: 2 }),
+    // PG-only: numeric(12,2) — stored as TEXT on SQLite (drizzle returns string for both).
+    hourlyRate: textColumn("hourly_rate"),
     rateCurrency: currencyCodeEnum("rate_currency").$type<CurrencyCode>(),
-    isActive: boolean("is_active").notNull().default(true),
-    sortOrder: integer("sort_order").notNull().default(0),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+    isActive: booleanColumn("is_active").notNull().default(true),
+    sortOrder: integerColumn("sort_order").notNull().default(0),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
     index("class_subjects_category_id_idx").on(table.categoryId),

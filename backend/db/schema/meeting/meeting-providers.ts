@@ -1,23 +1,32 @@
-import { boolean, index, jsonb, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  booleanColumn,
+  createTable,
+  index,
+  jsonbColumn,
+  textColumn,
+  timestampColumn,
+  uuidColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import type { MeetingProviderFieldSchema, MeetingProviderKind } from "@/backend/types";
 import type { LocalizedString } from "@/shared/types";
 
-export const meetingProviders = pgTable(
+export const meetingProviders = createTable(
   "meeting_providers",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    slug: varchar("slug", { length: 100 }).notNull().unique(),
-    providerKind: varchar("provider_kind", { length: 50 }).notNull().default("manual").$type<MeetingProviderKind>(),
-    name: jsonb("name").$type<LocalizedString>().notNull(),
-    description: jsonb("description").$type<LocalizedString>(),
-    instructions: jsonb("instructions").$type<LocalizedString>(),
-    urlAllowlist: jsonb("url_allowlist").$type<readonly string[]>().notNull(),
-    urlExample: text("url_example"),
-    logoUrl: text("logo_url"),
-    fieldSchema: jsonb("field_schema").$type<MeetingProviderFieldSchema>().notNull(),
-    isActive: boolean("is_active").notNull().default(true),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    id: uuidColumn("id"),
+    slug: varcharColumn("slug", { length: 100 }).notNull().unique(),
+    providerKind: varcharColumn("provider_kind", { length: 50 }).notNull().default("manual").$type<MeetingProviderKind>(),
+    name: jsonbColumn<LocalizedString>("name").notNull(),
+    description: jsonbColumn<LocalizedString>("description"),
+    instructions: jsonbColumn<LocalizedString>("instructions"),
+    urlAllowlist: jsonbColumn<readonly string[]>("url_allowlist").notNull(),
+    urlExample: textColumn("url_example"),
+    logoUrl: textColumn("logo_url"),
+    fieldSchema: jsonbColumn<MeetingProviderFieldSchema>("field_schema").notNull(),
+    isActive: booleanColumn("is_active").notNull().default(true),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
     index("meeting_providers_is_active_idx").on(table.isActive),

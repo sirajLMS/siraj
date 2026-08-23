@@ -1,4 +1,4 @@
-import { index, pgTable, uuid } from "drizzle-orm/pg-core";
+import { createTable, index, uuidColumn, uuidDefaultColumn } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { meetingConfigSharedColumns } from "@/backend/db/schema/meeting/__shared__/meeting-config-columns";
 import {
   meetingConfigOneDefaultPerScopeIndex,
@@ -8,13 +8,13 @@ import { users } from "@/backend/db/schema/users/users";
 
 const TABLE_NAME = "user_meeting_configs";
 
-export const userMeetingConfigs = pgTable(
+export const userMeetingConfigs = createTable(
   TABLE_NAME,
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id")
+    id: uuidColumn("id"),
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => users.id as never, { onDelete: "cascade" }),
     ...meetingConfigSharedColumns(),
   },
   table => [

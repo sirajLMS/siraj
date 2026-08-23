@@ -1,4 +1,14 @@
-import { boolean, index, jsonb, pgTable, primaryKey, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  booleanColumn,
+  createTable,
+  index,
+  jsonbColumn,
+  primaryKey,
+  timestampColumn,
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { appPermissionEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
 import type { LocalizedString } from "@/shared/types";
@@ -10,16 +20,16 @@ import type { LocalizedString } from "@/shared/types";
  * or converting an existing custom permission to a system permission. System permissions are immutable.
  * description and category are JSONB locale maps (LocalizedString).
  */
-export const permissions = pgTable(
+export const permissions = createTable(
   "permissions",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
+    id: uuidColumn("id"),
     key: appPermissionEnum("key").notNull().unique(),
-    resource: varchar("resource", { length: 100 }).notNull(),
-    action: varchar("action", { length: 100 }).notNull(),
-    description: jsonb("description").$type<LocalizedString>().notNull(),
-    category: jsonb("category").$type<LocalizedString>().notNull(),
-    isSystem: boolean("is_system").notNull().default(false),
+    resource: varcharColumn("resource", { length: 100 }).notNull(),
+    action: varcharColumn("action", { length: 100 }).notNull(),
+    description: jsonbColumn<LocalizedString>("description").notNull(),
+    category: jsonbColumn<LocalizedString>("category").notNull(),
+    isSystem: booleanColumn("is_system").notNull().default(false),
   },
   table => [
     index("permissions_key_idx").on(table.key),
@@ -33,17 +43,17 @@ export const permissions = pgTable(
  * Permission groups. name/description are JSONB locale maps.
  * Uniqueness is on slug only (name is localized and not unique).
  */
-export const permissionGroups = pgTable(
+export const permissionGroups = createTable(
   "permission_groups",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    name: jsonb("name").$type<LocalizedString>().notNull(),
-    description: jsonb("description").$type<LocalizedString>(),
-    isSystem: boolean("is_system").notNull().default(false),
-    slug: varchar("slug", { length: 100 }).notNull().unique(),
-    createdByUserId: uuid("created_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull(),
+    id: uuidColumn("id"),
+    name: jsonbColumn<LocalizedString>("name").notNull(),
+    description: jsonbColumn<LocalizedString>("description"),
+    isSystem: booleanColumn("is_system").notNull().default(false),
+    slug: varcharColumn("slug", { length: 100 }).notNull().unique(),
+    createdByUserId: uuidDefaultColumn("created_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    createdAt: timestampColumn("created_at").notNull(),
+    updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
     index("permission_groups_is_system_idx").on(table.isSystem),
@@ -53,15 +63,15 @@ export const permissionGroups = pgTable(
   ]
 );
 
-export const groupPermissions = pgTable(
+export const groupPermissions = createTable(
   "group_permissions",
   {
-    groupId: uuid("group_id")
+    groupId: uuidDefaultColumn("group_id")
       .notNull()
-      .references(() => permissionGroups.id, { onDelete: "cascade" }),
-    permissionId: uuid("permission_id")
+      .references(() => permissionGroups.id as never, { onDelete: "cascade" }),
+    permissionId: uuidDefaultColumn("permission_id")
       .notNull()
-      .references(() => permissions.id, { onDelete: "cascade" }),
+      .references(() => permissions.id as never, { onDelete: "cascade" }),
   },
   table => [
     primaryKey({ columns: [table.groupId, table.permissionId] }),
@@ -70,17 +80,17 @@ export const groupPermissions = pgTable(
   ]
 );
 
-export const userPermissionGroups = pgTable(
+export const userPermissionGroups = createTable(
   "user_permission_groups",
   {
-    userId: uuid("user_id")
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    groupId: uuid("group_id")
+      .references(() => users.id as never, { onDelete: "cascade" }),
+    groupId: uuidDefaultColumn("group_id")
       .notNull()
-      .references(() => permissionGroups.id, { onDelete: "cascade" }),
-    assignedAt: timestamp("assigned_at", { withTimezone: true, precision: 3 }).notNull(),
-    assignedByUserId: uuid("assigned_by_user_id").references(() => users.id, { onDelete: "set null" }),
+      .references(() => permissionGroups.id as never, { onDelete: "cascade" }),
+    assignedAt: timestampColumn("assigned_at").notNull(),
+    assignedByUserId: uuidDefaultColumn("assigned_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
   },
   table => [
     primaryKey({ columns: [table.userId, table.groupId] }),
@@ -90,18 +100,18 @@ export const userPermissionGroups = pgTable(
   ]
 );
 
-export const userPermissionOverrides = pgTable(
+export const userPermissionOverrides = createTable(
   "user_permission_overrides",
   {
-    userId: uuid("user_id")
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    permissionId: uuid("permission_id")
+      .references(() => users.id as never, { onDelete: "cascade" }),
+    permissionId: uuidDefaultColumn("permission_id")
       .notNull()
-      .references(() => permissions.id, { onDelete: "cascade" }),
-    state: varchar("state", { length: 20 }).notNull(), // 'GRANTED' | 'DENIED'
-    assignedByUserId: uuid("assigned_by_user_id").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+      .references(() => permissions.id as never, { onDelete: "cascade" }),
+    state: varcharColumn("state", { length: 20 }).notNull(), // 'GRANTED' | 'DENIED'
+    assignedByUserId: uuidDefaultColumn("assigned_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
   },
   table => [
     primaryKey({ columns: [table.userId, table.permissionId] }),

@@ -1,15 +1,21 @@
-import { index, pgTable, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  index,
+  timestampColumn,
+  uuidColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { availabilityStatusEnum } from "@/backend/db/schema/enums";
 import type { AvailabilityStatus } from "@/backend/enum/books/book.enum";
 
-export const books = pgTable(
+export const books = createTable(
   "books",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    name: varchar("name", { length: 255 }).notNull(),
+    id: uuidColumn("id"),
+    name: varcharColumn("name", { length: 255 }).notNull(),
     availabilityStatus: availabilityStatusEnum("availability_status").$type<AvailabilityStatus>().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
+    createdAt: timestampColumn("created_at").notNull(),
+    deletedAt: timestampColumn("deleted_at"),
   },
   table => [
     index("books_deleted_at_idx").on(table.deletedAt),

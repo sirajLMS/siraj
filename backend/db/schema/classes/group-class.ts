@@ -1,26 +1,36 @@
-import { boolean, index, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  booleanColumn,
+  createTable,
+  index,
+  textColumn,
+  timestampColumn,
+  uniqueIndex,
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { classInstances, classStatusEvents } from "@/backend/db/schema/classes/scheduling";
 import { notificationDeliveries } from "@/backend/db/schema/communications/communications";
 import { students } from "@/backend/db/schema/students/students";
 
-export const groupClasses = pgTable(
+export const groupClasses = createTable(
   "group_classes",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    classInstanceId: uuid("class_instance_id")
+    id: uuidColumn("id"),
+    classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id, { onDelete: "cascade" }),
-    courseName: varchar("course_name", { length: 255 }).notNull(),
-    teacherName: varchar("teacher_name", { length: 255 }).notNull(),
-    classType: varchar("class_type", { length: 50 }).notNull(),
-    originalDate: timestamp("original_date", { withTimezone: true, precision: 3 }),
-    rescheduledDate: timestamp("rescheduled_date", { withTimezone: true, precision: 3 }),
-    timeSlot: varchar("time_slot", { length: 100 }).notNull(),
-    status: varchar("status", { length: 50 }).notNull(),
-    auditRemark: text("audit_remark"),
-    auditLoggedAt: timestamp("audit_logged_at", { withTimezone: true, precision: 3 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+      .references(() => classInstances.id as never, { onDelete: "cascade" }),
+    courseName: varcharColumn("course_name", { length: 255 }).notNull(),
+    teacherName: varcharColumn("teacher_name", { length: 255 }).notNull(),
+    classType: varcharColumn("class_type", { length: 50 }).notNull(),
+    originalDate: timestampColumn("original_date"),
+    rescheduledDate: timestampColumn("rescheduled_date"),
+    timeSlot: varcharColumn("time_slot", { length: 100 }).notNull(),
+    status: varcharColumn("status", { length: 50 }).notNull(),
+    auditRemark: textColumn("audit_remark"),
+    auditLoggedAt: timestampColumn("audit_logged_at").notNull(),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     index("group_classes_class_instance_id_idx").on(table.classInstanceId),
@@ -33,20 +43,20 @@ export const groupClasses = pgTable(
   ]
 );
 
-export const groupClassEnrollments = pgTable(
+export const groupClassEnrollments = createTable(
   "group_class_enrollments",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    groupClassId: uuid("group_class_id")
+    id: uuidColumn("id"),
+    groupClassId: uuidDefaultColumn("group_class_id")
       .notNull()
-      .references(() => groupClasses.id, { onDelete: "cascade" }),
-    studentId: uuid("student_id")
+      .references(() => groupClasses.id as never, { onDelete: "cascade" }),
+    studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id, { onDelete: "restrict" }),
-    studentIdNumber: varchar("student_id_number", { length: 50 }),
-    attendanceStatus: varchar("attendance_status", { length: 20 }).notNull().default("pending"),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+      .references(() => students.id as never, { onDelete: "restrict" }),
+    studentIdNumber: varcharColumn("student_id_number", { length: 50 }),
+    attendanceStatus: varcharColumn("attendance_status", { length: 20 }).notNull().default("pending"),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
+    updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },
   table => [
     uniqueIndex("group_class_enrollments_unique_idx").on(table.groupClassId, table.studentId),
@@ -57,26 +67,26 @@ export const groupClassEnrollments = pgTable(
   ]
 );
 
-export const classCommunications = pgTable(
+export const classCommunications = createTable(
   "class_communications",
   {
-    id: uuid("id").defaultRandom().primaryKey(),
-    groupClassId: uuid("group_class_id")
+    id: uuidColumn("id"),
+    groupClassId: uuidDefaultColumn("group_class_id")
       .notNull()
-      .references(() => groupClasses.id, { onDelete: "cascade" }),
-    type: varchar("type", { length: 20 }).notNull(),
-    title: varchar("title", { length: 255 }).notNull(),
-    description: text("description"),
-    isActive: boolean("is_active").notNull().default(true),
-    isDelivered: boolean("is_delivered"),
-    notificationDeliveryId: uuid("notification_delivery_id").references(() => notificationDeliveries.id, {
+      .references(() => groupClasses.id as never, { onDelete: "cascade" }),
+    type: varcharColumn("type", { length: 20 }).notNull(),
+    title: varcharColumn("title", { length: 255 }).notNull(),
+    description: textColumn("description"),
+    isActive: booleanColumn("is_active").notNull().default(true),
+    isDelivered: booleanColumn("is_delivered"),
+    notificationDeliveryId: uuidDefaultColumn("notification_delivery_id").references(() => notificationDeliveries.id as never, {
       onDelete: "set null",
     }),
-    classStatusEventId: uuid("class_status_event_id").references(() => classStatusEvents.id, {
+    classStatusEventId: uuidDefaultColumn("class_status_event_id").references(() => classStatusEvents.id as never, {
       onDelete: "set null",
     }),
-    timestamp: timestamp("timestamp", { withTimezone: true, precision: 3 }),
-    createdAt: timestamp("created_at", { withTimezone: true, precision: 3 }).notNull().defaultNow(),
+    timestamp: timestampColumn("timestamp"),
+    createdAt: timestampColumn("created_at").notNull().defaultNow(),
   },
   table => [
     index("class_communications_group_class_id_idx").on(table.groupClassId),
