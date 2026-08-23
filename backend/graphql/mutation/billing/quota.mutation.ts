@@ -57,7 +57,11 @@ gqlSchemaBuilder.mutationField("createQuota", t =>
       // (see requirePermission in quota.service.ts). No duplicate check here.
       // V3-070: Map service-layer errors to proper GraphQL error codes.
       try {
-        return await QuotaService.createQuota(args.input, actorUserId, ctx.locale);
+        return await QuotaService.createQuota(
+          { ...args.input, studentId: args.input.studentId ?? undefined },
+          actorUserId,
+          ctx.locale
+        );
       } catch (error) {
         throw mapQuotaErrorToGraphQLError(error);
       }

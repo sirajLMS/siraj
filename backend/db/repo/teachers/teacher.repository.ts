@@ -26,10 +26,12 @@ export namespace TeacherRepository {
   ): Promise<TeacherCreateReturnType> {
     const executor = tx ?? db;
 
+    const userId = input.userId ?? "";
+
     const existingTeacher = await executor
       .select({ id: teachers.id })
       .from(teachers)
-      .where(eq(teachers.userId, input.userId))
+      .where(eq(teachers.userId, userId))
       .limit(1);
 
     if (existingTeacher.length > 0) {
@@ -54,7 +56,7 @@ export namespace TeacherRepository {
     const [userRow] = await executor
       .select({ timezone: users.timezone, status: users.status })
       .from(users)
-      .where(eq(users.id, input.userId))
+      .where(eq(users.id, userId))
       .limit(1);
 
     return {

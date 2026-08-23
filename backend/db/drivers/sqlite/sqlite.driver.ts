@@ -1,5 +1,6 @@
-import { createClient, type Client } from "@libsql/client";
+import { type Client, createClient } from "@libsql/client";
 import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
+import type { AnyRelations } from "drizzle-orm/relations";
 import { getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 
@@ -16,7 +17,7 @@ export function resolveSqliteUrl(): string {
   if (databaseUrl && /^(file:|libsql:|https?:|wss?:)/i.test(databaseUrl)) {
     return databaseUrl;
   }
-  const fileName = getStringEnv("DB_FILE_NAME", "./siraj.sqlite");
+  const fileName = getStringEnv("DB_FILE_NAME", "./siraj.sqlite") ?? "./siraj.sqlite";
   return fileName.startsWith("file:") ? fileName : `file:${fileName}`;
 }
 
@@ -29,7 +30,7 @@ export function createSqliteClient(): Client {
   const url = resolveSqliteUrl();
   const authToken = process.env.DATABASE_AUTH_TOKEN ?? undefined;
 
-  logger.log(`Initializing libsql SQLite connection (${url.replace(/file:/, "file://")})`);
+  logger.info(`Initializing libsql SQLite connection (${url.replace(/file:/, "file://")})`);
 
   const client = createClient({ url, authToken });
 
@@ -56,7 +57,7 @@ export type SqliteDbType = LibSQLDatabase;
  * Creates the Drizzle database instance backed by libsql.
  * Relations are injected by the caller so this module stays free of schema imports.
  */
-export function createSqliteDb<TRelations>(relations: TRelations): SqliteDbType {
+export function createSqliteDb(relations?: AnyRelations): SqliteDbType {
   const client = createSqliteClient();
-  return drizzle({ client, relations: relations as never });
+  return drizzle({ client, ...(relations ? { relations } : {}) });
 }

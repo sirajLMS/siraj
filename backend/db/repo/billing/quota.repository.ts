@@ -34,8 +34,8 @@ type ReadExecutor = DBTransaction | typeof db;
  * All quota-operation idempotency keys go through this single function
  * to avoid copy-paste drift (DUP-5).
  */
-const deriveIdempotencyKey = (prefix: string, ...parts: string[]): string => {
-  const payload = `quota-${prefix}:${parts.join(":")}`;
+const deriveIdempotencyKey = (prefix: string, ...parts: (string | undefined | null)[]): string => {
+  const payload = `quota-${prefix}:${parts.map(p => p ?? "").join(":")}`;
   return createHash("sha256").update(payload).digest("hex");
 };
 

@@ -51,11 +51,13 @@ export namespace ParentRepository {
   ): Promise<ParentCreateResult> {
     const executor = tx ?? db;
 
+    const userId = input.userId ?? "";
+
     // Verify the user exists and doesn't already have a parent profile
     const existingParent = await executor
       .select({ id: parents.id })
       .from(parents)
-      .where(eq(parents.userId, input.userId))
+      .where(eq(parents.userId, userId))
       .limit(1);
 
     if (existingParent.length > 0) {
@@ -80,7 +82,7 @@ export namespace ParentRepository {
     const [userRow] = await executor
       .select({ timezone: users.timezone })
       .from(users)
-      .where(eq(users.id, input.userId))
+      .where(eq(users.id, userId))
       .limit(1);
 
     return {

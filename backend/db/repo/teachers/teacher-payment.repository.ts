@@ -3,8 +3,11 @@ import { db, queryDb } from "@/backend/db";
 import { teacherPayments } from "@/backend/db/schema";
 import type { DBTransaction, TeacherPaymentInsertType, TeacherPaymentSelectType } from "@/backend/types";
 
-function teacherPaymentKeyOf(teacherId: string, paymentDate: Date | string): string {
-  return `${teacherId}|${new Date(paymentDate).getTime()}`;
+function teacherPaymentKeyOf(
+  teacherId: string | undefined | null,
+  paymentDate: Date | string | undefined | null
+): string {
+  return `${teacherId ?? ""}|${paymentDate ? new Date(paymentDate).getTime() : 0}`;
 }
 
 export namespace TeacherPaymentRepository {
@@ -26,11 +29,16 @@ export namespace TeacherPaymentRepository {
     tx?: DBTransaction
   ): Promise<TeacherPaymentSelectType[]> {
     if (inputs.length === 0) return [];
+    const validInputs = inputs.filter(
+      (input): input is TeacherPaymentInsertType & { teacherId: string; paymentDate: Date | string } =>
+        Boolean(input.teacherId && input.paymentDate)
+    );
+    if (validInputs.length === 0) return [];
     const executor = tx ?? db;
 
     // Batch existence check: a single query covering all (teacherId, paymentDate) pairs.
-    const existingConditions = inputs.map(input =>
-      and(eq(teacherPayments.teacherId, input.teacherId), eq(teacherPayments.paymentDate, input.paymentDate))
+    const existingConditions = validInputs.map(input =>
+      and(eq(teacherPayments.teacherId, input.teacherId), eq(teacherPayments.paymentDate, new Date(input.paymentDate)))
     );
     const existingRows = await executor
       .select()

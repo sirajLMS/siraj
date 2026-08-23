@@ -67,10 +67,12 @@ export namespace ComplaintResponseRepository {
         throw new Error(complaint.responseCreateFailed);
       }
 
-      await t
-        .update(complaints)
-        .set({ status: ComplaintStatus.ANSWERED, updatedAt: now })
-        .where(eq(complaints.id, input.complaintId));
+      if (input.complaintId) {
+        await t
+          .update(complaints)
+          .set({ status: ComplaintStatus.ANSWERED, updatedAt: now })
+          .where(eq(complaints.id, input.complaintId));
+      }
 
       return created;
     };

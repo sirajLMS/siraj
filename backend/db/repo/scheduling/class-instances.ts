@@ -124,10 +124,12 @@ export const createClassInstance = async (
 ): Promise<Types.ClassInstanceSelectType> => {
   const runner = async (t: DBTransaction) => {
     const tFuncErrors = tErrors ?? getServerTranslations("en").errorsTranslations;
-    await acquireLocks(t, input.teacherId, input.studentId);
-    await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, tFuncErrors);
+    const studentId = input.studentId ?? "";
+    const teacherId = input.teacherId ?? "";
+    await acquireLocks(t, teacherId, studentId);
+    await validateTeacherAssignment(t, studentId, teacherId, input.scheduledStartAt, tFuncErrors);
     await AvailabilityService.validateBookingAvailability(
-      input.teacherId,
+      teacherId,
       input.scheduledStartAt,
       input.scheduledEndAt,
       t,
@@ -137,8 +139,8 @@ export const createClassInstance = async (
     await checkOverlaps(
       t,
       {
-        studentId: input.studentId,
-        teacherId: input.teacherId,
+        studentId,
+        teacherId,
         startTime: input.scheduledStartAt,
         endTime: input.scheduledEndAt,
         meetingJoinUrl: input.meetingJoinUrl,

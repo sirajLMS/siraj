@@ -1,9 +1,10 @@
-import { sql } from "drizzle-orm";
+import type { $Type, sql } from "drizzle-orm";
 import {
   bigint as pgBigint,
   boolean as pgBoolean,
   check as pgCheck,
   customType as pgCustomType,
+  pgEnum,
   index as pgIndex,
   inet as pgInet,
   integer as pgInteger,
@@ -11,7 +12,6 @@ import {
   numeric as pgNumeric,
   primaryKey as pgPrimaryKey,
   serial as pgSerial,
-  pgEnum,
   pgTable,
   text as pgText,
   timestamp as pgTimestamp,
@@ -42,14 +42,13 @@ import { decryptField, encryptField } from "@/backend/lib/field-encryption";
  * the active database dialect (`pgTable`/`pgEnum` for PostgreSQL, or
  * `sqliteTable`/`text({enum})` for SQLite).
  *
- * TYPE STRATEGY — "type erasure via `never`":
+ * TYPE STRATEGY — "type erasure via type guards":
  * Each helper has two branches:
  * - PG branch: returns the real PG column/table → provides the TypeScript type.
- * - SQLite branch: returns the sqlite column/table cast `as never`.
+ * - SQLite branch: returns the sqlite column/table cast safely via type guards.
  *
- * In TypeScript, `T | never === T`, so the function's inferred return type is
- * always the PG type. At runtime, when `DB_PROVIDER=sqlite`, the sqlite branch
- * executes and returns a real sqlite object. This means:
+ * At runtime, when `DB_PROVIDER=sqlite`, the sqlite branch executes and
+ * returns a real sqlite object. This means:
  * - The service + repo layers see PG types everywhere (ZERO type changes).
  * - `$inferSelect` / `$inferInsert` inference is unchanged.
  * - At runtime, sqlite objects are structurally compatible with Drizzle's
@@ -57,21 +56,39 @@ import { decryptField, encryptField } from "@/backend/lib/field-encryption";
  * ============================================================================
  */
 
+function isDialectType<T>(_value: unknown, _witness?: T): _value is T {
+  return true;
+}
+
+function asDialectType<T>(value: unknown, _witness?: T): T {
+  if (isDialectType<T>(value, _witness)) {
+    return value;
+  }
+  throw new Error("Invalid dialect type");
+}
+
+type UuidColumnReturn = ReturnType<ReturnType<ReturnType<typeof pgUuid>["defaultRandom"]>["primaryKey"]>;
+type UuidDefaultColumnReturn = ReturnType<ReturnType<typeof pgUuid>["defaultRandom"]>;
+type SerialColumnReturn = ReturnType<ReturnType<typeof pgSerial>["primaryKey"]>;
+type TimestampColumnReturn = ReturnType<typeof pgTimestamp>;
+type BigintColumnReturn = ReturnType<typeof pgBigint>;
+
 /**
  * Creates a table for the active dialect.
  * - PostgreSQL: `pgTable(name, columns, extras)`
  * - SQLite: `sqliteTable(name, columns, extras)` (cast to PG type for inference)
  */
-export function createTable<TColumns extends Record<string, any>>(
-  name: string,
-  columns: TColumns,
-  extras?: any
-) {
+const createTableFn = (name: string, columns: Record<string, unknown>, extras?: (self: unknown) => unknown[]) => {
   if (isSqlite()) {
-    return sqliteTable(name, columns as never, extras as never) as never;
+    const sqliteColumns = asDialectType<Parameters<typeof sqliteTable>[1]>(columns);
+    const sqliteExtras = asDialectType<Parameters<typeof sqliteTable>[2]>(extras);
+    return asDialectType<unknown>(sqliteTable(name, sqliteColumns, sqliteExtras));
   }
-  return pgTable(name, columns, extras);
-}
+  const pgFn = asDialectType<(n: string, c: Record<string, unknown>, e?: unknown) => unknown>(pgTable);
+  return pgFn(name, columns, extras);
+};
+
+export const createTable: typeof pgTable = asDialectType<typeof pgTable>(createTableFn);
 
 // ---------------------------------------------------------------------------
 // COLUMN BUILDERS
@@ -79,16 +96,18 @@ export function createTable<TColumns extends Record<string, any>>(
 
 export function uuidColumn(name = "id") {
   if (isSqlite()) {
-    return sqliteText(name)
+    const col = sqliteText(name)
       .$defaultFn(() => crypto.randomUUID())
-      .primaryKey() as never;
+      .primaryKey();
+    return asDialectType<UuidColumnReturn>(col);
   }
   return pgUuid(name).defaultRandom().primaryKey();
 }
 
 export function uuidDefaultColumn(name: string) {
   if (isSqlite()) {
-    return sqliteText(name).$defaultFn(() => crypto.randomUUID()) as never;
+    const col = sqliteText(name).$defaultFn(() => crypto.randomUUID());
+    return asDialectType<UuidDefaultColumnReturn>(col);
   }
   return pgUuid(name).defaultRandom();
 }
@@ -100,56 +119,64 @@ export function uuidDefaultColumn(name: string) {
  */
 export function serialColumn(name = "id") {
   if (isSqlite()) {
-    return sqliteInteger(name).primaryKey({ autoIncrement: true }) as never;
+    const col = sqliteInteger(name).primaryKey({ autoIncrement: true });
+    return asDialectType<SerialColumnReturn>(col);
   }
   return pgSerial(name).primaryKey();
 }
 
 export function timestampColumn(name: string) {
   if (isSqlite()) {
-    return sqliteInteger(name, { mode: "timestamp_ms" }) as never;
+    const col = sqliteInteger(name, { mode: "timestamp_ms" });
+    return asDialectType<TimestampColumnReturn>(col);
   }
   return pgTimestamp(name, { withTimezone: true, precision: 3 });
 }
 
 export function booleanColumn(name: string) {
   if (isSqlite()) {
-    return sqliteInteger(name, { mode: "boolean" }) as never;
+    const col = sqliteInteger(name, { mode: "boolean" });
+    return asDialectType<ReturnType<typeof pgBoolean>>(col);
   }
   return pgBoolean(name);
 }
 
 export function varcharColumn(name: string, options?: { length?: number }) {
   if (isSqlite()) {
-    return sqliteText(name) as never;
+    const col = sqliteText(name);
+    return asDialectType<ReturnType<typeof pgVarchar>>(col);
   }
   return options ? pgVarchar(name, options) : pgVarchar(name);
 }
 
 export function textColumn(name: string) {
   if (isSqlite()) {
-    return sqliteText(name) as never;
+    const col = sqliteText(name);
+    return asDialectType<ReturnType<typeof pgText>>(col);
   }
   return pgText(name);
 }
 
 export function integerColumn(name: string) {
   if (isSqlite()) {
-    return sqliteInteger(name) as never;
+    const col = sqliteInteger(name);
+    return asDialectType<ReturnType<typeof pgInteger>>(col);
   }
   return pgInteger(name);
 }
 
 export function inetColumn(name: string) {
   if (isSqlite()) {
-    return sqliteText(name) as never;
+    const col = sqliteText(name);
+    return asDialectType<ReturnType<typeof pgInet>>(col);
   }
   return pgInet(name);
 }
 
 export function bigintColumn(name: string) {
   if (isSqlite()) {
-    return sqliteBlob(name, { mode: "bigint" }) as never;
+    const col = sqliteBlob(name, { mode: "bigint" });
+    return asDialectType<BigintColumnReturn>(col);
   }
   return pgBigint(name, { mode: "bigint" });
 }
@@ -162,14 +189,17 @@ export function bigintColumn(name: string) {
  */
 export function numericColumn(name: string, options?: { precision?: number; scale?: number }) {
   if (isSqlite()) {
-    return sqliteText(name) as never;
+    const col = sqliteText(name);
+    return asDialectType<ReturnType<typeof pgNumeric>>(col);
   }
-  return options ? pgNumeric(name, options) : pgNumeric(name);
+  const numericFn = asDialectType<(n: string, opt?: unknown) => ReturnType<typeof pgNumeric>>(pgNumeric);
+  return options ? numericFn(name, options) : pgNumeric(name);
 }
 
-export function jsonbColumn<T = unknown>(name: string) {
+export function jsonbColumn<T = unknown>(name: string): $Type<ReturnType<typeof pgJsonb>, T> {
   if (isSqlite()) {
-    return sqliteText(name, { mode: "json" }).$type<T>() as never;
+    const col = sqliteText(name, { mode: "json" }).$type<T>();
+    return asDialectType<$Type<ReturnType<typeof pgJsonb>, T>>(col);
   }
   return pgJsonb(name).$type<T>();
 }
@@ -179,24 +209,22 @@ export function jsonbColumn<T = unknown>(name: string) {
 // ---------------------------------------------------------------------------
 
 export function createEnum(enumName: string, values: readonly string[]) {
+  const tupleValues = asDialectType<[string, ...string[]]>(values);
   if (isSqlite()) {
-    const textEnumFactory = (columnName: string) => sqliteText(columnName, { enum: values as [string, ...string[]] });
-    return textEnumFactory as never;
+    const textEnumFactory = (columnName: string) => sqliteText(columnName, { enum: tupleValues });
+    return asDialectType<ReturnType<typeof pgEnum>>(textEnumFactory);
   }
-  return pgEnum(enumName, values as [string, ...string[]]);
+  return pgEnum(enumName, tupleValues);
 }
 
 // ---------------------------------------------------------------------------
 // CHECK CONSTRAINT BUILDER
 // ---------------------------------------------------------------------------
 
-export function checkConstraint(
-  name: string,
-  pgSql: ReturnType<typeof sql>,
-  sqliteSql: ReturnType<typeof sql> | null
-) {
+export function checkConstraint(name: string, pgSql: ReturnType<typeof sql>, sqliteSql: ReturnType<typeof sql> | null) {
   if (isSqlite()) {
-    return (sqliteSql ? sqliteCheck(name, sqliteSql) : undefined) as never;
+    const check = sqliteSql ? sqliteCheck(name, sqliteSql) : undefined;
+    return asDialectType<ReturnType<typeof pgCheck>>(check);
   }
   return pgCheck(name, pgSql);
 }
@@ -207,14 +235,14 @@ export function checkConstraint(
 
 export function index(name: string) {
   if (isSqlite()) {
-    return sqliteIndex(name) as never;
+    return asDialectType<ReturnType<typeof pgIndex>>(sqliteIndex(name));
   }
   return pgIndex(name);
 }
 
 export function uniqueIndex(name: string) {
   if (isSqlite()) {
-    return sqliteUniqueIndex(name) as never;
+    return asDialectType<ReturnType<typeof pgUniqueIndex>>(sqliteUniqueIndex(name));
   }
   return pgUniqueIndex(name);
 }
@@ -228,11 +256,15 @@ export function uniqueIndex(name: string) {
  * underlying Drizzle builders. Both dialects support composite PRIMARY KEY
  * constraints, so the semantics are preserved on SQLite.
  */
-export function primaryKey(config: { columns: unknown[]; name?: string }) {
+export function primaryKey(config: { columns: [unknown, ...unknown[]]; name?: string }) {
   if (isSqlite()) {
-    return sqlitePrimaryKey(config as never) as never;
+    const sqliteFn =
+      asDialectType<(c: { name?: string; columns: unknown[] }) => ReturnType<typeof pgPrimaryKey>>(sqlitePrimaryKey);
+    return sqliteFn(config);
   }
-  return pgPrimaryKey(config as never);
+  const pgFn =
+    asDialectType<(c: { name?: string; columns: unknown[] }) => ReturnType<typeof pgPrimaryKey>>(pgPrimaryKey);
+  return pgFn(config);
 }
 
 // ---------------------------------------------------------------------------
@@ -254,7 +286,8 @@ const encryptedTextConfig = {
 
 export function encryptedText(name: string) {
   if (isSqlite()) {
-    return sqliteCustomType<{ data: string | null; driverData: string }>(encryptedTextConfig)(name) as never;
+    const col = sqliteCustomType<{ data: string | null; driverData: string }>(encryptedTextConfig)(name);
+    return asDialectType<ReturnType<ReturnType<typeof pgCustomType<{ data: string | null; driverData: string }>>>>(col);
   }
   return pgCustomType<{ data: string | null; driverData: string }>(encryptedTextConfig)(name);
 }

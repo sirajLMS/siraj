@@ -1,1 +1,1 @@
-# bun run build || true
+bun run quality-gate

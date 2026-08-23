@@ -248,18 +248,14 @@ export namespace GroupClassRepository {
 
     return runInTransaction(tx, async t => {
       await bulkInsertOnConflictDoNothing(groupClassEnrollments, inputs, { tx: t });
-      const keys = inputs.map(i => ({ groupClassId: i.groupClassId, studentId: i.studentId }));
+      const groupClassIds = [...new Set(inputs.map(i => i.groupClassId).filter((id): id is string => Boolean(id)))];
+      if (groupClassIds.length === 0) return [];
       const rows = await t
         .select()
         .from(groupClassEnrollments)
-        .where(
-          inArray(
-            groupClassEnrollments.groupClassId,
-            keys.map(k => k.groupClassId)
-          )
-        );
-      const wanted = new Set(keys.map(k => k.groupClassId + ":" + k.studentId));
-      return rows.filter(r => wanted.has(r.groupClassId + ":" + r.studentId));
+        .where(inArray(groupClassEnrollments.groupClassId, groupClassIds));
+      const wanted = new Set(inputs.map(k => `${k.groupClassId}:${k.studentId}`));
+      return rows.filter(r => wanted.has(`${r.groupClassId}:${r.studentId}`));
     });
   }
 

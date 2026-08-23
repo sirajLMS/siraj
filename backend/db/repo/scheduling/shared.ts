@@ -127,10 +127,12 @@ export async function performRescheduleValidations(
   input: Omit<Types.ClassInstanceInsertType, "createdAt" | "updatedAt">,
   tErrors: ErrorsLabels
 ) {
-  await acquireLocks(t, input.teacherId, input.studentId);
-  await validateTeacherAssignment(t, input.studentId, input.teacherId, input.scheduledStartAt, tErrors);
+  const studentId = input.studentId ?? "";
+  const teacherId = input.teacherId ?? "";
+  await acquireLocks(t, teacherId, studentId);
+  await validateTeacherAssignment(t, studentId, teacherId, input.scheduledStartAt, tErrors);
   await AvailabilityService.validateBookingAvailability(
-    input.teacherId,
+    teacherId,
     input.scheduledStartAt,
     input.scheduledEndAt,
     t,
@@ -139,8 +141,8 @@ export async function performRescheduleValidations(
   await checkOverlaps(
     t,
     {
-      studentId: input.studentId,
-      teacherId: input.teacherId,
+      studentId,
+      teacherId,
       startTime: input.scheduledStartAt,
       endTime: input.scheduledEndAt,
       meetingJoinUrl: input.meetingJoinUrl,

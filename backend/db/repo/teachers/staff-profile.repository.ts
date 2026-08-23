@@ -41,10 +41,12 @@ export namespace StaffProfileRepository {
   ): Promise<StaffProfileCreateResult> {
     const executor = tx ?? db;
 
+    const userId = input.userId ?? "";
+
     const existingProfile = await executor
       .select({ id: staffProfiles.id })
       .from(staffProfiles)
-      .where(eq(staffProfiles.userId, input.userId))
+      .where(eq(staffProfiles.userId, userId))
       .limit(1);
 
     if (existingProfile.length > 0) {

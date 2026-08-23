@@ -60,7 +60,7 @@ export namespace NotificationRepository {
    */
   function mapDeliveryInput(
     input: {
-      userId: string;
+      userId?: string;
       deviceTokenId?: string | null;
       channel: NotificationChannel | string;
       eventType: NotificationEventType | string;
@@ -80,7 +80,7 @@ export namespace NotificationRepository {
     now: Date
   ) {
     return {
-      userId: input.userId,
+      userId: input.userId ?? "",
       deviceTokenId: input.deviceTokenId ?? null,
       channel: input.channel,
       eventType: input.eventType,

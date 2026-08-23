@@ -19,7 +19,7 @@ export namespace LeaveRequestRepository {
   ): Promise<LeaveRequestSelectType[]> {
     if (inputs.length === 0) return [];
     const executor = tx ?? db;
-    const classInstanceIds = inputs.map(i => i.classInstanceId);
+    const classInstanceIds = inputs.map(i => i.classInstanceId).filter((id): id is string => Boolean(id));
     const existing = await findByClassInstanceIds(classInstanceIds, tx);
     const existingByClass = new Map(existing.map(r => [r.classInstanceId, r]));
     const results: LeaveRequestSelectType[] = [...existing];
@@ -27,6 +27,7 @@ export namespace LeaveRequestRepository {
     const processNext = async (index: number): Promise<void> => {
       if (index >= inputs.length) return;
       const input = inputs[index];
+      if (!input?.classInstanceId) return processNext(index + 1);
       const found = existingByClass.get(input.classInstanceId);
       if (found) {
         if (!results.some(r => r.id === found.id)) results.push(found);

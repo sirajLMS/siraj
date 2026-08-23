@@ -115,9 +115,11 @@ export namespace InvoicePaymentSubmissionRepository {
     if (inputs.length === 0) return [];
     return Promise.all(
       inputs.map(async input => {
-        const existing = await getLatestByInvoiceId(input.invoiceId, tx);
-        if (existing) {
-          return existing;
+        if (input.invoiceId) {
+          const existing = await getLatestByInvoiceId(input.invoiceId, tx);
+          if (existing) {
+            return existing;
+          }
         }
         return createSubmission(input, tx);
       })

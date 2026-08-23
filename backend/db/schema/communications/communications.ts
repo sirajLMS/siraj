@@ -1,4 +1,5 @@
-import { sql, type AnyPgColumn } from "drizzle-orm";
+import { sql } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
   booleanColumn,
   createTable,

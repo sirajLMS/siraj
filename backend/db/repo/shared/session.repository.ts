@@ -428,7 +428,7 @@ export namespace SessionRepository {
 
       const config = await getSessionConfig(roleName);
       const now = BigInt(Math.floor(Date.now() / 1000));
-      const isExpired = Number(now - session.lastActivity) > config.ttlSeconds;
+      const isExpired = Number(now - BigInt(session.lastActivity)) > config.ttlSeconds;
 
       if (isExpired) {
         await db.delete(sessions).where(eq(sessions.hashedId, hashedId));

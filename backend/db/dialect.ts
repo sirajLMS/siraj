@@ -22,7 +22,7 @@ export type DbDialect = "postgres" | "sqlite";
  * use PostgreSQL with zero behavior change.
  */
 export function getDbDialect(): DbDialect {
-  const provider = getStringEnv("DB_PROVIDER", "postgres").toLowerCase();
+  const provider = (getStringEnv("DB_PROVIDER", "postgres") ?? "postgres").toLowerCase();
   if (provider === "sqlite") return "sqlite";
   return "postgres";
 }

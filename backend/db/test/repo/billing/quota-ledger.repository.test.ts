@@ -5,9 +5,9 @@ import { recurringSchedules } from "@/backend/db/schema";
 import { ensureTestSubjectId, setupStudent, setupTeacher } from "@/backend/db/test/entity-setup";
 import { runInRollback } from "@/backend/db/test/test-utils";
 import { QuotaKind, QuotaLedgerReason } from "@/backend/enum";
-import type { QuotaSubmitInput, QuotaLedgerSubmitInput as RawQuotaLedgerSubmitInput } from "@/backend/types";
+import type { QuotaSubmitInput } from "@/backend/types";
 
-type QuotaLedgerSubmitInput = Omit<RawQuotaLedgerSubmitInput, "reason"> & { reason: QuotaLedgerReason };
+type QuotaLedgerSubmitInput = Parameters<typeof QuotaLedgerRepository.insert>[1];
 
 describe("QuotaLedgerRepository", () => {
   test("insert & listByQuota", async () => {

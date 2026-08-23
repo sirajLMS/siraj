@@ -82,7 +82,7 @@ gqlSchemaBuilder.mutationField("createUserPaymentMethod", t =>
       return PaymentMethodService.createUserPaymentMethod(
         actorUserId,
         {
-          userId: args.input.userId,
+          userId: args.input.userId ?? actorUserId,
           type: args.input.type,
           direction: args.input.direction,
           isDefault: args.input.isDefault ?? false,
