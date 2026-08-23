@@ -1,5 +1,5 @@
 {
-  "manifestHash": "5de26cee7a239ca0ab519cca593b8970d3da3c37af5f1bf5f45fa7d00967c93d",
+  "manifestHash": "0405374fbdcff1595851d5d66baf8118120d63d90686cee9839f3e2fb4fc2ce0",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -94,8 +94,16 @@
       "sha256": "ecbf57d7aa5dc681ca3151e6dc5926232ad3501d812b5efe73484d9a23c0a08d"
     },
     {
+      "file": "7c-appearance-permissions-enum.sql",
+      "sha256": "efc221c2535c861654d31c556a87d8a1f45b085ba618eb4612bf69f831396fcc"
+    },
+    {
       "file": "7c-quota_permissions_enum.sql",
       "sha256": "9f2c9d2161c791762c091aee3130b121cd8b88cc886ed68584a982afe0b6e475"
+    },
+    {
+      "file": "7d-appearance-permissions-data.sql",
+      "sha256": "51cd2a3a8dc92d29279629b834190868cc8953afee4c93ac517c57b93bd1b9fd"
     },
     {
       "file": "7d-quota_permissions_data.sql",
@@ -253,6 +261,8 @@
     "20260815185128_custom_3-system_permissions_and_groups",
     "20260817185218_custom_3-system_permissions_and_groups",
     "20260817185219_custom_6-lms-permissions-and-groups",
-    "20260817185220_custom_6d-profile-fine-grained-only"
+    "20260817185220_custom_6d-profile-fine-grained-only",
+    "20260822054900_custom_7c-appearance-permissions-enum",
+    "20260822054901_custom_7d-appearance-permissions-data"
   ]
 }

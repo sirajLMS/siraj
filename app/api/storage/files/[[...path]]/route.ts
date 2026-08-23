@@ -13,6 +13,33 @@ import { SessionService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
 import { extToMime } from "@/shared/utils";
+import {
+  APPEARANCE_LOGO_CACHE_CONTROL,
+  isAppearanceLogoStoragePath,
+} from "@/shared/utils/appearance-logo-storage.utils";
+
+/**
+ * Default short-lived cache control for general storage assets.
+ *
+ * Kept as a named constant (rather than an inline string) so the contrast
+ * with {@link APPEARANCE_LOGO_CACHE_CONTROL} is explicit at the call site.
+ */
+const DEFAULT_STORAGE_CACHE_CONTROL = "public, max-age=3600";
+
+/**
+ * Resolve the `Cache-Control` header value for a served storage asset
+ * (AC-34, decision §18).
+ *
+ * Appearance logos (paths under `public/appearance/`) are served with the
+ * long-lived immutable header ({@link APPEARANCE_LOGO_CACHE_CONTROL}) because
+ * their storage keys are UUID-randomized — a re-upload produces a new URL,
+ * so the bytes behind any given URL never change. All other assets keep the
+ * short-lived `max-age=3600` default (they may be overwritten in place by
+ * the storage pipeline).
+ */
+function resolveCacheControl(relativePath: string): string {
+  return isAppearanceLogoStoragePath(relativePath) ? APPEARANCE_LOGO_CACHE_CONTROL : DEFAULT_STORAGE_CACHE_CONTROL;
+}
 
 /**
  * Detect content type from file extension
@@ -80,13 +107,14 @@ interface RangeResponseOptions {
   fileSize: number;
   contentType: string;
   lastModified: string;
+  relativePath: string;
 }
 
 /**
  * Generate a partial content response for range requests
  */
 function createRangeResponse(options: RangeResponseOptions): NextResponse {
-  const { absolutePath, rangeHeader, fileSize, contentType, lastModified } = options;
+  const { absolutePath, rangeHeader, fileSize, contentType, lastModified, relativePath } = options;
   const range = parseRange(rangeHeader, fileSize);
 
   if (!range) {
@@ -108,7 +136,7 @@ function createRangeResponse(options: RangeResponseOptions): NextResponse {
     "Content-Range": `bytes ${start}-${end}/${fileSize}`,
     "X-Content-Type-Options": "nosniff",
     "Accept-Ranges": "bytes",
-    "Cache-Control": "public, max-age=3600",
+    "Cache-Control": resolveCacheControl(relativePath),
     "Last-Modified": lastModified,
   };
   if (!isImage) {
@@ -159,7 +187,7 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
   const lastModified = stats.mtime.toUTCString();
 
   if (rangeHeader) {
-    return createRangeResponse({ absolutePath, rangeHeader, fileSize, contentType, lastModified });
+    return createRangeResponse({ absolutePath, rangeHeader, fileSize, contentType, lastModified, relativePath });
   }
 
   const stream = createReadStream(absolutePath);
@@ -171,7 +199,7 @@ function buildFileResponse(absolutePath: string, relativePath: string, rangeHead
     "Content-Length": fileSize.toString(),
     "X-Content-Type-Options": "nosniff",
     "Accept-Ranges": "bytes",
-    "Cache-Control": "public, max-age=3600",
+    "Cache-Control": resolveCacheControl(relativePath),
     "Last-Modified": lastModified,
   };
   if (!isImage) {

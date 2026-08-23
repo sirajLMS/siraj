@@ -20,6 +20,7 @@ export const dashboardCoreLayoutAr: DashboardCoreLayoutLabels = {
   pageNotFoundTitle: "الصفحة غير موجودة",
   pageNotFoundDescription: "الصفحة التي تبحث عنها غير موجودة أو قد لا تملك صلاحية الوصول إليها.",
   pageNotFoundBackToDashboard: "العودة إلى لوحة التحكم",
+  customizeButton: "تخصيص",
 
   // ─── Interpolated → typed functions ────────────────────────────────
   welcomeUser: name => `مرحبًا ${name}`,

@@ -1,3 +1,4 @@
+export type { SettingsAppearanceTabLabels } from "./appearance";
 export type { SettingsEnvironmentCategoryKey, SettingsEnvironmentLabels } from "./environment";
 export type { SettingsGeneralTabLabels } from "./general";
 export type { SettingsLabels } from "./main";

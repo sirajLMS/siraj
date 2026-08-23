@@ -4,6 +4,7 @@ import { alpha, Box, Typography } from "@mui/material";
 import { usePermissionGroupSimulation } from "@/frontend/common/hooks/usePermissionGroupSimulation";
 import { formatUserRoleLabel } from "@/frontend/common/utils/formatUserRoleLabel";
 import {
+  CustomizeButton,
   LanguageSwitcher,
   NotificationButton,
   ThemeSwitcher,
@@ -33,6 +34,7 @@ export function TopNavbarIslandDesktop({
 
   return (
     <>
+      <CustomizeButton />
       <ThemeSwitcher />
       <LanguageSwitcher />
       <NotificationButton notificationCount={notificationCount} />

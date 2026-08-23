@@ -258,6 +258,7 @@ export enum AppPermission {
   SETTINGS_EDIT_SESSION = "settings.edit_session",
   SETTINGS_AUDIT_VIEW = "settings.audit_view",
   SETTINGS_SITE_CONTENT_MANAGE = "settings.site_content_manage",
+  SETTINGS_APPEARANCE_MANAGE = "settings.appearance_manage",
   SETTINGS_TIMEZONES_VIEW = "settings.timezones_view",
   SETTINGS_EDIT_MEETING_INTEGRATIONS = "settings.edit_meeting_integrations",
   // WhatsApp admin (BL2: no whatsapp.dispatch — no send-mutation in v1)

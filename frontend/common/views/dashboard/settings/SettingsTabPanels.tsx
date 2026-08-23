@@ -58,6 +58,12 @@ const LazyMeetingIntegrationsTab = lazy(() =>
   }))
 );
 
+const LazyAppearanceSettingsTab = lazy(() =>
+  import("@/frontend/common/views/dashboard/settings/tabs/appearance/AppearanceSettingsTab").then(module => ({
+    default: module.AppearanceSettingsTab,
+  }))
+);
+
 const TAB_PANELS: readonly TabPanelDefinition[] = [
   { id: "general", permissions: PAGE_PERMISSIONS.settingsGeneral, Component: LazyGeneralSettingsTab },
   { id: "environment", permissions: PAGE_PERMISSIONS.settingsEnvironment, Component: LazyEnvironmentConfigTab },
@@ -70,6 +76,7 @@ const TAB_PANELS: readonly TabPanelDefinition[] = [
     permissions: PAGE_PERMISSIONS.settingsMeetingIntegrations,
     Component: LazyMeetingIntegrationsTab,
   },
+  { id: "appearance", permissions: PAGE_PERMISSIONS.settingsAppearance, Component: LazyAppearanceSettingsTab },
 ];
 
 function TabPanelFallback() {

@@ -2,6 +2,7 @@ import {
   ArticleOutlined,
   HistoryOutlined,
   LanguageOutlined,
+  PaletteOutlined,
   PublicOutlined,
   ScheduleOutlined,
   SettingsOutlined,
@@ -53,6 +54,12 @@ export const SETTINGS_TABS: readonly SettingsTabDefinition[] = [
     labelKey: "meetingIntegrations",
     permissions: PAGE_PERMISSIONS.settingsMeetingIntegrations,
     icon: VideocamOutlined,
+  },
+  {
+    id: "appearance",
+    labelKey: "appearance",
+    permissions: PAGE_PERMISSIONS.settingsAppearance,
+    icon: PaletteOutlined,
   },
 ] as const;
 

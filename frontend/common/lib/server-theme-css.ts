@@ -1,4 +1,7 @@
 import type { PaletteColorOptions, PaletteMode } from "@mui/material/styles";
+import { logger } from "@/backend/lib/logger";
+import { AppearanceSettingsService } from "@/backend/services";
+import type { AppearanceFields } from "@/backend/types";
 import { darkPalette } from "@/frontend/common/providers/theme/palette/darkPalette";
 import { lightPalette } from "@/frontend/common/providers/theme/palette/lightPalette";
 
@@ -69,10 +72,34 @@ const LIGHT_FALLBACKS: ServerThemeTokens = {
   skeletonBg: "rgba(0 0 0 / 0.11)",
 };
 
-function extractTokens(mode: PaletteMode): ServerThemeTokens {
+/**
+ * Cached SSR read of the published appearance (tag `"appearance"`,
+ * invalidated on every publish via `revalidateTag` — AC-22). Wrapped in
+ * try/catch so a transient DB/cache failure degrades gracefully to the
+ * static fallback tokens instead of 500-ing every page render — the SSR
+ * theme CSS is non-critical and the page body renders independently.
+ *
+ * Returns `null` when no row exists or the read throws; the caller falls
+ * back to {@link DARK_FALLBACKS} / {@link LIGHT_FALLBACKS}.
+ */
+async function fetchPublishedAppearance(): Promise<AppearanceFields | null> {
+  try {
+    return await AppearanceSettingsService.getFirstAppearancePublished();
+  } catch (error) {
+    logger.error(
+      `[server-theme-css] published appearance read failed; falling back to static tokens. ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return null;
+  }
+}
+
+function extractTokens(mode: PaletteMode, appearance?: AppearanceFields | null): ServerThemeTokens {
   const isDark = mode === "dark";
   const palette = isDark ? darkPalette : lightPalette;
   const fallbacks = isDark ? DARK_FALLBACKS : LIGHT_FALLBACKS;
+  const publishedPrimary = appearance?.colors[mode].primaryMain;
 
   const bg = palette.background;
   const primary = palette.primary;
@@ -92,7 +119,7 @@ function extractTokens(mode: PaletteMode): ServerThemeTokens {
     surfaceContainerLow: palette.surfaceContainerLow ?? fallbacks.surfaceContainerLow,
     surface: palette.surface ?? fallbacks.surface,
     primaryContainer: palette.primaryContainer ?? fallbacks.primaryContainer,
-    primaryMain: hasMain(primary) ? primary.main : fallbacks.primaryMain,
+    primaryMain: publishedPrimary ?? (hasMain(primary) ? primary.main : fallbacks.primaryMain),
     borderLight: border?.light ?? fallbacks.borderLight,
     textPrimary: palette.text?.primary ?? fallbacks.textPrimary,
     textPrimaryChannel: fallbacks.textPrimaryChannel,
@@ -113,9 +140,15 @@ function extractTokens(mode: PaletteMode): ServerThemeTokens {
  *   - `html[data-${mode}]` — the boolean attribute form written by MUI's
  *     `useColorScheme().setMode()` when `colorSchemeSelector: "data"` is used
  *     (e.g. `data-dark` / `data-light`).
+ *
+ * When `appearance` is provided (a published row exists), the
+ * `--mui-palette-primary-main` token is overridden with the published
+ * per-mode `primaryMain` (AC-21), taking precedence over both the static
+ * palette value and the {@link DARK_FALLBACKS} / {@link LIGHT_FALLBACKS}
+ * constant. All other tokens retain their palette-or-fallback resolution.
  */
-function buildModeRule(mode: PaletteMode): string {
-  const tokens = extractTokens(mode);
+function buildModeRule(mode: PaletteMode, appearance?: AppearanceFields | null): string {
+  const tokens = extractTokens(mode, appearance);
 
   return `
     html[data-mui-color-scheme="${mode}"], html[data-theme="${mode}"], html[data-${mode}] {
@@ -163,8 +196,38 @@ function buildModeRule(mode: PaletteMode): string {
  * The initial server `mode` is emitted first so it wins the SSR first-paint race before
  * hydration; the selectors are mutually exclusive by attribute value, so order does not
  * affect correctness after toggle — only which rule applies during the very first paint.
+ *
+ * When a published appearance row exists, the `--mui-palette-primary-main` token is
+ * overridden with the published per-mode `primaryMain` for **both** emitted modes
+ * (AC-21), so the published brand color paints on first render regardless of which
+ * mode the visitor lands in. The read is cached via `unstable_cache` tag
+ * `"appearance"` (AC-22) and degrades gracefully to the static palette on failure.
  */
-export function buildServerThemeCss(mode: PaletteMode): string {
+export async function buildServerThemeCss(mode: PaletteMode): Promise<string> {
+  const appearance = await fetchPublishedAppearance();
   const otherMode: PaletteMode = mode === "dark" ? "light" : "dark";
-  return `${buildModeRule(mode)} ${buildModeRule(otherMode)}`;
+  return `${buildModeRule(mode, appearance)} ${buildModeRule(otherMode, appearance)}`;
+}
+
+/**
+ * Resolve the SSR initial theme mode from the theme cookie, falling back to
+ * the published `defaultColorScheme` when no cookie preference is set, and
+ * finally to `"dark"` (the pre-task default).
+ *
+ * The cookie takes precedence so the user's explicit mode choice is respected
+ * across navigations. When no cookie is set (first visit, or cookie expired),
+ * the published `defaultColorScheme` drives the initial SSR mode (AC-21) —
+ * this is the "use published value as default mode" gating for the
+ * `server-theme-css` primary-token override.
+ *
+ * The published read goes through {@link fetchPublishedAppearance} (cached,
+ * tag `"appearance"`, try/catch → `null`), so a transient DB/cache failure
+ * degrades to `"dark"` instead of 500-ing the layout.
+ */
+export async function resolveServerThemeMode(cookieThemeValue?: string): Promise<PaletteMode> {
+  if (cookieThemeValue === "light" || cookieThemeValue === "dark") {
+    return cookieThemeValue;
+  }
+  const appearance = await fetchPublishedAppearance();
+  return appearance?.defaultColorScheme ?? "dark";
 }

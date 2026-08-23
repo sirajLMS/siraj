@@ -1,6 +1,8 @@
 "use client";
 
 import { Box } from "@mui/material";
+import { useCustomizeMode } from "@/frontend/common/hooks/useCustomizeMode";
+import { CustomizeOverlay } from "@/frontend/common/views/dashboard/components/customize/CustomizeOverlay";
 import type { DashboardLayoutProps } from "@/frontend/common/views/dashboard/components/dashboardLayoutTypes";
 import { NavbarStaticShell } from "@/frontend/common/views/dashboard/components/navbar/NavbarStaticShell";
 import { DashboardLayoutIsland } from "@/frontend/desktop/views/dashboard/components/dashboardLayoutIsland.desktop";
@@ -23,39 +25,64 @@ export function DashboardLayoutDesktop({
   initialSidebarOpen,
   hideSidebarNavigation = false,
 }: Readonly<DashboardLayoutProps>) {
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
-      <NavbarStaticShell appTitle={appTitle} roleLabel={roleLabel} logoAriaLabel={logoAriaLabel}>
-        <TopNavbarDesktop
-          userName={userName}
-          userEmail={userEmail}
-          userRole={userRole}
-          avatarUrl={avatarUrl}
-          notificationCount={notificationCount}
-        />
-      </NavbarStaticShell>
+  const customizeMode = useCustomizeMode();
 
+  return (
+    <CustomizeOverlay>
       <Box
-        sx={theme => ({
+        sx={{
           display: "flex",
-          flex: 1,
-          minHeight: 0,
-          pt: theme.layout.navbarHeight,
+          flexDirection: "column",
+          minHeight: "100vh",
+          height: "100vh",
+          overflow: "hidden",
           boxSizing: "border-box",
-        })}
+          ...(customizeMode && {
+            paddingTop: "48px",
+            // Push the fixed AppBar (NavbarStaticShell) down below the
+            // 48px CustomizeToolbar so it doesn't overlap. The AppBar's
+            // default `top: 0` (from `.MuiAppBar-positionFixed`) is
+            // overridden here via descendant-selector specificity.
+            "& .MuiAppBar-root": {
+              top: "48px",
+            },
+          }),
+        }}
       >
-        <DashboardLayoutIsland
-          sidebarGroups={sidebarGroups}
-          sidebarItems={sidebarItems}
-          sidebarWidth={sidebarWidth}
-          initialSidebarOpen={initialSidebarOpen}
-          userName={userName}
-          avatarUrl={avatarUrl}
-          hideSidebarNavigation={hideSidebarNavigation}
+        {customizeMode ? <CustomizeOverlay.Toolbar /> : null}
+        <NavbarStaticShell appTitle={appTitle} roleLabel={roleLabel} logoAriaLabel={logoAriaLabel}>
+          <TopNavbarDesktop
+            userName={userName}
+            userEmail={userEmail}
+            userRole={userRole}
+            avatarUrl={avatarUrl}
+            notificationCount={notificationCount}
+          />
+        </NavbarStaticShell>
+
+        <Box
+          sx={theme => ({
+            display: "flex",
+            flex: 1,
+            minHeight: 0,
+            pt: theme.layout.navbarHeight,
+            boxSizing: "border-box",
+          })}
         >
-          {children}
-        </DashboardLayoutIsland>
+          {customizeMode ? <CustomizeOverlay.Sidebar /> : null}
+          <DashboardLayoutIsland
+            sidebarGroups={sidebarGroups}
+            sidebarItems={sidebarItems}
+            sidebarWidth={sidebarWidth}
+            initialSidebarOpen={initialSidebarOpen}
+            userName={userName}
+            avatarUrl={avatarUrl}
+            hideSidebarNavigation={hideSidebarNavigation}
+          >
+            {children}
+          </DashboardLayoutIsland>
+        </Box>
       </Box>
-    </Box>
+    </CustomizeOverlay>
   );
 }

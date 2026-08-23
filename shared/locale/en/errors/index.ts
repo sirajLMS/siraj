@@ -363,6 +363,12 @@ export const errorsEn: ErrorsLabels = {
   session: {
     userIdRequired: "User ID (userId) is required.",
   },
+  appearance: {
+    saveDraftFailed: "Failed to save appearance draft.",
+    publishFailed: "Failed to publish appearance settings.",
+    resetFailed: "Failed to reset appearance draft.",
+    unauthorized: "You are not authorized to manage site appearance.",
+  },
   classSubject,
   leaveQuota,
   classInstance,

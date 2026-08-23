@@ -1,3 +1,4 @@
+import { dashboardSettingsAppearanceAr } from "@/shared/locale/ar/dashboard/settings/appearance";
 import { dashboardSettingsEnvironmentAr } from "@/shared/locale/ar/dashboard/settings/environment";
 import { dashboardSettingsGeneralAr } from "@/shared/locale/ar/dashboard/settings/general";
 import { dashboardSettingsMeetingIntegrationsAr } from "@/shared/locale/ar/dashboard/settings/meeting-integrations";
@@ -55,6 +56,7 @@ export const dashboardSettingsAr: SettingsLabels = {
     siteContent: "محتوى الموقع",
     timezones: "المناطق الزمنية",
     meetingIntegrations: "تكامل الاجتماعات",
+    appearance: "المظهر",
   },
   audit: {
     emptyMessage: "لا توجد سجلات تدقيق تطابق عوامل التصفية الحالية.",
@@ -77,6 +79,7 @@ export const dashboardSettingsAr: SettingsLabels = {
     entityTypes: auditEntityTypes,
     actions: auditActions,
   },
+  appearance: dashboardSettingsAppearanceAr,
   environment: dashboardSettingsEnvironmentAr,
   general: dashboardSettingsGeneralAr,
   meetingIntegrations: dashboardSettingsMeetingIntegrationsAr,

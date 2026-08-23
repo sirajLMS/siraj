@@ -16,5 +16,11 @@
   "chat.permissions.default": "autopilot",
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "always"
-  }
+  },
+  "json.schemas": [
+    {
+      "fileMatch": ["*appearance*.json", ".brand.json"],
+      "url": "./shared/schemas/appearance.schema.json"
+    }
+  ]
 }

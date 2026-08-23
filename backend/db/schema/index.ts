@@ -6,6 +6,7 @@
 // every Drizzle table.
 
 export * from "./__shared__";
+export * from "./appearance";
 export * from "./audit";
 export * from "./auth";
 export * from "./billing";

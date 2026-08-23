@@ -5,8 +5,10 @@ import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 import { logger } from "@/backend/lib/logger";
 import { NEXT_PUBLIC_BASE_URL } from "@/backend/lib/server";
-import { buildServerThemeCss } from "@/frontend/common/lib/server-theme-css";
-import { getThemeFromCookies, THEME_COOKIE_NAME } from "@/frontend/common/lib/theme-detection";
+import { AppearanceSettingsService } from "@/backend/services";
+import type { AppearanceFields } from "@/backend/types";
+import { buildServerThemeCss, resolveServerThemeMode } from "@/frontend/common/lib/server-theme-css";
+import { THEME_COOKIE_NAME } from "@/frontend/common/lib/theme-detection";
 import { LocaleProvider } from "@/frontend/common/providers/LocaleProvider";
 import { NewRelicBrowserAgent } from "@/frontend/common/providers/NewRelicBrowserAgent";
 import MuiProvider from "@/frontend/common/providers/theme/MuiProvider";
@@ -51,24 +53,51 @@ const jetbrainsMono = JetBrains_Mono({
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = getTranslations(locale).commonTranslations;
+  const metadataBase = new URL(NEXT_PUBLIC_BASE_URL);
+
+  // Cached SSR read of the published appearance (tag `"appearance"`,
+  // invalidated on every publish via `revalidateTag` — AC-22). Returns `null`
+  // when no row exists; the caller falls back to translation defaults below.
+  // Wrapped in try/catch so a transient DB/cache failure degrades gracefully to
+  // translations instead of 500-ing every page render (metadata is non-critical).
+  let appearance: AppearanceFields | null = null;
+  try {
+    appearance = await AppearanceSettingsService.getFirstAppearancePublished();
+  } catch (error) {
+    logger.error(
+      `[generateMetadata] appearance read failed; falling back to translations. ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
+  // Resolve brand values: published appearance takes precedence (AC-20);
+  // translations are the fallback when the service returns null or throws.
+  // `siteName` (short brand) maps to `applicationName` / OG `siteName`;
+  // `siteTitle` (full title) maps to `title.default` / OG & twitter `title`.
+  const siteName = appearance?.siteName ?? t.title;
+  const siteTitle = appearance?.siteTitle ?? t.title;
+  const siteDescription = appearance?.siteDescription ?? t.description;
+  const template = appearance ? `%s | ${appearance.siteName}` : t.documentTitleTemplate("%s");
+  const images = appearance?.logoUrl ? [{ url: appearance.logoUrl }] : undefined;
+
   return {
-    metadataBase: new URL(NEXT_PUBLIC_BASE_URL),
-    title: {
-      default: t.title,
-      template: t.documentTitleTemplate("%s"),
-    },
-    description: t.description,
-    applicationName: t.title,
+    metadataBase,
+    title: { default: siteTitle, template },
+    description: siteDescription,
+    applicationName: siteName,
     openGraph: {
-      title: t.title,
-      description: t.description,
-      siteName: t.title,
+      title: siteTitle,
+      description: siteDescription,
+      siteName,
       type: "website",
+      ...(images ? { images } : {}),
     },
     twitter: {
-      card: "summary",
-      title: t.title,
-      description: t.description,
+      card: appearance?.logoUrl ? "summary_large_image" : "summary",
+      title: siteTitle,
+      description: siteDescription,
+      ...(images ? { images } : {}),
     },
   };
 }
@@ -80,7 +109,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get(THEME_COOKIE_NAME);
-  const initialTheme = getThemeFromCookies(themeCookie?.value);
+  // Resolve the SSR initial theme mode: cookie takes precedence; otherwise the
+  // published `defaultColorScheme` is the default mode (AC-21), falling back to
+  // "dark" when no published row exists or the cached read throws.
+  const initialTheme = await resolveServerThemeMode(themeCookie?.value);
 
   logger.info("[RootLayout] Server theme detection", {
     themeCookieRaw: themeCookie?.value ?? null,
@@ -89,7 +121,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   });
 
   const direction = locale === "ar" ? "rtl" : "ltr";
-  const serverThemeCss = buildServerThemeCss(initialTheme);
+  const serverThemeCss = await buildServerThemeCss(initialTheme);
 
   return (
     <html

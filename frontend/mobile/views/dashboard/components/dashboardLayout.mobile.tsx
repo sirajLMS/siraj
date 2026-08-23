@@ -3,15 +3,18 @@
 import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { type ReactNode, useEffect, useRef } from "react";
+import { useCustomizeMode } from "@/frontend/common/hooks/useCustomizeMode";
 import { useFxLiveRefresh } from "@/frontend/common/hooks/useFxLiveRefresh";
 import {
   SidebarShell,
   type TranslatedNavGroup,
   type TranslatedNavItem,
 } from "@/frontend/common/views/dashboard/components/client/SidebarShell";
+import { CustomizeOverlay } from "@/frontend/common/views/dashboard/components/customize/CustomizeOverlay";
 import type { DashboardLayoutProps } from "@/frontend/common/views/dashboard/components/dashboardLayoutTypes";
 import { FxStaleBanner } from "@/frontend/common/views/dashboard/components/FxStaleBanner";
 import {
+  CustomizeButton,
   LanguageSwitcher,
   NavbarChrome,
   NotificationButton,
@@ -104,54 +107,78 @@ export function DashboardLayoutMobile({
   const pathname = usePathname();
   const t = useNavLabels();
   const navLabels = useAppTranslation(Translation.Dashboard.CoreNav);
+  const customizeMode = useCustomizeMode();
   const activeNavKey = getActiveNavKey(pathname, sidebarItems);
   const translatedNavGroups = buildTranslatedNavGroups(sidebarGroups, t);
   const translatedNavItems = buildTranslatedNavItems(sidebarItems, t);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
-      <NavbarChrome
-        roleLabel={roleLabel}
-        leftSlot={hideSidebarNavigation ? null : <MobileMenuButton />}
-        rightSlot={
-          <>
-            <ThemeSwitcher />
-            <LanguageSwitcher />
-            <NotificationButton notificationCount={notificationCount} />
-            <UserMenuButton userName={userName} userEmail={userEmail} avatarUrl={avatarUrl} />
-          </>
-        }
-      />
-
-      {hideSidebarNavigation ? null : (
-        <SidebarShell
-          navGroups={translatedNavGroups}
-          navItems={translatedNavItems}
-          activeKey={activeNavKey}
-          sidebarWidth={sidebarWidth}
-          userName={userName}
-          avatarUrl={avatarUrl}
-          logoutLabel={navLabels.nav.logout}
-          toggleGroupAriaLabel={navLabels.toggleGroupAriaLabel}
-        />
-      )}
-
-      {/* NavbarChrome is position:fixed — offset content like desktop (pt: navbarHeight) */}
+    <CustomizeOverlay>
       <Box
-        sx={theme => ({
+        sx={{
           display: "flex",
           flexDirection: "column",
-          flex: 1,
-          minHeight: 0,
-          minWidth: 0,
-          pt: theme.layout.navbarHeight,
+          minHeight: "100vh",
+          height: "100vh",
+          overflow: "hidden",
           boxSizing: "border-box",
-        })}
+          ...(customizeMode && {
+            paddingTop: "48px",
+            // Push the fixed AppBar (NavbarChrome) down below the
+            // 48px CustomizeToolbar so it doesn't overlap. The AppBar's
+            // default `top: 0` (from `.MuiAppBar-positionFixed`) is
+            // overridden here via descendant-selector specificity.
+            "& .MuiAppBar-root": {
+              top: "48px",
+            },
+          }),
+        }}
       >
-        <MobileMainScrollArea hideBottomNav={hideSidebarNavigation}>{children}</MobileMainScrollArea>
-      </Box>
+        {customizeMode ? <CustomizeOverlay.Toolbar /> : null}
+        <NavbarChrome
+          roleLabel={roleLabel}
+          leftSlot={hideSidebarNavigation ? null : <MobileMenuButton />}
+          rightSlot={
+            <>
+              <CustomizeButton />
+              <ThemeSwitcher />
+              <LanguageSwitcher />
+              <NotificationButton notificationCount={notificationCount} />
+              <UserMenuButton userName={userName} userEmail={userEmail} avatarUrl={avatarUrl} />
+            </>
+          }
+        />
 
-      {hideSidebarNavigation ? null : <BottomNavbarMobile items={bottomNavItems} activeKey={activeNavKey} />}
-    </Box>
+        {hideSidebarNavigation ? null : (
+          <SidebarShell
+            navGroups={translatedNavGroups}
+            navItems={translatedNavItems}
+            activeKey={activeNavKey}
+            sidebarWidth={sidebarWidth}
+            userName={userName}
+            avatarUrl={avatarUrl}
+            logoutLabel={navLabels.nav.logout}
+            toggleGroupAriaLabel={navLabels.toggleGroupAriaLabel}
+          />
+        )}
+
+        {/* NavbarChrome is position:fixed — offset content like desktop (pt: navbarHeight) */}
+        <Box
+          sx={theme => ({
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            minHeight: 0,
+            minWidth: 0,
+            pt: theme.layout.navbarHeight,
+            boxSizing: "border-box",
+          })}
+        >
+          <MobileMainScrollArea hideBottomNav={hideSidebarNavigation}>{children}</MobileMainScrollArea>
+        </Box>
+
+        {hideSidebarNavigation ? null : <BottomNavbarMobile items={bottomNavItems} activeKey={activeNavKey} />}
+      </Box>
+    </CustomizeOverlay>
   );
 }

@@ -20,6 +20,7 @@ export const dashboardCoreLayoutEn: DashboardCoreLayoutLabels = {
   pageNotFoundTitle: "Page not found",
   pageNotFoundDescription: "The page you are looking for does not exist or you may not have access to it.",
   pageNotFoundBackToDashboard: "Back to dashboard",
+  customizeButton: "Customize",
 
   // ─── Interpolated → typed functions ────────────────────────────────
   welcomeUser: name => `Welcome ${name}`,

@@ -8,7 +8,8 @@ export type SettingsTabId =
   | "audit"
   | "siteContent"
   | "timezones"
-  | "meetingIntegrations";
+  | "meetingIntegrations"
+  | "appearance";
 
 export type SettingsTabLabelKey = keyof SettingsLabels["tabs"];
 

@@ -128,6 +128,7 @@ export const PAGE_PERMISSIONS = {
     AppPermission.SettingsEditMeetingIntegrations,
     AppPermission.SettingsView,
   ] as PagePermissions,
+  settingsAppearance: [AppPermission.SettingsAppearanceManage, AppPermission.SettingsView] as PagePermissions,
   // Phase 2 nav additions for previously-orphaned routes.
   classesPage: [AppPermission.ScheduleManageRecurring] as PagePermissions,
   recurringSchedules: [AppPermission.ScheduleManageRecurring] as PagePermissions,

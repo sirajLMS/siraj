@@ -238,6 +238,7 @@ enum AppPermission {
   SESSION_UPDATE_STATUS_LEAVE
   SESSION_UPDATE_STATUS_START
   SESSION_VIEW_DETAILS
+  SETTINGS_APPEARANCE_MANAGE
   SETTINGS_AUDIT_VIEW
   SETTINGS_EDIT_ENV
   SETTINGS_EDIT_GENERAL
@@ -331,6 +332,66 @@ enum AppPermission {
   WHATSAPP_CONFIG_MANAGE
   WHATSAPP_TEMPLATES_MANAGE
   WHATSAPP_VIEW
+}
+
+"""A pair of brand colors (primary + secondary) for a single mode."""
+type AppearanceColorPair {
+  primaryMain: String
+  secondaryMain: String
+}
+
+"""Input pair of brand colors (primary + secondary) for a single mode."""
+input AppearanceColorPairInput {
+  primaryMain: String!
+  secondaryMain: String!
+}
+
+"""Per-mode brand colors (light + dark)."""
+type AppearanceColors {
+  dark: AppearanceColorPair
+  light: AppearanceColorPair
+}
+
+"""Input for per-mode brand colors (light + dark)."""
+input AppearanceColorsInput {
+  dark: AppearanceColorPairInput!
+  light: AppearanceColorPairInput!
+}
+
+"""Input for the saveAppearanceDraft mutation (full draft field bundle)."""
+input AppearanceDraftInput {
+  colors: AppearanceColorsInput!
+  defaultColorScheme: String!
+  logoUrl: String
+  siteDescription: String!
+  siteName: String!
+  siteTitle: String!
+}
+
+"""Full appearance field bundle (per-mode colors + scalar brand fields)."""
+type AppearanceFields {
+  colors: AppearanceColors
+  defaultColorScheme: String
+  logoUrl: String
+  siteDescription: String
+  siteName: String
+  siteTitle: String
+}
+
+"""Site appearance settings (single global row, no tenant scoping)."""
+type AppearanceSettings {
+  createdAt: DateTime
+  defaultColorScheme: String
+  draftFields: AppearanceFields
+  id: String
+  logoUrl: String
+  primaryMain: String
+  secondaryMain: String
+  siteDescription: String
+  siteName: String
+  siteTitle: String
+  updatedAt: DateTime
+  updatedByUserId: String
 }
 
 input AssignPermissionGroupToUserInput {
@@ -2491,6 +2552,11 @@ type Mutation {
   overrideClassInstanceRate(classInstanceId: ID!, rateAmount: String, rateCurrency: CurrencyCode): ClassInstanceDetail
   partiallyUpdateStudent(input: PartialStudentUpdateInput!): Student
   prepareUpload(input: UploadPreparationInput!): UploadPreparation
+
+  """
+  Publishes the draft — copies `draftFields` into the published columns (AC-9) and invalidates the appearance SSR cache (AC-22). Requires SETTINGS_APPEARANCE_MANAGE. Pass `expectedUpdatedAt` for optimistic concurrency control (AC-33).
+  """
+  publishAppearance(expectedUpdatedAt: String): AppearanceSettings
   reactivateParent(parentId: String!): ReactivateParentResult
   reassignStudentTeacher(expectedVersion: Int, newTeacherId: String!, studentId: String!): ReassignStudentTeacherResult
 
@@ -2509,6 +2575,11 @@ type Mutation {
   renameFile(input: FileRenameInput!): FileOperationResult
   rescheduleClass(classInstanceId: ID!, input: RescheduleClassInput!): ClassInstanceDetail
   resendClassNotifications(classInstanceId: String!): SupportRequestResult
+
+  """
+  Resets the draft — sets `draftFields` to match the published columns (discard unpublished draft changes). Requires SETTINGS_APPEARANCE_MANAGE.
+  """
+  resetAppearanceDraft: AppearanceSettings
   resetClass(classInstanceId: ID!): Boolean
 
   """Creates a response to an existing complaint (admin only)."""
@@ -2517,6 +2588,11 @@ type Mutation {
   """Responds to a suggestion with an admin text response (admin only)."""
   respondToSuggestion(input: RespondToSuggestionInput!): Suggestion
   revokePermissionGroupFromUser(input: RevokePermissionGroupFromUserInput!): Boolean
+
+  """
+  Saves a draft — replaces `draftFields` with `input`. Published columns are preserved unchanged (AC-8). Requires SETTINGS_APPEARANCE_MANAGE. Pass `expectedUpdatedAt` for optimistic concurrency control (AC-33).
+  """
+  saveAppearanceDraft(expectedUpdatedAt: String, input: AppearanceDraftInput!): AppearanceSettings
   sendPaymentReminder(studentId: String!): SendPaymentReminderResult
   setDefaultClassMeetingConfig(id: ID!): ClassMeetingConfig
   setDefaultMeetingConfig(id: ID!): UserMeetingConfig
@@ -3191,6 +3267,11 @@ type Query {
 
   """Returns the paginated admin suggestion list with metrics."""
   adminSuggestions(filter: SuggestionFilter!): AdminSuggestionResult
+
+  """
+  Returns the single `appearance_settings` row (or null if unseeded). Pass `draft: true` to indicate an admin draft-view request — requires SETTINGS_APPEARANCE_MANAGE. The service always returns the full row (including draftFields); `draft` is a permission-gate marker.
+  """
+  appearanceSettings(draft: Boolean = false): AppearanceSettings
 
   """Find available class slots for a student on a given date"""
   availableClassSlots(date: DateTime!, durationMinutes: Int, studentId: ID!, teacherId: ID): [AvailableClassSlot!]

@@ -1,3 +1,4 @@
+export * from "./appearance.types";
 export * from "./audit";
 export * from "./auth";
 export * from "./billing";

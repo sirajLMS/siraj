@@ -1,0 +1,270 @@
+"use client";
+
+import { Box } from "@mui/material";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCustomizeMode } from "@/frontend/common/hooks/useCustomizeMode";
+import type { AppearancePreset } from "@/frontend/common/providers/theme/presets";
+import { useAppearancePreviewStore } from "@/frontend/common/stores/appearancePreviewStore";
+import { AppearanceErrorBoundary } from "@/frontend/common/views/dashboard/components/customize/AppearanceErrorBoundary";
+import { ColorField } from "@/frontend/common/views/dashboard/components/customize/ColorEditorSection";
+import { CustomizeSidebar } from "@/frontend/common/views/dashboard/components/customize/CustomizeSidebar";
+import { CustomizeToolbar } from "@/frontend/common/views/dashboard/components/customize/CustomizeToolbar";
+import {
+  CustomizeOverlayContext,
+  type CustomizeOverlayContextValue,
+  OVERLAY_SURFACE_ATTR,
+} from "@/frontend/common/views/dashboard/components/customize/customizeOverlayContext";
+import { PresetThemeSection } from "@/frontend/common/views/dashboard/components/customize/PresetThemeSection";
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea, input:not([type="hidden"]), select, [tabindex]:not([tabindex="-1"])';
+
+function isFocusable(el: Element): el is HTMLElement {
+  return el instanceof HTMLElement;
+}
+
+function listOverlayFocusables(): HTMLElement[] {
+  if (typeof document === "undefined") return [];
+  const surfaces = document.querySelectorAll<HTMLElement>(`[${OVERLAY_SURFACE_ATTR}="true"]`);
+  const acc: HTMLElement[] = [];
+  surfaces.forEach(surface => {
+    surface.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR).forEach(el => {
+      if (isFocusable(el)) acc.push(el);
+    });
+  });
+  return acc;
+}
+
+/**
+ * Props for {@link CustomizeOverlay}.
+ *
+ * `children` is rendered inside an `AppearanceErrorBoundary` (when
+ * customize mode is on) and a React context that exposes the polite
+ * `aria-live` announce function. The overlay always renders children —
+ * when customize mode is off, it just provides a no-op announce context
+ * so descendants (e.g. `CustomizeToolbar`) can be safely mounted before
+ * the overlay opens.
+ */
+export interface CustomizeOverlayProps {
+  readonly children: ReactNode;
+}
+
+/**
+ * Site-appearance customizer overlay root (Task 9.9, AC-35).
+ *
+ * Compound composition: the overlay exposes static sub-components
+ * (`Toolbar`, `Sidebar`, `PresetGrid`, `ColorField`) as thin wrappers
+ * around the existing editor components so call sites compose like:
+ *
+ * ```tsx
+ * <CustomizeOverlay>
+ *   {customizeMode ? <CustomizeOverlay.Toolbar /> : null}
+ *   {customizeMode ? <CustomizeOverlay.Sidebar /> : null}
+ * </CustomizeOverlay>
+ * ```
+ *
+ * The wrapper adds three cross-cutting concerns that the editor
+ * components themselves don't own:
+ *
+ *  1. **Focus trapping + restoration** — on enter, the
+ *     previously-focused element is captured into `previousFocusRef`.
+ *     While open, Tab / Shift+Tab cycles focus within the overlay
+ *     surfaces (toolbar + sidebar). On `Escape`, focus is restored to
+ *     the captured element and `?customize=1` is stripped from the URL.
+ *  2. **`aria-live="polite"` announcements** — a visually-hidden region
+ *     mirrors short status messages ("Draft saved", "Published") for
+ *     assistive tech. The toolbar writes via `useCustomizeOverlayAnnounce`.
+ *  3. **Error boundary** — when customize mode is on, wraps children in
+ *     `AppearanceErrorBoundary` so a render-time crash in any editor
+ *     surfaces a "Reset & Exit" fallback that clears the preview store
+ *     and closes the overlay. When customize mode is off, no boundary —
+ *     the dashboard's own error boundary remains in effect.
+ *
+ * Mounting: the dashboard layouts (desktop + mobile) render
+ * `<CustomizeOverlay>` once at the top of the dashboard tree, wrapping
+ * the entire tree so the toolbar (fixed top) and sidebar (in-flow flex
+ * item) both live inside the overlay's context.
+ */
+export function CustomizeOverlay({ children }: Readonly<CustomizeOverlayProps>) {
+  const customizeMode = useCustomizeMode();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+  const resetToDefaults = useAppearancePreviewStore(s => s.resetToDefaults);
+
+  const announce = useCallback(
+    (message: string) => {
+      if (!customizeMode) return;
+      setAnnouncement(message);
+    },
+    [customizeMode]
+  );
+
+  const closeOverlay = useCallback(() => {
+    if (!customizeMode) return;
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    params.delete("customize");
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  }, [customizeMode, router, pathname, searchParams]);
+
+  const handleReset = useCallback(() => {
+    resetToDefaults();
+    closeOverlay();
+  }, [resetToDefaults, closeOverlay]);
+
+  // Capture previously-focused element on enter; restore on exit.
+  useEffect(() => {
+    if (!customizeMode) return undefined;
+    const previouslyFocused = document.activeElement;
+    previousFocusRef.current = previouslyFocused instanceof HTMLElement ? previouslyFocused : null;
+    return () => {
+      const target = previousFocusRef.current;
+      if (target) {
+        target.focus();
+      }
+    };
+  }, [customizeMode]);
+
+  // Escape key: close overlay + restore focus (AC-35).
+  useEffect(() => {
+    if (!customizeMode) return undefined;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      const target = previousFocusRef.current;
+      if (target) {
+        target.focus();
+      }
+      closeOverlay();
+    };
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [customizeMode, closeOverlay]);
+
+  // Tab focus trap: cycle within overlay surfaces only.
+  useEffect(() => {
+    if (!customizeMode) return undefined;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      const focusables = listOverlayFocusables();
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+      if (!(active instanceof HTMLElement)) return;
+      const activeInOverlay = focusables.includes(active);
+      if (event.shiftKey) {
+        if (!activeInOverlay || active === first) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else if (active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => document.removeEventListener("keydown", handleKeyDown, true);
+  }, [customizeMode]);
+
+  const contextValue = useMemo<CustomizeOverlayContextValue>(() => ({ announce }), [announce]);
+
+  const inner = (
+    <CustomizeOverlayContext.Provider value={contextValue}>
+      {children}
+      {customizeMode ? (
+        <Box
+          component="span"
+          aria-live="polite"
+          aria-atomic="true"
+          sx={{
+            position: "absolute",
+            width: 1,
+            height: 1,
+            margin: -1,
+            padding: 0,
+            border: 0,
+            overflow: "hidden",
+            clip: "rect(0 0 0 0)",
+            clipPath: "inset(50%)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {announcement}
+        </Box>
+      ) : null}
+    </CustomizeOverlayContext.Provider>
+  );
+
+  if (!customizeMode) return inner;
+
+  return <AppearanceErrorBoundary onReset={handleReset}>{inner}</AppearanceErrorBoundary>;
+}
+
+/**
+ * Thin wrapper around `CustomizeToolbar` that tags the surface with
+ * `data-customize-overlay-surface="true"` so the parent overlay's Tab
+ * focus-trap handler enumerates its focusable descendants.
+ *
+ * `display: contents` keeps the wrapper out of the box model so the
+ * toolbar's existing `position: fixed` styling is unaffected.
+ */
+CustomizeOverlay.Toolbar = function CustomizeOverlayToolbar() {
+  return (
+    <Box component="span" data-customize-overlay-surface="true" sx={{ display: "contents" }}>
+      <CustomizeToolbar />
+    </Box>
+  );
+};
+
+/**
+ * Thin wrapper around `CustomizeSidebar` — same focus-surface tagging
+ * as `Toolbar`. The sidebar is an in-flow flex item on desktop; the
+ * `display: contents` wrapper preserves that layout.
+ */
+CustomizeOverlay.Sidebar = function CustomizeOverlaySidebar() {
+  return (
+    <Box component="span" data-customize-overlay-surface="true" sx={{ display: "contents" }}>
+      <CustomizeSidebar />
+    </Box>
+  );
+};
+
+/**
+ * Thin wrapper around `PresetThemeSection`. Exposed for composition
+ * symmetry — consumers can mount presets in isolation (e.g. inside a
+ * future mobile bottom sheet) without importing the sidebar.
+ */
+CustomizeOverlay.PresetGrid = function CustomizeOverlayPresetGrid() {
+  return <PresetThemeSection />;
+};
+
+interface CustomizeOverlayColorFieldProps {
+  readonly label: string;
+  readonly hex: string;
+  readonly onChange: (hex: string) => void;
+}
+
+/**
+ * Thin wrapper around `ColorField` from `ColorEditorSection`. Re-exports
+ * the picker + hex-text combo as an overlay compound member so external
+ * compositions (e.g. a future "quick colors" popover) can mount it
+ * without pulling the whole `ColorEditorSection` (which also renders the
+ * Light/Dark `ToggleButtonGroup`).
+ */
+CustomizeOverlay.ColorField = function CustomizeOverlayColorField({
+  label,
+  hex,
+  onChange,
+}: Readonly<CustomizeOverlayColorFieldProps>) {
+  return <ColorField label={label} hex={hex} onChange={onChange} />;
+};
+
+// Re-export `AppearancePreset` type so consumers of the compound API can
+// reference the preset shape without a separate import from the
+// providers package. (Type-only re-export — no runtime impact.)
+export type { AppearancePreset };

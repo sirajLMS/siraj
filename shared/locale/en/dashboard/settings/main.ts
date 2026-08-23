@@ -1,3 +1,4 @@
+import { dashboardSettingsAppearanceEn } from "@/shared/locale/en/dashboard/settings/appearance";
 import { dashboardSettingsEnvironmentEn } from "@/shared/locale/en/dashboard/settings/environment";
 import { dashboardSettingsGeneralEn } from "@/shared/locale/en/dashboard/settings/general";
 import { dashboardSettingsMeetingIntegrationsEn } from "@/shared/locale/en/dashboard/settings/meeting-integrations";
@@ -55,6 +56,7 @@ export const dashboardSettingsEn: SettingsLabels = {
     siteContent: "Site Content",
     timezones: "Timezones",
     meetingIntegrations: "Meeting Integrations",
+    appearance: "Appearance",
   },
   audit: {
     emptyMessage: "No audit log entries match the current filters.",
@@ -77,6 +79,7 @@ export const dashboardSettingsEn: SettingsLabels = {
     entityTypes: auditEntityTypes,
     actions: auditActions,
   },
+  appearance: dashboardSettingsAppearanceEn,
   environment: dashboardSettingsEnvironmentEn,
   general: dashboardSettingsGeneralEn,
   meetingIntegrations: dashboardSettingsMeetingIntegrationsEn,

@@ -21,8 +21,9 @@ import {
   Tooltip,
 } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { type RefObject, useEffect, useRef, useSyncExternalStore } from "react";
+import { type RefObject, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { UserAvatar } from "@/frontend/common/components/ui/avatar/UserAvatar";
+import { useCustomizeMode } from "@/frontend/common/hooks/useCustomizeMode";
 import { useLayoutStore } from "@/frontend/common/stores/layoutStore";
 import { mergeSx } from "@/frontend/common/utils/sx/mergeSx";
 import { NavIcon } from "@/frontend/common/views/dashboard/config/navIconRegistry";
@@ -666,17 +667,26 @@ function SidebarDesktop({
   readonly logoutLabel: string;
   readonly toggleGroupAriaLabel: (label: string) => string;
 }) {
-  const collapsedWidth = "80px";
+  const customizeMode = useCustomizeMode();
+  const collapsedWidth = customizeMode ? "64px" : "80px";
   const toggleSidebar = useLayoutStore(state => state.toggleSidebar);
   const sidebarOpen = useSyncExternalStore(
     useLayoutStore.subscribe,
     () => useLayoutStore.getState().sidebarOpen,
     () => initialSidebarOpen
   );
-  const isCollapsed = !sidebarOpen;
+  const [isHovered, setIsHovered] = useState(false);
+  // In customize mode, force-collapse to icon-only (64px) and expand on
+  // hover. When not in customize mode, respect the user's sidebarOpen
+  // preference (persisted via layoutStore). State is automatically restored
+  // on exit because customizeMode=false falls back to !sidebarOpen without
+  // mutating the store.
+  const isCollapsed = customizeMode ? !isHovered : !sidebarOpen;
 
   return (
     <Box
+      onMouseEnter={customizeMode ? () => setIsHovered(true) : undefined}
+      onMouseLeave={customizeMode ? () => setIsHovered(false) : undefined}
       sx={(theme: Theme) => ({
         display: { xs: "none", md: "flex" },
         flexDirection: "column",
@@ -703,63 +713,65 @@ function SidebarDesktop({
         toggleGroupAriaLabel={toggleGroupAriaLabel}
       />
 
-      <Box
-        onClick={toggleSidebar}
-        sx={(theme: Theme) => ({
-          position: "absolute",
-          insetInlineEnd: 0,
-          top: 0,
-          bottom: 0,
-          width: "8px",
-          cursor: "pointer",
-          transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
-          "&:hover": {
-            width: "12px",
-            backgroundColor: "var(--mui-palette-background-paper)",
-            "& .toggle-button": {
-              opacity: 1,
-              transform: "scale(1)",
-            },
-          },
-        })}
-      >
-        <IconButton
-          className="toggle-button"
+      {customizeMode ? null : (
+        <Box
+          onClick={toggleSidebar}
           sx={(theme: Theme) => ({
             position: "absolute",
-            top: "50%",
-            insetInlineEnd: "-16px",
-            transform: "translateY(-50%) scale(0.8)",
-            opacity: 0,
+            insetInlineEnd: 0,
+            top: 0,
+            bottom: 0,
+            width: "8px",
+            cursor: "pointer",
             transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
-            backgroundColor: "var(--mui-palette-background-paper)",
-            border: "1px solid var(--mui-palette-border-light)",
-            width: "32px",
-            height: "32px",
-            color: "var(--mui-palette-onSurface)",
             "&:hover": {
+              width: "12px",
               backgroundColor: "var(--mui-palette-background-paper)",
-              borderColor: "var(--mui-palette-border-light)",
+              "& .toggle-button": {
+                opacity: 1,
+                transform: "scale(1)",
+              },
             },
           })}
         >
-          {isCollapsed ? (
-            <ChevronRight
-              fontSize="small"
-              sx={theme => ({
-                transform: theme.direction === "rtl" ? " scaleX(-1)" : "scaleX(1)",
-              })}
-            />
-          ) : (
-            <ChevronLeft
-              fontSize="small"
-              sx={theme => ({
-                transform: theme.direction === "rtl" ? " scaleX(-1)" : "scaleX(1)",
-              })}
-            />
-          )}
-        </IconButton>
-      </Box>
+          <IconButton
+            className="toggle-button"
+            sx={(theme: Theme) => ({
+              position: "absolute",
+              top: "50%",
+              insetInlineEnd: "-16px",
+              transform: "translateY(-50%) scale(0.8)",
+              opacity: 0,
+              transition: theme.transitions.create("all", { duration: 200, easing: "ease" }),
+              backgroundColor: "var(--mui-palette-background-paper)",
+              border: "1px solid var(--mui-palette-border-light)",
+              width: "32px",
+              height: "32px",
+              color: "var(--mui-palette-onSurface)",
+              "&:hover": {
+                backgroundColor: "var(--mui-palette-background-paper)",
+                borderColor: "var(--mui-palette-border-light)",
+              },
+            })}
+          >
+            {isCollapsed ? (
+              <ChevronRight
+                fontSize="small"
+                sx={theme => ({
+                  transform: theme.direction === "rtl" ? " scaleX(-1)" : "scaleX(1)",
+                })}
+              />
+            ) : (
+              <ChevronLeft
+                fontSize="small"
+                sx={theme => ({
+                  transform: theme.direction === "rtl" ? " scaleX(-1)" : "scaleX(1)",
+                })}
+              />
+            )}
+          </IconButton>
+        </Box>
+      )}
     </Box>
   );
 }

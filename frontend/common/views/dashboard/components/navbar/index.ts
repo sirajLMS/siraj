@@ -1,3 +1,4 @@
+export * from "./CustomizeButton";
 export * from "./LanguageSwitcher";
 export * from "./NavbarChrome";
 export * from "./NotificationButton";

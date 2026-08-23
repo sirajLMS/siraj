@@ -362,6 +362,12 @@ export const errorsAr: ErrorsLabels = {
   session: {
     userIdRequired: "معرف المستخدم (userId) مطلوب.",
   },
+  appearance: {
+    saveDraftFailed: "فشل حفظ مسودة المظهر.",
+    publishFailed: "فشل نشر إعدادات المظهر.",
+    resetFailed: "فشل إعادة تعيين مسودة المظهر.",
+    unauthorized: "ليس لديك صلاحية لإدارة مظهر الموقع.",
+  },
   classSubject,
   leaveQuota,
   classInstance,

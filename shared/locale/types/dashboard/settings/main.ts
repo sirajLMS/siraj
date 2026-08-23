@@ -1,3 +1,4 @@
+import type { SettingsAppearanceTabLabels } from "@/shared/locale/types/dashboard/settings/appearance";
 import type { SettingsEnvironmentLabels } from "@/shared/locale/types/dashboard/settings/environment";
 import type { SettingsGeneralTabLabels } from "@/shared/locale/types/dashboard/settings/general";
 import type { SettingsMeetingIntegrationsLabels } from "@/shared/locale/types/dashboard/settings/meeting-integrations";
@@ -40,8 +41,10 @@ export interface SettingsLabels {
     readonly siteContent: string;
     readonly timezones: string;
     readonly meetingIntegrations: string;
+    readonly appearance: string;
   };
   readonly audit: SettingsAuditLabels;
+  readonly appearance: SettingsAppearanceTabLabels;
   readonly environment: SettingsEnvironmentLabels;
   readonly general: SettingsGeneralTabLabels;
   readonly meetingIntegrations: SettingsMeetingIntegrationsLabels;

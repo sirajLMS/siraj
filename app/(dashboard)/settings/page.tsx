@@ -19,6 +19,7 @@ export default withPageAuth(
     AppPermission.SETTINGS_EDIT_SESSION,
     AppPermission.SETTINGS_AUDIT_VIEW,
     AppPermission.SETTINGS_SITE_CONTENT_MANAGE,
+    AppPermission.SETTINGS_APPEARANCE_MANAGE,
     AppPermission.SETTINGS_TIMEZONES_VIEW,
   ],
   async () => {

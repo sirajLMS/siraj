@@ -37,6 +37,7 @@ export type EnvConfigCategory =
   | "meeting"
   | "billing"
   | "whatsapp"
+  | "branding"
   | "general"
   | "cron";
 
@@ -675,6 +676,32 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
     isSecret: true,
     excludeFromDb: true,
     serverOnly: true,
+  },
+
+  // ---------------------------------------------------------------------------
+  // Branding & Appearance (AC-30)
+  // ---------------------------------------------------------------------------
+  {
+    key: "NEXT_PUBLIC_APP_BRANDING",
+    category: "branding",
+    displayStrategy: "plain",
+    description: {
+      en: "JSON string of default appearance fields (colors, logo, site name/title/description, default color scheme). Parsed server-side at runtime as the tier-4 fallback when no DB row exists (AC-26). DB override applies at request time — NOT build-time-inlined into client bundles.",
+      ar: "سلسلة JSON لحقول المظهر الافتراضية (الألوان، الشعار، اسم/عنوان/وصف الموقع، نظام الألوان الافتراضي). تُحلَّل من جهة الخادم وقت التشغيل كطبقة احتياطية رابعة عندما لا يوجد صف في قاعدة البيانات (AC-26). تجاوز قاعدة البيانات يُطبَّق وقت الطلب — وليس مُضمَّنًا في حزم العميل وقت البناء.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
+  {
+    key: "APP_THEME_PRESET",
+    category: "branding",
+    displayStrategy: "plain",
+    description: {
+      en: "Built-in preset theme ID (e.g. emerald / ocean / sunset / rose / indigo / slate). Applied server-side at runtime as the preset-theme fallback (decision §14). DB override applies at request time.",
+      ar: "معرّف سمة جاهزة مدمجة (مثل emerald / ocean / sunset / rose / indigo / slate). تُطبَّق من جهة الخادم وقت التشغيل كطبقة احتياطية للسمات الجاهزة (القرار §14). تجاوز قاعدة البيانات يُطبَّق وقت الطلب.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
   },
 
   // ---------------------------------------------------------------------------

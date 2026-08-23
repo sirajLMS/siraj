@@ -27,10 +27,14 @@
  *   Validates the key against the registry, rejects `excludeFromDb` keys,
  *   persists via `SystemSettingsRepository.upsertSetting` under `env::<key>`,
  *   and invalidates the resolver cache so the new value is picked up.
+ *   For branding keys (`NEXT_PUBLIC_APP_BRANDING` / `APP_THEME_PRESET`) it ALSO
+ *   invalidates the SSR appearance cache (AC-30) so the next render picks up
+ *   the new branding/preset value.
  *
  * ── Delete path — `deleteEnvConfigOverride(key)` ──
  *   Validates the key, removes the DB override row, and invalidates the
- *   resolver cache.
+ *   resolver cache. For branding keys it ALSO invalidates the SSR appearance
+ *   cache (AC-30) so the next render falls back to `process.env` for branding.
  *
  * ── List path — `listEnvConfigEntries()` ──
  *   Walks DB-eligible `ENV_CONFIG_KEYS` and consults `system_settings` for a DB
@@ -55,6 +59,7 @@ import {
   isEnvConfigKeyExposedInSettings,
 } from "@/backend/lib/env-config-keys";
 import { logger } from "@/backend/lib/logger";
+import { revalidateAppearanceCache } from "@/backend/services/appearance/appearance-settings.service";
 import { AuditService } from "@/backend/services/system/audit.service";
 import type {
   CreateAuditLogInput,
@@ -76,6 +81,38 @@ const ENV_SETTING_KEY_PREFIX = "env::";
 /** Returns the DB storage key for an env var (applies the `env::` prefix). */
 function toDbKey(envKey: string): string {
   return `${ENV_SETTING_KEY_PREFIX}${envKey}`;
+}
+
+/**
+ * Branding env-config keys whose override mutations must also invalidate the SSR
+ * appearance cache (AC-30). When an admin overrides one of these via the
+ * Settings → Environment Config tab, the cached published-appearance read
+ * (`getFirstAppearancePublished`) must be re-validated so the next SSR pass picks
+ * up the new branding/preset value.
+ */
+const BRANDING_ENV_KEYS: ReadonlySet<string> = new Set(["NEXT_PUBLIC_APP_BRANDING", "APP_THEME_PRESET"]);
+
+/**
+ * Best-effort appearance-cache invalidation for branding env-config keys (AC-30).
+ *
+ * `revalidateAppearanceCache` calls `next/cache.revalidateTag("appearance", "max")`.
+ * Wrapped in try/catch so a failure in the cache layer never blocks the env-config
+ * write — the env-config cache itself is already invalidated by the caller, so the
+ * next read will at worst pick up the new value on the next SSR pass.
+ */
+function maybeInvalidateAppearanceCache(envKey: string): void {
+  if (!BRANDING_ENV_KEYS.has(envKey)) {
+    return;
+  }
+  try {
+    revalidateAppearanceCache();
+  } catch (error) {
+    logger.warn(
+      `env-config-service: failed to invalidate appearance cache after override for key "${envKey}". ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
 }
 
 /** Reads an env var from `process.env`, treating empty string as unset. */
@@ -545,6 +582,7 @@ const VALID_ENTRY_CATEGORIES: ReadonlySet<string> = new Set([
   "meeting",
   "billing",
   "whatsapp",
+  "branding",
   "general",
 ]);
 
@@ -621,7 +659,9 @@ export async function listEnvConfigEntries(): Promise<EnvConfigEntry[]> {
  * (which by contract cannot be persisted in `system_settings`).
  *
  * After a successful upsert, invalidates the resolver cache for the key so
- * the new value is picked up on the next read.
+ * the new value is picked up on the next read. For branding keys
+ * (`NEXT_PUBLIC_APP_BRANDING` / `APP_THEME_PRESET`) it ALSO invalidates the
+ * SSR appearance cache (AC-30) — see {@link maybeInvalidateAppearanceCache}.
  */
 export async function upsertEnvConfigOverride(input: EnvConfigUpsertInput): Promise<EnvConfigUpsertReturnType> {
   const descriptor = getSettingsExposedDescriptor(input.key);
@@ -646,6 +686,11 @@ export async function upsertEnvConfigOverride(input: EnvConfigUpsertInput): Prom
 
   invalidateEnvConfigCache(input.key);
 
+  // AC-30 — when a branding env-config key (NEXT_PUBLIC_APP_BRANDING / APP_THEME_PRESET)
+  // is overridden, also invalidate the SSR appearance cache so the next render picks up
+  // the new branding/preset value. Best-effort: failure here does not roll back the write.
+  maybeInvalidateAppearanceCache(input.key);
+
   return {
     key: input.key,
     source: "db",
@@ -660,7 +705,9 @@ export async function upsertEnvConfigOverride(input: EnvConfigUpsertInput): Prom
  * Delete the DB override for an env-config key.
  *
  * Rejects keys flagged `excludeFromDb`. After deletion, invalidates the
- * resolver cache so the next read falls back to `process.env`.
+ * resolver cache so the next read falls back to `process.env`. For branding
+ * keys (`NEXT_PUBLIC_APP_BRANDING` / `APP_THEME_PRESET`) it ALSO invalidates
+ * the SSR appearance cache (AC-30) — see {@link maybeInvalidateAppearanceCache}.
  */
 export async function deleteEnvConfigOverride(key: string): Promise<EnvConfigDeleteReturnType> {
   const descriptor = getSettingsExposedDescriptor(key);
@@ -685,6 +732,11 @@ export async function deleteEnvConfigOverride(key: string): Promise<EnvConfigDel
 
   await SystemSettingsRepository.deleteSetting(dbKey);
   invalidateEnvConfigCache(key);
+
+  // AC-30 — when a branding env-config key override is removed, the SSR appearance
+  // cache must also be invalidated so the next render falls back to process.env (or
+  // the appearance_settings DB row) for branding/preset resolution.
+  maybeInvalidateAppearanceCache(key);
 
   const envFallback = readFromProcessEnv(key);
   return {

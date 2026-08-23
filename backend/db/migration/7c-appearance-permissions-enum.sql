@@ -1,0 +1,21 @@
+-- Migration: Appearance (site branding) permissions — enum addition (Phase 1)
+-- Adds `settings.appearance_manage` to the `app_permission` PG enum so the
+-- companion data migration `7d-appearance-permissions-data.sql` can INSERT it
+-- into `permissions.key` (which is typed `app_permission` via
+-- `appPermissionEnum("key")` in backend/db/schema/permissions/permissions.ts,
+-- NOT plain text).
+--
+-- `ADD VALUE IF NOT EXISTS` is natively idempotent; no EXCEPTION block is needed.
+-- (A DO $$ ... EXCEPTION block would require valid PL/pgSQL condition names —
+--  duplicate_value / object_not_string are not, and the IF NOT EXISTS guard
+--  makes swallow-on-duplicate unnecessary.)
+--
+-- PostgreSQL `check_safe_enum_use` forbids using a freshly-added enum value
+-- inside the same transaction that added it, so this MUST be a separate
+-- drizzle migration folder (separate transaction) from the data INSERT.
+-- The auto-bundler in backend/db/scripts/applyCustomMigrations.ts puts each
+-- custom SQL file into its own drizzle folder, so naming this file
+-- `7c-...-enum.sql` and the data file `7d-...-data.sql` guarantees the enum
+-- folder (alphabetically earlier) is applied before the data folder.
+
+ALTER TYPE "app_permission" ADD VALUE IF NOT EXISTS 'settings.appearance_manage';

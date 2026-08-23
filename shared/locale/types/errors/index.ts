@@ -464,6 +464,20 @@ export interface FxErrors {
 }
 
 /**
+ * AppearanceErrors — site appearance (branding) mutation errors.
+ *
+ * Surfaced when `saveAppearanceDraft`, `publishAppearance`, or
+ * `resetAppearanceDraft` GraphQL mutations fail, or when the caller lacks the
+ * `SETTINGS_APPEARANCE_MANAGE` permission (AC-7, AC-24).
+ */
+export interface AppearanceErrors {
+  readonly saveDraftFailed: string;
+  readonly publishFailed: string;
+  readonly resetFailed: string;
+  readonly unauthorized: string;
+}
+
+/**
  * ErrorsLabels — the top-level errors namespace.
  * Only the subset needed by the login GraphQL mutation is defined here.
  * Grow this interface as more errors are migrated.
@@ -503,6 +517,7 @@ export interface ErrorsLabels
   readonly classSubject: ClassSubjectErrors;
   readonly leaveQuota: LeaveQuotaErrors;
   readonly classInstance: ClassInstanceErrors;
+  readonly appearance: AppearanceErrors;
   // ─── Top-level API-facing strings ──────────────────────────────────
   readonly rateLimitExceeded: string;
   readonly duplicateRequest: string;

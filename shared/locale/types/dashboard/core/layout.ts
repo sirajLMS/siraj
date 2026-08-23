@@ -24,6 +24,7 @@ export interface DashboardCoreLayoutLabels {
   readonly pageNotFoundTitle: string;
   readonly pageNotFoundDescription: string;
   readonly pageNotFoundBackToDashboard: string;
+  readonly customizeButton: string;
 
   // ─── Interpolated → typed functions ────────────────────────────────
   readonly welcomeUser: (name: string) => string;
