@@ -1,4 +1,4 @@
-import { pgEnum } from "drizzle-orm/pg-core";
+import { createEnum } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 
 function isNonEmptyStringArray(values: string[]): values is [string, ...string[]] {
   return values.length > 0;
@@ -7,11 +7,11 @@ function isNonEmptyStringArray(values: string[]): values is [string, ...string[]
 export function createPgEnumFromEnum(enumName: string, enumObject: Record<string, string>) {
   const values = Object.values(enumObject);
   if (!isNonEmptyStringArray(values)) {
-    throw new Error(`Cannot create pgEnum "${enumName}": enum must have at least one value.`);
+    throw new Error(`Cannot create enum "${enumName}": enum must have at least one value.`);
   }
-  return pgEnum(enumName, values);
+  return createEnum(enumName, values);
 }
 
 export function escapeLikeWildcards(input: string): string {
-  return input.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_"); // NoSonar - string escapes are intentional for LIKE wildcard escaping
+  return input.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_");
 }

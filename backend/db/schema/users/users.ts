@@ -1,18 +1,18 @@
 import { sql } from "drizzle-orm";
 import {
-  bigint,
-  boolean,
-  check,
+  bigintColumn,
+  booleanColumn,
+  checkConstraint,
+  createTable,
   index,
-  inet,
-  integer,
-  pgTable,
-  text,
-  timestamp,
+  inetColumn,
+  integerColumn,
+  textColumn,
+  timestampColumn,
   uniqueIndex,
-  uuid,
-  varchar,
-} from "drizzle-orm/pg-core";
+  uuidDefaultColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { createdAtColumn, primaryKeyColumn, timestampColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import { accountStatusEnum, currencyCodeEnum } from "@/backend/db/schema/enums";
 import { AccountStatus } from "@/backend/enum";
@@ -21,28 +21,31 @@ import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 // NOTE: PostgreSQL Row-Level Security (RLS) policies are active on this table.
 // Soft-deleted records (deleted_at IS NOT NULL) are automatically filtered out for SELECT/UPDATE.
-export const users = pgTable(
+// On SQLite, RLS is not available — soft-delete filtering is handled at the repo layer.
+export const users = createTable(
   "users",
   {
     ...primaryKeyColumn(),
     ...timestampColumns(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true, precision: 3 }),
-    name: varchar("name", { length: 255 }).notNull(),
-    email: varchar("email", { length: 255 }).notNull().unique(),
-    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true, precision: 3 }),
-    password: varchar("password", { length: 255 }).notNull(),
-    rememberTokenHash: varchar("remember_token_hash", { length: 255 }),
-    avatarFilePath: varchar("avatar_file_path", { length: 1024 }),
-    avatarUrl: varchar("avatar_url", { length: 1024 }),
-    phone: varchar("phone", { length: 50 }),
+    deletedAt: timestampColumn("deleted_at"),
+    name: varcharColumn("name", { length: 255 }).notNull(),
+    email: varcharColumn("email", { length: 255 }).notNull().unique(),
+    emailVerifiedAt: timestampColumn("email_verified_at"),
+    password: varcharColumn("password", { length: 255 }).notNull(),
+    rememberTokenHash: varcharColumn("remember_token_hash", { length: 255 }),
+    avatarFilePath: varcharColumn("avatar_file_path", { length: 1024 }),
+    avatarUrl: varcharColumn("avatar_url", { length: 1024 }),
+    phone: varcharColumn("phone", { length: 50 }),
     status: accountStatusEnum("status").notNull().default(AccountStatus.ACTIVATED),
-    isSuperAdmin: boolean("is_super_admin").notNull().default(false),
-    timezone: varchar("timezone", { length: 100 }).notNull().default(IanaTimezone.UTC),
+    isSuperAdmin: booleanColumn("is_super_admin").notNull().default(false),
+    timezone: varcharColumn("timezone", { length: 100 }).notNull().default(IanaTimezone.UTC),
     displayCurrency: currencyCodeEnum("display_currency").$type<CurrencyCode>(),
-    lastLoginAt: timestamp("last_login_at", { withTimezone: true, precision: 3 }),
+    lastLoginAt: timestampColumn("last_login_at"),
   },
   table => [
-    check("users_timezone_chk", sql`is_valid_timezone(${table.timezone})`),
+    // PG-only CHECK: calls the is_valid_timezone() UDF. SQLite cannot register
+    // JS UDFs via libsql — timezone validation is handled at the app layer.
+    checkConstraint("users_timezone_chk", sql`is_valid_timezone(${table.timezone})`, null),
     index("users_status_idx").on(table.status),
     index("users_last_login_at_idx").on(table.lastLoginAt),
     index("users_created_at_idx").on(table.createdAt),
@@ -58,17 +61,15 @@ export const users = pgTable(
   ]
 );
 
-// DEPRECATED: Legacy sessions table - sessions are now stored in Redis
-// This table is kept for backwards compatibility and stores minimal metadata
-export const sessions = pgTable(
+export const sessions = createTable(
   "sessions",
   {
-    hashedId: varchar("hashed_id", { length: 255 }).primaryKey(),
-    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
-    ipAddress: inet("ip_address"),
-    userAgent: text("user_agent"),
-    payload: text("payload").notNull(),
-    lastActivity: bigint("last_activity", { mode: "bigint" }).notNull(),
+    hashedId: varcharColumn("hashed_id", { length: 255 }).primaryKey(),
+    userId: uuidDefaultColumn("user_id").references(() => users.id as never, { onDelete: "cascade" }),
+    ipAddress: inetColumn("ip_address"),
+    userAgent: textColumn("user_agent"),
+    payload: textColumn("payload").notNull(),
+    lastActivity: bigintColumn("last_activity").notNull(),
   },
   table => [
     index("sessions_user_id_index").on(table.userId),
@@ -76,23 +77,21 @@ export const sessions = pgTable(
   ]
 );
 
-// New session metadata table - stores minimal tracking info in PostgreSQL
-// Actual session data is stored in Redis with TTL
-export const sessionMetadata = pgTable(
+export const sessionMetadata = createTable(
   "session_metadata",
   {
     ...primaryKeyColumn(),
     ...createdAtColumn(),
-    lastActivityAt: timestamp("last_activity_at", { withTimezone: true, precision: 3 }).notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
-    sessionId: varchar("session_id", { length: 255 }).notNull().unique(),
-    userId: uuid("user_id")
+    lastActivityAt: timestampColumn("last_activity_at").notNull(),
+    expiresAt: timestampColumn("expires_at").notNull(),
+    sessionId: varcharColumn("session_id", { length: 255 }).notNull().unique(),
+    userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    deviceType: varchar("device_type", { length: 50 }),
-    deviceName: varchar("device_name", { length: 255 }),
-    ipAddress: inet("ip_address"),
-    userAgent: text("user_agent"),
+      .references(() => users.id as never, { onDelete: "cascade" }),
+    deviceType: varcharColumn("device_type", { length: 50 }),
+    deviceName: varcharColumn("device_name", { length: 255 }),
+    ipAddress: inetColumn("ip_address"),
+    userAgent: textColumn("user_agent"),
   },
   table => [
     index("session_metadata_user_id_idx").on(table.userId),
@@ -102,23 +101,22 @@ export const sessionMetadata = pgTable(
   ]
 );
 
-// Session configuration per role - defines TTL and concurrent session limits
-export const sessionConfig = pgTable("session_config", {
+export const sessionConfig = createTable("session_config", {
   ...primaryKeyColumn(),
   ...timestampColumns(),
-  roleName: varchar("role_name", { length: 100 }).notNull().unique(),
-  ttlSeconds: integer("ttl_seconds").notNull().default(604800), // 7 days default
-  maxConcurrentSessions: integer("max_concurrent_sessions").notNull().default(5),
+  roleName: varcharColumn("role_name", { length: 100 }).notNull().unique(),
+  ttlSeconds: integerColumn("ttl_seconds").notNull().default(604800),
+  maxConcurrentSessions: integerColumn("max_concurrent_sessions").notNull().default(5),
 });
 
-export const passwordResetTokens = pgTable(
+export const passwordResetTokens = createTable(
   "password_reset_tokens",
   {
     ...primaryKeyColumn(),
     ...createdAtColumn(),
-    email: varchar("email", { length: 255 }).notNull(),
-    hashedToken: varchar("hashed_token", { length: 255 }).notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, precision: 3 }).notNull(),
+    email: varcharColumn("email", { length: 255 }).notNull(),
+    hashedToken: varcharColumn("hashed_token", { length: 255 }).notNull(),
+    expiresAt: timestampColumn("expires_at").notNull(),
   },
   table => [
     index("password_reset_tokens_email_idx").on(table.email),
@@ -127,15 +125,15 @@ export const passwordResetTokens = pgTable(
   ]
 );
 
-export const authRateLimits = pgTable(
+export const authRateLimits = createTable(
   "auth_rate_limits",
   {
     ...primaryKeyColumn(),
     ...timestampColumns(),
-    ipAddress: inet("ip_address"),
-    email: varchar("email", { length: 255 }),
-    attempts: integer("attempts").notNull().default(1),
-    lockedUntil: timestamp("locked_until", { withTimezone: true, precision: 3 }),
+    ipAddress: inetColumn("ip_address"),
+    email: varcharColumn("email", { length: 255 }),
+    attempts: integerColumn("attempts").notNull().default(1),
+    lockedUntil: timestampColumn("locked_until"),
   },
   table => [
     index("auth_rate_limits_ip_idx").on(table.ipAddress),
