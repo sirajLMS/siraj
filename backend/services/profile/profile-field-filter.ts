@@ -5,9 +5,9 @@ import {
   hasStudentGroupEditPermission,
   hasStudentGroupViewPermission,
 } from "@/backend/services/profile/profile-field-filter-bridge";
-import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
-import { STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
-import type { ProfileFieldGroupDefinition } from "@/backend/types";
+import { PROFILE_FIELD_GROUP_BY_KEY, PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
+import { STUDENT_FIELD_GROUP_BY_KEY, STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
+import type { ProfileFieldGroupDefinition, ProfileFieldGroupKey, StudentFieldGroupKey } from "@/backend/types";
 
 export type FieldFilterContext = {
   readonly actorUserId: string;
@@ -29,8 +29,20 @@ function isStringRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+// Optimization: Cache split path segments to avoid repeated string splitting during payload filtering loops.
+const PATH_SEGMENTS_CACHE = new Map<string, string[]>();
+
+function getPathSegments(path: string): string[] {
+  let segments = PATH_SEGMENTS_CACHE.get(path);
+  if (!segments) {
+    segments = path.split(".");
+    PATH_SEGMENTS_CACHE.set(path, segments);
+  }
+  return segments;
+}
+
 function setValueAtPath(target: Record<string, unknown>, path: string, value: unknown): void {
-  const segments = path.split(".");
+  const segments = getPathSegments(path);
   let current: Record<string, unknown> = target;
 
   for (let index = 0; index < segments.length - 1; index += 1) {
@@ -98,8 +110,9 @@ export function filterStudentProfileByFieldGroups<T extends Record<string, unkno
   return filtered;
 }
 
+// Optimization: Replaced O(N) linear scan (array.find) with O(1) dictionary lookup via manifest lookup tables.
 export function canViewProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {
-  const group = PROFILE_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  const group = PROFILE_FIELD_GROUP_BY_KEY[groupKey as ProfileFieldGroupKey];
   if (!group || !shouldApplyProfileGroup(group, ctx)) {
     return false;
   }
@@ -107,7 +120,7 @@ export function canViewProfileFieldGroup(ctx: FieldFilterContext, groupKey: stri
 }
 
 export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {
-  const group = PROFILE_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  const group = PROFILE_FIELD_GROUP_BY_KEY[groupKey as ProfileFieldGroupKey];
   if (!group || !shouldApplyProfileGroup(group, ctx)) {
     return false;
   }
@@ -115,7 +128,7 @@ export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: stri
 }
 
 export function canViewStudentFieldGroup(ctx: StudentFieldFilterContext, groupKey: string): boolean {
-  const group = STUDENT_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  const group = STUDENT_FIELD_GROUP_BY_KEY[groupKey as StudentFieldGroupKey];
   if (!group) {
     return false;
   }
@@ -123,7 +136,7 @@ export function canViewStudentFieldGroup(ctx: StudentFieldFilterContext, groupKe
 }
 
 export function canEditStudentFieldGroup(ctx: StudentFieldFilterContext, groupKey: string): boolean {
-  const group = STUDENT_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  const group = STUDENT_FIELD_GROUP_BY_KEY[groupKey as StudentFieldGroupKey];
   if (!group) {
     return false;
   }
