@@ -124,3 +124,9 @@ jscpd-all
 shared/locale/**/*.js
 .openhands/agent-canvas/logs
 .next-locale-snapshots-version
+
+# QA-only artifacts (local sandbox testing — not for production)
+/db/
+/download/
+/worklog.md
+dev.log

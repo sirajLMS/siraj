@@ -1,4 +1,5 @@
 import { getActiveHttpProvider, resolveConnectionStrategy } from "@/backend/db/connection-strategy";
+import { getDbDialect } from "@/backend/db/dialect";
 import type { relations } from "@/backend/db/drizzleRelations";
 import { createDatabase, createPool } from "@/backend/db/factory";
 import { clearHttpClientSingleton, getNeonHttpDb } from "@/backend/db/http-client";
@@ -15,7 +16,26 @@ export const drizzleLogs: string[] = [];
 function initDatabase() {
   ensureEnvironmentValidated();
 
+  const dialect = getDbDialect();
   const { databaseUrl } = getEnvironmentConfig();
+
+  // SQLite uses DB_FILE_NAME (or a file:/... DATABASE_URL) — do NOT require
+  // a Postgres-style DATABASE_URL for the SQLite path.
+  if (dialect === "sqlite") {
+    const mode = getStringEnv("DB_CONNECTION_MODE", "auto");
+    const provider = getStringEnv("DB_PROVIDER", "sqlite");
+    const sqliteUrl =
+      databaseUrl && /^(file:|libsql:|https?:|wss?:)/i.test(databaseUrl)
+        ? databaseUrl
+        : getStringEnv("DB_FILE_NAME", "./siraj.sqlite");
+    logger.debug("backend/db/drizzleDb.ts Environment variables loaded successfully");
+    logger.debug(`   Dialect=sqlite`);
+    logger.debug(`   DB_CONNECTION_MODE=${mode}`);
+    logger.debug(`   DB_PROVIDER=${provider}`);
+    logger.debug(`   SQLite target=${sqliteUrl}`);
+    return createDatabase();
+  }
+
   if (!databaseUrl) {
     logger.error("backend/db/drizzleDb.ts:❌ Error: DATABASE_URL is not set in environment variables");
     logger.error("   Please check your .env file");

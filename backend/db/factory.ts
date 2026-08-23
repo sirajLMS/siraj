@@ -10,12 +10,14 @@ import {
   poolMax,
   resolveConnectionStrategy,
 } from "@/backend/db/connection-strategy";
+import { getDbDialect } from "@/backend/db/dialect";
 import { relations } from "@/backend/db/drizzleRelations";
 import { getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { isVercelRuntime } from "@/backend/lib/runtime";
+import { createSqliteDb } from "@/backend/db/drivers/sqlite/sqlite.driver";
 
-export type DatabaseProvider = "postgres" | "neon";
+export type DatabaseProvider = "postgres" | "neon" | "sqlite";
 
 function attachVercelPoolLifecycle(pool: PgPool): void {
   if (!isVercelRuntime()) return;
@@ -76,6 +78,20 @@ function logConnectionStrategy(strategy: DbConnectionStrategy): void {
 }
 
 export function createDatabase(): NeonDbType | PostgresDbType {
+  // SQLite (libsql) path — resolved BEFORE the Postgres env checks so a
+  // SQLite-only deployment does not need a valid Postgres DATABASE_URL.
+  //
+  // TYPE-ERASURE NOTE: the sqlite db is cast to `PostgresDbType` so the entire
+  // codebase keeps its PG types unchanged (service/repo layers NOT modified).
+  // At runtime, sqlite objects are structurally compatible with Drizzle's query
+  // API (.select/.insert/.where/eq/inArray/onConflictDoUpdate/.returning).
+  if (getDbDialect() === "sqlite") {
+    const provider = getStringEnv("DB_PROVIDER", "sqlite");
+    const mode = getStringEnv("DB_CONNECTION_MODE", "auto");
+    logger.log(`Creating database connection (dialect: sqlite, provider: ${provider}, mode: ${mode})`);
+    return createSqliteDb({}) as unknown as PostgresDbType;
+  }
+
   const databaseUrl = getEnvironmentConfig().databaseUrl;
   if (!databaseUrl) {
     logger.error("DATABASE_URL is not set in environment variables");
@@ -91,7 +107,11 @@ export function createDatabase(): NeonDbType | PostgresDbType {
   return createPostgresDb();
 }
 
-export function createPool(): PgPool | Pool {
+export function createPool(): PgPool | Pool | null {
+  // SQLite manages connections internally — no separate pool to expose.
+  if (getDbDialect() === "sqlite") {
+    return null;
+  }
   const strategy = resolveConnectionStrategy();
 
   if (strategy === "pg-pooled") {

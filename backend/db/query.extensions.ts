@@ -1,5 +1,6 @@
-import { type Column, type SQL, sql } from "drizzle-orm";
+import { type Column, ilike, like, type SQL, sql } from "drizzle-orm";
 import type { PgSelect } from "drizzle-orm/pg-core";
+import { isSqlite } from "@/backend/db/dialect";
 import type { PaginationArgs } from "@/backend/types";
 
 export function queryWithPagination<T extends PgSelect>(qb: T, args?: PaginationArgs | null) {
@@ -58,4 +59,22 @@ export function fullTextSearch(
   }
 
   return sql`to_tsvector(${config}, ${column}) @@ to_tsquery(${config}, ${tsQueryString})`;
+}
+
+/**
+ * Dialect-aware case-insensitive `LIKE` filter.
+ * - PostgreSQL: `ilike(column, value)` — native case-insensitive LIKE.
+ * - SQLite: `like(column, value)` — SQLite LIKE is case-insensitive for ASCII.
+ *
+ * Resolves the `ilike` portability blocker: `ilike()` emits the literal
+ * `ILIKE` keyword which SQLite doesn't understand (drizzle-orm#3075).
+ */
+export function caseInsensitiveLike(
+  column: Column | SQL | SQL.Aliased,
+  value: string
+): SQL {
+  if (isSqlite()) {
+    return like(column as Column, value);
+  }
+  return ilike(column as Column, value);
 }
