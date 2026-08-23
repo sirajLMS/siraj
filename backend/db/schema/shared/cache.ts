@@ -1,16 +1,21 @@
-import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  createTable,
+  index,
+  textColumn,
+  timestampColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 
 /**
- * Rate limit cache table
- * Uses UNLOGGED table for better write performance (no WAL)
- * Data is not crash-safe but acceptable for rate limiting
+ * Rate limit cache table.
+ * (PG used an UNLOGGED table for write perf; SQLite has no UNLOGGED concept —
+ * data is crash-safe under WAL, which is the SQLite default set by the driver.)
  */
-export const rateLimitCache = pgTable(
+export const rateLimitCache = createTable(
   "rate_limit_cache",
   {
-    key: text("key").primaryKey().notNull(),
-    value: text("value").notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    key: textColumn("key").primaryKey().notNull(),
+    value: textColumn("value").notNull(),
+    expiresAt: timestampColumn("expires_at").notNull(),
   },
   table => [
     index("rate_limit_cache_expires_at_idx").on(table.expiresAt),
@@ -19,17 +24,20 @@ export const rateLimitCache = pgTable(
 );
 
 /**
- * Session and general application cache table
- * Standard LOGGED table to ensure data survives crashes
+ * Session and general application cache table.
+ * Standard crash-safe cache (WAL journal mode on SQLite).
  */
-export const sessionCache = pgTable(
+export const sessionCache = createTable(
   "session_cache",
   {
-    key: text("key").primaryKey().notNull(),
-    value: text("value").notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    key: textColumn("key").primaryKey().notNull(),
+    value: textColumn("value").notNull(),
+    expiresAt: timestampColumn("expires_at").notNull(),
   },
-  table => [index("session_cache_expires_at_idx").on(table.expiresAt), index("session_cache_value_idx").on(table.value)]
+  table => [
+    index("session_cache_expires_at_idx").on(table.expiresAt),
+    index("session_cache_value_idx").on(table.value),
+  ]
 );
 
 // Export types

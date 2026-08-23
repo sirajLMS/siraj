@@ -8,6 +8,7 @@ import {
   inet as pgInet,
   integer as pgInteger,
   jsonb as pgJsonb,
+  serial as pgSerial,
   pgEnum,
   pgTable,
   text as pgText,
@@ -87,6 +88,18 @@ export function uuidDefaultColumn(name: string) {
     return sqliteText(name).$defaultFn(() => crypto.randomUUID()) as never;
   }
   return pgUuid(name).defaultRandom();
+}
+
+/**
+ * Auto-incrementing integer primary key.
+ * - PostgreSQL: `serial` (integer with sequence default).
+ * - SQLite: `integer().primaryKey({ autoIncrement: true })` (INTEGER PRIMARY KEY = rowid alias).
+ */
+export function serialColumn(name = "id") {
+  if (isSqlite()) {
+    return sqliteInteger(name).primaryKey({ autoIncrement: true }) as never;
+  }
+  return pgSerial(name).primaryKey();
 }
 
 export function timestampColumn(name: string) {

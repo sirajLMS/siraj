@@ -1,17 +1,24 @@
-import { boolean, index, integer, pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import {
+  booleanColumn,
+  createTable,
+  index,
+  integerColumn,
+  serialColumn,
+  varcharColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 
 /**
  * Timezones lookup table.
  * Stores IANA timezone IDs and their base UTC offsets.
  * Used to ensure referential integrity for timezones and support DST calculations.
  */
-export const timezones = pgTable(
+export const timezones = createTable(
   "timezones",
   {
-    id: serial("id").primaryKey(),
-    ianaId: varchar("iana_id", { length: 100 }).notNull().unique(), // e.g. 'Africa/Cairo'
-    baseOffsetMinutes: integer("base_offset_minutes").notNull(), // Standard offset from UTC
-    isDstSupported: boolean("is_dst_supported").notNull().default(true),
+    id: serialColumn("id"),
+    ianaId: varcharColumn("iana_id", { length: 100 }).notNull().unique(),
+    baseOffsetMinutes: integerColumn("base_offset_minutes").notNull(),
+    isDstSupported: booleanColumn("is_dst_supported").notNull().default(true),
   },
   table => [
     index("timezones_is_dst_supported_idx").on(table.isDstSupported),
