@@ -12,32 +12,32 @@
 
 ## Phase 2: Consumer-Code Type Reconciliation (IN PROGRESS)
 
-- [ ] 2.1 Cluster A — nullable FK consumers (4 files)
-  - [ ] 2.1.QL Quality Loop (per file, after fix): bun run scripts/health/sub-loop.ts <file> --lifecycle codescene (exit 0)
-  - [ ] 2.1.F1 Fix backend/services/payment-method/payment-method.service.ts:270 — null-guard / non-null assert on FK arg
-  - [ ] 2.1.F2 Fix backend/services/seed/leave-request-seed.service.ts:37 — filter undefined from array / non-null assert
-  - [ ] 2.1.F3 Fix backend/services/seed/student-seed.service.ts:92 — non-null assert on studentId/classInstanceId
-  - [ ] 2.1.F4 Fix backend/services/seed/teacher-payment-seed.service.ts:45,47 — non-null assert (2 sites)
+- [x] 2.1 Cluster A — nullable FK consumers (4 files)
+  - [x] 2.1.QL Quality Loop (per file, after fix): bun run scripts/health/sub-loop.ts <file> --lifecycle codescene (exit 0)
+  - [x] 2.1.F1 Fix backend/services/payment-method/payment-method.service.ts:270 — null-guard / non-null assert on FK arg
+  - [x] 2.1.F2 Fix backend/services/seed/leave-request-seed.service.ts:37 — filter undefined from array / non-null assert
+  - [x] 2.1.F3 Fix backend/services/seed/student-seed.service.ts:92 — non-null assert on studentId/classInstanceId
+  - [x] 2.1.F4 Fix backend/services/seed/teacher-payment-seed.service.ts:45,47 — non-null assert (2 sites)
   - _Requirements: AC 3, 5_
 
-- [ ] 2.2 Cluster B — bigintColumn union type (1 file)
-  - [ ] 2.2.QL Quality Loop: bun run scripts/health/sub-loop.ts backend/services/storage/storage.service.ts --lifecycle codescene (exit 0)
-  - [ ] 2.2.F1 Fix backend/services/storage/storage.service.ts:138 — fileSize = BigInt(row.fileSize) (idempotent for bigint, accepts string-or-number)
+- [x] 2.2 Cluster B — bigintColumn union type (1 file)
+  - [x] 2.2.QL Quality Loop: bun run scripts/health/sub-loop.ts backend/services/storage/storage.service.ts --lifecycle codescene (exit 0)
+  - [x] 2.2.F1 Fix backend/services/storage/storage.service.ts:138 — fileSize = BigInt(row.fileSize) (idempotent for bigint, accepts string-or-number)
   - _Requirements: AC 3, 5_
 
-- [ ] 2.3 Cluster C — nullable pool (1 file)
-  - [ ] 2.3.QL Quality Loop: bun run scripts/health/sub-loop.ts backend/services/cron/queue-adapters/custom-sql.adapter.ts --lifecycle codescene (exit 0)
-  - [ ] 2.3.F1 Fix backend/services/cron/queue-adapters/custom-sql.adapter.ts:95-97 — null-guard getDrizzleDbPool() (early-return or throw explicit error for SQLite)
+- [x] 2.3 Cluster C — nullable pool (1 file)
+  - [x] 2.3.QL Quality Loop: bun run scripts/health/sub-loop.ts backend/services/cron/queue-adapters/custom-sql.adapter.ts --lifecycle codescene (exit 0)
+  - [x] 2.3.F1 Fix backend/services/cron/queue-adapters/custom-sql.adapter.ts:95-97 — null-guard getDrizzleDbPool() (early-return or throw explicit error for SQLite)
   - _Requirements: AC 3, 5_
 
 ## Phase 3: Verification and Gate (PENDING)
 
-- [ ] 3.1 Full quality-gate green: bun run quality-gate passes (husky pre-commit) without --no-verify
-- [ ] 3.2 SQLite regression: DB_PROVIDER=sqlite bunx drizzle-kit generate --config=drizzle.config.sqlite.ts still produces 94 tables
-- [ ] 3.3 PG regression: DB_PROVIDER=postgres bunx drizzle-kit generate --config=drizzle.config.ts still succeeds (modulo one-time FK-rename hints for suggestions.duplicateOfId)
-- [ ] 3.4 tsgo total = 0 (down from baseline 9; no NEW errors introduced)
-- [ ] 3.5 Commit Phase 2 fixes (single commit, husky hook passes)
-- [ ] 3.6 Write outcome/3.x-verification.md + update progress doc docs/SQLITE_MIGRATION_PROGRESS.md
+- [x] 3.1 Full quality-gate green: bun run quality-gate passes (husky pre-commit) without --no-verify
+- [x] 3.2 SQLite regression: DB_PROVIDER=sqlite bunx drizzle-kit generate --config=drizzle.config.sqlite.ts still produces 94 tables
+- [x] 3.3 PG regression: DB_PROVIDER=postgres bunx drizzle-kit generate --config=drizzle.config.ts still succeeds (modulo one-time FK-rename hints for suggestions.duplicateOfId)
+- [x] 3.4 tsgo total = 0 (down from baseline 9; no NEW errors introduced)
+- [x] 3.5 Commit Phase 2 fixes (single commit, husky hook passes)
+- [x] 3.6 Write outcome/3.x-verification.md + update progress doc docs/SQLITE_MIGRATION_PROGRESS.md
 
 ## Phase 4 (STRETCH — not in scope unless requested)
 
