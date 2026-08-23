@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { checkConstraint, createTable, index, uuidColumn, uuidDefaultColumn } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
+import {
+  checkConstraint,
+  createTable,
+  index,
+  uuidColumn,
+  uuidDefaultColumn,
+} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { classInstances, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
 import { meetingConfigSharedColumns } from "@/backend/db/schema/meeting/__shared__/meeting-config-columns";
 import {
@@ -13,8 +19,12 @@ export const classMeetingConfigs = createTable(
   TABLE_NAME,
   {
     id: uuidColumn("id"),
-    classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id as never, { onDelete: "cascade" }),
-    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id").references(() => recurringSchedules.id as never, { onDelete: "cascade" }),
+    classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id, {
+      onDelete: "cascade",
+    }),
+    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id").references(() => recurringSchedules.id, {
+      onDelete: "cascade",
+    }),
     ...meetingConfigSharedColumns(),
   },
   table => [

@@ -6,7 +6,9 @@ import {
   printDestructiveActionBlock,
   printPermanentlyDisabledBlock,
 } from "@/scripts/dbActions/destructive";
+import { drizzleConfigPathForDialect, resolveDialectFromSelectedEnvFile } from "@/scripts/dbActions/dialect";
 import { ensureExtensions } from "@/scripts/dbActions/ensureExtensions";
+import { getSelectedEnvFile } from "@/scripts/dbActions/envFile";
 import { runBunCommand } from "@/scripts/dbActions/runCommand";
 
 export const ACTIONS: Record<string, { label: string; name: string }> = {
@@ -46,22 +48,30 @@ export async function dispatchAction(key: string): Promise<number> {
     return 1;
   }
 
+  // Resolve the active dialect from the selected env file (default postgres).
+  // SQLite uses drizzle.config.sqlite.ts + backend/drizzle-sqlite/; skips PG-only steps.
+  const dialect = resolveDialectFromSelectedEnvFile(getSelectedEnvFile);
+  const configPath = drizzleConfigPathForDialect(dialect);
+
   switch (key) {
     case "1":
       return runBunCommand(["run", "backend/db/scripts/resetDb.ts"]);
     case "2":
       return runBunCommand(["run", "backend/db/scripts/drizzleSeed.ts"]);
     case "3":
-      return runBunCommand(["drizzle-kit", "generate", "--ignore-conflicts"]);
+      return runBunCommand(["drizzle-kit", "generate", "--ignore-conflicts", "--config", configPath]);
     case "4":
-      return runBunCommand(["drizzle-kit", "drop"]);
+      return runBunCommand(["drizzle-kit", "drop", "--config", configPath]);
     case "5":
       return runBunCommand(["run", "backend/db/scripts/migrate.ts"]);
     case "6":
-      await ensureExtensions();
-      return runBunCommand(["drizzle-kit", "push", "--force"]);
+      // ensureExtensions applies pg_trgm + is_valid_timezone (PG-only); skip for sqlite.
+      if (dialect === "postgres") {
+        await ensureExtensions();
+      }
+      return runBunCommand(["drizzle-kit", "push", "--force", "--config", configPath]);
     case "7":
-      return runBunCommand(["drizzle-kit", "studio"]);
+      return runBunCommand(["drizzle-kit", "studio", "--config", configPath]);
     case "8":
       return cleanGenerate();
     default:

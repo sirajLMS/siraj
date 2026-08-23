@@ -51,7 +51,9 @@ export const permissionGroups = createTable(
     description: jsonbColumn<LocalizedString>("description"),
     isSystem: booleanColumn("is_system").notNull().default(false),
     slug: varcharColumn("slug", { length: 100 }).notNull().unique(),
-    createdByUserId: uuidDefaultColumn("created_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    createdByUserId: uuidDefaultColumn("created_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestampColumn("created_at").notNull(),
     updatedAt: timestampColumn("updated_at").notNull(),
   },
@@ -68,10 +70,10 @@ export const groupPermissions = createTable(
   {
     groupId: uuidDefaultColumn("group_id")
       .notNull()
-      .references(() => permissionGroups.id as never, { onDelete: "cascade" }),
+      .references(() => permissionGroups.id, { onDelete: "cascade" }),
     permissionId: uuidDefaultColumn("permission_id")
       .notNull()
-      .references(() => permissions.id as never, { onDelete: "cascade" }),
+      .references(() => permissions.id, { onDelete: "cascade" }),
   },
   table => [
     primaryKey({ columns: [table.groupId, table.permissionId] }),
@@ -85,12 +87,14 @@ export const userPermissionGroups = createTable(
   {
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     groupId: uuidDefaultColumn("group_id")
       .notNull()
-      .references(() => permissionGroups.id as never, { onDelete: "cascade" }),
+      .references(() => permissionGroups.id, { onDelete: "cascade" }),
     assignedAt: timestampColumn("assigned_at").notNull(),
-    assignedByUserId: uuidDefaultColumn("assigned_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    assignedByUserId: uuidDefaultColumn("assigned_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
   },
   table => [
     primaryKey({ columns: [table.userId, table.groupId] }),
@@ -105,12 +109,14 @@ export const userPermissionOverrides = createTable(
   {
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     permissionId: uuidDefaultColumn("permission_id")
       .notNull()
-      .references(() => permissions.id as never, { onDelete: "cascade" }),
+      .references(() => permissions.id, { onDelete: "cascade" }),
     state: varcharColumn("state", { length: 20 }).notNull(), // 'GRANTED' | 'DENIED'
-    assignedByUserId: uuidDefaultColumn("assigned_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    assignedByUserId: uuidDefaultColumn("assigned_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),
   },
   table => [

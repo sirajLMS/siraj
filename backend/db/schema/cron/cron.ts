@@ -41,16 +41,14 @@ export const cronSchedules = createTable(
     updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
     createdByUserId: uuidDefaultColumn("created_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "restrict" }),
-    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id as never, {
+      .references(() => users.id, { onDelete: "restrict" }),
+    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
   },
   table => [
     index("cron_schedules_status_next_run_at_idx").on(table.status, table.nextRunAt),
-    uniqueIndex("cron_schedules_name_unique_idx")
-      .on(table.name)
-      .where(sql`${table.status} IN ('ACTIVE', 'PAUSED')`),
+    uniqueIndex("cron_schedules_name_unique_idx").on(table.name).where(sql`${table.status} IN ('ACTIVE', 'PAUSED')`),
     index("cron_schedules_job_kind_idx").on(table.jobKind),
   ]
 );
@@ -61,7 +59,7 @@ export const cronRuns = createTable(
     id: uuidColumn("id"),
     scheduleId: uuidDefaultColumn("schedule_id")
       .notNull()
-      .references(() => cronSchedules.id as never, { onDelete: "cascade" }),
+      .references(() => cronSchedules.id, { onDelete: "cascade" }),
     jobKind: cronJobKindEnum("job_kind").notNull(),
     status: cronRunStatusEnum("status").notNull().default("PENDING"),
     triggerSource: cronTriggerSourceEnum("trigger_source").notNull(),
@@ -89,7 +87,7 @@ export const cronHeartbeats = createTable(
     id: uuidColumn("id"),
     runId: uuidDefaultColumn("run_id")
       .notNull()
-      .references(() => cronRuns.id as never, { onDelete: "cascade" }),
+      .references(() => cronRuns.id, { onDelete: "cascade" }),
     workerId: varcharColumn("worker_id", { length: 255 }).notNull(),
     lastBeatAt: timestampColumn("last_beat_at").notNull().defaultNow(),
     progress: jsonbColumn<Record<string, unknown> | null>("progress"),

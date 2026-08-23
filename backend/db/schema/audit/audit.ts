@@ -32,8 +32,8 @@ export const adminAuditLogs = createTable(
     id: uuidColumn("id"),
     actorUserId: uuidDefaultColumn("actor_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "restrict" }),
-    targetUserId: uuidDefaultColumn("target_user_id").references(() => users.id as never, { onDelete: "restrict" }),
+      .references(() => users.id, { onDelete: "restrict" }),
+    targetUserId: uuidDefaultColumn("target_user_id").references(() => users.id, { onDelete: "restrict" }),
     action: varcharColumn("action", { length: 100 }).notNull(),
     description: textColumn("description"),
     previousState: jsonbColumn("previous_state"),
@@ -71,7 +71,7 @@ export const auditLogs = createTable(
   {
     id: uuidColumn("id"),
     // Actor performing the action
-    actorUserId: uuidDefaultColumn("actor_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    actorUserId: uuidDefaultColumn("actor_user_id").references(() => users.id, { onDelete: "set null" }),
     actorType: varcharColumn("actor_type", { length: 50 }).notNull(), // 'USER', 'SYSTEM', 'API', 'CRON'
     // Entity being changed
     entityType: varcharColumn("entity_type", { length: 100 }).notNull(), // 'STUDENT', 'INVOICE', 'PAYMENT', 'PERMISSION', etc.

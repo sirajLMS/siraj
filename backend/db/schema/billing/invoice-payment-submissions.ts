@@ -1,11 +1,11 @@
 import {
-  createTable,
   createEnum,
+  createTable,
+  index,
+  textColumn,
+  timestampColumn,
   uuidColumn,
   uuidDefaultColumn,
-  timestampColumn,
-  textColumn,
-  index,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { invoices } from "@/backend/db/schema/billing/billing";
 import { storageFiles } from "@/backend/db/schema/storage/storage";
@@ -23,15 +23,15 @@ export const invoicePaymentSubmissions = createTable(
     id: uuidColumn("id"),
     invoiceId: uuidDefaultColumn("invoice_id")
       .notNull()
-      .references(() => invoices.id as never, { onDelete: "restrict" }),
+      .references(() => invoices.id, { onDelete: "restrict" }),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "restrict" }),
+      .references(() => storageFiles.id, { onDelete: "restrict" }),
     submittedByUserId: uuidDefaultColumn("submitted_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "restrict" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     submittedAt: timestampColumn("submitted_at").notNull(),
-    reviewedByUserId: uuidDefaultColumn("reviewed_by_user_id").references(() => users.id as never, {
+    reviewedByUserId: uuidDefaultColumn("reviewed_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     reviewedAt: timestampColumn("reviewed_at"),

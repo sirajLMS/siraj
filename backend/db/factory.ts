@@ -11,11 +11,11 @@ import {
   resolveConnectionStrategy,
 } from "@/backend/db/connection-strategy";
 import { getDbDialect } from "@/backend/db/dialect";
+import { createSqliteDb } from "@/backend/db/drivers/sqlite/sqlite.driver";
 import { relations } from "@/backend/db/drizzleRelations";
 import { getEnvironmentConfig, getStringEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { isVercelRuntime } from "@/backend/lib/runtime";
-import { createSqliteDb } from "@/backend/db/drivers/sqlite/sqlite.driver";
 
 export type DatabaseProvider = "postgres" | "neon" | "sqlite";
 
@@ -45,7 +45,7 @@ function createPgPool(): PgPool {
 }
 
 const createNeonDb = () => {
-  logger.log("Initializing Neon serverless Pool connection");
+  logger.info("Initializing Neon serverless Pool connection");
   configureNeonWebSocket();
   const pool = new Pool({
     connectionString: getEnvironmentConfig().databaseUrl,
@@ -59,7 +59,7 @@ const createNeonDb = () => {
 export type NeonDbType = ReturnType<typeof createNeonDb>;
 
 const createPostgresDb = () => {
-  logger.log(
+  logger.info(
     isVercelRuntime()
       ? "Initializing Vercel Fluid compute PostgreSQL connection pool"
       : "Initializing PostgreSQL connection pool"
@@ -71,10 +71,14 @@ const createPostgresDb = () => {
 
 export type PostgresDbType = ReturnType<typeof createPostgresDb>;
 
+function isPostgresDbType(value: unknown): value is PostgresDbType {
+  return typeof value === "object" && value !== null;
+}
+
 function logConnectionStrategy(strategy: DbConnectionStrategy): void {
   const mode = getStringEnv("DB_CONNECTION_MODE", "auto");
   const provider = getStringEnv("DB_PROVIDER", "postgres");
-  logger.log(`Creating database connection (strategy: ${strategy}, mode: ${mode}, provider: ${provider})`);
+  logger.info(`Creating database connection (strategy: ${strategy}, mode: ${mode}, provider: ${provider})`);
 }
 
 export function createDatabase(): NeonDbType | PostgresDbType {
@@ -88,8 +92,11 @@ export function createDatabase(): NeonDbType | PostgresDbType {
   if (getDbDialect() === "sqlite") {
     const provider = getStringEnv("DB_PROVIDER", "sqlite");
     const mode = getStringEnv("DB_CONNECTION_MODE", "auto");
-    logger.log(`Creating database connection (dialect: sqlite, provider: ${provider}, mode: ${mode})`);
-    return createSqliteDb({}) as unknown as PostgresDbType;
+    logger.info(`Creating database connection (dialect: sqlite, provider: ${provider}, mode: ${mode})`);
+    const sqliteDb = createSqliteDb({});
+    if (isPostgresDbType(sqliteDb)) {
+      return sqliteDb;
+    }
   }
 
   const databaseUrl = getEnvironmentConfig().databaseUrl;

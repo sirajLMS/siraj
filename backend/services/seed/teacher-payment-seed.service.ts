@@ -42,8 +42,9 @@ export namespace TeacherPaymentSeedService {
       const results: TeacherPaymentSelectType[] = [];
       const byTeacher = new Map<string, Date[]>();
       for (const input of inputs) {
+        if (!input.teacherId || !input.paymentDate) continue;
         const dates = byTeacher.get(input.teacherId) ?? [];
-        dates.push(input.paymentDate);
+        dates.push(new Date(input.paymentDate));
         byTeacher.set(input.teacherId, dates);
       }
       const entries = [...byTeacher];

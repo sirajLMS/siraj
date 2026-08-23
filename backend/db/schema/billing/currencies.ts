@@ -1,10 +1,10 @@
 import {
-  createTable,
   booleanColumn,
+  createTable,
+  index,
   integerColumn,
   timestampColumn,
   varcharColumn,
-  index,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { countryCodeEnum, currencyCodeEnum } from "@/backend/db/schema/enums";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";

@@ -1,13 +1,11 @@
-import { type AnyPgColumnBuilder } from "drizzle-orm/pg-core";
-
+import type { AnyPgColumnBuilder } from "drizzle-orm/pg-core";
+import { createdAtColumn, primaryKeyColumn } from "@/backend/db/schema/__shared__/columnHelpers";
 import {
   createTable,
   index,
   uuidDefaultColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-
-import { createdAtColumn, primaryKeyColumn } from "@/backend/db/schema/__shared__/columnHelpers";
 import { storageFiles } from "@/backend/db/schema/storage/storage";
 
 /**
@@ -61,7 +59,7 @@ export function makeFileJunctionTable<TColumns extends FileJunctionColumns>(conf
       ...primaryKeyColumn(),
       fileId: uuidDefaultColumn("file_id")
         .notNull()
-        .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+        .references(() => storageFiles.id, { onDelete: "cascade" }),
       ...config.columns,
       usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
       ...createdAtColumn({ withDefaultNow: true }),

@@ -88,6 +88,10 @@ export namespace ComplaintResponseService {
     locale?: string
   ): Promise<ComplaintResponseReturnType> {
     const { complaintId, body } = input;
+    if (!complaintId) {
+      const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new NotFoundError("COMPLAINTS", tErrors.complaintNotFound);
+    }
 
     const complaint = await assertCanRespondToComplaint(responderUserId, complaintId, locale);
 

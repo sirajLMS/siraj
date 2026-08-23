@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { createdAtColumn, primaryKeyColumn, timestampColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import {
   bigintColumn,
   booleanColumn,
@@ -13,7 +14,6 @@ import {
   uuidDefaultColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-import { createdAtColumn, primaryKeyColumn, timestampColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import { accountStatusEnum, currencyCodeEnum } from "@/backend/db/schema/enums";
 import { AccountStatus } from "@/backend/enum";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -65,7 +65,7 @@ export const sessions = createTable(
   "sessions",
   {
     hashedId: varcharColumn("hashed_id", { length: 255 }).primaryKey(),
-    userId: uuidDefaultColumn("user_id").references(() => users.id as never, { onDelete: "cascade" }),
+    userId: uuidDefaultColumn("user_id").references(() => users.id, { onDelete: "cascade" }),
     ipAddress: inetColumn("ip_address"),
     userAgent: textColumn("user_agent"),
     payload: textColumn("payload").notNull(),
@@ -87,7 +87,7 @@ export const sessionMetadata = createTable(
     sessionId: varcharColumn("session_id", { length: 255 }).notNull().unique(),
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     deviceType: varcharColumn("device_type", { length: 50 }),
     deviceName: varcharColumn("device_name", { length: 255 }),
     ipAddress: inetColumn("ip_address"),

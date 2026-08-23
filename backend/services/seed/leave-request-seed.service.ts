@@ -33,7 +33,7 @@ export namespace LeaveRequestSeedService {
       return await LeaveRequestRepository.createManyIfMissing(inputs, tx);
     } catch (error) {
       if (!isDuplicateError(error)) throw error;
-      const classInstanceIds = inputs.map(i => i.classInstanceId);
+      const classInstanceIds = inputs.map(i => i.classInstanceId).filter((id): id is string => Boolean(id));
       return LeaveRequestRepository.findByClassInstanceIds(classInstanceIds, tx);
     }
   }

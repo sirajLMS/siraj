@@ -69,12 +69,9 @@ export function fullTextSearch(
  * Resolves the `ilike` portability blocker: `ilike()` emits the literal
  * `ILIKE` keyword which SQLite doesn't understand (drizzle-orm#3075).
  */
-export function caseInsensitiveLike(
-  column: Column | SQL | SQL.Aliased,
-  value: string
-): SQL {
+export function caseInsensitiveLike(column: Column | SQL | SQL.Aliased, value: string): SQL {
   if (isSqlite()) {
-    return like(column as Column, value);
+    return like(column, value);
   }
-  return ilike(column as Column, value);
+  return ilike(column, value);
 }

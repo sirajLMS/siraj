@@ -1,8 +1,4 @@
-import {
-  createTable,
-  index,
-  jsonbColumn,
-} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
+import { createTable, index, jsonbColumn } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import {
   supportedPaymentMethodBaseHead,
   supportedPaymentMethodBaseTail,

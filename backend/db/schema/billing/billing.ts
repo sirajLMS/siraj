@@ -1,15 +1,15 @@
 import {
   createTable,
-  uuidColumn,
-  uuidDefaultColumn,
-  timestampColumn,
-  varcharColumn,
-  textColumn,
+  index,
   integerColumn,
   jsonbColumn,
-  index,
-  uniqueIndex,
   primaryKey,
+  textColumn,
+  timestampColumn,
+  uniqueIndex,
+  uuidColumn,
+  uuidDefaultColumn,
+  varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { userPaymentMethods } from "@/backend/db/schema/billing/user-payment-methods";
 import { currencyCodeEnum, invoiceStatusEnum, invoiceTypeEnum, paymentMethodTypeEnum } from "@/backend/db/schema/enums";
@@ -28,8 +28,8 @@ export const invoices = createTable(
     id: uuidColumn("id"),
     parentId: uuidDefaultColumn("parent_id")
       .notNull()
-      .references(() => parents.id as never, { onDelete: "restrict" }),
-    studentId: uuidDefaultColumn("student_id").references(() => students.id as never, { onDelete: "restrict" }),
+      .references(() => parents.id, { onDelete: "restrict" }),
+    studentId: uuidDefaultColumn("student_id").references(() => students.id, { onDelete: "restrict" }),
     issueDate: textColumn("issue_date").notNull(), // date -> text (ISO string)
     dueDate: textColumn("due_date").notNull(), // date -> text (ISO string)
     paidDate: textColumn("paid_date"), // date -> text (ISO string)
@@ -40,7 +40,7 @@ export const invoices = createTable(
     version: integerColumn("version").notNull().default(0),
     exchangeRateSnapshot: textColumn("exchange_rate_snapshot"), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
     exchangeRateSource: varcharColumn("exchange_rate_source", { length: 50 }),
-    createdByUserId: uuidDefaultColumn("created_by_user_id").references(() => users.id as never, {
+    createdByUserId: uuidDefaultColumn("created_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     emailSentAt: timestampColumn("email_sent_at"),
@@ -66,7 +66,7 @@ export const invoiceCoverageMonths = createTable(
   {
     invoiceId: uuidDefaultColumn("invoice_id")
       .notNull()
-      .references(() => invoices.id as never, { onDelete: "restrict" }),
+      .references(() => invoices.id, { onDelete: "restrict" }),
     year: integerColumn("year").notNull(), // smallint -> integer (both return number)
     month: integerColumn("month").notNull(), // smallint -> integer (both return number)
   },
@@ -79,11 +79,11 @@ export const payments = createTable(
     id: uuidColumn("id"),
     invoiceId: uuidDefaultColumn("invoice_id")
       .notNull()
-      .references(() => invoices.id as never, { onDelete: "restrict" }),
+      .references(() => invoices.id, { onDelete: "restrict" }),
     amount: textColumn("amount").notNull(), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
     currency: currencyCodeEnum("currency").notNull().$type<CurrencyCode>(),
     paymentDate: timestampColumn("payment_date").notNull(),
-    userPaymentMethodId: uuidDefaultColumn("user_payment_method_id").references(() => userPaymentMethods.id as never, {
+    userPaymentMethodId: uuidDefaultColumn("user_payment_method_id").references(() => userPaymentMethods.id, {
       onDelete: "set null",
     }),
     paymentMethodType: paymentMethodTypeEnum("payment_method_type").notNull().$type<PaymentMethodType>(),
@@ -148,7 +148,7 @@ export const currencyExchangeAuditLogs = createTable(
     oldRate: textColumn("old_rate"), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
     newRate: textColumn("new_rate").notNull(), // numeric/decimal -> text for SQLite (precision-preserving); PG keeps numeric
     source: varcharColumn("source", { length: 50 }).notNull(),
-    changedByUserId: uuidDefaultColumn("changed_by_user_id").references(() => users.id as never, {
+    changedByUserId: uuidDefaultColumn("changed_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     createdAt: timestampColumn("created_at").notNull(),

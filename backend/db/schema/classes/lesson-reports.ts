@@ -40,13 +40,13 @@ export const lessonReports = createTable(
     id: uuidColumn("id"),
     classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id as never, { onDelete: "cascade" }),
+      .references(() => classInstances.id, { onDelete: "cascade" }),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "cascade" }),
     teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
-      .references(() => teachers.id as never, { onDelete: "cascade" }),
+      .references(() => teachers.id, { onDelete: "cascade" }),
     lessonDate: timestampColumn("lesson_date").notNull(),
     durationMinutes: integerColumn("duration_minutes").notNull(),
     attendanceEvaluation: attendanceEvaluationEnum("attendance_evaluation").notNull(),
@@ -56,9 +56,11 @@ export const lessonReports = createTable(
     status: lessonReportStatusEnum("status").notNull().default(LessonReportStatus.PENDING_REVIEW),
     submittedByUserId: uuidDefaultColumn("submitted_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "set null" }),
+      .references(() => users.id, { onDelete: "set null" }),
     submittedAt: timestampColumn("submitted_at").notNull().defaultNow(),
-    reviewedByUserId: uuidDefaultColumn("reviewed_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    reviewedByUserId: uuidDefaultColumn("reviewed_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     reviewedAt: timestampColumn("reviewed_at"),
     rejectionReason: textColumn("rejection_reason"),
     idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),

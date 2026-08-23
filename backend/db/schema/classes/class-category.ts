@@ -1,3 +1,4 @@
+import { primaryKeyColumn, timestampColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import {
   booleanColumn,
   createTable,
@@ -7,7 +8,6 @@ import {
   timestampColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-import { primaryKeyColumn, timestampColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 
 export const classCategories = createTable(
   "class_categories",

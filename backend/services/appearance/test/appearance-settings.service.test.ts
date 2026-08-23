@@ -25,6 +25,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { PaletteMode } from "@mui/material/styles";
 import { AppPermission } from "@/backend/enum";
+import type { AppearanceConflictError as AppearanceConflictErrorType } from "@/backend/services/appearance/appearance-settings.service";
 import type {
   AppearanceFields,
   AppearanceSettingsReturnType,
@@ -639,9 +640,7 @@ describe("AppearanceSettingsService — Tier 4 (security)", () => {
    * — each test then only asserts its own write-specific no-touch assertion.
    * Returns the narrowed error so the caller can do method-specific checks.
    */
-  async function expectStaleConflictError(
-    action: () => Promise<unknown>,
-  ): Promise<AppearanceConflictError> {
+  async function expectStaleConflictError(action: () => Promise<unknown>): Promise<AppearanceConflictErrorType> {
     const existing = makeRow({ updatedAt: UPDATED_AT });
     repoGetMock.mockImplementation(async () => existing);
     const error = await captureError(action);
@@ -658,14 +657,14 @@ describe("AppearanceSettingsService — Tier 4 (security)", () => {
   describe("optimistic concurrency conflict (expectedUpdatedAt)", () => {
     test("saveDraft throws AppearanceConflictError when expectedUpdatedAt is stale", async () => {
       await expectStaleConflictError(() =>
-        AppearanceSettingsService.saveDraft(DEFAULT_FIELDS, ACTOR_ID, T_ERRORS, undefined, STALE_UPDATED_AT),
+        AppearanceSettingsService.saveDraft(DEFAULT_FIELDS, ACTOR_ID, T_ERRORS, undefined, STALE_UPDATED_AT)
       );
       expect(repoUpsertMock).not.toHaveBeenCalled();
     });
 
     test("publish throws AppearanceConflictError when expectedUpdatedAt is stale", async () => {
       await expectStaleConflictError(() =>
-        AppearanceSettingsService.publish(ACTOR_ID, T_ERRORS, undefined, STALE_UPDATED_AT),
+        AppearanceSettingsService.publish(ACTOR_ID, T_ERRORS, undefined, STALE_UPDATED_AT)
       );
       expect(repoPublishDraftMock).not.toHaveBeenCalled();
       expect(revalidateTagMock).not.toHaveBeenCalled();

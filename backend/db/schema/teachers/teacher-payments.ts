@@ -25,8 +25,8 @@ export const teacherPayments = createTable(
     id: uuidColumn("id"),
     teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
-      .references(() => teachers.id as never, { onDelete: "restrict" }),
-    userPaymentMethodId: uuidDefaultColumn("user_payment_method_id").references(() => userPaymentMethods.id as never, {
+      .references(() => teachers.id, { onDelete: "restrict" }),
+    userPaymentMethodId: uuidDefaultColumn("user_payment_method_id").references(() => userPaymentMethods.id, {
       onDelete: "set null",
     }),
     paymentMethodType: paymentMethodTypeEnum("payment_method_type").notNull().$type<PaymentMethodType>(),

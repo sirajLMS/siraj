@@ -4,6 +4,7 @@ import type { Interface } from "node:readline";
 import { config } from "dotenv";
 import { resetEnvironmentCache } from "@/backend/lib/env";
 import { sanitizeUrlCredentials } from "@/backend/lib/utils/url";
+import { type DbDialect, readDbFileNameFromEnvFile, readDialectFromEnvFile } from "@/scripts/dbActions/dialect";
 import { clearDestructiveGuardEnvVars } from "@/scripts/lib/destructiveDbGuard";
 
 /** Default env file for non-interactive `bun db` commands when `--env-file` is omitted. */
@@ -13,10 +14,12 @@ const ENV_FILE_PREFIX = ".env";
 const EXCLUDED_ENV_FILES = new Set([".env.example"]);
 const DOTENV_QUIET = { quiet: true } as const;
 
-/** A discoverable root-level env file and its validated `DATABASE_URL`. */
+/** A discoverable root-level env file and its validated `DATABASE_URL` (or SQLite target). */
 export interface EnvFileOption {
   fileName: string;
   databaseUrl: string;
+  /** Resolved dialect for this env file (postgres | sqlite). */
+  dialect: DbDialect;
 }
 
 /** In-memory env file path used for the current `bun db` CLI session. */
@@ -60,6 +63,11 @@ export function isValidDatabaseUrl(databaseUrl: string | undefined): databaseUrl
     return false;
   }
 
+  // SQLite targets: file:/libsql:/http:/https: URLs (the libsql driver accepts all).
+  if (/^(file:|libsql:|https?:|wss?:)/i.test(trimmed)) {
+    return true;
+  }
+
   try {
     const parsed = new URL(trimmed);
     if (parsed.protocol !== "postgresql:" && parsed.protocol !== "postgres:") {
@@ -85,6 +93,41 @@ export function readDatabaseUrlFromEnvFile(fileName: string, rootDir = process.c
 
   const parsed = config({ path: filePath, processEnv: {}, ...DOTENV_QUIET }).parsed;
   return parsed?.DATABASE_URL;
+}
+
+/**
+ * Whether an env file is a SQLite env file (DB_PROVIDER=sqlite).
+ * SQLite env files use DB_FILE_NAME (or a file:/libsql: DATABASE_URL) and do
+ * not require a Postgres DATABASE_URL.
+ */
+export function isSqliteEnvFile(fileName: string, rootDir = process.cwd()): boolean {
+  return readDialectFromEnvFile(fileName, rootDir) === "sqlite";
+}
+
+/**
+ * Resolves the effective database URL for an env file.
+ *
+ * For PostgreSQL: returns DATABASE_URL (must be a valid postgres URL).
+ * For SQLite: returns DATABASE_URL when it points at a libsql target
+ * (file:/libsql:/http:), otherwise synthesizes a `file:` URL from DB_FILE_NAME
+ * (the convenience bare-path var).
+ */
+export function resolveEffectiveDatabaseUrl(fileName: string, rootDir = process.cwd()): string | undefined {
+  const dialect = readDialectFromEnvFile(fileName, rootDir);
+  const databaseUrl = readDatabaseUrlFromEnvFile(fileName, rootDir);
+
+  if (dialect === "sqlite") {
+    if (databaseUrl && /^(file:|libsql:|https?:|wss?:)/i.test(databaseUrl)) {
+      return databaseUrl;
+    }
+    const fileName2 = readDbFileNameFromEnvFile(fileName, rootDir);
+    if (fileName2) {
+      return fileName2.startsWith("file:") ? fileName2 : `file:${fileName2}`;
+    }
+    return undefined;
+  }
+
+  return databaseUrl;
 }
 
 function isDiscoverableEnvFile(fileName: string): boolean {
@@ -125,12 +168,14 @@ export function discoverEnvFilesWithDatabaseUrl(rootDir = process.cwd()): EnvFil
       continue;
     }
 
-    const databaseUrl = readDatabaseUrlFromEnvFile(entry, rootDir);
+    const dialect = readDialectFromEnvFile(entry, rootDir);
+    const databaseUrl =
+      dialect === "sqlite" ? resolveEffectiveDatabaseUrl(entry, rootDir) : readDatabaseUrlFromEnvFile(entry, rootDir);
     if (!isValidDatabaseUrl(databaseUrl)) {
       continue;
     }
 
-    options.push({ fileName: entry, databaseUrl });
+    options.push({ fileName: entry, databaseUrl, dialect });
   }
 
   return options.toSorted((a, b) => compareEnvFileNames(a.fileName, b.fileName));
@@ -220,7 +265,8 @@ export function applyEnvFile(fileName: string, rootDir = process.cwd()): void {
  * Passwords in the database URL are redacted.
  */
 export function formatEnvFileLabel(option: EnvFileOption): string {
-  return `${option.fileName} (${sanitizeUrlCredentials(option.databaseUrl)})`;
+  const dialectTag = option.dialect === "sqlite" ? " [sqlite]" : "";
+  return `${option.fileName}${dialectTag} (${sanitizeUrlCredentials(option.databaseUrl)})`;
 }
 
 /**

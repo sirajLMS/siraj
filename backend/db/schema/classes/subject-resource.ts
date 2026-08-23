@@ -16,10 +16,10 @@ export const subjectResources = createTable(
     id: uuidColumn("id"),
     subjectId: uuidDefaultColumn("subject_id")
       .notNull()
-      .references(() => classSubjects.id as never, { onDelete: "cascade" }),
+      .references(() => classSubjects.id, { onDelete: "cascade" }),
     learningResourceId: uuidDefaultColumn("learning_resource_id")
       .notNull()
-      .references(() => learningResources.id as never, { onDelete: "cascade" }),
+      .references(() => learningResources.id, { onDelete: "cascade" }),
     resourceType: varcharColumn("resource_type", { length: 50 }),
     sortOrder: integerColumn("sort_order").notNull().default(0),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),

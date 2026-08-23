@@ -17,7 +17,7 @@ export const meetingProviderTokens = createTable(
     id: uuidColumn("id"),
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     providerSlug: varcharColumn("provider_slug", { length: 50 }).notNull(),
     accessToken: encryptedText("access_token").notNull(),
     refreshToken: encryptedText("refresh_token"),

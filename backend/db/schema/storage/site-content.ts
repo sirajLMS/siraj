@@ -19,7 +19,7 @@ export const siteContent = createTable(
     body: textColumn("body").notNull(),
     contentType: varcharColumn("content_type", { length: 50 }).notNull().default("page"),
     isPublished: booleanColumn("is_published").notNull().default(true),
-    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id as never, {
+    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     createdAt: timestampColumn("created_at").notNull(),

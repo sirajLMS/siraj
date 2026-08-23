@@ -27,13 +27,13 @@ export const teacherDues = createTable(
     id: uuidColumn("id"),
     teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
-      .references(() => teachers.id as never, { onDelete: "cascade" }),
+      .references(() => teachers.id, { onDelete: "cascade" }),
     classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id as never, { onDelete: "cascade" }),
+      .references(() => classInstances.id, { onDelete: "cascade" }),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "cascade" }),
     // PG-only: `numeric` column has no dialect-aware helper — degraded to TEXT.
     // SQLite uses NUMERIC column affinity; precision/scale enforced at app layer.
     hours: textColumn("hours").notNull(),
@@ -46,9 +46,9 @@ export const teacherDues = createTable(
     status: teacherDueStatusEnum("status").notNull().default(TeacherDueStatus.PENDING).$type<TeacherDueStatus>(),
     approvedByUserId: uuidDefaultColumn("approved_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     approvedAt: timestampColumn("approved_at").notNull().defaultNow(),
-    teacherPaymentId: uuidDefaultColumn("teacher_payment_id").references(() => teacherPayments.id as never, {
+    teacherPaymentId: uuidDefaultColumn("teacher_payment_id").references(() => teacherPayments.id, {
       onDelete: "set null",
     }),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),

@@ -267,8 +267,9 @@ export namespace PaymentMethodService {
     tErrors: ErrorsLabels,
     tx?: DBTransaction
   ): Promise<UserPaymentMethodReturnType> {
-    await assertActorCanManageTarget(actorUserId, input.userId, tErrors);
-    const parsed = userPaymentMethodSubmitInputSchema.parse(input);
+    const targetUserId = input.userId ?? actorUserId;
+    await assertActorCanManageTarget(actorUserId, targetUserId, tErrors);
+    const parsed = userPaymentMethodSubmitInputSchema.parse({ ...input, userId: targetUserId });
     const encryptedDetails = encryptDetailsForStorage(parsed.type, input.details);
 
     const run = async (t: DBTransaction) => {

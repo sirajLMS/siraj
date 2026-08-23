@@ -20,13 +20,13 @@ const commonAvailabilityColumns = {
   id: uuidColumn("id"),
   teacherId: uuidDefaultColumn("teacher_id")
     .notNull()
-    .references(() => teachers.id as never, { onDelete: "cascade" }),
+    .references(() => teachers.id, { onDelete: "cascade" }),
   dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
   // PG-only: `time` column has no dialect-aware helper — degraded to TEXT.
   // SQLite stores time strings (HH:MM:SS); app layer handles parsing.
   startTime: textColumn("start_time").notNull(),
   endTime: textColumn("end_time").notNull(),
-  timezoneId: integerColumn("timezone_id").references(() => timezones.id as never),
+  timezoneId: integerColumn("timezone_id").references(() => timezones.id),
   timezone: varcharColumn("timezone", { length: 100 }).notNull(),
   utcOffsetSnapshot: integerColumn("utc_offset_snapshot"),
   // PG-only: `date` column has no dialect-aware helper — degraded to TEXT.
@@ -78,19 +78,19 @@ export const teacherVacationRequests = createTable(
     id: uuidColumn("id"),
     teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
-      .references(() => teachers.id as never, { onDelete: "cascade" }),
+      .references(() => teachers.id, { onDelete: "cascade" }),
     requestedByUserId: uuidDefaultColumn("requested_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     startAt: timestampColumn("start_at").notNull(),
     endAt: timestampColumn("end_at").notNull(),
-    timezoneId: integerColumn("timezone_id").references(() => timezones.id as never),
+    timezoneId: integerColumn("timezone_id").references(() => timezones.id),
     timezone: varcharColumn("timezone", { length: 100 }).notNull(),
     utcOffsetSnapshot: integerColumn("utc_offset_snapshot"),
     reason: textColumn("reason"),
     status: vacationRequestStatusEnum("status").notNull().default("PENDING"),
     processedAt: timestampColumn("processed_at"),
-    processedByUserId: uuidDefaultColumn("processed_by_user_id").references(() => users.id as never, {
+    processedByUserId: uuidDefaultColumn("processed_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     createdAt: timestampColumn("created_at").notNull(),

@@ -37,7 +37,7 @@ export const appearanceSettings = createTable(
     siteDescription: textColumn("site_description").notNull(),
     defaultColorScheme: textColumn("default_color_scheme").$type<PaletteMode>().notNull(),
     draftFields: jsonbColumn<AppearanceFields>("draft_fields").notNull(),
-    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
     updatedAt: timestampColumn("updated_at").defaultNow().notNull(),
     createdAt: timestampColumn("created_at").defaultNow().notNull(),
   },

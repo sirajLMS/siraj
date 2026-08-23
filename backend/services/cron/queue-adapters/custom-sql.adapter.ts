@@ -90,10 +90,30 @@ interface CustomSqlState {
 
 async function ensureInit(state: CustomSqlState): Promise<QueryablePool> {
   if (state.pool) return state.pool;
-  state.pool = createPool();
-  await state.pool.query(CREATE_TABLE_SQL);
+  const rawPool = createPool();
+  if (!rawPool) {
+    throw new Error("Cannot initialize CustomSqlAdapter: database pool is null (e.g. SQLite dialect is active)");
+  }
+  const queryFn = rawPool.query as (
+    sql: string,
+    params?: unknown[]
+  ) => Promise<{ rows?: unknown[]; rowCount?: number | null }>;
+  const pool: QueryablePool = {
+    query: async (text: string, values?: unknown[]) => {
+      const result = await queryFn.call(rawPool, text, values);
+      return {
+        rows: Array.isArray(result?.rows) ? result.rows.filter(isRecord) : [],
+        rowCount: typeof result?.rowCount === "number" ? result.rowCount : (result?.rows?.length ?? 0),
+      };
+    },
+    end: async () => {
+      await rawPool.end();
+    },
+  };
+  state.pool = pool;
+  await pool.query(CREATE_TABLE_SQL);
   logger.info("cron.customSql.initialized", {});
-  return state.pool;
+  return pool;
 }
 
 function trackRunId(state: CustomSqlState, runId: string, queueId: string): void {

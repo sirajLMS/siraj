@@ -23,7 +23,7 @@ export const teachers = createTable(
     userId: uuidDefaultColumn("user_id")
       .notNull()
       .unique()
-      .references(() => users.id as never, { onDelete: "restrict" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     nationality: countryCodeEnum("nationality"),
     nationalId: encryptedText("national_id"),
     phone: varcharColumn("phone", { length: 50 }),

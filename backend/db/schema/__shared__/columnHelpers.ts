@@ -1,4 +1,5 @@
-import { uuidColumn, timestampColumn, uuidDefaultColumn } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { timestampColumn, uuidColumn, uuidDefaultColumn } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 
 /**
  * Shared column helpers that eliminate the the structural duplication of the
@@ -50,21 +51,21 @@ export function createdAtColumn(options: Pick<TimestampColumnsOptions, "withDefa
 }
 
 interface CoreScheduleColumnsRefs {
-  students: () => { id: unknown };
-  teachers: () => { id: unknown };
-  classSubjects: () => { id: unknown };
+  students: () => { id: AnyPgColumn };
+  teachers: () => { id: AnyPgColumn };
+  classSubjects: () => { id: AnyPgColumn };
 }
 
 export function coreScheduleColumns(refs: CoreScheduleColumnsRefs) {
   return {
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => refs.students().id as never, { onDelete: "restrict" }),
+      .references(() => refs.students().id, { onDelete: "restrict" }),
     teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
-      .references(() => refs.teachers().id as never, { onDelete: "restrict" }),
+      .references(() => refs.teachers().id, { onDelete: "restrict" }),
     subjectId: uuidDefaultColumn("subject_id")
       .notNull()
-      .references(() => refs.classSubjects().id as never, { onDelete: "restrict" }),
+      .references(() => refs.classSubjects().id, { onDelete: "restrict" }),
   };
 }

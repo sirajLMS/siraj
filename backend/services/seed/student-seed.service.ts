@@ -88,7 +88,11 @@ export namespace StudentSeedService {
       return await StudentProgressRepository.upsertMany(inputs, tx);
     } catch (error) {
       if (!isDuplicateError(error)) throw error;
-      const pairs = inputs.map(i => ({ studentId: i.studentId, classInstanceId: i.classInstanceId }));
+      const pairs = inputs
+        .filter((i): i is StudentProgressUpsertInput & { studentId: string; classInstanceId: string } =>
+          Boolean(i.studentId && i.classInstanceId)
+        )
+        .map(i => ({ studentId: i.studentId, classInstanceId: i.classInstanceId }));
       return StudentProgressRepository.findByStudentClassPairs(pairs, tx);
     }
   }

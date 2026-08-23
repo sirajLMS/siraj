@@ -1,13 +1,13 @@
 import {
   createTable,
+  index,
+  integerColumn,
+  textColumn,
+  timestampColumn,
+  uniqueIndex,
   uuidColumn,
   uuidDefaultColumn,
-  timestampColumn,
   varcharColumn,
-  textColumn,
-  integerColumn,
-  index,
-  uniqueIndex,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { payments } from "@/backend/db/schema/billing/billing";
 import { classInstances } from "@/backend/db/schema/classes/scheduling";
@@ -21,19 +21,19 @@ export const creditTransactions = createTable(
     id: uuidColumn("id"),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "cascade" }),
     changeAmount: integerColumn("change_amount").notNull(),
     reason: creditReasonEnum("reason").notNull(),
-    sourcePaymentId: uuidDefaultColumn("source_payment_id").references(() => payments.id as never, {
+    sourcePaymentId: uuidDefaultColumn("source_payment_id").references(() => payments.id, {
       onDelete: "set null",
     }),
-    classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id as never, {
+    classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id, {
       onDelete: "set null",
     }),
     notes: textColumn("notes"),
     creditedByUserId: uuidDefaultColumn("credited_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "set null" }),
+      .references(() => users.id, { onDelete: "set null" }),
     idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),
     updatedAt: timestampColumn("updated_at").notNull().defaultNow(),

@@ -28,14 +28,16 @@ export const userPaymentMethods = createTable(
     id: uuidColumn("id"),
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "restrict" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     type: paymentMethodTypeEnum("type").notNull(),
     direction: paymentDirectionEnum("direction").notNull(),
     isDefault: booleanColumn("is_default").notNull().default(false),
     label: varcharColumn("label", { length: 100 }),
     details: jsonbColumn<PaymentMethodDetails>("details").notNull(),
     verifiedAt: timestampColumn("verified_at"),
-    verifiedByUserId: uuidDefaultColumn("verified_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    verifiedByUserId: uuidDefaultColumn("verified_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestampColumn("created_at").notNull(),
     updatedAt: timestampColumn("updated_at").notNull(),
   },

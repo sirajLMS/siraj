@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
-import { type AnyPgColumn } from "drizzle-orm/pg-core";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import { coreScheduleColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import {
   booleanColumn,
   checkConstraint,
@@ -14,7 +15,6 @@ import {
   uuidDefaultColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-import { coreScheduleColumns } from "@/backend/db/schema/__shared__/columnHelpers";
 import { quotas } from "@/backend/db/schema/billing/quotas";
 import { classSubjects } from "@/backend/db/schema/classes/class-subject";
 import {
@@ -56,20 +56,16 @@ export const recurringSchedules = createTable(
   "recurring_schedules",
   {
     id: uuidColumn("id"),
-    // Cast tables to `never` to satisfy `coreScheduleColumns`'s `{ id: unknown }`
-    // interface — the `TColumns extends Record<string, unknown>` constraint on
-    // `createTable` weakens column typing to an index signature, so the tables no
-    // longer expose an explicit `id` property for structural compatibility.
     ...coreScheduleColumns({
-      students: () => students as never,
-      teachers: () => teachers as never,
-      classSubjects: () => classSubjects as never,
+      students: () => students,
+      teachers: () => teachers,
+      classSubjects: () => classSubjects,
     }),
     avatarUrl: varcharColumn("avatar_url", { length: 1024 }),
     durationMinutes: integerColumn("duration_minutes").notNull(),
     // PG-only: time — stored as TEXT on SQLite (drizzle returns string for both).
     defaultStartTime: textColumn("default_start_time").notNull(),
-    timezoneId: integerColumn("timezone_id").references(() => timezones.id as never),
+    timezoneId: integerColumn("timezone_id").references(() => timezones.id),
     timezone: varcharColumn("timezone", { length: 100 }).notNull(),
     utcOffsetSnapshot: integerColumn("utc_offset_snapshot"), // Offset in minutes at time of schedule creation/update
     // Recurring-class-level hourly rate (highest non-override precedence tier).
@@ -81,7 +77,7 @@ export const recurringSchedules = createTable(
     // PG-only: date — stored as TEXT on SQLite (drizzle returns string for both).
     effectiveFrom: textColumn("effective_from"),
     effectiveUntil: textColumn("effective_until"),
-    quotaId: uuidDefaultColumn("quota_id").references(() => quotas.id as never, { onDelete: "set null" }),
+    quotaId: uuidDefaultColumn("quota_id").references(() => quotas.id, { onDelete: "set null" }),
     earmarkedClasses: integerColumn("earmarked_classes"),
     schedulingMode: schedulingModeEnum("scheduling_mode").notNull().default("NUMBER_OF_CLASSES"),
     generationHorizonWeeks: integerColumn("generation_horizon_weeks"),
@@ -121,7 +117,7 @@ export const recurringScheduleDays = createTable(
     id: uuidColumn("id"),
     recurringScheduleId: uuidDefaultColumn("recurring_schedule_id")
       .notNull()
-      .references(() => recurringSchedules.id as never, { onDelete: "restrict" }),
+      .references(() => recurringSchedules.id, { onDelete: "restrict" }),
     dayOfWeek: dayOfWeekEnum("day_of_week").notNull(),
     // PG-only: time — stored as TEXT on SQLite (drizzle returns string for both).
     startTime: textColumn("start_time").notNull(),
@@ -153,25 +149,23 @@ export const classInstances = createTable(
   "class_instances",
   {
     id: uuidColumn("id"),
-    // See `recurringSchedules` above for the rationale on the `as never` casts.
     ...coreScheduleColumns({
-      students: () => students as never,
-      teachers: () => teachers as never,
-      classSubjects: () => classSubjects as never,
+      students: () => students,
+      teachers: () => teachers,
+      classSubjects: () => classSubjects,
     }),
-    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id").references(() => recurringSchedules.id as never, {
+    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id").references(() => recurringSchedules.id, {
       onDelete: "set null",
     }),
     // Self-reference — explicit `AnyPgColumn` return type annotation breaks the
     // circular type inference (TS7022) that would otherwise make `classInstances`
     // implicitly `any` because `originalClassId` references `classInstances.id`.
-    originalClassId: uuidDefaultColumn("original_class_id").references(
-      (): AnyPgColumn => classInstances.id as never,
-      { onDelete: "set null" }
-    ),
+    originalClassId: uuidDefaultColumn("original_class_id").references((): AnyPgColumn => classInstances.id, {
+      onDelete: "set null",
+    }),
     scheduledStartAt: timestampColumn("scheduled_start_at").notNull(),
     scheduledEndAt: timestampColumn("scheduled_end_at").notNull(),
-    bookingTimezoneId: integerColumn("booking_timezone_id").references(() => timezones.id as never),
+    bookingTimezoneId: integerColumn("booking_timezone_id").references(() => timezones.id),
     bookingTimezone: varcharColumn("booking_timezone", { length: 100 }), // Snapshot of IANA ID at booking
     bookingUtcOffset: integerColumn("booking_utc_offset"), // Snapshot of UTC offset in minutes at booking
     durationMinutes: integerColumn("duration_minutes").notNull(),
@@ -181,17 +175,21 @@ export const classInstances = createTable(
     isRescheduled: booleanColumn("is_rescheduled").notNull().default(false),
     isFrozen: booleanColumn("is_frozen").notNull().default(false),
     meetingJoinUrl: varcharColumn("meeting_join_url", { length: 1024 }),
-    userMeetingConfigId: uuidDefaultColumn("user_meeting_config_id").references(() => userMeetingConfigs.id as never, {
+    userMeetingConfigId: uuidDefaultColumn("user_meeting_config_id").references(() => userMeetingConfigs.id, {
       onDelete: "set null",
     }),
-    meetingProviderId: uuidDefaultColumn("meeting_provider_id").references(() => meetingProviders.id as never, {
+    meetingProviderId: uuidDefaultColumn("meeting_provider_id").references(() => meetingProviders.id, {
       onDelete: "set null",
     }),
     meetingConfigSnapshot: jsonbColumn<MeetingConfigSnapshot>("meeting_config_snapshot"),
     activatedAt: timestampColumn("activated_at"),
-    activatedByUserId: uuidDefaultColumn("activated_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    activatedByUserId: uuidDefaultColumn("activated_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     forceActivated: booleanColumn("force_activated").notNull().default(false),
-    forceActivatedByUserId: uuidDefaultColumn("force_activated_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    forceActivatedByUserId: uuidDefaultColumn("force_activated_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     actualStartAt: timestampColumn("actual_start_at"),
     actualEndAt: timestampColumn("actual_end_at"),
     quotaDeducted: booleanColumn("quota_deducted").notNull().default(false),
@@ -304,12 +302,12 @@ export const classStatusEvents = createTable(
     id: uuidColumn("id"),
     classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id as never, { onDelete: "restrict" }),
+      .references(() => classInstances.id, { onDelete: "restrict" }),
     eventType: varcharColumn("event_type", { length: 50 }).notNull(),
     fromState: jsonbColumn("from_state"),
     toState: jsonbColumn("to_state"),
     description: textColumn("description"),
-    actorUserId: uuidDefaultColumn("actor_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    actorUserId: uuidDefaultColumn("actor_user_id").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestampColumn("created_at").notNull(),
   },
   table => [
@@ -326,16 +324,18 @@ export const leaveRequests = createTable(
     id: uuidColumn("id"),
     classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id as never, { onDelete: "restrict" }),
+      .references(() => classInstances.id, { onDelete: "restrict" }),
     requestedByUserId: uuidDefaultColumn("requested_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     requesterType: leaveRequesterTypeEnum("requester_type").notNull(),
     reason: textColumn("reason"),
     status: leaveRequestStatusEnum("status").notNull(),
     createdAt: timestampColumn("created_at").notNull(),
     processedAt: timestampColumn("processed_at"),
-    processedByUserId: uuidDefaultColumn("processed_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    processedByUserId: uuidDefaultColumn("processed_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
   },
   table => [
     index("leave_requests_class_instance_id_idx").on(table.classInstanceId),
@@ -362,8 +362,8 @@ export const leaveQuotaUsage = createTable(
   "leave_quota_usage",
   {
     id: uuidColumn("id"),
-    teacherId: uuidDefaultColumn("teacher_id").references(() => teachers.id as never, { onDelete: "restrict" }),
-    studentId: uuidDefaultColumn("student_id").references(() => students.id as never, { onDelete: "restrict" }),
+    teacherId: uuidDefaultColumn("teacher_id").references(() => teachers.id, { onDelete: "restrict" }),
+    studentId: uuidDefaultColumn("student_id").references(() => students.id, { onDelete: "restrict" }),
     // PG-only: smallint — stored as INTEGER on SQLite (drizzle returns number for both).
     periodYear: integerColumn("period_year").notNull(),
     // PG-only: smallint — stored as INTEGER on SQLite (drizzle returns number for both).
@@ -392,7 +392,7 @@ export const dstMigrationRuns = createTable(
     id: uuidColumn("id"),
     runByUserId: uuidDefaultColumn("run_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     offsetMinutes: integerColumn("offset_minutes").notNull(),
     description: varcharColumn("description", { length: 255 }),
     createdAt: timestampColumn("created_at").notNull(),
@@ -406,10 +406,10 @@ export const dstMigrationEntries = createTable(
     id: uuidColumn("id"),
     runId: uuidDefaultColumn("run_id")
       .notNull()
-      .references(() => dstMigrationRuns.id as never, { onDelete: "cascade" }),
+      .references(() => dstMigrationRuns.id, { onDelete: "cascade" }),
     recurringScheduleId: uuidDefaultColumn("recurring_schedule_id")
       .notNull()
-      .references(() => recurringSchedules.id as never, { onDelete: "restrict" }),
+      .references(() => recurringSchedules.id, { onDelete: "restrict" }),
     result: dstMigrationResultEnum("result").notNull(),
     conflictDetail: textColumn("conflict_detail"),
   },
@@ -427,7 +427,7 @@ export const classInstancePerformance = createTable(
     classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
       .unique()
-      .references(() => classInstances.id as never, { onDelete: "cascade" }),
+      .references(() => classInstances.id, { onDelete: "cascade" }),
     engagementScore: integerColumn("engagement_score"),
     assessmentProgress: integerColumn("assessment_progress"),
     assessmentTotal: integerColumn("assessment_total"),

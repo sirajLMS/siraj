@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db/dialect";
 import {
   booleanColumn,
   checkConstraint,
@@ -12,7 +13,6 @@ import {
   uuidDefaultColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-import { isSqlite } from "@/backend/db/dialect";
 import { classInstances } from "@/backend/db/schema/classes/scheduling";
 import { appLanguageEnum, genderEnum, studentStatusEnum } from "@/backend/db/schema/enums";
 import { parents } from "@/backend/db/schema/parents/parents";
@@ -49,11 +49,11 @@ export const students = createTable(
   "students",
   {
     id: uuidColumn("id"),
-    parentId: uuidDefaultColumn("parent_id").references(() => parents.id as never, { onDelete: "cascade" }),
+    parentId: uuidDefaultColumn("parent_id").references(() => parents.id, { onDelete: "cascade" }),
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
-    primaryTeacherId: uuidDefaultColumn("primary_teacher_id").references(() => teachers.id as never, {
+      .references(() => users.id, { onDelete: "cascade" }),
+    primaryTeacherId: uuidDefaultColumn("primary_teacher_id").references(() => teachers.id, {
       onDelete: "set null",
     }),
     name: varcharColumn("name", { length: 255 }).notNull(),
@@ -125,10 +125,10 @@ export const studentStatusHistory = createTable(
     id: uuidColumn("id"),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "cascade" }),
     oldStatus: studentStatusEnum("old_status"),
     newStatus: studentStatusEnum("new_status").notNull(),
-    changedByUserId: uuidDefaultColumn("changed_by_user_id").references(() => users.id as never, {
+    changedByUserId: uuidDefaultColumn("changed_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),
@@ -155,13 +155,13 @@ export const studentProgress = createTable(
     id: uuidColumn("id"),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "cascade" }),
     classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id as never, { onDelete: "restrict" }),
+      .references(() => classInstances.id, { onDelete: "restrict" }),
     teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
-      .references(() => teachers.id as never, { onDelete: "restrict" }),
+      .references(() => teachers.id, { onDelete: "restrict" }),
     topicsCovered: textColumn("topics_covered").notNull(),
     homeworkAssigned: textColumn("homework_assigned"),
     notes: textColumn("notes"),
@@ -185,12 +185,12 @@ export const teacherAssignments = createTable(
     id: uuidColumn("id"),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "cascade" }),
     teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
-      .references(() => teachers.id as never, { onDelete: "restrict" }),
+      .references(() => teachers.id, { onDelete: "restrict" }),
     assignedAt: timestampColumn("assigned_at").notNull(),
-    assignedByUserId: uuidDefaultColumn("assigned_by_user_id").references(() => users.id as never, {
+    assignedByUserId: uuidDefaultColumn("assigned_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     endedAt: timestampColumn("ended_at"),

@@ -19,7 +19,7 @@ export const groupClasses = createTable(
     id: uuidColumn("id"),
     classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id as never, { onDelete: "cascade" }),
+      .references(() => classInstances.id, { onDelete: "cascade" }),
     courseName: varcharColumn("course_name", { length: 255 }).notNull(),
     teacherName: varcharColumn("teacher_name", { length: 255 }).notNull(),
     classType: varcharColumn("class_type", { length: 50 }).notNull(),
@@ -49,10 +49,10 @@ export const groupClassEnrollments = createTable(
     id: uuidColumn("id"),
     groupClassId: uuidDefaultColumn("group_class_id")
       .notNull()
-      .references(() => groupClasses.id as never, { onDelete: "cascade" }),
+      .references(() => groupClasses.id, { onDelete: "cascade" }),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "restrict" }),
+      .references(() => students.id, { onDelete: "restrict" }),
     studentIdNumber: varcharColumn("student_id_number", { length: 50 }),
     attendanceStatus: varcharColumn("attendance_status", { length: 20 }).notNull().default("pending"),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),
@@ -73,16 +73,16 @@ export const classCommunications = createTable(
     id: uuidColumn("id"),
     groupClassId: uuidDefaultColumn("group_class_id")
       .notNull()
-      .references(() => groupClasses.id as never, { onDelete: "cascade" }),
+      .references(() => groupClasses.id, { onDelete: "cascade" }),
     type: varcharColumn("type", { length: 20 }).notNull(),
     title: varcharColumn("title", { length: 255 }).notNull(),
     description: textColumn("description"),
     isActive: booleanColumn("is_active").notNull().default(true),
     isDelivered: booleanColumn("is_delivered"),
-    notificationDeliveryId: uuidDefaultColumn("notification_delivery_id").references(() => notificationDeliveries.id as never, {
+    notificationDeliveryId: uuidDefaultColumn("notification_delivery_id").references(() => notificationDeliveries.id, {
       onDelete: "set null",
     }),
-    classStatusEventId: uuidDefaultColumn("class_status_event_id").references(() => classStatusEvents.id as never, {
+    classStatusEventId: uuidDefaultColumn("class_status_event_id").references(() => classStatusEvents.id, {
       onDelete: "set null",
     }),
     timestamp: timestampColumn("timestamp"),

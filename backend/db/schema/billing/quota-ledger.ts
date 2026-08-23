@@ -1,13 +1,13 @@
 import {
   createTable,
+  index,
+  integerColumn,
+  textColumn,
+  timestampColumn,
+  uniqueIndex,
   uuidColumn,
   uuidDefaultColumn,
-  timestampColumn,
   varcharColumn,
-  textColumn,
-  integerColumn,
-  index,
-  uniqueIndex,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { quotas } from "@/backend/db/schema/billing/quotas";
 import { classInstances, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
@@ -21,14 +21,14 @@ export const quotaLedger = createTable(
     id: uuidColumn("id"),
     quotaId: uuidDefaultColumn("quota_id")
       .notNull()
-      .references(() => quotas.id as never, { onDelete: "restrict" }),
+      .references(() => quotas.id, { onDelete: "restrict" }),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "restrict" }),
-    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id").references(() => recurringSchedules.id as never, {
+      .references(() => students.id, { onDelete: "restrict" }),
+    recurringScheduleId: uuidDefaultColumn("recurring_schedule_id").references(() => recurringSchedules.id, {
       onDelete: "set null",
     }),
-    classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id as never, {
+    classInstanceId: uuidDefaultColumn("class_instance_id").references(() => classInstances.id, {
       onDelete: "set null",
     }),
     delta: integerColumn("delta").notNull(),
@@ -44,7 +44,7 @@ export const quotaLedger = createTable(
      * deduplicated via the unique index below.
      */
     idempotencyKey: varcharColumn("idempotency_key", { length: 255 }).notNull(),
-    actorUserId: uuidDefaultColumn("actor_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    actorUserId: uuidDefaultColumn("actor_user_id").references(() => users.id, { onDelete: "set null" }),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),
     updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
   },

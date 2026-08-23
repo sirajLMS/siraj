@@ -6,6 +6,7 @@ import {
   isPermanentlyDisabled,
   PERMANENTLY_DISABLED_SUFFIX,
 } from "@/scripts/dbActions/destructive";
+import { readDialectFromEnvFile } from "@/scripts/dbActions/dialect";
 import {
   applyEnvFile,
   DEFAULT_ENV_FILE,
@@ -63,7 +64,8 @@ function printSelectedEnv(fileName: string): void {
     return;
   }
 
-  globalThis.console.log(`\nUsing env file: ${formatEnvFileLabel({ fileName, databaseUrl })}`);
+  const dialect = readDialectFromEnvFile(fileName);
+  globalThis.console.log(`\nUsing env file: ${formatEnvFileLabel({ fileName, databaseUrl, dialect })}`);
 }
 
 async function selectAndApplyEnv(rl: Interface): Promise<void> {

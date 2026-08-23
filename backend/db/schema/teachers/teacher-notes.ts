@@ -16,7 +16,7 @@ export const teacherImportantNotes = createTable(
   "teacher_important_notes",
   {
     id: uuidColumn("id"),
-    teacherId: uuidDefaultColumn("teacher_id").references(() => teachers.id as never, { onDelete: "restrict" }),
+    teacherId: uuidDefaultColumn("teacher_id").references(() => teachers.id, { onDelete: "restrict" }),
     title: varcharColumn("title", { length: 300 }).notNull(),
     body: textColumn("body"),
     isPublished: booleanColumn("is_published").notNull().default(false),
@@ -25,7 +25,7 @@ export const teacherImportantNotes = createTable(
     expiresAt: timestampColumn("expires_at"),
     createdByUserId: uuidDefaultColumn("created_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "restrict" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     createdAt: timestampColumn("created_at").notNull().defaultNow(),
     updatedAt: timestampColumn("updated_at").notNull().defaultNow(),
     deletedAt: timestampColumn("deleted_at"),

@@ -1,3 +1,4 @@
+import { createdAtColumn, primaryKeyColumn } from "@/backend/db/schema/__shared__/columnHelpers";
 import {
   bigintColumn,
   booleanColumn,
@@ -8,7 +9,6 @@ import {
   uuidDefaultColumn,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
-import { createdAtColumn, primaryKeyColumn } from "@/backend/db/schema/__shared__/columnHelpers";
 import { invoices } from "@/backend/db/schema/billing/billing";
 import { classInstances, recurringSchedules } from "@/backend/db/schema/classes/scheduling";
 import { complaints, learningResources } from "@/backend/db/schema/communications/communications";
@@ -40,10 +40,10 @@ export const userFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
@@ -56,10 +56,10 @@ export const teacherFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     teacherId: uuidDefaultColumn("teacher_id")
       .notNull()
-      .references(() => teachers.id as never, { onDelete: "cascade" }),
+      .references(() => teachers.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
@@ -75,10 +75,10 @@ export const studentFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
@@ -94,10 +94,10 @@ export const parentFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     parentId: uuidDefaultColumn("parent_id")
       .notNull()
-      .references(() => parents.id as never, { onDelete: "cascade" }),
+      .references(() => parents.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
@@ -110,10 +110,10 @@ export const invoiceFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     invoiceId: uuidDefaultColumn("invoice_id")
       .notNull()
-      .references(() => invoices.id as never, { onDelete: "cascade" }),
+      .references(() => invoices.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
@@ -129,10 +129,10 @@ export const complaintFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     complaintId: uuidDefaultColumn("complaint_id")
       .notNull()
-      .references(() => complaints.id as never, { onDelete: "cascade" }),
+      .references(() => complaints.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
@@ -148,10 +148,10 @@ export const learningResourceFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     learningResourceId: uuidDefaultColumn("learning_resource_id")
       .notNull()
-      .references(() => learningResources.id as never, { onDelete: "cascade" }),
+      .references(() => learningResources.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
@@ -167,10 +167,10 @@ export const staffProfileFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     staffProfileId: uuidDefaultColumn("staff_profile_id")
       .notNull()
-      .references(() => staffProfiles.id as never, { onDelete: "cascade" }),
+      .references(() => staffProfiles.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
@@ -186,10 +186,10 @@ export const recurringScheduleFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     recurringScheduleId: uuidDefaultColumn("recurring_schedule_id")
       .notNull()
-      .references(() => recurringSchedules.id as never, { onDelete: "cascade" }),
+      .references(() => recurringSchedules.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },
@@ -205,10 +205,10 @@ export const classInstanceFiles = createTable(
     ...primaryKeyColumn(),
     fileId: uuidDefaultColumn("file_id")
       .notNull()
-      .references(() => storageFiles.id as never, { onDelete: "cascade" }),
+      .references(() => storageFiles.id, { onDelete: "cascade" }),
     classInstanceId: uuidDefaultColumn("class_instance_id")
       .notNull()
-      .references(() => classInstances.id as never, { onDelete: "cascade" }),
+      .references(() => classInstances.id, { onDelete: "cascade" }),
     usageType: varcharColumn("usage_type", { length: 100 }).notNull(),
     ...createdAtColumn({ withDefaultNow: true }),
   },

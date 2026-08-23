@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { type PgColumn } from "drizzle-orm/pg-core";
+import type { PgColumn } from "drizzle-orm/pg-core";
 import { index, uniqueIndex } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 
 /**

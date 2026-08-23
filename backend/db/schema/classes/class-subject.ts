@@ -20,7 +20,7 @@ export const classSubjects = createTable(
     id: uuidColumn("id"),
     categoryId: uuidDefaultColumn("category_id")
       .notNull()
-      .references(() => classCategories.id as never, { onDelete: "restrict" }),
+      .references(() => classCategories.id, { onDelete: "restrict" }),
     name: varcharColumn("name", { length: 200 }).notNull(),
     slug: varcharColumn("slug", { length: 100 }).notNull().unique(),
     description: textColumn("description"),

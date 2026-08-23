@@ -17,7 +17,7 @@ export function meetingConfigSharedColumns() {
   return {
     providerId: uuidDefaultColumn("provider_id")
       .notNull()
-      .references(() => meetingProviders.id as never, { onDelete: "restrict" }),
+      .references(() => meetingProviders.id, { onDelete: "restrict" }),
     label: varcharColumn("label", { length: 100 }),
     isDefault: booleanColumn("is_default").notNull().default(false),
     details: jsonbColumn<MeetingConfigDetails>("details").notNull(),

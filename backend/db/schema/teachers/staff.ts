@@ -22,7 +22,7 @@ export const staffProfiles = createTable(
     userId: uuidDefaultColumn("user_id")
       .notNull()
       .unique()
-      .references(() => users.id as never, { onDelete: "restrict" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     // PG-only: `numeric` column has no dialect-aware helper — degraded to TEXT.
     // SQLite uses NUMERIC column affinity; precision/scale enforced at app layer.
     hourlyRate: textColumn("hourly_rate"),

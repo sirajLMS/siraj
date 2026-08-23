@@ -19,10 +19,10 @@ export const impersonationSessions = createTable(
     id: uuidColumn("id"),
     actorUserId: uuidDefaultColumn("actor_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "restrict" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     targetUserId: uuidDefaultColumn("target_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "restrict" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     sessionId: varcharColumn("session_id", { length: 255 }).notNull(),
     reason: textColumn("reason"),
     startedAt: timestampColumn("started_at").notNull().defaultNow(),

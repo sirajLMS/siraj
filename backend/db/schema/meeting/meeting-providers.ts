@@ -16,7 +16,10 @@ export const meetingProviders = createTable(
   {
     id: uuidColumn("id"),
     slug: varcharColumn("slug", { length: 100 }).notNull().unique(),
-    providerKind: varcharColumn("provider_kind", { length: 50 }).notNull().default("manual").$type<MeetingProviderKind>(),
+    providerKind: varcharColumn("provider_kind", { length: 50 })
+      .notNull()
+      .default("manual")
+      .$type<MeetingProviderKind>(),
     name: jsonbColumn<LocalizedString>("name").notNull(),
     description: jsonbColumn<LocalizedString>("description"),
     instructions: jsonbColumn<LocalizedString>("instructions"),

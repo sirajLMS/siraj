@@ -21,7 +21,9 @@ export const systemSettings = createTable(
       .default(SystemSettingDataType.String),
     description: textColumn("description").notNull(),
     category: systemSettingCategoryEnum("category").$type<SystemSettingCategory>().notNull(),
-    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id as never, { onDelete: "set null" }),
+    updatedByUserId: uuidDefaultColumn("updated_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [

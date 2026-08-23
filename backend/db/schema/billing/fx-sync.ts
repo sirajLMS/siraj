@@ -1,11 +1,11 @@
 import {
   createTable,
+  index,
+  jsonbColumn,
+  timestampColumn,
   uuidColumn,
   uuidDefaultColumn,
-  timestampColumn,
   varcharColumn,
-  jsonbColumn,
-  index,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 import { fxProviderEnum, fxSyncStatusEnum } from "@/backend/db/schema/enums";
 import { users } from "@/backend/db/schema/users/users";
@@ -21,7 +21,7 @@ export const fxSyncRuns = createTable(
     errorMessage: varcharColumn("error_message", { length: 500 }),
     providerResponse: jsonbColumn("provider_response"),
     triggerType: varcharColumn("trigger_type", { length: 20 }).notNull(),
-    triggeredByUserId: uuidDefaultColumn("triggered_by_user_id").references(() => users.id as never, {
+    triggeredByUserId: uuidDefaultColumn("triggered_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     startedAt: timestampColumn("started_at").notNull(),

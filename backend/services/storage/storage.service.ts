@@ -135,7 +135,14 @@ export namespace StorageService {
     contentHash: string;
     filePath: string;
   } | null> {
-    return await SignedUrlRepository.claimSignedUrl(sessionId);
+    const row = await SignedUrlRepository.claimSignedUrl(sessionId);
+    if (!row) return null;
+    return {
+      contentType: row.contentType,
+      fileSize: BigInt(row.fileSize),
+      contentHash: row.contentHash,
+      filePath: row.filePath,
+    };
   }
 
   /**

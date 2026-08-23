@@ -14,7 +14,7 @@ export const userMeetingConfigs = createTable(
     id: uuidColumn("id"),
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     ...meetingConfigSharedColumns(),
   },
   table => [

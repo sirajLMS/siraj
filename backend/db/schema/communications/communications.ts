@@ -41,7 +41,7 @@ export const userNotificationPreferences = createTable(
     id: uuidColumn("id"),
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     channel: notificationChannelEnum("channel").notNull(),
     eventType: notificationEventTypeEnum("event_type").notNull(),
     enabled: booleanColumn("enabled").notNull().default(true),
@@ -72,7 +72,7 @@ export const userDeviceTokens = createTable(
     id: uuidColumn("id"),
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     token: varcharColumn("token", { length: 512 }).notNull(),
     platform: devicePlatformEnum("platform").notNull(),
     deviceName: varcharColumn("device_name", { length: 255 }),
@@ -105,8 +105,8 @@ export const notificationDeliveries = createTable(
     id: uuidColumn("id"),
     userId: uuidDefaultColumn("user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
-    deviceTokenId: uuidDefaultColumn("device_token_id").references(() => userDeviceTokens.id as never, {
+      .references(() => users.id, { onDelete: "cascade" }),
+    deviceTokenId: uuidDefaultColumn("device_token_id").references(() => userDeviceTokens.id, {
       onDelete: "set null",
     }),
     channel: notificationChannelEnum("channel").notNull(),
@@ -153,8 +153,8 @@ export const complaints = createTable(
     id: uuidColumn("id"),
     parentId: uuidDefaultColumn("parent_id")
       .notNull()
-      .references(() => parents.id as never, { onDelete: "restrict" }),
-    studentId: uuidDefaultColumn("student_id").references(() => students.id as never, { onDelete: "set null" }),
+      .references(() => parents.id, { onDelete: "restrict" }),
+    studentId: uuidDefaultColumn("student_id").references(() => students.id, { onDelete: "set null" }),
     category: complaintCategoryEnum("category").notNull(),
     submitterEmail: varcharColumn("submitter_email", { length: 255 }).notNull(),
     body: textColumn("body").notNull(),
@@ -179,8 +179,8 @@ export const complaintResponses = createTable(
     id: uuidColumn("id"),
     complaintId: uuidDefaultColumn("complaint_id")
       .notNull()
-      .references(() => complaints.id as never, { onDelete: "cascade" }),
-    responderUserId: uuidDefaultColumn("responder_user_id").references(() => users.id as never, {
+      .references(() => complaints.id, { onDelete: "cascade" }),
+    responderUserId: uuidDefaultColumn("responder_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     body: textColumn("body").notNull(),
@@ -204,18 +204,18 @@ export const suggestions = createTable(
     id: uuidColumn("id"),
     parentId: uuidDefaultColumn("parent_id")
       .notNull()
-      .references(() => parents.id as never, { onDelete: "restrict" }),
+      .references(() => parents.id, { onDelete: "restrict" }),
     submitterName: varcharColumn("submitter_name", { length: 255 }).notNull(),
     body: textColumn("body").notNull(),
     status: suggestionStatusEnum("status").notNull().default("PENDING"),
     // Self-referential FK: duplicateOfId → suggestions.id (ON DELETE SET NULL).
     // Originally declared as a standalone foreignKey() in extras; converted to inline
     // .references() for cross-dialect compatibility (standalone foreignKey() is PG-only).
-    duplicateOfId: uuidDefaultColumn("duplicate_of_id").references((): AnyPgColumn => suggestions.id as never, {
+    duplicateOfId: uuidDefaultColumn("duplicate_of_id").references((): AnyPgColumn => suggestions.id, {
       onDelete: "set null",
     }),
     adminResponse: textColumn("admin_response"),
-    reviewedByUserId: uuidDefaultColumn("reviewed_by_user_id").references(() => users.id as never, {
+    reviewedByUserId: uuidDefaultColumn("reviewed_by_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
     reviewedAt: timestampColumn("reviewed_at"),
@@ -229,9 +229,7 @@ export const suggestions = createTable(
     index("suggestions_duplicate_of_id_idx").on(table.duplicateOfId),
     index("suggestions_reviewed_by_user_id_idx").on(table.reviewedByUserId),
     index("suggestions_deleted_at_idx").on(table.deletedAt),
-    index("suggestions_active_created_at_idx")
-      .on(table.createdAt)
-      .where(sql`${table.deletedAt} IS NULL`),
+    index("suggestions_active_created_at_idx").on(table.createdAt).where(sql`${table.deletedAt} IS NULL`),
     index("suggestions_created_at_idx").on(table.createdAt),
     index("suggestions_reviewed_at_idx").on(table.reviewedAt),
     index("suggestions_email_sent_at_idx").on(table.emailSentAt),
@@ -250,7 +248,7 @@ export const learningResources = createTable(
     filePath: varcharColumn("file_path", { length: 1024 }).notNull(),
     uploadedByUserId: uuidDefaultColumn("uploaded_by_user_id")
       .notNull()
-      .references(() => users.id as never, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     createdAt: timestampColumn("created_at").notNull(),
     deletedAt: timestampColumn("deleted_at"),
   },

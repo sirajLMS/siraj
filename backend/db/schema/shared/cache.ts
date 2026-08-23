@@ -1,9 +1,4 @@
-import {
-  createTable,
-  index,
-  textColumn,
-  timestampColumn,
-} from "@/backend/db/schema/__shared__/dialectAwareBuilder";
+import { createTable, index, textColumn, timestampColumn } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 
 /**
  * Rate limit cache table.
@@ -34,10 +29,7 @@ export const sessionCache = createTable(
     value: textColumn("value").notNull(),
     expiresAt: timestampColumn("expires_at").notNull(),
   },
-  table => [
-    index("session_cache_expires_at_idx").on(table.expiresAt),
-    index("session_cache_value_idx").on(table.value),
-  ]
+  table => [index("session_cache_expires_at_idx").on(table.expiresAt), index("session_cache_value_idx").on(table.value)]
 );
 
 // Export types

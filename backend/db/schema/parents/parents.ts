@@ -18,7 +18,7 @@ export const parents = createTable(
     userId: uuidDefaultColumn("user_id")
       .notNull()
       .unique()
-      .references(() => users.id as never, { onDelete: "restrict" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     status: parentStatusEnum("status").notNull(),
     nationality: countryCodeEnum("nationality"),
     address: textColumn("address"),

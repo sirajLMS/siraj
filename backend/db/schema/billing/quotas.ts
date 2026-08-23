@@ -21,7 +21,7 @@ export const quotas = createTable(
     id: uuidColumn("id"),
     studentId: uuidDefaultColumn("student_id")
       .notNull()
-      .references(() => students.id as never, { onDelete: "cascade" }),
+      .references(() => students.id, { onDelete: "cascade" }),
     kind: quotaKindEnum("kind").notNull(),
     name: varcharColumn("name", { length: 255 }).notNull(),
     totalClasses: integerColumn("total_classes").notNull(),
@@ -73,16 +73,28 @@ export const quotas = createTable(
         (${table.kind} = 'PERIODIC' AND ${table.periodType} IS NOT NULL AND ${table.periodDays} IS NOT NULL)
       `
     ),
-    checkConstraint("quotas_total_classes_positive_chk", sql`${table.totalClasses} > 0`, sql`${table.totalClasses} > 0`),
+    checkConstraint(
+      "quotas_total_classes_positive_chk",
+      sql`${table.totalClasses} > 0`,
+      sql`${table.totalClasses} > 0`
+    ),
     checkConstraint("quotas_priority_non_negative_chk", sql`${table.priority} >= 0`, sql`${table.priority} >= 0`),
     checkConstraint("quotas_remaining_non_negative_chk", sql`${table.remaining} >= 0`, sql`${table.remaining} >= 0`),
-    checkConstraint("quotas_reserved_classes_non_negative_chk", sql`${table.reservedClasses} >= 0`, sql`${table.reservedClasses} >= 0`),
+    checkConstraint(
+      "quotas_reserved_classes_non_negative_chk",
+      sql`${table.reservedClasses} >= 0`,
+      sql`${table.reservedClasses} >= 0`
+    ),
     checkConstraint(
       "quotas_reserved_not_exceed_remaining_chk",
       sql`${table.reservedClasses} <= ${table.remaining}`,
       sql`${table.reservedClasses} <= ${table.remaining}`
     ),
-    checkConstraint("quotas_used_this_period_non_negative_chk", sql`${table.usedThisPeriod} >= 0`, sql`${table.usedThisPeriod} >= 0`),
+    checkConstraint(
+      "quotas_used_this_period_non_negative_chk",
+      sql`${table.usedThisPeriod} >= 0`,
+      sql`${table.usedThisPeriod} >= 0`
+    ),
     // PG-only CHECK: relies on `jsonb_typeof()` and the `?` JSON key-existence
     // operator — both PostgreSQL-specific. SQLite has no equivalents (its jsonb
     // column stores text). Rollover policy shape validation is enforced at the

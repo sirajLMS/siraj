@@ -52,7 +52,7 @@ gqlSchemaBuilder.mutationField("respondToComplaint", t =>
       }
 
       const response = await ComplaintResponseService.respondToComplaint(
-        { complaintId: args.input.complaintId, body: args.input.body },
+        { complaintId: args.input.complaintId ?? undefined, body: args.input.body },
         ctx.user.id,
         ctx.locale
       );
