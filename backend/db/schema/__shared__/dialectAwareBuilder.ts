@@ -65,7 +65,7 @@ import { decryptField, encryptField } from "@/backend/lib/field-encryption";
 export function createTable<TColumns extends Record<string, any>>(
   name: string,
   columns: TColumns,
-  extras?: Parameters<typeof pgTable>[2]
+  extras?: any
 ) {
   if (isSqlite()) {
     return sqliteTable(name, columns as never, extras as never) as never;
