@@ -556,6 +556,7 @@ export namespace BillingRepository {
 
   async function fetchOverdueInvoices(t?: DBTransaction): Promise<OverdueInvoiceRow[]> {
     const q = queryDb(t);
+    const today = new Date().toISOString().split("T")[0];
     return q
       .select({
         invoiceId: invoices.id,
@@ -565,7 +566,7 @@ export namespace BillingRepository {
         dueDate: invoices.dueDate,
       })
       .from(invoices)
-      .where(and(eq(invoices.status, "UNPAID"), sql`${invoices.dueDate} < CURRENT_DATE`))
+      .where(and(eq(invoices.status, "UNPAID"), sql`${invoices.dueDate} < ${today}`))
       .orderBy(invoices.dueDate)
       .limit(500);
   }
@@ -857,7 +858,7 @@ export namespace BillingRepository {
 
     const unpaidResult = await q
       .select({
-        totalOutstanding: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+        totalOutstanding: sql<string>`COALESCE(SUM(CAST(${invoices.amount} AS DECIMAL)), '0.00')`,
         pendingCount: count(),
       })
       .from(invoices)
@@ -866,7 +867,7 @@ export namespace BillingRepository {
     const unpaidByCurrency = await q
       .select({
         currency: invoices.currency,
-        amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+        amount: sql<string>`COALESCE(SUM(CAST(${invoices.amount} AS DECIMAL)), '0.00')`,
       })
       .from(invoices)
       .where(and(eq(invoices.status, "UNPAID"), isNull(invoices.deletedAt)))
@@ -877,7 +878,7 @@ export namespace BillingRepository {
 
     const mtdResult = await q
       .select({
-        mtdRevenue: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+        mtdRevenue: sql<string>`COALESCE(SUM(CAST(${invoices.amount} AS DECIMAL)), '0.00')`,
       })
       .from(invoices)
       .where(
@@ -887,7 +888,7 @@ export namespace BillingRepository {
     const mtdByCurrency = await q
       .select({
         currency: invoices.currency,
-        amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+        amount: sql<string>`COALESCE(SUM(CAST(${invoices.amount} AS DECIMAL)), '0.00')`,
       })
       .from(invoices)
       .where(and(eq(invoices.status, "PAID"), isNull(invoices.deletedAt), sql`${invoices.paidDate} >= ${firstOfMonth}`))
@@ -965,7 +966,7 @@ export namespace BillingRepository {
     const [aggregateResult, byCurrency] = await Promise.all([
       q
         .select({
-          totalAmount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+          totalAmount: sql<string>`COALESCE(SUM(CAST(${invoices.amount} AS DECIMAL)), '0.00')`,
           nextDueDate: sql<string | null>`MIN(${invoices.dueDate})`,
         })
         .from(invoices)
@@ -973,7 +974,7 @@ export namespace BillingRepository {
       q
         .select({
           currency: invoices.currency,
-          amount: sql<string>`COALESCE(SUM(${invoices.amount}), '0.00')`,
+          amount: sql<string>`COALESCE(SUM(CAST(${invoices.amount} AS DECIMAL)), '0.00')`,
         })
         .from(invoices)
         .where(whereCondition)

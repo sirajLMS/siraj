@@ -69,6 +69,8 @@
     "db:sqlite:migrate": "bun --no-env-file run scripts/dbActions/index.ts --env-file=.env.sqlite migrate",
     "db:sqlite:generate": "DB_PROVIDER=sqlite bunx drizzle-kit generate --config=drizzle.config.sqlite.ts",
     "test:db:sqlite": "bun --no-env-file --env-file=.env.sqlite test/scripts/run-db-tests-parallel.ts",
+    "test:services:sqlite": "bun --no-env-file --env-file=.env.sqlite test/scripts/run-services-tests-parallel.ts",
+    "test:graphql:sqlite": "TEST_ENV_FILE=.env.sqlite bun run scripts/lib/run-locked-cmd.ts test:graphql:sqlite bun run test/scripts/run-server-tests.ts",
     "cron:worker": "bun run scripts/cron-worker.ts",
     "validate:seed-assets": "bun run scripts/validate-seed-assets.ts",
     "generate:icons": "bun scripts/generate-icons.ts",

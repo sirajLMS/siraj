@@ -124,13 +124,13 @@ export namespace TeacherDueRepository {
     const [dueAgg] = await executor
       .select({
         approvedCount: sql<number>`count(*)`.mapWith(Number),
-        totalAccruedHours: sql<number>`coalesce(sum(${teacherDues.hours}), 0)`.mapWith(Number),
+        totalAccruedHours: sql<number>`coalesce(sum(CAST(${teacherDues.hours} AS DECIMAL)), 0)`.mapWith(Number),
         totalDueAmount:
-          sql<number>`coalesce(sum(${teacherDues.amount}) filter (where ${teacherDues.status} = ${TeacherDueStatus.PENDING}), 0)`.mapWith(
+          sql<number>`coalesce(sum(CAST(${teacherDues.amount} AS DECIMAL)) filter (where ${teacherDues.status} = ${TeacherDueStatus.PENDING}), 0)`.mapWith(
             Number
           ),
         totalPaidAmount:
-          sql<number>`coalesce(sum(${teacherDues.amount}) filter (where ${teacherDues.status} = ${TeacherDueStatus.PAID}), 0)`.mapWith(
+          sql<number>`coalesce(sum(CAST(${teacherDues.amount} AS DECIMAL)) filter (where ${teacherDues.status} = ${TeacherDueStatus.PAID}), 0)`.mapWith(
             Number
           ),
       })

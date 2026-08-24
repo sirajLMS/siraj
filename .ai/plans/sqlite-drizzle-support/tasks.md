@@ -45,3 +45,19 @@
 - [x] 4.2 SQLite seed runner (DB_PROVIDER=sqlite bun db seed)
 - [x] 4.3 SQLite test runner (DB_PROVIDER=sqlite bun test:db)
 - [x] 4.4 README docs for SQLite local-dev setup
+
+## Phase 5: Cross-Dialect Test Parity + SQLite Path Relocation (DONE)
+
+- [x] 5.1 Relocate SQLite default path to ./db/siraj.sqlite (driver, config, env, docs, environment.d.ts)
+- [x] 5.2 PG migrate + SQLite migrate (both dialects current)
+- [x] 5.3 PG seed + SQLite seed (both 72 tables verified)
+- [x] 5.4 Cross-dialect ilike -> caseInsensitiveLike (22 call sites, 9 repo files)
+- [x] 5.5 cron.repository.ts reconcileStuckRuns dialect-aware stuckCondition (epoch-ms for SQLite)
+- [x] 5.6 Timezone CHECK test guards (parent + teacher tests, isSqlite() dialect-aware)
+- [x] 5.7 System-permission SQLite triggers (5 triggers mirroring PG protect_system_permissions())
+- [x] 5.8 permission-management.service.test.ts SQLite cleanup via executeTxSql (DROP/CREATE trigger)
+- [x] 5.9 PG db tests: 91/91 passed (897 tests, 4294 assertions, 0 failures)
+- [x] 5.10 SQLite db tests: 91/91 passed (860 tests, 2741 assertions, 0 failures)
+- [x] 5.11 Services tests: 65/65 passed (646 tests, 1625 assertions, 0 failures)
+- [x] 5.12 generate:gqlSchema: succeeded
+- [x] 5.13 Full quality-gate: ALL PASSED (5600 files, 0 errors)

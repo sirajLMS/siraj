@@ -143,12 +143,22 @@ async function pollServerReady(url: string, deadline: number): Promise<boolean> 
 
 function spawnTestServer(port: number, logStream: NodeJS.WritableStream): ChildProcess {
   const bunBin = process.execPath;
+  const envFile = process.env.TEST_ENV_FILE ?? ".env.test";
   const isProductionMode = process.env.TEST_SERVER_MODE === "production";
   const distDir = isProductionMode ? ".next-test-prod" : ".next-test-dev";
   const nodeEnv = isProductionMode ? "production" : "development";
 
-  const serverEnv: NodeJS.ProcessEnv = {
-    ...process.env,
+  // Drop DB env vars from the parent process so the spawned `next dev --env-file=.env.test`
+  // is the sole source of truth. Without this, `bun` auto-loads `.env` (the dev env
+  // pointing at the `siraj` DB) into process.env, and the spread below would override
+  // the `.env.test` DATABASE_URL (pointing at `siraj_test`), causing tests to run
+  // against the wrong database.
+  const parentEnv = { ...process.env } as Record<string, string | undefined>;
+  delete parentEnv.DATABASE_URL;
+  delete parentEnv.DB_FILE_NAME;
+
+  const serverEnv = {
+    ...parentEnv,
     NODE_ENV: nodeEnv,
     NEXT_DIST_DIR: distDir,
     IS_DEMO: "true",
@@ -157,11 +167,11 @@ function spawnTestServer(port: number, logStream: NodeJS.WritableStream): ChildP
     GRAPHQL_TEST_PORT: String(port),
     TEST_SERVER_PORT: String(port),
     DISABLE_RATE_LIMITING: "true",
-  };
+  } as unknown as NodeJS.ProcessEnv;
 
   const args = isProductionMode
-    ? ["--env-file=.env.test", "run", "next", "start", "-p", String(port), "-H", "0.0.0.0"]
-    : ["--env-file=.env.test", "run", "next", "dev", "--turbopack", "-p", String(port), "-H", "0.0.0.0"];
+    ? [`--env-file=${envFile}`, "run", "next", "start", "-p", String(port), "-H", "0.0.0.0"]
+    : [`--env-file=${envFile}`, "run", "next", "dev", "--turbopack", "-p", String(port), "-H", "0.0.0.0"];
 
   const proc = spawnChild(bunBin, args, {
     cwd: process.cwd(),
@@ -516,7 +526,8 @@ async function setupTestParser(
 
 function buildTestArgs(bunBin: string, e2e: boolean, coverage: boolean, bail: boolean, testPaths: string[]): string[] {
   const timeout = e2e ? "300000" : "120000";
-  const args = [bunBin, "--env-file=.env.test", "test", "--parallel=1", `--timeout=${timeout}`];
+  const testEnvFile = process.env.TEST_ENV_FILE ?? ".env.test";
+  const args = [bunBin, `--env-file=${testEnvFile}`, "test", "--parallel=1", `--timeout=${timeout}`];
   if (e2e) {
     args.push("--preload", "./test/ui/test-env.ts");
   }

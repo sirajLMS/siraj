@@ -99,7 +99,7 @@ export default defineConfig({
       // + docs/SQLITE_MIGRATION_PROGRESS.md). The casts are intentional and
       // runtime-safe (real sqlite/pg objects are returned; the cast only erases
       // the TS type so the service/repo layers see PG types unchanged).
-      files: ["backend/db/schema/**", "backend/db/scripts/migrate.ts"],
+      files: ["backend/db/schema/**", "backend/db/scripts/migrate.ts", "test/scripts/run-server-tests.ts"],
       rules: {
         "typescript/no-unsafe-type-assertion": "off",
       },
