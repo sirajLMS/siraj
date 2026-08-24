@@ -12,7 +12,7 @@ import {
 import { logger } from "@/backend/lib/logger";
 import { ReferenceDataService, UserSeedService } from "@/backend/services";
 import type { GroupWithPermissionIds, SeedDemoUserInput, UserSelectType } from "@/backend/types";
-import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
+import { INTERNAL_DEMO_USERS, resolveAdminPassword } from "@/shared/demo-users";
 
 function resolvePlainPassword(
   spec:
@@ -20,9 +20,9 @@ function resolvePlainPassword(
     | (typeof INTERNAL_DEMO_USERS)[number]
 ): string {
   if (!("plainPassword" in spec)) {
-    return DEFAULT_SEED_ADMIN_PASSWORD;
+    return resolveAdminPassword();
   }
-  return spec.plainPassword ?? DEFAULT_SEED_ADMIN_PASSWORD;
+  return spec.plainPassword ?? resolveAdminPassword();
 }
 
 function toDemoUserInput(

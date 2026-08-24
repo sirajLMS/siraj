@@ -134,6 +134,7 @@ export namespace StorageService {
     fileSize: bigint;
     contentHash: string;
     filePath: string;
+    uploadedByUserId: string | null;
   } | null> {
     const row = await SignedUrlRepository.claimSignedUrl(sessionId);
     if (!row) return null;
@@ -142,6 +143,7 @@ export namespace StorageService {
       fileSize: BigInt(row.fileSize),
       contentHash: row.contentHash,
       filePath: row.filePath,
+      uploadedByUserId: row.uploadedByUserId ?? null,
     };
   }
 
@@ -200,8 +202,10 @@ export namespace StorageService {
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
     const usages = await StorageDbRepository.getFileUsages(filePath);
 
-    // If no usages, file is accessible to all authenticated users
-    if (usages.length === 0) return null;
+    // H2 fix: default-deny when no usages (prevents unlinked file access).
+    // Previously returned null (allow) which let any authenticated user read
+    // files created but not yet junction-linked (upload race window).
+    if (usages.length === 0) return { error: tErrors.forbidden, status: 403 };
 
     // Check if user is super admin
     const userContext = await PermissionsService.getUserContext(userId);

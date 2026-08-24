@@ -28,7 +28,7 @@ import { createFileSeedingService } from "@/backend/storage/demo/fileInitializat
 import type { SeedDemoUserInput } from "@/backend/types";
 import { CurrencyCode } from "@/shared/constants/currency.enum";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
-import { DEFAULT_SEED_ADMIN_PASSWORD, INTERNAL_DEMO_USERS } from "@/shared/demo-users";
+import { INTERNAL_DEMO_USERS, resolveAdminPassword } from "@/shared/demo-users";
 import { getServerTranslations } from "@/shared/locale";
 
 export interface TestEntitiesResult {
@@ -53,7 +53,7 @@ export namespace TestHelperService {
     return {
       name: spec.name,
       email: spec.email,
-      plainPassword: spec.plainPassword ?? DEFAULT_SEED_ADMIN_PASSWORD,
+      plainPassword: spec.plainPassword ?? resolveAdminPassword(),
       isSuperAdmin: spec.isSuperAdmin,
       groupSlug: spec.groupSlug,
     };
@@ -323,7 +323,7 @@ export namespace TestHelperService {
     assertTestHelperAllowed();
 
     const now = new Date();
-    const plainPassword = DEFAULT_SEED_ADMIN_PASSWORD;
+    const plainPassword = resolveAdminPassword();
     const hashedPassword = await hashPassword(plainPassword);
 
     return await db.transaction(async tx => {
@@ -492,7 +492,7 @@ export namespace TestHelperService {
 
     const now = new Date();
     const email = `${prefix}-sa-${randomUUID().slice(0, 8)}@example.com`;
-    const plainPassword = DEFAULT_SEED_ADMIN_PASSWORD;
+    const plainPassword = resolveAdminPassword();
     const hashedPassword = await hashPassword(plainPassword);
 
     const [userRow] = await db

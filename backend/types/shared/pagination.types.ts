@@ -29,7 +29,12 @@ export type PaginationArgsShape = {
 
 export class PaginationArgs {
   public static readonly DEFAULT_COUNT = 10;
-  public static readonly MAX_COUNT = 5000;
+  /**
+   * Hard upper bound on rows returned per page. Bounds both `first` and the
+   * client-settable `maxCount` (see perPage clamp below) so a single list
+   * query cannot fan out into thousands of rows.
+   */
+  public static readonly MAX_COUNT = 200;
 
   first: number | null;
   skip: number | null;

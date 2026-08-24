@@ -247,6 +247,9 @@ export const signedUrls = createTable(
     fileSize: bigintColumn("file_size").notNull(), // File size in bytes
     contentHash: varcharColumn("content_hash", { length: 128 }).notNull(), // base64 or hex encoded hash
     expiresAt: timestampColumn("expires_at").notNull(),
+    // M2 fix: bind signed URL to the user who created it, so only the original
+    // uploader can write via the token (prevents token-sharing attacks).
+    uploadedByUserId: varcharColumn("uploaded_by_user_id", { length: 36 }), // nullable for backfill
     ...createdAtColumn(),
     used: booleanColumn("used").notNull().default(false),
   },

@@ -1,5 +1,7 @@
+import { ParentRepository } from "@/backend/db/repo/parents";
 import { StudentRepository } from "@/backend/db/repo/students";
 import { StudentHistoryRepository } from "@/backend/db/repo/students/student-history.repository";
+import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { AppPermission } from "@/backend/enum";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
 import { EffectiveMeetingService } from "@/backend/services/meeting/class-meeting-config.service";
@@ -29,21 +31,47 @@ function toClassOutcome(value: string | null): ClassOutcome | null {
 
 export namespace StudentHistoryService {
   async function assertCanViewStudentHistory(userId: string, studentId: string, tErrors: ErrorsLabels): Promise<void> {
-    const hasLegacy = await PermissionsService.hasPermission(userId, AppPermission.HISTORY_VIEW_CALENDAR);
-    if (hasLegacy) {
-      return;
-    }
+    // M1 fix: for non-admin actors, enforce ownership before honoring any
+    // view permission shortcut. Previously, HISTORY_VIEW_CALENDAR caused an
+    // early return without checking if the caller actually owns the student.
+    const ctx = await PermissionsService.getUserContext(userId);
+    if (ctx.isSuperAdmin) return;
 
     const profile = await StudentRepository.findProfileById(studentId);
     if (!profile) {
       throw new Error(tErrors.studentNotFound(studentId));
     }
 
+    // Check ownership: is the caller the student, their parent, or their teacher?
+    const isOwner = profile.userId === userId;
+    if (!isOwner) {
+      const [parent, teacher] = await Promise.all([
+        ParentRepository.findByUserId(userId),
+        TeacherRepository.findByUserId(userId),
+      ]);
+      const isParent = (parent?.id ?? null) === profile.parentId;
+      const isTeacher = (teacher?.id ?? null) === profile.primaryTeacherId;
+      if (!isParent && !isTeacher) {
+        // Not the owner — require the explicit "view other" permission.
+        const hasViewOther = await PermissionsService.hasPermission(userId, AppPermission.STUDENT_HISTORY_VIEW_OTHER);
+        if (!hasViewOther) {
+          throw new Error(tErrors.unauthorizedAction);
+        }
+        return;
+      }
+    }
+
+    // Owner or has view-other permission — check the appropriate view permission.
     const viewPermission =
       profile.userId === userId ? AppPermission.STUDENT_HISTORY_VIEW_OWN : AppPermission.STUDENT_HISTORY_VIEW_OTHER;
-
     const hasGroupPermission = await PermissionsService.hasPermission(userId, viewPermission);
     if (hasGroupPermission) {
+      return;
+    }
+
+    // Fall back to legacy calendar permission for owners only.
+    const hasLegacy = await PermissionsService.hasPermission(userId, AppPermission.HISTORY_VIEW_CALENDAR);
+    if (hasLegacy) {
       return;
     }
 

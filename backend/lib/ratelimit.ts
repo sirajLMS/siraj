@@ -198,6 +198,22 @@ export const apiRateLimiter = new RateLimiter(
 );
 
 /**
+ * Client-log ingestion rate limiter (`POST /api/logs`).
+ * Allows 30 batches per minute per authenticated user — enough headroom for a
+ * client recovering a buffered log stream, low enough that the endpoint cannot
+ * be used for unbounded disk-write amplification (security review M1).
+ * failOpen: true — log ingestion is diagnostic, not security-critical; the
+ * endpoint's batch cap and message truncation bound worst-case damage even
+ * when the limiter fails open.
+ */
+export const clientLogsRateLimiter = new RateLimiter(
+  "ratelimit:client-logs",
+  30,
+  60 * 1000, // 1 minute
+  true
+);
+
+/**
  * Helper function to check rate limit and return appropriate response
  */
 export async function checkRateLimit(
@@ -270,8 +286,11 @@ export async function checkRateLimit(
  * 3. `x-forwarded-for` — take the **FIRST** entry (leftmost), which is the
  *    original client IP. The last entry is the closest trusted proxy, but an
  *    attacker can append entries to this header, so the first entry is more
- *    reliable for identifying the actual client (r10-003).
- * 4. `x-real-ip` — direct trusted proxy header.
+ *    reliable for identifying the actual client (r10-003). Only honored when
+ *    `TRUSTED_PROXY=true`, i.e. the deployment sits behind a real reverse proxy
+ *    that sets these headers (security review M2).
+ * 4. `x-real-ip` — direct trusted proxy header. Only honored when
+ *    `TRUSTED_PROXY=true` (M2).
  * 5. Fallback — see below.
  *
  * Why conditional trust (r10-003):
@@ -313,23 +332,27 @@ export function getClientIdentifier(request: Request): string {
     }
   }
 
-  // x-forwarded-for: take the FIRST entry (leftmost = original client).
-  // The last entry could be a proxy the attacker controls, so the first
-  // entry (appended by the client) is used to identify the actual source (r10-003).
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    const ips = forwardedFor
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (ips.length > 0) {
-      return ips[0];
+  // x-forwarded-for / x-real-ip are only honored behind an explicitly trusted
+  // reverse proxy (TRUSTED_PROXY=true). Otherwise they are client-spoofable and
+  // enable rate-limit bucket rotation (security review M2). Take the FIRST entry
+  // (leftmost = original client); the last entry could be an attacker-controlled
+  // proxy hop (r10-003).
+  if (getBooleanEnv("TRUSTED_PROXY")) {
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    if (forwardedFor) {
+      const ips = forwardedFor
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+      if (ips.length > 0) {
+        return ips[0];
+      }
     }
-  }
 
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) {
-    return realIp.trim();
+    const realIp = request.headers.get("x-real-ip");
+    if (realIp) {
+      return realIp.trim();
+    }
   }
 
   // r7-018: No IP header found — log a warning and generate a fallback

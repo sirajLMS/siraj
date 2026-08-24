@@ -4,6 +4,20 @@ const MAX_ENTRIES = 100;
 const MAX_KEY_LENGTH = 64;
 const MAX_VALUE_LENGTH = 1024;
 
+/**
+ * Machine-stable error codes for StringMap validation failures.
+ * GraphQL scalar parsers receive no request context in graphql-js (the newer
+ * `coerceInputValue` pipeline is context-free too), so locale cannot be
+ * threaded here. Clients localize via `extensions.scalarCode`.
+ */
+const StringMapScalarError = {
+  NotObject: "STRING_MAP_NOT_OBJECT",
+  TooManyEntries: "STRING_MAP_TOO_MANY_ENTRIES",
+  KeyTooLong: "STRING_MAP_KEY_TOO_LONG",
+  ValueNotString: "STRING_MAP_VALUE_NOT_STRING",
+  ValueTooLong: "STRING_MAP_VALUE_TOO_LONG",
+} as const;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -15,7 +29,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function validateStringMap(value: unknown): Record<string, string> {
   if (!isRecord(value)) {
     throw new GraphQLError("StringMap must be an object", {
-      extensions: { code: "BAD_USER_INPUT" },
+      extensions: { code: "BAD_USER_INPUT", scalarCode: StringMapScalarError.NotObject },
     });
   }
 
@@ -23,7 +37,12 @@ function validateStringMap(value: unknown): Record<string, string> {
 
   if (entries.length > MAX_ENTRIES) {
     throw new GraphQLError("StringMap exceeds maximum number of entries.", {
-      extensions: { code: "BAD_USER_INPUT", maxEntries: MAX_ENTRIES, received: entries.length },
+      extensions: {
+        code: "BAD_USER_INPUT",
+        scalarCode: StringMapScalarError.TooManyEntries,
+        maxEntries: MAX_ENTRIES,
+        received: entries.length,
+      },
     });
   }
 
@@ -33,17 +52,27 @@ function validateStringMap(value: unknown): Record<string, string> {
   for (const [key, val] of entries) {
     if (key.length > MAX_KEY_LENGTH) {
       throw new GraphQLError("StringMap key exceeds maximum length.", {
-        extensions: { code: "BAD_USER_INPUT", key: key.slice(0, 20), maxLength: MAX_KEY_LENGTH },
+        extensions: {
+          code: "BAD_USER_INPUT",
+          scalarCode: StringMapScalarError.KeyTooLong,
+          key: key.slice(0, 20),
+          maxLength: MAX_KEY_LENGTH,
+        },
       });
     }
     if (typeof val !== "string") {
       throw new GraphQLError("StringMap values must be strings.", {
-        extensions: { code: "BAD_USER_INPUT", key },
+        extensions: { code: "BAD_USER_INPUT", scalarCode: StringMapScalarError.ValueNotString, key },
       });
     }
     if (val.length > MAX_VALUE_LENGTH) {
       throw new GraphQLError("StringMap value exceeds maximum length.", {
-        extensions: { code: "BAD_USER_INPUT", key, maxLength: MAX_VALUE_LENGTH },
+        extensions: {
+          code: "BAD_USER_INPUT",
+          scalarCode: StringMapScalarError.ValueTooLong,
+          key,
+          maxLength: MAX_VALUE_LENGTH,
+        },
       });
     }
     result[key] = val;
@@ -73,13 +102,18 @@ export const StringMapScalar = new GraphQLScalarType({
     // Parse inline object literals from queries
     if (ast.kind !== Kind.OBJECT) {
       throw new GraphQLError("StringMap must be an object", {
-        extensions: { code: "BAD_USER_INPUT" },
+        extensions: { code: "BAD_USER_INPUT", scalarCode: StringMapScalarError.NotObject },
       });
     }
 
     if (ast.fields.length > MAX_ENTRIES) {
       throw new GraphQLError("StringMap exceeds maximum number of entries.", {
-        extensions: { code: "BAD_USER_INPUT", maxEntries: MAX_ENTRIES, received: ast.fields.length },
+        extensions: {
+          code: "BAD_USER_INPUT",
+          scalarCode: StringMapScalarError.TooManyEntries,
+          maxEntries: MAX_ENTRIES,
+          received: ast.fields.length,
+        },
       });
     }
 
@@ -90,19 +124,29 @@ export const StringMapScalar = new GraphQLScalarType({
 
       if (key.length > MAX_KEY_LENGTH) {
         throw new GraphQLError("StringMap key exceeds maximum length.", {
-          extensions: { code: "BAD_USER_INPUT", key: key.slice(0, 20), maxLength: MAX_KEY_LENGTH },
+          extensions: {
+            code: "BAD_USER_INPUT",
+            scalarCode: StringMapScalarError.KeyTooLong,
+            key: key.slice(0, 20),
+            maxLength: MAX_KEY_LENGTH,
+          },
         });
       }
 
       if (field.value.kind !== Kind.STRING) {
         throw new GraphQLError("StringMap values must be strings.", {
-          extensions: { code: "BAD_USER_INPUT", key },
+          extensions: { code: "BAD_USER_INPUT", scalarCode: StringMapScalarError.ValueNotString, key },
         });
       }
 
       if (field.value.value.length > MAX_VALUE_LENGTH) {
         throw new GraphQLError("StringMap value exceeds maximum length.", {
-          extensions: { code: "BAD_USER_INPUT", key, maxLength: MAX_VALUE_LENGTH },
+          extensions: {
+            code: "BAD_USER_INPUT",
+            scalarCode: StringMapScalarError.ValueTooLong,
+            key,
+            maxLength: MAX_VALUE_LENGTH,
+          },
         });
       }
 

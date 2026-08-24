@@ -6,3 +6,4 @@ export * from "./drizzleRelations";
 export * from "./factory";
 export * from "./http-client";
 export * from "./query.extensions";
+export * from "./rls-context";

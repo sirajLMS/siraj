@@ -179,6 +179,9 @@ export namespace PaymentMethodService {
     direction?: PaymentDirection,
     _locale?: string
   ): Promise<UserPaymentMethodReturnType[]> {
+    // H4 fix: prevent cross-user payment method enumeration.
+    const tErrors = getServerTranslations(_locale ?? "en").errorsTranslations;
+    await assertActorCanManageTarget(actorUserId, userId, tErrors);
     const revealSensitive = actorUserId === userId || (await hasAdminPaymentAccess(actorUserId));
     const rows = await UserPaymentMethodRepository.listByUserId(userId);
     const filtered = direction

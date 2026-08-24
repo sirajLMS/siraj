@@ -1,4 +1,5 @@
 import { AppPermission } from "@/backend/enum";
+import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { StudentStatusPothosObject } from "@/backend/graphql/pothos/shared/enum.pothos";
 import { StudentLifecycleService } from "@/backend/services";
@@ -43,7 +44,7 @@ gqlSchemaBuilder.mutationField("reassignStudentTeacher", t =>
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
       return StudentLifecycleService.reassignTeacher(
-        ctx.user?.id ?? "",
+        requireUserId(ctx),
         args.studentId,
         args.newTeacherId,
         tErrors,
@@ -65,7 +66,7 @@ gqlSchemaBuilder.mutationField("changeStudentStatus", t =>
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
       return StudentLifecycleService.changeStudentStatus(
-        ctx.user?.id ?? "",
+        requireUserId(ctx),
         args.studentId,
         args.newStatus,
         tErrors,

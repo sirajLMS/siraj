@@ -1,4 +1,5 @@
 import { GraphQLError } from "graphql";
+import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { LearningResourceService } from "@/backend/services";
 import type { LearningResourceReturnType } from "@/backend/types";
@@ -41,7 +42,7 @@ gqlSchemaBuilder.queryField("learningResources", t =>
     },
     resolve: async (_root, args, ctx) => {
       const locale = ctx.locale ?? "en";
-      const userId = ctx.user?.id ?? "";
+      const userId = requireUserId(ctx);
 
       const result = await LearningResourceService.listResources(userId, args.searchQuery ?? undefined, locale);
 
@@ -60,7 +61,7 @@ gqlSchemaBuilder.mutationField("uploadLearningResource", t =>
     },
     resolve: async (_root, args, ctx) => {
       const locale = ctx.locale ?? "en";
-      const userId = ctx.user?.id ?? "";
+      const userId = requireUserId(ctx);
 
       return await LearningResourceService.createResource(userId, args.input, locale);
     },

@@ -15,9 +15,11 @@ export interface SeedUserSpec {
   idempotencyKey: string;
 }
 
-import { DEFAULT_SEED_ADMIN_PASSWORD } from "@/shared/demo-users";
+import { resolveAdminPassword } from "@/shared/demo-users";
 
-const SEED_PASSWORD = DEFAULT_SEED_ADMIN_PASSWORD;
+// Resolved lazily so the production / IS_DEMO / TEST_SERVER guards in
+// resolveAdminPassword() evaluate against the environment at call time.
+const seedPassword = (): string => resolveAdminPassword();
 
 const SEED_TIMEZONES = [
   "UTC",
@@ -37,7 +39,7 @@ export function buildExtraTeacherUserSpecs(config: SeedConfig): SeedUserSpec[] {
     specs.push({
       name: faker.person.fullName(),
       email: `teacher-${i}@seed.siraj.local`,
-      plainPassword: SEED_PASSWORD,
+      plainPassword: seedPassword(),
       isSuperAdmin: false,
       groupSlug: SystemPermissionGroupSlug.TEACHER_DEFAULT,
       idempotencyKey: `seed_teacher_user_${i}`,
@@ -53,7 +55,7 @@ export function buildExtraParentUserSpecs(config: SeedConfig): SeedUserSpec[] {
     specs.push({
       name: faker.person.fullName(),
       email: `parent-${i}@seed.siraj.local`,
-      plainPassword: SEED_PASSWORD,
+      plainPassword: seedPassword(),
       isSuperAdmin: false,
       groupSlug: SystemPermissionGroupSlug.PARENT_DEFAULT,
       idempotencyKey: `seed_parent_user_${i}`,
@@ -79,7 +81,7 @@ export function buildExtraStudentUserSpecs(config: SeedConfig): SeedUserSpec[] {
     specs.push({
       name: faker.person.fullName(),
       email: `student-${i}@seed.siraj.local`,
-      plainPassword: SEED_PASSWORD,
+      plainPassword: seedPassword(),
       isSuperAdmin: false,
       groupSlug: SystemPermissionGroupSlug.STUDENT_DEFAULT,
       idempotencyKey: `seed_student_user_${i}`,

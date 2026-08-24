@@ -107,6 +107,10 @@ function assertCanViewSessionConfig(ctx: BaseContext, tErrors: ErrorsLabels): vo
 gqlSchemaBuilder.queryField("sessionConfigs", t =>
   t.field({
     type: [SessionConfigPothosObject],
+    // Read access = loggedIn here; the SETTINGS_VIEW / SETTINGS_EDIT_SESSION OR
+    // gate lives in assertCanViewSessionConfig (via executeSessionConfigQuery).
+    // The authScopes plugin only supports AND-composed single permissions, so
+    // the OR view rule cannot be expressed declaratively.
     authScopes: { loggedIn: true },
     description: "Lists all per-role session configurations.",
     resolve: async (_root, _args, ctx) => {
@@ -119,6 +123,8 @@ gqlSchemaBuilder.queryField("sessionConfig", t =>
   t.field({
     type: SessionConfigPothosObject,
     nullable: true,
+    // Same as sessionConfigs: loggedIn declared here; the SETTINGS_VIEW /
+    // SETTINGS_EDIT_SESSION OR gate is enforced by assertCanViewSessionConfig.
     authScopes: { loggedIn: true },
     description: "Fetches the session configuration for a single role.",
     args: {

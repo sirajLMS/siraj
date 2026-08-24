@@ -1,5 +1,5 @@
 {
-  "manifestHash": "0405374fbdcff1595851d5d66baf8118120d63d90686cee9839f3e2fb4fc2ce0",
+  "manifestHash": "37ef1fddb4ef388beb80eb7f2f9cc467bb201d2258f2ae2e27cba4bed3ba462a",
   "manifest": [
     {
       "file": "2-functions.sql",
@@ -134,6 +134,10 @@
       "sha256": "2fa1cbb1418b69eea1b39d3aa4a65cf2066a6f5223c543691e064c214dc8e847"
     },
     {
+      "file": "appraisal_permissions.sql",
+      "sha256": "feec5db9c5238170d5b869707783b19084ad6165739596e20ddb84423a89c5b9"
+    },
+    {
       "file": "audit_log_immutability_trigger.sql",
       "sha256": "31bcba9e6b49f059a287fd1f1526e7e6ef4924f4f105764daa51ae09466970a4"
     },
@@ -263,6 +267,8 @@
     "20260817185219_custom_6-lms-permissions-and-groups",
     "20260817185220_custom_6d-profile-fine-grained-only",
     "20260822054900_custom_7c-appearance-permissions-enum",
-    "20260822054901_custom_7d-appearance-permissions-data"
+    "20260822054901_custom_7d-appearance-permissions-data",
+    "20260824192824_custom_appraisal_permissions",
+    "20260824210526_custom_appraisal_permissions"
   ]
 }

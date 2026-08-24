@@ -306,7 +306,7 @@ gqlSchemaBuilder.mutationField("saveAppearanceDraft", t =>
       // AC-33 - optional optimistic-concurrency guard. When provided, the
       // service throws AppearanceConflictError if the current row updatedAt
       // does not match. Omit to force the write (frontend Overwrite path).
-      expectedUpdatedAt: t.arg.string({ required: false }),
+      expectedUpdatedAt: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);
@@ -334,7 +334,7 @@ gqlSchemaBuilder.mutationField("publishAppearance", t =>
     },
     args: {
       // AC-33 - same optimistic-concurrency guard as saveAppearanceDraft.
-      expectedUpdatedAt: t.arg.string({ required: false }),
+      expectedUpdatedAt: t.arg.string({ required: false, directives: { constraint: { maxLength: 64 } } }),
     },
     resolve: async (_root, args, ctx) => {
       const actorUserId = await requireAuth(ctx);

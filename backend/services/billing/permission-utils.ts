@@ -3,7 +3,9 @@ import { StudentRepository } from "@/backend/db/repo/students";
 import { TeacherRepository } from "@/backend/db/repo/teachers";
 import { AppPermission } from "@/backend/enum";
 import { ForbiddenError } from "@/backend/lib/errors";
+import { logger } from "@/backend/lib/logger";
 import { PermissionsService } from "@/backend/services/auth/permissions.service";
+import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
 import type { ErrorsLabels } from "@/shared/locale";
 
 /**
@@ -44,11 +46,11 @@ export async function assertAssociatedOrManage(
   }
 }
 
-// Cache for request-level memoization on resolveAssociatedViewer.
-// Key format: "actorUserId:studentId". Reduces repeated DB lookups for
-// the same (caller, student) pair within a single request scope and limits
-// the surface for student enumeration via brute-force calls.
-const viewerCache = new Map<string, boolean>();
+// M3 fix: TTL'd association cache via cacheService (Redis/Postgres) instead of
+// a permanent in-memory Map. Prevents revoked teachers/parents from retaining
+// access until process restart. TTL: 60 seconds.
+const VIEWER_CACHE_TTL_SECONDS = 60;
+const VIEWER_CACHE_PREFIX = "billing:viewer:";
 
 /**
  * Resolves whether the calling user is associated with the given student —
@@ -62,21 +64,25 @@ const viewerCache = new Map<string, boolean>();
  * student-self check uses the profile already fetched before those lookups.
  */
 export async function resolveAssociatedViewer(actorUserId: string, studentId: string): Promise<boolean> {
-  const cacheKey = `${actorUserId}:${studentId}`;
-  const cached = viewerCache.get(cacheKey);
-  if (cached !== undefined) {
-    return cached;
+  const cacheKey = `${VIEWER_CACHE_PREFIX}${actorUserId}:${studentId}`;
+  try {
+    const cached = await cacheService.get(cacheKey);
+    if (cached !== null) {
+      return cached === "1";
+    }
+  } catch {
+    // Cache miss/failure is non-fatal — fall through to DB lookup.
   }
 
   const profile = await StudentRepository.findProfileById(studentId);
   if (!profile) {
-    viewerCache.set(cacheKey, false);
+    await setViewerCacheSafe(cacheKey, false);
     return false;
   }
 
   // (b) The user IS the student themselves
   if (profile.userId === actorUserId) {
-    viewerCache.set(cacheKey, true);
+    await setViewerCacheSafe(cacheKey, true);
     return true;
   }
 
@@ -87,23 +93,31 @@ export async function resolveAssociatedViewer(actorUserId: string, studentId: st
 
   // (a) The user is the student's parent
   if ((parent?.id ?? null) === profile.parentId) {
-    viewerCache.set(cacheKey, true);
+    await setViewerCacheSafe(cacheKey, true);
     return true;
   }
   // The user is the student's primary teacher
   if ((teacher?.id ?? null) === profile.primaryTeacherId) {
-    viewerCache.set(cacheKey, true);
+    await setViewerCacheSafe(cacheKey, true);
     return true;
   }
 
-  viewerCache.set(cacheKey, false);
+  await setViewerCacheSafe(cacheKey, false);
   return false;
 }
 
-// Cache for request-level memoization on resolveAssociatedStudentIds.
-// Key: actorUserId. Avoids redundant parent/teacher/student-self lookups
-// for the same user within a single request scope.
-const studentIdsCache = new Map<string, string[]>();
+/** Best-effort cache set — never throws (cache failures are non-fatal). */
+async function setViewerCacheSafe(cacheKey: string, value: boolean): Promise<void> {
+  try {
+    await cacheService.set(cacheKey, value ? "1" : "0", { ex: VIEWER_CACHE_TTL_SECONDS });
+  } catch (err) {
+    logger.warn("Failed to set viewer cache entry", { cacheKey, err: String(err) });
+  }
+}
+
+// M3 fix: TTL'd student-IDs cache via cacheService instead of permanent Map.
+const STUDENT_IDS_CACHE_TTL_SECONDS = 60;
+const STUDENT_IDS_CACHE_PREFIX = "billing:studentIds:";
 
 /**
  * Resolves the student IDs associated with the calling user — students
@@ -120,9 +134,14 @@ const studentIdsCache = new Map<string, string[]>();
  * nor a teacher.
  */
 export async function resolveAssociatedStudentIds(actorUserId: string): Promise<string[]> {
-  const cachedIds = studentIdsCache.get(actorUserId);
-  if (cachedIds !== undefined) {
-    return [...cachedIds];
+  const cacheKey = `${STUDENT_IDS_CACHE_PREFIX}${actorUserId}`;
+  try {
+    const cached = await cacheService.get(cacheKey);
+    if (cached !== null) {
+      return cached ? JSON.parse(cached) : [];
+    }
+  } catch {
+    // Cache miss/failure is non-fatal — fall through to DB lookup.
   }
 
   const [parent, teacher, ownStudentId] = await Promise.all([
@@ -139,13 +158,45 @@ export async function resolveAssociatedStudentIds(actorUserId: string): Promise<
   }
 
   if (!parent && !teacher && studentIds.length === 0) {
-    studentIdsCache.set(actorUserId, []);
+    await setStudentIdsCacheSafe(cacheKey, []);
     return [];
   }
 
   const associatedIds = await StudentRepository.findIdsByParentOrTeacher(parent?.id ?? null, teacher?.id ?? null);
   const merged = [...new Set([...studentIds, ...associatedIds])];
 
-  studentIdsCache.set(actorUserId, merged);
+  await setStudentIdsCacheSafe(cacheKey, merged);
   return [...merged];
+}
+
+/** Best-effort cache set — never throws. */
+async function setStudentIdsCacheSafe(cacheKey: string, value: string[]): Promise<void> {
+  try {
+    await cacheService.set(cacheKey, JSON.stringify(value), { ex: STUDENT_IDS_CACHE_TTL_SECONDS });
+  } catch (err) {
+    logger.warn("Failed to set studentIds cache entry", { cacheKey, err: String(err) });
+  }
+}
+
+/**
+ * M3 fix: invalidation hooks called when a teacher/parent is reassigned or
+ * deactivated. Clears the TTL'd cache entries so the next access re-queries
+ * the DB instead of using stale association data.
+ */
+export async function invalidateTeacherViewerCache(actorUserId: string): Promise<void> {
+  try {
+    await cacheService.del(`${VIEWER_CACHE_PREFIX}${actorUserId}:`);
+    await cacheService.del(`${STUDENT_IDS_CACHE_PREFIX}${actorUserId}`);
+  } catch (err) {
+    logger.warn("Failed to invalidate teacher cache", { actorUserId, err: String(err) });
+  }
+}
+
+export async function invalidateParentViewerCache(actorUserId: string): Promise<void> {
+  try {
+    await cacheService.del(`${VIEWER_CACHE_PREFIX}${actorUserId}:`);
+    await cacheService.del(`${STUDENT_IDS_CACHE_PREFIX}${actorUserId}`);
+  } catch (err) {
+    logger.warn("Failed to invalidate parent cache", { actorUserId, err: String(err) });
+  }
 }

@@ -72,6 +72,11 @@ export const SystemSettingUpsertInputPothos = gqlSchemaBuilder
 gqlSchemaBuilder.queryField("systemSettings", t =>
   t.field({
     type: [SystemSettingPothosObject],
+    // Read access = loggedIn here; the effective SETTINGS_VIEW /
+    // SETTINGS_EDIT_GENERAL gate lives in assertCanViewGeneralSettings below.
+    // The authScopes plugin only supports AND-composed single permissions, so
+    // the OR view rule cannot be expressed declaratively — keep the resolver
+    // guard as the source of truth.
     authScopes: { loggedIn: true },
     resolve: async (_root, _args, ctx) => {
       const tErrors = resolveErrors(ctx);
@@ -87,6 +92,8 @@ gqlSchemaBuilder.queryField("systemSetting", t =>
   t.field({
     type: SystemSettingPothosObject,
     nullable: true,
+    // Same as systemSettings: loggedIn declared here; the SETTINGS_VIEW /
+    // SETTINGS_EDIT_GENERAL OR gate is enforced by assertCanViewGeneralSettings.
     authScopes: { loggedIn: true },
     args: {
       key: t.arg.string({ required: true, directives: { constraint: { maxLength: 100 } } }),

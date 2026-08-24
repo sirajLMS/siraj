@@ -5,6 +5,18 @@ import { resolveExcludedIanaTimezoneId } from "@/shared/lib/timezone/excluded-ia
 
 const IANA_TIMEZONE_ENUM_VALUES = new Set<string>(Object.values(IanaTimezone));
 
+/**
+ * Machine-stable error codes for IanaTimezone coercion failures.
+ * GraphQL scalar parsers receive no request context in graphql-js, so locale
+ * cannot be threaded here — clients localize via `extensions.scalarCode`.
+ */
+const IanaTimezoneScalarError = {
+  NotAString: "IANA_TIMEZONE_NOT_STRING",
+  InvalidValue: "IANA_TIMEZONE_INVALID_VALUE",
+  LiteralNotString: "IANA_TIMEZONE_LITERAL_NOT_STRING",
+  CannotSerialize: "IANA_TIMEZONE_CANNOT_SERIALIZE",
+} as const;
+
 function normalizeToSlashId(value: string): string {
   const slashNormalized = value.includes("/") ? value : value.replaceAll("_", "/");
   return resolveExcludedIanaTimezoneId(slashNormalized);
@@ -13,7 +25,7 @@ function normalizeToSlashId(value: string): string {
 function parseIanaTimezoneValue(value: unknown): IanaTimezone {
   if (typeof value !== "string") {
     throw new GraphQLError(`IanaTimezone must be a string, got ${typeof value}`, {
-      extensions: { code: "BAD_USER_INPUT" },
+      extensions: { code: "BAD_USER_INPUT", scalarCode: IanaTimezoneScalarError.NotAString },
     });
   }
 
@@ -24,7 +36,7 @@ function parseIanaTimezoneValue(value: unknown): IanaTimezone {
   }
 
   throw new GraphQLError(`Invalid IanaTimezone: ${value}`, {
-    extensions: { code: "BAD_USER_INPUT" },
+    extensions: { code: "BAD_USER_INPUT", scalarCode: IanaTimezoneScalarError.InvalidValue },
   });
 }
 
@@ -41,14 +53,14 @@ function serializeIanaTimezone(value: unknown): IanaTimezone {
     return parseIanaTimezoneValue(value);
   }
   throw new GraphQLError(`Cannot serialize value as IanaTimezone: ${String(value)}`, {
-    extensions: { code: "INTERNAL_SERVER_ERROR" },
+    extensions: { code: "INTERNAL_SERVER_ERROR", scalarCode: IanaTimezoneScalarError.CannotSerialize },
   });
 }
 
 function parseLiteral(ast: ValueNode): IanaTimezone {
   if (ast.kind !== Kind.STRING) {
     throw new GraphQLError("IanaTimezone literal must be a string", {
-      extensions: { code: "BAD_USER_INPUT" },
+      extensions: { code: "BAD_USER_INPUT", scalarCode: IanaTimezoneScalarError.LiteralNotString },
     });
   }
   return parseIanaTimezoneValue(ast.value);

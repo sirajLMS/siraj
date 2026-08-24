@@ -4,6 +4,7 @@ import { cookies, headers } from "next/headers";
 import { SessionRepository } from "@/backend/db/repo/shared";
 import { type BaseContext, createContext } from "@/backend/graphql/gqlContext";
 import { extractTokenFromHeader, verifyToken } from "@/backend/lib/auth/jwt";
+import { getBooleanEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { ImpersonationService, PermissionGroupSimulationService } from "@/backend/services";
 import type { SessionSelectType } from "@/backend/types";
@@ -96,11 +97,41 @@ async function resolveAuthFromRequest(
 }
 
 /**
+ * Resolve the client IP from raw proxy forwarding headers (x-forwarded-for
+ * leftmost entry, then x-real-ip). Callers MUST only invoke this behind an
+ * explicitly trusted reverse proxy (`TRUSTED_PROXY=true`) — otherwise these
+ * headers are client-spoofable and would allow rate-limit bucket rotation
+ * (security review M2).
+ */
+function resolveTrustedProxyIp(headersList: Headers): string | null {
+  const forwardedFor = headersList.get("x-forwarded-for");
+  if (forwardedFor) {
+    const ips = forwardedFor
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean);
+    if (ips.length > 0 && isIP(ips[0]) > 0) {
+      return ips[0];
+    }
+  }
+
+  const realIp = headersList.get("x-real-ip");
+  if (realIp) {
+    const ip = realIp.trim();
+    if (isIP(ip) > 0) {
+      return ip;
+    }
+  }
+  return null;
+}
+
+/**
  * Extracts the client IP from request headers. Only trusts platform-trusted
  * headers (x-vercel-forwarded-for on Vercel, cf-connecting-ip behind Cloudflare)
- * when the deployment is on that platform. Falls back to x-forwarded-for (first
- * entry) and x-real-ip. Uses a UA+Accept-Language fingerprint if no valid IP is
- * found so clients with different fingerprints are rate-limited separately.
+ * when the deployment is on that platform. Raw x-forwarded-for / x-real-ip are
+ * honored only behind an explicit TRUSTED_PROXY=true reverse proxy (M2). Uses a
+ * UA+Accept-Language fingerprint if no valid IP is found so clients with
+ * different fingerprints are rate-limited separately.
  */
 function getIpAddress(headersList: Headers): string {
   const isOnVercel = process.env.VERCEL === "1";
@@ -120,25 +151,11 @@ function getIpAddress(headersList: Headers): string {
     }
   }
 
-  const forwardedFor = headersList.get("x-forwarded-for");
-  if (forwardedFor) {
-    const ips = forwardedFor
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean);
-    if (ips.length > 0) {
-      const ip = ips[0];
-      if (isIP(ip) > 0) {
-        return ip;
-      }
-    }
-  }
-
-  const realIp = headersList.get("x-real-ip");
-  if (realIp) {
-    const ip = realIp.trim();
-    if (isIP(ip) > 0) {
-      return ip;
+  // Trusted reverse proxy opt-in (security review M2 — see resolveTrustedProxyIp).
+  if (getBooleanEnv("TRUSTED_PROXY")) {
+    const proxyIp = resolveTrustedProxyIp(headersList);
+    if (proxyIp) {
+      return proxyIp;
     }
   }
 

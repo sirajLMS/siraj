@@ -25,14 +25,30 @@ export async function updateInstanceState(
   }
 ): Promise<Types.ClassInstanceSelectType | null> {
   const now = new Date();
-  const [updated] = await t
-    .update(classInstances)
-    .set({
-      ...state,
-      updatedAt: now,
-    })
-    .where(eq(classInstances.id, id))
-    .returning();
+  // H7 fix: whitelist allowed state keys to prevent mass-assignment of financial fields.
+  const ALLOWED_STATE_KEYS = new Set([
+    "executionState",
+    "outcome",
+    "actualStartAt",
+    "actualEndAt",
+    "activatedAt",
+    "activatedByUserId",
+    "forceActivated",
+    "forceActivatedByUserId",
+    "payrollCredited",
+    "quotaDeducted",
+    "isRescheduled",
+    "remarks",
+    "adminNotes",
+  ]);
+  const safe: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(state)) {
+    if (ALLOWED_STATE_KEYS.has(key)) {
+      safe[key] = value;
+    }
+  }
+  safe.updatedAt = now;
+  const [updated] = await t.update(classInstances).set(safe).where(eq(classInstances.id, id)).returning();
 
   if (updated) {
     await t.insert(classStatusEvents).values({

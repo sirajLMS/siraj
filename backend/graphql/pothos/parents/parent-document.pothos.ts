@@ -1,3 +1,4 @@
+import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { ParentDocumentService } from "@/backend/services";
 import type { ParentDocument } from "@/backend/types";
@@ -23,7 +24,7 @@ gqlSchemaBuilder.queryField("parentDocuments", t =>
       parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentDocumentService.getParentDocuments(ctx.user?.id ?? "", args.parentId, ctx.locale);
+      return ParentDocumentService.getParentDocuments(requireUserId(ctx), args.parentId, ctx.locale);
     },
   })
 );
@@ -39,7 +40,7 @@ gqlSchemaBuilder.mutationField("linkDocumentToParent", t =>
     },
     resolve: async (_root, args, ctx) => {
       const result = await ParentDocumentService.linkDocumentToParent(
-        ctx.user?.id ?? "",
+        requireUserId(ctx),
         args.parentId,
         args.fileId,
         args.usageType,

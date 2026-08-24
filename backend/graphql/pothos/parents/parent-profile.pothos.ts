@@ -1,4 +1,5 @@
 import { AppPermission } from "@/backend/enum";
+import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { DisplayAmountPothosObject } from "@/backend/graphql/pothos/billing/fx-display.pothos";
 import {
@@ -116,7 +117,7 @@ gqlSchemaBuilder.queryField("parentProfile", t =>
       parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentProfileService.getProfile(ctx.user?.id ?? "", args.parentId, ctx.locale);
+      return ParentProfileService.getProfile(requireUserId(ctx), args.parentId, ctx.locale);
     },
   })
 );
@@ -129,7 +130,7 @@ gqlSchemaBuilder.queryField("parentAssociatedStudents", t =>
       parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentProfileService.getAssociatedStudents(ctx.user?.id ?? "", args.parentId, ctx.locale);
+      return ParentProfileService.getAssociatedStudents(requireUserId(ctx), args.parentId, ctx.locale);
     },
   })
 );
@@ -146,7 +147,7 @@ gqlSchemaBuilder.queryField("studentById", t =>
       // Reusing AssociatedStudentRef but fetching a single one.
       // Need a student-specific service method or repository call.
       // AssociatedStudentResult is defined as { id, name, status, teacherName, ... }
-      return ParentProfileService.getStudentById(ctx.user?.id ?? "", args.studentId, ctx.locale);
+      return ParentProfileService.getStudentById(requireUserId(ctx), args.studentId, ctx.locale);
     },
   })
 );
@@ -161,7 +162,7 @@ gqlSchemaBuilder.mutationField("deactivateParent", t =>
       parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentProfileService.deactivateAccount(ctx.user?.id ?? "", args.parentId, ctx.locale);
+      return ParentProfileService.deactivateAccount(requireUserId(ctx), args.parentId, ctx.locale);
     },
   })
 );
@@ -174,7 +175,7 @@ gqlSchemaBuilder.mutationField("reactivateParent", t =>
       parentId: t.arg.string({ required: true, directives: { constraint: { maxLength: 36 } } }),
     },
     resolve: async (_root, args, ctx) => {
-      return ParentProfileService.reactivateAccount(ctx.user?.id ?? "", args.parentId, ctx.locale);
+      return ParentProfileService.reactivateAccount(requireUserId(ctx), args.parentId, ctx.locale);
     },
   })
 );
@@ -191,7 +192,7 @@ gqlSchemaBuilder.mutationField("updateStudentQuota", t =>
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
       return StudentManagementService.editQuota(
-        ctx.user?.id ?? "",
+        requireUserId(ctx),
         args.studentId,
         tErrors,
         args.newClassesRemaining,

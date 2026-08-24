@@ -33,6 +33,22 @@ export namespace BillingHistoryService {
     return parent.id;
   }
 
+  /** H1 fix: verify the caller owns the resolved parent (or is admin) to prevent cross-tenant IDOR. */
+  async function assertParentOwnershipOrAdmin(
+    actorUserId: string,
+    resolvedParentId: string,
+    tErrors: ErrorsLabels
+  ): Promise<void> {
+    const ctx = await PermissionsService.getUserContext(actorUserId);
+    if (ctx.isSuperAdmin) return;
+    const isAdmin = ctx.permissions.includes(AppPermission.BILLING_VIEW_UNPAID_INVOICES);
+    if (isAdmin) return;
+    const callerParent = await ParentRepository.findByUserId(actorUserId);
+    if (!callerParent || callerParent?.id !== resolvedParentId) {
+      throw new Error(tErrors.insufficientPermissions);
+    }
+  }
+
   export async function getParentInvoiceHistory(
     actorUserId: string,
     parentId: string | null,
@@ -43,6 +59,7 @@ export namespace BillingHistoryService {
   ): Promise<InvoiceHistoryPaginatedResult> {
     await assertBillingViewPermission(actorUserId, tErrors);
     const resolvedParentId = await resolveParentId(parentId, userId ?? actorUserId, tErrors);
+    await assertParentOwnershipOrAdmin(actorUserId, resolvedParentId, tErrors);
 
     const result = await BillingRepository.getInvoicesForParent(resolvedParentId, pagination, search);
 
@@ -92,6 +109,7 @@ export namespace BillingHistoryService {
   ): Promise<ParentBillingSummaryResult> {
     await assertBillingViewPermission(actorUserId, tErrors);
     const resolvedParentId = await resolveParentId(parentId, userId ?? actorUserId, tErrors);
+    await assertParentOwnershipOrAdmin(actorUserId, resolvedParentId, tErrors);
     return BillingRepository.getParentBillingSummary(resolvedParentId);
   }
 

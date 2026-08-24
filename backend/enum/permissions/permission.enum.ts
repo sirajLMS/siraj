@@ -274,6 +274,10 @@ export enum AppPermission {
   USER_ADMIN_RESET_PASSWORD = "user.admin_reset_password",
   USER_VIEW_PROFILE = "user.view_profile",
   USER_EDIT_PROFILE = "user.edit_profile",
+  // Monthly Appraisals (F1)
+  APPRAISAL_SUBMIT = "appraisal.submit",
+  APPRAISAL_VIEW = "appraisal.view",
+  APPRAISAL_FEEDBACK = "appraisal.feedback",
 }
 
 const appPermissionValues = Object.values(AppPermission) as readonly AppPermission[];

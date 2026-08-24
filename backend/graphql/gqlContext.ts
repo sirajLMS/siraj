@@ -1,5 +1,6 @@
 import type { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
 import { type AppPermission, UserRole } from "@/backend/enum";
+import { UnauthorizedError } from "@/backend/lib/errors";
 import { PermissionsService, UserService } from "@/backend/services";
 import type { SanitizedUserSelectType } from "@/backend/types";
 import type { CurrencyCode } from "@/shared/constants/currency.enum";
@@ -42,6 +43,20 @@ export type AuthContexts = {
   loggedIn: BaseContext & { user: object };
   permission: BaseContext & { user: object };
 };
+
+/**
+ * Returns the authenticated user's id, throwing a localized UNAUTHENTICATED
+ * error when the context carries no user. Every caller is already behind a
+ * `loggedIn`/`permission` authScope — this is a defense-in-depth assertion
+ * replacing silent `ctx.user?.id ?? ""` fallbacks that would otherwise
+ * execute with an empty userId if scopes are ever weakened.
+ */
+export function requireUserId(ctx: BaseContext): string {
+  if (!ctx.user) {
+    throw new UnauthorizedError(ctx.t().errorsTranslations.unauthorized);
+  }
+  return ctx.user.id;
+}
 
 export async function createContext({
   userId,

@@ -1,3 +1,4 @@
+import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import {
   recurringScheduleDetailFields,
@@ -74,7 +75,7 @@ gqlSchemaBuilder.queryField("recurringSchedules", t =>
     },
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
-      const userId = ctx.user?.id ?? "";
+      const userId = requireUserId(ctx);
 
       const { RecurringScheduleDetailService } = await import(
         "@/backend/services/schedule/recurring-schedule-detail.service"

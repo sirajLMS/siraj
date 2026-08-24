@@ -45,7 +45,7 @@ export namespace TeacherAvailabilityRepository {
   async function assertValidTimeRange(startTime: string, endTime: string, locale?: string): Promise<void> {
     if (timeToMinutes(startTime) >= timeToMinutes(endTime)) {
       const errorsTranslations = getServerTranslations(locale ?? "en").errorsTranslations;
-      throw new ValidationError(`${errorsTranslations.invalidInput}; Start time must be before end time`);
+      throw new ValidationError(errorsTranslations.scheduling.startTimeBeforeEndTime);
     }
   }
 

@@ -44,12 +44,14 @@ async function dispatchResponseNotifications(
     // The pure-payload contract is not in play here — this is
     // a legacy direct-dispatch path (F1 grandfather) — so we populate
     // `metadata.to` inline at the call site.
-    const responder = await UserRepository.findSafeById(responderUserId);
-    const to = responder?.email ?? "";
+    const emailParent = await ParentRepository.findByUserId(complaint.parentId);
+    const emailRecipientUserId = emailParent?.userId ?? responderUserId;
+    const emailRecipient = await UserRepository.findSafeById(emailRecipientUserId);
+    const to = emailRecipient?.email ?? "";
     if (to) {
       await CommunicationService.dispatch(
         {
-          userId: responderUserId,
+          userId: emailRecipientUserId,
           title: tNotifications.complaintResponse.title,
           body: response.body,
           channel: NotificationChannel.EMAIL,

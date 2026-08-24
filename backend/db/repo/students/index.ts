@@ -1,3 +1,4 @@
+export * from "./monthly-appraisal.repository";
 export * from "./student.repository";
 export * from "./student-history.repository";
 export * from "./student-progress.repository";

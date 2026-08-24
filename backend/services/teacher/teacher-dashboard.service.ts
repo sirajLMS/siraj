@@ -2,6 +2,7 @@ import { db } from "@/backend/db/drizzleDb";
 import { AuditRepository } from "@/backend/db/repo/audit/audit.repository";
 import { CreditRepository } from "@/backend/db/repo/billing";
 import { SchedulingRepository } from "@/backend/db/repo/scheduling";
+import { StudentRepository } from "@/backend/db/repo/students/student.repository";
 import { TeacherRepository } from "@/backend/db/repo/teachers/teacher.repository";
 import { UserRepository } from "@/backend/db/repo/users/user.repository";
 import { AppPermission } from "@/backend/enum";
@@ -82,6 +83,19 @@ export namespace TeacherDashboardService {
 
   export async function createManualEntry(userId: string, input: ManualEntryInput, tErrors: ErrorsLabels) {
     await assertPermission(userId, AppPermission.TEACHER_VIEW_DASHBOARD, tErrors);
+
+    // H3 fix: verify the actor owns the teacherId and has assignment to the studentId.
+    const isAdmin = await PermissionsService.hasPermission(userId, AppPermission.SCHEDULE_CREATE_CLASS);
+    if (!isAdmin) {
+      const actorTeacher = await TeacherRepository.findByUserId(userId);
+      if (!actorTeacher || input.teacherId !== actorTeacher?.id) {
+        throw new UnauthorizedError(tErrors.unauthorizedAction);
+      }
+      const assigned = await StudentRepository.hasTeacherAssignment(input.studentId, actorTeacher.id);
+      if (!assigned) {
+        throw new UnauthorizedError(tErrors.unauthorizedAction);
+      }
+    }
 
     if (!input.subjectId) {
       throw new ValidationError(tErrors.invalidInput);

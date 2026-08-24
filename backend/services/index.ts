@@ -9,6 +9,7 @@ export * from "./fx";
 export * from "./group-class";
 export * from "./history";
 export * from "./meeting";
+export * from "./monthly-appraisal";
 export * from "./notification";
 export * from "./parent";
 export * from "./payment-method";

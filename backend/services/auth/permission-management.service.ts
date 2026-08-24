@@ -497,10 +497,20 @@ export namespace PermissionManagementService {
 
   /**
    * Ensures app_permission enum values exist before inserting system permissions.
+   * Validates each key against the AppPermission enum before interpolating it
+   * into the DDL statement (stmt is built with sql.raw, so this guard is the
+   * only thing standing between a caller bug and unvalidated SQL).
    */
   export async function ensurePermissionEnumValues(keys: readonly AppPermission[]): Promise<void> {
+    const validatedKeys = keys.map(key => {
+      const parsed = parseAppPermission(key);
+      if (!parsed) {
+        throw new Error(`Invalid AppPermission key for enum DDL: ${key}`);
+      }
+      return parsed;
+    });
     await Promise.all(
-      keys.map(key => db.execute(sql.raw(`ALTER TYPE app_permission ADD VALUE IF NOT EXISTS '${key}';`)))
+      validatedKeys.map(key => db.execute(sql.raw(`ALTER TYPE app_permission ADD VALUE IF NOT EXISTS '${key}';`)))
     );
   }
 

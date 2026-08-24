@@ -1,4 +1,5 @@
 import { AppPermission } from "@/backend/enum";
+import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { PaginationArgsObject } from "@/backend/graphql/pothos/shared/pagination.objects";
 import { TeacherDirectoryPothosObject } from "@/backend/graphql/pothos/teachers/staff-directory.pothos";
@@ -35,7 +36,7 @@ gqlSchemaBuilder.queryField("teacherDirectory", t =>
       const pagination = parsePaginationArgs(args.paginationArgs);
 
       return await StaffDirectoryService.getDirectory(
-        ctx.user?.id ?? "",
+        requireUserId(ctx),
         pagination,
         args.search ?? undefined,
         ctx.locale

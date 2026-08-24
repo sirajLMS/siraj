@@ -250,7 +250,7 @@ export namespace SuggestionRepository {
     suggestionId: string,
     fields: Partial<SuggestionInsertType>,
     tx?: DBTransaction,
-    _locale?: string
+    locale?: string
   ) => {
     const runner = async (t: DBTransaction) => {
       const [updated] = await t
@@ -260,7 +260,8 @@ export namespace SuggestionRepository {
         .returning();
 
       if (!updated) {
-        throw new NotFoundError("SUGGESTION", `Suggestion ${suggestionId} not found`);
+        const tErrors = getServerTranslations(locale ?? "en").errorsTranslations;
+        throw new NotFoundError("SUGGESTION", tErrors.suggestionNotFound);
       }
 
       return updated;

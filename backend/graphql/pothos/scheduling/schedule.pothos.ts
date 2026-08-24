@@ -1,4 +1,5 @@
 import { AppPermission } from "@/backend/enum";
+import { requireUserId } from "@/backend/graphql/gqlContext";
 import { gqlSchemaBuilder } from "@/backend/graphql/gqlSchemaBuilder";
 import { classExecutionFields } from "@/backend/graphql/pothos/scheduling/__shared__/classExecutionFields";
 import { classSessionMetricsFields } from "@/backend/graphql/pothos/scheduling/__shared__/classSessionMetricsFields";
@@ -193,7 +194,7 @@ gqlSchemaBuilder.queryField("statusTrackingSchedule", t =>
     resolve: async (_root, args, ctx) => {
       const tErrors = ctx.t().errorsTranslations;
       const date = new Date(args.date);
-      return ScheduleQueryService.getStatusTrackingSchedule(ctx.user?.id ?? "", date, tErrors, {
+      return ScheduleQueryService.getStatusTrackingSchedule(requireUserId(ctx), date, tErrors, {
         search: args.search ?? undefined,
         viewerTimezone: args.viewerTimezone ?? undefined,
       });

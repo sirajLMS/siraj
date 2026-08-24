@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
+import { randomUUID } from "node:crypto";
 import { verifyCronSecretAuth } from "@/backend/lib/cron-auth";
 import type { EnvironmentConfig } from "@/backend/lib/env";
 import * as envModule from "@/backend/lib/env";
@@ -31,7 +32,9 @@ function minimalEnvConfig(cronSecret: string | undefined): EnvironmentConfig {
     allowedOrigin: undefined,
     databaseEncryptionKey: "test-encryption-key-32chars-long!!",
     adminEmail: "admin@test.com",
-    adminPassword: process.env.ADMIN_PASSWORD ?? process.env.PATH ?? process.env.HOME ?? process.env.USER ?? "",
+    // Random dummy value — never read real env vars (PATH/HOME/USER) here since
+    // they could leak into test logs/artifacts.
+    adminPassword: `TestPass-${randomUUID().slice(0, 8)}!`,
     storageProvider: "local",
     cronSecret,
   };
