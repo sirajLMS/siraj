@@ -27,17 +27,19 @@ export async function seedOrGet(complaintsList: ComplaintRow[], usersList: UserS
     .map((complaint, index) => ({ complaint, index }))
     .filter(({ complaint }) => complaint.status === "ANSWERED");
 
-  const results = await Promise.all(
-    answeredComplaints.map(async ({ complaint, index }) => {
-      const faker = getFakerForIndex(seedConfig.fakerSeed, 12000 + index);
-      return ComplaintService.ensureComplaintResponse({
-        complaintId: complaint.id,
-        responderUserId: responderUser?.id ?? null,
-        body: faker.lorem.paragraph(),
-        emailSent: true,
-      });
-    })
-  );
+  const results = await answeredComplaints.reduce<
+    Promise<Awaited<ReturnType<typeof ComplaintService.ensureComplaintResponse>>[]>
+  >(async (prev, { complaint, index }) => {
+    const acc = await prev;
+    const faker = getFakerForIndex(seedConfig.fakerSeed, 12000 + index);
+    const res = await ComplaintService.ensureComplaintResponse({
+      complaintId: complaint.id,
+      responderUserId: responderUser?.id ?? null,
+      body: faker.lorem.paragraph(),
+      emailSent: true,
+    });
+    return [...acc, res];
+  }, Promise.resolve([]));
 
   logger.info(`Complaint responses seeded (${results.length} rows).`);
   return results;

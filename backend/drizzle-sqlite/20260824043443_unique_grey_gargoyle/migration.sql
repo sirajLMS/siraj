@@ -1505,7 +1505,7 @@ CREATE INDEX `books_deleted_at_idx` ON `books` (`deleted_at`);--> statement-brea
 CREATE INDEX `books_availability_status_idx` ON `books` (`availability_status`);--> statement-breakpoint
 CREATE INDEX `books_created_at_idx` ON `books` (`created_at`);--> statement-breakpoint
 CREATE INDEX `books_name_idx` ON `books` (`name`);--> statement-breakpoint
-CREATE INDEX `class_categories_slug_idx` ON `class_categories` (`slug`);--> statement-breakpoint
+CREATE UNIQUE INDEX `class_categories_slug_idx` ON `class_categories` (`slug`);--> statement-breakpoint
 CREATE INDEX `class_categories_deleted_at_idx` ON `class_categories` (`deleted_at`);--> statement-breakpoint
 CREATE INDEX `class_subjects_category_id_idx` ON `class_subjects` (`category_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `class_subjects_slug_idx` ON `class_subjects` (`slug`);--> statement-breakpoint
@@ -1683,7 +1683,7 @@ CREATE INDEX `user_meeting_configs_is_default_idx` ON `user_meeting_configs` (`i
 CREATE INDEX `user_meeting_configs_user_id_is_default_idx` ON `user_meeting_configs` (`user_id`,`is_default`);--> statement-breakpoint
 CREATE INDEX `user_meeting_configs_provider_id_idx` ON `user_meeting_configs` (`provider_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_meeting_configs_one_default_per_user_idx` ON `user_meeting_configs` (`user_id`) WHERE "user_meeting_configs"."is_default" = true;--> statement-breakpoint
-CREATE INDEX `parents_user_id_idx` ON `parents` (`user_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `parents_user_id_idx` ON `parents` (`user_id`);--> statement-breakpoint
 CREATE INDEX `parents_status_idx` ON `parents` (`status`);--> statement-breakpoint
 CREATE INDEX `parents_created_at_idx` ON `parents` (`created_at`);--> statement-breakpoint
 CREATE INDEX `parents_updated_at_idx` ON `parents` (`updated_at`);--> statement-breakpoint
@@ -1776,7 +1776,7 @@ CREATE INDEX `teacher_assignments_student_id_idx` ON `teacher_assignments` (`stu
 CREATE INDEX `teacher_assignments_teacher_id_idx` ON `teacher_assignments` (`teacher_id`);--> statement-breakpoint
 CREATE INDEX `teacher_assignments_ended_at_idx` ON `teacher_assignments` (`ended_at`);--> statement-breakpoint
 CREATE INDEX `teacher_assignments_assigned_by_user_id_idx` ON `teacher_assignments` (`assigned_by_user_id`);--> statement-breakpoint
-CREATE INDEX `staff_profiles_user_id_idx` ON `staff_profiles` (`user_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `staff_profiles_user_id_idx` ON `staff_profiles` (`user_id`);--> statement-breakpoint
 CREATE INDEX `staff_profiles_created_at_idx` ON `staff_profiles` (`created_at`);--> statement-breakpoint
 CREATE INDEX `staff_profiles_updated_at_idx` ON `staff_profiles` (`updated_at`);--> statement-breakpoint
 CREATE INDEX `staff_profiles_rate_currency_idx` ON `staff_profiles` (`rate_currency`);--> statement-breakpoint
@@ -1808,7 +1808,7 @@ CREATE INDEX `teacher_payments_user_payment_method_id_idx` ON `teacher_payments`
 CREATE INDEX `teacher_payments_payment_date_idx` ON `teacher_payments` (`payment_date`);--> statement-breakpoint
 CREATE INDEX `teacher_payments_payment_method_type_idx` ON `teacher_payments` (`payment_method_type`);--> statement-breakpoint
 CREATE INDEX `teacher_payments_is_test_payment_idx` ON `teacher_payments` (`is_test_payment`);--> statement-breakpoint
-CREATE INDEX `teachers_user_id_idx` ON `teachers` (`user_id`);--> statement-breakpoint
+CREATE UNIQUE INDEX `teachers_user_id_idx` ON `teachers` (`user_id`);--> statement-breakpoint
 CREATE INDEX `teachers_created_at_idx` ON `teachers` (`created_at`);--> statement-breakpoint
 CREATE INDEX `teachers_updated_at_idx` ON `teachers` (`updated_at`);--> statement-breakpoint
 CREATE INDEX `teachers_nationality_idx` ON `teachers` (`nationality`);--> statement-breakpoint

@@ -56,8 +56,11 @@ export async function seedOrGet(teachersList: TeacherSelectType[], _usersList: U
 
   const anchor = startOfDay(seedConfig.anchorDate);
   const monthsBack = seedConfig.profile === "standard" ? 3 : 1;
-  const payoutMethods = await Promise.all(
-    teachersList.map(teacher => TeacherPaymentSeedService.findDefaultPayoutMethod(teacher.userId))
+  const payoutMethods = await teachersList.reduce<
+    Promise<Awaited<ReturnType<typeof TeacherPaymentSeedService.findDefaultPayoutMethod>>[]>
+  >(
+    async (prev, teacher) => [...(await prev), await TeacherPaymentSeedService.findDefaultPayoutMethod(teacher.userId)],
+    Promise.resolve([])
   );
 
   const inputs = teachersList.flatMap((teacher, i) => {

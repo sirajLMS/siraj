@@ -46,20 +46,21 @@ export async function seedOrGet(
 
   if (shouldSeedExtendedFiles(seedConfig)) {
     const validSchedules = results;
-    await Promise.all(
-      validSchedules.map(schedule =>
-        seedEntityFile({
+    await validSchedules.reduce<Promise<void>>(async (prev, schedule) => {
+      await prev;
+      try {
+        await seedEntityFile({
           assetRelativePath: "documents/sample-attachment.pdf",
           bucketPath: `public/schedules/seed_${schedule.id}.pdf`,
           referenceTable: "recurring_schedules",
           referenceId: schedule.id,
           usageType: "attachment",
           ensureParentDirs: ["public/schedules"],
-        }).catch(error => {
-          logger.error(`Failed to seed recurring schedule file for ${schedule.id}:`, error);
-        })
-      )
-    );
+        });
+      } catch (error) {
+        logger.error(`Failed to seed recurring schedule file for ${schedule.id}:`, error);
+      }
+    }, Promise.resolve());
   }
 
   logger.info(`System classes seeded (${results.length} recurring schedules).`);

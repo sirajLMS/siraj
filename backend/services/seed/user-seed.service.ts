@@ -66,11 +66,15 @@ export namespace UserSeedService {
     groupMap: Map<string, string>
   ): Promise<UserSelectType[]> {
     assertSeedWriteAllowed("Demo user seed writes");
-    const users = await Promise.all(inputs.map(input => upsertDemoUser(input, groupMap)));
-    for (const input of inputs) {
-      logger.debug("Seed demo user ensured", { email: input.email });
-    }
-    return users;
+    return db.transaction(async tx => {
+      return Promise.all(
+        inputs.map(async input => {
+          const user = await upsertDemoUser(input, groupMap, tx);
+          logger.debug("Seed demo user ensured", { email: input.email });
+          return user;
+        })
+      );
+    });
   }
 
   /** Read helper for seed scripts — lists staff profiles for avatar seeding. */

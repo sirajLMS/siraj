@@ -3,6 +3,7 @@ import {
   index,
   textColumn,
   timestampColumn,
+  uniqueIndex,
   uuidColumn,
   uuidDefaultColumn,
   varcharColumn,
@@ -35,7 +36,7 @@ export const parents = createTable(
     updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
-    index("parents_user_id_idx").on(table.userId),
+    uniqueIndex("parents_user_id_idx").on(table.userId),
     index("parents_status_idx").on(table.status),
     index("parents_created_at_idx").on(table.createdAt),
     index("parents_updated_at_idx").on(table.updatedAt),

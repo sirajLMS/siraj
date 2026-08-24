@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, inArray, isNull, lte, ne, or, type SQL, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import {
   currencyExchangeAuditLogs,
   currencyExchangeRates,
@@ -30,7 +31,7 @@ import type { ErrorsLabels } from "@/shared/locale";
 
 export namespace BillingRepository {
   async function acquireInvoiceLock(tx: DBTransaction, invoiceId: string): Promise<void> {
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('invoice_' || ${invoiceId}::text))`);
+    await acquireAdvisoryLock(tx, `invoice_${invoiceId}`);
   }
 
   async function getExistingInvoiceOrThrow(
@@ -1225,28 +1226,29 @@ export namespace BillingRepository {
     const now = new Date();
     const t = tx ?? db;
 
-    const inserted = await Promise.all(
-      inputs.map(input =>
-        t
-          .insert(currencyExchangeRates)
-          .values({
-            ...input,
-            createdAt: now,
-            updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: [
-              currencyExchangeRates.fromCurrency,
-              currencyExchangeRates.toCurrency,
-              currencyExchangeRates.effectiveDate,
-            ],
-            set: { rate: input.rate, updatedAt: now },
-          })
-          .returning()
-      )
-    );
+    const rows = await inputs.reduce(async (prevPromise, input) => {
+      const acc = await prevPromise;
+      const [row] = await t
+        .insert(currencyExchangeRates)
+        .values({
+          ...input,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: [
+            currencyExchangeRates.fromCurrency,
+            currencyExchangeRates.toCurrency,
+            currencyExchangeRates.effectiveDate,
+          ],
+          set: { rate: input.rate, updatedAt: now },
+        })
+        .returning();
+      if (row) acc.push(row);
+      return acc;
+    }, Promise.resolve<Types.CurrencyExchangeRateSelectType[]>([]));
 
-    return inserted.flatMap(rows => (rows[0] ? [rows[0]] : []));
+    return rows;
   };
 
   export const createManyExchangeAuditLogs = async (

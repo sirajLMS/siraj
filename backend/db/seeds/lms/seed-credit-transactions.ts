@@ -54,16 +54,17 @@ export async function seedOrGet(
 
   const tErrors = getServerTranslations("ar").errorsTranslations;
 
-  const results = await Promise.all(
-    CREDIT_PURCHASE_SPECS.map(async spec => {
+  const results = await CREDIT_PURCHASE_SPECS.reduce<Promise<(CreditTransactionReturnType | null)[]>>(
+    async (prev, spec) => {
+      const acc = await prev;
       const student = students[spec.studentIndex];
       if (!student) {
         logger.warn(`Student at index ${spec.studentIndex} not found — skipping credit purchase.`);
-        return null;
+        return [...acc, null];
       }
 
       const idempotencyKey = buildIdempotencyKey(spec);
-      return CreditService.recordPurchaseIfMissing(
+      const res = await CreditService.recordPurchaseIfMissing(
         actorUser.id,
         {
           studentId: student.id,
@@ -73,7 +74,9 @@ export async function seedOrGet(
         idempotencyKey,
         tErrors
       );
-    })
+      return [...acc, res];
+    },
+    Promise.resolve([])
   );
 
   const seeded = results.filter((row): row is CreditTransactionReturnType => row != null);

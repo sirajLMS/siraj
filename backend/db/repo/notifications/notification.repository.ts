@@ -4,6 +4,7 @@ import {
   DELIVERY_STATUS_RANK,
   isValidStatusTransition,
 } from "@/backend/db/repo/notifications/notification-status.constants";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { notificationDeliveries, userDeviceTokens, userNotificationPreferences } from "@/backend/db/schema";
 import { NotificationChannel, NotificationDeliveryStatus, type NotificationEventType } from "@/backend/enum";
 import { NotFoundError } from "@/backend/lib/errors";
@@ -128,11 +129,11 @@ export namespace NotificationRepository {
   };
 
   async function acquireDeviceTokenLock(tx: DBTransaction, userId: string): Promise<void> {
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('device_token_user_' || ${userId}::text))`);
+    await acquireAdvisoryLock(tx, `device_token_user_${userId}`);
   }
 
   async function acquireDeliveryLock(tx: DBTransaction, deliveryId: string): Promise<void> {
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('notification_delivery_' || ${deliveryId}::text))`);
+    await acquireAdvisoryLock(tx, `notification_delivery_${deliveryId}`);
   }
 
   /**
@@ -296,7 +297,7 @@ export namespace NotificationRepository {
     // that are assigning the same providerMessageId regardless of which
     // deliveryId they target, preventing a unique-constraint violation.
     if (incomingProviderMessageId && incomingProviderMessageId !== current.providerMessageId) {
-      await t.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${incomingProviderMessageId}))`);
+      await acquireAdvisoryLock(t, incomingProviderMessageId);
     }
 
     // Fix 3: Race-condition guard — if the webhook handler already created a
@@ -800,9 +801,7 @@ export namespace NotificationRepository {
     tx?: DBTransaction
   ): Promise<UserNotificationPreferenceSelectType> => {
     const runner = async (t: DBTransaction) => {
-      await t.execute(
-        sql`SELECT pg_advisory_xact_lock(hashtext('notification_pref_' || ${userId}::text || '_' || ${input.channel}::text || '_' || ${input.eventType}::text))`
-      );
+      await acquireAdvisoryLock(t, `notification_pref_${userId}_${input.channel}_${input.eventType}`);
 
       const now = new Date();
 

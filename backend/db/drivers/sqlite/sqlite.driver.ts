@@ -21,12 +21,25 @@ export function resolveSqliteUrl(): string {
   return fileName.startsWith("file:") ? fileName : `file:${fileName}`;
 }
 
+let cachedSqliteClient: Client | null = null;
+
 /**
- * Creates the libsql raw client and applies SQLite pragmas for a Next.js
- * server workload: WAL mode, foreign_keys ON, busy_timeout 5s.
+ * Resets the cached SQLite client (useful in test teardown).
+ */
+export function resetSqliteClient(): void {
+  cachedSqliteClient = null;
+}
+
+/**
+ * Creates or returns the singleton libsql raw client and applies SQLite pragmas for a Next.js
+ * server workload: WAL mode, foreign_keys ON, busy_timeout 60s.
  * For remote (Turso / http) targets, pragmas are skipped.
  */
 export function createSqliteClient(): Client {
+  if (cachedSqliteClient) {
+    return cachedSqliteClient;
+  }
+
   const url = resolveSqliteUrl();
   const authToken = process.env.DATABASE_AUTH_TOKEN ?? undefined;
 
@@ -35,13 +48,16 @@ export function createSqliteClient(): Client {
   const client = createClient({ url, authToken });
 
   if (url.startsWith("file:")) {
-    client.execute("PRAGMA journal_mode = WAL;").catch(err => {
-      logger.error(`Failed to set SQLite WAL journal mode: ${String(err)}`);
-    });
-    client.execute("PRAGMA foreign_keys = ON;").catch(() => {});
-    client.execute("PRAGMA busy_timeout = 5000;").catch(() => {});
+    client
+      .executeMultiple(
+        "PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 60000; PRAGMA foreign_keys = ON; PRAGMA synchronous = NORMAL;"
+      )
+      .catch(err => {
+        logger.error(`Failed to set SQLite pragmas: ${String(err)}`);
+      });
   }
 
+  cachedSqliteClient = client;
   return client;
 }
 

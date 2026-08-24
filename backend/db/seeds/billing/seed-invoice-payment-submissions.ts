@@ -53,27 +53,37 @@ export async function seedOrGet(
     pending.push({ invoice, index, parentUserId });
   }
 
-  const toCreate = await Promise.all(
-    pending.map(async ({ invoice, index, parentUserId }) => {
-      const bucketPath = `public/payment-proofs/seed_submission_${invoice.id}.pdf`;
-      const localFilePath = resolveAssetPath("documents/sample-invoice.pdf");
+  const toCreate = await pending.reduce<
+    Promise<
+      Array<{
+        invoiceId: string;
+        fileId: string;
+        submittedByUserId: string;
+        submittedAt: Date;
+        status: "pending";
+      }>
+    >
+  >(async (prev, { invoice, index, parentUserId }) => {
+    const acc = await prev;
+    const bucketPath = `public/payment-proofs/seed_submission_${invoice.id}.pdf`;
+    const localFilePath = resolveAssetPath("documents/sample-invoice.pdf");
 
-      await fileSeeder.seedFile({ bucketPath, localFilePath });
-      const file = await StorageService.createFileAndGet(bucketPath);
+    await fileSeeder.seedFile({ bucketPath, localFilePath });
+    const file = await StorageService.createFileAndGet(bucketPath);
 
-      if (index === 0) {
-        logger.info(`Prepared payment proof for invoice ${invoice.id}`);
-      }
+    if (index === 0) {
+      logger.info(`Prepared payment proof for invoice ${invoice.id}`);
+    }
 
-      return {
-        invoiceId: invoice.id,
-        fileId: file.id,
-        submittedByUserId: parentUserId,
-        submittedAt: new Date(),
-        status: "pending" as const,
-      };
-    })
-  );
+    acc.push({
+      invoiceId: invoice.id,
+      fileId: file.id,
+      submittedByUserId: parentUserId,
+      submittedAt: new Date(),
+      status: "pending" as const,
+    });
+    return acc;
+  }, Promise.resolve([]));
 
   const results = await BillingManagementService.createManyInvoicePaymentSubmissions(toCreate);
   logger.info(`Invoice payment submissions seeded (${results.length} rows).`);

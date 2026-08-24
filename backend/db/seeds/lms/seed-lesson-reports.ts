@@ -115,35 +115,35 @@ export async function seedOrGet(
 
   const specs = buildReportSpecs(completedInstances, studentById, teacherById);
 
-  const results = await Promise.all(
-    specs.map(async spec => {
-      const submittedByUserId = teacherUserIdById.get(spec.classInstance.teacherId) ?? adminUser?.id;
-      if (!submittedByUserId) {
-        logger.warn("No submitter user id available — skipping lesson report.");
-        return null;
-      }
+  const results = await specs.reduce<Promise<(LessonReportReturnType | null)[]>>(async (prev, spec) => {
+    const acc = await prev;
+    const submittedByUserId = teacherUserIdById.get(spec.classInstance.teacherId) ?? adminUser?.id;
+    if (!submittedByUserId) {
+      logger.warn("No submitter user id available — skipping lesson report.");
+      return [...acc, null];
+    }
 
-      const isReviewed = spec.status === LessonReportStatus.APPROVED || spec.status === LessonReportStatus.REJECTED;
-      const reviewedByUserId = isReviewed ? (supervisorUser?.id ?? submittedByUserId) : null;
-      const reviewedAt = isReviewed ? (spec.classInstance.actualEndAt ?? spec.classInstance.scheduledEndAt) : null;
+    const isReviewed = spec.status === LessonReportStatus.APPROVED || spec.status === LessonReportStatus.REJECTED;
+    const reviewedByUserId = isReviewed ? (supervisorUser?.id ?? submittedByUserId) : null;
+    const reviewedAt = isReviewed ? (spec.classInstance.actualEndAt ?? spec.classInstance.scheduledEndAt) : null;
 
-      return LessonReportService.seedLessonReportIfMissing({
-        classInstanceId: spec.classInstance.id,
-        studentId: spec.classInstance.studentId,
-        teacherId: spec.classInstance.teacherId,
-        lessonDate: spec.classInstance.scheduledStartAt,
-        durationMinutes: spec.classInstance.durationMinutes,
-        attendanceEvaluation: spec.attendanceEvaluation,
-        teacherNotes: spec.teacherNotes,
-        completionPercentage: spec.completionPercentage,
-        status: spec.status,
-        submittedByUserId,
-        reviewedByUserId,
-        reviewedAt,
-        rejectionReason: spec.rejectionReason,
-      });
-    })
-  );
+    const res = await LessonReportService.seedLessonReportIfMissing({
+      classInstanceId: spec.classInstance.id,
+      studentId: spec.classInstance.studentId,
+      teacherId: spec.classInstance.teacherId,
+      lessonDate: spec.classInstance.scheduledStartAt,
+      durationMinutes: spec.classInstance.durationMinutes,
+      attendanceEvaluation: spec.attendanceEvaluation,
+      teacherNotes: spec.teacherNotes,
+      completionPercentage: spec.completionPercentage,
+      status: spec.status,
+      submittedByUserId,
+      reviewedByUserId,
+      reviewedAt,
+      rejectionReason: spec.rejectionReason,
+    });
+    return [...acc, res];
+  }, Promise.resolve([]));
 
   const seeded = results.filter((row): row is LessonReportReturnType => row != null);
   logger.info(`LMS lesson reports seeded (${seeded.length} rows).`);

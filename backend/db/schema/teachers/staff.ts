@@ -3,6 +3,7 @@ import {
   index,
   textColumn,
   timestampColumn,
+  uniqueIndex,
   uuidColumn,
   uuidDefaultColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
@@ -31,7 +32,7 @@ export const staffProfiles = createTable(
     updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
-    index("staff_profiles_user_id_idx").on(table.userId),
+    uniqueIndex("staff_profiles_user_id_idx").on(table.userId),
     index("staff_profiles_created_at_idx").on(table.createdAt),
     index("staff_profiles_updated_at_idx").on(table.updatedAt),
     index("staff_profiles_rate_currency_idx").on(table.rateCurrency),

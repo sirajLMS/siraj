@@ -1,3 +1,4 @@
+export * from "./advisory-lock";
 export * from "./bulk-upsert";
 export * from "./cache.repository";
 export * from "./ratelimit.repository";

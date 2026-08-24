@@ -1,5 +1,6 @@
-import { eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { userNotificationPreferences } from "@/backend/db/schema";
 import type {
   DBTransaction,
@@ -14,6 +15,18 @@ export namespace NotificationPreferencesRepository {
   ): Promise<UserNotificationPreferenceSelectType[]> {
     const q = queryDb(tx);
     return q.select().from(userNotificationPreferences).where(eq(userNotificationPreferences.userId, userId));
+  }
+
+  export async function getByUserIdAndChannel(
+    userId: string,
+    channel: string,
+    tx?: DBTransaction
+  ): Promise<UserNotificationPreferenceSelectType[]> {
+    const q = queryDb(tx);
+    return q
+      .select()
+      .from(userNotificationPreferences)
+      .where(and(eq(userNotificationPreferences.userId, userId), eq(userNotificationPreferences.channel, channel)));
   }
 
   /**
@@ -57,7 +70,7 @@ export namespace NotificationPreferencesRepository {
     }
 
     const runner = async (t: DBTransaction) => {
-      await t.execute(sql`SELECT pg_advisory_xact_lock(hashtext('notification_prefs_batch_' || ${userId}::text))`);
+      await acquireAdvisoryLock(t, `notification_prefs_batch_${userId}`);
 
       const now = new Date();
 

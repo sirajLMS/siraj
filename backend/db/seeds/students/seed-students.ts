@@ -163,12 +163,12 @@ export async function seedOrGet(
   const assignmentDate = new Date("2020-01-01");
 
   const indices = Array.from({ length: ctx.totalStudents }, (_, i) => i);
-  const results = await Promise.all(
-    indices.map(i => {
-      const spec = buildStudentRowSpec(i, ctx, parentsList, teachersList);
-      return upsertStudentRow(spec, assignmentDate);
-    })
-  );
+  const results = await indices.reduce<Promise<Awaited<ReturnType<typeof upsertStudentRow>>[]>>(async (prev, i) => {
+    const acc = await prev;
+    const spec = buildStudentRowSpec(i, ctx, parentsList, teachersList);
+    const row = await upsertStudentRow(spec, assignmentDate);
+    return [...acc, row];
+  }, Promise.resolve([]));
 
   if (shouldSeedExtendedFiles(seedConfig)) {
     await linkAvatarsToEntities({

@@ -76,35 +76,33 @@ export namespace RecurringScheduleRepository {
     const now = new Date();
 
     return runInTransaction(tx, async t => {
-      // NOTE: N+1 pattern — per-input SELECT then UPDATE-or-INSERT. Should batch existence check with inArray SELECT
-      const results = await Promise.all(
-        inputs.map(async input => {
-          const [existing] = await t
-            .select()
-            .from(recurringSchedules)
-            .where(eq(recurringSchedules.studentId, input.studentId))
-            .limit(1);
+      return inputs.reduce(async (prevPromise, input) => {
+        const acc = await prevPromise;
+        const [existing] = await t
+          .select()
+          .from(recurringSchedules)
+          .where(eq(recurringSchedules.studentId, input.studentId))
+          .limit(1);
 
-          if (existing) {
-            const [updated] = await t
-              .update(recurringSchedules)
-              .set({
-                teacherId: input.teacherId,
-                subjectId: input.subjectId,
-                durationMinutes: input.durationMinutes,
-                defaultStartTime: input.defaultStartTime,
-                timezone: input.timezone,
-                effectiveFrom: input.effectiveFrom,
-                effectiveUntil: input.effectiveUntil,
-                hourlyRate: input.hourlyRate === undefined ? existing.hourlyRate : input.hourlyRate,
-                rateCurrency: input.rateCurrency === undefined ? existing.rateCurrency : input.rateCurrency,
-                updatedAt: now,
-              })
-              .where(eq(recurringSchedules.id, existing.id))
-              .returning();
-            return updated;
-          }
-
+        if (existing) {
+          const [updated] = await t
+            .update(recurringSchedules)
+            .set({
+              teacherId: input.teacherId,
+              subjectId: input.subjectId,
+              durationMinutes: input.durationMinutes,
+              defaultStartTime: input.defaultStartTime,
+              timezone: input.timezone,
+              effectiveFrom: input.effectiveFrom,
+              effectiveUntil: input.effectiveUntil,
+              hourlyRate: input.hourlyRate === undefined ? existing.hourlyRate : input.hourlyRate,
+              rateCurrency: input.rateCurrency === undefined ? existing.rateCurrency : input.rateCurrency,
+              updatedAt: now,
+            })
+            .where(eq(recurringSchedules.id, existing.id))
+            .returning();
+          if (updated) acc.push(updated);
+        } else {
           const [inserted] = await t
             .insert(recurringSchedules)
             .values({
@@ -113,10 +111,10 @@ export namespace RecurringScheduleRepository {
               updatedAt: now,
             })
             .returning();
-          return inserted;
-        })
-      );
-      return results;
+          if (inserted) acc.push(inserted);
+        }
+        return acc;
+      }, Promise.resolve<RecurringScheduleSelectType[]>([]));
     });
   }
 
@@ -167,23 +165,22 @@ export namespace RecurringScheduleRepository {
     if (inputs.length === 0) return [];
 
     return runInTransaction(tx, async t => {
-      const results = await Promise.all(
-        inputs.map(async input => {
-          const [row] = await t
-            .insert(recurringScheduleDays)
-            .values(input)
-            .onConflictDoUpdate({
-              target: [recurringScheduleDays.recurringScheduleId, recurringScheduleDays.dayOfWeek],
-              set: {
-                startTime: input.startTime,
-                isActive: input.isActive,
-              },
-            })
-            .returning();
-          return row;
-        })
-      );
-      return results;
+      return inputs.reduce(async (prevPromise, input) => {
+        const acc = await prevPromise;
+        const [row] = await t
+          .insert(recurringScheduleDays)
+          .values(input)
+          .onConflictDoUpdate({
+            target: [recurringScheduleDays.recurringScheduleId, recurringScheduleDays.dayOfWeek],
+            set: {
+              startTime: input.startTime,
+              isActive: input.isActive,
+            },
+          })
+          .returning();
+        if (row) acc.push(row);
+        return acc;
+      }, Promise.resolve<RecurringScheduleDaySelectType[]>([]));
     });
   }
 

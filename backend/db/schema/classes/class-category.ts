@@ -6,6 +6,7 @@ import {
   integerColumn,
   textColumn,
   timestampColumn,
+  uniqueIndex,
   varcharColumn,
 } from "@/backend/db/schema/__shared__/dialectAwareBuilder";
 
@@ -22,7 +23,7 @@ export const classCategories = createTable(
     deletedAt: timestampColumn("deleted_at"),
   },
   table => [
-    index("class_categories_slug_idx").on(table.slug),
+    uniqueIndex("class_categories_slug_idx").on(table.slug),
     index("class_categories_deleted_at_idx").on(table.deletedAt),
   ]
 );

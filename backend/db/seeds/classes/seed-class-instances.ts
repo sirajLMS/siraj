@@ -69,18 +69,16 @@ async function insertClassInstances(
   const chunkCount = Math.ceil(allInstances.length / CHUNK_SIZE);
   const chunks = Array.from({ length: chunkCount }, (_, i) => allInstances.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE));
   let completed = 0;
-  const insertedChunks = await Promise.all(
-    chunks.map(async chunk => {
-      const inserted = await ClassSessionService.upsertManyClassInstancesForSeed(chunk, {
-        chunkSize: CHUNK_SIZE,
-        updatedAt: now,
-      });
-      completed += inserted.length;
-      logger.info(`Class instances progress: ${completed}/${allInstances.length}`);
-      return inserted;
-    })
-  );
-  return insertedChunks.flat();
+  return chunks.reduce<Promise<ClassInstanceSelectType[]>>(async (prev, chunk) => {
+    const acc = await prev;
+    const inserted = await ClassSessionService.upsertManyClassInstancesForSeed(chunk, {
+      chunkSize: CHUNK_SIZE,
+      updatedAt: now,
+    });
+    completed += inserted.length;
+    logger.info(`Class instances progress: ${completed}/${allInstances.length}`);
+    return [...acc, ...inserted];
+  }, Promise.resolve([]));
 }
 
 async function seedClassInstanceFiles(results: ClassInstanceSelectType[], seedConfig: SeedConfig): Promise<void> {
@@ -88,26 +86,21 @@ async function seedClassInstanceFiles(results: ClassInstanceSelectType[], seedCo
 
   const instances = results.slice(0, 3).filter((instance): instance is ClassInstanceSelectType => Boolean(instance));
 
-  const outcomes = await Promise.allSettled(
-    instances.map(instance =>
-      seedEntityFile({
+  await instances.reduce<Promise<void>>(async (prev, instance) => {
+    await prev;
+    try {
+      await seedEntityFile({
         assetRelativePath: "documents/sample-attachment.pdf",
         bucketPath: `public/class-instances/seed_${instance.id}.pdf`,
         referenceTable: "class_instances",
         referenceId: instance.id,
         usageType: "attachment",
         ensureParentDirs: ["public/class-instances"],
-      })
-    )
-  );
-
-  for (let i = 0; i < outcomes.length; i++) {
-    const outcome = outcomes[i];
-    const instance = instances[i];
-    if (outcome?.status === "rejected" && instance) {
-      logger.error(`Failed to seed class instance file for ${instance.id}:`, outcome.reason);
+      });
+    } catch (error) {
+      logger.error(`Failed to seed class instance file for ${instance.id}:`, error);
     }
-  }
+  }, Promise.resolve());
 }
 
 export async function seedOrGet(

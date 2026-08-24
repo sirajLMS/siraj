@@ -1,19 +1,19 @@
 import { and, eq, isNull, ne, or, sql } from "drizzle-orm";
 import { queryDb } from "@/backend/db";
+import { acquireAdvisoryLock, SystemSettingsRepository } from "@/backend/db/repo/shared";
 import type { DBTransaction } from "@/backend/types";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
 
 export type { DBTransaction };
 
-import { SystemSettingsRepository } from "@/backend/db/repo/shared";
 import { classInstances, parents, students, teacherAssignments, users } from "@/backend/db/schema";
 import { AvailabilityService } from "@/backend/services/scheduling/availability.service";
 import type * as Types from "@/backend/types";
 import type { ErrorsLabels } from "@/shared/locale";
 
 export async function acquireLocks(tx: DBTransaction, teacherId: string, studentId: string) {
-  await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('booking_teacher_' || ${teacherId}::text))`);
-  await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('booking_student_' || ${studentId}::text))`);
+  await acquireAdvisoryLock(tx, `booking_teacher_${teacherId}`);
+  await acquireAdvisoryLock(tx, `booking_student_${studentId}`);
 }
 
 export async function getClassInstanceByIdOrThrow(
@@ -69,7 +69,7 @@ export interface OverlapCheckParams {
 
 export async function checkOverlaps(tx: DBTransaction, params: OverlapCheckParams, tErrors: ErrorsLabels) {
   const { teacherId, studentId, startTime, endTime, excludeId, meetingJoinUrl } = params;
-  const overlapCondition = sql`(${classInstances.scheduledStartAt}, ${classInstances.scheduledEndAt}) OVERLAPS (${startTime}, ${endTime})`;
+  const overlapCondition = sql`(${classInstances.scheduledStartAt} < ${endTime} AND ${classInstances.scheduledEndAt} > ${startTime})`;
 
   const teacherOverlaps = await tx
     .select({ id: classInstances.id })

@@ -38,23 +38,25 @@ export async function seedOrGet(users: UserSelectType[], timezones: TimezoneSele
     throw new Error("No teacher users found in seed data.");
   }
 
-  const results = await Promise.all(
-    teacherUsers.map(async (user, i) => {
-      const tzIana = i === 0 ? "UTC" : pickTimezoneForIndex(i);
-      resolveTimezone(timezones, tzIana);
-      const status = i === 0 ? ALL_ACCOUNT_STATUSES[0] : cycleAtIndex(ALL_ACCOUNT_STATUSES, i);
+  const results = await teacherUsers.reduce<
+    Promise<Awaited<ReturnType<typeof PersonaSeedService.seedTeacherProfile>>[]>
+  >(async (prev, user, i) => {
+    const acc = await prev;
+    const tzIana = i === 0 ? "UTC" : pickTimezoneForIndex(i);
+    resolveTimezone(timezones, tzIana);
+    const status = i === 0 ? ALL_ACCOUNT_STATUSES[0] : cycleAtIndex(ALL_ACCOUNT_STATUSES, i);
 
-      // Pass the hourlyRate and rateCurrency cleanly via service bootstrap
-      const rate = (50 + i * 15).toString();
-      return PersonaSeedService.seedTeacherProfile({
-        userId: user.id,
-        timezone: tzIana,
-        status,
-        hourlyRate: rate,
-        rateCurrency: CurrencyCode.SAR,
-      });
-    })
-  );
+    // Pass the hourlyRate and rateCurrency cleanly via service bootstrap
+    const rate = (50 + i * 15).toString();
+    const row = await PersonaSeedService.seedTeacherProfile({
+      userId: user.id,
+      timezone: tzIana,
+      status,
+      hourlyRate: rate,
+      rateCurrency: CurrencyCode.SAR,
+    });
+    return [...acc, row];
+  }, Promise.resolve([]));
 
   if (shouldSeedExtendedFiles(seedConfig)) {
     await linkAvatarsToEntities({

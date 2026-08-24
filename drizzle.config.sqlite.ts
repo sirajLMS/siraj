@@ -1,5 +1,7 @@
 import { defineConfig } from "drizzle-kit";
 
+process.env.DB_PROVIDER = "sqlite";
+
 /**
  * Drizzle Kit configuration for the SQLite (libsql) dialect.
  * Used to generate SQLite-specific migrations:

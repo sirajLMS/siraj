@@ -25,16 +25,19 @@ export async function seedOrGet(users: UserSelectType[], config?: SeedConfig) {
     throw new Error("No parent users found in seed data.");
   }
 
-  const results = await Promise.all(
-    parentUsers.map((user, i) => {
+  const results = await parentUsers.reduce<Promise<Awaited<ReturnType<typeof PersonaSeedService.seedParentProfile>>[]>>(
+    async (prev, user, i) => {
+      const acc = await prev;
       const timezone = i === 0 ? IanaTimezone.Africa_Cairo : pickTimezoneForIndex(i);
       const status = cycleAtIndex(ALL_PARENT_STATUSES, i);
-      return PersonaSeedService.seedParentProfile({
+      const row = await PersonaSeedService.seedParentProfile({
         userId: user.id,
         timezone,
         status,
       });
-    })
+      return [...acc, row];
+    },
+    Promise.resolve([])
   );
 
   if (shouldSeedExtendedFiles(seedConfig)) {

@@ -55,7 +55,19 @@ export namespace AuditRepository {
    * Maps CreateAuditLogInput[] to insert row objects.
    */
   function mapAuditLogRows(inputs: readonly Types.CreateAuditLogInput[]) {
-    return inputs.map(mapSingleAuditLogRow);
+    const now = new Date();
+    return inputs.map(input => ({
+      actorUserId: input.actorUserId ?? null,
+      actorType: input.actorType,
+      entityType: input.entityType,
+      entityId: input.entityId,
+      action: input.action,
+      description: input.description ?? null,
+      previousState: input.previousState ?? null,
+      newState: input.newState ?? null,
+      ipAddress: sanitizeIpAddress(input.ipAddress),
+      createdAt: input.createdAt ?? now,
+    }));
   }
 
   /**
@@ -73,7 +85,10 @@ export namespace AuditRepository {
       const chunks = Array.from({ length: Math.ceil(rows.length / DEFAULT_BULK_CHUNK_SIZE) }, (_, i) =>
         rows.slice(i * DEFAULT_BULK_CHUNK_SIZE, (i + 1) * DEFAULT_BULK_CHUNK_SIZE)
       );
-      const insertedChunks = await Promise.all(chunks.map(chunk => t.insert(auditLogs).values(chunk).returning()));
+      const insertedChunks = await chunks.reduce<Promise<Types.AuditLogSelectType[][]>>(
+        async (prev, chunk) => [...(await prev), await t.insert(auditLogs).values(chunk).returning()],
+        Promise.resolve([])
+      );
       return insertedChunks.flat();
     };
 
@@ -130,7 +145,10 @@ export namespace AuditRepository {
       const chunks = Array.from({ length: Math.ceil(rows.length / DEFAULT_BULK_CHUNK_SIZE) }, (_, i) =>
         rows.slice(i * DEFAULT_BULK_CHUNK_SIZE, (i + 1) * DEFAULT_BULK_CHUNK_SIZE)
       );
-      const insertedChunks = await Promise.all(chunks.map(chunk => t.insert(adminAuditLogs).values(chunk).returning()));
+      const insertedChunks = await chunks.reduce<Promise<Types.AdminAuditLogSelectType[][]>>(
+        async (prev, chunk) => [...(await prev), await t.insert(adminAuditLogs).values(chunk).returning()],
+        Promise.resolve([])
+      );
       return insertedChunks.flat();
     };
 

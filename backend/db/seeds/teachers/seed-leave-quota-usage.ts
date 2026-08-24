@@ -31,20 +31,22 @@ export async function seedOrGet(
   }
 
   const periodEntries = [...periodCounts];
-  const seededRows = await Promise.all(
-    periodEntries.map(([periodKey, count]) => {
-      const [yearStr, monthStr] = periodKey.split("-");
-      const year = Number(yearStr);
-      const month = Number(monthStr);
+  const seededRows = await periodEntries.reduce<
+    Promise<Awaited<ReturnType<typeof LeaveRequestSeedService.seedStudentLeaveQuota>>[]>
+  >(async (prev, [periodKey, count]) => {
+    const acc = await prev;
+    const [yearStr, monthStr] = periodKey.split("-");
+    const year = Number(yearStr);
+    const month = Number(monthStr);
 
-      return LeaveRequestSeedService.seedStudentLeaveQuota({
-        studentId: student.id,
-        periodYear: year,
-        periodMonth: month,
-        usedCount: count,
-      });
-    })
-  );
+    const row = await LeaveRequestSeedService.seedStudentLeaveQuota({
+      studentId: student.id,
+      periodYear: year,
+      periodMonth: month,
+      usedCount: count,
+    });
+    return [...acc, row];
+  }, Promise.resolve([]));
   results.push(...seededRows);
 
   logger.info(`Leave quota usage seeded (${results.length} rows).`);

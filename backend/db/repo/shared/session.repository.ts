@@ -1,5 +1,6 @@
 import { and, desc, eq, lte, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared/advisory-lock";
 import { sessionConfig, sessionMetadata, sessions } from "@/backend/db/schema";
 import { hashSessionId } from "@/backend/lib/auth/session-hash";
 import { getEnvironmentConfig } from "@/backend/lib/env";
@@ -56,7 +57,7 @@ export namespace SessionRepository {
    * Acquire advisory lock for a user
    */
   async function acquireUserLock(tx: DBTransaction, userId: string): Promise<void> {
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('session_user_' || ${userId}::text))`);
+    await acquireAdvisoryLock(tx, `session_user_${userId}`);
   }
 
   /**

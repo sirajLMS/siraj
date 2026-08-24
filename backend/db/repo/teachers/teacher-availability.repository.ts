@@ -1,5 +1,6 @@
 import { and, eq, gte, ilike, inArray, isNull, lte, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import {
   classInstances,
   teacherAvailabilityWindows,
@@ -38,7 +39,7 @@ function dayOfWeekEquals(value: string, day: DayOfWeek): boolean {
 
 export namespace TeacherAvailabilityRepository {
   async function acquireAvailabilityLock(tx: DBTransaction, teacherId: string): Promise<void> {
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('teacher_availability_' || ${teacherId}::text))`);
+    await acquireAdvisoryLock(tx, `teacher_availability_${teacherId}`);
   }
 
   async function assertValidTimeRange(startTime: string, endTime: string, locale?: string): Promise<void> {
@@ -240,7 +241,7 @@ export namespace TeacherAvailabilityRepository {
           and(
             eq(teacherVacationRequests.teacherId, teacherId),
             eq(teacherVacationRequests.status, VacationRequestStatus.APPROVED),
-            sql`(${teacherVacationRequests.startAt}, ${teacherVacationRequests.endAt}) OVERLAPS (${earliestStart}, ${latestEnd})`
+            sql`(${teacherVacationRequests.startAt} < ${latestEnd} AND ${teacherVacationRequests.endAt} > ${earliestStart})`
           )
         ),
       t.select().from(teacherRecurringUnavailability).where(eq(teacherRecurringUnavailability.teacherId, teacherId)),
@@ -321,7 +322,7 @@ export namespace TeacherAvailabilityRepository {
         and(
           inArray(teacherVacationRequests.teacherId, teacherIds),
           eq(teacherVacationRequests.status, VacationRequestStatus.APPROVED),
-          sql`(${teacherVacationRequests.startAt}, ${teacherVacationRequests.endAt}) OVERLAPS (${rangeStart}, ${rangeEnd})`
+          sql`(${teacherVacationRequests.startAt} < ${rangeEnd} AND ${teacherVacationRequests.endAt} > ${rangeStart})`
         )
       );
   }

@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { and, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db, queryDb, queryWithPagination } from "@/backend/db";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { parents, students, teacherAssignments, teachers, users } from "@/backend/db/schema";
 import { OrderSortDirection, StudentStatus } from "@/backend/enum";
 import { StudentsOrderByColumn } from "@/backend/enum/students";
@@ -115,14 +116,16 @@ export namespace StudentRepository {
    * Helper to acquire an advisory lock for a student
    */
   async function acquireStudentLock(tx: DBTransaction, studentId: string): Promise<void> {
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('student_' || ${studentId}::text))`);
+    await acquireAdvisoryLock(tx, `student_${studentId}`);
   }
 
-  export const findById = async (id: string): Promise<Types.StudentSelectType | null | undefined> => {
-    const q = queryDb();
-    return await q.query.students.findFirst({
-      where: { id: id },
-    });
+  export const findById = async (
+    id: string,
+    tx?: DBTransaction
+  ): Promise<Types.StudentSelectType | null | undefined> => {
+    const q = queryDb(tx);
+    const [row] = await q.select().from(students).where(eq(students.id, id)).limit(1);
+    return row ?? null;
   };
 
   export const getStudentIdByUserId = async (userId: string, tx?: DBTransaction): Promise<string | null> => {

@@ -1,4 +1,5 @@
 import { getTableName, isTable, sql } from "drizzle-orm";
+import { isSqlite } from "@/backend/db/dialect";
 import { db } from "@/backend/db/drizzleDb";
 import { PermissionManagementRepository } from "@/backend/db/repo/permissions/permission-management.repository";
 import { TimezoneRepository } from "@/backend/db/repo/shared/timezone.repository";
@@ -44,6 +45,15 @@ function isCountRow(value: unknown): value is CountRow {
 
 function isQueryResultLike(value: unknown): value is QueryResultLike {
   return typeof value === "object" && value !== null && !Array.isArray(value) && "rows" in value;
+}
+
+interface SqliteDb {
+  all(q: unknown): Promise<Record<string, unknown>[]>;
+}
+
+function isSqliteDb(target: unknown): target is SqliteDb {
+  if (typeof target !== "object" || target === null) return false;
+  return typeof Reflect.get(target, "all") === "function";
 }
 
 function isTableLike(value: unknown): value is Parameters<typeof getTableName>[0] {
@@ -117,8 +127,11 @@ export namespace ReferenceDataService {
 
     const entries = await Promise.all(
       tableNames.map(async tableName => {
-        const result = await db.execute(sql`SELECT COUNT(*)::int AS count FROM ${sql.identifier(tableName)}`);
-        return [tableName, extractCount(result)] as const;
+        const count =
+          isSqlite() && isSqliteDb(db)
+            ? Number((await db.all(sql`SELECT COUNT(*) AS count FROM ${sql.identifier(tableName)}`))[0]?.count ?? 0)
+            : extractCount(await db.execute(sql`SELECT COUNT(*)::int AS count FROM ${sql.identifier(tableName)}`));
+        return [tableName, count] as const;
       })
     );
     return Object.fromEntries(entries);

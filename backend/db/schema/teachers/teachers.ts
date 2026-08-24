@@ -4,6 +4,7 @@ import {
   index,
   textColumn,
   timestampColumn,
+  uniqueIndex,
   uuidColumn,
   uuidDefaultColumn,
   varcharColumn,
@@ -44,7 +45,7 @@ export const teachers = createTable(
     updatedAt: timestampColumn("updated_at").notNull(),
   },
   table => [
-    index("teachers_user_id_idx").on(table.userId),
+    uniqueIndex("teachers_user_id_idx").on(table.userId),
     index("teachers_created_at_idx").on(table.createdAt),
     index("teachers_updated_at_idx").on(table.updatedAt),
     index("teachers_nationality_idx").on(table.nationality),

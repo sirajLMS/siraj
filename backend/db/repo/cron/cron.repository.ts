@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, gt, ilike, inArray, lte, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared";
 import { cronHeartbeats, cronRuns, cronSchedules } from "@/backend/db/schema";
 import {
   CronConcurrencyPolicy,
@@ -247,7 +248,7 @@ export namespace CronRepository {
     overridePayload?: Record<string, unknown> | null
   ): Promise<{ runId: string } | null> => {
     return withTx(tx, async (t): Promise<{ runId: string } | null> => {
-      await t.execute(sql`SELECT pg_advisory_xact_lock(hashtext('cron_schedule_claim_' || ${scheduleId}::text))`);
+      await acquireAdvisoryLock(t, `cron_schedule_claim_${scheduleId}`);
 
       // Check schedule is still active and still due.
       // When `forceDue` is true (manual triggers), the `nextRunAt <= now` due-check

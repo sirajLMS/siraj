@@ -18,34 +18,34 @@ export async function seedOrGet(groupClassesList: GroupClassEntity[], _config?: 
   );
   const toSeed = groupClassesList.filter(groupClass => !existingIds.has(groupClass.id));
 
-  const insertedArrays = await Promise.all(
-    toSeed.map(async groupClass => {
-      return GroupClassService.createManyCommunications([
-        {
-          groupClassId: groupClass.id,
-          type: "email",
-          title: "Class Reminder",
-          description: `Reminder for ${groupClass.courseName}`,
-          isActive: true,
-          isDelivered: true,
-          timestamp: new Date(now.getTime() - 86400000),
-          notificationDeliveryId: null,
-          classStatusEventId: null,
-        },
-        {
-          groupClassId: groupClass.id,
-          type: "sms",
-          title: "Schedule Update",
-          description: `Schedule updated for ${groupClass.courseName}`,
-          isActive: true,
-          isDelivered: false,
-          timestamp: now,
-          notificationDeliveryId: null,
-          classStatusEventId: null,
-        },
-      ]);
-    })
-  );
+  const insertedArrays = await toSeed.reduce<Promise<ClassCommunicationSelectType[][]>>(async (prev, groupClass) => {
+    const acc = await prev;
+    const inserted = await GroupClassService.createManyCommunications([
+      {
+        groupClassId: groupClass.id,
+        type: "email",
+        title: "Class Reminder",
+        description: `Reminder for ${groupClass.courseName}`,
+        isActive: true,
+        isDelivered: true,
+        timestamp: new Date(now.getTime() - 86400000),
+        notificationDeliveryId: null,
+        classStatusEventId: null,
+      },
+      {
+        groupClassId: groupClass.id,
+        type: "sms",
+        title: "Schedule Update",
+        description: `Schedule updated for ${groupClass.courseName}`,
+        isActive: true,
+        isDelivered: false,
+        timestamp: now,
+        notificationDeliveryId: null,
+        classStatusEventId: null,
+      },
+    ]);
+    return [...acc, inserted];
+  }, Promise.resolve([]));
 
   const results: ClassCommunicationSelectType[] = insertedArrays.flat();
 

@@ -1,6 +1,8 @@
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/backend/db";
+import { isSqlite } from "@/backend/db/dialect";
 import { AuditRepository } from "@/backend/db/repo/audit";
+import { acquireAdvisoryLock } from "@/backend/db/repo/shared/advisory-lock";
 import {
   books,
   classInstances,
@@ -39,18 +41,26 @@ const SOFT_DELETE_TABLES: Record<Types.SoftDeletableTableName, { table: AllTable
   books: { table: books, entityType: "BOOK" },
 };
 
+interface ExecutableTx {
+  execute(query: unknown): Promise<unknown>;
+}
+
+function isExecutableTx(tx: unknown): tx is ExecutableTx {
+  return typeof tx === "object" && tx !== null && "execute" in tx && typeof tx.execute === "function";
+}
+
 export namespace SoftDeleteRepository {
   async function acquireSoftDeleteLock(
     tx: DBTransaction,
     tableName: Types.SoftDeletableTableName,
     entityId: string
   ): Promise<void> {
-    await tx.execute(
-      sql`SELECT pg_advisory_xact_lock(hashtext('soft_delete_' || ${tableName}::text || '_' || ${entityId}::text))`
-    );
+    await acquireAdvisoryLock(tx, `soft_delete_${tableName}_${entityId}`);
   }
 
   async function enableSoftDeleteSession(tx: DBTransaction): Promise<void> {
+    if (isSqlite()) return;
+    if (!isExecutableTx(tx)) return;
     await tx.execute(sql`SELECT set_config('app.soft_delete', 'true', true)`);
   }
 

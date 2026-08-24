@@ -68,7 +68,7 @@ function asDialectType<T>(value: unknown, _witness?: T): T {
 }
 
 type UuidColumnReturn = ReturnType<ReturnType<ReturnType<typeof pgUuid>["defaultRandom"]>["primaryKey"]>;
-type UuidDefaultColumnReturn = ReturnType<ReturnType<typeof pgUuid>["defaultRandom"]>;
+type UuidDefaultColumnReturn = ReturnType<typeof pgUuid>;
 type SerialColumnReturn = ReturnType<ReturnType<typeof pgSerial>["primaryKey"]>;
 type TimestampColumnReturn = ReturnType<typeof pgTimestamp>;
 type BigintColumnReturn = ReturnType<typeof pgBigint>;
@@ -106,10 +106,10 @@ export function uuidColumn(name = "id") {
 
 export function uuidDefaultColumn(name: string) {
   if (isSqlite()) {
-    const col = sqliteText(name).$defaultFn(() => crypto.randomUUID());
+    const col = sqliteText(name);
     return asDialectType<UuidDefaultColumnReturn>(col);
   }
-  return pgUuid(name).defaultRandom();
+  return pgUuid(name);
 }
 
 /**

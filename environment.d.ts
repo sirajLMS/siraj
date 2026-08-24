@@ -35,10 +35,12 @@ declare global {
       GCP_SECRET_ID?: string;
 
       // Database Configuration
-      DB_PROVIDER?: "postgres" | "neon";
+      DB_PROVIDER?: "postgres" | "neon" | "sqlite";
       DB_CONNECTION_MODE?: "auto" | "pg" | "neon";
       DATABASE_URL: string;
       DATABASE_ENCRYPTION_KEY: string;
+      /** SQLite database file name/path (e.g. ./siraj.sqlite) */
+      DB_FILE_NAME?: string;
       /** Neon integration test database URL (loaded from .env.test, not for production use) */
       NEON_TEST_DATABASE_URL?: string;
 

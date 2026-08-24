@@ -39,21 +39,23 @@ export async function seedOrGet(usersList: UserSelectType[], config?: SeedConfig
       ? usersList.filter(u => u.email.includes("@seed.siraj.local") || u.email.includes("@siraj.local"))
       : usersList.slice(0, 3);
 
-  const results = await Promise.all(
-    targetUsers.map(async (user, userIndex) => {
-      const channel = cycleAtIndex(ALL_NOTIFICATION_CHANNELS, userIndex);
-      const allowlist = eventTypesForUser(user.email);
-      const eventType = cycleAtIndex(allowlist, userIndex);
+  const results = await targetUsers.reduce<
+    Promise<Awaited<ReturnType<typeof NotificationPreferencesService.upsertManyPreferences>>[]>
+  >(async (prev, user, userIndex) => {
+    const acc = await prev;
+    const channel = cycleAtIndex(ALL_NOTIFICATION_CHANNELS, userIndex);
+    const allowlist = eventTypesForUser(user.email);
+    const eventType = cycleAtIndex(allowlist, userIndex);
 
-      return NotificationPreferencesService.upsertManyPreferences(user.id, [
-        {
-          channel,
-          eventType,
-          enabled: userIndex % 5 !== 0,
-        },
-      ]);
-    })
-  );
+    const inserted = await NotificationPreferencesService.upsertManyPreferences(user.id, [
+      {
+        channel,
+        eventType,
+        enabled: userIndex % 5 !== 0,
+      },
+    ]);
+    return [...acc, inserted];
+  }, Promise.resolve([]));
   const inserted = results.flat();
 
   logger.info(`User notification preferences seeded (${inserted.length} rows).`);
