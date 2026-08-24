@@ -141,6 +141,21 @@ async function pollServerReady(url: string, deadline: number): Promise<boolean> 
   return pollServerReady(url, deadline);
 }
 
+/**
+ * Returns a copy of process.env with DB-related vars dropped, so the spawned
+ * `next dev --env-file=<envFile>` is the sole source of truth for DB config.
+ * Without this, `bun` auto-loads `.env` (dev env) into process.env, and the
+ * spread would override the test env file DB settings.
+ */
+function buildDbEnv(): Record<string, string | undefined> {
+  const env = { ...process.env } as Record<string, string | undefined>;
+  delete env.DATABASE_URL;
+  delete env.DB_FILE_NAME;
+  delete env.DB_PROVIDER;
+  delete env.DB_CONNECTION_MODE;
+  return env;
+}
+
 function spawnTestServer(port: number, logStream: NodeJS.WritableStream): ChildProcess {
   const bunBin = process.execPath;
   const envFile = process.env.TEST_ENV_FILE ?? ".env.test";
@@ -153,9 +168,7 @@ function spawnTestServer(port: number, logStream: NodeJS.WritableStream): ChildP
   // pointing at the `siraj` DB) into process.env, and the spread below would override
   // the `.env.test` DATABASE_URL (pointing at `siraj_test`), causing tests to run
   // against the wrong database.
-  const parentEnv = { ...process.env } as Record<string, string | undefined>;
-  delete parentEnv.DATABASE_URL;
-  delete parentEnv.DB_FILE_NAME;
+  const parentEnv = buildDbEnv();
 
   const serverEnv = {
     ...parentEnv,
@@ -685,7 +698,7 @@ async function main(): Promise<void> {
     const testProc = bunSpawn(testArgs, {
       cwd: process.cwd(),
       env: {
-        ...process.env,
+        ...buildDbEnv(),
         SIRAJ_TEST_RUNNER_OK: "1",
         GRAPHQL_TEST_PORT: String(port),
         TEST_SERVER_PORT: String(port),
