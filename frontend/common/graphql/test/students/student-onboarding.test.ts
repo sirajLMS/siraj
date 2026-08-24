@@ -1,5 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import { generateTestPassword } from "@/backend/db/test/test-utils";
 import { StudentStatus } from "@/frontend/common/graphql/generated/gql/graphql";
 import { createParentMutationDocument, createStudentMutationDocument } from "@/frontend/common/graphql/sharedDocuments";
 import { IanaTimezone } from "@/shared/constants/iana-timezone.enum";
@@ -17,7 +18,7 @@ const createMinimalParentInput = (overrides?: Partial<{ name: string; email: str
   name: overrides?.name ?? "Student Onboard Parent",
   email: overrides?.email ?? `student_parent_${Date.now()}@test.com`,
   avatarUrl: null,
-  password: `Pwd_${randomUUID()}`,
+  password: generateTestPassword(),
   phone: null,
   displayCurrency: null,
   invoiceType: null,
@@ -47,7 +48,7 @@ const createMinimalStudentInput = (
   classesTotal: null,
   classesRemaining: null,
   email: overrides?.email ?? `stu_${Date.now()}_${randomUUID().slice(0, 8)}@test.com`,
-  password: overrides?.password ?? `Pwd_${randomUUID()}`,
+  password: overrides?.password ?? generateTestPassword(),
   phone: null,
   displayCurrency: null,
   timezone: null,

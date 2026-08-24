@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { randomUUID } from "node:crypto";
+import { generateTestPassword } from "@/backend/db/test/test-utils";
 import {
   CurrencyCode,
   InvoiceType,
@@ -27,7 +27,7 @@ const createMinimalParentInput = (
   name: overrides?.name ?? "Test Parent",
   email: overrides?.email ?? `test_parent_${Date.now()}@test.com`,
   avatarUrl: null,
-  password: `Pwd_${randomUUID()}`,
+  password: generateTestPassword(),
   phone: null,
   displayCurrency: null,
   invoiceType: null,
@@ -64,7 +64,7 @@ const createFullParentInput = (
   name: overrides?.name ?? "Test Parent",
   email: overrides?.email ?? `test_parent_${Date.now()}@test.com`,
   avatarUrl: overrides?.avatarUrl ?? "https://example.com/avatar.png",
-  password: `Pwd_${randomUUID()}`,
+  password: generateTestPassword(),
   phone: overrides?.phone ?? "+1234567890",
   displayCurrency: overrides?.displayCurrency ?? CurrencyCode.Eur,
   invoiceType: overrides?.invoiceType ?? InvoiceType.Monthly,

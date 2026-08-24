@@ -5,6 +5,14 @@ enum AccountStatus {
   DEACTIVATED
 }
 
+"""
+Input for a parent/student appending feedback to a published monthly appraisal.
+"""
+input AddAppraisalFeedbackInput {
+  appraisalId: String!
+  body: String!
+}
+
 type AdminBillingSummary {
   id: String
   mtdRevenue: String
@@ -82,6 +90,9 @@ enum AppLanguage {
 }
 
 enum AppPermission {
+  APPRAISAL_FEEDBACK
+  APPRAISAL_SUBMIT
+  APPRAISAL_VIEW
   AUTH_EDIT_OWN_PROFILE
   AUTH_LOGIN
   AUTH_VIEW_OWN_PROFILE
@@ -2373,10 +2384,71 @@ input MeetingProviderUpdateInput {
   urlExample: String
 }
 
+"""
+A teacher's monthly appraisal of a student — sparse rubric (1..5 grades, nullable) + feedback thread.
+"""
+type MonthlyAppraisal {
+  attendanceComment: String
+  attendanceGrade: Int
+  behaviorComment: String
+  behaviorGrade: Int
+  createdAt: DateTime
+  feedback: [MonthlyAppraisalFeedback!]
+  id: String
+  learningTargets: String
+  month: DateTime
+  overallComment: String
+  overallGrade: Int
+  punctualityComment: String
+  punctualityGrade: Int
+  studentId: String
+  teacherId: String
+  updatedAt: DateTime
+}
+
+"""A parent/student feedback entry appended to a monthly appraisal."""
+type MonthlyAppraisalFeedback {
+  appraisalId: String
+  authorName: String
+  authorUserId: String
+  body: String
+  createdAt: DateTime
+  id: String
+}
+
+"""
+Summary of an existing appraisal for a specific month (teacher appraisal list view).
+"""
+type MonthlyAppraisalForMonth {
+  id: String
+  month: DateTime
+  updatedAt: DateTime
+}
+
+"""
+A student summary row for the teacher appraisal list, with an optional appraisal-for-month summary.
+"""
+type MonthlyAppraisalStudentEntry {
+  appraisalForMonth: MonthlyAppraisalForMonth
+  classesRemaining: Int
+  classesTotal: Int
+  hoursPerWeek: Int
+  id: String
+  name: String
+  parentAvatarUrl: String
+  parentId: String
+  parentName: String
+  status: String
+  studentAvatarUrl: String
+}
+
 type Mutation {
   activateClass(classInstanceId: ID!): ClassInstanceDetail
   activateOverrideClass(classInstanceId: ID!): ClassInstanceDetail
   activateSupportedCurrency(input: SupportedCurrencyUpsertInput!): SupportedCurrency
+
+  """Appends parent/student feedback to a published monthly appraisal."""
+  addAppraisalFeedback(input: AddAppraisalFeedbackInput!): MonthlyAppraisalFeedback
   adminResetPassword(input: AdminResetPasswordInput!): AdminResetPasswordResult
   adminRevokeMeetingProviderToken(input: AdminRevokeTokenInput!): AdminRevokeTokenResult
 
@@ -2622,6 +2694,11 @@ type Mutation {
 
   """Submit a lesson report for a completed class instance (teacher action)"""
   submitLessonReport(classInstanceId: ID!, input: LessonReportSubmitInput!): LessonReport
+
+  """
+  Submits or updates (upsert) a teacher's monthly appraisal for a student. Teacher identity from auth context.
+  """
+  submitMonthlyAppraisal(input: SubmitMonthlyAppraisalInput!): MonthlyAppraisal
   submitPaymentProof(expectedVersion: Int, invoiceId: String!, proofFileId: ID!): MarkInvoicePaidResult
 
   """Student adds their reflection/notes to an existing lesson report"""
@@ -3364,6 +3441,11 @@ type Query {
   meetingProvider(id: ID!): MeetingProvider
   meetingProviders(activeOnly: Boolean = true): [MeetingProvider!]
   myConnectedMeetingProviders: [MyConnectedMeetingProvider!]
+
+  """
+  Returns the authenticated student's monthly appraisal for a given month (or null if none).
+  """
+  myMonthlyAppraisal(month: DateTime!): MonthlyAppraisal
   notificationAlerts: NotificationAlertsResult
   notificationPreferences: [NotificationPreference!]
 
@@ -3493,6 +3575,11 @@ type Query {
   studentDirectory(filterArgs: StudentFilterArgs, orderBy: [StudentsOrderByClause!], paginationArgs: PaginationArgs): StudentDirectoryPayload
 
   """
+  Returns all monthly appraisals for a student. Caller must be the student, their parent, or an assigned teacher.
+  """
+  studentMonthlyAppraisals(studentId: String!): [MonthlyAppraisal!]
+
+  """
   Aggregated monthly report for a single student: attendance, lessons, and credit ledger activity.
   """
   studentMonthlyReport(month: Int!, studentId: ID!, year: Int!): StudentMonthlyReport!
@@ -3533,6 +3620,11 @@ type Query {
   teacherDirectory(paginationArgs: PaginationArgs, search: String): TeacherDirectory
   teacherFutureSchedule(teacherId: String): TeacherFutureSchedule
   teacherHandbookUrl: TeacherHandbookUrl
+
+  """
+  Returns the teacher's assigned students with an optional appraisal summary for the given month (teacher appraisal list view).
+  """
+  teacherMonthlyAppraisalStudents(month: DateTime): [MonthlyAppraisalStudentEntry!]
 
   """
   Aggregated monthly report for a single teacher: lessons taught, dues, and cancellation count.
@@ -4405,6 +4497,23 @@ type SubjectResource {
   resourceType: String
   sortOrder: Int
   subjectId: String
+}
+
+"""
+Input for a teacher submitting/updating a monthly appraisal. `teacherId` is resolved from auth context.
+"""
+input SubmitMonthlyAppraisalInput {
+  attendanceComment: String
+  attendanceGrade: Int
+  behaviorComment: String
+  behaviorGrade: Int
+  learningTargets: String!
+  month: DateTime!
+  overallComment: String
+  overallGrade: Int
+  punctualityComment: String
+  punctualityGrade: Int
+  studentId: String!
 }
 
 """Input for submitting a new suggestion."""

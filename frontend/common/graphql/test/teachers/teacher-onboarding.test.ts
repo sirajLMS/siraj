@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { randomUUID } from "node:crypto";
+import { generateTestPassword } from "@/backend/db/test/test-utils";
 import {
   CountryCode,
   CurrencyCode,
@@ -28,7 +28,7 @@ const createMinimalTeacherInput = (
   name: overrides?.name ?? "Test Teacher",
   email: overrides?.email ?? `test_teacher_${Date.now()}@test.com`,
   avatarUrl: null,
-  password: `Pwd_${randomUUID()}`,
+  password: generateTestPassword(),
   timezone: IanaTimezone.UTC,
   nationality: CountryCode.Us,
   countryCode: CountryCode.Us,
@@ -228,7 +228,7 @@ describe("Teacher Onboarding GraphQL API", () => {
     const minimalInput = {
       name: "Minimal Teacher",
       email: `minimal_${Date.now()}@test.com`,
-      password: `Pwd_${randomUUID()}`,
+      password: generateTestPassword(),
       timezone: IanaTimezone.UTC,
       avatarUrl: null,
       nationality: null,
