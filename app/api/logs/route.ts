@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
 import { getServerUserContext } from "@/backend/lib";
 import { getBooleanEnv } from "@/backend/lib/env";
+import { checkRateLimit, clientLogsRateLimiter } from "@/backend/lib/ratelimit";
 import { getServerTranslations } from "@/shared/locale";
 
 interface LogEntry {
@@ -19,6 +20,17 @@ interface LogEntry {
 // Client-side logger (frontend/lib/logger/index.ts) must generate session IDs
 // that match this regex — it uses the format YYYY-MM-DD-HH-mm-ss (hyphens only).
 const SAFE_SESSION_ID_REGEX = /^[a-zA-Z0-9-]+$/;
+
+/**
+ * Disk-write DoS bounds (security review M1): cap the number of log entries
+ * accepted per POST and the length of each message/caller field.
+ */
+const MAX_LOG_ENTRIES_PER_BATCH = 100; // L2 fix: lowered from 500 to 100 to cap disk writes
+const MAX_LOG_MESSAGE_LENGTH = 4000;
+
+function truncateLogField(value: string): string {
+  return value.length > MAX_LOG_MESSAGE_LENGTH ? value.slice(0, MAX_LOG_MESSAGE_LENGTH) : value;
+}
 
 function sanitizeSessionId(sessionId: string): string {
   if (!SAFE_SESSION_ID_REGEX.test(sessionId)) {
@@ -134,8 +146,8 @@ async function writeLogEntry(logEntry: LogEntry, logsDir: string): Promise<void>
         buffer.nextSequence = entry.sequence;
       }
 
-      const sanitizedMessage = sanitizeForRendering(entry.message);
-      const sanitizedCaller = entry.caller ? sanitizeForRendering(entry.caller) : "unknown";
+      const sanitizedMessage = truncateLogField(sanitizeForRendering(entry.message));
+      const sanitizedCaller = truncateLogField(entry.caller ? sanitizeForRendering(entry.caller) : "unknown");
       const logLine = `[${entry.timestamp}] [${entry.level.toUpperCase()}] [SEQ:${entry.sequence}] [${sanitizedCaller}] ${sanitizedMessage}\n`;
 
       await writeFile(logFilePath, logLine, { flag: "a" });
@@ -204,6 +216,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: tErrors.invalidRequestFormat }, { status: 400 });
     }
     const body = rawBody;
+
+    if (body.logs.length > MAX_LOG_ENTRIES_PER_BATCH) {
+      return NextResponse.json({ error: tErrors.invalidRequestFormat }, { status: 400 });
+    }
+
+    // Per-user rate limit on log ingestion (security review M1) — keying on the
+    // authenticated userId prevents token-sharing IP rotation from gaining
+    // extra buckets.
+    const logsRateLimit = await checkRateLimit(`client-logs:${userId}`, clientLogsRateLimiter);
+    if (!logsRateLimit.success) {
+      return NextResponse.json({ error: tErrors.rateLimitExceeded }, { status: 429 });
+    }
 
     if (!body.logs.every(isValidLogEntry)) {
       return NextResponse.json({ error: tErrors.missingRequiredFields }, { status: 400 });

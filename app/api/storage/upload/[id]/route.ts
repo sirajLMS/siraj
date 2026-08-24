@@ -5,7 +5,7 @@ import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { type NextRequest, NextResponse } from "next/server";
-import { logger, resolveLocalStoragePath } from "@/backend/lib";
+import { getServerUserContext, logger, resolveLocalStoragePath } from "@/backend/lib";
 import { isAllowedMimeType } from "@/backend/lib/storage/mime-allowlist";
 import { StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
@@ -23,6 +23,7 @@ interface SignedUrlData {
   fileSize: bigint;
   contentHash: string;
   filePath: string;
+  uploadedByUserId?: string | null;
 }
 
 function resolveLocaleFromRequest(request: NextRequest): string {
@@ -150,6 +151,21 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const locale = resolveLocaleFromRequest(request);
     const tErrors = getServerTranslations(locale).errorsTranslations;
+
+    // M2 fix: if the signed URL has an uploadedByUserId, verify the current
+    // session user matches. Prevents token-sharing attacks where anyone who
+    // obtains the token can write the file.
+    if (signedUrl.uploadedByUserId) {
+      const { userId: sessionUserId } = await getServerUserContext();
+      if (!sessionUserId || sessionUserId !== signedUrl.uploadedByUserId) {
+        logger.warn("Signed URL user mismatch", {
+          tokenId,
+          signedUrlUserId: signedUrl.uploadedByUserId,
+          sessionUserId,
+        });
+        return NextResponse.json({ error: tErrors.file.invalidOrExpiredToken }, { status: 403 });
+      }
+    }
 
     const validationResponse = validateHeaders(request, signedUrl, tErrors);
     if (validationResponse) return validationResponse;

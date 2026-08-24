@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       ip: extractIp(request),
       mode,
     });
-    return new NextResponse("Forbidden", { status: 403 });
+    return new NextResponse(null, { status: 403 });
   }
 
   const ip = extractIp(request);
@@ -70,13 +70,13 @@ export async function GET(request: NextRequest) {
   });
   if (!verifyRateLimitResult.success) {
     logger.warn("whatsapp-webhook: verify rate limit exceeded", { ip });
-    return new NextResponse("Too Many Requests", { status: 429 });
+    return new NextResponse(null, { status: 429 });
   }
 
   const verifyToken = await resolveEnvConfig("WHATSAPP_VERIFY_TOKEN");
   if (!verifyToken) {
     logger.error("whatsapp-webhook: WHATSAPP_VERIFY_TOKEN not configured");
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return new NextResponse(null, { status: 500 });
   }
 
   // S5: timingSafeEqual over equal-length buffers
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
   const expectedBuf = Buffer.from(verifyToken);
   if (!safeEqual(tokenBuf, expectedBuf)) {
     logger.warn("whatsapp-webhook: verify token mismatch", { ip });
-    return new NextResponse("Forbidden", { status: 403 });
+    return new NextResponse(null, { status: 403 });
   }
 
   // r10-002: Validate challenge is numeric-only before reflecting it back.
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
   const isNumeric = /^\d{1,20}$/.test(challenge);
   if (!isNumeric) {
     logger.warn("whatsapp-webhook: invalid challenge format", { ip });
-    return new NextResponse("Bad Request", { status: 400 });
+    return new NextResponse(null, { status: 400 });
   }
 
   // Defense-in-depth: truncate to max 20 characters (already enforced by regex,
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
   // Body-size cap ~1 MB → 413
   if (contentLength > MAX_BODY_SIZE) {
     logger.warn("whatsapp-webhook: body too large", { ip, contentLength });
-    return new NextResponse("Payload Too Large", { status: 413 });
+    return new NextResponse(null, { status: 413 });
   }
 
   // S1: Rate-limit per IP on POST to prevent flooding (before body read to avoid memory exhaustion)
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
   });
   if (!postRateLimitResult.success) {
     logger.warn("whatsapp-webhook: POST rate limit exceeded", { ip });
-    return new NextResponse("Too Many Requests", { status: 429 });
+    return new NextResponse(null, { status: 429 });
   }
 
   // Read raw body first (needed for HMAC verification).
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
   const rawBody = await request.text();
   if (Buffer.byteLength(rawBody, "utf-8") > MAX_BODY_SIZE) {
     logger.warn("whatsapp-webhook: actual body too large", { ip, contentLength: Buffer.byteLength(rawBody, "utf-8") });
-    return new NextResponse("Payload Too Large", { status: 413 });
+    return new NextResponse(null, { status: 413 });
   }
 
   const hmacResult = await verifyHmacSignature(request, ip, contentLength, rawBody);
@@ -186,7 +186,7 @@ async function verifyHmacSignature(
 
   if (!appSecret) {
     logger.error("whatsapp-webhook: WHATSAPP_APP_SECRET not configured");
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return new NextResponse(null, { status: 500 });
   }
 
   if (!signatureHeader.startsWith("sha256=")) {
@@ -196,7 +196,7 @@ async function verifyHmacSignature(
       userAgent: request.headers.get("user-agent") ?? "",
       contentLength,
     });
-    return new NextResponse("Unauthorized", { status: 401 });
+    return new NextResponse(null, { status: 401 });
   }
 
   // Compute expected signature
@@ -213,7 +213,7 @@ async function verifyHmacSignature(
       userAgent: request.headers.get("user-agent") ?? "",
       contentLength,
     });
-    return new NextResponse("Unauthorized", { status: 401 });
+    return new NextResponse(null, { status: 401 });
   }
 
   return null;
@@ -229,7 +229,7 @@ function parseWebhookBody(rawBody: string, ip: string): { body: unknown; respons
     body = JSON.parse(rawBody);
   } catch {
     logger.warn("whatsapp-webhook: invalid JSON body", { ip });
-    return { body: null, response: new NextResponse("Bad Request", { status: 400 }) };
+    return { body: null, response: new NextResponse(null, { status: 400 }) };
   }
 
   const objectValue =
@@ -243,7 +243,7 @@ function parseWebhookBody(rawBody: string, ip: string): { body: unknown; respons
       ip,
       object: objectValue,
     });
-    return { body: null, response: new NextResponse("Not Found", { status: 404 }) };
+    return { body: null, response: new NextResponse(null, { status: 404 }) };
   }
 
   return { body, response: null };

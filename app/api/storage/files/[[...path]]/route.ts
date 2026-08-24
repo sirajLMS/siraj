@@ -227,13 +227,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: tErrors.file.filePathRequired }, { status: 400 });
     }
 
-    // Allow unauthenticated access to public files (public/ or avatars/ directories)
-    if (relativePath.startsWith("public/") || relativePath.startsWith("avatars/")) {
+    // Allow unauthenticated access to public files (public/ directory only).
+    // User avatar uploads land under public/avatars/...; the raw `avatars/`
+    // prefix is intentionally NOT exempt — nothing writes there anymore and
+    // serving it unauthenticated would expose arbitrary user files.
+    if (relativePath.startsWith("public/")) {
       let absolutePath: string;
       try {
-        absolutePath = relativePath.startsWith("public/")
-          ? resolvePublicStoragePath(relativePath.substring("public/".length))
-          : resolveLocalStoragePath(relativePath);
+        absolutePath = resolvePublicStoragePath(relativePath.substring("public/".length));
       } catch (error) {
         logger.warn("Path traversal attempt detected in public file request", { path: relativePath, error });
         return NextResponse.json({ error: tErrors.file.invalidFilePath }, { status: 400 });

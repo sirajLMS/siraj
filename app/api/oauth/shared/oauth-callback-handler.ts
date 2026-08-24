@@ -16,6 +16,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 
+import { getServerUserContext } from "@/backend/lib";
 import { ensureEnvironmentValidated } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import {
@@ -70,6 +71,18 @@ export async function handleOAuthCallback(request: NextRequest, cfg: OAuthCallba
       actual: statePayload.providerSlug,
     });
     return NextResponse.json({ error: tErrors.providerMismatch }, { status: 400 });
+  }
+
+  // H5 fix: verify the authenticated session user matches the state payload user.
+  // Prevents token binding to the wrong account if a signed state is replayed
+  // within the 10-minute window by a different user.
+  const { userId: sessionUserId } = await getServerUserContext();
+  if (!sessionUserId || sessionUserId !== statePayload.userId) {
+    logger.warn(`${logTag}: session/state user mismatch`, {
+      stateUserId: statePayload.userId,
+      sessionUserId,
+    });
+    return NextResponse.json({ error: tErrors.invalidOrExpiredOAuthState }, { status: 400 });
   }
 
   const { userId, returnPath } = statePayload;

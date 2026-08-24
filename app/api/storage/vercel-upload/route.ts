@@ -1,6 +1,7 @@
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { extractTokenFromHeader, logger, verifyToken } from "@/backend/lib";
+import { ALLOWED_MIME_TYPES } from "@/backend/lib/storage";
 import { SessionService, StorageService } from "@/backend/services";
 import { getServerTranslations } from "@/shared/locale";
 import type { ErrorsLabels } from "@/shared/locale/types";
@@ -220,7 +221,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         // Return metadata to attach to the blob
         return Promise.resolve({
           allowOverwrite: false,
-          allowedContentTypes: [contentType],
+          // Server-side allowlist — never echo the client-supplied content type.
+          allowedContentTypes: [...ALLOWED_MIME_TYPES],
+          // Hard server-side cap on actually-uploaded bytes (client-reported
+          // fileSize is attacker-controlled). Keep in sync with
+          // MAX_FILE_SIZE_BYTES in backend/db/repo/storage/storage.repository.ts.
+          maximumSizeInBytes: 100 * 1024 * 1024,
           tokenPayload: JSON.stringify({
             sessionId,
             pathname: pathName,
