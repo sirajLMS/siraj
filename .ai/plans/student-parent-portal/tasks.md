@@ -40,20 +40,20 @@ Tier 1: 100% branch/statement coverage of new logic · Tier 2: boundary/edge (em
 - **Sanitization**: LIKE/ILIKE escaped via `escapeLikeWildcards` on any search input.
 
 ### X.Y.SR — Semantic Review (agent self-review, no script)
-- [ ] No client-supplied ID without ownership/permission assertion (IDOR/BOLA)
-- [ ] Tenancy filters explicit: `eq(table.studentId/parentId/childIds, caller…)`
-- [ ] No unbounded `...input` spread into Drizzle writes (BOPLA)
-- [ ] DataLoaders filter batch results by caller tenancy
-- [ ] No read-then-write without atomicity (tx / SELECT FOR UPDATE / advisory lock) — applies to duplicate-request guard + refund paths
-- [ ] No module-level mutable state without bounds
-- [ ] All `resolveEnvConfig` keys registered in `shared/constants/env-config-keys.ts` (`SELF_SERVICE_RESCHEDULE_LOCK_HOURS`, calendar grid hours)
-- [ ] All `resetX()` invalidators cover every resolved key
-- [ ] No empty-string credential acceptance
-- [ ] No dead branches
-- [ ] No cross-layer imports (frontend→backend, shared→frontend/backend/app)
-- [ ] Enums value-imported when used at runtime
-- [ ] `bun run db push` output matches Drizzle schema (no drift)
-- [ ] Deferred items logged in `deferred-items.md`
+- [x] No client-supplied ID without ownership/permission assertion (IDOR/BOLA)
+- [x] Tenancy filters explicit: `eq(table.studentId/parentId/childIds, caller…)`
+- [x] No unbounded `...input` spread into Drizzle writes (BOPLA)
+- [x] DataLoaders filter batch results by caller tenancy
+- [x] No read-then-write without atomicity (tx / SELECT FOR UPDATE / advisory lock) — applies to duplicate-request guard + refund paths
+- [x] No module-level mutable state without bounds
+- [x] All `resolveEnvConfig` keys registered in `shared/constants/env-config-keys.ts` (`SELF_SERVICE_RESCHEDULE_LOCK_HOURS`, calendar grid hours)
+- [x] All `resetX()` invalidators cover every resolved key
+- [x] No empty-string credential acceptance
+- [x] No dead branches
+- [x] No cross-layer imports (frontend→backend, shared→frontend/backend/app)
+- [x] Enums value-imported when used at runtime
+- [x] `bun run db push` output matches Drizzle schema (no drift)
+- [x] Deferred items logged in `deferred-items.md`
 
 ### X.Y.IV — Instruction Verification
 Read ALL rule files printed by the X.Y.QL sub-loop run (AGENTS.md + `.agents/instructions/`) and validate each modified file against them.
@@ -99,7 +99,7 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
 
 ## Phase 0 — Pre-Implementation Baseline & Analysis (MANDATORY)
 
-- [ ] 0.1 Baseline quality snapshot & deferred-items ledger
+- [x] 0.1 Baseline quality snapshot & deferred-items ledger
   - Record baseline error counts BEFORE any implementation:
     ```bash
     bun tsgo 2>&1 | grep "error TS" | wc -l > /tmp/baseline-tsgo.txt
@@ -110,7 +110,7 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
   - Write `outcome/0.1-baseline-outcome.md` documenting baseline counts
   - _Requirements: REQ-0 (Pre-Implementation Baseline)_
   - No code changes → QL/IV not applicable; TE/SEC/SR not applicable (no runtime code)
-- [ ] 0.2 Schema verification analysis (no code changes)
+- [x] 0.2 Schema verification analysis (no code changes)
   - Verify `payments` ↔ `invoices` ↔ `credit_transactions` ↔ quotas link to derive package name — `invoiceType` (`backend/enum/billing/billing.enum.ts`) is the only package-kind signal on invoices (no line-items table, verified); enumerate its members and decide derive-or-placeholder; credit linkage via `credit_transactions` PURCHASE reason
   - ~~Verify student sessions query supports arbitrary date-range~~ (verified: NOT supported — student sessions list helpers filter with `gte(scheduledStartAt, now)` only (`.helpers.ts:209`); `findUpcoming.ts:52` is a separate `withinHours` cron-reminder path, not this query; task 7.1 adds `from`/`to` params with a 42-day window cap)
   - Identify the AppPermission → permission-group seed mapping (groups in `backend/db/schema/permissions/permissions.ts`; overrides only in `backend/db/seeds/auth/seed-user-permission-overrides.ts`) so the 6 new permissions land in the correct parent/student/teacher/supervisor/admin groups
@@ -127,7 +127,7 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
 
 ## Phase 1.5 — Plan Review Gate (MANDATORY)
 
-- [ ] P1.5 Continuous plan-review gate (rounds R1–R4 complete; re-run if plan changes)
+- [x] P1.5 Continuous plan-review gate (rounds R1–R4 complete; re-run if plan changes)
   - Invoke `@plan-review` on `specs.md` + `design.md` + `tasks.md` whenever any plan file changes before implementation starts
   - Fix all reported violations; re-run until "Plan passes all AGENTS.md rules"
   - Existing outcomes: `outcome/plan-review-R1.md`, `outcome/plan-review-R2.md`, `outcome/plan-review-R3.md`, `outcome/plan-review-R4.md`
@@ -138,61 +138,61 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
 
 ## Feature 1 — Monthly Appraisals
 
-- [ ] 1. Schema & enums
-- [ ] 1.1 Create `monthly_appraisals` + `appraisal_feedback` tables
+- [x] 1. Schema & enums
+- [x] 1.1 Create `monthly_appraisals` + `appraisal_feedback` tables
   - `backend/db/schema/students/monthly-appraisals.ts` per design using `createTable` + dialect-aware helper columns from `backend/db/schema/__shared__/dialectAwareBuilder`; RLS policies per billing.ts note pattern; `bun run db push`
   - Update nested barrels + `backend/db/schema` barrel
   - AGENTS.md: root, `backend/db/schema/AGENTS.md` (if exists), `backend/db/repo/AGENTS.md`; instructions: backend
-  - [ ] 1.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/db/schema/students/monthly-appraisals.ts` + both touched barrels
-  - [ ] 1.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Schema verified by repo smoke tests in 2.1.TE (insert + unique-conflict on `(studentId, monthKey)`); Tier 2: `monthKey` boundary formats; Tier 3: concurrent double-submit via `Promise.allSettled` proves unique-index protection
-  - [ ] 1.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): RLS/policies per design follow billing.ts note pattern; no client-mutable identity columns in DDL (ownership enforced at 2.2 service layer); composite FK `appraisal_feedback.appraisalId` with cascade
-  - [ ] 1.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 1.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/db/schema/students/monthly-appraisals.ts` + both touched barrels
+  - [x] 1.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Schema verified by repo smoke tests in 2.1.TE (insert + unique-conflict on `(studentId, monthKey)`); Tier 2: `monthKey` boundary formats; Tier 3: concurrent double-submit via `Promise.allSettled` proves unique-index protection
+  - [x] 1.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): RLS/policies per design follow billing.ts note pattern; no client-mutable identity columns in DDL (ownership enforced at 2.2 service layer); composite FK `appraisal_feedback.appraisalId` with cascade
+  - [x] 1.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - `bun run db push` diff contains unique index + FKs and no unexpected drops
     - barrels: relative `./` paths, `export *` only, no imports
-  - [ ] 1.1.IV **Instruction Verification**: read root AGENTS.md, `backend/db/schema/AGENTS.md`, `backend/AGENTS.md`, `backend.instructions.md`
+  - [x] 1.1.IV **Instruction Verification**: read root AGENTS.md, `backend/db/schema/AGENTS.md`, `backend/AGENTS.md`, `backend.instructions.md`
   - Write `outcome/1.1-outcome.md`; mark task 1.1 `[x]`
   - _Requirements: R1.2, R1.7_
 
-- [ ] 2. Types, repo, service
-- [ ] 2.1 Types + repository + tests
+- [x] 2. Types, repo, service
+- [x] 2.1 Types + repository + tests
   - `backend/types/report/monthly-appraisal.types.ts`; `backend/db/repo/students/monthly-appraisal.repository.ts` (prepared statements, upsert, feedback append)
   - DB tests in `backend/db/test/repo/` via runInRollback + tx; 100% branch coverage incl. unique conflict
-  - [ ] 2.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/types/report/monthly-appraisal.types.ts`, `backend/db/repo/students/monthly-appraisal.repository.ts` + new test file(s) under `backend/db/test/repo/`
-  - [ ] 2.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): DB tests via `runInRollback` + `tx` passed to EVERY repo method, `expectRepoError` try/catch (never `rejects.toThrow`); Tier 1 100% branch coverage incl. upsert + feedback-append paths; Tier 2: sparse-field nullability, unicode/RTL title/body, monthKey bounds; Tier 3: concurrent upsert race; Tier 4: invalid id shapes rejected
-  - [ ] 2.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): All reads/writes scoped by `studentId` param from service (service owns tenancy check in 2.2.SEC); prepared statements per `docs/drizzle/prepared-statements.md`; BOPLA: explicit column lists, no input spread
-  - [ ] 2.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 2.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/types/report/monthly-appraisal.types.ts`, `backend/db/repo/students/monthly-appraisal.repository.ts` + new test file(s) under `backend/db/test/repo/`
+  - [x] 2.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): DB tests via `runInRollback` + `tx` passed to EVERY repo method, `expectRepoError` try/catch (never `rejects.toThrow`); Tier 1 100% branch coverage incl. upsert + feedback-append paths; Tier 2: sparse-field nullability, unicode/RTL title/body, monthKey bounds; Tier 3: concurrent upsert race; Tier 4: invalid id shapes rejected
+  - [x] 2.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): All reads/writes scoped by `studentId` param from service (service owns tenancy check in 2.2.SEC); prepared statements per `docs/drizzle/prepared-statements.md`; BOPLA: explicit column lists, no input spread
+  - [x] 2.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - all types live in `backend/types/` (no service-layer `.types.ts`)
     - 100% repo coverage required by `backend/db/test/AGENTS.md`
-  - [ ] 2.1.IV **Instruction Verification**: read `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md`, `backend/db/test/AGENTS.md`, `backend/AGENTS.md` + backend/tests instructions
+  - [x] 2.1.IV **Instruction Verification**: read `backend/db/repo/AGENTS.md`, `backend/types/AGENTS.md`, `backend/db/test/AGENTS.md`, `backend/AGENTS.md` + backend/tests instructions
   - Write `outcome/2.1-outcome.md`; mark task 2.1 `[x]`
   - _Requirements: R1.1–R1.7_
-- [ ] 2.2 Service + tests
+- [x] 2.2 Service + tests
   - `backend/services/monthly-appraisal/monthly-appraisal.service.ts` (teacher-teaches-student check, parent/student tenancy, grade validation, sparse-field normalization)
   - Service tests: mock repos for teacher/teaches verification; tenancy matrix
-  - [ ] 2.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/services/monthly-appraisal/monthly-appraisal.service.ts` + service tests
-  - [ ] 2.2.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: 100% branches (submit/update/feedback); Tier 2: grade bounds 1–5, sparse-rubric normalization, empty feedback text; Tier 3: out-of-order submit/feedback, concurrent feedback appends; Tier 4: forged `teacherId` in input ignored; mock repository + teacher-teaches lookup; run via `bun run test/scripts/run-test.ts <path>`
-  - [ ] 2.2.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): BOLA: teacher-teaches-student relation re-verified on submit; parent/student read scoped to own children/self; BFLA: students/parents cannot call submit (permission checked again at 3.1 resolver); BOPLA: whitelist mapping into repo input types
-  - [ ] 2.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 2.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/services/monthly-appraisal/monthly-appraisal.service.ts` + service tests
+  - [x] 2.2.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: 100% branches (submit/update/feedback); Tier 2: grade bounds 1–5, sparse-rubric normalization, empty feedback text; Tier 3: out-of-order submit/feedback, concurrent feedback appends; Tier 4: forged `teacherId` in input ignored; mock repository + teacher-teaches lookup; run via `bun run test/scripts/run-test.ts <path>`
+  - [x] 2.2.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): BOLA: teacher-teaches-student relation re-verified on submit; parent/student read scoped to own children/self; BFLA: students/parents cannot call submit (permission checked again at 3.1 resolver); BOPLA: whitelist mapping into repo input types
+  - [x] 2.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - teacher identity always from auth context, never input
     - no client-supplied IDs pass unmatched through to repo
-  - [ ] 2.2.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
+  - [x] 2.2.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
   - Write `outcome/2.2-outcome.md`; mark task 2.2 `[x]`
   - _Requirements: R1.1, R1.5, R1.7_
 
-- [ ] 3. GraphQL layer
-- [ ] 3.1 Pothos types + resolvers + integration tests
+- [x] 3. GraphQL layer
+- [x] 3.1 Pothos types + resolvers + integration tests
   - Object types (both entities, with `id`), queries (myMonthlyAppraisal, studentMonthlyAppraisals, teacherMonthlyAppraisalStudents), mutations (submitMonthlyAppraisal, addAppraisalFeedback)
   - Permissions: `APPRAISAL_SUBMIT`, `APPRAISAL_VIEW`, `APPRAISAL_FEEDBACK` seeds
   - Integration tests via setupTestServerLifecycle + testClient; IDOR probes (cross-student, cross-teacher, student-cannot-submit)
   - `bun run generate:gqlSchema && bun codegen`
-  - [ ] 3.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: Pothos files under `backend/graphql/pothos/` (monthly-appraisal domain) + new permission seed mapping + integration tests under `frontend/common/graphql/test/`
-  - [ ] 3.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): GraphQL integration via `setupTestServerLifecycle()` + `testClient` (never raw fetch); Tier 1: every query/mutation field; Tier 2: pagination bounds, empty result sets; Tier 3: query batching ambience, out-of-order mutations; Tier 4: unauthenticated rejection for all 5 operations
-  - [ ] 3.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Permission seeds `APPRAISAL_SUBMIT`, `APPRAISAL_VIEW`, `APPRAISAL_FEEDBACK` mapped to groups via the mapping found in 0.2 (groups, NOT per-user overrides); IDOR probes: cross-student, cross-teacher, student-cannot-submit; verify `extensions.code` propagation per `docs/graphql/domain-error-extensions-code.md`
-  - [ ] 3.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 3.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: Pothos files under `backend/graphql/pothos/` (monthly-appraisal domain) + new permission seed mapping + integration tests under `frontend/common/graphql/test/`
+  - [x] 3.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): GraphQL integration via `setupTestServerLifecycle()` + `testClient` (never raw fetch); Tier 1: every query/mutation field; Tier 2: pagination bounds, empty result sets; Tier 3: query batching ambience, out-of-order mutations; Tier 4: unauthenticated rejection for all 5 operations
+  - [x] 3.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Permission seeds `APPRAISAL_SUBMIT`, `APPRAISAL_VIEW`, `APPRAISAL_FEEDBACK` mapped to groups via the mapping found in 0.2 (groups, NOT per-user overrides); IDOR probes: cross-student, cross-teacher, student-cannot-submit; verify `extensions.code` propagation per `docs/graphql/domain-error-extensions-code.md`
+  - [x] 3.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - every object type includes `id` (Apollo cache normalization)
     - single canonical object type per entity — no local Pothos type defs
     - `bun run generate:gqlSchema && bun codegen` run; generated files committed
-  - [ ] 3.1.IV **Instruction Verification**: read `backend/graphql/AGENTS.md`, `backend/AGENTS.md`, `backend/instructions` (+ tests instructions for the integration tests)
+  - [x] 3.1.IV **Instruction Verification**: read `backend/graphql/AGENTS.md`, `backend/AGENTS.md`, `backend/instructions` (+ tests instructions for the integration tests)
   - Write `outcome/3.1-outcome.md`; mark task 3.1 `[x]`
   - _Requirements: R1.1–R1.7_
 
@@ -252,69 +252,69 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
 
 ## Feature 2 — Self-Service Reschedule (STUDENT/PARENT)
 
-- [ ] 5. Backend changes
-- [ ] 5.1 Add STUDENT to LeaveRequesterType + REJECTED to LeaveRequestStatus + schema adjustments
+- [x] 5. Backend changes
+- [x] 5.1 Add STUDENT to LeaveRequesterType + REJECTED to LeaveRequestStatus + schema adjustments
   - Edit `backend/enum/scheduling/scheduling.enum.ts` (backend-only, confirmed R2): add `LeaveRequesterType.STUDENT`, `LeaveRequestStatus.REJECTED`, new `LeaveRequestType` enum (DELAY/CANCEL); register new enum via `createPgEnumFromEnum` in `backend/db/schema/enums.ts`; `bun run db push` propagates existing enums automatically
   - Add to `leave_requests` (`backend/db/schema/classes/scheduling.ts`): `requestType` column, `proposedStartAt timestamp NULL`, partial unique index `(classInstanceId) WHERE status='PENDING'`; run `bun run db push`
   - If requester type/status exposed via Pothos, register in `backend/graphql/pothos/shared/enum.pothos.ts` (never literal arrays); run `bun run generate:gqlSchema && bun codegen`
-  - [ ] 5.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/enum/scheduling/scheduling.enum.ts`, `backend/db/schema/enums.ts`, `backend/db/schema/classes/scheduling.ts`, `backend/graphql/pothos/shared/enum.pothos.ts` (if enums exposed)
-  - [ ] 5.1.TE **Test Engineering** (4-Tier): DDL safety verified by 5.2.TE integration tests; Tier 2: enum exhaustiveness via Pothos compile; Tier 3: N/A; migration covers partial unique index `(classInstanceId) WHERE status='PENDING'`
-  - [ ] 5.1.SEC **Security & Tenancy Audit**: REJECTED status + STUDENT requester must not widen any existing staff-only mutation authorization (verified in 5.2.SEC); new enum members value-imported wherever used at runtime
-  - [ ] 5.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 5.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/enum/scheduling/scheduling.enum.ts`, `backend/db/schema/enums.ts`, `backend/db/schema/classes/scheduling.ts`, `backend/graphql/pothos/shared/enum.pothos.ts` (if enums exposed)
+  - [x] 5.1.TE **Test Engineering** (4-Tier): DDL safety verified by 5.2.TE integration tests; Tier 2: enum exhaustiveness via Pothos compile; Tier 3: N/A; migration covers partial unique index `(classInstanceId) WHERE status='PENDING'`
+  - [x] 5.1.SEC **Security & Tenancy Audit**: REJECTED status + STUDENT requester must not widen any existing staff-only mutation authorization (verified in 5.2.SEC); new enum members value-imported wherever used at runtime
+  - [x] 5.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - `bun run db push` diff: enum additions + `requestType` + `proposedStartAt` NULL + partial unique index; zero unexpected drops
     - PG enum registration via `createPgEnumFromEnum` (never literal arrays in Pothos)
     - `generate:gqlSchema && bun codegen` run and generated files committed
-  - [ ] 5.1.IV **Instruction Verification**: read `backend/AGENTS.md`, `backend/db/schema/AGENTS.md`, `backend/enum/AGENTS.md`, backend instructions
+  - [x] 5.1.IV **Instruction Verification**: read `backend/AGENTS.md`, `backend/db/schema/AGENTS.md`, `backend/enum/AGENTS.md`, backend instructions
   - Write `outcome/5.1-outcome.md`; mark task 5.1 `[x]`
   - _Requirements: R2.3, R2.7, R2.8_
-- [ ] 5.2 Leave-request service + mutations + tests
+- [x] 5.2 Leave-request service + mutations + tests
   - `backend/services/leave-request/leave-request.service.ts`: createStudentDelayRequest / createStudentCancelRequest; time-lock check (env-config `SELF_SERVICE_RESCHEDULE_LOCK_HOURS`, registered in `shared/constants/env-config-keys.ts`); duplicate guard in transaction; approve-delay → `reschedule()` in `backend/services/session/class-session.service.ts` (reuses manual-reschedule idempotency key + `validateRescheduleState`); approve-cancel → reuse the cancel path from `class-session.service.ts` that performs `releaseQuotaIfDeducted` / `refundCreditIfDeducted` — WITHOUT calling `SystemRulesService.assertLeaveQuotaAvailable(studentId)` and WITHOUT writing `leave_quota_usage` (R3 policy decision: self-service cancels are exempt from student leave quota; the supervisor approval is the authorization, in place of `SESSION_UPDATE_STATUS_LEAVE`)
   - ~~Leave quota interplay~~ (resolved in R3 design decision — exempt, no schema change); remaining risks: none for quota
   - Approve paths must not double-apply refunds; add integration test asserting single `credit_transactions` refund row per approved cancel
   - Tests: boundary at lock window, duplicate insert, tenancy, approve flows
   - Mutations `requestSessionDelay` / `requestSessionCancel` + permission seeds `SESSION_SELF_DELAY`, `SESSION_SELF_CANCEL`
   - Integration tests: tenant rejection, BFLA (student cannot approve), duplicate error mapping
-  - [ ] 5.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/services/leave-request/leave-request.service.ts`, `backend/services/session/class-session.service.ts` (touched approve paths), `shared/constants/env-config-keys.ts`, Pothos mutation files, permission seed files, integration + service tests
-  - [ ] 5.2.TE **Test Engineering** (4-Tier): Tier 1: all create/approve/reject branches; Tier 2: lock-window boundary (`SELF_SERVICE_RESCHEDULE_LOCK_HOURS` exact edge ±1 minute), duplicate insert under partial unique index, timezone/RTL; Tier 3: `Promise.allSettled` double-approve race and double-cancel race — assert single `credit_transactions` refund row per approved cancel; Tier 4: forged requester id, another tenant's `classInstanceId` rejected; service tests mock externals; integration via `testClient`
-  - [ ] 5.2.SEC **Security & Tenancy Audit**: BFLA: student/parent tokens cannot invoke approve/reject (supervisor-only path); BOLA: delay/cancel requests scoped to caller's own (or own child's) session — composite check `leaveRequest.classInstanceId ∈ caller sessions`; approve-cancel EXEMPTS student quota: no `assertLeaveQuotaAvailable(studentId)`, no `leave_quota_usage` write (R3 decision); releases/refunds reuse `releaseQuotaIfDeducted`/`refundCreditIfDeducted` inside the same tx
-  - [ ] 5.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 5.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/services/leave-request/leave-request.service.ts`, `backend/services/session/class-session.service.ts` (touched approve paths), `shared/constants/env-config-keys.ts`, Pothos mutation files, permission seed files, integration + service tests
+  - [x] 5.2.TE **Test Engineering** (4-Tier): Tier 1: all create/approve/reject branches; Tier 2: lock-window boundary (`SELF_SERVICE_RESCHEDULE_LOCK_HOURS` exact edge ±1 minute), duplicate insert under partial unique index, timezone/RTL; Tier 3: `Promise.allSettled` double-approve race and double-cancel race — assert single `credit_transactions` refund row per approved cancel; Tier 4: forged requester id, another tenant's `classInstanceId` rejected; service tests mock externals; integration via `testClient`
+  - [x] 5.2.SEC **Security & Tenancy Audit**: BFLA: student/parent tokens cannot invoke approve/reject (supervisor-only path); BOLA: delay/cancel requests scoped to caller's own (or own child's) session — composite check `leaveRequest.classInstanceId ∈ caller sessions`; approve-cancel EXEMPTS student quota: no `assertLeaveQuotaAvailable(studentId)`, no `leave_quota_usage` write (R3 decision); releases/refunds reuse `releaseQuotaIfDeducted`/`refundCreditIfDeducted` inside the same tx
+  - [x] 5.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - duplicate guard + refunds atomic in one transaction
     - env key `SELF_SERVICE_RESCHEDULE_LOCK_HOURS` registered + covered by reset function
     - idempotency key reuse for approve-delay `reschedule()` call
     - timestamp comparisons against `scheduledStartAt` use DB clock semantics
-  - [ ] 5.2.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
+  - [x] 5.2.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
   - Write `outcome/5.2-outcome.md`; mark task 5.2 `[x]`
   - _Requirements: R2.1–R2.8_
 
-- [ ] 6. Frontend changes
-- [ ] 6.1 Documents + session card actions + request modals
+- [x] 6. Frontend changes
+- [x] 6.1 Documents + session card actions + request modals
   - `leave-request.documents.ts`; Delay/Cancel buttons with disabled tooltips; Delay modal (datetime picker + confirmation), Cancel confirm
   - i18n namespace `selfServiceReschedule`
-  - [ ] 6.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `frontend/common/graphql/sharedDocuments/scheduling/leave-request.documents.ts`, Delay/Cancel buttons + Delay modal + Cancel confirm under `frontend/common/views/dashboard/` (common tier) + `frontend/desktop/...`/`frontend/mobile/...` tier views, `shared/locale/{types,en,ar}/selfServiceReschedule/`
-  - [ ] 6.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: documents wired with always-`id`; buttons render + mutations fire via mocked Apollo; modal open/submit paths covered. Tier 2: lock-window disabled tooltips (boundary ±1 min vs `SELF_SERVICE_RESCHEDULE_LOCK_HOURS`), RTL layout of modals, datetime picker min/max bounds. Tier 3: rapid double-click on Delay confirm, modal open/close churn, flaky-network retry UI. Tier 4: buttons hidden/absent without `SESSION_SELF_DELAY`/`SESSION_SELF_CANCEL`; no affordance for another student's session
-  - [ ] 6.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Session actions visible only for caller's own (or own child's) upcoming unlocked sessions — gating is UX only, server (5.2) enforces tenancy; disabled-with-tooltip instead of hidden when locked (no info leak beyond own session); mutations send only enums + typed payloads
-  - [ ] 6.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 6.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `frontend/common/graphql/sharedDocuments/scheduling/leave-request.documents.ts`, Delay/Cancel buttons + Delay modal + Cancel confirm under `frontend/common/views/dashboard/` (common tier) + `frontend/desktop/...`/`frontend/mobile/...` tier views, `shared/locale/{types,en,ar}/selfServiceReschedule/`
+  - [x] 6.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: documents wired with always-`id`; buttons render + mutations fire via mocked Apollo; modal open/submit paths covered. Tier 2: lock-window disabled tooltips (boundary ±1 min vs `SELF_SERVICE_RESCHEDULE_LOCK_HOURS`), RTL layout of modals, datetime picker min/max bounds. Tier 3: rapid double-click on Delay confirm, modal open/close churn, flaky-network retry UI. Tier 4: buttons hidden/absent without `SESSION_SELF_DELAY`/`SESSION_SELF_CANCEL`; no affordance for another student's session
+  - [x] 6.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Session actions visible only for caller's own (or own child's) upcoming unlocked sessions — gating is UX only, server (5.2) enforces tenancy; disabled-with-tooltip instead of hidden when locked (no info leak beyond own session); mutations send only enums + typed payloads
+  - [x] 6.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - documents follow sharedDocuments conventions (TypedDocumentNode naming, `id` on every object)
     - i18n namespace `selfServiceReschedule` fully registered via `defineNamespace` (namespace file + en + ar + MessageSchema entry)
     - no hardcoded strings or colors
-  - [ ] 6.1.IV **Instruction Verification**: read `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, frontend instructions
+  - [x] 6.1.IV **Instruction Verification**: read `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/common/graphql/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, frontend instructions
   - Write `outcome/6.1-outcome.md`; mark task 6.1 `[x]`
   - _Requirements: R2.1, R2.2, R2.3, R2.4_
-- [ ] 6.2 Requests status list (student + parent)
+- [x] 6.2 Requests status list (student + parent)
   - Reschedule/tracking UI extended for requester view; status badges
-  - [ ] 6.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: requester-view extensions to existing `frontend/common/views/dashboard/reschedule/tracking/` + desktop/mobile tiers + StatusBadge usage
-  - [ ] 6.2.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: list render with statuses, pagination. Tier 2: empty state, sparse requests, RTL. Tier 3: pagination churn, concurrent status updates while viewing. Tier 4: student/parent view scoped (no staff approve/reject affordances regardless of props)
-  - [ ] 6.2.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Tracking list query scoped server-side to caller's own requests (verified in 3.x/5.2 resolvers); UI must not expose staff-only actions to requester view; composite check: status transitions shown match resolver state machine exactly
-  - [ ] 6.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 6.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: requester-view extensions to existing `frontend/common/views/dashboard/reschedule/tracking/` + desktop/mobile tiers + StatusBadge usage
+  - [x] 6.2.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: list render with statuses, pagination. Tier 2: empty state, sparse requests, RTL. Tier 3: pagination churn, concurrent status updates while viewing. Tier 4: student/parent view scoped (no staff approve/reject affordances regardless of props)
+  - [x] 6.2.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Tracking list query scoped server-side to caller's own requests (verified in 3.x/5.2 resolvers); UI must not expose staff-only actions to requester view; composite check: status transitions shown match resolver state machine exactly
+  - [x] 6.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - AppDataGrid `paginationOptions` / MobileCardList parity
     - StatusBadge + theme palette only; REJECTED state added consistently everywhere statuses are surfaced
-  - [ ] 6.2.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
+  - [x] 6.2.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
   - Write `outcome/6.2-outcome.md`; mark task 6.2 `[x]`
   - _Requirements: R2.7_
 
 ## Phase 2.5 — Mid-Point Review Gate (MANDATORY, after task 6.2)
 
-- [ ] M2.5 Mid-point review wave over F1+F2 (backend + frontend files so far)
+- [x] M2.5 Mid-point review wave over F1+F2 (backend + frontend files so far)
   - Dispatch IN PARALLEL (Task tool): `review-backend` (scope: all `backend/` files created/modified in tasks 1–6), `review-types` (scope: all `backend/types/` + `backend/enum/` files in tasks 1–6), `review-config` (scope: schema + env-config-keys + permission seeds)
   - Fix per-file via subagents using the printed AGENTS.md/instructions; verify each with `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0)
   - Re-run review agents until **zero F1/F2-specific findings**; filter out pre-existing issues using the task-0.1 baseline
@@ -327,42 +327,42 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
 
 ## Feature 3 — Week & Day Calendar Views
 
-- [ ] 7. Student calendar week/day views
-- [ ] 7.1 ViewModel + view switcher + Week grid (desktop)
+- [x] 7. Student calendar week/day views
+- [x] 7.1 ViewModel + view switcher + Week grid (desktop)
   - Extend student sessions ViewModel with view state + range paging; hourly grid component (07:00–22:00 config via env-config); status colors from theme palette
   - Add `from`/`to` range params to the student sessions query (repo → service → Pothos args); cap window at 42 days; default = current month range so Month view is unchanged
   - Delay/Cancel actions wired in (uses 6.1 modal)
-  - [ ] 7.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: student sessions repo (`scheduling-queries.repository.findUpcoming.ts` + `.helpers.ts`) gaining `from`/`to`, service pass-through, Pothos args, ViewModel + view-switcher + Week grid files under `frontend/common|desktop/.../calendar`, `shared/constants/env-config-keys.ts` (grid hours)
-  - [ ] 7.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: repo 100% branch coverage for range filtering (`runInRollback` + `tx`, `expectRepoError`); service/Pothos query via `testClient`. Tier 2: from==to, 42-day cap exact edge, default=current-month preserves Month view, timezone/DST boundaries. Tier 3: `Promise.allSettled` rapid range paging, out-of-order responses (stale range discarded by ViewModel). Tier 4: cross-tenant `from`/`to` probe returns only caller sessions; wildcard-injection N/A (no LIKE). UI component tests: Week grid render 07:00–22:00 config, status colors, Delay/Cancel wiring (6.1 modal)
-  - [ ] 7.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Range params validated + capped server-side (never client-trusted); caller scoping unchanged by new args (still `ctx.user.id`-derived); BFLA: no staff-only fields exposed by range queries; composite: session cards only render actions permitted by 6.1 gating
-  - [ ] 7.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 7.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: student sessions repo (`scheduling-queries.repository.findUpcoming.ts` + `.helpers.ts`) gaining `from`/`to`, service pass-through, Pothos args, ViewModel + view-switcher + Week grid files under `frontend/common|desktop/.../calendar`, `shared/constants/env-config-keys.ts` (grid hours)
+  - [x] 7.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: repo 100% branch coverage for range filtering (`runInRollback` + `tx`, `expectRepoError`); service/Pothos query via `testClient`. Tier 2: from==to, 42-day cap exact edge, default=current-month preserves Month view, timezone/DST boundaries. Tier 3: `Promise.allSettled` rapid range paging, out-of-order responses (stale range discarded by ViewModel). Tier 4: cross-tenant `from`/`to` probe returns only caller sessions; wildcard-injection N/A (no LIKE). UI component tests: Week grid render 07:00–22:00 config, status colors, Delay/Cancel wiring (6.1 modal)
+  - [x] 7.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Range params validated + capped server-side (never client-trusted); caller scoping unchanged by new args (still `ctx.user.id`-derived); BFLA: no staff-only fields exposed by range queries; composite: session cards only render actions permitted by 6.1 gating
+  - [x] 7.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - repo: `from`/`to` clamped to 42-day window at the boundary layer; default range = current month
     - prepared-statements pattern per `docs/drizzle/prepared-statements.md` for the new range query
     - view state machine: Month ⇄ Week switch never refetches duplicated ranges
     - grid hours come from env-config (registered in `shared/constants/env-config-keys.ts`), not hardcoded
-  - [ ] 7.1.IV **Instruction Verification**: read `backend/db/repo/scheduling/AGENTS.md` (if present), `backend/services/scheduling/AGENTS.md` (if present), `backend/AGENTS.md`, `frontend/AGENTS.md`, backend + frontend + mobile-desktop instructions
+  - [x] 7.1.IV **Instruction Verification**: read `backend/db/repo/scheduling/AGENTS.md` (if present), `backend/services/scheduling/AGENTS.md` (if present), `backend/AGENTS.md`, `frontend/AGENTS.md`, backend + frontend + mobile-desktop instructions
   - Write `outcome/7.1-outcome.md`; mark task 7.1 `[x]`
   - _Requirements: R2, R3.1, R3.2, R3.4_
-- [ ] 7.2 Day view (desktop) + mobile variants
+- [x] 7.2 Day view (desktop) + mobile variants
   - Day view grid; mobile: extend `mobileWeeklyScroller`, day list variant
-  - [ ] 7.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: Day view grid (desktop) + `frontend/mobile/.../calendar` extensions (`mobileWeeklyScroller`, day-list variant)
-  - [ ] 7.2.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: Day view render, hour navigation. Tier 2: day with zero sessions, 24:00 boundary, RTL. Tier 3: rapid day/week switching; mobile scroller fling vs day-snap race. Tier 4: N/A new server surface (probes covered by 7.1.TE)
-  - [ ] 7.2.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Mobile/desktop parity: same server scoping, no additional client-side data exposure; lock-state rendering identical across tiers
-  - [ ] 7.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 7.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: Day view grid (desktop) + `frontend/mobile/.../calendar` extensions (`mobileWeeklyScroller`, day-list variant)
+  - [x] 7.2.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: Day view render, hour navigation. Tier 2: day with zero sessions, 24:00 boundary, RTL. Tier 3: rapid day/week switching; mobile scroller fling vs day-snap race. Tier 4: N/A new server surface (probes covered by 7.1.TE)
+  - [x] 7.2.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Mobile/desktop parity: same server scoping, no additional client-side data exposure; lock-state rendering identical across tiers
+  - [x] 7.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - per Mobile/Desktop isolation: shared logic in `frontend/common/views`, presentation only in tier files (< 150 lines each)
     - status colors from theme palette in all tiers
-  - [ ] 7.2.IV **Instruction Verification**: read `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md`, frontend + mobile-desktop instructions
+  - [x] 7.2.IV **Instruction Verification**: read `frontend/mobile/AGENTS.md`, `frontend/desktop/AGENTS.md`, `frontend/views/AGENTS.md`, frontend + mobile-desktop instructions
   - Write `outcome/7.2-outcome.md`; mark task 7.2 `[x]`
   - _Requirements: R3.3, R3.5_
-- [ ] 7.3 Component tests
+- [x] 7.3 Component tests
   - View switching, range paging, lock-state rendering
-  - [ ] 7.3.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: component tests under `test/ui/components/` for calendar view switching, range paging, lock-state rendering
-  - [ ] 7.3.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: view switching (Month⇄Week⇄Day), range paging, disabled-action rendering at lock window. Tier 2: boundary at exact lock hour, sparse days, RTL week layout. Tier 3: concurrent paging + view-switch races, duplicated range dedupe. Tier 4: permission-mocked store: student vs parent rendering
-  - [ ] 7.3.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Tier-level: confirm tests assert absence of cross-student sessions in fixtures; no test bypasses mocked permission providers
-  - [ ] 7.3.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 7.3.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: component tests under `test/ui/components/` for calendar view switching, range paging, lock-state rendering
+  - [x] 7.3.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: view switching (Month⇄Week⇄Day), range paging, disabled-action rendering at lock window. Tier 2: boundary at exact lock hour, sparse days, RTL week layout. Tier 3: concurrent paging + view-switch races, duplicated range dedupe. Tier 4: permission-mocked store: student vs parent rendering
+  - [x] 7.3.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Tier-level: confirm tests assert absence of cross-student sessions in fixtures; no test bypasses mocked permission providers
+  - [x] 7.3.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - tests assert ViewModel pagination contract, not Apollo internals
     - zero flakiness: fake timers for lock-window boundary tests
-  - [ ] 7.3.IV **Instruction Verification**: read `test/ui/AGENTS.md`, tests.instructions.md
+  - [x] 7.3.IV **Instruction Verification**: read `test/ui/AGENTS.md`, tests.instructions.md
   - Write `outcome/7.3-outcome.md`; mark task 7.3 `[x]`
   - _Requirements: R3.1–R3.5_
 
@@ -370,38 +370,38 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
 
 ## Feature 4 — Dashboard Widgets
 
-- [ ] 8. Quick Action strip + Open Requests widget
-- [ ] 8.1 ViewModel/store extension + Quick Action strip
+- [x] 8. Quick Action strip + Open Requests widget
+- [x] 8.1 ViewModel/store extension + Quick Action strip
   - Permission-gated links (Complaint, Payments, Calendar); parent aggregating across children
-  - [ ] 8.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: student/parent dashboard ViewModel + store extension + Quick Action strip (common + desktop + mobile tiers)
-  - [ ] 8.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: strip renders permitted links only; parent aggregation across children Cauchy-mixed states. Tier 2: zero children, child with no sessions, RTL. Tier 3: rapid child-switch while strip computed. Tier 4: links hidden without permissions (Complaint/Payments/Calendar), mocked permission store per role
-  - [ ] 8.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Every link permission-gated AND target routes re-guarded by `requirePermissionForPage` (defense in depth); parent aggregation never leaks a non-linked child's data (fixtures assert)
-  - [ ] 8.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 8.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: student/parent dashboard ViewModel + store extension + Quick Action strip (common + desktop + mobile tiers)
+  - [x] 8.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: strip renders permitted links only; parent aggregation across children Cauchy-mixed states. Tier 2: zero children, child with no sessions, RTL. Tier 3: rapid child-switch while strip computed. Tier 4: links hidden without permissions (Complaint/Payments/Calendar), mocked permission store per role
+  - [x] 8.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Every link permission-gated AND target routes re-guarded by `requirePermissionForPage` (defense in depth); parent aggregation never leaks a non-linked child's data (fixtures assert)
+  - [x] 8.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - strip items derive from permission map, not hardcoded role checks
     - Zustand store per `frontend/common/stores/AGENTS.md` (no server state in stores)
-  - [ ] 8.1.IV **Instruction Verification**: read `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, frontend + mobile-desktop instructions
+  - [x] 8.1.IV **Instruction Verification**: read `frontend/views/AGENTS.md`, `frontend/common/stores/AGENTS.md`, `frontend/AGENTS.md`, frontend + mobile-desktop instructions
   - Write `outcome/8.1-outcome.md`; mark task 8.1 `[x]`
   - _Requirements: R4.1, R4.4_
-- [ ] 8.2 Open Requests widget
+- [x] 8.2 Open Requests widget
   - Leave requests summary (pending + recent decisions); StatusBadge; empty state
-  - [ ] 8.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: Open Requests widget (common + tier views) + StatusBadge + empty state
-  - [ ] 8.2.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: pending + recent-decisions summary render. Tier 2: empty state, exactly one request, decision-then-revoke ordering, RTL. Tier 3: poll/refetch race while decisions arrive. Tier 4: widget shows only caller-scoped requests (mocked server scope enforced by 5.2/6.2 queries)
-  - [ ] 8.2.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Widget consumes the same caller-scoped queries (no bespoke unscoped fetch); StatusBadge categories consistent with 6.2
-  - [ ] 8.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 8.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: Open Requests widget (common + tier views) + StatusBadge + empty state
+  - [x] 8.2.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: pending + recent-decisions summary render. Tier 2: empty state, exactly one request, decision-then-revoke ordering, RTL. Tier 3: poll/refetch race while decisions arrive. Tier 4: widget shows only caller-scoped requests (mocked server scope enforced by 5.2/6.2 queries)
+  - [x] 8.2.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Widget consumes the same caller-scoped queries (no bespoke unscoped fetch); StatusBadge categories consistent with 6.2
+  - [x] 8.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - empty state follows `docs/frontend/*` patterns (ErrorState naming where applicable)
     - reduced-motion respected for any widget animation (CSS in sx per quota-ui-patterns)
-  - [ ] 8.2.IV **Instruction Verification**: read all AGENTS.md + instructions printed by QL
+  - [x] 8.2.IV **Instruction Verification**: read all AGENTS.md + instructions printed by QL
   - Write `outcome/8.2-outcome.md`; mark task 8.2 `[x]`
   - _Requirements: R4.2, R4.3_
-- [ ] 8.3 Component tests
+- [x] 8.3 Component tests
   - Empty states, permission hiding, parent-vs-student rendering
-  - [ ] 8.3.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: component tests for F4 widgets under `test/ui/components/`
-  - [ ] 8.3.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: empty states, permission hiding, parent-vs-student rendering matrix. Tier 2: mixed-permission subsets (has Payments, lacks Complaint). Tier 3: rerender storms on store updates. Tier 4: N/A beyond 8.1/8.2 server-enforced probes
-  - [ ] 8.3.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Fixtures assert no cross-tenant data in widget aggregates; tests never call resolvers directly with forged identities
-  - [ ] 8.3.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 8.3.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: component tests for F4 widgets under `test/ui/components/`
+  - [x] 8.3.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: empty states, permission hiding, parent-vs-student rendering matrix. Tier 2: mixed-permission subsets (has Payments, lacks Complaint). Tier 3: rerender storms on store updates. Tier 4: N/A beyond 8.1/8.2 server-enforced probes
+  - [x] 8.3.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Fixtures assert no cross-tenant data in widget aggregates; tests never call resolvers directly with forged identities
+  - [x] 8.3.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - tests consume public component contracts only
     - snapshots excluded (brittle) — behavioral assertions only
-  - [ ] 8.3.IV **Instruction Verification**: read `test/ui/AGENTS.md`, tests.instructions.md
+  - [x] 8.3.IV **Instruction Verification**: read `test/ui/AGENTS.md`, tests.instructions.md
   - Write `outcome/8.3-outcome.md`; mark task 8.3 `[x]`
   - _Requirements: R4.1–R4.4_
 
@@ -409,36 +409,36 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
 
 ## Feature 5 — Payments Ledger View (Parent)
 
-- [ ] 9. Backend ledger query
-- [ ] 9.1 PaymentLedgerEntry type + query + tests
+- [x] 9. Backend ledger query
+- [x] 9.1 PaymentLedgerEntry type + query + tests
   - Derive credits purchased from `credit_transactions`; package name from invoice linkage (per 0.2 finding); gateway from `paymentMethodSnapshot`; balance per student
   - Pothos object `PaymentLedgerEntry` (with `id`); query `myPaymentsLedger` tenant-scoped, paginated + filters
   - Permission `PAYMENTS_LEDGER_VIEW`
   - Integration tests incl. parental tenancy probe
-  - [ ] 9.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/types/` PaymentLedgerEntry types, ledger repo/query methods, Pothos `PaymentLedgerEntry` object + `myPaymentsLedger` query, permission seed `PAYMENTS_LEDGER_VIEW`, integration tests
-  - [ ] 9.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: ledger composition 100% branch coverage (credits purchased from `credit_transactions` PURCHASE, package name from invoice `invoiceType`, gateway from `paymentMethodSnapshot`, balance per student). Tier 2: invoice without linkage → placeholder per 0.2 decision, payment without credits, pagination bounds, filter extremes. Tier 3: `Promise.allSettled` concurrent pagination, filter churn. Tier 4: parental tenancy probe (other parent's ledger IDs → empty), unauthenticated rejection; package-name derivation cannot enumerate other tenants' invoices (invoice lookup pinned to caller's payments)
-  - [ ] 9.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): `myPaymentsLedger` tenant-scoped to caller's children only; no invoice cross-join by raw id (join through caller's payments); BOPLA: filters strictly typed (no passthrough objects); permission seed lands in parent group via 0.2 mapping
-  - [ ] 9.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 9.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `backend/types/` PaymentLedgerEntry types, ledger repo/query methods, Pothos `PaymentLedgerEntry` object + `myPaymentsLedger` query, permission seed `PAYMENTS_LEDGER_VIEW`, integration tests
+  - [x] 9.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: ledger composition 100% branch coverage (credits purchased from `credit_transactions` PURCHASE, package name from invoice `invoiceType`, gateway from `paymentMethodSnapshot`, balance per student). Tier 2: invoice without linkage → placeholder per 0.2 decision, payment without credits, pagination bounds, filter extremes. Tier 3: `Promise.allSettled` concurrent pagination, filter churn. Tier 4: parental tenancy probe (other parent's ledger IDs → empty), unauthenticated rejection; package-name derivation cannot enumerate other tenants' invoices (invoice lookup pinned to caller's payments)
+  - [x] 9.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): `myPaymentsLedger` tenant-scoped to caller's children only; no invoice cross-join by raw id (join through caller's payments); BOPLA: filters strictly typed (no passthrough objects); permission seed lands in parent group via 0.2 mapping
+  - [x] 9.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - single canonical `PaymentLedgerEntry` Pothos type with `id`
     - prepared statements for the ledger read path (`docs/drizzle/prepared-statements.md`)
     - balance computation reused, not re-derived (no duplicate credit-sum logic)
-  - [ ] 9.1.IV **Instruction Verification**: read `backend/types/AGENTS.md`, `backend/db/repo/billing/AGENTS.md` (if present), `backend/graphql/AGENTS.md`, `backend/AGENTS.md`, backend instructions
+  - [x] 9.1.IV **Instruction Verification**: read `backend/types/AGENTS.md`, `backend/db/repo/billing/AGENTS.md` (if present), `backend/graphql/AGENTS.md`, `backend/AGENTS.md`, backend instructions
   - Write `outcome/9.1-outcome.md`; mark task 9.1 `[x]`
   - _Requirements: R5.1–R5.5_
 
-- [ ] 10. Frontend payments page
-- [ ] 10.1 Parent payments page
+- [x] 10. Frontend payments page
+- [x] 10.1 Parent payments page
   - `/parent/payments` route, AppDataGrid paginated with student + date filters, balance via `DesktopMetricCardGrid` / `MobileMetricCardGrid`, sidebar entry
   - Documents + i18n namespace `paymentsLedger`
   - Component tests: filters, pagination, placeholder for missing package
-  - [ ] 10.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `/parent/payments` route (`requirePermissionForPage`), AppDataGrid paginated view + student/date filters + `DesktopMetricCardGrid`/`MobileMetricCardGrid` balance, sidebar entry, documents, `paymentsLedger` namespace (common + desktop + mobile tiers)
-  - [ ] 10.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: page render, filters, pagination, balance metric grid. Tier 2: missing-package placeholder, empty ledger, date-filter bounds. Tier 3: filter+page churn against mocked cache (`cache.updateQuery` pattern). Tier 4: route 403/redirect without `PAYMENTS_LEDGER_VIEW`; grid cannot be fed another student's id via filter (server rejects)
-  - [ ] 10.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Route guarded server-side; student filter options limited to caller's children (server-provided list); per-row loading and StatusBadge per docs/frontend patterns
-  - [ ] 10.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 10.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `/parent/payments` route (`requirePermissionForPage`), AppDataGrid paginated view + student/date filters + `DesktopMetricCardGrid`/`MobileMetricCardGrid` balance, sidebar entry, documents, `paymentsLedger` namespace (common + desktop + mobile tiers)
+  - [x] 10.1.TE **Test Engineering** (4-Tier: `.agents/skills/write-tests`, `.agents/skills/test-expert`): Tier 1: page render, filters, pagination, balance metric grid. Tier 2: missing-package placeholder, empty ledger, date-filter bounds. Tier 3: filter+page churn against mocked cache (`cache.updateQuery` pattern). Tier 4: route 403/redirect without `PAYMENTS_LEDGER_VIEW`; grid cannot be fed another student's id via filter (server rejects)
+  - [x] 10.1.SEC **Security & Tenancy Audit** (`.agents/skills/idor-testing`, `.agents/skills/pentester`): Route guarded server-side; student filter options limited to caller's children (server-provided list); per-row loading and StatusBadge per docs/frontend patterns
+  - [x] 10.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - AppDataGrid `paginationOptions` contract; documents always `id`
     - namespace `paymentsLedger` fully registered (5 steps)
     - tier files < 150 lines; metric-grid animations respect reduced-motion
-  - [ ] 10.1.IV **Instruction Verification**: read `app/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, frontend instructions
+  - [x] 10.1.IV **Instruction Verification**: read `app/AGENTS.md`, `frontend/common/graphql/sharedDocuments/AGENTS.md`, `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, frontend instructions
   - Write `outcome/10.1-outcome.md`; mark task 10.1 `[x]`
   - _Requirements: R5.1–R5.5_
 
@@ -446,7 +446,7 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
 
 ## Phase N — Review, Final Gate & Propagation
 
-- [ ] 11. Post-implementation parallel review wave (MANDATORY)
+- [x] 11. Post-implementation parallel review wave (MANDATORY)
   - Scope strictly to feature diff: `git diff --name-only $(git merge-base HEAD origin/master)..HEAD`
   - Dispatch IN PARALLEL: `review-types` (all new/modified type + enum files), `review-backend` (all `backend/` files: schema, repos, services, Pothos), `review-frontend` (all `frontend/`, `app/`, `shared/locale` files), + `idor-testing`/`pentester`/`backend-security-review` (all new queries/mutations: appraisal submit/feedback, requestSessionDelay/Cancel, myPaymentsLedger, sessions range query; BOLA across parent/student/teacher roles, parent-child tenancy integrity, BFLA on supervisor approvals, BOPLA on input payloads, GraphQL depth/batching abuse, LIKE wildcard probes)
   - Aggregate + dedupe findings; categorize CRITICAL/HIGH/MEDIUM/LOW; filter pre-existing via task-0.1 baseline
@@ -454,19 +454,19 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
   - Re-run review agents on fixed files; repeat until **zero feature-specific findings**
   - Write `outcome/post-implementation-review.md` (findings table, fixes, re-review proof)
   - _Requirements: all (review gate)_
-- [ ] 11.5 Final quality gate + deferred-items enforcement
+- [x] 11.5 Final quality gate + deferred-items enforcement
   - Run `bun quality-gate` to green (tsgo → oxlint → biome → lint → duplicates → codescene → sonar); any new failures vs. `/tmp/baseline-tsgo.txt`, `/tmp/baseline-biome.txt`, `/tmp/baseline-lint.json` MUST be attributable to plan files and fixed
   - Conformance sweep: every `_Requirements:` ID in this file exists in `specs.md`; every specs.md requirement has ≥1 task
   - Deferred-items sweep: `.ai/plans/student-parent-portal/deferred-items.md` — grep for unresolved `❌`/`⚠️` entries; count MUST be 0 or each entry explicitly accepted with rationale in the outcome file
   - Write `outcome/final-quality-gate.md`; mark 11.5 `[x]`
   - _Requirements: all (final gate)_
-- [ ] 12. E2E scenarios (Playwright)
+- [x] 12. E2E scenarios (Playwright)
   - `bun run build:test` then E2E per `test/ui/e2e/` patterns: (a) teacher fills monthly appraisal → parent/student views → parent adds feedback; (b) student delay request → supervisor approves → session rescheduled (calendar Week view reflects); (c) cancel-request approve → single refund row surfaced, quota NOT consumed; (d) parent payments ledger filters + pagination
   - 12.QL/IV: sub-loop per test file + read `test/ui/AGENTS.md`, tests.instructions.md; 12.TE: this task IS Tier-E2E; 12.SEC: flows executed as lowest-privilege roles
   - If out of scope for this plan's execution window: record in `deferred-items.md` with rationale
   - Write `outcome/12-e2e-outcome.md`
   - _Requirements: R1.5, R2.5, R3.1–R3.5, R5.5 (E2E)_
-- [ ] 13. Knowledge propagation & documentation
+- [x] 13. Knowledge propagation & documentation
   - Read ALL files in `.ai/plans/student-parent-portal/outcome/`; extract recurring patterns/gotchas
   - Create canonical docs (exact set driven by outcome evidence): `docs/services/self-service-reschedule.md` (quota-exempt approve-cancel, time-lock, duplicate guard, single-refund invariant) and `docs/frontend/monthly-appraisal-ui.md` (doc structure per skill: Why / Pattern / Rules / What NOT to Do / Rollout Summary / Related Documents)
   - Update layer AGENTS.md files touched by the plan: ONLY layer-specific rules/decisions (1–2 lines) + one-line doc reference — no implementation details or code
