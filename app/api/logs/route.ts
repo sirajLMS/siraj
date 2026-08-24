@@ -25,8 +25,9 @@ const SAFE_SESSION_ID_REGEX = /^[a-zA-Z0-9-]+$/;
  * Disk-write DoS bounds (security review M1): cap the number of log entries
  * accepted per POST and the length of each message/caller field.
  */
-const MAX_LOG_ENTRIES_PER_BATCH = 100; // L2 fix: lowered from 500 to 100 to cap disk writes
+const MAX_LOG_ENTRIES_PER_BATCH = 100;
 const MAX_LOG_MESSAGE_LENGTH = 4000;
+const MAX_LOG_BATCH_BYTES = 262144; // 256 KiB total batch cap
 
 function truncateLogField(value: string): string {
   return value.length > MAX_LOG_MESSAGE_LENGTH ? value.slice(0, MAX_LOG_MESSAGE_LENGTH) : value;
@@ -218,6 +219,12 @@ export async function POST(request: NextRequest) {
     const body = rawBody;
 
     if (body.logs.length > MAX_LOG_ENTRIES_PER_BATCH) {
+      return NextResponse.json({ error: tErrors.invalidRequestFormat }, { status: 400 });
+    }
+
+    // Total batch byte cap — rejects oversized payloads before disk write
+    // (prevent disk-exhaustion via unbounded log batches).
+    if (Buffer.byteLength(JSON.stringify(body)) > MAX_LOG_BATCH_BYTES) {
       return NextResponse.json({ error: tErrors.invalidRequestFormat }, { status: 400 });
     }
 

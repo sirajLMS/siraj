@@ -3,6 +3,7 @@ import { after, type NextRequest, NextResponse } from "next/server";
 import { logger } from "@/backend/lib/logger";
 import { apiRateLimiter, checkRateLimit, getClientIdentifier } from "@/backend/lib/ratelimit";
 import { resolveEnvConfig, WhatsappWebhookHandler } from "@/backend/services";
+import { cacheService } from "@/backend/services/cache/CacheServiceFactory";
 
 /**
  * Meta WhatsApp Cloud API webhook endpoint.
@@ -214,6 +215,40 @@ async function verifyHmacSignature(
       contentLength,
     });
     return new NextResponse(null, { status: 401 });
+  }
+
+  // M7: Replay-window nonce. A captured (rawBody, signature) pair can be replayed
+  // indefinitely without this check. The cache key is the SHA-256 of the raw body —
+  // identical bodies produce identical keys, so the FIRST accepted delivery claims the
+  // nonce and subsequent deliveries within the 24h window are rejected with 409.
+  //
+  // The 24h TTL mirrors Meta's maximum retry window — once Meta stops retrying a
+  // webhook, the nonce expires and a future legitimate identical body (extremely
+  // unlikely for HMAC-signed payloads) would be accepted.
+  //
+  // `WhatsappWebhookHandler.processEvent` is already idempotent (B3 forward-only rank
+  // guard), so duplicate Meta retries were already safe; this nonce is defense-in-depth
+  // in case that idempotency is ever weakened.
+  //
+  // r6-sec-04 / fail-closed: on cache errors, reject the webhook (409) rather than risk
+  // accepting a replay. Matches the existing `failOpen: false` pattern on the POST rate
+  // limiter above. Meta will retry; a healthy cache will allow the retry to claim the nonce.
+  const replayKey = `whatsapp:replay:${crypto.createHash("sha256").update(rawBody).digest("hex")}`;
+  try {
+    const claimed = await cacheService.setNx(replayKey, "1", 24 * 60 * 60 * 1000);
+    if (claimed === null) {
+      logger.warn("whatsapp-webhook: replay detected (duplicate body within 24h window)", {
+        ip,
+        contentLength,
+      });
+      return new NextResponse(null, { status: 409 });
+    }
+  } catch (error) {
+    logger.error("whatsapp-webhook: replay-cache error, rejecting (fail-closed)", {
+      ip,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return new NextResponse(null, { status: 409 });
   }
 
   return null;

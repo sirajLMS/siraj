@@ -85,7 +85,10 @@ function createApolloServer(schema: typeof graphQLSchema) {
     // Enable HTTP batching — Apollo Server 4 disables this by default.
     // With BatchHttpLink on the client, multiple operations are POSTed as a
     // single JSON array body, reducing Vercel function invocations (8→1 POSTs).
-    allowBatchedHttpRequests: true,
+    // CRITICAL (security review H3): disable array-batching in production so a
+    // single HTTP POST cannot amplify into hundreds of resolver executions while
+    // counting as one rate-limit unit. Dev/test still allows batching for tooling.
+    allowBatchedHttpRequests: !isProduction,
     formatError: (formattedError, error) => {
       const code =
         findCode(error) ??
@@ -174,6 +177,29 @@ async function withRateLimit(
   eventHandler: (req: NextRequest) => Promise<Response>
 ): Promise<Response> {
   const identifier = getClientIdentifier(request);
+
+  // Security review H3: reject oversized batched GraphQL arrays before Apollo
+  // sees them. A single POST carrying > 10 operations is almost always abuse
+  // (request amplification). We parse a cloned body so the downstream handler
+  // can still read the original request body. Malformed bodies fall through to
+  // Apollo's normal handling.
+  if (request.method === "POST") {
+    try {
+      const cloned = request.clone();
+      const body: unknown = await cloned.json();
+      if (Array.isArray(body) && body.length > 10) {
+        const locale = await getLocale();
+        const tErrors = getServerTranslations(locale).errorsTranslations;
+        logger.warn(`GraphQL batched request rejected: ${body.length} operations from ${identifier}`);
+        return NextResponse.json(
+          { errors: [{ message: tErrors.invalidRequestFormat, extensions: { code: "BAD_REQUEST" } }] },
+          { status: 400 }
+        );
+      }
+    } catch {
+      // malformed body — let Apollo handle it
+    }
+  }
 
   // Check rate limit
   const { success, limit, remaining, reset } = await checkRateLimit(identifier, graphqlRateLimiter);
