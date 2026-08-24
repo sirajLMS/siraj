@@ -2,6 +2,7 @@ import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { db, queryDb } from "@/backend/db";
 import { rateLimitCache, sessionCache } from "@/backend/db/schema";
 import { logger } from "@/backend/lib/logger";
+import { escapeLikeWildcards } from "@/backend/utils";
 
 export namespace CacheDbRepository {
   /**
@@ -127,7 +128,7 @@ export namespace CacheDbRepository {
       const result = await db
         .update(table)
         .set({ expiresAt: newExpiresAt })
-        .where(sql`${table.key} LIKE ${prefix + "%"}`)
+        .where(sql`${table.key} LIKE ${escapeLikeWildcards(prefix) + "%"}`)
         .returning({ key: table.key });
       return result.length;
     } catch (error) {
@@ -148,7 +149,7 @@ export namespace CacheDbRepository {
         .delete(table)
         .where(
           and(
-            sql`${table.key} LIKE ${prefix + "%"}`,
+            sql`${table.key} LIKE ${escapeLikeWildcards(prefix) + "%"}`,
             sql`${table.value}::bigint <= ${BigInt(maxScore)}`,
             gte(table.expiresAt, now)
           )
@@ -176,7 +177,7 @@ export namespace CacheDbRepository {
       const result = await q
         .select({ count: sql<number>`count(*)`.mapWith(Number) })
         .from(table)
-        .where(sql`${table.key} LIKE ${prefix + "%"} AND ${table.expiresAt} > ${now}`);
+        .where(sql`${table.key} LIKE ${escapeLikeWildcards(prefix) + "%"} AND ${table.expiresAt} > ${now}`);
 
       return result[0]?.count ?? 0;
     } catch (error) {

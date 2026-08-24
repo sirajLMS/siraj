@@ -9,8 +9,17 @@ import { INTERNAL_DEMO_USERS } from "@/shared/demo-users";
 import { resolveLocalizedString } from "@/shared/lib/localized-string";
 import type { ErrorsLabels } from "@/shared/locale";
 
-/** Internal machine roles — never exposed as demo quick-login options. */
-const EXCLUDED_DEMO_LOGIN_GROUP_SLUGS = new Set<string>(["system_automated"]);
+/**
+ * Internal machine roles AND seeded super-admin — never exposed as demo quick-login options.
+ *
+ * `super_admin` is excluded even though a SEEDED `permissionGroups` row with that slug exists
+ * (migration `3-system_permissions_and_groups.sql`) and `test-helper.service.ts:createTestSuperAdmin`
+ * assigns seeded super-admin users to that group. Excluding here short-circuits `loginWithGroupSlug`
+ * BEFORE the group lookup, so `demoLogin("super_admin")` throws `demoGroupNotFound("super_admin")`
+ * instead of yielding a super-admin session. (H9 follow-up: deleting the now-removed fallback block
+ * alone was insufficient because the normal group-slug lookup still found the seeded row.)
+ */
+const EXCLUDED_DEMO_LOGIN_GROUP_SLUGS = new Set<string>(["system_automated", "super_admin"]);
 
 export namespace DemoAuthService {
   /**
@@ -48,7 +57,6 @@ export namespace DemoAuthService {
    *
    * @see {@link db.select().from(permissionGroups)}
    * @see {@link db.select().from(userPermissionGroups).innerJoin(users)}
-   * @see {@link db.select().from(users)}
    * @param groupSlug The unique slug of the permission group to authenticate as.
    * @param tErrors Translated error labels (passed from GraphQL resolver via ctx.t("errors"))
    * @returns The user entity along with newly generated access and refresh tokens.
@@ -71,13 +79,6 @@ export namespace DemoAuthService {
     const [group] = await db.select().from(permissionGroups).where(eq(permissionGroups.slug, groupSlug)).limit(1);
 
     if (!group) {
-      // Check if it's super admin
-      if (groupSlug === "super_admin") {
-        const [superAdmin] = await db.select().from(users).where(eq(users.isSuperAdmin, true)).limit(1);
-        if (superAdmin) {
-          return proceedWithUser(superAdmin);
-        }
-      }
       throw new Error(t.auth.demoGroupNotFound(groupSlug));
     }
 

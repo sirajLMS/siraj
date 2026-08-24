@@ -5,6 +5,7 @@ import { students } from "@/backend/db/schema";
 import { OrderSortDirection } from "@/backend/enum";
 import { StudentsOrderByColumn } from "@/backend/enum/students";
 import type * as Types from "@/backend/types";
+import { escapeLikeWildcards } from "@/backend/utils";
 
 export namespace StudentFilterUtils {
   export function applyFilters<T extends PgSelect>(qb: T, args?: Types.StudentFilterArgs | null): T {
@@ -28,7 +29,7 @@ export namespace StudentFilterUtils {
       }
     }
     if (args.nameNotContains) {
-      qb = qb.where(notLike(students.name, `%${args.nameNotContains}%`));
+      qb = qb.where(notLike(students.name, `%${escapeLikeWildcards(args.nameNotContains)}%`));
     }
     if (args.nameEquals) {
       qb = qb.where(eq(students.name, args.nameEquals));
@@ -37,10 +38,10 @@ export namespace StudentFilterUtils {
       qb = qb.where(not(eq(students.name, args.nameNotEquals)));
     }
     if (args.nameStartsWith) {
-      qb = qb.where(like(students.name, `${args.nameStartsWith}%`));
+      qb = qb.where(like(students.name, `${escapeLikeWildcards(args.nameStartsWith)}%`));
     }
     if (args.nameEndsWith) {
-      qb = qb.where(like(students.name, `%${args.nameEndsWith}`));
+      qb = qb.where(like(students.name, `%${escapeLikeWildcards(args.nameEndsWith)}`));
     }
     if (args.nameIsEmpty) {
       qb = qb.where(eq(students.name, ""));

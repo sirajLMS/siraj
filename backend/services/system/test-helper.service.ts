@@ -507,7 +507,10 @@ export namespace TestHelperService {
       })
       .returning();
 
-    // Assign to the super_admin permission group so demoLogin("super_admin") can find this user
+    // Assign to the super_admin permission group for permission-group consistency.
+    // NOTE: `demoLogin("super_admin")` is blocked by `EXCLUDED_DEMO_LOGIN_GROUP_SLUGS`
+    // (in demo-auth.service.ts) — tests that need a super-admin session must use direct
+    // login (email + plainPassword) via the standard `login` mutation, not `demoLogin`.
     const [superAdminGroup] = await db
       .select()
       .from(permissionGroups)

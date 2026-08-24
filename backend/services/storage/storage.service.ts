@@ -232,6 +232,10 @@ export namespace StorageService {
   /**
    * Check if uploads are allowed in a directory.
    * Returns an error message if uploads are not allowed, or null if allowed.
+   *
+   * M8 (security review): DEFAULT-DENY when the directory is not registered. Previously
+   * returned null (allow) on a missing `dbDirectory` row, which let any authenticated
+   * user upload to non-existent paths. Now an unregistered directory rejects uploads.
    */
   export async function checkDirectoryUploadPermissions(
     directoryPath: string,
@@ -239,7 +243,11 @@ export namespace StorageService {
   ): Promise<string | null> {
     const tErrors = getServerTranslations(locale ?? "en").errorsTranslations.file;
     const dbDirectory = await StorageDbRepository.directoryByPath(directoryPath);
-    if (dbDirectory && !dbDirectory.allowUploads) {
+    if (!dbDirectory) {
+      logger.warn("Upload rejected: directory not registered (default-deny)", { directoryPath });
+      return tErrors.uploadsNotAllowedInDirectory;
+    }
+    if (!dbDirectory.allowUploads) {
       logger.warn("Uploads not allowed in directory", { directoryPath });
       return tErrors.uploadsNotAllowedInDirectory;
     }

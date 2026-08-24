@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { isIP } from "node:net";
 import { getBooleanEnv } from "@/backend/lib/env";
 import { logger } from "@/backend/lib/logger";
 import { isTestHelperEnabled } from "@/backend/lib/test-helper-gate";
@@ -340,12 +341,15 @@ export function getClientIdentifier(request: Request): string {
   if (getBooleanEnv("TRUSTED_PROXY")) {
     const forwardedFor = request.headers.get("x-forwarded-for");
     if (forwardedFor) {
-      const ips = forwardedFor
+      // r10-003 / H4-parity: validate the first non-empty XFF entry with
+      // isIP() so a spoofed non-IP XFF value cannot be used to rotate
+      // rate-limit buckets. Mirrors gqlContextFactory.resolveTrustedProxyIp.
+      const first = forwardedFor
         .split(",")
         .map(s => s.trim())
-        .filter(Boolean);
-      if (ips.length > 0) {
-        return ips[0];
+        .find(s => s.length > 0 && isIP(s));
+      if (first) {
+        return first;
       }
     }
 

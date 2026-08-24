@@ -24,6 +24,7 @@ import {
   InvoiceType,
   LeaveRequesterType,
   LeaveRequestStatus,
+  LeaveRequestType,
   LessonReportStatus,
   NotificationChannel,
   NotificationDeliveryStatus,
@@ -104,6 +105,7 @@ export const suggestionStatusEnum = createPgEnumFromEnum("suggestion_status", Su
 export const leaveRequestStatusEnum = createPgEnumFromEnum("leave_request_status", LeaveRequestStatus);
 
 export const leaveRequesterTypeEnum = createPgEnumFromEnum("leave_requester_type", LeaveRequesterType);
+export const leaveRequestTypeEnum = createPgEnumFromEnum("leave_request_type", LeaveRequestType);
 
 export const vacationRequestStatusEnum = createPgEnumFromEnum("vacation_request_status", VacationRequestStatus);
 

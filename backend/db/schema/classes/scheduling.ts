@@ -26,6 +26,7 @@ import {
   dstMigrationResultEnum,
   leaveRequesterTypeEnum,
   leaveRequestStatusEnum,
+  leaveRequestTypeEnum,
   onDemandNoCreditsOutcomeEnum,
   onDemandStatusEnum,
   rateSourceEnum,
@@ -329,6 +330,8 @@ export const leaveRequests = createTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     requesterType: leaveRequesterTypeEnum("requester_type").notNull(),
+    requestType: leaveRequestTypeEnum("request_type"),
+    proposedStartAt: timestampColumn("proposed_start_at"),
     reason: textColumn("reason"),
     status: leaveRequestStatusEnum("status").notNull(),
     createdAt: timestampColumn("created_at").notNull(),
@@ -345,6 +348,9 @@ export const leaveRequests = createTable(
     index("leave_requests_requester_type_idx").on(table.requesterType),
     index("leave_requests_created_at_idx").on(table.createdAt),
     index("leave_requests_processed_at_idx").on(table.processedAt),
+    uniqueIndex("leave_requests_pending_class_instance_unique_idx")
+      .on(table.classInstanceId)
+      .where(sql`status = 'PENDING'`),
   ]
 );
 

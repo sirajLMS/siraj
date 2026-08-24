@@ -1044,6 +1044,20 @@ export const ENV_CONFIG_KEYS: EnvConfigKeyDescriptor[] = [
     isSecret: false,
     excludeFromDb: false,
   },
+  // ---------------------------------------------------------------------------
+  // Self-Service Reschedule (F2)
+  // ---------------------------------------------------------------------------
+  {
+    key: "SELF_SERVICE_RESCHEDULE_LOCK_HOURS",
+    category: "app",
+    displayStrategy: "plain",
+    description: {
+      en: "Minimum hours before session start for self-service delay/cancel requests. Within this window, actions are disabled.",
+      ar: "الحد الأدنى من الساعات قبل بدء الجلسة لطلبات التأجيل/الإلغاء الذاتية. ضمن هذه النافذة، يتم تعطيل الإجراءات.",
+    },
+    isSecret: false,
+    excludeFromDb: false,
+  },
 ];
 
 export function isEnvConfigKeyExposedInSettings(descriptor: EnvConfigKeyDescriptor): boolean {

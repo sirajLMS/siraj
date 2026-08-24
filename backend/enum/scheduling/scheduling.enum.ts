@@ -3,12 +3,19 @@ export enum LeaveRequestStatus {
   APPROVED = "APPROVED",
   RESCHEDULED = "RESCHEDULED",
   CANCELLED = "CANCELLED",
+  REJECTED = "REJECTED",
 }
 
 export enum LeaveRequesterType {
   TEACHER = "TEACHER",
   PARENT = "PARENT",
   ADMIN = "ADMIN",
+  STUDENT = "STUDENT",
+}
+
+export enum LeaveRequestType {
+  DELAY = "DELAY",
+  CANCEL = "CANCEL",
 }
 
 export enum VacationRequestStatus {
