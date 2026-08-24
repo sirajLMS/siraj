@@ -5,8 +5,8 @@ import {
   hasStudentGroupEditPermission,
   hasStudentGroupViewPermission,
 } from "@/backend/services/profile/profile-field-filter-bridge";
-import { PROFILE_FIELD_GROUPS } from "@/backend/services/profile/profile-field-manifest";
-import { STUDENT_FIELD_GROUPS } from "@/backend/services/student/student-field-manifest";
+import { PROFILE_FIELD_GROUP_BY_KEY, PROFILE_FIELD_GROUPS, type ProfileFieldGroupKey } from "@/backend/services/profile/profile-field-manifest";
+import { STUDENT_FIELD_GROUP_BY_KEY, STUDENT_FIELD_GROUPS, type StudentFieldGroupKey } from "@/backend/services/student/student-field-manifest";
 import type { ProfileFieldGroupDefinition } from "@/backend/types";
 
 export type FieldFilterContext = {
@@ -99,7 +99,8 @@ export function filterStudentProfileByFieldGroups<T extends Record<string, unkno
 }
 
 export function canViewProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {
-  const group = PROFILE_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  // Performance optimization: O(1) hash map lookup instead of O(N) array scan
+  const group = PROFILE_FIELD_GROUP_BY_KEY[groupKey as ProfileFieldGroupKey] as ProfileFieldGroupDefinition | undefined;
   if (!group || !shouldApplyProfileGroup(group, ctx)) {
     return false;
   }
@@ -107,7 +108,8 @@ export function canViewProfileFieldGroup(ctx: FieldFilterContext, groupKey: stri
 }
 
 export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: string): boolean {
-  const group = PROFILE_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  // Performance optimization: O(1) hash map lookup instead of O(N) array scan
+  const group = PROFILE_FIELD_GROUP_BY_KEY[groupKey as ProfileFieldGroupKey] as ProfileFieldGroupDefinition | undefined;
   if (!group || !shouldApplyProfileGroup(group, ctx)) {
     return false;
   }
@@ -115,7 +117,8 @@ export function canEditProfileFieldGroup(ctx: FieldFilterContext, groupKey: stri
 }
 
 export function canViewStudentFieldGroup(ctx: StudentFieldFilterContext, groupKey: string): boolean {
-  const group = STUDENT_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  // Performance optimization: O(1) hash map lookup instead of O(N) array scan
+  const group = STUDENT_FIELD_GROUP_BY_KEY[groupKey as StudentFieldGroupKey];
   if (!group) {
     return false;
   }
@@ -123,7 +126,8 @@ export function canViewStudentFieldGroup(ctx: StudentFieldFilterContext, groupKe
 }
 
 export function canEditStudentFieldGroup(ctx: StudentFieldFilterContext, groupKey: string): boolean {
-  const group = STUDENT_FIELD_GROUPS.find(entry => entry.groupKey === groupKey);
+  // Performance optimization: O(1) hash map lookup instead of O(N) array scan
+  const group = STUDENT_FIELD_GROUP_BY_KEY[groupKey as StudentFieldGroupKey];
   if (!group) {
     return false;
   }
