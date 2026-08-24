@@ -4,6 +4,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
+import Tooltip from "@mui/material/Tooltip";
 import { type SxProps, styled, type Theme } from "@mui/material/styles";
 import TextField, { type TextFieldProps } from "@mui/material/TextField";
 import Typography, { type TypographyProps } from "@mui/material/Typography";
@@ -180,12 +181,16 @@ export function EditableTypographyShared({
   const endAdornment = useMemo(
     () => (
       <InputAdornment position="end">
-        <IconButton onClick={handleSave} aria-label={t.save} color="success" size={iconButtonSize}>
-          <CheckIcon />
-        </IconButton>
-        <IconButton onClick={handleCancel} aria-label={t.cancel} color="error" size={iconButtonSize}>
-          <CloseIcon />
-        </IconButton>
+        <Tooltip title={t.save}>
+          <IconButton onClick={handleSave} aria-label={t.save} color="success" size={iconButtonSize}>
+            <CheckIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title={t.cancel}>
+          <IconButton onClick={handleCancel} aria-label={t.cancel} color="error" size={iconButtonSize}>
+            <CloseIcon />
+          </IconButton>
+        </Tooltip>
       </InputAdornment>
     ),
     [handleSave, handleCancel, iconButtonSize, t.save, t.cancel]
