@@ -196,55 +196,55 @@ Design anchors adopted in R3 (see `design.md` §F2–§F5 and `outcome/plan-revi
   - Write `outcome/3.1-outcome.md`; mark task 3.1 `[x]`
   - _Requirements: R1.1–R1.7_
 
-- [ ] 4. Frontend
-- [ ] 4.1 Shared documents + i18n namespaces
+- [x] 4. Frontend
+- [x] 4.1 Shared documents + i18n namespaces
   - `frontend/common/graphql/sharedDocuments/reports/monthly-appraisal.documents.ts` — TypedDocumentNode naming, always `id`, no `useLazyQuery`
   - Locale namespace `monthlyAppraisal`: full registration — namespace file in `shared/locale/namespaces/**/monthly-appraisal.namespace.ts` via `defineNamespace("<stable.string.id>", config)`, `en` + `ar` implementations, type entry in the `shared/locale/types/message.ts` schema (`MessageSchema`)
-  - [ ] 4.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `frontend/common/graphql/sharedDocuments/reports/monthly-appraisal.documents.ts`, `shared/locale/namespaces/**/monthly-appraisal.namespace.ts`, en + ar implementations, `shared/locale/types/message.ts`
-  - [ ] 4.1.TE **Test Engineering** (4-Tier): Tier 1: hook data/loading/error states against mocked Apollo; Tier 2: missing `id` field detection (Apollo cache warning), RTL rendering of ar strings; document shape tests per `frontend/common/graphql/AGENTS.md`
-  - [ ] 4.1.SEC **Security & Tenancy Audit**: Documents never widen fields beyond resolver authorization (no field requests that would leak across students); i18n: no hardcoded strings anywhere — typed translation fns only
-  - [ ] 4.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 4.1.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `frontend/common/graphql/sharedDocuments/reports/monthly-appraisal.documents.ts`, `shared/locale/namespaces/**/monthly-appraisal.namespace.ts`, en + ar implementations, `shared/locale/types/message.ts`
+  - [x] 4.1.TE **Test Engineering** (4-Tier): Tier 1: hook data/loading/error states against mocked Apollo; Tier 2: missing `id` field detection (Apollo cache warning), RTL rendering of ar strings; document shape tests per `frontend/common/graphql/AGENTS.md`
+  - [x] 4.1.SEC **Security & Tenancy Audit**: Documents never widen fields beyond resolver authorization (no field requests that would leak across students); i18n: no hardcoded strings anywhere — typed translation fns only
+  - [x] 4.1.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - TypedDocumentNode naming `{Entity}QueryDocument` / `{Entity}MutationDocument`
     - `shared/` must not import from `@/frontend|@/backend|@/app`
     - namespace fully registered: `defineNamespace` stable id + en + ar + MessageSchema entry (legacy `serverLegacy.ts`/`namespacePaths` no longer exist — do not reference them)
-  - [ ] 4.1.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
+  - [x] 4.1.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
   - Write `outcome/4.1-outcome.md`; mark task 4.1 `[x]`
   - _Requirements: R1 (UI), i18n cross-cutting_
-- [ ] 4.2 Teacher view (list + form) — common/desktop/mobile
+- [x] 4.2 Teacher view (list + form) — common/desktop/mobile
   - Structure per Mobile/Desktop isolation: Container + ViewModel in `frontend/common/views/dashboard/...`, tier views in `frontend/desktop/...` / `frontend/mobile/...` — **never `frontend/views/`** (deprecated)
   - RHF 3-generic form; sparse optional rubric; validation 1–5; `< 150` lines per tier file; MUI v9 rules (sx-only style props, theme palette colors)
   - AGENTS.md: `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md` (if present); instructions: frontend + mobile-desktop
-  - [ ] 4.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: Container + ViewModel under `frontend/common/views/dashboard/reports/monthly-appraisal/`; tier views under `frontend/desktop/...` and `frontend/mobile/...` (both + Shared)
-  - [ ] 4.2.TE **Test Engineering** (4-Tier): Component tests in `test/ui/components/` (Happy DOM, mocked Apollo): Tier 1: render + submit paths; Tier 2: sparse rubric optional fields, validation 1–5 bounds, grade 0/negative rejection; Tier 3: rapid double-submit click; Tier 4: N/A server-side (tier passthrough); teacher-only rendering with mocked permission store
-  - [ ] 4.2.SEC **Security & Tenancy Audit**: All affordances permission-gated via `<RequirePermission>` where fine-grained; no trust of client-side gating for security (server enforces in 3.1)
-  - [ ] 4.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 4.2.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: Container + ViewModel under `frontend/common/views/dashboard/reports/monthly-appraisal/`; tier views under `frontend/desktop/...` and `frontend/mobile/...` (both + Shared)
+  - [x] 4.2.TE **Test Engineering** (4-Tier): Component tests in `test/ui/components/` (Happy DOM, mocked Apollo): Tier 1: render + submit paths; Tier 2: sparse rubric optional fields, validation 1–5 bounds, grade 0/negative rejection; Tier 3: rapid double-submit click; Tier 4: N/A server-side (tier passthrough); teacher-only rendering with mocked permission store
+  - [x] 4.2.SEC **Security & Tenancy Audit**: All affordances permission-gated via `<RequirePermission>` where fine-grained; no trust of client-side gating for security (server enforces in 3.1)
+  - [x] 4.2.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - each tier file < 150 lines (CodeScene)
     - MUI v9: `sx` prop only for styles; theme palette colors; `*Outlined` icon names
     - RHF 3-generic pattern; no uncontrolled inputs
-  - [ ] 4.2.IV **Instruction Verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, frontend + mobile-desktop instructions
+  - [x] 4.2.IV **Instruction Verification**: read `frontend/views/AGENTS.md`, `frontend/AGENTS.md`, `frontend/common/views/AGENTS.md`, frontend + mobile-desktop instructions
   - Write `outcome/4.2-outcome.md`; mark task 4.2 `[x]`
   - _Requirements: R1.1, R1.2, R1.7_
-- [ ] 4.3 Student/Parent view (list + sparse detail + Add Feedback modal)
+- [x] 4.3 Student/Parent view (list + sparse detail + Add Feedback modal)
   - AppDataGrid (desktop) / MobileCardList (mobile) with `paginationOptions`; StatusBadge for states; component tests: sparse rendering, feedback append flow, empty states
-  - [ ] 4.3.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: List/detail views (common + desktop + mobile tiers) + Add Feedback modal + component tests
-  - [ ] 4.3.TE **Test Engineering** (4-Tier): Tier 1: list render, detail render, feedback modal submit; Tier 2: empty states, sparse-field rendering (missing rubric keys), RTL; Tier 3: rapid modal open/close, pagination churn; Tier 4: `useQuery` only (no `useLazyQuery`) — enforced by doc conventions
-  - [ ] 4.3.SEC **Security & Tenancy Audit**: Parent view restricted to own children via student switcher scoped to linked children; feedback append requires `APPRAISAL_FEEDBACK` (server-enforced); StatusBadge states match resolver states exactly
-  - [ ] 4.3.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 4.3.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: List/detail views (common + desktop + mobile tiers) + Add Feedback modal + component tests
+  - [x] 4.3.TE **Test Engineering** (4-Tier): Tier 1: list render, detail render, feedback modal submit; Tier 2: empty states, sparse-field rendering (missing rubric keys), RTL; Tier 3: rapid modal open/close, pagination churn; Tier 4: `useQuery` only (no `useLazyQuery`) — enforced by doc conventions
+  - [x] 4.3.SEC **Security & Tenancy Audit**: Parent view restricted to own children via student switcher scoped to linked children; feedback append requires `APPRAISAL_FEEDBACK` (server-enforced); StatusBadge states match resolver states exactly
+  - [x] 4.3.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - AppDataGrid `paginationOptions` contract; MobileCardList parity
     - StatusBadge + theme-palette tokens only
-  - [ ] 4.3.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
+  - [x] 4.3.IV **Instruction Verification**: read all AGENTS.md + .agents/instructions files printed by QL and validate every modified file
   - Write `outcome/4.3-outcome.md`; mark task 4.3 `[x]`
   - _Requirements: R1.3, R1.4, R1.6_
-- [ ] 4.4 Routes + navigation + permission wiring
+- [x] 4.4 Routes + navigation + permission wiring
   - Routes per design UX table; pages MUST use `requirePermissionForPage` in `page.tsx` (server guard); `<RequirePermission>` only for fine-grained affordances; sidebar entries; role matrix; mobile variants
   - AGENTS.md: `app/AGENTS.md`; instructions: frontend
-  - [ ] 4.4.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `app/[locale]/(dashboard)/...` route `page.tsx` files + sidebar/navigation config files
-  - [ ] 4.4.TE **Test Engineering** (4-Tier): Tier 1: route renders for permitted roles via mocked session; Tier 2: unauthorized → redirect/403; smoke via existing route test harness (if present) else deferred to task 12 E2E
-  - [ ] 4.4.SEC **Security & Tenancy Audit**: `requirePermissionForPage` server guard on every page (never client-only); role matrix per design UX table verified for parent/student/teacher/supervisor/admin
-  - [ ] 4.4.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
+  - [x] 4.4.QL **Quality Loop**: `bun run scripts/health/sub-loop.ts <file> --lifecycle codescene` (exit 0) per modified file: `app/[locale]/(dashboard)/...` route `page.tsx` files + sidebar/navigation config files
+  - [x] 4.4.TE **Test Engineering** (4-Tier): Tier 1: route renders for permitted roles via mocked session; Tier 2: unauthorized → redirect/403; smoke via existing route test harness (if present) else deferred to task 12 E2E
+  - [x] 4.4.SEC **Security & Tenancy Audit**: `requirePermissionForPage` server guard on every page (never client-only); role matrix per design UX table verified for parent/student/teacher/supervisor/admin
+  - [x] 4.4.SR **Semantic Review**: full X.Y.SR checklist from header, with emphasis:
     - navigation entries respect role matrix for all 9 roles
     - mobile bottom-nav parity with sidebar
-  - [ ] 4.4.IV **Instruction Verification**: read `app/AGENTS.md` + frontend instructions
+  - [x] 4.4.IV **Instruction Verification**: read `app/AGENTS.md` + frontend instructions
   - Write `outcome/4.4-outcome.md`; mark task 4.4 `[x]`
   - _Requirements: R1 (UX/nav)_
 

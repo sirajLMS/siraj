@@ -8,11 +8,11 @@
       "allowedModels": []
     }
   },
-  "chat.utilitySmallModel": "customendpoint/nvidia/thinkingmachines/inkling",
-  "chat.defaultModel": "customendpoint/nvidia/thinkingmachines/inkling",
-  "chat.newSession.defaultMode": "customendpoint/nvidia/thinkingmachines/inkling",
-  "chat.planAgent.defaultModel": "Glm-5.2 (customendpoint)",
-  "chat.utilityModel": "customendpoint/nvidia/thinkingmachines/inkling",
+  "chat.utilitySmallModel": "customendpoint/nvidia/moonshotai/kimi-k3",
+  "chat.defaultModel": "customendpoint/nvidia/moonshotai/kimi-k3",
+  "chat.newSession.defaultMode": "customendpoint/nvidia/moonshotai/kimi-k3",
+  "chat.planAgent.defaultModel": "Kimi-k3 (customendpoint)",
+  "chat.utilityModel": "customendpoint/nvidia/moonshotai/kimi-k3",
   "chat.permissions.default": "autopilot",
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "always"
