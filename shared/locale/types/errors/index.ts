@@ -8,6 +8,7 @@ export interface AuthErrors {
   // ─── No-param strings ──────────────────────────────────────────────
   readonly invalidRoleTab: string;
   readonly passwordMinLength: string;
+  readonly passwordWeakComplexity: string;
   readonly passwordRequiresUppercase: string;
   readonly passwordRequiresLowercase: string;
   readonly passwordRequiresDigit: string;

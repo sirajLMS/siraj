@@ -118,7 +118,8 @@ export const errorsEn: ErrorsLabels = {
   auth: {
     // ─── No-param strings ────────────────────────────────────────────
     invalidRoleTab: "The selected role tab is invalid.",
-    passwordMinLength: "Password must be at least 8 characters long.",
+    passwordMinLength: "Password must be at least 12 characters long.",
+    passwordWeakComplexity: "Password must contain at least 2 of: lowercase, uppercase, digits, symbols",
     passwordRequiresUppercase: "Password must contain at least one uppercase letter.",
     passwordRequiresLowercase: "Password must contain at least one lowercase letter.",
     passwordRequiresDigit: "Password must contain at least one digit.",

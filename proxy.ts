@@ -69,12 +69,23 @@ export default function proxy(request: NextRequest) {
     `font-src 'self' https://fonts.gstatic.com; ` +
     `img-src 'self' data: blob: https://images.unsplash.com https://flagcdn.com https://*.blob.vercel-storage.com http://localhost http://127.0.0.1 https://localhost https://127.0.0.1; ` +
     `connect-src 'self' https://*.nr-data.net https://*.newrelic.com https://*.upstash.com https://vercel.live https://*.blob.vercel-storage.com${devConnectSrc}; ` +
-    `frame-ancestors 'none';`;
+    `frame-ancestors 'none';` +
+    // harden CSP — block plugins/object, restrict base + form targets to self.
+    ` object-src 'none'; base-uri 'self'; form-action 'self';`;
 
   response.headers.set("x-pathname", pathname);
   response.headers.set("x-search", search);
   response.headers.set("x-nonce", nonce);
   response.headers.set("Content-Security-Policy", cspValue);
+
+  // transport + sniffing + referrer hardening, only in production where the
+  // deployment is served over HTTPS behind a real edge (avoid breaking local
+  // dev where HSTS would lock the browser into https://localhost).
+  if (process.env.NODE_ENV === "production") {
+    response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  }
 
   return response;
 }

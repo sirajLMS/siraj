@@ -2093,6 +2093,7 @@ enum LeaveRequestStatus {
   APPROVED
   CANCELLED
   PENDING
+  REJECTED
   RESCHEDULED
 }
 

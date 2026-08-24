@@ -1048,6 +1048,7 @@ export enum LeaveRequestStatus {
   Approved = 'APPROVED',
   Cancelled = 'CANCELLED',
   Pending = 'PENDING',
+  Rejected = 'REJECTED',
   Rescheduled = 'RESCHEDULED'
 }
 

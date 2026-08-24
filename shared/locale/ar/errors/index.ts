@@ -118,7 +118,9 @@ export const errorsAr: ErrorsLabels = {
   auth: {
     // ─── No-param strings ────────────────────────────────────────────
     invalidRoleTab: "علامة التبويب المحددة للدور غير صالحة.",
-    passwordMinLength: "يجب أن تكون كلمة المرور ٨ أحرف على الأقل.",
+    passwordMinLength: "يجب أن تكون كلمة المرور ١٢ حرفاً على الأقل.",
+    passwordWeakComplexity:
+      "كلمة المرور يجب أن تحتوي على الأقل على فئتين من الأحرف: أحرف صغيرة، أحرف كبيرة، أرقام، رموز",
     passwordRequiresUppercase: "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل.",
     passwordRequiresLowercase: "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل.",
     passwordRequiresDigit: "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل.",
