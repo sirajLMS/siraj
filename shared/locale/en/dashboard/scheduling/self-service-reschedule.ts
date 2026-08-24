@@ -1,0 +1,51 @@
+import type { SelfServiceRescheduleLabels } from "@/shared/locale/types/dashboard/scheduling/self-service-reschedule";
+
+export const selfServiceRescheduleEn: SelfServiceRescheduleLabels = {
+  buttons: {
+    delay: "Delay",
+    cancel: "Cancel",
+  },
+  delayModal: {
+    title: "Request Session Delay",
+    proposedStartAt: "Proposed New Start Time",
+    reason: "Reason (optional)",
+    reasonPlaceholder: "Explain why you need to delay this session...",
+    submit: "Submit Delay Request",
+    cancel: "Cancel",
+    successMessage: "Delay request submitted successfully.",
+  },
+  cancelConfirm: {
+    title: "Request Session Cancellation",
+    message: "Are you sure you want to cancel this session? Your request will be reviewed by a supervisor.",
+    reason: "Reason (optional)",
+    reasonPlaceholder: "Explain why you need to cancel this session...",
+    confirm: "Submit Cancel Request",
+    cancel: "Keep Session",
+    successMessage: "Cancel request submitted successfully.",
+  },
+  statusBadge: {
+    pending: "Pending",
+    approved: "Approved",
+    rejected: "Rejected",
+    rescheduled: "Rescheduled",
+    cancelled: "Cancelled",
+  },
+  requestType: {
+    delay: "Delay",
+    cancel: "Cancel",
+  },
+  errors: {
+    sessionLocked: "This session is locked for changes (within the time-lock window).",
+    duplicateRequest: "A pending request already exists for this session.",
+    requestFailed: "Failed to submit request. Please try again.",
+  },
+  requestsList: {
+    title: "My Requests",
+    emptyState: "No requests yet",
+    emptyStateDescription: "You haven't submitted any delay or cancel requests.",
+    sessionDate: "Session Date",
+    reason: "Reason",
+    submittedAt: "Submitted",
+    processedAt: "Processed",
+  },
+};

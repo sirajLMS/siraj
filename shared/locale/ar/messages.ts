@@ -49,6 +49,7 @@ import { dashboardPaymentCatalogsParentAr } from "@/shared/locale/ar/dashboard/p
 import { dashboardPermissionsAr } from "@/shared/locale/ar/dashboard/permissions/main.ts";
 import { dashboardReportsAr } from "@/shared/locale/ar/dashboard/reports/main.ts";
 import { monthlyAppraisalAr } from "@/shared/locale/ar/dashboard/reports/monthly-appraisal";
+import { selfServiceRescheduleAr } from "@/shared/locale/ar/dashboard/scheduling/self-service-reschedule";
 import { dashboardBooksAndBagsAr } from "@/shared/locale/ar/dashboard/resources/booksAndBags.ts";
 import { dashboardResourcesAr } from "@/shared/locale/ar/dashboard/resources/main.ts";
 import { dashboardScheduleTrackingParentAr } from "@/shared/locale/ar/dashboard/schedule-tracking/main.ts";
@@ -202,6 +203,7 @@ export const arMessages: Translations = {
     usersCreateUser: dashboardUsersCreateUserAr,
     permissions: dashboardPermissionsAr,
     settings: dashboardSettingsAr,
+    selfServiceReschedule: selfServiceRescheduleAr,
     monthlyAppraisal: monthlyAppraisalAr,
     reports: dashboardReportsAr,
     resources: dashboardResourcesAr,

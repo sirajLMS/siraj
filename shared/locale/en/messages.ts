@@ -49,6 +49,7 @@ import { dashboardPaymentCatalogsParentEn } from "@/shared/locale/en/dashboard/p
 import { dashboardPermissionsEn } from "@/shared/locale/en/dashboard/permissions/main.ts";
 import { dashboardReportsEn } from "@/shared/locale/en/dashboard/reports/main.ts";
 import { monthlyAppraisalEn } from "@/shared/locale/en/dashboard/reports/monthly-appraisal";
+import { selfServiceRescheduleEn } from "@/shared/locale/en/dashboard/scheduling/self-service-reschedule";
 import { dashboardBooksAndBagsEn } from "@/shared/locale/en/dashboard/resources/booksAndBags.ts";
 import { dashboardResourcesEn } from "@/shared/locale/en/dashboard/resources/main.ts";
 import { dashboardScheduleTrackingParentEn } from "@/shared/locale/en/dashboard/schedule-tracking/main.ts";
@@ -202,6 +203,7 @@ export const enMessages: Translations = {
     usersCreateUser: dashboardUsersCreateUserEn,
     permissions: dashboardPermissionsEn,
     settings: dashboardSettingsEn,
+    selfServiceReschedule: selfServiceRescheduleEn,
     monthlyAppraisal: monthlyAppraisalEn,
     reports: dashboardReportsEn,
     resources: dashboardResourcesEn,
