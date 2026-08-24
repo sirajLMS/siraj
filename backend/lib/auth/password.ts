@@ -14,6 +14,23 @@ export async function validatePasswordStrength(password: string, locale?: string
   if (password.length < 8) {
     throw new Error(auth.passwordMinLength);
   }
+
+  // Security enhancement: enforce password complexity requirements
+  if (!/[A-Z]/.test(password)) {
+    throw new Error(auth.passwordRequiresUppercase);
+  }
+
+  if (!/[a-z]/.test(password)) {
+    throw new Error(auth.passwordRequiresLowercase);
+  }
+
+  if (!/\d/.test(password)) {
+    throw new Error(auth.passwordRequiresDigit);
+  }
+
+  if (!/[^a-zA-Z0-9]/.test(password)) {
+    throw new Error(auth.passwordRequiresSpecialChar);
+  }
 }
 
 /**
