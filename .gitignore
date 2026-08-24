@@ -130,3 +130,5 @@ shared/locale/**/*.js
 /download/
 /worklog.md
 dev.log
+
+__pycache__

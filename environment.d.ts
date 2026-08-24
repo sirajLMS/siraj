@@ -141,6 +141,16 @@ declare global {
       CF_PAGES?: string;
       RAILWAY_ENVIRONMENT?: string;
 
+      /**
+       * Set to "true" ONLY when the deployment sits behind a real reverse proxy
+       * (nginx/haproxy/ingress) that overwrites `x-forwarded-for` / `x-real-ip`.
+       * When unset, those headers are treated as client-spoofable and rate
+       * limiting falls back to the anon fingerprint (security review M2).
+       * On Vercel/Cloudflare deployments this is unnecessary — the platform
+       * headers are used instead.
+       */
+      TRUSTED_PROXY?: string;
+
       GOOGLE_FONTS_API_KEY?: string;
 
       /**
