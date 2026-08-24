@@ -68,7 +68,7 @@ The dialect is resolved once at process start from `DB_PROVIDER`. All schema def
 
 `bun db` (no args) shows the env-file picker. SQLite env files now appear with a `[sqlite]` tag:
 
-```
+```text
 --- Database Actions ---
 1. Reset Database
 2. Seed Database

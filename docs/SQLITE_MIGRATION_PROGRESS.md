@@ -2,7 +2,16 @@
 
 Multi-dialect (libsql/SQLite + PostgreSQL) migration of backend/db/schema/* from raw drizzle-orm/pg-core to dialect-aware builders (type-erasure via never).
 
-## Status: ALL 15 DOMAINS PORTED. SQLite generate WORKS (94 tables).
+## Status: _Stale_ — Phases 2–4 landed after this snapshot (commits `bc7d9cf1f0`, `3d108d5c9b`). See "Phase completion update" below.
+
+## Phase completion update (2025)
+
+After this document was last refreshed, the outstanding Phase 2/3/4 work was completed:
+- **Phase 2**: consumer-layer tsgo errors were resolved and `bun quality-gate` is green (husky pre-commit `tsgo` no longer needs `--no-verify`).
+- **Phase 3**: `drizzle.config.sqlite.ts`, `bun run db --env-file .env.sqlite` actions (generate/push/migrate/seed/studio), and `backend/drizzle-sqlite/` journal added.
+- **Phase 4**: `bun bd:gates*`, SQL Server-variant dialect gating, and the dialect-aware schema regression suites (`backend/db/test/dialect/` / `db-provider.test.ts`) now cover both dialects.
+
+The table below reflects the Phase 1c snapshot and is kept for historical context.
 
 | Domain | Files | Status |
 |--------|-------|--------|

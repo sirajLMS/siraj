@@ -53,6 +53,8 @@ export namespace AuditRepository {
 
   /**
    * Maps CreateAuditLogInput[] to insert row objects.
+   * NOTE: keep in sync with mapCreateAuditLogRow — the single-row mapper includes
+   * `changes`, `userAgent`, and `metadata`; the bulk mapper must insert all fields.
    */
   function mapAuditLogRows(inputs: readonly Types.CreateAuditLogInput[]) {
     const now = new Date();
@@ -65,7 +67,10 @@ export namespace AuditRepository {
       description: input.description ?? null,
       previousState: input.previousState ?? null,
       newState: input.newState ?? null,
+      changes: input.changes ?? null,
       ipAddress: sanitizeIpAddress(input.ipAddress),
+      userAgent: input.userAgent ?? null,
+      metadata: input.metadata ?? null,
       createdAt: input.createdAt ?? now,
     }));
   }

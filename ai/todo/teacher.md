@@ -52,6 +52,8 @@ export interface HomeworkAssignment {
   studentSubmissionUrl?: string;
   submissionTimestamp?: string;
   status: 'PENDING' | 'SUBMITTED' | 'GRADED';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MonthlyAppraisal {
@@ -395,32 +397,32 @@ export function getHighPriorityFeatures(): Array<{ module: string; feature: stri
     {
       module: 'Dashboard',
       feature: 'Persistent Live Meeting Link',
-      strategy: 'Implement a dynamic session status watcher serving active meeting URLs throughout scheduled window.'
+      strategy: 'Implement a dynamic session status watcher that serves active meeting URLs based on class schedule times.'
     },
     {
       module: 'Calendar',
       feature: 'Self-Service Delay & Cancel',
-      strategy: 'Add action buttons to calendar cards with automated time-lock business rules.'
+      strategy: 'Add action buttons to calendar card modals with automated time-based lock rules.'
     },
     {
       module: 'Assignments',
-      feature: 'Embedded Audio / Recitation Media',
-      strategy: 'Integrate HTML5 audio player & oEmbed parsers within assignment instruction fields.'
+      feature: 'Embedded SoundCloud / Audio',
+      strategy: 'Integrate an HTML5 audio player / oEmbed parser within assignment instruction rich text fields.'
     },
     {
       module: 'Monthly Appraisal',
       feature: 'Standardized Evaluation Rubric',
-      strategy: 'Build monthly report generator module with 5-point metric scoring and parent feedback loops.'
+      strategy: 'Build a monthly report generator module with configurable grading criteria and comment fields.'
     },
     {
       module: 'Messaging',
-      feature: 'Two-Tier Support Routing',
-      strategy: 'Separate Teacher Private Messaging from Admin Escalation channels.'
+      feature: 'Two-Tier Support Channels',
+      strategy: 'Implement routing tags on ticket creation (Route to: Instructor vs. Support/Admin).'
     },
     {
       module: 'Accounting',
-      feature: 'Prepaid Hourly Credit Ledger',
-      strategy: 'Implement credit tracking system for purchased vs consumed live tutoring hours.'
+      feature: 'Hourly Credit Ledger',
+      strategy: 'Add a balance ledger tracking remaining prepaid class hours/credits per student account.'
     }
   ];
 }

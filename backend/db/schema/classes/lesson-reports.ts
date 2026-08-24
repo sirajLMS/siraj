@@ -56,7 +56,7 @@ export const lessonReports = createTable(
     status: lessonReportStatusEnum("status").notNull().default(LessonReportStatus.PENDING_REVIEW),
     submittedByUserId: uuidDefaultColumn("submitted_by_user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "set null" }),
+      .references(() => users.id, { onDelete: "restrict" }),
     submittedAt: timestampColumn("submitted_at").notNull().defaultNow(),
     reviewedByUserId: uuidDefaultColumn("reviewed_by_user_id").references(() => users.id, {
       onDelete: "set null",

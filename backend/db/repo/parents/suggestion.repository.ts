@@ -1,5 +1,5 @@
 import { aliasedTable, and, count, desc, eq, gte, ilike, isNull, ne, sql } from "drizzle-orm";
-import { db, queryDb } from "@/backend/db";
+import { db, isSqlite, queryDb } from "@/backend/db";
 import { parents, suggestions, users } from "@/backend/db/schema";
 import { SuggestionStatus } from "@/backend/enum";
 import { NotFoundError } from "@/backend/lib/errors";
@@ -114,7 +114,7 @@ export namespace SuggestionRepository {
         createdAt: suggestions.createdAt,
       })
       .from(suggestions)
-      .leftJoin(dupSuggestions, eq(suggestions.duplicateOfId, dupSuggestions.id))
+      .leftJoin(dupSuggestions, and(eq(suggestions.duplicateOfId, dupSuggestions.id), isNull(dupSuggestions.deletedAt)))
       .where(and(eq(suggestions.parentId, parentId), isNull(suggestions.deletedAt)))
       .orderBy(desc(suggestions.createdAt))
       .limit(options.limit)
@@ -179,7 +179,7 @@ export namespace SuggestionRepository {
       .from(suggestions)
       .leftJoin(parents, eq(suggestions.parentId, parents.id))
       .leftJoin(users, eq(parents.userId, users.id))
-      .leftJoin(dupSuggestions, eq(suggestions.duplicateOfId, dupSuggestions.id))
+      .leftJoin(dupSuggestions, and(eq(suggestions.duplicateOfId, dupSuggestions.id), isNull(dupSuggestions.deletedAt)))
       .where(whereClause)
       .orderBy(desc(suggestions.createdAt))
       .limit(options.limit)
@@ -374,13 +374,13 @@ export namespace SuggestionRepository {
     const reviewed = statusCounts.find((r: { status: string; count: number }) => r.status === "REVIEWED")?.count ?? 0;
     const duplicate = statusCounts.find((r: { status: string; count: number }) => r.status === "DUPLICATE")?.count ?? 0;
 
+    const epochExprSuggestion = isSqlite()
+      ? sql<number>`((${suggestions.reviewedAt} - ${suggestions.createdAt}) / 1000.0 / 3600.0)`
+      : sql<number>`EXTRACT(EPOCH FROM (${suggestions.reviewedAt} - ${suggestions.createdAt})) / 3600`;
+
     const [avgResult] = await q
       .select({
-        avgHours: sql<number>`COALESCE(
-          AVG(
-            EXTRACT(EPOCH FROM (${suggestions.reviewedAt} - ${suggestions.createdAt})) / 3600
-          ), 0
-        )`.mapWith(Number),
+        avgHours: sql<number>`COALESCE(AVG(${epochExprSuggestion}), 0)`.mapWith(Number),
       })
       .from(suggestions)
       .where(and(isNull(suggestions.deletedAt), ne(suggestions.status, SuggestionStatus.PENDING)));

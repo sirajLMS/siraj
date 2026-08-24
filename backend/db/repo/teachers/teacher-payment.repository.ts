@@ -53,7 +53,7 @@ export namespace TeacherPaymentRepository {
     // Determine which inputs still need to be inserted (deduplicated by composite key).
     const toInsert: TeacherPaymentInsertType[] = [];
     const seenKeys = new Set<string>();
-    for (const input of inputs) {
+    for (const input of validInputs) {
       const key = teacherPaymentKeyOf(input.teacherId, input.paymentDate);
       if (existingByKey.has(key) || seenKeys.has(key)) continue;
       toInsert.push(input);

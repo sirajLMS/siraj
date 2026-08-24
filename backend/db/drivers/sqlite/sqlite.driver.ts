@@ -25,9 +25,18 @@ let cachedSqliteClient: Client | null = null;
 
 /**
  * Resets the cached SQLite client (useful in test teardown).
+ * Closes the underlying libsql client so file handles are released.
  */
 export function resetSqliteClient(): void {
+  const client = cachedSqliteClient;
   cachedSqliteClient = null;
+  if (client && !client.closed) {
+    try {
+      client.close();
+    } catch (error) {
+      logger.warn(`Failed to close SQLite client during reset: ${String(error)}`);
+    }
+  }
 }
 
 /**
@@ -54,6 +63,10 @@ export function createSqliteClient(): Client {
       )
       .catch(err => {
         logger.error(`Failed to set SQLite pragmas: ${String(err)}`);
+        // Drop the broken client so the next createSqliteClient() call can retry
+        // instead of running against an uninitialized/un-migrated database.
+        resetSqliteClient();
+        throw err;
       });
   }
 

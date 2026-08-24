@@ -70,7 +70,7 @@ export namespace UserSeedService {
       return Promise.all(
         inputs.map(async input => {
           const user = await upsertDemoUser(input, groupMap, tx);
-          logger.debug("Seed demo user ensured", { email: input.email });
+          logger.debug("Seed demo user ensured", { userId: user.id });
           return user;
         })
       );

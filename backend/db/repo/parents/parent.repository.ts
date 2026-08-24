@@ -51,7 +51,11 @@ export namespace ParentRepository {
   ): Promise<ParentCreateResult> {
     const executor = tx ?? db;
 
-    const userId = input.userId ?? "";
+    if (!input.userId) {
+      const { session } = getServerTranslations(locale ?? "en").errorsTranslations;
+      throw new Error(session.userIdRequired);
+    }
+    const userId = input.userId;
 
     // Verify the user exists and doesn't already have a parent profile
     const existingParent = await executor
@@ -153,7 +157,7 @@ export namespace ParentRepository {
     const unpaidCounts = await executor
       .select({
         parentId: invoices.parentId,
-        cnt: sql<number>`COUNT(*)::int`.mapWith(Number),
+        cnt: sql<number>`count(*)`.mapWith(Number),
       })
       .from(invoices)
       .where(and(inArray(invoices.parentId, parentIds), eq(invoices.status, "UNPAID")))
